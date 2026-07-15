@@ -1,5 +1,11 @@
 # @adapttable/i18n
 
+## 1.1.1
+
+### Patch Changes
+
+- @adapttable/core@1.1.1
+
 ## 1.1.0
 
 ### Patch Changes

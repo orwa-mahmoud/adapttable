@@ -1,5 +1,17 @@
 # @adapttable/unstyled
 
+## 1.1.1
+
+### Patch Changes
+
+- 5a8fed4: Keep the filters popover inside the viewport on narrow screens. The card is
+  anchored to the trigger's inline edge, so on a phone it could hang past the
+  screen (a 320px card under a button near the edge rendered ~170px off-screen,
+  cutting off the filter controls). It now shifts back inside after opening and
+  on resize, and is capped to the viewport width. `@adapttable/shadcn` inherits
+  the fix.
+  - @adapttable/core@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # @adapttable/shadcn
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [5a8fed4]
+  - @adapttable/unstyled@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @adapttable/antd
 
+## 1.1.1
+
+### Patch Changes
+
+- 5a8fed4: Keep the filters popover inside the viewport on narrow screens. The card was
+  anchored to a corner placement, which antd can only flip — not slide — so on a
+  phone it rendered partly off-screen with the filter controls cut off. It now
+  centres under the trigger (antd slides that placement into view) and its width
+  is capped to the viewport.
+  - @adapttable/core@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

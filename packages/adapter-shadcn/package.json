@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/shadcn",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "shadcn/ui adapter for AdaptTable — a fully-styled React data table in one import, built on the headless @adapttable/core engine and shadcn's design tokens.",
   "keywords": [
     "react",
