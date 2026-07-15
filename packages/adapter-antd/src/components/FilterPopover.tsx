@@ -10,6 +10,10 @@ export interface FilterPopoverProps {
   activeFilterCount: number;
   onClearFilters: () => void;
   labels: Required<TableLabels>;
+  /**
+   * Accepted for a consistent adapter surface; the card centres under its
+   * trigger, so it needs no direction-specific placement.
+   */
   dir?: Direction;
   /** The Filters trigger button — becomes the popover anchor. */
   children: ReactNode;
@@ -29,7 +33,6 @@ export function FilterPopover({
   activeFilterCount,
   onClearFilters,
   labels,
-  dir = "ltr",
   children,
 }: Readonly<FilterPopoverProps>) {
   const anchorRef = useRef<HTMLSpanElement>(null);
@@ -62,7 +65,9 @@ export function FilterPopover({
   }, [open, onClose]);
 
   const content = (
-    <div style={{ minWidth: 280, maxWidth: 360 }}>
+    // The card must never claim the whole screen: antd adds its own padding
+    // around this content, so leave room for it plus a gutter on both sides.
+    <div style={{ minWidth: 280, maxWidth: "min(360px, calc(100vw - 48px))" }}>
       <Flex align="center" justify="space-between" gap="small">
         <span style={{ fontWeight: 600, fontSize: 14 }}>{labels.filters}</span>
         <Button
@@ -82,7 +87,13 @@ export function FilterPopover({
     <Popover
       open={open}
       trigger={[]}
-      placement={dir === "rtl" ? "bottomLeft" : "bottomRight"}
+      // `bottom` (not the bottomLeft/bottomRight corners): antd only grants a
+      // horizontal shift to the edge-centred placements, so a corner placement
+      // can only flip — which cannot rescue a card wider than the space beside
+      // the trigger, and left it ~80px off-screen on a phone. Centring under
+      // the trigger keeps antd's own shift-into-view behaviour, and needs no
+      // RTL variant because it is direction-agnostic.
+      placement="bottom"
       content={content}
       styles={{ content: { padding: 12 } }}
     >

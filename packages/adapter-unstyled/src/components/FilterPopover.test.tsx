@@ -123,4 +123,67 @@ describe("FilterPopover", () => {
       document.querySelector('[data-adapttable-part="filters-title"]')
     ).toHaveTextContent("(3)");
   });
+
+  describe("viewport collision", () => {
+    // jsdom has no layout engine, so the card's geometry is stubbed to mirror
+    // what a real 390px phone reports: a 320px card anchored under a trigger
+    // near the right edge lands at left: -173 (measured on the live demo).
+    function stubCardRect(rect: { left: number; right: number }) {
+      const card = document.querySelector<HTMLDivElement>(
+        '[data-adapttable-part="filters-popover"]'
+      )!;
+      vi.spyOn(card, "getBoundingClientRect").mockReturnValue({
+        ...rect,
+        width: rect.right - rect.left,
+        height: 400,
+        top: 0,
+        bottom: 400,
+        x: rect.left,
+        y: 0,
+        toJSON: () => ({}),
+      });
+      return card;
+    }
+
+    it("shifts a card that overflows the left edge back into the viewport", () => {
+      vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
+        390
+      );
+      renderPopover({ dir: "ltr" });
+      const card = stubCardRect({ left: -173, right: 147 });
+      // Re-open so the effect measures the stubbed geometry.
+      fireEvent.resize(window);
+      // -173 → needs +181 to clear the 8px gutter.
+      expect(card.style.transform).toBe("translateX(181px)");
+    });
+
+    it("shifts a card that overflows the right edge back into the viewport", () => {
+      vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
+        390
+      );
+      renderPopover({ dir: "rtl" });
+      const card = stubCardRect({ left: 150, right: 470 });
+      fireEvent.resize(window);
+      // 470 → needs -88 to clear the 8px gutter.
+      expect(card.style.transform).toBe("translateX(-88px)");
+    });
+
+    it("leaves a card that already fits untouched", () => {
+      vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
+        1280
+      );
+      renderPopover({ dir: "ltr" });
+      const card = stubCardRect({ left: 900, right: 1220 });
+      fireEvent.resize(window);
+      expect(card.style.transform).toBe("");
+    });
+
+    it("caps the card width so it can never exceed the viewport", () => {
+      renderPopover();
+      const card = document.querySelector(
+        '[data-adapttable-part="filters-popover"]'
+      )!;
+      expect(card).toHaveStyle({ maxWidth: "calc(100vw - 16px)" });
+    });
+  });
 });

@@ -4,6 +4,9 @@ import { type ReactNode, useEffect, useRef } from "react";
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 
+/** Breathing room kept between the popover and the viewport edge, in px. */
+const VIEWPORT_GUTTER = 8;
+
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
   open: boolean;
@@ -75,6 +78,34 @@ export function FilterPopover({
     };
   }, [open]);
 
+  // The card is anchored to the trigger's inline-start edge, so on a narrow
+  // screen it can hang past the viewport (a 320px card under a button sitting
+  // 150px from the edge lands at -170px). Kit poppers do collision detection
+  // for us; plain DOM does not, so nudge the card back inside after it mounts.
+  // Runs on open and on resize/orientation change.
+  useEffect(() => {
+    if (!open) return;
+    const card = cardRef.current;
+    if (!card) return;
+    const clampIntoViewport = () => {
+      // Measure unshifted, then re-apply, so repeat runs stay idempotent.
+      card.style.transform = "";
+      const rect = card.getBoundingClientRect();
+      const viewportWidth = document.documentElement.clientWidth;
+      let shift = 0;
+      if (rect.left < VIEWPORT_GUTTER) {
+        shift = VIEWPORT_GUTTER - rect.left;
+      } else if (rect.right > viewportWidth - VIEWPORT_GUTTER) {
+        shift = viewportWidth - VIEWPORT_GUTTER - rect.right;
+      }
+      if (shift !== 0)
+        card.style.transform = `translateX(${Math.round(shift)}px)`;
+    };
+    clampIntoViewport();
+    window.addEventListener("resize", clampIntoViewport);
+    return () => window.removeEventListener("resize", clampIntoViewport);
+  }, [open, dir]);
+
   // RTL flips which edge the card aligns to: anchor to the inline-start so it
   // stays under the button on both writing directions.
   const side = dir === "rtl" ? { left: 0 } : { right: 0 };
@@ -96,7 +127,14 @@ export function FilterPopover({
             "adapttable-filters-popover",
             classNames.filtersPopover
           )}
-          style={{ position: "absolute", top: "100%", zIndex: 200, ...side }}
+          style={{
+            position: "absolute",
+            top: "100%",
+            zIndex: 200,
+            // Shifting alone can't save a card wider than the screen.
+            maxWidth: `calc(100vw - ${VIEWPORT_GUTTER * 2}px)`,
+            ...side,
+          }}
         >
           <header
             data-adapttable-part="filters-header"
