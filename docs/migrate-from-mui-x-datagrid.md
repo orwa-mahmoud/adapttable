@@ -1,4 +1,4 @@
-# Migrate from MUI X DataGrid
+# MUI X DataGrid alternative — Pro features, MIT, real MUI
 
 [MUI X DataGrid](https://mui.com/x/react-data-grid/) is an excellent grid if
 you are all-in on Material UI. The catch is its licensing: many everyday table

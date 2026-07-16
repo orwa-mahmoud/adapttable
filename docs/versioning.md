@@ -1,4 +1,4 @@
-# Versioning & stability
+# AdaptTable versioning & stability policy
 
 AdaptTable follows [Semantic Versioning](https://semver.org/). This page states
 what that means in practice, what the committed-stable API surface is, and how

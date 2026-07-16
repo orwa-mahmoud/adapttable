@@ -394,6 +394,55 @@ a {
 .demo-surface__body {
   padding: 14px;
 }
+.demo-surface__fallback {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.trial-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--page-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--page-surface) 88%, var(--brand) 12%);
+}
+.trial-cta .install {
+  margin: 0;
+}
+.trial-cta__blitz,
+.trial-cta__docs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--page-border);
+  background: var(--page-surface);
+}
+.trial-cta__blitz:hover,
+.trial-cta__docs:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--page-border));
+}
+.trial-cta__blitz {
+  color: #fff;
+  background: var(--brand, #0f766e);
+  border-color: transparent;
+}
+.trial-cta__blitz:hover {
+  filter: brightness(1.06);
+  border-color: transparent;
+}
 .pad-surface {
   border: 1px solid var(--page-border);
   border-radius: 16px;

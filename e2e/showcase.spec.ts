@@ -24,12 +24,51 @@ const filtersTrigger = (page: Page) =>
 
 async function openDemo(page: Page, adapter: string): Promise<void> {
   await page.goto("/");
+  // Default kit (Mantine) is eager — wait for it before switching so lazy
+  // chunk requests for other kits are attributable to the click.
+  await expect(
+    demo(page).locator('[data-adapter="mantine"] [data-stagger]').first()
+  ).toBeVisible();
+  if (adapter === "mantine") return;
   const tab = page.getByTestId(`adapter-${adapter}`);
   await tab.scrollIntoViewIfNeeded();
   await tab.click();
-  // The real table has rendered once data rows carry the animation hook.
-  await expect(demo(page).locator("[data-stagger]").first()).toBeVisible();
+  // startTransition keeps the previous kit painted until the new chunk is
+  // ready — assert against the NEW adapter's tree, not the outgoing one.
+  await expect(
+    demo(page).locator(`[data-adapter="${adapter}"] [data-stagger]`).first()
+  ).toBeVisible();
 }
+
+test("non-default kits load on demand (code-split)", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    demo(page).locator('[data-adapter="mantine"] [data-stagger]').first()
+  ).toBeVisible();
+
+  const chunk = page.waitForRequest(
+    (req) =>
+      req.resourceType() === "script" &&
+      /adapters\/MuiDemo|MuiDemo/.test(req.url())
+  );
+  await page.getByTestId("adapter-mui").click();
+  await chunk;
+  await expect(
+    demo(page).locator('[data-adapter="mui"] [data-stagger]').first()
+  ).toBeVisible();
+});
+
+test("install + StackBlitz CTAs sit under the kit switcher", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Copy install command" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Open in StackBlitz" })
+  ).toBeVisible();
+});
 
 async function setFiltersMode(
   page: Page,

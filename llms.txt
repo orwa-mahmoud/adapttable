@@ -53,31 +53,31 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 ## Docs
 
 - [Overview](https://orwa-mahmoud.github.io/adapttable/): what AdaptTable is, in one page
-- [Getting started](https://orwa-mahmoud.github.io/adapttable/getting-started/): install (npx @adapttable/cli init), providers, first table
-- [Columns](https://orwa-mahmoud.github.io/adapttable/columns/): keys, headers, Cell, align, responsive, per-locale paths
-- [Sorting](https://orwa-mahmoud.github.io/adapttable/sorting/): sortable, sortValue, multi-sort, URL codec
-- [Filtering](https://orwa-mahmoud.github.io/adapttable/filtering/): five types, operator widgets, option sources, custom JSX
-- [Pagination](https://orwa-mahmoud.github.io/adapttable/pagination/): paged, infinite, auto by device
-- [Selection & bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/): checkboxes, bulk bar, select-all-matching
-- [Row expansion](https://orwa-mahmoud.github.io/adapttable/row-expansion/): renderRowDetail, useRowExpansion
-- [Column management](https://orwa-mahmoud.github.io/adapttable/column-management/): menu, pin, resize, layout persistence
-- [Saved views](https://orwa-mahmoud.github.io/adapttable/saved-views/): built-in menu, useSavedViews
-- [Virtualization](https://orwa-mahmoud.github.io/adapttable/virtualization/): row/card windowing. Measured A/B at 10,000 rows — virtualized renders 24 DOM `<tr>` vs 10,000 for a plain table (417x fewer nodes, ~half the JS heap: 169 MB vs 347 MB), and the rendered row count stays ~24 from 1k to 100k rows. Window or scroll-box mode.
-- [Data tiers](https://orwa-mahmoud.github.io/adapttable/data-tiers/): in-memory, server query event, custom TableSource
-- [Concepts](https://orwa-mahmoud.github.io/adapttable/concepts/): architecture, TableSource contract
-- [Customization](https://orwa-mahmoud.github.io/adapttable/customization/): classNames, slots, theming per kit
-- [URL state](https://orwa-mahmoud.github.io/adapttable/url-state/): adapters, urlKey namespacing, urlSync opt-out
-- [i18n & RTL](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/): 10 locales, per-locale data paths, logical layout
-- [API reference](https://orwa-mahmoud.github.io/adapttable/api/): every prop in tables
-- [FAQ](https://orwa-mahmoud.github.io/adapttable/faq/): direct answers to "best headless React table", "free MUI DataGrid / ag-Grid alternative", "React table with RTL/Arabic", "same table for client and server data"
-- [Comparison](https://orwa-mahmoud.github.io/adapttable/comparison/): vs ag-grid, TanStack Table, MUI X DataGrid, mantine-datatable
-- [Versioning & stability](https://orwa-mahmoud.github.io/adapttable/versioning/): SemVer policy, committed-stable API surface, supported UI-kit versions, deprecation policy
-- [Migrate from mantine-datatable](https://orwa-mahmoud.github.io/adapttable/migrate-from-mantine-datatable/): records→data, sortStatus→sortable, built-in filter UI, URL state, column menu, saved views
-- [Migrate from MUI X DataGrid](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-x-datagrid/): Pro/Premium features (pinning, row virtualization, multi-sort/filter, resizing, master-detail) free under MIT
-- [Migrate from TanStack Table](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/): keep headless control, drop the row models, toolbar, pagination and URL wiring (incl. react-table v7)
-- [Migrate from mui-datatables](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-datatables/): unmaintained since Jan 2023, MUI v5 lock — column/options mapping, onTableChange → one query callback
-- [Migrate from material-table](https://orwa-mahmoud.github.io/adapttable/migrate-from-material-table/): MUI v4-era dormant library — columns, remote data query fn, actions mapping, what doesn't map
-- [Migrate from ag-Grid](https://orwa-mahmoud.github.io/adapttable/migrate-from-ag-grid/): CRUD tables only — ~300 kB lighter, native kit look, free master-detail/filters; honest "stay on ag-Grid" list
+- [Get started with AdaptTable — React table for your UI kit](https://orwa-mahmoud.github.io/adapttable/getting-started/): install (npx @adapttable/cli init), providers, first table
+- [React table columns — ColumnDef, sort, pin, custom cells](https://orwa-mahmoud.github.io/adapttable/columns/): keys, headers, Cell, align, responsive, per-locale paths
+- [React table sorting — single, multi-column, server-side](https://orwa-mahmoud.github.io/adapttable/sorting/): sortable, sortValue, multi-sort, URL codec
+- [React table filters — chips, operators, URL-synced state](https://orwa-mahmoud.github.io/adapttable/filtering/): five types, operator widgets, option sources, custom JSX
+- [React table pagination — paged, infinite scroll, auto by device](https://orwa-mahmoud.github.io/adapttable/pagination/): paged, infinite, auto by device
+- [React table row selection & bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/): checkboxes, bulk bar, select-all-matching
+- [React table expandable rows & detail panels](https://orwa-mahmoud.github.io/adapttable/row-expansion/): renderRowDetail, useRowExpansion
+- [React table column management — show/hide, reorder, pin, resize](https://orwa-mahmoud.github.io/adapttable/column-management/): menu, pin, resize, layout persistence
+- [React table saved views — shareable named layouts](https://orwa-mahmoud.github.io/adapttable/saved-views/): built-in menu, useSavedViews
+- [React table virtualization — 10k rows, ~24 DOM nodes](https://orwa-mahmoud.github.io/adapttable/virtualization/): row/card windowing. Measured A/B at 10,000 rows — virtualized renders 24 DOM `<tr>` vs 10,000 for a plain table (417x fewer nodes, ~half the JS heap: 169 MB vs 347 MB), and the rendered row count stays ~24 from 1k to 100k rows. Window or scroll-box mode.
+- [Client & server React table data — one TableSource API](https://orwa-mahmoud.github.io/adapttable/data-tiers/): in-memory, server query event, custom TableSource
+- [AdaptTable concepts — headless core, TableSource, adapters](https://orwa-mahmoud.github.io/adapttable/concepts/): architecture, TableSource contract
+- [Customize AdaptTable — slots, classNames, headless prop-getters](https://orwa-mahmoud.github.io/adapttable/customization/): classNames, slots, theming per kit
+- [React table URL state — shareable filters, sort, and page](https://orwa-mahmoud.github.io/adapttable/url-state/): adapters, urlKey namespacing, urlSync opt-out
+- [React table i18n & RTL — Arabic, Hebrew, 10 locales](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/): 10 locales, per-locale data paths, logical layout
+- [AdaptTable API reference — DataTable, columns, hooks](https://orwa-mahmoud.github.io/adapttable/api/): every prop in tables
+- [AdaptTable FAQ — free MUI X / ag-Grid alternative, RTL, SSR](https://orwa-mahmoud.github.io/adapttable/faq/): direct answers to "best headless React table", "free MUI DataGrid / ag-Grid alternative", "React table with RTL/Arabic", "same table for client and server data"
+- [React data table comparison — AdaptTable vs ag-Grid, MUI X, TanStack](https://orwa-mahmoud.github.io/adapttable/comparison/): feature-by-feature vs ag-grid, TanStack Table, MUI X DataGrid, mantine-datatable
+- [AdaptTable versioning & stability policy](https://orwa-mahmoud.github.io/adapttable/versioning/): SemVer policy, committed-stable API surface, supported UI-kit versions, deprecation policy
+- [mantine-datatable alternative — same Mantine, more built-in](https://orwa-mahmoud.github.io/adapttable/migrate-from-mantine-datatable/): records→data, sortStatus→sortable, built-in filter UI, URL state, column menu, saved views
+- [MUI X DataGrid alternative — Pro features, MIT, real MUI](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-x-datagrid/): Pro/Premium features (pinning, row virtualization, multi-sort/filter, resizing, master-detail) free under MIT
+- [TanStack Table alternative — headless + ready UI kits](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/): keep headless control, drop the row models, toolbar, pagination and URL wiring (incl. react-table v7)
+- [mui-datatables alternative — maintained, MUI v6+, React 19](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-datatables/): unmaintained since Jan 2023, MUI v5 lock — column/options mapping, onTableChange → one query callback
+- [material-table alternative — modern MUI, still MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-material-table/): MUI v4-era dormant library — columns, remote data query fn, actions mapping, what doesn't map
+- [ag-Grid alternative for CRUD — lighter, native UI kits, MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-ag-grid/): CRUD tables only — ~300 kB lighter, native kit look, free master-detail/filters; honest "stay on ag-Grid" list
 
 ## Demo
 

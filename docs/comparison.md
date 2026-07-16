@@ -1,4 +1,4 @@
-# Comparison
+# React data table comparison — AdaptTable vs ag-Grid, MUI X, TanStack
 
 How AdaptTable compares to popular React table libraries — scoped to what
 each ships **built-in**. Every one of these projects is excellent at what it
@@ -125,3 +125,16 @@ matches unstyled feature-for-feature.
   framework). AdaptTable is React-only for v1.
 - You need a spreadsheet-like editing surface today, not a responsive data
   table for application lists.
+
+## Migration guides
+
+- [MUI X DataGrid alternative](./migrate-from-mui-x-datagrid.md)
+- [TanStack Table alternative](./migrate-from-tanstack-table.md)
+- [mantine-datatable alternative](./migrate-from-mantine-datatable.md)
+- [ag-Grid alternative for CRUD](./migrate-from-ag-grid.md)
+- [mui-datatables alternative](./migrate-from-mui-datatables.md)
+- [material-table alternative](./migrate-from-material-table.md)
+
+Also: [URL state](./url-state.md) · [Virtualization](./virtualization.md) ·
+[i18n & RTL](./i18n-rtl.md) ·
+[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)

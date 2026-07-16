@@ -1,6 +1,14 @@
-# Getting started
+# Get started with AdaptTable — React table for your UI kit
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4" autoplay loop muted playsinline style="width:100%;border-radius:8px"></video>
+<video
+src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4"
+poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.png?v=2"
+controls
+playsinline
+preload="none"
+style="width:100%;border-radius:8px"
+
+> </video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, filterable, paginated
@@ -14,6 +22,10 @@ prints the install command, and scaffolds a starter `src/PeopleTable.tsx`:
 ```bash
 npx @adapttable/cli init
 ```
+
+Prefer zero install first? Open a live starter in
+[StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
+— or [any other kit](#try-it-in-stackblitz).
 
 Or install manually: `@adapttable/core`, the adapter for your kit, and the
 kit's own packages (peer dependencies — skip what you already have).

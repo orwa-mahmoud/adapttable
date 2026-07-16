@@ -1,4 +1,4 @@
-# API reference
+# AdaptTable API reference — DataTable, columns, hooks
 
 The complete public surface. Every symbol ships full TypeScript types and
 JSDoc, so editor autocomplete mirrors everything below.

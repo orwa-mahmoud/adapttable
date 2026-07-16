@@ -184,7 +184,7 @@ export function AppNav({
 const DOCS_URL = "https://orwa-mahmoud.github.io/adapttable/";
 const REPO_URL = "https://github.com/orwa-mahmoud/adapttable";
 
-function Install({ large = false }: Readonly<{ large?: boolean }>) {
+export function Install({ large = false }: Readonly<{ large?: boolean }>) {
   const [copied, setCopied] = useState(false);
   return (
     <div className={large ? "install install--lg" : "install"}>
@@ -204,6 +204,29 @@ function Install({ large = false }: Readonly<{ large?: boolean }>) {
           <Check size={14} />
         </button>
       )}
+    </div>
+  );
+}
+
+const STACKBLITZ_URL =
+  "https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine";
+
+/** Install + try-in-browser CTAs parked at the moment of kit-switch delight. */
+export function TrialCta() {
+  return (
+    <div className="trial-cta">
+      <Install />
+      <a
+        className="trial-cta__blitz"
+        href={STACKBLITZ_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <External size={14} /> Open in StackBlitz
+      </a>
+      <a className="trial-cta__docs" href={`${DOCS_URL}getting-started/`}>
+        Docs
+      </a>
     </div>
   );
 }

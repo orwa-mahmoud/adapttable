@@ -1,8 +1,22 @@
-# Frequently asked questions
+# AdaptTable FAQ — free MUI X / ag-Grid alternative, RTL, SSR
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
 [comparison.md](./comparison.md).)
+
+**Jump to a feature:** [URL state](./url-state.md) ·
+[Filtering](./filtering.md) · [Virtualization](./virtualization.md) ·
+[i18n & RTL](./i18n-rtl.md) · [Column management](./column-management.md) ·
+[Data tiers](./data-tiers.md) ·
+[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+
+**Migrating from another table:**
+[MUI X DataGrid](./migrate-from-mui-x-datagrid.md) ·
+[TanStack Table](./migrate-from-tanstack-table.md) ·
+[mantine-datatable](./migrate-from-mantine-datatable.md) ·
+[ag-Grid](./migrate-from-ag-grid.md) ·
+[mui-datatables](./migrate-from-mui-datatables.md) ·
+[material-table](./migrate-from-material-table.md)
 
 ## What is AdaptTable?
 

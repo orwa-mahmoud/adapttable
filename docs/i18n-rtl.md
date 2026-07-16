@@ -1,4 +1,4 @@
-# i18n & RTL
+# React table i18n & RTL — Arabic, Hebrew, 10 locales
 
 <video src="https://orwa-mahmoud.github.io/adapttable/media/demo-rtl.mp4" autoplay loop muted playsinline style="width:100%;border-radius:8px"></video>
 

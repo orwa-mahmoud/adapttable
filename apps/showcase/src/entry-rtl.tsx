@@ -1,11 +1,10 @@
-import "@mantine/core/styles.css";
-import "./tailwind.css";
 import "./styles.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { PageShell, RtlSection } from "./App";
+import { PageShell } from "./PageShell";
+import { RtlSection } from "./RtlSection";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

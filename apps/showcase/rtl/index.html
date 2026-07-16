@@ -6,9 +6,13 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
     <meta
       name="description"
-      content="Switch to Arabic and the whole table mirrors: toolbar, sort arrows, pinned columns, pagination. A genuinely flipped axis, not just translated strings."
+      content="AdaptTable RTL demo — switch to Arabic and the whole table mirrors: toolbar, sort arrows, pinned columns, pagination. A genuinely flipped axis."
     />
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
+    <link
+      rel="canonical"
+      href="https://orwa-mahmoud.github.io/adapttable/demo/rtl/"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
@@ -16,14 +20,13 @@
     ></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Arabic is first paint on this page — load it with the UI face. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>AdaptTable demo — RTL & Arabic</title>
+    <title>AdaptTable demo — RTL & Arabic table layout</title>
     <script>
-      // Apply the stored theme before paint so page-to-page navigation
-      // doesn't flash light.
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
           document.documentElement.dataset.theme = "dark";

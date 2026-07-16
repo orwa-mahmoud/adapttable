@@ -6,9 +6,13 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
     <meta
       name="description"
-      content="Scroll fifty thousand rows under a pinned sticky header — AdaptTable's opt-in virtualization keeps the DOM to a handful of nodes."
+      content="AdaptTable virtualization demo — scroll fifty thousand rows under a pinned sticky header with only a handful of DOM nodes."
     />
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
+    <link
+      rel="canonical"
+      href="https://orwa-mahmoud.github.io/adapttable/demo/scale/"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
@@ -17,13 +21,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>AdaptTable demo — 50,000 rows, virtualized</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>AdaptTable demo — 50,000 rows virtualized</title>
     <script>
-      // Apply the stored theme before paint so page-to-page navigation
-      // doesn't flash light.
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
           document.documentElement.dataset.theme = "dark";

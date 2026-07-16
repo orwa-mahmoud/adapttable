@@ -24,7 +24,8 @@ const DEFAULTS = { limit: 5 };
 /**
  * The URL-persisted column controls every adapter demo spreads onto its
  * `<DataTable>`. Wiring these makes pin / hide / reorder / resize survive a
- * re-mount (density, locale, … all remount the demo) and a page reload.
+ * kit remount and a page reload. Density / locale / filters update as props
+ * without tearing the table down.
  */
 export interface DemoColumnProps {
   columnLayout: ColumnLayoutState;

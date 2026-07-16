@@ -1,4 +1,4 @@
-# Core concepts
+# AdaptTable concepts — headless core, TableSource, adapters
 
 ## The `TableSource` contract
 

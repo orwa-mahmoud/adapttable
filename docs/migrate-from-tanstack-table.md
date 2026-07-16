@@ -1,4 +1,4 @@
-# Migrate from TanStack Table
+# TanStack Table alternative — headless + ready UI kits
 
 [TanStack Table](https://tanstack.com/table/latest) is a superb headless engine
 — you keep total control because it renders nothing: no markup, no toolbar, no

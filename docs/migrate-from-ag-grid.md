@@ -1,4 +1,4 @@
-# Migrate from ag-Grid
+# ag-Grid alternative for CRUD — lighter, native UI kits, MIT
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.

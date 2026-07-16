@@ -155,8 +155,20 @@ const JSON_LD = JSON.stringify({
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+      />
+    </noscript>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -350,6 +362,14 @@ const JSON_LD = JSON.stringify({
               <path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"
               ></path>
             </svg>
+          </a>
+          <a
+            class="btn-demo btn-demo--ghost"
+            href="https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open StackBlitz
           </a>
         </div>
         <div class="hero__adapters reveal">
@@ -1258,6 +1278,17 @@ const JSON_LD = JSON.stringify({
     animation: none;
     transform: translateY(-2px);
     opacity: 0.93;
+  }
+  .btn-demo--ghost {
+    background: var(--page-surface);
+    color: var(--ink);
+    border: 1px solid var(--page-border);
+    box-shadow: none;
+    animation: none;
+  }
+  .btn-demo--ghost:hover {
+    border-color: color-mix(in oklch, var(--brand) 40%, var(--page-border));
+    opacity: 1;
   }
   @keyframes bob {
     0%, 100% { transform: translateY(0); }

@@ -1,4 +1,4 @@
-# Migrate from material-table
+# material-table alternative — modern MUI, still MIT
 
 [material-table](https://github.com/mbrn/material-table) was once the default
 Material UI table. Today it's effectively dormant: the last release with

@@ -1,4 +1,4 @@
-# Migrate from mantine-datatable
+# mantine-datatable alternative — same Mantine, more built-in
 
 [mantine-datatable](https://icflorescu.github.io/mantine-datatable/) is a
 polished, Mantine-only table. `@adapttable/mantine` renders the **same Mantine

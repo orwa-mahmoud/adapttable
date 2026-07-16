@@ -5,9 +5,17 @@
 
 ---
 
-# Getting started
+# Get started with AdaptTable — React table for your UI kit
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4" autoplay loop muted playsinline style="width:100%;border-radius:8px"></video>
+<video
+src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4"
+poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.png?v=2"
+controls
+playsinline
+preload="none"
+style="width:100%;border-radius:8px"
+
+> </video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, filterable, paginated
@@ -21,6 +29,10 @@ prints the install command, and scaffolds a starter `src/PeopleTable.tsx`:
 ```bash
 npx @adapttable/cli init
 ```
+
+Prefer zero install first? Open a live starter in
+[StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
+— or [any other kit](#try-it-in-stackblitz).
 
 Or install manually: `@adapttable/core`, the adapter for your kit, and the
 kit's own packages (peer dependencies — skip what you already have).
@@ -216,7 +228,7 @@ Full surface: [API reference](./api.md) ·
 
 ---
 
-# Core concepts
+# AdaptTable concepts — headless core, TableSource, adapters
 
 ## The `TableSource` contract
 
@@ -369,7 +381,7 @@ desktop-visible columns so every card keeps enough identity to be useful.
 
 ---
 
-# Data tiers
+# Client & server React table data — one TableSource API
 
 One `<DataTable>`, three ways to feed it — from "here's an array" to full
 query-library control. Search, sorting, filters, chips, and URL sync behave
@@ -574,7 +586,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Columns
+# React table columns — ColumnDef, sort, pin, custom cells
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -707,7 +719,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Sorting
+# React table sorting — single, multi-column, server-side
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -824,7 +836,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Filtering
+# React table filters — chips, operators, URL-synced state
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1009,7 +1021,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Pagination
+# React table pagination — paged, infinite scroll, auto by device
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1090,7 +1102,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Selection & bulk actions
+# React table row selection & bulk actions
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1229,7 +1241,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Row expansion
+# React table expandable rows & detail panels
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1311,7 +1323,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Column management
+# React table column management — show/hide, reorder, pin, resize
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1428,7 +1440,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Saved views
+# React table saved views — shareable named layouts
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1564,7 +1576,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# Virtualization
+# React table virtualization — 10k rows, ~24 DOM nodes
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -1678,7 +1690,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# URL-synced state
+# React table URL state — shareable filters, sort, and page
 
 AdaptTable keeps the table's state in the URL query string: search (`q`),
 pagination (`page`, `limit`), sorting (`sortBy`/`sortDir`, or `sort` for a
@@ -1867,7 +1879,7 @@ when there is no `window`, so nothing crashes under SSR either way.
 
 ---
 
-# Customization
+# Customize AdaptTable — slots, classNames, headless prop-getters
 
 A spectrum, all opt-in: restyle parts with `classNames`, replace parts with
 `slots`, tune the chrome with props, or theme through your kit's provider.
@@ -2127,7 +2139,7 @@ See the [Columns guide](./columns.md) and the
 
 ---
 
-# i18n & RTL
+# React table i18n & RTL — Arabic, Hebrew, 10 locales
 
 <video src="https://orwa-mahmoud.github.io/adapttable/media/demo-rtl.mp4" autoplay loop muted playsinline style="width:100%;border-radius:8px"></video>
 
@@ -2264,7 +2276,7 @@ const sw = { ...en, search: "Tafuta", noData: "Hakuna data" };
 
 ---
 
-# API reference
+# AdaptTable API reference — DataTable, columns, hooks
 
 The complete public surface. Every symbol ships full TypeScript types and
 JSDoc, so editor autocomplete mirrors everything below.
@@ -2573,11 +2585,25 @@ production):
 
 ---
 
-# Frequently asked questions
+# AdaptTable FAQ — free MUI X / ag-Grid alternative, RTL, SSR
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
 [comparison.md](./comparison.md).)
+
+**Jump to a feature:** [URL state](./url-state.md) ·
+[Filtering](./filtering.md) · [Virtualization](./virtualization.md) ·
+[i18n & RTL](./i18n-rtl.md) · [Column management](./column-management.md) ·
+[Data tiers](./data-tiers.md) ·
+[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+
+**Migrating from another table:**
+[MUI X DataGrid](./migrate-from-mui-x-datagrid.md) ·
+[TanStack Table](./migrate-from-tanstack-table.md) ·
+[mantine-datatable](./migrate-from-mantine-datatable.md) ·
+[ag-Grid](./migrate-from-ag-grid.md) ·
+[mui-datatables](./migrate-from-mui-datatables.md) ·
+[material-table](./migrate-from-material-table.md)
 
 ## What is AdaptTable?
 
@@ -2737,7 +2763,7 @@ near-100% test coverage across every adapter.
 
 ---
 
-# Comparison
+# React data table comparison — AdaptTable vs ag-Grid, MUI X, TanStack
 
 How AdaptTable compares to popular React table libraries — scoped to what
 each ships **built-in**. Every one of these projects is excellent at what it
@@ -2865,9 +2891,22 @@ matches unstyled feature-for-feature.
 - You need a spreadsheet-like editing surface today, not a responsive data
   table for application lists.
 
+## Migration guides
+
+- [MUI X DataGrid alternative](./migrate-from-mui-x-datagrid.md)
+- [TanStack Table alternative](./migrate-from-tanstack-table.md)
+- [mantine-datatable alternative](./migrate-from-mantine-datatable.md)
+- [ag-Grid alternative for CRUD](./migrate-from-ag-grid.md)
+- [mui-datatables alternative](./migrate-from-mui-datatables.md)
+- [material-table alternative](./migrate-from-material-table.md)
+
+Also: [URL state](./url-state.md) · [Virtualization](./virtualization.md) ·
+[i18n & RTL](./i18n-rtl.md) ·
+[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+
 ---
 
-# Migrate from mantine-datatable
+# mantine-datatable alternative — same Mantine, more built-in
 
 [mantine-datatable](https://icflorescu.github.io/mantine-datatable/) is a
 polished, Mantine-only table. `@adapttable/mantine` renders the **same Mantine
@@ -3042,7 +3081,7 @@ and the row predicate — is code you would have written by hand before.
 
 ---
 
-# Migrate from MUI X DataGrid
+# MUI X DataGrid alternative — Pro features, MIT, real MUI
 
 [MUI X DataGrid](https://mui.com/x/react-data-grid/) is an excellent grid if
 you are all-in on Material UI. The catch is its licensing: many everyday table
@@ -3227,7 +3266,7 @@ Set }` model — `onSelectionChange` hands you `string[]`.
 
 ---
 
-# Migrate from TanStack Table
+# TanStack Table alternative — headless + ready UI kits
 
 [TanStack Table](https://tanstack.com/table/latest) is a superb headless engine
 — you keep total control because it renders nothing: no markup, no toolbar, no
@@ -3428,7 +3467,7 @@ build-it-yourself engine.
 
 ---
 
-# Migrate from mui-datatables
+# mui-datatables alternative — maintained, MUI v6+, React 19
 
 [mui-datatables](https://github.com/gregnb/mui-datatables) served a generation
 of Material UI apps well — but it has had **no releases or commits since
@@ -3630,7 +3669,7 @@ function PeopleTable({ people }: { people: Person[] }) {
 
 ---
 
-# Migrate from material-table
+# material-table alternative — modern MUI, still MIT
 
 [material-table](https://github.com/mbrn/material-table) was once the default
 Material UI table. Today it's effectively dormant: the last release with
@@ -3849,7 +3888,7 @@ function PeopleTable({ people }: { people: Person[] }) {
 
 ---
 
-# Migrate from ag-Grid
+# ag-Grid alternative for CRUD — lighter, native UI kits, MIT
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.
@@ -4041,7 +4080,7 @@ table is your design system's, not a themed grid.
 
 ---
 
-# Versioning & stability
+# AdaptTable versioning & stability policy
 
 AdaptTable follows [Semantic Versioning](https://semver.org/). This page states
 what that means in practice, what the committed-stable API surface is, and how

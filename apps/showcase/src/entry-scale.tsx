@@ -5,7 +5,8 @@ import "./styles.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { PageShell, ScaleSection } from "./App";
+import { PageShell } from "./PageShell";
+import { ScaleSection } from "./ScaleSection";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

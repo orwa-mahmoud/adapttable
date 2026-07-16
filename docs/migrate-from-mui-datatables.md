@@ -1,4 +1,4 @@
-# Migrate from mui-datatables
+# mui-datatables alternative — maintained, MUI v6+, React 19
 
 [mui-datatables](https://github.com/gregnb/mui-datatables) served a generation
 of Material UI apps well — but it has had **no releases or commits since

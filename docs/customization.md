@@ -1,4 +1,4 @@
-# Customization
+# Customize AdaptTable — slots, classNames, headless prop-getters
 
 A spectrum, all opt-in: restyle parts with `classNames`, replace parts with
 `slots`, tune the chrome with props, or theme through your kit's provider.

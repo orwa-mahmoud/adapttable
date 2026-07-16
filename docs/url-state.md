@@ -1,4 +1,4 @@
-# URL-synced state
+# React table URL state — shareable filters, sort, and page
 
 AdaptTable keeps the table's state in the URL query string: search (`q`),
 pagination (`page`, `limit`), sorting (`sortBy`/`sortDir`, or `sort` for a

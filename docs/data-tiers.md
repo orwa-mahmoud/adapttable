@@ -1,4 +1,4 @@
-# Data tiers
+# Client & server React table data — one TableSource API
 
 One `<DataTable>`, three ways to feed it — from "here's an array" to full
 query-library control. Search, sorting, filters, chips, and URL sync behave
