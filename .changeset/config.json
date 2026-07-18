@@ -2,23 +2,22 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [
-    [
-      "@adapttable/core",
-      "@adapttable/mantine",
-      "@adapttable/mui",
-      "@adapttable/chakra",
-      "@adapttable/antd",
-      "@adapttable/radix",
-      "@adapttable/base-ui",
-      "@adapttable/shadcn",
-      "@adapttable/unstyled",
-      "@adapttable/i18n"
-    ]
-  ],
+  "fixed": [],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@adapttable/examples", "@adapttable/showcase", "@adapttable/docs"]
+  "ignore": [
+    "@adapttable/examples",
+    "@adapttable/showcase",
+    "@adapttable/docs",
+    "@adapttable/starter-antd",
+    "@adapttable/starter-base-ui",
+    "@adapttable/starter-chakra",
+    "@adapttable/starter-mantine",
+    "@adapttable/starter-mui",
+    "@adapttable/starter-radix",
+    "@adapttable/starter-shadcn",
+    "@adapttable/starter-unstyled"
+  ]
 }

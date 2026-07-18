@@ -112,7 +112,7 @@ const DESCRIPTIONS = {
   "migrate-from-ag-grid.md":
     "Shipping CRUD tables, not analytics grids? AdaptTable is ~300 kB lighter, renders your kit's real components, and includes URL state and filter UI under MIT — plus when to stay on AG Grid.",
   "versioning.md":
-    "AdaptTable's versioning and stability policy — semantic versioning, the committed-stable public API surface, deprecation policy and the fixed-group release flow.",
+    "AdaptTable's versioning and stability policy — semantic versioning, the committed-stable public API surface, deprecation policy and independent per-package releases.",
 };
 
 const SITE = "https://orwa-mahmoud.github.io/adapttable";
