@@ -148,16 +148,20 @@ for (const adapter of ADAPTERS) {
       );
 
       await filtersTrigger(page).click();
-      // With the drawer open, the same point now hits its backdrop/panel, not
-      // the row that was there — the background is blocked.
-      const covering = await page.evaluate((p) => {
-        const el = document.elementFromPoint(p.x, p.y);
-        if (!el) return { blocked: false, sameRow: false };
-        const row = el.closest("[data-stagger]");
-        return { blocked: true, sameRow: Boolean(row), tag: el.tagName };
-      }, point);
-      expect(covering.blocked).toBe(true);
-      expect(covering.sameRow).toBe(false);
+      // Drawer kits mount/animate the backdrop a tick after open — poll the
+      // hit-test until the same point no longer lands on the row (CI flake
+      // without this: sameRow stayed true while the panel was still sliding).
+      await expect
+        .poll(async () => {
+          const covering = await page.evaluate((p) => {
+            const el = document.elementFromPoint(p.x, p.y);
+            if (!el) return { blocked: false, sameRow: true };
+            const row = el.closest("[data-stagger]");
+            return { blocked: true, sameRow: Boolean(row) };
+          }, point);
+          return covering.blocked && !covering.sameRow;
+        })
+        .toBe(true);
       expect(behind).not.toBeNull();
     });
 
