@@ -1,6 +1,6 @@
 # AdaptTable
 
-> AdaptTable is a headless, UI-agnostic React data table. A single headless engine (`@adapttable/core`) powers ready, batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix Themes, shadcn/ui, and unstyled Tailwind. It unifies client-side and server-side data behind one `TableSource` contract, syncs search/sort/filter/page state to the URL for shareable links, supports true infinite scroll and classic paging (auto by device), optional row/card virtualization, column management (show/hide, reorder, pin, resize), automatic responsive mobile cards, and first-class i18n + RTL (Arabic). Easy by default (5-line setup), infinitely customizable (slots, classNames, render props, prop-getters). MIT licensed.
+> AdaptTable is a headless, UI-agnostic React data table. A single headless engine (`@adapttable/core`) powers ready, batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui, and unstyled Tailwind. It unifies client-side and server-side data behind one `TableSource` contract, syncs search/sort/filter/page state to the URL for shareable links, supports true infinite scroll and classic paging (auto by device), optional row/card virtualization, column management (show/hide, reorder, pin, resize), automatic responsive mobile cards, and first-class i18n + RTL (Arabic). Easy by default (5-line setup), infinitely customizable (slots, classNames, render props, prop-getters). MIT licensed.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -17,6 +17,7 @@ automatic table-to-card responsive layouts.
 - [@adapttable/chakra](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-chakra): Chakra UI adapter.
 - [@adapttable/antd](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-antd): Ant Design adapter — batteries-included `<DataTable>` on antd's high-level `<Table>`.
 - [@adapttable/radix](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-radix): Radix Themes adapter — batteries-included `<DataTable>` on Radix Themes.
+- [@adapttable/base-ui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-base-ui): Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.
 - [@adapttable/shadcn](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-shadcn): shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn class preset; a one-import styled `<DataTable>`.
 - [@adapttable/unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-unstyled): Headless/unstyled adapter with `data-*` + `className` hooks for Tailwind or any custom CSS.
 - [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/i18n): Locale presets for 10 languages (English, Arabic, German, Spanish, French, Hebrew, Italian, Japanese, Portuguese, Chinese) + RTL direction helpers.

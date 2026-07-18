@@ -19,6 +19,7 @@ StackBlitz opens a repo subdirectory straight from GitHub — no account needed:
 | Chakra UI           | [StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/chakra)   | [`chakra/`](./chakra)     |
 | Ant Design          | [StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/antd)     | [`antd/`](./antd)         |
 | Radix Themes        | [StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/radix)    | [`radix/`](./radix)       |
+| Base UI             | [StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/base-ui)  | [`base-ui/`](./base-ui)   |
 | shadcn/ui           | [StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/shadcn)   | [`shadcn/`](./shadcn)     |
 | Unstyled / Tailwind | [StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/unstyled) | [`unstyled/`](./unstyled) |
 
@@ -28,7 +29,7 @@ StackBlitz opens a repo subdirectory straight from GitHub — no account needed:
 pnpm --filter @adapttable/starter-mantine dev
 ```
 
-Swap `mantine` for any kit (`mui`, `chakra`, `antd`, `radix`, `shadcn`,
-`unstyled`). Each starter depends on the **published** `@adapttable/*` packages
+Swap `mantine` for any kit (`mui`, `chakra`, `antd`, `radix`, `base-ui`,
+`shadcn`, `unstyled`). Each starter depends on the **published** `@adapttable/*` packages
 (so it installs cleanly on StackBlitz); inside this monorepo pnpm links them to
 the local workspace versions.

@@ -14,6 +14,7 @@ const ADAPTERS = [
   "chakra",
   "antd",
   "radix",
+  "base-ui",
   "shadcn",
   "tailwind",
 ] as const;

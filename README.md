@@ -98,6 +98,7 @@ const { getTableProps, getRowProps, rows } = useDataTable({
 | `@adapttable/chakra`   | Chakra UI adapter.                                                         |
 | `@adapttable/antd`     | Ant Design adapter — drives antd's high-level `<Table>`.                   |
 | `@adapttable/radix`    | Radix Themes adapter — batteries-included `<DataTable>`.                   |
+| `@adapttable/base-ui`  | Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.    |
 | `@adapttable/unstyled` | Headless primitives + Tailwind / shadcn classes.                           |
 | `@adapttable/shadcn`   | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset. |
 | `@adapttable/i18n`     | Optional locale presets (10 languages, incl. RTL) + direction helpers.     |

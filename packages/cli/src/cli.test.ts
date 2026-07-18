@@ -12,6 +12,7 @@ describe("detectKit", () => {
     expect(detectKit({ "@chakra-ui/react": "2" }).kit).toBe("chakra");
     expect(detectKit({ antd: "5" }).kit).toBe("antd");
     expect(detectKit({ "@radix-ui/themes": "3" }).kit).toBe("radix");
+    expect(detectKit({ "@base-ui/react": "1" }).kit).toBe("base-ui");
     expect(detectKit({ tailwindcss: "3" }).kit).toBe("unstyled");
   });
 

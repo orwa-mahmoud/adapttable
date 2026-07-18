@@ -41,6 +41,9 @@ const ADAPTERS: Record<string, DemoComponent> = {
   radix: lazy(() =>
     import("./adapters/RadixDemo").then((m) => ({ default: m.RadixDemo }))
   ),
+  "base-ui": lazy(() =>
+    import("./adapters/BaseUiDemo").then((m) => ({ default: m.BaseUiDemo }))
+  ),
   shadcn: lazy(() =>
     import("./adapters/ShadcnDemo").then((m) => ({ default: m.ShadcnDemo }))
   ),

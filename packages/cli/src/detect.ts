@@ -5,6 +5,7 @@ export type Kit =
   | "chakra"
   | "antd"
   | "radix"
+  | "base-ui"
   | "shadcn"
   | "unstyled";
 
@@ -58,6 +59,13 @@ export const KITS: readonly KitInfo[] = [
     signals: ["@radix-ui/themes"],
     extras: [],
     label: "Radix Themes",
+  },
+  {
+    kit: "base-ui",
+    adapter: "@adapttable/base-ui",
+    signals: ["@base-ui/react"],
+    extras: [],
+    label: "Base UI",
   },
   {
     // shadcn/ui ships no package of its own (its components are copied into the

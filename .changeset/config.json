@@ -10,6 +10,7 @@
       "@adapttable/chakra",
       "@adapttable/antd",
       "@adapttable/radix",
+      "@adapttable/base-ui",
       "@adapttable/shadcn",
       "@adapttable/unstyled",
       "@adapttable/i18n"

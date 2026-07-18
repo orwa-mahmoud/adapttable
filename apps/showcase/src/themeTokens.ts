@@ -46,6 +46,13 @@ export const ADAPTER_TOKENS: AdapterToken[] = [
     accentDark: "oklch(0.7 0.16 280)",
   },
   {
+    key: "base-ui",
+    label: "Base UI",
+    blurb: "Unstyled primitives, blue accent",
+    accentLight: "oklch(0.55 0.19 255)",
+    accentDark: "oklch(0.7 0.15 255)",
+  },
+  {
     key: "shadcn",
     label: "shadcn",
     blurb: "Monochrome, ring focus",

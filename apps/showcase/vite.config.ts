@@ -37,6 +37,7 @@ export default defineConfig({
       "@adapttable/shadcn": pkg("adapter-shadcn"),
       "@adapttable/antd": pkg("adapter-antd"),
       "@adapttable/radix": pkg("adapter-radix"),
+      "@adapttable/base-ui": pkg("adapter-base-ui"),
       "@adapttable/i18n": pkg("i18n"),
     },
     dedupe: ["react", "react-dom"],

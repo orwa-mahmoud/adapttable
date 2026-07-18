@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@adapttable/antd": "workspace:*",
+    "@adapttable/base-ui": "workspace:*",
     "@adapttable/chakra": "workspace:*",
     "@adapttable/core": "workspace:*",
     "@adapttable/i18n": "workspace:*",
@@ -21,6 +22,7 @@
     "@adapttable/radix": "workspace:*",
     "@adapttable/shadcn": "workspace:*",
     "@adapttable/unstyled": "workspace:*",
+    "@base-ui/react": "^1.6.0",
     "@chakra-ui/react": "^3.36.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",

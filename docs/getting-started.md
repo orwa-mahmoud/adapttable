@@ -44,6 +44,12 @@ pnpm add @adapttable/core @adapttable/chakra @chakra-ui/react @emotion/react
 # Ant Design
 pnpm add @adapttable/core @adapttable/antd antd
 
+# Radix Themes
+pnpm add @adapttable/core @adapttable/radix @radix-ui/themes
+
+# Base UI
+pnpm add @adapttable/core @adapttable/base-ui @base-ui/react
+
 # shadcn/ui — one import, pre-wired with the shadcn class preset
 pnpm add @adapttable/core @adapttable/shadcn
 
@@ -101,6 +107,12 @@ import { ConfigProvider } from "antd";
 </ConfigProvider>;
 ```
 
+**Radix Themes** — import the Themes stylesheet and wrap in `<Theme>` (see
+Radix Themes docs).
+
+**Base UI** — no provider. Import `@adapttable/base-ui` (it side-effect-loads
+minimal chrome CSS) or `@adapttable/base-ui/styles.css` once at the app entry.
+
 **shadcn/ui** — no provider. `@adapttable/shadcn` is the unstyled adapter
 pre-wired with the shadcn class preset, so it inherits your app's existing
 shadcn/ui theme (its CSS variables + Tailwind config) automatically.
@@ -114,7 +126,8 @@ Pass `data` and declare columns — that's the whole thing:
 
 ```tsx
 // or import from "@adapttable/mui", "@adapttable/chakra", "@adapttable/antd",
-// "@adapttable/radix", "@adapttable/shadcn", "@adapttable/unstyled" — same props everywhere.
+// "@adapttable/radix", "@adapttable/base-ui", "@adapttable/shadcn",
+// "@adapttable/unstyled" — same props everywhere.
 import { DataTable } from "@adapttable/mantine";
 
 interface Person {
@@ -199,6 +212,7 @@ kit:
 - [Chakra UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/chakra)
 - [Ant Design](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/antd)
 - [Radix Themes](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/radix)
+- [Base UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/base-ui)
 - [shadcn/ui](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/shadcn)
 - [Unstyled / Tailwind](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/unstyled)
 
