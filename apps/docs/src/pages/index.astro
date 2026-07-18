@@ -8,14 +8,17 @@ const SITE = "https://orwa-mahmoud.github.io/adapttable";
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
 const TITLE = "AdaptTable — Headless React Data Table for Any UI Kit";
 const DESCRIPTION =
-  "One React data table, rendered natively by Mantine, MUI, Chakra, Ant Design, Radix or shadcn/ui — filters, URL-synced state, virtualization, RTL. MIT, headless core.";
+  "One React data table, rendered natively by Mantine, MUI, Chakra, Ant Design, Radix, Base UI or shadcn/ui — filters, URL-synced state, virtualization, RTL. MIT, headless core.";
 
-// The demo hero's adapter chips, same labels and accent colors.
+// The demo hero's adapter chips, same labels and accent colors as
+// apps/showcase/src/themeTokens.ts.
 const KITS = [
   { label: "Mantine", c: "oklch(0.58 0.17 252)" },
   { label: "MUI", c: "oklch(0.55 0.18 264)" },
   { label: "Chakra", c: "oklch(0.6 0.1 188)" },
   { label: "Ant Design", c: "oklch(0.56 0.2 262)" },
+  { label: "Radix", c: "oklch(0.54 0.19 280)" },
+  { label: "Base UI", c: "oklch(0.55 0.19 255)" },
   { label: "shadcn / Tailwind", c: "oklch(0.28 0.01 264)" },
   { label: "Custom Tailwind", c: "oklch(0.55 0.2 277)" },
 ];
@@ -582,7 +585,7 @@ const JSON_LD = JSON.stringify({
         </div>
         <div class="getstarted">
           <pre
-            class="getstarted__code"><code>{`import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, unstyled
+            class="getstarted__code"><code>{`import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
 
 <DataTable
   data={people}

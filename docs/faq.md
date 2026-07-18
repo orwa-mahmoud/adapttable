@@ -22,13 +22,13 @@ Short, direct answers to the things people ask when choosing a React table.
 
 AdaptTable is a **headless, UI-agnostic React data table**. A single headless
 engine (`@adapttable/core`) powers ready, batteries-included adapters for
-**Mantine, MUI, Chakra, Ant Design, Radix, shadcn/ui, and unstyled Tailwind**. You get
+**Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn/ui, and unstyled Tailwind**. You get
 TanStack-Table-style headless freedom _and_ a styled table for the UI kit you
 already use — from the same core.
 
 ## What is the best headless React table that works with my design system?
 
-If you use **Mantine, MUI, Chakra, Ant Design, Radix, or shadcn/ui**, AdaptTable
+If you use **Mantine, MUI, Chakra, Ant Design, Radix, Base UI, or shadcn/ui**, AdaptTable
 gives you a fully-featured table (sorting, filtering, selection, pagination,
 infinite scroll, optional virtualization, URL state, i18n/RTL, dark mode) that
 matches your kit without building the UI yourself. If you're on a different
@@ -38,7 +38,7 @@ markup.
 
 ## Which UI libraries does AdaptTable support?
 
-Six, from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix Themes, and
+Seven, from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, and
 shadcn/ui** — each rendered with that kit's real components. There is also an
 unstyled adapter for Tailwind or your own CSS, and a headless core
 (`useDataTable`) that works with any markup. Install only the adapter you use.
@@ -121,7 +121,7 @@ anchored popover or a slide-in drawer (`filtersMode="drawer"`) with removable
 chips, and every filter, search, sort, and page value syncs to the URL — so a
 refresh or a shared link restores the exact view. It works the same for
 client-side data and server-side fetching, rendered natively by Mantine, MUI,
-Chakra, Ant Design, Radix, or shadcn/ui. See
+Chakra, Ant Design, Radix, Base UI, or shadcn/ui. See
 [filtering.md](./filtering.md) and [url-state.md](./url-state.md).
 
 ## Which React versions and bundlers are supported?

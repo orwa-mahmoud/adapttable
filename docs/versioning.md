@@ -43,6 +43,7 @@ supported major — so a claimed-but-broken version is caught before you hit it:
 | `@adapttable/chakra`                          | `@chakra-ui/react` 3                   |
 | `@adapttable/antd`                            | `antd` 6                               |
 | `@adapttable/radix`                           | `@radix-ui/themes` 3                   |
+| `@adapttable/base-ui`                         | `@base-ui/react` ^1.6                  |
 | `@adapttable/unstyled` / `@adapttable/shadcn` | no UI-kit dependency                   |
 
 `react` / `react-dom` 18 and 19 are supported across every package.

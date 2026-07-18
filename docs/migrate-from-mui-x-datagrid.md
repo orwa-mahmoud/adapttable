@@ -30,8 +30,8 @@ Plus things DataGrid has no built-in answer for at any tier:
 - **URL-synced, shareable state** — see [URL state](./url-state.md).
 - **An automatic responsive card layout** on mobile (DataGrid's List view is
   Pro and manual).
-- **One API for six UI kits** — the same code renders in Mantine, Chakra, Ant
-  Design, Radix, and shadcn/ui too.
+- **One API for seven UI kits** — the same code renders in Mantine, Chakra, Ant
+  Design, Radix, Base UI, and shadcn/ui too.
 
 > Tiers above reflect MUI X **v8** (2025), verified against MUI's licensing
 > docs. MUI may move features between tiers — check their

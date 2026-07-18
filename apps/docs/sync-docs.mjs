@@ -64,9 +64,9 @@ const TITLES = {
 // answer engines have something better than a generic site default.
 const DESCRIPTIONS = {
   "getting-started.md":
-    "Install AdaptTable for Mantine, MUI, Chakra, Ant, Radix or shadcn — npx @adapttable/cli init, or open a StackBlitz starter and ship a full React data table in minutes.",
+    "Install AdaptTable for Mantine, MUI, Chakra, Ant, Radix, Base UI or shadcn — npx @adapttable/cli init, or open a StackBlitz starter and ship a full React data table in minutes.",
   "concepts.md":
-    "How AdaptTable works: one headless core, a TableSource data contract, and adapters that mount real Mantine/MUI/Chakra/Ant/Radix/shadcn components — not a re-skin.",
+    "How AdaptTable works: one headless core, a TableSource data contract, and adapters that mount real Mantine/MUI/Chakra/Ant/Radix/Base UI/shadcn components — not a re-skin.",
   "columns.md":
     "Define React table columns once with ColumnDef — accessors, sorting, per-column filters, alignment, pinning and custom cells — same API across every UI kit.",
   "sorting.md":
@@ -104,7 +104,7 @@ const DESCRIPTIONS = {
   "migrate-from-mui-x-datagrid.md":
     "Looking past MUI X Pro pricing? @adapttable/mui keeps real Material UI components and ships pinning, virtualization, multi-filter and more under MIT — plus URL-synced state. Migration map inside.",
   "migrate-from-tanstack-table.md":
-    "Love TanStack's headless model but tired of rebuilding filters, toolbars, pagination and URL sync? AdaptTable keeps prop-getters and ships native adapters for seven React UI kits. Migration map inside.",
+    "Love TanStack's headless model but tired of rebuilding filters, toolbars, pagination and URL sync? AdaptTable keeps prop-getters and ships native adapters for eight React UI kits. Migration map inside.",
   "migrate-from-mui-datatables.md":
     "mui-datatables is unmaintained since Jan 2023 and stuck on MUI v5. @adapttable/mui maps columns and onTableChange to one query callback — MUI v6+ and React 19 ready. Migration guide inside.",
   "migrate-from-material-table.md":

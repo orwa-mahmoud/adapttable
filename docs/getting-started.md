@@ -2,7 +2,7 @@
 
 <video
 src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4"
-poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.png?v=2"
+poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-poster.png?v=2"
 controls
 playsinline
 preload="none"

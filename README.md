@@ -2,7 +2,7 @@
 
 # AdaptTable
 
-### The headless React data table that works with **any** UI kit — batteries-included adapters for Mantine, MUI, Chakra, Ant Design, and Radix, plus an unstyled path for Tailwind & shadcn/ui.
+### The headless React data table that works with **any** UI kit — batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix, and Base UI, plus an unstyled path for Tailwind & shadcn/ui.
 
 [![CI](https://github.com/orwa-mahmoud/adapttable/actions/workflows/ci.yml/badge.svg)](https://github.com/orwa-mahmoud/adapttable/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@adapttable/core.svg)](https://www.npmjs.com/package/@adapttable/core)
@@ -16,7 +16,7 @@
 **Easy by default, infinitely customizable.** One unified data source for both client-side and server-side data, URL-synced shareable state, optional virtualization, infinite-scroll & paging (auto by device), responsive mobile cards, a real filter UX, **column management** (reorder · pin · resize · show/hide), first-class **i18n + RTL**, and seamless **dark mode** — out of the box.
 
 <video src="https://github.com/user-attachments/assets/1d59e6de-b201-4997-bcd5-beef1133c769" poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.png?v=2" controls playsinline width="860">
-  <a href="https://github.com/user-attachments/assets/1d59e6de-b201-4997-bcd5-beef1133c769">▶ Watch the 25-second tour — the same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, shadcn, and Tailwind, from one headless engine.</a>
+  <a href="https://github.com/user-attachments/assets/1d59e6de-b201-4997-bcd5-beef1133c769">▶ Watch the 25-second tour — the same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn, and Tailwind, from one headless engine.</a>
 </video>
 
 </div>

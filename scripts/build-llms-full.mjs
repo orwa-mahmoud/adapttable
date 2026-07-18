@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 
 const HEADER = `# AdaptTable — full documentation
 
-> Headless, UI-agnostic React data table with ready adapters for Mantine, MUI, Chakra, Ant Design, Radix, shadcn/ui, and unstyled Tailwind. Unified client/server data via TableSource, URL-synced state, column management (show/hide, reorder, pin left/right, resize, density), responsive mobile cards, optional row/card virtualization, provider-native filter popovers/drawers with chips, numeric/date/status filters, i18n + RTL (logical pinning — works in Arabic/Hebrew), dark mode. MIT.
+> Headless, UI-agnostic React data table with ready adapters for Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn/ui, and unstyled Tailwind. Unified client/server data via TableSource, URL-synced state, column management (show/hide, reorder, pin left/right, resize, density), responsive mobile cards, optional row/card virtualization, provider-native filter popovers/drawers with chips, numeric/date/status filters, i18n + RTL (logical pinning — works in Arabic/Hebrew), dark mode. MIT.
 
 `;
 

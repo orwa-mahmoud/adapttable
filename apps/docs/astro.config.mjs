@@ -9,7 +9,7 @@ export default defineConfig({
     starlight({
       title: "AdaptTable",
       description:
-        "One headless React data-table engine, native adapters for Mantine, MUI, Chakra, Ant Design and Tailwind/shadcn.",
+        "One headless React data-table engine, native adapters for Mantine, MUI, Chakra, Ant Design, Radix, Base UI and Tailwind/shadcn.",
       head: [
         // Social-share image is per-page (PNG, 1200x630): sync-docs injects a
         // distinct og:image/twitter:image into each page's frontmatter `head`.
@@ -36,7 +36,7 @@ export default defineConfig({
             "@type": "SoftwareApplication",
             name: "AdaptTable",
             description:
-              "Headless, UI-agnostic React data table with native adapters for Mantine, MUI, Chakra UI, Ant Design and Tailwind/shadcn — URL-synced state, declarative filters, column management, virtualization, i18n and RTL.",
+              "Headless, UI-agnostic React data table with native adapters for Mantine, MUI, Chakra UI, Ant Design, Radix, Base UI and Tailwind/shadcn — URL-synced state, declarative filters, column management, virtualization, i18n and RTL.",
             url: "https://orwa-mahmoud.github.io/adapttable/",
             applicationCategory: "DeveloperApplication",
             operatingSystem: "Any",

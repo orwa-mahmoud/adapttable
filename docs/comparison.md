@@ -29,7 +29,7 @@ libraries.
 TanStack Table is a headless engine — framework-agnostic and the closest in
 philosophy. The difference is what you ship: with TanStack you build every
 cell, header, filter, and pagination control yourself. AdaptTable gives you
-native, batteries-included UI for Mantine, MUI, Chakra, Ant Design, Radix, and
+native, batteries-included UI for Mantine, MUI, Chakra, Ant Design, Radix, Base UI, and
 shadcn/ui out of the box — and still exposes a headless core with prop-getters
 when you want to drop down. Pick TanStack for non-React or total-control
 builds; pick AdaptTable when you want the UI done for your kit without losing
@@ -56,7 +56,7 @@ MUI X DataGrid is a strong choice if you're all-in on MUI — but it's
 MUI-only, and its server-side data, tree data, and infinite loading sit behind
 the paid Pro / Premium tiers (open-core). AdaptTable's MUI adapter gives a
 DataGrid-style experience for free, and the same API also renders in Mantine,
-Chakra, Ant Design, Radix, and shadcn/ui, with server data and shareable URL
+Chakra, Ant Design, Radix, Base UI, and shadcn/ui, with server data and shareable URL
 state built in at no cost.
 
 → [Migrate from MUI X DataGrid](./migrate-from-mui-x-datagrid.md). Coming from
@@ -80,22 +80,22 @@ AdaptTable covers more ground.
 The point of AdaptTable is that the feature set never changes when you switch
 kits — only the look does. Every adapter ships the same batteries:
 
-| Feature                               | Mantine | MUI | Chakra | Ant Design | Radix | shadcn/ui | Unstyled |
-| ------------------------------------- | :-----: | :-: | :----: | :--------: | :---: | :-------: | :------: |
-| Filter popover                        |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Filter drawer                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅¹  |    ✅     |    ✅    |
-| Active-filter chips                   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Column menu (show/hide, reorder, pin) |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Column resize                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Saved views                           |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Bulk action bar                       |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Summary / footer row                  |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Row expansion                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |    ✅     |    ✅    |
-| Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Skeleton / empty / error states       |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
-| Mount entrance animation              |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |    ✅     |    ✅    |
+| Feature                               | Mantine | MUI | Chakra | Ant Design | Radix | Base UI | shadcn/ui | Unstyled |
+| ------------------------------------- | :-----: | :-: | :----: | :--------: | :---: | :-----: | :-------: | :------: |
+| Filter popover                        |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Filter drawer                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅¹  |   ✅    |    ✅     |    ✅    |
+| Active-filter chips                   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Column menu (show/hide, reorder, pin) |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Column resize                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Saved views                           |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Bulk action bar                       |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Summary / footer row                  |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Row expansion                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Skeleton / empty / error states       |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Mount entrance animation              |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 
 <sub>¹ Radix Themes ships no Drawer primitive, so `filtersMode="drawer"` renders
 as a Radix Dialog restyled into a side panel — same dimming backdrop and focus
@@ -107,7 +107,7 @@ matches unstyled feature-for-feature.
 
 ## When to choose AdaptTable
 
-- You use **Mantine, MUI, Chakra, Ant Design, Radix, or shadcn/ui** and want a table
+- You use **Mantine, MUI, Chakra, Ant Design, Radix, Base UI, or shadcn/ui** and want a table
   that matches your kit without building it yourself.
 - You need **the same table for both in-memory and server-paginated data**.
 - You want **shareable, deep-linkable table state** for free.
