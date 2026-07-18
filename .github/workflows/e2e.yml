@@ -2,17 +2,17 @@ name: E2E
 
 # Real-browser smoke suite over the showcase. Guards the bug class jsdom can't
 # see (overlay z-index / bleed-through, drawer backdrops, sticky/pinned offsets,
-# virtualization DOM bounds) — so it runs only when the library or the showcase
-# it drives actually changes.
+# virtualization DOM bounds).
+#
+# "Playwright smoke (showcase)" is a REQUIRED status check on main, so this
+# workflow must run — and report — on EVERY pull request: a path filter here
+# leaves the required check permanently "expected" on PRs that don't touch
+# the library (config-only, docs-only), making them unmergeable. The heavy
+# steps instead self-skip via an in-job diff check when nothing the suite
+# covers has changed.
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "packages/**"
-      - "apps/showcase/**"
-      - "e2e/**"
-      - "playwright.config.ts"
-      - "pnpm-lock.yaml"
   workflow_dispatch:
 
 concurrency:
@@ -26,20 +26,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Decide whether the diff touches anything this suite exercises.
+      # Manual runs (workflow_dispatch) always exercise the full suite.
+      - name: Detect relevant changes
+        id: changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git fetch --quiet --depth=1 origin "$BASE_REF"
+          if git diff --name-only "origin/$BASE_REF"...HEAD \
+            | grep -qE '^(packages/|apps/showcase/|e2e/|playwright\.config\.ts$|pnpm-lock\.yaml$)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No library/showcase/e2e changes — smoke suite not needed for this diff."
+          fi
+
       - uses: pnpm/action-setup@v4
+        if: steps.changes.outputs.run == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.run == 'true'
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install dependencies
+        if: steps.changes.outputs.run == 'true'
         run: pnpm install --frozen-lockfile
 
       # Cache the downloaded browser binary across runs, keyed on the lockfile
       # (which pins @playwright/test, so a version bump busts the cache).
       - name: Cache Playwright browser
         id: pw-cache
+        if: steps.changes.outputs.run == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -48,9 +72,11 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright Chromium
+        if: steps.changes.outputs.run == 'true'
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run E2E smoke suite
+        if: steps.changes.outputs.run == 'true'
         run: pnpm test:e2e
 
       - name: Upload report on failure
