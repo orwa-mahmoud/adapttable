@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@adapttable/base-ui": "workspace:*",
-    "@adapttable/core": "^1.1.2",
+    "@adapttable/core": "^1.0.0",
     "@base-ui/react": "^1.6.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
