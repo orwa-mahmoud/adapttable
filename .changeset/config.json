@@ -19,5 +19,6 @@
     "@adapttable/starter-radix",
     "@adapttable/starter-shadcn",
     "@adapttable/starter-unstyled"
-  ]
+  ],
+  "bumpVersionsWithWorkspaceProtocolOnly": true
 }
