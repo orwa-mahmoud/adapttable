@@ -7,7 +7,7 @@
 
 # Get started with AdaptTable — React table for your UI kit
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-poster.png?v=2" controls playsinline preload="none" style="width:100%;border-radius:8px"></video>
+<video src="https://orwa-mahmoud.github.io/adapttable/media/demo-core.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.png?v=2" controls playsinline preload="none" style="width:100%;border-radius:8px"></video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, filterable, paginated

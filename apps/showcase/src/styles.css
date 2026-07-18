@@ -266,10 +266,14 @@ a {
 
 /* ---------- adapter switcher ---------- */
 .adapterbar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
   margin-bottom: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 4px; /* room for scrollbar so chips aren't clipped */
+  scrollbar-width: thin;
 }
 .adtab {
   display: flex;
@@ -283,6 +287,9 @@ a {
   background: var(--page-surface);
   transition: all 0.18s ease;
   position: relative;
+  flex: 1 0 auto;
+  min-width: 148px;
+  max-width: 200px;
 }
 .adtab:hover {
   border-color: color-mix(in oklch, var(--c) 50%, var(--page-border));
@@ -521,16 +528,18 @@ a {
 
 /* ---------- responsive ---------- */
 @media (max-width: 920px) {
-  .adapterbar {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .nav__links {
     display: none;
   }
 }
 @media (max-width: 560px) {
-  .adapterbar {
-    grid-template-columns: 1fr;
+  .adtab {
+    min-width: 132px;
+    max-width: 168px;
+    padding: 10px;
+  }
+  .adtab__l small {
+    display: none; /* keep one-line scroll compact on phones */
   }
 }
 @media (prefers-reduced-motion: reduce) {
