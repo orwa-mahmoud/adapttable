@@ -62,7 +62,7 @@ const RESIZE_HANDLE_STYLE: CSSProperties = {
 const EXPANSION_WIDTH = 32;
 
 /** Opaque background for sticky/pinned cells (the panel surface). */
-const PIN_BG = "var(--adapttable-surface, Canvas)";
+const PIN_BG = "var(--adapttable-surface, #ffffff)";
 
 /**
  * Ensure pinned columns stick against our scroll wrapper via a min-width

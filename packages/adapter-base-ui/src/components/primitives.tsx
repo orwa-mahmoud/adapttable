@@ -83,6 +83,7 @@ export function Checkbox({
     </BaseCheckbox.Root>
   );
   if (children == null) return box;
+  if (children == null) return box;
   // Native <label> (not Text-as-label): Base UI wires aria-labelledby to the
   // enclosing label id; a plain label keeps the visible text as the name.
   return (
@@ -149,12 +150,17 @@ export function NativeSelect({
         className="adapttable-btn"
         data-size={size}
         data-variant="outline"
+        data-slot="select-trigger"
         style={width ? { width } : undefined}
       >
-        <Select.Value placeholder={placeholder} />
+        <Select.Value data-slot="select-value" placeholder={placeholder} />
       </Select.Trigger>
       <Select.Portal>
-        <Select.Positioner sideOffset={4} alignItemWithTrigger={false}>
+        <Select.Positioner
+          className="adapttable-select-positioner"
+          sideOffset={4}
+          alignItemWithTrigger={false}
+        >
           <Select.Popup className="adapttable-select-popup">
             <Select.List>
               {options.map((option) => {

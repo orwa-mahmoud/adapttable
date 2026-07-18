@@ -1,6 +1,6 @@
 # @adapttable/unstyled
 
-[![@adapttable/unstyled — a headless table styled with Tailwind / shadcn](https://orwa-mahmoud.github.io/adapttable/media/demo-unstyled-poster.png)](https://orwa-mahmoud.github.io/adapttable/media/demo-unstyled.mp4)
+[![@adapttable/unstyled — a headless table styled with Tailwind / shadcn](https://orwa-mahmoud.github.io/adapttable/media/demo-unstyled.gif)](https://orwa-mahmoud.github.io/adapttable/media/demo-unstyled.mp4)
 
 **[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/unstyled)**
 

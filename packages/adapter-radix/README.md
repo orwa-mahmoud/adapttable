@@ -1,6 +1,6 @@
 # @adapttable/radix
 
-[![@adapttable/radix — a Radix Themes data table built on AdaptTable](https://orwa-mahmoud.github.io/adapttable/media/demo-radix-poster.png)](https://orwa-mahmoud.github.io/adapttable/media/demo-radix.mp4)
+[![@adapttable/radix — a Radix Themes data table built on AdaptTable](https://orwa-mahmoud.github.io/adapttable/media/demo-radix.gif)](https://orwa-mahmoud.github.io/adapttable/media/demo-radix.mp4)
 
 **[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/radix)**
 

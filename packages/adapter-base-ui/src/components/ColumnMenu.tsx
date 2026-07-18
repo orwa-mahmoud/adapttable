@@ -117,7 +117,12 @@ export function ColumnMenu<TRow>({
         {labels.columns}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="bottom" align="end" sideOffset={8}>
+        <Popover.Positioner
+          className="adapttable-popup-positioner"
+          side="bottom"
+          align="end"
+          sideOffset={8}
+        >
           <Popover.Popup className="adapttable-popup" style={{ minWidth: 260 }}>
             <Flex direction="column" gap="1">
               <Text

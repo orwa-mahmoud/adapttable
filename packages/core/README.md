@@ -1,6 +1,6 @@
 # @adapttable/core
 
-[![AdaptTable — one headless engine: the same table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, shadcn, and Tailwind](https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.png?v=2)](https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.mp4)
+[![AdaptTable — one headless engine: the same table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, shadcn, and Tailwind](https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.gif)](https://orwa-mahmoud.github.io/adapttable/media/demo-core-tour.mp4)
 
 **[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)**
 

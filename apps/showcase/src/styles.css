@@ -265,67 +265,81 @@ a {
 }
 
 /* ---------- adapter switcher ---------- */
+/* Wide: equal-width chips in one row, no scroll. Narrow: horizontal scroll.
+   Vertical padding + overflow:visible on wide so hover lift/shadow isn't clipped
+   (overflow-x:auto alone forces overflow-y clipping). */
 .adapterbar {
   display: flex;
   flex-wrap: nowrap;
-  gap: 8px;
+  align-items: stretch;
+  gap: 6px;
   margin-bottom: 16px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding-bottom: 4px; /* room for scrollbar so chips aren't clipped */
-  scrollbar-width: thin;
+  padding-block: 6px; /* room for hover translateY + shadow */
+  overflow: visible;
 }
 .adtab {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px;
   text-align: start;
   cursor: pointer;
-  padding: 12px 12px;
-  border-radius: 12px;
+  padding: 8px 9px;
+  border-radius: 10px;
   border: 1px solid var(--page-border);
   background: var(--page-surface);
-  transition: all 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
   position: relative;
-  flex: 1 0 auto;
-  min-width: 148px;
-  max-width: 200px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .adtab:hover {
   border-color: color-mix(in oklch, var(--c) 50%, var(--page-border));
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--c) 14%, transparent);
+  z-index: 1;
 }
 .adtab.is-on {
   border-color: var(--c);
   box-shadow:
     0 0 0 1px var(--c),
-    0 6px 18px color-mix(in oklch, var(--c) 22%, transparent);
+    0 4px 14px color-mix(in oklch, var(--c) 22%, transparent);
+  z-index: 1;
 }
 .adtab__dot {
-  width: 11px;
-  height: 11px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--c);
   margin-top: 4px;
   flex: none;
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--c) 18%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--c) 18%, transparent);
 }
 .adtab__l {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 .adtab__l strong {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 650;
   color: var(--ink);
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .adtab__l small {
-  font-size: 11.5px;
+  font-size: 10px;
   color: var(--ink-3);
-  line-height: 1.3;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ---------- secondary controls ---------- */
@@ -531,15 +545,30 @@ a {
   .nav__links {
     display: none;
   }
+  .adapterbar {
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    /* Keep hover lift inside the scrollport */
+    padding-block: 8px;
+    margin-block: -2px;
+  }
+  .adtab {
+    flex: 0 0 auto;
+    min-width: 118px;
+    max-width: 140px;
+  }
 }
 @media (max-width: 560px) {
   .adtab {
-    min-width: 132px;
-    max-width: 168px;
-    padding: 10px;
+    min-width: 104px;
+    max-width: 124px;
+    padding: 7px 8px;
   }
   .adtab__l small {
-    display: none; /* keep one-line scroll compact on phones */
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

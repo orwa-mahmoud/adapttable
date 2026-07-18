@@ -69,7 +69,12 @@ export function SavedViewsMenu({
         {labels.savedViews}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="bottom" align="end" sideOffset={8}>
+        <Popover.Positioner
+          className="adapttable-popup-positioner"
+          side="bottom"
+          align="end"
+          sideOffset={8}
+        >
           <Popover.Popup className="adapttable-popup" style={{ minWidth: 240 }}>
             <Flex direction="column" gap="1">
               <Text

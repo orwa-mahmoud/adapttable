@@ -15,15 +15,10 @@ import { type ReactNode, useId } from "react";
 
 import type { BaseUiAccentColor } from "../types";
 import { Flex, Spinner, Text, TextField } from "../ui";
-import {
-  Checkbox,
-  FormField,
-  NativeSelect,
-  type SelectOption,
-} from "./primitives";
+import { FormField, NativeSelect, type SelectOption } from "./primitives";
 
 /**
- * A labelled GROUP wrapper for multi-control fields (the multiSelect checkbox
+ * A labelled GROUP wrapper for multi-control fields (the multiSelect chip
  * group). Unlike {@link FormField} the label carries an `id` so the group
  * references it via `aria-labelledby` instead of naming a single control.
  */
@@ -194,9 +189,9 @@ function AutoFilterField<TRow>({
       );
     }
     case "multiSelect": {
-      // A multiSelect is a GROUP of checkboxes, named through the group label
-      // via `aria-labelledby`; each box self-labels through its own text and
-      // toggles itself in/out of the current list.
+      // Toggle chips — selected state is the chip chrome, no nested checkbox.
+      // Named through the group label via `aria-labelledby`; each chip is a
+      // `role="checkbox"` so existing a11y semantics / tests stay intact.
       const selected = listFilterValues(extra[def.key]);
       const toggle = (value: string) =>
         setExtra(
@@ -210,20 +205,25 @@ function AutoFilterField<TRow>({
           {loading ? (
             <Spinner size="1" />
           ) : (
-            <Flex gap="3" wrap="wrap" role="group" aria-labelledby={id}>
-              {options.map((option, index) => (
-                <Checkbox
-                  key={option.value}
-                  id={`${id}-${index}`}
-                  size="1"
-                  color={accentColor}
-                  value={option.value}
-                  checked={selected.includes(option.value)}
-                  onToggle={() => toggle(option.value)}
-                >
-                  {option.label}
-                </Checkbox>
-              ))}
+            <Flex gap="2" wrap="wrap" role="group" aria-labelledby={id}>
+              {options.map((option) => {
+                const checked = selected.includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    id={`${id}-${option.value}`}
+                    role="checkbox"
+                    aria-checked={checked}
+                    className="adapttable-filter-chip"
+                    data-checked={checked ? "true" : "false"}
+                    data-accent={accentColor}
+                    onClick={() => toggle(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
             </Flex>
           )}
         </GroupField>

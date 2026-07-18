@@ -1,19 +1,31 @@
-/* Minimal chrome for @adapttable/base-ui — Base UI itself is unstyled. */
-.adapttable-base-ui {
+/* Minimal chrome for @adapttable/base-ui — Base UI itself is unstyled.
+ *
+ * Tokens live on BOTH the table root and every portaled surface (popover /
+ * positioner / select / drawer / tooltip). Portals mount under document.body,
+ * so without this duplication `var(--adapttable-*)` goes invalid. Positioners
+ * MUST host the overlay z token: Base UI applies `transform` on them, which
+ * creates the stacking context — z-index on the inner popup alone cannot beat
+ * sticky table headers.
+ */
+.adapttable-base-ui,
+.adapttable-popup,
+.adapttable-popup-positioner,
+.adapttable-select-popup,
+.adapttable-select-positioner,
+.adapttable-drawer,
+.adapttable-tooltip,
+.adapttable-drawer-backdrop {
   --adapttable-accent: #2563eb;
   --adapttable-accent-fg: #fff;
-  --adapttable-border: color-mix(in srgb, currentColor 18%, transparent);
-  --adapttable-muted: color-mix(in srgb, currentColor 55%, transparent);
-  --adapttable-surface: Canvas;
-  --adapttable-soft: color-mix(in srgb, currentColor 8%, transparent);
+  --adapttable-border: #d4d4d8;
+  --adapttable-muted: #71717a;
+  --adapttable-surface: #ffffff;
+  --adapttable-soft: #f4f4f5;
   --adapttable-danger: #dc2626;
   --adapttable-radius: 8px;
   --adapttable-gap: 0.5rem;
-  color: CanvasText;
-  background: var(--adapttable-surface);
-  border: 1px solid var(--adapttable-border);
-  border-radius: calc(var(--adapttable-radius) + 2px);
-  padding: 0.75rem;
+  --adapttable-overlay-z: 10050;
+  --adapttable-overlay-backdrop-z: 10040;
   font-family:
     system-ui,
     -apple-system,
@@ -23,6 +35,35 @@
   font-size: 0.875rem;
   line-height: 1.4;
   box-sizing: border-box;
+}
+
+[data-theme="dark"] .adapttable-base-ui,
+[data-theme="dark"] .adapttable-popup,
+[data-theme="dark"] .adapttable-select-popup,
+[data-theme="dark"] .adapttable-drawer,
+[data-theme="dark"] .adapttable-tooltip,
+.adapttable-base-ui[data-theme="dark"],
+.adapttable-popup[data-theme="dark"],
+.adapttable-select-popup[data-theme="dark"],
+.adapttable-drawer[data-theme="dark"] {
+  --adapttable-border: #3f3f46;
+  --adapttable-muted: #a1a1aa;
+  --adapttable-surface: #18181b;
+  --adapttable-soft: #27272a;
+  --adapttable-accent-fg: #fff;
+}
+
+.adapttable-base-ui {
+  color: #18181b;
+  background: var(--adapttable-surface);
+  border: 1px solid var(--adapttable-border);
+  border-radius: calc(var(--adapttable-radius) + 2px);
+  padding: 0.75rem;
+}
+
+[data-theme="dark"] .adapttable-base-ui,
+.adapttable-base-ui[data-theme="dark"] {
+  color: #fafafa;
 }
 
 .adapttable-base-ui *,
@@ -357,28 +398,47 @@
 }
 
 .adapttable-popup {
-  z-index: 50;
+  position: relative;
+  z-index: var(--adapttable-overlay-z);
+  isolation: isolate;
   box-sizing: border-box;
   border: 1px solid var(--adapttable-border);
-  border-radius: var(--adapttable-radius);
-  background: Canvas;
-  color: CanvasText;
-  box-shadow: 0 8px 28px color-mix(in srgb, #000 18%, transparent);
-  padding: 0.75rem;
+  border-radius: calc(var(--adapttable-radius) + 2px);
+  background: var(--adapttable-surface);
+  color: #18181b;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 12%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
+  padding: 0.85rem;
   outline: none;
+  max-height: min(70vh, 560px);
+  overflow: auto;
+}
+
+[data-theme="dark"] .adapttable-popup,
+.adapttable-popup[data-theme="dark"] {
+  color: #fafafa;
 }
 
 .adapttable-select-popup {
-  z-index: 60;
+  z-index: calc(var(--adapttable-overlay-z) + 10);
+  isolation: isolate;
   max-height: min(280px, 50vh);
   overflow: auto;
   border: 1px solid var(--adapttable-border);
   border-radius: var(--adapttable-radius);
-  background: Canvas;
-  color: CanvasText;
-  box-shadow: 0 8px 28px color-mix(in srgb, #000 18%, transparent);
+  background: var(--adapttable-surface);
+  color: #18181b;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 12%),
+    0 4px 6px -4px rgb(0 0 0 / 10%);
   padding: 0.25rem;
   outline: none;
+}
+
+[data-theme="dark"] .adapttable-select-popup,
+.adapttable-select-popup[data-theme="dark"] {
+  color: #fafafa;
 }
 
 .adapttable-select-item {
@@ -386,7 +446,7 @@
   align-items: center;
   gap: 0.4rem;
   border-radius: 6px;
-  padding: 0.35rem 0.5rem;
+  padding: 0.4rem 0.55rem;
   cursor: default;
   outline: none;
 }
@@ -422,17 +482,51 @@
 
 .adapttable-checkbox__indicator {
   display: flex;
+  font-size: 0.7rem;
+  line-height: 1;
 }
 
 .adapttable-checkbox__indicator[data-unchecked] {
   display: none;
 }
 
+/* Multi-select options as chips (portaled filter forms) — label only, no box. */
+.adapttable-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--adapttable-border);
+  border-radius: 999px;
+  background: var(--adapttable-surface);
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+.adapttable-filter-chip:hover {
+  background: var(--adapttable-soft);
+}
+
+.adapttable-filter-chip[data-checked="true"] {
+  border-color: color-mix(in srgb, var(--adapttable-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--adapttable-accent) 14%, transparent);
+  color: var(--adapttable-accent);
+  font-weight: 600;
+}
+
+.adapttable-filter-chip:focus-visible {
+  outline: 2px solid var(--adapttable-accent);
+  outline-offset: 2px;
+}
+
 .adapttable-tooltip {
-  z-index: 70;
+  z-index: calc(var(--adapttable-overlay-z) + 20);
   border-radius: 6px;
-  background: CanvasText;
-  color: Canvas;
+  background: #18181b;
+  color: #fafafa;
   font-size: 0.75rem;
   padding: 0.25rem 0.45rem;
   outline: none;
@@ -441,8 +535,8 @@
 .adapttable-drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, #000 35%, transparent);
-  z-index: 40;
+  background: rgb(0 0 0 / 40%);
+  z-index: var(--adapttable-overlay-backdrop-z);
 }
 
 .adapttable-drawer {
@@ -451,13 +545,40 @@
   inset-inline-end: 0;
   width: min(420px, 100vw);
   height: 100dvh;
-  z-index: 50;
+  z-index: var(--adapttable-overlay-z);
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  background: Canvas;
-  color: CanvasText;
+  background: var(--adapttable-surface);
+  color: #18181b;
   border-inline-start: 1px solid var(--adapttable-border);
-  padding: 1rem;
+  padding: 1rem 1.1rem;
   outline: none;
-  box-shadow: -8px 0 28px color-mix(in srgb, #000 18%, transparent);
+  box-shadow: -12px 0 32px rgb(0 0 0 / 16%);
+}
+
+[data-theme="dark"] .adapttable-drawer,
+.adapttable-drawer[data-theme="dark"] {
+  color: #fafafa;
+}
+
+.adapttable-drawer-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* Select trigger: read as a real control, not naked text. */
+.adapttable-btn[data-slot="select-trigger"],
+button.adapttable-btn:has([data-slot="select-value"]) {
+  justify-content: space-between;
+  min-height: 2rem;
+  min-width: 7.5rem;
+  gap: 0.5rem;
+}
+
+.adapttable-popup-positioner,
+.adapttable-select-positioner {
+  z-index: var(--adapttable-overlay-z);
 }

@@ -480,7 +480,9 @@ export function FilterDrawer({
         <Drawer.Viewport>
           <Drawer.Popup className="adapttable-drawer" dir={dir}>
             <Drawer.Content>
-              <Drawer.Title>{labels.filters}</Drawer.Title>
+              <Drawer.Title className="adapttable-drawer-title">
+                {labels.filters}
+              </Drawer.Title>
               <Flex
                 direction="column"
                 gap="4"

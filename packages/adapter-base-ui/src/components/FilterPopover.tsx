@@ -51,6 +51,7 @@ export function FilterPopover({
       {trigger}
       <Popover.Portal>
         <Popover.Positioner
+          className="adapttable-popup-positioner"
           side="bottom"
           align={dir === "rtl" ? "start" : "end"}
           sideOffset={8}

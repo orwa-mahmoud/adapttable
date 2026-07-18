@@ -638,6 +638,12 @@ export function demoFilterDefs(locale: Locale): FilterDef<Person>[] {
       getValue: personStatus,
     },
     {
+      key: "budget",
+      type: "numberRange",
+      label: s.budgetFilter,
+      getValue: budget,
+    },
+    {
       key: "start",
       type: "dateRange",
       label: s.startDate,
@@ -648,12 +654,6 @@ export function demoFilterDefs(locale: Locale): FilterDef<Person>[] {
       type: "numberRange",
       label: s.allocationFilter,
       getValue: allocationCount,
-    },
-    {
-      key: "budget",
-      type: "numberRange",
-      label: s.budgetFilter,
-      getValue: budget,
     },
   ];
 }
