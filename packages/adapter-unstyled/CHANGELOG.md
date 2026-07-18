@@ -1,5 +1,13 @@
 # @adapttable/unstyled
 
+## 1.1.2
+
+### Patch Changes
+
+- e909bf7: Refresh adapter npm README demos: animated GIFs (click through to mp4) replace static posters so npm package pages show motion without leaving the page.
+- Updated dependencies [e909bf7]
+  - @adapttable/core@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @adapttable/core
 
+## 1.1.2
+
+### Patch Changes
+
+- e909bf7: Use an animated GIF for the core tour on npm READMEs (click through to mp4), matching the adapter package demos.
+
 ## 1.1.1
 
 ## 1.1.0

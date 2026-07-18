@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/unstyled",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Headless, unstyled AdaptTable adapter — semantic HTML with class + data-attribute hooks for Tailwind, shadcn/ui, or your own CSS.",
   "keywords": [
     "react",

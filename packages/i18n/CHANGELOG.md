@@ -1,5 +1,13 @@
 # @adapttable/i18n
 
+## 1.1.2
+
+### Patch Changes
+
+- e909bf7: Use an animated GIF for the RTL demo on the npm README (click through to mp4), matching the other packages.
+- Updated dependencies [e909bf7]
+  - @adapttable/core@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes
