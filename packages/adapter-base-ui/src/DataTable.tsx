@@ -83,7 +83,16 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     empty:
       slots?.empty ??
       (chrome.emptyVariant === "noResults" ? (
-        <Flex role="status" direction="column" align="center" py="6" gap="3">
+        <output
+          className="adapttable-flex"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "0.75rem",
+            paddingBlock: "1.5rem",
+          }}
+        >
           <Text {...subtleText}>{labels.noResults}</Text>
           <Button
             size="2"
@@ -93,16 +102,16 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           >
             {labels.clearAll}
           </Button>
-        </Flex>
+        </output>
       ) : (
-        <Text
-          role="status"
-          {...subtleText}
-          align="center"
-          style={{ display: "block", padding: "var(--space-6) 0" }}
+        <output
+          className="adapttable-text"
+          data-muted="true"
+          data-align="center"
+          style={{ display: "block", padding: "1.5rem 0" }}
         >
           {labels.noData}
-        </Text>
+        </output>
       )),
     mobile: <MobileCards {...tableProps} className={props.classNames?.card} />,
     desktop: (

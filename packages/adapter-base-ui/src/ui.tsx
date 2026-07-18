@@ -372,7 +372,7 @@ export function Skeleton({
   );
 }
 
-/** Indeterminate progress bar. */
+/** Indeterminate (or determinate) progress bar. */
 export function Progress({
   size: _size,
   duration: _duration,
@@ -385,22 +385,15 @@ export function Progress({
     duration?: string;
     value?: number;
     className?: string;
-  } & HTMLAttributes<HTMLDivElement>
+  } & Omit<HTMLAttributes<HTMLProgressElement>, "value">
 >) {
   return (
-    <div
+    <progress
       className={cx("adapttable-progress", className)}
-      role="progressbar"
-      aria-valuenow={value}
+      value={value}
+      max={100}
       {...rest}
-    >
-      <span
-        className="adapttable-progress__bar"
-        style={
-          value == null ? undefined : { width: `${value}%`, animation: "none" }
-        }
-      />
-    </div>
+    />
   );
 }
 
@@ -410,9 +403,8 @@ export function Spinner({
   className,
 }: Readonly<{ size?: Size; className?: string }>) {
   return (
-    <span
+    <output
       className={cx("adapttable-spinner", className)}
-      role="status"
       aria-label="Loading"
     />
   );

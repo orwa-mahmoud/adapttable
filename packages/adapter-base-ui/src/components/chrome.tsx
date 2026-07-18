@@ -425,10 +425,9 @@ export function LoadingState({
   loadingLabel,
 }: Readonly<{ rows: number; columns: number; loadingLabel?: string }>) {
   return (
-    <Flex
-      direction="column"
-      gap="2"
-      role="status"
+    <output
+      className="adapttable-flex"
+      style={{ flexDirection: "column", gap: "0.5rem", display: "flex" }}
       aria-busy="true"
       aria-live="polite"
       data-testid="adapttable-loading"
@@ -441,7 +440,7 @@ export function LoadingState({
         </Flex>
       ))}
       {loadingLabel ? <VisuallyHidden>{loadingLabel}</VisuallyHidden> : null}
-    </Flex>
+    </output>
   );
 }
 
