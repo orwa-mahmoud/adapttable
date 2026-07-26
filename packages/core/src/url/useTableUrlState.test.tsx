@@ -383,6 +383,17 @@ describe("multi-sort chain", () => {
     expect(result.current.sortLevels).toEqual([{ key: "name", dir: "asc" }]);
   });
 
+  it("clearAll clears an active chain (rows never stay visibly sorted)", () => {
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    act(() => result.current.toggleSortLevel("team"));
+    act(() => result.current.toggleSortLevel("age"));
+    expect(result.current.sortLevels).toHaveLength(2);
+    act(() => result.current.clearAll());
+    expect(result.current.sortLevels).toEqual([]);
+    expect(adapter.getSearch()).not.toContain("sort");
+  });
+
   it("a plain setSort resets an active chain (clicks never look dead)", () => {
     const adapter = createMemoryAdapter("sort=name%3Aasc,age%3Adesc");
     const { result } = renderHook(() => useTableUrlState({ adapter }));

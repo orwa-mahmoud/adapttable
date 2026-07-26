@@ -352,6 +352,9 @@ export function useTableUrlState(
       commit((p) => {
         if (defaults.search) p.set(ns + PARAM_SEARCH, "");
         else p.delete(ns + PARAM_SEARCH);
+        // The multi-sort chain supersedes the single-sort params, so "clear
+        // all" must drop it too or the rows visibly stay sorted.
+        writeSortLevels(p, [], ns);
         if (defaults.sortBy) p.set(ns + PARAM_SORT_BY, "");
         else p.delete(ns + PARAM_SORT_BY);
         p.delete(ns + PARAM_SORT_DIR);
