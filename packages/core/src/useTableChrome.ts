@@ -26,6 +26,7 @@ import {
   type GroupCollapseState,
   useGroupCollapse,
 } from "./grouping/useGroupCollapse";
+import { useEventCallback } from "./hooks/useEventCallback";
 import { useInfiniteScroll } from "./hooks/useInfiniteScroll";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useScrollToTableTop } from "./hooks/useScrollToTableTop";
@@ -289,16 +290,23 @@ export function useTableChrome<TRow>(
 
   // Selection observer (uncontrolled only): the Set identity only changes
   // when the selection does, so this fires exactly once per user-visible
-  // change (including automatic resets). In the CONTROLLED mode the parent
-  // already receives change requests synchronously through useSelection's
-  // onChange — echoing them here would double-fire (and feed loops).
+  // change (including automatic resets and the documented mount fire with
+  // the empty selection). The handler is read through a ref-latch — the
+  // documented inline-arrow usage is a fresh identity every render, and
+  // keying the effect on it loops forever when the handler stores the ids
+  // in state. In the CONTROLLED mode the parent already receives change
+  // requests synchronously through useSelection's onChange — echoing them
+  // here would double-fire (and feed loops).
   const controlledSelection = selectedIdsProp !== undefined;
   const selectedIds = table.selection?.selectedIds;
+  const notifySelectionChange = useEventCallback((ids: string[]) => {
+    onSelectionChange?.(ids);
+  });
   useEffect(() => {
     if (!controlledSelection && selectedIds) {
-      onSelectionChange?.([...selectedIds]);
+      notifySelectionChange([...selectedIds]);
     }
-  }, [controlledSelection, onSelectionChange, selectedIds]);
+  }, [controlledSelection, selectedIds, notifySelectionChange]);
 
   const mergedChips = useMemo<readonly ActiveFilterChip[]>(
     () => mergeFilterChips(table.filterChips, extraChips),

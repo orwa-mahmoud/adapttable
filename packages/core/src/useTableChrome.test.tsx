@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useFrontendData } from "./source/useFrontendData";
@@ -116,5 +117,52 @@ describe("useTableChrome", () => {
 
     rerender();
     expect(onRowsChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not loop when an uncontrolled inline handler stores the selection", () => {
+    // The documented uncontrolled usage: an inline arrow (fresh identity
+    // every render) that writes the ids straight into state. Keying the
+    // observer effect on the handler identity made this recurse forever.
+    const adapter = createMemoryAdapter("");
+    const renders = { count: 0 };
+    const received: string[][] = [];
+    const { result } = renderHook(() => {
+      renders.count += 1;
+      // Fail fast (instead of starving the runner) if the loop returns.
+      if (renders.count > 50) {
+        throw new Error("selection observer feedback loop");
+      }
+      const [ids, setIds] = useState<readonly string[]>([]);
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      const chrome = useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+        onSelectionChange: (next) => {
+          received.push(next);
+          setIds(next);
+        },
+      });
+      return { chrome, ids };
+    });
+
+    // Mount: the documented single fire with the empty selection, and no
+    // feedback loop (initial render + the setIds([]) commit).
+    expect(received).toEqual([[]]);
+    expect(renders.count).toBeLessThanOrEqual(3);
+
+    // One real selection change notifies exactly once more.
+    const mounted = renders.count;
+    act(() => result.current.chrome.table.selection?.toggle("a"));
+    expect(received).toEqual([[], ["a"]]);
+    expect(result.current.ids).toEqual(["a"]);
+    // toggle commit + setIds re-render — never an unbounded cascade.
+    expect(renders.count - mounted).toBeLessThanOrEqual(2);
   });
 });
