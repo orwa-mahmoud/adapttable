@@ -1,5 +1,6 @@
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useEventCallback } from "../hooks/useEventCallback";
 import type { SortLevel } from "../sort/compare";
 import type { ExtraFilters, SortDirection } from "../types";
 import {
@@ -102,7 +103,7 @@ export function useServerData<TRow>(
 
   // Emits the LATEST query / handler when the value-keyed query changes,
   // without re-subscribing on every render.
-  const emitQuery = useEffectEvent(() => {
+  const emitQuery = useEventCallback(() => {
     if (!onQueryChange) return undefined;
     controllerRef.current?.abort();
     const controller = new AbortController();
@@ -112,7 +113,7 @@ export function useServerData<TRow>(
     return () => controller.abort();
   });
 
-  useEffect(() => emitQuery(), [queryKey, generation]);
+  useEffect(() => emitQuery(), [queryKey, generation, emitQuery]);
 
   return {
     rows,

@@ -23,6 +23,7 @@
     "clean": "turbo run clean && rimraf node_modules .turbo coverage",
     "sonar:coverage": "turbo run test:coverage --force && node scripts/fix-lcov-paths.mjs",
     "llms": "node scripts/build-llms-full.mjs",
+    "react:matrix": "node scripts/react-matrix.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo run build && changeset publish",

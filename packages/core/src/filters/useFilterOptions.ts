@@ -1,5 +1,6 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useState } from "react";
 
+import { useEventCallback } from "../hooks/useEventCallback";
 import { devWarn } from "../utils/devWarn";
 import type { FilterDef, FilterOption } from "./filterDefs";
 
@@ -31,7 +32,7 @@ export function useFilterOptions<TRow>(
   // The load reads the LATEST loader (callers routinely pass it inline, a
   // fresh identity every render) without restarting — only a key change
   // re-runs the effect.
-  const startLoad = useEffectEvent(() => {
+  const startLoad = useEventCallback(() => {
     const loader = source;
     if (typeof loader !== "function") return undefined;
     let alive = true;
@@ -54,7 +55,7 @@ export function useFilterOptions<TRow>(
     };
   });
 
-  useEffect(() => startLoad(), [isLoader, def.key]);
+  useEffect(() => startLoad(), [isLoader, def.key, startLoad]);
 
   // Warn from an effect, not the render path (render stays pure; devWarn
   // already dedupes, this just keeps StrictMode double-renders silent too).

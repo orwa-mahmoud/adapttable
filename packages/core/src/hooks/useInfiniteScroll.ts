@@ -1,4 +1,6 @@
-import { type RefObject, useEffect, useEffectEvent, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
+
+import { useEventCallback } from "./useEventCallback";
 
 /** Options for {@link useInfiniteScroll}. */
 export interface UseInfiniteScrollOptions {
@@ -60,7 +62,7 @@ export function useInfiniteScroll<
   // The sentinel handler always sees the latest `fetchNextPage` /
   // `isFetchingNextPage` without re-subscribing the observer, so passing a
   // fresh closure each render never re-arms it.
-  const onSentinelVisible = useEffectEvent(() => {
+  const onSentinelVisible = useEventCallback(() => {
     if (!isFetchingNextPage) fetchNextPage();
   });
 
@@ -77,7 +79,7 @@ export function useInfiniteScroll<
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [enabled, hasNextPage, rootMargin, itemCount]);
+  }, [enabled, hasNextPage, rootMargin, itemCount, onSentinelVisible]);
 
   return ref;
 }

@@ -62,3 +62,32 @@ jobs:
 
       - name: Validate published package configs
         run: pnpm publint
+
+  # Every package promises `react: ^18 || ^19`, but the workspace develops on
+  # one React version — this job proves the packed build actually runs (render,
+  # sort, page, search, server-tier fetch) on each supported release line.
+  react-matrix:
+    name: React ${{ matrix.react }} compatibility
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        react: ["18.3.1", "19.0.0", "19.2.7"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the probed packages
+        run: pnpm turbo run build --filter=@adapttable/unstyled...
+
+      - name: Smoke-test against React ${{ matrix.react }}
+        run: pnpm react:matrix ${{ matrix.react }}
