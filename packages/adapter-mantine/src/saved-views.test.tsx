@@ -4,7 +4,6 @@ import {
   defaultLabels,
   type LayoutStorage,
   type UrlStateAdapter,
-  useSavedViews,
 } from "@adapttable/core";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -32,12 +31,12 @@ function MenuHarness({
   adapter,
   storage,
 }: Readonly<{ adapter: UrlStateAdapter; storage: LayoutStorage }>) {
-  const views = useSavedViews({
-    storageKey: "test-views",
-    storage,
-    urlAdapter: adapter,
-  });
-  return <SavedViewsMenu views={views} labels={defaultLabels} />;
+  return (
+    <SavedViewsMenu
+      options={{ storageKey: "test-views", storage, urlAdapter: adapter }}
+      labels={defaultLabels}
+    />
+  );
 }
 
 /** Mount the menu over a memory URL adapter and open its dropdown. */

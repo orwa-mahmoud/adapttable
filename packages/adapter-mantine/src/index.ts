@@ -31,6 +31,7 @@ export {
   type PaginationFooterProps,
 } from "./components/PaginationFooter";
 export {
+  type SavedViewsLabels,
   SavedViewsMenu,
   type SavedViewsMenuProps,
 } from "./components/SavedViewsMenu";

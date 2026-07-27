@@ -1,4 +1,8 @@
-import type { TableLabels, UseSavedViewsResult } from "@adapttable/core";
+import {
+  type TableLabels,
+  useSavedViews,
+  type UseSavedViewsOptions,
+} from "@adapttable/core";
 import {
   ActionIcon,
   Box,
@@ -12,12 +16,18 @@ import { useState } from "react";
 
 import { CloseIcon } from "../icons";
 
+/** The label strings the saved-views menu renders. */
+export type SavedViewsLabels = Pick<
+  Required<TableLabels>,
+  "savedViews" | "saveView" | "viewName" | "deleteView"
+>;
+
 /** Props for {@link SavedViewsMenu}. */
 export interface SavedViewsMenuProps {
-  /** The saved-views state from core's `useSavedViews`. */
-  views: UseSavedViewsResult;
-  /** Resolved table labels (e.g. `table.labels` from `useDataTable`). */
-  labels: Required<TableLabels>;
+  /** Storage + URL backend wiring, forwarded to core's `useSavedViews`. */
+  options: UseSavedViewsOptions;
+  /** Resolved table labels (trigger, save row, delete action). */
+  labels: SavedViewsLabels;
 }
 
 /**
@@ -28,9 +38,10 @@ export interface SavedViewsMenuProps {
  * mount it for you next to the Columns menu.
  */
 export function SavedViewsMenu({
-  views,
+  options,
   labels,
 }: Readonly<SavedViewsMenuProps>) {
+  const views = useSavedViews(options);
   const [name, setName] = useState("");
   const trimmed = name.trim();
   // Saving clears the input but keeps the menu open, so several views can

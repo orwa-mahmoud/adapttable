@@ -115,8 +115,18 @@ describe("<DataTable> gaps", () => {
     expect(screen.queryByRole("searchbox")).toBeNull();
   });
 
-  it("applies a custom sticky toolbar offset", () => {
-    const { container } = render(<Harness override={{ stickyTop: 42 }} />);
+  it("stickyToolbar parks the toolbar at stickyTop; off by default", () => {
+    // Aligned contract: stickyTop alone is the sticky-header inset (as in
+    // every other adapter) — the toolbar only sticks when asked to.
+    const plain = render(<Harness override={{ stickyTop: 42 }} />);
+    expect(
+      plain.container.querySelector('[style*="position: sticky"]')
+    ).toBeNull();
+    plain.unmount();
+
+    const { container } = render(
+      <Harness override={{ stickyTop: 42, stickyToolbar: true }} />
+    );
     const toolbar = container.querySelector<HTMLElement>(
       '[style*="position: sticky"]'
     );

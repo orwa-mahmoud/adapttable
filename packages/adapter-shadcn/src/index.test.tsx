@@ -21,8 +21,10 @@ let adapter: ReturnType<typeof createMemoryAdapter>;
 
 function Harness({
   classNames,
+  density,
 }: {
   classNames?: Parameters<typeof DataTable<Row>>[0]["classNames"];
+  density?: "comfortable" | "compact";
 }) {
   const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
   return (
@@ -31,15 +33,17 @@ function Harness({
       columns={columns}
       rowKey={(r) => r.id}
       classNames={classNames}
+      density={density}
     />
   );
 }
 
 function renderHarness(
-  classNames?: Parameters<typeof Harness>[0]["classNames"]
+  classNames?: Parameters<typeof Harness>[0]["classNames"],
+  extra?: { density?: "comfortable" | "compact" }
 ) {
   adapter = createMemoryAdapter("");
-  return render(<Harness classNames={classNames} />);
+  return render(<Harness classNames={classNames} density={extra?.density} />);
 }
 
 describe("@adapttable/shadcn", () => {
@@ -63,5 +67,21 @@ describe("@adapttable/shadcn", () => {
     expect(shadcnClassNames.root).toContain("bg-card");
     expect(shadcnClassNames.table).toContain("border-collapse");
     expect(Object.keys(shadcnClassNames).length).toBeGreaterThan(30);
+  });
+
+  it("density=compact tightens preset cells via the data-density root attr", () => {
+    // The visual mechanism: the unstyled root carries data-density, and the
+    // preset's cell classes react to it with ancestor-attribute variants.
+    expect(shadcnClassNames.cell).toContain(
+      "[[data-density=compact]_&]:py-1.5"
+    );
+    expect(shadcnClassNames.headerCell).toContain(
+      "[[data-density=compact]_&]:py-1.5"
+    );
+    expect(shadcnClassNames.card).toContain("[[data-density=compact]_&]:p-2");
+    const { container } = renderHarness(undefined, { density: "compact" });
+    expect(
+      container.querySelector('[data-adapttable-part="root"]')
+    ).toHaveAttribute("data-density", "compact");
   });
 });

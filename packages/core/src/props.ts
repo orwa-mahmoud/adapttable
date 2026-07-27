@@ -256,7 +256,12 @@ export interface BaseDataTableProps<TRow> {
   confirm?: ConfirmHandler;
   /** Number of skeleton rows while loading. Defaults to the page size. */
   skeletonRows?: number;
-  /** Sticky toolbar top offset in px. Defaults to 0. */
+  /**
+   * Top inset in px for the sticky header (`stickyHeader`) — e.g. the
+   * height of an app bar it must clear. Identical meaning in every
+   * adapter; Mantine's optional sticky toolbar (`stickyToolbar`) also
+   * parks at this inset. Defaults to 0.
+   */
   stickyTop?: number;
   /** Keep the desktop table header sticky while scrolling. Defaults to false (opt-in). */
   stickyHeader?: boolean;

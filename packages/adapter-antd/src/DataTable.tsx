@@ -167,17 +167,26 @@ function antdMinWidth<TRow>(
   });
 }
 
+// antd's virtual table requires explicit x/y; these bound the scroller
+// when neither maxHeight nor a measured column width supplies one.
+const VIRTUAL_FALLBACK_HEIGHT = 480;
+const VIRTUAL_FALLBACK_WIDTH = 960;
+
 /** antd scroll config: virtual sizing, else x for pinning + y for the box. */
 function resolveScroll(
   virtualize: boolean,
-  virtualWidth: number,
-  virtualHeight: number,
   hasPinned: boolean,
   maxHeight: number | undefined,
   minWidth: number
 ): NonNullable<TableProps<unknown>["scroll"]> {
-  // Virtual rows need explicit x/y so antd can size its internal scroller.
-  if (virtualize) return { x: virtualWidth, y: virtualHeight };
+  // Virtual rows need explicit x/y so antd can size its internal scroller —
+  // the shared maxHeight model bounds the box, content width drives x.
+  if (virtualize) {
+    return {
+      x: minWidth > 0 ? minWidth : VIRTUAL_FALLBACK_WIDTH,
+      y: maxHeight ?? VIRTUAL_FALLBACK_HEIGHT,
+    };
+  }
   // Pinning needs content-driven width; otherwise a fixed-width column set
   // gets its summed min-width so the table scrolls instead of squishing.
   let x: number | "max-content" | undefined;
@@ -626,8 +635,6 @@ interface DataTableBodyRegionProps<TRow> {
   size: AntdTableSize;
   bordered: boolean;
   virtualize: boolean;
-  virtualHeight: number;
-  virtualWidth: number;
   maxHeight: number | undefined;
   sticky: TableProps<unknown>["sticky"];
   dataSource: readonly GroupedDataRecord<TRow>[];
@@ -660,8 +667,6 @@ function DesktopTableBody<TRow>({
   rowClassName,
   onRowClick,
   prefetch,
-  virtualWidth,
-  virtualHeight,
   hasPinned,
   maxHeight,
   minWidth,
@@ -684,8 +689,6 @@ function DesktopTableBody<TRow>({
   rowClassName: DataTableProps<TRow>["rowClassName"];
   onRowClick: DataTableProps<TRow>["onRowClick"];
   prefetch: DataTableProps<TRow>["prefetch"];
-  virtualWidth: number;
-  virtualHeight: number;
   hasPinned: boolean;
   maxHeight: number | undefined;
   minWidth: number;
@@ -723,8 +726,6 @@ function DesktopTableBody<TRow>({
       }}
       scroll={resolveScroll(
         virtualize && !grouping,
-        virtualWidth,
-        virtualHeight,
         hasPinned,
         maxHeight,
         minWidth
@@ -769,8 +770,6 @@ function DataTableBodyRegion<TRow>(
     size,
     bordered,
     virtualize,
-    virtualHeight,
-    virtualWidth,
     maxHeight,
     sticky,
     dataSource,
@@ -848,8 +847,6 @@ function DataTableBodyRegion<TRow>(
         rowClassName={rowClassName}
         onRowClick={onRowClick}
         prefetch={prefetch}
-        virtualWidth={virtualWidth}
-        virtualHeight={virtualHeight}
         hasPinned={hasPinned}
         maxHeight={maxHeight}
         minWidth={minWidth}
@@ -878,8 +875,6 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     animate = false,
     bordered = false,
     virtualize = false,
-    virtualHeight = 480,
-    virtualWidth = 960,
   } = props;
   const size = resolveSize(props.size, props.density);
   const filtersMode = props.filtersMode ?? "popover";
@@ -1102,8 +1097,6 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       size={size}
       bordered={bordered}
       virtualize={virtualize}
-      virtualHeight={virtualHeight}
-      virtualWidth={virtualWidth}
       maxHeight={props.maxHeight}
       sticky={sticky}
       dataSource={dataSource}

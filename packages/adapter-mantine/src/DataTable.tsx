@@ -10,7 +10,6 @@ import {
   useChromeScrollReset,
   useFilterTriggerToggle,
   useResolvedAdapter,
-  useSavedViews,
   type UseSavedViewsOptions,
   useTableChrome,
   useTableData,
@@ -63,6 +62,20 @@ const stickyToolbarStyle = (top: number) => ({
   paddingBottom: "var(--mantine-spacing-xs)",
 });
 
+/** The toolbar's style: parked sticky at `stickyTop` only when asked to. */
+const toolbarStyle = (stickyToolbar: boolean, stickyTop: number) =>
+  stickyToolbar ? stickyToolbarStyle(stickyTop) : undefined;
+
+/**
+ * The sticky header's inset: below the sticky toolbar when it sticks,
+ * otherwise the caller's inset alone — the cross-adapter meaning.
+ */
+const stickyHeaderInset = (
+  stickyToolbar: boolean,
+  stickyTop: number,
+  toolbarHeight: number
+) => (stickyToolbar ? stickyTop + toolbarHeight : stickyTop);
+
 /** The Columns menu, rendered inline in the toolbar — or nothing when off. */
 function ColumnMenuSlot<TRow>({
   enabled,
@@ -80,8 +93,7 @@ function SavedViewsSlot({
   options,
   labels,
 }: Readonly<{ options: UseSavedViewsOptions; labels: Required<TableLabels> }>) {
-  const views = useSavedViews(options);
-  return <SavedViewsMenu views={views} labels={labels} />;
+  return <SavedViewsMenu options={options} labels={labels} />;
 }
 
 /**
@@ -168,6 +180,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     toolbar: customToolbar,
     skeletonRows,
     stickyTop = 0,
+    stickyToolbar = false,
     animate = false,
     stickyHeader = false,
     enableColumnMenu = false,
@@ -290,7 +303,11 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         paddingTop={virtualization.paddingTop}
         paddingBottom={virtualization.paddingBottom}
         measureElement={virtualization.measureElement}
-        stickyHeaderOffset={stickyTop + toolbarHeight}
+        stickyHeaderOffset={stickyHeaderInset(
+          stickyToolbar,
+          stickyTop,
+          toolbarHeight
+        )}
         stickyHeader={stickyHeader}
         pinOffset={chrome.columnLayout.pinOffset}
         actionsPinned={actionsPinned}
@@ -319,7 +336,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       <Stack gap="xs">
         <Box
           ref={toolbarRef}
-          style={stickyToolbarStyle(stickyTop)}
+          style={toolbarStyle(stickyToolbar, stickyTop)}
           className={classNames?.toolbar}
         >
           <Stack gap="xs">

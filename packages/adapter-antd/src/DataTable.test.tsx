@@ -709,11 +709,12 @@ describe("<DataTable> (Ant Design)", () => {
   });
 
   it("enables antd virtual scrolling when virtualize is true", () => {
+    // The shared maxHeight model bounds the virtual scroller (no more
+    // antd-only virtualHeight/virtualWidth extras).
     const { container } = renderHarness({
       override: {
         virtualize: true,
-        virtualHeight: 240,
-        virtualWidth: 720,
+        maxHeight: 240,
       },
     });
     expect(

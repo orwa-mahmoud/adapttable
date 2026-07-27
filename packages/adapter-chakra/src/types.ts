@@ -78,7 +78,10 @@ interface DataTablePropsBase<TRow> extends Omit<
   accentColor?: string;
   /** Alias for `accentColor` (v1 name) — deleted before the 2.0.0 release. */
   colorScheme?: string;
-  /** Chakra table size. Defaults to `"md"`. */
+  /**
+   * Explicit Chakra table size override. When omitted, `density` decides:
+   * `"comfortable"` (default) → `"md"`, `"compact"` → `"sm"`.
+   */
   size?: "sm" | "md" | "lg";
   /**
    * Animate rows/cards on mount (dependency-free; honors reduced motion).

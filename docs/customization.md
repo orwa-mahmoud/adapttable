@@ -278,8 +278,8 @@ Kit-specific knobs:
 - **Chakra** — `colorScheme` colors primary accents (buttons, badges);
   `size` (`"sm" | "md" | "lg"`, default `"md"`).
 - **Ant Design** — `size` (`"small" | "middle" | "large"`), `bordered` for
-  cell borders, `virtualHeight` / `virtualWidth` for the virtualized scroll
-  area, `className` on the wrapper.
+  cell borders, `className` on the wrapper. The virtualized scroll area is
+  bounded by the shared `maxHeight` prop.
 - **Unstyled** — no provider needed; theme entirely through `classNames`,
   the `data-adapttable-part` hooks above, and your own CSS variables /
   `data-theme`.

@@ -2374,8 +2374,8 @@ Kit-specific knobs:
 - **Chakra** — `colorScheme` colors primary accents (buttons, badges);
   `size` (`"sm" | "md" | "lg"`, default `"md"`).
 - **Ant Design** — `size` (`"small" | "middle" | "large"`), `bordered` for
-  cell borders, `virtualHeight` / `virtualWidth` for the virtualized scroll
-  area, `className` on the wrapper.
+  cell borders, `className` on the wrapper. The virtualized scroll area is
+  bounded by the shared `maxHeight` prop.
 - **Unstyled** — no provider needed; theme entirely through `classNames`,
   the `data-adapttable-part` hooks above, and your own CSS variables /
   `data-theme`.
@@ -2730,8 +2730,6 @@ Props beyond the core surface, with per-kit availability.
 | `colorScheme`   | `string`                                        | —           | chakra                                    | Chakra color scheme for primary accents (buttons, badges).                                                                                |
 | `accentColor`   | kit accent union                                | —           | radix, base-ui                            | Accent color for primary controls (buttons, badges, active page).                                                                         |
 | `bordered`      | `boolean`                                       | `false`     | antd                                      | Render the table with cell borders.                                                                                                       |
-| `virtualHeight` | `number`                                        | `480`       | antd                                      | Vertical scroll height used when `virtualize` is true.                                                                                    |
-| `virtualWidth`  | `number`                                        | `960`       | antd                                      | Horizontal scroll width used when `virtualize` is true.                                                                                   |
 | `emptyState`    | `ReactNode`                                     | —           | unstyled                                  | Empty-state node override (`slots.empty` alias wins when both are set).                                                                   |
 | `loadingState`  | `ReactNode`                                     | —           | unstyled                                  | Loading-state node override (`slots.skeleton` alias wins when both are set).                                                              |
 

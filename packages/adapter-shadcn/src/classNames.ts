@@ -58,12 +58,12 @@ export const shadcnClassNames = {
     "h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90",
   table: "w-full border-collapse text-sm",
   headerCell:
-    "border-b border-border bg-card px-3 py-2.5 text-start font-medium text-muted-foreground",
+    "border-b border-border bg-card px-3 py-2.5 text-start font-medium text-muted-foreground [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
   sortButton:
     "inline-flex items-center gap-1 font-medium hover:text-foreground",
   row: "border-b border-border last:border-0 hover:bg-muted/50 data-[selected]:bg-accent",
   // Pinned cells must be opaque so scrolled content never shows through.
-  cell: "px-3 py-2.5 [&[data-pinned]]:bg-card",
+  cell: "px-3 py-2.5 [&[data-pinned]]:bg-card [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
   actionButton:
     "h-8 w-8 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-50",
   footer:
@@ -107,7 +107,7 @@ export const shadcnClassNames = {
   columnMenuReset:
     "mt-1.5 w-full border-t border-border px-2 pb-1 pt-2 text-start text-[13px] font-medium text-primary hover:opacity-80",
   resizeHandle: "hover:bg-border",
-  card: "mb-2 rounded-lg border border-border p-3",
+  card: "mb-2 rounded-lg border border-border p-3 [[data-density=compact]_&]:p-2",
   cardRow: "flex justify-between gap-3 py-0.5 text-sm",
   cardLabel: "text-muted-foreground",
   cardValue: "font-medium",
@@ -157,18 +157,21 @@ export const shadcnClassNames = {
   selectAllButton:
     "rounded-md px-1.5 py-0.5 text-xs font-medium text-primary hover:bg-accent",
   selectionHeader: "w-11 border-b border-border bg-card px-3 py-2.5",
-  selectionCell: "w-11 px-3 py-2.5 [&[data-pinned]]:bg-card",
+  selectionCell:
+    "w-11 px-3 py-2.5 [&[data-pinned]]:bg-card [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
   checkbox: "h-4 w-4 accent-primary",
   actionsHeader:
     "w-[120px] border-b border-border bg-card px-3 py-2.5 text-end font-medium text-muted-foreground",
-  actionsCell: "px-3 py-2.5 text-end [&[data-pinned]]:bg-card",
+  actionsCell:
+    "px-3 py-2.5 text-end [&[data-pinned]]:bg-card [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
   // ── Row expansion & detail ──────────────────────────────────────
   expandHeader: "w-8 border-b border-border bg-card",
   expandCell: "w-8 px-2 py-2.5",
   expandButton:
     "inline-grid h-6 w-6 place-items-center rounded-md text-muted-foreground transition-transform hover:bg-accent data-[expanded]:rotate-90",
   detailRow: "border-b border-border bg-muted/30",
-  detailCell: "px-3 py-2.5 text-sm",
+  detailCell:
+    "px-3 py-2.5 text-sm [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
   cardDetail: "mt-2 border-t border-border pt-2 text-sm",
   // ── Row grouping ────────────────────────────────────────────────
   groupRow: "border-b border-border bg-muted/40",
@@ -191,7 +194,8 @@ export const shadcnClassNames = {
   // ── Summary row ─────────────────────────────────────────────────
   summary: "border-t border-border bg-muted/40 font-medium",
   summaryRow: "align-middle",
-  summaryCell: "px-3 py-2.5",
+  summaryCell:
+    "px-3 py-2.5 [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
   summaryCard:
     "mt-2 rounded-lg border border-border bg-muted/40 p-3 text-sm font-medium",
   // ── Loading, refresh, error ─────────────────────────────────────

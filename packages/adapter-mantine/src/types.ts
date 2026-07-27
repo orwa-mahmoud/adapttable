@@ -78,6 +78,13 @@ interface DataTablePropsBase<TRow> extends Omit<
   /** Per-part class name overrides. */
   classNames?: DataTableClassNames;
   /**
+   * Keep the toolbar sticky while the page scrolls, parked at `stickyTop`.
+   * The sticky HEADER then offsets below it automatically. Off by default —
+   * `stickyTop` alone means the same thing here as in every other adapter:
+   * the sticky-header inset.
+   */
+  stickyToolbar?: boolean;
+  /**
    * Animate rows/cards on mount (dependency-free; honors reduced motion).
    * Off by default.
    */
