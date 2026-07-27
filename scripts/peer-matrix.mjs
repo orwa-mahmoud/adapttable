@@ -52,14 +52,15 @@ const MATRIX = [
   {
     adapter: "mantine",
     majors: [7, 9],
+    // The declared v7 floor is 7.2 (stickyHeaderOffset), not 7.0.
     deps: (m) => ({
-      "@mantine/core": `^${m}.0.0`,
-      "@mantine/hooks": `^${m}.0.0`,
+      "@mantine/core": m === 7 ? "^7.2.0" : `^${m}.0.0`,
+      "@mantine/hooks": m === 7 ? "^7.2.0" : `^${m}.0.0`,
     }),
   },
   {
     adapter: "mui",
-    majors: [5, 9],
+    majors: [6, 9],
     deps: (m) => ({
       "@mui/material": `^${m}.0.0`,
       "@emotion/react": "^11.0.0",
@@ -70,7 +71,8 @@ const MATRIX = [
     adapter: "chakra",
     majors: [3],
     deps: () => ({
-      "@chakra-ui/react": "^3.0.0",
+      // The declared floor is 3.13 (InputGroup/CloseButton/Wrap exports).
+      "@chakra-ui/react": "^3.13.0",
       "@emotion/react": "^11.0.0",
     }),
   },
