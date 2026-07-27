@@ -160,7 +160,7 @@ describe("storage resolution", () => {
   });
 
   it("keeps the layout in memory under SSR (no storage at all)", () => {
-    vi.spyOn(env, "isBrowser").mockReturnValue(false);
+    vi.spyOn(env, "safeLocalStorage").mockReturnValue(undefined);
     const { result } = renderHook(() =>
       useColumnLayoutStorageState({ storageKey: "ssr-t" })
     );

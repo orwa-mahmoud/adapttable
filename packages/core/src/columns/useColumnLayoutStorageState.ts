@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { devWarn } from "../utils/devWarn";
-import { isBrowser } from "../utils/env";
+import { safeLocalStorage } from "../utils/env";
 import { stableKey } from "../utils/stableKey";
 import { type ColumnLayoutState, EMPTY_COLUMN_LAYOUT } from "./useColumnLayout";
 
@@ -78,23 +78,21 @@ function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null {
 
 function readStored(
   storage: LayoutStorage | undefined,
-  storageKey: string,
-  fallback: ColumnLayoutState
-): ColumnLayoutState {
+  storageKey: string
+): ColumnLayoutState | null {
   try {
     const raw = storage?.getItem(storageKey);
-    if (!raw) return fallback;
+    if (!raw) return null;
     const sanitized = sanitizeStoredLayout(JSON.parse(raw));
     if (sanitized === null) {
       devWarn(
         `stored column layout under "${storageKey}" is not a layout object — ignoring it.`
       );
-      return fallback;
     }
     return sanitized;
   } catch {
     // Corrupted/inaccessible storage (private mode, quota) → just fall back.
-    return fallback;
+    return null;
   }
 }
 
@@ -119,16 +117,21 @@ export function useColumnLayoutStorageState(
   options: UseColumnLayoutStorageStateOptions
 ): UseColumnLayoutStorageStateResult {
   const { storageKey, defaultLayout } = options;
-  const storage =
-    options.storage ?? (isBrowser() ? globalThis.localStorage : undefined);
+  const storage = options.storage ?? safeLocalStorage();
 
   const fallback = useMemo<ColumnLayoutState>(
     () => ({ ...EMPTY_COLUMN_LAYOUT, ...defaultLayout }),
     [defaultLayout]
   );
-  const [layout, setLayout] = useState<ColumnLayoutState>(() =>
-    readStored(storage, storageKey, fallback)
-  );
+  // Start from the default and hydrate from storage AFTER mount: reading
+  // storage in the initializer made the client's first render differ from
+  // the server's whenever a layout was saved (hydration mismatch).
+  const [layout, setLayout] = useState<ColumnLayoutState>(fallback);
+  useEffect(() => {
+    const stored = readStored(storage, storageKey);
+    if (stored !== null) setLayout(stored);
+    // `storage` is module-stable (localStorage) or caller-provided.
+  }, [storage, storageKey]);
 
   const onLayoutChange = useCallback(
     (next: ColumnLayoutState) => {

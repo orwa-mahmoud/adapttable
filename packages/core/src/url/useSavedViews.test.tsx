@@ -180,7 +180,7 @@ describe("useSavedViews", () => {
   });
 
   it("works in-memory under SSR (no storage backend at all)", () => {
-    const spy = vi.spyOn(env, "isBrowser").mockReturnValue(false);
+    const spy = vi.spyOn(env, "safeLocalStorage").mockReturnValue(undefined);
     const adapter = createMemoryAdapter("q=1");
     const { result } = renderHook(() =>
       useSavedViews({ storageKey: "ssr-views", adapter })

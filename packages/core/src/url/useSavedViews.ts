@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { LayoutStorage } from "../columns/useColumnLayoutStorageState";
-import { isBrowser } from "../utils/env";
+import { safeLocalStorage } from "../utils/env";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import {
   FILTER_PREFIX,
@@ -130,12 +130,16 @@ export function useSavedViews({
   const ns = urlKey ? `${urlKey}.` : "";
   const backend = useMemo<LayoutStorage | undefined>(() => {
     if (storage) return storage;
-    return isBrowser() ? globalThis.localStorage : undefined;
+    return safeLocalStorage();
   }, [storage]);
 
-  const [views, setViews] = useState<SavedView[]>(() =>
-    readStored(backend, storageKey)
-  );
+  // Start empty and hydrate from storage AFTER mount: reading storage in
+  // the initializer made the client's first render differ from the
+  // server's whenever views were saved (hydration mismatch).
+  const [views, setViews] = useState<SavedView[]>([]);
+  useEffect(() => {
+    setViews(readStored(backend, storageKey));
+  }, [backend, storageKey]);
 
   const persist = useCallback(
     (next: SavedView[]) => {

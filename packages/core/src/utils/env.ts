@@ -10,3 +10,22 @@
 export function isBrowser(): boolean {
   return (globalThis as { window?: unknown }).window !== undefined;
 }
+
+/**
+ * `localStorage` when it is actually usable, else `undefined`. The GETTER
+ * itself throws a SecurityError when storage is blocked (Safari private
+ * mode, sandboxed iframes, some embedded webviews), so even touching
+ * `globalThis.localStorage` must be guarded.
+ *
+ * @returns The storage object, or `undefined` under SSR / blocked storage.
+ */
+export function safeLocalStorage():
+  | Pick<Storage, "getItem" | "setItem" | "removeItem">
+  | undefined {
+  if (!isBrowser()) return undefined;
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return undefined;
+  }
+}
