@@ -163,6 +163,36 @@ describe("useTableChrome", () => {
     expect(csv.trim().split("\n")).toHaveLength(31);
   });
 
+  it("typing in search does not rebuild the grouped model", () => {
+    const rows: Row[] = Array.from({ length: 50 }, (_, i) => ({
+      id: String(i),
+      name: `P${i % 5}`,
+    }));
+    const adapter = createMemoryAdapter("");
+    const stableRowKey = (r: Row) => r.id;
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: rows,
+        adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: stableRowKey,
+        groupBy: "name",
+      });
+    });
+    const before = result.current.grouping;
+    expect(before).toBeDefined();
+    // Uncommitted keystrokes re-render the table but must not rebuild the
+    // O(filtered rows) grouped flat model.
+    act(() => result.current.table.setSearchValue("p"));
+    act(() => result.current.table.setSearchValue("p1"));
+    expect(result.current.grouping).toBe(before);
+  });
+
   it("CSV export columns are identical on desktop and mobile viewports", () => {
     const deviceCols: ColumnDef<Row>[] = [
       { key: "name", header: "Name" },

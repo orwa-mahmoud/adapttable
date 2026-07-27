@@ -86,6 +86,18 @@ function mount<TPage = Page>(
 }
 
 describe("useBackendData", () => {
+  it("keeps the source identity stable across unrelated re-renders", () => {
+    const q = makeQuery({ pages: [page([{ id: "a", name: "A" }], 1)] });
+    const view = mount(q, { selectPage });
+    const first = view.result.current;
+    view.rerender();
+    view.rerender();
+    expect(view.result.current).toBe(first);
+    // A real state change produces a NEW source object.
+    act(() => view.result.current.setSearch("term"));
+    expect(view.result.current).not.toBe(first);
+  });
+
   it("flattens rows across infinite pages and keeps the latest total", () => {
     const q = makeQuery({
       pages: [

@@ -421,12 +421,18 @@ export function useTableChrome<TRow>(
     );
   }, [effectiveGroupBy, source.allFilteredRows]);
 
+  // Depend on the two stable members, never the whole props/source objects
+  // (both fresh every render) — keying on them rebuilt the grouping bundle,
+  // and the O(filtered rows) grouped flat model behind it, on every
+  // keystroke.
+  const { onGroupByChange } = props;
+  const { setGroupBy: sourceSetGroupBy } = source;
   const setGroupBy = useCallback(
     (key: string | null) => {
-      if (props.onGroupByChange) props.onGroupByChange(key);
-      else source.setGroupBy(key ?? undefined);
+      if (onGroupByChange) onGroupByChange(key);
+      else sourceSetGroupBy(key ?? undefined);
     },
-    [props, source]
+    [onGroupByChange, sourceSetGroupBy]
   );
 
   const getRowId = selectionGetId ?? rowKey;

@@ -168,41 +168,95 @@ export function useBackendData<
     if (page > lastPage) state.setPage(lastPage);
   }, [paged, query.isLoading, query.isFetching, total, limit, page, state]);
 
+  // Query libraries hand back a FRESH result object every render — latch
+  // it so these two keep permanent identity (they gate the source memo).
+  const queryRef = useRef(query);
+  queryRef.current = query;
   const fetchNextPage = useCallback(() => {
-    if (query.hasNextPage && !query.isFetchingNextPage)
-      void query.fetchNextPage();
-  }, [query]);
+    const live = queryRef.current;
+    if (live.hasNextPage && !live.isFetchingNextPage) void live.fetchNextPage();
+  }, []);
 
-  const refetch = useCallback(() => query.refetch(), [query]);
+  const refetch = useCallback(() => queryRef.current.refetch(), []);
 
-  return {
-    rows,
-    total,
-    isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    isFetchingNextPage: query.isFetchingNextPage,
-    hasNextPage: query.hasNextPage,
-    fetchNextPage,
-    error: query.error,
-    refetch,
-    paginationMode: resolvedMode,
-    page,
-    limit,
-    search,
-    sortBy,
-    sortDir,
-    groupBy,
-    extra,
-    setPage: state.setPage,
-    setLimit: state.setLimit,
-    setSort: state.setSort,
-    setGroupBy: state.setGroupBy,
-    sortLevels: state.sortLevels,
-    toggleSortLevel: state.toggleSortLevel,
-    setSearch: state.setSearch,
-    setExtra: state.setExtra,
-    setExtras: state.setExtras,
-    clearExtras: state.clearExtras,
-    clearAll: state.clearAll,
-  };
+  // Memoised so the returned source keeps its identity across unrelated
+  // renders — a fresh object every render defeated downstream memoization
+  // (and the React Compiler bails on this hook, unlike useFrontendData).
+  // The mutators are destructured because the url-state RESULT object is
+  // itself fresh every render; its members are the stable parts.
+  const {
+    setPage,
+    setLimit,
+    setSort,
+    setGroupBy,
+    sortLevels,
+    toggleSortLevel,
+    setSearch,
+    setExtra,
+    setExtras,
+    clearExtras,
+    clearAll,
+  } = state;
+  return useMemo(
+    () => ({
+      rows,
+      total,
+      isLoading: query.isLoading,
+      isFetching: query.isFetching,
+      isFetchingNextPage: query.isFetchingNextPage,
+      hasNextPage: query.hasNextPage,
+      fetchNextPage,
+      error: query.error,
+      refetch,
+      paginationMode: resolvedMode,
+      page,
+      limit,
+      search,
+      sortBy,
+      sortDir,
+      groupBy,
+      extra,
+      setPage,
+      setLimit,
+      setSort,
+      setGroupBy,
+      sortLevels,
+      toggleSortLevel,
+      setSearch,
+      setExtra,
+      setExtras,
+      clearExtras,
+      clearAll,
+    }),
+    [
+      rows,
+      total,
+      query.isLoading,
+      query.isFetching,
+      query.isFetchingNextPage,
+      query.hasNextPage,
+      fetchNextPage,
+      query.error,
+      refetch,
+      resolvedMode,
+      page,
+      limit,
+      search,
+      sortBy,
+      sortDir,
+      groupBy,
+      extra,
+      setPage,
+      setLimit,
+      setSort,
+      setGroupBy,
+      sortLevels,
+      toggleSortLevel,
+      setSearch,
+      setExtra,
+      setExtras,
+      clearExtras,
+      clearAll,
+    ]
+  );
 }
