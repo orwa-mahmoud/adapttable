@@ -12,6 +12,8 @@ export interface PaginationFooterProps {
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
   labels: Required<TableLabels>;
+  /** Hidden in the grouped full-set view, where page size has no effect. */
+  showRowsPerPage?: boolean;
 }
 
 /** Desktop pagination bar: page-size + range on the left, pager on the right. */
@@ -25,6 +27,7 @@ export function PaginationFooter({
   onPageChange,
   onLimitChange,
   labels,
+  showRowsPerPage = true,
 }: Readonly<PaginationFooterProps>) {
   const safeTotalPages = Math.max(totalPages, 1);
   const safePage = Math.min(Math.max(page, 1), safeTotalPages);
@@ -36,20 +39,24 @@ export function PaginationFooter({
   return (
     <Group justify="space-between" align="center" wrap="wrap" gap="md" pt="xs">
       <Group gap="xs" align="center" wrap="nowrap">
-        <Text fz="xs" c="dimmed">
-          {labels.rowsPerPage}
-        </Text>
-        <Select
-          aria-label={labels.rowsPerPage}
-          data={options}
-          value={String(limit)}
-          // `allowDeselect={false}` keeps the value non-null.
-          onChange={(v) => onLimitChange(Number(v!))}
-          size="xs"
-          w={76}
-          allowDeselect={false}
-          comboboxProps={{ withinPortal: false }}
-        />
+        {showRowsPerPage && (
+          <>
+            <Text fz="xs" c="dimmed">
+              {labels.rowsPerPage}
+            </Text>
+            <Select
+              aria-label={labels.rowsPerPage}
+              data={options}
+              value={String(limit)}
+              // `allowDeselect={false}` keeps the value non-null.
+              onChange={(v) => onLimitChange(Number(v!))}
+              size="xs"
+              w={76}
+              allowDeselect={false}
+              comboboxProps={{ withinPortal: false }}
+            />
+          </>
+        )}
         {total > 0 && (
           <Text fz="xs" c="dimmed">
             {labels.showing({ from: fromIndex, to: toIndex, total })}

@@ -216,6 +216,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             setPage={source.setPage}
             setLimit={source.setLimit}
             labels={labels}
+            showRowsPerPage={!chrome.grouping}
           />
         )}
       </Flex>

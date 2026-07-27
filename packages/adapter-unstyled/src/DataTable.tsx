@@ -237,12 +237,15 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
 
   const chrome = useTableChrome<TRow>(chromeProps);
   const { table, confirm, getRowId } = chrome;
+  // Everything rendered below reads the chrome's VIEW facade — identical to
+  // `source` except under grouping, where it presents the full rendered set.
+  const viewSource = chrome.source;
   const { labels } = table;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersTrigger = useFilterTriggerToggle(filtersOpen, setFiltersOpen);
   const rootRef = useRef<HTMLDivElement>(null);
   useChromeScrollReset(rootRef, chrome, chromeProps);
-  useMountStagger(rootRef, [source.rows.length, chrome.isMobile], {
+  useMountStagger(rootRef, [viewSource.rows.length, chrome.isMobile], {
     enabled: animate,
   });
   const bodyData = useChromeBodyData(chrome, chromeProps);
@@ -295,7 +298,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
 
   const onExportCsv = makeExportCsvHandler(
     props.exportCsv,
-    source,
+    viewSource,
     table.columns
   );
 
@@ -424,9 +427,9 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             classNames={classNames}
           />
         )}
-        {canLoadMore && (
+        {canLoadMore && !chrome.grouping && (
           <RowsPerPageSelect
-            source={source}
+            source={viewSource}
             labels={labels}
             classNames={classNames}
           />
@@ -456,7 +459,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       {table.selection && bulkActions && (
         <BulkBar
           selection={table.selection}
-          total={source.total}
+          total={viewSource.total}
           bulkActions={bulkActions}
           confirm={confirm}
           labels={labels}
@@ -474,11 +477,13 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         />
       )}
 
-      {source.error ? (
+      {viewSource.error ? (
         <ErrorState
-          error={source.error}
+          error={viewSource.error}
           labels={labels}
-          onRetry={source.refetch ? () => void source.refetch?.() : undefined}
+          onRetry={
+            viewSource.refetch ? () => void viewSource.refetch?.() : undefined
+          }
           classNames={classNames}
         />
       ) : (
@@ -495,7 +500,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         />
       )}
 
-      {canLoadMore && source.hasNextPage && (
+      {canLoadMore && viewSource.hasNextPage && (
         <div
           ref={loadMoreRef}
           data-adapttable-part="load-more"
@@ -503,10 +508,10 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         >
           <button
             type="button"
-            disabled={source.isFetchingNextPage}
+            disabled={viewSource.isFetchingNextPage}
             data-adapttable-part="load-more-button"
             className={classNames.loadMoreButton}
-            onClick={() => source.fetchNextPage()}
+            onClick={() => viewSource.fetchNextPage()}
           >
             {labels.loadMore}
           </button>
@@ -516,9 +521,10 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       {chrome.showFooter && (
         <Footer
           pagination={table.pagination}
-          source={source}
+          source={viewSource}
           labels={labels}
           classNames={classNames}
+          showRowsPerPage={!chrome.grouping}
         />
       )}
     </div>

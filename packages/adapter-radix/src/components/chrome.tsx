@@ -312,6 +312,7 @@ export function Footer({
   setLimit,
   labels,
   className,
+  showRowsPerPage = true,
 }: Readonly<{
   pagination: PaginationInfo;
   total: number;
@@ -321,6 +322,8 @@ export function Footer({
   labels: Required<TableLabels>;
   /** Class hook for the footer row. */
   className?: string;
+  /** Hidden in the grouped full-set view, where page size has no effect. */
+  showRowsPerPage?: boolean;
 }>) {
   const { safePage, totalPages, fromIndex, toIndex } = pagination;
   return (
@@ -332,17 +335,21 @@ export function Footer({
       className={className}
     >
       <Flex gap="2" align="center">
-        <Text size="1" {...subtleText}>
-          {labels.rowsPerPage}
-        </Text>
-        <NativeSelect
-          size="1"
-          width="72px"
-          aria-label={labels.rowsPerPage}
-          value={String(limit)}
-          options={pageSizeSelectOptions(limit)}
-          onValueChange={(value) => setLimit(Number(value))}
-        />
+        {showRowsPerPage && (
+          <>
+            <Text size="1" {...subtleText}>
+              {labels.rowsPerPage}
+            </Text>
+            <NativeSelect
+              size="1"
+              width="72px"
+              aria-label={labels.rowsPerPage}
+              value={String(limit)}
+              options={pageSizeSelectOptions(limit)}
+              onValueChange={(value) => setLimit(Number(value))}
+            />
+          </>
+        )}
         {total > 0 && (
           <Text size="1" {...subtleText}>
             {labels.showing({ from: fromIndex, to: toIndex, total })}

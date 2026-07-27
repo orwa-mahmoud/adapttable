@@ -104,4 +104,41 @@ describe("<DataTable> row grouping (unstyled)", () => {
     });
     expect(part("group-select")).toBeInTheDocument();
   });
+
+  it("grouped over multiple pages: screen, footer, select-all and export agree", () => {
+    // 30 rows over 3 pages at limit=10 — grouped mode must render and
+    // describe the FULL set, not the page slice.
+    const many: Row[] = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      team: i % 2 === 0 ? "Core" : "Platform",
+      name: `P${String(i + 1).padStart(2, "0")}`,
+    }));
+    adapter = createMemoryAdapter("limit=10");
+    render(
+      <DataTable<Row>
+        data={many}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlAdapter={adapter}
+        groupBy="team"
+        bulkActions={[{ key: "x", label: "Archive", onClick: vi.fn() }]}
+      />
+    );
+
+    // Every leaf row is on screen.
+    expect(
+      document.querySelectorAll("tbody tr[data-adapttable-part='row']")
+    ).toHaveLength(30);
+
+    // Footer describes exactly the rendered set, and the rows-per-page
+    // control (meaningless in a full-set view) is gone.
+    expect(screen.getByText("Showing 1–30 of 30")).toBeInTheDocument();
+    expect(screen.getByText("Page 1 of 1")).toBeInTheDocument();
+    expect(part("rows-per-page")).toBeNull();
+
+    // Header select-all covers the full rendered set.
+    const [selectAll] = screen.getAllByLabelText("Select all");
+    fireEvent.click(selectAll!);
+    expect(screen.getByText("30 selected")).toBeInTheDocument();
+  });
 });

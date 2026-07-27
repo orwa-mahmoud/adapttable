@@ -151,7 +151,6 @@ function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
 export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const chromeProps = useResolvedTableProps(props);
   const {
-    source,
     rowActions,
     searchPlaceholder,
     sortByOptions,
@@ -175,6 +174,9 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const density = chromeProps.density ?? "comfortable";
 
   const chrome = useTableChrome<TRow>(chromeProps);
+  // Everything rendered below reads the chrome's VIEW facade — identical to
+  // `source` except under grouping, where it presents the full rendered set.
+  const viewSource = chrome.source;
   const { table, isMobile, confirm, getRowId } = chrome;
   // The injected actions column is first-class in the column layout: the
   // menu lists it under `labels.actions`, hiding it strips the row actions
@@ -218,7 +220,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     body = slots?.skeleton ?? (
       <TableSkeleton
         columns={table.columns.length || 1}
-        rows={skeletonRows ?? source.limit}
+        rows={skeletonRows ?? viewSource.limit}
         loadingLabel={table.labels.loading}
       />
     );
@@ -360,10 +362,10 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
               }
               onExportCsv={makeExportCsvHandler(
                 exportCsv,
-                source,
+                viewSource,
                 table.columns
               )}
-              showRowsPerPage={canLoadMore}
+              showRowsPerPage={canLoadMore && !chrome.grouping}
             />
             <ActiveFilterChips
               chips={chrome.mergedChips}
@@ -374,7 +376,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             {table.selection && bulkActions && (
               <BulkActionBar
                 selection={table.selection}
-                total={source.total}
+                total={viewSource.total}
                 bulkActions={bulkActions}
                 confirm={confirm}
                 labels={table.labels}
@@ -392,26 +394,28 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           />
         )}
 
-        {source.error && (
+        {viewSource.error && (
           <ErrorState
-            error={source.error}
+            error={viewSource.error}
             title={table.labels.errorTitle}
             message={table.labels.errorMessage}
             retryLabel={table.labels.retry}
-            onRetry={source.refetch ? () => void source.refetch?.() : undefined}
-            isRetrying={source.isFetching}
+            onRetry={
+              viewSource.refetch ? () => void viewSource.refetch?.() : undefined
+            }
+            isRetrying={viewSource.isFetching}
           />
         )}
 
-        {!source.error && body}
+        {!viewSource.error && body}
 
-        {canLoadMore && source.hasNextPage && (
+        {canLoadMore && viewSource.hasNextPage && (
           <Group ref={loadMoreRef} justify="center" py="xs">
             <Button
               variant="default"
               size="sm"
-              loading={source.isFetchingNextPage}
-              onClick={() => source.fetchNextPage()}
+              loading={viewSource.isFetchingNextPage}
+              onClick={() => viewSource.fetchNextPage()}
             >
               {table.labels.loadMore}
             </Button>
@@ -423,13 +427,14 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             <PaginationFooter
               page={table.pagination.safePage}
               totalPages={table.pagination.totalPages}
-              limit={source.limit}
-              total={source.total}
+              limit={viewSource.limit}
+              total={viewSource.total}
               fromIndex={table.pagination.fromIndex}
               toIndex={table.pagination.toIndex}
-              onPageChange={source.setPage}
-              onLimitChange={source.setLimit}
+              onPageChange={viewSource.setPage}
+              onLimitChange={viewSource.setLimit}
               labels={table.labels}
+              showRowsPerPage={!chrome.grouping}
             />
           </Box>
         )}

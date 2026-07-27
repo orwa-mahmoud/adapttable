@@ -36,6 +36,7 @@ import {
   useRowExpansion,
 } from "./rows/useRowExpansion";
 import type { SelectionState } from "./selection/useSelection";
+import type { TableSource } from "./source/TableSource";
 import type { BulkAction, ColumnDef, SortByOption, TableLabels } from "./types";
 import {
   useDataTable,
@@ -125,6 +126,14 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 /** The shared, UI-agnostic orchestration result for an adapter table. */
 export interface TableChrome<TRow> {
+  /**
+   * The source as the VIEW sees it. Identical to the caller's source —
+   * except with grouping armed, where the table renders the full filtered
+   * set and this facade presents that set (full rows, one page, matching
+   * total) so footer numbers, select-all scope and page-scope CSV export
+   * agree with the screen. Adapters read THIS, never the raw source.
+   */
+  source: TableSource<TRow>;
   /** The headless table state + prop-getters. */
   table: UseDataTableResult<TRow>;
   /** Resolved mobile layout flag. */
@@ -267,8 +276,38 @@ export function useTableChrome<TRow>(
     defaultLayout: defaultColumnLayout,
   });
 
+  // Effective groupBy: prop wins when provided (including `null` to force
+  // off); otherwise the URL/source value. Empty string is treated as unset.
+  //
+  // With grouping armed the table is a FULL-SET view: grouped mode renders
+  // every filtered row, so the source the chrome reasons about presents
+  // that same set — footer numbers, select-all scope and page-scope CSV
+  // export all describe exactly what is on screen instead of the page
+  // slice. Mutators pass through untouched; the overlay disappears (and
+  // real pagination resumes) the moment grouping is cleared.
+  const requestedGroupBy =
+    props.groupBy === undefined ? source.groupBy : (props.groupBy ?? undefined);
+  const effectiveGroupBy =
+    requestedGroupBy && requestedGroupBy.length > 0
+      ? requestedGroupBy
+      : undefined;
+  const groupingArmed = Boolean(effectiveGroupBy && source.allFilteredRows);
+  const viewSource = useMemo<TableSource<TRow>>(() => {
+    if (!groupingArmed || !source.allFilteredRows) return source;
+    const all = source.allFilteredRows;
+    return {
+      ...source,
+      rows: all,
+      page: 1,
+      limit: Math.max(all.length, 1),
+      total: all.length,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+    };
+  }, [groupingArmed, source]);
+
   const table = useDataTable<TRow>({
-    source,
+    source: viewSource,
     columns: columnLayout.visibleColumns,
     rowKey,
     tableLabel,
@@ -321,7 +360,7 @@ export function useTableChrome<TRow>(
   const isPaged = source.paginationMode === "paged";
 
   let body: TableBodyRegion;
-  if (source.isLoading && source.rows.length === 0) body = "skeleton";
+  if (viewSource.isLoading && viewSource.rows.length === 0) body = "skeleton";
   else if (table.isEmpty) body = "empty";
   else if (isMobile) body = "mobile";
   else body = "desktop";
@@ -374,15 +413,6 @@ export function useTableChrome<TRow>(
     onCollapsedIdsChange: props.onCollapsedGroupIdsChange,
   });
 
-  // Effective groupBy: prop wins when provided (including `null` to force off);
-  // otherwise the URL/source value. Empty string is treated as unset.
-  const requestedGroupBy =
-    props.groupBy === undefined ? source.groupBy : (props.groupBy ?? undefined);
-  const effectiveGroupBy =
-    requestedGroupBy && requestedGroupBy.length > 0
-      ? requestedGroupBy
-      : undefined;
-
   useEffect(() => {
     if (!effectiveGroupBy) return;
     if (source.allFilteredRows) return;
@@ -430,13 +460,13 @@ export function useTableChrome<TRow>(
   // See TableChrome.editingRows — the row universe the editing layer
   // validates against must match what the body renders.
   const editingRows = useMemo<readonly TRow[]>(() => {
-    if (!grouping) return source.rows;
+    if (!grouping) return viewSource.rows;
     const leaves: TRow[] = [];
     for (const entry of grouping.entries) {
       if (entry.kind === "row") leaves.push(entry.row);
     }
     return leaves;
-  }, [grouping, source.rows]);
+  }, [grouping, viewSource.rows]);
 
   useEffect(() => {
     if (!editing) return;
@@ -447,10 +477,11 @@ export function useTableChrome<TRow>(
 
   const showFooter =
     isPaged &&
-    !source.error &&
-    (source.total > 0 || source.isLoading || source.isFetching);
+    !viewSource.error &&
+    (viewSource.total > 0 || viewSource.isLoading || viewSource.isFetching);
 
   return {
+    source: viewSource,
     table,
     isMobile,
     confirm,
@@ -509,7 +540,10 @@ export function useChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
   props: BaseDataTableProps<TRow>
 ): ChromeBodyData<TRow> {
-  const { source, rowKey, virtualize = false } = props;
+  const { rowKey, virtualize = false } = props;
+  // The chrome's view facade, so grouped full-set state (no next page, all
+  // rows present) drives the sentinel and virtualization too.
+  const { source } = chrome;
   if (virtualize && props.renderRowDetail) {
     devWarn(
       "renderRowDetail with virtualize: desktop detail panels render as unmeasured sibling rows, so scroll heights can drift — prefer paged data with row details."

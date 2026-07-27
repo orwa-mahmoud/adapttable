@@ -179,8 +179,11 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const size = tableSize(props.size, props.density);
   const { filtersMode = "popover" } = props;
   const chromeProps = useChromeProps(props);
-  const { source, filters: filtersNode } = chromeProps;
+  const { filters: filtersNode } = chromeProps;
   const c = useTableChrome<TRow>(chromeProps);
+  // Everything rendered below reads the chrome's VIEW facade — identical to
+  // `source` except under grouping, where it presents the full rendered set.
+  const viewSource = c.source;
   const { table, confirm, getRowId } = c;
   const { labels } = table;
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -195,7 +198,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     virtualScrollRef,
   } = useChromeBodyData(c, chromeProps);
   const grouping = withWindowedGroupingEntries(c.grouping, groupingEntries);
-  useMountStagger(rootRef, [source.rows.length, c.isMobile], {
+  useMountStagger(rootRef, [viewSource.rows.length, c.isMobile], {
     enabled: animate,
   });
   const { hasRowActions, rowActions, actionsPinned } = resolveActionsColumn(
@@ -228,7 +231,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   if (c.body === "skeleton") {
     body = slots?.skeleton ?? (
       <LoadingState
-        rows={props.skeletonRows ?? source.limit}
+        rows={props.skeletonRows ?? viewSource.limit}
         columns={table.columns.length}
         loadingLabel={labels.loading}
       />
@@ -339,7 +342,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           columnMenu={columnMenu}
           onExportCsv={makeExportCsvHandler(
             props.exportCsv,
-            source,
+            viewSource,
             table.columns
           )}
         />
@@ -352,22 +355,24 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         {table.selection && props.bulkActions && (
           <BulkBar
             selection={table.selection}
-            total={source.total}
+            total={viewSource.total}
             bulkActions={props.bulkActions}
             confirm={confirm}
             labels={labels}
           />
         )}
-        {source.error ? (
+        {viewSource.error ? (
           <ErrorState
-            error={source.error}
+            error={viewSource.error}
             labels={labels}
-            onRetry={source.refetch ? () => void source.refetch?.() : undefined}
+            onRetry={
+              viewSource.refetch ? () => void viewSource.refetch?.() : undefined
+            }
           />
         ) : (
           body
         )}
-        {canLoadMore && source.hasNextPage && (
+        {canLoadMore && viewSource.hasNextPage && (
           <Box
             ref={loadMoreRef}
             sx={{ display: "flex", justifyContent: "center", py: 1 }}
@@ -375,8 +380,8 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             <Button
               variant="outlined"
               size="small"
-              disabled={source.isFetchingNextPage}
-              onClick={() => source.fetchNextPage()}
+              disabled={viewSource.isFetchingNextPage}
+              onClick={() => viewSource.fetchNextPage()}
             >
               {labels.loadMore}
             </Button>
@@ -385,11 +390,12 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         {c.showFooter && (
           <Footer
             pagination={table.pagination}
-            total={source.total}
-            limit={source.limit}
-            setPage={source.setPage}
-            setLimit={source.setLimit}
+            total={viewSource.total}
+            limit={viewSource.limit}
+            setPage={viewSource.setPage}
+            setLimit={viewSource.setLimit}
             labels={labels}
+            showRowsPerPage={!c.grouping}
           />
         )}
       </Stack>

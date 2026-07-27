@@ -184,6 +184,7 @@ export function Footer({
   source,
   labels,
   classNames,
+  showRowsPerPage = true,
 }: Readonly<{
   pagination: PaginationInfo;
   source: {
@@ -194,15 +195,19 @@ export function Footer({
   };
   labels: Required<TableLabels>;
   classNames: DataTableClassNames;
+  /** Hidden in the grouped full-set view, where page size has no effect. */
+  showRowsPerPage?: boolean;
 }>) {
   const { safePage, totalPages, fromIndex, toIndex } = pagination;
   return (
     <div data-adapttable-part="footer" className={classNames.footer}>
-      <RowsPerPageSelect
-        source={source}
-        labels={labels}
-        classNames={classNames}
-      />
+      {showRowsPerPage && (
+        <RowsPerPageSelect
+          source={source}
+          labels={labels}
+          classNames={classNames}
+        />
+      )}
       {source.total > 0 && (
         <span>
           {labels.showing({

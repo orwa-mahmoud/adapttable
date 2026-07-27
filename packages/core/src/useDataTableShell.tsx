@@ -180,13 +180,20 @@ export function useDataTableShell<TRow>(
     activeFilterCount: chrome.activeFilterCount,
     filters: filtersNode,
     onClearFilters: chrome.clearFilters,
-    showRowsPerPage: canLoadMore,
-    onExportCsv: makeExportCsvHandler(props.exportCsv, source, table.columns),
+    // Hidden in the grouped full-set view, where page size has no effect.
+    showRowsPerPage: canLoadMore && !chrome.grouping,
+    onExportCsv: makeExportCsvHandler(
+      props.exportCsv,
+      chrome.source,
+      table.columns
+    ),
     dir: props.dir,
   };
 
   return {
-    source,
+    // The chrome's VIEW facade — with grouping armed it presents the full
+    // rendered set, so adapter footers and export buttons stay truthful.
+    source: chrome.source,
     runtime,
     /** The table's resolved URL backend — pass to saved-views UIs. */
     urlAdapter,

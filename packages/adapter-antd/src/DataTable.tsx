@@ -433,27 +433,36 @@ function PagedFooter<TRow>({
   table,
   source,
   labels,
+  showRowsPerPage = true,
 }: Readonly<{
   table: UseDataTableResult<TRow>;
   source: TableSource<TRow>;
   labels: Required<TableLabels>;
+  /** Hidden in the grouped full-set view, where page size has no effect. */
+  showRowsPerPage?: boolean;
 }>) {
   const from = (table.pagination.safePage - 1) * source.limit + 1;
   const to = Math.min(table.pagination.safePage * source.limit, source.total);
   return (
     <Flex justify="space-between" align="center" wrap gap={8}>
       <Flex align="center" gap={8}>
-        <Typography.Text type="secondary">{labels.rowsPerPage}</Typography.Text>
-        <Select
-          size="small"
-          aria-label={labels.rowsPerPage}
-          value={source.limit}
-          onChange={(value: number) => source.setLimit(value)}
-          options={pageSizeOptions(source.limit).map((n) => ({
-            value: n,
-            label: n,
-          }))}
-        />
+        {showRowsPerPage && (
+          <>
+            <Typography.Text type="secondary">
+              {labels.rowsPerPage}
+            </Typography.Text>
+            <Select
+              size="small"
+              aria-label={labels.rowsPerPage}
+              value={source.limit}
+              onChange={(value: number) => source.setLimit(value)}
+              options={pageSizeOptions(source.limit).map((n) => ({
+                value: n,
+                label: n,
+              }))}
+            />
+          </>
+        )}
         {source.total > 0 && (
           <Typography.Text type="secondary">
             {labels.showing({ from, to, total: source.total })}
@@ -1168,7 +1177,12 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         )}
         {bodyRegion}
         {c.isPaged && !source.error && c.body === "desktop" && (
-          <PagedFooter table={table} source={source} labels={labels} />
+          <PagedFooter
+            table={table}
+            source={source}
+            labels={labels}
+            showRowsPerPage={!c.grouping}
+          />
         )}
         {!c.isPaged && !source.error && source.hasNextPage && (
           <Flex ref={loadMoreRef} justify="center">

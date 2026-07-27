@@ -305,6 +305,7 @@ export function Footer({
   setLimit,
   labels,
   className,
+  showRowsPerPage = true,
 }: Readonly<{
   pagination: PaginationInfo;
   total: number;
@@ -314,6 +315,8 @@ export function Footer({
   labels: Required<TableLabels>;
   /** Class hook for the footer row. */
   className?: string;
+  /** Hidden in the grouped full-set view, where page size has no effect. */
+  showRowsPerPage?: boolean;
 }>) {
   const { safePage, totalPages, fromIndex, toIndex } = pagination;
   return (
@@ -324,22 +327,26 @@ export function Footer({
       className={className}
     >
       <HStack gap={2}>
-        <Text fontSize="xs" {...subtleText}>
-          {labels.rowsPerPage}
-        </Text>
-        <NativeSelect
-          size="xs"
-          w="72px"
-          aria-label={labels.rowsPerPage}
-          value={String(limit)}
-          onChange={(e) => setLimit(Number(e.target.value))}
-        >
-          {pageSizeOptions(limit).map((n) => (
-            <option key={n} value={String(n)}>
-              {n}
-            </option>
-          ))}
-        </NativeSelect>
+        {showRowsPerPage && (
+          <>
+            <Text fontSize="xs" {...subtleText}>
+              {labels.rowsPerPage}
+            </Text>
+            <NativeSelect
+              size="xs"
+              w="72px"
+              aria-label={labels.rowsPerPage}
+              value={String(limit)}
+              onChange={(e) => setLimit(Number(e.target.value))}
+            >
+              {pageSizeOptions(limit).map((n) => (
+                <option key={n} value={String(n)}>
+                  {n}
+                </option>
+              ))}
+            </NativeSelect>
+          </>
+        )}
         {total > 0 && (
           <Text fontSize="xs" {...subtleText}>
             {labels.showing({ from: fromIndex, to: toIndex, total })}

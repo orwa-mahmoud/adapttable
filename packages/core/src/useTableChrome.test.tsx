@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { buildTableCsv } from "./export/tableCsv";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
@@ -117,6 +118,68 @@ describe("useTableChrome", () => {
 
     rerender();
     expect(onRowsChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("grouping is a full-set view: footer numbers, select-all and CSV match the screen", () => {
+    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      name: `P${String(i + 1).padStart(2, "0")}-${i % 3 === 0 ? "A" : "B"}`,
+    }));
+    const adapter = createMemoryAdapter("limit=10");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: rows,
+        adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        groupBy: "name",
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+      });
+    });
+
+    // The view facade presents the full filtered set as one page.
+    expect(result.current.grouping).toBeDefined();
+    expect(result.current.source.rows).toHaveLength(30);
+    expect(result.current.table.pagination.totalPages).toBe(1);
+    expect(result.current.table.pagination.fromIndex).toBe(1);
+    expect(result.current.table.pagination.toIndex).toBe(30);
+    expect(result.current.showFooter).toBe(true);
+
+    // Select-all covers every rendered row, not the page slice.
+    act(() => result.current.table.selection?.toggleAll());
+    expect(result.current.table.selection?.selectedCount).toBe(30);
+
+    // Page-scope CSV exports exactly the rendered set: header + 30 rows.
+    const csv = buildTableCsv({
+      source: result.current.source,
+      columns: result.current.table.columns,
+      scope: "page",
+    });
+    expect(csv.trim().split("\n")).toHaveLength(31);
+  });
+
+  it("without grouping the source passes through untouched", () => {
+    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      name: `P${i + 1}`,
+    }));
+    const adapter = createMemoryAdapter("limit=10");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: rows,
+        adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({ source, columns, rowKey: (r) => r.id });
+    });
+    expect(result.current.source.rows).toHaveLength(10);
+    expect(result.current.table.pagination.totalPages).toBe(3);
   });
 
   it("does not loop when an uncontrolled inline handler stores the selection", () => {

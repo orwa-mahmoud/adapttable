@@ -407,6 +407,7 @@ export function Footer({
   setPage,
   setLimit,
   labels,
+  showRowsPerPage = true,
 }: Readonly<{
   pagination: PaginationInfo;
   total: number;
@@ -414,6 +415,8 @@ export function Footer({
   setPage: (n: number) => void;
   setLimit: (n: number) => void;
   labels: Required<TableLabels>;
+  /** Hidden in the grouped full-set view, where page size has no effect. */
+  showRowsPerPage?: boolean;
 }>) {
   return (
     <Stack
@@ -432,20 +435,22 @@ export function Footer({
         useFlexGap
         sx={{ alignItems: "center" }}
       >
-        <TextField
-          select
-          size="small"
-          label={labels.rowsPerPage}
-          value={String(limit)}
-          onChange={(e) => setLimit(Number(e.target.value))}
-          sx={{ minWidth: 100 }}
-        >
-          {pageSizeOptions(limit).map((n) => (
-            <MenuItem key={n} value={String(n)}>
-              {n}
-            </MenuItem>
-          ))}
-        </TextField>
+        {showRowsPerPage && (
+          <TextField
+            select
+            size="small"
+            label={labels.rowsPerPage}
+            value={String(limit)}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            sx={{ minWidth: 100 }}
+          >
+            {pageSizeOptions(limit).map((n) => (
+              <MenuItem key={n} value={String(n)}>
+                {n}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
         {total > 0 && (
           <Typography variant="caption" color="text.secondary">
             {labels.showing({
