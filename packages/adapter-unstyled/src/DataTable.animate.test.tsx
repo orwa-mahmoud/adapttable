@@ -18,7 +18,7 @@ const columns: ColumnDef<Row>[] = [{ key: "name", accessor: (r) => r.name }];
 function Harness({ animate }: { animate?: boolean }) {
   const source = useFrontendData<Row>({
     data: ROWS,
-    adapter: createMemoryAdapter(),
+    urlAdapter: createMemoryAdapter(),
     columns,
   });
   return (

@@ -36,6 +36,8 @@ export interface UseTableUrlStateOptions {
    * router-specific adapter (react-router / Next.js) to integrate with an
    * existing navigation stack.
    */
+  urlAdapter?: UrlStateAdapter;
+  /** Alias for `urlAdapter` (v1 name) — deleted before the 2.0.0 release. */
   adapter?: UrlStateAdapter;
   /**
    * When `false`, state is kept in a component-local memory store instead
@@ -107,6 +109,7 @@ export function useTableUrlState(
   options: UseTableUrlStateOptions = {}
 ): UseTableUrlStateResult {
   const {
+    urlAdapter,
     adapter,
     urlSync,
     enabled,
@@ -118,8 +121,9 @@ export function useTableUrlState(
   // Per-table namespace, e.g. "left." → left.q / left.page / left.f_status.
   const ns = urlKey ? `${urlKey}.` : "";
 
+  const backend = urlAdapter ?? adapter;
   const syncToUrl = urlSync ?? enabled ?? true;
-  const resolved = useResolvedAdapter(adapter, syncToUrl);
+  const resolved = useResolvedAdapter(backend, syncToUrl);
   // Server snapshot: with the default (history) adapter the server rendered
   // from an empty memory store, so hydration must read "" too — the real URL
   // applies right after hydration. An EXPLICIT adapter is assumed to be
@@ -127,7 +131,7 @@ export function useTableUrlState(
   const search = useSyncExternalStore(
     (onChange) => resolved.subscribe(onChange),
     () => resolved.getSearch(),
-    () => (adapter ? adapter.getSearch() : "")
+    () => (backend ? backend.getSearch() : "")
   );
   const params = useMemo(() => new URLSearchParams(search), [search]);
 

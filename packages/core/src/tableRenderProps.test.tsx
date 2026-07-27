@@ -33,7 +33,7 @@ describe("tableRenderModel", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useTableChrome<Row>({
@@ -100,7 +100,7 @@ describe("useChromeScrollReset", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
@@ -125,7 +125,7 @@ describe("useChromeScrollReset", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: mode,
         defaults: { limit: 1 },
       });
@@ -169,7 +169,7 @@ describe("onSelectionChange", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useTableChrome<Row>({
@@ -197,7 +197,7 @@ describe("onSelectionChange", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useTableChrome<Row>({
@@ -217,7 +217,7 @@ function chromeWith(over: Record<string, unknown> = {}, initialUrl = "") {
     const source = useFrontendData<Row>({
       data: ROWS,
       columns: cols,
-      adapter,
+      urlAdapter: adapter,
       paginationMode: "paged",
       filterFn: (row, extra) => !extra.team || row.name.includes("li"),
     });
@@ -254,7 +254,7 @@ describe("emptyVariant / isRefreshing / clearFilters", () => {
       const source = useFrontendData<Row>({
         data: [],
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useTableChrome<Row>({
@@ -322,7 +322,7 @@ describe("useChromeBodyData", () => {
       const source = useFrontendData<Row>({
         data: many,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "infinite",
       });
       const props = {
@@ -358,7 +358,7 @@ describe("useChromeBodyData", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
@@ -376,7 +376,7 @@ describe("useChromeBodyData", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "infinite",
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
@@ -393,7 +393,7 @@ describe("useChromeBodyData", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "infinite",
       });
       const props = {
@@ -643,7 +643,7 @@ describe("chrome row expansion", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return {
@@ -678,7 +678,7 @@ describe("chrome row expansion", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "infinite",
       });
       const props = {
@@ -713,7 +713,7 @@ describe("multi-sort headers", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: sortable,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useTableChrome<Row>({
@@ -752,7 +752,7 @@ describe("multi-sort headers", () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: [{ key: "name", header: "Name" }] as never,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useTableChrome<Row>({

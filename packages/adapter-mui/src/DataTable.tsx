@@ -135,7 +135,7 @@ function useChromeProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     onQueryChange: props.onQueryChange,
     columns: props.columns,
     filters: props.filters,
-    adapter: urlAdapter,
+    urlAdapter,
     urlSync: props.urlSync,
     urlKey: props.urlKey,
   });
@@ -220,7 +220,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const savedViewsMenu = props.savedViews && (
     <SavedViewsMenu
       options={{
-        adapter: chromeProps.urlAdapter,
+        urlAdapter: chromeProps.urlAdapter,
         urlKey: props.urlKey,
         ...props.savedViews,
       }}

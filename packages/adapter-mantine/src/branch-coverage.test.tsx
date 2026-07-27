@@ -45,7 +45,7 @@ function mount(
   function Harness() {
     const source = useFrontendData<Row>({
       data: opts.rows ?? ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns,
       paginationMode: opts.mode ?? "paged",
       isLoading: opts.isLoading,
@@ -284,7 +284,7 @@ describe("DataTable skeleton row count", () => {
 function SkeletonHarness({ skeletonRows }: { skeletonRows?: number }) {
   const source = useFrontendData<Row>({
     data: [],
-    adapter: createMemoryAdapter(""),
+    urlAdapter: createMemoryAdapter(""),
     columns,
     paginationMode: "paged",
     isLoading: true,
@@ -303,7 +303,7 @@ function EmptyColumnsSkeletonHarness() {
   const noColumns: ColumnDef<Row>[] = [];
   const source = useFrontendData<Row>({
     data: [],
-    adapter: createMemoryAdapter(""),
+    urlAdapter: createMemoryAdapter(""),
     columns: noColumns,
     paginationMode: "paged",
     isLoading: true,

@@ -62,7 +62,7 @@ function Harness(props: {
 }) {
   const source = useFrontendData<Row>({
     data: props.rows ?? ROWS,
-    adapter: createMemoryAdapter(),
+    urlAdapter: createMemoryAdapter(),
     columns,
     paginationMode: props.mode ?? "paged",
   });
@@ -207,7 +207,7 @@ describe("<DataTable> gaps", () => {
     function LoadingHarness() {
       const source = useFrontendData<Row>({
         data: [],
-        adapter: createMemoryAdapter(),
+        urlAdapter: createMemoryAdapter(),
         columns,
         paginationMode: "paged",
         isLoading: true,

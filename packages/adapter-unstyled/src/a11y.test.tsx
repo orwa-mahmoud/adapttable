@@ -26,7 +26,7 @@ function renderTable(
   function Harness() {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter: createMemoryAdapter(),
+      urlAdapter: createMemoryAdapter(),
       columns,
       paginationMode: "paged",
     });
@@ -70,7 +70,7 @@ describe("accessibility (axe)", () => {
     function Empty() {
       const source = useFrontendData<Row>({
         data: [],
-        adapter: createMemoryAdapter(),
+        urlAdapter: createMemoryAdapter(),
         columns,
         paginationMode: "paged",
       });

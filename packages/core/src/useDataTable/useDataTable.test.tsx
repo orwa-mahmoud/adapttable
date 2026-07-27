@@ -32,7 +32,7 @@ function mount(
   const view = renderHook(() => {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns: cols,
       paginationMode: frontendOpts.paginationMode ?? "paged",
     });
@@ -195,7 +195,7 @@ describe("useDataTable", () => {
       const { result } = renderHook(() => {
         const source = useFrontendData<Row>({
           data: [...ROWS].reverse(),
-          adapter,
+          urlAdapter: adapter,
           columns: cols,
           paginationMode: "paged",
           defaults: { sortBy: "name" },
@@ -295,7 +295,7 @@ describe("useDataTable", () => {
     const { result } = renderHook(() => {
       const source = useFrontendData<Row>({
         data: ROWS,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       });
       return useDataTable<Row>({ source, columns: cols, rowKey: (r) => r.id });

@@ -25,7 +25,7 @@ function renderWith(
 ) {
   const adapter = createMemoryAdapter(initial);
   const view = renderHook(() =>
-    useColumnLayoutUrlState({ adapter, ...options })
+    useColumnLayoutUrlState({ urlAdapter: adapter, ...options })
   );
   return { adapter, ...view };
 }
@@ -45,7 +45,7 @@ describe("useColumnLayoutUrlState", () => {
   it("reads the layout via the server snapshot during SSR", () => {
     const adapter = createMemoryAdapter("colHide=email");
     function Probe() {
-      const { layout } = useColumnLayoutUrlState({ adapter });
+      const { layout } = useColumnLayoutUrlState({ urlAdapter: adapter });
       return <span>{layout.hidden.join(",")}</span>;
     }
     expect(renderToString(<Probe />)).toContain("email");
@@ -164,7 +164,9 @@ describe("debounced URL persistence", () => {
 
   it("reads optimistically before the URL write lands", () => {
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => useColumnLayoutUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useColumnLayoutUrlState({ urlAdapter: adapter })
+    );
     act(() => result.current.onLayoutChange(NEXT));
     // Instant for the UI…
     expect(result.current.layout.hidden).toEqual(["email"]);
@@ -185,7 +187,7 @@ describe("debounced URL persistence", () => {
       },
     };
     const { result } = renderHook(() =>
-      useColumnLayoutUrlState({ adapter: spied })
+      useColumnLayoutUrlState({ urlAdapter: spied })
     );
     act(() => {
       // A resize drag: one commit per frame.
@@ -206,7 +208,7 @@ describe("debounced URL persistence", () => {
   it("flushes a pending layout on unmount so the last frame is kept", () => {
     const adapter = createMemoryAdapter("");
     const { result, unmount } = renderHook(() =>
-      useColumnLayoutUrlState({ adapter })
+      useColumnLayoutUrlState({ urlAdapter: adapter })
     );
     act(() => result.current.onLayoutChange(NEXT));
     unmount();

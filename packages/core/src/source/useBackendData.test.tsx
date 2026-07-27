@@ -79,7 +79,7 @@ function mount<TPage = Page>(
   return renderHook(() =>
     useBackendData<Row, ListParams, TPage>({
       usePaginatedQuery: query.usePaginatedQuery,
-      adapter,
+      urlAdapter: adapter,
       ...rest,
     })
   );

@@ -49,7 +49,7 @@ function renderBody(maxHeight: number | undefined) {
     const source = useFrontendData<Row>({
       data: ROWS,
       columns: cols,
-      adapter,
+      urlAdapter: adapter,
       paginationMode: "infinite",
     });
     const props = {
@@ -131,7 +131,7 @@ describe("useChromeBodyData with row grouping", () => {
       const source = useFrontendData<Row>({
         data: groupedRows,
         columns: groupCols,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "infinite",
       });
       const props = {

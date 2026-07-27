@@ -32,7 +32,11 @@ function MenuHarness({
   adapter,
   storage,
 }: Readonly<{ adapter: UrlStateAdapter; storage: LayoutStorage }>) {
-  const views = useSavedViews({ storageKey: "test-views", storage, adapter });
+  const views = useSavedViews({
+    storageKey: "test-views",
+    storage,
+    urlAdapter: adapter,
+  });
   return <SavedViewsMenu views={views} labels={defaultLabels} />;
 }
 

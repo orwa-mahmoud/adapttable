@@ -343,7 +343,7 @@ function SavedViewsSlot({
   if (!options) return null;
   return (
     <SavedViewsMenu
-      options={{ adapter: urlAdapter, urlKey, ...options }}
+      options={{ urlAdapter, urlKey, ...options }}
       labels={labels}
       dir={dir}
     />
@@ -897,7 +897,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     loading: props.loading,
     mode: props.mode,
     onQueryChange: props.onQueryChange,
-    adapter: resolvedUrlAdapter,
+    urlAdapter: resolvedUrlAdapter,
     urlSync: props.urlSync,
     urlKey: props.urlKey,
     columns: props.columns,

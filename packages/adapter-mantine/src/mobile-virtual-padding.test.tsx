@@ -59,7 +59,7 @@ const adapter = createMemoryAdapter("");
 function Harness() {
   const source = useFrontendData<Row>({
     data: ROWS,
-    adapter,
+    urlAdapter: adapter,
     columns,
     paginationMode: "infinite",
   });

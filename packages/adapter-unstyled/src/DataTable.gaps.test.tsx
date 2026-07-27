@@ -60,7 +60,7 @@ function Harness(props: {
 }) {
   const source = useFrontendData<Row>({
     data: ROWS,
-    adapter,
+    urlAdapter: adapter,
     columns,
     paginationMode: props.mode ?? "paged",
   });

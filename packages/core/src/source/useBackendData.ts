@@ -44,6 +44,7 @@ export interface UseBackendDataOptions<
 > extends Pick<
   UseTableUrlStateOptions,
   | "adapter"
+  | "urlAdapter"
   | "enabled"
   | "urlSync"
   | "defaults"

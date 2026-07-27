@@ -22,6 +22,8 @@ import {
 /** Options for {@link useColumnLayoutUrlState}. */
 export interface UseColumnLayoutUrlStateOptions {
   /** URL-state backend. Defaults to the browser History API. */
+  urlAdapter?: UrlStateAdapter;
+  /** Alias for `urlAdapter` (v1 name) — deleted before the 2.0.0 release. */
   adapter?: UrlStateAdapter;
   /** When `false`, keep the layout in a local memory store. Defaults `true`. */
   urlSync?: boolean;
@@ -71,17 +73,19 @@ export interface UseColumnLayoutUrlStateResult {
 export function useColumnLayoutUrlState(
   options: UseColumnLayoutUrlStateOptions = {}
 ): UseColumnLayoutUrlStateResult {
-  const { adapter, urlSync, enabled, defaultLayout, urlKey } = options;
+  const { urlAdapter, adapter, urlSync, enabled, defaultLayout, urlKey } =
+    options;
+  const backend = urlAdapter ?? adapter;
   const syncToUrl = urlSync ?? enabled ?? true;
   const ns = urlKey ? `${urlKey}.` : "";
 
-  const resolved = useResolvedAdapter(adapter, syncToUrl);
+  const resolved = useResolvedAdapter(backend, syncToUrl);
   // Same SSR rule as useTableUrlState: only an explicit adapter is trusted
   // to be hydration-consistent; the default history adapter hydrates from "".
   const search = useSyncExternalStore(
     (onChange) => resolved.subscribe(onChange),
     () => resolved.getSearch(),
-    () => (adapter ? adapter.getSearch() : "")
+    () => (backend ? backend.getSearch() : "")
   );
   const params = useMemo(() => new URLSearchParams(search), [search]);
 

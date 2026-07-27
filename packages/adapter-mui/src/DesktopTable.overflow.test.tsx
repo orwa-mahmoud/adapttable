@@ -53,7 +53,7 @@ function installResizeObserver() {
 function Harness({ stickyTop }: Readonly<{ stickyTop?: number }>) {
   const source = useFrontendData<Row>({
     data: ROWS,
-    adapter: createMemoryAdapter(""),
+    urlAdapter: createMemoryAdapter(""),
     columns,
   });
   const table = useDataTable<Row>({ source, columns, rowKey: (r) => r.id });

@@ -30,7 +30,7 @@ import {
 /** Options for {@link useTableData}. */
 export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
-  "adapter" | "enabled" | "urlSync" | "defaults" | "urlKey"
+  "adapter" | "urlAdapter" | "enabled" | "urlSync" | "defaults" | "urlKey"
 > {
   /** Full-control tier: a prebuilt source (e.g. `useBackendData`). */
   source?: TableSource<TRow>;

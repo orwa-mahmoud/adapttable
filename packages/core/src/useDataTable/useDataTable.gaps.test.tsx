@@ -23,7 +23,7 @@ function mount(opts: Partial<UseDataTableOptions<Row>> = {}) {
   return renderHook(() => {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter,
+      urlAdapter: adapter,
       paginationMode: "paged",
     });
     return useDataTable<Row>({

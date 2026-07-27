@@ -78,7 +78,7 @@ function renderTable(stickyTop?: number): HTMLElement {
   function Harness() {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns,
       paginationMode: "paged",
     });

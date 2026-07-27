@@ -20,7 +20,7 @@ const theme = createTheme();
 function Harness({ animate }: { animate?: boolean }) {
   const source = useFrontendData<Row>({
     data: ROWS,
-    adapter: createMemoryAdapter(),
+    urlAdapter: createMemoryAdapter(),
     columns,
   });
   return (

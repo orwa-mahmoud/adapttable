@@ -71,7 +71,7 @@ function mount(
   function Harness() {
     const source = useFrontendData<Row>({
       data: opts.rows ?? ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns,
       paginationMode: opts.mode ?? "paged",
     });

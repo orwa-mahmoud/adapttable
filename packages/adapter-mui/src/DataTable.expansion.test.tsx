@@ -53,7 +53,7 @@ function Harness(props: {
 }) {
   const source = useFrontendData<Row>({
     data: PEOPLE,
-    adapter,
+    urlAdapter: adapter,
     columns,
     paginationMode: "paged",
   });

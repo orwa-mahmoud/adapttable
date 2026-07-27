@@ -49,7 +49,7 @@ interface HarnessProps {
 function Harness(props: HarnessProps) {
   const source = useFrontendData<Row>({
     data: props.rows ?? ROWS,
-    adapter: harnessAdapter,
+    urlAdapter: harnessAdapter,
     columns,
     paginationMode: props.mode ?? "paged",
     error: props.error ?? null,

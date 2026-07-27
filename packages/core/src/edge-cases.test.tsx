@@ -12,7 +12,9 @@ import { useTableUrlState } from "./url/useTableUrlState";
 describe("URL round-trip with special characters", () => {
   it("preserves spaces, ampersands, and equals in the search term", () => {
     const adapter = createMemoryAdapter();
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     act(() => result.current.setSearch("a b & c=d"));
     expect(result.current.search).toBe("a b & c=d");
     // The stored query string is percent-encoded.
@@ -21,7 +23,9 @@ describe("URL round-trip with special characters", () => {
 
   it("preserves unicode (Arabic) search terms", () => {
     const adapter = createMemoryAdapter();
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     act(() => result.current.setSearch("بحث"));
     expect(result.current.search).toBe("بحث");
   });
@@ -29,7 +33,7 @@ describe("URL round-trip with special characters", () => {
   it("round-trips array extras with whitespace, trimming each element", () => {
     const adapter = createMemoryAdapter();
     const { result } = renderHook(() =>
-      useTableUrlState({ adapter, arrayExtraKeys: ["tags"] })
+      useTableUrlState({ urlAdapter: adapter, arrayExtraKeys: ["tags"] })
     );
     act(() => result.current.setExtra("tags", ["a", " b ", "c"]));
     expect(result.current.extra.tags).toEqual(["a", "b", "c"]);

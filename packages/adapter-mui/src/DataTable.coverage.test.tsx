@@ -52,7 +52,7 @@ function mount(
   function Harness() {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns,
       paginationMode: mode,
     });
@@ -192,7 +192,7 @@ describe("MUI coverage gaps", () => {
     function Harness() {
       const source = useFrontendData<Row>({
         data: many,
-        adapter,
+        urlAdapter: adapter,
         columns,
         paginationMode: "paged",
       });

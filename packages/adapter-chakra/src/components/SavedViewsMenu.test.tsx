@@ -41,7 +41,12 @@ async function mount(initialSearch = "t.q=alice&other=1") {
   const storage = memoryStorage();
   renderChakra(
     <SavedViewsMenu
-      options={{ storageKey: "views", storage, adapter, urlKey: "t" }}
+      options={{
+        storageKey: "views",
+        storage,
+        urlAdapter: adapter,
+        urlKey: "t",
+      }}
       labels={defaultLabels}
     />
   );

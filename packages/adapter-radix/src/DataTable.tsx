@@ -138,7 +138,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
               <SavedViewsMenu
                 options={{
                   // The table's RESOLVED backend — shared so views follow urlSync.
-                  adapter: shell.urlAdapter,
+                  urlAdapter: shell.urlAdapter,
                   urlKey: props.urlKey,
                   ...props.savedViews,
                 }}

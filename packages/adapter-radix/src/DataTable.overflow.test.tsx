@@ -77,7 +77,7 @@ function renderTable(stickyTop?: number): HTMLElement {
   function Harness() {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns,
       paginationMode: "paged",
     });
@@ -169,7 +169,7 @@ describe("column-pin sticky fix (Radix ScrollArea workaround)", () => {
     function Harness() {
       const source = useFrontendData<Row>({
         data: ROWS,
-        adapter,
+        urlAdapter: adapter,
         columns: wideCols,
         paginationMode: "paged",
       });

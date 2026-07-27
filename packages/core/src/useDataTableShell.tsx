@@ -89,7 +89,7 @@ export function useDataTableShell<TRow>(
     loading: props.loading,
     mode: props.mode,
     onQueryChange: props.onQueryChange,
-    adapter: urlAdapter,
+    urlAdapter,
     urlSync: props.urlSync,
     urlKey: props.urlKey,
     columns: props.columns,

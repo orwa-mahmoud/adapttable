@@ -41,7 +41,12 @@ describe("antd SavedViewsMenu", () => {
     const storage = fakeStorage();
     render(
       <SavedViewsMenu
-        options={{ storageKey: "views", storage, adapter, urlKey: "t" }}
+        options={{
+          storageKey: "views",
+          storage,
+          urlAdapter: adapter,
+          urlKey: "t",
+        }}
         labels={labels}
       />
     );
@@ -75,7 +80,7 @@ describe("antd SavedViewsMenu", () => {
         options={{
           storageKey: "views",
           storage: fakeStorage(),
-          adapter,
+          urlAdapter: adapter,
           urlKey: "t",
         }}
         labels={labels}
@@ -123,7 +128,7 @@ describe("antd SavedViewsMenu", () => {
         options={{
           storageKey: "views",
           storage: fakeStorage(),
-          adapter: createMemoryAdapter(""),
+          urlAdapter: createMemoryAdapter(""),
         }}
         labels={labels}
       />
@@ -143,7 +148,7 @@ describe("antd SavedViewsMenu", () => {
         options={{
           storageKey: "views",
           storage: fakeStorage(),
-          adapter: createMemoryAdapter(""),
+          urlAdapter: createMemoryAdapter(""),
         }}
         labels={labels}
         dir="rtl"

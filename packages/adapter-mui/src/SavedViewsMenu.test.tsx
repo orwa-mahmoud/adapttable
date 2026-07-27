@@ -44,7 +44,12 @@ function mountMenu(initialSearch: string) {
   const storage = fakeStorage();
   renderMui(
     <SavedViewsMenu
-      options={{ storageKey: "views", storage, adapter, urlKey: "t" }}
+      options={{
+        storageKey: "views",
+        storage,
+        urlAdapter: adapter,
+        urlKey: "t",
+      }}
       labels={labels}
     />
   );

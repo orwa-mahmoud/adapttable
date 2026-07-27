@@ -31,7 +31,7 @@ function render(initial = "", opts: Partial<UseFrontendDataOptions<Row>> = {}) {
   return renderHook(() =>
     useFrontendData<Row>({
       data: ROWS,
-      adapter,
+      urlAdapter: adapter,
       paginationMode: "paged",
       ...opts,
     })
@@ -228,7 +228,7 @@ describe("multi-sort chain on the frontend tier", () => {
           { key: "name", header: "Name", accessor: (r) => r.name },
           { key: "team", header: "Team", accessor: (r) => r.team },
         ],
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       })
     );
@@ -249,7 +249,7 @@ describe("multi-sort chain on the frontend tier", () => {
           { id: "2", name: "Ann" },
         ],
         columns: [{ key: "name", header: "Name", accessor: (r) => r.name }],
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       })
     );

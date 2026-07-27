@@ -36,7 +36,7 @@ describe("useTableData — frontend tier", () => {
         data: ROWS,
         columns,
         filters: [{ key: "budget", type: "numberRange" }],
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       })
     );
@@ -52,7 +52,7 @@ describe("useTableData — frontend tier", () => {
       useTableData<Row>({
         data: ROWS,
         columns,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
         filterFn: (row) => row.budget < 200,
       })
@@ -124,7 +124,7 @@ describe("useTableData — tier resolution", () => {
         source,
         onQueryChange: vi.fn(),
         columns,
-        adapter,
+        urlAdapter: adapter,
       });
     });
     expect(warn).toHaveBeenCalledWith(
@@ -136,7 +136,7 @@ describe("useTableData — tier resolution", () => {
   it("warns when no tier is provided at all", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     renderHook(() =>
-      useTableData<Row>({ columns, adapter: createMemoryAdapter("") })
+      useTableData<Row>({ columns, urlAdapter: createMemoryAdapter("") })
     );
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("no data tier provided")
@@ -156,7 +156,7 @@ describe("useTableData — explicit mode", () => {
         mode: "frontend",
         onQueryChange,
         columns,
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       })
     );
@@ -208,7 +208,7 @@ describe("useTableData — explicit mode", () => {
         mode: "server",
         onQueryChange,
         columns,
-        adapter,
+        urlAdapter: adapter,
       })
     );
     // Server tier: rows pass through untouched, mount fire happens.
@@ -224,7 +224,7 @@ describe("useTableData — explicit mode", () => {
     const { result } = renderHook(() => {
       const prebuilt = useFrontendData<Row>({
         data: ROWS,
-        adapter,
+        urlAdapter: adapter,
         columns,
         paginationMode: "paged",
       });
@@ -232,7 +232,7 @@ describe("useTableData — explicit mode", () => {
         source: prebuilt,
         mode: "frontend",
         columns,
-        adapter,
+        urlAdapter: adapter,
       });
     });
     expect(result.current.source.rows).toHaveLength(3);
@@ -267,7 +267,7 @@ describe("useTableData / useServerData — server tier", () => {
         loading: true,
         onQueryChange,
         columns,
-        adapter,
+        urlAdapter: adapter,
         urlSync: true,
       })
     );
@@ -286,7 +286,7 @@ describe("useTableData / useServerData — server tier", () => {
         loading: false,
         onQueryChange,
         columns,
-        adapter,
+        urlAdapter: adapter,
       })
     );
     expect(onQueryChange).toHaveBeenCalledTimes(1);
@@ -311,7 +311,7 @@ describe("useTableData / useServerData — server tier", () => {
         total: 50, // 5 pages at the default limit of 25 → 2 pages
         loading: false,
         onQueryChange,
-        adapter,
+        urlAdapter: adapter,
       })
     );
     await waitFor(() => {
@@ -331,7 +331,7 @@ describe("useTableData / useServerData — server tier", () => {
         total: 0,
         loading: true,
         onQueryChange: vi.fn(),
-        adapter: loadingAdapter,
+        urlAdapter: loadingAdapter,
       })
     );
     expect(loadingView.result.current.page).toBe(999);
@@ -348,7 +348,7 @@ describe("useTableData / useServerData — server tier", () => {
         rows: ROWS,
         total: 40,
         onQueryChange,
-        adapter,
+        urlAdapter: adapter,
       })
     );
     act(() => result.current.setSearch("bo"));
@@ -405,7 +405,7 @@ describe("useTableData / useServerData — server tier", () => {
         onQueryChange: (_q, { signal }) => {
           seen.push(signal);
         },
-        adapter,
+        urlAdapter: adapter,
       })
     );
     unmount();
@@ -439,7 +439,7 @@ describe("async filter options through useTableData", () => {
             options: loader,
           },
         ],
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       })
     );
@@ -477,7 +477,7 @@ describe("async filter options through useTableData", () => {
             options: loader,
           },
         ],
-        adapter,
+        urlAdapter: adapter,
         paginationMode: "paged",
       })
     );
@@ -510,7 +510,7 @@ describe("async filter options through useTableData", () => {
           data,
           columns: [{ key: "name" }],
           filters: filtersDef,
-          adapter,
+          urlAdapter: adapter,
           paginationMode: "paged",
         }),
       { initialProps: { data: ROWS } }

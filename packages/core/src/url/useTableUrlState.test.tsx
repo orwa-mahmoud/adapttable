@@ -16,7 +16,9 @@ function renderWith(
   extra?: Parameters<typeof useTableUrlState>[0]
 ) {
   const adapter = createMemoryAdapter(initial);
-  const view = renderHook(() => useTableUrlState({ adapter, ...extra }));
+  const view = renderHook(() =>
+    useTableUrlState({ urlAdapter: adapter, ...extra })
+  );
   return { adapter, ...view };
 }
 
@@ -24,7 +26,7 @@ describe("useTableUrlState", () => {
   it("reads the initial search via the server snapshot during SSR", () => {
     const adapter = createMemoryAdapter("page=4");
     function Probe() {
-      const { page } = useTableUrlState({ adapter });
+      const { page } = useTableUrlState({ urlAdapter: adapter });
       return <span>{`page-${page}`}</span>;
     }
     // Server rendering exercises the getServerSnapshot path, which reads the
@@ -144,6 +146,12 @@ describe("useTableUrlState", () => {
     expect(window.location.search).toBe("?page=9");
   });
 
+  it("the v1 `adapter` alias still works (removed before release)", () => {
+    const memory = createMemoryAdapter("page=3");
+    const { result } = renderHook(() => useTableUrlState({ adapter: memory }));
+    expect(result.current.page).toBe(3);
+  });
+
   it("the deprecated `enabled` alias still works (removed before release)", () => {
     window.history.replaceState(null, "", "/?page=9");
     const { result } = renderHook(() => useTableUrlState({ enabled: false }));
@@ -197,8 +205,8 @@ describe("useTableUrlState", () => {
         .mockImplementation(() => undefined);
       const adapter = createMemoryAdapter("");
       renderHook(() => {
-        useTableUrlState({ adapter });
-        useTableUrlState({ adapter });
+        useTableUrlState({ urlAdapter: adapter });
+        useTableUrlState({ urlAdapter: adapter });
       });
       expect(warn).toHaveBeenCalledWith(
         expect.stringContaining("share the URL namespace")
@@ -213,8 +221,8 @@ describe("useTableUrlState", () => {
         .mockImplementation(() => undefined);
       const adapter = createMemoryAdapter("");
       renderHook(() => {
-        useTableUrlState({ adapter, urlKey: "left" });
-        useTableUrlState({ adapter, urlKey: "right" });
+        useTableUrlState({ urlAdapter: adapter, urlKey: "left" });
+        useTableUrlState({ urlAdapter: adapter, urlKey: "right" });
       });
       expect(warn).not.toHaveBeenCalled();
       vi.restoreAllMocks();
@@ -338,7 +346,9 @@ describe("clearExtras", () => {
     const adapter = createMemoryAdapter(
       "q=li&sortBy=name&sortDir=desc&page=3&f_team=core&f_status=active"
     );
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     act(() => result.current.clearExtras());
     expect(result.current.extra).toEqual({});
     expect(result.current.page).toBe(1);
@@ -349,7 +359,10 @@ describe("clearExtras", () => {
   it("stamps cleared markers so defaulted extras stay cleared", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
-      useTableUrlState({ adapter, defaults: { extra: { team: "core" } } })
+      useTableUrlState({
+        urlAdapter: adapter,
+        defaults: { extra: { team: "core" } },
+      })
     );
     expect(result.current.extra.team).toBe("core");
     act(() => result.current.clearExtras());
@@ -362,7 +375,9 @@ describe("clearExtras", () => {
 describe("multi-sort chain", () => {
   it("toggleSortLevel cycles asc → desc → removed and supersedes single sort", () => {
     const adapter = createMemoryAdapter("sortBy=name&sortDir=desc");
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     act(() => result.current.toggleSortLevel("team"));
     expect(result.current.sortLevels).toEqual([{ key: "team", dir: "asc" }]);
     // Single-sort params dropped once a chain exists.
@@ -384,7 +399,9 @@ describe("multi-sort chain", () => {
 
   it("round-trips the chain through the URL", () => {
     const adapter = createMemoryAdapter("sort=name%3Aasc,age%3Adesc");
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     expect(result.current.sortLevels).toEqual([
       { key: "name", dir: "asc" },
       { key: "age", dir: "desc" },
@@ -393,13 +410,17 @@ describe("multi-sort chain", () => {
 
   it("ignores malformed chain pairs from hand-edited URLs", () => {
     const adapter = createMemoryAdapter("sort=name%3Aasc,bogus,age%3Asideways");
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     expect(result.current.sortLevels).toEqual([{ key: "name", dir: "asc" }]);
   });
 
   it("clearAll clears an active chain (rows never stay visibly sorted)", () => {
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     act(() => result.current.toggleSortLevel("team"));
     act(() => result.current.toggleSortLevel("age"));
     expect(result.current.sortLevels).toHaveLength(2);
@@ -410,7 +431,9 @@ describe("multi-sort chain", () => {
 
   it("a plain setSort resets an active chain (clicks never look dead)", () => {
     const adapter = createMemoryAdapter("sort=name%3Aasc,age%3Adesc");
-    const { result } = renderHook(() => useTableUrlState({ adapter }));
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
     expect(result.current.sortLevels).toHaveLength(2);
     act(() => result.current.setSort("city", "asc"));
     expect(result.current.sortLevels).toEqual([]);

@@ -110,7 +110,7 @@ function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     columns: props.columns,
     filters: props.filters,
     urlKey: props.urlKey,
-    adapter: urlAdapter,
+    urlAdapter,
     urlSync: props.urlSync,
   });
 
@@ -344,7 +344,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
                       // The table's own URL backend/namespace are the
                       // defaults — an explicit option still wins.
                       options={{
-                        adapter: chromeProps.urlAdapter,
+                        urlAdapter: chromeProps.urlAdapter,
                         urlKey: chromeProps.urlKey,
                         ...savedViews,
                       }}

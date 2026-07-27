@@ -203,7 +203,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     loading,
     mode: props.mode,
     onQueryChange,
-    adapter: resolvedUrlAdapter,
+    urlAdapter: resolvedUrlAdapter,
     urlSync: props.urlSync,
     urlKey,
     columns: props.columns,
@@ -422,7 +422,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           // own props (explicit option values still win).
           <SavedViewsMenu
             options={{
-              adapter: resolvedUrlAdapter,
+              urlAdapter: resolvedUrlAdapter,
               urlKey,
               ...props.savedViews,
             }}

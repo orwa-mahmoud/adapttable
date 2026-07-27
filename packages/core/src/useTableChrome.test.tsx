@@ -34,7 +34,7 @@ function mount(
   return renderHook(() => {
     const source = useFrontendData<Row>({
       data: opts.rows ?? ROWS,
-      adapter,
+      urlAdapter: adapter,
       columns,
       paginationMode: "paged",
       isLoading: opts.isLoading,
@@ -129,7 +129,7 @@ describe("useTableChrome", () => {
     const { result } = renderHook(() => {
       const source = useFrontendData<Row>({
         data: rows,
-        adapter,
+        urlAdapter: adapter,
         columns,
         paginationMode: "paged",
       });
@@ -173,7 +173,7 @@ describe("useTableChrome", () => {
     const { result } = renderHook(() => {
       const source = useFrontendData<Row>({
         data: rows,
-        adapter,
+        urlAdapter: adapter,
         columns,
         paginationMode: "paged",
       });
@@ -203,7 +203,7 @@ describe("useTableChrome", () => {
       const { result } = renderHook(() => {
         const source = useFrontendData<Row>({
           data: ROWS,
-          adapter,
+          urlAdapter: adapter,
           columns: deviceCols,
           paginationMode: "paged",
         });
@@ -236,7 +236,7 @@ describe("useTableChrome", () => {
     const { result } = renderHook(() => {
       const source = useFrontendData<Row>({
         data: rows,
-        adapter,
+        urlAdapter: adapter,
         columns,
         paginationMode: "paged",
       });
@@ -262,7 +262,7 @@ describe("useTableChrome", () => {
       const [ids, setIds] = useState<readonly string[]>([]);
       const source = useFrontendData<Row>({
         data: ROWS,
-        adapter,
+        urlAdapter: adapter,
         columns,
         paginationMode: "paged",
       });

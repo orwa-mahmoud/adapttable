@@ -463,7 +463,7 @@ describe("<DataTable> declarative columns + filters (unstyled)", () => {
       // No arrayExtraKeys registered → the bag holds "Dubai" as a scalar.
       const source = useFrontendData<Row>({
         data: ROWS,
-        adapter,
+        urlAdapter: adapter,
         columns: COLS,
       });
       return (

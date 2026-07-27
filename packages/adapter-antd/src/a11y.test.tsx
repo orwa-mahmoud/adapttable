@@ -29,7 +29,7 @@ function renderTable(
   function Harness() {
     const source = useFrontendData<Row>({
       data: ROWS,
-      adapter: createMemoryAdapter(),
+      urlAdapter: createMemoryAdapter(),
       columns,
       paginationMode: "paged",
     });
