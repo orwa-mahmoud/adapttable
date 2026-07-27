@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFrontendData } from "../source/useFrontendData";
@@ -301,5 +301,96 @@ describe("useDataTable", () => {
       return useDataTable<Row>({ source, columns: cols, rowKey: (r) => r.id });
     });
     expect(result.current.isEmpty).toBe(true);
+  });
+
+  it("resolves bare-key columns to real headers and cell content", () => {
+    const { result } = mount("", {
+      columns: [{ key: "name" }, { key: "city" }],
+    });
+    expect(result.current.columns.map((c) => c.header)).toEqual([
+      "Name",
+      "City",
+    ]);
+    expect(
+      result.current.getCellContent(result.current.columns[0]!, ROWS[0]!, 0)
+    ).toBe("Alice");
+  });
+
+  it("resolves per-column i18n data paths from the locale option", () => {
+    interface Localized {
+      id: string;
+      name: string;
+      name_ar: string;
+    }
+    const rows: Localized[] = [{ id: "a", name: "Alice", name_ar: "أليس" }];
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Localized>({
+        data: rows,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      });
+      return useDataTable<Localized>({
+        source,
+        columns: [{ key: "name", i18n: { ar: "name_ar" } }],
+        rowKey: (r) => r.id,
+        locale: "ar",
+      });
+    });
+    const column = result.current.columns[0]!;
+    expect(result.current.getCellContent(column, rows[0]!, 0)).toBe("أليس");
+  });
+
+  it("renders a Cell component through getCellContent", () => {
+    const Cell = ({ row, rowIndex }: { row: Row; rowIndex: number }) => (
+      <em>
+        {row.name}#{rowIndex}
+      </em>
+    );
+    const { result } = mount("", {
+      columns: [{ key: "name", header: "Name", Cell }],
+    });
+    const content = result.current.getCellContent(
+      result.current.columns[0]!,
+      ROWS[0]!,
+      1
+    );
+    const { container } = render(<>{content}</>);
+    expect(container.querySelector("em")?.textContent).toBe("Alice#1");
+  });
+
+  it("keeps getRowProps spread-clean and the key in getRowKey", () => {
+    const { result } = mount();
+    const rowProps = result.current.getRowProps(ROWS[0]!, 0);
+    expect("key" in rowProps).toBe(false);
+    expect(result.current.getRowKey(ROWS[0]!)).toBe("a");
+
+    // Spreading the result into JSX must not trigger React's spread-key
+    // warning (the exact failure headless consumers had to code around).
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      render(
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr key={result.current.getRowKey(ROWS[0]!)} {...rowProps}>
+              <td>x</td>
+            </tr>
+          </tbody>
+        </table>
+      );
+      const spreadKeyComplaints = errorSpy.mock.calls.filter((call) =>
+        String(call[0]).includes("key")
+      );
+      expect(spreadKeyComplaints).toEqual([]);
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });

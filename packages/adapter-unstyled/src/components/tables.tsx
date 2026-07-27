@@ -293,12 +293,10 @@ function DesktopRowBase<TRow>(
   };
   const bodyPinStyle = (key: string): CSSProperties | undefined =>
     pinnedCellStyle(pinOffset?.(key), PIN_Z.body, leads);
-  const rowProps = { ...table.getRowProps(row, index) };
-  delete rowProps.key;
   return (
     <>
       <tr
-        {...rowProps}
+        {...table.getRowProps(row, index)}
         {...rowClickProps(row, clickable ? onRowClick : undefined)}
         ref={measureElement}
         data-adapttable-part="row"

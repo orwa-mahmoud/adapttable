@@ -1,6 +1,7 @@
-import type { CSSProperties } from "react";
-import { useCallback, useEffect, useMemo } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { createElement, useCallback, useEffect, useMemo } from "react";
 
+import { resolveColumns } from "../columns/resolveColumns";
 import { visibleColumns } from "../columns/visibleColumns";
 import { SEARCH_DEBOUNCE_MS } from "../constants";
 import {
@@ -48,6 +49,11 @@ export interface UseDataTableOptions<TRow> {
   dir?: Direction;
   /** Whether the table is in its mobile layout. Defaults to `false`. */
   isMobile?: boolean;
+  /**
+   * Active locale — drives per-column `i18n` data-path resolution for
+   * bare-key columns, exactly as it does under `<DataTable>`.
+   */
+  locale?: string;
   /** Number of leading desktop-visible columns always shown on mobile cards. */
   mobileIdentityColumns?: number;
   /** Search debounce in ms. Defaults to 300. */
@@ -118,9 +124,23 @@ export interface UseDataTableResult<TRow> {
     column: ColumnDef<TRow>,
     props?: Props
   ) => SortButtonElementProps;
-  getRowProps: (row: TRow, index: number, props?: Props) => Props;
+  getRowProps: (row: TRow, index: number, props?: Props) => RowElementProps;
   getCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
   getSearchInputProps: (props?: Props) => SearchInputElementProps;
+  /**
+   * The row's stable React key. Kept OUT of {@link getRowProps} so its
+   * result spreads clean — React forbids spreading a `key`.
+   */
+  getRowKey: (row: TRow) => string;
+  /**
+   * A cell's rendered content: the column's `Cell` component when set,
+   * else its (resolved) `accessor` value — no optional chaining needed.
+   */
+  getCellContent: (
+    column: ColumnDef<TRow>,
+    row: TRow,
+    rowIndex: number
+  ) => ReactNode;
 }
 
 /* Precise prop-getter return shapes. Each extends `Props` (keeping the
@@ -133,6 +153,17 @@ export interface TableElementProps extends Props {
   role: string;
   dir?: Direction;
   "aria-label": string;
+}
+
+/**
+ * Props from {@link UseDataTableResult.getRowProps}. Spread-clean by
+ * contract: never contains `key` — read {@link UseDataTableResult.getRowKey}
+ * for the React key.
+ */
+export interface RowElementProps extends Props {
+  role: string;
+  "data-index": number;
+  "aria-selected"?: boolean;
 }
 
 /** Props from {@link UseDataTableResult.getSortButtonProps}. */
@@ -214,7 +245,7 @@ export function useDataTable<TRow>(
 ): UseDataTableResult<TRow> {
   const {
     source,
-    columns: allColumns,
+    columns: declaredColumns,
     rowKey,
     tableLabel,
     labels: labelOverrides,
@@ -228,9 +259,18 @@ export function useDataTable<TRow>(
     onSelectedIdsChange,
     filterLabels = EMPTY_LABELS,
     multiSort = false,
+    locale,
   } = options;
 
   const labels = useMemo(() => resolveLabels(labelOverrides), [labelOverrides]);
+
+  // Bare-key columns auto-derive their header and accessor here, exactly
+  // as they do under `<DataTable>` — headless callers get real headers and
+  // cells, not blanks. Idempotent: already-complete columns pass through.
+  const allColumns = useMemo(
+    () => resolveColumns(declaredColumns, locale),
+    [declaredColumns, locale]
+  );
 
   // Duplicate keys silently corrupt sorting, selection, and column layout —
   // every feature targets columns by key. Catch it in development.
@@ -362,21 +402,31 @@ export function useDataTable<TRow>(
     [toggleSort, labels.sortBy, multiSort, source]
   );
 
+  // Spread-clean by contract: no `key` in here — React forbids spreading
+  // one, and every consumer had to destructure-and-cast it out. The key
+  // lives in `getRowKey` instead.
   const getRowProps = useCallback(
     (row: TRow, index: number, props?: Props) => {
       const id = getId(row);
       const selected = selection?.isSelected(id) ?? false;
-      return mergeProps(
+      return mergeProps<RowElementProps>(
         {
           role: "row",
           "data-index": index,
-          key: rowKey(row),
           "aria-selected": hasBulk ? selected : undefined,
         },
         props
       );
     },
-    [getId, selection, hasBulk, rowKey]
+    [getId, selection, hasBulk]
+  );
+
+  const getCellContent = useCallback(
+    (column: ColumnDef<TRow>, row: TRow, rowIndex: number): ReactNode =>
+      column.Cell
+        ? createElement(column.Cell, { row, rowIndex })
+        : (column.accessor?.(row) ?? null),
+    []
   );
 
   const getCellProps = useCallback(
@@ -433,6 +483,8 @@ export function useDataTable<TRow>(
     getRowProps,
     getCellProps,
     getSearchInputProps,
+    getRowKey: rowKey,
+    getCellContent,
   };
 }
 
