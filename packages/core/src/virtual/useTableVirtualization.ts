@@ -3,7 +3,7 @@ import {
   useWindowVirtualizer,
   type VirtualItem,
 } from "@tanstack/react-virtual";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { VIRTUAL_OVERSCAN } from "../constants";
 
@@ -104,10 +104,21 @@ export function useTableVirtualization<TRow>({
   onEndReached,
 }: UseTableVirtualizationOptions<TRow>): TableVirtualization<TRow> {
   const elementMode = getScrollElement !== undefined;
-  const getItemKey = (index: number): string => {
-    const row = rows[index];
-    return row === undefined ? String(index) : rowKey(row);
-  };
+  // Stable identity, re-keyed ONLY when the data changes: the virtualizer
+  // memoises its measurements on `getItemKey`, so an inline closure (or the
+  // routinely-inline `rowKey` prop) invalidated the cache every render — a
+  // full O(n) rebuild with n rowKey calls per keystroke at 10k rows. The
+  // extractor reads through a ref (ids for the same row are stable by
+  // contract), so only a new `rows` array re-keys.
+  const rowKeyRef = useRef(rowKey);
+  rowKeyRef.current = rowKey;
+  const getItemKey = useCallback(
+    (index: number): string => {
+      const row = rows[index];
+      return row === undefined ? String(index) : rowKeyRef.current(row);
+    },
+    [rows]
+  );
   // Both hooks must run unconditionally (rules of hooks); exactly one is
   // enabled. Window mode tracks the page; element mode tracks the box.
   const windowVirtualizer = useWindowVirtualizer({

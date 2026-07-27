@@ -54,6 +54,36 @@ describe("useTableVirtualization", () => {
     expect(options.getItemKey!(99)).toBe("99");
   });
 
+  it("keeps getItemKey identity stable across unrelated re-renders", () => {
+    // Callers routinely pass `rowKey` as an inline arrow (fresh identity
+    // every render). The virtualizer memoises its measurements on
+    // `getItemKey`, so a fresh identity per render meant a full O(n)
+    // measurement rebuild per render at 10k rows.
+    const { rerender } = renderHook(
+      ({ data }: { data: Row[]; tick: number }) =>
+        useTableVirtualization({
+          rows: data,
+          rowKey: (row: Row) => row.id,
+          enabled: true,
+        }),
+      { initialProps: { data: rows, tick: 0 } }
+    );
+    const firstKey = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
+      .getItemKey;
+    rerender({ data: rows, tick: 1 });
+    const secondKey = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
+      .getItemKey;
+    expect(secondKey).toBe(firstKey);
+
+    // A DATA change re-keys, and the new extractor sees the new rows.
+    const swapped = [{ id: "z", name: "Z" }, ...rows.slice(1)];
+    rerender({ data: swapped, tick: 2 });
+    const thirdKey = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
+      .getItemKey;
+    expect(thirdKey).not.toBe(firstKey);
+    expect(thirdKey!(0)).toBe("z");
+  });
+
   it("returns every row when virtualization is disabled", () => {
     const { result } = renderHook(() =>
       useTableVirtualization({
