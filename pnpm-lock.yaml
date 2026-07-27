@@ -672,8 +672,8 @@ importers:
   starters/base-ui:
     dependencies:
       '@adapttable/base-ui':
-        specifier: workspace:*
-        version: link:../../packages/adapter-base-ui
+        specifier: ^1.3.0
+        version: 1.3.3(@base-ui/react@1.6.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@adapttable/core':
         specifier: ^1.0.0
         version: 1.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -966,6 +966,14 @@ packages:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
+  '@adapttable/base-ui@1.3.3':
+    resolution: {integrity: sha512-VktnFcm9W63ZjIE7CayVk1On5daEUyBXAZ/bSA1JXtwYxSRjbj1nmVn7Ph7wGXOoJ+JemyoV7BDX7S886c6d3g==}
+    engines: {node: '>=18.18.0'}
+    peerDependencies:
+      '@base-ui/react': ^1.6.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+
   '@adapttable/chakra@1.0.0':
     resolution: {integrity: sha512-pJUI3cRgdVjBpew110+Uk4gOPESEMHFLFHPBwV1vG3FDuX102pkzFQO1+6Yb8vKu8THP+ZV8FjiI6YLe/Niq1g==}
     engines: {node: '>=18.18.0'}
@@ -983,6 +991,12 @@ packages:
 
   '@adapttable/core@1.2.0':
     resolution: {integrity: sha512-AiLY9BB8t4pXVxr8btL3gWhxGNCtxGMCq5iTiFI5uZ6PtUbhyrZtFrLaN/TSNrUNvU/n14U0EOKm8/OZUSWRTw==}
+    engines: {node: '>=18.18.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+
+  '@adapttable/core@1.2.3':
+    resolution: {integrity: sha512-15QteBJwilEKVlMM+7uXfA8N/8PNmoXI4xwI0pYpmxQmeXZaXkIuoBRnlE6857D71WFMGT0grac6SmxFs0uzRA==}
     engines: {node: '>=18.18.0'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
@@ -7827,6 +7841,14 @@ snapshots:
       react-compiler-runtime: 1.0.0(react@19.2.7)
       react-dom: 19.2.7(react@19.2.7)
 
+  '@adapttable/base-ui@1.3.3(@base-ui/react@1.6.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@adapttable/core': 1.2.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@base-ui/react': 1.6.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react: 19.2.7
+      react-compiler-runtime: 1.0.0(react@19.2.7)
+      react-dom: 19.2.7(react@19.2.7)
+
   '@adapttable/chakra@1.0.0(@chakra-ui/react@3.36.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@adapttable/core': 1.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -7845,6 +7867,14 @@ snapshots:
       - react-dom
 
   '@adapttable/core@1.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@tanstack/react-virtual': 3.14.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react: 19.2.7
+      react-compiler-runtime: 1.0.0(react@19.2.7)
+    transitivePeerDependencies:
+      - react-dom
+
+  '@adapttable/core@1.2.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@tanstack/react-virtual': 3.14.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7

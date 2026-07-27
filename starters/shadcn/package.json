@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/core": "^2.0.0",
-    "@adapttable/shadcn": "^2.0.0",
+    "@adapttable/core": "^1.0.0",
+    "@adapttable/shadcn": "^1.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
