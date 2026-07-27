@@ -251,8 +251,7 @@ describe("<DataTable> (unstyled)", () => {
     });
     expect(
       container.querySelectorAll('[data-adapttable-part="loading-header-cell"]')
-        .length
-    ).toBe(3);
+    ).toHaveLength(3);
   });
 
   it("renders a loadingState override", () => {

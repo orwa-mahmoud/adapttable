@@ -29,7 +29,7 @@ describe("stableKey", () => {
   });
 
   it("returns undefined-serialisation for a bare undefined", () => {
-    expect(stableKey(undefined)).toBe(undefined);
+    expect(stableKey(undefined)).toBeUndefined();
   });
 
   it("keeps null entries inside objects", () => {

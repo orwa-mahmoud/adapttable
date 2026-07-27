@@ -142,7 +142,7 @@ describe("<DataTable> gaps", () => {
         }}
       />
     );
-    expect(screen.getAllByLabelText("Select row").length).toBe(2);
+    expect(screen.getAllByLabelText("Select row")).toHaveLength(2);
     fireEvent.click(screen.getAllByRole("button", { name: "Delete" })[0]!);
     expect(confirm).toHaveBeenCalled();
     expect(onClick).toHaveBeenCalledWith(ROWS[0]);
@@ -200,7 +200,7 @@ describe("<DataTable> gaps", () => {
     ];
     render(<Harness isMobile override={{ columns: nodeCols }} />);
     // One "Person" label per card (two rows).
-    expect(screen.getAllByText("Person").length).toBe(2);
+    expect(screen.getAllByText("Person")).toHaveLength(2);
   });
 
   it("renders a slots.skeleton override while loading", () => {

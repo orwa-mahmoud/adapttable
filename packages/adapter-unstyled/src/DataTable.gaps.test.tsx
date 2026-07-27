@@ -87,7 +87,7 @@ describe("<DataTable> (unstyled) gaps", () => {
       override: { bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }] },
     });
     const checkboxes = screen.getAllByLabelText("Select row");
-    expect(checkboxes.length).toBe(2);
+    expect(checkboxes).toHaveLength(2);
     fireEvent.click(checkboxes[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
   });

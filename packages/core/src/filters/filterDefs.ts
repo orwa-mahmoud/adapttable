@@ -173,9 +173,9 @@ const END_OF_DAY_MS = 86_399_999;
 function dateValueToEpochMs(value: unknown): number {
   if (value instanceof Date) return value.getTime();
   if (typeof value === "number") return value;
-  if (typeof value !== "string") return NaN;
+  if (typeof value !== "string") return Number.NaN;
   const text = value.trim();
-  if (text === "") return NaN;
+  if (text === "") return Number.NaN;
   if (DATE_ONLY_RE.test(text)) {
     const [year = 0, month = 1, day = 1] = text.split("-").map(Number);
     return new Date(year, month - 1, day).getTime();

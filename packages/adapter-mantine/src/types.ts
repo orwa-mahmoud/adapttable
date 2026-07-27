@@ -49,7 +49,7 @@ export interface DataTableProps<TRow> extends Omit<
    * sort, filters) whenever it changes — including once on mount with the
    * URL-restored values. Fetch in response and hand back `data` + `total`.
    */
-  onQueryChange?: UseServerDataOptions<TRow>["onQueryChange"];
+  onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
   /**
    * Namespace for this table's URL params (`urlKey="left"` → `left.q`,
    * `left.page`, …) so multiple tables can share one URL. Applies to the

@@ -546,7 +546,7 @@ describe("<DataTable> (MUI)", () => {
       },
     });
     const checks = screen.getAllByLabelText("Select row");
-    expect(checks.length).toBe(2);
+    expect(checks).toHaveLength(2);
     fireEvent.click(checks[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "Edit" })[0]!);

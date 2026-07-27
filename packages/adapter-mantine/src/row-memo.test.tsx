@@ -74,7 +74,7 @@ describe("desktop row memoization (Mantine)", () => {
     // The tree re-rendered (the live input value is React state)…
     expect(search).toHaveValue("a");
     // …but every row held: no accessor ran again.
-    expect(accessor.mock.calls.length).toBe(before);
+    expect(accessor.mock.calls).toHaveLength(before);
   });
 
   it("toggling one row's checkbox re-renders only that row", () => {

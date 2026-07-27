@@ -50,7 +50,7 @@ export interface DataTableProps<TRow> extends Omit<
    * Server tier: fired with the consolidated query whenever it changes —
    * including once on mount with the URL-restored values.
    */
-  onQueryChange?: UseServerDataOptions<TRow>["onQueryChange"];
+  onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
   /**
    * URL-state backend for the built-in tiers. Defaults to the browser
    * History API; pass a router adapter (or a memory adapter) to integrate.

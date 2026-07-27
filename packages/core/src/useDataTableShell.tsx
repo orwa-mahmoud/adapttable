@@ -38,7 +38,7 @@ export type DataTableShellProps<TRow> = Omit<
   /** Server tier: a request is in flight. */
   loading?: boolean;
   /** Server tier: consolidated-query callback. */
-  onQueryChange?: UseServerDataOptions<TRow>["onQueryChange"];
+  onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
   /** URL-state backend (defaults to the History API). */
   urlAdapter?: UrlStateAdapter;
   /** Sync table state to the URL (default `true`). */

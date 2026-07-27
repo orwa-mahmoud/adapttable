@@ -206,7 +206,7 @@ describe("<DataTable> (Radix)", () => {
       },
     });
     const flagged = container.querySelectorAll("tbody tr.row-overdue");
-    expect(flagged.length).toBe(1);
+    expect(flagged).toHaveLength(1);
     expect(within(flagged[0] as HTMLElement).getByText("Alice")).toBeTruthy();
   });
 
@@ -219,9 +219,9 @@ describe("<DataTable> (Radix)", () => {
       },
     });
     // Both cards keep the static hook; only Alice's gets the row class.
-    expect(container.querySelectorAll(".my-card").length).toBe(2);
+    expect(container.querySelectorAll(".my-card")).toHaveLength(2);
     const flagged = container.querySelectorAll(".my-card.row-overdue");
-    expect(flagged.length).toBe(1);
+    expect(flagged).toHaveLength(1);
     expect(within(flagged[0] as HTMLElement).getByText("Alice")).toBeTruthy();
   });
 
@@ -230,7 +230,7 @@ describe("<DataTable> (Radix)", () => {
       isMobile: true,
       override: { rowClassName: () => "row-marked" },
     });
-    expect(container.querySelectorAll(".row-marked").length).toBe(2);
+    expect(container.querySelectorAll(".row-marked")).toHaveLength(2);
   });
 
   it("renders loading skeletons", () => {
@@ -504,7 +504,7 @@ describe("<DataTable> (Radix)", () => {
       },
     });
     const checks = screen.getAllByLabelText("Select row");
-    expect(checks.length).toBe(2);
+    expect(checks).toHaveLength(2);
     fireEvent.click(checks[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "Edit" })[0]!);

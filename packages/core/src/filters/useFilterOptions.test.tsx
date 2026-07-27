@@ -42,7 +42,7 @@ describe("materializeAutoOptions", () => {
       [{ key: "status", type: "select", options: "auto" }],
       many
     );
-    expect((def!.options as unknown[]).length).toBe(AUTO_OPTIONS_LIMIT);
+    expect(def!.options as unknown[]).toHaveLength(AUTO_OPTIONS_LIMIT);
   });
 
   it("derives through a custom getValue projection", () => {

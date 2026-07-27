@@ -328,7 +328,7 @@ describe("<DataTable> (unstyled) branch coverage", () => {
     const spacers = container.querySelectorAll(
       '[data-adapttable-part="virtual-spacer"]'
     );
-    expect(spacers.length).toBe(1);
+    expect(spacers).toHaveLength(1);
     expect(spacers[0]).toHaveStyle({ height: "120px" });
   });
 
@@ -357,8 +357,7 @@ describe("<DataTable> (unstyled) branch coverage", () => {
     // 1 data column + 1 actions column = 2 skeleton header cells.
     expect(
       container.querySelectorAll('[data-adapttable-part="loading-header-cell"]')
-        .length
-    ).toBe(2);
+    ).toHaveLength(2);
   });
 
   // tables.tsx:66 — `if (!disabled) runRowAction(...)`, the true side via an

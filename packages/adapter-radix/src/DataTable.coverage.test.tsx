@@ -67,7 +67,7 @@ describe("<DataTable> (Radix) coverage-fill", () => {
       override: { bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }] },
     });
     const rowChecks = screen.getAllByLabelText("Select row");
-    expect(rowChecks.length).toBe(2);
+    expect(rowChecks).toHaveLength(2);
     fireEvent.click(rowChecks[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
   });
@@ -93,7 +93,7 @@ describe("<DataTable> (Radix) coverage-fill", () => {
       },
     });
     const handles = screen.getAllByLabelText(/Resize column: /);
-    expect(handles.length).toBe(columns.length);
+    expect(handles).toHaveLength(columns.length);
     // The header cell with an explicit width carries the inline width style.
     const nameHandle = screen.getByLabelText("Resize column: Name");
     const th = nameHandle.closest("th")!;

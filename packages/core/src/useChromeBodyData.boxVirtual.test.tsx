@@ -147,7 +147,7 @@ describe("useChromeBodyData with row grouping", () => {
 
     expect(result.current.chrome.grouping).toBeDefined();
     expect(result.current.body.groupingEntries).toBeDefined();
-    expect(result.current.body.groupingEntries!.length).toBe(2);
+    expect(result.current.body.groupingEntries!).toHaveLength(2);
     // Leaf row virtualization is off while grouping is armed — the keyed
     // group window owns the spacers instead.
     expect(result.current.body.virtualization.rows).toEqual([]);

@@ -193,7 +193,7 @@ export interface DataTableProps<TRow> extends Omit<
    * filters) whenever it changes — including once on mount with the
    * URL-restored values. The caller fetches and hands back `data` + `total`.
    */
-  onQueryChange?: UseTableDataOptions<TRow>["onQueryChange"];
+  onQueryChange?: NonNullable<UseTableDataOptions<TRow>["onQueryChange"]>;
   /**
    * URL-state adapter for the managed tiers (router integration, memory
    * adapter for tests/SSR). Defaults to the browser History API.

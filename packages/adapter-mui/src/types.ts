@@ -41,7 +41,7 @@ export interface DataTableProps<TRow> extends Omit<
    * filters) whenever it changes — including once on mount with the
    * URL-restored values. Run the request and hand back `data` + `total`.
    */
-  onQueryChange?: UseServerDataOptions<TRow>["onQueryChange"];
+  onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
   /**
    * URL-state backend for the built-in tiers. Defaults to the browser
    * History API; supply a router adapter (react-router / Next.js) — or a

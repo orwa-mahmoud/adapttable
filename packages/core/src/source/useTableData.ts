@@ -38,7 +38,9 @@ export interface UseTableDataOptions<TRow> extends Pick<
   /** Forwarded error. */
   error?: Error | null;
   /** Server tier: see {@link UseServerDataOptions.onQueryChange}. */
-  onQueryChange?: Parameters<typeof useServerData<TRow>>[0]["onQueryChange"];
+  onQueryChange?: NonNullable<
+    Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]
+  >;
   /** Columns — their `filter` shorthands feed the runtime. */
   columns: readonly ColumnDef<TRow>[];
   /** Table-level filters: declarative array, or JSX for a hand-drawn form. */
