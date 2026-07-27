@@ -15,7 +15,16 @@ import {
   PinIcon,
   useColumnDragState,
 } from "@adapttable/core";
-import { ActionIcon, Box, Button, Group, Menu, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Divider,
+  Group,
+  Popover,
+  Text,
+} from "@mantine/core";
+import { useState } from "react";
 
 /**
  * Props for the column menu — the shared core contract, plus the injected
@@ -134,14 +143,28 @@ export function ColumnMenu<TRow>({
   dir,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
+  const [opened, setOpened] = useState(false);
+  // A Popover, not a Menu: the panel holds checkboxes, drag handles and
+  // buttons, so `role="menu"` semantics (menuitem children) would be a lie.
   return (
-    <Menu closeOnItemClick={false} position="bottom-end" withinPortal>
-      <Menu.Target>
-        <Button variant="default" size="sm">
+    <Popover
+      opened={opened}
+      onDismiss={() => setOpened(false)}
+      position="bottom-end"
+      withinPortal
+      returnFocus
+    >
+      <Popover.Target>
+        <Button
+          variant="default"
+          size="sm"
+          aria-expanded={opened}
+          onClick={() => setOpened((value) => !value)}
+        >
           {labels.columns}
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown dir={dir}>
+      </Popover.Target>
+      <Popover.Dropdown dir={dir}>
         <Box p={4} miw={250}>
           <Text size="xs" c="dimmed" fw={600} tt="uppercase" px={4} pb={6}>
             {labels.columns}
@@ -201,11 +224,11 @@ export function ColumnMenu<TRow>({
           })}
           {hasRowActions && (
             <>
-              <Menu.Divider />
+              <Divider my={4} />
               <ActionsRow layout={layout} labels={labels} />
             </>
           )}
-          <Menu.Divider />
+          <Divider my={4} />
           <Button
             variant="subtle"
             size="xs"
@@ -216,7 +239,7 @@ export function ColumnMenu<TRow>({
             {labels.resetColumns}
           </Button>
         </Box>
-      </Menu.Dropdown>
-    </Menu>
+      </Popover.Dropdown>
+    </Popover>
   );
 }

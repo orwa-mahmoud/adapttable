@@ -402,7 +402,7 @@ function DesktopRowBase<TRow>({
         role="row"
         data-index={index}
         aria-selected={selected}
-        {...rowClickProps(row, onRowClick)}
+        {...rowClickProps(row, onRowClick, index)}
         className={className}
         ref={measureElement}
         data-stagger=""

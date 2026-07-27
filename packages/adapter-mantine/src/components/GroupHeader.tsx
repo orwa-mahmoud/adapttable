@@ -135,6 +135,7 @@ export function GroupHeaderCard<TRow>({
     <Card
       data-adapttable-part="group-card"
       data-collapsed={entry.collapsed ? "true" : undefined}
+      role="listitem"
       withBorder
       radius="md"
       padding={padding}

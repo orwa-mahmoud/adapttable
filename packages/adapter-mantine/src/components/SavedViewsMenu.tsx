@@ -7,8 +7,9 @@ import {
   ActionIcon,
   Box,
   Button,
+  Divider,
   Group,
-  Menu,
+  Popover,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -42,6 +43,7 @@ export function SavedViewsMenu({
   labels,
 }: Readonly<SavedViewsMenuProps>) {
   const views = useSavedViews(options);
+  const [opened, setOpened] = useState(false);
   const [name, setName] = useState("");
   const trimmed = name.trim();
   // Saving clears the input but keeps the menu open, so several views can
@@ -50,14 +52,27 @@ export function SavedViewsMenu({
     views.save(trimmed);
     setName("");
   };
+  // A Popover, not a Menu: the panel holds buttons and a text input, so
+  // `role="menu"` semantics (menuitem children, typeahead) would be a lie.
   return (
-    <Menu closeOnItemClick={false} position="bottom-end" withinPortal>
-      <Menu.Target>
-        <Button variant="default" size="sm">
+    <Popover
+      opened={opened}
+      onDismiss={() => setOpened(false)}
+      position="bottom-end"
+      withinPortal
+      returnFocus
+    >
+      <Popover.Target>
+        <Button
+          variant="default"
+          size="sm"
+          aria-expanded={opened}
+          onClick={() => setOpened((value) => !value)}
+        >
           {labels.savedViews}
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown>
+      </Popover.Target>
+      <Popover.Dropdown>
         <Box p={4} miw={220}>
           <Text size="xs" c="dimmed" fw={600} tt="uppercase" px={4} pb={6}>
             {labels.savedViews}
@@ -84,7 +99,7 @@ export function SavedViewsMenu({
               </ActionIcon>
             </Group>
           ))}
-          <Menu.Divider />
+          <Divider my={4} />
           <Group gap={6} p={4} wrap="nowrap">
             <TextInput
               size="xs"
@@ -98,7 +113,7 @@ export function SavedViewsMenu({
             </Button>
           </Group>
         </Box>
-      </Menu.Dropdown>
-    </Menu>
+      </Popover.Dropdown>
+    </Popover>
   );
 }

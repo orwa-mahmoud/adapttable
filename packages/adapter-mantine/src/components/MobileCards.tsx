@@ -173,7 +173,7 @@ function MobileCardBase<TRow>({
 }: Readonly<MobileCardProps<TRow>>) {
   return (
     <Card
-      {...rowClickProps(row, onRowClick)}
+      {...rowClickProps(row, onRowClick, index)}
       className={className}
       ref={measureElement}
       data-index={index}

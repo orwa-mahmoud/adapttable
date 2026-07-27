@@ -36,6 +36,7 @@ export function FilterPopover({
     <Popover
       opened={open}
       onDismiss={onClose}
+      returnFocus
       position={dir === "rtl" ? "bottom-start" : "bottom-end"}
       withinPortal
       shadow="md"
