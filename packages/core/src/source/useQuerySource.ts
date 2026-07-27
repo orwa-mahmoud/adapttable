@@ -59,7 +59,13 @@ export interface UseQuerySourceOptions<
   usePaginatedQuery: (params: Partial<TParams>) => InfiniteQueryLike<TPage>;
   /** Page → `{ items, total }` selector. Defaults to reading {@link PaginatedResponse}. */
   selectPage?: PageSelector<TRow, TPage>;
-  /** Static params merged into every query call (e.g. a parent scope id). */
+  /**
+   * Static params merged into every query call (e.g. a parent scope id).
+   * The live table state always wins on collision: `page`, `limit`,
+   * `search`, `sortBy`, `sortDir`, `groupBy` and `filters` come from the
+   * table itself and can never be overridden here — seed state through
+   * `defaults` instead.
+   */
   baseParams?: Partial<TParams>;
   /** Pagination mode. Defaults to `"auto"` (mobile → infinite). */
   paginationMode?: PaginationMode;
@@ -105,13 +111,18 @@ export function useQuerySource<
   const { page, limit, search, sortBy, sortDir, groupBy, extra } = state;
 
   const params = useMemo(() => {
-    const merged: Record<string, unknown> = { ...extra, ...baseParams };
+    // baseParams are DEFAULTS: everything live is written after them, so a
+    // static param can never beat the user's current state. Filter values
+    // travel under their own `filters` key — a user filter named `sortBy`,
+    // `search` or `groupBy` can never collide with a state param.
+    const merged: Record<string, unknown> = { ...baseParams };
     merged.page = page;
     merged.limit = limit;
     merged.search = search || undefined;
     merged.sortBy = sortBy;
     merged.sortDir = sortDir;
     merged.groupBy = groupBy;
+    merged.filters = extra;
     const next = merged as Partial<TParams>;
     return sanitizeParams ? sanitizeParams(next) : next;
   }, [

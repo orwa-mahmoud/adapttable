@@ -224,6 +224,11 @@ export interface TableQueryParams {
   sortDir?: SortDirection;
   /** Single-level row grouping column key (URL-synced; frontend chrome only). */
   groupBy?: string;
+  /**
+   * The active filter values, namespaced so a user filter named like a
+   * state param (`sortBy`, `search`, …) can never collide with one.
+   */
+  filters?: ExtraFilters;
 }
 
 /** Standard paginated response envelope. */

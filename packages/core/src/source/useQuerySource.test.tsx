@@ -244,8 +244,35 @@ describe("useQuerySource", () => {
     expect(l.search).toBe("alpha");
     expect(l.sortBy).toBe("name");
     expect(l.sortDir).toBe("desc");
-    expect(l.status).toEqual(["Active", "Planned"]);
+    // Filter values travel under their own namespace, never at top level.
+    expect(l.filters).toEqual({ status: ["Active", "Planned"] });
     expect(l.scopeId).toBe("s-1");
+  });
+
+  it("keeps a user filter named like a state param intact under `filters`", () => {
+    const q = makeQuery({ pages: [page([], 0)] });
+    mount(q, {
+      selectPage,
+      initial: "sortBy=name&sortDir=asc&f_sortBy=priority&f_search=urgent",
+    });
+    const l = last(q.calls);
+    // The state params and the same-named filters coexist untouched.
+    expect(l.sortBy).toBe("name");
+    expect(l.filters).toEqual({ sortBy: "priority", search: "urgent" });
+    expect(l.search).toBeUndefined();
+  });
+
+  it("never lets baseParams beat the live table state", () => {
+    const q = makeQuery({ pages: [page([], 0)] });
+    mount(q, {
+      selectPage,
+      baseParams: { scopeId: "s-1", sortBy: "createdAt", page: 99 },
+      initial: "page=3&sortBy=name&sortDir=desc",
+    });
+    const l = last(q.calls);
+    expect(l.scopeId).toBe("s-1");
+    expect(l.page).toBe(3);
+    expect(l.sortBy).toBe("name");
   });
 
   it("applies sanitizeParams as the final scrubber", () => {
