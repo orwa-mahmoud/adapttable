@@ -19,24 +19,32 @@ export interface GroupCollapseState {
  * URL-synced (punch-list #62). Groups default to expanded (empty set).
  */
 export function useGroupCollapse(controlled?: {
+  collapsedGroupIds?: readonly string[];
+  /** Alias for `collapsedGroupIds` (v1 name) — deleted before the 2.0.0 release. */
   collapsedIds?: readonly string[];
+  onCollapsedGroupIdsChange?: (ids: string[]) => void;
+  /** Alias for `onCollapsedGroupIdsChange` (v1 name) — deleted before the 2.0.0 release. */
   onCollapsedIdsChange?: (ids: string[]) => void;
 }): GroupCollapseState {
-  const isControlled = controlled?.collapsedIds !== undefined;
+  const controlledIds =
+    controlled?.collapsedGroupIds ?? controlled?.collapsedIds;
+  const isControlled = controlledIds !== undefined;
   const [uncontrolled, setUncontrolled] = useState<ReadonlySet<string>>(
     () => new Set()
   );
 
   const collapsedIds = useMemo(
-    () =>
-      isControlled ? new Set(controlled?.collapsedIds ?? []) : uncontrolled,
-    [isControlled, controlled?.collapsedIds, uncontrolled]
+    () => (isControlled ? new Set(controlledIds ?? []) : uncontrolled),
+    [isControlled, controlledIds, uncontrolled]
   );
 
   const commit = useCallback(
     (next: Set<string>) => {
       if (isControlled) {
-        controlled?.onCollapsedIdsChange?.([...next]);
+        (
+          controlled?.onCollapsedGroupIdsChange ??
+          controlled?.onCollapsedIdsChange
+        )?.([...next]);
       } else {
         setUncontrolled(next);
       }

@@ -409,8 +409,8 @@ export function useTableChrome<TRow>(
   // rows beyond page 1 froze as display-only).
 
   const groupCollapse = useGroupCollapse({
-    collapsedIds: props.collapsedGroupIds,
-    onCollapsedIdsChange: props.onCollapsedGroupIdsChange,
+    collapsedGroupIds: props.collapsedGroupIds,
+    onCollapsedGroupIdsChange: props.onCollapsedGroupIdsChange,
   });
 
   useEffect(() => {
