@@ -68,6 +68,8 @@ export interface ToolbarChromeProps<TRow> {
   /** Options for an explicit sort-by control. */
   sortByOptions?: SortByOption[];
   /** Extra caller-supplied toolbar content. */
+  toolbar?: ReactNode;
+  /** Alias for `toolbar` (v1 name) — deleted before the 2.0.0 release. */
   customToolbar?: ReactNode;
   /** Whether a filters affordance should render. */
   hasFilters: boolean;

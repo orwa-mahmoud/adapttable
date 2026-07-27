@@ -1124,7 +1124,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           hideSearch={props.hideSearch}
           searchPlaceholder={props.searchPlaceholder}
           sortByOptions={props.sortByOptions}
-          customToolbar={props.toolbar}
+          toolbar={props.toolbar}
           hasFilters={Boolean(filtersNode)}
           activeFilterCount={c.activeFilterCount}
           filters={filtersNode}

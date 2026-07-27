@@ -323,7 +323,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           hideSearch={props.hideSearch}
           searchPlaceholder={props.searchPlaceholder}
           sortByOptions={props.sortByOptions}
-          customToolbar={
+          toolbar={
             <>
               {savedViewsMenu}
               {props.toolbar}

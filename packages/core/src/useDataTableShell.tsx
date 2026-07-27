@@ -178,7 +178,7 @@ export function useDataTableShell<TRow>(
     hideSearch: props.hideSearch,
     searchPlaceholder: props.searchPlaceholder,
     sortByOptions: props.sortByOptions,
-    customToolbar: props.toolbar,
+    toolbar: props.toolbar,
     hasFilters: Boolean(filtersNode),
     activeFilterCount: chrome.activeFilterCount,
     filters: filtersNode,

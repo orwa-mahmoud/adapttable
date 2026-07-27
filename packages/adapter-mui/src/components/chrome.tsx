@@ -104,6 +104,7 @@ export function Toolbar<TRow>({
   hideSearch,
   searchPlaceholder,
   sortByOptions,
+  toolbar,
   customToolbar,
   hasFilters,
   activeFilterCount,
@@ -201,7 +202,7 @@ export function Toolbar<TRow>({
             ))}
           </TextField>
         )}
-        {customToolbar}
+        {toolbar ?? customToolbar}
         {filtersButton}
         {hasFilters && filtersMode === "popover" && (
           <FilterPopover

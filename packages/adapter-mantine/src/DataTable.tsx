@@ -326,7 +326,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
               hideSearch={hideSearch}
               searchPlaceholder={searchPlaceholder}
               sortByOptions={sortByOptions}
-              customToolbar={customToolbar}
+              toolbar={customToolbar}
               hasFilters={Boolean(filters)}
               activeFilterCount={chrome.activeFilterCount}
               filtersMode={filtersMode}
