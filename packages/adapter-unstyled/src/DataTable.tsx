@@ -296,10 +296,12 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     </button>
   );
 
+  // Layout-visible columns WITHOUT device filtering: the same button must
+  // produce the same file on phone and desktop.
   const onExportCsv = makeExportCsvHandler(
     props.exportCsv,
     viewSource,
-    table.columns
+    chrome.columnLayout.visibleColumns
   );
 
   return (

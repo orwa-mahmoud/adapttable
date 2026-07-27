@@ -163,6 +163,40 @@ describe("useTableChrome", () => {
     expect(csv.trim().split("\n")).toHaveLength(31);
   });
 
+  it("CSV export columns are identical on desktop and mobile viewports", () => {
+    const deviceCols: ColumnDef<Row>[] = [
+      { key: "name", header: "Name" },
+      { key: "id", header: "Ref", hideOnMobile: true },
+    ];
+    const build = (isMobile: boolean) => {
+      const adapter = createMemoryAdapter("");
+      const { result } = renderHook(() => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          adapter,
+          columns: deviceCols,
+          paginationMode: "paged",
+        });
+        return useTableChrome<Row>({
+          source,
+          columns: deviceCols,
+          rowKey: (r) => r.id,
+          isMobile,
+        });
+      });
+      return buildTableCsv({
+        source: result.current.source,
+        columns: result.current.columnLayout.visibleColumns,
+        scope: "page",
+      });
+    };
+    const desktop = build(false);
+    const mobile = build(true);
+    expect(mobile).toBe(desktop);
+    // And the full exportable set is present — hideOnMobile is visual only.
+    expect(desktop.split("\r\n")[0]).toBe("Name,Ref");
+  });
+
   it("without grouping the source passes through untouched", () => {
     const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
       id: String(i + 1),

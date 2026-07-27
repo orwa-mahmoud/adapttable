@@ -363,7 +363,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
               onExportCsv={makeExportCsvHandler(
                 exportCsv,
                 viewSource,
-                table.columns
+                chrome.columnLayout.visibleColumns
               )}
               showRowsPerPage={canLoadMore && !chrome.grouping}
             />

@@ -182,10 +182,12 @@ export function useDataTableShell<TRow>(
     onClearFilters: chrome.clearFilters,
     // Hidden in the grouped full-set view, where page size has no effect.
     showRowsPerPage: canLoadMore && !chrome.grouping,
+    // Layout-visible columns WITHOUT device filtering: the same button
+    // must produce the same file on phone and desktop.
     onExportCsv: makeExportCsvHandler(
       props.exportCsv,
       chrome.source,
-      table.columns
+      chrome.columnLayout.visibleColumns
     ),
     dir: props.dir,
   };

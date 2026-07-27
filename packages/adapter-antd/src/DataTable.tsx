@@ -1148,7 +1148,9 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           onExportCsv={makeExportCsvHandler(
             props.exportCsv,
             source,
-            table.columns
+            // Layout-visible columns WITHOUT device filtering: the same
+            // button must produce the same file on phone and desktop.
+            c.columnLayout.visibleColumns
           )}
           savedViewsMenu={
             <SavedViewsSlot

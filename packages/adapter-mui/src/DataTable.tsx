@@ -343,7 +343,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           onExportCsv={makeExportCsvHandler(
             props.exportCsv,
             viewSource,
-            table.columns
+            c.columnLayout.visibleColumns
           )}
         />
         {c.isRefreshing && <LinearProgress aria-label={labels.loading} />}
