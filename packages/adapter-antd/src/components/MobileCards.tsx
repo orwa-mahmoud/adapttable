@@ -208,7 +208,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
       size="small"
       className={className}
       data-stagger=""
-      {...rowClickProps(row, onRowClick)}
+      {...rowClickProps(row, onRowClick, rowIndex)}
       onMouseEnter={prefetch ? () => prefetch(row) : undefined}
       title={
         onToggleSelect ? (

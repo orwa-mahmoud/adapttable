@@ -123,6 +123,8 @@ describe("antd ColumnMenu", () => {
     // document listener so keyboard users can dismiss it.
     fireEvent.keyDown(document, { key: "Escape" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
+    // …and hands keyboard focus back to the trigger it dismissed from.
+    expect(trigger).toHaveFocus();
   });
 
   it("keeps the menu open for non-Escape keys", async () => {

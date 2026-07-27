@@ -85,6 +85,15 @@ beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 afterEach(() => vi.useRealTimers());
 
 describe("<DataTable> (Ant Design)", () => {
+  it("the pager names its arrows and announces the current page", () => {
+    renderHarness({}, "limit=1");
+    const current = document.querySelector('[aria-current="page"]');
+    expect(current).not.toBeNull();
+    expect(current?.textContent).toBe("1");
+    expect(screen.getByLabelText("Previous page")).toBeInTheDocument();
+    expect(screen.getByLabelText("Next page")).toBeInTheDocument();
+  });
+
   it("activates onRowClick from a row, but never from row actions", () => {
     const onRowClick = vi.fn();
     const onAction = vi.fn();

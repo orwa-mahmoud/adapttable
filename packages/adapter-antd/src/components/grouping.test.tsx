@@ -145,7 +145,9 @@ describe("GroupSelectionCheckbox (antd)", () => {
         labels={labels}
       />
     );
-    const checkbox = screen.getByRole("checkbox", { name: labels.selectRow });
+    const checkbox = screen.getByRole("checkbox", {
+      name: `${labels.selectAll}: Core`,
+    });
     expect(checkbox).toHaveProperty("indeterminate", true);
     fireEvent.click(checkbox);
     expect(selection.toggleGroupLeaves).toHaveBeenCalledWith(LEAF_IDS);
@@ -179,7 +181,11 @@ describe("GroupHeaderCard (antd)", () => {
     expect(screen.getByText("sum")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: labels.expandGroup }));
     expect(onToggle).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("checkbox", { name: labels.selectRow }));
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: `${labels.selectAll}: Core`,
+      })
+    );
     expect(selection.toggleGroupLeaves).toHaveBeenCalledWith(LEAF_IDS);
   });
 });

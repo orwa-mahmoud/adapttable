@@ -92,6 +92,6 @@ describe("<DataTable> row grouping (antd)", () => {
         bulkActions: [{ key: "x", label: "Archive", onClick: vi.fn() }],
       },
     });
-    expect(screen.getAllByLabelText("Select row").length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText(/^Select all: /).length).toBeGreaterThan(0);
   });
 });

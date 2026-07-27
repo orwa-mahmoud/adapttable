@@ -5,7 +5,7 @@ import type {
 } from "@adapttable/core";
 import { useSavedViews } from "@adapttable/core";
 import { Button, Divider, Flex, Input, Popover } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** The label strings the saved-views menu renders. */
 export type SavedViewsLabels = Pick<
@@ -37,11 +37,15 @@ export function SavedViewsMenu({
 }: Readonly<SavedViewsMenuProps>) {
   const { views, save, apply, remove } = useSavedViews(options);
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [name, setName] = useState("");
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -103,7 +107,7 @@ export function SavedViewsMenu({
       content={content}
       styles={{ content: { padding: 0 } }}
     >
-      <Button aria-expanded={open} aria-haspopup="true">
+      <Button ref={triggerRef} aria-expanded={open} aria-haspopup="true">
         {labels.savedViews}
       </Button>
     </Popover>

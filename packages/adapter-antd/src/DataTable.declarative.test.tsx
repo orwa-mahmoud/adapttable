@@ -282,6 +282,18 @@ describe("multiSort (shift-click chain on antd headers)", () => {
     expect(nameHeader()).toHaveAttribute("aria-sort", "descending");
   });
 
+  it("Shift+Enter chains a multi-sort level from the keyboard", () => {
+    renderHarness({ columns: sortable, override: { multiSort: true } });
+    // The shift-click chain was mouse-only — the same gesture must work
+    // on the focused header via Shift+Enter.
+    fireEvent.keyDown(nameHeader(), { key: "Enter", shiftKey: true });
+    expect(adapter.getSearch()).toContain("sort=name%3Aasc");
+    expect(nameHeader()).toHaveAttribute("data-sort-index", "1");
+
+    fireEvent.keyDown(cityHeader(), { key: "Enter", shiftKey: true });
+    expect(cityHeader()).toHaveAttribute("data-sort-index", "2");
+  });
+
   it("keeps plain clicks on antd's native single-sort path", () => {
     renderHarness({ columns: sortable, override: { multiSort: true } });
     fireEvent.click(nameHeader());

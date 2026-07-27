@@ -44,8 +44,11 @@ import {
   Typography,
 } from "antd";
 import {
+  cloneElement,
   type CSSProperties,
   type HTMLAttributes,
+  isValidElement,
+  type ReactElement,
   type ReactNode,
   type UIEventHandler,
   useMemo,
@@ -484,6 +487,30 @@ function PagedFooter<TRow>({
         total={source.total}
         showSizeChanger={false}
         onChange={(page: number) => source.setPage(page)}
+        // antd's pager exposes neither aria-current nor per-arrow names by
+        // default — clone its own items with the missing attributes.
+        itemRender={(page, type, original) => {
+          let extra: Record<string, unknown> | null = null;
+          if (isValidElement(original)) {
+            if (type === "page") {
+              extra = {
+                "aria-current":
+                  page === table.pagination.safePage ? "page" : undefined,
+              };
+            } else if (type === "prev" || type === "next") {
+              extra = {
+                "aria-label":
+                  type === "prev" ? labels.previousPage : labels.nextPage,
+              };
+            }
+          }
+          return extra
+            ? cloneElement(
+                original as ReactElement<Record<string, unknown>>,
+                extra
+              )
+            : original;
+        }}
       />
     </Flex>
   );
@@ -711,7 +738,7 @@ function DesktopTableBody<TRow>({
       pagination={false}
       rowClassName={rowClassName ? buildRowClassName(rowClassName) : undefined}
       onChange={handleChange as TableProps<GroupedDataRecord<TRow>>["onChange"]}
-      onRow={(record) => {
+      onRow={(record, rowIndex) => {
         if (isAdaptTableGroupRow(record)) {
           return {
             "data-adapttable-part": "group-row",
@@ -719,7 +746,7 @@ function DesktopTableBody<TRow>({
           } as HTMLAttributes<HTMLElement>;
         }
         return {
-          ...rowClickProps(record, onRowClick),
+          ...rowClickProps(record, onRowClick, rowIndex),
           "data-stagger": "",
           onMouseEnter: prefetch ? () => prefetch(record) : undefined,
         };

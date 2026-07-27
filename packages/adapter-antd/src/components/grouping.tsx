@@ -170,7 +170,9 @@ export function GroupSelectionCheckbox({
   const state = groupSelectionState(group.leafIds, selection.selectedIds);
   return (
     <Checkbox
-      aria-label={labels.selectRow}
+      // Name the GROUP, not a row: "Select all: <group>" — the generic
+      // row label made every group checkbox indistinguishable.
+      aria-label={`${labels.selectAll}: ${group.label}`}
       checked={state === "all"}
       indeterminate={state === "some"}
       onChange={() => selection.toggleGroupLeaves(group.leafIds)}
