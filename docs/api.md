@@ -305,12 +305,117 @@ production):
 - two tables sharing a URL namespace without distinct `urlKey`s;
 - `virtualize` combined with `renderRowDetail` (detail panels are unmeasured sibling rows).
 
+## Companion types
+
+Every documented hook and component exports its option/result/prop types
+under predictable names — `useFoo` ships `UseFooOptions` (and
+`UseFooResult` where the return type is named), a component `Foo` ships
+`FooProps` — and each companion follows its owner's stability tier. The
+full set: `UseDataTableOptions`, `UseFrontendDataOptions`,
+`UseServerDataOptions`, `UseTableDataOptions` / `UseTableDataResult`,
+`UseTableUrlStateOptions`, `UseSavedViewsResult`, `UseSelectionOptions`,
+`UseColumnLayoutOptions`, `UseColumnLayoutStorageStateOptions` /
+`UseColumnLayoutStorageStateResult`, `UseColumnLayoutUrlStateOptions` /
+`UseColumnLayoutUrlStateResult`, `UseActiveFilterChipsOptions`,
+`UseExtraChipsOptions`, `UseBulkActionRunnerOptions`,
+`UseBulkBarStateOptions`, `UseInfiniteScrollOptions`,
+`UseScrollToTableTopOptions`, `UseTableVirtualizationOptions`,
+`MountStaggerOptions`.
+
+## The adapter contract
+
+Everything the eight built-in adapters consume from `@adapttable/core`
+crosses the same public surface a ninth adapter would use — there are no
+private channels. This tier is aimed at adapter authors; app code rarely
+needs it.
+
+**Orchestration.** `useDataTableShell(props, renderAutoForm)` is the whole
+shared engine behind a batteries-included `<DataTable>` — it resolves the
+data tier, builds the declarative-filter runtime, wires the chrome, and
+returns the `tableProps` / `toolbarProps` bundles. `DataTableShellProps`
+is its kit-agnostic prop surface and `DataModeProps` the discriminated
+`mode` union inside it (`mode="server"` requires `onQueryChange` at
+compile time). `tableRenderModel(props)` / `TableRenderModel` derive the
+shared render prelude from `SharedTableRenderProps`; `TableBodyRegion`
+names which body region renders (desktop rows, mobile cards);
+`VirtualTableRow` is one materialized virtual row/card entry.
+`useResolvedAdapter` resolves the URL backend the way the shell does;
+`PageSelector` projects a fetched page to rows and an optional total, and
+`InfiniteQueryLike` is the minimal `useInfiniteQuery` shape
+`useQuerySource` reads (structural — TanStack Query stays a type-only
+peer).
+
+**Render plumbing.** The prop-getter payload types (`TableElementProps`,
+`RowElementProps`, `CellElementProps`, `SearchInputElementProps`,
+`SortButtonElementProps`, `RowClickProps`) name what `useDataTable`'s
+getters and `rowClickProps` return. Pinning: `PinSide` / `PinnedSide` /
+`PinOffset` / `PinLeads` describe the layout, `nextPinSide` cycles a
+column's pin, `pinActionLabel` labels the action, and
+`pinnedDataCellStyle` / `pinnedEdgeCellStyle` / `pinnedColumnWidth` /
+`PinnedCellStyle` compute direction-aware sticky styles. Pager math:
+`paginationSlots` / `paginationItems` build the windowed pager model
+(`PaginationSlot`, `PaginationItem`, `PaginationInfo`). Column chrome:
+`ColumnMenuChromeProps`, `ColumnMenuRow`, `ColumnMenuLabels`,
+`ColumnDragState`, `ColumnDragRowAttrs`, `ColumnDropProps`,
+`ColumnRowDragProps`, `ColumnReorderKeyProps`,
+`ColumnResizeHandleProps` and `COLUMN_DND_MIME` power the column menu's
+reorder/resize/pin rows. Toolbar glue: `SearchInputState` (debounced
+search binding), `FilterTriggerToggle` (popover/drawer trigger
+handlers). Editing/grouping glue: `focusEditorOnMount`,
+`rowEditingSignature`, `HeaderGroupCell` and `headerGroupRow`. Shared
+utilities: `logicalAlign` (logical → physical alignment),
+`shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,
+`DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
+(virtualize an opaque keyed list, e.g. grouped entries),
+`useMountStagger` (the `animate` stagger), and the inline icon set
+(`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
+`ExpandChevron`, `sortArrow`).
+
+**Bulk actions.** `useBulkBarState` / `BulkBarState` /
+`BulkBarChromeProps` derive everything a bulk-action toolbar renders
+(selected ids, in-flight action, the "select all matching" banner);
+`BulkActionOutcome` is a run's result and `bulkActionErrorMessage` its
+failure text.
+
+**Misc helpers.** `deriveSortByOptions` builds mobile "Sort by" options
+from sortable columns; `resolveColumns` fills declarative column
+defaults (humanized headers, locale-resolved accessors);
+`resolveDisabledReason` normalizes a row action's `disabled`;
+`useSummaryCells` maps a `summaryRow` builder over the visible columns;
+`ResolvedPaginationMode` is `paginationMode` after `"auto"` resolves;
+`TableLayout` names which layout is rendering (desktop table or mobile
+cards); `TableStateMutators` is the setter half shared by `TableSource`
+and `useTableUrlState` — the same mutations exist whether state lives in
+the URL, in memory, or behind a server query;
+`localizedColumnPath`, `normalizeLocaleTag` and `resolveLocaleTag` are
+the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
-  `RTL_LANGUAGES`, `locales` and the seventeen presets (`en`, `ar`, `de`, `es`,
-  `fr`, `he`, `it`, `ja`, `pt`, `zh`) — see [i18n & RTL](./i18n-rtl.md).
+  `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the seventeen
+  presets (`en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
+  … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
   `detectKit`, `choosePackageManager`, `installCommand`, `scaffoldFiles`,
-  `runInit`.
+  `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
+  describe the detectable kits, `packagesFor` and `mergeDependencies`
+  compute what to install, `starterComponent` / `ScaffoldFile` /
+  `STARTER_PATH` describe the scaffold, `PackageManager` names the
+  supported managers, `InitError` is the typed failure, and
+  `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
+  testing.
+- **Adapter packages** — each exports its `DataTable` with `DataTableProps`,
+  `DataTableSlots` and `SavedViewsMenuProps` (plus the shared core
+  re-exports); Radix and Base UI export their accent unions
+  (`RadixAccentColor`, `BaseUiAccentColor`); Mantine also exports its
+  chrome as reusable components (`ActiveFilterChips`, `AutoFilterForm`,
+  `EmptyState`, `ErrorState`, `PaginationFooter`, `TableSkeleton`, each
+  with a `…Props` companion: `ActiveFilterChipsProps`,
+  `AutoFilterFormProps`, `EmptyStateProps`, `ErrorStateProps`,
+  `PaginationFooterProps`, `TableSkeletonProps`); unstyled and shadcn
+  export their building blocks (`FilterPanel` / `FilterPanelProps`,
+  `FilterPopover` / `FilterPopoverProps`, `AutoFilterForm`, the `cx`
+  class joiner) and shadcn additionally ships `shadcnClassNames`, the
+  preset map behind its default look.

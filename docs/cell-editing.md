@@ -83,6 +83,27 @@ export function People() {
 | `editValue`  | `(row: TRow) => string`                                | —        | Draft seed when the displayed cell is formatted but editing needs the raw. |
 | `labels`     | `TableLabels`                                          | English  | Override `editCell` for the activate control's accessible name.            |
 
+## Headless editing
+
+The editing engine is exported for custom adapters and fully custom tables.
+`useCellEditing` is the state machine (one active cell, a draft string, and
+the Enter / Escape / Tab keyboard flow); `EditableCellGate` is the reusable
+activation wrapper every built-in adapter renders (double-click / Enter / F2
+to begin, with the cell value as the accessible name and the edit hint as
+its `title`).
+
+| Export                                                                   | Purpose                                                                             |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `useCellEditing` / `CellEditingState`                                    | The state machine hook and the state it returns.                                    |
+| `EditableCellGate` / `EditableCellGateProps`                             | Activation wrapper: display content when idle, the kit's editor while active.       |
+| `EditableCellEditing`                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).             |
+| `CellEditCommit` / `CellEditTarget`                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.               |
+| `CellEditor` / `CellEditorOption`                                        | The column `editor` descriptor and one option of a select editor.                   |
+| `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`        | Keyboard-flow vocabulary: what a key press means and where focus goes next.         |
+| `EditableCellController` / `EditableCellEditorCtrl` / `EditableCellMode` | The controller handed to a custom editor: draft, commit/cancel, mode.               |
+| `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`           | The minimal column shape editing reads, plus the two predicates the chrome uses.    |
+| `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`    | Draft parsing (number editors yield `number \| null`) and editor/option resolution. |
+
 ## Notes
 
 - Works on desktop rows and mobile cards, LTR and RTL.

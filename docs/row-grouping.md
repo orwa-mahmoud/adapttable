@@ -88,6 +88,21 @@ rendered set, header select-all covers all rendered rows, page-scope CSV
 export contains exactly what you see, and the rows-per-page control hides
 (page size has no effect). Ungroup to return to normal pagination.
 
+## Headless grouping
+
+The grouping model is exported so custom tables can render the same
+single-level flat structure the adapters do:
+
+| Export                                         | Purpose                                                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `buildGroupedFlatModel` / `GroupedFlatEntry`   | Partition leaf rows into a flat list — group header, then its leaves (omitted when collapsed). |
+| `groupValueKey`                                | Stable, type-tagged string key for a group bucket (`5` and `"5"` never share one).             |
+| `useGroupCollapse` / `GroupCollapseState`      | Ephemeral collapse state — groups default to expanded; not URL-synced.                         |
+| `GroupAggregatesFn`                            | The `(rows) => Partial<Record<string, ReactNode>>` mapper shared with `summaryRow`.            |
+| `formatGroupLabel`                             | The header label for a bucket value (localized blank-value fallback included).                 |
+| `groupSelectionState` / `HeaderSelectionState` | Tri-state for a group checkbox over its leaf ids — the same enum the header select-all uses.   |
+| `windowGroupedEntries`                         | Slice a flat grouped model to a virtual window (see [Virtualization](./virtualization.md)).    |
+
 ## Notes
 
 - Bucketing uses the column's `sortValue` when present, otherwise a path lookup

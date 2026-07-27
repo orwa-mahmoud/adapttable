@@ -1050,6 +1050,36 @@ export function PeopleTable() {
 | `extraChips`        | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                                                                       |
 | `activeFilterCount` | `number`                            | chip count     | Overrides the Filters-button badge.                                                                                                       |
 
+## Headless filter primitives
+
+The pieces behind the auto-built forms are exported for custom filter UIs:
+
+- **Count filters** (the numeric operator + value pair, committed stable in
+  [Versioning & stability](./versioning.md)): `COUNT_OPERATORS` is the operator
+  list and `COUNT_OPERATOR_SYMBOL` the display symbol per `CountOperator`;
+  `CountFilterState` is the widget state; `countFilterExtra` /
+  `countFilterStateFromExtra` convert state to and from the filter bag;
+  `isCountFilterComplete`, `clearCountFilterExtra`,
+  `sanitizeCountFilterParams` and `countFilterChipLabel` handle validation,
+  reset, outgoing params, and the chip text.
+- **Range widgets**: `useRangeFilterWidget` is the kit-agnostic logic behind
+  `numberRange` / `dateRange` fields — it returns a `RangeWidgetState` whose
+  `RangeFieldWidget` entries carry the visible bounds and the active
+  `RangeOp`; `RANGE_SUFFIXES` names the persisted `Min` / `Max` key pair and
+  `RANGE_OP_LABEL_KEYS` / `RangeOpLabelKeys` map each operator to its
+  `TableLabels` key.
+- **Definitions and state**: `filterStateKeys` lists the state keys a
+  definition reads and writes; `scalarFilterText` renders a scalar filter
+  value as input text; `listFilterValues` normalizes a multi-select value
+  list; `isDeclarativeFilters` narrows the `filters` prop to its array form;
+  `FilterFormSource` is the minimal source shape a filter form needs;
+  `ResolvedFilterOptions` is the loaded state of a `filter`'s options
+  (including `options: "auto"`); `FilterRuntime` is everything the engine
+  derives from the resolved definitions (defs, chip labels, URL keys,
+  predicate).
+- **Search**: `defaultSearchText` is the default searchable-text projector
+  (flattens a row's own values) — replace per column with `searchValue`.
+
 ## Notes
 
 - `"auto"` needs the full dataset, so it only works on the frontend tier
@@ -1459,6 +1489,27 @@ export function People() {
 | `editValue`  | `(row: TRow) => string`                                | —        | Draft seed when the displayed cell is formatted but editing needs the raw. |
 | `labels`     | `TableLabels`                                          | English  | Override `editCell` for the activate control's accessible name.            |
 
+## Headless editing
+
+The editing engine is exported for custom adapters and fully custom tables.
+`useCellEditing` is the state machine (one active cell, a draft string, and
+the Enter / Escape / Tab keyboard flow); `EditableCellGate` is the reusable
+activation wrapper every built-in adapter renders (double-click / Enter / F2
+to begin, with the cell value as the accessible name and the edit hint as
+its `title`).
+
+| Export                                                                   | Purpose                                                                             |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `useCellEditing` / `CellEditingState`                                    | The state machine hook and the state it returns.                                    |
+| `EditableCellGate` / `EditableCellGateProps`                             | Activation wrapper: display content when idle, the kit's editor while active.       |
+| `EditableCellEditing`                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).             |
+| `CellEditCommit` / `CellEditTarget`                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.               |
+| `CellEditor` / `CellEditorOption`                                        | The column `editor` descriptor and one option of a select editor.                   |
+| `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`        | Keyboard-flow vocabulary: what a key press means and where focus goes next.         |
+| `EditableCellController` / `EditableCellEditorCtrl` / `EditableCellMode` | The controller handed to a custom editor: draft, commit/cancel, mode.               |
+| `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`           | The minimal column shape editing reads, plus the two predicates the chrome uses.    |
+| `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`    | Draft parsing (number editors yield `number \| null`) and editor/option resolution. |
+
 ## Notes
 
 - Works on desktop rows and mobile cards, LTR and RTL.
@@ -1562,6 +1613,21 @@ and the chrome agrees with the screen: the footer count describes the
 rendered set, header select-all covers all rendered rows, page-scope CSV
 export contains exactly what you see, and the rows-per-page control hides
 (page size has no effect). Ungroup to return to normal pagination.
+
+## Headless grouping
+
+The grouping model is exported so custom tables can render the same
+single-level flat structure the adapters do:
+
+| Export                                         | Purpose                                                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `buildGroupedFlatModel` / `GroupedFlatEntry`   | Partition leaf rows into a flat list — group header, then its leaves (omitted when collapsed). |
+| `groupValueKey`                                | Stable, type-tagged string key for a group bucket (`5` and `"5"` never share one).             |
+| `useGroupCollapse` / `GroupCollapseState`      | Ephemeral collapse state — groups default to expanded; not URL-synced.                         |
+| `GroupAggregatesFn`                            | The `(rows) => Partial<Record<string, ReactNode>>` mapper shared with `summaryRow`.            |
+| `formatGroupLabel`                             | The header label for a bucket value (localized blank-value fallback included).                 |
+| `groupSelectionState` / `HeaderSelectionState` | Tri-state for a group checkbox over its leaf ids — the same enum the header select-all uses.   |
+| `windowGroupedEntries`                         | Slice a flat grouped model to a virtual window (see [Virtualization](./virtualization.md)).    |
 
 ## Notes
 
@@ -2401,6 +2467,16 @@ raw output for a non-spreadsheet pipeline.
 Headless helpers remain available: `rowsToCsv`, `downloadCsv`, and
 `downloadTableCsv` from `@adapttable/core`.
 
+### The CSV pipeline (headless)
+
+The export path is exported end to end: `exportableColumns` filters the
+visible layout to columns with exportable values, `buildTableCsv` turns
+rows + columns into CSV text (`RowsToCsvOptions` controls delimiter,
+BOM and `escapeFormulas`), `resolveExportCsv` normalizes the `exportCsv`
+prop (`ExportCsvOptions`), and `makeExportCsvHandler` wires all of it to
+a download handler the toolbar button calls. Custom toolbars can reuse
+any stage.
+
 ## Sticky header, offset & scroll box
 
 ```tsx
@@ -2931,15 +3007,120 @@ production):
 - two tables sharing a URL namespace without distinct `urlKey`s;
 - `virtualize` combined with `renderRowDetail` (detail panels are unmeasured sibling rows).
 
+## Companion types
+
+Every documented hook and component exports its option/result/prop types
+under predictable names — `useFoo` ships `UseFooOptions` (and
+`UseFooResult` where the return type is named), a component `Foo` ships
+`FooProps` — and each companion follows its owner's stability tier. The
+full set: `UseDataTableOptions`, `UseFrontendDataOptions`,
+`UseServerDataOptions`, `UseTableDataOptions` / `UseTableDataResult`,
+`UseTableUrlStateOptions`, `UseSavedViewsResult`, `UseSelectionOptions`,
+`UseColumnLayoutOptions`, `UseColumnLayoutStorageStateOptions` /
+`UseColumnLayoutStorageStateResult`, `UseColumnLayoutUrlStateOptions` /
+`UseColumnLayoutUrlStateResult`, `UseActiveFilterChipsOptions`,
+`UseExtraChipsOptions`, `UseBulkActionRunnerOptions`,
+`UseBulkBarStateOptions`, `UseInfiniteScrollOptions`,
+`UseScrollToTableTopOptions`, `UseTableVirtualizationOptions`,
+`MountStaggerOptions`.
+
+## The adapter contract
+
+Everything the eight built-in adapters consume from `@adapttable/core`
+crosses the same public surface a ninth adapter would use — there are no
+private channels. This tier is aimed at adapter authors; app code rarely
+needs it.
+
+**Orchestration.** `useDataTableShell(props, renderAutoForm)` is the whole
+shared engine behind a batteries-included `<DataTable>` — it resolves the
+data tier, builds the declarative-filter runtime, wires the chrome, and
+returns the `tableProps` / `toolbarProps` bundles. `DataTableShellProps`
+is its kit-agnostic prop surface and `DataModeProps` the discriminated
+`mode` union inside it (`mode="server"` requires `onQueryChange` at
+compile time). `tableRenderModel(props)` / `TableRenderModel` derive the
+shared render prelude from `SharedTableRenderProps`; `TableBodyRegion`
+names which body region renders (desktop rows, mobile cards);
+`VirtualTableRow` is one materialized virtual row/card entry.
+`useResolvedAdapter` resolves the URL backend the way the shell does;
+`PageSelector` projects a fetched page to rows and an optional total, and
+`InfiniteQueryLike` is the minimal `useInfiniteQuery` shape
+`useQuerySource` reads (structural — TanStack Query stays a type-only
+peer).
+
+**Render plumbing.** The prop-getter payload types (`TableElementProps`,
+`RowElementProps`, `CellElementProps`, `SearchInputElementProps`,
+`SortButtonElementProps`, `RowClickProps`) name what `useDataTable`'s
+getters and `rowClickProps` return. Pinning: `PinSide` / `PinnedSide` /
+`PinOffset` / `PinLeads` describe the layout, `nextPinSide` cycles a
+column's pin, `pinActionLabel` labels the action, and
+`pinnedDataCellStyle` / `pinnedEdgeCellStyle` / `pinnedColumnWidth` /
+`PinnedCellStyle` compute direction-aware sticky styles. Pager math:
+`paginationSlots` / `paginationItems` build the windowed pager model
+(`PaginationSlot`, `PaginationItem`, `PaginationInfo`). Column chrome:
+`ColumnMenuChromeProps`, `ColumnMenuRow`, `ColumnMenuLabels`,
+`ColumnDragState`, `ColumnDragRowAttrs`, `ColumnDropProps`,
+`ColumnRowDragProps`, `ColumnReorderKeyProps`,
+`ColumnResizeHandleProps` and `COLUMN_DND_MIME` power the column menu's
+reorder/resize/pin rows. Toolbar glue: `SearchInputState` (debounced
+search binding), `FilterTriggerToggle` (popover/drawer trigger
+handlers). Editing/grouping glue: `focusEditorOnMount`,
+`rowEditingSignature`, `HeaderGroupCell` and `headerGroupRow`. Shared
+utilities: `logicalAlign` (logical → physical alignment),
+`shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,
+`DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
+(virtualize an opaque keyed list, e.g. grouped entries),
+`useMountStagger` (the `animate` stagger), and the inline icon set
+(`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
+`ExpandChevron`, `sortArrow`).
+
+**Bulk actions.** `useBulkBarState` / `BulkBarState` /
+`BulkBarChromeProps` derive everything a bulk-action toolbar renders
+(selected ids, in-flight action, the "select all matching" banner);
+`BulkActionOutcome` is a run's result and `bulkActionErrorMessage` its
+failure text.
+
+**Misc helpers.** `deriveSortByOptions` builds mobile "Sort by" options
+from sortable columns; `resolveColumns` fills declarative column
+defaults (humanized headers, locale-resolved accessors);
+`resolveDisabledReason` normalizes a row action's `disabled`;
+`useSummaryCells` maps a `summaryRow` builder over the visible columns;
+`ResolvedPaginationMode` is `paginationMode` after `"auto"` resolves;
+`TableLayout` names which layout is rendering (desktop table or mobile
+cards); `TableStateMutators` is the setter half shared by `TableSource`
+and `useTableUrlState` — the same mutations exist whether state lives in
+the URL, in memory, or behind a server query;
+`localizedColumnPath`, `normalizeLocaleTag` and `resolveLocaleTag` are
+the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
-  `RTL_LANGUAGES`, `locales` and the seventeen presets (`en`, `ar`, `de`, `es`,
-  `fr`, `he`, `it`, `ja`, `pt`, `zh`) — see [i18n & RTL](./i18n-rtl.md).
+  `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the seventeen
+  presets (`en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
+  … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
   `detectKit`, `choosePackageManager`, `installCommand`, `scaffoldFiles`,
-  `runInit`.
+  `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
+  describe the detectable kits, `packagesFor` and `mergeDependencies`
+  compute what to install, `starterComponent` / `ScaffoldFile` /
+  `STARTER_PATH` describe the scaffold, `PackageManager` names the
+  supported managers, `InitError` is the typed failure, and
+  `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
+  testing.
+- **Adapter packages** — each exports its `DataTable` with `DataTableProps`,
+  `DataTableSlots` and `SavedViewsMenuProps` (plus the shared core
+  re-exports); Radix and Base UI export their accent unions
+  (`RadixAccentColor`, `BaseUiAccentColor`); Mantine also exports its
+  chrome as reusable components (`ActiveFilterChips`, `AutoFilterForm`,
+  `EmptyState`, `ErrorState`, `PaginationFooter`, `TableSkeleton`, each
+  with a `…Props` companion: `ActiveFilterChipsProps`,
+  `AutoFilterFormProps`, `EmptyStateProps`, `ErrorStateProps`,
+  `PaginationFooterProps`, `TableSkeletonProps`); unstyled and shadcn
+  export their building blocks (`FilterPanel` / `FilterPanelProps`,
+  `FilterPopover` / `FilterPopoverProps`, `AutoFilterForm`, the `cx`
+  class joiner) and shadcn additionally ships `shadcnClassNames`, the
+  preset map behind its default look.
 
 ---
 

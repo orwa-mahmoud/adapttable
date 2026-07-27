@@ -29,9 +29,10 @@
     "version-packages": "changeset version",
     "release": "turbo run build && changeset publish",
     "publint": "pnpm --filter \"./packages/*\" exec publint --strict",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run typecheck && pnpm run test:coverage && pnpm run build && pnpm run publint",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run typecheck && pnpm run test:coverage && pnpm run build && pnpm run publint",
     "prepare": "husky",
-    "check:readmes": "node scripts/check-readme-features.mjs"
+    "check:readmes": "node scripts/check-readme-features.mjs",
+    "check:docsurface": "node scripts/check-doc-surface.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

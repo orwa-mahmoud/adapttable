@@ -161,6 +161,36 @@ export function PeopleTable() {
 | `extraChips`        | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                                                                       |
 | `activeFilterCount` | `number`                            | chip count     | Overrides the Filters-button badge.                                                                                                       |
 
+## Headless filter primitives
+
+The pieces behind the auto-built forms are exported for custom filter UIs:
+
+- **Count filters** (the numeric operator + value pair, committed stable in
+  [Versioning & stability](./versioning.md)): `COUNT_OPERATORS` is the operator
+  list and `COUNT_OPERATOR_SYMBOL` the display symbol per `CountOperator`;
+  `CountFilterState` is the widget state; `countFilterExtra` /
+  `countFilterStateFromExtra` convert state to and from the filter bag;
+  `isCountFilterComplete`, `clearCountFilterExtra`,
+  `sanitizeCountFilterParams` and `countFilterChipLabel` handle validation,
+  reset, outgoing params, and the chip text.
+- **Range widgets**: `useRangeFilterWidget` is the kit-agnostic logic behind
+  `numberRange` / `dateRange` fields — it returns a `RangeWidgetState` whose
+  `RangeFieldWidget` entries carry the visible bounds and the active
+  `RangeOp`; `RANGE_SUFFIXES` names the persisted `Min` / `Max` key pair and
+  `RANGE_OP_LABEL_KEYS` / `RangeOpLabelKeys` map each operator to its
+  `TableLabels` key.
+- **Definitions and state**: `filterStateKeys` lists the state keys a
+  definition reads and writes; `scalarFilterText` renders a scalar filter
+  value as input text; `listFilterValues` normalizes a multi-select value
+  list; `isDeclarativeFilters` narrows the `filters` prop to its array form;
+  `FilterFormSource` is the minimal source shape a filter form needs;
+  `ResolvedFilterOptions` is the loaded state of a `filter`'s options
+  (including `options: "auto"`); `FilterRuntime` is everything the engine
+  derives from the resolved definitions (defs, chip labels, URL keys,
+  predicate).
+- **Search**: `defaultSearchText` is the default searchable-text projector
+  (flattens a row's own values) — replace per column with `searchValue`.
+
 ## Notes
 
 - `"auto"` needs the full dataset, so it only works on the frontend tier

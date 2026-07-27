@@ -248,6 +248,16 @@ raw output for a non-spreadsheet pipeline.
 Headless helpers remain available: `rowsToCsv`, `downloadCsv`, and
 `downloadTableCsv` from `@adapttable/core`.
 
+### The CSV pipeline (headless)
+
+The export path is exported end to end: `exportableColumns` filters the
+visible layout to columns with exportable values, `buildTableCsv` turns
+rows + columns into CSV text (`RowsToCsvOptions` controls delimiter,
+BOM and `escapeFormulas`), `resolveExportCsv` normalizes the `exportCsv`
+prop (`ExportCsvOptions`), and `makeExportCsvHandler` wires all of it to
+a download handler the toolbar button calls. Custom toolbars can reuse
+any stage.
+
 ## Sticky header, offset & scroll box
 
 ```tsx

@@ -2,8 +2,8 @@
  * `@adapttable/core` — the headless engine behind AdaptTable.
  *
  * Zero UI-kit, i18n-library, or router imports. Exposes the unified
- * {@link TableSource} contract, the `useFrontendData` / `useBackendData`
- * source builders, URL-synced state with an injectable adapter, filter
+ * {@link TableSource} contract, the `useFrontendData` / `useServerData` /
+ * `useQuerySource` source builders, URL-synced state with an injectable adapter, filter
  * chips, selection, and the `useDataTable` prop-getter API.
  *
  * @packageDocumentation
@@ -133,12 +133,9 @@ export { defaultLabels, resolveLabels } from "./labels";
 export {
   DEFAULT_CARD_SIZE_PX,
   DEFAULT_LIMIT,
-  DEFAULT_ROW_SIZE_PX,
-  MOBILE_BREAKPOINT_PX,
   PAGE_SIZE_OPTIONS,
   pageSizeOptions,
   SEARCH_DEBOUNCE_MS,
-  VIRTUAL_OVERSCAN,
 } from "./constants";
 
 /* ── URL state ─────────────────────────────────────────────────────── */
@@ -211,8 +208,6 @@ export {
 export {
   type ActiveFilterChip,
   type ChipLabelResolver,
-  mergeFilterChips,
-  resolveActiveFilterCount,
   useActiveFilterChips,
   type UseActiveFilterChipsOptions,
 } from "./filters/useActiveFilterChips";
@@ -264,14 +259,10 @@ export {
   useColumnDragState,
 } from "./columns/columnReorder";
 export {
-  COLUMN_RESIZE_STEP,
   type ColumnResizeHandleProps,
   columnResizeHandleProps,
-  MAX_COLUMN_WIDTH,
-  MIN_COLUMN_WIDTH,
 } from "./columns/columnResize";
 export {
-  FALLBACK_PIN_WIDTH,
   parsePxWidth,
   pinnedColumnWidth,
   resolveColumnWidth,
@@ -281,7 +272,6 @@ export { EyeIcon, GripIcon, PinIcon } from "./columns/icons";
 export {
   type ColumnLayoutState,
   edgePinStyle,
-  EMPTY_COLUMN_LAYOUT,
   PIN_Z,
   type PinLeads,
   type PinnedCellStyle,
@@ -308,10 +298,7 @@ export {
   sortArrow,
 } from "./display";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
-export {
-  type HorizontalOverflow,
-  useHorizontalOverflow,
-} from "./layout/useHorizontalOverflow";
+export { useHorizontalOverflow } from "./layout/useHorizontalOverflow";
 
 /* ── Pagination ────────────────────────────────────────────────────── */
 export {
@@ -324,26 +311,19 @@ export {
 } from "./pagination/paginationMath";
 
 /* ── Hooks ─────────────────────────────────────────────────────────── */
-export { DARK_SCHEME_QUERY, useColorScheme } from "./hooks/useColorScheme";
+export { useColorScheme } from "./hooks/useColorScheme";
 export { useDebounce } from "./hooks/useDebounce";
 export {
   useInfiniteScroll,
   type UseInfiniteScrollOptions,
 } from "./hooks/useInfiniteScroll";
-export {
-  MOBILE_MEDIA_QUERY,
-  resolvePaginationMode,
-  useIsMobile,
-} from "./hooks/useIsMobile";
+export { useIsMobile } from "./hooks/useIsMobile";
 export { useMediaQuery } from "./hooks/useMediaQuery";
 export {
   type MountStaggerOptions,
   useMountStagger,
 } from "./hooks/useMountStagger";
-export {
-  REDUCED_MOTION_QUERY,
-  usePrefersReducedMotion,
-} from "./hooks/usePrefersReducedMotion";
+export { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 export {
   useScrollToTableTop,
   type UseScrollToTableTopOptions,
@@ -373,7 +353,6 @@ export {
   useKeyedVirtualization,
   useTableVirtualization,
   type UseTableVirtualizationOptions,
-  virtualColumnSpan,
   type VirtualTableRow,
   windowGroupedEntries,
 } from "./virtual/useTableVirtualization";
@@ -391,7 +370,6 @@ export {
 
 /* ── Inline cell editing ───────────────────────────────────────────── */
 export {
-  applyCellEditCommit,
   type CellEditCommit,
   type CellEditor,
   type CellEditorOption,
@@ -399,21 +377,16 @@ export {
   type EditableColumnLike,
   hasEditableColumns,
   isCellEditable,
-  nextEditableCell,
   normalizeEditorOptions,
   parseCellEditValue,
-  readEditableCellValue,
   resolveCellEditor,
-  stepEditableCell,
 } from "./editing/cellEditing";
 export {
   type EditableCellController,
-  editableCellController,
   type EditableCellEditing,
   type EditableCellMode,
   focusEditorOnMount,
   rowEditingSignature,
-  stopCellEditKeyboard,
 } from "./editing/editableCellController";
 export {
   type EditableCellEditorCtrl,
@@ -421,7 +394,6 @@ export {
   type EditableCellGateProps,
 } from "./editing/EditableCellGate";
 export {
-  beginCellEdit,
   type CellEditingState,
   type CellEditKeyAction,
   type CellEditKeyOutcome,
@@ -436,14 +408,8 @@ export {
   type GroupAggregatesFn,
   type GroupedFlatEntry,
   groupValueKey,
-  makeGroupRowKey,
-  resolveGroupValue,
 } from "./grouping/groupRows";
-export {
-  applyGroupLeafSelection,
-  groupSelectionState,
-  nextGroupSelection,
-} from "./grouping/groupSelection";
+export { groupSelectionState } from "./grouping/groupSelection";
 export {
   type GroupCollapseState,
   useGroupCollapse,
