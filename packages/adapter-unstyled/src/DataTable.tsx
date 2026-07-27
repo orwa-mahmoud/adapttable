@@ -208,6 +208,8 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     urlKey,
     columns: props.columns,
     filters: props.filters,
+    defaults: props.defaults,
+    paginationMode: props.paginationMode,
   });
 
   // The declarative array becomes the auto-built form; JSX passes through.

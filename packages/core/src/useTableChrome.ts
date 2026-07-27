@@ -326,6 +326,8 @@ export function useTableChrome<TRow>(
     onSelectedIdsChange: onSelectionChange,
     filterLabels,
     multiSort: props.multiSort,
+    searchDebounceMs: props.searchDebounceMs,
+    locale: props.locale,
   });
 
   useEffect(() => {
@@ -566,6 +568,11 @@ export function useChromeBodyData<TRow>(
   if (virtualize && props.renderRowDetail) {
     devWarn(
       "renderRowDetail with virtualize: desktop detail panels render as unmeasured sibling rows, so scroll heights can drift — prefer paged data with row details."
+    );
+  }
+  if (virtualize && source.paginationMode === "paged") {
+    devWarn(
+      'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it.'
     );
   }
   const fetchNext = useCallback(() => {

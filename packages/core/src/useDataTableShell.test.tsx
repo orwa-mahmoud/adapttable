@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { FilterDef } from "./filters/filterDefs";
@@ -8,6 +8,7 @@ import { createMemoryAdapter } from "./url/adapter";
 import { useDataTableShell } from "./useDataTableShell";
 import type * as TableChromeModule from "./useTableChrome";
 import { useChromeBodyData } from "./useTableChrome";
+import { resetDevWarnings } from "./utils/devWarn";
 
 // The body-data hook is mocked so the virtual-window / load-more branches can
 // be driven directly (jsdom can't measure a real virtualizer).
@@ -178,6 +179,80 @@ describe("useDataTableShell", () => {
     expect(onQueryChange).not.toHaveBeenCalled();
     // prefetch reaches the table renderer's prop bundle.
     expect(result.current.tableProps.prefetch).toBe(prefetch);
+  });
+
+  it("forwards defaults and paginationMode into the resolved source", () => {
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() =>
+      useDataTableShell(
+        {
+          data: ROWS,
+          columns,
+          rowKey,
+          urlAdapter: adapter,
+          defaults: { limit: 1, sortBy: "name" },
+          paginationMode: "infinite",
+        },
+        noForm
+      )
+    );
+    // defaults seeded the silent-URL state; the mode reached the source.
+    expect(result.current.source.limit).toBe(1);
+    expect(result.current.source.sortBy).toBe("name");
+    expect(result.current.source.paginationMode).toBe("infinite");
+    expect(result.current.source.rows).toHaveLength(1);
+  });
+
+  it("forwards searchDebounceMs into the table's search commit", () => {
+    vi.useFakeTimers();
+    try {
+      const adapter = createMemoryAdapter("");
+      const { result } = renderHook(() =>
+        useDataTableShell(
+          {
+            data: ROWS,
+            columns,
+            rowKey,
+            urlAdapter: adapter,
+            searchDebounceMs: 50,
+          },
+          noForm
+        )
+      );
+      act(() => result.current.table.setSearchValue("ali"));
+      // Committed after the CUSTOM debounce, well before the 300ms default.
+      act(() => vi.advanceTimersByTime(50));
+      expect(result.current.source.search).toBe("ali");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("dev-warns when virtualize is inert on a paged table", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const adapter = createMemoryAdapter("");
+      renderHook(() =>
+        useDataTableShell(
+          {
+            data: ROWS,
+            columns,
+            rowKey,
+            urlAdapter: adapter,
+            paginationMode: "paged",
+            virtualize: true,
+          },
+          noForm
+        )
+      );
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('paginationMode="infinite"')
+      );
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
   });
 
   it("covers a prebuilt source and a live URL adapter", () => {

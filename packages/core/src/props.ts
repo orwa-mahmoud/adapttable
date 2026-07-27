@@ -13,9 +13,12 @@ import type {
   BulkAction,
   ColumnDef,
   Direction,
+  ExtraFilters,
+  PaginationMode,
   RowAction,
   SortByOption,
   TableLabels,
+  TableQueryParams,
 } from "./types";
 
 /**
@@ -59,6 +62,23 @@ export interface BaseDataTableProps<TRow> {
   density?: "comfortable" | "compact";
   /** Force the mobile layout (otherwise resolved from the viewport). */
   forceMobile?: boolean;
+  /**
+   * Initial state applied while the URL is silent about a key — e.g.
+   * `defaults={{ limit: 10, sortBy: "name" }}`. The user's own changes
+   * (and explicit URL params) always win.
+   */
+  defaults?: Partial<TableQueryParams> & { extra?: ExtraFilters };
+  /**
+   * Debounce for committing the search input to the source, in
+   * milliseconds. Defaults to 300.
+   */
+  searchDebounceMs?: number;
+  /**
+   * Pagination mode: `"paged"`, `"infinite"`, or `"auto"` (the default —
+   * mobile resolves to infinite, desktop to paged). `virtualize` applies
+   * in infinite mode; on a paged desktop table it is inert.
+   */
+  paginationMode?: PaginationMode;
   /** Alias for `forceMobile` (v1 name) — deleted before the 2.0.0 release. */
   isMobile?: boolean;
   /** Leading desktop-visible columns kept on mobile even if hideOnMobile. */

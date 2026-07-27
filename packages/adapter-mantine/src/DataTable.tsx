@@ -109,6 +109,8 @@ function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     onQueryChange: props.onQueryChange,
     columns: props.columns,
     filters: props.filters,
+    defaults: props.defaults,
+    paginationMode: props.paginationMode,
     urlKey: props.urlKey,
     urlAdapter,
     urlSync: props.urlSync,

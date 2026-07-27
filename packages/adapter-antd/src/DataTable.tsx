@@ -902,6 +902,8 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     urlKey: props.urlKey,
     columns: props.columns,
     filters: props.filters,
+    defaults: props.defaults,
+    paginationMode: props.paginationMode,
   });
   // A declarative `filters` array becomes the auto-built form; JSX passes
   // through untouched. Column-level `filter` shorthands alone (no `filters`

@@ -94,6 +94,8 @@ export function useDataTableShell<TRow>(
     urlKey: props.urlKey,
     columns: props.columns,
     filters: props.filters,
+    defaults: props.defaults,
+    paginationMode: props.paginationMode,
   });
   // Declarative `filters` array → the auto-built form; JSX passes through.
   const autoForm =
