@@ -101,6 +101,7 @@ export interface MuiToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
 /** Search field + sort select + filters button + rows-per-page. */
 export function Toolbar<TRow>({
   table,
+  searchable,
   hideSearch,
   searchPlaceholder,
   sortByOptions,
@@ -155,7 +156,7 @@ export function Toolbar<TRow>({
         justifyContent: "space-between",
       }}
     >
-      {!hideSearch && (
+      {(searchable ?? hideSearch !== true) && (
         <TextField
           size="small"
           value={searchProps.value}

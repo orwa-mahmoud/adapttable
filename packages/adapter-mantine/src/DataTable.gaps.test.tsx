@@ -97,16 +97,21 @@ describe("<DataTable> gaps", () => {
     expect(screen.getAllByLabelText("Sort by").length).toBeGreaterThan(0);
   });
 
-  it("renders a custom toolbar node and can hide the search", () => {
+  it("renders a custom toolbar node and searchable={false} hides the search", () => {
     render(
       <Harness
         override={{
           toolbar: <button type="button">view</button>,
-          hideSearch: true,
+          searchable: false,
         }}
       />
     );
     expect(screen.getByText("view")).toBeInTheDocument();
+    expect(screen.queryByRole("searchbox")).toBeNull();
+  });
+
+  it("the v1 hideSearch alias still hides the search (removed before release)", () => {
+    render(<Harness override={{ hideSearch: true }} />);
     expect(screen.queryByRole("searchbox")).toBeNull();
   });
 

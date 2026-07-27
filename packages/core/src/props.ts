@@ -118,6 +118,12 @@ export interface BaseDataTableProps<TRow> {
   collapsedGroupIds?: readonly string[];
   onCollapsedGroupIdsChange?: (ids: string[]) => void;
   /** Disable the built-in search box. */
+  /**
+   * Render the search input. Positive polarity — `false` hides it.
+   * @defaultValue true
+   */
+  searchable?: boolean;
+  /** Alias for `searchable: false` (v1 name) — deleted before the 2.0.0 release. */
   hideSearch?: boolean;
   /**
    * Opt into multi-column sorting: shift-click (or shift-Enter) on a header

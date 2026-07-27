@@ -1121,7 +1121,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       <Space orientation="vertical" size="small" style={{ width: "100%" }}>
         <Toolbar
           table={table}
-          hideSearch={props.hideSearch}
+          searchable={props.searchable ?? props.hideSearch !== true}
           searchPlaceholder={props.searchPlaceholder}
           sortByOptions={props.sortByOptions}
           toolbar={props.toolbar}

@@ -328,7 +328,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           rowGap: 8,
         }}
       >
-        {!hideSearch && (
+        {(props.searchable ?? hideSearch !== true) && (
           <span
             data-adapttable-part="search-field"
             className={classNames.searchField}

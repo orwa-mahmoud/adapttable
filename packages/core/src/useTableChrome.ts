@@ -61,7 +61,9 @@ import {
 export interface ToolbarChromeProps<TRow> {
   /** The headless table state + prop-getters. */
   table: UseDataTableResult<TRow>;
-  /** Hide the search input. */
+  /** Render the search input (default `true`). */
+  searchable?: boolean;
+  /** Alias for `searchable: false` (v1 name) — deleted before the 2.0.0 release. */
   hideSearch?: boolean;
   /** Placeholder for the search input. */
   searchPlaceholder?: string;

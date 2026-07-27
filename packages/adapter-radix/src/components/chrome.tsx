@@ -61,6 +61,7 @@ export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
 /** Search + sort select + filters button + columns menu + rows-per-page. */
 export function Toolbar<TRow>({
   table,
+  searchable,
   hideSearch,
   searchPlaceholder,
   sortByOptions,
@@ -118,7 +119,7 @@ export function Toolbar<TRow>({
       align="center"
       className={className}
     >
-      {!hideSearch && (
+      {(searchable ?? hideSearch !== true) && (
         <Box style={{ flex: 1, minWidth: 160, maxWidth: 360 }}>
           <TextField.Root
             size="2"

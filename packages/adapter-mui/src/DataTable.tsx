@@ -320,7 +320,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       <Stack spacing={1.5}>
         <Toolbar
           table={table}
-          hideSearch={props.hideSearch}
+          searchable={props.searchable ?? props.hideSearch !== true}
           searchPlaceholder={props.searchPlaceholder}
           sortByOptions={props.sortByOptions}
           toolbar={

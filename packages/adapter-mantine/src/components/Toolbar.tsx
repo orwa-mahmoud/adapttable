@@ -23,6 +23,7 @@ export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
 /** Sticky toolbar: search, optional sort select, custom slot, filters, size. */
 export function Toolbar<TRow>({
   table,
+  searchable,
   hideSearch,
   searchPlaceholder,
   sortByOptions,
@@ -80,7 +81,7 @@ export function Toolbar<TRow>({
       align="center"
       className={className}
     >
-      {!hideSearch && (
+      {(searchable ?? hideSearch !== true) && (
         <TextInput
           {...searchProps}
           leftSection={<SearchIcon size={14} />}

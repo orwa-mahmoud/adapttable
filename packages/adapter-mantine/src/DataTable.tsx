@@ -323,7 +323,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           <Stack gap="xs">
             <Toolbar
               table={table}
-              hideSearch={hideSearch}
+              searchable={chromeProps.searchable ?? hideSearch !== true}
               searchPlaceholder={searchPlaceholder}
               sortByOptions={sortByOptions}
               toolbar={customToolbar}
