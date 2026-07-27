@@ -105,15 +105,16 @@ export function useSelection<TRow>({
   const selectAllMatching = useCallback(() => setAllMatching(true), []);
 
   // Clear on reset-key change, but not on first mount. The effect reads the
-  // LATEST size through a ref so only `resetKey` retriggers it.
+  // LATEST size through a ref so only `resetKey` retriggers it. The guard
+  // is last-seen-value, not a boolean first-run flag: refs survive
+  // StrictMode's simulated remount, so a boolean guard saw the doubled
+  // mount effect as a "change" and wiped a controlled preselection.
   const liveRef = useRef({ commit, size: selectedIds.size });
   liveRef.current = { commit, size: selectedIds.size };
-  const firstRef = useRef(true);
+  const lastResetKeyRef = useRef(resetKey);
   useEffect(() => {
-    if (firstRef.current) {
-      firstRef.current = false;
-      return;
-    }
+    if (Object.is(lastResetKeyRef.current, resetKey)) return;
+    lastResetKeyRef.current = resetKey;
     // Identity-preserving no-op when there is nothing to clear.
     if (liveRef.current.size === 0) return;
     liveRef.current.commit(() => new Set());

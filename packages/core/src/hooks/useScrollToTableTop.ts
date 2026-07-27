@@ -29,14 +29,16 @@ export function useScrollToTableTop({
   gap = 8,
   behavior = "smooth",
 }: UseScrollToTableTopOptions): void {
-  const firstRef = useRef(true);
   const depsKey = deps.map(String).join("|");
+  // Last-seen-value guard, not a boolean first-run flag: refs survive
+  // StrictMode's simulated remount, so a boolean guard scrolled on the
+  // doubled mount effect and yanked the browser's restored position. Only
+  // an actual view change (a new deps key) scrolls.
+  const lastDepsKeyRef = useRef(depsKey);
 
   useEffect(() => {
-    if (firstRef.current) {
-      firstRef.current = false;
-      return;
-    }
+    if (lastDepsKeyRef.current === depsKey) return;
+    lastDepsKeyRef.current = depsKey;
     if (!enabled) return;
     queueMicrotask(() => {
       const node = ref.current;

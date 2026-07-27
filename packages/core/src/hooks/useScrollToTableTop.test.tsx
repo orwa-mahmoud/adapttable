@@ -1,9 +1,34 @@
 import { act, renderHook } from "@testing-library/react";
+import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useScrollToTableTop } from "./useScrollToTableTop";
 
 describe("useScrollToTableTop", () => {
+  it("skips a StrictMode mount (restored scroll is not yanked)", async () => {
+    const scrollBy = vi
+      .spyOn(window, "scrollBy")
+      .mockImplementation(() => undefined);
+    const ref = {
+      current: {
+        getBoundingClientRect: () => ({ top: -80 }),
+      } as HTMLElement,
+    };
+
+    const { rerender } = renderHook(
+      ({ dep }) => useScrollToTableTop({ ref, deps: [dep], offset: 56 }),
+      { initialProps: { dep: "a" }, wrapper: StrictMode }
+    );
+    await act(async () => Promise.resolve());
+    expect(scrollBy).not.toHaveBeenCalled();
+
+    // A real view change still scrolls.
+    rerender({ dep: "b" });
+    await act(async () => Promise.resolve());
+    expect(scrollBy).toHaveBeenCalledTimes(1);
+    scrollBy.mockRestore();
+  });
+
   it("skips the initial render", async () => {
     const scrollBy = vi
       .spyOn(window, "scrollBy")

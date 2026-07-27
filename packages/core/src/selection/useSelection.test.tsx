@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useSelection } from "./useSelection";
@@ -72,6 +73,33 @@ describe("useSelection", () => {
     const before = result.current.selectedIds;
     rerender({ k: "same" });
     expect(result.current.selectedIds).toBe(before);
+  });
+
+  it("a controlled preselection survives a StrictMode mount", () => {
+    const onChange = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ k }) =>
+        useSelection({ rows, getId, resetKey: k, selected: ["a"], onChange }),
+      { initialProps: { k: "page1" }, wrapper: StrictMode }
+    );
+    // StrictMode's doubled mount effect must NOT request a clear.
+    expect(onChange).not.toHaveBeenCalled();
+    expect(result.current.selectedCount).toBe(1);
+    // A REAL reset-key change still requests one.
+    rerender({ k: "page2" });
+    expect(onChange).toHaveBeenCalledWith([]);
+  });
+
+  it("an uncontrolled selection made before a StrictMode re-render is kept", () => {
+    const { result, rerender } = renderHook(
+      ({ k }) => useSelection({ rows, getId, resetKey: k }),
+      { initialProps: { k: "page1" }, wrapper: StrictMode }
+    );
+    act(() => result.current.toggle("a"));
+    rerender({ k: "page1" });
+    expect(result.current.selectedCount).toBe(1);
+    rerender({ k: "page2" });
+    expect(result.current.selectedCount).toBe(0);
   });
 });
 
