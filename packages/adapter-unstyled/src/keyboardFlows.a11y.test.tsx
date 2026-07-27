@@ -142,9 +142,9 @@ describe("keyboard flows (unstyled)", () => {
       />
     );
     fireEvent.click(part("selection-cell")!.querySelector("input")!);
-    const status = document.body.querySelector('[role="status"]')!;
+    // <output> carries the implicit status role — the live region.
+    const status = part("bulk-bar")!.querySelector("output")!;
     expect(status).not.toBeNull();
-    expect(part("bulk-bar")!.contains(status)).toBe(true);
     expect(status.textContent).toMatch(/1/);
   });
 

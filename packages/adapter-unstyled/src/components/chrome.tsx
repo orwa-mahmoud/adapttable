@@ -105,9 +105,10 @@ export function BulkBar({
 
   return (
     <div data-adapttable-part="bulk-bar" className={classNames.bulkBar}>
-      {/* role=status: selection changes are announced without stealing
-          focus — the count was previously silent to screen readers. */}
-      <span role="status">{labels.selectedCount(selectedCount)}</span>
+      {/* A live region (implicit status role): selection changes are
+          announced without stealing focus — the count was previously
+          silent to screen readers. */}
+      <output>{labels.selectedCount(selectedCount)}</output>
       {showBanner && (
         <div
           data-adapttable-part="select-all-banner"

@@ -759,7 +759,7 @@ export function DesktopTable<TRow>({
       <tbody data-adapttable-part="tbody" className={classNames.tbody}>
         {paddingTop > 0 && (
           <tr
-            aria-hidden
+            role="presentation"
             data-adapttable-part="virtual-spacer"
             className={classNames.virtualSpacer}
           >
@@ -869,7 +869,7 @@ export function DesktopTable<TRow>({
             })}
         {paddingBottom > 0 && (
           <tr
-            aria-hidden
+            role="presentation"
             data-adapttable-part="virtual-spacer"
             className={classNames.virtualSpacer}
           >
