@@ -73,6 +73,19 @@ describe("useActiveFilterChips", () => {
     expect(onChange).toHaveBeenCalledWith("scope", undefined);
   });
 
+  it("never resolves labels through the prototype chain (crafted URL keys)", () => {
+    // `?f_valueOf=x` produces the key "valueOf"; a plain-record lookup
+    // would return Object.prototype.valueOf and crash when called.
+    const { result } = renderHook(() =>
+      useActiveFilterChips({
+        values: { valueOf: "x", toString: "y", constructor: "z" },
+        labels: {},
+        onChange: vi.fn(),
+      })
+    );
+    expect(result.current).toEqual([]);
+  });
+
   it("skips empty values and keys without a resolver", () => {
     const { result } = renderHook(() =>
       useActiveFilterChips({

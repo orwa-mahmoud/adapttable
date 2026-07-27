@@ -186,6 +186,15 @@ describe("readColumnLayout", () => {
     });
   });
 
+  it("clamps hostile widths to the sane range", () => {
+    const params = ps("colW=a:1000000000,b:1,c:240");
+    expect(readColumnLayout(params)?.widths).toEqual({
+      a: 4000,
+      b: 60,
+      c: 240,
+    });
+  });
+
   it("round-trips keys that contain the delimiters through a real URL", () => {
     // Keys carrying ':' / ',' must survive the write → toString → parse → read
     // cycle the History adapter performs, never colliding with the delimiters.

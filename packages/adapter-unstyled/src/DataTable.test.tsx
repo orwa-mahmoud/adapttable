@@ -65,6 +65,24 @@ beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 afterEach(() => vi.useRealTimers());
 
 describe("<DataTable> (unstyled)", () => {
+  it("renders normally under hostile URL params and corrupt storage", () => {
+    // Prototype-named filter keys, an absurd colW, and garbage in the
+    // column-layout storage must all degrade silently.
+    globalThis.localStorage.setItem("hostile-cols", "{not json");
+    const { container } = renderHarness(
+      {
+        override: {
+          filterLabels: { status: (v: string) => `Status: ${v}` },
+          columnLayout: undefined,
+        },
+      },
+      "f_valueOf=x&f___proto__=y&f_constructor=z&colW=name:1000000000"
+    );
+    expect(screen.getByText("Alice")).toBeInTheDocument();
+    expect(container.querySelector("table")).toBeInTheDocument();
+    globalThis.localStorage.removeItem("hostile-cols");
+  });
+
   it("applies the rowsPerPageSelect class hook to both selects", () => {
     const { container } = renderHarness({
       override: { classNames: { rowsPerPageSelect: "my-rpp" } },

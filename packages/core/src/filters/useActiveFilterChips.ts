@@ -78,7 +78,10 @@ export function useActiveFilterChips({
   return useMemo(() => {
     const chips: ActiveFilterChip[] = [];
     for (const [key, value] of Object.entries(values)) {
-      const resolve = labels[key];
+      // Own properties only — the keys come from the URL, and a crafted
+      // `?f_valueOf=x` would otherwise pull Object.prototype.valueOf out
+      // of the record and crash when called as a label resolver.
+      const resolve = Object.hasOwn(labels, key) ? labels[key] : undefined;
       if (!resolve || value == null || value === "") {
         continue;
       }

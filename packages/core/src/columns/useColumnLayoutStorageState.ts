@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
+import { devWarn } from "../utils/devWarn";
 import { isBrowser } from "../utils/env";
 import { stableKey } from "../utils/stableKey";
 import { type ColumnLayoutState, EMPTY_COLUMN_LAYOUT } from "./useColumnLayout";
@@ -25,6 +26,56 @@ export interface UseColumnLayoutStorageStateResult {
   onLayoutChange: (next: ColumnLayoutState) => void;
 }
 
+/** Keep only string entries of a (possibly hostile) stored array. */
+function stringEntries(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+}
+
+/** A non-null, non-array object — the only shape worth field-scanning. */
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Keep only valid pin sides of a (possibly hostile) stored record. */
+function sanitizePinned(value: unknown): Record<string, "start" | "end"> {
+  const pinned: Record<string, "start" | "end"> = {};
+  if (!isPlainRecord(value)) return pinned;
+  for (const [key, side] of Object.entries(value)) {
+    if (side === "start" || side === "end") pinned[key] = side;
+  }
+  return pinned;
+}
+
+/** Keep only finite positive widths of a (possibly hostile) stored record. */
+function sanitizeWidths(value: unknown): Record<string, number> {
+  const widths: Record<string, number> = {};
+  if (!isPlainRecord(value)) return widths;
+  for (const [key, px] of Object.entries(value)) {
+    if (typeof px === "number" && Number.isFinite(px) && px > 0) {
+      widths[key] = px;
+    }
+  }
+  return widths;
+}
+
+/**
+ * Validate a parsed storage payload into a {@link ColumnLayoutState}.
+ * Persisted data is external input — hand-edited or written by another
+ * app version — so every field is checked; anything malformed is dropped
+ * rather than crashing the table. Returns `null` when the payload is not
+ * even an object.
+ */
+function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null {
+  if (!isPlainRecord(parsed)) return null;
+  return {
+    hidden: stringEntries(parsed.hidden),
+    order: stringEntries(parsed.order),
+    pinned: sanitizePinned(parsed.pinned),
+    widths: sanitizeWidths(parsed.widths),
+  };
+}
+
 function readStored(
   storage: LayoutStorage | undefined,
   storageKey: string,
@@ -33,8 +84,14 @@ function readStored(
   try {
     const raw = storage?.getItem(storageKey);
     if (!raw) return fallback;
-    const parsed = JSON.parse(raw) as Partial<ColumnLayoutState>;
-    return { ...EMPTY_COLUMN_LAYOUT, ...parsed };
+    const sanitized = sanitizeStoredLayout(JSON.parse(raw));
+    if (sanitized === null) {
+      devWarn(
+        `stored column layout under "${storageKey}" is not a layout object — ignoring it.`
+      );
+      return fallback;
+    }
+    return sanitized;
   } catch {
     // Corrupted/inaccessible storage (private mode, quota) → just fall back.
     return fallback;

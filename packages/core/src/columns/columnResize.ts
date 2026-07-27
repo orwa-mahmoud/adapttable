@@ -2,6 +2,13 @@ import type { KeyboardEvent, PointerEvent } from "react";
 
 /** Minimum column width (px) a resize drag/keyboard step will not go below. */
 export const MIN_COLUMN_WIDTH = 60;
+
+/**
+ * Upper bound for a persisted/URL-restored column width — generous enough
+ * for any real drag on an ultra-wide display, tight enough that a hostile
+ * `colW=1e9` cannot blow the layout.
+ */
+export const MAX_COLUMN_WIDTH = 4000;
 /** Keyboard resize step (px) per arrow press. */
 export const COLUMN_RESIZE_STEP = 16;
 

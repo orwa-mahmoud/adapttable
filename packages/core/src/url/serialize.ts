@@ -9,6 +9,7 @@
  *   may itself contain a comma); numbers are parsed back.
  * - Default values are omitted to keep the URL clean.
  */
+import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
 import type { ColumnLayoutState } from "../columns/useColumnLayout";
 import type { ExtraFilters, FilterValue, SortDirection } from "../types";
 
@@ -186,7 +187,14 @@ export function readColumnLayout(
   for (const pair of splitRaw(widthRaw)) {
     const [encKey, px] = pair.split(":");
     const n = Number(px);
-    if (encKey && Number.isFinite(n) && n > 0) widths[safeDecode(encKey)] = n;
+    if (encKey && Number.isFinite(n) && n > 0) {
+      // URL input is hostile: clamp to the same sane range the resize UI
+      // can produce, so a hand-edited colW of 1e9 cannot blow the layout.
+      widths[safeDecode(encKey)] = Math.min(
+        Math.max(n, MIN_COLUMN_WIDTH),
+        MAX_COLUMN_WIDTH
+      );
+    }
   }
 
   return {

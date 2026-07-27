@@ -87,6 +87,45 @@ describe("useColumnLayoutStorageState", () => {
     expect(result.current.layout.hidden).toEqual([]);
   });
 
+  it("drops malformed persisted shapes instead of crashing", () => {
+    // An array where an object should be → warn + default.
+    const arrayStore = fakeStorage({ cols: JSON.stringify([1, 2, 3]) });
+    const arrayView = renderHook(() =>
+      useColumnLayoutStorageState({
+        storageKey: "cols",
+        storage: arrayStore.storage,
+      })
+    );
+    expect(arrayView.result.current.layout).toEqual({
+      hidden: [],
+      order: [],
+      pinned: {},
+      widths: {},
+    });
+
+    // Field-level garbage is dropped per field, valid parts kept.
+    const mixedStore = fakeStorage({
+      cols: JSON.stringify({
+        hidden: ["ok", 42, null],
+        order: "not-an-array",
+        pinned: { a: "start", b: "sideways", c: 7 },
+        widths: { a: 120, b: "wide", c: null },
+      }),
+    });
+    const mixedView = renderHook(() =>
+      useColumnLayoutStorageState({
+        storageKey: "cols",
+        storage: mixedStore.storage,
+      })
+    );
+    expect(mixedView.result.current.layout).toEqual({
+      hidden: ["ok"],
+      order: [],
+      pinned: { a: "start" },
+      widths: { a: 120 },
+    });
+  });
+
   it("survives a throwing storage backend on write", () => {
     const storage: LayoutStorage = {
       getItem: () => null,

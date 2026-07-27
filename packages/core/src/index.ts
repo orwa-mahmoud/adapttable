@@ -258,6 +258,7 @@ export {
   COLUMN_RESIZE_STEP,
   type ColumnResizeHandleProps,
   columnResizeHandleProps,
+  MAX_COLUMN_WIDTH,
   MIN_COLUMN_WIDTH,
 } from "./columns/columnResize";
 export {
