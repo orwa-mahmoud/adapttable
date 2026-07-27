@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { PaginatedResponse, TableQueryParams } from "../types";
 import { createMemoryAdapter } from "../url/adapter";
-import { type InfiniteQueryLike, useBackendData } from "./useBackendData";
+import { type InfiniteQueryLike, useQuerySource } from "./useQuerySource";
 
 interface Row {
   id: string;
@@ -61,7 +61,7 @@ const last = <T,>(arr: T[]): T => {
 };
 
 /**
- * Mount `useBackendData` with a STABLE memory adapter created once
+ * Mount `useQuerySource` with a STABLE memory adapter created once
  * outside the render callback. (Creating the adapter inside the render
  * function would rebuild it every render and reset URL state.)
  */
@@ -70,14 +70,14 @@ function mount<TPage = Page>(
     usePaginatedQuery: (p: Partial<ListParams>) => InfiniteQueryLike<TPage>;
   },
   opts: Omit<
-    Parameters<typeof useBackendData<Row, ListParams, TPage>>[0],
+    Parameters<typeof useQuerySource<Row, ListParams, TPage>>[0],
     "usePaginatedQuery"
   > & { initial?: string }
 ) {
   const { initial = "", ...rest } = opts;
   const adapter = createMemoryAdapter(initial);
   return renderHook(() =>
-    useBackendData<Row, ListParams, TPage>({
+    useQuerySource<Row, ListParams, TPage>({
       usePaginatedQuery: query.usePaginatedQuery,
       urlAdapter: adapter,
       ...rest,
@@ -85,7 +85,7 @@ function mount<TPage = Page>(
   );
 }
 
-describe("useBackendData", () => {
+describe("useQuerySource", () => {
   it("the default selector reads the v2 rows field (and the v1 items alias)", () => {
     const v2 = makeQuery({
       pages: [
@@ -296,5 +296,13 @@ describe("useBackendData", () => {
     expect(result.current.error?.message).toBe("nope");
     act(() => void result.current.refetch?.());
     expect(q.refetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("v1 useBackendData alias", () => {
+  it("re-exports the same hook (removed before release)", async () => {
+    const legacy = await import("./useBackendData");
+    const current = await import("./useQuerySource");
+    expect(legacy.useBackendData).toBe(current.useQuerySource);
   });
 });

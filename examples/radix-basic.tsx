@@ -31,7 +31,7 @@ const columns: ColumnDef<Person>[] = [
  * Radix Themes table: appearance — light/dark, accent color, radius — is
  * inherited from the surrounding `<Theme>`; pass `accentColor` to tint the
  * table's own accents. Search, sorting, pagination and URL-synced state come
- * built in. Swap `useFrontendData` for `useBackendData` to drive the same
+ * built in. Swap `useFrontendData` for `useQuerySource` to drive the same
  * table from a server-paginated query.
  */
 export function RadixBasicExample() {

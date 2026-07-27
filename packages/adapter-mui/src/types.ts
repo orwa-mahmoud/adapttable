@@ -22,7 +22,7 @@ interface DataTablePropsBase<TRow> extends Omit<
 > {
   /**
    * Full-control data tier: a prebuilt source (`useFrontendData` /
-   * `useBackendData`). Omit it and pass `data` instead for the zero-ceremony
+   * `useQuerySource`). Omit it and pass `data` instead for the zero-ceremony
    * tiers below.
    */
   source?: TableSource<TRow>;

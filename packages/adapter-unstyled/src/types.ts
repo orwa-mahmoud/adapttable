@@ -177,7 +177,7 @@ interface DataTablePropsBase<TRow> extends Omit<
 > {
   /**
    * Full-control tier: a prebuilt source (`useFrontendData`,
-   * `useBackendData`, …), used as-is. Omit it and pass `data` instead for
+   * `useQuerySource`, …), used as-is. Omit it and pass `data` instead for
    * the managed tiers.
    */
   source?: TableSource<TRow>;

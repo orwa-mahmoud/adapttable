@@ -7,7 +7,7 @@ import type {
 
 /**
  * The uniform contract a table consumes regardless of whether its rows
- * came from an API (`useBackendData`) or an in-memory array
+ * came from an API (`useQuerySource`) or an in-memory array
  * (`useFrontendData`). The table renders without knowing which produced
  * it — every difference between "fetched" and "filtered locally" is
  * captured here.

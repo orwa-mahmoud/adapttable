@@ -32,7 +32,7 @@ export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   "adapter" | "urlAdapter" | "enabled" | "urlSync" | "defaults" | "urlKey"
 > {
-  /** Full-control tier: a prebuilt source (e.g. `useBackendData`). */
+  /** Full-control tier: a prebuilt source (e.g. `useQuerySource`). */
   source?: TableSource<TRow>;
   /** Frontend tier: the raw rows; the table filters/sorts/pages them. */
   data?: readonly TRow[];

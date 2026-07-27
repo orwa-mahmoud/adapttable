@@ -1,9 +1,9 @@
 import {
   type ColumnLayoutState,
   type TableSource,
-  useBackendData,
   useColumnLayoutUrlState,
   useFrontendData,
+  useQuerySource,
 } from "@adapttable/core";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { type ReactNode, useCallback, useState } from "react";
@@ -145,7 +145,7 @@ function Frontend({
 }
 
 function Backend({ render, columns, pageMode, urlKey }: Readonly<DataProps>) {
-  const source = useBackendData<Person, PeopleParams, PeoplePage>({
+  const source = useQuerySource<Person, PeopleParams, PeoplePage>({
     usePaginatedQuery: usePeopleQuery,
     arrayExtraKeys: DEMO_FILTER_RUNTIME.arrayExtraKeys,
     numberExtraKeys: DEMO_FILTER_RUNTIME.numberExtraKeys,

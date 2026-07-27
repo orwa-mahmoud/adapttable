@@ -34,7 +34,7 @@ const EMPTY_LABELS: Readonly<Record<string, ChipLabelResolver>> = {};
 
 /** Options for {@link useDataTable}. */
 export interface UseDataTableOptions<TRow> {
-  /** The data + state contract, from `useFrontendData` / `useBackendData`. */
+  /** The data + state contract, from `useFrontendData` / `useQuerySource`. */
   source: TableSource<TRow>;
   /** Column definitions. */
   columns: ColumnDef<TRow>[];

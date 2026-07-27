@@ -65,7 +65,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
  * widgets, chips, debounce) and emits ONE consolidated event per real
  * change; the caller's only job is to run the request and hand back
  * `rows` + `total`. No query library required — and the full
- * `useBackendData` tier remains for callers who want one.
+ * `useQuerySource` tier remains for callers who want one.
  *
  * @typeParam TRow - The row type.
  */
@@ -118,7 +118,7 @@ export function useServerData<TRow>(
   useEffect(() => emitQuery(), [queryKey, generation, emitQuery]);
 
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
-  // total is known and nothing is in flight — mirrors useBackendData, so a
+  // total is known and nothing is in flight — mirrors useQuerySource, so a
   // ?page=999 deep link self-heals to the last real page (and the URL is
   // rewritten) instead of showing an empty state the pager disagrees with.
   const { setPage } = state;

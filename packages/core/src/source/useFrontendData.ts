@@ -117,7 +117,7 @@ export function defaultSearchText<TRow>(row: TRow): string {
 
 /**
  * In-memory {@link TableSource}: reads URL/local state and filters, sorts,
- * and slices a caller-supplied array. The mirror of `useBackendData` —
+ * and slices a caller-supplied array. The mirror of `useQuerySource` —
  * the table cannot tell which produced it.
  *
  * @typeParam TRow - The row item type.

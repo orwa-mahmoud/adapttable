@@ -26,7 +26,7 @@ import type {
  * @typeParam TRow - The row type.
  */
 export interface BaseDataTableProps<TRow> {
-  /** Data + state contract from `useFrontendData` / `useBackendData`. */
+  /** Data + state contract from `useFrontendData` / `useQuerySource`. */
   source: TableSource<TRow>;
   /** Column definitions. */
   columns: ColumnDef<TRow>[];

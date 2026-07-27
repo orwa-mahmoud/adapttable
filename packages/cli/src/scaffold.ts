@@ -40,7 +40,7 @@ const columns: ColumnDef<Person>[] = [
 
 /**
  * Starter table scaffolded by \`npx @adapttable/cli init\` (${info.label}).
- * Swap \`useFrontendData\` for \`useBackendData\` to drive it from a
+ * Swap \`useFrontendData\` for \`useQuerySource\` to drive it from a
  * server-paginated query — the component doesn't change.
  */
 export function PeopleTable() {
