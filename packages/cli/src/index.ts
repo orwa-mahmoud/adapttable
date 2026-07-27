@@ -14,6 +14,7 @@ export {
   type KitInfo,
   KITS,
   mergeDependencies,
+  SHADCN,
 } from "./detect";
 export {
   InitError,

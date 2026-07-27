@@ -26,12 +26,18 @@ AdaptTable — detected Mantine.
 ## What it does
 
 - **Detects your UI kit** from `package.json` — Mantine, MUI, Chakra, Ant
-  Design, Radix Themes, or Tailwind (→ the unstyled adapter, or shadcn/ui when
-  a `components.json` is present), falling back to unstyled.
+  Design, Radix Themes, Base UI, shadcn/ui (via `components.json`), or
+  Tailwind — falling back to the unstyled adapter.
 - **Detects your package manager** from the lockfile (pnpm / yarn / bun /
-  npm) and prints the right install command.
-- **Scaffolds** `src/PeopleTable.tsx`, a ready-to-render starter using the
-  matching adapter. Pass `--force` to overwrite an existing file.
+  npm) and **prints** the right install command — it never installs
+  anything itself; you run the command it shows.
+- **Scaffolds** `src/PeopleTable.tsx`, a sortable starter table wired to
+  the matching adapter (every AdaptTable feature is one prop away — see
+  the docs). Pass `--force` to overwrite an existing file.
+- **One step it can't do for you:** wrap your app in the kit's provider
+  (`MantineProvider`, MUI's `ThemeProvider`, `ChakraProvider`, antd's
+  `ConfigProvider`, Radix's `Theme`) if it isn't already — that's the
+  most common first-run failure.
 
 ## Programmatic use
 
@@ -47,11 +53,11 @@ detectKit({ "@mui/material": "^6" }).kit; // "mui"
 
 - **Detects your UI kit** from `package.json` — Mantine, MUI, Chakra, Ant Design, Radix,
   Base UI, shadcn/ui (via `components.json`) or Tailwind.
-- **Installs the matching adapter** plus any peer packages it needs.
-- **Scaffolds a working table** wired to your kit, not a blank file.
-- The table it generates supports the full feature set: sorting, filtering, selection,
-  row expansion, inline cell editing, row grouping, column management, saved views,
-  CSV export, virtualization, pagination and RTL.
+- **Prints the exact install command** for the matching adapter plus the peer
+  packages it needs (run it yourself with your package manager).
+- **Scaffolds a working table** wired to your kit, not a blank file: sortable out
+  of the box, with the full AdaptTable feature set (filtering, selection, editing,
+  grouping, saved views, CSV export, virtualization, …) each one prop away.
 - **Programmatic API** — call it from your own scripts, not only the terminal.
 
 ## See it work

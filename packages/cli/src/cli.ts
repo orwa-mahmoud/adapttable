@@ -37,8 +37,15 @@ function createNodeIO(cwd: string): InitIO {
 }
 
 function main(argv: readonly string[]): number {
-  const command = argv[0] ?? "init";
-  if (command === "--help" || command === "-h" || command === "help") {
+  const command = argv[0];
+  // A bare `adapttable` must never write files — require the explicit
+  // command and show usage instead.
+  if (
+    command === undefined ||
+    command === "--help" ||
+    command === "-h" ||
+    command === "help"
+  ) {
     console.log(
       "Usage: adapttable init [--force]\n\nDetects your UI kit and scaffolds an AdaptTable starter."
     );

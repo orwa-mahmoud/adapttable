@@ -16,12 +16,28 @@ describe("detectKit", () => {
     expect(detectKit({ tailwindcss: "3" }).kit).toBe("unstyled");
   });
 
-  it("never auto-detects shadcn (it has no dependency signal)", () => {
-    // shadcn ships no package of its own; a Tailwind project resolves to
-    // unstyled here and is only upgraded to shadcn by runInit via components.json.
+  it("never auto-detects shadcn from dependencies alone", () => {
+    // shadcn ships no package of its own; without the components.json
+    // hint a Tailwind project resolves to unstyled.
     expect(
       detectKit({ tailwindcss: "3", "class-variance-authority": "0.7" }).kit
     ).toBe("unstyled");
+  });
+
+  it("resolves shadcn when components.json is present (parity with runInit)", () => {
+    expect(
+      detectKit({ tailwindcss: "3" }, { hasComponentsJson: true }).kit
+    ).toBe("shadcn");
+    expect(detectKit({}, { hasComponentsJson: true }).kit).toBe("shadcn");
+    // A concrete kit signal still wins over the shadcn hint.
+    expect(
+      detectKit({ "@mantine/core": "8" }, { hasComponentsJson: true }).kit
+    ).toBe("mantine");
+  });
+
+  it("chakra's printed install includes its real @emotion/react peer", () => {
+    const chakra = detectKit({ "@chakra-ui/react": "3" });
+    expect(chakra.extras).toContain("@emotion/react");
   });
 
   it("prefers Mantine when several kits are present", () => {
@@ -198,5 +214,15 @@ describe("runInit", () => {
   it("throws InitError on invalid package.json", () => {
     const { io } = makeIO("{ not json");
     expect(() => runInit(io)).toThrow(/valid JSON/);
+  });
+});
+
+describe("starterComponent (v2 shape)", () => {
+  it("scaffolds the zero-ceremony data tier with a use client banner", () => {
+    const mantine = detectKit({ "@mantine/core": "8" });
+    const src = starterComponent(mantine);
+    expect(src.startsWith('"use client";')).toBe(true);
+    expect(src).toContain("data={PEOPLE}");
+    expect(src).not.toContain("useFrontendData");
   });
 });

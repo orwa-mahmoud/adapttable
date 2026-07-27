@@ -17,7 +17,8 @@ export interface ScaffoldFile {
  * @returns The starter component source.
  */
 export function starterComponent(info: KitInfo): string {
-  return `import { DataTable, useFrontendData, type ColumnDef } from "${info.adapter}";
+  return `"use client";
+import { DataTable, type ColumnDef } from "${info.adapter}";
 
 interface Person {
   id: string;
@@ -40,12 +41,12 @@ const columns: ColumnDef<Person>[] = [
 
 /**
  * Starter table scaffolded by \`npx @adapttable/cli init\` (${info.label}).
- * Swap \`useFrontendData\` for \`useQuerySource\` to drive it from a
- * server-paginated query — the component doesn't change.
+ * \`data\` is the zero-ceremony frontend tier; add \`onQueryChange\` for
+ * server pagination, or a \`source\` from \`useQuerySource\` for a query
+ * library — the component stays the same.
  */
 export function PeopleTable() {
-  const source = useFrontendData({ data: PEOPLE, columns });
-  return <DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
+  return <DataTable data={PEOPLE} columns={columns} rowKey={(r) => r.id} />;
 }
 `;
 }

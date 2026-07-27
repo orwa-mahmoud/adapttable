@@ -43,7 +43,9 @@ export const KITS: readonly KitInfo[] = [
     kit: "chakra",
     adapter: "@adapttable/chakra",
     signals: ["@chakra-ui/react"],
-    extras: [],
+    // Chakra v3's own peers — without @emotion/react the printed install
+    // command produced a broken setup.
+    extras: ["@emotion/react"],
     label: "Chakra UI",
   },
   {
@@ -97,16 +99,27 @@ export const SHADCN = KITS.find((k) => k.kit === "shadcn")!;
  * first kit (in priority order) whose signal package is present wins;
  * falls back to the unstyled adapter when none match.
  *
+ * shadcn/ui ships no package of its own, so it has no dependency signal —
+ * pass `hasComponentsJson` (the presence of shadcn's `components.json`)
+ * and a Tailwind project resolves to the shadcn adapter, exactly as
+ * `runInit` does.
+ *
  * @param dependencies - Merged `dependencies` + `devDependencies` map.
+ * @param options - Extra detection context beyond the dependency map.
  * @returns The chosen {@link KitInfo}.
  */
 export function detectKit(
-  dependencies: Readonly<Record<string, string>>
+  dependencies: Readonly<Record<string, string>>,
+  options?: { hasComponentsJson?: boolean }
 ): KitInfo {
   for (const info of KITS) {
-    if (info.signals.some((pkg) => pkg in dependencies)) return info;
+    if (info.signals.some((pkg) => Object.hasOwn(dependencies, pkg))) {
+      return info.kit === "unstyled" && options?.hasComponentsJson
+        ? SHADCN
+        : info;
+    }
   }
-  return UNSTYLED;
+  return options?.hasComponentsJson ? SHADCN : UNSTYLED;
 }
 
 /**
