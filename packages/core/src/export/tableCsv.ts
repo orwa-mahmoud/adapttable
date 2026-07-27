@@ -15,6 +15,13 @@ export interface ExportCsvOptions {
    * page with a dev-only warning.
    */
   scope?: "page" | "all";
+  /**
+   * Neutralise spreadsheet formula injection (see
+   * {@link RowsToCsvOptions.escapeFormulas}). Disable ONLY for
+   * machine-consumed output that is never opened in a spreadsheet.
+   * @defaultValue true
+   */
+  escapeFormulas?: boolean;
 }
 
 /** Resolve a boolean-or-options prop into a concrete config, or `null` when off. */
@@ -42,6 +49,7 @@ export function buildTableCsv<TRow>(options: {
   source: TableSource<TRow>;
   columns: readonly ColumnDef<TRow>[];
   scope?: "page" | "all";
+  escapeFormulas?: boolean;
 }): string {
   const scope = options.scope ?? "page";
   if (scope === "all" && !options.source.allFilteredRows) {
@@ -53,7 +61,9 @@ export function buildTableCsv<TRow>(options: {
     scope === "all"
       ? (options.source.allFilteredRows ?? options.source.rows)
       : options.source.rows;
-  return rowsToCsv(rows, exportableColumns(options.columns));
+  return rowsToCsv(rows, exportableColumns(options.columns), {
+    escapeFormulas: options.escapeFormulas,
+  });
 }
 
 /**
@@ -66,6 +76,7 @@ export function downloadTableCsv<TRow>(options: {
   columns: readonly ColumnDef<TRow>[];
   filename?: string;
   scope?: "page" | "all";
+  escapeFormulas?: boolean;
 }): void {
   const csv = buildTableCsv(options);
   downloadCsv(options.filename ?? "export.csv", csv);
@@ -90,5 +101,6 @@ export function makeExportCsvHandler<TRow>(
       columns,
       filename: options.filename,
       scope: options.scope,
+      escapeFormulas: options.escapeFormulas,
     });
 }

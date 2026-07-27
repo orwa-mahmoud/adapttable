@@ -52,6 +52,53 @@ describe("rowsToCsv", () => {
     expect(csv.split("\r\n")[1]).toBe("1200,");
   });
 
+  it("neutralises every dangerous formula prefix by default", () => {
+    const cols: ColumnDef<{ v: string }>[] = [
+      { key: "v", header: "V", accessor: (r) => r.v },
+    ];
+    for (const payload of [
+      "=1+2",
+      "+SUM(A1:A9)",
+      "-2+3",
+      "@cmd",
+      "\tleading-tab",
+      "\rleading-cr",
+    ]) {
+      const line = rowsToCsv([{ v: payload }], cols).split("\r\n")[1]!;
+      // The cell now starts with a quote-as-text apostrophe (possibly
+      // inside RFC-4180 quoting when the payload needed wrapping).
+      const cell = line.startsWith('"')
+        ? line.slice(1, -1).replaceAll('""', '"')
+        : line;
+      expect(cell).toBe(`'${payload}`);
+    }
+  });
+
+  it("a HYPERLINK formula round-trips as text, not a formula", () => {
+    const cols: ColumnDef<{ v: string }>[] = [
+      { key: "v", header: "V", accessor: (r) => r.v },
+    ];
+    const payload = '=HYPERLINK("http://evil.test","click")';
+    const line = rowsToCsv([{ v: payload }], cols).split("\r\n")[1]!;
+    expect(line).toBe(`"'=HYPERLINK(""http://evil.test"",""click"")"`);
+  });
+
+  it("never touches numeric cells (negative numbers stay numbers)", () => {
+    const cols: ColumnDef<Row>[] = [
+      { key: "amount", header: "Amount", accessor: (r) => -r.amount },
+    ];
+    const csv = rowsToCsv([ROWS[0]!], cols);
+    expect(csv.split("\r\n")[1]).toBe("-1200");
+  });
+
+  it("escapeFormulas: false emits raw cells for machine consumers", () => {
+    const cols: ColumnDef<{ v: string }>[] = [
+      { key: "v", header: "V", accessor: (r) => r.v },
+    ];
+    const csv = rowsToCsv([{ v: "=1+2" }], cols, { escapeFormulas: false });
+    expect(csv.split("\r\n")[1]).toBe("=1+2");
+  });
+
   it("uses non-string headers' keys and a custom delimiter/getValue", () => {
     const cols: ColumnDef<Row>[] = [{ key: "k", header: 1 as never }];
     const csv = rowsToCsv([ROWS[0]!], cols, {
