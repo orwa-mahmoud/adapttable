@@ -81,7 +81,11 @@ export interface BaseDataTableProps<TRow> {
   paginationMode?: PaginationMode;
   /** Alias for `forceMobile` (v1 name) — deleted before the 2.0.0 release. */
   isMobile?: boolean;
-  /** Leading desktop-visible columns kept on mobile even if hideOnMobile. */
+  /**
+   * How many leading desktop-visible columns anchor the mobile identity
+   * block. Never overrides an explicit `hideOnMobile: true` — the
+   * author's hide always wins.
+   */
   mobileIdentityColumns?: number;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
   prefetch?: (row: TRow) => void;
@@ -231,9 +235,11 @@ export interface BaseDataTableProps<TRow> {
   selectedIds?: readonly string[];
   /**
    * Selection change channel. Uncontrolled: an observer that fires with the
-   * selected ids whenever the set changes (toggles, select-all, automatic
-   * resets on search/filter change). Controlled (`selectedIds` provided):
-   * the change-request handler — apply the ids to your state to accept.
+   * selected ids whenever the set changes — once on mount with the initial
+   * (empty) selection, on every toggle/select-all, and on the automatic
+   * reset when the search or a filter changes (the result set changed, so
+   * stale ids never linger). Controlled (`selectedIds` provided): the
+   * change-request handler — apply the ids to your state to accept.
    */
   onSelectionChange?: (selectedIds: string[]) => void;
 

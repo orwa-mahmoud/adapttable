@@ -126,7 +126,10 @@ export interface ColumnDef<TRow> {
   align?: "start" | "center" | "end";
   /** Label used on mobile card layouts; falls back to `header` when a string. */
   mobileLabel?: string;
-  /** Hide this column entirely on mobile layouts. */
+  /**
+   * Hide this column entirely on mobile layouts. Explicit and absolute:
+   * it always wins, including over the `mobileIdentityColumns` default.
+   */
   hideOnMobile?: boolean;
   /** Hide this column entirely on desktop layouts. */
   hideOnDesktop?: boolean;

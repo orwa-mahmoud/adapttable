@@ -24,19 +24,19 @@ describe("visibleColumns", () => {
     ]);
   });
 
-  it("keeps the first three desktop columns on mobile even if hideOnMobile", () => {
-    // a, b, c are the first three desktop-visible → all surface; d is
-    // hideOnMobile and beyond the first three → dropped; e is mobile-only
-    // (hideOnDesktop) → it renders here.
+  it("never overrides an explicit hideOnMobile — the author's hide wins", () => {
+    // b and d are explicitly hidden on mobile: they NEVER surface, identity
+    // default or not; a and c stay; e is mobile-only (hideOnDesktop).
     expect(visibleColumns(cols, "mobile").map((c) => c.key)).toEqual([
       "a",
-      "b",
       "c",
       "e",
     ]);
   });
 
-  it("lets callers customize how many identity columns mobile keeps", () => {
+  it("anchors only columns without an explicit mobile hide", () => {
+    // Even with a single identity slot, explicit hides stay hidden and the
+    // remaining desktop-visible columns render as normal.
     expect(visibleColumns(cols, "mobile", 1).map((c) => c.key)).toEqual([
       "a",
       "c",

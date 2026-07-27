@@ -411,6 +411,15 @@ export function useTableChrome<TRow>(
     () => (onCellEdit ? { onCellEdit, state: cellEditingState } : undefined),
     [onCellEdit, cellEditingState]
   );
+  // Half-configured editing is a silent trap: `editable: true` on a column
+  // does NOTHING without the table-level change channel. Say so in dev.
+  const hasEditableColumn = resolvedColumns.some((column) => column.editable);
+  useEffect(() => {
+    if (!hasEditableColumn || onCellEdit) return;
+    devWarn(
+      "columns declare `editable` but no `onCellEdit` handler is set — cell editing stays inert. Pass `onCellEdit` on the table to enable it."
+    );
+  }, [hasEditableColumn, onCellEdit]);
 
   // If the active row leaves the rendered set, drop the draft without
   // committing — the host never receives a stale edit. The check runs

@@ -7,6 +7,7 @@ import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
 import { useTableChrome } from "./useTableChrome";
+import { resetDevWarnings } from "./utils/devWarn";
 
 interface Row {
   id: string;
@@ -294,6 +295,107 @@ describe("useTableChrome", () => {
     // but the mutator ran and the host was notified with the value).
     expect(onGroupByChange).toHaveBeenCalledWith(null);
     expect(adapter.getSearch()).not.toContain("groupBy");
+  });
+
+  it("dev-warns when a column is editable but no onCellEdit is set", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const first = renderHook(() => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return useTableChrome<Row>({
+          source,
+          columns: [{ key: "name", header: "Name", editable: true }],
+          rowKey: (r) => r.id,
+        });
+      });
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("onCellEdit"));
+      first.unmount();
+
+      // With the handler present the combination is complete: no warning.
+      warn.mockClear();
+      resetDevWarnings();
+      renderHook(() => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return useTableChrome<Row>({
+          source,
+          columns: [{ key: "name", header: "Name", editable: true }],
+          rowKey: (r) => r.id,
+          onCellEdit: vi.fn(),
+        });
+      });
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
+  });
+
+  it("controlled selection: change requests go to the handler, state stays put", () => {
+    const onSelectionChange = vi.fn();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+        selectedIds: ["a"],
+        onSelectionChange,
+      });
+    });
+    // The controlled value is authoritative — and there is NO observer
+    // mount fire in controlled mode (the parent already owns the state).
+    expect(result.current.table.selection?.isSelected("a")).toBe(true);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+
+    // A toggle is a change REQUEST: the handler receives the next ids and
+    // the table does not mutate its own state.
+    act(() => result.current.table.selection?.toggle("b"));
+    expect(onSelectionChange).toHaveBeenCalledWith(["a", "b"]);
+    expect(result.current.table.selection?.isSelected("b")).toBe(false);
+  });
+
+  it("uncontrolled selection: the automatic reset notifies the observer", () => {
+    const received: string[][] = [];
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+        onSelectionChange: (ids) => received.push(ids),
+      });
+    });
+    act(() => result.current.table.selection?.toggle("a"));
+    expect(received.at(-1)).toEqual(["a"]);
+    // The designed resetKey behavior: a search change empties the
+    // selection AND tells the observer about it.
+    act(() => result.current.table.source.setSearch("zzz"));
+    expect(received.at(-1)).toEqual([]);
   });
 
   it("does not loop when an uncontrolled inline handler stores the selection", () => {

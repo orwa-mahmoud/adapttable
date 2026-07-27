@@ -80,17 +80,14 @@ describe("useDataTable", () => {
     expect(result.current.labels.search).toBe("Buscar");
   });
 
-  it("filters columns by layout (mobile drops hideOnDesktop-aware set)", () => {
+  it("filters columns by layout (explicit hideOnMobile always wins)", () => {
     const mobileCols: ColumnDef<Row>[] = [
       ...cols,
       { key: "x", header: "X", hideOnMobile: true },
     ];
     const { result } = mount("", { columns: mobileCols, isMobile: true });
-    expect(result.current.columns.map((c) => c.key)).toEqual([
-      "name",
-      "city",
-      "x",
-    ]);
+    // x sits inside the identity-anchor window, but its explicit hide wins.
+    expect(result.current.columns.map((c) => c.key)).toEqual(["name", "city"]);
   });
 
   it("toggleSort cycles asc → desc → cleared through the source", () => {
