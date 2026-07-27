@@ -190,6 +190,41 @@ describe("useTableData / useServerData — server tier", () => {
     expect(onQueryChange).toHaveBeenCalledTimes(1);
   });
 
+  it("clamps a stale out-of-range deep link to the last page", async () => {
+    const onQueryChange = vi.fn();
+    const adapter = createMemoryAdapter("page=999");
+    const { result } = renderHook(() =>
+      useServerData<Row>({
+        rows: ROWS,
+        total: 50, // 5 pages at the default limit of 25 → 2 pages
+        loading: false,
+        onQueryChange,
+        adapter,
+      })
+    );
+    await waitFor(() => {
+      expect(result.current.page).toBe(2);
+    });
+    // The URL self-heals too, and the corrected query is re-emitted.
+    expect(adapter.getSearch()).toContain("page=2");
+    expect(onQueryChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
+    // While a request is in flight, no clamping happens (total may be stale).
+    const loadingAdapter = createMemoryAdapter("page=999");
+    const loadingView = renderHook(() =>
+      useServerData<Row>({
+        rows: [],
+        total: 0,
+        loading: true,
+        onQueryChange: vi.fn(),
+        adapter: loadingAdapter,
+      })
+    );
+    expect(loadingView.result.current.page).toBe(999);
+  });
+
   it("aborts the superseded request when the query changes", () => {
     const seen: AbortSignal[] = [];
     const onQueryChange = vi.fn((_q, { signal }: { signal: AbortSignal }) => {

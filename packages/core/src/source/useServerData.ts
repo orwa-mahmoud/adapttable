@@ -115,6 +115,17 @@ export function useServerData<TRow>(
 
   useEffect(() => emitQuery(), [queryKey, generation, emitQuery]);
 
+  // Clamp out-of-range pages (hand-edited / stale shared links) once the
+  // total is known and nothing is in flight — mirrors useBackendData, so a
+  // ?page=999 deep link self-heals to the last real page (and the URL is
+  // rewritten) instead of showing an empty state the pager disagrees with.
+  const { setPage } = state;
+  useEffect(() => {
+    if (loading || total <= 0) return;
+    const lastPage = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+    if (page > lastPage) setPage(lastPage);
+  }, [loading, total, limit, page, setPage]);
+
   return {
     rows,
     total,
