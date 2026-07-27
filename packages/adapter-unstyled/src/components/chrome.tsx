@@ -1,5 +1,6 @@
 import {
   type ActiveFilterChip,
+  bulkActionErrorMessage,
   type BulkBarChromeProps,
   pageSizeOptions,
   type PaginationInfo,
@@ -85,12 +86,16 @@ export function BulkBar({
     allMatching,
     selectAllMatching,
   } = selection;
-  const { pending, run } = useBulkActionRunner({
+  const { pending, error, run } = useBulkActionRunner({
     confirm,
     cancelLabel: labels.cancel,
-    onComplete: clear,
+    // Clear only on success — a failed run keeps the selection for retry.
+    onComplete: (outcome) => {
+      if (outcome.status === "success") clear();
+    },
   });
   if (selectedCount === 0) return null;
+  const errorMessage = bulkActionErrorMessage(error);
   const ids = [...selectedIds];
   // Offer the cross-page scope only when a full page is selected and more
   // rows match elsewhere; once active, actions run against the whole set.
@@ -144,6 +149,15 @@ export function BulkBar({
           </button>
         );
       })}
+      {errorMessage !== null && (
+        <span
+          role="alert"
+          data-adapttable-part="bulk-error"
+          className={classNames.bulkError}
+        >
+          {`${labels.errorTitle}: ${errorMessage}`}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,7 +1,11 @@
 import type { SelectionState } from "../selection/useSelection";
 import type { BulkAction, BulkActionContext, TableLabels } from "../types";
 import { type ConfirmHandler } from "./confirm";
-import { useBulkActionRunner } from "./useBulkActionRunner";
+import {
+  bulkActionErrorMessage,
+  type BulkActionOutcome,
+  useBulkActionRunner,
+} from "./useBulkActionRunner";
 
 /** Options for {@link useBulkBarState}. */
 export interface UseBulkBarStateOptions {
@@ -23,6 +27,12 @@ export interface BulkBarState {
   ids: string[];
   /** Key of the action currently running, or `null`. */
   pending: string | null;
+  /**
+   * Message of the last failed run, or `null`. The selection is KEPT on
+   * failure (so the user can retry); adapters render this in the bar,
+   * ideally in a live region.
+   */
+  errorMessage: string | null;
   /** Run a bulk action against `ids` (and `scope` when "all matching" is on). */
   run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
   /** Clear the selection. */
@@ -51,11 +61,15 @@ export function useBulkBarState({
   labels,
 }: Readonly<UseBulkBarStateOptions>): BulkBarState {
   const { selectedIds, selectedCount, clear } = selection;
-  const { pending, run } = useBulkActionRunner({
+  const { pending, error, run } = useBulkActionRunner({
     confirm,
     cancelLabel: labels.cancel,
-    onComplete: clear,
+    // Clear only on success — a failed run keeps the selection for retry.
+    onComplete: (outcome: BulkActionOutcome) => {
+      if (outcome.status === "success") clear();
+    },
   });
+  const errorMessage = bulkActionErrorMessage(error);
   const ids = [...selectedIds];
   // A full page is selected but more rows match elsewhere → show the
   // two-state "select all N matching" banner instead of the plain count.
@@ -77,5 +91,15 @@ export function useBulkBarState({
         action: labels.selectAllMatching(total),
         onClick: selection.selectAllMatching,
       };
-  return { selectedCount, ids, pending, run, clear, expandable, scope, banner };
+  return {
+    selectedCount,
+    ids,
+    pending,
+    errorMessage,
+    run,
+    clear,
+    expandable,
+    scope,
+    banner,
+  };
 }

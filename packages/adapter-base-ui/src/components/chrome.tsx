@@ -254,8 +254,17 @@ export function BulkBar({
   labels,
   accentColor,
 }: Readonly<BulkBarChromeProps & { accentColor?: BaseUiAccentColor }>) {
-  const { selectedCount, ids, pending, run, clear, expandable, scope, banner } =
-    useBulkBarState({ selection, total, confirm, labels });
+  const {
+    selectedCount,
+    ids,
+    pending,
+    errorMessage,
+    run,
+    clear,
+    expandable,
+    scope,
+    banner,
+  } = useBulkBarState({ selection, total, confirm, labels });
   if (selectedCount === 0) return null;
   return (
     <Flex gap="2" justify="between" wrap="wrap" align="center">
@@ -301,6 +310,11 @@ export function BulkBar({
             </Tooltip>
           );
         })}
+        {errorMessage !== null && (
+          <Text size="2" color="red" role="alert">
+            {`${labels.errorTitle}: ${errorMessage}`}
+          </Text>
+        )}
       </Flex>
     </Flex>
   );

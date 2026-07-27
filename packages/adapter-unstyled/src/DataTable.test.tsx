@@ -471,6 +471,27 @@ describe("<DataTable> (unstyled)", () => {
     });
   });
 
+  it("a rejecting bulk action shows the error and keeps the selection", async () => {
+    const onClick = vi.fn().mockRejectedValue(new Error("backend said no"));
+    renderHarness({
+      override: {
+        bulkActions: [{ key: "del", label: "Delete", onClick }],
+      },
+    });
+    fireEvent.click(screen.getByLabelText("Select all"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Delete"));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    // The failure is announced in the bar and the selection survives for
+    // a retry — nothing vanishes into an unhandled rejection.
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveAttribute("data-adapttable-part", "bulk-error");
+    expect(alert).toHaveTextContent("Something went wrong: backend said no");
+    expect(screen.getByText("2 selected")).toBeInTheDocument();
+  });
+
   it("hides the select-all banner when the page holds every match", () => {
     renderHarness({
       override: {

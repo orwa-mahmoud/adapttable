@@ -39,6 +39,8 @@ export {
   runRowAction,
 } from "./actions/confirm";
 export {
+  bulkActionErrorMessage,
+  type BulkActionOutcome,
   type BulkActionRunner,
   useBulkActionRunner,
   type UseBulkActionRunnerOptions,

@@ -87,6 +87,8 @@ export interface DataTableClassNames {
   resizeHandle?: string;
   bulkBar?: string;
   bulkButton?: string;
+  /** The failure line shown in the bulk bar after a rejected bulk action. */
+  bulkError?: string;
   /** The cross-page banner inside the bulk bar (full page selected). */
   selectAllBanner?: string;
   /** The banner's status text (page selected / all matching selected). */

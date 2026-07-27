@@ -245,8 +245,17 @@ export function BulkBar({
   labels,
   colorScheme,
 }: Readonly<BulkBarChromeProps & { colorScheme?: string }>) {
-  const { selectedCount, ids, pending, run, clear, expandable, scope, banner } =
-    useBulkBarState({ selection, total, confirm, labels });
+  const {
+    selectedCount,
+    ids,
+    pending,
+    errorMessage,
+    run,
+    clear,
+    expandable,
+    scope,
+    banner,
+  } = useBulkBarState({ selection, total, confirm, labels });
   if (selectedCount === 0) return null;
   return (
     <HStack gap={2} justify="space-between" flexWrap="wrap">
@@ -291,6 +300,11 @@ export function BulkBar({
             </Tooltip>
           );
         })}
+        {errorMessage !== null && (
+          <Text fontSize="sm" color="red.500" role="alert">
+            {`${labels.errorTitle}: ${errorMessage}`}
+          </Text>
+        )}
       </HStack>
     </HStack>
   );

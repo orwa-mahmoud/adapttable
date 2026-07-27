@@ -1,5 +1,6 @@
 import {
   type ActiveFilterChip,
+  bulkActionErrorMessage,
   type BulkBarChromeProps,
   type Direction,
   pageSizeOptions,
@@ -226,9 +227,13 @@ export function BulkBar(props: Readonly<BulkBarChromeProps>) {
   const runner = useBulkActionRunner({
     confirm,
     cancelLabel: labels.cancel,
-    onComplete: selection.clear,
+    // Clear only on success — a failed run keeps the selection for retry.
+    onComplete: (outcome) => {
+      if (outcome.status === "success") selection.clear();
+    },
   });
   if (selection.selectedCount === 0) return null;
+  const errorMessage = bulkActionErrorMessage(runner.error);
   const ids = [...selection.selectedIds];
   const busy = runner.pending !== null;
   const crossPage =
@@ -254,9 +259,14 @@ export function BulkBar(props: Readonly<BulkBarChromeProps>) {
   }
   return (
     <Alert
-      type="info"
+      type={errorMessage === null ? "info" : "error"}
       banner
       title={message}
+      description={
+        errorMessage === null ? undefined : (
+          <span role="alert">{`${labels.errorTitle}: ${errorMessage}`}</span>
+        )
+      }
       action={
         <Space size="small" wrap>
           <Button

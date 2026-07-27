@@ -127,7 +127,44 @@ describe("useBulkActionRunner", () => {
       allMatching: false,
       total: 2,
     });
-    expect(onComplete).toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalledWith({ status: "success" });
+    expect(result.current.error).toBeNull();
+  });
+
+  it("catches a rejecting action: no unhandled rejection, outcome + error surfaced", async () => {
+    const boom = new Error("backend said no");
+    const onClick = vi.fn().mockRejectedValue(boom);
+    const onComplete = vi.fn();
+    const unhandled = vi.fn();
+    process.on("unhandledRejection", unhandled);
+    const { result } = renderHook(() =>
+      useBulkActionRunner({
+        confirm: vi.fn(),
+        cancelLabel: "Cancel",
+        onComplete,
+      })
+    );
+    await act(async () => {
+      result.current.run({ key: "x", label: "X", onClick }, ["a"]);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    // Flush the microtask queue fully so a stray rejection would fire.
+    await act(async () => new Promise((r) => setTimeout(r, 0)));
+    process.off("unhandledRejection", unhandled);
+
+    expect(unhandled).not.toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalledWith({ status: "error", error: boom });
+    expect(result.current.error).toBe(boom);
+    expect(result.current.pending).toBeNull();
+
+    // The next run clears the stale error.
+    const okClick = vi.fn().mockResolvedValue(undefined);
+    await act(async () => {
+      result.current.run({ key: "y", label: "Y", onClick: okClick }, ["a"]);
+      await Promise.resolve();
+    });
+    expect(result.current.error).toBeNull();
   });
 
   it("no-ops on an empty id list", () => {

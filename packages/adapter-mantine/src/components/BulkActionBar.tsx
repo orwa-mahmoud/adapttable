@@ -1,5 +1,6 @@
 import {
   type BulkAction,
+  bulkActionErrorMessage,
   type BulkBarChromeProps,
   resolveDisabledReason,
   type SelectionState,
@@ -17,14 +18,18 @@ export function BulkActionBar({
   labels,
 }: Readonly<BulkBarChromeProps>) {
   const { selectedIds, selectedCount, clear, allMatching } = selection;
-  const { pending, run } = useBulkActionRunner({
+  const { pending, error, run } = useBulkActionRunner({
     confirm,
     cancelLabel: labels.cancel,
-    onComplete: clear,
+    // Clear only on success — a failed run keeps the selection for retry.
+    onComplete: (outcome) => {
+      if (outcome.status === "success") clear();
+    },
   });
 
   if (selectedCount === 0) return null;
 
+  const errorMessage = bulkActionErrorMessage(error);
   const ids = [...selectedIds];
   return (
     <Stack gap="xs">
@@ -56,6 +61,11 @@ export function BulkActionBar({
         </Group>
       </Group>
       <ScopeBanner selection={selection} total={total} labels={labels} />
+      {errorMessage !== null && (
+        <Text fz="sm" c="red" role="alert">
+          {`${labels.errorTitle}: ${errorMessage}`}
+        </Text>
+      )}
     </Stack>
   );
 }

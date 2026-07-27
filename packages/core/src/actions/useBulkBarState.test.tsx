@@ -113,4 +113,35 @@ describe("useBulkBarState", () => {
       total: 30,
     });
   });
+
+  it("keeps the selection and exposes the message when a run fails", async () => {
+    const selection = makeSelection({});
+    const clear = selection.clear as ReturnType<typeof vi.fn>;
+    const { result } = renderHook(() =>
+      useBulkBarState({ selection, total: 2, confirm: vi.fn(), labels })
+    );
+    const failing = vi.fn().mockRejectedValue(new Error("nope"));
+    await act(async () => {
+      result.current.run(
+        { key: "x", label: "X", onClick: failing },
+        result.current.ids
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(result.current.errorMessage).toBe("nope");
+    expect(clear).not.toHaveBeenCalled();
+
+    // A successful run clears the selection (and the error).
+    const ok = vi.fn().mockResolvedValue(undefined);
+    await act(async () => {
+      result.current.run(
+        { key: "y", label: "Y", onClick: ok },
+        result.current.ids
+      );
+      await Promise.resolve();
+    });
+    expect(result.current.errorMessage).toBeNull();
+    expect(clear).toHaveBeenCalled();
+  });
 });
