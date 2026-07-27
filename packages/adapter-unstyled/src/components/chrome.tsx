@@ -344,7 +344,6 @@ export function LoadingState({
   const columnKeys = Array.from({ length: columnCount }, (_, i) => i);
   return (
     <div
-      role="status"
       aria-busy="true"
       aria-live="polite"
       data-adapttable-part="loading"

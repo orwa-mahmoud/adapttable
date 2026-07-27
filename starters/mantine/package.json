@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/core": "^1.0.0",
-    "@adapttable/mantine": "^1.2.0",
+    "@adapttable/core": "^2.0.0",
+    "@adapttable/mantine": "^2.0.0",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
     "react": "^19.2.7",

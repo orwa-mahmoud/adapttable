@@ -759,7 +759,6 @@ export function DesktopTable<TRow>({
       <tbody data-adapttable-part="tbody" className={classNames.tbody}>
         {paddingTop > 0 && (
           <tr
-            role="presentation"
             data-adapttable-part="virtual-spacer"
             className={classNames.virtualSpacer}
           >
@@ -869,7 +868,6 @@ export function DesktopTable<TRow>({
             })}
         {paddingBottom > 0 && (
           <tr
-            role="presentation"
             data-adapttable-part="virtual-spacer"
             className={classNames.virtualSpacer}
           >
@@ -1191,7 +1189,6 @@ export function MobileCards<TRow>({
     >
       {paddingTop > 0 && (
         <li
-          aria-hidden
           data-adapttable-part="virtual-spacer"
           className={classNames.virtualSpacer}
           style={{ display: "block", height: paddingTop }}
@@ -1216,7 +1213,6 @@ export function MobileCards<TRow>({
         : entries.map(({ row, index, key }) => renderCard(row, index, key))}
       {paddingBottom > 0 && (
         <li
-          aria-hidden
           data-adapttable-part="virtual-spacer"
           className={classNames.virtualSpacer}
           style={{ display: "block", height: paddingBottom }}
