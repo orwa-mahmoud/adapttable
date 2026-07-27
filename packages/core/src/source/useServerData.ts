@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
+import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
 import type { SortLevel } from "../sort/compare";
-import type { ExtraFilters, SortDirection } from "../types";
+import type { ExtraFilters, PaginationMode, SortDirection } from "../types";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
+import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
 import type { TableSource } from "./TableSource";
 
@@ -48,6 +50,10 @@ export interface UseServerDataOptions<TRow> extends Pick<
   loading?: boolean;
   /** Forwarded error to display. */
   error?: Error | null;
+  /** Pagination mode. Defaults to `"auto"` (mobile → infinite). */
+  paginationMode?: PaginationMode;
+  /** Force the resolved mobile state instead of a media query (test/SSR seam). */
+  forceMobile?: boolean;
   /**
    * Fired with the consolidated {@link TableQuery} whenever it changes —
    * including once on mount with the URL-restored values. The previous
@@ -67,6 +73,12 @@ export interface UseServerDataOptions<TRow> extends Pick<
  * `rows` + `total`. No query library required — and the full
  * `useQuerySource` tier remains for callers who want one.
  *
+ * Implements the shared source contract: `isLoading` covers the first
+ * load only, `isFetching` any in-flight request, and in infinite mode
+ * `fetchNextPage` APPENDS the next page's rows to those on screen
+ * (accumulating across `onQueryChange` round-trips) instead of replacing
+ * them.
+ *
  * @typeParam TRow - The row type.
  */
 export function useServerData<TRow>(
@@ -77,9 +89,16 @@ export function useServerData<TRow>(
     total,
     loading = false,
     error = null,
+    paginationMode = "auto",
+    forceMobile,
     onQueryChange,
     ...urlOptions
   } = options;
+  const mediaMobile = useIsMobile();
+  const isMobile = forceMobile ?? mediaMobile;
+  const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
+  const paged = resolvedMode === "paged";
+
   const state = useTableUrlState(urlOptions);
   const { page, limit, search, sortBy, sortDir, groupBy, sortLevels, extra } =
     state;
@@ -117,6 +136,22 @@ export function useServerData<TRow>(
 
   useEffect(() => emitQuery(), [queryKey, generation, emitQuery]);
 
+  // `isLoading` covers the FIRST load only — TanStack's reference
+  // semantics: fetching with no data yet. Once rows have ever been present
+  // or one load has completed (loading transitions true → false), later
+  // refreshes never re-raise it — even a refresh that empties `rows`.
+  // Latched in an idempotent effect body so StrictMode's simulated remount
+  // cannot mark it early.
+  const rowsPresent = rows.length > 0;
+  const sawLoadingRef = useRef(false);
+  const firstLoadDoneRef = useRef(false);
+  useEffect(() => {
+    if (rowsPresent) firstLoadDoneRef.current = true;
+    if (loading) sawLoadingRef.current = true;
+    else if (sawLoadingRef.current) firstLoadDoneRef.current = true;
+  }, [loading, rowsPresent]);
+  const isLoading = loading && !rowsPresent && !firstLoadDoneRef.current;
+
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
   // total is known and nothing is in flight — mirrors useQuerySource, so a
   // ?page=999 deep link self-heals to the last real page (and the URL is
@@ -128,8 +163,58 @@ export function useServerData<TRow>(
     if (page > lastPage) setPage(lastPage);
   }, [loading, total, limit, page, setPage]);
 
+  // Infinite-append accumulation: `fetchNextPage` stashes the rows already
+  // on screen (plus the CURRENT `rows` prop identity) and advances the
+  // page; the stashed rows alone stay on screen until the caller hands
+  // back a NEW `rows` array for the advanced page, which is then appended.
+  // Any base-query change (sort/filter/search/limit), a direct page jump,
+  // or an error invalidates the stash, falling back to replacement.
+  const baseKey = stableKey({
+    limit,
+    search,
+    sortBy,
+    sortDir,
+    sortLevels,
+    filters: extra,
+  });
+  const [stash, setStash] = useState<{
+    key: string;
+    page: number;
+    rows: readonly TRow[];
+    prevProp: readonly TRow[];
+  } | null>(null);
+  const appending =
+    stash !== null && stash.key === baseKey && stash.page === page;
+  // The advanced page's response hasn't landed while the caller still
+  // passes the identical `rows` array the append started from.
+  const appendPending = appending && rows === stash.prevProp;
+  useEffect(() => {
+    // Memory hygiene + failure recovery: a stash for a superseded base
+    // query can never apply, and an errored append stops accumulating.
+    if (stash !== null && (stash.key !== baseKey || error !== null)) {
+      setStash(null);
+    }
+  }, [stash, baseKey, error]);
+
+  const displayRows = useMemo<readonly TRow[]>(() => {
+    if (!appending) return rows;
+    return appendPending ? stash.rows : [...stash.rows, ...rows];
+  }, [appending, appendPending, stash, rows]);
+
+  const hasNextPage = !paged && page * limit < total;
+  const fetchNextPage = useEventCallback(() => {
+    if (paged || loading || appendPending || !hasNextPage) return;
+    setStash({
+      key: baseKey,
+      page: page + 1,
+      rows: displayRows,
+      prevProp: rows,
+    });
+    setPage(page + 1);
+  });
+
   return {
-    rows,
+    rows: displayRows,
     total,
     page,
     limit,
@@ -138,12 +223,12 @@ export function useServerData<TRow>(
     sortDir,
     groupBy,
     extra,
-    isLoading: loading && rows.length === 0,
+    isLoading,
     isFetching: loading,
-    isFetchingNextPage: false,
-    hasNextPage: page * limit < total,
+    isFetchingNextPage: appendPending,
+    hasNextPage,
     error,
-    paginationMode: "paged",
+    paginationMode: resolvedMode,
     setPage: state.setPage,
     setLimit: state.setLimit,
     setSort: state.setSort,
@@ -155,7 +240,17 @@ export function useServerData<TRow>(
     setExtras: state.setExtras,
     clearExtras: state.clearExtras,
     clearAll: state.clearAll,
-    fetchNextPage: () => state.setPage(page + 1),
-    refetch: () => setGeneration((g) => g + 1),
+    fetchNextPage,
+    refetch: () => {
+      // Re-emitting the query IS this tier's fetch mechanism — the caller
+      // runs the request. Without a handler there is nothing to re-run.
+      if (!onQueryChange) {
+        devWarn(
+          "refetch() has nothing to re-run without an `onQueryChange` handler."
+        );
+        return;
+      }
+      setGeneration((g) => g + 1);
+    },
   };
 }

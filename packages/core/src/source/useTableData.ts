@@ -333,6 +333,7 @@ export function useTableData<TRow>(
     total,
     loading,
     error,
+    paginationMode,
     onQueryChange: tier === "server" ? onQueryChange : undefined,
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,

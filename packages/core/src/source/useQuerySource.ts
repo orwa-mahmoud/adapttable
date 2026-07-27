@@ -171,13 +171,17 @@ export function useQuerySource<
   }, [paged, query.isLoading, query.isFetching, total, limit, page, state]);
 
   // Query libraries hand back a FRESH result object every render — latch
-  // it so these two keep permanent identity (they gate the source memo).
+  // it so these two keep stable identity (they gate the source memo).
+  // Shared contract: append semantics exist only in infinite mode — paged
+  // navigation is `setPage`, so in paged mode `fetchNextPage` no-ops and
+  // the append flags below read false instead of leaking TanStack's values.
   const queryRef = useRef(query);
   queryRef.current = query;
   const fetchNextPage = useCallback(() => {
+    if (paged) return;
     const live = queryRef.current;
     if (live.hasNextPage && !live.isFetchingNextPage) void live.fetchNextPage();
-  }, []);
+  }, [paged]);
 
   const refetch = useCallback(() => queryRef.current.refetch(), []);
 
@@ -205,8 +209,8 @@ export function useQuerySource<
       total,
       isLoading: query.isLoading,
       isFetching: query.isFetching,
-      isFetchingNextPage: query.isFetchingNextPage,
-      hasNextPage: query.hasNextPage,
+      isFetchingNextPage: paged ? false : query.isFetchingNextPage,
+      hasNextPage: paged ? false : query.hasNextPage,
       fetchNextPage,
       error: query.error,
       refetch,
@@ -233,6 +237,7 @@ export function useQuerySource<
     [
       rows,
       total,
+      paged,
       query.isLoading,
       query.isFetching,
       query.isFetchingNextPage,

@@ -363,7 +363,10 @@ describe("useTableData / useServerData — server tier", () => {
       useServerData<Row>({ rows: ROWS, total: 40, adapter })
     );
     expect(result.current.rows).toBe(ROWS);
-    expect(result.current.hasNextPage).toBe(true);
+    // Shared contract: append semantics are infinite-only — in paged mode
+    // more data is reached through setPage, never fetchNextPage.
+    expect(result.current.hasNextPage).toBe(false);
+    expect(result.current.total).toBe(40);
     expect(result.current.paginationMode).toBe("paged");
   });
 
@@ -380,7 +383,7 @@ describe("useTableData / useServerData — server tier", () => {
     expect(refresh.result.current.isFetching).toBe(true);
   });
 
-  it("refetch re-emits the same query; fetchNextPage advances the page", () => {
+  it("refetch re-emits the same query; paged fetchNextPage no-ops", () => {
     const onQueryChange = vi.fn();
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
@@ -390,9 +393,11 @@ describe("useTableData / useServerData — server tier", () => {
     // `refetch` is optional on TableSource but useServerData always sets it.
     act(() => result.current.refetch!());
     expect(onQueryChange).toHaveBeenCalledTimes(2);
+    expect(onQueryChange.mock.calls.at(-1)![0].page).toBe(1);
+    // Shared contract: fetchNextPage appends in infinite mode only — in
+    // paged mode it never advances the page (that is setPage's job).
     act(() => result.current.fetchNextPage());
-    expect(onQueryChange).toHaveBeenCalledTimes(3);
-    expect(onQueryChange.mock.calls.at(-1)![0].page).toBe(2);
+    expect(onQueryChange).toHaveBeenCalledTimes(2);
   });
 
   it("aborts the in-flight request on unmount", () => {
