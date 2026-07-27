@@ -52,6 +52,12 @@ describe("useTableUrlState", () => {
     expect(result.current.sortDir).toBe("asc");
   });
 
+  it("defaults.sortBy alone sorts ascending (no broken tri-state)", () => {
+    const { result } = renderWith("", { defaults: { sortBy: "name" } });
+    expect(result.current.sortBy).toBe("name");
+    expect(result.current.sortDir).toBe("asc");
+  });
+
   it("applies default extra filters and lets URL values override them", () => {
     const withDefaults = renderWith("", {
       defaults: { extra: { status: "Active", team: ["Core"] } },

@@ -190,6 +190,33 @@ describe("useDataTable", () => {
       );
     });
 
+    it("defaults.sortBy alone sorts, reports aria-sort, and cycles on click", () => {
+      const adapter = createMemoryAdapter("");
+      const { result } = renderHook(() => {
+        const source = useFrontendData<Row>({
+          data: [...ROWS].reverse(),
+          adapter,
+          columns: cols,
+          paginationMode: "paged",
+          defaults: { sortBy: "name" },
+        });
+        return useDataTable<Row>({
+          source,
+          columns: cols,
+          rowKey: (r) => r.id,
+        });
+      });
+      // Data is actually ordered ascending, and the header says so.
+      expect(result.current.rows.map((r) => r.name)).toEqual(["Alice", "Bob"]);
+      expect(result.current.getHeaderCellProps(cols[0]!)["aria-sort"]).toBe(
+        "ascending"
+      );
+      // First click cycles to descending instead of clearing.
+      act(() => result.current.toggleSort("name"));
+      expect(result.current.sortDir).toBe("desc");
+      expect(result.current.rows.map((r) => r.name)).toEqual(["Bob", "Alice"]);
+    });
+
     it("maps center alignment to a centered cell", () => {
       const { result } = mount();
       const centered: ColumnDef<Row> = {

@@ -161,9 +161,13 @@ export function useTableUrlState(
   ).trim();
   const sortByRaw = params.get(ns + PARAM_SORT_BY);
   const sortBy = sortByRaw === null ? defaults.sortBy : sortByRaw || undefined;
-  // A defaulted sort adopts the defaulted direction; an explicit URL sort
-  // with no direction falls back to ascending.
-  const sortDirFallback = sortByRaw === null ? defaults.sortDir : "asc";
+  // A defaulted sort adopts the defaulted direction — else ascending, so
+  // `defaults: { sortBy }` alone still yields a real sort (data actually
+  // ordered, aria-sort truthful, first header click cycles to descending
+  // instead of clearing). An explicit URL sort with no direction falls
+  // back to ascending too.
+  const sortDirFallback =
+    sortByRaw === null ? (defaults.sortDir ?? "asc") : "asc";
   const sortDir =
     sortBy === undefined
       ? undefined
