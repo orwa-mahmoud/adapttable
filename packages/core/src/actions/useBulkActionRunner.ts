@@ -87,9 +87,9 @@ export function useBulkActionRunner({
           setError(null);
           await action.onClick(ids, scope);
           onComplete?.({ status: "success" });
-        } catch (thrown) {
-          setError(thrown);
-          onComplete?.({ status: "error", error: thrown });
+        } catch (error_) {
+          setError(error_);
+          onComplete?.({ status: "error", error: error_ });
         } finally {
           setPending(null);
         }
