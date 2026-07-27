@@ -4713,7 +4713,7 @@ through the rename table below.
   always performs the change itself, then notifies. _Why: providing a
   logging handler used to silently replace the built-in mutation._ Take
   full control via `source.setGroupBy` / `source.clearExtras`.
-- **One source-flag contract (TanStack semantics).** `isLoading` = first
+- **One source-flag contract.** `isLoading` = first
   load only; `isFetching` = any in-flight; `hasNextPage`/`fetchNextPage` =
   infinite-append only (false / no-op when paged); `refetch` really
   re-runs. The `onQueryChange` tier now APPENDS on `fetchNextPage`

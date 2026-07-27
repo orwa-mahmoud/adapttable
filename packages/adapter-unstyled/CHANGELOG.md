@@ -50,7 +50,7 @@
     />;
     ```
 
-  - **One source-flag contract (TanStack semantics).** `isLoading` is
+  - **One source-flag contract.** `isLoading` is
     first-load only; `isFetching` is any in-flight request;
     `hasNextPage` / `fetchNextPage` are infinite-append only; `refetch`
     really re-runs. The `onQueryChange` tier now **appends** on
@@ -183,7 +183,7 @@
     />;
     ```
 
-  - **One source-flag contract (TanStack semantics).** `isLoading` is
+  - **One source-flag contract.** `isLoading` is
     first-load only; `isFetching` is any in-flight request;
     `hasNextPage` / `fetchNextPage` are infinite-append only; `refetch`
     really re-runs. The `onQueryChange` tier now **appends** on
