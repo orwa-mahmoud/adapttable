@@ -22,8 +22,11 @@
   },
   "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
+    "LICENSE",
     "dist",
     "src/styles.css",
     "README.md",

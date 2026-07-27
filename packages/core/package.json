@@ -29,6 +29,7 @@
   "type": "module",
   "sideEffects": false,
   "files": [
+    "LICENSE",
     "dist",
     "README.md",
     "CHANGELOG.md"
