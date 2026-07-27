@@ -47,7 +47,7 @@ function Harness(props: {
       source={source}
       columns={columns}
       rowKey={(r) => r.id}
-      isMobile={props.isMobile}
+      forceMobile={props.isMobile}
       {...props.override}
     />
   );
@@ -119,6 +119,20 @@ describe("<DataTable> (unstyled)", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Edit" })[0]!);
     expect(onAction).toHaveBeenCalled();
     expect(onRowClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("the v1 isMobile alias still forces the card layout (removed before release)", () => {
+    render(
+      <DataTable<Row>
+        data={ROWS}
+        columns={columns}
+        rowKey={(r) => r.id}
+        isMobile
+      />
+    );
+    expect(
+      document.querySelector('[data-adapttable-part="cards"]')
+    ).toBeInTheDocument();
   });
 
   it("renders a semantic table with rows and data hooks", () => {

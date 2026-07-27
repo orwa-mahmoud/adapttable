@@ -108,7 +108,7 @@ describe("summaryRow (Mantine)", () => {
   });
 
   it("mobile: renders no summary card without the prop", () => {
-    renderTable({ isMobile: true });
+    renderTable({ forceMobile: true });
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
 });

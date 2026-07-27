@@ -43,7 +43,7 @@ function Harness(props: {
       source={source}
       columns={columns}
       rowKey={(r) => r.id}
-      isMobile={props.isMobile}
+      forceMobile={props.isMobile}
       groupBy="team"
       groupAggregates={(rows) => ({ name: rows.length })}
       {...props.override}

@@ -64,7 +64,7 @@ describe("accessibility (axe) — Mantine", () => {
   });
 
   it("mobile card layout has no violations", async () => {
-    const { container } = renderTable({ isMobile: true });
+    const { container } = renderTable({ forceMobile: true });
     expect(await axe(container, axeOpts)).toHaveNoViolations();
   });
 });

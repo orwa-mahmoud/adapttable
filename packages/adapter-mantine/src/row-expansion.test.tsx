@@ -39,7 +39,7 @@ function Harness(props: HarnessProps) {
       columns={columns}
       rowKey={(r) => r.id}
       renderRowDetail={renderRowDetail}
-      isMobile={props.isMobile}
+      forceMobile={props.isMobile}
       {...props.override}
     />
   );

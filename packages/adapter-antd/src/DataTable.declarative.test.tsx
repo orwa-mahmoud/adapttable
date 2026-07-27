@@ -162,7 +162,7 @@ describe("summaryRow (antd native summary)", () => {
   });
 
   it("renders no mobile summary card without the prop", () => {
-    const { container } = renderHarness({ override: { isMobile: true } });
+    const { container } = renderHarness({ override: { forceMobile: true } });
     expect(
       container.querySelector('[data-adapttable-part="summary-card"]')
     ).toBeNull();

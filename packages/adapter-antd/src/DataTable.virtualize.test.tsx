@@ -124,7 +124,7 @@ describe("<DataTable> (Ant Design) mobile card windowing", () => {
   });
 
   it("renders every card when virtualize is off (no windowing)", () => {
-    const { container } = mount({ isMobile: true });
+    const { container } = mount({ forceMobile: true });
     const list = cardList(container);
     // The real hook stays disabled, so all 50 source rows render as cards.
     expect(within(list).getAllByRole("listitem")).toHaveLength(50);

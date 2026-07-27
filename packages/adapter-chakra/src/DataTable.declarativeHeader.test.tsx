@@ -123,7 +123,7 @@ describe("summaryRow (Chakra)", () => {
   });
 
   it("mobile: renders no summary card without summaryRow", () => {
-    renderTable({ isMobile: true });
+    renderTable({ forceMobile: true });
     expect(screen.getAllByRole("listitem")).toHaveLength(PEOPLE.length);
   });
 });

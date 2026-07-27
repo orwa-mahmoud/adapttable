@@ -58,6 +58,8 @@ export interface BaseDataTableProps<TRow> {
    */
   density?: "comfortable" | "compact";
   /** Force the mobile layout (otherwise resolved from the viewport). */
+  forceMobile?: boolean;
+  /** Alias for `forceMobile` (v1 name) — deleted before the 2.0.0 release. */
   isMobile?: boolean;
   /** Leading desktop-visible columns kept on mobile even if hideOnMobile. */
   mobileIdentityColumns?: number;

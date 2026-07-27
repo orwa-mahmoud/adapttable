@@ -52,7 +52,7 @@ function Harness({ withDetail, isMobile, summaryRow }: HarnessProps) {
       rowKey={rowKey}
       bulkActions={bulkActions}
       renderRowDetail={withDetail ? renderRowDetail : undefined}
-      isMobile={isMobile}
+      forceMobile={isMobile}
       summaryRow={summaryRow}
     />
   );

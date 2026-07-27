@@ -243,6 +243,7 @@ export function useTableChrome<TRow>(
     tableLabel,
     labels,
     dir,
+    forceMobile,
     isMobile: isMobileProp,
     mobileIdentityColumns,
     onRowsChange,
@@ -261,7 +262,7 @@ export function useTableChrome<TRow>(
   } = props;
 
   const autoMobile = useIsMobile();
-  const isMobile = isMobileProp ?? autoMobile;
+  const isMobile = forceMobile ?? isMobileProp ?? autoMobile;
   const confirm = confirmProp ?? defaultConfirm;
 
   // Declarative defaults (auto headers, dot-path accessors) resolve once

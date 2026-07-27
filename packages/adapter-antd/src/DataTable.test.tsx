@@ -589,7 +589,7 @@ describe("<DataTable> (Ant Design)", () => {
   });
 
   it("renders cards instead of a table on mobile", () => {
-    const { container } = renderHarness({ override: { isMobile: true } });
+    const { container } = renderHarness({ override: { forceMobile: true } });
     expect(
       container.querySelector('[data-adapttable-part="cards"]')
     ).toBeInTheDocument();
@@ -623,7 +623,7 @@ describe("<DataTable> (Ant Design)", () => {
   });
 
   it("shows the empty state on mobile too", () => {
-    renderHarness({ rows: [], override: { isMobile: true } });
+    renderHarness({ rows: [], override: { forceMobile: true } });
     expect(screen.queryByRole("listitem")).toBeNull();
     expect(screen.getAllByText("No data").length).toBeGreaterThan(0);
   });
@@ -948,7 +948,7 @@ describe("<DataTable> (Ant Design)", () => {
 
   it("tightens the card gap for density='compact' on mobile", () => {
     const { container } = renderHarness({
-      override: { isMobile: true, density: "compact" },
+      override: { forceMobile: true, density: "compact" },
     });
     // Compact density halves the vertical rhythm between cards.
     const list = container.querySelector<HTMLElement>(
@@ -976,7 +976,7 @@ describe("<DataTable> (Ant Design)", () => {
 
   it("prefetches a row on card hover in mobile mode", () => {
     const prefetch = vi.fn();
-    renderHarness({ override: { isMobile: true, prefetch } });
+    renderHarness({ override: { forceMobile: true, prefetch } });
     fireEvent.mouseEnter(screen.getByText("Alice").closest(".ant-card")!);
     expect(prefetch).toHaveBeenCalledWith(ROWS[0]);
   });
@@ -999,7 +999,7 @@ describe("<DataTable> (Ant Design)", () => {
   });
 
   it("derives mobile sort options from sortable columns when none are passed", () => {
-    renderHarness({ override: { isMobile: true } });
+    renderHarness({ override: { forceMobile: true } });
     // "name" is sortable, so the mobile toolbar exposes a Sort by select.
     expect(
       screen.getByRole("combobox", { name: "Sort by" })

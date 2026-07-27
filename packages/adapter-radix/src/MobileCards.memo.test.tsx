@@ -52,7 +52,7 @@ function mount(
         source={source}
         columns={columns}
         rowKey={rowKey}
-        isMobile
+        forceMobile
         bulkActions={bulkActions}
         {...override}
       />
