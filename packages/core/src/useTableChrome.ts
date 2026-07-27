@@ -273,7 +273,7 @@ export function useTableChrome<TRow>(
     columns: resolvedColumns,
     layout: columnLayoutProp,
     onLayoutChange: onColumnLayoutChange,
-    defaultLayout: defaultColumnLayout,
+    defaultColumnLayout,
   });
 
   // Effective groupBy: prop wins when provided (including `null` to force

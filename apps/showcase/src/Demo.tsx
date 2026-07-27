@@ -183,7 +183,7 @@ export function DemoBody({
 }>) {
   const { layout, onLayoutChange } = useColumnLayoutUrlState({
     urlKey,
-    defaultLayout: defaultColumnLayout,
+    defaultColumnLayout,
   });
   const onColumnLayoutChange = useCallback(
     (next: ColumnLayoutState) =>

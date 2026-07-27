@@ -15,6 +15,8 @@ export interface UseColumnLayoutStorageStateOptions {
   /** Storage backend. Defaults to `localStorage`; memory-only under SSR. */
   storage?: LayoutStorage;
   /** Layout applied when storage carries no saved layout yet. */
+  defaultColumnLayout?: Partial<ColumnLayoutState>;
+  /** Alias for `defaultColumnLayout` (v1 name) — deleted before the 2.0.0 release. */
   defaultLayout?: Partial<ColumnLayoutState>;
 }
 
@@ -116,12 +118,13 @@ function readStored(
 export function useColumnLayoutStorageState(
   options: UseColumnLayoutStorageStateOptions
 ): UseColumnLayoutStorageStateResult {
-  const { storageKey, defaultLayout } = options;
+  const { storageKey, defaultColumnLayout, defaultLayout } = options;
+  const baseLayout = defaultColumnLayout ?? defaultLayout;
   const storage = options.storage ?? safeLocalStorage();
 
   const fallback = useMemo<ColumnLayoutState>(
-    () => ({ ...EMPTY_COLUMN_LAYOUT, ...defaultLayout }),
-    [defaultLayout]
+    () => ({ ...EMPTY_COLUMN_LAYOUT, ...baseLayout }),
+    [baseLayout]
   );
   // Start from the default and hydrate from storage AFTER mount: reading
   // storage in the initializer made the client's first render differ from

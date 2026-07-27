@@ -36,7 +36,7 @@ describe("useColumnLayoutStorageState", () => {
       useColumnLayoutStorageState({
         storageKey: "t",
         storage,
-        defaultLayout: { hidden: ["email"] },
+        defaultColumnLayout: { hidden: ["email"] },
       })
     );
     expect(result.current.layout.hidden).toEqual(["email"]);
@@ -65,7 +65,7 @@ describe("useColumnLayoutStorageState", () => {
       useColumnLayoutStorageState({
         storageKey: "t",
         storage,
-        defaultLayout: { hidden: ["email"] },
+        defaultColumnLayout: { hidden: ["email"] },
       })
     );
     act(() =>

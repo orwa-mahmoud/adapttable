@@ -39,6 +39,8 @@ export interface UseColumnLayoutOptions<TRow> {
   /** Change handler; required for the controlled mode to update. */
   onLayoutChange?: (next: ColumnLayoutState) => void;
   /** Initial layout for the uncontrolled mode. */
+  defaultColumnLayout?: Partial<ColumnLayoutState>;
+  /** Alias for `defaultColumnLayout` (v1 name) — deleted before the 2.0.0 release. */
   defaultLayout?: Partial<ColumnLayoutState>;
 }
 
@@ -181,11 +183,12 @@ export function useColumnLayout<TRow>({
   columns,
   layout,
   onLayoutChange,
+  defaultColumnLayout,
   defaultLayout,
 }: UseColumnLayoutOptions<TRow>): UseColumnLayoutResult<TRow> {
   const [internal, setInternal] = useState<ColumnLayoutState>(() => ({
     ...EMPTY_COLUMN_LAYOUT,
-    ...defaultLayout,
+    ...(defaultColumnLayout ?? defaultLayout),
   }));
   const state = layout ?? internal;
 

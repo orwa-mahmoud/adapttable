@@ -53,14 +53,14 @@ describe("useColumnLayoutUrlState", () => {
 
   it("falls back to the default layout when the URL is empty", () => {
     const { result } = renderWith("", {
-      defaultLayout: { hidden: ["email", "team"] },
+      defaultColumnLayout: { hidden: ["email", "team"] },
     });
     expect(result.current.layout.hidden).toEqual(["email", "team"]);
   });
 
   it("prefers the URL layout over the default", () => {
     const { result } = renderWith("colHide=status", {
-      defaultLayout: { hidden: ["email", "team"] },
+      defaultColumnLayout: { hidden: ["email", "team"] },
     });
     expect(result.current.layout.hidden).toEqual(["status"]);
   });
@@ -113,7 +113,9 @@ describe("useColumnLayoutUrlState", () => {
   it("an explicitly emptied layout sticks instead of snapping back to the default", () => {
     // Unhiding the last default-hidden column empties the layout; deleting
     // every param would re-apply the default and instantly re-hide it.
-    const { result } = renderWith("", { defaultLayout: { hidden: ["email"] } });
+    const { result } = renderWith("", {
+      defaultColumnLayout: { hidden: ["email"] },
+    });
     expect(result.current.layout.hidden).toEqual(["email"]);
     act(() => {
       result.current.onLayoutChange({
@@ -128,7 +130,7 @@ describe("useColumnLayoutUrlState", () => {
 
   it("drops all params when the layout returns to the exact default", () => {
     const { result, adapter } = renderWith("colHide=status", {
-      defaultLayout: { hidden: ["email"] },
+      defaultColumnLayout: { hidden: ["email"] },
     });
     act(() => {
       result.current.onLayoutChange({

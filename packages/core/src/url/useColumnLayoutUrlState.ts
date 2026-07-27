@@ -30,6 +30,8 @@ export interface UseColumnLayoutUrlStateOptions {
   /** Alias for `urlSync` (v1 name) — deleted before the 2.0.0 release. */
   enabled?: boolean;
   /** Layout applied when the URL carries no column layout yet. */
+  defaultColumnLayout?: Partial<ColumnLayoutState>;
+  /** Alias for `defaultColumnLayout` (v1 name) — deleted before the 2.0.0 release. */
   defaultLayout?: Partial<ColumnLayoutState>;
   /**
    * Namespace for this table's params, so multiple tables can share one URL
@@ -61,7 +63,7 @@ export interface UseColumnLayoutUrlStateResult {
  * shared links, and re-mounts restore the exact layout. Feed the result into
  * a table's `columnLayout` / `onColumnLayoutChange`.
  *
- * `defaultLayout` applies only while the URL carries no layout. When the user
+ * `defaultColumnLayout` applies only while the URL carries no layout. When the user
  * explicitly empties the layout (e.g. unhides the last default-hidden
  * column), an empty `colHide=` marker records that emptiness — deleting every
  * param would resurrect the default on the next read. A change back to the
@@ -73,8 +75,16 @@ export interface UseColumnLayoutUrlStateResult {
 export function useColumnLayoutUrlState(
   options: UseColumnLayoutUrlStateOptions = {}
 ): UseColumnLayoutUrlStateResult {
-  const { urlAdapter, adapter, urlSync, enabled, defaultLayout, urlKey } =
-    options;
+  const {
+    urlAdapter,
+    adapter,
+    urlSync,
+    enabled,
+    defaultColumnLayout,
+    defaultLayout,
+    urlKey,
+  } = options;
+  const baseLayout = defaultColumnLayout ?? defaultLayout;
   const backend = urlAdapter ?? adapter;
   const syncToUrl = urlSync ?? enabled ?? true;
   const ns = urlKey ? `${urlKey}.` : "";
@@ -90,8 +100,8 @@ export function useColumnLayoutUrlState(
   const params = useMemo(() => new URLSearchParams(search), [search]);
 
   const fallback = useMemo<ColumnLayoutState>(
-    () => ({ ...EMPTY_COLUMN_LAYOUT, ...defaultLayout }),
-    [defaultLayout]
+    () => ({ ...EMPTY_COLUMN_LAYOUT, ...baseLayout }),
+    [baseLayout]
   );
   // Optimistic overlay: the most recent layout not yet flushed to the URL.
   const [pending, setPending] = useState<ColumnLayoutState | null>(null);
