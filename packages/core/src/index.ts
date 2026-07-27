@@ -169,6 +169,7 @@ export {
   type SharedTableRenderProps,
   type TableRenderModel,
   tableRenderModel,
+  useSummaryCells,
 } from "./tableRenderProps";
 
 /* ── Sources ───────────────────────────────────────────────────────── */

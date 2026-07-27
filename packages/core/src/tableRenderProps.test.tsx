@@ -2,7 +2,7 @@ import { act, render, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useFrontendData } from "./source/useFrontendData";
-import { tableRenderModel } from "./tableRenderProps";
+import { tableRenderModel, useSummaryCells } from "./tableRenderProps";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
@@ -767,5 +767,45 @@ describe("multi-sort headers", () => {
       onClick: (e?: { shiftKey?: boolean }) => void;
     };
     expect(() => props.onClick({ shiftKey: true })).not.toThrow();
+  });
+});
+
+describe("useSummaryCells", () => {
+  interface SummaryRow {
+    id: string;
+    amount: number;
+  }
+  const SUM_ROWS: SummaryRow[] = [
+    { id: "a", amount: 2 },
+    { id: "b", amount: 3 },
+  ];
+
+  it("returns undefined (and computes nothing) without a builder", () => {
+    const { result } = renderHook(() => useSummaryCells(undefined, SUM_ROWS));
+    expect(result.current).toBeUndefined();
+  });
+
+  it("recomputes only when the rows change, even with an inline builder", () => {
+    const spy = vi.fn((rows: readonly SummaryRow[]) => ({
+      amount: rows.reduce((sum, row) => sum + row.amount, 0),
+    }));
+    const { result, rerender } = renderHook(
+      ({ rows }: { rows: readonly SummaryRow[]; tick: number }) =>
+        // A FRESH closure every render — the latch absorbs identity churn.
+        useSummaryCells((r) => spy(r), rows),
+      { initialProps: { rows: SUM_ROWS, tick: 0 } }
+    );
+    expect(result.current).toEqual({ amount: 5 });
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // Unrelated re-render: no recompute.
+    rerender({ rows: SUM_ROWS, tick: 1 });
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // New rows: recompute with the LATEST builder.
+    const next = [...SUM_ROWS, { id: "c", amount: 10 }];
+    rerender({ rows: next, tick: 2 });
+    expect(result.current).toEqual({ amount: 15 });
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 });

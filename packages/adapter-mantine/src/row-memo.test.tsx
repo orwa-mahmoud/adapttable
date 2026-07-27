@@ -37,11 +37,13 @@ const renderRowDetail = (row: Row) => <div>Detail for {row.name}</div>;
 
 interface HarnessProps {
   withDetail?: boolean;
+  isMobile?: boolean;
+  summaryRow?: (rows: readonly Row[]) => Partial<Record<string, string>>;
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
-function Harness({ withDetail }: HarnessProps) {
+function Harness({ withDetail, isMobile, summaryRow }: HarnessProps) {
   const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
   return (
     <DataTable<Row>
@@ -50,6 +52,8 @@ function Harness({ withDetail }: HarnessProps) {
       rowKey={rowKey}
       bulkActions={bulkActions}
       renderRowDetail={withDetail ? renderRowDetail : undefined}
+      isMobile={isMobile}
+      summaryRow={summaryRow}
     />
   );
 }
@@ -99,5 +103,49 @@ describe("desktop row memoization (Mantine)", () => {
 
     expect(screen.getByText("Detail for Alice")).toBeInTheDocument();
     expect(accessor.mock.calls.length - before).toBe(columns.length);
+  });
+});
+
+describe("mobile card memoization (Mantine)", () => {
+  it("a search keystroke re-renders the chrome but no card", () => {
+    renderHarness({ isMobile: true });
+    const search = screen.getByRole("searchbox");
+    const before = accessor.mock.calls.length;
+
+    fireEvent.change(search, { target: { value: "a" } });
+
+    expect(search).toHaveValue("a");
+    expect(accessor.mock.calls).toHaveLength(before);
+  });
+
+  it("toggling one card's checkbox re-renders only that card", () => {
+    renderHarness({ isMobile: true });
+    const boxes = screen.getAllByLabelText("Select row");
+    const before = accessor.mock.calls.length;
+
+    fireEvent.click(boxes[0]!);
+
+    expect(boxes[0]).toBeChecked();
+    expect(boxes[1]).not.toBeChecked();
+    // At most the toggled card re-rendered (the compiler may even skip its
+    // accessor work) — an unmemoized list would re-run every card here.
+    expect(accessor.mock.calls.length - before).toBeLessThanOrEqual(
+      columns.length
+    );
+  });
+});
+
+describe("summary aggregation (Mantine)", () => {
+  it("runs only when its input rows change", () => {
+    const summaryRow = vi.fn(() => ({ name: "3 people" }));
+    renderHarness({ summaryRow });
+    expect(screen.getByText("3 people")).toBeInTheDocument();
+    const before = summaryRow.mock.calls.length;
+
+    // Keystrokes re-render the table; the aggregate must not re-run until
+    // the debounced term commits and actually changes the rows.
+    const search = screen.getByRole("searchbox");
+    fireEvent.change(search, { target: { value: "ali" } });
+    expect(summaryRow.mock.calls).toHaveLength(before);
   });
 });

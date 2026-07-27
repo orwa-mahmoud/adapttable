@@ -19,6 +19,7 @@ import {
   tableRenderModel,
   type UseDataTableResult,
   useHorizontalOverflow,
+  useSummaryCells,
 } from "@adapttable/core";
 import {
   ActionIcon,
@@ -522,7 +523,7 @@ export function DesktopTable<TRow>({
   // Grouped header row over the VISIBLE columns (`null` → no extra row) and
   // the per-column footer summary cells (`undefined` → no footer).
   const groupCells = headerGroupRow(columns);
-  const summaryCells = summaryRow?.(rows);
+  const summaryCells = useSummaryCells(summaryRow, rows);
   const hasEndPin = table.columns.some(
     (c) => pinOffset?.(c.key)?.side === "end"
   );

@@ -22,6 +22,7 @@ import {
   tableRenderModel,
   type UseDataTableResult,
   useHorizontalOverflow,
+  useSummaryCells,
 } from "@adapttable/core";
 import type { CSSProperties, MouseEvent, ReactElement, ReactNode } from "react";
 import { memo, useCallback, useMemo, useRef } from "react";
@@ -596,7 +597,7 @@ export function DesktopTable<TRow>({
   // the footer summary both align under the data columns, so the leading
   // expand/selection and trailing actions columns get unlabeled pad cells.
   const groups = headerGroupRow(columns);
-  const summary = summaryRow?.(rows);
+  const summary = useSummaryCells(summaryRow, rows);
   const groupPad = (
     <th data-adapttable-part="group-cell" className={classNames.groupCell} />
   );
@@ -899,6 +900,193 @@ export function DesktopTable<TRow>({
   );
 }
 
+/** Per-card inputs for the memoized {@link MobileCardBase}. */
+interface MobileCardProps<TRow> {
+  row: TRow;
+  index: number;
+  /** Stable row id (selection / expansion key). */
+  id: string;
+  columns: ColumnDef<TRow>[];
+  labels: Required<TableLabels>;
+  confirm: ConfirmHandler;
+  rowActions?: RowAction<TRow>[];
+  classNames: DataTableClassNames;
+  /** Resolved `rowClassName(row, index)`, compared as a plain string. */
+  className?: string;
+  selected: boolean;
+  expanded: boolean;
+  /** Selection toggle — present only when selection is enabled. */
+  onToggleSelect?: (id: string) => void;
+  /** Expansion toggle — present only when `renderRowDetail` is set. */
+  onToggleExpand?: (id: string) => void;
+  renderDetail?: (row: TRow) => ReactNode;
+  onRowClick?: (row: TRow) => void;
+  measureElement?: (node: Element | null) => void;
+  clickable: boolean;
+  /**
+   * Opt-in editing bundle — uncompared. Its identity changes on every
+   * keystroke anywhere in the table; the per-row visual churn is
+   * fingerprinted by `editingSignature` instead. A held card keeps an
+   * older bundle safely: its handlers read live state through refs.
+   */
+  editing?: EditableCellEditing<TRow>;
+  /** Page rows for Tab advance — uncompared (see `editing`). */
+  rows: readonly TRow[];
+  getRowId: (row: TRow) => string;
+  /** Memo digest from {@link rowEditingSignature}. */
+  editingSignature: string | null;
+}
+
+/** The card props the memo comparator deliberately skips (see `editing`). */
+type UncomparedCardProp = "editing" | "rows" | "getRowId";
+
+/** Every card prop the memo comparator checks with `Object.is`. */
+const COMPARED_CARD_PROPS: readonly Exclude<
+  keyof MobileCardProps<unknown>,
+  UncomparedCardProp
+>[] = [
+  "row",
+  "index",
+  "id",
+  "columns",
+  "labels",
+  "confirm",
+  "rowActions",
+  "classNames",
+  "className",
+  "selected",
+  "expanded",
+  "onToggleSelect",
+  "onToggleExpand",
+  "renderDetail",
+  "onRowClick",
+  "measureElement",
+  "clickable",
+  "editingSignature",
+];
+
+/**
+ * `React.memo` comparator: re-render a card only when one of its VISUAL
+ * inputs changes — a search keystroke or another card's checkbox re-renders
+ * the list shell, but every unchanged card bails out here.
+ */
+function mobileCardPropsEqual<TRow>(
+  prev: Readonly<MobileCardProps<TRow>>,
+  next: Readonly<MobileCardProps<TRow>>
+): boolean {
+  return COMPARED_CARD_PROPS.every((key) => Object.is(prev[key], next[key]));
+}
+
+/** One card. Memoized by {@link mobileCardPropsEqual} at the call site. */
+function MobileCardBase<TRow>({
+  row,
+  index,
+  id,
+  columns,
+  labels,
+  confirm,
+  rowActions,
+  classNames,
+  className,
+  selected,
+  expanded,
+  onToggleSelect,
+  onToggleExpand,
+  renderDetail,
+  onRowClick,
+  measureElement,
+  clickable,
+  editing,
+  rows,
+  getRowId,
+}: Readonly<MobileCardProps<TRow>>) {
+  return (
+    <li
+      {...rowClickProps(row, onRowClick)}
+      ref={measureElement}
+      data-index={index}
+      data-adapttable-part="card"
+      data-stagger=""
+      data-selected={selected ? "" : undefined}
+      data-clickable={clickable ? "" : undefined}
+      className={cx(classNames.card, className)}
+    >
+      {onToggleSelect && (
+        <input
+          type="checkbox"
+          aria-label={labels.selectRow}
+          checked={selected}
+          onChange={() => onToggleSelect(id)}
+          className={classNames.checkbox}
+        />
+      )}
+      {onToggleExpand && (
+        <ExpandButton
+          expanded={expanded}
+          labels={labels}
+          classNames={classNames}
+          onToggle={() => onToggleExpand(id)}
+        />
+      )}
+      {columns.map((column) => (
+        <div
+          key={column.key}
+          data-adapttable-part="card-row"
+          className={classNames.cardRow}
+        >
+          <span
+            data-adapttable-part="card-label"
+            className={classNames.cardLabel}
+          >
+            {cardLabel(column)}
+          </span>
+          <span
+            data-adapttable-part="card-value"
+            className={classNames.cardValue}
+          >
+            <EditableDataCell
+              editing={editing}
+              row={row}
+              column={column}
+              rowId={id}
+              rows={rows}
+              columns={columns}
+              rowKey={getRowId}
+              editLabel={labels.editCell}
+              display={
+                column.Cell ? (
+                  <column.Cell row={row} rowIndex={index} />
+                ) : (
+                  column.accessor?.(row)
+                )
+              }
+            />
+          </span>
+        </div>
+      ))}
+      {rowActions && rowActions.length > 0 && (
+        <div data-adapttable-part="card-actions">
+          <RowActionButtons
+            row={row}
+            actions={rowActions}
+            confirm={confirm}
+            cancelLabel={labels.cancel}
+            classNames={classNames}
+          />
+        </div>
+      )}
+      {expanded && renderDetail && (
+        <div
+          data-adapttable-part="card-detail"
+          className={classNames.cardDetail}
+        >
+          {renderDetail(row)}
+        </div>
+      )}
+    </li>
+  );
+}
+
 /** Mobile card-list rendering. */
 export function MobileCards<TRow>({
   table,
@@ -922,96 +1110,42 @@ export function MobileCards<TRow>({
   const { columns, selection, labels } = table;
   const entries = resolveVirtualRows(rows, getRowId, rowEntries);
   const expansionState = renderRowDetail ? expansion : undefined;
-  const summary = summaryRow?.(rows);
+  const summary = useSummaryCells(summaryRow, rows);
+
+  // `memo` erases generics at module level, so the memoized card is
+  // instantiated here (once — the identity is stable for the list's life).
+  const CardItem = useMemo(
+    () => memo(MobileCardBase<TRow>, mobileCardPropsEqual),
+    []
+  );
 
   const renderCard = (row: TRow, index: number, key: string): ReactElement => {
     const id = getRowId(row);
-    const expanded = expansionState?.isExpanded(id) ?? false;
     return (
-      <li
+      <CardItem
         key={key}
-        {...rowClickProps(row, onRowClick)}
-        ref={measureElement}
-        data-index={index}
-        data-adapttable-part="card"
-        data-stagger=""
-        data-selected={selection?.isSelected(id) ? "" : undefined}
-        data-clickable={onRowClick ? "" : undefined}
-        className={cx(classNames.card, rowClassName?.(row, index))}
-      >
-        {selection && (
-          <input
-            type="checkbox"
-            aria-label={labels.selectRow}
-            checked={selection.isSelected(id)}
-            onChange={() => selection.toggle(id)}
-            className={classNames.checkbox}
-          />
-        )}
-        {expansionState && (
-          <ExpandButton
-            expanded={expanded}
-            labels={labels}
-            classNames={classNames}
-            onToggle={() => expansionState.toggle(id)}
-          />
-        )}
-        {columns.map((column) => (
-          <div
-            key={column.key}
-            data-adapttable-part="card-row"
-            className={classNames.cardRow}
-          >
-            <span
-              data-adapttable-part="card-label"
-              className={classNames.cardLabel}
-            >
-              {cardLabel(column)}
-            </span>
-            <span
-              data-adapttable-part="card-value"
-              className={classNames.cardValue}
-            >
-              <EditableDataCell
-                editing={editing}
-                row={row}
-                column={column}
-                rowId={id}
-                rows={rows}
-                columns={columns}
-                rowKey={getRowId}
-                editLabel={labels.editCell}
-                display={
-                  column.Cell ? (
-                    <column.Cell row={row} rowIndex={index} />
-                  ) : (
-                    column.accessor?.(row)
-                  )
-                }
-              />
-            </span>
-          </div>
-        ))}
-        {rowActions && rowActions.length > 0 && (
-          <div data-adapttable-part="card-actions">
-            <RowActionButtons
-              row={row}
-              actions={rowActions}
-              confirm={confirm}
-              cancelLabel={labels.cancel}
-              classNames={classNames}
-            />
-          </div>
-        )}
-        {expansionState && expanded && renderRowDetail && (
-          <div
-            data-adapttable-part="card-detail"
-            className={classNames.cardDetail}
-          >
-            {renderRowDetail(row)}
-          </div>
-        )}
-      </li>
+        row={row}
+        index={index}
+        id={id}
+        columns={columns}
+        labels={labels}
+        confirm={confirm}
+        rowActions={rowActions}
+        classNames={classNames}
+        className={rowClassName?.(row, index)}
+        selected={selection ? selection.isSelected(id) : false}
+        expanded={expansionState ? expansionState.isExpanded(id) : false}
+        onToggleSelect={selection ? selection.toggle : undefined}
+        onToggleExpand={expansionState ? expansionState.toggle : undefined}
+        renderDetail={renderRowDetail}
+        onRowClick={onRowClick}
+        measureElement={measureElement}
+        clickable={Boolean(onRowClick)}
+        editing={editing}
+        rows={rows}
+        getRowId={getRowId}
+        editingSignature={rowEditingSignature(editing, id)}
+      />
     );
   };
 

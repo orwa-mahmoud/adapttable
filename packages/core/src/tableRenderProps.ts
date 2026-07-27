@@ -12,7 +12,7 @@
  *
  * @typeParam TRow - The row type.
  */
-import type { ReactNode } from "react";
+import { type ReactNode, useMemo, useRef } from "react";
 
 import type { ConfirmHandler } from "./actions/confirm";
 import type { PinOffset } from "./columns/useColumnLayout";
@@ -148,4 +148,32 @@ export function tableRenderModel<TRow>(
       Boolean(props.renderRowDetail && props.expansion)
     ),
   };
+}
+
+/**
+ * Memoised `summaryRow` aggregation: re-executes ONLY when the rendered
+ * rows change, never on unrelated table re-renders (a search keystroke,
+ * a checkbox toggle). The builder is read through a ref because callers
+ * routinely pass it inline — a fresh identity every render — and the
+ * aggregate walks the full filtered set, which is exactly the work this
+ * exists to avoid repeating.
+ *
+ * @typeParam TRow - The row type.
+ * @param summaryRow - The caller's summary builder, or `undefined` when off.
+ * @param rows - The rows the summary describes.
+ * @returns The aggregate cells, or `undefined` when no builder is set.
+ */
+export function useSummaryCells<TRow>(
+  summaryRow:
+    | ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>)
+    | undefined,
+  rows: readonly TRow[]
+): Partial<Record<string, ReactNode>> | undefined {
+  const builderRef = useRef(summaryRow);
+  builderRef.current = summaryRow;
+  const enabled = summaryRow !== undefined;
+  return useMemo(
+    () => (enabled ? builderRef.current?.(rows) : undefined),
+    [enabled, rows]
+  );
 }

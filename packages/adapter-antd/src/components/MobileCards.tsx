@@ -12,6 +12,7 @@ import {
   runRowAction,
   type TableLabels,
   type UseDataTableResult,
+  useSummaryCells,
   type VirtualTableRow,
 } from "@adapttable/core";
 import { Button, Card, Checkbox, Descriptions, Space } from "antd";
@@ -91,7 +92,7 @@ function SummaryCard<TRow>({
   columns: ColumnDef<TRow>[];
   summaryRow: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
 }>) {
-  const cells = summaryRow(rows);
+  const cells = useSummaryCells(summaryRow, rows) ?? {};
   return (
     <Card size="small" data-adapttable-part="summary-card">
       <Descriptions column={1} size="small" colon={false}>
