@@ -228,6 +228,24 @@ describe("filterPredicate", () => {
     expect(p(bad, { budgetMin: 1 })).toBe(false);
   });
 
+  it("numberRange: rows with no numeric value never match a zero-spanning range", () => {
+    interface Balance {
+      balance: number | string | null | undefined;
+    }
+    const p = filterPredicate<Balance>({ key: "balance", type: "numberRange" });
+    const range = { balanceMin: -5, balanceMax: 100 };
+    // Number(null) and Number("") are 0 — none of these may sneak in.
+    expect(p({ balance: null }, range)).toBe(false);
+    expect(p({ balance: "" }, range)).toBe(false);
+    expect(p({ balance: "   " }, range)).toBe(false);
+    expect(p({ balance: undefined }, range)).toBe(false);
+    expect(p({ balance: Number.NaN }, range)).toBe(false);
+    // Real zeros and numeric strings still match.
+    expect(p({ balance: 0 }, range)).toBe(true);
+    expect(p({ balance: "0" }, range)).toBe(true);
+    expect(p({ balance: "-4.5" }, range)).toBe(true);
+  });
+
   it("compares primitive row values of every type as text", () => {
     const of = (v: unknown) =>
       filterPredicate<Row>({ key: "k", type: "text", getValue: () => v });

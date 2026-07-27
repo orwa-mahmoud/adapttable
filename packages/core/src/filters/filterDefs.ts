@@ -183,6 +183,18 @@ function dateValueToEpochMs(value: unknown): number {
   return new Date(text).getTime();
 }
 
+/**
+ * A row value as a number for range filtering, or `NaN` when the row has
+ * no numeric value. `Number(null)` and `Number("")` are `0`, which would
+ * silently include no-value rows in any range spanning zero — so only
+ * real numbers and non-empty numeric strings qualify.
+ */
+function numericRowValue(value: unknown): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim() !== "") return Number(value);
+  return Number.NaN;
+}
+
 function textMatch(rowValue: unknown, term: string): boolean {
   const text = valueText(rowValue).toLowerCase();
   return text !== "" && text.includes(term.toLowerCase());
@@ -237,7 +249,7 @@ export function filterPredicate<TRow>(
       const [minKey, maxKey] = filterStateKeys(def);
       return (row, extra) => {
         if (!has(extra, minKey!) && !has(extra, maxKey!)) return true;
-        const n = Number(value(row));
+        const n = numericRowValue(value(row));
         if (Number.isNaN(n)) return false;
         if (has(extra, minKey!) && n < Number(extra[minKey!])) return false;
         return !(has(extra, maxKey!) && n > Number(extra[maxKey!]));
