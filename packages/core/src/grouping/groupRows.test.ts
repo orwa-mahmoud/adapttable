@@ -41,11 +41,13 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
 
   it("keys and labels blank / primitive / object / date values", () => {
     expect(groupValueKey(null)).toBe("");
-    expect(groupValueKey("Core")).toBe("Core");
-    expect(groupValueKey(42)).toBe("42");
-    expect(groupValueKey(true)).toBe("true");
+    expect(groupValueKey(undefined)).toBe("");
+    expect(groupValueKey("")).toBe("");
+    expect(groupValueKey("Core")).toBe("s:Core");
+    expect(groupValueKey(42)).toBe("n:42");
+    expect(groupValueKey(true)).toBe("b:true");
     expect(groupValueKey(new Date("2020-01-01T00:00:00.000Z"))).toBe(
-      "2020-01-01T00:00:00.000Z"
+      "d:2020-01-01T00:00:00.000Z"
     );
     expect(formatGroupLabel(null)).toBe("(blank)");
     expect(formatGroupLabel("Core")).toBe("Core");
@@ -56,13 +58,26 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
       "2020-01-01T00:00:00.000Z"
     );
     expect(formatGroupLabel({ a: 1 })).toBe('{"a":1}');
-    expect(groupValueKey({ a: 1 })).toBe('{"a":1}');
+    expect(groupValueKey({ a: 1 })).toBe('j:{"a":1}');
+  });
+
+  it("keys never collide across value types", () => {
+    const values = [
+      5,
+      "5",
+      true,
+      "true",
+      new Date(0),
+      "1970-01-01T00:00:00.000Z",
+    ];
+    const keys = values.map(groupValueKey);
+    expect(new Set(keys).size).toBe(values.length);
   });
 
   it("falls back when JSON.stringify throws", () => {
     const cyclic: Record<string, unknown> = {};
     cyclic.self = cyclic;
-    expect(groupValueKey(cyclic)).toMatch(/^\[object /);
+    expect(groupValueKey(cyclic)).toMatch(/^o:\[object /);
     expect(formatGroupLabel(cyclic)).toMatch(/^\[object /);
   });
 
@@ -72,6 +87,37 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
 });
 
 describe("buildGroupedFlatModel", () => {
+  it("a mixed-type fixture produces distinct groups with correct labels", () => {
+    interface Mixed {
+      id: string;
+      flag: unknown;
+    }
+    const rows: Mixed[] = [
+      { id: "1", flag: 5 },
+      { id: "2", flag: "5" },
+      { id: "3", flag: true },
+      { id: "4", flag: "true" },
+    ];
+    const flat = buildGroupedFlatModel({
+      rows,
+      groupBy: "flag",
+      columns: [{ key: "flag" }],
+      getRowId: (r) => r.id,
+      collapsedIds: new Set(),
+    });
+    const groups = flat.filter((e) => e.kind === "group");
+    // Four distinct buckets — no cross-type merging — each labelled by its
+    // own value's text.
+    expect(groups).toHaveLength(4);
+    expect(groups.map((g) => (g.kind === "group" ? g.label : ""))).toEqual([
+      "5",
+      "5",
+      "true",
+      "true",
+    ]);
+    expect(new Set(groups.map((g) => g.key)).size).toBe(4);
+  });
+
   it("emits group headers then leaves in first-seen order", () => {
     const flat = buildGroupedFlatModel({
       rows: ROWS,
@@ -97,13 +143,13 @@ describe("buildGroupedFlatModel", () => {
     expect(flat[1]).toMatchObject({
       kind: "row",
       key: "1",
-      groupKey: "group:team:Core",
+      groupKey: "group:team:s:Core",
       index: 0,
     });
   });
 
   it("omits leaves when a group is collapsed", () => {
-    const coreKey = makeGroupRowKey("team", "Core");
+    const coreKey = makeGroupRowKey("team", groupValueKey("Core"));
     const flat = buildGroupedFlatModel({
       rows: ROWS,
       groupBy: "team",

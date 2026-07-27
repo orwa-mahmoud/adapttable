@@ -66,18 +66,26 @@ export function resolveGroupValue<TRow>(
   return getPath(row, path);
 }
 
-/** Stable string key for a group bucket (handles null/undefined/objects). */
+/**
+ * Stable string key for a group bucket. Type-tagged so distinct values
+ * never share a bucket across types — number `5` vs string `"5"`, boolean
+ * `true` vs string `"true"`, a Date vs its own ISO string. Null-ish and
+ * empty-string values deliberately share the one blank bucket (they all
+ * render the same blank label; splitting them would show several
+ * identical "(blank)" groups).
+ */
 export function groupValueKey(value: unknown): string {
-  if (value == null) return "";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
+  if (value == null || value === "") return "";
+  if (typeof value === "string") return `s:${value}`;
+  if (typeof value === "number" || typeof value === "bigint") {
+    return `n:${String(value)}`;
   }
-  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "boolean") return `b:${String(value)}`;
+  if (value instanceof Date) return `d:${value.toISOString()}`;
   try {
-    return JSON.stringify(value);
+    return `j:${JSON.stringify(value)}`;
   } catch {
-    return Object.prototype.toString.call(value);
+    return `o:${Object.prototype.toString.call(value)}`;
   }
 }
 
