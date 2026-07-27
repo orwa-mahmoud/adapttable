@@ -1,4 +1,5 @@
 import type { RowAction } from "../types";
+import { devWarn } from "../utils/devWarn";
 
 /** A confirmation request raised by a row or bulk action. */
 export interface ConfirmRequest {
@@ -22,12 +23,21 @@ export type ConfirmHandler = (request: ConfirmRequest) => void;
 /**
  * The default confirmation handler — a dependency-free `window.confirm`.
  * Adapters pass a styled handler when they have one.
+ *
+ * When no dialog exists at all (SSR, jsdom, some embedded webviews) the
+ * action is DENIED: an environment that cannot ask must never approve a
+ * destructive action on the user's behalf. Integrators in dialogless
+ * environments pass their own `confirm` handler.
  */
 export const defaultConfirm: ConfirmHandler = ({ message, onConfirm }) => {
   const native = (globalThis as { confirm?: (m?: string) => boolean }).confirm;
-  if (typeof native !== "function" || native(message)) {
-    onConfirm();
+  if (typeof native !== "function") {
+    devWarn(
+      "no confirm dialog is available in this environment — the action was NOT run. Pass a `confirm` handler to support dialogless environments."
+    );
+    return;
   }
+  if (native(message)) onConfirm();
 };
 
 /**

@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { BulkAction, RowAction } from "../types";
+import { resetDevWarnings } from "../utils/devWarn";
 import {
   type ConfirmHandler,
   defaultConfirm,
@@ -49,8 +50,12 @@ describe("defaultConfirm", () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it("runs onConfirm when there is no native confirm (SSR)", () => {
+  it("DENIES the action when no confirm dialog exists (SSR, jsdom, webviews)", () => {
+    // The absence of a dialog must never auto-approve a destructive
+    // action — deny, and tell the integrator to pass a confirm handler.
     vi.stubGlobal("confirm", undefined);
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const onConfirm = vi.fn();
     defaultConfirm({
       title: "t",
@@ -59,7 +64,29 @@ describe("defaultConfirm", () => {
       cancelLabel: "no",
       onConfirm,
     });
-    expect(onConfirm).toHaveBeenCalled();
+    expect(onConfirm).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("no confirm dialog is available")
+    );
+    warn.mockRestore();
+    resetDevWarnings();
+  });
+
+  it("with a dialog present, behavior is unchanged either way", () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true)
+    );
+    const onConfirm = vi.fn();
+    const action: RowAction<Row> = {
+      key: "del",
+      label: "Delete",
+      onClick: vi.fn(),
+      confirm: { title: "t", message: () => "m", confirmLabel: "ok" },
+    };
+    runRowAction(action, { id: "x" }, defaultConfirm, "Cancel");
+    expect(action.onClick).toHaveBeenCalledWith({ id: "x" });
+    expect(onConfirm).not.toHaveBeenCalled();
   });
 });
 
