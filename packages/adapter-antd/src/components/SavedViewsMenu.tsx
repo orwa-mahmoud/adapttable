@@ -1,15 +1,17 @@
-import type { Direction, UseSavedViewsOptions } from "@adapttable/core";
+import type {
+  Direction,
+  TableLabels,
+  UseSavedViewsOptions,
+} from "@adapttable/core";
 import { useSavedViews } from "@adapttable/core";
 import { Button, Divider, Flex, Input, Popover } from "antd";
 import { useEffect, useState } from "react";
 
-/** Labels the saved-views menu needs (pre-translated by the caller). */
-export interface SavedViewsLabels {
-  savedViews: string;
-  saveView: string;
-  viewName: string;
-  deleteView: string;
-}
+/** The label strings the saved-views menu renders. */
+export type SavedViewsLabels = Pick<
+  Required<TableLabels>,
+  "savedViews" | "saveView" | "viewName" | "deleteView"
+>;
 
 /** Props for {@link SavedViewsMenu}. */
 export interface SavedViewsMenuProps {

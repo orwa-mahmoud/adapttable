@@ -12,6 +12,7 @@ import { ensureBaseUiStyles } from "./injectStyles";
 ensureBaseUiStyles();
 
 export {
+  type SavedViewsLabels,
   SavedViewsMenu,
   type SavedViewsMenuProps,
 } from "./components/SavedViewsMenu";

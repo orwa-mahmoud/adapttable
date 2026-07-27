@@ -8,6 +8,7 @@
  */
 
 export {
+  type SavedViewsLabels,
   SavedViewsMenu,
   type SavedViewsMenuProps,
 } from "./components/SavedViewsMenu";

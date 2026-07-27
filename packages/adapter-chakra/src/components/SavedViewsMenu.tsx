@@ -36,14 +36,17 @@ function CrossIcon() {
 }
 
 /** Props for {@link SavedViewsMenu}. */
+/** The label strings the saved-views menu renders. */
+export type SavedViewsLabels = Pick<
+  Required<TableLabels>,
+  "savedViews" | "saveView" | "viewName" | "deleteView"
+>;
+
 export interface SavedViewsMenuProps {
   /** Forwarded to core's `useSavedViews` (storage key, adapter, urlKey, …). */
   options: UseSavedViewsOptions;
   /** The four saved-view strings (pass `table.labels` or your own). */
-  labels: Pick<
-    Required<TableLabels>,
-    "savedViews" | "saveView" | "viewName" | "deleteView"
-  >;
+  labels: SavedViewsLabels;
   /** Chakra color scheme for the save button. */
   colorScheme?: string;
 }
