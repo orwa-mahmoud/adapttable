@@ -201,6 +201,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     data,
     total,
     loading,
+    error: props.error,
     mode: props.mode,
     onQueryChange,
     urlAdapter: resolvedUrlAdapter,

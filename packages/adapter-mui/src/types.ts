@@ -54,6 +54,8 @@ interface DataTablePropsBase<TRow> extends Omit<
   total?: number;
   /** Server tier: request in flight. */
   loading?: boolean;
+  /** Forwarded error to display in the table's error state. */
+  error?: Error | null;
   /**
    * URL-state backend for the built-in tiers. Defaults to the browser
    * History API; supply a router adapter (react-router / Next.js) — or a

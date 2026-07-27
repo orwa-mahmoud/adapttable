@@ -248,6 +248,8 @@ interface DataTablePropsBase<TRow> extends Omit<
   total?: number;
   /** Server tier: request in flight. */
   loading?: boolean;
+  /** Forwarded error to display in the table's error state. */
+  error?: Error | null;
   /**
    * URL-state adapter for the managed tiers (router integration, memory
    * adapter for tests/SSR). Defaults to the browser History API.

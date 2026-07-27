@@ -27,8 +27,10 @@ is the closer fit):
   [Inline cell editing](./cell-editing.md)), not material-table's row
   dialog engine. Multi-field forms still go through `rowActions` + your
   own UI, with the built-in `confirm` seam for destructive actions.
-- **Drag-to-group aggregation** (`options.grouping`) — AdaptTable has
-  presentational header groups, not runtime grouping.
+- **Drag-to-group aggregation** (`options.grouping`) — AdaptTable ships
+  single-level [row grouping](./row-grouping.md) (`groupBy` + optional
+  `groupAggregates`); there is no drag-a-column-to-group UI, so wire your
+  own control to `groupBy` if you need that gesture.
 - **Tree data** (`parentChildData`) — not supported.
 - **PDF export button** — AdaptTable ships a headless CSV helper only.
 
@@ -88,19 +90,19 @@ Same Material look, on a current MUI — and your rows stay untouched.
 
 Column def → `ColumnDef`:
 
-| material-table                     | `@adapttable/mui`                             | Notes                                                       |
-| ---------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `field`                            | `key`                                         | Dot paths supported.                                        |
-| `title`                            | `header`                                      | Auto-derived from `key` when omitted.                       |
-| `render(rowData)`                  | `Cell` / `accessor: (row) => …`               | Same idea, typed row.                                       |
-| `type: "numeric"`                  | `align: "end"` + `filter: "numberRange"`      | Type is behavior you declare, not an enum.                  |
-| `type: "date"` / `"datetime"`      | `accessor` formatting + `filter: "dateRange"` | Operator-first range widgets included.                      |
-| `lookup: { 1: "Active", … }`       | `filter: { type: "select", options }`         | Options are explicit `{ value, label }[]` (or `"auto"`).    |
-| `sorting` / `defaultSort`          | `sortable`                                    | Default sort comes from URL state / `defaultColumnLayout`.  |
-| `customSort(a, b)`                 | `sortValue: (row) => primitive`               | Extract a comparable value instead of writing a comparator. |
-| `customFilterAndSearch`            | `filter` + `getValue`                         | Predicate derives from the declaration.                     |
-| `hidden` / `hiddenByColumnsButton` | `enableColumnMenu` + `columnLayout`           | User-facing visibility lives in the menu.                   |
-| `cellStyle` / `headerStyle`        | `align`, `width`, `className`, `Cell`         | Style through your own components/classes.                  |
+| material-table                     | `@adapttable/mui`                             | Notes                                                                           |
+| ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `field`                            | `key`                                         | Dot paths supported.                                                            |
+| `title`                            | `header`                                      | Auto-derived from `key` when omitted.                                           |
+| `render(rowData)`                  | `Cell` / `accessor: (row) => …`               | Same idea, typed row.                                                           |
+| `type: "numeric"`                  | `align: "end"` + `filter: "numberRange"`      | Type is behavior you declare, not an enum.                                      |
+| `type: "date"` / `"datetime"`      | `accessor` formatting + `filter: "dateRange"` | Operator-first range widgets included.                                          |
+| `lookup: { 1: "Active", … }`       | `filter: { type: "select", options }`         | Options are explicit `{ value, label }[]` (or `"auto"`).                        |
+| `sorting` / `defaultSort`          | `sortable` + `defaults`                       | Default sort is `defaults={{ sortBy, sortDir }}` (URL state wins when present). |
+| `customSort(a, b)`                 | `sortValue: (row) => primitive`               | Extract a comparable value instead of writing a comparator.                     |
+| `customFilterAndSearch`            | `filter` + `getValue`                         | Predicate derives from the declaration.                                         |
+| `hidden` / `hiddenByColumnsButton` | `enableColumnMenu` + `columnLayout`           | User-facing visibility lives in the menu.                                       |
+| `cellStyle` / `headerStyle`        | `align`, `width`, `className`, `Cell`         | Style through your own components/classes.                                      |
 
 ## Remote data: the query function maps almost 1:1
 

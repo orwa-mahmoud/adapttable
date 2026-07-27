@@ -63,6 +63,22 @@ pnpm add @adapttable/core @adapttable/shadcn
 pnpm add @adapttable/core @adapttable/unstyled
 ```
 
+## Supported versions
+
+| Dependency        | Supported range                                                               |
+| ----------------- | ----------------------------------------------------------------------------- |
+| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)                      |
+| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                                      |
+| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                                  |
+| Chakra UI         | `^3.13.0`                                                                     |
+| Ant Design        | `^6`                                                                          |
+| Radix Themes      | `^3`                                                                          |
+| Base UI           | `^1`                                                                          |
+| Node (toolchain)  | consumers: any Node your bundler supports; building this repo needs `>=20.19` |
+
+Each floor is the lowest version the adapter actually runs on — verified
+by automated install-and-render probes, not guesswork.
+
 ## Provider setup
 
 Each adapter renders with its UI kit's own components, so your app needs that
@@ -258,10 +274,12 @@ knowing which produced it.
 interface TableSource<TRow> {
   rows: readonly TRow[];
   total: number;
-  isLoading: boolean;
-  isFetching: boolean;
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
+  isLoading: boolean; // FIRST load only — refreshes never re-raise it
+  isFetching: boolean; // any in-flight request
+  isFetchingNextPage: boolean; // an append fetch (infinite mode)
+  hasNextPage: boolean; // more rows can be APPENDED (always false when paged)
+  fetchNextPage: () => void; // appends; no-op in paged mode
+  refetch?: () => void; // re-runs the underlying fetch
   error: Error | null;
   paginationMode: "infinite" | "paged";
   // state
@@ -297,14 +315,14 @@ In-memory. Filters by a searchable-text projector, sorts by a column's
 const source = useFrontendData({ data, columns, getSearchText, getSortValue });
 ```
 
-### `useBackendData`
+### `useQuerySource`
 
 Server-paginated. Wraps a caller-supplied `useInfiniteQuery` hook and maps
 each page to rows via `selectPage`. Flattens pages in infinite mode, returns
 the latest page in paged mode, and clamps out-of-range pages.
 
 ```ts
-const source = useBackendData({ usePaginatedQuery, selectPage, baseParams });
+const source = useQuerySource({ usePaginatedQuery, selectPage, baseParams });
 ```
 
 ## Columns
@@ -491,7 +509,7 @@ export function PeopleTable() {
 
 ### 3. Full control — `source`
 
-Build a `TableSource` yourself — `useBackendData` over TanStack Query (shown
+Build a `TableSource` yourself — `useQuerySource` over TanStack Query (shown
 below; wrap your app in its `QueryClientProvider`), `useFrontendData` for
 headless in-memory use, or a hand-rolled object that fulfils the contract.
 
@@ -503,7 +521,7 @@ import {
   DataTable,
   type PaginatedResponse,
   type TableQueryParams,
-  useBackendData,
+  useQuerySource,
 } from "@adapttable/mantine";
 
 interface Person {
@@ -535,7 +553,7 @@ function usePeopleQuery(params: Partial<TableQueryParams>) {
 }
 
 export function PeopleTable() {
-  const source = useBackendData<Person>({ usePaginatedQuery: usePeopleQuery });
+  const source = useQuerySource<Person>({ usePaginatedQuery: usePeopleQuery });
   return (
     <DataTable
       source={source}
@@ -545,6 +563,22 @@ export function PeopleTable() {
   );
 }
 ```
+
+## Explicit `mode` — when inference isn't what you meant
+
+The tier is inferred from what you pass (`data` alone → frontend;
+`data` + `onQueryChange` → server; `source` → full control). The optional
+`mode` prop pins it explicitly — and unlocks one combination inference
+cannot express:
+
+| I want…                                                           | Pass                                       | `onQueryChange` acts as…                                        |
+| ----------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
+| The table to fetch nothing; my handler runs every query           | `mode="server"` (requires `onQueryChange`) | **the contract** — you fetch and hand back `data` + `total`     |
+| The table to keep filtering/sorting/paging my `data`, but TELL me | `mode="frontend"` + `onQueryChange`        | **a pure notification** — fires per committed change, not mount |
+| Today's inference exactly                                         | omit `mode`                                | contract when present, nothing otherwise                        |
+
+`mode="server"` without `onQueryChange` does not compile; `mode` together
+with `source` dev-warns and `source` wins.
 
 ## How it works
 
@@ -579,18 +613,18 @@ export function PeopleTable() {
 | `loading`       | `boolean`                                                                     | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise). |
 | `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included.                       |
 | `error`         | `Error \| null`                                                               | `null`  | Forwarded error to display.                                                                     |
-| `source`        | `TableSource<TRow>`                                                           | —       | Full control: a prebuilt source from `useFrontendData` / `useBackendData` / your own.           |
+| `source`        | `TableSource<TRow>`                                                           | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.           |
 
 ## Notes
 
 - **Picking a tier**: rows already in memory (up to a few thousand) →
   frontend. A paginated API and no query library → server. Caching, infinite
   scroll, prefetching, or an existing TanStack Query setup → `source` with
-  `useBackendData`.
+  `useQuerySource`.
 - The hooks behind the first two tiers — `useFrontendData` and
   `useServerData` — are exported for headless use; `useTableData` is the
   resolver that picks between them.
-- `useBackendData` accepts `selectPage` (when your page shape isn't
+- `useQuerySource` accepts `selectPage` (when your page shape isn't
   `PaginatedResponse`), `baseParams` (static params merged into every call,
   e.g. a parent scope id), and `sanitizeParams`. See
   [`examples/mui-backend.tsx`](../examples/mui-backend.tsx) for a complete
@@ -829,7 +863,7 @@ export function People() {
 - `null` / `undefined` / `NaN` always sort last — in both directions. A descending sort never flips the blanks to the top.
 - Sort state lives in the URL: `sortBy` + `sortDir` for a single sort, and the chain as `sort=name:asc,hiredAt:desc` under `multiSort`. `defaults` apply only while the URL is silent; clearing a defaulted sort writes an empty `sortBy=` marker so it does not resurrect.
 - `multiSort` adds shift-click (or shift-Enter): each shift-click adds the column to the chain or advances it (asc → desc → removed). Chained headers expose a 1-based `data-sort-index` for the order badge. A plain click resets the chain back to a single sort.
-- Server tier (`onQueryChange` / `useBackendData`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
+- Server tier (`onQueryChange` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
 
 ## Options
 
@@ -843,7 +877,7 @@ export function People() {
 
 ## Notes
 
-- `defaults` is an option on the source builders (`useFrontendData`, `useBackendData`, the headless hooks), not a `<DataTable>` prop — to default-sort the zero-ceremony `data` tier, build the source yourself as in the example.
+- `defaults` works both as a `<DataTable>` prop and as an option on the source builders — `defaults={{ sortBy: "name" }}` default-sorts the zero-ceremony `data` tier directly (ascending unless `sortDir` is given; explicit URL state wins).
 - A column whose accessor returns JSX needs `sortValue`; otherwise the sort cannot resolve a value and a development warning fires (`sortBy` matching no column warns too).
 - The plain-click reset of a multi-sort chain is deliberate: without it the chain would keep superseding the single sort and the click would appear dead.
 - A hand-edited URL sort with no `sortDir` falls back to ascending.
@@ -1007,14 +1041,14 @@ export function PeopleTable() {
 
 `<DataTable>` filter props:
 
-| Prop                | Type                                | Default        | Description                                                                                    |
-| ------------------- | ----------------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
-| `filters`           | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch).             |
-| `filtersMode`       | `"popover" \| "drawer"`             | `"popover"`    | Popover: anchored card, no backdrop, closes on Escape/outside click. Drawer: panel + backdrop. |
-| `onClearFilters`    | `() => void`                        | built-in clear | Clear handler used by the drawer and the chip strip.                                           |
-| `filterLabels`      | `Record<string, ChipLabelResolver>` | derived        | Per-key chip label resolvers — only needed with JSX filters.                                   |
-| `extraChips`        | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                            |
-| `activeFilterCount` | `number`                            | chip count     | Overrides the Filters-button badge.                                                            |
+| Prop                | Type                                | Default        | Description                                                                                                                               |
+| ------------------- | ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters`           | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch).                                                        |
+| `filtersMode`       | `"popover" \| "drawer"`             | `"popover"`    | Popover: anchored card, no backdrop, closes on Escape/outside click. Drawer: panel + backdrop.                                            |
+| `onClearFilters`    | `() => void`                        | built-in clear | Clear handler used by the drawer and the chip strip.                                                                                      |
+| `filterLabels`      | `Record<string, ChipLabelResolver>` | derived        | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label). |
+| `extraChips`        | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                                                                       |
+| `activeFilterCount` | `number`                            | chip count     | Overrides the Filters-button badge.                                                                                                       |
 
 ## Notes
 
@@ -1105,10 +1139,10 @@ export function People() {
 
 ## Notes
 
-- `limit` is clamped to **1–500** (`MAX_LIMIT`), whether it comes from
+- `limit` is clamped to **1–500**, whether it comes from
   `defaults` or a hand-edited URL.
 - Sources built with `useServerData` (the `onQueryChange` tier) are always
-  paged; `paginationMode` applies to the frontend tier and `useBackendData`.
+  paged; `paginationMode` applies to the frontend tier and `useQuerySource`.
 - In infinite mode the table slices `page × limit` rows, so "page" really
   means "how much is loaded" — `fetchNextPage` just bumps it.
 - The infinite-scroll sentinel is exported as a headless hook,
@@ -1227,14 +1261,14 @@ export function PeopleTable() {
 
 ## Options
 
-| Prop                | Type                      | Default          | Description                                                                                                              |
-| ------------------- | ------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `bulkActions`       | `BulkAction[]`            | —                | Bulk-action buttons; passing this turns on row selection.                                                                |
-| `rowActions`        | `RowAction<TRow>[]`       | —                | Trailing per-row actions; independent of selection.                                                                      |
-| `selectedIds`       | `readonly string[]`       | — (uncontrolled) | Controlled selection ids.                                                                                                |
-| `onSelectionChange` | `(ids: string[]) => void` | —                | Uncontrolled: observer for every change (toggles, select-all, automatic resets). Controlled: the change-request handler. |
-| `selectionGetId`    | `(row: TRow) => string`   | `rowKey`         | Selection id extractor when it must differ from the React key.                                                           |
-| `confirm`           | `ConfirmHandler`          | `window.confirm` | Confirmation handler for actions with a `confirm` block; pass your own for a styled dialog.                              |
+| Prop                | Type                      | Default          | Description                                                                                                                                                                                                                      |
+| ------------------- | ------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bulkActions`       | `BulkAction[]`            | —                | Bulk-action buttons; passing this turns on row selection.                                                                                                                                                                        |
+| `rowActions`        | `RowAction<TRow>[]`       | —                | Trailing per-row actions; independent of selection.                                                                                                                                                                              |
+| `selectedIds`       | `readonly string[]`       | — (uncontrolled) | Controlled selection ids.                                                                                                                                                                                                        |
+| `onSelectionChange` | `(ids: string[]) => void` | —                | Uncontrolled: observer for every change — once on mount with the (empty) initial set, per toggle/select-all, and on the automatic reset when search or a filter changes. Controlled: the change-request handler (no mount fire). |
+| `selectionGetId`    | `(row: TRow) => string`   | `rowKey`         | Selection id extractor when it must differ from the React key.                                                                                                                                                                   |
+| `confirm`           | `ConfirmHandler`          | `window.confirm` | Confirmation handler for actions with a `confirm` block; pass your own for a styled dialog.                                                                                                                                      |
 
 ## Notes
 
@@ -1434,7 +1468,8 @@ export function People() {
   `data` / source identity.
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/) —
-double-click the Email column.
+double-click an editable cell (Person, Email, or Team) in the editing
+section.
 
 ---
 
@@ -1520,6 +1555,14 @@ export function People() {
 | `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                         |
 | `labels`                    | `TableLabels`                                                   | English | Override `expandGroup`, `collapseGroup`, and `groupCount` for header controls.              |
 
+## Grouped tables are a full-set view
+
+With `groupBy` active the table renders **every filtered row** (grouped),
+and the chrome agrees with the screen: the footer count describes the
+rendered set, header select-all covers all rendered rows, page-scope CSV
+export contains exactly what you see, and the rows-per-page control hides
+(page size has no effect). Ungroup to return to normal pagination.
+
 ## Notes
 
 - Bucketing uses the column's `sortValue` when present, otherwise a path lookup
@@ -1599,7 +1642,7 @@ export function People() {
   // (from @adapttable/core) to make it part of shareable links instead.
   const { layout, onLayoutChange } = useColumnLayoutStorageState({
     storageKey: "people-table-columns",
-    defaultLayout: { pinned: { name: "left" } },
+    defaultColumnLayout: { pinned: { name: "left" } },
   });
 
   return (
@@ -1647,7 +1690,11 @@ export function People() {
 - `useColumnLayoutUrlState` debounces URL writes by 150 ms (a resize drag commits per animation frame; unthrottled `replaceState` trips Safari's rate limit). Reads stay instant.
 - `useColumnLayoutStorageState` removes its stored entry when the layout returns to the exact default, so defaults can evolve in later releases; it is SSR-safe (memory-only without a browser).
 - Layouts are keyed by column `key` — renaming a key orphans any persisted layout for it (the column reappears with default placement).
-- `defaultColumnLayout` only applies in uncontrolled mode; once you pass `columnLayout`, the controlled value is the single source of truth (the persistence hooks take their own `defaultLayout`).
+- `defaultColumnLayout` only applies in uncontrolled mode; once you pass `columnLayout`, the controlled value is the single source of truth (the persistence hooks take their own `defaultColumnLayout`).
+- **SSR-safe persistence**: a stored layout hydrates in an effect AFTER the
+  first client render, so server and client markup always match — expect one
+  paint with the default layout before the stored one applies. Blocked
+  storage (Safari private mode, sandboxed webviews) is tolerated silently.
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
@@ -1758,6 +1805,12 @@ hook):
 
 ## Notes
 
+- **SSR-safe**: stored views hydrate in an effect after mount (no
+  hydration mismatch); blocked storage is tolerated.
+- With `urlSync={false}` the menu captures and applies the table's
+  IN-MEMORY state — the address bar never changes and foreign query
+  params are never touched (`apply` writes only params the table owns).
+
 - For custom UIs, use the headless hook and wire any menu into the `toolbar`
   slot (each adapter also exports its `SavedViewsMenu` component to pair with
   it):
@@ -1831,6 +1884,9 @@ export function Readings() {
   );
 }
 ```
+
+The estimates default to **56 px** rows and **132 px** cards — pass your
+real measured sizes (like the `140` above) when your cells differ.
 
 ## How it works
 
@@ -1958,7 +2014,7 @@ export function Dashboard({
 // → ?people.q=avery&people.page=2&orders.f_totalMin=100
 ```
 
-The same `urlKey` option exists on `useFrontendData`, `useBackendData`,
+The same `urlKey` option exists on `useFrontendData`, `useQuerySource`,
 `useTableUrlState`, `useColumnLayoutUrlState`, and `useSavedViews` for
 headless consumers. Omitting distinct `urlKey`s on shared-URL tables logs a
 development warning.
@@ -2064,6 +2120,7 @@ modals or drawers where the address bar shouldn't change.
 | `limit`                     | `limit=50`                  | Page size, clamped to 1–500; omitted at the default (25).                                   |
 | `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`  | Single-column sort (`sortDir` falls back to `asc`).                                         |
 | `sort`                      | `sort=name:asc,age:desc`    | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                              |
+| `groupBy`                   | `groupBy=team`              | Active row-grouping column key (frontend tier).                                             |
 | `f_<key>`                   | `f_status=active`           | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded. |
 | `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`  | `dateRange` bounds (inclusive; the end bound keeps that whole day).                         |
 | `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`         | `numberRange` bounds (inclusive; parsed as numbers).                                        |
@@ -2136,15 +2193,15 @@ plain CSS, Tailwind, and shadcn tokens all work. The full part map:
 
 ### Toolbar & search
 
-| Part                | Element                                                                 |
-| ------------------- | ----------------------------------------------------------------------- |
-| `root`              | The outer wrapper around the whole table.                               |
-| `toolbar`           | The toolbar row (search, filters, columns, views, your `toolbar`).      |
-| `searchField`       | The search field wrapper (input + leading icon).                        |
-| `search`            | The search `<input>`.                                                   |
-| `searchIcon`        | The leading magnifying-glass icon.                                      |
-| `sortSelect`        | The mobile sort-by `<select>`.                                          |
-| `rowsPerPageSelect` | Rows-per-page `<select>` (toolbar in infinite mode, footer when paged). |
+| Part          | Element                                                                 |
+| ------------- | ----------------------------------------------------------------------- |
+| `root`        | The outer wrapper around the whole table.                               |
+| `toolbar`     | The toolbar row (search, filters, columns, views, your `toolbar`).      |
+| `searchField` | The search field wrapper (input + leading icon).                        |
+| `search`      | The search `<input>`.                                                   |
+| `searchIcon`  | The leading magnifying-glass icon.                                      |
+| `sortSelect`  | The mobile sort-by `<select>`.                                          |
+| `rowsPerPage` | Rows-per-page `<select>` (toolbar in infinite mode, footer when paged). |
 
 ### Filters
 
@@ -2310,8 +2367,15 @@ overrides the mapping (e.g. antd `size="large"`).
 ## CSV export
 
 Opt in with `exportCsv` to render a kit-native **Export CSV** button next to
-Filters / Columns. The file mirrors the current view: visible columns in
-display order, under the active search, filters, and sort.
+Filters / Columns. The file mirrors the current view's data — the active search, filters,
+and sort — with **the full exportable column set in display order,
+regardless of viewport**: the same button produces the same file on phone
+and desktop (`hideOnMobile` never shrinks an export).
+
+Cells that a spreadsheet would execute as formulas (`=`, `+`, `-`, `@`,
+tab or carriage-return prefixes) are neutralised with a leading `'` by
+default; pass `escapeFormulas: false` in the options object if you need
+raw output for a non-spreadsheet pipeline.
 
 ```tsx
 <DataTable
@@ -2361,6 +2425,8 @@ to the table when search/filter/page changes, with `scrollTopGap` (default
 The core is style-free: wrap your app in the kit's provider and AdaptTable
 renders with that kit's real components, following its theme and dark mode
 (`prefers-color-scheme`) automatically.
+
+## Animations
 
 `animate` works on **every adapter** — a dependency-free row/card entrance
 stagger that honours reduced motion. Rolling your own? Every animatable
@@ -2574,7 +2640,7 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 
 | Prop     | Type                    | Default | Description                                                                                                              |
 | -------- | ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `source` | `TableSource<TRow>`     | —       | Data + state contract from `useFrontendData` / `useBackendData`; adapters make it optional when you pass `data` instead. |
+| `source` | `TableSource<TRow>`     | —       | Data + state contract from `useFrontendData` / `useQuerySource`; adapters make it optional when you pass `data` instead. |
 | `rowKey` | `(row: TRow) => string` | —       | Stable React key extractor for a row (required).                                                                         |
 
 ### Columns & layout
@@ -2594,27 +2660,27 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 
 ### Filters & search
 
-| Prop                | Type                                | Default     | Description                                                                                                                                 |
-| ------------------- | ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters`           | `FilterDef<TRow>[] \| ReactNode`    | —           | Declarative array (the adapter builds the form) or JSX (you draw it); column `filter` shorthands merge in, a same-key `filters` entry wins. |
-| `filtersMode`       | `"popover" \| "drawer"`             | `"popover"` | Popover anchors a light card under the Filters button (no backdrop); drawer slides in a side panel with one.                                |
-| `filterLabels`      | `Record<string, ChipLabelResolver>` | —           | Per-filter-key chip label resolvers (derived automatically by declarative filters).                                                         |
-| `extraChips`        | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                         |
-| `activeFilterCount` | `number`                            | chip count  | Override the active-filter count badge.                                                                                                     |
-| `onClearFilters`    | `() => void`                        | —           | Clear-filters handler used by the panel + chip strip (built-in `clearExtras` fallback otherwise).                                           |
-| `hideSearch`        | `boolean`                           | `false`     | Disable the built-in search box.                                                                                                            |
-| `searchPlaceholder` | `string`                            | —           | Placeholder for the search input.                                                                                                           |
+| Prop                | Type                                | Default     | Description                                                                                                                                                    |
+| ------------------- | ----------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters`           | `FilterDef<TRow>[] \| ReactNode`    | —           | Declarative array (the adapter builds the form) or JSX (you draw it); column `filter` shorthands merge in, a same-key `filters` entry wins.                    |
+| `filtersMode`       | `"popover" \| "drawer"`             | `"popover"` | Popover anchors a light card under the Filters button (no backdrop); drawer slides in a side panel with one.                                                   |
+| `filterLabels`      | `Record<string, ChipLabelResolver>` | —           | Per-filter-key chip label resolvers. Declarative `filters` derive them automatically; needed only for hand-drawn JSX filters (or to override a derived label). |
+| `extraChips`        | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                            |
+| `activeFilterCount` | `number`                            | chip count  | Override the active-filter count badge.                                                                                                                        |
+| `onClearFilters`    | `() => void`                        | —           | Clear-filters handler used by the panel + chip strip (built-in `clearExtras` fallback otherwise).                                                              |
+| `searchable`        | `boolean`                           | `true`      | Render the built-in search box; pass `false` to hide it.                                                                                                       |
+| `searchPlaceholder` | `string`                            | —           | Placeholder for the search input.                                                                                                                              |
 
 ### Selection & actions
 
-| Prop                | Type                              | Default          | Description                                                                 |
-| ------------------- | --------------------------------- | ---------------- | --------------------------------------------------------------------------- |
-| `rowActions`        | `RowAction<TRow>[]`               | —                | Trailing per-row actions (icon buttons on desktop, card buttons on mobile). |
-| `bulkActions`       | `BulkAction[]`                    | —                | Bulk actions — providing these turns on row selection.                      |
-| `selectionGetId`    | `(row: TRow) => string`           | `rowKey`         | Selection id extractor when it must differ from `rowKey`.                   |
-| `selectedIds`       | `readonly string[]`               | —                | Controlled selection; apply `onSelectionChange` requests to your own state. |
-| `onSelectionChange` | `(selectedIds: string[]) => void` | —                | Selection observer (uncontrolled) or change-request handler (controlled).   |
-| `confirm`           | `ConfirmHandler`                  | `window.confirm` | Confirmation handler for actions that declare a `confirm` block.            |
+| Prop                | Type                              | Default          | Description                                                                                                                                                                                                    |
+| ------------------- | --------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rowActions`        | `RowAction<TRow>[]`               | —                | Trailing per-row actions (icon buttons on desktop, card buttons on mobile).                                                                                                                                    |
+| `bulkActions`       | `BulkAction[]`                    | —                | Bulk actions — providing these turns on row selection.                                                                                                                                                         |
+| `selectionGetId`    | `(row: TRow) => string`           | `rowKey`         | Selection id extractor when it must differ from `rowKey`.                                                                                                                                                      |
+| `selectedIds`       | `readonly string[]`               | —                | Controlled selection; apply `onSelectionChange` requests to your own state.                                                                                                                                    |
+| `onSelectionChange` | `(selectedIds: string[]) => void` | —                | Selection observer (uncontrolled) or change-request handler (controlled).                                                                                                                                      |
+| `confirm`           | `ConfirmHandler`                  | `window.confirm` | Confirmation handler for actions that declare a `confirm` block. Where no dialog exists (SSR, some webviews), the default DENIES the action and dev-warns — pass your own handler for dialogless environments. |
 
 ### Appearance & chrome
 
@@ -2625,9 +2691,10 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `dir`                       | `"ltr" \| "rtl"`                                                | `"ltr"`         | Text direction.                                                                                                                                                                                                                            |
 | `locale`                    | `string`                                                        | —               | Active locale tag (e.g. `"ar"`, `"ar-EG"`) driving per-column `i18n` data-path resolution.                                                                                                                                                 |
 | `density`                   | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size.                                                                                                                                                                                 |
-| `isMobile`                  | `boolean`                                                       | viewport        | Force the mobile layout instead of resolving from the viewport.                                                                                                                                                                            |
+| `forceMobile`               | `boolean`                                                       | viewport        | Force the mobile layout instead of resolving from the viewport.                                                                                                                                                                            |
 | `toolbar`                   | `ReactNode`                                                     | —               | Inline toolbar slot for custom controls (view toggles, etc.).                                                                                                                                                                              |
 | `exportCsv`                 | `boolean \| { filename?: string; scope?: "page" \| "all" }`     | `false`         | Opt-in Export CSV toolbar button. `true` → `export.csv` + current page; `scope: "all"` uses the full filtered set when the source provides it — server sources without `allFilteredRows` fall back to the current page with a dev warning. |
+| `error`                     | `Error \| null`                                                 | `null`          | Forwarded error to display in the table's error state (retry via the source's `refetch`).                                                                                                                                                  |
 | `skeletonRows`              | `number`                                                        | page size       | Number of skeleton rows while loading.                                                                                                                                                                                                     |
 | `stickyHeader`              | `boolean`                                                       | `false`         | Keep the desktop table header sticky while scrolling.                                                                                                                                                                                      |
 | `stickyTop`                 | `number`                                                        | `0`             | Sticky toolbar top offset in px (for app headers above the table).                                                                                                                                                                         |
@@ -2712,26 +2779,26 @@ On or after / On or before / Between) — headless: `readRangeWidget`,
 
 Props beyond the core surface, with per-kit availability.
 
-| Prop            | Type                                            | Default     | Available on                              | Description                                                                                                                               |
-| --------------- | ----------------------------------------------- | ----------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                               | —           | all                                       | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                |
-| `total`         | `number`                                        | —           | all                                       | Server tier: total row count across all pages (drives the pager).                                                                         |
-| `loading`       | `boolean`                                       | —           | all                                       | Server tier: a request is in flight.                                                                                                      |
-| `onQueryChange` | `(query: TableQuery, info: { signal }) => void` | —           | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`.                |
-| `urlKey`        | `string`                                        | —           | all                                       | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                       |
-| `urlAdapter`    | `UrlStateAdapter`                               | History API | all                                       | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                |
-| `urlSync`       | `boolean`                                       | `true`      | all                                       | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                           |
-| `savedViews`    | `UseSavedViewsOptions`                          | —           | all                                       | Mounts a saved-views toolbar menu; `adapter`/`urlKey` default to the table's own, so usually only `storageKey` is needed.                 |
-| `slots`         | `{ skeleton?, empty? }`                         | —           | all                                       | Replace sub-components (loading skeleton, empty state).                                                                                   |
-| `classNames`    | `DataTableClassNames`                           | —           | mantine, chakra, radix, base-ui, unstyled | Per-part class overrides — five parts on Mantine/Chakra/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled. |
-| `className`     | `string`                                        | —           | mui, antd                                 | Class name applied to the root wrapper.                                                                                                   |
-| `animate`       | `boolean`                                       | `false`     | all                                       | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                     |
-| `size`          | kit-specific union                              | —           | mui, chakra, antd, radix                  | Explicit kit table size, overriding the size derived from `density` (chakra default `"md"`; radix `"2"`, compact `"1"`).                  |
-| `colorScheme`   | `string`                                        | —           | chakra                                    | Chakra color scheme for primary accents (buttons, badges).                                                                                |
-| `accentColor`   | kit accent union                                | —           | radix, base-ui                            | Accent color for primary controls (buttons, badges, active page).                                                                         |
-| `bordered`      | `boolean`                                       | `false`     | antd                                      | Render the table with cell borders.                                                                                                       |
-| `emptyState`    | `ReactNode`                                     | —           | unstyled                                  | Empty-state node override (`slots.empty` alias wins when both are set).                                                                   |
-| `loadingState`  | `ReactNode`                                     | —           | unstyled                                  | Loading-state node override (`slots.skeleton` alias wins when both are set).                                                              |
+| Prop            | Type                                            | Default     | Available on                              | Description                                                                                                                                                                             |
+| --------------- | ----------------------------------------------- | ----------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`          | `readonly TRow[]`                               | —           | all                                       | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                              |
+| `total`         | `number`                                        | —           | all                                       | Server tier: total row count across all pages (drives the pager).                                                                                                                       |
+| `loading`       | `boolean`                                       | —           | all                                       | Server tier: a request is in flight.                                                                                                                                                    |
+| `onQueryChange` | `(query: TableQuery, info: { signal }) => void` | —           | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`.                                                              |
+| `urlKey`        | `string`                                        | —           | all                                       | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                     |
+| `urlAdapter`    | `UrlStateAdapter`                               | History API | all                                       | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                              |
+| `urlSync`       | `boolean`                                       | `true`      | all                                       | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                         |
+| `savedViews`    | `UseSavedViewsOptions`                          | —           | all                                       | Mounts a saved-views toolbar menu; `adapter`/`urlKey` default to the table's own, so usually only `storageKey` is needed.                                                               |
+| `slots`         | `{ skeleton?, empty? }`                         | —           | all                                       | Replace sub-components (loading skeleton, empty state).                                                                                                                                 |
+| `classNames`    | `DataTableClassNames`                           | —           | mantine, chakra, radix, base-ui, unstyled | Per-part class overrides — five parts on Mantine/Chakra/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled.                                               |
+| `className`     | `string`                                        | —           | mui, antd                                 | Class name applied to the root wrapper.                                                                                                                                                 |
+| `animate`       | `boolean`                                       | `false`     | all                                       | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                   |
+| `size`          | kit-specific union                              | —           | mui, chakra, antd, radix                  | Explicit kit table size, overriding the density mapping (comfortable/compact → chakra `"md"`/`"sm"`, radix & base-ui `"2"`/`"1"`, mui `"medium"`/`"small"`, antd `"middle"`/`"small"`). |
+| `colorScheme`   | `string`                                        | —           | chakra                                    | Chakra color scheme for primary accents (buttons, badges).                                                                                                                              |
+| `accentColor`   | kit accent union                                | —           | radix, base-ui                            | Accent color for primary controls (buttons, badges, active page).                                                                                                                       |
+| `bordered`      | `boolean`                                       | `false`     | antd                                      | Render the table with cell borders.                                                                                                                                                     |
+| `emptyState`    | `ReactNode`                                     | —           | unstyled                                  | Empty-state node override (`slots.empty` alias wins when both are set).                                                                                                                 |
+| `loadingState`  | `ReactNode`                                     | —           | unstyled                                  | Loading-state node override (`slots.skeleton` alias wins when both are set).                                                                                                            |
 
 Each adapter also re-exports the core source builders and types, so one
 import path covers everything.
@@ -2744,7 +2811,7 @@ All from `@adapttable/core`.
 
 - `useFrontendData<TRow>(options): TableSource<TRow>` — in-memory source:
   filters, sorts, and slices a raw array from URL state.
-- `useBackendData<TRow, TParams, TPage>(options): TableSource<TRow>` — wraps
+- `useQuerySource<TRow, TParams, TPage>(options): TableSource<TRow>` — wraps
   your `useInfiniteQuery`-style hook into the same contract.
 - `useServerData<TRow>(options): TableSource<TRow>` — hand-rolled-fetch
   server tier: emits one consolidated `TableQuery` per change, aborting
@@ -2868,7 +2935,7 @@ production):
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
-  `RTL_LANGUAGES`, `locales` and the ten presets (`en`, `ar`, `de`, `es`,
+  `RTL_LANGUAGES`, `locales` and the seventeen presets (`en`, `ar`, `de`, `es`,
   `fr`, `he`, `it`, `ja`, `pt`, `zh`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
   `detectKit`, `choosePackageManager`, `installCommand`, `scaffoldFiles`,
@@ -2916,10 +2983,11 @@ markup.
 
 ## Which UI libraries does AdaptTable support?
 
-Seven, from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, and
-shadcn/ui** — each rendered with that kit's real components. There is also an
-unstyled adapter for Tailwind or your own CSS, and a headless core
-(`useDataTable`) that works with any markup. Install only the adapter you use.
+Eight adapters from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix
+Themes, Base UI, shadcn/ui, and unstyled** (for Tailwind or your own CSS) —
+each kit adapter rendered with that kit's real components, plus a headless
+core (`useDataTable`) that works with any markup. Install only the adapter
+you use.
 
 ## Is there a free alternative to MUI X DataGrid or ag-Grid?
 
@@ -2952,7 +3020,7 @@ Use one `TableSource` contract for both:
 // in-memory
 const source = useFrontendData({ data: rows, columns });
 // server-paginated (wraps your useInfiniteQuery hook) — the table is identical
-const source = useBackendData({ usePaginatedQuery });
+const source = useQuerySource({ usePaginatedQuery });
 ```
 
 `<DataTable source={source} … />` doesn't change between them.
@@ -3151,6 +3219,7 @@ kits — only the look does. Every adapter ships the same batteries:
 | Summary / footer row                  |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row expansion                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Inline cell editing (opt-in)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Row grouping + per-group aggregates   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
@@ -3252,20 +3321,20 @@ through it exactly as mantine-datatable did.
 
 `<DataTable>` props:
 
-| mantine-datatable                             | `@adapttable/mantine`                                      | Notes                                                                             |
-| --------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `records`                                     | `data`                                                     | Frontend tier. Server tier: `data` (current page) + `total` + `onQueryChange`.    |
-| `columns`                                     | `columns`                                                  | Field-by-field mapping below.                                                     |
-| `idAccessor`                                  | `rowKey`                                                   | **Required** — `(row) => string`. There is no `"id"` default.                     |
-| `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort`)                      | AdaptTable owns sort state and applies it; you don't sort `records` yourself.     |
-| `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `total` + `onQueryChange` (server) | Pagination is `"auto"`: paged on desktop, infinite on mobile.                     |
-| `recordsPerPage` / `recordsPerPageOptions`    | built-in page-size control                                 | Defaults to `PAGE_SIZE_OPTIONS`; `DEFAULT_LIMIT` is 25.                           |
-| `selectedRecords` / `onSelectedRecordsChange` | `bulkActions`, or `selectedIds` / `onSelectionChange`      | Providing `bulkActions` turns selection on and mounts the bulk bar.               |
-| `isRecordSelectable`                          | `selectionGetId`                                           | Selection id extractor; gate rows in your own action logic.                       |
-| `rowExpansion={{ content }}`                  | `renderRowDetail`                                          | `(row) => ReactNode`; multiple rows may be open at once.                          |
-| `fetching`                                    | `loading`                                                  | Server tier: skeleton when empty, subtle refresh indicator otherwise.             |
-| `noRecordsText` / `emptyState`                | `slots.empty`                                              | Replace the empty state; `slots.skeleton` replaces the loader.                    |
-| `column.filter` (your JSX popover)            | column `filter` shorthand                                  | Declarative — see below. JSX is still allowed via the table-level `filters` prop. |
+| mantine-datatable                             | `@adapttable/mantine`                                      | Notes                                                                                                                                 |
+| --------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `records`                                     | `data`                                                     | Frontend tier. Server tier: `data` (current page) + `total` + `onQueryChange`.                                                        |
+| `columns`                                     | `columns`                                                  | Field-by-field mapping below.                                                                                                         |
+| `idAccessor`                                  | `rowKey`                                                   | **Required** — `(row) => string`. There is no `"id"` default.                                                                         |
+| `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort`)                      | AdaptTable owns sort state and applies it; you don't sort `records` yourself.                                                         |
+| `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `total` + `onQueryChange` (server) | Pagination is `"auto"`: paged on desktop, infinite on mobile.                                                                         |
+| `recordsPerPage` / `recordsPerPageOptions`    | built-in page-size control                                 | Defaults to `PAGE_SIZE_OPTIONS`; `DEFAULT_LIMIT` is 25.                                                                               |
+| `selectedRecords` / `onSelectedRecordsChange` | `bulkActions`, or `selectedIds` / `onSelectionChange`      | Providing `bulkActions` turns selection on and mounts the bulk bar.                                                                   |
+| `isRecordSelectable`                          | — (gate in your bulk actions)                              | No per-row checkbox disable; use a bulk action's `disabledReason` to refuse ineligible ids (`selectionGetId` only customises the id). |
+| `rowExpansion={{ content }}`                  | `renderRowDetail`                                          | `(row) => ReactNode`; multiple rows may be open at once.                                                                              |
+| `fetching`                                    | `loading`                                                  | Server tier: skeleton when empty, subtle refresh indicator otherwise.                                                                 |
+| `noRecordsText` / `emptyState`                | `slots.empty`                                              | Replace the empty state; `slots.skeleton` replaces the loader.                                                                        |
+| `column.filter` (your JSX popover)            | column `filter` shorthand                                  | Declarative — see below. JSX is still allowed via the table-level `filters` prop.                                                     |
 
 Column fields (`DataTableColumn` → `ColumnDef`):
 
@@ -3617,23 +3686,23 @@ pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
 
 ## Concept mapping
 
-| TanStack Table                                                        | AdaptTable                                                      | Notes                                                             |
-| --------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `useReactTable({ data, columns, getCoreRowModel })`                   | `useDataTable({ source, columns })` or an adapter `<DataTable>` | `source` from `useFrontendData`; adapters accept `data` directly. |
-| `getSortedRowModel` / `getFilteredRowModel` / `getPaginationRowModel` | (none needed)                                                   | Applied automatically on the frontend tier.                       |
-| `flexRender(cell.column.columnDef.cell, …)`                           | adapter renders, or prop-getters (`getCellProps`, …)            | Headless route mirrors TanStack's model.                          |
-| `columnHelper.accessor("name", …)`                                    | `{ key: "name" }`                                               | Dot paths work in both.                                           |
-| `columnHelper.accessor(row => …)` (`accessorFn`)                      | `{ key, accessor: (row) => … }`                                 | —                                                                 |
-| `columnHelper.display({ cell })`                                      | `{ key, Cell }`                                                 | `Cell` receives `{ row, rowIndex }`.                              |
-| `header` / `cell` / `footer`                                          | `header` / `Cell` (or `accessor`) / `summaryRow`                | Footer is one table-level function.                               |
-| `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort`)                           | AdaptTable owns sort state.                                       |
-| `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters` array                     | Widgets + chips built for you.                                    |
-| `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                            | Paged on desktop, infinite on mobile.                             |
-| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions` / `selectedIds` / `onSelectionChange`             | —                                                                 |
-| `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `renderRowDetail`                                               | Toggle UI is provided, not hand-added.                            |
-| `columnVisibility` / `columnOrder` / `columnPinning` state            | `enableColumnMenu` / `columnLayout`                             | One built-in menu instead of hand-wired state + DnD.              |
-| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useBackendData`)              | One consolidated server query. See [data tiers](./data-tiers.md). |
-| (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews`                             | On by default.                                                    |
+| TanStack Table                                                        | AdaptTable                                                      | Notes                                                                    |
+| --------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `useReactTable({ data, columns, getCoreRowModel })`                   | `useDataTable({ source, columns })` or an adapter `<DataTable>` | `source` from `useFrontendData`; adapters accept `data` directly.        |
+| `getSortedRowModel` / `getFilteredRowModel` / `getPaginationRowModel` | (none needed)                                                   | Applied automatically on the frontend tier.                              |
+| `flexRender(cell.column.columnDef.cell, …)`                           | adapter renders, or prop-getters (`getCellProps`, …)            | Headless route mirrors TanStack's model.                                 |
+| `columnHelper.accessor("name", …)`                                    | `{ key: "name" }`                                               | Dot paths work in both.                                                  |
+| `columnHelper.accessor(row => …)` (`accessorFn`)                      | `{ key, accessor: (row) => … }`                                 | —                                                                        |
+| `columnHelper.display({ cell })`                                      | `{ key, Cell }`                                                 | `Cell` receives `{ row, rowIndex }`.                                     |
+| `header` / `cell` / `footer`                                          | `header` / `Cell` (or `accessor`) / `summaryRow`                | Footer is one table-level function.                                      |
+| `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort`)                           | AdaptTable owns sort state.                                              |
+| `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters` array                     | Widgets + chips built for you.                                           |
+| `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                            | Paged on desktop, infinite on mobile.                                    |
+| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions` / `selectedIds` / `onSelectionChange`             | —                                                                        |
+| `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `renderRowDetail`                                               | Toggle UI is provided, not hand-added.                                   |
+| `columnVisibility` / `columnOrder` / `columnPinning` state            | `enableColumnMenu` / `columnLayout`                             | One built-in menu instead of hand-wired state + DnD.                     |
+| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)              | One consolidated server query. See [data tiers](./data-tiers.md).        |
+| (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews`                             | URL sync is on by default; `savedViews` is opt-in (pass a `storageKey`). |
 
 ## Before / after
 
@@ -3821,37 +3890,37 @@ whenever you want.
 
 `<MUIDataTable>` → `<DataTable>`:
 
-| mui-datatables                                        | `@adapttable/mui`                                     | Notes                                                                                        |
-| ----------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `data` (objects)                                      | `data`                                                | Array-of-objects only; no array-of-arrays mode.                                              |
-| `data` (arrays)                                       | convert to objects                                    | One `map()` at the boundary — see Gotchas.                                                   |
-| `columns` (`name`, `label`, `options`)                | `columns` (`key`, `header`, …)                        | Field-by-field below.                                                                        |
-| `options.serverSide` + `count` + `onTableChange`      | `data` + `total` + `onQueryChange`                    | One consolidated query object replaces the action-string switch.                             |
-| `options.page` / `rowsPerPage` / `rowsPerPageOptions` | automatic                                             | Built-in pager; page size control included.                                                  |
-| `options.sortOrder` / `onColumnSortChange`            | per-column `sortable` (+ `multiSort`)                 | AdaptTable owns and applies sort state.                                                      |
-| `options.filterType` / `onFilterChange`               | column `filter` shorthand + table `filters`           | Kit-native widgets + removable chips, derived for you.                                       |
-| `options.search` / `searchText` / `onSearchChange`    | built-in search (`searchPlaceholder`, `hideSearch`)   | Debounced and URL-synced.                                                                    |
-| `options.selectableRows` + `onRowSelectionChange`     | `bulkActions`, or `selectedIds` / `onSelectionChange` | Providing `bulkActions` enables selection + the bulk bar.                                    |
-| `options.expandableRows` + `renderExpandableRow`      | `renderRowDetail`                                     | `(row) => ReactNode` — no separate flag, no colSpan markup.                                  |
-| `options.viewColumns` / `draggableColumns`            | `enableColumnMenu`                                    | Show/hide, reorder, and pin in one menu.                                                     |
-| `options.resizableColumns`                            | `resizableColumns`                                    | Drag + keyboard resize.                                                                      |
-| `options.responsive` (`'vertical'`, …)                | automatic mobile cards                                | Cards render below the breakpoint — no mode to configure.                                    |
-| `options.download` / `print`                          | `exportCsv` prop / `rowsToCsv` + `downloadCsv`        | Built-in Export CSV button, or headless helpers on a custom `toolbar` button; print via CSS. |
-| `options.textLabels`                                  | `labels`                                              | Same idea; English defaults fill missing keys.                                               |
-| `options.storageKey`                                  | `savedViews` / URL state                              | Views are named, shareable snapshots instead of one implicit save.                           |
+| mui-datatables                                        | `@adapttable/mui`                                     | Notes                                                                                                      |
+| ----------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `data` (objects)                                      | `data`                                                | Array-of-objects only; no array-of-arrays mode.                                                            |
+| `data` (arrays)                                       | convert to objects                                    | One `map()` at the boundary — see Gotchas.                                                                 |
+| `columns` (`name`, `label`, `options`)                | `columns` (`key`, `header`, …)                        | Field-by-field below.                                                                                      |
+| `options.serverSide` + `count` + `onTableChange`      | `data` + `total` + `onQueryChange`                    | One consolidated query object replaces the action-string switch.                                           |
+| `options.page` / `rowsPerPage` / `rowsPerPageOptions` | automatic                                             | Built-in pager; page size control included.                                                                |
+| `options.sortOrder` / `onColumnSortChange`            | per-column `sortable` (+ `multiSort`)                 | AdaptTable owns and applies sort state.                                                                    |
+| `options.filterType` / `onFilterChange`               | column `filter` shorthand + table `filters`           | Kit-native widgets + removable chips, derived for you.                                                     |
+| `options.search` / `searchText` / `onSearchChange`    | built-in search (`searchPlaceholder`, `searchable`)   | Debounced and URL-synced.                                                                                  |
+| `options.selectableRows` + `onRowSelectionChange`     | `bulkActions`, or `selectedIds` / `onSelectionChange` | Providing `bulkActions` enables selection + the bulk bar.                                                  |
+| `options.expandableRows` + `renderExpandableRow`      | `renderRowDetail`                                     | `(row) => ReactNode` — no separate flag, no colSpan markup.                                                |
+| `options.viewColumns` / `draggableColumns`            | `enableColumnMenu`                                    | Show/hide, reorder, and pin in one menu.                                                                   |
+| `options.resizableColumns`                            | `resizableColumns`                                    | Drag + keyboard resize.                                                                                    |
+| `options.responsive` (`'vertical'`, …)                | automatic mobile cards                                | Cards render below the breakpoint — no mode to configure.                                                  |
+| `options.download` / `print`                          | `exportCsv` prop / `rowsToCsv` + `downloadCsv`        | Built-in Export CSV button, or headless helpers on a custom `toolbar` button; print via CSS.               |
+| `options.textLabels`                                  | `labels`                                              | Same idea; English defaults fill missing keys.                                                             |
+| `options.storageKey`                                  | `savedViews={{ storageKey }}` / URL state             | Views are named, shareable snapshots (savedViews takes its own `storageKey`) instead of one implicit save. |
 
 Column options → `ColumnDef`:
 
-| mui-datatables                                    | `@adapttable/mui`                       | Notes                                                                  |
-| ------------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------- |
-| `name`                                            | `key`                                   | Dot paths reach nested values without `enableNestedDataAccess`.        |
-| `label`                                           | `header`                                | Auto-derived from `key` when omitted.                                  |
-| `options.customBodyRender(value, tableMeta)`      | `Cell` (component) or `accessor: (row)` | You get the **row object**, not index bookkeeping.                     |
-| `options.customBodyRenderLite(dataIndex)`         | `Cell`                                  | Row memoization is built in — no "lite" variant needed.                |
-| `options.display` / `viewColumns`                 | `enableColumnMenu` (+ `columnLayout`)   | User-facing visibility lives in the Columns menu.                      |
-| `options.filter` / `filterType` / `filterOptions` | `filter` shorthand                      | `"text"`, `"select"`, `"multiSelect"`, `"numberRange"`, `"dateRange"`. |
-| `options.sort` / `sortCompare`                    | `sortable` / `sortValue`                | `sortValue` extracts the comparable primitive.                         |
-| `options.setCellProps` / `setCellHeaderProps`     | `align`, `width`, `className` hooks     | Common cases are first-class props.                                    |
+| mui-datatables                                    | `@adapttable/mui`                       | Notes                                                                                                 |
+| ------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `name`                                            | `key`                                   | Dot paths reach nested values without `enableNestedDataAccess`.                                       |
+| `label`                                           | `header`                                | Auto-derived from `key` when omitted.                                                                 |
+| `options.customBodyRender(value, tableMeta)`      | `Cell` (component) or `accessor: (row)` | You get the **row object**, not index bookkeeping.                                                    |
+| `options.customBodyRenderLite(dataIndex)`         | `Cell`                                  | Row memoization is built in — no "lite" variant needed.                                               |
+| `options.display` / `viewColumns`                 | `enableColumnMenu` (+ `columnLayout`)   | User-facing visibility lives in the Columns menu.                                                     |
+| `options.filter` / `filterType` / `filterOptions` | `filter` shorthand                      | `"text"`, `"select"`, `"multiSelect"`, `"numberRange"`, `"dateRange"`.                                |
+| `options.sort` / `sortCompare`                    | `sortable` / `sortValue`                | `sortValue` extracts the comparable primitive.                                                        |
+| `options.setCellProps` / `setCellHeaderProps`     | `align`, `width`, `classNames`          | Common cases are first-class column props; per-part classes come from the adapter's `classNames` map. |
 
 ## Server-side data: retire the action switch
 
@@ -3868,7 +3937,7 @@ callback receiving one consolidated query:
   total={total}
   loading={loading}
   onQueryChange={async (query, { signal }) => {
-    // query: { page, limit, search, sortBy, sortDir, filters } — one shape,
+    // query: { page, limit, search, sortBy, sortDir, sortLevels, filters } — one shape,
     // fired once per real change (mount included), previous fetch aborted.
     const res = await fetch(`/api/people?${toParams(query)}`, { signal });
     const body = await res.json();
@@ -4001,8 +4070,10 @@ is the closer fit):
   [Inline cell editing](./cell-editing.md)), not material-table's row
   dialog engine. Multi-field forms still go through `rowActions` + your
   own UI, with the built-in `confirm` seam for destructive actions.
-- **Drag-to-group aggregation** (`options.grouping`) — AdaptTable has
-  presentational header groups, not runtime grouping.
+- **Drag-to-group aggregation** (`options.grouping`) — AdaptTable ships
+  single-level [row grouping](./row-grouping.md) (`groupBy` + optional
+  `groupAggregates`); there is no drag-a-column-to-group UI, so wire your
+  own control to `groupBy` if you need that gesture.
 - **Tree data** (`parentChildData`) — not supported.
 - **PDF export button** — AdaptTable ships a headless CSV helper only.
 
@@ -4062,19 +4133,19 @@ Same Material look, on a current MUI — and your rows stay untouched.
 
 Column def → `ColumnDef`:
 
-| material-table                     | `@adapttable/mui`                             | Notes                                                       |
-| ---------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `field`                            | `key`                                         | Dot paths supported.                                        |
-| `title`                            | `header`                                      | Auto-derived from `key` when omitted.                       |
-| `render(rowData)`                  | `Cell` / `accessor: (row) => …`               | Same idea, typed row.                                       |
-| `type: "numeric"`                  | `align: "end"` + `filter: "numberRange"`      | Type is behavior you declare, not an enum.                  |
-| `type: "date"` / `"datetime"`      | `accessor` formatting + `filter: "dateRange"` | Operator-first range widgets included.                      |
-| `lookup: { 1: "Active", … }`       | `filter: { type: "select", options }`         | Options are explicit `{ value, label }[]` (or `"auto"`).    |
-| `sorting` / `defaultSort`          | `sortable`                                    | Default sort comes from URL state / `defaultColumnLayout`.  |
-| `customSort(a, b)`                 | `sortValue: (row) => primitive`               | Extract a comparable value instead of writing a comparator. |
-| `customFilterAndSearch`            | `filter` + `getValue`                         | Predicate derives from the declaration.                     |
-| `hidden` / `hiddenByColumnsButton` | `enableColumnMenu` + `columnLayout`           | User-facing visibility lives in the menu.                   |
-| `cellStyle` / `headerStyle`        | `align`, `width`, `className`, `Cell`         | Style through your own components/classes.                  |
+| material-table                     | `@adapttable/mui`                             | Notes                                                                           |
+| ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `field`                            | `key`                                         | Dot paths supported.                                                            |
+| `title`                            | `header`                                      | Auto-derived from `key` when omitted.                                           |
+| `render(rowData)`                  | `Cell` / `accessor: (row) => …`               | Same idea, typed row.                                                           |
+| `type: "numeric"`                  | `align: "end"` + `filter: "numberRange"`      | Type is behavior you declare, not an enum.                                      |
+| `type: "date"` / `"datetime"`      | `accessor` formatting + `filter: "dateRange"` | Operator-first range widgets included.                                          |
+| `lookup: { 1: "Active", … }`       | `filter: { type: "select", options }`         | Options are explicit `{ value, label }[]` (or `"auto"`).                        |
+| `sorting` / `defaultSort`          | `sortable` + `defaults`                       | Default sort is `defaults={{ sortBy, sortDir }}` (URL state wins when present). |
+| `customSort(a, b)`                 | `sortValue: (row) => primitive`               | Extract a comparable value instead of writing a comparator.                     |
+| `customFilterAndSearch`            | `filter` + `getValue`                         | Predicate derives from the declaration.                                         |
+| `hidden` / `hiddenByColumnsButton` | `enableColumnMenu` + `columnLayout`           | User-facing visibility lives in the menu.                                       |
+| `cellStyle` / `headerStyle`        | `align`, `width`, `className`, `Cell`         | Style through your own components/classes.                                      |
 
 ## Remote data: the query function maps almost 1:1
 
@@ -4201,8 +4272,8 @@ function PeopleTable({ people }: { people: Person[] }) {
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.
-If your app uses row grouping, pivoting, aggregation, tree data, cell/range
-selection, or Excel export, keep AG Grid (those are its Enterprise tier, from
+If your app uses pivoting, tree data, cell/range selection, or Excel
+export, keep AG Grid (those are its Enterprise tier, from
 $999/developer, and they're genuinely good). AdaptTable doesn't do analytics
 grids, and pretending otherwise would waste your week.
 
@@ -4217,7 +4288,8 @@ AdaptTable renders _your_ UI kit's real components).
 
 ## When to stay on AG Grid
 
-- Row grouping / pivoting / aggregation dashboards
+- Pivoting / aggregation dashboards (single-level [row grouping](./row-grouping.md)
+  with per-group aggregates IS built in — deep multi-level grouping is not)
 - Tree data, cell/range selection + fill handle, clipboard-heavy workflows
 - Excel export (not just CSV), tool panels / side bar
 - Excel-style cell editing at scale
@@ -4360,9 +4432,11 @@ table is your design system's, not a themed grid.
 
 ## Gotchas
 
-- **Don't migrate the analytics grids.** Grouping, pivoting, aggregation,
+- **Don't migrate the analytics grids.** Pivoting, multi-level grouping,
   tree data, range selection, clipboard, Excel export have no AdaptTable
-  equivalent — that's deliberate scope, not a roadmap gap.
+  equivalent — that's deliberate scope, not a roadmap gap. (Single-level
+  row grouping with aggregates DID ship — see
+  [Row grouping](./row-grouping.md).)
 - **Cell editing is opt-in, not spreadsheet-grade.** Map AG Grid `editable`
   columns to `ColumnDef.editable` + table `onCellEdit` (see
   [Inline cell editing](./cell-editing.md)). Full Excel-style fill-handle /
@@ -4388,6 +4462,128 @@ table is your design system's, not a themed grid.
   [Filtering](./filtering.md) · [Column management](./column-management.md).
 - [Comparison](./comparison.md) — the honest feature table, including where
   AG Grid wins.
+
+---
+
+# Migrating from v1 to v2
+
+v2 is a truth-and-consistency release: every documented behavior now works
+as written, the same word always means the same thing across all eight
+adapters, and a batch of silent traps became loud. Nothing deprecated
+ships — v1 names were removed, not aliased, so the compiler walks you
+through the rename table below.
+
+## The rename table
+
+| v1                                                            | v2                                                | Where                                                         |
+| ------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------- |
+| `enabled`                                                     | `urlSync`                                         | source hooks + `useTableUrlState`                             |
+| `adapter`                                                     | `urlAdapter`                                      | source hooks + `UseSavedViewsOptions`                         |
+| `useBackendData` / `UseBackendDataOptions`                    | `useQuerySource` / `UseQuerySourceOptions`        | the query-library source builder                              |
+| `defaultLayout`                                               | `defaultColumnLayout`                             | column-layout hooks                                           |
+| `selected` / `onChange`                                       | `selectedIds` / `onSelectionChange`               | `useSelection` options                                        |
+| `collapsedIds` / `onCollapsedIdsChange`                       | `collapsedGroupIds` / `onCollapsedGroupIdsChange` | row grouping                                                  |
+| `customToolbar`                                               | `toolbar`                                         | `ToolbarChromeProps`                                          |
+| `PaginatedResponse.items` / `.hasNext`                        | `.rows` / `.hasNextPage`                          | response envelope                                             |
+| `SortState`                                                   | `SortLevel` (one merged type)                     | sorting types                                                 |
+| `colorScheme` (Chakra accent)                                 | `accentColor`                                     | Chakra adapter (frees the light/dark type name)               |
+| `hideSearch`                                                  | `searchable` (positive polarity, default `true`)  | all adapters                                                  |
+| `isMobile` prop                                               | `forceMobile`                                     | all adapters                                                  |
+| `labels.applyFilters`                                         | `labels.filtersDone`                              | labels (the button closes; filters apply live)                |
+| `SavedViewsMenuLabels` (and per-kit variants)                 | `SavedViewsLabels`                                | every adapter, one exported name                              |
+| `classNames.rowsPerPageSelect`                                | `classNames.rowsPerPage`                          | unstyled / shadcn                                             |
+| `classNames.pageButton`                                       | `pagePrev` / `pageNext` / `pageNumber`            | unstyled / shadcn (one key per rendered part)                 |
+| `data-adapttable-part="group-row/group-cell"` (header groups) | `header-group-row` / `header-group-cell`          | header groups; `group-row`/`group-cell` now mean ROW grouping |
+| `data-adapttable-part="retry"`                                | `retry-button`                                    | error state                                                   |
+| antd `virtualHeight` / `virtualWidth`                         | removed — bound the scroller with `maxHeight`     | antd adapter                                                  |
+
+## Behavior changes (and why)
+
+- **React 18 works again.** v1.2 accidentally required React 19.2
+  (`useEffectEvent`); v2 runs the declared `^18 || ^19` range and CI
+  proves it on 18.3 / 19.0 / 19.2.
+- **Explicit `mode` prop.** `mode="server"` requires `onQueryChange` at
+  compile time; `mode="frontend"` turns `onQueryChange` into a pure
+  notification (the table keeps processing your `data`). Omitting `mode`
+  keeps v1 inference exactly. _Why: the frontend tier had no way to
+  observe query changes without surrendering the data path._
+- **`onGroupByChange` and `onClearFilters` are observers.** The table
+  always performs the change itself, then notifies. _Why: providing a
+  logging handler used to silently replace the built-in mutation._ Take
+  full control via `source.setGroupBy` / `source.clearExtras`.
+- **One source-flag contract (TanStack semantics).** `isLoading` = first
+  load only; `isFetching` = any in-flight; `hasNextPage`/`fetchNextPage` =
+  infinite-append only (false / no-op when paged); `refetch` really
+  re-runs. The `onQueryChange` tier now APPENDS on `fetchNextPage`
+  (accumulating across round-trips) instead of replacing the page, and it
+  resolves `paginationMode: "auto"` like the other tiers — mobile becomes
+  infinite cards; pass `paginationMode="paged"` for the v1 behavior.
+- **`baseParams` never beat live state, and filters are namespaced.**
+  Query hooks receive filter values under `params.filters` instead of
+  spread at the top level. _Why: a static param could silently override an
+  active filter, and a filter named `sortBy` clobbered the sort._
+- **The headless tier renders real tables.** `useDataTable` resolves
+  bare-key columns (headers + accessors) like `<DataTable>` does, and
+  `getRowProps` no longer smuggles `key` inside its spreadable result —
+  read `getRowKey(row)`; `getCellContent(column, row, index)` renders
+  Cell-or-accessor without casts.
+- **`defaults`, `searchDebounceMs` and `paginationMode` are real
+  component props** (they were documented but didn't exist), and
+  `virtualize` on a paged table dev-warns instead of silently doing
+  nothing.
+- **An explicit `hideOnMobile: true` always wins** — the mobile identity
+  anchor no longer forces hidden columns onto cards. A column marked
+  `editable` without a table-level `onCellEdit` dev-warns instead of
+  doing nothing.
+- **The selection contract is settled**: uncontrolled =` onSelectionChange`
+  observes (mount fire with the empty set, auto-reset on search/filter
+  change included); controlled = change-request handler, no mount fire.
+- **`clearAll` clears the multi-sort chain too** (it used to leave rows
+  visibly sorted).
+- **Grouped tables are a full-set view**: footer count, select-all scope
+  and page-scope CSV all describe the rendered (full filtered) set.
+- **CSV export**: formula-prefixed cells are neutralised by default
+  (`escapeFormulas: false` opts out), and the export always contains the
+  full exportable column set regardless of viewport.
+- **`defaultConfirm` fails safe**: no dialog available (SSR, webviews)
+  now DENIES a destructive action instead of auto-approving it.
+- **Persisted state hydrates after mount** (column layout, saved views) —
+  no SSR hydration mismatch; blocked storage is tolerated.
+- **Styling surface is 1:1** — every `classNames` key maps to a rendered
+  `data-adapttable-part` and vice versa (127 keys, enforced by tests);
+  the shadcn preset styles every part; MUI and antd gained structural
+  `classNames`; Chakra/Radix/Base UI export their `DataTableClassNames`.
+- **`density` has a visual effect in every adapter** and kit `size`
+  overrides it; `stickyTop` means the sticky-header inset everywhere
+  (Mantine's toolbar stickiness became an explicit `stickyToolbar` prop);
+  Mantine's `SavedViewsMenu` takes the same `options` shape as the other
+  kits.
+- **Accessibility**: editable cells expose the VALUE as their accessible
+  name (edit hint as title); Enter-commit restores focus; clickable rows
+  use a roving tab stop and activate on Space; menus restore focus on
+  Escape; antd multi-sort chains from the keyboard (Shift+Enter); bulk
+  selection announces via a live region; the pager announces the current
+  page.
+- **i18n**: one locale-resolution algorithm for labels AND per-column
+  `i18n` paths (`ar_EG` ≡ `AR-eg`); count-aware plural forms; a new
+  `labels.removeFilter` names chip removal; the RTL list is script-based
+  (Hausa out, Assyrian Neo-Aramaic / Western Punjabi / South Azerbaijani
+  in).
+- **Packaging**: truthful peer floors (Chakra `^3.13`, MUI `^6`,
+  Mantine `^7.2`); `"use client"` in every hook-bearing build (Next App
+  Router imports work without wrappers); LICENSE in every tarball; the
+  CLI gained a CJS entry and stopped scaffolding on a bare invocation.
+
+## Suggested path
+
+1. Update the packages; let the compiler surface the renames (table above).
+2. If you consume the `onQueryChange` tier: move filter reads to
+   `query.filters` / `params.filters`, and re-test infinite flows (append
+   semantics).
+3. If you relied on replacing behavior through `onGroupByChange` /
+   `onClearFilters`, switch to `source.setGroupBy` / `source.clearExtras`.
+4. Re-run your visual checks on mobile if you used the server tier
+   (auto → infinite cards) or relied on identity-anchored hidden columns.
 
 ---
 
@@ -4448,7 +4644,7 @@ supported major — so a claimed-but-broken version is caught before you hit it:
 What "the public API" means — the things we commit to keeping stable:
 
 - **`@adapttable/core`** — the `TableSource` contract; the `useFrontendData` /
-  `useBackendData` / `useServerData` source builders; `useDataTable` and its
+  `useQuerySource` / `useServerData` source builders; `useDataTable` and its
   prop-getter return (`getTableProps`, `getRowProps`, `getHeaderCellProps`,
   `getSortButtonProps`, `getSearchInputProps`, …); the core types
   (`ColumnDef`, `RowAction`, `BulkAction`, `TableLabels`, `FilterValue`,

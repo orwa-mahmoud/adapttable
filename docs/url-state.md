@@ -53,7 +53,7 @@ export function Dashboard({
 // → ?people.q=avery&people.page=2&orders.f_totalMin=100
 ```
 
-The same `urlKey` option exists on `useFrontendData`, `useBackendData`,
+The same `urlKey` option exists on `useFrontendData`, `useQuerySource`,
 `useTableUrlState`, `useColumnLayoutUrlState`, and `useSavedViews` for
 headless consumers. Omitting distinct `urlKey`s on shared-URL tables logs a
 development warning.
@@ -159,6 +159,7 @@ modals or drawers where the address bar shouldn't change.
 | `limit`                     | `limit=50`                  | Page size, clamped to 1–500; omitted at the default (25).                                   |
 | `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`  | Single-column sort (`sortDir` falls back to `asc`).                                         |
 | `sort`                      | `sort=name:asc,age:desc`    | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                              |
+| `groupBy`                   | `groupBy=team`              | Active row-grouping column key (frontend tier).                                             |
 | `f_<key>`                   | `f_status=active`           | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded. |
 | `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`  | `dateRange` bounds (inclusive; the end bound keeps that whole day).                         |
 | `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`         | `numberRange` bounds (inclusive; parsed as numbers).                                        |

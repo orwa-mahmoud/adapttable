@@ -35,8 +35,11 @@ Every one of these works in **all eight adapters** — the same props, whichever
 | **Shaping** | [Row grouping](https://orwa-mahmoud.github.io/adapttable/row-grouping/) with per-group aggregates · [column management](https://orwa-mahmoud.github.io/adapttable/column-management/) — show/hide, reorder, pin, resize · [saved views](https://orwa-mahmoud.github.io/adapttable/saved-views/) · [CSV export](https://orwa-mahmoud.github.io/adapttable/customization/#csv-export) |
 | **Reach**   | First-class [RTL and i18n](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/) · dark mode · responsive mobile cards · full [customization](https://orwa-mahmoud.github.io/adapttable/customization/) down to a headless escape hatch                                                                                                                                              |
 
-Everything above is **opt-in**: omit the prop and the feature stays dormant — no bundle
-cost, no UI, no keyboard handlers. See each one running per kit on its
+Every feature above is **opt-in**: omit the prop and it stays dormant — no bundle
+cost, no UI, no keyboard handlers. (A few table-stakes conveniences default
+ON instead: URL sync (`urlSync={false}` to keep state in memory), the search
+box (`searchable={false}`), pagination, and scroll-to-top on page change.)
+See each one running per kit on its
 [npm page](https://www.npmjs.com/org/adapttable), or click through the
 [live demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
@@ -141,7 +144,7 @@ pnpm add @adapttable/core @adapttable/mantine
 Every data source — in-memory or server-paginated — fulfils one contract. The table is agnostic to where rows came from:
 
 ```ts
-const source = useBackendData({ usePaginatedQuery }); // server-side, infinite or paged
+const source = useQuerySource({ usePaginatedQuery }); // server-side, infinite or paged
 const source = useFrontendData({ data }); // client-side filter/sort/slice
 // Both return the same TableSource<T>. Swap freely; the UI never changes.
 ```
@@ -158,7 +161,7 @@ See the [customization guide](https://orwa-mahmoud.github.io/adapttable/customiz
 
 ## i18n, RTL & dark mode
 
-- **Core is i18n-agnostic** — pass `labels` (or a `t` function). Use _your_ i18n stack, or grab ready `en`/`ar` sets from `@adapttable/i18n`.
+- **Core is i18n-agnostic** — pass `labels` (pre-translated strings from _your_ i18n stack), or grab ready presets from `@adapttable/i18n` (17 locales).
 - **RTL** is first-class: `dir="rtl"` flows through logical CSS and each adapter's direction provider.
 - **Dark mode** follows the host app or `prefers-color-scheme`, mapped to each kit's theming.
 

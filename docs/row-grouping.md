@@ -80,6 +80,14 @@ export function People() {
 | `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                         |
 | `labels`                    | `TableLabels`                                                   | English | Override `expandGroup`, `collapseGroup`, and `groupCount` for header controls.              |
 
+## Grouped tables are a full-set view
+
+With `groupBy` active the table renders **every filtered row** (grouped),
+and the chrome agrees with the screen: the footer count describes the
+rendered set, header select-all covers all rendered rows, page-scope CSV
+export contains exactly what you see, and the rows-per-page control hides
+(page size has no effect). Ungroup to return to normal pagination.
+
 ## Notes
 
 - Bucketing uses the column's `sortValue` when present, otherwise a path lookup

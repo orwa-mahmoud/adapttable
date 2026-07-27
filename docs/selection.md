@@ -106,14 +106,14 @@ export function PeopleTable() {
 
 ## Options
 
-| Prop                | Type                      | Default          | Description                                                                                                              |
-| ------------------- | ------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `bulkActions`       | `BulkAction[]`            | —                | Bulk-action buttons; passing this turns on row selection.                                                                |
-| `rowActions`        | `RowAction<TRow>[]`       | —                | Trailing per-row actions; independent of selection.                                                                      |
-| `selectedIds`       | `readonly string[]`       | — (uncontrolled) | Controlled selection ids.                                                                                                |
-| `onSelectionChange` | `(ids: string[]) => void` | —                | Uncontrolled: observer for every change (toggles, select-all, automatic resets). Controlled: the change-request handler. |
-| `selectionGetId`    | `(row: TRow) => string`   | `rowKey`         | Selection id extractor when it must differ from the React key.                                                           |
-| `confirm`           | `ConfirmHandler`          | `window.confirm` | Confirmation handler for actions with a `confirm` block; pass your own for a styled dialog.                              |
+| Prop                | Type                      | Default          | Description                                                                                                                                                                                                                      |
+| ------------------- | ------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bulkActions`       | `BulkAction[]`            | —                | Bulk-action buttons; passing this turns on row selection.                                                                                                                                                                        |
+| `rowActions`        | `RowAction<TRow>[]`       | —                | Trailing per-row actions; independent of selection.                                                                                                                                                                              |
+| `selectedIds`       | `readonly string[]`       | — (uncontrolled) | Controlled selection ids.                                                                                                                                                                                                        |
+| `onSelectionChange` | `(ids: string[]) => void` | —                | Uncontrolled: observer for every change — once on mount with the (empty) initial set, per toggle/select-all, and on the automatic reset when search or a filter changes. Controlled: the change-request handler (no mount fire). |
+| `selectionGetId`    | `(row: TRow) => string`   | `rowKey`         | Selection id extractor when it must differ from the React key.                                                                                                                                                                   |
+| `confirm`           | `ConfirmHandler`          | `window.confirm` | Confirmation handler for actions with a `confirm` block; pass your own for a styled dialog.                                                                                                                                      |
 
 ## Notes
 

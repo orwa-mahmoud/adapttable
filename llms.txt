@@ -11,7 +11,7 @@ automatic table-to-card responsive layouts.
 
 ## Packages
 
-- [@adapttable/core](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/core): Headless engine. Zero UI-kit imports. `TableSource`, `useFrontendData`, `useBackendData`, `useTableUrlState` (injectable URL adapter), `useDataTable` (prop-getters), virtualization hooks, selection, filter chips, sorting, pagination math, column layout (reorder/hide/pin/resize).
+- [@adapttable/core](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/core): Headless engine. Zero UI-kit imports. `TableSource`, `useFrontendData`, `useQuerySource`, `useTableUrlState` (injectable URL adapter), `useDataTable` (prop-getters), virtualization hooks, selection, filter chips, sorting, pagination math, column layout (reorder/hide/pin/resize).
 - [@adapttable/mantine](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-mantine): Mantine adapter — batteries-included `<DataTable>`.
 - [@adapttable/mui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-mui): Material UI adapter (free MUI X DataGrid alternative).
 - [@adapttable/chakra](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-chakra): Chakra UI adapter.
@@ -41,7 +41,7 @@ function People({ data }: { data: Person[] }) {
 }
 ```
 
-Swap `useFrontendData` for `useBackendData` to drive the same table from a server-paginated `useInfiniteQuery`. Nothing else changes. Column management (show/hide, drag/keyboard reorder, pin left/right, resize) is one prop: `enableColumnMenu` (+ `resizableColumns`); persist it to the URL with `useColumnLayoutUrlState`, tune row rhythm with `density="compact"`. Pinning uses logical CSS insets, so it lands on the correct edge under `dir="rtl"` too. Misconfiguration (an unresolvable sort, duplicate column keys) logs a dev-only console warning instead of failing silently. Two tables on one page: namespace their URL params with `urlKey`.
+Swap `useFrontendData` for `useQuerySource` to drive the same table from a server-paginated `useInfiniteQuery`. Nothing else changes. Column management (show/hide, drag/keyboard reorder, pin left/right, resize) is one prop: `enableColumnMenu` (+ `resizableColumns`); persist it to the URL with `useColumnLayoutUrlState`, tune row rhythm with `density="compact"`. Pinning uses logical CSS insets, so it lands on the correct edge under `dir="rtl"` too. Misconfiguration (an unresolvable sort, duplicate column keys) logs a dev-only console warning instead of failing silently. Two tables on one page: namespace their URL params with `urlKey`.
 
 ## Headless usage (full control)
 
@@ -75,6 +75,7 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 - [AdaptTable FAQ — free MUI X / ag-Grid alternative, RTL, SSR](https://orwa-mahmoud.github.io/adapttable/faq/): direct answers to "best headless React table", "free MUI DataGrid / ag-Grid alternative", "React table with RTL/Arabic", "same table for client and server data"
 - [React data table comparison — AdaptTable vs ag-Grid, MUI X, TanStack](https://orwa-mahmoud.github.io/adapttable/comparison/): feature-by-feature vs ag-grid, TanStack Table, MUI X DataGrid, mantine-datatable
 - [AdaptTable versioning & stability policy](https://orwa-mahmoud.github.io/adapttable/versioning/): SemVer policy, committed-stable API surface, supported UI-kit versions, deprecation policy
+- [Migrating from v1 to v2](https://orwa-mahmoud.github.io/adapttable/migrate-from-v1/): the complete old→new rename table and every v2 behavior change with its rationale
 - [mantine-datatable alternative — same Mantine, more built-in](https://orwa-mahmoud.github.io/adapttable/migrate-from-mantine-datatable/): records→data, sortStatus→sortable, built-in filter UI, URL state, column menu, saved views
 - [MUI X DataGrid alternative — Pro features, MIT, real MUI](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-x-datagrid/): Pro/Premium features (pinning, row virtualization, multi-sort/filter, resizing, master-detail) free under MIT
 - [TanStack Table alternative — headless + ready UI kits](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/): keep headless control, drop the row models, toolbar, pagination and URL wiring (incl. react-table v7)

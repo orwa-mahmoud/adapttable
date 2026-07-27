@@ -55,7 +55,7 @@ supported major — so a claimed-but-broken version is caught before you hit it:
 What "the public API" means — the things we commit to keeping stable:
 
 - **`@adapttable/core`** — the `TableSource` contract; the `useFrontendData` /
-  `useBackendData` / `useServerData` source builders; `useDataTable` and its
+  `useQuerySource` / `useServerData` source builders; `useDataTable` and its
   prop-getter return (`getTableProps`, `getRowProps`, `getHeaderCellProps`,
   `getSortButtonProps`, `getSearchInputProps`, …); the core types
   (`ColumnDef`, `RowAction`, `BulkAction`, `TableLabels`, `FilterValue`,

@@ -92,4 +92,5 @@ export function People() {
   `data` / source identity.
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/) —
-double-click the Email column.
+double-click an editable cell (Person, Email, or Team) in the editing
+section.

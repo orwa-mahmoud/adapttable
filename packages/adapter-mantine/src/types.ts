@@ -44,6 +44,8 @@ interface DataTablePropsBase<TRow> extends Omit<
   total?: number;
   /** Server tier: a request is in flight. */
   loading?: boolean;
+  /** Forwarded error to display in the table's error state. */
+  error?: Error | null;
   /**
    * Namespace for this table's URL params (`urlKey="left"` → `left.q`,
    * `left.page`, …) so multiple tables can share one URL. Applies to the

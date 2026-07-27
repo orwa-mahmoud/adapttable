@@ -4,8 +4,8 @@
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.
-If your app uses row grouping, pivoting, aggregation, tree data, cell/range
-selection, or Excel export, keep AG Grid (those are its Enterprise tier, from
+If your app uses pivoting, tree data, cell/range selection, or Excel
+export, keep AG Grid (those are its Enterprise tier, from
 $999/developer, and they're genuinely good). AdaptTable doesn't do analytics
 grids, and pretending otherwise would waste your week.
 
@@ -20,7 +20,8 @@ AdaptTable renders _your_ UI kit's real components).
 
 ## When to stay on AG Grid
 
-- Row grouping / pivoting / aggregation dashboards
+- Pivoting / aggregation dashboards (single-level [row grouping](./row-grouping.md)
+  with per-group aggregates IS built in — deep multi-level grouping is not)
 - Tree data, cell/range selection + fill handle, clipboard-heavy workflows
 - Excel export (not just CSV), tool panels / side bar
 - Excel-style cell editing at scale
@@ -163,9 +164,11 @@ table is your design system's, not a themed grid.
 
 ## Gotchas
 
-- **Don't migrate the analytics grids.** Grouping, pivoting, aggregation,
+- **Don't migrate the analytics grids.** Pivoting, multi-level grouping,
   tree data, range selection, clipboard, Excel export have no AdaptTable
-  equivalent — that's deliberate scope, not a roadmap gap.
+  equivalent — that's deliberate scope, not a roadmap gap. (Single-level
+  row grouping with aggregates DID ship — see
+  [Row grouping](./row-grouping.md).)
 - **Cell editing is opt-in, not spreadsheet-grade.** Map AG Grid `editable`
   columns to `ColumnDef.editable` + table `onCellEdit` (see
   [Inline cell editing](./cell-editing.md)). Full Excel-style fill-handle /

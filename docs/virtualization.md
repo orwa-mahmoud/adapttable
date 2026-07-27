@@ -41,6 +41,9 @@ export function Readings() {
 }
 ```
 
+The estimates default to **56 px** rows and **132 px** cards — pass your
+real measured sizes (like the `140` above) when your cells differ.
+
 ## How it works
 
 - `virtualize` is opt-in (default `false`) and applies in **infinite (non-paged)

@@ -40,6 +40,8 @@ export type DataTableShellProps<TRow> = Omit<
   total?: number;
   /** Server tier: a request is in flight. */
   loading?: boolean;
+  /** Forwarded error to display in the table's error state. */
+  error?: Error | null;
   /** URL-state backend (defaults to the History API). */
   urlAdapter?: UrlStateAdapter;
   /** Sync table state to the URL (default `true`). */
@@ -87,6 +89,7 @@ export function useDataTableShell<TRow>(
     data: props.data,
     total: props.total,
     loading: props.loading,
+    error: props.error,
     mode: props.mode,
     onQueryChange: props.onQueryChange,
     urlAdapter,

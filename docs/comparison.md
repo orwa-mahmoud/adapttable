@@ -92,6 +92,7 @@ kits — only the look does. Every adapter ships the same batteries:
 | Summary / footer row                  |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row expansion                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Inline cell editing (opt-in)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Row grouping + per-group aggregates   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |

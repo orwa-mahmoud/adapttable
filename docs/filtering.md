@@ -152,14 +152,14 @@ export function PeopleTable() {
 
 `<DataTable>` filter props:
 
-| Prop                | Type                                | Default        | Description                                                                                    |
-| ------------------- | ----------------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
-| `filters`           | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch).             |
-| `filtersMode`       | `"popover" \| "drawer"`             | `"popover"`    | Popover: anchored card, no backdrop, closes on Escape/outside click. Drawer: panel + backdrop. |
-| `onClearFilters`    | `() => void`                        | built-in clear | Clear handler used by the drawer and the chip strip.                                           |
-| `filterLabels`      | `Record<string, ChipLabelResolver>` | derived        | Per-key chip label resolvers — only needed with JSX filters.                                   |
-| `extraChips`        | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                            |
-| `activeFilterCount` | `number`                            | chip count     | Overrides the Filters-button badge.                                                            |
+| Prop                | Type                                | Default        | Description                                                                                                                               |
+| ------------------- | ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters`           | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch).                                                        |
+| `filtersMode`       | `"popover" \| "drawer"`             | `"popover"`    | Popover: anchored card, no backdrop, closes on Escape/outside click. Drawer: panel + backdrop.                                            |
+| `onClearFilters`    | `() => void`                        | built-in clear | Clear handler used by the drawer and the chip strip.                                                                                      |
+| `filterLabels`      | `Record<string, ChipLabelResolver>` | derived        | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label). |
+| `extraChips`        | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                                                                       |
+| `activeFilterCount` | `number`                            | chip count     | Overrides the Filters-button badge.                                                                                                       |
 
 ## Notes
 

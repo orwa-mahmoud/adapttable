@@ -40,15 +40,15 @@ plain CSS, Tailwind, and shadcn tokens all work. The full part map:
 
 ### Toolbar & search
 
-| Part                | Element                                                                 |
-| ------------------- | ----------------------------------------------------------------------- |
-| `root`              | The outer wrapper around the whole table.                               |
-| `toolbar`           | The toolbar row (search, filters, columns, views, your `toolbar`).      |
-| `searchField`       | The search field wrapper (input + leading icon).                        |
-| `search`            | The search `<input>`.                                                   |
-| `searchIcon`        | The leading magnifying-glass icon.                                      |
-| `sortSelect`        | The mobile sort-by `<select>`.                                          |
-| `rowsPerPageSelect` | Rows-per-page `<select>` (toolbar in infinite mode, footer when paged). |
+| Part          | Element                                                                 |
+| ------------- | ----------------------------------------------------------------------- |
+| `root`        | The outer wrapper around the whole table.                               |
+| `toolbar`     | The toolbar row (search, filters, columns, views, your `toolbar`).      |
+| `searchField` | The search field wrapper (input + leading icon).                        |
+| `search`      | The search `<input>`.                                                   |
+| `searchIcon`  | The leading magnifying-glass icon.                                      |
+| `sortSelect`  | The mobile sort-by `<select>`.                                          |
+| `rowsPerPage` | Rows-per-page `<select>` (toolbar in infinite mode, footer when paged). |
 
 ### Filters
 
@@ -214,8 +214,15 @@ overrides the mapping (e.g. antd `size="large"`).
 ## CSV export
 
 Opt in with `exportCsv` to render a kit-native **Export CSV** button next to
-Filters / Columns. The file mirrors the current view: visible columns in
-display order, under the active search, filters, and sort.
+Filters / Columns. The file mirrors the current view's data — the active search, filters,
+and sort — with **the full exportable column set in display order,
+regardless of viewport**: the same button produces the same file on phone
+and desktop (`hideOnMobile` never shrinks an export).
+
+Cells that a spreadsheet would execute as formulas (`=`, `+`, `-`, `@`,
+tab or carriage-return prefixes) are neutralised with a leading `'` by
+default; pass `escapeFormulas: false` in the options object if you need
+raw output for a non-spreadsheet pipeline.
 
 ```tsx
 <DataTable
@@ -265,6 +272,8 @@ to the table when search/filter/page changes, with `scrollTopGap` (default
 The core is style-free: wrap your app in the kit's provider and AdaptTable
 renders with that kit's real components, following its theme and dark mode
 (`prefers-color-scheme`) automatically.
+
+## Animations
 
 `animate` works on **every adapter** — a dependency-free row/card entrance
 stagger that honours reduced motion. Rolling your own? Every animatable

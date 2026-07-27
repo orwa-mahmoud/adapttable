@@ -103,6 +103,12 @@ hook):
 
 ## Notes
 
+- **SSR-safe**: stored views hydrate in an effect after mount (no
+  hydration mismatch); blocked storage is tolerated.
+- With `urlSync={false}` the menu captures and applies the table's
+  IN-MEMORY state — the address bar never changes and foreign query
+  params are never touched (`apply` writes only params the table owns).
+
 - For custom UIs, use the headless hook and wire any menu into the `toolbar`
   slot (each adapter also exports its `SavedViewsMenu` component to pair with
   it):

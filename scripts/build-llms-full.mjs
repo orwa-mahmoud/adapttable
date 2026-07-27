@@ -44,6 +44,7 @@ const DOCS = [
   "migrate-from-mui-datatables.md",
   "migrate-from-material-table.md",
   "migrate-from-ag-grid.md",
+  "migrate-from-v1.md",
   "versioning.md",
 ];
 

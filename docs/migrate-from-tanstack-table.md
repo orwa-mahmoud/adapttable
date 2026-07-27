@@ -50,23 +50,23 @@ pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
 
 ## Concept mapping
 
-| TanStack Table                                                        | AdaptTable                                                      | Notes                                                             |
-| --------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `useReactTable({ data, columns, getCoreRowModel })`                   | `useDataTable({ source, columns })` or an adapter `<DataTable>` | `source` from `useFrontendData`; adapters accept `data` directly. |
-| `getSortedRowModel` / `getFilteredRowModel` / `getPaginationRowModel` | (none needed)                                                   | Applied automatically on the frontend tier.                       |
-| `flexRender(cell.column.columnDef.cell, …)`                           | adapter renders, or prop-getters (`getCellProps`, …)            | Headless route mirrors TanStack's model.                          |
-| `columnHelper.accessor("name", …)`                                    | `{ key: "name" }`                                               | Dot paths work in both.                                           |
-| `columnHelper.accessor(row => …)` (`accessorFn`)                      | `{ key, accessor: (row) => … }`                                 | —                                                                 |
-| `columnHelper.display({ cell })`                                      | `{ key, Cell }`                                                 | `Cell` receives `{ row, rowIndex }`.                              |
-| `header` / `cell` / `footer`                                          | `header` / `Cell` (or `accessor`) / `summaryRow`                | Footer is one table-level function.                               |
-| `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort`)                           | AdaptTable owns sort state.                                       |
-| `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters` array                     | Widgets + chips built for you.                                    |
-| `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                            | Paged on desktop, infinite on mobile.                             |
-| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions` / `selectedIds` / `onSelectionChange`             | —                                                                 |
-| `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `renderRowDetail`                                               | Toggle UI is provided, not hand-added.                            |
-| `columnVisibility` / `columnOrder` / `columnPinning` state            | `enableColumnMenu` / `columnLayout`                             | One built-in menu instead of hand-wired state + DnD.              |
-| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useBackendData`)              | One consolidated server query. See [data tiers](./data-tiers.md). |
-| (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews`                             | On by default.                                                    |
+| TanStack Table                                                        | AdaptTable                                                      | Notes                                                                    |
+| --------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `useReactTable({ data, columns, getCoreRowModel })`                   | `useDataTable({ source, columns })` or an adapter `<DataTable>` | `source` from `useFrontendData`; adapters accept `data` directly.        |
+| `getSortedRowModel` / `getFilteredRowModel` / `getPaginationRowModel` | (none needed)                                                   | Applied automatically on the frontend tier.                              |
+| `flexRender(cell.column.columnDef.cell, …)`                           | adapter renders, or prop-getters (`getCellProps`, …)            | Headless route mirrors TanStack's model.                                 |
+| `columnHelper.accessor("name", …)`                                    | `{ key: "name" }`                                               | Dot paths work in both.                                                  |
+| `columnHelper.accessor(row => …)` (`accessorFn`)                      | `{ key, accessor: (row) => … }`                                 | —                                                                        |
+| `columnHelper.display({ cell })`                                      | `{ key, Cell }`                                                 | `Cell` receives `{ row, rowIndex }`.                                     |
+| `header` / `cell` / `footer`                                          | `header` / `Cell` (or `accessor`) / `summaryRow`                | Footer is one table-level function.                                      |
+| `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort`)                           | AdaptTable owns sort state.                                              |
+| `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters` array                     | Widgets + chips built for you.                                           |
+| `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                            | Paged on desktop, infinite on mobile.                                    |
+| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions` / `selectedIds` / `onSelectionChange`             | —                                                                        |
+| `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `renderRowDetail`                                               | Toggle UI is provided, not hand-added.                                   |
+| `columnVisibility` / `columnOrder` / `columnPinning` state            | `enableColumnMenu` / `columnLayout`                             | One built-in menu instead of hand-wired state + DnD.                     |
+| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)              | One consolidated server query. See [data tiers](./data-tiers.md).        |
+| (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews`                             | URL sync is on by default; `savedViews` is opt-in (pass a `storageKey`). |
 
 ## Before / after
 

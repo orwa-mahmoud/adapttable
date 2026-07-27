@@ -13,10 +13,12 @@ knowing which produced it.
 interface TableSource<TRow> {
   rows: readonly TRow[];
   total: number;
-  isLoading: boolean;
-  isFetching: boolean;
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
+  isLoading: boolean; // FIRST load only — refreshes never re-raise it
+  isFetching: boolean; // any in-flight request
+  isFetchingNextPage: boolean; // an append fetch (infinite mode)
+  hasNextPage: boolean; // more rows can be APPENDED (always false when paged)
+  fetchNextPage: () => void; // appends; no-op in paged mode
+  refetch?: () => void; // re-runs the underlying fetch
   error: Error | null;
   paginationMode: "infinite" | "paged";
   // state
@@ -52,14 +54,14 @@ In-memory. Filters by a searchable-text projector, sorts by a column's
 const source = useFrontendData({ data, columns, getSearchText, getSortValue });
 ```
 
-### `useBackendData`
+### `useQuerySource`
 
 Server-paginated. Wraps a caller-supplied `useInfiniteQuery` hook and maps
 each page to rows via `selectPage`. Flattens pages in infinite mode, returns
 the latest page in paged mode, and clamps out-of-range pages.
 
 ```ts
-const source = useBackendData({ usePaginatedQuery, selectPage, baseParams });
+const source = useQuerySource({ usePaginatedQuery, selectPage, baseParams });
 ```
 
 ## Columns

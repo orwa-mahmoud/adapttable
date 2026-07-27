@@ -39,7 +39,7 @@ interface DataTablePropsBase<TRow>
     Omit<BaseDataTableProps<TRow>, "source">,
     Pick<
       UseTableDataOptions<TRow>,
-      "source" | "data" | "total" | "loading" | "urlKey"
+      "source" | "data" | "total" | "loading" | "error" | "urlKey"
     > {
   /**
    * URL-state backend for the built-in `data` / `onQueryChange` tiers.

@@ -38,10 +38,11 @@ markup.
 
 ## Which UI libraries does AdaptTable support?
 
-Seven, from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, and
-shadcn/ui** — each rendered with that kit's real components. There is also an
-unstyled adapter for Tailwind or your own CSS, and a headless core
-(`useDataTable`) that works with any markup. Install only the adapter you use.
+Eight adapters from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix
+Themes, Base UI, shadcn/ui, and unstyled** (for Tailwind or your own CSS) —
+each kit adapter rendered with that kit's real components, plus a headless
+core (`useDataTable`) that works with any markup. Install only the adapter
+you use.
 
 ## Is there a free alternative to MUI X DataGrid or ag-Grid?
 
@@ -74,7 +75,7 @@ Use one `TableSource` contract for both:
 // in-memory
 const source = useFrontendData({ data: rows, columns });
 // server-paginated (wraps your useInfiniteQuery hook) — the table is identical
-const source = useBackendData({ usePaginatedQuery });
+const source = useQuerySource({ usePaginatedQuery });
 ```
 
 `<DataTable source={source} … />` doesn't change between them.

@@ -65,10 +65,10 @@ export function People() {
 
 ## Notes
 
-- `limit` is clamped to **1–500** (`MAX_LIMIT`), whether it comes from
+- `limit` is clamped to **1–500**, whether it comes from
   `defaults` or a hand-edited URL.
 - Sources built with `useServerData` (the `onQueryChange` tier) are always
-  paged; `paginationMode` applies to the frontend tier and `useBackendData`.
+  paged; `paginationMode` applies to the frontend tier and `useQuerySource`.
 - In infinite mode the table slices `page × limit` rows, so "page" really
   means "how much is loaded" — `fetchNextPage` just bumps it.
 - The infinite-scroll sentinel is exported as a headless hook,

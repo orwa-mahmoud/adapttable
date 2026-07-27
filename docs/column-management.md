@@ -61,7 +61,7 @@ export function People() {
   // (from @adapttable/core) to make it part of shareable links instead.
   const { layout, onLayoutChange } = useColumnLayoutStorageState({
     storageKey: "people-table-columns",
-    defaultLayout: { pinned: { name: "left" } },
+    defaultColumnLayout: { pinned: { name: "left" } },
   });
 
   return (
@@ -109,6 +109,10 @@ export function People() {
 - `useColumnLayoutUrlState` debounces URL writes by 150 ms (a resize drag commits per animation frame; unthrottled `replaceState` trips Safari's rate limit). Reads stay instant.
 - `useColumnLayoutStorageState` removes its stored entry when the layout returns to the exact default, so defaults can evolve in later releases; it is SSR-safe (memory-only without a browser).
 - Layouts are keyed by column `key` — renaming a key orphans any persisted layout for it (the column reappears with default placement).
-- `defaultColumnLayout` only applies in uncontrolled mode; once you pass `columnLayout`, the controlled value is the single source of truth (the persistence hooks take their own `defaultLayout`).
+- `defaultColumnLayout` only applies in uncontrolled mode; once you pass `columnLayout`, the controlled value is the single source of truth (the persistence hooks take their own `defaultColumnLayout`).
+- **SSR-safe persistence**: a stored layout hydrates in an effect AFTER the
+  first client render, so server and client markup always match — expect one
+  paint with the default layout before the stored one applies. Blocked
+  storage (Safari private mode, sandboxed webviews) is tolerated silently.
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).

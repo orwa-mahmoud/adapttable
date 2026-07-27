@@ -91,7 +91,7 @@ export function PeopleTable() {
 
 ### 3. Full control — `source`
 
-Build a `TableSource` yourself — `useBackendData` over TanStack Query (shown
+Build a `TableSource` yourself — `useQuerySource` over TanStack Query (shown
 below; wrap your app in its `QueryClientProvider`), `useFrontendData` for
 headless in-memory use, or a hand-rolled object that fulfils the contract.
 
@@ -103,7 +103,7 @@ import {
   DataTable,
   type PaginatedResponse,
   type TableQueryParams,
-  useBackendData,
+  useQuerySource,
 } from "@adapttable/mantine";
 
 interface Person {
@@ -135,7 +135,7 @@ function usePeopleQuery(params: Partial<TableQueryParams>) {
 }
 
 export function PeopleTable() {
-  const source = useBackendData<Person>({ usePaginatedQuery: usePeopleQuery });
+  const source = useQuerySource<Person>({ usePaginatedQuery: usePeopleQuery });
   return (
     <DataTable
       source={source}
@@ -145,6 +145,22 @@ export function PeopleTable() {
   );
 }
 ```
+
+## Explicit `mode` — when inference isn't what you meant
+
+The tier is inferred from what you pass (`data` alone → frontend;
+`data` + `onQueryChange` → server; `source` → full control). The optional
+`mode` prop pins it explicitly — and unlocks one combination inference
+cannot express:
+
+| I want…                                                           | Pass                                       | `onQueryChange` acts as…                                        |
+| ----------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
+| The table to fetch nothing; my handler runs every query           | `mode="server"` (requires `onQueryChange`) | **the contract** — you fetch and hand back `data` + `total`     |
+| The table to keep filtering/sorting/paging my `data`, but TELL me | `mode="frontend"` + `onQueryChange`        | **a pure notification** — fires per committed change, not mount |
+| Today's inference exactly                                         | omit `mode`                                | contract when present, nothing otherwise                        |
+
+`mode="server"` without `onQueryChange` does not compile; `mode` together
+with `source` dev-warns and `source` wins.
 
 ## How it works
 
@@ -179,18 +195,18 @@ export function PeopleTable() {
 | `loading`       | `boolean`                                                                     | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise). |
 | `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included.                       |
 | `error`         | `Error \| null`                                                               | `null`  | Forwarded error to display.                                                                     |
-| `source`        | `TableSource<TRow>`                                                           | —       | Full control: a prebuilt source from `useFrontendData` / `useBackendData` / your own.           |
+| `source`        | `TableSource<TRow>`                                                           | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.           |
 
 ## Notes
 
 - **Picking a tier**: rows already in memory (up to a few thousand) →
   frontend. A paginated API and no query library → server. Caching, infinite
   scroll, prefetching, or an existing TanStack Query setup → `source` with
-  `useBackendData`.
+  `useQuerySource`.
 - The hooks behind the first two tiers — `useFrontendData` and
   `useServerData` — are exported for headless use; `useTableData` is the
   resolver that picks between them.
-- `useBackendData` accepts `selectPage` (when your page shape isn't
+- `useQuerySource` accepts `selectPage` (when your page shape isn't
   `PaginatedResponse`), `baseParams` (static params merged into every call,
   e.g. a parent scope id), and `sanitizeParams`. See
   [`examples/mui-backend.tsx`](../examples/mui-backend.tsx) for a complete

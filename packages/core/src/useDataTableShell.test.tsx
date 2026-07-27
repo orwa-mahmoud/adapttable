@@ -255,6 +255,17 @@ describe("useDataTableShell", () => {
     }
   });
 
+  it("forwards error into the resolved source", () => {
+    const boom = new Error("boom");
+    const { result } = renderHook(() =>
+      useDataTableShell(
+        { data: ROWS, columns, rowKey, urlSync: false, error: boom },
+        noForm
+      )
+    );
+    expect(result.current.source.error).toBe(boom);
+  });
+
   it("covers a prebuilt source and a live URL adapter", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() => {

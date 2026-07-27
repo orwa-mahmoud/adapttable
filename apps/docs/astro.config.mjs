@@ -118,11 +118,16 @@ export default defineConfig({
             { label: "API reference", slug: "api" },
             { label: "FAQ", slug: "faq" },
             { label: "Comparison", slug: "comparison" },
+            { label: "Versioning & stability", slug: "versioning" },
           ],
         },
         {
           label: "Migrating",
           items: [
+            {
+              label: "From AdaptTable v1",
+              slug: "migrate-from-v1",
+            },
             {
               label: "From mantine-datatable",
               slug: "migrate-from-mantine-datatable",
