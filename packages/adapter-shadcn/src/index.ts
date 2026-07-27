@@ -9,3 +9,21 @@
 export { shadcnClassNames } from "./classNames";
 export { DataTable } from "./DataTable";
 export * from "@adapttable/unstyled";
+
+/* Completed public surface (v2): every type a consumer's own code
+   needs — CSV options, column layout, cell editors, tier props —
+   without ever depending on @adapttable/core directly. */
+export {
+  type BaseDataTableProps,
+  type BulkActionContext,
+  type CellEditor,
+  type ChipLabelResolver,
+  type ColumnFilter,
+  type ColumnLayoutState,
+  type DataModeProps,
+  type ExportCsvOptions,
+  FILTER_TYPES,
+  type TableQuery,
+  type UseServerDataOptions,
+  type UseTableDataOptions,
+} from "@adapttable/core";

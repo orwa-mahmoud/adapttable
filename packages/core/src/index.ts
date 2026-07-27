@@ -13,6 +13,7 @@
 export type {
   ActionConfirm,
   BulkAction,
+  BulkActionContext,
   CellProps,
   ColorScheme,
   ColumnDef,

@@ -92,3 +92,16 @@ export {
   type UseTableUrlStateOptions,
   type UseTableUrlStateResult,
 } from "@adapttable/core";
+
+/* Completed public surface (v2): every type a consumer's own code
+   needs — CSV options, column layout, cell editors, tier props —
+   without ever depending on @adapttable/core directly. */
+export {
+  type BaseDataTableProps,
+  type BulkActionContext,
+  type CellEditor,
+  type ChipLabelResolver,
+  type ColumnLayoutState,
+  type DataModeProps,
+  type ExportCsvOptions,
+} from "@adapttable/core";
