@@ -351,6 +351,7 @@ export {
 /* ── Orchestrator ──────────────────────────────────────────────────── */
 export {
   type CellElementProps,
+  type RowElementProps,
   type SearchInputElementProps,
   type SortButtonElementProps,
   type TableElementProps,
