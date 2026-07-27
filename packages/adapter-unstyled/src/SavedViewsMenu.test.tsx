@@ -3,7 +3,7 @@ import {
   defaultLabels,
   type SavedView,
 } from "@adapttable/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
@@ -188,5 +188,50 @@ describe("unstyled SavedViewsMenu", () => {
     ]);
     const saved = new URLSearchParams(storage.read()[0]!.search);
     expect(saved.get("q")).toBe("seed");
+  });
+
+  it("with urlSync off, views share the table's memory backend and never touch the URL", async () => {
+    interface Row {
+      id: string;
+      name: string;
+    }
+    const columns: ColumnDef<Row>[] = [
+      { key: "name", header: "Name", accessor: (r) => r.name },
+    ];
+    const storage = memoryStorage();
+    const before = window.location.search;
+    render(
+      <DataTable<Row>
+        data={[
+          { id: "a", name: "Alice" },
+          { id: "b", name: "Bob" },
+        ]}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        savedViews={{ storageKey: KEY, storage }}
+      />
+    );
+
+    // Filter the table, wait for the debounced commit to land.
+    fireEvent.change(screen.getByPlaceholderText("Search…"), {
+      target: { value: "Alice" },
+    });
+    await waitFor(() => {
+      expect(screen.queryByText("Bob")).not.toBeInTheDocument();
+    });
+
+    // Save: the capture must see the table's live in-memory state — proof
+    // the menu shares the table's backend rather than the (empty) real URL.
+    fireEvent.click(trigger());
+    fireEvent.change(screen.getByRole("textbox", { name: "View name" }), {
+      target: { value: "S1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save view" }));
+    const saved = new URLSearchParams(storage.read()[0]!.search);
+    expect(saved.get("q")).toBe("Alice");
+
+    // And the address bar stayed untouched throughout.
+    expect(window.location.search).toBe(before);
   });
 });

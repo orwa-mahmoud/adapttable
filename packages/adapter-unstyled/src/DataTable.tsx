@@ -8,6 +8,7 @@ import {
   useChromeScrollReset,
   useFilterTriggerToggle,
   useMountStagger,
+  useResolvedAdapter,
   useTableChrome,
   useTableData,
 } from "@adapttable/core";
@@ -185,6 +186,13 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
 
   const density = props.density ?? "comfortable";
 
+  // ONE resolved URL backend for the tier hooks AND the saved-views menu,
+  // so with `urlSync={false}` both share the same in-memory backend instead
+  // of the menu silently reading the real address bar.
+  const resolvedUrlAdapter = useResolvedAdapter(
+    props.urlSync === false ? undefined : urlAdapter,
+    props.urlSync !== false
+  );
   // Resolve the data tier (prebuilt source > server > frontend) and the
   // declarative-filter runtime (URL keys, chip labels, predicate).
   const { source, runtime } = useTableData<TRow>({
@@ -194,7 +202,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     total,
     loading,
     onQueryChange,
-    adapter: props.urlSync === false ? undefined : urlAdapter,
+    adapter: resolvedUrlAdapter,
     enabled: props.urlSync,
     urlKey,
     columns: props.columns,
@@ -407,7 +415,11 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           // namespace the table reads, so those default from the table's
           // own props (explicit option values still win).
           <SavedViewsMenu
-            options={{ adapter: urlAdapter, urlKey, ...props.savedViews }}
+            options={{
+              adapter: resolvedUrlAdapter,
+              urlKey,
+              ...props.savedViews,
+            }}
             labels={labels}
             classNames={classNames}
           />

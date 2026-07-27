@@ -13,6 +13,7 @@ import {
   useChromeScrollReset,
   useFilterTriggerToggle,
   useMountStagger,
+  useResolvedAdapter,
   useTableChrome,
   useTableData,
 } from "@adapttable/core";
@@ -117,6 +118,13 @@ function resolveActionsColumn<TRow>(
  * runtime's chip-label resolvers merge under any caller overrides.
  */
 function useChromeProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
+  // ONE resolved URL backend for the tier hooks AND the saved-views menu,
+  // so with `urlSync={false}` both share the same in-memory backend instead
+  // of the menu silently reading the real address bar.
+  const urlAdapter = useResolvedAdapter(
+    props.urlSync === false ? undefined : props.urlAdapter,
+    props.urlSync !== false
+  );
   const { source, runtime } = useTableData<TRow>({
     locale: props.locale,
     source: props.source,
@@ -126,7 +134,7 @@ function useChromeProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     onQueryChange: props.onQueryChange,
     columns: props.columns,
     filters: props.filters,
-    adapter: props.urlSync === false ? undefined : props.urlAdapter,
+    adapter: urlAdapter,
     enabled: props.urlSync,
     urlKey: props.urlKey,
   });
@@ -145,8 +153,11 @@ function useChromeProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
   } else {
     filtersNode = props.filters;
   }
+  // `urlAdapter` is the RESOLVED backend from here on — downstream chrome
+  // (the saved-views menu) must share the table's own instance.
   return {
     ...props,
+    urlAdapter,
     source,
     filters: filtersNode,
     filterLabels: { ...runtime.filterLabels, ...props.filterLabels },
@@ -205,7 +216,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const savedViewsMenu = props.savedViews && (
     <SavedViewsMenu
       options={{
-        adapter: props.urlAdapter,
+        adapter: chromeProps.urlAdapter,
         urlKey: props.urlKey,
         ...props.savedViews,
       }}

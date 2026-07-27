@@ -8,7 +8,7 @@ import type { BaseDataTableProps } from "./props";
 import type { TableSource } from "./source/TableSource";
 import type { UseServerDataOptions } from "./source/useServerData";
 import { isDeclarativeFilters, useTableData } from "./source/useTableData";
-import type { UrlStateAdapter } from "./url/adapter";
+import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
 import {
   useChromeBodyData,
   useChromeScrollReset,
@@ -70,6 +70,14 @@ export function useDataTableShell<TRow>(
     source: TableSource<TRow>
   ) => ReactNode
 ) {
+  // ONE resolved URL backend for everything in this table: the tier hooks
+  // AND chrome that reads URL state (saved views) share this instance, so
+  // with `urlSync={false}` they share the same in-memory backend instead of
+  // the views hook silently falling back to the real address bar.
+  const urlAdapter = useResolvedAdapter(
+    props.urlSync === false ? undefined : props.urlAdapter,
+    props.urlSync !== false
+  );
   // Resolve the data tier (source > onQueryChange server > frontend) and the
   // declarative-filter runtime (defs, chip labels, URL keys, predicate).
   const { source, runtime } = useTableData<TRow>({
@@ -79,7 +87,7 @@ export function useDataTableShell<TRow>(
     total: props.total,
     loading: props.loading,
     onQueryChange: props.onQueryChange,
-    adapter: props.urlSync === false ? undefined : props.urlAdapter,
+    adapter: urlAdapter,
     enabled: props.urlSync,
     urlKey: props.urlKey,
     columns: props.columns,
@@ -180,6 +188,8 @@ export function useDataTableShell<TRow>(
   return {
     source,
     runtime,
+    /** The table's resolved URL backend — pass to saved-views UIs. */
+    urlAdapter,
     chrome,
     table,
     labels,

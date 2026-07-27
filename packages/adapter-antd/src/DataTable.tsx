@@ -24,6 +24,7 @@ import {
   useInfiniteScroll,
   useKeyedVirtualization,
   useMountStagger,
+  useResolvedAdapter,
   type UseSavedViewsOptions,
   useTableChrome,
   useTableData,
@@ -131,14 +132,6 @@ function EmptyState({
       <Button onClick={onClearFilters}>{labels.clearAll}</Button>
     </Empty>
   );
-}
-
-/** The URL adapter the table should use — none at all when sync is off. */
-function resolveUrlAdapter(
-  urlSync: boolean | undefined,
-  adapter: UrlStateAdapter | undefined
-): UrlStateAdapter | undefined {
-  return urlSync === false ? undefined : adapter;
 }
 
 /** Map antd's `onChange` sort event back onto the source's sort state. */
@@ -880,6 +873,13 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   // Resolve the data tier (source > onQueryChange server > frontend data)
   // and the declarative-filter runtime; everything below — pagination, row
   // selection, the sentinel — uses the RESOLVED source via `table.source`.
+  // ONE resolved URL backend for the tier hooks AND the saved-views menu,
+  // so with `urlSync={false}` both share the same in-memory backend instead
+  // of the menu silently reading the real address bar.
+  const resolvedUrlAdapter = useResolvedAdapter(
+    props.urlSync === false ? undefined : props.urlAdapter,
+    props.urlSync !== false
+  );
   const { source: resolvedSource, runtime } = useTableData<TRow>({
     locale: props.locale,
     source: props.source,
@@ -887,7 +887,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     total: props.total,
     loading: props.loading,
     onQueryChange: props.onQueryChange,
-    adapter: resolveUrlAdapter(props.urlSync, props.urlAdapter),
+    adapter: resolvedUrlAdapter,
     enabled: props.urlSync,
     urlKey: props.urlKey,
     columns: props.columns,
@@ -1144,7 +1144,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           savedViewsMenu={
             <SavedViewsSlot
               options={props.savedViews}
-              urlAdapter={props.urlAdapter}
+              urlAdapter={resolvedUrlAdapter}
               urlKey={props.urlKey}
               labels={labels}
               dir={props.dir}

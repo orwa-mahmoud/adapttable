@@ -9,6 +9,7 @@ import {
   useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
+  useResolvedAdapter,
   useSavedViews,
   type UseSavedViewsOptions,
   useTableChrome,
@@ -91,6 +92,13 @@ function SavedViewsSlot({
  * per key). Everything downstream consumes these.
  */
 function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
+  // ONE resolved URL backend for the tier hooks AND the saved-views menu,
+  // so with `urlSync={false}` both share the same in-memory backend instead
+  // of the menu silently reading the real address bar.
+  const urlAdapter = useResolvedAdapter(
+    props.urlSync === false ? undefined : props.urlAdapter,
+    props.urlSync !== false
+  );
   const { source, runtime } = useTableData<TRow>({
     locale: props.locale,
     source: props.source,
@@ -101,7 +109,7 @@ function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     columns: props.columns,
     filters: props.filters,
     urlKey: props.urlKey,
-    adapter: props.urlSync === false ? undefined : props.urlAdapter,
+    adapter: urlAdapter,
     enabled: props.urlSync,
   });
 
@@ -126,7 +134,9 @@ function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     [runtime.filterLabels, props.filterLabels]
   );
 
-  return { ...props, source, filters, filterLabels };
+  // `urlAdapter` is the RESOLVED backend from here on — downstream chrome
+  // (the saved-views menu) must share the table's own instance.
+  return { ...props, urlAdapter, source, filters, filterLabels };
 }
 
 /**

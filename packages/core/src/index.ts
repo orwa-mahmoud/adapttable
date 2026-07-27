@@ -143,6 +143,7 @@ export {
   createMemoryAdapter,
   getHistoryAdapter,
   type UrlStateAdapter,
+  useResolvedAdapter,
 } from "./url/adapter";
 export {
   useColumnLayoutUrlState,

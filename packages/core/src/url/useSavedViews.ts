@@ -13,6 +13,7 @@ import {
   PARAM_LIMIT,
   PARAM_PAGE,
   PARAM_SEARCH,
+  PARAM_SORT,
   PARAM_SORT_BY,
   PARAM_SORT_DIR,
 } from "./serialize";
@@ -34,6 +35,14 @@ export interface UseSavedViewsOptions {
   adapter?: UrlStateAdapter;
   /** The table's URL namespace — must match the table's `urlKey`. */
   urlKey?: string;
+  /**
+   * Mirror of the table's URL-sync switch. When `false` (and no explicit
+   * `adapter` is given) views capture and apply against an in-memory
+   * backend instead of the address bar — matching a table mounted with
+   * URL sync off.
+   * @defaultValue true
+   */
+  enabled?: boolean;
 }
 
 /** Result of {@link useSavedViews}. */
@@ -54,6 +63,9 @@ const BARE_PARAMS = [
   PARAM_SEARCH,
   PARAM_SORT_BY,
   PARAM_SORT_DIR,
+  // The multi-sort chain — it supersedes sortBy/sortDir, so a view that
+  // missed it could neither capture nor displace an active chain.
+  PARAM_SORT,
   PARAM_GROUP_BY,
   PARAM_COL_HIDDEN,
   PARAM_COL_PINNED,
@@ -112,8 +124,9 @@ export function useSavedViews({
   storage,
   adapter,
   urlKey,
+  enabled = true,
 }: UseSavedViewsOptions): UseSavedViewsResult {
-  const resolved = useResolvedAdapter(adapter, true);
+  const resolved = useResolvedAdapter(adapter, enabled);
   const ns = urlKey ? `${urlKey}.` : "";
   const backend = useMemo<LayoutStorage | undefined>(() => {
     if (storage) return storage;
@@ -158,8 +171,11 @@ export function useSavedViews({
         if (ownsParam(key, ns)) stale.push(key);
       });
       for (const key of stale) next.delete(key);
+      // Write owned params ONLY — a stored view is external input (old
+      // versions, hand-edited storage) and must never touch params that
+      // belong to other tables or the surrounding app.
       new URLSearchParams(view.search).forEach((value, key) => {
-        next.set(key, value);
+        if (ownsParam(key, ns)) next.set(key, value);
       });
       resolved.setSearch(next.toString());
     },
