@@ -306,6 +306,8 @@ export interface TableLabels {
   loadMore?: string;
   filters?: string;
   clearAll?: string;
+  /** Accessible name for a single filter chip's remove button. */
+  removeFilter?: (label: string) => string;
   /**
    * Label for the filter panel's closing action. Filters apply LIVE — the
    * button only closes the panel, so the key matches its "Done" wording

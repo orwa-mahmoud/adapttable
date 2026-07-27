@@ -34,6 +34,7 @@ export const defaultLabels: Required<TableLabels> = {
   loadMore: "Load more",
   filters: "Filters",
   clearAll: "Clear all",
+  removeFilter: (label) => `Remove filter: ${label}`,
   filtersDone: "Done",
   applyFilters: "Done",
   sortBy: "Sort by",

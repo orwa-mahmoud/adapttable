@@ -311,7 +311,7 @@ function DesktopRowBase<TRow>({
   return (
     <>
       <Table.Row
-        {...rowClickProps(row, hasRowClick ? activateRow : undefined)}
+        {...rowClickProps(row, hasRowClick ? activateRow : undefined, index)}
         ref={measureRef}
         data-index={index}
         data-stagger=""
@@ -1030,7 +1030,7 @@ function MobileCardBase<TRow>({
       variant="outline"
       role="listitem"
       className={className}
-      {...rowClickProps(row, onRowClick)}
+      {...rowClickProps(row, onRowClick, index)}
     >
       <Card.Body p={compact ? 3 : undefined}>
         {onToggleSelect && (

@@ -84,7 +84,10 @@ export function EditableCellGate<TRow>(
       draft: ctrl.draft,
       setDraft: ctrl.setDraft,
       onEditorKeyDown: (event) => {
-        if (event.key === "Escape") {
+        // Escape cancels, Enter commits — BOTH must hand keyboard focus
+        // back to the activate button, or it falls to <body>. (Tab moves
+        // to the next editable cell, which manages its own focus.)
+        if (event.key === "Escape" || event.key === "Enter") {
           restoreFocusRef.current = true;
         }
         ctrl.onEditorKeyDown(event);
@@ -99,7 +102,10 @@ export function EditableCellGate<TRow>(
     <button
       ref={activateRef}
       type="button"
-      aria-label={props.editLabel}
+      // The cell VALUE is the accessible name (the button's content); the
+      // edit affordance rides along as the title — an aria-label here
+      // would hide the value from screen readers entirely.
+      title={props.editLabel}
       className={props.activateClassName}
       data-adapttable-part="edit-cell-activate"
       onDoubleClick={(event) => {

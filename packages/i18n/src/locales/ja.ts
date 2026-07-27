@@ -31,6 +31,7 @@ export const ja: Required<TableLabels> = {
   loadMore: "さらに読み込む",
   filters: "フィルター",
   clearAll: "すべてクリア",
+  removeFilter: (label) => `フィルターを解除: ${label}`,
   filtersDone: "完了",
   applyFilters: "完了",
   sortBy: "並べ替え",

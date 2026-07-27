@@ -31,6 +31,7 @@ export const hi: Required<TableLabels> = {
   loadMore: "और लोड करें",
   filters: "फ़िल्टर",
   clearAll: "सभी साफ़ करें",
+  removeFilter: (label) => `फ़िल्टर हटाएँ: ${label}`,
   filtersDone: "पूर्ण",
   applyFilters: "पूर्ण",
   sortBy: "इसके अनुसार क्रमबद्ध करें",

@@ -347,7 +347,7 @@ function DesktopRowImpl<TRow>({
   return (
     <>
       <TableRow
-        {...rowClickProps(row, onRowClick)}
+        {...rowClickProps(row, onRowClick, index)}
         className={className}
         data-stagger=""
         ref={measureElement}
@@ -985,7 +985,7 @@ function MobileCardBase<TRow>({
       variant="outlined"
       role="listitem"
       className={className}
-      {...rowClickProps(row, onRowClick)}
+      {...rowClickProps(row, onRowClick, index)}
     >
       <CardContent
         sx={compact ? { p: 1.25, "&:last-child": { pb: 1.25 } } : undefined}

@@ -31,6 +31,7 @@ export const ar: Required<TableLabels> = {
   loadMore: "تحميل المزيد",
   filters: "عوامل التصفية",
   clearAll: "مسح الكل",
+  removeFilter: (label) => `إزالة عامل التصفية: ${label}`,
   filtersDone: "تم",
   applyFilters: "تم",
   sortBy: "ترتيب حسب",

@@ -171,4 +171,58 @@ describe("rowClickProps", () => {
       } as never)
     ).not.toThrow();
   });
+
+  it("activates on Space as well as Enter", () => {
+    const onRowClick = vi.fn();
+    render(
+      <table>
+        <thead>
+          <tr>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-testid="row" {...rowClickProps({ id: 1 }, onRowClick, 0)}>
+            <td>One</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+    const row = screen.getByTestId("row");
+    row.focus();
+    fireEvent.keyDown(row, { key: " " });
+    expect(onRowClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("roves the single tab stop with arrow navigation", () => {
+    const onRowClick = vi.fn();
+    render(
+      <table>
+        <thead>
+          <tr>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-testid="r0" {...rowClickProps({ id: 1 }, onRowClick, 0)}>
+            <td>One</td>
+          </tr>
+          <tr data-testid="r1" {...rowClickProps({ id: 2 }, onRowClick, 1)}>
+            <td>Two</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+    const first = screen.getByTestId("r0");
+    const second = screen.getByTestId("r1");
+    // Only the first row is a Tab stop; the rest are arrow-reachable.
+    expect(first.tabIndex).toBe(0);
+    expect(second.tabIndex).toBe(-1);
+    first.focus();
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+    expect(second).toHaveFocus();
+    // The stop roved along with the focus.
+    expect(first.tabIndex).toBe(-1);
+    expect(second.tabIndex).toBe(0);
+  });
 });

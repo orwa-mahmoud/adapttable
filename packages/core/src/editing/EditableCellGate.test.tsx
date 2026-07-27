@@ -51,14 +51,14 @@ describe("EditableCellGate", () => {
     render(<Harness />);
     expect(screen.getByText("Ada")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Edit cell" })
+      screen.queryByRole("button", { name: "Ada" })
     ).not.toBeInTheDocument();
   });
 
   it("activates on Enter, commits on Enter in the editor", () => {
     const onCellEdit = vi.fn();
     render(<Harness onCellEdit={onCellEdit} />);
-    const activate = screen.getByRole("button", { name: "Edit cell" });
+    const activate = screen.getByRole("button", { name: "Ada" });
     activate.focus();
     fireEvent.keyDown(activate, { key: "Enter" });
     const editor = screen.getByRole("textbox", { name: "Edit cell" });
@@ -70,20 +70,20 @@ describe("EditableCellGate", () => {
   it("Escape cancels and restores focus to the activate control", () => {
     const onCellEdit = vi.fn();
     render(<Harness onCellEdit={onCellEdit} />);
-    const activate = screen.getByRole("button", { name: "Edit cell" });
+    const activate = screen.getByRole("button", { name: "Ada" });
     activate.focus();
     fireEvent.keyDown(activate, { key: "Enter" });
     const editor = screen.getByRole("textbox", { name: "Edit cell" });
     fireEvent.keyDown(editor, { key: "Escape" });
     expect(onCellEdit).not.toHaveBeenCalled();
     act(() => undefined);
-    expect(screen.getByRole("button", { name: "Edit cell" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Ada" })).toHaveFocus();
   });
 
   it("begins on double-click and on F2", () => {
     const onCellEdit = vi.fn();
     render(<Harness onCellEdit={onCellEdit} />);
-    const activate = screen.getByRole("button", { name: "Edit cell" });
+    const activate = screen.getByRole("button", { name: "Ada" });
     fireEvent.doubleClick(activate);
     expect(
       screen.getByRole("textbox", { name: "Edit cell" })
@@ -91,7 +91,7 @@ describe("EditableCellGate", () => {
     fireEvent.keyDown(screen.getByRole("textbox", { name: "Edit cell" }), {
       key: "Escape",
     });
-    const again = screen.getByRole("button", { name: "Edit cell" });
+    const again = screen.getByRole("button", { name: "Ada" });
     again.focus();
     fireEvent.keyDown(again, { key: "F2" });
     expect(
@@ -107,7 +107,11 @@ describe("EditableCellGate", () => {
         <Harness onCellEdit={onCellEdit} />
       </button>
     );
-    fireEvent.click(screen.getByRole("button", { name: "Edit cell" }));
+    // The wrapping parent button shares the accessible name (it contains
+    // the cell), so target the activate control by its part attribute.
+    fireEvent.click(
+      document.querySelector('[data-adapttable-part="edit-cell-activate"]')!
+    );
     expect(parentClick).not.toHaveBeenCalled();
   });
 });

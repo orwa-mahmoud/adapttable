@@ -31,6 +31,7 @@ export const zh: Required<TableLabels> = {
   loadMore: "加载更多",
   filters: "筛选",
   clearAll: "清除全部",
+  removeFilter: (label) => `移除筛选：${label}`,
   filtersDone: "完成",
   applyFilters: "完成",
   sortBy: "排序方式",

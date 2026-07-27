@@ -4,8 +4,12 @@ import type { KeyboardEvent, MouseEvent } from "react";
 export interface RowClickProps {
   onClick: (event: MouseEvent<HTMLElement>) => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
-  /** Clickable rows must be reachable, or Enter activation can never fire. */
-  tabIndex: 0;
+  /**
+   * Roving tab stop: the first row is the list's single Tab entry point;
+   * the rest are reached with ArrowUp/ArrowDown (which move the stop
+   * along). Without a known index every row stays tabbable.
+   */
+  tabIndex: 0 | -1;
   /** Marks the element as an arrow-key navigation stop among its siblings. */
   "data-adapttable-row": "";
   style: { cursor: "pointer" };
@@ -40,34 +44,44 @@ function moveRowFocus(current: HTMLElement, delta: -1 | 1): void {
       el instanceof HTMLElement && "adapttableRow" in el.dataset
   );
   const next = stops[stops.indexOf(current) + delta];
-  next?.focus();
+  if (!next) return;
+  // Rove the tab stop with the focus, so Tab leaves the list from the
+  // current row and re-enters where the user left off.
+  current.tabIndex = -1;
+  next.tabIndex = 0;
+  next.focus();
 }
 
 /**
  * Build the row-activation props for `onRowClick`: a guarded click handler
- * (interactive children keep their own behaviour), Enter-key activation
- * when the row itself has focus, ArrowUp/ArrowDown roving focus across the
- * sibling rows, and the pointer cursor. Returns `undefined` when no handler
- * is configured, so adapters can spread the result unconditionally.
+ * (interactive children keep their own behaviour), Enter/Space activation
+ * when the row itself has focus, ArrowUp/ArrowDown roving focus (and tab
+ * stop) across the sibling rows, and the pointer cursor. Returns
+ * `undefined` when no handler is configured, so adapters can spread the
+ * result unconditionally.
  *
  * @typeParam TRow - The row type.
  * @param row - The row this element renders.
  * @param onRowClick - The caller's activation handler, if any.
+ * @param index - The row's index in the rendered list. When given, only
+ *   row 0 is a Tab stop (roving tabindex); omit it and every row stays
+ *   tabbable.
  */
 export function rowClickProps<TRow>(
   row: TRow,
-  onRowClick: ((row: TRow) => void) | undefined
+  onRowClick: ((row: TRow) => void) | undefined,
+  index?: number
 ): RowClickProps | undefined {
   if (!onRowClick) return undefined;
   return {
-    tabIndex: 0,
+    tabIndex: index === undefined || index === 0 ? 0 : -1,
     "data-adapttable-row": "",
     onClick: (event) => {
       if (!fromInteractiveChild(event.target)) onRowClick(row);
     },
     onKeyDown: (event) => {
       if (event.target !== event.currentTarget) return;
-      if (event.key === "Enter") {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         onRowClick(row);
         return;
