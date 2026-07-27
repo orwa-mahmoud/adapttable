@@ -74,7 +74,9 @@ interface DataTablePropsBase<TRow> extends Omit<
   slots?: DataTableSlots;
   /** Per-part class hooks (root / toolbar / table / card / footer). */
   classNames?: DataTableClassNames;
-  /** Chakra color scheme for primary accents (buttons, badges). */
+  /** Chakra color token for primary accents (buttons, badges). */
+  accentColor?: string;
+  /** Alias for `accentColor` (v1 name) — deleted before the 2.0.0 release. */
   colorScheme?: string;
   /** Chakra table size. Defaults to `"md"`. */
   size?: "sm" | "md" | "lg";

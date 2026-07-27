@@ -48,7 +48,7 @@ export interface SavedViewsMenuProps {
   /** The four saved-view strings (pass `table.labels` or your own). */
   labels: SavedViewsLabels;
   /** Chakra color scheme for the save button. */
-  colorScheme?: string;
+  accentColor?: string;
 }
 
 /**
@@ -59,7 +59,7 @@ export interface SavedViewsMenuProps {
 export function SavedViewsMenu({
   options,
   labels,
-  colorScheme,
+  accentColor,
 }: Readonly<SavedViewsMenuProps>) {
   const { views, save, apply, remove } = useSavedViews(options);
   const [name, setName] = useState("");
@@ -124,7 +124,7 @@ export function SavedViewsMenu({
                 <Button
                   size="xs"
                   flexShrink={0}
-                  colorPalette={colorScheme}
+                  colorPalette={accentColor}
                   disabled={trimmed === ""}
                   onClick={saveCurrent}
                 >

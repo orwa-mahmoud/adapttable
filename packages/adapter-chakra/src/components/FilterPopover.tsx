@@ -10,7 +10,7 @@ export interface FilterPopoverProps {
   activeFilterCount: number;
   onClearFilters: () => void;
   labels: Required<TableLabels>;
-  colorScheme?: string;
+  accentColor?: string;
   dir?: Direction;
   /** The Filters trigger button — becomes the popover anchor. */
   children: ReactNode;
@@ -29,7 +29,7 @@ export function FilterPopover({
   activeFilterCount,
   onClearFilters,
   labels,
-  colorScheme,
+  accentColor,
   dir = "ltr",
   children,
 }: Readonly<FilterPopoverProps>) {
@@ -88,7 +88,7 @@ export function FilterPopover({
                 <Button
                   size="xs"
                   variant="ghost"
-                  colorPalette={colorScheme}
+                  colorPalette={accentColor}
                   onClick={onClearFilters}
                   disabled={activeFilterCount === 0}
                 >

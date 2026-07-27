@@ -49,7 +49,7 @@ export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
   /** Built saved-views menu node, when the `savedViews` prop is set. */
   savedViewsMenu?: ReactNode;
   /** Chakra color scheme for primary accents. */
-  colorScheme?: string;
+  accentColor?: string;
   /** Class hook for the toolbar row. */
   className?: string;
 }
@@ -75,7 +75,7 @@ export function Toolbar<TRow>({
   columnMenu,
   onExportCsv,
   showRowsPerPage,
-  colorScheme,
+  accentColor,
   dir,
   className,
 }: Readonly<ToolbarProps<TRow>>) {
@@ -90,7 +90,7 @@ export function Toolbar<TRow>({
     <Button
       size="sm"
       variant="outline"
-      colorPalette={colorScheme}
+      colorPalette={accentColor}
       aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
       data-active={filtersOpen || undefined}
       onPointerDown={onFiltersTriggerPointerDown}
@@ -99,7 +99,7 @@ export function Toolbar<TRow>({
       <FiltersIcon />
       {labels.filters}
       {activeFilterCount > 0 && (
-        <Badge ml={2} colorPalette={colorScheme} borderRadius="full">
+        <Badge ml={2} colorPalette={accentColor} borderRadius="full">
           {activeFilterCount}
         </Badge>
       )}
@@ -164,7 +164,7 @@ export function Toolbar<TRow>({
               activeFilterCount={activeFilterCount}
               onClearFilters={onClearFilters}
               labels={labels}
-              colorScheme={colorScheme}
+              accentColor={accentColor}
               dir={dir}
             >
               {filtersButton}
@@ -178,7 +178,7 @@ export function Toolbar<TRow>({
           <Button
             size="sm"
             variant="outline"
-            colorPalette={colorScheme}
+            colorPalette={accentColor}
             onClick={onExportCsv}
           >
             {labels.exportCsv}
@@ -244,8 +244,8 @@ export function BulkBar({
   bulkActions,
   confirm,
   labels,
-  colorScheme,
-}: Readonly<BulkBarChromeProps & { colorScheme?: string }>) {
+  accentColor,
+}: Readonly<BulkBarChromeProps & { accentColor?: string }>) {
   const {
     selectedCount,
     ids,
@@ -266,7 +266,7 @@ export function BulkBar({
           <Button
             size="xs"
             variant="plain"
-            colorPalette={colorScheme}
+            colorPalette={accentColor}
             disabled={pending !== null}
             onClick={banner.onClick}
           >
@@ -291,7 +291,7 @@ export function BulkBar({
             <Tooltip key={action.key} label={reason ?? ""} disabled={!reason}>
               <Button
                 size="xs"
-                colorPalette={action.color ?? colorScheme}
+                colorPalette={action.color ?? accentColor}
                 disabled={reason !== undefined || pending !== null}
                 onClick={() => run(action, ids, scope)}
               >
@@ -471,7 +471,7 @@ export function FilterDrawer({
   activeFilterCount,
   onClearFilters,
   labels,
-  colorScheme,
+  accentColor,
   dir = "ltr",
 }: Readonly<{
   open: boolean;
@@ -480,7 +480,7 @@ export function FilterDrawer({
   activeFilterCount: number;
   onClearFilters: () => void;
   labels: Required<TableLabels>;
-  colorScheme?: string;
+  accentColor?: string;
   dir?: Direction;
 }>) {
   return (
@@ -511,7 +511,7 @@ export function FilterDrawer({
               >
                 {labels.clearAll}
               </Button>
-              <Button colorPalette={colorScheme} onClick={onClose}>
+              <Button colorPalette={accentColor} onClick={onClose}>
                 {labels.applyFilters}
               </Button>
             </Drawer.Footer>

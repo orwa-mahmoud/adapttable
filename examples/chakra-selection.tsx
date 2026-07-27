@@ -34,7 +34,7 @@ export function ChakraSelectionExample() {
         data={INVOICES}
         columns={columns}
         rowKey={(r) => r.id}
-        colorScheme="teal"
+        accentColor="teal"
         bulkActions={[
           {
             key: "remind",

@@ -53,7 +53,7 @@ export interface AutoFilterFormProps<TRow> {
   /** The resolved table source (filter bag + setters). */
   source: FilterFormSource<TRow>;
   /** Chakra color scheme for option checkboxes. */
-  colorScheme?: string;
+  accentColor?: string;
   /** Pre-translated label overrides (operator names, From/To, …). */
   labels?: TableLabels;
 }
@@ -151,12 +151,12 @@ function AutoFilterField<TRow>({
   def,
   source,
   labels,
-  colorScheme,
+  accentColor,
 }: Readonly<{
   def: FilterDef<TRow>;
   source: FilterFormSource<TRow>;
   labels: Required<TableLabels>;
-  colorScheme?: string;
+  accentColor?: string;
 }>) {
   const id = useId();
   const { extra, setExtra } = source;
@@ -233,7 +233,7 @@ function AutoFilterField<TRow>({
                   key={option.value}
                   id={`${id}-${index}`}
                   size="sm"
-                  colorPalette={colorScheme}
+                  colorPalette={accentColor}
                   value={option.value}
                   checked={selected.includes(option.value)}
                 >
@@ -266,7 +266,7 @@ function AutoFilterField<TRow>({
 export function AutoFilterForm<TRow>({
   defs,
   source,
-  colorScheme,
+  accentColor,
   labels,
 }: Readonly<AutoFilterFormProps<TRow>>) {
   const resolved = resolveLabels(labels);
@@ -278,7 +278,7 @@ export function AutoFilterForm<TRow>({
           def={def}
           source={source}
           labels={resolved}
-          colorScheme={colorScheme}
+          accentColor={accentColor}
         />
       ))}
     </Stack>

@@ -85,7 +85,7 @@ interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
   className?: string;
   size: "sm" | "md" | "lg";
-  colorScheme?: string;
+  accentColor?: string;
   /** Text direction — flips the expand chevron for RTL. */
   dir?: Direction;
   /**
@@ -148,13 +148,13 @@ function RowActionButtons<TRow>({
   actions,
   confirm,
   cancelLabel,
-  colorScheme,
+  accentColor,
 }: Readonly<{
   row: TRow;
   actions: RowAction<TRow>[];
   confirm: ConfirmHandler;
   cancelLabel: string;
-  colorScheme?: string;
+  accentColor?: string;
 }>) {
   return (
     <HStack gap={1} justify="flex-end">
@@ -179,7 +179,7 @@ function RowActionButtons<TRow>({
             <IconButton
               size="sm"
               variant="ghost"
-              colorPalette={action.color ?? colorScheme}
+              colorPalette={action.color ?? accentColor}
               disabled={disabled}
               aria-label={action.label}
               onClick={handleClick}
@@ -192,7 +192,7 @@ function RowActionButtons<TRow>({
             <Button
               size="sm"
               variant="ghost"
-              colorPalette={action.color ?? colorScheme}
+              colorPalette={action.color ?? accentColor}
               disabled={disabled}
               onClick={handleClick}
             >
@@ -235,7 +235,7 @@ interface DesktopRowProps<TRow> {
   selected: boolean;
   expanded: boolean;
   size: "sm" | "md" | "lg";
-  colorScheme?: string;
+  accentColor?: string;
   dir?: Direction;
   columns: ColumnDef<TRow>[];
   columnWidths?: Readonly<Record<string, number>>;
@@ -267,7 +267,7 @@ interface DesktopRowProps<TRow> {
  */
 const ROW_VISUAL_KEYS = [
   ...SHARED_DESKTOP_ROW_KEYS,
-  "colorScheme",
+  "accentColor",
   "editingSignature",
 ] as const satisfies readonly (keyof DesktopRowProps<unknown>)[];
 
@@ -286,7 +286,7 @@ function DesktopRowBase<TRow>({
   index,
   selected,
   expanded,
-  colorScheme,
+  accentColor,
   dir,
   columns,
   className,
@@ -384,7 +384,7 @@ function DesktopRowBase<TRow>({
               actions={live.rowActions!}
               confirm={live.confirm}
               cancelLabel={labels.cancel}
-              colorScheme={colorScheme}
+              accentColor={accentColor}
             />
           </Table.Cell>
         )}
@@ -417,7 +417,7 @@ function DesktopTableRows<TRow>({
   selection,
   expansion,
   size,
-  colorScheme,
+  accentColor,
   dir,
   columns,
   columnWidths,
@@ -441,7 +441,7 @@ function DesktopTableRows<TRow>({
   selection: SelectionState | null;
   expansion: RowExpansionState | undefined;
   size: SharedProps<TRow>["size"];
-  colorScheme?: string;
+  accentColor?: string;
   dir?: Direction;
   columns: ColumnDef<TRow>[];
   columnWidths?: Readonly<Record<string, number>>;
@@ -470,7 +470,7 @@ function DesktopTableRows<TRow>({
             selection={selection}
             labels={labels}
             dir={dir}
-            colorScheme={colorScheme}
+            accentColor={accentColor}
             onToggleCollapse={onToggleGroup}
           />
         );
@@ -485,7 +485,7 @@ function DesktopTableRows<TRow>({
           selected={selection?.isSelected(id) ?? false}
           expanded={expansion?.isExpanded(id) ?? false}
           size={size}
-          colorScheme={colorScheme}
+          accentColor={accentColor}
           dir={dir}
           columns={columns}
           columnWidths={columnWidths}
@@ -518,7 +518,7 @@ function DesktopTableRows<TRow>({
         selected={selection?.isSelected(id) ?? false}
         expanded={expansion?.isExpanded(id) ?? false}
         size={size}
-        colorScheme={colorScheme}
+        accentColor={accentColor}
         dir={dir}
         columns={columns}
         columnWidths={columnWidths}
@@ -549,7 +549,7 @@ export function DesktopTable<TRow>({
   confirm,
   getRowId,
   size,
-  colorScheme,
+  accentColor,
   dir,
   prefetch,
   onRowClick,
@@ -866,7 +866,7 @@ export function DesktopTable<TRow>({
             selection={selection}
             expansion={expansion}
             size={size}
-            colorScheme={colorScheme}
+            accentColor={accentColor}
             dir={dir}
             columns={columns}
             columnWidths={columnWidths}
@@ -942,7 +942,7 @@ interface MobileCardProps<TRow> {
   measureElement?: (node: Element | null) => void;
   compact: boolean;
   dir?: "ltr" | "rtl";
-  colorScheme?: string;
+  accentColor?: string;
   /**
    * Opt-in editing bundle — uncompared. Its identity changes on every
    * keystroke anywhere in the table; the per-row visual churn is
@@ -982,7 +982,7 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "measureElement",
   "compact",
   "dir",
-  "colorScheme",
+  "accentColor",
   "editingSignature",
 ];
 
@@ -1017,7 +1017,7 @@ function MobileCardBase<TRow>({
   measureElement,
   compact,
   dir,
-  colorScheme,
+  accentColor,
   editing,
   rows,
   getRowId,
@@ -1084,7 +1084,7 @@ function MobileCardBase<TRow>({
             actions={rowActions}
             confirm={confirm}
             cancelLabel={labels.cancel}
-            colorScheme={colorScheme}
+            accentColor={accentColor}
           />
         )}
       </Card.Body>
@@ -1100,7 +1100,7 @@ export function MobileCards<TRow>({
   confirm,
   getRowId,
   size,
-  colorScheme,
+  accentColor,
   dir,
   onRowClick,
   rowClassName,
@@ -1149,7 +1149,7 @@ export function MobileCards<TRow>({
         measureElement={measureElement}
         compact={compact}
         dir={dir}
-        colorScheme={colorScheme}
+        accentColor={accentColor}
         editing={editing}
         rows={rows}
         getRowId={getRowId}
@@ -1174,7 +1174,7 @@ export function MobileCards<TRow>({
                 selection={selection}
                 labels={labels}
                 dir={dir}
-                colorScheme={colorScheme}
+                accentColor={accentColor}
                 onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
               />
             ) : (
