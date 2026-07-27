@@ -104,7 +104,11 @@ export interface BaseDataTableProps<TRow> {
    * server-paginated sources get a devWarn and grouping is ignored.
    */
   groupBy?: string | null;
-  /** Controlled change channel for {@link groupBy}; falls back to `source.setGroupBy`. */
+  /**
+   * Notification fired AFTER the grouping change is applied — the table
+   * always performs the change itself. Take full control (e.g. a fully
+   * controlled `groupBy`) through `source.setGroupBy` instead.
+   */
   onGroupByChange?: (groupBy: string | null) => void;
   /**
    * Per-group aggregate cells — **same signature as {@link summaryRow}**.
@@ -186,7 +190,11 @@ export interface BaseDataTableProps<TRow> {
   extraChips?: readonly ActiveFilterChip[];
   /** Override the active-filter count (defaults to the chip count). */
   activeFilterCount?: number;
-  /** Clear-filters handler used by the drawer + chip strip. */
+  /**
+   * Notification fired AFTER the filters are cleared (drawer, chip strip,
+   * no-results CTA) — the table always performs the clear itself. Take
+   * full control through `source.clearExtras` instead.
+   */
   onClearFilters?: () => void;
 
   /* ── Bulk actions ────────────────────────────────────────────────── */

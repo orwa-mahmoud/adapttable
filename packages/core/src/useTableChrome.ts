@@ -380,9 +380,13 @@ export function useTableChrome<TRow>(
     source.isFetching && !source.isLoading && !source.isFetchingNextPage
   );
 
+  // `onClearFilters` is a pure NOTIFICATION: the chrome always performs
+  // the clear itself, then tells the host. (It used to REPLACE the clear,
+  // so a logging handler silently broke the button — take full control
+  // via `source.clearExtras` instead.)
   const clearFilters = useCallback(() => {
-    if (onClearFilters) onClearFilters();
-    else source.clearExtras();
+    source.clearExtras();
+    onClearFilters?.();
   }, [onClearFilters, source]);
 
   // Hooks run unconditionally; the state is simply unused (and unexposed)
@@ -432,10 +436,14 @@ export function useTableChrome<TRow>(
   // keystroke.
   const { onGroupByChange } = props;
   const { setGroupBy: sourceSetGroupBy } = source;
+  // `onGroupByChange` is a pure NOTIFICATION: the chrome always applies
+  // the grouping change itself, then tells the host. (It used to REPLACE
+  // the mutator, so a logging handler silently broke grouping — take full
+  // control via `source.setGroupBy` instead.)
   const setGroupBy = useCallback(
     (key: string | null) => {
-      if (onGroupByChange) onGroupByChange(key);
-      else sourceSetGroupBy(key ?? undefined);
+      sourceSetGroupBy(key ?? undefined);
+      onGroupByChange?.(key);
     },
     [onGroupByChange, sourceSetGroupBy]
   );

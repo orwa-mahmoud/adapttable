@@ -246,6 +246,56 @@ describe("useTableChrome", () => {
     expect(result.current.table.pagination.totalPages).toBe(3);
   });
 
+  it("onClearFilters observes — a logging handler never breaks the clear", () => {
+    const onClearFilters = vi.fn();
+    const adapter = createMemoryAdapter("f_status=Active");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        onClearFilters,
+      });
+    });
+    expect(result.current.table.source.extra.status).toBe("Active");
+    act(() => result.current.clearFilters());
+    // The clear HAPPENED, and the host was notified.
+    expect(result.current.table.source.extra.status).toBeUndefined();
+    expect(onClearFilters).toHaveBeenCalledTimes(1);
+  });
+
+  it("onGroupByChange observes — a logging handler never breaks grouping", () => {
+    const onGroupByChange = vi.fn();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        groupBy: "name",
+        onGroupByChange,
+      });
+    });
+    expect(result.current.grouping).toBeDefined();
+    act(() => result.current.grouping!.setGroupBy(null));
+    // The change APPLIED (URL cleared → prop groupBy still forces it on,
+    // but the mutator ran and the host was notified with the value).
+    expect(onGroupByChange).toHaveBeenCalledWith(null);
+    expect(adapter.getSearch()).not.toContain("groupBy");
+  });
+
   it("does not loop when an uncontrolled inline handler stores the selection", () => {
     // The documented uncontrolled usage: an inline arrow (fresh identity
     // every render) that writes the ids straight into state. Keying the
