@@ -228,11 +228,17 @@ export interface TableQueryParams {
 
 /** Standard paginated response envelope. */
 export interface PaginatedResponse<TRow> {
-  items: TRow[];
+  /** The page of rows. */
+  rows?: TRow[];
+  /** Alias for `rows` (v1 name) — deleted before the 2.0.0 release. */
+  items?: TRow[];
   total: number;
   page: number;
   limit: number;
-  hasNext: boolean;
+  /** Whether a page exists after this one. */
+  hasNextPage?: boolean;
+  /** Alias for `hasNextPage` (v1 name) — deleted before the 2.0.0 release. */
+  hasNext?: boolean;
 }
 
 /**

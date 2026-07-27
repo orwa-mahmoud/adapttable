@@ -71,7 +71,7 @@ export interface UseBackendDataOptions<
 
 const defaultSelectPage: PageSelector<unknown, PaginatedResponse<unknown>> = (
   page
-) => ({ items: page.items, total: page.total });
+) => ({ items: page.rows ?? page.items ?? [], total: page.total });
 
 /**
  * Server-paginated {@link TableSource}. Wraps a caller's

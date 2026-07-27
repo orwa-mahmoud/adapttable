@@ -86,6 +86,36 @@ function mount<TPage = Page>(
 }
 
 describe("useBackendData", () => {
+  it("the default selector reads the v2 rows field (and the v1 items alias)", () => {
+    const v2 = makeQuery({
+      pages: [
+        {
+          rows: [{ id: "a", name: "A" }],
+          total: 1,
+          page: 1,
+          limit: 25,
+          hasNextPage: false,
+        } as unknown as Page,
+      ],
+    });
+    const v2View = mount(v2, {});
+    expect(v2View.result.current.rows).toHaveLength(1);
+
+    const v1 = makeQuery({
+      pages: [
+        {
+          items: [{ id: "b", name: "B" }],
+          total: 1,
+          page: 1,
+          limit: 25,
+          hasNext: false,
+        } as unknown as Page,
+      ],
+    });
+    const v1View = mount(v1, {});
+    expect(v1View.result.current.rows).toHaveLength(1);
+  });
+
   it("keeps the source identity stable across unrelated re-renders", () => {
     const q = makeQuery({ pages: [page([{ id: "a", name: "A" }], 1)] });
     const view = mount(q, { selectPage });
