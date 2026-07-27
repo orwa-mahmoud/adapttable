@@ -34,14 +34,42 @@ export function FilterPanel({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  // While open: close on Escape, move focus into the panel, and restore focus
-  // to the trigger on close — basic dialog a11y the hand-rolled drawer needs.
+  // While open: close on Escape, move focus into the panel, TRAP Tab
+  // inside it (aria-modal promises focus cannot reach the background), and
+  // restore focus to the trigger on close.
   useEffect(() => {
     if (!open) return;
     const trigger = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onCloseRef.current();
+      if (event.key === "Escape") {
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || active === panel)) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        (!event.shiftKey && active === last) ||
+        // Focus escaped (pointer interaction) — pull it back inside.
+        (active !== null && !panel.contains(active))
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => {

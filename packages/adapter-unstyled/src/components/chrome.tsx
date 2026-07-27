@@ -13,6 +13,7 @@ import {
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
+import { SR_ONLY } from "./srOnly";
 
 /** Removable filter-chip strip. Renders nothing when empty. */
 export function Chips({
@@ -43,7 +44,7 @@ export function Chips({
           {chip.label}
           <button
             type="button"
-            aria-label={`${labels.clearAll}: ${chip.label}`}
+            aria-label={labels.removeFilter(chip.label)}
             data-adapttable-part="chip-remove"
             className={classNames.chipRemove}
             onClick={chip.onRemove}
@@ -104,7 +105,9 @@ export function BulkBar({
 
   return (
     <div data-adapttable-part="bulk-bar" className={classNames.bulkBar}>
-      <span>{labels.selectedCount(selectedCount)}</span>
+      {/* role=status: selection changes are announced without stealing
+          focus — the count was previously silent to screen readers. */}
+      <span role="status">{labels.selectedCount(selectedCount)}</span>
       {showBanner && (
         <div
           data-adapttable-part="select-all-banner"
@@ -424,7 +427,7 @@ export function LoadingState({
           ))}
         </div>
       )}
-      <span className="adapttable-sr-only">{labels.loading}</span>
+      <span style={SR_ONLY}>{labels.loading}</span>
     </div>
   );
 }

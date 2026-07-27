@@ -297,7 +297,7 @@ function DesktopRowBase<TRow>(
     <>
       <tr
         {...table.getRowProps(row, index)}
-        {...rowClickProps(row, clickable ? onRowClick : undefined)}
+        {...rowClickProps(row, clickable ? onRowClick : undefined, index)}
         ref={measureElement}
         data-adapttable-part="row"
         data-stagger=""
@@ -684,7 +684,15 @@ export function DesktopTable<TRow>({
               column,
               localStyle && { style: localStyle }
             );
-            const active = table.sortBy === column.key;
+            // A multi-sort chain level counts as sorted too — data-sorted
+            // and the glyph must agree with the aria-sort core reports.
+            const chainDir = table.source.sortLevels.find(
+              (level) => level.key === column.key
+            )?.dir;
+            const effectiveDir =
+              chainDir ??
+              (table.sortBy === column.key ? table.sortDir : undefined);
+            const active = effectiveDir !== undefined;
             // Spread the core prop-getter as-is so React hands the click
             // EVENT to core's onClick (shift-click chains a multi-sort
             // level). Its `data-sort-index` doubles as the badge content.
@@ -695,7 +703,7 @@ export function DesktopTable<TRow>({
                 key={column.key}
                 {...headerProps}
                 data-adapttable-part="header-cell"
-                data-sorted={active ? table.sortDir : undefined}
+                data-sorted={effectiveDir}
                 data-sticky={stickyAttr}
                 data-pinned={pinOffset?.(column.key)?.side}
                 className={classNames.headerCell}
@@ -715,7 +723,7 @@ export function DesktopTable<TRow>({
                         {sortIndex}
                       </span>
                     )}
-                    <span aria-hidden> {sortGlyph(active, table.sortDir)}</span>
+                    <span aria-hidden> {sortGlyph(active, effectiveDir)}</span>
                   </button>
                 ) : (
                   column.header
@@ -750,7 +758,11 @@ export function DesktopTable<TRow>({
       </thead>
       <tbody data-adapttable-part="tbody" className={classNames.tbody}>
         {paddingTop > 0 && (
-          <tr>
+          <tr
+            aria-hidden
+            data-adapttable-part="virtual-spacer"
+            className={classNames.virtualSpacer}
+          >
             <td
               colSpan={columnSpan}
               style={{ height: paddingTop, padding: 0 }}
@@ -856,7 +868,11 @@ export function DesktopTable<TRow>({
               );
             })}
         {paddingBottom > 0 && (
-          <tr>
+          <tr
+            aria-hidden
+            data-adapttable-part="virtual-spacer"
+            className={classNames.virtualSpacer}
+          >
             <td
               colSpan={columnSpan}
               style={{ height: paddingBottom, padding: 0 }}
@@ -1011,7 +1027,7 @@ function MobileCardBase<TRow>({
 }: Readonly<MobileCardProps<TRow>>) {
   return (
     <li
-      {...rowClickProps(row, onRowClick)}
+      {...rowClickProps(row, onRowClick, index)}
       ref={measureElement}
       data-index={index}
       data-adapttable-part="card"
@@ -1169,20 +1185,22 @@ export function MobileCards<TRow>({
       {...table.getTableProps({ role: undefined })}
       data-adapttable-part="cards"
       className={classNames.cards}
-      style={{ listStyle: "none", margin: 0, padding: 0 }}
+      // No `list-style: none` here: Safari/VoiceOver strips list semantics
+      // from such lists. Markers are suppressed per-item with display:block.
+      style={{ margin: 0, padding: 0 }}
     >
       {paddingTop > 0 && (
         <li
           aria-hidden
           data-adapttable-part="virtual-spacer"
           className={classNames.virtualSpacer}
-          style={{ height: paddingTop }}
+          style={{ display: "block", height: paddingTop }}
         />
       )}
       {grouping
         ? grouping.entries.map((entry) =>
             entry.kind === "group" ? (
-              <li key={entry.key} style={{ listStyle: "none" }}>
+              <li key={entry.key} style={{ display: "block" }}>
                 <GroupHeaderCard
                   entry={entry}
                   selection={selection}
@@ -1201,13 +1219,14 @@ export function MobileCards<TRow>({
           aria-hidden
           data-adapttable-part="virtual-spacer"
           className={classNames.virtualSpacer}
-          style={{ height: paddingBottom }}
+          style={{ display: "block", height: paddingBottom }}
         />
       )}
       {summary && (
         <li
           data-adapttable-part="summary-card"
           className={cx(classNames.card, classNames.summaryCard)}
+          style={{ display: "block" }}
         >
           {columns.map((column) =>
             summary[column.key] == null ? null : (
