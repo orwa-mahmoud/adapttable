@@ -17,9 +17,16 @@ function sortsLast(value: SortableValue): boolean {
  * @returns Negative if `a < b`, positive if `a > b`, `0` if equal.
  */
 export function compareValues(a: SortableValue, b: SortableValue): number {
+  // All unorderable values are EQUAL to each other (null vs undefined vs
+  // NaN), keeping the comparator symmetric — `a === b` alone would let a
+  // NaN pair fall through to the one-sided branches below.
+  const aLast = sortsLast(a);
+  const bLast = sortsLast(b);
+  if (aLast || bLast) {
+    if (aLast && bLast) return 0;
+    return aLast ? 1 : -1;
+  }
   if (a === b) return 0;
-  if (sortsLast(a)) return 1;
-  if (sortsLast(b)) return -1;
   if (typeof a === "number" && typeof b === "number") return a - b;
   if (typeof a === "boolean" && typeof b === "boolean") {
     return Number(a) - Number(b);
@@ -88,12 +95,13 @@ export function sortRowsMulti<TRow>(
       for (const [i, level] of levels.entries()) {
         const a = x.values[i]!;
         const b = y.values[i]!;
-        if (a === b) continue;
-        // Null-ish sorts last regardless of direction — never negated.
-        if (sortsLast(a)) return 1;
-        if (sortsLast(b)) return -1;
+        // Two unorderable values (null / undefined / NaN, in any mix) tie
+        // at this level and fall through to the next one.
         const cmp = compareValues(a, b);
-        if (cmp !== 0) return level.dir === "asc" ? cmp : -cmp;
+        if (cmp === 0) continue;
+        // Null-ish sorts last regardless of direction — never negated.
+        if (sortsLast(a) || sortsLast(b)) return cmp;
+        return level.dir === "asc" ? cmp : -cmp;
       }
       // Stable: preserve the original order for full ties.
       return x.index - y.index;

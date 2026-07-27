@@ -6,12 +6,16 @@ describe("compareValues", () => {
   it("returns 0 for equal values", () => {
     expect(compareValues(5, 5)).toBe(0);
   });
-  it("sorts null / undefined / NaN last", () => {
+  it("sorts null / undefined / NaN last, and equal to each other", () => {
     expect(compareValues(null, 5)).toBe(1);
     expect(compareValues(5, undefined)).toBe(-1);
-    expect(compareValues(undefined, null)).toBe(1);
     expect(compareValues(NaN, 5)).toBe(1);
     expect(compareValues(5, NaN)).toBe(-1);
+    // Unorderable values tie with each other — any nonzero answer here
+    // would be asymmetric (both orderings used to return 1).
+    expect(compareValues(undefined, null)).toBe(0);
+    expect(compareValues(null, undefined)).toBe(0);
+    expect(compareValues(NaN, NaN)).toBe(0);
   });
   it("compares numbers numerically", () => {
     expect(compareValues(2, 10)).toBeLessThan(0);
@@ -182,6 +186,56 @@ describe("sortRowsMulti", () => {
     ];
     const out = sortRowsMulti(data, [{ key: "team", dir: "desc" }], getValue);
     expect(out.map((r) => r.team)).toEqual(["b", "a"]);
+  });
+
+  it("the comparator is symmetric and transitive over unorderable mixes", () => {
+    // Property check over every pair and triple of a mixed fixture: sign
+    // symmetry (cmp(a,b) === -cmp(b,a)) and transitivity of <= — the
+    // contract Array.prototype.sort requires. The old comparator returned
+    // 1 for BOTH orderings of a NaN pair and of null-vs-undefined.
+    const fixture = [
+      null,
+      undefined,
+      Number.NaN,
+      -3,
+      0,
+      7,
+      "alpha",
+      "beta",
+      "",
+    ] as const;
+    for (const x of fixture) {
+      for (const y of fixture) {
+        expect(
+          Math.sign(compareValues(x, y)) + Math.sign(compareValues(y, x))
+        ).toBe(0);
+        for (const z of fixture) {
+          if (compareValues(x, y) <= 0 && compareValues(y, z) <= 0) {
+            expect(compareValues(x, z)).toBeLessThanOrEqual(0);
+          }
+        }
+      }
+    }
+  });
+
+  it("level-two ordering applies when level one ties on null-ish or NaN", () => {
+    const data = [
+      { team: null, age: 3 },
+      { team: undefined, age: 1 },
+      { team: Number.NaN, age: 2 },
+      { team: "core", age: 9 },
+    ] as unknown as R[];
+    const out = sortRowsMulti(
+      data,
+      [
+        { key: "team", dir: "asc" },
+        { key: "age", dir: "asc" },
+      ],
+      getValue
+    );
+    // Orderable value first; the unorderable trio ties at level one and
+    // is ordered by level two — not left in insertion order.
+    expect(out.map((r) => r.age)).toEqual([9, 1, 2, 3]);
   });
 
   it("collation-equal but non-identical values fall through to the next level", () => {
