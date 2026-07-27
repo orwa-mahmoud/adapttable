@@ -19,6 +19,7 @@ export {
 export { DataTable } from "./DataTable";
 export type {
   BaseUiAccentColor,
+  DataTableClassNames,
   DataTableProps,
   DataTableSlots,
 } from "./types";

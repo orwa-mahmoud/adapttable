@@ -22,7 +22,7 @@ export interface DataTableClassNames {
   searchIcon?: string;
   sortSelect?: string;
   /** Rows-per-page `<select>` (toolbar in infinite mode, footer when paged). */
-  rowsPerPageSelect?: string;
+  rowsPerPage?: string;
   filtersButton?: string;
   /** The leading funnel icon inside the Filters button. */
   filtersIcon?: string;
@@ -72,6 +72,8 @@ export interface DataTableClassNames {
   /** The separator above the trailing row-actions entry in the menu. */
   columnMenuSeparator?: string;
   columnMenuReset?: string;
+  /** The saved-views menu container (trigger + anchored panel). */
+  viewsMenu?: string;
   /** The saved-views menu trigger button. */
   viewsButton?: string;
   /** The saved-views dropdown panel. */
@@ -84,6 +86,8 @@ export interface DataTableClassNames {
   viewsInput?: string;
   /** The save-view button in the save row. */
   viewsSave?: string;
+  /** The separator between the views list and the save row. */
+  viewsDivider?: string;
   resizeHandle?: string;
   bulkBar?: string;
   bulkButton?: string;
@@ -100,9 +104,9 @@ export interface DataTableClassNames {
   headerRow?: string;
   headerCell?: string;
   /** The grouped-header `<tr>` rendered above the column headers. */
-  groupRow?: string;
-  /** One spanning `<th>` (or edge gap) inside the group row. */
-  groupCell?: string;
+  headerGroupRow?: string;
+  /** One spanning `<th>` (or edge gap) inside the header-group row. */
+  headerGroupCell?: string;
   sortButton?: string;
   /** The 1-based multi-sort position badge inside a sorted header. */
   sortIndex?: string;
@@ -121,17 +125,50 @@ export interface DataTableClassNames {
   detailCell?: string;
   /** The detail section inside an expanded mobile card. */
   cardDetail?: string;
+  /** The trailing row-actions header cell. */
+  actionsHeader?: string;
   actionsCell?: string;
   actionButton?: string;
+  /** The leading select-all header cell. */
+  selectionHeader?: string;
   selectionCell?: string;
+  /** A selection checkbox input (header select-all, row, mobile card). */
   checkbox?: string;
   loadMore?: string;
   loadMoreButton?: string;
+  /* ── Row grouping (groupBy) ──────────────────────────────────────── */
+  /** A group-header `<tr>` in the grouped desktop body. */
+  groupRow?: string;
+  /** The single spanning cell inside a group-header row. */
+  groupCell?: string;
+  /** A group-header `<li>` in the grouped mobile card list. */
+  groupCard?: string;
+  /** The group collapse/expand toggle button. */
+  groupToggle?: string;
+  /** The group's tri-state selection checkbox. */
+  groupSelect?: string;
+  /** The group's label text. */
+  groupLabel?: string;
+  /** The group's row-count badge. */
+  groupCount?: string;
+  /** One aggregate value chip in the group header. */
+  groupAggregate?: string;
+  /* ── Cell editing ────────────────────────────────────────────────── */
+  /** The invisible activate button wrapping an editable display cell. */
+  editCellActivate?: string;
+  /** The active inline cell editor (input or select). */
+  editCellEditor?: string;
   cards?: string;
   card?: string;
+  /** The trailing actions strip inside a mobile card. */
+  cardActions?: string;
   cardRow?: string;
   cardLabel?: string;
   cardValue?: string;
+  /** The sideways/bounded scroll wrapper around the desktop table. */
+  scrollBox?: string;
+  /** A virtualization padding spacer (desktop row or mobile card list). */
+  virtualSpacer?: string;
   /** The `<tfoot>` holding the summary row. */
   summary?: string;
   /** The summary `<tr>` inside the footer. */
@@ -144,14 +181,35 @@ export interface DataTableClassNames {
   footer?: string;
   /** The pager group on the footer's trailing edge: page-of label + numbered pages. */
   pager?: string;
-  /** Every pager button: prev/next arrows and each numbered page (the current page carries `aria-current="page"`). */
-  pageButton?: string;
+  /** The pager's previous-page arrow button. */
+  pagePrev?: string;
+  /** The pager's next-page arrow button. */
+  pageNext?: string;
+  /** One numbered page button (the current page carries `aria-current="page"`). */
+  pageNumber?: string;
   /** The "…" gap standing in for elided page numbers. */
   pageEllipsis?: string;
   empty?: string;
   /** The clear-filters button inside the "no results" empty state. */
   emptyClear?: string;
   loading?: string;
+  /* ── Loading skeleton ────────────────────────────────────────────── */
+  /** The skeleton `<table>`. */
+  loadingTable?: string;
+  /** The skeleton header `<tr>`. */
+  loadingHeaderRow?: string;
+  /** One skeleton header `<th>`. */
+  loadingHeaderCell?: string;
+  /** One skeleton body `<tr>`. */
+  loadingRow?: string;
+  /** One skeleton body `<td>`. */
+  loadingCell?: string;
+  /** The shimmering placeholder line inside a skeleton cell. */
+  loadingLine?: string;
+  /** The skeleton mobile card list. */
+  loadingCards?: string;
+  /** One skeleton mobile card. */
+  loadingCard?: string;
   /** The non-blocking background-refresh progress indicator. */
   refreshIndicator?: string;
   error?: string;

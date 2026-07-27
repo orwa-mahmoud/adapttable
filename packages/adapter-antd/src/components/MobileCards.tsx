@@ -279,6 +279,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
  */
 export function MobileCards<TRow>({
   table,
+  cardClassName,
   rows,
   rowActions,
   confirm,
@@ -299,6 +300,8 @@ export function MobileCards<TRow>({
   measureElement,
 }: Readonly<{
   table: UseDataTableResult<TRow>;
+  /** Class applied to every card (merged before `rowClassName`). */
+  cardClassName?: string;
   rows: readonly TRow[];
   rowActions?: readonly RowAction<TRow>[];
   confirm: ConfirmHandler;
@@ -363,7 +366,11 @@ export function MobileCards<TRow>({
           labels={labels}
           confirm={confirm}
           rowActions={rowActions}
-          className={rowClassName?.(row, index)}
+          className={
+            [cardClassName, rowClassName?.(row, index)]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
           selected={selection ? selection.isSelected(id) : false}
           expanded={expansion ? expansion.isExpanded(id) : false}
           onToggleSelect={selection ? selection.toggle : undefined}

@@ -16,6 +16,24 @@ export interface DataTableSlots {
 }
 
 /** Props for the Material UI `<DataTable>`. */
+/**
+ * Structural class hooks for the MUI adapter. Fine-grained per-part
+ * styling belongs to `@adapttable/unstyled` / `@adapttable/shadcn`; here
+ * the kit owns the visuals and these hooks target the wrapper elements.
+ */
+export interface DataTableClassNames {
+  /** The root `<Paper>` (also reachable via `className`). */
+  root?: string;
+  /** The toolbar row (search, filters, export, menus). */
+  toolbar?: string;
+  /** The desktop table region. */
+  table?: string;
+  /** One mobile card (merged with `rowClassName`). */
+  card?: string;
+  /** The pagination footer region. */
+  footer?: string;
+}
+
 interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
@@ -66,6 +84,8 @@ interface DataTablePropsBase<TRow> extends Omit<
   slots?: DataTableSlots;
   /** Class name applied to the root `<Paper>`. */
   className?: string;
+  /** Per-part class hooks for the structural elements. */
+  classNames?: DataTableClassNames;
   /**
    * Explicit MUI table size override. When omitted, the size is derived from
    * `density`: `"comfortable"` → `"medium"`, `"compact"` → `"small"`.

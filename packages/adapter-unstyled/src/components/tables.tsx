@@ -328,6 +328,7 @@ function DesktopRowBase<TRow>(
           >
             <input
               type="checkbox"
+              data-adapttable-part="checkbox"
               aria-label={labels.selectRow}
               checked={selected}
               onChange={() => onToggleSelect(id)}
@@ -346,6 +347,8 @@ function DesktopRowBase<TRow>(
               className={classNames.cell}
             >
               <EditableDataCell
+                activateClassName={classNames.editCellActivate}
+                editorClassName={classNames.editCellEditor}
                 editing={editing}
                 row={row}
                 column={column}
@@ -597,7 +600,10 @@ export function DesktopTable<TRow>({
   const groups = headerGroupRow(columns);
   const summary = useSummaryCells(summaryRow, rows);
   const groupPad = (
-    <th data-adapttable-part="group-cell" className={classNames.groupCell} />
+    <th
+      data-adapttable-part="header-group-cell"
+      className={classNames.headerGroupCell}
+    />
   );
   const summaryPad = (
     <td
@@ -615,15 +621,18 @@ export function DesktopTable<TRow>({
     >
       <thead data-adapttable-part="thead" className={classNames.thead}>
         {groups && (
-          <tr data-adapttable-part="group-row" className={classNames.groupRow}>
+          <tr
+            data-adapttable-part="header-group-row"
+            className={classNames.headerGroupRow}
+          >
             {expandable && groupPad}
             {selection && groupPad}
             {groups.map((group) => (
               <th
                 key={group.key}
                 colSpan={group.span}
-                data-adapttable-part="group-cell"
-                className={classNames.groupCell}
+                data-adapttable-part="header-group-cell"
+                className={classNames.headerGroupCell}
               >
                 {group.label}
               </th>
@@ -651,7 +660,7 @@ export function DesktopTable<TRow>({
               data-sticky={stickyAttr}
               data-pinned={hasStartPin ? "start" : undefined}
               style={edgeHeadStyle("start", hasStartPin)}
-              className={cx(classNames.headerCell, classNames.selectionCell)}
+              className={cx(classNames.headerCell, classNames.selectionHeader)}
             >
               <input
                 type="checkbox"
@@ -660,6 +669,7 @@ export function DesktopTable<TRow>({
                 ref={(el) => {
                   if (el) el.indeterminate = selection.headerState === "some";
                 }}
+                data-adapttable-part="checkbox"
                 onChange={selection.toggleAll}
                 className={classNames.checkbox}
               />
@@ -731,7 +741,7 @@ export function DesktopTable<TRow>({
               data-sticky={stickyAttr}
               data-pinned={hasEndPin || stickActions ? "end" : undefined}
               style={edgeHeadStyle("end", hasEndPin || stickActions)}
-              className={cx(classNames.headerCell, classNames.actionsCell)}
+              className={cx(classNames.headerCell, classNames.actionsHeader)}
             >
               {labels.actions}
             </th>
@@ -891,6 +901,7 @@ export function DesktopTable<TRow>({
         virtualScrollRef?.(node);
       }}
       data-adapttable-part="scroll-box"
+      className={classNames.scrollBox}
       style={scrollBoxStyle(maxHeight, hasPinned || overflowing)}
     >
       {tableEl}
@@ -1012,6 +1023,7 @@ function MobileCardBase<TRow>({
       {onToggleSelect && (
         <input
           type="checkbox"
+          data-adapttable-part="checkbox"
           aria-label={labels.selectRow}
           checked={selected}
           onChange={() => onToggleSelect(id)}
@@ -1043,6 +1055,8 @@ function MobileCardBase<TRow>({
             className={classNames.cardValue}
           >
             <EditableDataCell
+              activateClassName={classNames.editCellActivate}
+              editorClassName={classNames.editCellEditor}
               editing={editing}
               row={row}
               column={column}
@@ -1063,7 +1077,10 @@ function MobileCardBase<TRow>({
         </div>
       ))}
       {rowActions && rowActions.length > 0 && (
-        <div data-adapttable-part="card-actions">
+        <div
+          data-adapttable-part="card-actions"
+          className={classNames.cardActions}
+        >
           <RowActionButtons
             row={row}
             actions={rowActions}
@@ -1158,6 +1175,7 @@ export function MobileCards<TRow>({
         <li
           aria-hidden
           data-adapttable-part="virtual-spacer"
+          className={classNames.virtualSpacer}
           style={{ height: paddingTop }}
         />
       )}
@@ -1182,6 +1200,7 @@ export function MobileCards<TRow>({
         <li
           aria-hidden
           data-adapttable-part="virtual-spacer"
+          className={classNames.virtualSpacer}
           style={{ height: paddingBottom }}
         />
       )}

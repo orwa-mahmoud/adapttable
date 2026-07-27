@@ -83,9 +83,9 @@ describe("<DataTable> (unstyled)", () => {
     globalThis.localStorage.removeItem("hostile-cols");
   });
 
-  it("applies the rowsPerPageSelect class hook to both selects", () => {
+  it("applies the rowsPerPage class hook to both selects", () => {
     const { container } = renderHarness({
-      override: { classNames: { rowsPerPageSelect: "my-rpp" } },
+      override: { classNames: { rowsPerPage: "my-rpp" } },
     });
     // Paged mode renders the footer select.
     expect(
@@ -93,7 +93,7 @@ describe("<DataTable> (unstyled)", () => {
     ).toBeInTheDocument();
     const infinite = renderHarness({
       mode: "infinite",
-      override: { classNames: { rowsPerPageSelect: "my-rpp" } },
+      override: { classNames: { rowsPerPage: "my-rpp" } },
     });
     // Infinite mode renders the toolbar select instead.
     expect(

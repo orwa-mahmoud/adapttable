@@ -68,6 +68,8 @@ function muiColor(color: string | undefined): "default" | "error" {
 
 interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   size: "small" | "medium";
+  /** Class applied to every mobile card (merged before `rowClassName`). */
+  cardClassName?: string;
   /** Text direction — flips the collapsed expand chevron under RTL. */
   dir?: "ltr" | "rtl";
   /**
@@ -1052,6 +1054,7 @@ function MobileCardBase<TRow>({
 /** Mobile MUI card list. */
 export function MobileCards<TRow>({
   table,
+  cardClassName,
   rows,
   rowActions,
   confirm,
@@ -1100,7 +1103,11 @@ export function MobileCards<TRow>({
         labels={labels}
         confirm={confirm}
         rowActions={rowActions}
-        className={rowClassName?.(row, index)}
+        className={
+          [cardClassName, rowClassName?.(row, index)]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
         selected={selection ? selection.isSelected(id) : false}
         expanded={expand ? expand.isExpanded(id) : false}
         onToggleSelect={selection ? selection.toggle : undefined}

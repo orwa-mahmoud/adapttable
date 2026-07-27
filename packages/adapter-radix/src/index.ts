@@ -13,7 +13,12 @@ export {
   type SavedViewsMenuProps,
 } from "./components/SavedViewsMenu";
 export { DataTable } from "./DataTable";
-export type { DataTableProps, DataTableSlots, RadixAccentColor } from "./types";
+export type {
+  DataTableClassNames,
+  DataTableProps,
+  DataTableSlots,
+  RadixAccentColor,
+} from "./types";
 
 /* Re-exported headless engine — source builders, hooks, and types. */
 export {

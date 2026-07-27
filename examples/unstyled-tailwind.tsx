@@ -49,7 +49,9 @@ export function UnstyledTailwindExample({
         row: "border-t hover:bg-zinc-50 data-[selected]:bg-blue-50",
         cell: "px-3 py-2",
         footer: "flex items-center gap-2 mt-2 text-sm",
-        pageButton: "rounded border px-2 py-1 disabled:opacity-40",
+        pagePrev: "rounded border px-2 py-1 disabled:opacity-40",
+        pageNext: "rounded border px-2 py-1 disabled:opacity-40",
+        pageNumber: "rounded border px-2 py-1 disabled:opacity-40",
       }}
     />
   );

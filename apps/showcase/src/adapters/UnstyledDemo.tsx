@@ -23,7 +23,7 @@ const TAILWIND: DataTableClassNames = {
     "w-full bg-transparent text-sm outline-none placeholder:text-gray-400",
   sortSelect:
     "h-9 rounded-md border border-gray-300 px-2 text-sm dark:border-zinc-600 dark:bg-zinc-900",
-  rowsPerPageSelect:
+  rowsPerPage:
     "h-8 rounded-md border border-indigo-200 bg-white px-1.5 text-sm dark:border-indigo-900/60 dark:bg-zinc-900",
   filtersButton:
     "shrink-0 whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-md border border-gray-300 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800",
@@ -69,7 +69,11 @@ const TAILWIND: DataTableClassNames = {
   footer:
     "flex flex-wrap items-center gap-2 border-t border-gray-200 p-3 text-sm text-gray-600 dark:border-zinc-700 dark:text-zinc-400",
   pager: "ms-auto flex flex-wrap items-center gap-1",
-  pageButton:
+  pagePrev:
+    "inline-grid h-8 min-w-8 place-items-center rounded-md border border-gray-300 px-2 hover:bg-gray-50 disabled:opacity-50 aria-[current=page]:border-indigo-600 aria-[current=page]:bg-indigo-600 aria-[current=page]:text-white dark:border-zinc-600 dark:hover:bg-zinc-800",
+  pageNext:
+    "inline-grid h-8 min-w-8 place-items-center rounded-md border border-gray-300 px-2 hover:bg-gray-50 disabled:opacity-50 aria-[current=page]:border-indigo-600 aria-[current=page]:bg-indigo-600 aria-[current=page]:text-white dark:border-zinc-600 dark:hover:bg-zinc-800",
+  pageNumber:
     "inline-grid h-8 min-w-8 place-items-center rounded-md border border-gray-300 px-2 hover:bg-gray-50 disabled:opacity-50 aria-[current=page]:border-indigo-600 aria-[current=page]:bg-indigo-600 aria-[current=page]:text-white dark:border-zinc-600 dark:hover:bg-zinc-800",
   pageEllipsis:
     "grid h-8 place-items-center px-1 text-gray-400 dark:text-zinc-500",

@@ -11,9 +11,11 @@ import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 export function NativeCellEditor({
   ctrl,
   label,
+  className,
 }: Readonly<{
   ctrl: EditableCellEditorCtrl;
   label: string;
+  className?: string;
 }>): ReactElement {
   const onKeyDown = (event: KeyboardEvent) => {
     ctrl.onEditorKeyDown(event);
@@ -31,6 +33,7 @@ export function NativeCellEditor({
       <select
         ref={focusEditorOnMount}
         data-adapttable-part="edit-cell-editor"
+        className={className}
         aria-label={label}
         value={ctrl.draft}
         onChange={(event) => ctrl.setDraft(event.target.value)}
@@ -50,6 +53,7 @@ export function NativeCellEditor({
     <input
       ref={focusEditorOnMount}
       data-adapttable-part="edit-cell-editor"
+      className={className}
       aria-label={label}
       type={ctrl.editor === "number" ? "number" : "text"}
       value={ctrl.draft}
@@ -75,9 +79,14 @@ export function EditableDataCell<TRow>(props: {
   readonly rowKey: (row: TRow) => string;
   readonly editLabel: string;
   readonly display: ReactNode;
+  /** Class for the invisible activate button. */
+  readonly activateClassName?: string;
+  /** Class for the active inline editor. */
+  readonly editorClassName?: string;
 }): ReactElement {
   return (
     <EditableCellGate
+      activateClassName={props.activateClassName}
       editing={props.editing}
       row={props.row}
       column={props.column}
@@ -88,7 +97,11 @@ export function EditableDataCell<TRow>(props: {
       editLabel={props.editLabel}
       display={props.display}
       renderEditor={(ctrl) => (
-        <NativeCellEditor ctrl={ctrl} label={props.editLabel} />
+        <NativeCellEditor
+          ctrl={ctrl}
+          label={props.editLabel}
+          className={props.editorClassName}
+        />
       )}
     />
   );

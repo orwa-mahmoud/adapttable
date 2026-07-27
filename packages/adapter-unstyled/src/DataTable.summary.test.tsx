@@ -132,17 +132,20 @@ describe("group header row", () => {
         bulkActions: [{ key: "x", label: "X", onClick: () => undefined }],
         rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
         renderRowDetail: (r) => <div>{r.name}</div>,
-        classNames: { groupRow: "my-group-row", groupCell: "my-group-cell" },
+        classNames: {
+          headerGroupRow: "my-group-row",
+          headerGroupCell: "my-group-cell",
+        },
       },
     });
     const groupRow = container.querySelector(
-      'thead tr[data-adapttable-part="group-row"]'
+      'thead tr[data-adapttable-part="header-group-row"]'
     );
     expect(groupRow).toHaveClass("my-group-row");
     // The group row is the FIRST header row.
     expect(groupRow!.parentElement!.firstElementChild).toBe(groupRow);
     const cells = groupRow!.querySelectorAll(
-      'th[data-adapttable-part="group-cell"]'
+      'th[data-adapttable-part="header-group-cell"]'
     );
     // expand pad + selection pad + ungrouped gap + "Location" + actions pad.
     expect(cells).toHaveLength(5);
@@ -156,7 +159,7 @@ describe("group header row", () => {
   it("renders no group row when no column declares a group", () => {
     const { container } = renderHarness();
     expect(
-      container.querySelector('[data-adapttable-part="group-row"]')
+      container.querySelector('[data-adapttable-part="header-group-row"]')
     ).toBeNull();
   });
 });

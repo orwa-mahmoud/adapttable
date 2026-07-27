@@ -620,6 +620,7 @@ interface DataTableBodyRegionProps<TRow> {
   prefetch: DataTableProps<TRow>["prefetch"];
   onRowClick: DataTableProps<TRow>["onRowClick"];
   rowClassName: DataTableProps<TRow>["rowClassName"];
+  cardClassName: string | undefined;
   summaryRow: DataTableProps<TRow>["summaryRow"];
   skeletonRows: number | undefined;
   size: AntdTableSize;
@@ -762,6 +763,7 @@ function DataTableBodyRegion<TRow>(
     prefetch,
     onRowClick,
     rowClassName,
+    cardClassName,
     summaryRow,
     skeletonRows,
     size,
@@ -808,6 +810,7 @@ function DataTableBodyRegion<TRow>(
     body = (
       <MobileCards
         table={table}
+        cardClassName={cardClassName}
         rows={editingRows}
         rowActions={rowActions}
         confirm={confirm}
@@ -871,6 +874,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const {
     slots,
     className,
+    classNames,
     animate = false,
     bordered = false,
     virtualize = false,
@@ -1092,6 +1096,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       prefetch={props.prefetch}
       onRowClick={props.onRowClick}
       rowClassName={props.rowClassName}
+      cardClassName={classNames?.card}
       summaryRow={props.summaryRow}
       skeletonRows={props.skeletonRows}
       size={size}
@@ -1117,55 +1122,59 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     <div
       ref={rootRef}
       dir={props.dir}
-      className={className}
+      className={
+        [className, classNames?.root].filter(Boolean).join(" ") || undefined
+      }
       aria-busy={c.isRefreshing || undefined}
     >
       <Space orientation="vertical" size="small" style={{ width: "100%" }}>
-        <Toolbar
-          table={table}
-          searchable={props.searchable ?? props.hideSearch !== true}
-          searchPlaceholder={props.searchPlaceholder}
-          sortByOptions={props.sortByOptions}
-          toolbar={props.toolbar}
-          hasFilters={Boolean(filtersNode)}
-          activeFilterCount={c.activeFilterCount}
-          filters={filtersNode}
-          filtersMode={filtersMode}
-          filtersOpen={filtersOpen}
-          onToggleFilters={filtersTrigger.onClick}
-          onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-          onCloseFilters={() => setFiltersOpen(false)}
-          onClearFilters={c.clearFilters}
-          isRefreshing={c.isRefreshing}
-          dir={props.dir}
-          columnMenu={
-            <ColumnMenuSlot
-              enabled={Boolean(props.enableColumnMenu) && !c.isMobile}
-              allColumns={c.allColumns}
-              layout={c.columnLayout}
-              labels={labels}
-              dir={props.dir}
-              hasRowActions={Boolean(props.rowActions?.length)}
-            />
-          }
-          onExportCsv={makeExportCsvHandler(
-            props.exportCsv,
-            source,
-            // Layout-visible columns WITHOUT device filtering: the same
-            // button must produce the same file on phone and desktop.
-            c.columnLayout.visibleColumns
-          )}
-          savedViewsMenu={
-            <SavedViewsSlot
-              options={props.savedViews}
-              urlAdapter={resolvedUrlAdapter}
-              urlKey={props.urlKey}
-              labels={labels}
-              dir={props.dir}
-            />
-          }
-          showRowsPerPage={!c.isPaged}
-        />
+        <div className={classNames?.toolbar}>
+          <Toolbar
+            table={table}
+            searchable={props.searchable ?? props.hideSearch !== true}
+            searchPlaceholder={props.searchPlaceholder}
+            sortByOptions={props.sortByOptions}
+            toolbar={props.toolbar}
+            hasFilters={Boolean(filtersNode)}
+            activeFilterCount={c.activeFilterCount}
+            filters={filtersNode}
+            filtersMode={filtersMode}
+            filtersOpen={filtersOpen}
+            onToggleFilters={filtersTrigger.onClick}
+            onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+            onCloseFilters={() => setFiltersOpen(false)}
+            onClearFilters={c.clearFilters}
+            isRefreshing={c.isRefreshing}
+            dir={props.dir}
+            columnMenu={
+              <ColumnMenuSlot
+                enabled={Boolean(props.enableColumnMenu) && !c.isMobile}
+                allColumns={c.allColumns}
+                layout={c.columnLayout}
+                labels={labels}
+                dir={props.dir}
+                hasRowActions={Boolean(props.rowActions?.length)}
+              />
+            }
+            onExportCsv={makeExportCsvHandler(
+              props.exportCsv,
+              source,
+              // Layout-visible columns WITHOUT device filtering: the same
+              // button must produce the same file on phone and desktop.
+              c.columnLayout.visibleColumns
+            )}
+            savedViewsMenu={
+              <SavedViewsSlot
+                options={props.savedViews}
+                urlAdapter={resolvedUrlAdapter}
+                urlKey={props.urlKey}
+                labels={labels}
+                dir={props.dir}
+              />
+            }
+            showRowsPerPage={!c.isPaged}
+          />
+        </div>
         <Chips
           chips={c.mergedChips}
           onClearAll={c.clearFilters}
@@ -1180,14 +1189,18 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             labels={labels}
           />
         )}
-        {bodyRegion}
+        <div className={c.body === "desktop" ? classNames?.table : undefined}>
+          {bodyRegion}
+        </div>
         {c.isPaged && !source.error && c.body === "desktop" && (
-          <PagedFooter
-            table={table}
-            source={source}
-            labels={labels}
-            showRowsPerPage={!c.grouping}
-          />
+          <div className={classNames?.footer}>
+            <PagedFooter
+              table={table}
+              source={source}
+              labels={labels}
+              showRowsPerPage={!c.grouping}
+            />
+          </div>
         )}
         {!c.isPaged && !source.error && source.hasNextPage && (
           <Flex ref={loadMoreRef} justify="center">

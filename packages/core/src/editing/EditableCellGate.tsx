@@ -43,6 +43,8 @@ export interface EditableCellGateProps<TRow> {
   readonly rowKey: (row: TRow) => string;
   /** Accessible name for the activate control. */
   readonly editLabel: string;
+  /** Optional class for the activate button (adapters' styling hook). */
+  readonly activateClassName?: string;
   readonly display: ReactNode;
   /**
    * Kit-native editor. Only called while this cell is the active edit.
@@ -98,6 +100,7 @@ export function EditableCellGate<TRow>(
       ref={activateRef}
       type="button"
       aria-label={props.editLabel}
+      className={props.activateClassName}
       data-adapttable-part="edit-cell-activate"
       onDoubleClick={(event) => {
         event.preventDefault();

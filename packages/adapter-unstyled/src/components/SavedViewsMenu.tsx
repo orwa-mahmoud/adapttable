@@ -39,6 +39,7 @@ export function SavedViewsMenu({
     <div
       ref={rootRef}
       data-adapttable-part="views-menu"
+      className={classNames.viewsMenu}
       style={{ position: "relative" }}
     >
       <button
@@ -87,7 +88,10 @@ export function SavedViewsMenu({
               </button>
             </div>
           ))}
-          <hr data-adapttable-part="views-divider" />
+          <hr
+            data-adapttable-part="views-divider"
+            className={classNames.viewsDivider}
+          />
           <div style={{ display: "flex", alignItems: "center" }}>
             <input
               aria-label={labels.viewName}

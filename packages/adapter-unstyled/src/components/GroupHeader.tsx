@@ -34,12 +34,12 @@ export function GroupHeaderRow<TRow>({
     <tr
       data-adapttable-part="group-row"
       data-collapsed={entry.collapsed ? "true" : undefined}
-      className={classNames.row}
+      className={classNames.groupRow}
     >
       <td
         colSpan={columnSpan}
         data-adapttable-part="group-cell"
-        className={classNames.cell}
+        className={classNames.groupCell}
         style={{ fontWeight: 600 }}
       >
         <span
@@ -55,7 +55,7 @@ export function GroupHeaderRow<TRow>({
             data-adapttable-part="group-toggle"
             aria-expanded={expanded}
             aria-label={expanded ? labels.collapseGroup : labels.expandGroup}
-            className={classNames.expandButton}
+            className={classNames.groupToggle}
             onClick={() => onToggleCollapse(entry.key)}
           >
             <span
@@ -72,6 +72,7 @@ export function GroupHeaderRow<TRow>({
             <input
               type="checkbox"
               data-adapttable-part="group-select"
+              className={classNames.groupSelect}
               aria-label={labels.selectAll}
               checked={groupState === "all"}
               ref={(node) => {
@@ -80,8 +81,17 @@ export function GroupHeaderRow<TRow>({
               onChange={() => selection.toggleGroupLeaves(entry.leafIds)}
             />
           )}
-          <span data-adapttable-part="group-label">{entry.label}</span>
-          <span data-adapttable-part="group-count" style={{ opacity: 0.65 }}>
+          <span
+            data-adapttable-part="group-label"
+            className={classNames.groupLabel}
+          >
+            {entry.label}
+          </span>
+          <span
+            data-adapttable-part="group-count"
+            className={classNames.groupCount}
+            style={{ opacity: 0.65 }}
+          >
             {labels.groupCount(entry.leafIds.length)}
           </span>
           {entry.aggregateCells &&
@@ -90,6 +100,7 @@ export function GroupHeaderRow<TRow>({
                 key={key}
                 data-adapttable-part="group-aggregate"
                 data-column={key}
+                className={classNames.groupAggregate}
                 style={{ marginInlineStart: "auto" }}
               >
                 {node}
@@ -124,7 +135,7 @@ export function GroupHeaderCard<TRow>({
     <div
       data-adapttable-part="group-card"
       data-collapsed={entry.collapsed ? "true" : undefined}
-      className={classNames.card}
+      className={classNames.groupCard}
       style={{ fontWeight: 600 }}
     >
       <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -133,7 +144,7 @@ export function GroupHeaderCard<TRow>({
           data-adapttable-part="group-toggle"
           aria-expanded={expanded}
           aria-label={expanded ? labels.collapseGroup : labels.expandGroup}
-          className={classNames.expandButton}
+          className={classNames.groupToggle}
           onClick={() => onToggleCollapse(entry.key)}
         >
           <span
@@ -150,6 +161,7 @@ export function GroupHeaderCard<TRow>({
           <input
             type="checkbox"
             data-adapttable-part="group-select"
+            className={classNames.groupSelect}
             aria-label={labels.selectAll}
             checked={groupState === "all"}
             ref={(node) => {
@@ -158,8 +170,17 @@ export function GroupHeaderCard<TRow>({
             onChange={() => selection.toggleGroupLeaves(entry.leafIds)}
           />
         )}
-        <span data-adapttable-part="group-label">{entry.label}</span>
-        <span data-adapttable-part="group-count" style={{ opacity: 0.65 }}>
+        <span
+          data-adapttable-part="group-label"
+          className={classNames.groupLabel}
+        >
+          {entry.label}
+        </span>
+        <span
+          data-adapttable-part="group-count"
+          className={classNames.groupCount}
+          style={{ opacity: 0.65 }}
+        >
           {labels.groupCount(entry.leafIds.length)}
         </span>
       </span>

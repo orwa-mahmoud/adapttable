@@ -178,7 +178,7 @@ function useChromeProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
  * @typeParam TRow - The row type.
  */
 export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
-  const { slots, className, animate = false } = props;
+  const { slots, className, classNames, animate = false } = props;
   const size = tableSize(props.size, props.density);
   const { filtersMode = "popover" } = props;
   const chromeProps = useChromeProps(props);
@@ -256,6 +256,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     body = (
       <MobileCards
         table={table}
+        cardClassName={classNames?.card}
         rows={c.editingRows}
         rowActions={rowActions}
         confirm={confirm}
@@ -277,36 +278,41 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     );
   } else {
     body = (
-      <DesktopTable
-        table={table}
-        rows={c.editingRows}
-        rowActions={rowActions}
-        actionsPinned={actionsPinned}
-        confirm={confirm}
-        getRowId={getRowId}
-        size={size}
-        dir={props.dir}
-        prefetch={props.prefetch}
-        onRowClick={props.onRowClick}
-        rowClassName={props.rowClassName}
-        renderRowDetail={props.renderRowDetail}
-        summaryRow={props.summaryRow}
-        expansion={c.detail?.expansion}
-        editing={c.editing}
-        grouping={grouping}
-        rowEntries={virtualization.enabled ? virtualization.rows : undefined}
-        paddingTop={virtualization.paddingTop}
-        paddingBottom={virtualization.paddingBottom}
-        measureElement={virtualization.measureElement}
-        stickyHeader={props.stickyHeader}
-        stickyTop={props.stickyTop}
-        pinOffset={c.columnLayout.pinOffset}
-        maxHeight={props.maxHeight}
-        virtualScrollRef={virtualScrollRef}
-        setWidth={resizeSetter(props.resizableColumns, c.columnLayout.setWidth)}
-        columnWidths={c.columnLayout.state.widths}
-        resizeLabel={labels.resizeColumn}
-      />
+      <Box className={classNames?.table}>
+        <DesktopTable
+          table={table}
+          rows={c.editingRows}
+          rowActions={rowActions}
+          actionsPinned={actionsPinned}
+          confirm={confirm}
+          getRowId={getRowId}
+          size={size}
+          dir={props.dir}
+          prefetch={props.prefetch}
+          onRowClick={props.onRowClick}
+          rowClassName={props.rowClassName}
+          renderRowDetail={props.renderRowDetail}
+          summaryRow={props.summaryRow}
+          expansion={c.detail?.expansion}
+          editing={c.editing}
+          grouping={grouping}
+          rowEntries={virtualization.enabled ? virtualization.rows : undefined}
+          paddingTop={virtualization.paddingTop}
+          paddingBottom={virtualization.paddingBottom}
+          measureElement={virtualization.measureElement}
+          stickyHeader={props.stickyHeader}
+          stickyTop={props.stickyTop}
+          pinOffset={c.columnLayout.pinOffset}
+          maxHeight={props.maxHeight}
+          virtualScrollRef={virtualScrollRef}
+          setWidth={resizeSetter(
+            props.resizableColumns,
+            c.columnLayout.setWidth
+          )}
+          columnWidths={c.columnLayout.state.widths}
+          resizeLabel={labels.resizeColumn}
+        />
+      </Box>
     );
   }
 
@@ -315,40 +321,44 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       ref={rootRef}
       variant="outlined"
       dir={props.dir}
-      className={className}
+      className={
+        [className, classNames?.root].filter(Boolean).join(" ") || undefined
+      }
       aria-busy={c.isRefreshing || undefined}
       sx={{ p: 1.5 }}
     >
       <Stack spacing={1.5}>
-        <Toolbar
-          table={table}
-          searchable={props.searchable ?? props.hideSearch !== true}
-          searchPlaceholder={props.searchPlaceholder}
-          sortByOptions={props.sortByOptions}
-          toolbar={
-            <>
-              {savedViewsMenu}
-              {props.toolbar}
-            </>
-          }
-          hasFilters={Boolean(filtersNode)}
-          activeFilterCount={c.activeFilterCount}
-          showRowsPerPage={canLoadMore}
-          filtersMode={filtersMode}
-          filters={filtersNode}
-          filtersOpen={filtersOpen}
-          onToggleFilters={filtersTrigger.onClick}
-          onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-          onCloseFilters={() => setFiltersOpen(false)}
-          onClearFilters={c.clearFilters}
-          dir={props.dir}
-          columnMenu={columnMenu}
-          onExportCsv={makeExportCsvHandler(
-            props.exportCsv,
-            viewSource,
-            c.columnLayout.visibleColumns
-          )}
-        />
+        <Box className={classNames?.toolbar}>
+          <Toolbar
+            table={table}
+            searchable={props.searchable ?? props.hideSearch !== true}
+            searchPlaceholder={props.searchPlaceholder}
+            sortByOptions={props.sortByOptions}
+            toolbar={
+              <>
+                {savedViewsMenu}
+                {props.toolbar}
+              </>
+            }
+            hasFilters={Boolean(filtersNode)}
+            activeFilterCount={c.activeFilterCount}
+            showRowsPerPage={canLoadMore}
+            filtersMode={filtersMode}
+            filters={filtersNode}
+            filtersOpen={filtersOpen}
+            onToggleFilters={filtersTrigger.onClick}
+            onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+            onCloseFilters={() => setFiltersOpen(false)}
+            onClearFilters={c.clearFilters}
+            dir={props.dir}
+            columnMenu={columnMenu}
+            onExportCsv={makeExportCsvHandler(
+              props.exportCsv,
+              viewSource,
+              c.columnLayout.visibleColumns
+            )}
+          />
+        </Box>
         {c.isRefreshing && <LinearProgress aria-label={labels.loading} />}
         <Chips
           chips={c.mergedChips}
@@ -391,15 +401,17 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           </Box>
         )}
         {c.showFooter && (
-          <Footer
-            pagination={table.pagination}
-            total={viewSource.total}
-            limit={viewSource.limit}
-            setPage={viewSource.setPage}
-            setLimit={viewSource.setLimit}
-            labels={labels}
-            showRowsPerPage={!c.grouping}
-          />
+          <Box className={classNames?.footer}>
+            <Footer
+              pagination={table.pagination}
+              total={viewSource.total}
+              limit={viewSource.limit}
+              setPage={viewSource.setPage}
+              setLimit={viewSource.setLimit}
+              labels={labels}
+              showRowsPerPage={!c.grouping}
+            />
+          </Box>
         )}
       </Stack>
       {filtersNode && filtersMode === "drawer" && (

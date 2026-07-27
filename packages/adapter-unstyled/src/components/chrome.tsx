@@ -178,7 +178,7 @@ export function RowsPerPageSelect({
       <select
         aria-label={labels.rowsPerPage}
         data-adapttable-part="rows-per-page"
-        className={classNames.rowsPerPageSelect}
+        className={classNames.rowsPerPage}
         value={source.limit}
         onChange={(e) => source.setLimit(Number(e.currentTarget.value))}
       >
@@ -237,7 +237,7 @@ export function Footer({
           type="button"
           aria-label={labels.previousPage}
           data-adapttable-part="page-prev"
-          className={classNames.pageButton}
+          className={classNames.pagePrev}
           disabled={safePage <= 1}
           onClick={() => source.setPage(safePage - 1)}
         >
@@ -259,7 +259,7 @@ export function Footer({
               type="button"
               data-adapttable-part="page-number"
               aria-current={item === safePage ? "page" : undefined}
-              className={classNames.pageButton}
+              className={classNames.pageNumber}
               onClick={() => source.setPage(item)}
             >
               {item}
@@ -270,7 +270,7 @@ export function Footer({
           type="button"
           aria-label={labels.nextPage}
           data-adapttable-part="page-next"
-          className={classNames.pageButton}
+          className={classNames.pageNext}
           disabled={safePage >= totalPages}
           onClick={() => source.setPage(safePage + 1)}
         >
@@ -302,7 +302,7 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          data-adapttable-part="retry"
+          data-adapttable-part="retry-button"
           className={classNames.retryButton}
         >
           {labels.retry}
@@ -347,13 +347,24 @@ export function LoadingState({
       className={cx(classNames.loading)}
     >
       {variant === "table" ? (
-        <table data-adapttable-part="loading-table">
+        <table
+          data-adapttable-part="loading-table"
+          className={classNames.loadingTable}
+        >
           <thead>
-            <tr data-adapttable-part="loading-header-row">
+            <tr
+              data-adapttable-part="loading-header-row"
+              className={classNames.loadingHeaderRow}
+            >
               {columnKeys.map((column) => (
-                <th key={column} data-adapttable-part="loading-header-cell">
+                <th
+                  key={column}
+                  data-adapttable-part="loading-header-cell"
+                  className={classNames.loadingHeaderCell}
+                >
                   <span
                     data-adapttable-part="loading-line"
+                    className={classNames.loadingLine}
                     style={{ width: loadingLineWidth(column, columnCount) }}
                   />
                 </th>
@@ -362,11 +373,20 @@ export function LoadingState({
           </thead>
           <tbody>
             {rowKeys.map((row) => (
-              <tr key={row} data-adapttable-part="loading-row">
+              <tr
+                key={row}
+                data-adapttable-part="loading-row"
+                className={classNames.loadingRow}
+              >
                 {columnKeys.map((column) => (
-                  <td key={column} data-adapttable-part="loading-cell">
+                  <td
+                    key={column}
+                    data-adapttable-part="loading-cell"
+                    className={classNames.loadingCell}
+                  >
                     <span
                       data-adapttable-part="loading-line"
+                      className={classNames.loadingLine}
                       style={{
                         width: loadingLineWidth(column, columnCount),
                       }}
@@ -378,15 +398,23 @@ export function LoadingState({
           </tbody>
         </table>
       ) : (
-        <div data-adapttable-part="loading-cards">
+        <div
+          data-adapttable-part="loading-cards"
+          className={classNames.loadingCards}
+        >
           {rowKeys.map((row) => (
-            <div key={row} data-adapttable-part="loading-card">
+            <div
+              key={row}
+              data-adapttable-part="loading-card"
+              className={classNames.loadingCard}
+            >
               {columnKeys
                 .slice(0, Math.min(4, columnKeys.length))
                 .map((column) => (
                   <span
                     key={column}
                     data-adapttable-part="loading-line"
+                    className={classNames.loadingLine}
                     style={{
                       width: loadingLineWidth(column, columnKeys.length),
                     }}

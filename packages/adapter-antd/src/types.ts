@@ -16,6 +16,24 @@ export interface DataTableSlots {
 }
 
 /** Props for the Ant Design `<DataTable>`. */
+/**
+ * Structural class hooks for the antd adapter. Fine-grained per-part
+ * styling belongs to `@adapttable/unstyled` / `@adapttable/shadcn`; here
+ * the kit owns the visuals and these hooks target the wrapper elements.
+ */
+export interface DataTableClassNames {
+  /** The root wrapper (also reachable via `className`). */
+  root?: string;
+  /** The toolbar row (search, filters, export, menus). */
+  toolbar?: string;
+  /** The desktop table region. */
+  table?: string;
+  /** One mobile card (merged with `rowClassName`). */
+  card?: string;
+  /** The pagination footer region. */
+  footer?: string;
+}
+
 interface DataTablePropsBase<TRow>
   extends
     Omit<BaseDataTableProps<TRow>, "source">,
@@ -48,6 +66,8 @@ interface DataTablePropsBase<TRow>
   slots?: DataTableSlots;
   /** Class name applied to the outer wrapper. */
   className?: string;
+  /** Per-part class hooks for the structural elements. */
+  classNames?: DataTableClassNames;
   /**
    * antd table size. Overrides the size derived from `density`
    * (`"compact"` → `"small"`, `"comfortable"` → `"middle"`); use it to opt
