@@ -298,7 +298,13 @@ export interface TableLabels {
   loadMore?: string;
   filters?: string;
   clearAll?: string;
-  /** Label for the filter panel action that accepts the current live filters. */
+  /**
+   * Label for the filter panel's closing action. Filters apply LIVE — the
+   * button only closes the panel, so the key matches its "Done" wording
+   * (and the `filters-done` part name).
+   */
+  filtersDone?: string;
+  /** Alias for `filtersDone` (v1 name) — deleted before the 2.0.0 release. */
   applyFilters?: string;
   sortBy?: string;
   rowsPerPage?: string;

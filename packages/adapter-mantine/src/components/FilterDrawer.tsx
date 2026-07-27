@@ -44,7 +44,7 @@ export function FilterDrawer({
           >
             {labels.clearAll}
           </Button>
-          <Button onClick={onClose}>{labels.applyFilters}</Button>
+          <Button onClick={onClose}>{labels.filtersDone}</Button>
         </Group>
       </Stack>
     </Drawer>

@@ -43,3 +43,13 @@ it("formats the select-all-matching banner labels", () => {
     "All 57 matching selected"
   );
 });
+
+describe("v1 `applyFilters` label alias", () => {
+  it("still labels the filters-done button (removed before release)", () => {
+    const labels = resolveLabels({ applyFilters: "Apply now" });
+    expect(labels.filtersDone).toBe("Apply now");
+    // The v2 key wins when both are given.
+    const both = resolveLabels({ applyFilters: "old", filtersDone: "new" });
+    expect(both.filtersDone).toBe("new");
+  });
+});

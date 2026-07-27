@@ -143,7 +143,7 @@ export function FilterPanel({
             data-adapttable-part="filters-done"
             className={classNames.filtersDone}
           >
-            {labels.applyFilters}
+            {labels.filtersDone}
           </button>
         </footer>
       </dialog>

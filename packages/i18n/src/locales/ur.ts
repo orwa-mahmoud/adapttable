@@ -31,6 +31,7 @@ export const ur: Required<TableLabels> = {
   loadMore: "مزید لوڈ کریں",
   filters: "فلٹرز",
   clearAll: "سب صاف کریں",
+  filtersDone: "مکمل",
   applyFilters: "مکمل",
   sortBy: "ترتیب دیں بذریعہ",
   rowsPerPage: "فی صفحہ قطاریں",

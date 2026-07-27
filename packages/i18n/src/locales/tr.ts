@@ -31,6 +31,7 @@ export const tr: Required<TableLabels> = {
   loadMore: "Daha fazla yükle",
   filters: "Filtreler",
   clearAll: "Tümünü temizle",
+  filtersDone: "Tamam",
   applyFilters: "Tamam",
   sortBy: "Sıralama",
   rowsPerPage: "Sayfa başına satır",

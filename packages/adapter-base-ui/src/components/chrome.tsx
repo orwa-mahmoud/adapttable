@@ -535,7 +535,7 @@ export function FilterDrawer({
                   {labels.clearAll}
                 </Button>
                 <Button color={accentColor} variant="solid" onClick={onClose}>
-                  {labels.applyFilters}
+                  {labels.filtersDone}
                 </Button>
               </Flex>
             </Drawer.Content>

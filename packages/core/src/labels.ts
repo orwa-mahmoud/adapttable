@@ -34,6 +34,7 @@ export const defaultLabels: Required<TableLabels> = {
   loadMore: "Load more",
   filters: "Filters",
   clearAll: "Clear all",
+  filtersDone: "Done",
   applyFilters: "Done",
   sortBy: "Sort by",
   rowsPerPage: "Rows per page",
@@ -85,6 +86,11 @@ export function resolveLabels(
       // Each key's value type matches the same key in the target.
       (merged[key] as unknown) = value;
     }
+  }
+  // v1 alias: a caller overriding only `applyFilters` still labels the
+  // filters-done button (deleted before the 2.0.0 release).
+  if (overrides.filtersDone === undefined && overrides.applyFilters) {
+    merged.filtersDone = overrides.applyFilters;
   }
   return merged;
 }

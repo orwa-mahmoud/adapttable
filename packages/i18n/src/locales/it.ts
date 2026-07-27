@@ -31,6 +31,7 @@ export const it: Required<TableLabels> = {
   loadMore: "Carica altro",
   filters: "Filtri",
   clearAll: "Cancella tutto",
+  filtersDone: "Fine",
   applyFilters: "Fine",
   sortBy: "Ordina per",
   rowsPerPage: "Righe per pagina",

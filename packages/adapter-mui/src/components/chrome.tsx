@@ -590,7 +590,7 @@ export function FilterDrawer({
             {labels.clearAll}
           </Button>
           <Button variant="contained" onClick={onClose}>
-            {labels.applyFilters}
+            {labels.filtersDone}
           </Button>
         </Stack>
       </Box>

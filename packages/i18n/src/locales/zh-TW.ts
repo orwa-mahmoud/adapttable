@@ -31,6 +31,7 @@ export const zhTW: Required<TableLabels> = {
   loadMore: "載入更多",
   filters: "篩選",
   clearAll: "全部清除",
+  filtersDone: "完成",
   applyFilters: "完成",
   sortBy: "排序依據",
   rowsPerPage: "每頁列數",

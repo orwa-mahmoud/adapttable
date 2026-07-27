@@ -31,6 +31,7 @@ export const fa: Required<TableLabels> = {
   loadMore: "بارگذاری بیشتر",
   filters: "فیلترها",
   clearAll: "پاک‌کردن همه",
+  filtersDone: "انجام شد",
   applyFilters: "انجام شد",
   sortBy: "مرتب‌سازی بر اساس",
   rowsPerPage: "ردیف در هر صفحه",

@@ -31,6 +31,7 @@ export const ru: Required<TableLabels> = {
   loadMore: "Загрузить ещё",
   filters: "Фильтры",
   clearAll: "Очистить всё",
+  filtersDone: "Готово",
   applyFilters: "Готово",
   sortBy: "Сортировать по",
   rowsPerPage: "Строк на странице",

@@ -357,7 +357,7 @@ export function FilterDrawer({
             {labels.clearAll}
           </Button>
           <Button type="primary" onClick={onClose}>
-            {labels.applyFilters}
+            {labels.filtersDone}
           </Button>
         </Flex>
       }

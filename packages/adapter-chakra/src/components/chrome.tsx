@@ -513,7 +513,7 @@ export function FilterDrawer({
                 {labels.clearAll}
               </Button>
               <Button colorPalette={accentColor} onClick={onClose}>
-                {labels.applyFilters}
+                {labels.filtersDone}
               </Button>
             </Drawer.Footer>
           </Drawer.Content>

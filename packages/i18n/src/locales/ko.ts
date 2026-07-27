@@ -31,6 +31,7 @@ export const ko: Required<TableLabels> = {
   loadMore: "더 보기",
   filters: "필터",
   clearAll: "모두 지우기",
+  filtersDone: "완료",
   applyFilters: "완료",
   sortBy: "정렬 기준",
   rowsPerPage: "페이지당 행 수",
