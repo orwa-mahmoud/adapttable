@@ -86,8 +86,8 @@ function mount<TPage = Page>(
 }
 
 describe("useQuerySource", () => {
-  it("the default selector reads the v2 rows field (and the v1 items alias)", () => {
-    const v2 = makeQuery({
+  it("the default selector reads the rows envelope field", () => {
+    const query = makeQuery({
       pages: [
         {
           rows: [{ id: "a", name: "A" }],
@@ -98,22 +98,8 @@ describe("useQuerySource", () => {
         } as unknown as Page,
       ],
     });
-    const v2View = mount(v2, {});
-    expect(v2View.result.current.rows).toHaveLength(1);
-
-    const v1 = makeQuery({
-      pages: [
-        {
-          items: [{ id: "b", name: "B" }],
-          total: 1,
-          page: 1,
-          limit: 25,
-          hasNext: false,
-        } as unknown as Page,
-      ],
-    });
-    const v1View = mount(v1, {});
-    expect(v1View.result.current.rows).toHaveLength(1);
+    const view = mount(query, {});
+    expect(view.result.current.rows).toHaveLength(1);
   });
 
   it("keeps the source identity stable across unrelated re-renders", () => {
@@ -199,11 +185,10 @@ describe("useQuerySource", () => {
       data: {
         pages: [
           {
-            items: [{ id: "a", name: "A" }],
+            rows: [{ id: "a", name: "A" }],
             total: 1,
             page: 1,
             limit: 25,
-            hasNext: false,
           },
         ],
         pageParams: [0],
@@ -323,13 +308,5 @@ describe("useQuerySource", () => {
     expect(result.current.error?.message).toBe("nope");
     act(() => void result.current.refetch?.());
     expect(q.refetch).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("v1 useBackendData alias", () => {
-  it("re-exports the same hook (removed before release)", async () => {
-    const legacy = await import("./useBackendData");
-    const current = await import("./useQuerySource");
-    expect(legacy.useBackendData).toBe(current.useQuerySource);
   });
 });

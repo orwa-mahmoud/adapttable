@@ -65,7 +65,7 @@ Behavior lives in `@adapttable/core`; this package only renders Base UI primitiv
 - **CSV export** (`exportCsv`) — current page or the full filtered set.
 - **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered pagination, or infinite scroll (auto by device).
-- **Responsive** — desktop table ↔ mobile cards by viewport (or force `isMobile`).
+- **Responsive** — desktop table ↔ mobile cards by viewport (or force `forceMobile`).
 - **States** — skeleton loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** follows your theme tokens.
 - **Customisation** — `slots`, `className`, injectable `confirm` — Base UI ships unstyled, so every part is yours, and the full headless escape hatch via `@adapttable/core`.

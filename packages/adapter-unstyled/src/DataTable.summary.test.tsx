@@ -36,7 +36,11 @@ function Harness(props: {
   override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }) {
   const cols = props.columns ?? columns;
-  const source = useFrontendData<Row>({ data: ROWS, adapter, columns: cols });
+  const source = useFrontendData<Row>({
+    data: ROWS,
+    urlAdapter: adapter,
+    columns: cols,
+  });
   lastSource = source;
   return (
     <DataTable

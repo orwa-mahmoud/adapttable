@@ -26,7 +26,12 @@ describe("useSavedViews", () => {
     );
     const storage = fakeStorage();
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage, adapter, urlKey: "t" })
+      useSavedViews({
+        storageKey: "views",
+        storage,
+        urlAdapter: adapter,
+        urlKey: "t",
+      })
     );
     act(() => result.current.save("My view"));
     expect(result.current.views).toHaveLength(1);
@@ -47,7 +52,12 @@ describe("useSavedViews", () => {
     const adapter = createMemoryAdapter("t.sort=name%3Aasc%2Cage%3Adesc");
     const storage = fakeStorage();
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage, adapter, urlKey: "t" })
+      useSavedViews({
+        storageKey: "views",
+        storage,
+        urlAdapter: adapter,
+        urlKey: "t",
+      })
     );
     act(() => result.current.save("chained"));
     expect(result.current.views[0]!.search).toContain("t.sort=");
@@ -91,7 +101,12 @@ describe("useSavedViews", () => {
       ]),
     });
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage, adapter, urlKey: "t" })
+      useSavedViews({
+        storageKey: "views",
+        storage,
+        urlAdapter: adapter,
+        urlKey: "t",
+      })
     );
     act(() => result.current.apply("v"));
     const params = new URLSearchParams(adapter.getSearch());
@@ -104,7 +119,7 @@ describe("useSavedViews", () => {
     const adapter = createMemoryAdapter("q=a");
     const storage = fakeStorage();
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage, adapter })
+      useSavedViews({ storageKey: "views", storage, urlAdapter: adapter })
     );
     act(() => result.current.save("v"));
     adapter.setSearch("q=b");
@@ -123,13 +138,17 @@ describe("useSavedViews", () => {
       views: JSON.stringify([{ name: "x", search: "q=1" }, { bad: true }]),
     });
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage: good, adapter })
+      useSavedViews({ storageKey: "views", storage: good, urlAdapter: adapter })
     );
     expect(result.current.views).toEqual([{ name: "x", search: "q=1" }]);
 
     const corrupt = fakeStorage({ views: "{not json" });
     const { result: r2 } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage: corrupt, adapter })
+      useSavedViews({
+        storageKey: "views",
+        storage: corrupt,
+        urlAdapter: adapter,
+      })
     );
     expect(r2.current.views).toEqual([]);
   });
@@ -144,7 +163,7 @@ describe("useSavedViews", () => {
       removeItem: () => undefined,
     };
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage, adapter })
+      useSavedViews({ storageKey: "views", storage, urlAdapter: adapter })
     );
     act(() => result.current.save("v"));
     expect(result.current.views).toHaveLength(1);
@@ -153,7 +172,7 @@ describe("useSavedViews", () => {
   it("defaults to localStorage in the browser", () => {
     const adapter = createMemoryAdapter("q=z");
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views-default", adapter })
+      useSavedViews({ storageKey: "views-default", urlAdapter: adapter })
     );
     act(() => result.current.save("v"));
     expect(
@@ -168,13 +187,21 @@ describe("useSavedViews", () => {
     // getItem yields a non-array JSON value.
     const nonArray = fakeStorage({ views: JSON.stringify({ nope: 1 }) });
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage: nonArray, adapter })
+      useSavedViews({
+        storageKey: "views",
+        storage: nonArray,
+        urlAdapter: adapter,
+      })
     );
     expect(result.current.views).toEqual([]);
     // Truly empty key → empty list.
     const empty = fakeStorage();
     const { result: r2 } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage: empty, adapter })
+      useSavedViews({
+        storageKey: "views",
+        storage: empty,
+        urlAdapter: adapter,
+      })
     );
     expect(r2.current.views).toEqual([]);
   });
@@ -183,7 +210,7 @@ describe("useSavedViews", () => {
     const spy = vi.spyOn(env, "safeLocalStorage").mockReturnValue(undefined);
     const adapter = createMemoryAdapter("q=1");
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "ssr-views", adapter })
+      useSavedViews({ storageKey: "ssr-views", urlAdapter: adapter })
     );
     expect(result.current.views).toEqual([]);
     act(() => result.current.save("v"));

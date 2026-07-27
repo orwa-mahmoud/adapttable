@@ -69,7 +69,7 @@ function Harness() {
         source={source}
         columns={columns}
         rowKey={(r) => r.id}
-        isMobile
+        forceMobile
         virtualize
       />
     </MantineProvider>

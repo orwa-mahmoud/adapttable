@@ -36,14 +36,4 @@ describe("useGroupCollapse", () => {
     rerender({ ids: ["g1"] });
     expect(result.current.isCollapsed("g1")).toBe(true);
   });
-
-  it("v1 collapsedIds/onCollapsedIdsChange aliases still work (removed before release)", () => {
-    const onChange = vi.fn();
-    const { result } = renderHook(() =>
-      useGroupCollapse({ collapsedIds: ["g1"], onCollapsedIdsChange: onChange })
-    );
-    expect(result.current.isCollapsed("g1")).toBe(true);
-    act(() => result.current.toggle("g2"));
-    expect(onChange).toHaveBeenCalledWith(["g1", "g2"]);
-  });
 });

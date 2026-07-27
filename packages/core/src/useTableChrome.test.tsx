@@ -44,7 +44,7 @@ function mount(
       source,
       columns,
       rowKey: (r) => r.id,
-      isMobile: opts.isMobile,
+      forceMobile: opts.isMobile,
       extraChips: opts.extraChips,
       filterLabels: opts.filterLabels,
       activeFilterCount: opts.activeFilterCount,
@@ -212,7 +212,7 @@ describe("useTableChrome", () => {
           source,
           columns: deviceCols,
           rowKey: (r) => r.id,
-          isMobile,
+          forceMobile: isMobile,
         });
       });
       return buildTableCsv({

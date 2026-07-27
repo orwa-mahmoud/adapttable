@@ -35,7 +35,7 @@ export function People({ data }: { data: Person[] }) {
 ```
 
 Dark mode follows Chakra's color mode; pass `colorScheme` to tint accents.
-Swap `useFrontendData` for `useBackendData` to drive the same table from a
+Swap `useFrontendData` for `useQuerySource` to drive the same table from a
 server-paginated query.
 
 ## Features
@@ -55,7 +55,7 @@ server-paginated query.
 - **CSV export** (`exportCsv`) — current page or the full filtered set.
 - **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
 - **Pagination** — prev/next pagination, or infinite scroll (auto by device).
-- **Responsive** — desktop table ↔ mobile cards by viewport (or force `isMobile`).
+- **Responsive** — desktop table ↔ mobile cards by viewport (or force `forceMobile`).
 - **States** — `Skeleton` loading, `Alert` error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** via Chakra's color mode.
 - **Customisation** — `slots`, `className`, `size`, injectable `confirm`, and the full headless escape hatch via `@adapttable/core`.

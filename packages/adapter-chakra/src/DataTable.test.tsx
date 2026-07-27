@@ -92,7 +92,7 @@ describe("<DataTable> (Chakra)", () => {
 
   it("applies the card className on mobile", () => {
     const { container } = renderHarness({
-      override: { isMobile: true, classNames: { card: "my-card" } },
+      override: { forceMobile: true, classNames: { card: "my-card" } },
     });
     expect(container.querySelector(".my-card")).toBeInTheDocument();
   });

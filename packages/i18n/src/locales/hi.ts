@@ -33,7 +33,6 @@ export const hi: Required<TableLabels> = {
   clearAll: "सभी साफ़ करें",
   removeFilter: (label) => `फ़िल्टर हटाएँ: ${label}`,
   filtersDone: "पूर्ण",
-  applyFilters: "पूर्ण",
   sortBy: "इसके अनुसार क्रमबद्ध करें",
   rowsPerPage: "प्रति पृष्ठ पंक्तियाँ",
   actions: "क्रियाएँ",

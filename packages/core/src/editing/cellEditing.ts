@@ -175,7 +175,7 @@ export function stepEditableCell<TRow>(options: {
   return null;
 }
 
-/** Tab-advance alias for {@link stepEditableCell} with `direction: 1`. */
+/** Tab-advance form of {@link stepEditableCell}, fixed to `direction: 1`. */
 export function nextEditableCell<TRow>(options: {
   rows: readonly TRow[];
   columns: readonly EditableColumnLike<TRow>[];

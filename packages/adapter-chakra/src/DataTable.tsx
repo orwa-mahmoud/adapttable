@@ -34,8 +34,7 @@ import type { DataTableProps } from "./types";
  */
 export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const { slots, animate = false } = props;
-  // v2 name wins; the v1 colorScheme alias still styles until deleted.
-  const accentColor = props.accentColor ?? props.colorScheme;
+  const accentColor = props.accentColor;
   const { filtersMode = "popover" } = props;
   // Map row density to Chakra's table `size` (independent of column pinning):
   // compact → "sm", comfortable (default) → "md". An explicit `size` prop, if

@@ -10,7 +10,6 @@
 export {
   type SavedViewsLabels,
   SavedViewsMenu,
-  type SavedViewsMenuLabels,
   type SavedViewsMenuProps,
 } from "./components/SavedViewsMenu";
 export { DataTable } from "./DataTable";

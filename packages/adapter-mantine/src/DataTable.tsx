@@ -172,13 +172,12 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     sortByOptions,
     dir,
     prefetch,
-    hideSearch,
     filters,
     filtersMode = "popover",
     bulkActions,
     slots,
     classNames,
-    toolbar: customToolbar,
+    toolbar,
     skeletonRows,
     stickyTop = 0,
     stickyToolbar = false,
@@ -343,10 +342,10 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           <Stack gap="xs">
             <Toolbar
               table={table}
-              searchable={chromeProps.searchable ?? hideSearch !== true}
+              searchable={chromeProps.searchable !== false}
               searchPlaceholder={searchPlaceholder}
               sortByOptions={sortByOptions}
-              toolbar={customToolbar}
+              toolbar={toolbar}
               hasFilters={Boolean(filters)}
               activeFilterCount={chrome.activeFilterCount}
               filtersMode={filtersMode}

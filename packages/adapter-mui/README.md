@@ -38,7 +38,7 @@ export function People({ data }: { data: Person[] }) {
 ```
 
 Wrap your app in MUI's `ThemeProvider` to control light/dark mode and RTL,
-as usual. Swap `useFrontendData` for `useBackendData` to drive the table
+as usual. Swap `useFrontendData` for `useQuerySource` to drive the table
 from a server-paginated query — the component doesn't change.
 
 ## Features
@@ -58,7 +58,7 @@ from a server-paginated query — the component doesn't change.
 - **CSV export** (`exportCsv`) — current page or the full filtered set.
 - **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
 - **Pagination** — `Pagination` footer, or infinite scroll (auto by device).
-- **Responsive** — desktop table ↔ mobile `Card`s by viewport (or force `isMobile`).
+- **Responsive** — desktop table ↔ mobile `Card`s by viewport (or force `forceMobile`).
 - **States** — `Skeleton` loading, `Alert` error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** follows the MUI theme.
 - **Customisation** — `slots` (skeleton, empty), `className`, `size`, injectable `confirm`, and the full headless escape hatch via `@adapttable/core`.

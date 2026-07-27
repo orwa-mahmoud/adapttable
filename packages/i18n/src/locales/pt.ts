@@ -34,7 +34,6 @@ export const pt: Required<TableLabels> = {
   clearAll: "Limpar tudo",
   removeFilter: (label) => `Remover filtro: ${label}`,
   filtersDone: "Concluir",
-  applyFilters: "Concluir",
   sortBy: "Ordenar por",
   rowsPerPage: "Linhas por página",
   actions: "Ações",

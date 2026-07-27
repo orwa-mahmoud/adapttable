@@ -58,11 +58,9 @@ export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
 export function Toolbar<TRow>({
   table,
   searchable,
-  hideSearch,
   searchPlaceholder,
   sortByOptions,
   toolbar,
-  customToolbar,
   hasFilters,
   activeFilterCount,
   filtersMode,
@@ -116,7 +114,7 @@ export function Toolbar<TRow>({
       align="center"
       className={className}
     >
-      {(searchable ?? hideSearch !== true) && (
+      {searchable !== false && (
         <InputGroup
           maxW="360px"
           flex="1"
@@ -155,7 +153,7 @@ export function Toolbar<TRow>({
             ))}
           </NativeSelect>
         )}
-        {toolbar ?? customToolbar}
+        {toolbar}
         {hasFilters &&
           (filtersMode === "popover" ? (
             <FilterPopover

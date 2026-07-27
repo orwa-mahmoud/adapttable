@@ -121,20 +121,6 @@ describe("<DataTable> (unstyled)", () => {
     expect(onRowClick).toHaveBeenCalledTimes(1);
   });
 
-  it("the v1 isMobile alias still forces the card layout (removed before release)", () => {
-    render(
-      <DataTable<Row>
-        data={ROWS}
-        columns={columns}
-        rowKey={(r) => r.id}
-        isMobile
-      />
-    );
-    expect(
-      document.querySelector('[data-adapttable-part="cards"]')
-    ).toBeInTheDocument();
-  });
-
   it("renders a semantic table with rows and data hooks", () => {
     const { container } = renderHarness();
     expect(

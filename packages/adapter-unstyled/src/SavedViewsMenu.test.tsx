@@ -41,7 +41,7 @@ function renderMenu({
   const adapter = createMemoryAdapter(url);
   render(
     <SavedViewsMenu
-      options={{ storageKey: KEY, storage, adapter }}
+      options={{ storageKey: KEY, storage, urlAdapter: adapter }}
       labels={defaultLabels}
       classNames={classNames}
     />

@@ -20,14 +20,9 @@ export interface GroupCollapseState {
  */
 export function useGroupCollapse(controlled?: {
   collapsedGroupIds?: readonly string[];
-  /** Alias for `collapsedGroupIds` (v1 name) — deleted before the 2.0.0 release. */
-  collapsedIds?: readonly string[];
   onCollapsedGroupIdsChange?: (ids: string[]) => void;
-  /** Alias for `onCollapsedGroupIdsChange` (v1 name) — deleted before the 2.0.0 release. */
-  onCollapsedIdsChange?: (ids: string[]) => void;
 }): GroupCollapseState {
-  const controlledIds =
-    controlled?.collapsedGroupIds ?? controlled?.collapsedIds;
+  const controlledIds = controlled?.collapsedGroupIds;
   const isControlled = controlledIds !== undefined;
   const [uncontrolled, setUncontrolled] = useState<ReadonlySet<string>>(
     () => new Set()
@@ -41,10 +36,7 @@ export function useGroupCollapse(controlled?: {
   const commit = useCallback(
     (next: Set<string>) => {
       if (isControlled) {
-        (
-          controlled?.onCollapsedGroupIdsChange ??
-          controlled?.onCollapsedIdsChange
-        )?.([...next]);
+        controlled?.onCollapsedGroupIdsChange?.([...next]);
       } else {
         setUncontrolled(next);
       }

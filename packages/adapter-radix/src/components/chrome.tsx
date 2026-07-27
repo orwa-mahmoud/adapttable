@@ -62,11 +62,9 @@ export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
 export function Toolbar<TRow>({
   table,
   searchable,
-  hideSearch,
   searchPlaceholder,
   sortByOptions,
   toolbar,
-  customToolbar,
   hasFilters,
   activeFilterCount,
   filtersMode,
@@ -119,7 +117,7 @@ export function Toolbar<TRow>({
       align="center"
       className={className}
     >
-      {(searchable ?? hideSearch !== true) && (
+      {searchable !== false && (
         <Box style={{ flex: 1, minWidth: 160, maxWidth: 360 }}>
           <TextField.Root
             size="2"
@@ -152,7 +150,7 @@ export function Toolbar<TRow>({
             }
           />
         )}
-        {toolbar ?? customToolbar}
+        {toolbar}
         {hasFilters &&
           (filtersMode === "popover" ? (
             <FilterPopover

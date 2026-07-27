@@ -217,14 +217,15 @@ export interface DataTableClassNames {
 }
 
 /**
- * Overridable sub-components — a cross-adapter alias for the top-level
- * `emptyState` / `loadingState` props. When both are supplied the `slots`
- * entry wins (`slots.empty ?? emptyState`, `slots.skeleton ?? loadingState`).
+ * Overridable sub-components — the cross-adapter spelling of the
+ * top-level `emptyState` / `loadingState` props. When both are supplied
+ * the `slots` entry wins (`slots.empty ?? emptyState`,
+ * `slots.skeleton ?? loadingState`).
  */
 export interface DataTableSlots {
-  /** Replace the empty-state (alias for `emptyState`). */
+  /** Replace the empty-state (same node as `emptyState`). */
   empty?: ReactNode;
-  /** Replace the loading skeleton (alias for `loadingState`). */
+  /** Replace the loading skeleton (same node as `loadingState`). */
   skeleton?: ReactNode;
 }
 
@@ -277,8 +278,8 @@ interface DataTablePropsBase<TRow> extends Omit<
   /** Loading-state node override (replaces the skeleton on first load). */
   loadingState?: ReactNode;
   /**
-   * Cross-adapter alias for `emptyState` / `loadingState`. Takes precedence
-   * over the top-level props when both are provided.
+   * Cross-adapter spelling of `emptyState` / `loadingState`. Takes
+   * precedence over the top-level props when both are provided.
    */
   slots?: DataTableSlots;
   /**

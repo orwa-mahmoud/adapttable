@@ -36,7 +36,6 @@ export const defaultLabels: Required<TableLabels> = {
   clearAll: "Clear all",
   removeFilter: (label) => `Remove filter: ${label}`,
   filtersDone: "Done",
-  applyFilters: "Done",
   sortBy: "Sort by",
   rowsPerPage: "Rows per page",
   actions: "Actions",
@@ -87,11 +86,6 @@ export function resolveLabels(
       // Each key's value type matches the same key in the target.
       (merged[key] as unknown) = value;
     }
-  }
-  // v1 alias: a caller overriding only `applyFilters` still labels the
-  // filters-done button (deleted before the 2.0.0 release).
-  if (overrides.filtersDone === undefined && overrides.applyFilters) {
-    merged.filtersDone = overrides.applyFilters;
   }
   return merged;
 }

@@ -294,7 +294,7 @@ Kit-specific knobs:
 
 - **MUI** — `size` (`"small" | "medium"`) overrides the density mapping;
   `className` lands on the root `<Paper>`.
-- **Chakra** — `colorScheme` colors primary accents (buttons, badges);
+- **Chakra** — `accentColor` colors primary accents (buttons, badges);
   `size` (`"sm" | "md" | "lg"`, default `"md"`).
 - **Ant Design** — `size` (`"small" | "middle" | "large"`), `bordered` for
   cell borders, `className` on the wrapper. The virtualized scroll area is

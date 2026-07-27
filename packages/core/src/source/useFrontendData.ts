@@ -55,9 +55,7 @@ function warnUnresolvableSort<TRow>(
 /** Options for {@link useFrontendData}. */
 export interface UseFrontendDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
-  | "adapter"
   | "urlAdapter"
-  | "enabled"
   | "urlSync"
   | "defaults"
   | "numberExtraKeys"

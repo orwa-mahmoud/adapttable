@@ -33,7 +33,6 @@ export const fa: Required<TableLabels> = {
   clearAll: "پاک‌کردن همه",
   removeFilter: (label) => `حذف فیلتر: ${label}`,
   filtersDone: "انجام شد",
-  applyFilters: "انجام شد",
   sortBy: "مرتب‌سازی بر اساس",
   rowsPerPage: "ردیف در هر صفحه",
   actions: "اقدامات",

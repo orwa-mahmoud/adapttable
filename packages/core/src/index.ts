@@ -175,21 +175,16 @@ export {
 /* ── Sources ───────────────────────────────────────────────────────── */
 export type { TableSource } from "./source/TableSource";
 export {
+  defaultSearchText,
+  useFrontendData,
+  type UseFrontendDataOptions,
+} from "./source/useFrontendData";
+export {
   type InfiniteQueryLike,
   type PageSelector,
   useQuerySource,
   type UseQuerySourceOptions,
 } from "./source/useQuerySource";
-// Alias for `useQuerySource` (v1 name) — deleted before the 2.0.0 release.
-export {
-  useBackendData,
-  type UseBackendDataOptions,
-} from "./source/useBackendData";
-export {
-  defaultSearchText,
-  useFrontendData,
-  type UseFrontendDataOptions,
-} from "./source/useFrontendData";
 export type { TableStateMutators } from "./tableStateMutators";
 
 /* ── Filters / chips ───────────────────────────────────────────────── */
@@ -231,7 +226,7 @@ export {
   sortRows,
   sortRowsMulti,
 } from "./sort/compare";
-export { nextSort, type SortState } from "./sort/cycleSort";
+export { nextSort } from "./sort/cycleSort";
 export { deriveSortByOptions } from "./sort/sortByOptions";
 
 /* ── Columns ───────────────────────────────────────────────────────── */

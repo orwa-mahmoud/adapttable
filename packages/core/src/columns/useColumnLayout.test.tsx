@@ -298,15 +298,3 @@ describe("batched mutations", () => {
     expect(result.current.state.widths).toEqual({ a: 200 });
   });
 });
-
-describe("v1 `defaultLayout` alias", () => {
-  it("still seeds the uncontrolled layout (removed before release)", () => {
-    const { result } = renderHook(() =>
-      useColumnLayout({
-        columns: [{ key: "a" }, { key: "b" }],
-        defaultLayout: { hidden: ["b"] },
-      })
-    );
-    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(["a"]);
-  });
-});

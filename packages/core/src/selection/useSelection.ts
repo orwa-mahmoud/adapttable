@@ -24,12 +24,8 @@ export interface UseSelectionOptions<TRow> {
    * `useColumnLayout`.
    */
   selectedIds?: readonly string[];
-  /** Alias for `selectedIds` (v1 name) — deleted before the 2.0.0 release. */
-  selected?: readonly string[];
   /** Change handler; required for the controlled mode to update. */
   onSelectionChange?: (selectedIds: string[]) => void;
-  /** Alias for `onSelectionChange` (v1 name) — deleted before the 2.0.0 release. */
-  onChange?: (selectedIds: string[]) => void;
 }
 
 /** Selection state + actions returned by {@link useSelection}. */
@@ -74,8 +70,8 @@ export function useSelection<TRow>(
   options: UseSelectionOptions<TRow>
 ): SelectionState {
   const { rows, getId, resetKey } = options;
-  const controlledValue = options.selectedIds ?? options.selected;
-  const onChange = options.onSelectionChange ?? options.onChange;
+  const controlledValue = options.selectedIds;
+  const onChange = options.onSelectionChange;
   const [internal, setInternal] = useState<Set<string>>(() => new Set());
   const [allMatching, setAllMatching] = useState(false);
   const controlled = controlledValue !== undefined;

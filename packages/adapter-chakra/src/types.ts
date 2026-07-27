@@ -76,8 +76,6 @@ interface DataTablePropsBase<TRow> extends Omit<
   classNames?: DataTableClassNames;
   /** Chakra color token for primary accents (buttons, badges). */
   accentColor?: string;
-  /** Alias for `accentColor` (v1 name) — deleted before the 2.0.0 release. */
-  colorScheme?: string;
   /**
    * Explicit Chakra table size override. When omitted, `density` decides:
    * `"comfortable"` (default) → `"md"`, `"compact"` → `"sm"`.

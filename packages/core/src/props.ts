@@ -79,8 +79,6 @@ export interface BaseDataTableProps<TRow> {
    * in infinite mode; on a paged desktop table it is inert.
    */
   paginationMode?: PaginationMode;
-  /** Alias for `forceMobile` (v1 name) — deleted before the 2.0.0 release. */
-  isMobile?: boolean;
   /**
    * How many leading desktop-visible columns anchor the mobile identity
    * block. Never overrides an explicit `hideOnMobile: true` — the
@@ -153,8 +151,6 @@ export interface BaseDataTableProps<TRow> {
    * @defaultValue true
    */
   searchable?: boolean;
-  /** Alias for `searchable: false` (v1 name) — deleted before the 2.0.0 release. */
-  hideSearch?: boolean;
   /**
    * Opt into multi-column sorting: shift-click (or shift-Enter) on a header
    * adds the column to the sort chain (asc → desc → removed); a plain click

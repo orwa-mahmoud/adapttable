@@ -228,15 +228,3 @@ describe("controlled selection", () => {
     expect(result.current.selectedCount).toBe(0);
   });
 });
-
-describe("v1 `selected`/`onChange` aliases", () => {
-  it("still drive the controlled mode (removed before release)", () => {
-    const onChange = vi.fn();
-    const { result } = renderHook(() =>
-      useSelection({ rows, getId, selected: ["a"], onChange })
-    );
-    expect(result.current.selectedCount).toBe(1);
-    act(() => result.current.toggle("b"));
-    expect(onChange).toHaveBeenCalledWith(["a", "b"]);
-  });
-});

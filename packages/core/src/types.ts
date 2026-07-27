@@ -238,15 +238,11 @@ export interface TableQueryParams {
 export interface PaginatedResponse<TRow> {
   /** The page of rows. */
   rows?: TRow[];
-  /** Alias for `rows` (v1 name) — deleted before the 2.0.0 release. */
-  items?: TRow[];
   total: number;
   page: number;
   limit: number;
   /** Whether a page exists after this one. */
   hasNextPage?: boolean;
-  /** Alias for `hasNextPage` (v1 name) — deleted before the 2.0.0 release. */
-  hasNext?: boolean;
 }
 
 /**
@@ -314,8 +310,6 @@ export interface TableLabels {
    * (and the `filters-done` part name).
    */
   filtersDone?: string;
-  /** Alias for `filtersDone` (v1 name) — deleted before the 2.0.0 release. */
-  applyFilters?: string;
   sortBy?: string;
   rowsPerPage?: string;
   actions?: string;

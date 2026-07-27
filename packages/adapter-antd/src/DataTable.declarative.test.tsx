@@ -144,7 +144,7 @@ describe("summaryRow (antd native summary)", () => {
   it("renders a trailing mobile summary card listing only the covered keys", () => {
     const { container } = renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         summaryRow: (rows) => ({
           age: rows.reduce((sum, r) => sum + r.age, 0),
         }),

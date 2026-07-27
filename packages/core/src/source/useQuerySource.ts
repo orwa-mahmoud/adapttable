@@ -43,9 +43,7 @@ export interface UseQuerySourceOptions<
   TPage,
 > extends Pick<
   UseTableUrlStateOptions,
-  | "adapter"
   | "urlAdapter"
-  | "enabled"
   | "urlSync"
   | "defaults"
   | "numberExtraKeys"
@@ -77,7 +75,7 @@ export interface UseQuerySourceOptions<
 
 const defaultSelectPage: PageSelector<unknown, PaginatedResponse<unknown>> = (
   page
-) => ({ items: page.rows ?? page.items ?? [], total: page.total });
+) => ({ items: page.rows ?? [], total: page.total });
 
 /**
  * Server-paginated {@link TableSource}. Wraps a caller's

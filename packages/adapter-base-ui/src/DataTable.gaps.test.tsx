@@ -143,7 +143,7 @@ describe("Base UI gaps", () => {
 
   it("virtualizes mobile cards when enabled", () => {
     mockBodyData([{ row: { id: "b", name: "Bob" }, index: 1, key: "b" }], 132);
-    mount({ isMobile: true, virtualize: true, estimateCardSize: 132 });
+    mount({ forceMobile: true, virtualize: true, estimateCardSize: 132 });
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });

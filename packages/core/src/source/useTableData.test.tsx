@@ -63,7 +63,7 @@ describe("useTableData — frontend tier", () => {
   it("exposes the merged runtime (defs, chips) for the adapters", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
-      useTableData<Row>({ data: ROWS, columns, adapter })
+      useTableData<Row>({ data: ROWS, columns, urlAdapter: adapter })
     );
     expect(result.current.runtime.defs.map((d) => d.key)).toEqual(["status"]);
     expect(result.current.runtime.filterLabels.status!("active")).toBe(
@@ -119,7 +119,11 @@ describe("useTableData — tier resolution", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const adapter = createMemoryAdapter("");
     renderHook(() => {
-      const { source } = useTableData<Row>({ data: ROWS, columns, adapter });
+      const { source } = useTableData<Row>({
+        data: ROWS,
+        columns,
+        urlAdapter: adapter,
+      });
       return useTableData<Row>({
         source,
         onQueryChange: vi.fn(),
@@ -360,7 +364,7 @@ describe("useTableData / useServerData — server tier", () => {
   it("rows pass through untouched; pager math comes from total", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
-      useServerData<Row>({ rows: ROWS, total: 40, adapter })
+      useServerData<Row>({ rows: ROWS, total: 40, urlAdapter: adapter })
     );
     expect(result.current.rows).toBe(ROWS);
     // Shared contract: append semantics are infinite-only — in paged mode
@@ -373,11 +377,21 @@ describe("useTableData / useServerData — server tier", () => {
   it("distinguishes first load from background refresh", () => {
     const adapter = createMemoryAdapter("");
     const first = renderHook(() =>
-      useServerData<Row>({ rows: [], total: 0, loading: true, adapter })
+      useServerData<Row>({
+        rows: [],
+        total: 0,
+        loading: true,
+        urlAdapter: adapter,
+      })
     );
     expect(first.result.current.isLoading).toBe(true);
     const refresh = renderHook(() =>
-      useServerData<Row>({ rows: ROWS, total: 3, loading: true, adapter })
+      useServerData<Row>({
+        rows: ROWS,
+        total: 3,
+        loading: true,
+        urlAdapter: adapter,
+      })
     );
     expect(refresh.result.current.isLoading).toBe(false);
     expect(refresh.result.current.isFetching).toBe(true);
@@ -387,7 +401,12 @@ describe("useTableData / useServerData — server tier", () => {
     const onQueryChange = vi.fn();
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
-      useServerData<Row>({ rows: ROWS, total: 40, onQueryChange, adapter })
+      useServerData<Row>({
+        rows: ROWS,
+        total: 40,
+        onQueryChange,
+        urlAdapter: adapter,
+      })
     );
     expect(onQueryChange).toHaveBeenCalledTimes(1);
     // `refetch` is optional on TableSource but useServerData always sets it.
@@ -420,7 +439,7 @@ describe("useTableData / useServerData — server tier", () => {
   it("stays silent without an onQueryChange emitter", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>
-      useServerData<Row>({ rows: ROWS, total: 3, adapter })
+      useServerData<Row>({ rows: ROWS, total: 3, urlAdapter: adapter })
     );
     expect(result.current.rows).toBe(ROWS);
   });

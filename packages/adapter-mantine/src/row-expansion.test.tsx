@@ -32,7 +32,11 @@ interface HarnessProps {
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
 function Harness(props: HarnessProps) {
-  const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
+  const source = useFrontendData<Row>({
+    data: ROWS,
+    urlAdapter: adapter,
+    columns,
+  });
   return (
     <DataTable<Row>
       source={source}

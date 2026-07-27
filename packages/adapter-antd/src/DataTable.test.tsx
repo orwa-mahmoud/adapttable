@@ -612,7 +612,7 @@ describe("<DataTable> (Ant Design)", () => {
     const onClick = vi.fn();
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
         rowActions: [{ key: "e", label: "Edit", onClick }],
         columns: [
@@ -640,7 +640,7 @@ describe("<DataTable> (Ant Design)", () => {
   it("hides actions and uses the key as the card label for a non-string header", () => {
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         rowActions: [
           {
             key: "h",
@@ -776,7 +776,7 @@ describe("<DataTable> (Ant Design)", () => {
     // Mobile renders cards (never antd's virtual table), so the page-level
     // sentinel must stay enabled or infinite mode silently stops auto-loading.
     renderHarness(
-      { mode: "infinite", override: { virtualize: true, isMobile: true } },
+      { mode: "infinite", override: { virtualize: true, forceMobile: true } },
       "limit=1"
     );
     expect(screen.queryByText("Bob")).toBeNull();
@@ -971,7 +971,7 @@ describe("<DataTable> (Ant Design)", () => {
     const onClick = vi.fn();
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         rowActions: [
           { key: "d", label: "DisabledAct", onClick, isDisabled: () => true },
         ],
@@ -994,7 +994,7 @@ describe("<DataTable> (Ant Design)", () => {
   it("uses an explicit mobileLabel for the card descriptions label", () => {
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         columns: [
           {
             key: "name",
@@ -1336,7 +1336,7 @@ describe("<DataTable> (Ant Design)", () => {
   it("applies rowClassName to the mobile card root", () => {
     const { container } = renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         rowClassName: (r) => (r.name === "Alice" ? "card-vip" : undefined),
       },
     });
@@ -1420,7 +1420,7 @@ describe("<DataTable> (Ant Design)", () => {
   it("expands and collapses a mobile card's detail section via the chevron", () => {
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         renderRowDetail: (r) => <div>detail-{r.name}</div>,
       },
     });
@@ -1447,7 +1447,7 @@ describe("<DataTable> (Ant Design)", () => {
     const onRowClick = vi.fn();
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         onRowClick,
         renderRowDetail: (r) => <div>detail-{r.name}</div>,
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
@@ -1477,7 +1477,7 @@ describe("<DataTable> (Ant Design)", () => {
     const cityAccessor = vi.fn((r: Row) => r.city);
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         columns: [
           { key: "name", header: "Name", accessor: nameAccessor },
           { key: "city", header: "City", accessor: cityAccessor },

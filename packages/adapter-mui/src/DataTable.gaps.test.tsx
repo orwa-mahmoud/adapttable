@@ -192,7 +192,7 @@ describe("MUI gaps", () => {
       canLoadMore: false,
       virtualScrollRef: () => undefined,
     });
-    mount({ isMobile: true, virtualize: true, estimateCardSize: 132 });
+    mount({ forceMobile: true, virtualize: true, estimateCardSize: 132 });
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });

@@ -90,7 +90,7 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
         ]}
         rowKey={(r) => r.id}
         urlAdapter={adapter}
-        isMobile={false}
+        forceMobile={false}
       />
     );
     // The cell shows the Arabic field, and the URL-restored text filter
@@ -114,7 +114,7 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
         ]}
         rowKey={(r) => r.id}
         urlAdapter={adapter}
-        isMobile={false}
+        forceMobile={false}
       />
     );
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));

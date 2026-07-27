@@ -30,7 +30,7 @@ import {
 /** Options for {@link useTableData}. */
 export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
-  "adapter" | "urlAdapter" | "enabled" | "urlSync" | "defaults" | "urlKey"
+  "urlAdapter" | "urlSync" | "defaults" | "urlKey"
 > {
   /** Full-control tier: a prebuilt source (e.g. `useQuerySource`). */
   source?: TableSource<TRow>;
@@ -84,7 +84,7 @@ type DataTier = "source" | "server" | "frontend";
  * The public `mode` prop surface, shared by every batteries-included
  * `<DataTable>`: a discriminated union so `mode="server"` REQUIRES
  * `onQueryChange` at compile time, while `mode="frontend"` (or no mode
- * at all) keeps it optional — as a pure notification and as the legacy
+ * at all) keeps it optional — as a pure notification and as the v1-style
  * inference trigger respectively.
  *
  * @typeParam TRow - The row type.
@@ -312,8 +312,7 @@ export function useTableData<TRow>(
   );
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
-    urlSync:
-      tier === "frontend" ? (urlOptions.urlSync ?? urlOptions.enabled) : false,
+    urlSync: tier === "frontend" ? urlOptions.urlSync : false,
     data: tier === "frontend" ? (data ?? []) : [],
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
@@ -327,8 +326,7 @@ export function useTableData<TRow>(
   });
   const server = useServerData<TRow>({
     ...urlOptions,
-    urlSync:
-      tier === "server" ? (urlOptions.urlSync ?? urlOptions.enabled) : false,
+    urlSync: tier === "server" ? urlOptions.urlSync : false,
     rows: tier === "server" ? (data ?? []) : [],
     total,
     loading,

@@ -176,11 +176,10 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     searchPlaceholder,
     sortByOptions,
     dir,
-    hideSearch,
     filtersMode = "popover",
     bulkActions,
     classNames = NO_CLASSNAMES,
-    toolbar: customToolbar,
+    toolbar,
     animate = false,
   } = props;
 
@@ -331,7 +330,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
           rowGap: 8,
         }}
       >
-        {(props.searchable ?? hideSearch !== true) && (
+        {props.searchable !== false && (
           <span
             data-adapttable-part="search-field"
             className={classNames.searchField}
@@ -381,7 +380,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
             </select>
           </label>
         )}
-        {customToolbar}
+        {toolbar}
         {filters &&
           (filtersMode === "popover" ? (
             <FilterPopover

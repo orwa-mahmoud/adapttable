@@ -1,12 +1,6 @@
 import type { SortLevel } from "./compare";
 
 /**
- * Alias for `Partial<SortLevel>` (the v1 standalone shape) — SortLevel is
- * the one sort-pair type in v2; deleted before the 2.0.0 release.
- */
-export type SortState = Partial<SortLevel>;
-
-/**
  * Advance the three-step sort cycle for a column header click:
  * inactive → ascending → descending → cleared.
  *

@@ -16,8 +16,6 @@ export interface UseColumnLayoutStorageStateOptions {
   storage?: LayoutStorage;
   /** Layout applied when storage carries no saved layout yet. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
-  /** Alias for `defaultColumnLayout` (v1 name) — deleted before the 2.0.0 release. */
-  defaultLayout?: Partial<ColumnLayoutState>;
 }
 
 /** State + change handler returned by {@link useColumnLayoutStorageState}. */
@@ -118,8 +116,8 @@ function readStored(
 export function useColumnLayoutStorageState(
   options: UseColumnLayoutStorageStateOptions
 ): UseColumnLayoutStorageStateResult {
-  const { storageKey, defaultColumnLayout, defaultLayout } = options;
-  const baseLayout = defaultColumnLayout ?? defaultLayout;
+  const { storageKey, defaultColumnLayout } = options;
+  const baseLayout = defaultColumnLayout;
   const storage = options.storage ?? safeLocalStorage();
 
   const fallback = useMemo<ColumnLayoutState>(

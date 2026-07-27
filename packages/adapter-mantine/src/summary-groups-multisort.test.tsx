@@ -96,7 +96,7 @@ describe("summaryRow (Mantine)", () => {
 
   it("mobile: renders a final summary card with only the present keys", () => {
     renderTable({
-      isMobile: true,
+      forceMobile: true,
       summaryRow: () => ({ budget: "Σ 600" }),
     });
     const items = screen.getAllByRole("listitem");

@@ -109,7 +109,7 @@ describe("summaryRow (Base UI)", () => {
   });
 
   it("mobile: renders the summary as a final card, skipping absent keys", () => {
-    renderTable({ isMobile: true, summaryRow: () => ({ age: "75 total" }) });
+    renderTable({ forceMobile: true, summaryRow: () => ({ age: "75 total" }) });
     const card = screen.getAllByRole("listitem").at(-1)!;
     expect(within(card).getByText("Age")).toBeInTheDocument();
     expect(within(card).getByText("75 total")).toBeInTheDocument();
@@ -118,7 +118,7 @@ describe("summaryRow (Base UI)", () => {
 
   it("mobile compact: the summary card follows the dense card spacing", () => {
     renderTable({
-      isMobile: true,
+      forceMobile: true,
       size: "1",
       summaryRow: () => ({ age: "75 total" }),
     });

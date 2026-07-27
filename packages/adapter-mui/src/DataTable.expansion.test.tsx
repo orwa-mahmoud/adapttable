@@ -84,7 +84,11 @@ function PartsHarness(props: {
   mobile?: boolean;
   expansion?: RowExpansionState;
 }) {
-  const source = useFrontendData<Row>({ data: PEOPLE, adapter, columns });
+  const source = useFrontendData<Row>({
+    data: PEOPLE,
+    urlAdapter: adapter,
+    columns,
+  });
   const table = useDataTable<Row>({
     source,
     columns,
@@ -162,7 +166,7 @@ describe("row expansion (MUI)", () => {
   });
 
   it("renders the chevron and detail inside the mobile card", () => {
-    renderTable({ isMobile: true, renderRowDetail: detailFor });
+    renderTable({ forceMobile: true, renderRowDetail: detailFor });
     const card = screen.getAllByRole("listitem")[0]!;
     const btn = within(card).getByRole("button", { name: "Expand row" });
     expect(btn).toHaveAttribute("aria-expanded", "false");

@@ -70,7 +70,7 @@ describe("editing row universe under grouping", () => {
       useFrontendData<Row>({
         data: PAGED_ROWS,
         columns: [{ key: "team" }, { key: "name" }],
-        adapter: createMemoryAdapter(""),
+        urlAdapter: createMemoryAdapter(""),
         defaults: { limit: 2 },
       })
     );
@@ -131,7 +131,7 @@ describe("useTableChrome grouping bundle", () => {
       useFrontendData<Row>({
         data: ROWS,
         columns: [{ key: "team" }, { key: "name" }],
-        adapter: createMemoryAdapter(""),
+        urlAdapter: createMemoryAdapter(""),
         defaults: { limit: 10 },
       })
     );
@@ -150,7 +150,7 @@ describe("useTableChrome grouping bundle", () => {
       useFrontendData<Row>({
         data: ROWS,
         columns: [{ key: "team" }, { key: "name" }],
-        adapter: createMemoryAdapter(""),
+        urlAdapter: createMemoryAdapter(""),
         defaults: { limit: 10 },
       })
     );
@@ -180,7 +180,7 @@ describe("useTableChrome grouping bundle", () => {
       useFrontendData<Row>({
         data: ROWS,
         columns: [{ key: "team" }],
-        adapter: createMemoryAdapter(""),
+        urlAdapter: createMemoryAdapter(""),
         defaults: { limit: 10 },
       })
     );

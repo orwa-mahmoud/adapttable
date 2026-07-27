@@ -111,7 +111,7 @@ describe("antd SavedViewsMenu", () => {
     });
     render(
       <SavedViewsMenu
-        options={{ storageKey: "views", storage, adapter }}
+        options={{ storageKey: "views", storage, urlAdapter: adapter }}
         labels={labels}
       />
     );

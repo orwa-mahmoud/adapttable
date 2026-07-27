@@ -23,16 +23,10 @@ import {
 export interface UseColumnLayoutUrlStateOptions {
   /** URL-state backend. Defaults to the browser History API. */
   urlAdapter?: UrlStateAdapter;
-  /** Alias for `urlAdapter` (v1 name) — deleted before the 2.0.0 release. */
-  adapter?: UrlStateAdapter;
   /** When `false`, keep the layout in a local memory store. Defaults `true`. */
   urlSync?: boolean;
-  /** Alias for `urlSync` (v1 name) — deleted before the 2.0.0 release. */
-  enabled?: boolean;
   /** Layout applied when the URL carries no column layout yet. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
-  /** Alias for `defaultColumnLayout` (v1 name) — deleted before the 2.0.0 release. */
-  defaultLayout?: Partial<ColumnLayoutState>;
   /**
    * Namespace for this table's params, so multiple tables can share one URL
    * (`left.colHide`, `right.colPin`, …). Omit for the bare keys.
@@ -75,18 +69,10 @@ export interface UseColumnLayoutUrlStateResult {
 export function useColumnLayoutUrlState(
   options: UseColumnLayoutUrlStateOptions = {}
 ): UseColumnLayoutUrlStateResult {
-  const {
-    urlAdapter,
-    adapter,
-    urlSync,
-    enabled,
-    defaultColumnLayout,
-    defaultLayout,
-    urlKey,
-  } = options;
-  const baseLayout = defaultColumnLayout ?? defaultLayout;
-  const backend = urlAdapter ?? adapter;
-  const syncToUrl = urlSync ?? enabled ?? true;
+  const { urlAdapter, urlSync, defaultColumnLayout, urlKey } = options;
+  const baseLayout = defaultColumnLayout;
+  const backend = urlAdapter;
+  const syncToUrl = urlSync ?? true;
   const ns = urlKey ? `${urlKey}.` : "";
 
   const resolved = useResolvedAdapter(backend, syncToUrl);

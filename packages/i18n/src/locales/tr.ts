@@ -33,7 +33,6 @@ export const tr: Required<TableLabels> = {
   clearAll: "Tümünü temizle",
   removeFilter: (label) => `Filtreyi kaldır: ${label}`,
   filtersDone: "Tamam",
-  applyFilters: "Tamam",
   sortBy: "Sıralama",
   rowsPerPage: "Sayfa başına satır",
   actions: "İşlemler",

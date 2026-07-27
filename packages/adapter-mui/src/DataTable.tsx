@@ -332,7 +332,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
         <Box className={classNames?.toolbar}>
           <Toolbar
             table={table}
-            searchable={props.searchable ?? props.hideSearch !== true}
+            searchable={props.searchable !== false}
             searchPlaceholder={props.searchPlaceholder}
             sortByOptions={props.sortByOptions}
             toolbar={

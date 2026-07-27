@@ -33,7 +33,6 @@ export const it: Required<TableLabels> = {
   clearAll: "Cancella tutto",
   removeFilter: (label) => `Rimuovi filtro: ${label}`,
   filtersDone: "Fine",
-  applyFilters: "Fine",
   sortBy: "Ordina per",
   rowsPerPage: "Righe per pagina",
   actions: "Azioni",

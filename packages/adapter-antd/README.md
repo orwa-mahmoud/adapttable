@@ -38,7 +38,7 @@ export function People({ data }: { data: Person[] }) {
 
 Wrap your app in antd's `ConfigProvider` to control the theme (including
 `theme.darkAlgorithm`) and `direction="rtl"`, as usual. Swap `useFrontendData`
-for `useBackendData` to drive the table from a server-paginated query — the
+for `useQuerySource` to drive the table from a server-paginated query — the
 component doesn't change.
 
 ## Features

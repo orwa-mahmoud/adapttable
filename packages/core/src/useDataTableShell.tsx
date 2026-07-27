@@ -180,7 +180,7 @@ export function useDataTableShell<TRow>(
   // and adds its filters-mode wiring, saved-views / column menus, and colour.
   const toolbarProps = {
     table,
-    searchable: props.searchable ?? props.hideSearch !== true,
+    searchable: props.searchable !== false,
     searchPlaceholder: props.searchPlaceholder,
     sortByOptions: props.sortByOptions,
     toolbar: props.toolbar,

@@ -33,7 +33,6 @@ export const ur: Required<TableLabels> = {
   clearAll: "سب صاف کریں",
   removeFilter: (label) => `فلٹر ہٹائیں: ${label}`,
   filtersDone: "مکمل",
-  applyFilters: "مکمل",
   sortBy: "ترتیب دیں بذریعہ",
   rowsPerPage: "فی صفحہ قطاریں",
   actions: "اقدامات",

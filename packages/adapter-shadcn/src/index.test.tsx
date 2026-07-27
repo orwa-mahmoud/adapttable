@@ -26,7 +26,11 @@ function Harness({
   classNames?: Parameters<typeof DataTable<Row>>[0]["classNames"];
   density?: "comfortable" | "compact";
 }) {
-  const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
+  const source = useFrontendData<Row>({
+    data: ROWS,
+    urlAdapter: adapter,
+    columns,
+  });
   return (
     <DataTable
       source={source}

@@ -33,13 +33,11 @@ export interface UseSavedViewsOptions {
   storage?: LayoutStorage;
   /** The table's URL-state backend (same one the table uses). */
   urlAdapter?: UrlStateAdapter;
-  /** Alias for `urlAdapter` (v1 name) — deleted before the 2.0.0 release. */
-  adapter?: UrlStateAdapter;
   /** The table's URL namespace — must match the table's `urlKey`. */
   urlKey?: string;
   /**
    * Mirror of the table's URL-sync switch. When `false` (and no explicit
-   * `adapter` is given) views capture and apply against an in-memory
+   * `urlAdapter` is given) views capture and apply against an in-memory
    * backend instead of the address bar — matching a table mounted with
    * URL sync off.
    * @defaultValue true
@@ -125,11 +123,10 @@ export function useSavedViews({
   storageKey,
   storage,
   urlAdapter,
-  adapter,
   urlKey,
   urlSync = true,
 }: UseSavedViewsOptions): UseSavedViewsResult {
-  const resolved = useResolvedAdapter(urlAdapter ?? adapter, urlSync);
+  const resolved = useResolvedAdapter(urlAdapter, urlSync);
   const ns = urlKey ? `${urlKey}.` : "";
   const backend = useMemo<LayoutStorage | undefined>(() => {
     if (storage) return storage;

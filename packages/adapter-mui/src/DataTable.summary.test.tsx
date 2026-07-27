@@ -52,7 +52,11 @@ function Harness(props: {
   override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }) {
   const columns = props.columns ?? COLUMNS;
-  const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
+  const source = useFrontendData<Row>({
+    data: ROWS,
+    urlAdapter: adapter,
+    columns,
+  });
   return (
     <DataTable
       source={source}
@@ -206,7 +210,7 @@ describe("summary card (mobile)", () => {
   it("renders a final summary card, skipping columns without a summary value", () => {
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         summaryRow: (rows) => ({ amount: sumAmount(rows) }),
       },
     });
@@ -222,7 +226,7 @@ describe("summary card (mobile)", () => {
   it("compacts the summary card under compact density", () => {
     renderHarness({
       override: {
-        isMobile: true,
+        forceMobile: true,
         density: "compact",
         summaryRow: () => ({ name: "3 people" }),
       },

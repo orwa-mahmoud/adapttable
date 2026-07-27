@@ -55,7 +55,7 @@ function mount(
         source={source}
         columns={columns}
         rowKey={(r) => r.id}
-        isMobile={opts.isMobile}
+        forceMobile={opts.isMobile}
         {...override}
       />
     );

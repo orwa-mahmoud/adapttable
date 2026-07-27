@@ -146,20 +146,6 @@ describe("useTableUrlState", () => {
     expect(window.location.search).toBe("?page=9");
   });
 
-  it("the v1 `adapter` alias still works (removed before release)", () => {
-    const memory = createMemoryAdapter("page=3");
-    const { result } = renderHook(() => useTableUrlState({ adapter: memory }));
-    expect(result.current.page).toBe(3);
-  });
-
-  it("the deprecated `enabled` alias still works (removed before release)", () => {
-    window.history.replaceState(null, "", "/?page=9");
-    const { result } = renderHook(() => useTableUrlState({ enabled: false }));
-    act(() => result.current.setPage(4));
-    expect(result.current.page).toBe(4);
-    expect(window.location.search).toBe("?page=9");
-  });
-
   it("defaults to the history adapter when enabled and no adapter is given", () => {
     window.history.replaceState(null, "", "/?page=7");
     const { result } = renderHook(() => useTableUrlState());

@@ -20,12 +20,6 @@ export type SavedViewsLabels = Pick<
   "savedViews" | "saveView" | "viewName" | "deleteView"
 >;
 
-/** Alias for `SavedViewsLabels` (v1 name) — deleted before the 2.0.0 release. */
-export type SavedViewsMenuLabels = Pick<
-  Required<TableLabels>,
-  "savedViews" | "saveView" | "viewName" | "deleteView"
->;
-
 /** Props for the saved-views menu. */
 export interface SavedViewsMenuProps {
   /** Storage + URL backend wiring, forwarded to core's `useSavedViews`. */

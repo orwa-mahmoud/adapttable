@@ -898,8 +898,14 @@ describe("actions column in the column layout", () => {
   it("round-trips the actions pin through the URL layout state", async () => {
     const adapter = createMemoryAdapter("");
     function UrlHarness() {
-      const { layout, onLayoutChange } = useColumnLayoutUrlState({ adapter });
-      const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
+      const { layout, onLayoutChange } = useColumnLayoutUrlState({
+        urlAdapter: adapter,
+      });
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+      });
       return (
         <DataTable<Row>
           source={source}

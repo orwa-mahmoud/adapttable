@@ -33,7 +33,6 @@ export const fr: Required<TableLabels> = {
   clearAll: "Tout effacer",
   removeFilter: (label) => `Retirer le filtre : ${label}`,
   filtersDone: "Terminé",
-  applyFilters: "Terminé",
   sortBy: "Trier par",
   rowsPerPage: "Lignes par page",
   actions: "Actions",

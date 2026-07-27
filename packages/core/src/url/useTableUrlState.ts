@@ -37,16 +37,12 @@ export interface UseTableUrlStateOptions {
    * existing navigation stack.
    */
   urlAdapter?: UrlStateAdapter;
-  /** Alias for `urlAdapter` (v1 name) — deleted before the 2.0.0 release. */
-  adapter?: UrlStateAdapter;
   /**
    * When `false`, state is kept in a component-local memory store instead
    * of the URL — the table still works fully, it just isn't shareable.
    * Defaults to `true`.
    */
   urlSync?: boolean;
-  /** Alias for `urlSync` (v1 name) — deleted before the 2.0.0 release. */
-  enabled?: boolean;
   /** Initial values applied when the URL has no value for a key. */
   defaults?: Partial<TableQueryParams> & { extra?: ExtraFilters };
   /** Extra-filter keys whose values are parsed as numbers. */
@@ -110,9 +106,7 @@ export function useTableUrlState(
 ): UseTableUrlStateResult {
   const {
     urlAdapter,
-    adapter,
     urlSync,
-    enabled,
     defaults = {},
     numberExtraKeys = NO_KEYS,
     arrayExtraKeys = NO_KEYS,
@@ -121,8 +115,8 @@ export function useTableUrlState(
   // Per-table namespace, e.g. "left." → left.q / left.page / left.f_status.
   const ns = urlKey ? `${urlKey}.` : "";
 
-  const backend = urlAdapter ?? adapter;
-  const syncToUrl = urlSync ?? enabled ?? true;
+  const backend = urlAdapter;
+  const syncToUrl = urlSync ?? true;
   const resolved = useResolvedAdapter(backend, syncToUrl);
   // Server snapshot: with the default (history) adapter the server rendered
   // from an empty memory store, so hydration must read "" too — the real URL

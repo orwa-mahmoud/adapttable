@@ -33,7 +33,6 @@ export const he: Required<TableLabels> = {
   clearAll: "נקה הכול",
   removeFilter: (label) => `הסרת סינון: ${label}`,
   filtersDone: "סיום",
-  applyFilters: "סיום",
   sortBy: "מיין לפי",
   rowsPerPage: "שורות לעמוד",
   actions: "פעולות",

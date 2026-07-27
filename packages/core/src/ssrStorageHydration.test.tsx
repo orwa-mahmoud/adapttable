@@ -18,7 +18,10 @@ const adapter = createMemoryAdapter("");
 
 function Probe() {
   const { layout } = useColumnLayoutStorageState({ storageKey: "hydr-cols" });
-  const { views } = useSavedViews({ storageKey: "hydr-views", adapter });
+  const { views } = useSavedViews({
+    storageKey: "hydr-views",
+    urlAdapter: adapter,
+  });
   return (
     <div>
       {layout.hidden.join(",")}|{views.length}
@@ -99,7 +102,7 @@ describe("storage-backed state under SSR", () => {
       expect(view.result.current.layout.hidden).toEqual(["email"]);
 
       const views = renderHook(() =>
-        useSavedViews({ storageKey: "blocked-views", adapter })
+        useSavedViews({ storageKey: "blocked-views", urlAdapter: adapter })
       );
       act(() => views.result.current.save("v"));
       expect(views.result.current.views).toHaveLength(1);

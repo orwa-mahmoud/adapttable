@@ -33,7 +33,6 @@ export const ja: Required<TableLabels> = {
   clearAll: "すべてクリア",
   removeFilter: (label) => `フィルターを解除: ${label}`,
   filtersDone: "完了",
-  applyFilters: "完了",
   sortBy: "並べ替え",
   rowsPerPage: "1ページの行数",
   actions: "操作",

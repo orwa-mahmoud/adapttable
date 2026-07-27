@@ -63,16 +63,12 @@ export interface ToolbarChromeProps<TRow> {
   table: UseDataTableResult<TRow>;
   /** Render the search input (default `true`). */
   searchable?: boolean;
-  /** Alias for `searchable: false` (v1 name) — deleted before the 2.0.0 release. */
-  hideSearch?: boolean;
   /** Placeholder for the search input. */
   searchPlaceholder?: string;
   /** Options for an explicit sort-by control. */
   sortByOptions?: SortByOption[];
   /** Extra caller-supplied toolbar content. */
   toolbar?: ReactNode;
-  /** Alias for `toolbar` (v1 name) — deleted before the 2.0.0 release. */
-  customToolbar?: ReactNode;
   /** Whether a filters affordance should render. */
   hasFilters: boolean;
   /** Number shown on the filters badge. */
@@ -244,7 +240,6 @@ export function useTableChrome<TRow>(
     labels,
     dir,
     forceMobile,
-    isMobile: isMobileProp,
     mobileIdentityColumns,
     onRowsChange,
     bulkActions,
@@ -262,7 +257,7 @@ export function useTableChrome<TRow>(
   } = props;
 
   const autoMobile = useIsMobile();
-  const isMobile = forceMobile ?? isMobileProp ?? autoMobile;
+  const isMobile = forceMobile ?? autoMobile;
   const confirm = confirmProp ?? defaultConfirm;
 
   // Declarative defaults (auto headers, dot-path accessors) resolve once

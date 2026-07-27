@@ -48,7 +48,7 @@ export function People({ data }: { data: Person[] }) {
 ```
 
 That's it — a styled shadcn table, no class wiring. Swap `useFrontendData` for
-`useBackendData` to drive it from a server-paginated query; the component doesn't
+`useQuerySource` to drive it from a server-paginated query; the component doesn't
 change.
 
 ## Features
@@ -68,7 +68,7 @@ change.
 - **CSV export** (`exportCsv`) — current page or the full filtered set.
 - **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered pagination, or infinite scroll (auto by device).
-- **Responsive** — desktop table ↔ mobile `Card`s by viewport (or force `isMobile`).
+- **Responsive** — desktop table ↔ mobile `Card`s by viewport (or force `forceMobile`).
 - **States** — `Skeleton` loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** via your Tailwind `dark:` class strategy.
 - **Customisation** — the components are copied into your project — edit them directly, plus `slots`, `className`, injectable `confirm`, and the full headless escape hatch via `@adapttable/core`.

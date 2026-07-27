@@ -36,7 +36,6 @@ export const ru: Required<TableLabels> = {
   clearAll: "Очистить всё",
   removeFilter: (label) => `Убрать фильтр: ${label}`,
   filtersDone: "Готово",
-  applyFilters: "Готово",
   sortBy: "Сортировать по",
   rowsPerPage: "Строк на странице",
   actions: "Действия",

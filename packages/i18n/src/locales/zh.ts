@@ -33,7 +33,6 @@ export const zh: Required<TableLabels> = {
   clearAll: "清除全部",
   removeFilter: (label) => `移除筛选：${label}`,
   filtersDone: "完成",
-  applyFilters: "完成",
   sortBy: "排序方式",
   rowsPerPage: "每页行数",
   actions: "操作",

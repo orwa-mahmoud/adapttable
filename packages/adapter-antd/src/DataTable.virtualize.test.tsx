@@ -105,7 +105,7 @@ describe("<DataTable> (Ant Design) mobile card windowing", () => {
       paddingBottom: 2400,
       measureElement,
     });
-    const { container } = mount({ isMobile: true, virtualize: true });
+    const { container } = mount({ forceMobile: true, virtualize: true });
     const list = cardList(container);
     const items = within(list).getAllByRole("listitem");
     // Only the windowed cards render — far fewer than the 50 source rows.

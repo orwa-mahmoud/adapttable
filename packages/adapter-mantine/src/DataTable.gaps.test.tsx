@@ -1,6 +1,6 @@
 /**
  * Gap-fill for the Mantine DataTable — Toolbar branches (infinite-mode
- * rows-per-page, sort-by select, custom toolbar, hideSearch) and the
+ * rows-per-page, sort-by select, custom toolbar, searchable off) and the
  * mobile card layout (selection + row actions + confirm).
  */
 import {
@@ -107,11 +107,6 @@ describe("<DataTable> gaps", () => {
       />
     );
     expect(screen.getByText("view")).toBeInTheDocument();
-    expect(screen.queryByRole("searchbox")).toBeNull();
-  });
-
-  it("the v1 hideSearch alias still hides the search (removed before release)", () => {
-    render(<Harness override={{ hideSearch: true }} />);
     expect(screen.queryByRole("searchbox")).toBeNull();
   });
 

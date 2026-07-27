@@ -134,7 +134,7 @@ describe("<DataTable> (MUI)", () => {
 
   it("compact density tightens the mobile cards", () => {
     const { container } = renderHarness({
-      override: { isMobile: true, density: "compact" },
+      override: { forceMobile: true, density: "compact" },
     });
     expect(container.querySelector('[role="list"]')).toBeInTheDocument();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThan(0);

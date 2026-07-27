@@ -33,7 +33,6 @@ export const ko: Required<TableLabels> = {
   clearAll: "모두 지우기",
   removeFilter: (label) => `필터 제거: ${label}`,
   filtersDone: "완료",
-  applyFilters: "완료",
   sortBy: "정렬 기준",
   rowsPerPage: "페이지당 행 수",
   actions: "작업",

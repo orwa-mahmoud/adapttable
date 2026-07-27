@@ -67,7 +67,7 @@ describe("accessibility (axe) — Ant Design", () => {
     "the mobile card layout has no violations",
     async () => {
       const { container } = renderTable({
-        isMobile: true,
+        forceMobile: true,
         bulkActions: [{ key: "x", label: "Delete", onClick: () => undefined }],
         rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
       });

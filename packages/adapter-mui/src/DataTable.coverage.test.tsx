@@ -390,7 +390,7 @@ describe("MUI coverage gaps", () => {
       canLoadMore: true,
       virtualScrollRef: () => undefined,
     });
-    mount({ isMobile: true, virtualize: true }, "infinite");
+    mount({ forceMobile: true, virtualize: true }, "infinite");
     const list = screen.getByRole("list");
     expect(within(list).getByText("Bob")).toBeInTheDocument();
     // The list's direct spacer children: a bottom spacer (height 80) but no top

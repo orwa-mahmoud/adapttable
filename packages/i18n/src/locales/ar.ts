@@ -33,7 +33,6 @@ export const ar: Required<TableLabels> = {
   clearAll: "مسح الكل",
   removeFilter: (label) => `إزالة عامل التصفية: ${label}`,
   filtersDone: "تم",
-  applyFilters: "تم",
   sortBy: "ترتيب حسب",
   rowsPerPage: "صفوف لكل صفحة",
   actions: "إجراءات",

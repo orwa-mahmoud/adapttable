@@ -270,7 +270,7 @@ describe("<AutoFilterForm> operator-first range widgets (Ant Design)", () => {
         onPatch={onPatch}
       />
     );
-    // Legacy numeric bounds read back as Equal + the mirrored value.
+    // Persisted equal bounds read back as Equal + the mirrored value.
     expect(screen.getByTitle("Equal")).toBeInTheDocument();
     expect(screen.getByLabelText("Budget Value")).toHaveValue("5");
     fireEvent.mouseDown(container.querySelector(".ant-select-clear")!);

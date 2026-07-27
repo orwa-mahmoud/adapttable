@@ -53,7 +53,11 @@ describe("useFrontendData boundaries", () => {
   it("walks infinite mode page-by-page to the end, then stops", () => {
     const adapter = createMemoryAdapter("limit=2");
     const { result } = renderHook(() =>
-      useFrontendData<Row>({ data: ROWS, adapter, paginationMode: "infinite" })
+      useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        paginationMode: "infinite",
+      })
     );
     expect(result.current.rows).toHaveLength(2);
     act(() => result.current.fetchNextPage()); // page 2 → 4 rows
@@ -68,7 +72,11 @@ describe("useFrontendData boundaries", () => {
   it("returns an empty slice when the search matches nothing", () => {
     const adapter = createMemoryAdapter("q=zzz");
     const { result } = renderHook(() =>
-      useFrontendData<Row>({ data: ROWS, adapter, paginationMode: "paged" })
+      useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
     );
     expect(result.current.rows).toHaveLength(0);
     expect(result.current.total).toBe(0);
@@ -77,7 +85,11 @@ describe("useFrontendData boundaries", () => {
   it("clamps the page to the last when the page size grows past the data", () => {
     const adapter = createMemoryAdapter("page=3&limit=2");
     const { result } = renderHook(() =>
-      useFrontendData<Row>({ data: ROWS, adapter, paginationMode: "paged" })
+      useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
     );
     expect(result.current.page).toBe(3); // 5 rows / 2 = 3 pages
     expect(result.current.rows).toHaveLength(1); // last page has 1 row

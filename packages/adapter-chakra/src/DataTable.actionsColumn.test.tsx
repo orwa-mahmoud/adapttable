@@ -52,7 +52,11 @@ function Harness({ storage }: Readonly<{ storage: LayoutStorage }>) {
     storageKey: "actions-layout",
     storage,
   });
-  const source = useFrontendData<Row>({ data: ROWS, adapter, columns });
+  const source = useFrontendData<Row>({
+    data: ROWS,
+    urlAdapter: adapter,
+    columns,
+  });
   return (
     <DataTable
       source={source}

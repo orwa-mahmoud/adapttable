@@ -33,9 +33,7 @@ export interface TableQuery {
 /** Options for {@link useServerData}. */
 export interface UseServerDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
-  | "adapter"
   | "urlAdapter"
-  | "enabled"
   | "urlSync"
   | "defaults"
   | "numberExtraKeys"

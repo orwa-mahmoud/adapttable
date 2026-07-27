@@ -47,7 +47,7 @@ export function People({ data }: { data: Person[] }) {
 }
 ```
 
-Swap `useFrontendData` for `useBackendData` to drive the same table from a
+Swap `useFrontendData` for `useQuerySource` to drive the same table from a
 server-paginated `useInfiniteQuery` — nothing else changes.
 
 ## Features
@@ -67,7 +67,7 @@ server-paginated `useInfiniteQuery` — nothing else changes.
 - **CSV export** (`exportCsv`) — current page or the full filtered set.
 - **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered `Pagination`, or infinite scroll (auto by device).
-- **Responsive** — desktop table ↔ mobile cards by viewport (or force `isMobile`).
+- **Responsive** — desktop table ↔ mobile cards by viewport (or force `forceMobile`).
 - **States** — `Skeleton` loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** via Mantine's color scheme.
 - **Customisation** — `slots`, `classNames`, custom `toolbar`, injectable `confirm`, optional entrance animation (`animate`, honours `prefers-reduced-motion`), and the full headless escape hatch via `@adapttable/core`.

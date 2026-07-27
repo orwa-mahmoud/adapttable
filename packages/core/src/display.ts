@@ -55,8 +55,8 @@ export function pinnedEdgeCellStyle(
 /**
  * The row-prop keys (other than the kit's own accent token) that change a
  * desktop row's visuals — the memo guard re-renders a row only when one of
- * these differs. Each adapter appends its theming key (`colorScheme` /
- * `accentColor`) to this shared base.
+ * these differs. Each adapter appends its theming key (`accentColor`)
+ * to this shared base.
  */
 export const SHARED_DESKTOP_ROW_KEYS = [
   "row",
