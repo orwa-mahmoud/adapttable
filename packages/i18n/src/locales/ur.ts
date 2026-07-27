@@ -49,7 +49,7 @@ export const ur: Required<TableLabels> = {
   selectedCount: (count) => `${count} منتخب`,
   showing: ({ from, to, total }) =>
     `${total} میں سے ${from}–${to} دکھائے جا رہے ہیں`,
-  pageOf: ({ page, total }) => `صفحہ ${page} از ${total}`,
+  pageOf: ({ page, total }) => `${total} میں سے صفحہ ${page}`,
   columns: "کالمز",
   // Pinning/reorder follow writing direction — keep copy direction-neutral.
   pinStart: "شروع میں پن کریں",

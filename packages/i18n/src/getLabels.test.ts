@@ -1,3 +1,4 @@
+import { localizedColumnPath } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
 import { getDirection } from "./direction";
@@ -109,25 +110,71 @@ describe("presets", () => {
   });
 });
 
-it("every function label in every locale formats with its numbers", () => {
+type AnyLabelFn = (...args: never[]) => string;
+
+/** How to invoke each function label with distinguishable arguments. */
+const INTERPOLATION_CASES: Record<
+  string,
+  { call: (fn: AnyLabelFn) => string; expects: readonly string[] }
+> = {
+  showing: {
+    call: (fn) =>
+      (fn as (a: { from: number; to: number; total: number }) => string)({
+        from: 31,
+        to: 47,
+        total: 953,
+      }),
+    expects: ["31", "47", "953"],
+  },
+  pageOf: {
+    call: (fn) =>
+      (fn as (a: { page: number; total: number }) => string)({
+        page: 31,
+        total: 953,
+      }),
+    expects: ["31", "953"],
+  },
+  removeFilter: {
+    call: (fn) => (fn as (label: string) => string)("STATUS_X"),
+    expects: ["STATUS_X"],
+  },
+};
+
+const NUMERIC_CASE = {
+  call: (fn: AnyLabelFn) => (fn as (n: number) => string)(42),
+  expects: ["42"] as readonly string[],
+};
+
+it("every function label in every locale interpolates ALL its arguments", () => {
+  // Distinguishable values per argument: a translation that drops any one
+  // of them fails here (the old check only looked for a single number).
   for (const [tag, labels] of Object.entries(locales)) {
     for (const [key, value] of Object.entries(labels)) {
       if (typeof value !== "function") continue;
-      let out: string;
-      if (key === "showing") {
-        out = (
-          value as (a: { from: number; to: number; total: number }) => string
-        )({ from: 1, to: 8, total: 42 });
-      } else if (key === "pageOf") {
-        out = (value as (a: { page: number; total: number }) => string)({
-          page: 42,
-          total: 99,
-        });
-      } else {
-        out = (value as (n: number) => string)(42);
+      const spec = INTERPOLATION_CASES[key] ?? NUMERIC_CASE;
+      const out = spec.call(value);
+      for (const arg of spec.expects) {
+        expect(out, `${tag}.${key}`).toContain(arg);
       }
-      expect(out, `${tag}.${key}`).toEqual(expect.any(String));
-      expect(out, `${tag}.${key}`).toContain("42");
+      if (spec === NUMERIC_CASE) {
+        // Count-aware singular forms must still be real strings.
+        const one = (value as (n: number) => string)(1);
+        expect(one.length, `${tag}.${key}(1)`).toBeGreaterThan(0);
+      }
     }
   }
+});
+
+it("labels AND column i18n paths resolve locale tags identically", () => {
+  // "AR-eg" and "ar_EG" are the same locale — both surfaces must agree.
+  const arabic = getLabels("ar");
+  expect(getLabels("AR-eg")).toBe(arabic);
+  expect(getLabels("ar_EG")).toBe(arabic);
+
+  const column = { key: "name", i18n: { ar: "name_ar" } };
+  expect(localizedColumnPath(column, "AR-eg")).toBe("name_ar");
+  expect(localizedColumnPath(column, "ar_EG")).toBe("name_ar");
+  // Exact regional tags still beat the primary subtag on both surfaces.
+  const regional = { key: "name", i18n: { ar: "name_ar", "ar-EG": "name_eg" } };
+  expect(localizedColumnPath(regional, "ar_eg")).toBe("name_eg");
 });

@@ -1,5 +1,6 @@
 import type { ColumnDef } from "../types";
 import { humanizeKey } from "../utils/humanizeKey";
+import { resolveLocaleTag } from "../utils/localeTag";
 import { getPath } from "../utils/path";
 
 /** Cell content from a dot-path value: primitives render, anything else does not. */
@@ -27,9 +28,11 @@ export function localizedColumnPath(
   locale: string | undefined
 ): string {
   if (!column.i18n || !locale) return column.key;
-  return (
-    column.i18n[locale] ?? column.i18n[locale.split("-")[0]!] ?? column.key
-  );
+  // The SAME resolution the label presets use (case- and separator-
+  // insensitive, exact tag then primary subtag) — `"ar_EG"` must not get
+  // Arabic labels while missing the Arabic data paths.
+  const tag = resolveLocaleTag(Object.keys(column.i18n), locale);
+  return (tag !== undefined ? column.i18n[tag] : undefined) ?? column.key;
 }
 
 /**

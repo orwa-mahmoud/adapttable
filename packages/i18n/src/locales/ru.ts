@@ -7,9 +7,12 @@ export const ru: Required<TableLabels> = {
   searchPlaceholder: "Поиск…",
   noData: "Нет данных",
   noResults: "Нет результатов, соответствующих фильтрам",
-  pageSelected: (count) => `Выбраны все ${count} на этой странице`,
-  selectAllMatching: (total) => `Выбрать все ${total} совпадающих`,
-  allMatchingSelected: (total) => `Выбраны все ${total} совпадающих`,
+  // The count sits in parentheses so the phrase stays grammatical for
+  // every numeral («все … 21 совпадающий/совпадающих» would need
+  // case+number agreement that inline templates cannot provide).
+  pageSelected: (count) => `Выбраны все строки на этой странице (${count})`,
+  selectAllMatching: (total) => `Выбрать все совпадающие (${total})`,
+  allMatchingSelected: (total) => `Выбраны все совпадающие (${total})`,
   expandRow: "Развернуть строку",
   collapseRow: "Свернуть строку",
   operator: "Оператор",

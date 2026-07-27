@@ -1,6 +1,5 @@
-import type { TableLabels } from "@adapttable/core";
+import { resolveLocaleTag, type TableLabels } from "@adapttable/core";
 
-import { primarySubtag } from "./direction";
 import { ar } from "./locales/ar";
 import { de } from "./locales/de";
 import { en } from "./locales/en";
@@ -43,16 +42,16 @@ export const locales = {
 /** A key of {@link locales}. */
 export type LocaleKey = keyof typeof locales;
 
-/** Resolve a BCP-47 tag to a bundled key: exact tag first, then primary subtag. */
+/**
+ * Resolve a BCP-47 tag to a bundled key through core's SHARED locale
+ * resolver — the same rules per-column `i18n` paths use. Iterating
+ * `Object.keys` (never the `in` operator) keeps prototype names like
+ * `"constructor"` from resolving a preset.
+ */
 function resolveLocaleKey(locale: string): LocaleKey | undefined {
-  const normalized = locale.trim().replaceAll("_", "-");
-  const lower = normalized.toLowerCase();
-  for (const key of Object.keys(locales) as LocaleKey[]) {
-    if (key.toLowerCase() === lower) return key;
-  }
-  const primary = primarySubtag(locale);
-  if (primary in locales) return primary as LocaleKey;
-  return undefined;
+  return resolveLocaleTag(Object.keys(locales), locale) as
+    | LocaleKey
+    | undefined;
 }
 
 /** Whether a locale has a bundled preset. */

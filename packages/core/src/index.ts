@@ -54,7 +54,7 @@ export {
 
 /* ── Shared prop surface + orchestration ───────────────────────────── */
 /* ── Declarative filters & data tiers ──────────────────────────────── */
-export { resolveColumns } from "./columns/resolveColumns";
+export { localizedColumnPath, resolveColumns } from "./columns/resolveColumns";
 export {
   AUTO_OPTIONS_LIMIT,
   buildFilterRuntime,
@@ -123,6 +123,7 @@ export {
   useTableChrome,
 } from "./useTableChrome";
 export { humanizeKey } from "./utils/humanizeKey";
+export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { getPath } from "./utils/path";
 
 /* ── Labels ────────────────────────────────────────────────────────── */

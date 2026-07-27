@@ -46,7 +46,8 @@ export const it: Required<TableLabels> = {
   previousPage: "Pagina precedente",
   nextPage: "Pagina successiva",
   goToPage: (page) => `Vai alla pagina ${page}`,
-  selectedCount: (count) => `${count} selezionati`,
+  selectedCount: (count) =>
+    count === 1 ? "1 selezionato" : `${count} selezionati`,
   showing: ({ from, to, total }) => `Visualizzazione ${from}–${to} di ${total}`,
   pageOf: ({ page, total }) => `Pagina ${page} di ${total}`,
   columns: "Colonne",

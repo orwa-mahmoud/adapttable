@@ -2,18 +2,24 @@
 export type Direction = "ltr" | "rtl";
 
 /**
- * Base language codes that render right-to-left. Matched against the
- * primary subtag of a BCP-47 locale (e.g. `"ar-EG"` → `"ar"`).
+ * Base language codes whose MODERN standard orthography is right-to-left.
+ * Matched against the primary subtag of a BCP-47 locale (`"ar-EG"` →
+ * `"ar"`). Deliberately script-based and independent of which label
+ * presets ship: a Pashto table renders RTL (with English labels until a
+ * `ps` preset exists) because its content is RTL either way. Languages
+ * written predominantly in Latin script today (e.g. Hausa) are NOT
+ * listed — forcing RTL would mirror the whole table wrongly.
  */
 export const RTL_LANGUAGES = [
+  "aii", // Assyrian Neo-Aramaic
   "ar", // Arabic
-  "arc", // Aramaic
+  "azb", // South Azerbaijani
   "ckb", // Sorani Kurdish
   "dv", // Divehi
   "fa", // Persian
-  "ha", // Hausa (Ajami)
   "he", // Hebrew
   "ks", // Kashmiri
+  "pnb", // Western Punjabi (Shahmukhi)
   "ps", // Pashto
   "sd", // Sindhi
   "syr", // Syriac
