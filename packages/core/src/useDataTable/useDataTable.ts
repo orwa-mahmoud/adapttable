@@ -293,8 +293,8 @@ export function useDataTable<TRow>(
     rows: source.rows,
     getId,
     resetKey: selectionResetKey,
-    selected: selectedIds,
-    onChange: onSelectedIdsChange,
+    selectedIds,
+    onSelectionChange: onSelectedIdsChange,
   });
   const selection = hasBulk ? selectionState : null;
 

@@ -18,12 +18,17 @@ export interface UseSelectionOptions<TRow> {
    */
   resetKey?: unknown;
   /**
-   * Controlled selection. When provided, the hook reads from this value and
-   * reports every change request through `onChange` instead of mutating its
-   * own state — the same controlled/uncontrolled split as `useColumnLayout`.
+   * Controlled selection. When provided, the hook reads from this value
+   * and reports every change request through `onSelectionChange` instead
+   * of mutating its own state — the same controlled/uncontrolled split as
+   * `useColumnLayout`.
    */
+  selectedIds?: readonly string[];
+  /** Alias for `selectedIds` (v1 name) — deleted before the 2.0.0 release. */
   selected?: readonly string[];
   /** Change handler; required for the controlled mode to update. */
+  onSelectionChange?: (selectedIds: string[]) => void;
+  /** Alias for `onSelectionChange` (v1 name) — deleted before the 2.0.0 release. */
   onChange?: (selectedIds: string[]) => void;
 }
 
@@ -65,19 +70,18 @@ export interface SelectionState {
  * @param options - See {@link UseSelectionOptions}.
  * @returns Selection state and actions.
  */
-export function useSelection<TRow>({
-  rows,
-  getId,
-  resetKey,
-  selected,
-  onChange,
-}: UseSelectionOptions<TRow>): SelectionState {
+export function useSelection<TRow>(
+  options: UseSelectionOptions<TRow>
+): SelectionState {
+  const { rows, getId, resetKey } = options;
+  const controlledValue = options.selectedIds ?? options.selected;
+  const onChange = options.onSelectionChange ?? options.onChange;
   const [internal, setInternal] = useState<Set<string>>(() => new Set());
   const [allMatching, setAllMatching] = useState(false);
-  const controlled = selected !== undefined;
+  const controlled = controlledValue !== undefined;
   const selectedIds = useMemo(
-    () => (selected === undefined ? internal : new Set(selected)),
-    [selected, internal]
+    () => (controlledValue === undefined ? internal : new Set(controlledValue)),
+    [controlledValue, internal]
   );
 
   // The mutators below close over `commit`; reading the live mode/state
