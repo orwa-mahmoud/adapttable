@@ -180,10 +180,15 @@ export function useFrontendData<TRow>(
           ? getSortValue(row, key)
           : (column?.sortValue?.(row) ?? toSortable(column?.accessor?.(row)));
     };
-    // An active multi-sort chain supersedes the single sort.
+    // An active multi-sort chain supersedes the single sort. Resolvers are
+    // hoisted per LEVEL: resolving inside the comparator cost an O(columns)
+    // `find` plus a fresh closure per row per level.
     if (sortLevels.length > 0) {
+      const resolvers = new Map(
+        sortLevels.map((level) => [level.key, resolveFor(level.key)])
+      );
       return sortRowsMulti(filtered, sortLevels, (row, key) =>
-        resolveFor(key)(row)
+        resolvers.get(key)?.(row)
       );
     }
     if (!sortBy || !sortDir) return filtered;
