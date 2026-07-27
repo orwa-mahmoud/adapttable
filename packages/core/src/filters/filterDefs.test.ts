@@ -148,6 +148,75 @@ describe("filterPredicate", () => {
     expect(p(bad, { hiredAtFrom: "2026-01-01" })).toBe(false);
   });
 
+  it("dateRange: matches Date objects, epoch numbers and datetime strings", () => {
+    interface Stamped {
+      hiredAt: Date | number | string;
+    }
+    const p = filterPredicate<Stamped>({ key: "hiredAt", type: "dateRange" });
+    const range = { hiredAtFrom: "2026-03-01", hiredAtTo: "2026-03-31" };
+    // The same instant in three shapes — all must land inside the range.
+    const instant = new Date(2026, 2, 10, 14, 30);
+    expect(p({ hiredAt: instant }, range)).toBe(true);
+    expect(p({ hiredAt: instant.getTime() }, range)).toBe(true);
+    expect(p({ hiredAt: "2026-03-10T14:30:00" }, range)).toBe(true);
+    // And the same three shapes outside it are all excluded.
+    const outside = new Date(2026, 3, 2);
+    expect(p({ hiredAt: outside }, range)).toBe(false);
+    expect(p({ hiredAt: outside.getTime() }, range)).toBe(false);
+    expect(p({ hiredAt: "2026-04-02T00:00:00" }, range)).toBe(false);
+  });
+
+  it("dateRange: boundary-day rows survive in UTC+4 and UTC-8 alike", () => {
+    const originalTZ = process.env.TZ;
+    const inTZ = (tz: string, run: () => void) => {
+      process.env.TZ = tz;
+      try {
+        run();
+      } finally {
+        process.env.TZ = originalTZ;
+      }
+    };
+    const p = filterPredicate<{ hiredAt: Date | string }>({
+      key: "hiredAt",
+      type: "dateRange",
+    });
+    for (const tz of ["Asia/Dubai", "America/Los_Angeles"]) {
+      inTZ(tz, () => {
+        // Early morning and late night of the boundary days, as a local
+        // Date and as a local-naive datetime string.
+        const early = new Date(2026, 0, 1, 2, 0);
+        const late = new Date(2026, 0, 31, 23, 30);
+        const range = { hiredAtFrom: "2026-01-01", hiredAtTo: "2026-01-31" };
+        expect(p({ hiredAt: early }, range)).toBe(true);
+        expect(p({ hiredAt: late }, range)).toBe(true);
+        expect(p({ hiredAt: "2026-01-01T02:00:00" }, range)).toBe(true);
+        expect(p({ hiredAt: "2026-01-31T23:30:00" }, range)).toBe(true);
+        // Just past either edge stays out.
+        expect(p({ hiredAt: new Date(2025, 11, 31, 23, 59) }, range)).toBe(
+          false
+        );
+        expect(p({ hiredAt: new Date(2026, 1, 1, 0, 0) }, range)).toBe(false);
+      });
+    }
+  });
+
+  it("dateRange: inclusivity at both ends — exact datetime bounds included", () => {
+    const p = filterPredicate<{ hiredAt: Date }>({
+      key: "hiredAt",
+      type: "dateRange",
+    });
+    const at = (h: number, m: number) => new Date(2026, 2, 10, h, m);
+    // A datetime "to" bound is inclusive exactly, without end-of-day padding.
+    const exact = {
+      hiredAtFrom: "2026-03-10T09:00:00",
+      hiredAtTo: "2026-03-10T17:00:00",
+    };
+    expect(p({ hiredAt: at(9, 0) }, exact)).toBe(true);
+    expect(p({ hiredAt: at(17, 0) }, exact)).toBe(true);
+    expect(p({ hiredAt: at(8, 59) }, exact)).toBe(false);
+    expect(p({ hiredAt: at(17, 1) }, exact)).toBe(false);
+  });
+
   it("numberRange: min/max bounds; NaN row values never match", () => {
     const p = filterPredicate<Row>({ key: "budget", type: "numberRange" });
     expect(p(ROW, {})).toBe(true);
