@@ -44,7 +44,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
   columns: readonly ColumnDef<TRow>[];
   getRowId: (row: TRow) => string;
   /** Collapsed group keys (from {@link useGroupCollapse}). */
-  collapsedIds: ReadonlySet<string>;
+  collapsedGroupIds: ReadonlySet<string>;
   /** Optional per-group cells — same shape as `summaryRow`. */
   aggregates?: GroupAggregatesFn<TRow>;
   /** Override blank-group label (default `"(blank)"`). */
@@ -123,7 +123,7 @@ export function buildGroupedFlatModel<TRow>(
     groupBy,
     columns,
     getRowId,
-    collapsedIds,
+    collapsedGroupIds,
     aggregates,
     blankLabel,
   } = options;
@@ -155,7 +155,7 @@ export function buildGroupedFlatModel<TRow>(
   for (const valueKey of order) {
     const bucket = buckets.get(valueKey)!;
     const groupKey = makeGroupRowKey(groupBy, valueKey);
-    const collapsed = collapsedIds.has(groupKey);
+    const collapsed = collapsedGroupIds.has(groupKey);
     const leafIds = bucket.leafRows.map((row) => getRowId(row));
     const aggregateCells = aggregates?.(bucket.leafRows);
 

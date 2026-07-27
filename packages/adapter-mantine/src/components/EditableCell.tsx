@@ -3,8 +3,8 @@ import {
   type EditableCellEditing,
   type EditableCellEditorCtrl,
   EditableCellGate,
-  focusEditorOnMount,
 } from "@adapttable/core";
+import { focusEditorOnMount } from "@adapttable/core/adapter";
 import { Select, TextInput } from "@mantine/core";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 

@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 /** Collapse state + actions returned by {@link useGroupCollapse}. */
 export interface GroupCollapseState {
   /** Ids of currently collapsed groups (`group:…` keys). */
-  collapsedIds: ReadonlySet<string>;
+  collapsedGroupIds: ReadonlySet<string>;
   /** Whether a group is collapsed. */
   isCollapsed: (groupKey: string) => boolean;
   /** Toggle a group's collapsed state. */
@@ -28,7 +28,7 @@ export function useGroupCollapse(controlled?: {
     () => new Set()
   );
 
-  const collapsedIds = useMemo(
+  const collapsedGroupIds = useMemo(
     () => (isControlled ? new Set(controlledIds ?? []) : uncontrolled),
     [isControlled, controlledIds, uncontrolled]
   );
@@ -45,18 +45,18 @@ export function useGroupCollapse(controlled?: {
   );
 
   const isCollapsed = useCallback(
-    (groupKey: string) => collapsedIds.has(groupKey),
-    [collapsedIds]
+    (groupKey: string) => collapsedGroupIds.has(groupKey),
+    [collapsedGroupIds]
   );
 
   const toggle = useCallback(
     (groupKey: string) => {
-      const next = new Set(collapsedIds);
+      const next = new Set(collapsedGroupIds);
       if (next.has(groupKey)) next.delete(groupKey);
       else next.add(groupKey);
       commit(next);
     },
-    [collapsedIds, commit]
+    [collapsedGroupIds, commit]
   );
 
   const expandAll = useCallback(() => {
@@ -71,7 +71,7 @@ export function useGroupCollapse(controlled?: {
   );
 
   return useMemo(
-    () => ({ collapsedIds, isCollapsed, toggle, expandAll, collapseAll }),
-    [collapsedIds, isCollapsed, toggle, expandAll, collapseAll]
+    () => ({ collapsedGroupIds, isCollapsed, toggle, expandAll, collapseAll }),
+    [collapsedGroupIds, isCollapsed, toggle, expandAll, collapseAll]
   );
 }

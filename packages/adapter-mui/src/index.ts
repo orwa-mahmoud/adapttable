@@ -63,7 +63,6 @@ export {
   type ActionConfirm,
   createHistoryAdapter,
   createMemoryAdapter,
-  deriveSortByOptions,
   getHistoryAdapter,
   type InfiniteQueryLike,
   type PageSelector,
@@ -72,6 +71,7 @@ export {
   type UseTableUrlStateOptions,
   type UseTableUrlStateResult,
 } from "@adapttable/core";
+export { deriveSortByOptions } from "@adapttable/core/adapter";
 
 /* Completed public surface (v2): every type a consumer's own code
    needs — CSV options, column layout, cell editors, tier props —
@@ -82,9 +82,9 @@ export {
   type CellEditor,
   type ChipLabelResolver,
   type ColumnLayoutState,
-  type DataModeProps,
   type ExportCsvOptions,
   FILTER_TYPES,
   type UseServerDataOptions,
   type UseTableDataOptions,
 } from "@adapttable/core";
+export { type DataModeProps } from "@adapttable/core/adapter";

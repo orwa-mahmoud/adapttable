@@ -103,7 +103,7 @@ describe("buildGroupedFlatModel", () => {
       groupBy: "flag",
       columns: [{ key: "flag" }],
       getRowId: (r) => r.id,
-      collapsedIds: new Set(),
+      collapsedGroupIds: new Set(),
     });
     const groups = flat.filter((e) => e.kind === "group");
     // Four distinct buckets — no cross-type merging — each labelled by its
@@ -124,7 +124,7 @@ describe("buildGroupedFlatModel", () => {
       groupBy: "team",
       columns: COLS,
       getRowId: (r) => r.id,
-      collapsedIds: new Set(),
+      collapsedGroupIds: new Set(),
     });
     expect(flat.map((e) => e.kind)).toEqual([
       "group",
@@ -155,7 +155,7 @@ describe("buildGroupedFlatModel", () => {
       groupBy: "team",
       columns: COLS,
       getRowId: (r) => r.id,
-      collapsedIds: new Set([coreKey]),
+      collapsedGroupIds: new Set([coreKey]),
     });
     expect(flat).toHaveLength(4); // collapsed Core header + Platform header + 2 leaves
     expect(flat[0]).toMatchObject({
@@ -172,7 +172,7 @@ describe("buildGroupedFlatModel", () => {
       groupBy: "team",
       columns: COLS,
       getRowId: (r) => r.id,
-      collapsedIds: new Set(),
+      collapsedGroupIds: new Set(),
       aggregates: (rows) => ({
         budget: rows.reduce((sum, r) => sum + r.budget, 0),
       }),
@@ -194,7 +194,7 @@ describe("buildGroupedFlatModel", () => {
       groupBy: "team",
       columns: COLS,
       getRowId: (r) => r.id,
-      collapsedIds: new Set(),
+      collapsedGroupIds: new Set(),
     });
     expect(flat[0]).toMatchObject({ kind: "group", label: "(blank)" });
   });

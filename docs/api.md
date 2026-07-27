@@ -170,8 +170,6 @@ Props beyond the core surface, with per-kit availability.
 | `size`          | kit-specific union                              | —           | mui, chakra, antd, radix                  | Explicit kit table size, overriding the density mapping (comfortable/compact → chakra `"md"`/`"sm"`, radix & base-ui `"2"`/`"1"`, mui `"medium"`/`"small"`, antd `"middle"`/`"small"`). |
 | `accentColor`   | kit accent union (chakra: `string`)             | —           | chakra, radix, base-ui                    | Accent color for primary controls (buttons, badges, active page).                                                                                                                       |
 | `bordered`      | `boolean`                                       | `false`     | antd                                      | Render the table with cell borders.                                                                                                                                                     |
-| `emptyState`    | `ReactNode`                                     | —           | unstyled                                  | Empty-state node override (`slots.empty` alias wins when both are set).                                                                                                                 |
-| `loadingState`  | `ReactNode`                                     | —           | unstyled                                  | Loading-state node override (`slots.skeleton` alias wins when both are set).                                                                                                            |
 
 Each adapter also re-exports the core source builders and types, so one
 import path covers everything.
@@ -278,6 +276,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `BulkActionContext`                                                 | `{ allMatching, total }` — scope handed to a bulk action handler.                                            |
 | `ActionConfirm<TArg>`                                               | Confirmation dialog wiring (`title`, `message`, `confirmLabel`, `danger`).                                   |
 | `ConfirmHandler` / `ConfirmRequest`                                 | The injectable confirmation seam (`(request) => void`).                                                      |
+| `defaultConfirm`                                                    | The built-in `ConfirmHandler` (`window.confirm`; DENIES when no dialog exists).                              |
 | `ActiveFilterChip` / `ChipLabelResolver`                            | One removable chip (`key`, `label`, `onRemove`) / value → chip-label function.                               |
 | `UrlStateAdapter`                                                   | The router seam: `getSearch()`, `setSearch(search, { push? })`, `subscribe(onChange)`.                       |
 | `SavedView`                                                         | `{ name, search }` — one captured view.                                                                      |
@@ -315,7 +314,8 @@ full set: `UseDataTableOptions`, `UseFrontendDataOptions`,
 `UseTableUrlStateOptions`, `UseSavedViewsResult`, `UseSelectionOptions`,
 `UseColumnLayoutOptions`, `UseColumnLayoutStorageStateOptions` /
 `UseColumnLayoutStorageStateResult`, `UseColumnLayoutUrlStateOptions` /
-`UseColumnLayoutUrlStateResult`, `UseActiveFilterChipsOptions`,
+`UseColumnLayoutUrlStateResult`, `UseQuerySourceOptions`,
+`UseActiveFilterChipsOptions`,
 `UseExtraChipsOptions`, `UseBulkActionRunnerOptions`,
 `UseBulkBarStateOptions`, `UseInfiniteScrollOptions`,
 `UseScrollToTableTopOptions`, `UseTableVirtualizationOptions`,
@@ -323,10 +323,21 @@ full set: `UseDataTableOptions`, `UseFrontendDataOptions`,
 
 ## The adapter contract
 
-Everything the eight built-in adapters consume from `@adapttable/core`
-crosses the same public surface a ninth adapter would use — there are no
-private channels. This tier is aimed at adapter authors; app code rarely
-needs it.
+Everything the eight built-in adapters are made of ships from its own
+entry point, **`@adapttable/core/adapter`** — the same public surface a
+ninth adapter would use; there are no private channels. Same package,
+same semver promise as the main entry. This tier is aimed at adapter
+authors; app code rarely (if ever) imports from it:
+
+```ts
+import { useDataTableShell, paginationSlots } from "@adapttable/core/adapter";
+```
+
+A handful of names stay on the main entry even though adapters also use
+them, because app-facing signatures reach them (`PinSide` in the column
+layout state, `PaginationInfo` from `computePagination`, the
+`useDataTable` prop-getter payload types, `ResolvedPaginationMode`,
+`TableLayout`).
 
 **Orchestration.** `useDataTableShell(props, renderAutoForm)` is the whole
 shared engine behind a batteries-included `<DataTable>` — it resolves the

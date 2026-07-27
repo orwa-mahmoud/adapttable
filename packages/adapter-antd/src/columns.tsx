@@ -5,15 +5,17 @@ import {
   type ConfirmHandler,
   type EditableCellEditing,
   type GroupCollapseState,
-  headerGroupRow,
   type PinSide,
-  resolveDisabledReason,
   type RowAction,
   runRowAction,
   type SortDirection,
   type SortLevel,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  headerGroupRow,
+  resolveDisabledReason,
+} from "@adapttable/core/adapter";
 import { Button, type TableColumnsType, Tooltip, Typography } from "antd";
 import type {
   CSSProperties,

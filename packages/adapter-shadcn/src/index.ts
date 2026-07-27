@@ -20,10 +20,10 @@ export {
   type ChipLabelResolver,
   type ColumnFilter,
   type ColumnLayoutState,
-  type DataModeProps,
   type ExportCsvOptions,
   FILTER_TYPES,
   type TableQuery,
   type UseServerDataOptions,
   type UseTableDataOptions,
 } from "@adapttable/core";
+export { type DataModeProps } from "@adapttable/core/adapter";

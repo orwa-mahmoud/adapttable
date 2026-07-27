@@ -1,12 +1,14 @@
 import {
   type BulkAction,
-  bulkActionErrorMessage,
-  type BulkBarChromeProps,
-  resolveDisabledReason,
   type SelectionState,
   type TableLabels,
   useBulkActionRunner,
 } from "@adapttable/core";
+import {
+  bulkActionErrorMessage,
+  type BulkBarChromeProps,
+  resolveDisabledReason,
+} from "@adapttable/core/adapter";
 import { Button, Group, Stack, Text, Tooltip } from "@mantine/core";
 
 /** Selection toolbar: count, clear, and the configured bulk-action buttons. */

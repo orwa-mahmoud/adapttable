@@ -2,7 +2,7 @@ import {
   type TableBodyRegion,
   useDataTableShell,
   useMountStagger,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
 import { AutoFilterForm } from "./components/AutoFilterForm";

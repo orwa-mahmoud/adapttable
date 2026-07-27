@@ -3,18 +3,20 @@ import {
   type ConfirmHandler,
   type EditableCellEditing,
   type GroupedFlatEntry,
-  resolveDisabledReason,
-  resolveVirtualRows,
   type RowAction,
-  rowClickProps,
-  rowEditingSignature,
   type RowExpansionState,
   runRowAction,
   type TableLabels,
   type UseDataTableResult,
+} from "@adapttable/core";
+import {
+  resolveDisabledReason,
+  resolveVirtualRows,
+  rowClickProps,
+  rowEditingSignature,
   useSummaryCells,
   type VirtualTableRow,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import { Button, Card, Checkbox, Descriptions, Space } from "antd";
 import { memo, type ReactNode, useMemo } from "react";
 

@@ -22,7 +22,7 @@ const page = (items: Row[], total: number): Page => ({
   items,
   pagination: { total },
 });
-const selectPage = (p: Page) => ({ items: p.items, total: p.pagination.total });
+const selectPage = (p: Page) => ({ rows: p.items, total: p.pagination.total });
 
 function makeQuery(opts?: {
   pages?: Page[];
@@ -140,7 +140,7 @@ describe("useQuerySource", () => {
       ],
     });
     const { result } = mount(q, {
-      selectPage: (p) => ({ items: p.items }),
+      selectPage: (p) => ({ rows: p.items }),
       paginationMode: "infinite",
     });
     expect(result.current.rows).toHaveLength(2);
@@ -172,7 +172,7 @@ describe("useQuerySource", () => {
       ],
     });
     const { result } = mount(q, {
-      selectPage: (p) => ({ items: p.items }),
+      selectPage: (p) => ({ rows: p.items }),
       paginationMode: "paged",
     });
     expect(result.current.total).toBe(2);

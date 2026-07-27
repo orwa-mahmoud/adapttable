@@ -3,8 +3,8 @@ import {
   type EditableCellEditing,
   type EditableCellEditorCtrl,
   EditableCellGate,
-  focusEditorOnMount,
 } from "@adapttable/core";
+import { focusEditorOnMount } from "@adapttable/core/adapter";
 import { TextField } from "@radix-ui/themes";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 

@@ -3,13 +3,13 @@
  * branches in DataTable.tsx, components/chrome.tsx and components/tables.tsx
  * that the existing suites only hit on one side.
  */
-import type * as CoreModule from "@adapttable/core";
 import {
   createMemoryAdapter,
   defaultLabels,
-  useDataTableShell,
   useFrontendData,
 } from "@adapttable/core";
+import type * as AdapterModule from "@adapttable/core/adapter";
+import { useDataTableShell } from "@adapttable/core/adapter";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -32,15 +32,17 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 
-vi.mock("@adapttable/core", async (importOriginal) => {
-  const actual = await importOriginal<typeof CoreModule>();
+vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+  const actual = await importOriginal<typeof AdapterModule>();
   return {
     ...actual,
     useDataTableShell: vi.fn(actual.useDataTableShell),
   };
 });
 
-const actualCore = await vi.importActual<typeof CoreModule>("@adapttable/core");
+const actualCore = await vi.importActual<typeof AdapterModule>(
+  "@adapttable/core/adapter"
+);
 
 type Shell = ReturnType<typeof actualCore.useDataTableShell>;
 

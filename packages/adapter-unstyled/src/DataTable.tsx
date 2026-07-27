@@ -7,11 +7,10 @@ import {
   useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
-  useMountStagger,
-  useResolvedAdapter,
   useTableChrome,
   useTableData,
 } from "@adapttable/core";
+import { useMountStagger, useResolvedAdapter } from "@adapttable/core/adapter";
 import type { ReactElement, ReactNode, RefObject } from "react";
 import { useRef, useState } from "react";
 
@@ -85,7 +84,7 @@ function DataTableBody<TRow>({
   if (chrome.body === "skeleton") {
     return (
       <>
-        {props.slots?.skeleton ?? props.loadingState ?? (
+        {props.slots?.skeleton ?? (
           <LoadingState
             rows={props.skeletonRows ?? props.source.limit}
             columns={chrome.table.columns.length}
@@ -104,7 +103,7 @@ function DataTableBody<TRow>({
     const noResults = chrome.emptyVariant === "noResults";
     return (
       <>
-        {props.slots?.empty ?? props.emptyState ?? (
+        {props.slots?.empty ?? (
           <output data-adapttable-part="empty" className={classNames.empty}>
             {noResults ? labels.noResults : labels.noData}
             {noResults && (

@@ -85,7 +85,7 @@ describe("useDataTable", () => {
       ...cols,
       { key: "x", header: "X", hideOnMobile: true },
     ];
-    const { result } = mount("", { columns: mobileCols, isMobile: true });
+    const { result } = mount("", { columns: mobileCols, forceMobile: true });
     // x sits inside the identity-anchor window, but its explicit hide wins.
     expect(result.current.columns.map((c) => c.key)).toEqual(["name", "city"]);
   });

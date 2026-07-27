@@ -1,4 +1,5 @@
-import { pageSizeOptions, type ToolbarChromeProps } from "@adapttable/core";
+import { pageSizeOptions } from "@adapttable/core";
+import { type ToolbarChromeProps } from "@adapttable/core/adapter";
 import { Badge, Button, Group, Select, Text, TextInput } from "@mantine/core";
 import type { ReactNode } from "react";
 

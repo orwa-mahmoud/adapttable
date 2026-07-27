@@ -2,7 +2,6 @@ import {
   ACTIONS_COLUMN_KEY,
   type ColumnDef,
   type ConfirmHandler,
-  DEFAULT_CARD_SIZE_PX,
   type FilterRuntime,
   type GroupCollapseState,
   type GroupedFlatEntry,
@@ -10,7 +9,6 @@ import {
   makeExportCsvHandler,
   pageSizeOptions,
   resolveLabels,
-  rowClickProps,
   type RowExpansionState,
   type SelectionState,
   type TableLabels,
@@ -22,15 +20,19 @@ import {
   type UseDataTableResult,
   useFilterTriggerToggle,
   useInfiniteScroll,
-  useKeyedVirtualization,
-  useMountStagger,
-  useResolvedAdapter,
   type UseSavedViewsOptions,
   useTableChrome,
   useTableData,
   useTableVirtualization,
   windowGroupedEntries,
 } from "@adapttable/core";
+import {
+  DEFAULT_CARD_SIZE_PX,
+  rowClickProps,
+  useKeyedVirtualization,
+  useMountStagger,
+  useResolvedAdapter,
+} from "@adapttable/core/adapter";
 import {
   Button,
   Checkbox,

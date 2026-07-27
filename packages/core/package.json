@@ -48,6 +48,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./adapter": {
+      "import": {
+        "types": "./dist/adapter.d.ts",
+        "default": "./dist/adapter.js"
+      },
+      "require": {
+        "types": "./dist/adapter.d.cts",
+        "default": "./dist/adapter.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

@@ -34,7 +34,7 @@ export function People({ data }: { data: Person[] }) {
 }
 ```
 
-Dark mode follows Chakra's color mode; pass `colorScheme` to tint accents.
+Dark mode follows Chakra's color mode; pass `accentColor` to tint accents.
 Swap `useFrontendData` for `useQuerySource` to drive the same table from a
 server-paginated query.
 

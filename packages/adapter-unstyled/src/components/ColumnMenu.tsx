@@ -1,21 +1,23 @@
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import {
+  ACTIONS_COLUMN_KEY,
+  columnMenuRows,
+  columnReorderKeyProps,
+  useColumnDragState,
+} from "@adapttable/core";
 import type {
   ColumnDragState,
   ColumnMenuChromeProps,
   ColumnMenuLabels,
   ColumnMenuRow,
-  UseColumnLayoutResult,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import {
-  ACTIONS_COLUMN_KEY,
-  columnMenuRows,
-  columnReorderKeyProps,
   EyeIcon,
   GripIcon,
   nextPinSide,
   pinActionLabel,
   PinIcon,
-  useColumnDragState,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";

@@ -1,15 +1,17 @@
 import {
   type ActiveFilterChip,
-  bulkActionErrorMessage,
-  type BulkBarChromeProps,
   type Direction,
   pageSizeOptions,
   type PaginationInfo,
-  resolveDisabledReason,
   type TableLabels,
-  type ToolbarChromeProps,
   useBulkActionRunner,
 } from "@adapttable/core";
+import {
+  bulkActionErrorMessage,
+  type BulkBarChromeProps,
+  resolveDisabledReason,
+  type ToolbarChromeProps,
+} from "@adapttable/core/adapter";
 import {
   Alert,
   Badge,

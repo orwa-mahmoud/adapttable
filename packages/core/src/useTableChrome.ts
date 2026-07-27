@@ -313,7 +313,7 @@ export function useTableChrome<TRow>(
     tableLabel,
     labels,
     dir,
-    isMobile,
+    forceMobile: isMobile,
     mobileIdentityColumns,
     bulkActions,
     selectionGetId,
@@ -462,7 +462,7 @@ export function useTableChrome<TRow>(
       groupBy: effectiveGroupBy,
       columns: columnLayout.visibleColumns,
       getRowId,
-      collapsedIds: groupCollapse.collapsedIds,
+      collapsedGroupIds: groupCollapse.collapsedGroupIds,
       aggregates: props.groupAggregates,
     });
     return {

@@ -4,8 +4,8 @@ import {
   createMemoryAdapter,
   useChromeBodyData,
   useFrontendData,
-  type VirtualTableRow,
 } from "@adapttable/core";
+import { type VirtualTableRow } from "@adapttable/core/adapter";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";

@@ -2,15 +2,17 @@ import {
   type ColumnDef,
   type ConfirmHandler,
   type EditableCellEditing,
-  resolveDisabledReason,
   type RowAction,
+  runRowAction,
+  type TableLabels,
+} from "@adapttable/core";
+import {
+  resolveDisabledReason,
   rowClickProps,
   rowEditingSignature,
-  runRowAction,
   type SharedTableRenderProps,
-  type TableLabels,
   useSummaryCells,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import {
   ActionIcon,
   Button,

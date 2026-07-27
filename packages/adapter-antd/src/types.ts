@@ -1,10 +1,10 @@
 import type {
   BaseDataTableProps,
-  DataModeProps,
   UrlStateAdapter,
   UseSavedViewsOptions,
   UseTableDataOptions,
 } from "@adapttable/core";
+import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
 /** Overridable sub-components. */

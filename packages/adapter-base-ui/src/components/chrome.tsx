@@ -1,17 +1,19 @@
 import {
   type ActiveFilterChip,
-  type BulkBarChromeProps,
   type Direction,
-  FiltersIcon,
   pageSizeOptions,
   type PaginationInfo,
+  type TableLabels,
+} from "@adapttable/core";
+import {
+  type BulkBarChromeProps,
+  FiltersIcon,
   paginationSlots,
   resolveDisabledReason,
   SearchIcon,
-  type TableLabels,
   type ToolbarChromeProps,
   useBulkBarState,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import { Drawer } from "@base-ui/react/drawer";
 import { isValidElement, type ReactNode } from "react";
 

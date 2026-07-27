@@ -47,8 +47,8 @@ export interface UseDataTableOptions<TRow> {
   labels?: TableLabels;
   /** Text direction. Defaults to `"ltr"`. */
   dir?: Direction;
-  /** Whether the table is in its mobile layout. Defaults to `false`. */
-  isMobile?: boolean;
+  /** Render the mobile (card) layout. Defaults to `false`. */
+  forceMobile?: boolean;
   /**
    * Active locale — drives per-column `i18n` data-path resolution for
    * bare-key columns, exactly as it does under `<DataTable>`.
@@ -250,7 +250,7 @@ export function useDataTable<TRow>(
     tableLabel,
     labels: labelOverrides,
     dir = "ltr",
-    isMobile = false,
+    forceMobile: isMobile = false,
     mobileIdentityColumns = 3,
     searchDebounceMs = SEARCH_DEBOUNCE_MS,
     bulkActions,

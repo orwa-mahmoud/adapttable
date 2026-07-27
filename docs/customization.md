@@ -189,9 +189,7 @@ Replace whole sub-components on any adapter:
 
 `skeleton` replaces the first-load skeleton; `empty` replaces the
 empty-state. The error state is built-in (retry button included) — translate it
-via the `errorTitle` / `errorMessage` / `retry` labels. The unstyled adapter
-also accepts the equivalent top-level `emptyState` / `loadingState` props
-(the `slots` entry wins when both are set).
+via the `errorTitle` / `errorMessage` / `retry` labels.
 
 ## Density
 

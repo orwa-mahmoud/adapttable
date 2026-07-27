@@ -206,9 +206,11 @@ with `source` dev-warns and `source` wins.
 - The hooks behind the first two tiers — `useFrontendData` and
   `useServerData` — are exported for headless use; `useTableData` is the
   resolver that picks between them.
-- `useQuerySource` accepts `selectPage` (when your page shape isn't
-  `PaginatedResponse`), `baseParams` (static params merged into every call,
-  e.g. a parent scope id), and `sanitizeParams`. See
+- `useQuerySource` accepts `selectPage` (a `PageSelector` — project your
+  own page shape to `{ rows, total? }` when it isn't `PaginatedResponse`),
+  `baseParams` (static params merged into every call, e.g. a parent scope
+  id), and `sanitizeParams`. Its query argument is typed structurally as
+  `InfiniteQueryLike`, so TanStack Query stays a type-only peer. See
   [`examples/mui-backend.tsx`](../examples/mui-backend.tsx) for a complete
   runnable version.
 - On the server tier, `source.refetch()` re-emits the current query;

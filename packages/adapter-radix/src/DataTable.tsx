@@ -2,7 +2,7 @@ import {
   type TableBodyRegion,
   useDataTableShell,
   useMountStagger,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import { Box, Button, Flex, Progress, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 

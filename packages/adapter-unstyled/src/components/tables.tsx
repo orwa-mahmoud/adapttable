@@ -4,26 +4,28 @@ import {
   type ConfirmHandler,
   edgePinStyle,
   type EditableCellEditing,
-  headerGroupRow,
   PIN_Z,
-  type PinLeads,
   pinnedCellStyle,
+  type RowAction,
+  runRowAction,
+  type TableLabels,
+  tableMinWidth,
+  type UseDataTableResult,
+  useHorizontalOverflow,
+} from "@adapttable/core";
+import {
+  headerGroupRow,
+  type PinLeads,
   pinnedColumnWidth,
   type PinOffset,
   resolveDisabledReason,
   resolveVirtualRows,
-  type RowAction,
   rowClickProps,
   rowEditingSignature,
-  runRowAction,
   type SharedTableRenderProps,
-  type TableLabels,
-  tableMinWidth,
   tableRenderModel,
-  type UseDataTableResult,
-  useHorizontalOverflow,
   useSummaryCells,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import type { CSSProperties, MouseEvent, ReactElement, ReactNode } from "react";
 import { memo, useCallback, useMemo, useRef } from "react";
 

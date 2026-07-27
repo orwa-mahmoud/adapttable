@@ -1,15 +1,18 @@
-import type { ColumnMenuChromeProps, Direction } from "@adapttable/core";
+import type { Direction } from "@adapttable/core";
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
   columnReorderKeyProps,
+  useColumnDragState,
+} from "@adapttable/core";
+import type { ColumnMenuChromeProps } from "@adapttable/core/adapter";
+import {
   EyeIcon,
   GripIcon,
   nextPinSide,
   pinActionLabel,
   PinIcon,
-  useColumnDragState,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import {
   Box,
   Button,

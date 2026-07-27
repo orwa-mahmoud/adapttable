@@ -12,11 +12,10 @@ import {
   useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
-  useMountStagger,
-  useResolvedAdapter,
   useTableChrome,
   useTableData,
 } from "@adapttable/core";
+import { useMountStagger, useResolvedAdapter } from "@adapttable/core/adapter";
 import {
   Box,
   Button,

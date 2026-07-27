@@ -16,9 +16,9 @@ describe("useGroupCollapse", () => {
   it("expandAll / collapseAll", () => {
     const { result } = renderHook(() => useGroupCollapse());
     act(() => result.current.collapseAll(["a", "b"]));
-    expect(result.current.collapsedIds.size).toBe(2);
+    expect(result.current.collapsedGroupIds.size).toBe(2);
     act(() => result.current.expandAll());
-    expect(result.current.collapsedIds.size).toBe(0);
+    expect(result.current.collapsedGroupIds.size).toBe(0);
   });
 
   it("supports controlled collapsedGroupIds", () => {

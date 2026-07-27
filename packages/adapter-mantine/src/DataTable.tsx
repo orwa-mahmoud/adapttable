@@ -9,11 +9,11 @@ import {
   useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
-  useResolvedAdapter,
   type UseSavedViewsOptions,
   useTableChrome,
   useTableData,
 } from "@adapttable/core";
+import { useResolvedAdapter } from "@adapttable/core/adapter";
 import { Box, Button, Group, Paper, Progress, Stack } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
 import { type ReactNode, useMemo, useRef, useState } from "react";

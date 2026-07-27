@@ -39,6 +39,10 @@ adapters, and the silent traps became loud. Full guide:
   | `classNames.rowsPerPageSelect`             | `classNames.rowsPerPage`                          |
   | `classNames.pageButton`                    | `pagePrev` / `pageNext` / `pageNumber`            |
   | antd `virtualHeight` / `virtualWidth`      | removed — bound the scroller with `maxHeight`     |
+  | `PageSelector` returning `{ items }`       | `{ rows }`                                        |
+  | `GroupCollapseState.collapsedIds`          | `collapsedGroupIds`                               |
+  | `useDataTable` option `isMobile`           | `forceMobile`                                     |
+  | unstyled `emptyState` / `loadingState`     | `slots.empty` / `slots.skeleton`                  |
 
   ```tsx
   // before (v1)
@@ -92,6 +96,12 @@ adapters, and the silent traps became loud. Full guide:
 - **~30 internal plumbing exports were removed from `@adapttable/core`**
   (editing/grouping keyboard micro-steps, internal constants, layout math
   helpers). Everything the adapters use remains public and documented.
+
+- **The adapter-builder tier ships from `@adapttable/core/adapter`.**
+  `useDataTableShell`, the render prelude, chrome prop bundles, pinning
+  and pager math, keyed virtualization and the inline icons moved to the
+  new entry point; `@adapttable/core` keeps the app-facing API. Same
+  package, same semver promise — update imports if you consumed these.
 
 ### Features
 

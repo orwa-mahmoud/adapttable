@@ -1,11 +1,11 @@
 import {
   type Direction,
-  ExpandChevron,
   type GroupedFlatEntry,
   groupSelectionState,
   type SelectionState,
   type TableLabels,
 } from "@adapttable/core";
+import { ExpandChevron } from "@adapttable/core/adapter";
 import { Box, Card, HStack, IconButton, Table, Text } from "@chakra-ui/react";
 import type { ReactElement } from "react";
 

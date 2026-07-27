@@ -7,8 +7,10 @@ import { defineConfig } from "vite";
 // Resolve each @adapttable/* package to its TypeScript source so the showcase
 // always reflects the current library (and hot-reloads). The adapters are still
 // the REAL ones — each section mounts a genuine kit component, never a mock.
-const pkg = (rel: string) =>
-  fileURLToPath(new URL(`../../packages/${rel}/src/index.ts`, import.meta.url));
+const pkg = (rel: string, entry = "index") =>
+  fileURLToPath(
+    new URL(`../../packages/${rel}/src/${entry}.ts`, import.meta.url)
+  );
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
@@ -31,6 +33,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      // Longest key first: the bare "@adapttable/core" alias would otherwise
+      // swallow the subpath and resolve ".../index.ts/adapter".
+      "@adapttable/core/adapter": pkg("core", "adapter"),
       "@adapttable/core": pkg("core"),
       "@adapttable/mantine": pkg("adapter-mantine"),
       "@adapttable/mui": pkg("adapter-mui"),

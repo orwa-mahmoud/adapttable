@@ -179,7 +179,10 @@ describe("<DataTable> (unstyled)", () => {
   });
 
   it("renders a custom empty state", () => {
-    renderHarness({ rows: [], override: { emptyState: <div>nada</div> } });
+    renderHarness({
+      rows: [],
+      override: { slots: { empty: <div>nada</div> } },
+    });
     expect(screen.getByText("nada")).toBeInTheDocument();
   });
 
@@ -272,54 +275,13 @@ describe("<DataTable> (unstyled)", () => {
     ).toHaveLength(3);
   });
 
-  it("renders a loadingState override", () => {
+  it("renders a slots.skeleton override while loading", () => {
     renderHarness({
       rows: [],
       isLoading: true,
-      override: { loadingState: <div>load-custom</div> },
+      override: { slots: { skeleton: <div>load-custom</div> } },
     });
     expect(screen.getByText("load-custom")).toBeInTheDocument();
-  });
-
-  it("accepts slots.empty / slots.skeleton as aliases that take precedence", () => {
-    const { unmount } = renderHarness({
-      rows: [],
-      override: {
-        emptyState: <div>top-empty</div>,
-        slots: { empty: <div>slot-empty</div> },
-      },
-    });
-    // slots.empty wins over the top-level emptyState prop.
-    expect(screen.getByText("slot-empty")).toBeInTheDocument();
-    expect(screen.queryByText("top-empty")).toBeNull();
-    unmount();
-
-    renderHarness({
-      rows: [],
-      isLoading: true,
-      override: {
-        loadingState: <div>top-load</div>,
-        slots: { skeleton: <div>slot-load</div> },
-      },
-    });
-    expect(screen.getByText("slot-load")).toBeInTheDocument();
-    expect(screen.queryByText("top-load")).toBeNull();
-  });
-
-  it("falls back to emptyState / loadingState when slots are absent", () => {
-    const { unmount } = renderHarness({
-      rows: [],
-      override: { emptyState: <div>top-empty</div>, slots: {} },
-    });
-    expect(screen.getByText("top-empty")).toBeInTheDocument();
-    unmount();
-
-    renderHarness({
-      rows: [],
-      isLoading: true,
-      override: { loadingState: <div>top-load</div>, slots: {} },
-    });
-    expect(screen.getByText("top-load")).toBeInTheDocument();
   });
 
   it("renders the search icon glyph inside the search field", () => {

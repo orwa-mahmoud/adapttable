@@ -1,15 +1,17 @@
 import {
   type ActiveFilterChip,
-  bulkActionErrorMessage,
-  type BulkBarChromeProps,
   pageSizeOptions,
   type PaginationInfo,
-  paginationSlots,
-  resolveDisabledReason,
   type TableLabels,
   type TableSource,
   useBulkActionRunner,
 } from "@adapttable/core";
+import {
+  bulkActionErrorMessage,
+  type BulkBarChromeProps,
+  paginationSlots,
+  resolveDisabledReason,
+} from "@adapttable/core/adapter";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";

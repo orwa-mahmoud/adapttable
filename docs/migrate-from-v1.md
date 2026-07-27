@@ -24,6 +24,10 @@ through the rename table below.
 | `isMobile` prop                                               | `forceMobile`                                     | all adapters                                                  |
 | `labels.applyFilters`                                         | `labels.filtersDone`                              | labels (the button closes; filters apply live)                |
 | `SavedViewsMenuLabels` (and per-kit variants)                 | `SavedViewsLabels`                                | every adapter, one exported name                              |
+| `PageSelector` returning `{ items }`                          | `{ rows }`                                        | `useQuerySource` custom `selectPage`                          |
+| `GroupCollapseState.collapsedIds` (and the model option)      | `collapsedGroupIds`                               | headless grouping                                             |
+| `useDataTable` option `isMobile`                              | `forceMobile` (result field stays `isMobile`)     | headless tier                                                 |
+| `emptyState` / `loadingState` props                           | `slots.empty` / `slots.skeleton`                  | unstyled / shadcn (one override surface)                      |
 | `classNames.rowsPerPageSelect`                                | `classNames.rowsPerPage`                          | unstyled / shadcn                                             |
 | `classNames.pageButton`                                       | `pagePrev` / `pageNext` / `pageNumber`            | unstyled / shadcn (one key per rendered part)                 |
 | `data-adapttable-part="group-row/group-cell"` (header groups) | `header-group-row` / `header-group-cell`          | header groups; `group-row`/`group-cell` now mean ROW grouping |
@@ -31,6 +35,13 @@ through the rename table below.
 | antd `virtualHeight` / `virtualWidth`                         | removed — bound the scroller with `maxHeight`     | antd adapter                                                  |
 
 ## Behavior changes (and why)
+
+- **The adapter-builder tier moved to `@adapttable/core/adapter`.** The
+  ~65 exports only adapter implementations consume — `useDataTableShell`,
+  the render prelude, chrome prop bundles, pinning and pager math, the
+  inline icons — import from the new entry; `@adapttable/core` keeps the
+  app-facing API. _Why: autocomplete and docs at the main entry now show
+  only what app code is meant to use._
 
 - **React 18 works again.** v1.2 accidentally required React 19.2
   (`useEffectEvent`); v2 runs the declared `^18 || ^19` range and CI

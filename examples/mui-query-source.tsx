@@ -72,7 +72,7 @@ function Inner() {
     Page
   >({
     usePaginatedQuery: usePeopleQuery,
-    selectPage: (page) => ({ items: page.items, total: page.total }),
+    selectPage: (page) => ({ rows: page.items, total: page.total }),
   });
   return <DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
 }

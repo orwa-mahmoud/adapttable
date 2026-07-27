@@ -26,13 +26,24 @@ import ts from "typescript";
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_DIR = join(REPO_ROOT, "docs");
 
-/** Every published package: its export surface lives in src/index.ts. */
-const PACKAGES = readdirSync(join(REPO_ROOT, "packages"), {
+/**
+ * Every published package's export surface. Core has two entries — the
+ * app-facing API and the `/adapter` builder tier — and both are audited.
+ */
+const SURFACES = readdirSync(join(REPO_ROOT, "packages"), {
   withFileTypes: true,
 })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
-  .sort();
+  .sort()
+  .flatMap((pkg) =>
+    pkg === "core"
+      ? [
+          { label: "core", entry: join("core", "src", "index.ts") },
+          { label: "core/adapter", entry: join("core", "src", "adapter.ts") },
+        ]
+      : [{ label: pkg, entry: join(pkg, "src", "index.ts") }]
+  );
 
 const corpus = readdirSync(DOCS_DIR)
   .filter((name) => name.endsWith(".md"))
@@ -58,8 +69,8 @@ function exportsOf(program, checker, entryPath) {
 }
 
 function auditPackages() {
-  const entries = PACKAGES.map((pkg) =>
-    join(REPO_ROOT, "packages", pkg, "src", "index.ts")
+  const entries = SURFACES.map((surface) =>
+    join(REPO_ROOT, "packages", surface.entry)
   );
   const program = ts.createProgram(entries, {
     jsx: ts.JsxEmit.ReactJSX,
@@ -69,10 +80,10 @@ function auditPackages() {
     skipLibCheck: true,
   });
   const checker = program.getTypeChecker();
-  return PACKAGES.map((pkg, index) => {
+  return SURFACES.map((surface, index) => {
     const names = exportsOf(program, checker, entries[index]);
     const undocumented = new Set(names.filter((name) => !isDocumented(name)));
-    return { pkg, names, undocumented };
+    return { pkg: surface.label, names, undocumented };
   });
 }
 

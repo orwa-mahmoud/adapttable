@@ -1,10 +1,10 @@
 import type {
   BaseDataTableProps,
-  DataModeProps,
   TableSource,
   UrlStateAdapter,
   UseSavedViewsOptions,
 } from "@adapttable/core";
+import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
 /**
@@ -217,15 +217,12 @@ export interface DataTableClassNames {
 }
 
 /**
- * Overridable sub-components — the cross-adapter spelling of the
- * top-level `emptyState` / `loadingState` props. When both are supplied
- * the `slots` entry wins (`slots.empty ?? emptyState`,
- * `slots.skeleton ?? loadingState`).
+ * Overridable sub-components: the loading skeleton and the empty state.
  */
 export interface DataTableSlots {
-  /** Replace the empty-state (same node as `emptyState`). */
+  /** Replace the empty-state. */
   empty?: ReactNode;
-  /** Replace the loading skeleton (same node as `loadingState`). */
+  /** Replace the loading skeleton. */
   skeleton?: ReactNode;
 }
 
@@ -273,14 +270,7 @@ interface DataTablePropsBase<TRow> extends Omit<
   savedViews?: UseSavedViewsOptions;
   /** Per-part class name overrides. */
   classNames?: DataTableClassNames;
-  /** Empty-state node override. */
-  emptyState?: ReactNode;
-  /** Loading-state node override (replaces the skeleton on first load). */
-  loadingState?: ReactNode;
-  /**
-   * Cross-adapter spelling of `emptyState` / `loadingState`. Takes
-   * precedence over the top-level props when both are provided.
-   */
+  /** Replace sub-components (loading skeleton, empty state). */
   slots?: DataTableSlots;
   /**
    * Animate rows/cards on mount (dependency-free; honors reduced motion).

@@ -32,7 +32,7 @@ export interface InfiniteQueryLike<TPage> {
 
 /** Project a fetched page to its rows (and optional total). */
 export type PageSelector<TRow, TPage> = (page: TPage) => {
-  items: readonly TRow[];
+  rows: readonly TRow[];
   total?: number;
 };
 
@@ -75,7 +75,7 @@ export interface UseQuerySourceOptions<
 
 const defaultSelectPage: PageSelector<unknown, PaginatedResponse<unknown>> = (
   page
-) => ({ items: page.rows ?? [], total: page.total });
+) => ({ rows: page.rows ?? [], total: page.total });
 
 /**
  * Server-paginated {@link TableSource}. Wraps a caller's
@@ -155,15 +155,15 @@ export function useQuerySource<
       const lastPage = pages.at(-1)!;
       const projected = project(lastPage);
       return {
-        rows: projected.items,
-        total: projected.total ?? projected.items.length,
+        rows: projected.rows,
+        total: projected.total ?? projected.rows.length,
       };
     }
     const acc: TRow[] = [];
     let lastTotal: number | undefined;
     for (const pg of pages) {
       const projected = project(pg);
-      acc.push(...projected.items);
+      acc.push(...projected.rows);
       if (projected.total !== undefined) lastTotal = projected.total;
     }
     // Mirror the paged branch / useFrontendData: when the source reports no

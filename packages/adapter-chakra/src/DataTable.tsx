@@ -2,7 +2,7 @@ import {
   type TableBodyRegion,
   useDataTableShell,
   useMountStagger,
-} from "@adapttable/core";
+} from "@adapttable/core/adapter";
 import { Box, Button, Flex, Progress, Stack, Text } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
