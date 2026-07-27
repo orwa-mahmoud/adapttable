@@ -1,11 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import type { ColumnDef } from "../types";
 import { createMemoryAdapter } from "../url/adapter";
 import { resetDevWarnings } from "../utils/devWarn";
-import { useServerData } from "./useServerData";
-import { useTableData } from "./useTableData";
+import { useFrontendData } from "./useFrontendData";
+import { type TableQuery, useServerData } from "./useServerData";
+import { type DataModeProps, useTableData } from "./useTableData";
 
 interface Row {
   id: string;
@@ -141,6 +142,117 @@ describe("useTableData — tier resolution", () => {
       expect.stringContaining("no data tier provided")
     );
     warn.mockRestore();
+  });
+});
+
+describe("useTableData — explicit mode", () => {
+  it("mode='frontend' keeps local processing and notifies without rerouting", async () => {
+    const onQueryChange = vi.fn();
+    // limit=2 → two real pages, so a page change actually commits.
+    const adapter = createMemoryAdapter("limit=2");
+    const { result } = renderHook(() =>
+      useTableData<Row>({
+        data: ROWS,
+        mode: "frontend",
+        onQueryChange,
+        columns,
+        adapter,
+        paginationMode: "paged",
+      })
+    );
+    // The table still processes data itself (frontend tier)…
+    expect(result.current.source.rows).toHaveLength(2);
+    // …and the notification NEVER fires on mount.
+    expect(onQueryChange).not.toHaveBeenCalled();
+
+    // Sort commit → one notification with the consolidated query.
+    act(() => result.current.source.setSort("name", "asc"));
+    await waitFor(() => expect(onQueryChange).toHaveBeenCalledTimes(1));
+    expect(onQueryChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortBy: "name", sortDir: "asc" }),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+    // Rows are STILL locally sorted — the handler observed, not rerouted.
+    expect(result.current.source.rows[0]?.name).toBe("Alice");
+
+    // Filter, page and search commits each notify too.
+    act(() => result.current.source.setExtra("status", "active"));
+    await waitFor(() => expect(onQueryChange).toHaveBeenCalledTimes(2));
+    expect(onQueryChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ filters: { status: "active" } }),
+      expect.anything()
+    );
+    act(() => result.current.source.setExtra("status", undefined));
+    await waitFor(() => expect(onQueryChange).toHaveBeenCalledTimes(3));
+    act(() => result.current.source.setPage(2));
+    await waitFor(() => expect(onQueryChange).toHaveBeenCalledTimes(4));
+    expect(onQueryChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
+    act(() => result.current.source.setSearch("ali"));
+    await waitFor(() => expect(onQueryChange).toHaveBeenCalledTimes(5));
+    expect(onQueryChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: "ali" }),
+      expect.anything()
+    );
+  });
+
+  it("mode='server' selects the server tier explicitly", () => {
+    const onQueryChange = vi.fn();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() =>
+      useTableData<Row>({
+        data: ROWS,
+        total: 30,
+        mode: "server",
+        onQueryChange,
+        columns,
+        adapter,
+      })
+    );
+    // Server tier: rows pass through untouched, mount fire happens.
+    expect(result.current.source.rows).toHaveLength(3);
+    expect(result.current.source.total).toBe(30);
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("mode together with source dev-warns and source wins", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    resetDevWarnings();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const prebuilt = useFrontendData<Row>({
+        data: ROWS,
+        adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableData<Row>({
+        source: prebuilt,
+        mode: "frontend",
+        columns,
+        adapter,
+      });
+    });
+    expect(result.current.source.rows).toHaveLength(3);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("`mode` is ignored when `source` is provided")
+    );
+    warn.mockRestore();
+    resetDevWarnings();
+  });
+
+  it("mode='server' without onQueryChange does not compile", () => {
+    // Compile-time contract: the union's server branch REQUIRES the
+    // handler; the frontend branch forbids mode="server".
+    expectTypeOf<{ mode: "server" }>().not.toExtend<DataModeProps<Row>>();
+    expectTypeOf<{
+      mode: "server";
+      onQueryChange: (q: TableQuery, i: { signal: AbortSignal }) => void;
+    }>().toExtend<DataModeProps<Row>>();
+    expectTypeOf<{ mode: "frontend" }>().toExtend<DataModeProps<Row>>();
+    expectTypeOf<object>().toExtend<DataModeProps<Row>>();
   });
 });
 

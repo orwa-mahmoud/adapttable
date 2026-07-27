@@ -49,7 +49,7 @@ const theme = createTheme();
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
 function Harness(props: {
-  override?: Partial<Parameters<typeof DataTable<Row>>[0]>;
+  override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }) {
   const source = useFrontendData<Row>({
     data: PEOPLE,
@@ -68,7 +68,7 @@ function Harness(props: {
 }
 
 function renderTable(
-  override: Partial<Parameters<typeof DataTable<Row>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
   url = ""
 ) {
   adapter = createMemoryAdapter(url);

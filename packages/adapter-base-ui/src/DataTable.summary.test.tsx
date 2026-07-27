@@ -42,13 +42,15 @@ const GROUPED: ColumnDef<Person>[] = [
 ];
 
 /** Everything that enables the leading/trailing edge columns at once. */
-const EDGES: Partial<DataTableProps<Person>> = {
+const EDGES: Partial<Omit<DataTableProps<Person>, "mode">> = {
   bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   renderRowDetail: (row) => <div>Detail {row.id}</div>,
 };
 
-function renderTable(override: Partial<DataTableProps<Person>> = {}) {
+function renderTable(
+  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+) {
   return render(
     <DataTable<Person>
       data={PEOPLE}

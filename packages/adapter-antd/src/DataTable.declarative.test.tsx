@@ -26,7 +26,7 @@ let adapter: ReturnType<typeof createMemoryAdapter>;
 
 function Harness(props: {
   columns?: ColumnDef<Row>[];
-  override?: Partial<Parameters<typeof DataTable<Row>>[0]>;
+  override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }) {
   const columns = props.columns ?? baseColumns;
   const source = useFrontendData<Row>({

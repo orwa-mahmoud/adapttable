@@ -1,5 +1,6 @@
 import type {
   BaseDataTableProps,
+  DataModeProps,
   UrlStateAdapter,
   UseSavedViewsOptions,
   UseTableDataOptions,
@@ -15,12 +16,12 @@ export interface DataTableSlots {
 }
 
 /** Props for the Ant Design `<DataTable>`. */
-export interface DataTableProps<TRow>
+interface DataTablePropsBase<TRow>
   extends
     Omit<BaseDataTableProps<TRow>, "source">,
     Pick<
       UseTableDataOptions<TRow>,
-      "source" | "data" | "total" | "loading" | "onQueryChange" | "urlKey"
+      "source" | "data" | "total" | "loading" | "urlKey"
     > {
   /**
    * URL-state backend for the built-in `data` / `onQueryChange` tiers.
@@ -65,3 +66,12 @@ export interface DataTableProps<TRow>
    */
   animate?: boolean;
 }
+
+/**
+ * Props for the antd `<DataTable>`: the base surface intersected with
+ * core's data-mode union, so `mode="server"` requires `onQueryChange`
+ * at compile time and `mode="frontend"` turns it into a pure
+ * notification.
+ */
+export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
+  DataModeProps<TRow>;

@@ -26,7 +26,7 @@ const renderRowDetail = (row: Row) => <div>Detail for {row.name}</div>;
 
 interface HarnessProps {
   isMobile?: boolean;
-  override?: Partial<Parameters<typeof DataTable<Row>>[0]>;
+  override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;

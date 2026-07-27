@@ -73,7 +73,9 @@ const axeOpts = {
 };
 const AXE_TIMEOUT_MS = 20_000;
 
-function renderTable(override: Partial<DataTableProps<Person>> = {}) {
+function renderTable(
+  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+) {
   return render(
     <DataTable<Person>
       data={PEOPLE}

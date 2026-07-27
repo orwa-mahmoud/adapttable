@@ -1,9 +1,9 @@
 import type {
   BaseDataTableProps,
+  DataModeProps,
   TableSource,
   UrlStateAdapter,
   UseSavedViewsOptions,
-  UseTableDataOptions,
 } from "@adapttable/core";
 import type { ReactNode } from "react";
 
@@ -171,7 +171,7 @@ export interface DataTableSlots {
 }
 
 /** Props for the unstyled `<DataTable>`. */
-export interface DataTableProps<TRow> extends Omit<
+interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {
@@ -190,12 +190,6 @@ export interface DataTableProps<TRow> extends Omit<
   total?: number;
   /** Server tier: request in flight. */
   loading?: boolean;
-  /**
-   * Server tier: fired with the consolidated query (page, search, sort,
-   * filters) whenever it changes — including once on mount with the
-   * URL-restored values. The caller fetches and hands back `data` + `total`.
-   */
-  onQueryChange?: NonNullable<UseTableDataOptions<TRow>["onQueryChange"]>;
   /**
    * URL-state adapter for the managed tiers (router integration, memory
    * adapter for tests/SSR). Defaults to the browser History API.
@@ -233,3 +227,12 @@ export interface DataTableProps<TRow> extends Omit<
    */
   animate?: boolean;
 }
+
+/**
+ * Props for the unstyled `<DataTable>`: the base surface intersected
+ * with core's data-mode union, so `mode="server"` requires
+ * `onQueryChange` at compile time and `mode="frontend"` turns it into a
+ * pure notification.
+ */
+export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
+  DataModeProps<TRow>;

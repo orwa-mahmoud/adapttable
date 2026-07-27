@@ -30,7 +30,9 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 
-function mount(override: Partial<Parameters<typeof DataTable<Row>>[0]> = {}) {
+function mount(
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {}
+) {
   const adapter = createMemoryAdapter("");
   function Harness() {
     const source = useFrontendData<Row>({

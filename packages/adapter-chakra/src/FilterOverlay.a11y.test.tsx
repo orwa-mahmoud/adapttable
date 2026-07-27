@@ -67,7 +67,9 @@ const axeOpts = {
 };
 const AXE_TIMEOUT_MS = 20_000;
 
-function renderTable(override: Partial<DataTableProps<Person>> = {}) {
+function renderTable(
+  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+) {
   return render(
     <ChakraProvider value={defaultSystem}>
       <DataTable<Person>

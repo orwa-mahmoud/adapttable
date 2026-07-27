@@ -18,9 +18,14 @@ import type {
 } from "../types";
 import type { UseTableUrlStateOptions } from "../url/useTableUrlState";
 import { devWarn } from "../utils/devWarn";
+import { stableKey } from "../utils/stableKey";
 import type { TableSource } from "./TableSource";
 import { useFrontendData } from "./useFrontendData";
-import { useServerData } from "./useServerData";
+import {
+  type TableQuery,
+  useServerData,
+  type UseServerDataOptions,
+} from "./useServerData";
 
 /** Options for {@link useTableData}. */
 export interface UseTableDataOptions<TRow> extends Pick<
@@ -37,6 +42,14 @@ export interface UseTableDataOptions<TRow> extends Pick<
   loading?: boolean;
   /** Forwarded error. */
   error?: Error | null;
+  /**
+   * Explicit data mode. `"server"` makes `onQueryChange` the data
+   * contract (the caller fetches); `"frontend"` keeps the table's own
+   * data processing and turns `onQueryChange` into a pure notification.
+   * Absent, the tier is inferred exactly as before: `data` alone →
+   * frontend; `data` + `onQueryChange` → server; `source` → source tier.
+   */
+  mode?: "frontend" | "server";
   /** Server tier: see {@link UseServerDataOptions.onQueryChange}. */
   onQueryChange?: NonNullable<
     Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]
@@ -67,17 +80,57 @@ export interface UseTableDataResult<TRow> {
 
 type DataTier = "source" | "server" | "frontend";
 
-function resolveTier(source: unknown, onQueryChange: unknown): DataTier {
+/**
+ * The public `mode` prop surface, shared by every batteries-included
+ * `<DataTable>`: a discriminated union so `mode="server"` REQUIRES
+ * `onQueryChange` at compile time, while `mode="frontend"` (or no mode
+ * at all) keeps it optional — as a pure notification and as the legacy
+ * inference trigger respectively.
+ *
+ * @typeParam TRow - The row type.
+ */
+export type DataModeProps<TRow> =
+  | {
+      /** The table owns the query state; the CALLER fetches. */
+      mode: "server";
+      /** The data contract: run the request, hand back `data` + `total`. */
+      onQueryChange: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
+    }
+  | {
+      /**
+       * The table processes `data` itself. Omit `mode` for the inferred
+       * tiers (`data` + `onQueryChange` still means server).
+       */
+      mode?: "frontend";
+      /**
+       * With `mode="frontend"`: a pure notification, fired on every
+       * committed sort / filter / page / search change and never on
+       * mount. Without `mode`: providing it selects the server tier.
+       */
+      onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
+    };
+
+function resolveTier(
+  source: unknown,
+  mode: "frontend" | "server" | undefined,
+  onQueryChange: unknown
+): DataTier {
   if (source) return "source";
-  if (onQueryChange) return "server";
-  return "frontend";
+  if (mode) return mode;
+  return onQueryChange ? "server" : "frontend";
 }
 
 function warnTierMisuse(
   source: unknown,
+  mode: "frontend" | "server" | undefined,
   data: unknown,
   onQueryChange: unknown
 ): void {
+  if (source && mode) {
+    devWarn(
+      "`mode` is ignored when `source` is provided — the prebuilt source wins. Pass one data tier."
+    );
+  }
   if (source && (data || onQueryChange)) {
     devWarn(
       "both `source` and `data`/`onQueryChange` were provided — using `source`. Pass one data tier."
@@ -88,6 +141,51 @@ function warnTierMisuse(
       "no data tier provided — pass `data` (frontend), `data` + `onQueryChange` (server) or `source`."
     );
   }
+}
+
+/**
+ * Notify-only `onQueryChange` for the explicit frontend mode: fires with
+ * the consolidated {@link TableQuery} on every COMMITTED state change —
+ * sort, filter, page, page size, search — and never on mount. The
+ * previous call's signal aborts when a newer notification supersedes it,
+ * mirroring the server tier's contract.
+ */
+function useQueryNotification<TRow>(
+  source: TableSource<TRow>,
+  handler: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]> | undefined
+): void {
+  const { page, limit, search, sortBy, sortDir, sortLevels, extra } = source;
+  const query = useMemo<TableQuery>(
+    () => ({
+      page,
+      limit,
+      search,
+      sortBy,
+      sortDir,
+      sortLevels: sortLevels ?? [],
+      filters: extra,
+    }),
+    [page, limit, search, sortBy, sortDir, sortLevels, extra]
+  );
+  const queryKey = stableKey(query);
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
+  const queryRef = useRef(query);
+  queryRef.current = query;
+  // Primed with the mount key, so the first firing needs a REAL change.
+  const lastKeyRef = useRef(queryKey);
+  const controllerRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (lastKeyRef.current === queryKey) return;
+    lastKeyRef.current = queryKey;
+    const notify = handlerRef.current;
+    if (!notify) return;
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    void notify(queryRef.current, { signal: controller.signal });
+    return () => controller.abort();
+  }, [queryKey]);
 }
 
 /** True when the `filters` prop is the declarative array form. */
@@ -121,6 +219,7 @@ export function useTableData<TRow>(
     total = 0,
     loading,
     error,
+    mode,
     onQueryChange,
     columns,
     filters,
@@ -193,8 +292,8 @@ export function useTableData<TRow>(
     };
   }, [runtime.defs]);
 
-  const mode = resolveTier(source, onQueryChange);
-  warnTierMisuse(source, data, onQueryChange);
+  const tier = resolveTier(source, mode, onQueryChange);
+  warnTierMisuse(source, mode, data, onQueryChange);
 
   const combinedFilterFn = useMemo(
     () =>
@@ -213,8 +312,8 @@ export function useTableData<TRow>(
   );
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
-    enabled: mode === "frontend" ? urlOptions.enabled : false,
-    data: mode === "frontend" ? (data ?? []) : [],
+    enabled: tier === "frontend" ? urlOptions.enabled : false,
+    data: tier === "frontend" ? (data ?? []) : [],
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
     arrayExtraKeys: runtime.arrayExtraKeys,
@@ -227,19 +326,26 @@ export function useTableData<TRow>(
   });
   const server = useServerData<TRow>({
     ...urlOptions,
-    enabled: mode === "server" ? urlOptions.enabled : false,
-    rows: mode === "server" ? (data ?? []) : [],
+    enabled: tier === "server" ? urlOptions.enabled : false,
+    rows: tier === "server" ? (data ?? []) : [],
     total,
     loading,
     error,
-    onQueryChange: mode === "server" ? onQueryChange : undefined,
+    onQueryChange: tier === "server" ? onQueryChange : undefined,
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
   });
 
+  // Explicit frontend mode turns `onQueryChange` into a pure notification
+  // over the frontend source's committed state.
+  useQueryNotification(
+    frontend,
+    tier === "frontend" && mode === "frontend" ? onQueryChange : undefined
+  );
+
   let resolved: TableSource<TRow>;
   if (source) resolved = source;
-  else if (mode === "server") resolved = server;
+  else if (tier === "server") resolved = server;
   else resolved = frontend;
 
   return { source: resolved, runtime };

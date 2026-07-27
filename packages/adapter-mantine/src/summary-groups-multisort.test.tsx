@@ -40,7 +40,7 @@ const CHROME_PROPS = {
 };
 
 function renderTable(
-  override: Partial<Parameters<typeof DataTable<Person>>[0]> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <MantineProvider>

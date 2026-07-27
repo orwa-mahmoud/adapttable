@@ -35,7 +35,9 @@ const bulkActions = [
   { key: "export", label: "Export", onClick: () => undefined },
 ];
 
-function mount(override: Partial<Parameters<typeof DataTable<Row>>[0]> = {}) {
+function mount(
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {}
+) {
   const adapter = createMemoryAdapter("");
   function Harness() {
     const source = useFrontendData<Row>({

@@ -48,7 +48,7 @@ function Harness(props: {
   refetch?: () => void;
   isLoading?: boolean;
   isFetching?: boolean;
-  override?: Partial<Parameters<typeof DataTable<Row>>[0]>;
+  override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
   onSource?: (s: TableSource<Row>) => void;
 }) {
   const source = useFrontendData<Row>({
@@ -1567,7 +1567,7 @@ const TYPE_FILTERS: FilterDef<Person>[] = [
 ];
 
 function renderZero(
-  override: Partial<Parameters<typeof DataTable<Person>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {},
   url = ""
 ) {
   adapter = createMemoryAdapter(url);

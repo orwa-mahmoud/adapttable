@@ -64,7 +64,7 @@ function mockBodyData(rows: VirtualTableRow<Row>[], padding: number) {
 }
 
 function mount(
-  override: Partial<Parameters<typeof DataTable<Row>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
   url = "",
   mode: "paged" | "infinite" = "paged"
 ) {

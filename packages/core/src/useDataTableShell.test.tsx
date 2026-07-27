@@ -154,6 +154,32 @@ describe("useDataTableShell", () => {
     expect(result.current.toolbarProps.searchPlaceholder).toBe("Search…");
   });
 
+  it("forwards mode and prefetch (previously dead surface)", () => {
+    const onQueryChange = vi.fn();
+    const prefetch = vi.fn();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() =>
+      useDataTableShell(
+        {
+          data: ROWS,
+          mode: "frontend",
+          onQueryChange,
+          prefetch,
+          columns,
+          rowKey,
+          urlAdapter: adapter,
+        },
+        noForm
+      )
+    );
+    // mode="frontend" reached useTableData: local processing kept, and
+    // the notification did NOT fire on mount (server mode would have).
+    expect(result.current.source.rows).toHaveLength(2);
+    expect(onQueryChange).not.toHaveBeenCalled();
+    // prefetch reaches the table renderer's prop bundle.
+    expect(result.current.tableProps.prefetch).toBe(prefetch);
+  });
+
   it("covers a prebuilt source and a live URL adapter", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() => {

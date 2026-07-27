@@ -50,7 +50,7 @@ function Harness(props: {
   refetch?: () => void;
   isLoading?: boolean;
   isFetching?: boolean;
-  override?: Partial<Parameters<typeof DataTable<Row>>[0]>;
+  override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }) {
   const source = useFrontendData<Row>({
     data: props.rows ?? ROWS,

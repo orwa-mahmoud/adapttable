@@ -24,7 +24,7 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const AXE_TIMEOUT_MS = 20_000;
 
 function renderTable(
-  props: Partial<Parameters<typeof DataTable<Row>>[0]> = {}
+  props: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {}
 ) {
   function Harness() {
     const source = useFrontendData<Row>({

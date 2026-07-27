@@ -1,9 +1,9 @@
 import type {
   BaseDataTableProps,
+  DataModeProps,
   TableSource,
   UrlStateAdapter,
   UseSavedViewsOptions,
-  UseServerDataOptions,
 } from "@adapttable/core";
 import type { ReactNode } from "react";
 
@@ -54,7 +54,7 @@ export type RadixAccentColor =
   | "sky";
 
 /** Props for the Radix Themes `<DataTable>`. */
-export interface DataTableProps<TRow> extends Omit<
+interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {
@@ -75,11 +75,6 @@ export interface DataTableProps<TRow> extends Omit<
   total?: number;
   /** Server tier: a request is in flight. */
   loading?: boolean;
-  /**
-   * Server tier: fired with the consolidated query whenever it changes —
-   * including once on mount with the URL-restored values.
-   */
-  onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
   /**
    * URL-state backend for the built-in tiers. Defaults to the browser
    * History API; pass a router adapter (or a memory adapter) to integrate.
@@ -118,3 +113,12 @@ export interface DataTableProps<TRow> extends Omit<
    */
   animate?: boolean;
 }
+
+/**
+ * Props for the Radix Themes `<DataTable>`: the base surface intersected
+ * with core's data-mode union, so `mode="server"` requires
+ * `onQueryChange` at compile time and `mode="frontend"` turns it into a
+ * pure notification.
+ */
+export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
+  DataModeProps<TRow>;

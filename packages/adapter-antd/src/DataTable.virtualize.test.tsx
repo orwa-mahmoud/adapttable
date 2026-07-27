@@ -53,7 +53,7 @@ beforeEach(async () => {
 });
 
 function mount(
-  override: Partial<Parameters<typeof DataTable<Row>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
   url = "limit=100"
 ) {
   adapter = createMemoryAdapter(url);

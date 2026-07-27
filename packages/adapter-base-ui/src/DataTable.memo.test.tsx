@@ -29,7 +29,9 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 
-function mount(override: Partial<Parameters<typeof DataTable<Row>>[0]> = {}) {
+function mount(
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {}
+) {
   const adapter = createMemoryAdapter("");
   function Harness() {
     const source = useFrontendData<Row>({
@@ -64,6 +66,15 @@ describe("<DataTable> (Base UI) desktop row memoization", () => {
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Bob")).toBeInTheDocument();
     expect(accessor).not.toHaveBeenCalled();
+  });
+
+  it("prefetch reaches the rendered rows through the shell", () => {
+    const prefetch = vi.fn();
+    mount({ prefetch });
+    fireEvent.mouseEnter(screen.getByText("Alice").closest("tr")!);
+    expect(prefetch).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Alice" })
+    );
   });
 
   it("does not re-invoke accessors when hovering a row without prefetch", () => {

@@ -32,7 +32,7 @@ const columns: ColumnDef<Row>[] = [
 ];
 
 function mount(
-  override: Partial<Parameters<typeof DataTable<Row>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
   opts: {
     mode?: "paged" | "infinite";
     isMobile?: boolean;

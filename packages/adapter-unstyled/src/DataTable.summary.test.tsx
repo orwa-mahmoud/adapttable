@@ -33,7 +33,7 @@ let lastSource: TableSource<Row>;
 function Harness(props: {
   columns?: ColumnDef<Row>[];
   isMobile?: boolean;
-  override?: Partial<Parameters<typeof DataTable<Row>>[0]>;
+  override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }) {
   const cols = props.columns ?? columns;
   const source = useFrontendData<Row>({ data: ROWS, adapter, columns: cols });

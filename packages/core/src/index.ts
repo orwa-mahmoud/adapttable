@@ -99,6 +99,7 @@ export {
   type UseServerDataOptions,
 } from "./source/useServerData";
 export {
+  type DataModeProps,
   isDeclarativeFilters,
   useTableData,
   type UseTableDataOptions,

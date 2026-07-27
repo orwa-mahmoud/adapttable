@@ -27,7 +27,7 @@ const columns: ColumnDef<Row>[] = [
 const renderRowDetail = (row: Row) => <div>detail-{row.name}</div>;
 
 function mount(
-  override: Partial<Parameters<typeof DataTable<Row>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
   opts: { isMobile?: boolean } = {}
 ) {
   const adapter = createMemoryAdapter("");

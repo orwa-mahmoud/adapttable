@@ -48,7 +48,9 @@ const COLUMNS: ColumnDef<Person>[] = [
   { key: "status", filter: { type: "select", options: STATUS_OPTIONS } },
 ];
 
-function renderTable(override: Partial<DataTableProps<Person>> = {}) {
+function renderTable(
+  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+) {
   return render(
     <DataTable<Person>
       data={PEOPLE}

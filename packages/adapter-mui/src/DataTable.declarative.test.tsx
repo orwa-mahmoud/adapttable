@@ -83,7 +83,7 @@ const FILTERS: FilterDef<Person>[] = [
 const theme = createTheme();
 
 function mountTable(
-  override: Partial<Parameters<typeof DataTable<Person>>[0]> = {},
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {},
   url = ""
 ) {
   const adapter = createMemoryAdapter(url);

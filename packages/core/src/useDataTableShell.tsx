@@ -6,8 +6,11 @@ import { makeExportCsvHandler } from "./export/tableCsv";
 import type { FilterDef } from "./filters/filterDefs";
 import type { BaseDataTableProps } from "./props";
 import type { TableSource } from "./source/TableSource";
-import type { UseServerDataOptions } from "./source/useServerData";
-import { isDeclarativeFilters, useTableData } from "./source/useTableData";
+import {
+  type DataModeProps,
+  isDeclarativeFilters,
+  useTableData,
+} from "./source/useTableData";
 import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
 import {
   useChromeBodyData,
@@ -37,15 +40,13 @@ export type DataTableShellProps<TRow> = Omit<
   total?: number;
   /** Server tier: a request is in flight. */
   loading?: boolean;
-  /** Server tier: consolidated-query callback. */
-  onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
   /** URL-state backend (defaults to the History API). */
   urlAdapter?: UrlStateAdapter;
   /** Sync table state to the URL (default `true`). */
   urlSync?: boolean;
   /** Namespace for this table's URL params. */
   urlKey?: string;
-};
+} & DataModeProps<TRow>;
 
 /**
  * The whole shared orchestration behind a batteries-included `<DataTable>`:
@@ -86,6 +87,7 @@ export function useDataTableShell<TRow>(
     data: props.data,
     total: props.total,
     loading: props.loading,
+    mode: props.mode,
     onQueryChange: props.onQueryChange,
     adapter: urlAdapter,
     enabled: props.urlSync,
@@ -159,6 +161,7 @@ export function useDataTableShell<TRow>(
     columnWidths: chrome.columnLayout.state.widths,
     resizeLabel: table.labels.resizeColumn,
     onRowClick: props.onRowClick,
+    prefetch: props.prefetch,
     rowClassName: props.rowClassName,
     renderRowDetail: props.renderRowDetail,
     summaryRow: props.summaryRow,

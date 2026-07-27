@@ -22,7 +22,7 @@ const columns: ColumnDef<Row>[] = [
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 function renderTable(
-  props: Partial<Parameters<typeof DataTable<Row>>[0]> = {}
+  props: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {}
 ) {
   function Harness() {
     const source = useFrontendData<Row>({
