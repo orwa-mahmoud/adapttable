@@ -30,7 +30,7 @@ import {
 /** Options for {@link useTableData}. */
 export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
-  "adapter" | "enabled" | "defaults" | "urlKey"
+  "adapter" | "enabled" | "urlSync" | "defaults" | "urlKey"
 > {
   /** Full-control tier: a prebuilt source (e.g. `useBackendData`). */
   source?: TableSource<TRow>;
@@ -312,7 +312,8 @@ export function useTableData<TRow>(
   );
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
-    enabled: tier === "frontend" ? urlOptions.enabled : false,
+    urlSync:
+      tier === "frontend" ? (urlOptions.urlSync ?? urlOptions.enabled) : false,
     data: tier === "frontend" ? (data ?? []) : [],
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
@@ -326,7 +327,8 @@ export function useTableData<TRow>(
   });
   const server = useServerData<TRow>({
     ...urlOptions,
-    enabled: tier === "server" ? urlOptions.enabled : false,
+    urlSync:
+      tier === "server" ? (urlOptions.urlSync ?? urlOptions.enabled) : false,
     rows: tier === "server" ? (data ?? []) : [],
     total,
     loading,

@@ -96,7 +96,7 @@ describe("useColumnLayoutUrlState", () => {
 
   it("keeps the layout local when disabled (no adapter)", () => {
     const { result } = renderHook(() =>
-      useColumnLayoutUrlState({ enabled: false })
+      useColumnLayoutUrlState({ urlSync: false })
     );
     act(() => {
       result.current.onLayoutChange({

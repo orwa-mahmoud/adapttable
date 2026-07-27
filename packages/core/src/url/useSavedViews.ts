@@ -42,7 +42,7 @@ export interface UseSavedViewsOptions {
    * URL sync off.
    * @defaultValue true
    */
-  enabled?: boolean;
+  urlSync?: boolean;
 }
 
 /** Result of {@link useSavedViews}. */
@@ -124,9 +124,9 @@ export function useSavedViews({
   storage,
   adapter,
   urlKey,
-  enabled = true,
+  urlSync = true,
 }: UseSavedViewsOptions): UseSavedViewsResult {
-  const resolved = useResolvedAdapter(adapter, enabled);
+  const resolved = useResolvedAdapter(adapter, urlSync);
   const ns = urlKey ? `${urlKey}.` : "";
   const backend = useMemo<LayoutStorage | undefined>(() => {
     if (storage) return storage;

@@ -268,7 +268,7 @@ describe("useTableData / useServerData — server tier", () => {
         onQueryChange,
         columns,
         adapter,
-        enabled: true,
+        urlSync: true,
       })
     );
     expect(result.current.source.rows).toEqual([]);

@@ -42,6 +42,8 @@ export interface UseTableUrlStateOptions {
    * of the URL — the table still works fully, it just isn't shareable.
    * Defaults to `true`.
    */
+  urlSync?: boolean;
+  /** Alias for `urlSync` (v1 name) — deleted before the 2.0.0 release. */
   enabled?: boolean;
   /** Initial values applied when the URL has no value for a key. */
   defaults?: Partial<TableQueryParams> & { extra?: ExtraFilters };
@@ -106,7 +108,8 @@ export function useTableUrlState(
 ): UseTableUrlStateResult {
   const {
     adapter,
-    enabled = true,
+    urlSync,
+    enabled,
     defaults = {},
     numberExtraKeys = NO_KEYS,
     arrayExtraKeys = NO_KEYS,
@@ -115,7 +118,8 @@ export function useTableUrlState(
   // Per-table namespace, e.g. "left." → left.q / left.page / left.f_status.
   const ns = urlKey ? `${urlKey}.` : "";
 
-  const resolved = useResolvedAdapter(adapter, enabled);
+  const syncToUrl = urlSync ?? enabled ?? true;
+  const resolved = useResolvedAdapter(adapter, syncToUrl);
   // Server snapshot: with the default (history) adapter the server rendered
   // from an empty memory store, so hydration must read "" too — the real URL
   // applies right after hydration. An EXPLICIT adapter is assumed to be

@@ -33,6 +33,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   | "adapter"
   | "enabled"
+  | "urlSync"
   | "defaults"
   | "numberExtraKeys"
   | "arrayExtraKeys"

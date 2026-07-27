@@ -135,10 +135,18 @@ describe("useTableUrlState", () => {
     expect(adapter.getSearch()).toBe("");
   });
 
-  it("disabled mode keeps state local and never touches the URL", () => {
+  it("urlSync: false keeps state local and never touches the URL", () => {
+    window.history.replaceState(null, "", "/?page=9");
+    const { result } = renderHook(() => useTableUrlState({ urlSync: false }));
+    expect(result.current.page).toBe(1);
+    act(() => result.current.setPage(4));
+    expect(result.current.page).toBe(4);
+    expect(window.location.search).toBe("?page=9");
+  });
+
+  it("the deprecated `enabled` alias still works (removed before release)", () => {
     window.history.replaceState(null, "", "/?page=9");
     const { result } = renderHook(() => useTableUrlState({ enabled: false }));
-    expect(result.current.page).toBe(1);
     act(() => result.current.setPage(4));
     expect(result.current.page).toBe(4);
     expect(window.location.search).toBe("?page=9");

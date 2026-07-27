@@ -111,7 +111,7 @@ function useResolvedTableProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     filters: props.filters,
     urlKey: props.urlKey,
     adapter: urlAdapter,
-    enabled: props.urlSync,
+    urlSync: props.urlSync,
   });
 
   // The same resolution `useTableChrome` applies — the auto form needs the

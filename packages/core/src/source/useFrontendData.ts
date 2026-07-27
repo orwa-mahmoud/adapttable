@@ -57,6 +57,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   | "adapter"
   | "enabled"
+  | "urlSync"
   | "defaults"
   | "numberExtraKeys"
   | "arrayExtraKeys"

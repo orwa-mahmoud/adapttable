@@ -45,6 +45,7 @@ export interface UseBackendDataOptions<
   UseTableUrlStateOptions,
   | "adapter"
   | "enabled"
+  | "urlSync"
   | "defaults"
   | "numberExtraKeys"
   | "arrayExtraKeys"

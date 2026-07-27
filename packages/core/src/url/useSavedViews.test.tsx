@@ -69,11 +69,11 @@ describe("useSavedViews", () => {
     expect(params.get("t.sortBy")).toBeNull();
   });
 
-  it("enabled: false keeps views working without touching the address bar", () => {
+  it("urlSync: false keeps views working without touching the address bar", () => {
     const before = window.location.search;
     const storage = fakeStorage();
     const { result } = renderHook(() =>
-      useSavedViews({ storageKey: "views", storage, enabled: false })
+      useSavedViews({ storageKey: "views", storage, urlSync: false })
     );
     act(() => result.current.save("v"));
     act(() => result.current.apply("v"));

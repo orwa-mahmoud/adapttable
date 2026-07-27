@@ -136,7 +136,7 @@ function useChromeProps<TRow>(props: Readonly<DataTableProps<TRow>>) {
     columns: props.columns,
     filters: props.filters,
     adapter: urlAdapter,
-    enabled: props.urlSync,
+    urlSync: props.urlSync,
     urlKey: props.urlKey,
   });
   let filtersNode: ReactNode;

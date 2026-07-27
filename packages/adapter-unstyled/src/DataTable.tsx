@@ -204,7 +204,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     mode: props.mode,
     onQueryChange,
     adapter: resolvedUrlAdapter,
-    enabled: props.urlSync,
+    urlSync: props.urlSync,
     urlKey,
     columns: props.columns,
     filters: props.filters,

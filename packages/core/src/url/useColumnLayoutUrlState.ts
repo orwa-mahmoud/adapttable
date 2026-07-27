@@ -24,6 +24,8 @@ export interface UseColumnLayoutUrlStateOptions {
   /** URL-state backend. Defaults to the browser History API. */
   adapter?: UrlStateAdapter;
   /** When `false`, keep the layout in a local memory store. Defaults `true`. */
+  urlSync?: boolean;
+  /** Alias for `urlSync` (v1 name) — deleted before the 2.0.0 release. */
   enabled?: boolean;
   /** Layout applied when the URL carries no column layout yet. */
   defaultLayout?: Partial<ColumnLayoutState>;
@@ -69,10 +71,11 @@ export interface UseColumnLayoutUrlStateResult {
 export function useColumnLayoutUrlState(
   options: UseColumnLayoutUrlStateOptions = {}
 ): UseColumnLayoutUrlStateResult {
-  const { adapter, enabled = true, defaultLayout, urlKey } = options;
+  const { adapter, urlSync, enabled, defaultLayout, urlKey } = options;
+  const syncToUrl = urlSync ?? enabled ?? true;
   const ns = urlKey ? `${urlKey}.` : "";
 
-  const resolved = useResolvedAdapter(adapter, enabled);
+  const resolved = useResolvedAdapter(adapter, syncToUrl);
   // Same SSR rule as useTableUrlState: only an explicit adapter is trusted
   // to be hydration-consistent; the default history adapter hydrates from "".
   const search = useSyncExternalStore(
