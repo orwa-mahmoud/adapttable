@@ -188,4 +188,21 @@ describe("Toolbar", () => {
 
     expect(screen.queryByLabelText(labels.search)).not.toBeInTheDocument();
   });
+  it("evaluates mobile sort fallback when sortByOptions is undefined (line 52)", () => {
+    const props = makeToolbarProps({ sortByOptions: undefined });
+
+    // 1. isMobile = true
+    (props.table as any).isMobile = true;
+    const { rerender } = render(<Toolbar {...props} />);
+    expect(
+      screen.getByRole("combobox", { name: labels.sortBy })
+    ).toBeInTheDocument();
+
+    // 2. isMobile = false
+    (props.table as any).isMobile = false;
+    rerender(<Toolbar {...props} />);
+    expect(
+      screen.queryByRole("combobox", { name: labels.sortBy })
+    ).not.toBeInTheDocument();
+  });
 });

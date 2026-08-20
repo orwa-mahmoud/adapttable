@@ -118,6 +118,33 @@ describe("DesktopTable", () => {
     expect(screen.getByText("Acc-Alice")).toBeInTheDocument();
   });
 
+  it("renders header actions and a multi-sort index badge", () => {
+    const props = makeProps();
+    props.table.columns = [
+      {
+        key: "name",
+        header: "Name",
+        sortable: true,
+        headerActions: <button type="button">Filter name</button>,
+      },
+      { key: "email", header: "Email", sortable: false },
+    ];
+    props.table.getSortButtonProps = (column: any) => ({
+      type: "button" as const,
+      disabled: false,
+      "aria-label": `Sort by: ${column.header}`,
+      ...(column.sortable ? { "data-sort-index": 1 } : {}),
+      onClick: vi.fn(),
+    });
+
+    render(<DesktopTable {...props} size="sm" dir="rtl" />);
+
+    expect(
+      screen.getByRole("button", { name: "Filter name" })
+    ).toBeInTheDocument();
+    expect(document.querySelector("[data-sort-index='1']")).toBeInTheDocument();
+  });
+
   it("handles pinned columns (start and end offsets), column widths, and resize handle", () => {
     const setWidth = vi.fn();
     const props = makeProps();
@@ -136,9 +163,17 @@ describe("DesktopTable", () => {
       />
     );
 
-    const resizeHandles = document.querySelectorAll(
+    const resizeHandles = document.querySelectorAll<HTMLElement>(
       '[aria-label*="Resize column"]'
     );
     expect(resizeHandles.length).toBeGreaterThan(0);
+    expect(resizeHandles[0]?.style.insetInlineEnd).toBe("0px");
+
+    const startHeader = screen.getByRole("columnheader", { name: /Name/ });
+    const endHeader = screen.getByRole("columnheader", { name: /Email/ });
+    expect(startHeader.style.insetInlineStart).toBe("0px");
+    expect(endHeader.style.insetInlineEnd).toBe("10px");
+
+    expect(document.querySelectorAll(".table-responsive")).toHaveLength(1);
   });
 });

@@ -1,5 +1,10 @@
-import type { ColumnDef } from "@adapttable/core";
-import { columnResizeHandleProps, tableMinWidth } from "@adapttable/core";
+import type { ColumnDef, Direction } from "@adapttable/core";
+import {
+  columnHeaderController,
+  columnResizeHandleProps,
+  resolveColumnHeader,
+  tableMinWidth,
+} from "@adapttable/core";
 import {
   columnFlexShares,
   columnSizeStyle,
@@ -7,11 +12,27 @@ import {
   pinnedColumnWidth,
   type PinOffset,
   type SharedTableRenderProps,
+  sortArrow,
   tableRenderModel,
 } from "@adapttable/core/adapter";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { Table } from "./primitives";
+
+export interface BootstrapDesktopTableProps<
+  TRow,
+> extends SharedTableRenderProps<TRow> {
+  /** Custom CSS class name for the <table> element. */
+  className?: string;
+  /** Density / size of the table. */
+  size?: "sm" | "md" | "lg";
+  /** Accent color token or hex. */
+  accentColor?: string;
+  /** Text direction for RTL support. */
+  dir?: Direction;
+  /** Explicit actions column pinning. */
+  actionsPinned?: boolean;
+}
 
 const RESIZE_HANDLE_STYLE: CSSProperties = {
   position: "absolute",
@@ -42,7 +63,7 @@ function getPinStyle(
 }
 
 export function DesktopTable<TRow>(
-  props: Readonly<SharedTableRenderProps<TRow>>
+  props: Readonly<BootstrapDesktopTableProps<TRow>>
 ) {
   const {
     table,
@@ -53,6 +74,9 @@ export function DesktopTable<TRow>(
     setWidth,
     resizeLabel = "Resize column",
     fitColumns,
+    className,
+    size = "md",
+    dir,
   } = props;
 
   const renderModel = tableRenderModel({
@@ -77,22 +101,139 @@ export function DesktopTable<TRow>(
   const getHeaderName = (col: ColumnDef<TRow>): string =>
     typeof col.header === "string" ? col.header : col.key;
 
+  const tableSizeClass = size === "sm" ? "table-sm" : "";
+
   return (
-    <div style={{ overflowX: "auto" }}>
-      <Table>
-        <table
-          className="table align-middle mb-0"
-          style={{
-            minWidth: minWidth > 0 ? `${minWidth}px` : undefined,
-            ...fittedTableStyle(fitColumns),
-          }}
-        >
-          <thead>
-            <tr {...table.getHeaderRowProps()}>
+    <div className="table-responsive" dir={dir}>
+      <Table
+        responsive={false}
+        className={`align-middle mb-0 ${tableSizeClass} ${className ?? ""}`.trim()}
+        style={{
+          tableLayout: "fixed",
+          width: "100%",
+          minWidth: minWidth > 0 ? `${minWidth}px` : undefined,
+          ...fittedTableStyle(fitColumns),
+        }}
+      >
+        <thead>
+          <tr {...table.getHeaderRowProps()}>
+            {columns.map((column) => {
+              const key = String(column.key);
+              const offset = pinOffset?.(column.key);
+              const pinStyle = getPinStyle(offset, 2);
+              const width = offset
+                ? pinnedColumnWidth(column, columnWidths)
+                : (columnWidths?.[key] ?? column.width);
+              const sizing = columnSizeStyle(
+                column,
+                flexShares,
+                columnWidths?.[key]
+              );
+
+              const sortButton = table.getSortButtonProps?.(column);
+              const sortClick = sortButton?.onClick;
+              const sortIndex = sortButton?.["data-sort-index"];
+              const ariaSort = table.getHeaderCellProps(column)["aria-sort"] as
+                | "ascending"
+                | "descending"
+                | "none"
+                | undefined;
+
+              const caption = resolveColumnHeader(
+                column,
+                columnHeaderController(column, {
+                  sortIndex:
+                    typeof sortIndex === "number" ? sortIndex : undefined,
+                  toggleSort: sortClick,
+                })
+              );
+
+              const actions = column.headerActions ? (
+                <span
+                  data-adapttable-part="header-actions"
+                  className="d-inline-flex align-items-center ms-auto"
+                >
+                  {column.headerActions as ReactNode}
+                </span>
+              ) : null;
+
+              return (
+                <th
+                  key={key}
+                  {...table.getHeaderCellProps(column)}
+                  aria-sort={ariaSort}
+                  style={{
+                    position: pinStyle.position ?? "relative",
+                    width: width ? `${width}px` : undefined,
+                    minWidth: width ? `${width}px` : undefined,
+                    boxSizing: "border-box",
+                    ...sizing,
+                    ...pinStyle,
+                  }}
+                >
+                  <div className="d-flex align-items-center justify-content-between gap-1 pe-2">
+                    <div className="d-inline-flex align-items-center gap-1 overflow-hidden text-truncate">
+                      {column.sortable && sortClick ? (
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-decoration-none text-reset fw-bold d-inline-flex align-items-center gap-1 text-truncate"
+                          onClick={sortClick}
+                          aria-label={`${table.labels.sortBy}: ${getHeaderName(column)}`}
+                          title={column.headerTooltip}
+                        >
+                          <span className="text-truncate">{caption}</span>
+                          <span aria-hidden="true">{sortArrow(ariaSort)}</span>
+                          {sortIndex !== undefined && (
+                            <span
+                              aria-hidden="true"
+                              data-sort-index={sortIndex}
+                              className="badge bg-secondary rounded-pill"
+                              style={{ fontSize: "0.7em" }}
+                            >
+                              {sortIndex}
+                            </span>
+                          )}
+                        </button>
+                      ) : (
+                        <span
+                          className="text-truncate"
+                          title={column.headerTooltip}
+                        >
+                          {caption}
+                        </span>
+                      )}
+                    </div>
+
+                    {actions}
+                  </div>
+
+                  {setWidth && (
+                    <span
+                      data-adapttable-part="column-resize-handle"
+                      style={RESIZE_HANDLE_STYLE}
+                      {...columnResizeHandleProps(
+                        column.key,
+                        setWidth,
+                        `${resizeLabel}: ${getHeaderName(column)}`
+                      )}
+                    />
+                  )}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr
+              key={table.getRowKey(row)}
+              {...table.getRowProps(row, rowIndex)}
+            >
               {columns.map((column) => {
                 const key = String(column.key);
                 const offset = pinOffset?.(column.key);
-                const pinStyle = getPinStyle(offset, 2);
+                const pinStyle = getPinStyle(offset, 1);
                 const width = offset
                   ? pinnedColumnWidth(column, columnWidths)
                   : (columnWidths?.[key] ?? column.width);
@@ -102,98 +243,28 @@ export function DesktopTable<TRow>(
                   columnWidths?.[key]
                 );
 
-                const sortButton = table.getSortButtonProps?.(column);
-                const ariaSort = table.getHeaderCellProps(column)[
-                  "aria-sort"
-                ] as "ascending" | "descending" | "none" | undefined;
-
                 return (
-                  <th
+                  <td
                     key={key}
-                    {...table.getHeaderCellProps(column)}
-                    aria-sort={ariaSort}
+                    {...table.getCellProps(column)}
                     style={{
-                      position:
-                        pinStyle.position ??
-                        (setWidth ? "relative" : undefined),
-                      width,
-                      minWidth: width,
+                      position: pinStyle.position,
+                      width: width ? `${width}px` : undefined,
+                      minWidth: width ? `${width}px` : undefined,
+                      boxSizing: "border-box",
                       ...sizing,
                       ...pinStyle,
                     }}
                   >
-                    <div className="d-flex align-items-center justify-content-between position-relative">
-                      {column.sortable && sortButton ? (
-                        <button
-                          type="button"
-                          className="btn btn-link p-0 text-decoration-none text-reset fw-bold d-inline-flex align-items-center gap-1"
-                          onClick={sortButton.onClick}
-                          aria-label={`${table.labels.sortBy}: ${getHeaderName(column)}`}
-                        >
-                          <span>{column.header}</span>
-                          <span aria-hidden="true"> ^ </span>
-                        </button>
-                      ) : (
-                        <span>{column.header}</span>
-                      )}
-
-                      {setWidth && (
-                        <span
-                          style={RESIZE_HANDLE_STYLE}
-                          {...columnResizeHandleProps(
-                            column.key,
-                            setWidth,
-                            `${resizeLabel}: ${getHeaderName(column)}`
-                          )}
-                        />
-                      )}
-                    </div>
-                  </th>
+                    {table.getCellContent
+                      ? table.getCellContent(column, row, rowIndex)
+                      : column.accessor?.(row)}
+                  </td>
                 );
               })}
             </tr>
-          </thead>
-
-          <tbody>
-            {rows.map((row, rowIndex) => (
-              <tr
-                key={table.getRowKey(row)}
-                {...table.getRowProps(row, rowIndex)}
-              >
-                {columns.map((column) => {
-                  const key = String(column.key);
-                  const offset = pinOffset?.(column.key);
-                  const pinStyle = getPinStyle(offset, 1);
-                  const width = offset
-                    ? pinnedColumnWidth(column, columnWidths)
-                    : (columnWidths?.[key] ?? column.width);
-                  const sizing = columnSizeStyle(
-                    column,
-                    flexShares,
-                    columnWidths?.[key]
-                  );
-
-                  return (
-                    <td
-                      key={key}
-                      {...table.getCellProps(column)}
-                      style={{
-                        width,
-                        minWidth: width,
-                        ...sizing,
-                        ...pinStyle,
-                      }}
-                    >
-                      {table.getCellContent
-                        ? table.getCellContent(column, row, rowIndex)
-                        : column.accessor?.(row)}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </tbody>
       </Table>
     </div>
   );
