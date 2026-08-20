@@ -844,4 +844,32 @@ export interface TableLabels {
   collapseGroup?: string;
   /** Leaf-count suffix on a group header, e.g. `(12)`. */
   groupCount?: (count: number) => string;
+  /**
+   * Status copy when `virtualize` is on a paged table, which stays one page.
+   */
+  noticeVirtualizePaged?: string;
+  /** Status copy when row pin is on while grouping or a tree is on. */
+  noticePinNested?: string;
+  /** Status copy when row reorder is on while grouping or a tree is on. */
+  noticeReorderNested?: string;
+  /**
+   * Status copy when `groupBy` is set but the source cannot regroup
+   * (no `allFilteredRows`, no server groups).
+   */
+  noticeGroupingUnavailable?: string;
+  /**
+   * Status copy when `exportCsv.scope` is `"all"` and only the current
+   * page can be written.
+   */
+  noticeExportAllPage?: string;
+  /**
+   * Status copy when editing is opted in without the matching write
+   * callback (`onCellEdit` / `onRowEdit` / `onBatchEdit`).
+   */
+  noticeEditWithoutWriter?: string;
+  /**
+   * Export button caption when `"all"` can only write the current page.
+   * Defaults to `"Export this page"`.
+   */
+  exportThisPage?: string;
 }

@@ -205,4 +205,15 @@ export const hi: Required<TableLabels> = {
   gridCellPosition: (row, total) => `${total} में से पंक्ति ${row}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `पंक्तियाँ ${fromRow} से ${toRow}, स्तंभ ${fromColumn} से ${toColumn} चयनित, ${cells} सेल`,
+  noticeVirtualizePaged:
+    "वर्चुअलाइज़ेशन बंद है — यह पृष्ठांकित तालिका एक समय में एक पृष्ठ दिखाती है।",
+  noticePinNested: "समूहीकरण या वृक्ष चालू होने पर पंक्ति पिन बंद है।",
+  noticeReorderNested:
+    "समूहीकरण या वृक्ष चालू होने पर पंक्ति क्रम बदलना बंद है।",
+  noticeGroupingUnavailable:
+    "समूहीकरण बंद है — यह स्रोत पूरी फ़िल्टर की गई सूची नहीं देता।",
+  noticeExportAllPage:
+    "सभी निर्यात इस पृष्ठ का है — पूरी फ़िल्टर की गई सूची उपलब्ध नहीं है।",
+  noticeEditWithoutWriter: "संपादन बंद है — कोई लेखन हैंडलर नहीं जोड़ा गया।",
+  exportThisPage: "यह पृष्ठ निर्यात करें",
 };

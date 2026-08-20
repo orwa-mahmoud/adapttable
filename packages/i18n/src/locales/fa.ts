@@ -203,4 +203,14 @@ export const fa: Required<TableLabels> = {
   gridCellPosition: (row, total) => `سطر ${row} از ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `سطرهای ${fromRow} تا ${toRow}، ستون‌های ${fromColumn} تا ${toColumn} انتخاب شد، ${cells} خانه`,
+  noticeVirtualizePaged:
+    "مجازی‌سازی خاموش است — این جدول صفحه‌بندی‌شده هر بار یک صفحه نشان می‌دهد.",
+  noticePinNested: "سنجاق‌کردن ردیف‌ها هنگام گروه‌بندی یا درخت خاموش است.",
+  noticeReorderNested: "جابه‌جایی ردیف‌ها هنگام گروه‌بندی یا درخت خاموش است.",
+  noticeGroupingUnavailable:
+    "گروه‌بندی خاموش است — این منبع مجموعهٔ فیلترشدهٔ کامل را فراهم نمی‌کند.",
+  noticeExportAllPage:
+    "برون‌بری همه همین صفحه است — مجموعهٔ فیلترشدهٔ کامل در دسترس نیست.",
+  noticeEditWithoutWriter: "ویرایش خاموش است — هیچ تابع نوشتنی وصل نشده.",
+  exportThisPage: "برون‌بری این صفحه",
 };

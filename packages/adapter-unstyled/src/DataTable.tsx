@@ -699,6 +699,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       )}
       <StatusBar
         enabled={props.statusBar === true}
+        notices={chrome.featureNotices}
         shown={viewSource.rows.length}
         page={viewSource.page}
         limit={viewSource.limit}

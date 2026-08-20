@@ -204,4 +204,13 @@ export const he: Required<TableLabels> = {
   gridCellPosition: (row, total) => `שורה ${row} מתוך ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `נבחרו שורות ${fromRow} עד ${toRow}, עמודות ${fromColumn} עד ${toColumn}, ${cells} תאים`,
+  noticeVirtualizePaged:
+    "הווירטואליזציה כבויה — הטבלה המחולקת לעמודים מציגה עמוד אחד בכל פעם.",
+  noticePinNested: "נעיצת שורות כבויה כשיש קיבוץ או עץ.",
+  noticeReorderNested: "סידור מחדש של שורות כבוי כשיש קיבוץ או עץ.",
+  noticeGroupingUnavailable:
+    "הקיבוץ כבוי — המקור אינו מספק את הסט המסונן המלא.",
+  noticeExportAllPage: "ייצוא הכל הוא העמוד הזה — הסט המסונן המלא אינו זמין.",
+  noticeEditWithoutWriter: "העריכה כבויה — לא חובר מטפל כתיבה.",
+  exportThisPage: "ייצוא העמוד הזה",
 };

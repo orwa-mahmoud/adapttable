@@ -208,6 +208,16 @@ export const defaultLabels: Required<TableLabels> = {
   expandGroup: "Expand group",
   collapseGroup: "Collapse group",
   groupCount: (count) => `(${count})`,
+  noticeVirtualizePaged:
+    "Virtualization is off — this paged table shows one page at a time.",
+  noticePinNested: "Row pinning is off while grouping or a tree is on.",
+  noticeReorderNested: "Row reorder is off while grouping or a tree is on.",
+  noticeGroupingUnavailable:
+    "Grouping is off — this source does not provide the full filtered set.",
+  noticeExportAllPage:
+    "Export all is this page — the full filtered set is not available.",
+  noticeEditWithoutWriter: "Editing is off — no write handler is wired.",
+  exportThisPage: "Export this page",
 };
 
 /**

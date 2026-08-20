@@ -78,6 +78,12 @@ import type { SelectionState } from "./selection/useSelection";
 import { serverGroupEntries } from "./source/queryGroups";
 import type { TableSource } from "./source/TableSource";
 import { type TableErrorState, tableErrorState } from "./state/errorState";
+import {
+  collectFeatureNotices,
+  type FeatureNotice,
+} from "./state/featureNotices";
+
+export type { FeatureNotice } from "./state/featureNotices";
 import { nestedTableDetail } from "./tree/nestedTable";
 import {
   buildTreeEntries,
@@ -426,6 +432,13 @@ export interface TableChrome<TRow> {
   columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
   /** All declared columns (pre layout/device filtering) for the column menu. */
   allColumns: ColumnDef<TRow>[];
+  /**
+   * Opted-in features that cannot run. Empty when everything the host
+   * asked for can. Adapters show these on the status bar (when it is
+   * on) and as `data-adapttable-notices` on the root; the matching
+   * control already looks off, disabled, or one-page.
+   */
+  featureNotices: readonly FeatureNotice[];
 }
 
 /**
@@ -1240,6 +1253,58 @@ export function useTableChrome<TRow>(
     !viewSource.error &&
     (viewSource.total > 0 || viewSource.isLoading || viewSource.isFetching);
 
+  const featureNotices = useMemo(
+    () =>
+      collectFeatureNotices({
+        virtualize: props.virtualize,
+        paginationMode: source.paginationMode,
+        groupByKeys,
+        allFilteredRows: source.allFilteredRows,
+        serverGroups,
+        rowPinningRequested:
+          props.pinnedRowIds !== undefined ||
+          props.onPinnedRowIdsChange !== undefined,
+        rowReorderRequested: props.onRowReorder !== undefined,
+        nestedArmed: grouping !== undefined || treeShaped,
+        hasEditableColumn,
+        onCellEdit,
+        rowEditing: props.rowEditing,
+        onRowEdit: props.onRowEdit,
+        batchEditing: props.batchEditing,
+        onBatchEdit: props.onBatchEdit,
+        exportCsv: props.exportCsv,
+        labels: table.labels,
+      }),
+    [
+      props.virtualize,
+      source.paginationMode,
+      groupByKeys,
+      source.allFilteredRows,
+      serverGroups,
+      props.pinnedRowIds,
+      props.onPinnedRowIdsChange,
+      props.onRowReorder,
+      grouping,
+      treeShaped,
+      hasEditableColumn,
+      onCellEdit,
+      props.rowEditing,
+      props.onRowEdit,
+      props.batchEditing,
+      props.onBatchEdit,
+      props.exportCsv,
+      table.labels,
+    ]
+  );
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const value = featureNotices.map((notice) => notice.kind).join(" ");
+    if (value) el.setAttribute("data-adapttable-notices", value);
+    else el.removeAttribute("data-adapttable-notices");
+  });
+
   const hasAnyActions = hasRowActions || rowPinning !== undefined;
   const visibleRowActions = useMemo(() => {
     if (actionsHidden || !hasAnyActions) return undefined;
@@ -1279,6 +1344,7 @@ export function useTableChrome<TRow>(
     columnLayout,
     columnGroups: flattened.groups,
     allColumns: resolvedColumns,
+    featureNotices,
   };
 }
 

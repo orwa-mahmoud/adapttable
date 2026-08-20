@@ -204,4 +204,15 @@ export const ur: Required<TableLabels> = {
   gridCellPosition: (row, total) => `${total} میں سے سطر ${row}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `سطریں ${fromRow} تا ${toRow}، کالم ${fromColumn} تا ${toColumn} منتخب، ${cells} خانے`,
+  noticeVirtualizePaged:
+    "ورچوئلائزیشن بند ہے — یہ صفحہ بند جدول ایک وقت میں ایک صفحہ دکھاتا ہے۔",
+  noticePinNested: "گروپنگ یا درخت آن ہونے پر قطار پن بند ہے۔",
+  noticeReorderNested:
+    "گروپنگ یا درخت آن ہونے پر قطاروں کی ترتیب بدلنا بند ہے۔",
+  noticeGroupingUnavailable:
+    "گروپنگ بند ہے — یہ ماخذ پوری فلٹر شدہ فہرست نہیں دیتا۔",
+  noticeExportAllPage:
+    "سب برآمد یہی صفحہ ہے — پوری فلٹر شدہ فہرست دستیاب نہیں۔",
+  noticeEditWithoutWriter: "ترمیم بند ہے — کوئی لکھائی ہینڈلر منسلک نہیں۔",
+  exportThisPage: "یہ صفحہ برآمد کریں",
 };
