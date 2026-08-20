@@ -153,7 +153,7 @@ jobs:
         run: pnpm lint:root
 
   eslint:
-    name: ESLint · ${{ matrix.name }}
+    name: ESLint
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
@@ -179,7 +179,7 @@ jobs:
         run: pnpm lint ${{ matrix.filter }} --concurrency=1
 
   typescript:
-    name: TypeScript · ${{ matrix.name }}
+    name: TypeScript
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
@@ -224,7 +224,7 @@ jobs:
           fi
 
   unit-shard:
-    name: Unit · ${{ matrix.name }}
+    name: Unit shards
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runUnit == 'true'
     runs-on: ubuntu-latest
@@ -345,7 +345,7 @@ jobs:
           done
 
   react-matrix:
-    name: React ${{ matrix.react }} compatibility
+    name: React compatibility
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPackage == 'true'
     runs-on: ubuntu-latest
@@ -409,7 +409,7 @@ jobs:
           case "$preview" in success|skipped) ;; *) echo "Preview: $preview"; exit 1 ;; esac
 
   playwright-shard:
-    name: Playwright · ${{ matrix.shard }}/9
+    name: Playwright shards
     needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
