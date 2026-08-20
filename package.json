@@ -39,6 +39,7 @@
     "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
     "prepare": "husky",
     "check:kits-docs": "pnpm --filter @adapttable/cli exec vitest run src/kits-docs.test.ts",
+    "check:readmes": "node scripts/check-readme-features.mjs",
     "check:sitemap": "node scripts/check-sitemap.mjs",
     "check:docsurface": "node scripts/check-doc-surface.mjs",
     "consumer:harness": "node scripts/consumer-harness.mjs",
