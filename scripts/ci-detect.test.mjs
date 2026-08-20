@@ -11,12 +11,14 @@ describe("classify", () => {
     assert.equal(f.needBuild, true);
   });
 
-  it("runs unit tests when the root README changes, not Playwright", () => {
+  it("treats the root README as docs, not a library gate", () => {
     const f = classify(["README.md"]);
-    assert.equal(f.runUnit, true);
-    assert.equal(f.runPackage, true);
+    assert.equal(f.runLint, false);
+    assert.equal(f.runUnit, false);
+    assert.equal(f.runPackage, false);
+    assert.equal(f.runPreview, false);
     assert.equal(f.runPlaywright, false);
-    assert.equal(f.runBench, false);
+    assert.equal(f.needBuild, false);
   });
 
   it("skips unit, package and Playwright on docs-only diffs", () => {
@@ -24,6 +26,32 @@ describe("classify", () => {
     assert.equal(f.runLint, false);
     assert.equal(f.runUnit, false);
     assert.equal(f.runPlaywright, false);
+    assert.equal(f.needBuild, false);
+  });
+
+  it("does not lint adapters for a workflow-only change", () => {
+    const f = classify([".github/workflows/pr.yml"]);
+    assert.equal(f.runLint, false);
+    assert.equal(f.runLintRoot, false);
+    assert.equal(f.runUnit, false);
+    assert.equal(f.runPackage, false);
+    assert.equal(f.runPreview, false);
+    assert.equal(f.needBuild, false);
+  });
+
+  it("does not run the library gate for CI + README + scripts", () => {
+    const f = classify([
+      ".github/workflows/pr.yml",
+      "README.md",
+      "scripts/ci-detect.mjs",
+      "package.json",
+    ]);
+    assert.equal(f.runLint, false);
+    assert.equal(f.runUnit, false);
+    assert.equal(f.runPackage, false);
+    assert.equal(f.runPreview, false);
+    assert.equal(f.runPlaywright, false);
+    assert.equal(f.runLintRoot, true);
     assert.equal(f.needBuild, false);
   });
 
@@ -46,6 +74,7 @@ describe("classify", () => {
     assert.equal(f.runLint, true);
     assert.equal(f.runUnit, true);
     assert.equal(f.runPackage, true);
+    assert.equal(f.runPreview, true);
     assert.equal(f.runPlaywright, true);
     assert.equal(f.runBench, true);
   });
@@ -59,13 +88,19 @@ describe("classify", () => {
     assert.equal(f.needBuild, false);
   });
 
-  it("runs package lint on a workflow change, not the unit shards", () => {
-    const f = classify([".github/workflows/pr.yml"]);
+  it("lints packages when the root ESLint config changes", () => {
+    const f = classify(["eslint.config.mjs"]);
     assert.equal(f.runLint, true);
     assert.equal(f.runLintRoot, true);
     assert.equal(f.runUnit, false);
-    assert.equal(f.runPlaywright, false);
     assert.equal(f.needBuild, true);
+  });
+
+  it("runs unit shards when the shared vitest config changes", () => {
+    const f = classify(["vitest.shared.ts"]);
+    assert.equal(f.runUnit, true);
+    assert.equal(f.runPackage, false);
+    assert.equal(f.runPlaywright, false);
   });
 
   it("lints root tooling when only a script changes", () => {

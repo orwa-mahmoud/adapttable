@@ -69,7 +69,7 @@ Unify the **model**, never the **pixels**. The standing pattern is
 `pnpm check` is the full local library gate. Husky runs `format:check` on
 every commit (fast). Pre-push runs `pnpm check:if-needed` then
 `pnpm e2e:if-needed`, using the same path classify as the PR Detect job:
-docs/workflow-only diffs skip lint, types, coverage and build; a package
+docs, workflows, and README skip lint, types, coverage and build; a package
 change still runs the full sequence:
 
 ```

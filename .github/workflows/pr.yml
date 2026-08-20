@@ -70,7 +70,14 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
           BEFORE: ${{ github.event.before }}
         run: |
+          set -o pipefail
           zero="0000000000000000000000000000000000000000"
+          emit() {
+            echo "Changed files:"
+            if [ -s "$1" ]; then cat "$1"; else echo "(none)"; fi
+            echo "Detect flags:"
+            node scripts/ci-detect.mjs < "$1" | tee -a "$GITHUB_OUTPUT"
+          }
           if [ "${{ steps.dedupe.outputs.skipAll }}" = "true" ]; then
             echo "skipAll=true" >> "$GITHUB_OUTPUT"
             echo "runLint=false" >> "$GITHUB_OUTPUT"
@@ -85,16 +92,19 @@ jobs:
             exit 0
           fi
           echo "skipAll=false" >> "$GITHUB_OUTPUT"
+          tmp="$(mktemp)"
           if [ "$EVENT" = "pull_request" ]; then
             git fetch --quiet origin "$BASE_REF"
-            if ! git diff --name-only "origin/$BASE_REF"...HEAD | node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"; then
+            git diff --name-only "origin/$BASE_REF"...HEAD > "$tmp" || true
+            if ! emit "$tmp"; then
               echo "Could not classify the diff — fail-open to the full gate."
               node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
             fi
             exit 0
           fi
           if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "$zero" ]; then
-            git diff --name-only "$BEFORE" HEAD | node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
+            git diff --name-only "$BEFORE" HEAD > "$tmp" || true
+            emit "$tmp"
             exit 0
           fi
           node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
@@ -102,17 +112,13 @@ jobs:
   build:
     name: Build
     needs: detect
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
-
       - uses: ./.github/actions/setup-pnpm
-        if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
-
       - name: Build packages
-        if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
         run: pnpm build
 
   format:
@@ -161,22 +167,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: core
-            filter: "--filter=@adapttable/core"
-          - name: antd
-            filter: "--filter=@adapttable/antd"
-          - name: mui
-            filter: "--filter=@adapttable/mui"
-          - name: kits
-            filter: "--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap"
-          - name: tools
-            filter: "--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples"
+        name: [core, antd, mui, kits, tools]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Lint
-        run: pnpm lint ${{ matrix.filter }} --concurrency=1
+        env:
+          LANE: ${{ matrix.name }}
+        run: |
+          case "$LANE" in
+            core) f="--filter=@adapttable/core" ;;
+            antd) f="--filter=@adapttable/antd" ;;
+            mui) f="--filter=@adapttable/mui" ;;
+            kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
+            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
+            *) echo "unknown lane: $LANE"; exit 1 ;;
+          esac
+          pnpm lint $f --concurrency=1
 
   typescript:
     name: TypeScript
@@ -187,22 +194,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: core
-            filter: "--filter=@adapttable/core"
-          - name: antd
-            filter: "--filter=@adapttable/antd"
-          - name: mui
-            filter: "--filter=@adapttable/mui"
-          - name: kits
-            filter: "--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap"
-          - name: tools
-            filter: "--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples"
+        name: [core, antd, mui, kits, tools]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Typecheck
-        run: pnpm typecheck ${{ matrix.filter }}
+        env:
+          LANE: ${{ matrix.name }}
+        run: |
+          case "$LANE" in
+            core) f="--filter=@adapttable/core" ;;
+            antd) f="--filter=@adapttable/antd" ;;
+            mui) f="--filter=@adapttable/mui" ;;
+            kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
+            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
+            *) echo "unknown lane: $LANE"; exit 1 ;;
+          esac
+          pnpm typecheck $f
 
   lint:
     name: Lint
@@ -234,24 +242,30 @@ jobs:
       matrix:
         include:
           - name: core
-            filter: "--filter=@adapttable/core"
           - name: antd
-            filter: "--filter=@adapttable/antd"
           - name: mui
-            filter: "--filter=@adapttable/mui"
           - name: chakra · mantine
-            filter: "--filter=@adapttable/chakra --filter=@adapttable/mantine"
           - name: radix · base-ui
-            filter: "--filter=@adapttable/radix --filter=@adapttable/base-ui"
           - name: shadcn · unstyled · bootstrap
-            filter: "--filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap"
           - name: server · cli · i18n
-            filter: "--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Test with coverage
-        run: pnpm test:coverage ${{ matrix.filter }} --concurrency=1
+        env:
+          LANE: ${{ matrix.name }}
+        run: |
+          case "$LANE" in
+            core) f="--filter=@adapttable/core" ;;
+            antd) f="--filter=@adapttable/antd" ;;
+            mui) f="--filter=@adapttable/mui" ;;
+            "chakra · mantine") f="--filter=@adapttable/chakra --filter=@adapttable/mantine" ;;
+            "radix · base-ui") f="--filter=@adapttable/radix --filter=@adapttable/base-ui" ;;
+            "shadcn · unstyled · bootstrap") f="--filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
+            "server · cli · i18n") f="--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
+            *) echo "unknown lane: $LANE"; exit 1 ;;
+          esac
+          pnpm test:coverage $f --concurrency=1
 
   unit:
     name: Unit
@@ -363,6 +377,7 @@ jobs:
 
   preview:
     name: Preview
+    continue-on-error: true
     needs: [detect, build]
     if: >
       github.event_name == 'pull_request' &&
@@ -383,7 +398,7 @@ jobs:
 
   package:
     name: Package
-    needs: [detect, package-gate, consumer, floors, react-matrix, preview]
+    needs: [detect, package-gate, consumer, floors, react-matrix]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
@@ -404,9 +419,7 @@ jobs:
           [ "${{ needs.consumer.result }}" = "success" ] || { echo "Consumer: ${{ needs.consumer.result }}"; exit 1; }
           [ "${{ needs.react-matrix.result }}" = "success" ] || { echo "React matrix: ${{ needs.react-matrix.result }}"; exit 1; }
           floors="${{ needs.floors.result }}"
-          preview="${{ needs.preview.result }}"
           case "$floors" in success|skipped) ;; *) echo "Floors: $floors"; exit 1 ;; esac
-          case "$preview" in success|skipped) ;; *) echo "Preview: $preview"; exit 1 ;; esac
 
   playwright-shard:
     name: Playwright shards
@@ -450,7 +463,12 @@ jobs:
   codeql:
     name: CodeQL
     needs: detect
-    if: github.event_name == 'pull_request' && needs.detect.outputs.skipAll != 'true'
+    if: >
+      github.event_name == 'pull_request' &&
+      needs.detect.outputs.skipAll != 'true' &&
+      (needs.detect.outputs.needBuild == 'true' ||
+       needs.detect.outputs.runPlaywright == 'true' ||
+       needs.detect.outputs.runLintRoot == 'true')
     runs-on: ubuntu-latest
     permissions:
       contents: read

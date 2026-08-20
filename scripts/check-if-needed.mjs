@@ -20,16 +20,6 @@ const GIT =
 const PNPM = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
 /**
- * Workflow YAML cannot break tsc or vitest. CI still lints on a workflow
- * edit because that is the gate itself; locally we skip the package lane.
- *
- * @param {ReturnType<typeof classify>} flags
- */
-function packagesTouched(flags) {
-  return flags.runUnit || flags.runPackage;
-}
-
-/**
  * @param {ReturnType<typeof classify>} flags
  * @returns {{ label: string, args: string[] }[]}
  */
@@ -47,10 +37,10 @@ export function checkPlan(flags) {
   /** @type {{ label: string, args: string[] }[]} */
   const steps = [{ label: "format:check", args: ["run", "format:check"] }];
 
-  if (packagesTouched(flags)) {
+  if (flags.runLint) {
     steps.push({ label: "lint", args: ["run", "lint"] });
   }
-  if (flags.runLintRoot && (packagesTouched(flags) || !flags.runLint)) {
+  if (flags.runLintRoot) {
     steps.push({ label: "lint:root", args: ["run", "lint:root"] });
   }
 
@@ -60,7 +50,7 @@ export function checkPlan(flags) {
   if (flags.runUnit) {
     steps.push({ label: "check:parts", args: ["run", "check:parts"] });
   }
-  if (packagesTouched(flags)) {
+  if (flags.runUnit || flags.runPackage) {
     steps.push({ label: "typecheck", args: ["run", "typecheck"] });
   }
   if (flags.runUnit) {
@@ -89,9 +79,8 @@ export function checkPlan(flags) {
 export function checkReason(flags) {
   if (flags.runUnit && flags.runPackage) return "package code changed";
   if (flags.versionOnly) return "version-only bump";
-  if (flags.runLint && !flags.runUnit) return "workflow-only";
-  if (flags.runLintRoot && !flags.runLint) return "root tooling";
   if (flags.runPlaywright && !flags.runUnit) return "e2e-only";
+  if (flags.runLintRoot || flags.runLint) return "root tooling";
   return "docs/meta-only";
 }
 

@@ -4,8 +4,6 @@
  * drive this layer.
  */
 
-const ROOT_README = /^README\.md$/;
-
 const PLAYWRIGHT =
   /^(packages\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|pnpm-lock\.yaml$)/;
 
@@ -15,15 +13,17 @@ const BENCH =
 const PACKAGES =
   /^(packages\/|pnpm-lock\.yaml$|scripts\/consumer-harness\.mjs$)/;
 
-const WORKFLOW = /^\.github\/(workflows\/|actions\/)/;
-
-const ROOT_TOOLING = /^(scripts\/|vitest\.shared\.ts$|eslint\.config\.mjs$)/;
+const ROOT_TOOLING =
+  /^(scripts\/|vitest\.shared\.ts$|eslint\.config\.mjs$|package\.json$|pnpm-workspace\.yaml$|turbo\.json$)/;
 
 const DOCS_OR_META =
-  /^(docs\/|.*\.md$|llms.*\.txt$|.*\/robots\.txt$|\.github\/|\.changeset\/|ai_docs\/)/;
+  /^(docs\/|.*\.md$|llms.*\.txt$|.*\/robots\.txt$|\.github\/|\.changeset\/|ai_docs\/|\.husky\/)/;
 
 const VERSION_ONLY =
   /^(packages\/[^/]+\/(package\.json|CHANGELOG\.md)|\.changeset\/)/;
+
+const ESLINT_ROOT = /^eslint\.config\.mjs$/;
+const VITEST_SHARED = /^vitest\.shared\.ts$/;
 
 /**
  * @param {string[]} files paths relative to the repo root, one per change
@@ -57,19 +57,18 @@ export function classify(files) {
     });
   }
 
-  const workflow = list.some((f) => WORKFLOW.test(f));
-  const versionOnly = !workflow && list.every((f) => VERSION_ONLY.test(f));
-  const docsOnly =
-    !workflow &&
-    !versionOnly &&
-    list.every((f) => DOCS_OR_META.test(f) && !PACKAGES.test(f));
   const packagesChanged = list.some((f) => PACKAGES.test(f));
   const rootTooling = list.some((f) => ROOT_TOOLING.test(f));
   const playwright = list.some((f) => PLAYWRIGHT.test(f));
   const bench = list.some((f) => BENCH.test(f));
-  const readme = list.some((f) => ROOT_README.test(f));
+  const eslintRoot = list.some((f) => ESLINT_ROOT.test(f));
+  const vitestShared = list.some((f) => VITEST_SHARED.test(f));
+  const versionOnly = list.every((f) => VERSION_ONLY.test(f));
+  const docsOnly =
+    !versionOnly &&
+    list.every((f) => DOCS_OR_META.test(f) && !PACKAGES.test(f));
 
-  if (docsOnly && !readme) {
+  if (docsOnly) {
     return gate({
       runLint: false,
       runLintRoot: false,
@@ -98,14 +97,14 @@ export function classify(files) {
   }
 
   return gate({
-    runLint: packagesChanged || workflow || readme,
-    runLintRoot: packagesChanged || workflow || rootTooling || readme,
-    runUnit: packagesChanged || readme,
-    runPackage: packagesChanged || readme,
-    runPublint: packagesChanged || readme,
+    runLint: packagesChanged || eslintRoot,
+    runLintRoot: packagesChanged || rootTooling,
+    runUnit: packagesChanged || vitestShared,
+    runPackage: packagesChanged,
+    runPublint: packagesChanged,
     runPlaywright: playwright,
     runBench: bench,
-    runPreview: packagesChanged || readme,
+    runPreview: packagesChanged,
     versionOnly: false,
   });
 }

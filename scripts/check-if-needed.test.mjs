@@ -9,9 +9,14 @@ function labels(files) {
 }
 
 describe("checkPlan", () => {
-  it("runs the library check when the root README changes, not Playwright", () => {
-    assert.deepEqual(labels(["README.md"]), ["check"]);
-    assert.equal(checkReason(classify(["README.md"])), "package code changed");
+  it("keeps format and doc guards when the root README changes", () => {
+    assert.deepEqual(labels(["README.md"]), [
+      "format:check",
+      "check:readmes",
+      "check:docsurface",
+      "test:scripts",
+    ]);
+    assert.equal(checkReason(classify(["README.md"])), "docs/meta-only");
     assert.equal(classify(["README.md"]).runPlaywright, false);
   });
 
@@ -64,7 +69,7 @@ describe("checkPlan", () => {
     ]);
     assert.equal(
       checkReason(classify([".github/workflows/pr.yml"])),
-      "workflow-only"
+      "docs/meta-only"
     );
   });
 
@@ -80,6 +85,23 @@ describe("checkPlan", () => {
       checkReason(classify(["scripts/ci-detect.mjs"])),
       "root tooling"
     );
+  });
+
+  it("does not run pnpm check for CI + README + scripts", () => {
+    const files = [
+      ".github/workflows/pr.yml",
+      "README.md",
+      "scripts/ci-detect.mjs",
+      "package.json",
+    ];
+    assert.deepEqual(labels(files), [
+      "format:check",
+      "lint:root",
+      "check:readmes",
+      "check:docsurface",
+      "test:scripts",
+    ]);
+    assert.equal(checkReason(classify(files)), "root tooling");
   });
 
   it("runs the full pnpm check when an adapter changes", () => {
