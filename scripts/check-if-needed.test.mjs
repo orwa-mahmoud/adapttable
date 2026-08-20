@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { classify } from "./ci-detect.mjs";
 import { checkPlan, checkReason } from "./check-if-needed.mjs";
+import { classify } from "./ci-detect.mjs";
 
 function labels(files) {
   return checkPlan(classify(files)).map((step) => step.label);

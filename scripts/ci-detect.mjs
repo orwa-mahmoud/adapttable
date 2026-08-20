@@ -128,9 +128,12 @@ function parseArgs(argv) {
 }
 
 function printOutputs(flags) {
-  const lines = Object.entries(flags).map(
-    ([k, v]) => `${k}=${v === true ? "true" : v === false ? "false" : v}`
-  );
+  const lines = Object.entries(flags).map(([k, v]) => {
+    let printed = v;
+    if (v === true) printed = "true";
+    else if (v === false) printed = "false";
+    return `${k}=${printed}`;
+  });
   process.stdout.write(`${lines.join("\n")}\n`);
 }
 
