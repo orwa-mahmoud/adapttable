@@ -86,8 +86,8 @@ format:check → lint → lint:root → check:readmes → check:docsurface
 - **`pnpm test:e2e` is part of the bar** — `pnpm check` does not run it.
   Pre-push runs `pnpm e2e:if-needed`: skip when the diff vs `origin/main` has
   no packages/showcase/e2e; run only changed `e2e/*.spec.ts` when that is all
-  that changed; otherwise the full suite. CI already skips the whole job on
-  the same path set. Needs Chromium once: `pnpm exec playwright install chromium`.
+  that changed; otherwise the full suite. The PR workflow skips Playwright
+  on the same path set. Needs Chromium once: `pnpm exec playwright install chromium`.
 - A change is not done until the gate is green with real command output —
   evidence, not assertions. Anything visual or keyboard-driven is also
   verified in a real browser.

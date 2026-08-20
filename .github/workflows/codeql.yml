@@ -3,8 +3,6 @@ name: CodeQL
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   schedule:
     # Weekly re-scan so newly published queries run against unchanged code.
     - cron: "17 3 * * 1"

@@ -1,4 +1,4 @@
-name: Peer matrix
+name: Peers
 
 # Weekly, NON-BLOCKING probe of each adapter against the oldest and newest major
 # of its UI-kit peer range: install published packages, typecheck, then mount in

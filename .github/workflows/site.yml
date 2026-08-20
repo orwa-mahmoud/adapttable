@@ -1,8 +1,23 @@
-name: docs
+name: Site
 
 on:
   push:
     branches: [main]
+    paths:
+      - "apps/docs/**"
+      - "apps/showcase/**"
+      - "packages/**"
+      - "docs/**"
+      - "llms.txt"
+      - "llms-full.txt"
+      - "scripts/sitemap-routes.mjs"
+      - "scripts/check-sitemap.mjs"
+      - "scripts/build-llms-full.mjs"
+      - "scripts/indexnow.mjs"
+      - "scripts/indexnow-delta.mjs"
+      - "scripts/build-showcase-html.mjs"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
   workflow_dispatch:
 
 permissions:
@@ -19,12 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
       - name: Build packages
         run: pnpm -r --filter './packages/*' build
       - name: Build docs site
@@ -35,15 +45,16 @@ jobs:
         run: |
           mkdir -p apps/docs/dist/demo
           cp -R apps/showcase/dist/* apps/docs/dist/demo/
-      # The composed tree is the first thing that can be checked: the sitemap
-      # comes from Astro, the demo pages from Vite, and only here do both
-      # exist. Every built demo page that is not a redirect must be listed, or
-      # this fails with the route names before the artifact is uploaded.
       - name: Check every demo route is in the sitemap
         run: pnpm check:sitemap
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: apps/docs/dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: composed-site
+          path: apps/docs/dist
+          retention-days: 1
 
   deploy:
     needs: build
@@ -54,13 +65,24 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
-      # Push the freshly deployed URLs to Bing, Yandex, Seznam and Naver.
-      # Runs after the deploy so the sitemap it reads is the one just
-      # published. A failure here means the submission did not land — most
-      # often a missing key file — so it is reported, not ignored.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-      - name: Notify IndexNow
-        run: node scripts/indexnow.mjs
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: composed-site
+          path: apps/docs/dist
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .indexnow-state.json
+          key: indexnow-${{ github.sha }}
+          restore-keys: |
+            indexnow-
+      - name: Notify IndexNow of changed URLs
+        run: node scripts/indexnow.mjs --dist apps/docs/dist --state .indexnow-state.json
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: always()
+        with:
+          path: .indexnow-state.json
+          key: indexnow-${{ github.sha }}

@@ -1,0 +1,479 @@
+name: PR
+
+# Everything that runs on a pull request (and on push to main). Required
+# wrap-ups — point the ruleset at these four, in the same sitting as merge:
+#   Lint · Unit · Package · Playwright
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  detect:
+    name: Detect
+    runs-on: ubuntu-latest
+    outputs:
+      skipAll: ${{ steps.flags.outputs.skipAll }}
+      runLint: ${{ steps.flags.outputs.runLint }}
+      runLintRoot: ${{ steps.flags.outputs.runLintRoot }}
+      runUnit: ${{ steps.flags.outputs.runUnit }}
+      runPackage: ${{ steps.flags.outputs.runPackage }}
+      runPublint: ${{ steps.flags.outputs.runPublint }}
+      runPlaywright: ${{ steps.flags.outputs.runPlaywright }}
+      runBench: ${{ steps.flags.outputs.runBench }}
+      runPreview: ${{ steps.flags.outputs.runPreview }}
+      needBuild: ${{ steps.flags.outputs.needBuild }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Dedupe against PR-verified trees
+        id: dedupe
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "skipAll=false" >> "$GITHUB_OUTPUT"
+          tree="$(git rev-parse 'HEAD^{tree}')"
+          for wf in pr.yml ci.yml; do
+            shas="$(gh api "repos/${{ github.repository }}/actions/workflows/${wf}/runs?status=success&event=pull_request&per_page=30" \
+              --jq '.workflow_runs[].head_sha' 2>/dev/null)" || continue
+            for sha in $shas; do
+              t="$(gh api "repos/${{ github.repository }}/git/commits/${sha}" --jq '.tree.sha' 2>/dev/null)" || continue
+              if [ "$t" = "$tree" ]; then
+                echo "Tree $tree already verified by a PR run at $sha — reporting green without re-running."
+                echo "skipAll=true" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            done
+          done
+          echo "No verified tree match — classifying the push."
+
+      - name: Classify the diff
+        id: flags
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          zero="0000000000000000000000000000000000000000"
+          if [ "${{ steps.dedupe.outputs.skipAll }}" = "true" ]; then
+            echo "skipAll=true" >> "$GITHUB_OUTPUT"
+            echo "runLint=false" >> "$GITHUB_OUTPUT"
+            echo "runLintRoot=false" >> "$GITHUB_OUTPUT"
+            echo "runUnit=false" >> "$GITHUB_OUTPUT"
+            echo "runPackage=false" >> "$GITHUB_OUTPUT"
+            echo "runPublint=false" >> "$GITHUB_OUTPUT"
+            echo "runPlaywright=false" >> "$GITHUB_OUTPUT"
+            echo "runBench=false" >> "$GITHUB_OUTPUT"
+            echo "runPreview=false" >> "$GITHUB_OUTPUT"
+            echo "needBuild=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skipAll=false" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" = "pull_request" ]; then
+            git fetch --quiet origin "$BASE_REF"
+            if ! git diff --name-only "origin/$BASE_REF"...HEAD | node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"; then
+              echo "Could not classify the diff — fail-open to the full gate."
+              node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
+          if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "$zero" ]; then
+            git diff --name-only "$BEFORE" HEAD | node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build
+    needs: detect
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
+
+      - uses: ./.github/actions/setup-pnpm
+        if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
+
+      - name: Build packages
+        if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.needBuild == 'true'
+        run: pnpm build
+
+  format:
+    name: Format
+    needs: detect
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.detect.outputs.skipAll != 'true'
+
+      - uses: ./.github/actions/setup-pnpm
+        if: needs.detect.outputs.skipAll != 'true'
+        with:
+          turbo-cache: "false"
+
+      - name: Format check
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm format:check
+
+      - name: Check adapter READMEs advertise every feature
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:readmes
+
+      - name: Check every export is documented
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:docsurface
+
+      - name: Test root tooling
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm test:scripts
+
+      - name: Check every structural part is named in every kit
+        if: needs.detect.outputs.runUnit == 'true'
+        run: pnpm check:parts
+
+      - name: Lint root tooling
+        if: needs.detect.outputs.runLintRoot == 'true'
+        run: pnpm lint:root
+
+  eslint:
+    name: ESLint · ${{ matrix.name }}
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: core
+            filter: "--filter=@adapttable/core"
+          - name: antd
+            filter: "--filter=@adapttable/antd"
+          - name: mui
+            filter: "--filter=@adapttable/mui"
+          - name: kits
+            filter: "--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap"
+          - name: tools
+            filter: "--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Lint
+        run: pnpm lint ${{ matrix.filter }} --concurrency=1
+
+  typescript:
+    name: TypeScript · ${{ matrix.name }}
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: core
+            filter: "--filter=@adapttable/core"
+          - name: antd
+            filter: "--filter=@adapttable/antd"
+          - name: mui
+            filter: "--filter=@adapttable/mui"
+          - name: kits
+            filter: "--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap"
+          - name: tools
+            filter: "--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Typecheck
+        run: pnpm typecheck ${{ matrix.filter }}
+
+  lint:
+    name: Lint
+    needs: [detect, format, eslint, typescript]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require format, ESLint and TypeScript
+        run: |
+          [ "${{ needs.detect.result }}" = "success" ] || { echo "Detect: ${{ needs.detect.result }}"; exit 1; }
+          if [ "${{ needs.detect.outputs.skipAll }}" = "true" ]; then
+            echo "Tree already verified."
+            exit 0
+          fi
+          [ "${{ needs.format.result }}" = "success" ] || { echo "Format: ${{ needs.format.result }}"; exit 1; }
+          if [ "${{ needs.detect.outputs.runLint }}" = "true" ]; then
+            [ "${{ needs.eslint.result }}" = "success" ] || { echo "ESLint: ${{ needs.eslint.result }}"; exit 1; }
+            [ "${{ needs.typescript.result }}" = "success" ] || { echo "TypeScript: ${{ needs.typescript.result }}"; exit 1; }
+          fi
+
+  unit-shard:
+    name: Unit · ${{ matrix.name }}
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runUnit == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: core
+            filter: "--filter=@adapttable/core"
+          - name: antd
+            filter: "--filter=@adapttable/antd"
+          - name: mui
+            filter: "--filter=@adapttable/mui"
+          - name: chakra · mantine
+            filter: "--filter=@adapttable/chakra --filter=@adapttable/mantine"
+          - name: radix · base-ui
+            filter: "--filter=@adapttable/radix --filter=@adapttable/base-ui"
+          - name: shadcn · unstyled · bootstrap
+            filter: "--filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap"
+          - name: server · cli · i18n
+            filter: "--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Test with coverage
+        run: pnpm test:coverage ${{ matrix.filter }} --concurrency=1
+
+  unit:
+    name: Unit
+    needs: [detect, unit-shard]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require unit shards
+        run: |
+          [ "${{ needs.detect.result }}" = "success" ] || { echo "Detect: ${{ needs.detect.result }}"; exit 1; }
+          if [ "${{ needs.detect.outputs.skipAll }}" = "true" ] || [ "${{ needs.detect.outputs.runUnit }}" != "true" ]; then
+            echo "Unit shards not required for this diff."
+            exit 0
+          fi
+          [ "${{ needs.unit-shard.result }}" = "success" ] || { echo "Unit shards: ${{ needs.unit-shard.result }}"; exit 1; }
+
+  package-gate:
+    name: api · publint · smoke · budget
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPublint == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Restore built packages
+        run: pnpm build
+      - name: Validate published package configs
+        run: pnpm publint
+      - name: Check the extracted API reports are current
+        if: needs.detect.outputs.runPackage == 'true'
+        run: pnpm api:check
+      - name: Smoke-check built package artifacts
+        if: needs.detect.outputs.runPackage == 'true'
+        run: pnpm smoke:dist
+      - name: Bundle-size budget
+        if: needs.detect.outputs.runPackage == 'true'
+        run: pnpm budget
+
+  consumer:
+    name: Packed-consumer harness
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPackage == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Restore built packages
+        run: pnpm build
+      - name: Run the packed-consumer harness
+        run: pnpm consumer:harness
+
+  floors:
+    name: Peer floors (changed adapters)
+    needs: [detect, build]
+    if: github.event_name == 'pull_request' && needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPackage == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Detect changed adapters with kit floors
+        id: kits
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --quiet origin "$BASE_REF"
+          floored="mantine mui chakra antd radix base-ui"
+          changed="$(git diff --name-only "origin/$BASE_REF"...HEAD \
+            | grep -oE '^packages/adapter-[a-z-]+/' | sort -u \
+            | sed -e 's|packages/adapter-||' -e 's|/$||')" || true
+          kits=""
+          for kit in $changed; do
+            case " $floored " in *" $kit "*) kits="$kits $kit" ;; esac
+          done
+          kits="${kits# }"
+          echo "kits=$kits" >> "$GITHUB_OUTPUT"
+          if [ -n "$kits" ]; then echo "Floors to run: $kits"; else echo "No floored adapter changed."; fi
+      - uses: ./.github/actions/setup-pnpm
+        if: steps.kits.outputs.kits != ''
+      - name: Restore the changed adapters
+        if: steps.kits.outputs.kits != ''
+        run: |
+          for kit in ${{ steps.kits.outputs.kits }}; do
+            pnpm turbo run build --filter="@adapttable/${kit}..."
+          done
+      - name: Run the floor probes
+        if: steps.kits.outputs.kits != ''
+        run: |
+          for kit in ${{ steps.kits.outputs.kits }}; do
+            pnpm peer:floors "$kit"
+          done
+
+  react-matrix:
+    name: React ${{ matrix.react }} compatibility
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPackage == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        react: ["18.3.1", "19.0.0", "19.2.7"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Restore the probed packages
+        run: pnpm turbo run build --filter=@adapttable/unstyled...
+      - name: Smoke-test against React ${{ matrix.react }}
+        run: pnpm react:matrix ${{ matrix.react }}
+
+  preview:
+    name: Preview
+    needs: [detect, build]
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.detect.outputs.skipAll != 'true' &&
+      needs.detect.outputs.runPreview == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Restore built packages
+        run: pnpm build
+      - name: Publish preview packages
+        run: pnpm dlx pkg-pr-new publish --pnpm --compact './packages/*'
+
+  package:
+    name: Package
+    needs: [detect, package-gate, consumer, floors, react-matrix, preview]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require package jobs
+        run: |
+          [ "${{ needs.detect.result }}" = "success" ] || { echo "Detect: ${{ needs.detect.result }}"; exit 1; }
+          if [ "${{ needs.detect.outputs.skipAll }}" = "true" ]; then
+            echo "Tree already verified."
+            exit 0
+          fi
+          if [ "${{ needs.detect.outputs.runPublint }}" = "true" ]; then
+            [ "${{ needs.package-gate.result }}" = "success" ] || { echo "Package gate: ${{ needs.package-gate.result }}"; exit 1; }
+          fi
+          if [ "${{ needs.detect.outputs.runPackage }}" != "true" ]; then
+            echo "Packed harness not required for this diff."
+            exit 0
+          fi
+          [ "${{ needs.consumer.result }}" = "success" ] || { echo "Consumer: ${{ needs.consumer.result }}"; exit 1; }
+          [ "${{ needs.react-matrix.result }}" = "success" ] || { echo "React matrix: ${{ needs.react-matrix.result }}"; exit 1; }
+          floors="${{ needs.floors.result }}"
+          preview="${{ needs.preview.result }}"
+          case "$floors" in success|skipped) ;; *) echo "Floors: $floors"; exit 1 ;; esac
+          case "$preview" in success|skipped) ;; *) echo "Preview: $preview"; exit 1 ;; esac
+
+  playwright-shard:
+    name: Playwright · ${{ matrix.shard }}/9
+    needs: detect
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - uses: ./.github/actions/playwright-chromium
+      - name: Run E2E smoke suite
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/9
+      - name: Upload report on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 7
+
+  playwright:
+    name: Playwright
+    needs: [detect, playwright-shard]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require Playwright shards
+        run: |
+          [ "${{ needs.detect.result }}" = "success" ] || { echo "Detect: ${{ needs.detect.result }}"; exit 1; }
+          if [ "${{ needs.detect.outputs.skipAll }}" = "true" ] || [ "${{ needs.detect.outputs.runPlaywright }}" != "true" ]; then
+            echo "Playwright not required for this diff."
+            exit 0
+          fi
+          [ "${{ needs.playwright-shard.result }}" = "success" ] || { echo "Playwright shards: ${{ needs.playwright-shard.result }}"; exit 1; }
+
+  codeql:
+    name: CodeQL
+    needs: detect
+    if: github.event_name == 'pull_request' && needs.detect.outputs.skipAll != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+
+  bench:
+    name: Bench
+    needs: detect
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runBench == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - uses: ./.github/actions/playwright-chromium
+      - name: Start the showcase
+        run: |
+          pnpm --filter @adapttable/showcase exec vite --port 4321 --strictPort &
+          npx --yes wait-on http://localhost:4321 --timeout 120000
+      - name: Run the performance smoke subset
+        run: node scripts/bench.mjs --port 4321 --smoke

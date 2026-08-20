@@ -43,7 +43,7 @@
     "consumer:harness": "node scripts/consumer-harness.mjs",
     "api:reports": "node scripts/api-reports.mjs --local",
     "api:check": "node scripts/api-reports.mjs",
-    "release:gated": "pnpm run verify:release && pnpm run release",
+    "release:gated": "pnpm run publint && pnpm run release",
     "check:parts": "node scripts/check-parts-parity.mjs"
   },
   "devDependencies": {

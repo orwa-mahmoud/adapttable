@@ -58,12 +58,9 @@ jobs:
       - name: Create release PR or publish
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
-          # The publish path re-verifies the exact release commit before
-          # anything reaches npm: full gate (lint, types, coverage, build,
-          # publint, dist smoke) plus peer floors. There is no route to
-          # `changeset publish` around a failed gate. Version-PR creation
-          # (the other path of this action) stays fast — CI runs the same
-          # gate on that PR anyway.
+          # Publish does not re-run the full test gate — the PR that landed
+          # the code already did, and a version-only PR is publint + format.
+          # This path builds and publishes; publint is the last cheap check.
           # ONE command: the action execs its publish input without a shell,
           # so a `&&` here would be passed to pnpm as a literal argument. The
           # gate-then-publish chain lives inside the release:gated script.

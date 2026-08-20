@@ -6,12 +6,20 @@
  * back, the site tells Bing, Yandex, Seznam and Naver which URLs to fetch.
  * Google does not participate — its indexing stays on the sitemap.
  *
- * The URL list is read from the deployed sitemap, so pages added later are
- * submitted without touching this script.
+ * After a Pages deploy the composed dist is hashed. Only URLs whose HTML
+ * changed (or that are new since the last successful deploy) are POSTed.
+ * The first run seeds the hash map and submits nothing, so a whole-site
+ * blast is not the default.
  *
- * Runs from the docs workflow after a Pages deploy, and standalone via
- * `node scripts/indexnow.mjs`.
+ * Runs from the Site workflow after a Pages deploy, and standalone via
+ * `node scripts/indexnow.mjs [--dist dir] [--state file]`.
  */
+
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { hashesFromDist, urlsToSubmit } from "./indexnow-delta.mjs";
 
 /**
  * The key is public by design — it is served verbatim at KEY_LOCATION, and
@@ -35,22 +43,11 @@ const HOST = "orwa-mahmoud.github.io";
  */
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
 
-const SITEMAP = `https://${HOST}/adapttable/sitemap.xml`;
 const ENDPOINT = "https://api.indexnow.org/indexnow";
 
-async function readSitemap() {
-  const res = await fetch(SITEMAP);
-  if (!res.ok) {
-    throw new Error(`sitemap ${SITEMAP} returned HTTP ${res.status}`);
-  }
-  const urls = [...(await res.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map(
-    (m) => m[1].trim()
-  );
-  if (urls.length === 0) {
-    throw new Error(`sitemap ${SITEMAP} listed no <loc> entries`);
-  }
-  return urls;
-}
+const DEFAULT_DIST = fileURLToPath(
+  new URL("../apps/docs/dist", import.meta.url)
+);
 
 async function submit(urlList) {
   const res = await fetch(ENDPOINT, {
@@ -64,10 +61,6 @@ async function submit(urlList) {
     }),
   });
 
-  // 200 accepts the batch outright; 202 accepts it pending key validation.
-  // Anything else means the submission did not land, and the most likely
-  // cause — a missing or mismatched key file — stays broken silently unless
-  // this exits non-zero.
   if (res.status !== 200 && res.status !== 202) {
     throw new Error(
       `IndexNow returned HTTP ${res.status} ${res.statusText}\n` +
@@ -78,8 +71,42 @@ async function submit(urlList) {
   return res.status;
 }
 
+function arg(flag, fallback) {
+  const i = process.argv.indexOf(flag);
+  if (i === -1 || i + 1 >= process.argv.length) return fallback;
+  return process.argv[i + 1];
+}
+
+function readState(path) {
+  try {
+    return JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
 async function main() {
-  const urls = await readSitemap();
+  const dist = arg("--dist", DEFAULT_DIST);
+  const statePath = arg("--state", "");
+  const previous = statePath ? readState(statePath) : {};
+  const next = hashesFromDist(dist);
+  const urls = urlsToSubmit(previous, next);
+
+  if (statePath) {
+    mkdirSync(dirname(statePath), { recursive: true });
+    writeFileSync(statePath, `${JSON.stringify(next)}\n`);
+  }
+
+  if (urls.length === 0) {
+    const seeded = Object.keys(previous).length === 0;
+    console.log(
+      seeded
+        ? `indexnow: seeded ${Object.keys(next).length} URLs, no POST`
+        : "indexnow: no URL hashes changed, no POST"
+    );
+    return;
+  }
+
   const status = await submit(urls);
   console.log(
     `indexnow: submitted ${urls.length} URLs, HTTP ${status}` +
