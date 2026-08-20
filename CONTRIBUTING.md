@@ -34,10 +34,10 @@ examples/           one runnable example per adapter
 
 ## Your first PR
 
-**Every check runs in CI on your pull request** — quality, tests with
-coverage, packaging, Playwright end-to-end, peer-dependency floors, a
-packed-consumer harness, a React version matrix, and CodeQL. Nothing here is
-advisory.
+**Every check runs in CI on your pull request** — format, lint, types, tests
+with coverage, packaging, Playwright, peer-dependency floors, a packed-consumer
+harness, a React version matrix, and CodeQL. The required wrap-ups are
+**Lint**, **Unit**, **Package**, and **Playwright**.
 
 Most of that is reproducible locally, so you can catch failures before you
 push rather than in review:

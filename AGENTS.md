@@ -66,9 +66,11 @@ Unify the **model**, never the **pixels**. The standing pattern is
 
 ## The quality gate — green before every push, zero suppressions
 
-`pnpm check` is the single source of truth for the library gate. Husky runs
-`format:check` on every commit (fast) and `pnpm check` then `pnpm test:e2e`
-on every push:
+`pnpm check` is the full local library gate. Husky runs `format:check` on
+every commit (fast). Pre-push runs `pnpm check:if-needed` then
+`pnpm e2e:if-needed`, using the same path classify as the PR Detect job:
+docs, workflows, and README skip lint, types, coverage and build; a package
+change still runs the full sequence:
 
 ```
 format:check → lint → lint:root → check:readmes → check:docsurface
@@ -86,8 +88,8 @@ format:check → lint → lint:root → check:readmes → check:docsurface
 - **`pnpm test:e2e` is part of the bar** — `pnpm check` does not run it.
   Pre-push runs `pnpm e2e:if-needed`: skip when the diff vs `origin/main` has
   no packages/showcase/e2e; run only changed `e2e/*.spec.ts` when that is all
-  that changed; otherwise the full suite. CI already skips the whole job on
-  the same path set. Needs Chromium once: `pnpm exec playwright install chromium`.
+  that changed; otherwise the full suite. The PR workflow skips Playwright
+  on the same path set. Needs Chromium once: `pnpm exec playwright install chromium`.
 - A change is not done until the gate is green with real command output —
   evidence, not assertions. Anything visual or keyboard-driven is also
   verified in a real browser.

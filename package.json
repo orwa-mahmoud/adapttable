@@ -16,6 +16,7 @@
     "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "test:e2e": "playwright test",
     "e2e:if-needed": "node scripts/e2e-if-needed.mjs",
+    "check:if-needed": "node scripts/check-if-needed.mjs",
     "bench": "node scripts/bench.mjs",
     "lint": "turbo run lint",
     "lint:root": "eslint scripts vitest.shared.ts",
@@ -43,7 +44,7 @@
     "consumer:harness": "node scripts/consumer-harness.mjs",
     "api:reports": "node scripts/api-reports.mjs --local",
     "api:check": "node scripts/api-reports.mjs",
-    "release:gated": "pnpm run verify:release && pnpm run release",
+    "release:gated": "pnpm run publint && pnpm run release",
     "check:parts": "node scripts/check-parts-parity.mjs"
   },
   "devDependencies": {
