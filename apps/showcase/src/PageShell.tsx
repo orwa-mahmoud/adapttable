@@ -4,6 +4,7 @@ import { type ReactNode, startTransition, useEffect, useState } from "react";
 
 import { DEMO_CONFIRM_EVENT, DEMO_NOTICE_EVENT, type DemoNotice } from "./data";
 import { AppNav, Footer } from "./sections";
+import { StarTheRepo } from "./StarTheRepo";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ export function PageShell({
         }}
       />
       <main>{children(dark)}</main>
+      <StarTheRepo />
       <Footer root={root} />
 
       {notice && (

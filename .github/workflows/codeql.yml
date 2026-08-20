@@ -1,8 +1,8 @@
 name: CodeQL
 
+# Pull requests are scanned in pr.yml. This workflow is the weekly
+# full-repo pass only — not a second scan on every merge to main.
 on:
-  push:
-    branches: [main]
   schedule:
     # Weekly re-scan so newly published queries run against unchanged code.
     - cron: "17 3 * * 1"
