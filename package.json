@@ -16,6 +16,7 @@
     "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "test:e2e": "playwright test",
     "e2e:if-needed": "node scripts/e2e-if-needed.mjs",
+    "check:if-needed": "node scripts/check-if-needed.mjs",
     "bench": "node scripts/bench.mjs",
     "lint": "turbo run lint",
     "lint:root": "eslint scripts vitest.shared.ts",

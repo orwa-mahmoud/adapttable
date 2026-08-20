@@ -1,12 +1,13 @@
-# The full quality gate runs before anything leaves the machine. Turbo
-# caches keep re-runs fast when nothing changed since the last green run.
+# Pre-push uses the same path classify as the PR Detect job, so a docs or
+# workflow diff does not pay for lint / coverage / build. `pnpm check` is
+# still the full local gate when you want every step.
 # Hooks inherit the pushing tool's PATH; GUI clients and non-interactive
 # shells may not carry pnpm there — corepack ships with Node and resolves
 # the pinned pnpm either way.
 if command -v pnpm >/dev/null 2>&1; then
-  pnpm check
+  pnpm check:if-needed
   pnpm e2e:if-needed
 else
-  corepack pnpm check
+  corepack pnpm check:if-needed
   corepack pnpm e2e:if-needed
 fi

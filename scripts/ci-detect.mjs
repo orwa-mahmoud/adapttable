@@ -1,6 +1,7 @@
 /**
- * Classify a git-diff path list for the PR workflow. Strings in, flags out —
- * the workflow is the only caller that talks to git; tests drive this layer.
+ * Classify a git-diff path list for the PR workflow and for husky
+ * (`check:if-needed`). Strings in, flags out — callers talk to git; tests
+ * drive this layer.
  */
 
 const ROOT_README = /^README\.md$/;
