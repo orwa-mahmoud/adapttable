@@ -46,6 +46,9 @@ export function checkPlan(flags) {
 
   steps.push({ label: "check:readmes", args: ["run", "check:readmes"] });
   steps.push({ label: "check:docsurface", args: ["run", "check:docsurface"] });
+  if (flags.runKitsDocs) {
+    steps.push({ label: "check:kits-docs", args: ["run", "check:kits-docs"] });
+  }
 
   if (flags.runUnit) {
     steps.push({ label: "check:parts", args: ["run", "check:parts"] });

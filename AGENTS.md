@@ -117,7 +117,9 @@ coverage where visual · tests with the coverage floors met.
    versions; exact pins resolve core automatically.
 
 Release mechanics: merge the PR carrying its changeset → the bot opens a
-"Version Packages" PR → merging that publishes to npm.
+"Version Packages" PR → merging that publishes to npm. A main push with
+neither a pending changeset nor an unpublished version skips the Release
+job; publish is build → publint → `changeset publish`, not `verify:release`.
 
 ## Generated vs hand-written files
 

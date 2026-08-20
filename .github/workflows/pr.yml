@@ -16,6 +16,7 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -35,11 +36,10 @@ jobs:
       runPlaywright: ${{ steps.flags.outputs.runPlaywright }}
       runBench: ${{ steps.flags.outputs.runBench }}
       runPreview: ${{ steps.flags.outputs.runPreview }}
+      runKitsDocs: ${{ steps.flags.outputs.runKitsDocs }}
       needBuild: ${{ steps.flags.outputs.needBuild }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
 
       - name: Dedupe against PR-verified trees
         id: dedupe
@@ -69,6 +69,8 @@ jobs:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
           BEFORE: ${{ github.event.before }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -o pipefail
           zero="0000000000000000000000000000000000000000"
@@ -88,14 +90,15 @@ jobs:
             echo "runPlaywright=false" >> "$GITHUB_OUTPUT"
             echo "runBench=false" >> "$GITHUB_OUTPUT"
             echo "runPreview=false" >> "$GITHUB_OUTPUT"
+            echo "runKitsDocs=false" >> "$GITHUB_OUTPUT"
             echo "needBuild=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "skipAll=false" >> "$GITHUB_OUTPUT"
           tmp="$(mktemp)"
           if [ "$EVENT" = "pull_request" ]; then
-            git fetch --quiet origin "$BASE_REF"
-            git diff --name-only "origin/$BASE_REF"...HEAD > "$tmp" || true
+            gh api --paginate "repos/${{ github.repository }}/pulls/${PR_NUMBER}/files" \
+              --jq '.[].filename' > "$tmp"
             if ! emit "$tmp"; then
               echo "Could not classify the diff — fail-open to the full gate."
               node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
@@ -103,6 +106,7 @@ jobs:
             exit 0
           fi
           if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "$zero" ]; then
+            git fetch --no-tags --depth=1 origin "$BEFORE"
             git diff --name-only "$BEFORE" HEAD > "$tmp" || true
             emit "$tmp"
             exit 0
@@ -146,6 +150,10 @@ jobs:
         if: needs.detect.outputs.skipAll != 'true'
         run: pnpm check:docsurface
 
+      - name: Check the root README lists every CLI kit
+        if: needs.detect.outputs.runKitsDocs == 'true'
+        run: pnpm check:kits-docs
+
       - name: Test root tooling
         if: needs.detect.outputs.skipAll != 'true'
         run: pnpm test:scripts
@@ -160,7 +168,7 @@ jobs:
 
   eslint:
     name: ESLint
-    needs: [detect, build]
+    needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -187,7 +195,7 @@ jobs:
 
   typescript:
     name: TypeScript
-    needs: [detect, build]
+    needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -377,7 +385,6 @@ jobs:
 
   preview:
     name: Preview
-    continue-on-error: true
     needs: [detect, build]
     if: >
       github.event_name == 'pull_request' &&
