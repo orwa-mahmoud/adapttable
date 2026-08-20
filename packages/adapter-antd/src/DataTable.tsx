@@ -1652,7 +1652,8 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     c.table.labels,
     // The button names the format it produces, so a spreadsheet writer relabels
     // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv)?.writer?.extension
+    resolveExportCsv(props.exportCsv)?.writer?.extension,
+    c.featureNotices.some((notice) => notice.kind === "export-all-page")
   );
 
   // The palette lists the table's own actions; its shortcut is bound here
@@ -1703,7 +1704,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     virtualOverscan: props.virtualOverscan,
     virtualScrollMargin: props.virtualScrollMargin,
   });
-  const virtualBody = virtualize && !grouping;
+  const virtualBody = virtualize && !grouping && !c.isPaged;
   const resolvedTableLabel = table.getTableProps()["aria-label"];
   // In virtual mode the rows live inside antd's own fixed-height scroll
   // container, so the page-level sentinel never reaches the viewport — the
@@ -1935,7 +1936,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       skeletonRows={props.skeletonRows}
       size={size}
       bordered={bordered}
-      virtualize={virtualize}
+      virtualize={virtualBody}
       maxHeight={props.maxHeight}
       sticky={sticky}
       dataSource={dataSource}
@@ -2120,6 +2121,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
       />
       <StatusBar
         enabled={props.statusBar === true}
+        notices={c.featureNotices}
         shown={source.rows.length}
         page={source.page}
         limit={source.limit}

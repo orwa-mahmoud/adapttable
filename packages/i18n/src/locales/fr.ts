@@ -206,4 +206,17 @@ export const fr: Required<TableLabels> = {
   gridCellPosition: (row, total) => `ligne ${row} sur ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `Lignes ${fromRow} à ${toRow}, colonnes ${fromColumn} à ${toColumn} sélectionnées, ${cells} cellules`,
+  noticeVirtualizePaged:
+    "La virtualisation est inactive — ce tableau paginé affiche une page à la fois.",
+  noticePinNested:
+    "L’épinglage des lignes est inactif tant que le regroupement ou un arbre est actif.",
+  noticeReorderNested:
+    "Le réordonnancement des lignes est inactif tant que le regroupement ou un arbre est actif.",
+  noticeGroupingUnavailable:
+    "Le regroupement est inactif — cette source n’expose pas l’ensemble filtré complet.",
+  noticeExportAllPage:
+    "Exporter tout correspond à cette page — l’ensemble filtré complet n’est pas disponible.",
+  noticeEditWithoutWriter:
+    "L’édition est inactive — aucun gestionnaire d’écriture n’est branché.",
+  exportThisPage: "Exporter cette page",
 };

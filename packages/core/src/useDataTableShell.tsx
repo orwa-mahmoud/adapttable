@@ -282,7 +282,8 @@ export function useDataTableShell<TRow>(
     labels,
     // The button names the format it produces, so a spreadsheet writer relabels
     // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv)?.writer?.extension
+    resolveExportCsv(props.exportCsv)?.writer?.extension,
+    chrome.featureNotices.some((notice) => notice.kind === "export-all-page")
   );
   // The chrome owns it: progressive column hiding measures this element.
   const rootRef = chrome.rootRef;

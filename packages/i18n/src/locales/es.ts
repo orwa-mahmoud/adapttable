@@ -203,4 +203,17 @@ export const es: Required<TableLabels> = {
   gridCellPosition: (row, total) => `fila ${row} de ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `Filas ${fromRow} a ${toRow}, columnas ${fromColumn} a ${toColumn} seleccionadas, ${cells} celdas`,
+  noticeVirtualizePaged:
+    "La virtualización está desactivada: esta tabla paginada muestra una página cada vez.",
+  noticePinNested:
+    "El anclaje de filas está desactivado mientras hay agrupación o un árbol.",
+  noticeReorderNested:
+    "El reorden de filas está desactivado mientras hay agrupación o un árbol.",
+  noticeGroupingUnavailable:
+    "La agrupación está desactivada: esta fuente no proporciona el conjunto filtrado completo.",
+  noticeExportAllPage:
+    "Exportar todo es esta página: el conjunto filtrado completo no está disponible.",
+  noticeEditWithoutWriter:
+    "La edición está desactivada: no hay un controlador de escritura.",
+  exportThisPage: "Exportar esta página",
 };

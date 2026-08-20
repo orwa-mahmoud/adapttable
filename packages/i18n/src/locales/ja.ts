@@ -203,4 +203,16 @@ export const ja: Required<TableLabels> = {
   gridCellPosition: (row, total) => `${total} 行中 ${row} 行目`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `${fromRow}行目から${toRow}行目、${fromColumn}列目から${toColumn}列目を選択、${cells}セル`,
+  noticeVirtualizePaged:
+    "仮想化はオフです。このページ分割テーブルは一度に1ページだけ表示します。",
+  noticePinNested: "グループ化またはツリーの使用中は行の固定はオフです。",
+  noticeReorderNested:
+    "グループ化またはツリーの使用中は行の並べ替えはオフです。",
+  noticeGroupingUnavailable:
+    "グループ化はオフです。このソースは絞り込んだ全件を提供しません。",
+  noticeExportAllPage:
+    "すべて書き出しはこのページです。絞り込んだ全件は利用できません。",
+  noticeEditWithoutWriter:
+    "編集はオフです。書き込みハンドラーがつながっていません。",
+  exportThisPage: "このページを書き出す",
 };

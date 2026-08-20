@@ -204,4 +204,17 @@ export const pt: Required<TableLabels> = {
   gridCellPosition: (row, total) => `linha ${row} de ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `Linhas ${fromRow} a ${toRow}, colunas ${fromColumn} a ${toColumn} selecionadas, ${cells} células`,
+  noticeVirtualizePaged:
+    "A virtualização está desligada — esta tabela paginada mostra uma página de cada vez.",
+  noticePinNested:
+    "A fixação de linhas está desligada com agrupamento ou árvore ativos.",
+  noticeReorderNested:
+    "A reordenação de linhas está desligada com agrupamento ou árvore ativos.",
+  noticeGroupingUnavailable:
+    "O agrupamento está desligado — esta origem não fornece o conjunto filtrado completo.",
+  noticeExportAllPage:
+    "Exportar tudo é esta página — o conjunto filtrado completo não está disponível.",
+  noticeEditWithoutWriter:
+    "A edição está desligada — nenhum handler de escrita está ligado.",
+  exportThisPage: "Exportar esta página",
 };

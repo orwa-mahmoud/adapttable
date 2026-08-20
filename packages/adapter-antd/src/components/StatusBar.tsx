@@ -27,6 +27,7 @@ const slots: StatusBarSlots = {
           type="secondary"
           data-adapttable-part="status-item"
           data-status={item.key}
+          data-appearance={item.appearance}
         >
           {item.text}
         </Typography.Text>

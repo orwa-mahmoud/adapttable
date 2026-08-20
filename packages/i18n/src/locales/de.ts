@@ -207,4 +207,17 @@ export const de: Required<TableLabels> = {
   gridCellPosition: (row, total) => `Zeile ${row} von ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `Zeilen ${fromRow} bis ${toRow}, Spalten ${fromColumn} bis ${toColumn} ausgewählt, ${cells} Zellen`,
+  noticeVirtualizePaged:
+    "Virtualisierung ist aus — diese paginierte Tabelle zeigt eine Seite auf einmal.",
+  noticePinNested:
+    "Zeilenheften ist aus, solange Gruppierung oder ein Baum aktiv ist.",
+  noticeReorderNested:
+    "Zeilenverschieben ist aus, solange Gruppierung oder ein Baum aktiv ist.",
+  noticeGroupingUnavailable:
+    "Gruppierung ist aus — diese Quelle liefert nicht die vollständige gefilterte Menge.",
+  noticeExportAllPage:
+    "Alle exportieren ist diese Seite — die vollständige gefilterte Menge ist nicht verfügbar.",
+  noticeEditWithoutWriter:
+    "Bearbeiten ist aus — es ist kein Schreib-Handler verbunden.",
+  exportThisPage: "Diese Seite exportieren",
 };

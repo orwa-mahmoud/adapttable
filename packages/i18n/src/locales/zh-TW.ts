@@ -202,4 +202,11 @@ export const zhTW: Required<TableLabels> = {
   gridCellPosition: (row, total) => `第 ${row} 行，共 ${total} 行`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `已選取第 ${fromRow} 至 ${toRow} 列、第 ${fromColumn} 至 ${toColumn} 欄，共 ${cells} 個儲存格`,
+  noticeVirtualizePaged: "虛擬捲動已關閉 — 此分頁表格每次只顯示一頁。",
+  noticePinNested: "分組或樹狀結構開啟時，列固定已關閉。",
+  noticeReorderNested: "分組或樹狀結構開啟時，列重排已關閉。",
+  noticeGroupingUnavailable: "分組已關閉 — 此資料來源未提供完整篩選結果。",
+  noticeExportAllPage: "匯出全部即本頁 — 完整篩選結果不可用。",
+  noticeEditWithoutWriter: "編輯已關閉 — 未接上寫入處理函式。",
+  exportThisPage: "匯出本頁",
 };

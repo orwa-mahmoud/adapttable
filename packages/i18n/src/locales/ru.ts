@@ -208,4 +208,17 @@ export const ru: Required<TableLabels> = {
   gridCellPosition: (row, total) => `строка ${row} из ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `Выбраны строки ${fromRow}–${toRow}, столбцы ${fromColumn}–${toColumn}, ячеек: ${cells}`,
+  noticeVirtualizePaged:
+    "Виртуализация выключена — эта страница таблицы показывает одну страницу за раз.",
+  noticePinNested:
+    "Закрепление строк выключено, пока включена группировка или дерево.",
+  noticeReorderNested:
+    "Перестановка строк выключена, пока включена группировка или дерево.",
+  noticeGroupingUnavailable:
+    "Группировка выключена — источник не отдаёт полный отфильтрованный набор.",
+  noticeExportAllPage:
+    "Экспорт всех — это эта страница: полный отфильтрованный набор недоступен.",
+  noticeEditWithoutWriter:
+    "Редактирование выключено — обработчик записи не подключён.",
+  exportThisPage: "Экспортировать эту страницу",
 };

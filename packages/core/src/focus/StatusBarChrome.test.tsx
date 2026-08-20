@@ -207,6 +207,54 @@ describe("StatusBarChrome", () => {
     );
   });
 
+  it("lists feature notices ahead of the counts when the bar is on", () => {
+    render(
+      <StatusBarChrome
+        enabled
+        shown={10}
+        total={10}
+        selected={0}
+        stats={null}
+        notices={[
+          {
+            kind: "virtualize-paged",
+            appearance: "one-page",
+            message: "One page at a time",
+          },
+        ]}
+        slots={slots}
+      />
+    );
+
+    expect(screen.getByTestId("item-virtualize-paged")).toHaveTextContent(
+      "One page at a time"
+    );
+    expect(screen.getByTestId("item-rows")).toBeInTheDocument();
+  });
+
+  it("does not flip the bar on just to show a notice", () => {
+    render(
+      <StatusBarChrome
+        enabled={false}
+        shown={10}
+        total={10}
+        selected={0}
+        stats={null}
+        notices={[
+          {
+            kind: "edit-without-writer",
+            appearance: "off",
+            message: "Editing is off",
+          },
+        ]}
+        slots={slots}
+      />
+    );
+
+    expect(screen.queryByTestId("bar")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("item-edit-without-writer")).toBeNull();
+  });
+
   it("passes the kit's class straight through", () => {
     render(
       <StatusBarChrome
