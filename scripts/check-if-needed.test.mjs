@@ -14,6 +14,7 @@ describe("checkPlan", () => {
       "format:check",
       "check:readmes",
       "check:docsurface",
+      "check:kits-docs",
       "test:scripts",
     ]);
     assert.equal(checkReason(classify(["README.md"])), "docs/meta-only");
@@ -99,6 +100,7 @@ describe("checkPlan", () => {
       "lint:root",
       "check:readmes",
       "check:docsurface",
+      "check:kits-docs",
       "test:scripts",
     ]);
     assert.equal(checkReason(classify(files)), "root tooling");

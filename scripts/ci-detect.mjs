@@ -36,25 +36,30 @@ const VITEST_SHARED = /^vitest\.shared\.ts$/;
  *   runPlaywright: boolean,
  *   runBench: boolean,
  *   runPreview: boolean,
+ *   runKitsDocs: boolean,
  *   needBuild: boolean,
  *   versionOnly: boolean,
  * }}
  */
 export function classify(files) {
   const list = files.map((f) => f.trim()).filter(Boolean);
+  const readme = list.some((f) => f === "README.md");
 
   if (list.length === 0) {
-    return gate({
-      runLint: true,
-      runLintRoot: true,
-      runUnit: true,
-      runPackage: true,
-      runPublint: true,
-      runPlaywright: true,
-      runBench: true,
-      runPreview: true,
-      versionOnly: false,
-    });
+    return gate(
+      {
+        runLint: true,
+        runLintRoot: true,
+        runUnit: true,
+        runPackage: true,
+        runPublint: true,
+        runPlaywright: true,
+        runBench: true,
+        runPreview: true,
+        versionOnly: false,
+      },
+      { readme: false }
+    );
   }
 
   const packagesChanged = list.some((f) => PACKAGES.test(f));
@@ -69,51 +74,60 @@ export function classify(files) {
     list.every((f) => DOCS_OR_META.test(f) && !PACKAGES.test(f));
 
   if (docsOnly) {
-    return gate({
-      runLint: false,
-      runLintRoot: false,
-      runUnit: false,
-      runPackage: false,
-      runPublint: false,
-      runPlaywright: false,
-      runBench: false,
-      runPreview: false,
-      versionOnly: false,
-    });
+    return gate(
+      {
+        runLint: false,
+        runLintRoot: false,
+        runUnit: false,
+        runPackage: false,
+        runPublint: false,
+        runPlaywright: false,
+        runBench: false,
+        runPreview: false,
+        versionOnly: false,
+      },
+      { readme }
+    );
   }
 
   if (versionOnly) {
-    return gate({
-      runLint: false,
-      runLintRoot: false,
-      runUnit: false,
-      runPackage: false,
-      runPublint: true,
-      runPlaywright: false,
-      runBench: false,
-      runPreview: false,
-      versionOnly: true,
-    });
+    return gate(
+      {
+        runLint: false,
+        runLintRoot: false,
+        runUnit: false,
+        runPackage: false,
+        runPublint: true,
+        runPlaywright: false,
+        runBench: false,
+        runPreview: false,
+        versionOnly: true,
+      },
+      { readme }
+    );
   }
 
-  return gate({
-    runLint: packagesChanged || eslintRoot,
-    runLintRoot: packagesChanged || rootTooling,
-    runUnit: packagesChanged || vitestShared,
-    runPackage: packagesChanged,
-    runPublint: packagesChanged,
-    runPlaywright: playwright,
-    runBench: bench,
-    runPreview: packagesChanged,
-    versionOnly: false,
-  });
+  return gate(
+    {
+      runLint: packagesChanged || eslintRoot,
+      runLintRoot: packagesChanged || rootTooling,
+      runUnit: packagesChanged || vitestShared,
+      runPackage: packagesChanged,
+      runPublint: packagesChanged,
+      runPlaywright: playwright,
+      runBench: bench,
+      runPreview: packagesChanged,
+      versionOnly: false,
+    },
+    { readme }
+  );
 }
 
-function gate(flags) {
+function gate(flags, { readme = false } = {}) {
   return {
     ...flags,
-    needBuild:
-      flags.runLint || flags.runUnit || flags.runPackage || flags.runPublint,
+    runKitsDocs: Boolean(readme && !flags.runUnit),
+    needBuild: flags.runUnit || flags.runPackage || flags.runPublint,
   };
 }
 

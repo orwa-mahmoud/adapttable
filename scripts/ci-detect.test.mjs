@@ -18,6 +18,7 @@ describe("classify", () => {
     assert.equal(f.runPackage, false);
     assert.equal(f.runPreview, false);
     assert.equal(f.runPlaywright, false);
+    assert.equal(f.runKitsDocs, true);
     assert.equal(f.needBuild, false);
   });
 
@@ -27,6 +28,7 @@ describe("classify", () => {
     assert.equal(f.runUnit, false);
     assert.equal(f.runPlaywright, false);
     assert.equal(f.needBuild, false);
+    assert.equal(f.runKitsDocs, false);
   });
 
   it("does not lint adapters for a workflow-only change", () => {
@@ -52,6 +54,7 @@ describe("classify", () => {
     assert.equal(f.runPreview, false);
     assert.equal(f.runPlaywright, false);
     assert.equal(f.runLintRoot, true);
+    assert.equal(f.runKitsDocs, true);
     assert.equal(f.needBuild, false);
   });
 
@@ -77,6 +80,7 @@ describe("classify", () => {
     assert.equal(f.runPreview, true);
     assert.equal(f.runPlaywright, true);
     assert.equal(f.runBench, true);
+    assert.equal(f.runKitsDocs, false);
   });
 
   it("runs Playwright when only e2e specs change, not the packed harness", () => {
@@ -93,7 +97,7 @@ describe("classify", () => {
     assert.equal(f.runLint, true);
     assert.equal(f.runLintRoot, true);
     assert.equal(f.runUnit, false);
-    assert.equal(f.needBuild, true);
+    assert.equal(f.needBuild, false);
   });
 
   it("runs unit shards when the shared vitest config changes", () => {
