@@ -43,7 +43,7 @@ const VERSION_ONLY =
 export function classify(files) {
   const list = files.map((f) => f.trim()).filter(Boolean);
 
-  if (list.some((f) => ROOT_README.test(f)) || list.length === 0) {
+  if (list.length === 0) {
     return gate({
       runLint: true,
       runLintRoot: true,
@@ -67,8 +67,9 @@ export function classify(files) {
   const rootTooling = list.some((f) => ROOT_TOOLING.test(f));
   const playwright = list.some((f) => PLAYWRIGHT.test(f));
   const bench = list.some((f) => BENCH.test(f));
+  const readme = list.some((f) => ROOT_README.test(f));
 
-  if (docsOnly) {
+  if (docsOnly && !readme) {
     return gate({
       runLint: false,
       runLintRoot: false,
@@ -97,14 +98,14 @@ export function classify(files) {
   }
 
   return gate({
-    runLint: packagesChanged || workflow,
-    runLintRoot: packagesChanged || workflow || rootTooling,
-    runUnit: packagesChanged,
-    runPackage: packagesChanged,
-    runPublint: packagesChanged,
+    runLint: packagesChanged || workflow || readme,
+    runLintRoot: packagesChanged || workflow || rootTooling || readme,
+    runUnit: packagesChanged || readme,
+    runPackage: packagesChanged || readme,
+    runPublint: packagesChanged || readme,
     runPlaywright: playwright,
     runBench: bench,
-    runPreview: packagesChanged,
+    runPreview: packagesChanged || readme,
     versionOnly: false,
   });
 }

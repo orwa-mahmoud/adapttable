@@ -14,7 +14,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  // Nine GitHub-hosted boxes (`--shard=i/9` in pr.yml) × 1 Chromium.
+  // Five GitHub-hosted boxes (`--shard=i/5` in e2e.yml) × 1 Chromium.
   // Four workers on one runner contended and stalled; one per box is enough.
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "line" : "list",

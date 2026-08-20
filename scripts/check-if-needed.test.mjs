@@ -9,9 +9,10 @@ function labels(files) {
 }
 
 describe("checkPlan", () => {
-  it("runs the full pnpm check when the root README changes", () => {
+  it("runs the library check when the root README changes, not Playwright", () => {
     assert.deepEqual(labels(["README.md"]), ["check"]);
     assert.equal(checkReason(classify(["README.md"])), "package code changed");
+    assert.equal(classify(["README.md"]).runPlaywright, false);
   });
 
   it("keeps format and doc guards on docs-only diffs", () => {

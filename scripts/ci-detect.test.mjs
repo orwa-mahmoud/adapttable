@@ -11,10 +11,12 @@ describe("classify", () => {
     assert.equal(f.needBuild, true);
   });
 
-  it("runs the full gate when the root README changes (it is a test input)", () => {
+  it("runs unit tests when the root README changes, not Playwright", () => {
     const f = classify(["README.md"]);
     assert.equal(f.runUnit, true);
     assert.equal(f.runPackage, true);
+    assert.equal(f.runPlaywright, false);
+    assert.equal(f.runBench, false);
   });
 
   it("skips unit, package and Playwright on docs-only diffs", () => {
