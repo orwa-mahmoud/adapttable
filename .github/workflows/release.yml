@@ -27,9 +27,28 @@ jobs:
       - id: check
         run: echo "enabled=${{ secrets.NPM_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
 
-  release:
+  detect:
+    name: Detect
     needs: guard
     if: ${{ needs.guard.outputs.enabled == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      needVersion: ${{ steps.flags.outputs.needVersion }}
+      needPublish: ${{ steps.flags.outputs.needPublish }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: flags
+        name: Classify version vs publish vs skip
+        run: node scripts/release-detect.mjs >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: [guard, detect]
+    if: >
+      needs.guard.outputs.enabled == 'true' &&
+      (needs.detect.outputs.needVersion == 'true' ||
+       needs.detect.outputs.needPublish == 'true')
     name: Version or Publish
     runs-on: ubuntu-latest
     # contents: tag and commit the version bump · id-token: npm provenance on
@@ -58,12 +77,10 @@ jobs:
       - name: Create release PR or publish
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
-          # Publish does not re-run the full test gate — the PR that landed
-          # the code already did, and a version-only PR is publint + format.
-          # This path builds and publishes; publint is the last cheap check.
-          # ONE command: the action execs its publish input without a shell,
-          # so a `&&` here would be passed to pnpm as a literal argument. The
-          # gate-then-publish chain lives inside the release:gated script.
+          # Detect already decided a version PR or an unpublished package
+          # exists. Publish is build → publint → changeset publish — not
+          # verify:release. ONE command: the action execs its publish input
+          # without a shell, so a `&&` here would be a literal argument.
           publish: pnpm release:gated
           version: pnpm version-packages
         env:
