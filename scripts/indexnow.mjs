@@ -27,7 +27,7 @@ import { hashesFromDist, urlsToSubmit } from "./indexnow-delta.mjs";
  * secret and must not be moved into one: a reader needs to be able to
  * check that this value and the deployed file agree.
  */
-const KEY = "b2947bf41182ff1cb20adfc0232069e3";
+const KEY = "3066b6ad5c3c436ab2078c12c23ce05c";
 
 const HOST = "orwa-mahmoud.github.io";
 
