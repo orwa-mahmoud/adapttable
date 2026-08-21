@@ -65,4 +65,14 @@ describe("selection statistics (unstyled)", () => {
     fireEvent.mouseUp(cell(0, 1));
     expect(strip()).toBeNull();
   });
+
+  it("hosts the stats inside the status bar", () => {
+    table({ selectionStats: true, statusBar: true, locale: "en-US" });
+    selectBudgetColumn();
+    const bar = document.querySelector('[data-adapttable-part="status-bar"]');
+    expect(
+      bar?.querySelector('[data-adapttable-part="selection-stats"]')
+    ).not.toBeNull();
+    expect(bar?.textContent).toContain("Sum 40");
+  });
 });

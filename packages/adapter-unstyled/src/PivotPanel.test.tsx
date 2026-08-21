@@ -108,4 +108,42 @@ describe("PivotPanel", () => {
       zone("Measures").querySelector('[aria-label="Aggregation"]')
     ).not.toBeNull();
   });
+
+  it("adds a field from the Rows add control", () => {
+    render(<Harness />);
+    const add = zone("Rows").querySelector(
+      '[aria-label="Add field"]'
+    ) as HTMLSelectElement;
+    fireEvent.change(add, { target: { value: "region" } });
+    expect(
+      zone("Rows").querySelectorAll('[data-adapttable-part="pivot-field"]')
+    ).toHaveLength(1);
+  });
+
+  it("changes a measure aggregation", () => {
+    render(
+      <Harness
+        initial={{
+          ...EMPTY_PIVOT_CONFIG,
+          measures: [{ key: "amount", agg: "sum" }],
+        }}
+      />
+    );
+    const agg = zone("Measures").querySelector(
+      '[aria-label="Aggregation"]'
+    ) as HTMLSelectElement;
+    fireEvent.change(agg, { target: { value: "avg" } });
+    expect(agg.value).toBe("avg");
+  });
+
+  it("ignores a cleared add control", () => {
+    render(<Harness />);
+    const add = zone("Rows").querySelector(
+      '[aria-label="Add field"]'
+    ) as HTMLSelectElement;
+    fireEvent.change(add, { target: { value: "" } });
+    expect(
+      zone("Rows").querySelectorAll('[data-adapttable-part="pivot-field"]')
+    ).toHaveLength(0);
+  });
 });

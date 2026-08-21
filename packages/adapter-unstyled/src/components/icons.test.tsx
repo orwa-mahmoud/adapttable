@@ -8,7 +8,12 @@ import {
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { FiltersIcon, iconForRowAction } from "./icons";
+import {
+  FiltersIcon,
+  PinBottomIcon,
+  SearchIcon,
+  iconForRowAction,
+} from "./icons";
 
 const BUILT_IN = [
   DUPLICATE_ROW_ACTION_KEY,
@@ -32,5 +37,18 @@ describe("icons", () => {
       const { container } = render(<>{iconForRowAction({ key })}</>);
       expect(container.querySelector("svg")).not.toBeNull();
     }
+  });
+
+  it("honors an explicit size and className", () => {
+    const { container } = render(
+      <>
+        <SearchIcon size={24} className="s" />
+        <FiltersIcon size={24} className="f" />
+        <PinBottomIcon size={24} />
+      </>
+    );
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("width", "24");
+    expect(svg).toHaveClass("s");
   });
 });

@@ -108,4 +108,38 @@ describe("PivotPanel", () => {
       zone("Measures").querySelector('[aria-label="Aggregation"]')
     ).not.toBeNull();
   });
+
+  it("adds a field from the Rows add control", () => {
+    render(<Harness />);
+    fireEvent.mouseDown(
+      zone("Rows").querySelector('[aria-label="Add field"]')!
+    );
+    fireEvent.click(screen.getByRole("option", { name: "Region" }));
+    expect(
+      zone("Rows").querySelectorAll('[data-adapttable-part="pivot-field"]')
+    ).toHaveLength(1);
+  });
+
+  it("changes a measure aggregation", () => {
+    render(
+      <Harness
+        initial={{
+          ...EMPTY_PIVOT_CONFIG,
+          measures: [{ key: "amount", agg: "sum" }],
+        }}
+      />
+    );
+    fireEvent.mouseDown(
+      zone("Measures").querySelector('[aria-label="Aggregation"]')!
+    );
+    const option =
+      screen.queryByRole("option", { name: "avg" }) ??
+      screen.queryByRole("option", { name: "count" }) ??
+      screen.queryByRole("option", { name: "min" });
+    expect(option).not.toBeNull();
+    fireEvent.click(option!);
+    expect(
+      zone("Measures").querySelector('[aria-label="Aggregation"]')
+    ).toBeInTheDocument();
+  });
 });

@@ -901,6 +901,65 @@ describe("<DataTable> (unstyled)", () => {
       document.querySelector('[data-adapttable-part="filters-popover"]')
     ).toBeNull();
   });
+  it("wraps focus with shift+tab inside the drawer", () => {
+    renderHarness({
+      override: { filters: <div>filter body</div>, filtersMode: "drawer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /filters/i }));
+    const close = document.querySelector(
+      '[data-adapttable-part="filters-close"]'
+    ) as HTMLElement;
+    const done = document.querySelector(
+      '[data-adapttable-part="filters-done"]'
+    ) as HTMLElement;
+    close.focus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(done);
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(
+      document.querySelector('[data-adapttable-part="filters-close"]') ??
+        document.querySelector('[data-adapttable-part="filters-clear"]')
+    );
+  });
+
+  it("runs column-menu bulk and per-column sort from a live table", () => {
+    renderHarness({
+      override: {
+        enableColumnMenu: true,
+        dir: "rtl",
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show all" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hide all" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show all" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Name" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Sort ascending" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Name" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Sort descending" }));
+    expect(document.querySelector('[aria-sort="descending"]')).not.toBeNull();
+  });
+  it("closes the column menu on outside click and Escape", () => {
+    renderHarness({ override: { enableColumnMenu: true } });
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    expect(
+      document.querySelector('[data-adapttable-part="column-menu-panel"]')
+    ).not.toBeNull();
+    fireEvent.mouseDown(document.body);
+    expect(
+      document.querySelector('[data-adapttable-part="column-menu-panel"]')
+    ).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(
+      document.querySelector('[data-adapttable-part="column-menu-panel"]')
+    ).toBeNull();
+  });
 
   it("renders mobile cards when isMobile", () => {
     const { container } = renderHarness({ isMobile: true });

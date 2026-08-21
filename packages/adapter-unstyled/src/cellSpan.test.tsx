@@ -77,4 +77,27 @@ describe("cell spanning (unstyled)", () => {
     expect(cell).toHaveAttribute("data-cell-span", "2x1");
     expect(cell).not.toHaveStyle({ textAlign: "center" });
   });
+
+  it("sets rowSpan on the origin and skips the covered row", () => {
+    const { container } = render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        getCellSpan={({ column, rowIndex }) =>
+          column.key === "team" && rowIndex === 0 ? { rowSpan: 2 } : undefined
+        }
+      />
+    );
+    const origin = container.querySelector(
+      'td[data-column-key="team"]'
+    ) as HTMLElement;
+    expect(origin).toHaveAttribute("rowspan", "2");
+    expect(origin).toHaveAttribute("data-cell-span", "1x2");
+    const rows = container.querySelectorAll("tbody tr");
+    expect(
+      rows[1]?.querySelectorAll("td[data-adapttable-part='cell']")
+    ).toHaveLength(1);
+  });
 });
