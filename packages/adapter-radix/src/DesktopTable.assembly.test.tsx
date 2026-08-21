@@ -98,9 +98,9 @@ describe("DesktopTable assembly paint (Radix)", () => {
     expect(expandTh.style.background).toBe("var(--color-background)");
     expect(expandTh).toHaveAttribute("rowspan", "2");
 
-    const reorderTh = container.querySelector(
+    const reorderTh = container.querySelector<HTMLElement>(
       '[data-adapttable-part="reorder-header"]'
-    ) as HTMLElement;
+    )!;
     expect(reorderTh).toBeTruthy();
     expect(reorderTh.style.insetInlineStart).toBe(`${EXPANSION_WIDTH}px`);
     expect(reorderTh).toHaveAttribute("rowspan", "2");
@@ -110,9 +110,9 @@ describe("DesktopTable assembly paint (Radix)", () => {
       `${EXPANSION_WIDTH + REORDER_WIDTH}px`
     );
 
-    const reorderTd = container.querySelector(
+    const reorderTd = container.querySelector<HTMLElement>(
       '[data-adapttable-part="reorder-cell"]'
-    ) as HTMLElement;
+    )!;
     expect(reorderTd.style.insetInlineStart).toBe(`${EXPANSION_WIDTH}px`);
 
     const selectTd = screen.getAllByLabelText("Select row")[0]!.closest("td")!;
@@ -120,9 +120,9 @@ describe("DesktopTable assembly paint (Radix)", () => {
       `${EXPANSION_WIDTH + REORDER_WIDTH}px`
     );
 
-    const nameCell = container.querySelector(
+    const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
-    ) as HTMLElement;
+    )!;
     expect(nameCell.style.position).toBe("sticky");
     expect(nameCell.style.background).toBe("var(--color-background)");
 
@@ -164,9 +164,9 @@ describe("DesktopTable assembly paint (Radix)", () => {
 
     expect(screen.getByTestId("name-actions")).toBeInTheDocument();
     expect(container.querySelector("em")?.textContent).toBe("lead");
-    const noteCell = container.querySelector(
+    const noteCell = container.querySelector<HTMLElement>(
       'td[data-column-key="note"]'
-    ) as HTMLElement;
+    )!;
     expect(noteCell).toHaveAttribute("rowspan", "2");
   });
 
@@ -175,7 +175,9 @@ describe("DesktopTable assembly paint (Radix)", () => {
       ...fullChrome,
       summaryRow: () => ({ name: "2 people" }),
     });
-    const summary = container.querySelector("tbody tr[data-summary]")!;
+    const summary = container.querySelector<HTMLElement>(
+      "tbody tr[data-summary]"
+    )!;
     const cells = within(summary).getAllByRole("cell");
     // expand + reorder + selection + name + city + note + actions
     expect(cells).toHaveLength(7);

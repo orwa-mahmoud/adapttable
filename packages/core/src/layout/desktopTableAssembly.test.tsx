@@ -1,5 +1,5 @@
-import { createElement } from "react";
 import { renderHook } from "@testing-library/react";
+import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { defaultConfirm } from "../actions/confirm";
@@ -10,20 +10,20 @@ import type { ColumnDef } from "../types";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableChrome } from "../useTableChrome";
 import {
+  createDesktopRow,
   DESKTOP_ACTIONS_WIDTH,
   DESKTOP_EXPANSION_WIDTH,
   DESKTOP_SELECTION_WIDTH,
-  createDesktopRow,
   desktopBodyPinStyle,
   desktopChromeMetrics,
   desktopEdgeHeadStyle,
-  desktopHeadCellStyle,
   desktopHasPinned,
+  desktopHeadCellStyle,
   desktopPinSignature,
   desktopRowMeasureRef,
+  type DesktopRowWiring,
   desktopRowWiringEqual,
   desktopScrollBoxStyle,
-  type DesktopRowWiring,
   useDesktopTableAssembly,
 } from "./desktopTableAssembly";
 

@@ -104,9 +104,9 @@ describe("DesktopTable assembly paint (Base UI)", () => {
     expect(expandTh.style.insetInlineStart).toBe("0px");
     expect(expandTh.style.background).toBe(PIN_BG);
 
-    const reorderTh = container.querySelector(
+    const reorderTh = container.querySelector<HTMLElement>(
       '[data-adapttable-part="reorder-header"]'
-    ) as HTMLElement;
+    )!;
     expect(reorderTh.style.insetInlineStart).toBe(`${EXPANSION_WIDTH}px`);
 
     const selectTh = screen.getByLabelText("Select all").closest("th")!;
@@ -114,9 +114,9 @@ describe("DesktopTable assembly paint (Base UI)", () => {
       `${EXPANSION_WIDTH + REORDER_WIDTH}px`
     );
 
-    const nameCell = container.querySelector(
+    const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
-    ) as HTMLElement;
+    )!;
     expect(nameCell.style.background).toBe(PIN_BG);
     expect(nameCell.style.position).toBe("sticky");
 
@@ -129,7 +129,9 @@ describe("DesktopTable assembly paint (Base UI)", () => {
       ...fullChrome,
       summaryRow: () => ({ name: "2 people" }),
     });
-    const summary = container.querySelector("tbody tr[data-summary]")!;
+    const summary = container.querySelector<HTMLElement>(
+      "tbody tr[data-summary]"
+    )!;
     expect(summary.parentElement?.tagName).toBe("TBODY");
     const cells = within(summary).getAllByRole("cell");
     expect(cells).toHaveLength(7);

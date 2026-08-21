@@ -68,9 +68,9 @@ describe("FilterPanel", () => {
         classNames={{}}
       />
     );
-    const panel = document.querySelector(
+    const panel = document.querySelector<HTMLElement>(
       '[data-adapttable-part="filters-panel"]'
-    ) as HTMLElement;
+    )!;
     panel.focus();
     fireEvent.keyDown(panel, { key: "Tab", shiftKey: true });
     const last = document.querySelector(

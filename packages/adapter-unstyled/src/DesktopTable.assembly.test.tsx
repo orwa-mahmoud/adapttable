@@ -116,9 +116,9 @@ describe("DesktopTable assembly paint (unstyled)", () => {
     expect(part("selection-cell")).toHaveAttribute("data-pinned", "start");
     expect(part("actions-cell")).toHaveAttribute("data-pinned", "end");
 
-    const nameCell = container.querySelector(
+    const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
-    ) as HTMLElement;
+    )!;
     expect(nameCell).toHaveAttribute("data-pinned", "start");
 
     expect(screen.getByTestId("name-actions")).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe("DesktopTable assembly paint (unstyled)", () => {
       summaryRow: () => ({ name: "2 people" }),
     });
     expect(part("summary")?.tagName).toBe("TFOOT");
-    const summary = container.querySelector(
+    const summary = container.querySelector<HTMLElement>(
       '[data-adapttable-part="summary-row"]'
     )!;
     const cells = within(summary).getAllByRole("cell");

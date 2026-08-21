@@ -1,10 +1,10 @@
 /** Shared desktop-table assembly — wiring, not pixels. */
 import {
   type CSSProperties,
+  memo,
   type ReactElement,
   type ReactNode,
   type RefCallback,
-  memo,
   useCallback,
   useRef,
 } from "react";
@@ -18,26 +18,26 @@ import {
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
 import { columnResizeHandleProps } from "../columns/columnResize";
 import { fittedTableStyle } from "../columns/columnSizing";
+import { pinnedColumnWidth, tableMinWidth } from "../columns/columnWidths";
 import type { HtmlGroupedHeaderCell } from "../columns/headerGroups";
 import { htmlGroupedHeaderPlan } from "../columns/headerGroups";
 import {
-  type PinLeads,
-  type PinOffset,
-  PIN_Z,
   edgePinStyle,
+  PIN_Z,
+  type PinLeads,
   pinnedCellStyle,
+  type PinOffset,
 } from "../columns/useColumnLayout";
-import { pinnedColumnWidth, tableMinWidth } from "../columns/columnWidths";
+import type { EditableCellEditing } from "../editing/editableCellController";
+import {
+  rowEditingSignature,
+  rowIsDirty,
+} from "../editing/editableCellController";
 import type { FilterDef } from "../filters/filterDefs";
 import { filterDefForColumn } from "../filters/FilterHeaderRow";
 import { columnSelectLabel } from "../focus/ColumnSelectCheckbox";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
-import {
-  rowEditingSignature,
-  rowIsDirty,
-} from "../editing/editableCellController";
-import type { EditableCellEditing } from "../editing/editableCellController";
 import type { BodyCell } from "../rows/cellSpan";
 import {
   bodyCellsHaveRowSpan,
@@ -71,8 +71,8 @@ import {
   tableRenderModel,
   useSummaryCells,
 } from "../tableRenderProps";
-import { bodyRowEntries } from "../tree/treeRows";
 import type { TreeEntry } from "../tree/treeRows";
+import { bodyRowEntries } from "../tree/treeRows";
 import type { ColumnDef, TableLabels } from "../types";
 import type {
   CellElementProps,
