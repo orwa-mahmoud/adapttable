@@ -56,4 +56,49 @@ describe("FilterPanel", () => {
     );
     expect(onClose).toHaveBeenCalled();
   });
+
+  it("wraps Shift+Tab from the dialog itself back to the last control", () => {
+    render(
+      <FilterPanel
+        open
+        onClose={vi.fn()}
+        filters={<div>filters</div>}
+        activeFilterCount={0}
+        labels={defaultLabels}
+        classNames={{}}
+      />
+    );
+    const panel = document.querySelector(
+      '[data-adapttable-part="filters-panel"]'
+    ) as HTMLElement;
+    panel.focus();
+    fireEvent.keyDown(panel, { key: "Tab", shiftKey: true });
+    const last = document.querySelector(
+      '[data-adapttable-part="filters-done"]'
+    );
+    expect(document.activeElement).toBe(last);
+  });
+
+  it("pulls Tab back inside when focus has left the drawer", () => {
+    render(
+      <FilterPanel
+        open
+        onClose={vi.fn()}
+        filters={<div>filters</div>}
+        activeFilterCount={0}
+        labels={defaultLabels}
+        classNames={{}}
+      />
+    );
+    const stray = document.createElement("button");
+    stray.textContent = "outside";
+    document.body.appendChild(stray);
+    stray.focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    const first = document.querySelector(
+      '[data-adapttable-part="filters-close"]'
+    );
+    expect(document.activeElement).toBe(first);
+    stray.remove();
+  });
 });

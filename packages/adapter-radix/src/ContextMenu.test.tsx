@@ -123,4 +123,14 @@ describe("context menu (radix)", () => {
     expect(screen.getByText("Delete")).toBeInTheDocument();
     expect(screen.getByText("Locked")).toBeInTheDocument();
   });
+
+  it("runs a built-in item and closes", () => {
+    table();
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="header-cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    fireEvent.click(screen.getByText("Sort ascending"));
+    expect(menu()).toBeNull();
+  });
 });

@@ -112,4 +112,13 @@ describe("command palette (radix)", () => {
       [...options].some((el) => el.getAttribute("aria-selected") === "true")
     ).toBe(true);
   });
+
+  it("shows the empty message when nothing matches", () => {
+    table();
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+    fireEvent.change(input(), { target: { value: "zzzz-no-match" } });
+    expect(
+      document.querySelector('[data-adapttable-part="command-empty"]')
+    ).not.toBeNull();
+  });
 });
