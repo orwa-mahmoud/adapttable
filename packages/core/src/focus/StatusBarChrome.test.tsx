@@ -232,7 +232,7 @@ describe("StatusBarChrome", () => {
     expect(screen.getByTestId("item-rows")).toBeInTheDocument();
   });
 
-  it("does not flip the bar on just to show a notice", () => {
+  it("shows a notice even when the host did not ask for the status bar", () => {
     render(
       <StatusBarChrome
         enabled={false}
@@ -251,8 +251,10 @@ describe("StatusBarChrome", () => {
       />
     );
 
-    expect(screen.queryByTestId("bar")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("item-edit-without-writer")).toBeNull();
+    expect(screen.getByTestId("item-edit-without-writer")).toHaveTextContent(
+      "Editing is off"
+    );
+    expect(screen.queryByTestId("item-rows")).toBeNull();
   });
 
   it("passes the kit's class straight through", () => {

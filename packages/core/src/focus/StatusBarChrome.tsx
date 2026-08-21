@@ -91,9 +91,9 @@ export interface StatusBarChromeProps {
   /** A kit's own class for the strip. */
   className?: string;
   /**
-   * Opted-in features that cannot run. Shown at the start of the strip
-   * when the host asked for the bar; ignored when the bar is off so a
-   * notice cannot flip `statusBar` on.
+   * Opted-in features that cannot run. Always shown — the person at the
+   * table must see them even when the host did not ask for `statusBar`.
+   * Row/selected counts still require `enabled`.
    */
   notices?: readonly FeatureNotice[];
   /** Adapter-owned visible components. */
@@ -114,7 +114,14 @@ export interface StatusBarChromeProps {
 function itemsFor(
   props: Pick<
     StatusBarChromeProps,
-    "shown" | "page" | "limit" | "total" | "selected" | "labels" | "notices"
+    | "enabled"
+    | "shown"
+    | "page"
+    | "limit"
+    | "total"
+    | "selected"
+    | "labels"
+    | "notices"
   >
 ): StatusBarItem[] {
   const labels = props.labels;
@@ -126,6 +133,7 @@ function itemsFor(
       appearance: notice.appearance,
     });
   }
+  if (!props.enabled) return items;
   const total = props.total ?? props.shown;
   const { fromIndex, toIndex } = computePagination({
     page: props.page ?? 1,
@@ -167,8 +175,14 @@ export function StatusBarChrome(props: Readonly<StatusBarChromeProps>) {
       slots={props.slots.stats}
     />
   );
-  if (!props.enabled) return stats;
+  const items = itemsFor(props);
+  const showBar = props.enabled || items.length > 0;
+  if (!showBar) return stats;
   return (
-    <Bar items={itemsFor(props)} className={props.className} stats={stats} />
+    <Bar
+      items={items}
+      className={props.className}
+      stats={props.enabled ? stats : null}
+    />
   );
 }
