@@ -791,9 +791,10 @@ describe("<DataTable> (Ant Design)", () => {
   });
 
   it("enables antd virtual scrolling when virtualize is true", () => {
-    // The shared maxHeight model bounds the virtual scroller (no more
-    // antd-only virtualHeight/virtualWidth extras).
+    // Virtualize only arms on a full/infinite set. The shared maxHeight
+    // model bounds the virtual scroller (no more antd-only extras).
     const { container } = renderHarness({
+      mode: "infinite",
       override: {
         virtualize: true,
         maxHeight: 240,
@@ -858,13 +859,15 @@ describe("<DataTable> (Ant Design)", () => {
   });
 
   it("ignores the virtual scroll handler in paged (non-infinite) mode", () => {
+    // Visible no-op: a paged table does not mount antd's virtual scroller.
+    // The person sees that virtualization is off / one-page.
     const { container } = renderHarness({ override: { virtualize: true } });
-    const scroller = container.querySelector<HTMLElement>(
-      ".ant-table-tbody-virtual-holder"
-    );
-    expect(scroller).not.toBeNull();
-    // No next page in paged mode — scrolling must not throw or page anything.
-    act(() => fireEvent.scroll(scroller!));
+    expect(
+      container.querySelector(".ant-table-tbody-virtual-holder")
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-notices="virtualize-paged"]')
+    ).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
   });
 
