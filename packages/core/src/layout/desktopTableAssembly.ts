@@ -655,6 +655,355 @@ function extraSlot(
   };
 }
 
+interface DesktopRowWiringContext<TRow> {
+  cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+  rowStyle: SharedTableRenderProps<TRow>["rowStyle"];
+  rowHeight: SharedTableRenderProps<TRow>["rowHeight"];
+  leads: PinLeads;
+  pinRowSticky: boolean;
+  rowPinOffset: number;
+  measureRowPair: SharedTableRenderProps<TRow>["measureRowPair"];
+  measureElement: SharedTableRenderProps<TRow>["measureElement"];
+  rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
+  table: UseDataTableResult<TRow>;
+  gridFocus: SharedTableRenderProps<TRow>["gridFocus"];
+  onRowClick: SharedTableRenderProps<TRow>["onRowClick"];
+  handleRowClick: (row: TRow) => void;
+  windowStart: number;
+  selection: TableRenderModel<TRow>["selection"];
+  editing: SharedTableRenderProps<TRow>["editing"];
+  prefetch: SharedTableRenderProps<TRow>["prefetch"];
+  handlePrefetch: (row: TRow) => void;
+  columns: readonly ColumnDef<TRow>[];
+  labels: Required<TableLabels>;
+  expansionState: SharedTableRenderProps<TRow>["expansion"];
+  showActions: boolean;
+  showReorder: boolean;
+  rows: readonly TRow[];
+  reorderPinned: boolean;
+  rowPinning: SharedTableRenderProps<TRow>["rowPinning"];
+  rowActions: SharedTableRenderProps<TRow>["rowActions"];
+  rowActionsLayout: SharedTableRenderProps<TRow>["rowActionsLayout"];
+  cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+  renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
+  confirm: ConfirmHandler;
+  columnSpan: number;
+  columnSpacers: TableRenderModel<TRow>["columnSpacers"];
+  tree: SharedTableRenderProps<TRow>["tree"];
+  columnWidths: SharedTableRenderProps<TRow>["columnWidths"];
+  pinOffset: SharedTableRenderProps<TRow>["pinOffset"];
+  pinSignature: string;
+  hasStartPin: boolean;
+  hasEndPin: boolean;
+  stickActions: boolean;
+  rowClassName: SharedTableRenderProps<TRow>["rowClassName"];
+  getRowId: (row: TRow) => string;
+  onToggleSelect: (id: string) => void;
+  onToggleExpand: (id: string) => void;
+  renderDetail: (row: TRow) => ReactNode;
+}
+
+interface DesktopRowWiringArgs<TRow> {
+  row: TRow;
+  index: number;
+  id: string;
+  sourceIndex: number;
+  rowPinSide: RowPinSide | undefined;
+  treeEntry: TreeEntry<TRow> | undefined;
+  measure: boolean;
+}
+
+interface DesktopBodySlotsContext<TRow> {
+  pinnedTopRows: readonly TRow[];
+  pinnedBottomRows: readonly TRow[];
+  extraRows: SharedTableRenderProps<TRow>["extraRows"];
+  extraFill: (key: string) => CSSProperties | undefined;
+  paddingTop: number;
+  paddingBottom: number;
+  grouping: SharedTableRenderProps<TRow>["grouping"];
+  entries: TableRenderModel<TRow>["entries"];
+  wiring: DesktopRowWiringContext<TRow>;
+}
+
+function buildDesktopRowWiring<TRow>(
+  ctx: DesktopRowWiringContext<TRow>,
+  args: DesktopRowWiringArgs<TRow>
+): DesktopRowWiring<TRow> {
+  const {
+    cellsByRow,
+    rowStyle,
+    rowHeight,
+    leads,
+    pinRowSticky,
+    rowPinOffset,
+    measureRowPair,
+    measureElement,
+    rowReorder,
+    table,
+    gridFocus,
+    onRowClick,
+    handleRowClick,
+    windowStart,
+    selection,
+    editing,
+    prefetch,
+    handlePrefetch,
+    columns,
+    labels,
+    expansionState,
+    showActions,
+    showReorder,
+    rows,
+    reorderPinned,
+    rowPinning,
+    rowActions,
+    rowActionsLayout,
+    cellSpanAppearance,
+    renderRowActions,
+    confirm,
+    columnSpan,
+    columnSpacers,
+    tree,
+    columnWidths,
+    pinOffset,
+    pinSignature,
+    hasStartPin,
+    hasEndPin,
+    stickActions,
+    rowClassName,
+    getRowId,
+    onToggleSelect,
+    onToggleExpand,
+    renderDetail,
+  } = ctx;
+  const { row, index, id, sourceIndex, rowPinSide, treeEntry, measure } = args;
+  const bodyCells = cellsForRow(cellsByRow, id);
+  const visualStyle = resolveRowStyle(rowStyle, rowHeight, row, sourceIndex);
+  const focusIndex = sourceIndex;
+  const pinPart = pinnedRowPart(rowPinSide);
+  const pinSticky = pinnedRowSticky(rowPinSide, pinRowSticky, rowPinOffset);
+  const edgeRowPin = pinnedRowCellStyle(rowPinSide, rowPinOffset, true);
+  const measureRef = measure
+    ? desktopRowMeasureRef(rowPinSide, measureRowPair, index, measureElement)
+    : undefined;
+  const reorderAttrs = rowReorder?.rowAttrs?.(id, index);
+  const rowDomProps = {
+    ...table.getRowProps(row, focusIndex),
+    ...(gridFocus?.getRowPropsAt(focusIndex) ?? {}),
+    ...rowClickProps(row, onRowClick ? handleRowClick : undefined, focusIndex),
+    ...(rowReorder?.dropProps?.(index, row, windowStart) ?? {}),
+    ...(reorderAttrs ?? {}),
+    "data-row-pin": rowPinSide,
+    "data-adapttable-part": pinPart ?? "row",
+    "data-stagger": "",
+    "data-selected": selection?.isSelected(id) ? "" : undefined,
+    "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
+    "data-clickable": onRowClick ? "" : undefined,
+    style: {
+      ...visualStyle,
+      ...pinSticky,
+      ...rowReorderDropStyle(reorderAttrs),
+    },
+    onMouseEnter: prefetch ? () => handlePrefetch(row) : undefined,
+  };
+  return {
+    gridFocus,
+    row,
+    index,
+    id,
+    table,
+    columns,
+    bodyCells,
+    spanSignature: rowSpanSignature(bodyCells),
+    labels,
+    selected: selection ? selection.isSelected(id) : undefined,
+    expanded: expansionState ? expansionState.isExpanded(id) : undefined,
+    showActions,
+    showReorder,
+    rowReorder,
+    windowStart,
+    rowCount: rows.length,
+    reorderPinned,
+    reorderSignature: rowReorderSignature(rowReorder, id, index),
+    rowPinSide,
+    pinRowSticky,
+    rowPinOffset,
+    rowPinSignature: rowPinSignature(rowPinning, id),
+    sourceIndex,
+    rowActions,
+    rowActionsLayout,
+    cellSpanAppearance,
+    renderRowActions,
+    confirm,
+    columnSpan,
+    columnSpacers,
+    treeEntry,
+    treeColumnKey: tree?.columnKey,
+    onToggleTree: tree?.expansion.toggle,
+    columnWidths,
+    pinOffset,
+    pinSignature,
+    hasStartPin,
+    hasEndPin,
+    actionsPinned: stickActions,
+    rowClass: rowClassName?.(row, sourceIndex),
+    rowVisualStyle: visualStyle,
+    rowStyleSignature: rowStyleSignature(visualStyle),
+    clickable: Boolean(onRowClick),
+    hasPrefetch: Boolean(prefetch),
+    editing,
+    rows,
+    getRowId,
+    editingSignature: rowEditingSignature(editing, id),
+    onRowClick: handleRowClick,
+    onPrefetch: handlePrefetch,
+    onToggleSelect,
+    onToggleExpand,
+    renderDetail,
+    measureElement: measure ? measureElement : undefined,
+    measureRowPair: measure ? measureRowPair : undefined,
+    leads,
+    focusIndex,
+    pinPart,
+    pinSticky,
+    edgeRowPin,
+    measureRef,
+    rowDomProps,
+    bodyPinStyle: (key: string) =>
+      desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),
+  };
+}
+
+function appendPinnedDesktopSlots<TRow>(
+  bodySlots: DesktopBodySlot<TRow>[],
+  ctx: DesktopBodySlotsContext<TRow>,
+  pinnedRows: readonly TRow[],
+  side: RowPinSide
+): void {
+  const { extraRows, extraFill, wiring } = ctx;
+  const { getRowId, columnSpan, rows } = wiring;
+  for (const slot of insertExtrasBeforeRows(pinnedRows, extraRows, getRowId)) {
+    if (isExtraEntry(slot)) {
+      bodySlots.push(extraSlot(slot, columnSpan, extraFill));
+    } else {
+      const id = getRowId(slot.row);
+      const found = rows.findIndex((item) => getRowId(item) === id);
+      const sourceIndex = Math.max(0, found);
+      bodySlots.push({
+        kind: "row",
+        key: slot.key,
+        wiring: buildDesktopRowWiring(wiring, {
+          row: slot.row,
+          index: sourceIndex,
+          id,
+          sourceIndex,
+          rowPinSide: side,
+          treeEntry: undefined,
+          measure: false,
+        }),
+      });
+    }
+  }
+}
+
+function appendGroupedDesktopSlots<TRow>(
+  bodySlots: DesktopBodySlot<TRow>[],
+  ctx: DesktopBodySlotsContext<TRow>
+): void {
+  const grouping = ctx.grouping;
+  if (!grouping) return;
+  const { extraFill, wiring } = ctx;
+  const { getRowId, columnSpan } = wiring;
+  for (const entry of grouping.entries) {
+    if (entry.kind === "separator" || entry.kind === "fullWidth") {
+      bodySlots.push(extraSlot(entry, columnSpan, extraFill));
+      continue;
+    }
+    if (isGroupEntry(entry)) {
+      bodySlots.push({ kind: "group", key: entry.key, entry });
+      continue;
+    }
+    const id = getRowId(entry.row);
+    bodySlots.push({
+      kind: "row",
+      key: entry.key,
+      wiring: buildDesktopRowWiring(wiring, {
+        row: entry.row,
+        index: entry.index,
+        id,
+        sourceIndex: entry.index,
+        rowPinSide: undefined,
+        treeEntry: undefined,
+        measure: true,
+      }),
+    });
+  }
+}
+
+function appendScrollDesktopSlots<TRow>(
+  bodySlots: DesktopBodySlot<TRow>[],
+  ctx: DesktopBodySlotsContext<TRow>
+): void {
+  const { extraRows, extraFill, entries, wiring } = ctx;
+  const { getRowId, columnSpan, tree } = wiring;
+  for (const slot of insertExtraRows(
+    bodyRowEntries(entries, tree),
+    extraRows,
+    (entry) => entry.key
+  )) {
+    if (isExtraEntry(slot)) {
+      bodySlots.push(extraSlot(slot, columnSpan, extraFill));
+      continue;
+    }
+    const { row, index, key, treeEntry, sourceIndex } = slot;
+    const id = getRowId(row);
+    const resolvedSource = sourceIndex ?? index;
+    bodySlots.push({
+      kind: "row",
+      key,
+      wiring: buildDesktopRowWiring(wiring, {
+        row,
+        index,
+        id,
+        sourceIndex: resolvedSource,
+        rowPinSide: undefined,
+        treeEntry,
+        measure: true,
+      }),
+    });
+  }
+}
+
+function collectDesktopBodySlots<TRow>(
+  ctx: DesktopBodySlotsContext<TRow>
+): DesktopBodySlot<TRow>[] {
+  const bodySlots: DesktopBodySlot<TRow>[] = [];
+  appendPinnedDesktopSlots(bodySlots, ctx, ctx.pinnedTopRows, "top");
+  if (ctx.paddingTop > 0) {
+    bodySlots.push({
+      kind: "virtualPad",
+      key: "pad-top",
+      height: ctx.paddingTop,
+      colSpan: ctx.wiring.columnSpan,
+    });
+  }
+  if (ctx.grouping) {
+    appendGroupedDesktopSlots(bodySlots, ctx);
+  } else {
+    appendScrollDesktopSlots(bodySlots, ctx);
+  }
+  if (ctx.paddingBottom > 0) {
+    bodySlots.push({
+      kind: "virtualPad",
+      key: "pad-bottom",
+      height: ctx.paddingBottom,
+      colSpan: ctx.wiring.columnSpan,
+    });
+  }
+  appendPinnedDesktopSlots(bodySlots, ctx, ctx.pinnedBottomRows, "bottom");
+  return bodySlots;
+}
+
 /**
  * Shared desktop-table assembly. Calls {@link tableRenderModel} and
  * {@link UseDataTableResult.getRowProps}; does not replace them.
@@ -876,239 +1225,65 @@ export function useDesktopTableAssembly<TRow>(
     [overflowRef, virtualScrollRef]
   );
 
-  const buildWiring = (
-    row: TRow,
-    index: number,
-    id: string,
-    sourceIndex: number,
-    rowPinSide: RowPinSide | undefined,
-    treeEntry: TreeEntry<TRow> | undefined,
-    measure: boolean
-  ): DesktopRowWiring<TRow> => {
-    const bodyCells = cellsForRow(cellsByRow, id);
-    const visualStyle = resolveRowStyle(rowStyle, rowHeight, row, sourceIndex);
-    const leads = metrics.leads;
-    const focusIndex = sourceIndex;
-    const pinPart = pinnedRowPart(rowPinSide);
-    const pinSticky = pinnedRowSticky(rowPinSide, pinRowSticky, rowPinOffset);
-    const edgeRowPin = pinnedRowCellStyle(rowPinSide, rowPinOffset, true);
-    const measureRef = measure
-      ? desktopRowMeasureRef(rowPinSide, measureRowPair, index, measureElement)
-      : undefined;
-    const reorderAttrs = rowReorder?.rowAttrs?.(id, index);
-    const rowDomProps = {
-      ...table.getRowProps(row, focusIndex),
-      ...(gridFocus?.getRowPropsAt(focusIndex) ?? {}),
-      ...rowClickProps(
-        row,
-        onRowClick ? handleRowClick : undefined,
-        focusIndex
-      ),
-      ...(rowReorder?.dropProps?.(index, row, windowStart) ?? {}),
-      ...(reorderAttrs ?? {}),
-      "data-row-pin": rowPinSide,
-      "data-adapttable-part": pinPart ?? "row",
-      "data-stagger": "",
-      "data-selected": selection?.isSelected(id) ? "" : undefined,
-      "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
-      "data-clickable": onRowClick ? "" : undefined,
-      style: {
-        ...visualStyle,
-        ...pinSticky,
-        ...rowReorderDropStyle(reorderAttrs),
-      },
-      onMouseEnter: prefetch ? () => handlePrefetch(row) : undefined,
-    };
-    return {
-      gridFocus,
-      row,
-      index,
-      id,
-      table,
-      columns,
-      bodyCells,
-      spanSignature: rowSpanSignature(bodyCells),
-      labels,
-      selected: selection ? selection.isSelected(id) : undefined,
-      expanded: expansionState ? expansionState.isExpanded(id) : undefined,
-      showActions,
-      showReorder,
-      rowReorder,
-      windowStart,
-      rowCount: rows.length,
-      reorderPinned,
-      reorderSignature: rowReorderSignature(rowReorder, id, index),
-      rowPinSide,
-      pinRowSticky,
-      rowPinOffset,
-      rowPinSignature: rowPinSignature(rowPinning, id),
-      sourceIndex,
-      rowActions,
-      rowActionsLayout,
-      cellSpanAppearance,
-      renderRowActions,
-      confirm,
-      columnSpan,
-      columnSpacers,
-      treeEntry,
-      treeColumnKey: tree?.columnKey,
-      onToggleTree: tree?.expansion.toggle,
-      columnWidths,
-      pinOffset,
-      pinSignature,
-      hasStartPin,
-      hasEndPin,
-      actionsPinned: stickActions,
-      rowClass: rowClassName?.(row, sourceIndex),
-      rowVisualStyle: visualStyle,
-      rowStyleSignature: rowStyleSignature(visualStyle),
-      clickable: Boolean(onRowClick),
-      hasPrefetch: Boolean(prefetch),
-      editing,
-      rows,
-      getRowId,
-      editingSignature: rowEditingSignature(editing, id),
-      onRowClick: handleRowClick,
-      onPrefetch: handlePrefetch,
-      onToggleSelect,
-      onToggleExpand,
-      renderDetail,
-      measureElement: measure ? measureElement : undefined,
-      measureRowPair: measure ? measureRowPair : undefined,
-      leads,
-      focusIndex,
-      pinPart,
-      pinSticky,
-      edgeRowPin,
-      measureRef,
-      rowDomProps,
-      bodyPinStyle: (key: string) =>
-        desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),
-    };
+  const wiringCtx: DesktopRowWiringContext<TRow> = {
+    cellsByRow,
+    rowStyle,
+    rowHeight,
+    leads: metrics.leads,
+    pinRowSticky,
+    rowPinOffset,
+    measureRowPair,
+    measureElement,
+    rowReorder,
+    table,
+    gridFocus,
+    onRowClick,
+    handleRowClick,
+    windowStart,
+    selection,
+    editing,
+    prefetch,
+    handlePrefetch,
+    columns,
+    labels,
+    expansionState,
+    showActions,
+    showReorder,
+    rows,
+    reorderPinned,
+    rowPinning,
+    rowActions,
+    rowActionsLayout,
+    cellSpanAppearance,
+    renderRowActions,
+    confirm,
+    columnSpan,
+    columnSpacers,
+    tree,
+    columnWidths,
+    pinOffset,
+    pinSignature,
+    hasStartPin,
+    hasEndPin,
+    stickActions,
+    rowClassName,
+    getRowId,
+    onToggleSelect,
+    onToggleExpand,
+    renderDetail,
   };
 
-  const bodySlots: DesktopBodySlot<TRow>[] = [];
-  for (const slot of insertExtrasBeforeRows(
+  const bodySlots = collectDesktopBodySlots({
     pinnedTopRows,
-    extraRows,
-    getRowId
-  )) {
-    if (isExtraEntry(slot)) {
-      bodySlots.push(extraSlot(slot, columnSpan, extraFill));
-    } else {
-      const id = getRowId(slot.row);
-      const found = rows.findIndex((item) => getRowId(item) === id);
-      const sourceIndex = Math.max(0, found);
-      bodySlots.push({
-        kind: "row",
-        key: slot.key,
-        wiring: buildWiring(
-          slot.row,
-          sourceIndex,
-          id,
-          sourceIndex,
-          "top",
-          undefined,
-          false
-        ),
-      });
-    }
-  }
-  if (paddingTop > 0) {
-    bodySlots.push({
-      kind: "virtualPad",
-      key: "pad-top",
-      height: paddingTop,
-      colSpan: columnSpan,
-    });
-  }
-  if (grouping) {
-    for (const entry of grouping.entries) {
-      if (entry.kind === "separator" || entry.kind === "fullWidth") {
-        bodySlots.push(extraSlot(entry, columnSpan, extraFill));
-        continue;
-      }
-      if (isGroupEntry(entry)) {
-        bodySlots.push({ kind: "group", key: entry.key, entry });
-        continue;
-      }
-      const id = getRowId(entry.row);
-      bodySlots.push({
-        kind: "row",
-        key: entry.key,
-        wiring: buildWiring(
-          entry.row,
-          entry.index,
-          id,
-          entry.index,
-          undefined,
-          undefined,
-          true
-        ),
-      });
-    }
-  } else {
-    for (const slot of insertExtraRows(
-      bodyRowEntries(entries, tree),
-      extraRows,
-      (entry) => entry.key
-    )) {
-      if (isExtraEntry(slot)) {
-        bodySlots.push(extraSlot(slot, columnSpan, extraFill));
-        continue;
-      }
-      const { row, index, key, treeEntry, sourceIndex } = slot;
-      const id = getRowId(row);
-      const resolvedSource = sourceIndex ?? index;
-      bodySlots.push({
-        kind: "row",
-        key,
-        wiring: buildWiring(
-          row,
-          index,
-          id,
-          resolvedSource,
-          undefined,
-          treeEntry,
-          true
-        ),
-      });
-    }
-  }
-  if (paddingBottom > 0) {
-    bodySlots.push({
-      kind: "virtualPad",
-      key: "pad-bottom",
-      height: paddingBottom,
-      colSpan: columnSpan,
-    });
-  }
-  for (const slot of insertExtrasBeforeRows(
     pinnedBottomRows,
     extraRows,
-    getRowId
-  )) {
-    if (isExtraEntry(slot)) {
-      bodySlots.push(extraSlot(slot, columnSpan, extraFill));
-    } else {
-      const id = getRowId(slot.row);
-      const found = rows.findIndex((item) => getRowId(item) === id);
-      const sourceIndex = Math.max(0, found);
-      bodySlots.push({
-        kind: "row",
-        key: slot.key,
-        wiring: buildWiring(
-          slot.row,
-          sourceIndex,
-          id,
-          sourceIndex,
-          "bottom",
-          undefined,
-          false
-        ),
-      });
-    }
-  }
+    extraFill,
+    paddingTop,
+    paddingBottom,
+    grouping,
+    entries,
+    wiring: wiringCtx,
+  });
 
   const leaf = (
     column: ColumnDef<TRow>,
