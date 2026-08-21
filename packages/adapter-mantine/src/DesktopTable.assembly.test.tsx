@@ -89,28 +89,28 @@ const fullChrome = {
 describe("DesktopTable assembly paint (Mantine)", () => {
   it("floors the table min-width at 480 even without wide columns", () => {
     const { container } = mount({ density: "compact" });
-    const table = container.querySelector(
+    const table = container.querySelector<HTMLElement>(
       '[data-adapttable-part="table"]'
-    ) as HTMLElement;
+    )!;
     expect(table.style.minWidth).toBe("480px");
   });
 
   it("uses SURFACE/HAIRLINE and separate collapse when the header sticks", () => {
     const { container } = mount(fullChrome);
-    const table = container.querySelector(
+    const table = container.querySelector<HTMLElement>(
       '[data-adapttable-part="table"]'
-    ) as HTMLElement;
+    )!;
     expect(table.style.borderCollapse).toBe("separate");
     expect(table.style.borderSpacing).toBe("0px");
 
-    const thead = container.querySelector(
+    const thead = container.querySelector<HTMLElement>(
       '[data-adapttable-part="thead"]'
-    ) as HTMLElement;
+    )!;
     expect(thead.style.background).toBe(SURFACE);
 
-    const nameHeader = container.querySelector(
+    const nameHeader = container.querySelector<HTMLElement>(
       'th[data-adapttable-part="header-cell"]'
-    ) as HTMLElement;
+    )!;
     expect(nameHeader.style.background).toBe(SURFACE);
     expect(nameHeader.style.boxShadow).toContain(HAIRLINE);
 
@@ -128,9 +128,9 @@ describe("DesktopTable assembly paint (Mantine)", () => {
       expandTh.style.insetInlineStart || expandTh.style.left
     ).toBeDefined();
 
-    const reorderTh = container.querySelector(
+    const reorderTh = container.querySelector<HTMLElement>(
       '[data-adapttable-part="reorder-header"]'
-    ) as HTMLElement;
+    )!;
     expect(reorderTh.style.insetInlineStart).toBe(`${EXPANSION_WIDTH}px`);
 
     const selectTh = screen.getByLabelText("Select all").closest("th")!;
@@ -138,9 +138,9 @@ describe("DesktopTable assembly paint (Mantine)", () => {
       `${EXPANSION_WIDTH + REORDER_WIDTH}px`
     );
 
-    const nameCell = container.querySelector(
+    const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
-    ) as HTMLElement;
+    )!;
     expect(nameCell.style.background).toBe(SURFACE);
 
     expect(screen.getByTestId("name-actions")).toBeInTheDocument();
@@ -152,7 +152,7 @@ describe("DesktopTable assembly paint (Mantine)", () => {
       ...fullChrome,
       summaryRow: () => ({ name: "2 people" }),
     });
-    const summary = container.querySelector("tfoot tr")!;
+    const summary = container.querySelector<HTMLElement>("tfoot tr")!;
     const cells = within(summary).getAllByRole("cell");
     expect(cells).toHaveLength(7);
     expect(cells[3]).toHaveTextContent("2 people");

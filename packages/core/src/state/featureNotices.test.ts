@@ -120,7 +120,10 @@ describe("collectFeatureNotices", () => {
     expect(
       collectFeatureNotices({
         ...BASE,
-        exportCsv: { scope: "all", fetchAll: { fetchPage: async () => [] } },
+        exportCsv: {
+          scope: "all",
+          fetchAll: { fetchPage: () => Promise.resolve([]) },
+        },
       })
     ).toEqual([]);
     expect(

@@ -111,9 +111,9 @@ describe("PivotPanel", () => {
 
   it("adds a field from the Rows add control", () => {
     render(<Harness />);
-    const add = zone("Rows").querySelector(
+    const add = zone("Rows").querySelector<HTMLSelectElement>(
       '[aria-label="Add field"]'
-    ) as HTMLSelectElement;
+    )!;
     fireEvent.change(add, { target: { value: "region" } });
     expect(
       zone("Rows").querySelectorAll('[data-adapttable-part="pivot-field"]')
@@ -129,18 +129,18 @@ describe("PivotPanel", () => {
         }}
       />
     );
-    const agg = zone("Measures").querySelector(
+    const agg = zone("Measures").querySelector<HTMLSelectElement>(
       '[aria-label="Aggregation"]'
-    ) as HTMLSelectElement;
+    )!;
     fireEvent.change(agg, { target: { value: "avg" } });
     expect(agg.value).toBe("avg");
   });
 
   it("ignores a cleared add control", () => {
     render(<Harness />);
-    const add = zone("Rows").querySelector(
+    const add = zone("Rows").querySelector<HTMLSelectElement>(
       '[aria-label="Add field"]'
-    ) as HTMLSelectElement;
+    )!;
     fireEvent.change(add, { target: { value: "" } });
     expect(
       zone("Rows").querySelectorAll('[data-adapttable-part="pivot-field"]')

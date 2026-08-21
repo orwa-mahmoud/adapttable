@@ -243,9 +243,15 @@ export interface ExportInfo<TRow> {
   filename: string;
 }
 
+/** Boolean-or-options CSV export prop (off / on / configured). */
+type ExportCsvProp<TRow = unknown> =
+  | boolean
+  | ExportCsvOptions<TRow>
+  | undefined;
+
 /** Resolve a boolean-or-options prop into a concrete config, or `null` when off. */
 export function resolveExportCsv<TRow = unknown>(
-  value: boolean | ExportCsvOptions<TRow> | undefined
+  value: ExportCsvProp<TRow>
 ): ExportCsvOptions<TRow> | null {
   if (!value) return null;
   if (value === true) return {};
@@ -261,7 +267,7 @@ export function resolveExportCsv<TRow = unknown>(
  * is this page — the button should say so.
  */
 export function exportAllFallsBackToPage<TRow = unknown>(
-  exportCsv: boolean | ExportCsvOptions<TRow> | undefined,
+  exportCsv: ExportCsvProp<TRow>,
   source: Pick<TableSource<TRow>, "allFilteredRows">
 ): boolean {
   const options = resolveExportCsv(exportCsv);

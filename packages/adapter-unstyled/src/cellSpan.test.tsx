@@ -90,9 +90,9 @@ describe("cell spanning (unstyled)", () => {
         }
       />
     );
-    const origin = container.querySelector(
+    const origin = container.querySelector<HTMLElement>(
       'td[data-column-key="team"]'
-    ) as HTMLElement;
+    )!;
     expect(origin).toHaveAttribute("rowspan", "2");
     expect(origin).toHaveAttribute("data-cell-span", "1x2");
     const rows = container.querySelectorAll("tbody tr");

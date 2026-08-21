@@ -568,7 +568,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     fitColumns,
     widths: columnWidths,
   });
-  const headPaint: SxProps<Theme> = stickyHeader
+  const headPaint: SxProps<Theme> | undefined = stickyHeader
     ? {
         position: "sticky",
         top: pin.headerStickTop,

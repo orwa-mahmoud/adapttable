@@ -122,9 +122,9 @@ describe("DesktopTable assembly paint (MUI)", () => {
     expect(expandTh.style.insetInlineStart).toBe("0px");
     expect(expandTh.style.background).toBe(PIN_BG);
 
-    const reorderTh = container.querySelector(
+    const reorderTh = container.querySelector<HTMLElement>(
       '[data-adapttable-part="reorder-header"]'
-    ) as HTMLElement;
+    )!;
     expect(reorderTh.style.insetInlineStart).toBe(`${EXPANSION_WIDTH}px`);
     expect(reorderTh.style.background).toBe(PIN_BG);
 
@@ -133,9 +133,9 @@ describe("DesktopTable assembly paint (MUI)", () => {
       `${EXPANSION_WIDTH + REORDER_WIDTH}px`
     );
 
-    const nameCell = container.querySelector(
+    const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
-    ) as HTMLElement;
+    )!;
     expect(nameCell.style.background).toBe(PIN_BG);
     expect(nameCell.style.position).toBe("sticky");
 
@@ -162,7 +162,7 @@ describe("DesktopTable assembly paint (MUI)", () => {
       ...fullChrome,
       summaryRow: () => ({ name: "2 people" }),
     });
-    const summary = container.querySelector("tfoot tr")!;
+    const summary = container.querySelector<HTMLElement>("tfoot tr")!;
     const cells = within(summary).getAllByRole("cell");
     expect(cells).toHaveLength(7);
     expect(cells[3]).toHaveTextContent("2 people");

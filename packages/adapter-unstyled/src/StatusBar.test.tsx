@@ -1,9 +1,9 @@
+import { defaultLabels } from "@adapttable/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SelectionStatsBar } from "./components/SelectionStatsBar";
 import { StatusBar } from "./components/StatusBar";
-import { defaultLabels } from "@adapttable/core";
 
 const STATS = {
   cells: 2,

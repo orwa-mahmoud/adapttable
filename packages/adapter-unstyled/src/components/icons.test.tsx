@@ -10,9 +10,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   FiltersIcon,
+  iconForRowAction,
   PinBottomIcon,
   SearchIcon,
-  iconForRowAction,
 } from "./icons";
 
 const BUILT_IN = [

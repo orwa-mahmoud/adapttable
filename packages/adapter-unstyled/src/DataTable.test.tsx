@@ -906,12 +906,12 @@ describe("<DataTable> (unstyled)", () => {
       override: { filters: <div>filter body</div>, filtersMode: "drawer" },
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
-    const close = document.querySelector(
+    const close = document.querySelector<HTMLElement>(
       '[data-adapttable-part="filters-close"]'
-    ) as HTMLElement;
-    const done = document.querySelector(
+    )!;
+    const done = document.querySelector<HTMLElement>(
       '[data-adapttable-part="filters-done"]'
-    ) as HTMLElement;
+    )!;
     close.focus();
     fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(done);
