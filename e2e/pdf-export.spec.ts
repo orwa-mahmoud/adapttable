@@ -212,15 +212,14 @@ for (const [from, to] of REPLACED_PAGES) {
     });
 
     test("declares the new URL to a crawler without JavaScript", async ({
-      browser,
+      request,
     }) => {
-      const context = await browser.newContext({ javaScriptEnabled: false });
-      const page = await context.newPage();
-      // Meta-refresh still fires with scripting off, so take the response the
-      // moment it commits — a page that has already forwarded itself hands
-      // back the destination's bytes, or none at all.
-      const response = await page.goto(`/${from}/`, { waitUntil: "commit" });
-      const html = await response!.text();
+      // A crawler reads the stub's bytes without rendering anything, so fetch
+      // them the same way. A browser page races its own meta-refresh here:
+      // the stub forwards the moment it commits, and the original response
+      // body can be gone before it is read.
+      const response = await request.get(`/${from}/`);
+      const html = await response.text();
 
       expect(html).toContain('http-equiv="refresh"');
       expect(html).toContain(`${to}/`);
@@ -230,14 +229,15 @@ for (const [from, to] of REPLACED_PAGES) {
 
       // Not thin content: a stub carrying one line of text reads as a soft
       // 404, so it says what moved and where in real prose.
-      const words = (await page.locator("main").innerText()).split(
-        /\s+/
-      ).length;
+      const main = /<main[\s\S]*?<\/main>/.exec(html)?.[0] ?? "";
+      const words = main
+        .replace(/<[^>]+>/g, " ")
+        .trim()
+        .split(/\s+/).length;
       expect(words, `the stub serves only ${words} words`).toBeGreaterThan(40);
 
       // And it mounts no demo — the bundle belongs to the page that moved.
       expect(html).not.toContain("/src/entry-");
-      await context.close();
     });
   });
 }

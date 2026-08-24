@@ -7,7 +7,7 @@ between [Mantine](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mantine) Â
 [shadcn](https://orwa-mahmoud.github.io/adapttable/demo/?kit=shadcn) Â· [Tailwind](https://orwa-mahmoud.github.io/adapttable/demo/?kit=tailwind) on the same data,
 and toggle grouping and inline editing while you are there.
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" style="width:100%;border-radius:8px"></video>
+<video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, filterable, paginated

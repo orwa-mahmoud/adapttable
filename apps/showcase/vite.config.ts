@@ -31,6 +31,10 @@ const googleAnalytics = (): Plugin => ({
       tag: "script",
       attrs: {
         async: true,
+        // googletagmanager.com serves the tag with `access-control-allow-origin: *`,
+        // so an anonymous fetch gives the browser full error detail instead of
+        // the opaque "Script error." every cross-origin failure collapses into.
+        crossorigin: "anonymous",
         src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
       },
       injectTo: "head",
@@ -52,7 +56,21 @@ const googleAnalytics = (): Plugin => ({
         "    });",
         "  }",
         "  window.addEventListener('error', function (event) {",
-        "    report(event.error && event.error.name ? event.error.name : 'Error', true);",
+        "    var message = typeof event.message === 'string' ? event.message : '';",
+        // ResizeObserver's benign loop notification arrives as an error event
+        // with no error object. It gets its own bucket so the count stays
+        // readable in GA4 instead of hiding inside a generic 'Error' total.
+        "    if (message.startsWith('ResizeObserver loop')) {",
+        "      report('ResizeObserverLoop', false);",
+        "      return;",
+        "    }",
+        "    var error = event.error;",
+        // Without an error object the message is the only identifying detail
+        // GA4 will ever see, so send it instead of the blanket 'Error' —
+        // truncated to the 100-character parameter limit. Only a real error
+        // object marks the event fatal.
+        "    var name = error && error.name ? error.name : '';",
+        "    report(name || message.slice(0, 100) || 'Error', Boolean(error));",
         "  });",
         "  window.addEventListener('unhandledrejection', function (event) {",
         "    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);",

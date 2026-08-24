@@ -734,7 +734,14 @@ a {
 .demo-surface__fallback {
   display: grid;
   place-items: center;
-  min-height: 280px;
+  /* Reserve what a mounted table occupies, so swapping this placeholder for
+     the real adapter chunk moves the page as little as possible. Measured
+     across all nine kits at 1280px the surface body settles at 463–580px,
+     clustered on 500px; 472px plus the body's 28px of padding lands on that
+     cluster. The mobile card layout runs 1562–2238px, but the surface sits
+     below the fold on a phone, so reserving that much would trade a shift
+     nobody sees for a screen and a half of empty placeholder. */
+  min-height: 472px;
   color: var(--ink-2);
   font-size: 14px;
 }
