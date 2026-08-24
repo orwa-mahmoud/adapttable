@@ -14,7 +14,7 @@ between [Mantine](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mantine) �
 [shadcn](https://orwa-mahmoud.github.io/adapttable/demo/?kit=shadcn) · [Tailwind](https://orwa-mahmoud.github.io/adapttable/demo/?kit=tailwind) on the same data,
 and toggle grouping and inline editing while you are there.
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" style="width:100%;border-radius:8px"></video>
+<video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, filterable, paginated
@@ -5251,7 +5251,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ▶ **See it before you install:** [the live mobile demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/) — the same table flipped between desktop rows and phone cards with one toggle.
 
-[![The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table](https://orwa-mahmoud.github.io/adapttable/media/features/mobile.gif)](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/)
+<a href="https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/"><img src="https://orwa-mahmoud.github.io/adapttable/media/features/mobile.gif" alt="The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table" width="640" height="392" style="width:100%;height:auto;aspect-ratio:640/392;border-radius:8px" /></a>
 
 Most React data tables answer the phone problem with a horizontal scrollbar.
 AdaptTable answers it with a different layout: below the mobile breakpoint,
