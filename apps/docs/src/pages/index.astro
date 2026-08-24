@@ -992,6 +992,26 @@ gtag('config', 'G-FT8LY7Z15Y');
 </html>
 
 <style>
+  /* Schibsted Grotesk loads with `display=swap`, so the first paint uses a
+     local face and every glyph metric changes when the webfont arrives.
+     This face wraps the local fallback in Schibsted Grotesk's own metrics —
+     ascent 977/1000, descent 258/1000, no line gap — with `size-adjust`
+     carrying the 2.58% advance-width difference measured against Helvetica
+     and Arial, which share identical widths. Helvetica covers macOS, Arial
+     Windows, Liberation Sans the metric-compatible Linux clone; anywhere
+     none of the three exists the stack falls through to `system-ui` as
+     before. */
+  @font-face {
+    font-family: "Schibsted Grotesk Fallback";
+    src:
+      local("Helvetica"),
+      local("Arial"),
+      local("Liberation Sans");
+    size-adjust: 102.58%;
+    ascent-override: 95.24%;
+    descent-override: 25.15%;
+    line-gap-override: 0%;
+  }
   /* The demo's exact token set (light theme), so /demo and the landing
      read as one product. */
   :root {
@@ -1022,7 +1042,8 @@ gtag('config', 'G-FT8LY7Z15Y');
   body {
     margin: 0;
     /* The brand face, same as the demo's: Schibsted Grotesk. */
-    font-family: "Schibsted Grotesk", system-ui, sans-serif;
+    font-family:
+      "Schibsted Grotesk", "Schibsted Grotesk Fallback", system-ui, sans-serif;
     /* The demo's effective body line-height (Chakra's 1.5). */
     line-height: 1.5;
     background: var(--page-bg);
@@ -1089,17 +1110,44 @@ gtag('config', 'G-FT8LY7Z15Y');
     margin-inline-start: 14px;
   }
   .nav__links a {
+    position: relative;
     color: var(--ink-2);
     font-size: 14px;
     font-weight: 500;
     transition: color 0.15s;
+  }
+  /* The active marker is an absolutely positioned underline animated with
+     transform and opacity only. The scroll watcher retags the active link on
+     every section crossing, so anything that changes the link's metrics —
+     a heavier weight above all — reflows the sticky nav on every scroll. */
+  .nav__links a::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -7px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--brand);
+    opacity: 0;
+    transform: scaleX(0.3);
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
   }
   .nav__links a:hover {
     color: var(--ink);
   }
   .nav__links a.is-on {
     color: var(--brand);
-    font-weight: 650;
+  }
+  .nav__links a.is-on::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav__links a::after {
+      transition: none;
+    }
   }
   .nav__right {
     margin-inline-start: auto;
