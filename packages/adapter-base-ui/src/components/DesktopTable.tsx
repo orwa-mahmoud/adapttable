@@ -320,7 +320,7 @@ interface DesktopRowProps<TRow> {
   rowStyleSignature: string;
   labels: Required<TableLabels>;
   rowActionsLayout?: RowActionsLayout;
-  cellSpanAppearance?: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+  cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
   renderRowActions?: RowActionsRenderer<TRow>;
   hasSelection: boolean;
   expandable: boolean;
