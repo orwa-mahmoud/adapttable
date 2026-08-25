@@ -83,14 +83,15 @@ jobs:
           # without a shell, so a `&&` here would be a literal argument.
           publish-script: pnpm release:gated
           version-script: pnpm version-packages
-        env:
           # A fine-grained PAT scoped to this repository alone, with Contents
           # and Pull requests write and nothing else. Repository settings deny
           # the workflow token the ability to create pull requests, so this is
           # the identity that opens the "Version Packages" PR — and because it
           # is a real account, that PR runs the required checks.
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          github-token: ${{ secrets.RELEASE_TOKEN }}
+        env:
+          # npm auth for `changeset publish`: setup-node's registry-url writes
+          # the .npmrc that reads this variable.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # The version-bump commit must not run the husky gate on this
           # 2-core runner: CI enforces the same gate on every PR (including
