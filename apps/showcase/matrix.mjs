@@ -507,7 +507,7 @@ export function People({ rows, onSave }) {
       tailwind:
         "The editor is a native input or select carrying the map's field classes with an indigo focus ring; the validation and rollback parts carry no classes in this map, so a rejected commit reads as browser-default text.",
     },
-    docs: ["editing", "cell-navigation"],
+    docs: ["cell-editing", "cell-navigation"],
   },
   {
     slug: "tree",
@@ -645,7 +645,7 @@ export function Ledger({ rows, columns }) {
       tailwind:
         "The map paints the header and pinned cells opaque per element rather than through a token, which is what stops scrolled rows showing through them, and the scroll box contains its own overscroll.",
     },
-    docs: ["performance", "virtualization"],
+    docs: ["virtualization"],
   },
   {
     slug: "columns",
@@ -806,7 +806,7 @@ export function People({ rows, columns }) {
       tailwind:
         "The button and its spinner are both plain elements the map styles — the same construction shadcn's preset uses, in this map's own neutrals.",
     },
-    docs: ["export-csv", "export-pdf"],
+    docs: ["export-pdf"],
   },
   {
     slug: "selection",
@@ -856,7 +856,7 @@ export function People({ rows, columns, onArchive }) {
       tailwind:
         "The boxes are native checkboxes tinted indigo, a selected row takes an indigo wash that has its own dark variant, and the bulk bar is styled to match.",
     },
-    docs: ["selection", "bulk-actions"],
+    docs: ["selection"],
   },
   {
     slug: "grouping",
@@ -906,7 +906,7 @@ export function People({ rows, columns }) {
       tailwind:
         "The group row, toggle, label, count and aggregate all carry the map's classes with a dark variant; group footers and the show-more row are not in the map, so those two read as browser defaults.",
     },
-    docs: ["grouping"],
+    docs: ["row-grouping"],
   },
   {
     slug: "column-groups",
