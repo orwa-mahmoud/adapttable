@@ -1,5 +1,18 @@
 # @adapttable/antd
 
+## 2.4.1
+
+### Patch Changes
+
+- ce5cfe7: Internal code-quality refactor. No behavior or API change.
+- 0ce274a: An active-filter chip's remove control is a button in the accessibility tree
+  and in the tab order: screen readers announce it as "Clear all: <chip>", and
+  Tab reaches it so Enter or Space removes that filter.
+- 3223a18: When an opted-in feature cannot run, the person at the table sees it (off, disabled, or this page) — not only a console warning. Chrome exposes kit-agnostic notices; export-all without a full dataset labels the button “Export this page”.
+- Updated dependencies [2524306]
+- Updated dependencies [3223a18]
+  - @adapttable/core@2.7.0
+
 ## 2.4.0
 
 ### Minor Changes
