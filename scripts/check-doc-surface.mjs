@@ -29,6 +29,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
+import { TITLES } from "../apps/docs/sync-docs.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_DIR = join(REPO_ROOT, "docs");
@@ -223,9 +224,49 @@ function printNavFailures({ orphans, dead }) {
   }
 }
 
+/**
+ * `docs/` and the page-title map compared both ways.
+ *
+ * A page missing from the `TITLES` map in `apps/docs/sync-docs.mjs` still
+ * builds: Starlight falls back to the filename, so the page ships as
+ * "filter-tree | AdaptTable" — a `<title>` that describes nothing, matches no
+ * query and is the one string search results and browser tabs show first.
+ * `stale` are entries whose markdown is gone; they mask the next real gap.
+ */
+function auditTitles() {
+  const named = new Set(Object.keys(TITLES));
+  return {
+    untitled: docPages.filter((name) => !named.has(name)),
+    stale: [...named]
+      .filter((name) => !docPages.includes(name))
+      .sort((a, b) => a.localeCompare(b)),
+  };
+}
+
+function printTitleFailures({ untitled, stale }) {
+  if (untitled.length > 0) {
+    console.error(
+      `\n${untitled.length} docs page(s) have no entry in the TITLES map of ` +
+        `apps/docs/sync-docs.mjs — each ships with its filename as its title:`
+    );
+    for (const name of untitled) {
+      console.error(`  - docs/${name} → "${name.replace(/\.md$/, "")}"`);
+    }
+  }
+  if (stale.length > 0) {
+    console.error(
+      `\n${stale.length} TITLES entr(ies) in apps/docs/sync-docs.mjs name a ` +
+        `page that does not exist:`
+    );
+    for (const name of stale) console.error(`  - ${name}`);
+  }
+}
+
 function main() {
   const audits = auditPackages();
   const nav = auditNav();
+  const titles = auditTitles();
+  const titleFailures = titles.untitled.length + titles.stale.length;
   const navFailures = nav.orphans.length + nav.dead.length;
   const exportTotal = audits.reduce((sum, a) => sum + a.names.length, 0);
   const undocumentedTotal = audits.reduce(
@@ -245,11 +286,21 @@ function main() {
       `Nav: ${docPages.length} pages, ${nav.orphans.length} missing from the ` +
         `sidebar, ${nav.dead.length} sidebar entr(ies) without a page.`
     );
+    console.log(
+      `Titles: ${titles.untitled.length} page(s) with no TITLES entry, ` +
+        `${titles.stale.length} entr(ies) without a page.`
+    );
     return;
   }
-  if (undocumentedTotal > 0 || missingRefTotal > 0 || navFailures > 0) {
+  if (
+    undocumentedTotal > 0 ||
+    missingRefTotal > 0 ||
+    navFailures > 0 ||
+    titleFailures > 0
+  ) {
     printFailures(audits, missingFromReference);
     printNavFailures(nav);
+    printTitleFailures(titles);
     if (undocumentedTotal > 0) {
       console.error(
         `\n${undocumentedTotal} undocumented export(s). Document each name in docs/ or stop exporting it.`
@@ -267,11 +318,17 @@ function main() {
           `apps/docs/sidebar.mjs, and every entry there needs its page.`
       );
     }
+    if (titleFailures > 0) {
+      console.error(
+        `${titleFailures} title mismatch(es). Every docs/*.md page needs a ` +
+          `TITLES entry in apps/docs/sync-docs.mjs, and every entry needs its page.`
+      );
+    }
     process.exit(1);
   }
   console.log(
     `doc-surface: all ${exportTotal} exports documented, ` +
-      `all ${docPages.length} pages in the sidebar.`
+      `all ${docPages.length} pages in the sidebar and titled.`
   );
 }
 

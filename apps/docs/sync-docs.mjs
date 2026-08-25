@@ -20,7 +20,16 @@ const repoRoot = join(here, "../..");
 const source = join(here, "../../docs");
 const target = join(here, "src/content/docs");
 
-const TITLES = {
+/**
+ * Each page's `<title>`, keyed by its markdown file.
+ *
+ * A page with no entry here falls back to its own filename, so `filter-tree.md`
+ * ships as "filter-tree | AdaptTable" — a title that describes nothing and wins
+ * no search. `scripts/check-doc-surface.mjs` imports this map and fails when a
+ * `docs/*.md` page is missing from it, the same way it holds the sidebar and
+ * `docs/` to each other.
+ */
+export const TITLES = {
   "getting-started.md": "Get started — a React table for your UI kit",
   "concepts.md": "AdaptTable concepts — headless core & source",
   "columns.md": "React table columns — ColumnDef & custom cells",
@@ -30,6 +39,7 @@ const TITLES = {
   "export-pdf.md": "React table PDF export and print layout",
   "sorting.md": "React table sorting — multi-column, URL-synced",
   "filtering.md": "React table filtering — chips & URL-synced",
+  "filter-tree.md": "React table advanced filters — nested AND/OR groups",
   "pagination.md": "React table pagination — paged, infinite, auto",
   "selection.md": "React table row selection & bulk actions",
   "row-expansion.md": "React table expandable rows — detail panels",
@@ -41,6 +51,10 @@ const TITLES = {
   "row-styling.md": "React table row styling and heights",
   "cell-navigation.md": "React table keyboard navigation — ARIA grid",
   "row-grouping.md": "React table row grouping with subtotals",
+  "pivot.md": "React pivot table — rows, columns and measures",
+  "formulas.md": "React table formulas — spreadsheet computed columns",
+  "server-queries.md": "React table server queries — parse and validate",
+  "tree-data.md": "React table tree data — hierarchical rows",
   "column-management.md": "React table column management — pin, resize",
   "saved-views.md": "React table saved views, shareable by URL",
   "virtualization.md": "React table virtualization — 50k rows, 24 nodes",
@@ -55,6 +69,7 @@ const TITLES = {
   "api.md": "AdaptTable API reference — every export",
   "faq.md": "FAQ — the free MUI X & ag-Grid alternative",
   "comparison.md": "React table comparison — AG Grid, TanStack, MUI",
+  "migrate-from-v1.md": "Migrate from AdaptTable v1 to v2 — every rename",
   "migrate-from-mantine-datatable.md":
     "Migrate from mantine-datatable — more built-in",
   "migrate-from-mui-x-datagrid.md":
@@ -225,64 +240,70 @@ function headBlock(entries) {
   return `head:\n${entries.join("\n")}\n`;
 }
 
-mkdirSync(target, { recursive: true });
-for (const file of readdirSync(source)) {
-  if (!file.endsWith(".md")) continue;
-  const raw = readFileSync(join(source, file), "utf8");
-  // Drop the H1 (Starlight renders the frontmatter title) and rewrite
-  // repo-relative links into their site equivalents: doc-to-doc .md links
-  // become page routes (anchors preserved), repo files point at GitHub.
-  const body = raw
-    .replace(/^# .*\n/, "")
-    .replace(
-      /\((?:\.\/)?([a-z0-9-]+)\.md(#[a-z0-9-]+)?\)/g,
-      "(/adapttable/$1/$2)"
-    )
-    .replace(
-      /\(\.\.\/([^)]+)\)/g,
-      "(https://github.com/orwa-mahmoud/adapttable/blob/main/$1)"
-    );
-  const title = TITLES[file] ?? file.replace(/\.md$/, "");
-  const description = DESCRIPTIONS[file];
-  const slug = file.replace(/\.md$/, "");
+function syncDocs() {
+  mkdirSync(target, { recursive: true });
+  for (const file of readdirSync(source)) {
+    if (!file.endsWith(".md")) continue;
+    const raw = readFileSync(join(source, file), "utf8");
+    // Drop the H1 (Starlight renders the frontmatter title) and rewrite
+    // repo-relative links into their site equivalents: doc-to-doc .md links
+    // become page routes (anchors preserved), repo files point at GitHub.
+    const body = raw
+      .replace(/^# .*\n/, "")
+      .replace(
+        /\((?:\.\/)?([a-z0-9-]+)\.md(#[a-z0-9-]+)?\)/g,
+        "(/adapttable/$1/$2)"
+      )
+      .replace(
+        /\(\.\.\/([^)]+)\)/g,
+        "(https://github.com/orwa-mahmoud/adapttable/blob/main/$1)"
+      );
+    const title = TITLES[file] ?? file.replace(/\.md$/, "");
+    const description = DESCRIPTIONS[file];
+    const slug = file.replace(/\.md$/, "");
 
-  // Structured data: a BreadcrumbList on every page, plus FAQPage on the FAQ
-  // so its Q&As are eligible for Google rich results.
-  const jsonLd = [breadcrumbList(title, slug)];
-  if (file === "faq.md") jsonLd.push(faqPage(parseFaq(raw)));
+    // Structured data: a BreadcrumbList on every page, plus FAQPage on the FAQ
+    // so its Q&As are eligible for Google rich results.
+    const jsonLd = [breadcrumbList(title, slug)];
+    if (file === "faq.md") jsonLd.push(faqPage(parseFaq(raw)));
 
-  // Per-page social-share card (generated under public/og/<slug>.png).
-  const ogImage = `${SITE}/og/${slug}.png`;
-  const head = [
-    ...jsonLd.map(ldScript),
-    metaEntry("property", "og:image", ogImage),
-    metaEntry("name", "twitter:image", ogImage),
-  ];
+    // Per-page social-share card (generated under public/og/<slug>.png).
+    const ogImage = `${SITE}/og/${slug}.png`;
+    const head = [
+      ...jsonLd.map(ldScript),
+      metaEntry("property", "og:image", ogImage),
+      metaEntry("name", "twitter:image", ogImage),
+    ];
 
-  const fm = [`title: ${JSON.stringify(title)}`];
-  if (description) fm.push(`description: ${JSON.stringify(description)}`);
-  const frontmatter = `---\n${fm.join("\n")}\n${headBlock(head)}---\n\n`;
-  writeFileSync(join(target, file), `${frontmatter}${body}`);
-}
-// LLM-search surface (llmstxt.org): /llms.txt is the index, /llms-full.txt
-// the whole documentation in one file. Tools like Perplexity/ChatGPT
-// search fetch these from the site root, so they ship with every deploy.
-// llms-full.txt is regenerated from docs/ right here so it can never go
-// stale; llms.txt is the hand-written root index, copied verbatim.
-const pub = join(here, "public");
-mkdirSync(pub, { recursive: true });
-buildLlmsFull(repoRoot);
-copyFileSync(join(repoRoot, "llms-full.txt"), join(pub, "llms-full.txt"));
-const llmsIndex = readFileSync(join(repoRoot, "llms.txt"), "utf8");
-const unlinked = readdirSync(source).filter(
-  (file) =>
-    file.endsWith(".md") &&
-    !llmsIndex.includes(`/adapttable/${file.replace(/\.md$/, "")}/`)
-);
-if (unlinked.length > 0) {
-  console.warn(
-    `sync-docs: llms.txt has no link for: ${unlinked.join(", ")} — add them to the root llms.txt Docs list`
+    const fm = [`title: ${JSON.stringify(title)}`];
+    if (description) fm.push(`description: ${JSON.stringify(description)}`);
+    const frontmatter = `---\n${fm.join("\n")}\n${headBlock(head)}---\n\n`;
+    writeFileSync(join(target, file), `${frontmatter}${body}`);
+  }
+  // LLM-search surface (llmstxt.org): /llms.txt is the index, /llms-full.txt
+  // the whole documentation in one file. Tools like Perplexity/ChatGPT
+  // search fetch these from the site root, so they ship with every deploy.
+  // llms-full.txt is regenerated from docs/ right here so it can never go
+  // stale; llms.txt is the hand-written root index, copied verbatim.
+  const pub = join(here, "public");
+  mkdirSync(pub, { recursive: true });
+  buildLlmsFull(repoRoot);
+  copyFileSync(join(repoRoot, "llms-full.txt"), join(pub, "llms-full.txt"));
+  const llmsIndex = readFileSync(join(repoRoot, "llms.txt"), "utf8");
+  const unlinked = readdirSync(source).filter(
+    (file) =>
+      file.endsWith(".md") &&
+      !llmsIndex.includes(`/adapttable/${file.replace(/\.md$/, "")}/`)
   );
+  if (unlinked.length > 0) {
+    console.warn(
+      `sync-docs: llms.txt has no link for: ${unlinked.join(", ")} — add them to the root llms.txt Docs list`
+    );
+  }
+  copyFileSync(join(repoRoot, "llms.txt"), join(pub, "llms.txt"));
+  console.log("docs synced into Starlight");
 }
-copyFileSync(join(repoRoot, "llms.txt"), join(pub, "llms.txt"));
-console.log("docs synced into Starlight");
+
+// The docs build runs this as a script; the doc-surface gate imports it for
+// TITLES alone, and importing must not write into the content collection.
+if (process.argv[1] === fileURLToPath(import.meta.url)) syncDocs();
