@@ -598,6 +598,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       const leaf = header.leaf(column, cell.columnIndex, cell.rowSpan);
       return (
         <LeafHeader
+          key={cell.key}
           leaf={leaf}
           headSx={{
             ...headPaint,

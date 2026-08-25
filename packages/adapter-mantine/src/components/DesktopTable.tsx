@@ -27,7 +27,7 @@ import {
 } from "@adapttable/core/adapter";
 import { Badge, Checkbox, Group, Table, VisuallyHidden } from "@mantine/core";
 import type { CSSProperties, ReactElement, ReactNode, RefObject } from "react";
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
@@ -576,9 +576,10 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
     if (cell.kind === "leaf") {
       const column = columns[cell.columnIndex];
-      if (!column) return <></>;
+      if (!column) return <Fragment key={cell.key} />;
       return (
         <LeafHeader
+          key={cell.key}
           leaf={header.leaf(column, cell.columnIndex, cell.rowSpan)}
           {...leafProps}
         />

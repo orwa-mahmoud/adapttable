@@ -583,6 +583,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     if (cell.kind === "leaf") {
       return (
         <LeafHeader
+          key={cell.key}
           leaf={header.leaf(
             columns[cell.columnIndex]!,
             cell.columnIndex,
