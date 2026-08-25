@@ -789,10 +789,10 @@ function buildDesktopRowWiring<TRow>(
   const reorderAttrs = rowReorder?.rowAttrs?.(id, index);
   const rowDomProps = {
     ...table.getRowProps(row, focusIndex),
-    ...(gridFocus?.getRowPropsAt(focusIndex) ?? {}),
+    ...gridFocus?.getRowPropsAt(focusIndex),
     ...rowClickProps(row, onRowClick ? handleRowClick : undefined, focusIndex),
-    ...(rowReorder?.dropProps?.(index, row, windowStart) ?? {}),
-    ...(reorderAttrs ?? {}),
+    ...rowReorder?.dropProps?.(index, row, windowStart),
+    ...reorderAttrs,
     "data-row-pin": rowPinSide,
     "data-adapttable-part": pinPart ?? "row",
     "data-stagger": "",

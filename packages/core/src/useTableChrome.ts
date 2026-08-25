@@ -1301,8 +1301,8 @@ export function useTableChrome<TRow>(
     const el = rootRef.current;
     if (!el) return;
     const value = featureNotices.map((notice) => notice.kind).join(" ");
-    if (value) el.setAttribute("data-adapttable-notices", value);
-    else el.removeAttribute("data-adapttable-notices");
+    if (value) el.dataset.adapttableNotices = value;
+    else delete el.dataset.adapttableNotices;
   });
 
   const hasAnyActions = hasRowActions || rowPinning !== undefined;
