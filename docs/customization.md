@@ -311,6 +311,14 @@ to. The range is the one the pagination footer shows, from the same
 arithmetic, so the two never disagree. The strip hosts the selection figures
 rather than repeating them, so turning it on does not print them twice.
 
+Opted-in features that cannot run (virtualize on a paged table, pin or
+reorder under grouping, `exportCsv` `scope: "all"` with only this page,
+edits with no writer) still show as `FeatureNotice` items
+(`FeatureNoticeKind` is the union). They live on
+`StatusBarChromeProps.notices` and `TableChrome.featureNotices`, and they
+render even when `statusBar` is off — row and selected counts still need
+the bar.
+
 `printButton` adds a Print button beside the view controls. It needs two
 things, not one: the option, and an `onPrint` handler saying what to print.
 Either alone draws nothing — a button that opens no dialog would be worse than
@@ -832,6 +840,38 @@ CSS variables, so a panel whose surface is not the page background can say so:
 They default to `--mantine-color-body` and `--mantine-color-default-border`,
 so tables look the same until you set them. Declare them on any ancestor of
 the table.
+
+## Desktop table assembly
+
+The six HTML kits (Mantine, MUI, Chakra, Radix, Base UI, Unstyled; shadcn
+follows Unstyled) paint from one shared plan on
+`@adapttable/core/adapter`. Ant Design stays on its native `<Table>`.
+
+```ts
+import {
+  createDesktopRow,
+  DESKTOP_ACTIONS_WIDTH,
+  DESKTOP_EXPANSION_WIDTH,
+  DESKTOP_SELECTION_WIDTH,
+  useDesktopTableAssembly,
+} from "@adapttable/core/adapter";
+```
+
+`useDesktopTableAssembly(props, options?)` takes
+`DesktopAssemblyProps` plus optional `DesktopAssemblyOptions` (mostly
+`DesktopChromeWidths` for the reserved selection / expansion / actions
+columns — defaults `DESKTOP_SELECTION_WIDTH`, `DESKTOP_EXPANSION_WIDTH`,
+`DESKTOP_ACTIONS_WIDTH`) and returns a `DesktopTableAssembly`: header
+leaves (`DesktopHeaderLeaf`), pin state (`DesktopTablePin`), and body
+slots (`DesktopBodySlot` — rows as `DesktopRowSlot`, groups as
+`DesktopGroupSlot` / `DesktopGroupEntry`, extras as `DesktopExtraSlot`,
+virtual pads as `DesktopVirtualPadSlot`). `createDesktopRow` is the
+memoized row the kits mount; `DesktopRowWiring` is the per-row bundle it
+receives. Layout changes land once in the plan; each kit still owns
+pixels.
+
+`tableRenderModel` and `getRowProps` stay first-class — this helper is
+add-only.
 
 ## Theming per kit
 

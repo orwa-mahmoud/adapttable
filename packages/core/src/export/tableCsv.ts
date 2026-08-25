@@ -633,8 +633,7 @@ export function makeExportCsvHandler<TRow>(
   }
 
   // Neither a backend handler nor an opt-in fetch, and no rows to read:
-  // write this page and name the button that way. Hiding the control left
-  // only a console warning; the person at the table should see "this page".
+  // write this page and name the button that way.
   if (options.scope === "all" && !source.allFilteredRows) {
     devWarn(
       'exportCsv scope "all" needs the full filtered set. This source ' +

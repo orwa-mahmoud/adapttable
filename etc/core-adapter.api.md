@@ -11,6 +11,7 @@ import { Dispatch } from 'react';
 import { DragEvent as DragEvent_2 } from 'react';
 import { JSX } from 'react';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
+import { MemoExoticComponent } from 'react';
 import { MouseEvent as MouseEvent_2 } from 'react';
 import { PointerEvent as PointerEvent_2 } from 'react';
 import { ReactElement } from 'react';
@@ -637,6 +638,9 @@ export interface ContextMenuSurfaceProps {
 }
 
 // @public
+export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
+
+// @public
 export type DataModeProps<TRow> = {
     mode: "server"; /** The data contract: run the request, hand back `data` + `total`. */
     onQueryChange: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
@@ -665,6 +669,370 @@ export const DEFAULT_CARD_SIZE_PX = 132;
 
 // @public
 export function deriveSortByOptions<TRow>(columns: readonly ColumnDef<TRow>[]): SortByOption[];
+
+// @public
+export const DESKTOP_ACTIONS_WIDTH = 120;
+
+// @public
+export const DESKTOP_EXPANSION_WIDTH = 32;
+
+// @public
+export const DESKTOP_SELECTION_WIDTH = 48;
+
+// @public
+export interface DesktopAssemblyOptions {
+    widths?: DesktopChromeWidths;
+}
+
+// @public
+export type DesktopAssemblyProps<TRow> = SharedTableRenderProps<TRow> & {
+    actionsPinned?: boolean;
+};
+
+// @public
+export type DesktopBodySlot<TRow> = DesktopExtraSlot | DesktopVirtualPadSlot | DesktopGroupSlot<TRow> | DesktopRowSlot<TRow>;
+
+// @public
+export interface DesktopChromeWidths {
+    actions?: number;
+    expansion?: number;
+    includeExpansionInLeads?: boolean;
+    selection?: number;
+}
+
+// @public
+export interface DesktopExtraSlot {
+    // (undocumented)
+    colSpan: number;
+    // (undocumented)
+    extraKind: "separator" | "fullWidth";
+    // (undocumented)
+    fillStyle?: CSSProperties;
+    // (undocumented)
+    key: string;
+    // (undocumented)
+    kind: "extra";
+    // (undocumented)
+    render?: () => ReactNode;
+}
+
+// @public
+export type DesktopGroupEntry<TRow> = Extract<GroupedFlatEntry<TRow>, {
+    kind: "group" | "groupFooter" | "groupMore";
+}>;
+
+// @public
+export interface DesktopGroupSlot<TRow> {
+    // (undocumented)
+    entry: DesktopGroupEntry<TRow>;
+    // (undocumented)
+    key: string;
+    // (undocumented)
+    kind: "group";
+}
+
+// @public
+export interface DesktopHeaderLeaf<TRow> {
+    // (undocumented)
+    caption: ReactNode;
+    // (undocumented)
+    column: ColumnDef<TRow>;
+    // (undocumented)
+    columnCheckboxChecked: boolean;
+    // (undocumented)
+    columnHeaderProps: Record<string, unknown>;
+    // (undocumented)
+    columnName: string;
+    // (undocumented)
+    columnSelectAriaLabel: string;
+    // (undocumented)
+    headerDef: FilterDef<TRow> | undefined;
+    // (undocumented)
+    headerIndex: number;
+    // (undocumented)
+    headerProps: CellElementProps;
+    // (undocumented)
+    onToggleColumn: (() => void) | undefined;
+    // (undocumented)
+    pinSide: PinOffset["side"] | undefined;
+    // (undocumented)
+    resizeHandleProps: ColumnResizeHandleProps | undefined;
+    // (undocumented)
+    rowSpan: number;
+    // (undocumented)
+    showColumnCheckbox: boolean;
+    // (undocumented)
+    sortActive: boolean;
+    // (undocumented)
+    sortButtonProps: SortButtonElementProps;
+    // (undocumented)
+    sortDir: "asc" | "desc" | undefined;
+    // (undocumented)
+    sortIndex: number | undefined;
+    // (undocumented)
+    style: CSSProperties;
+}
+
+// @public
+export interface DesktopRowSlot<TRow> {
+    // (undocumented)
+    key: string;
+    // (undocumented)
+    kind: "row";
+    // (undocumented)
+    wiring: DesktopRowWiring<TRow>;
+}
+
+// @public
+export interface DesktopRowWiring<TRow> {
+    // (undocumented)
+    actionsPinned: boolean;
+    // (undocumented)
+    bodyCells: readonly BodyCell<TRow>[];
+    // (undocumented)
+    bodyPinStyle: (key: string) => CSSProperties | undefined;
+    // (undocumented)
+    cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+    // (undocumented)
+    clickable: boolean;
+    // (undocumented)
+    columns: readonly ColumnDef<TRow>[];
+    // (undocumented)
+    columnSpacers?: {
+        start: number;
+        end: number;
+    };
+    // (undocumented)
+    columnSpan: number;
+    // (undocumented)
+    columnWidths?: Readonly<Record<string, number>>;
+    // (undocumented)
+    confirm: ConfirmHandler;
+    // (undocumented)
+    edgeRowPin: ReturnType<typeof pinnedRowCellStyle>;
+    // (undocumented)
+    editing: EditableCellEditing<TRow> | undefined;
+    // (undocumented)
+    editingSignature: string | null;
+    // (undocumented)
+    expanded: boolean | undefined;
+    // (undocumented)
+    focusIndex: number;
+    // (undocumented)
+    getRowId: (row: TRow) => string;
+    // (undocumented)
+    gridFocus?: GridFocusState;
+    // (undocumented)
+    hasEndPin: boolean;
+    // (undocumented)
+    hasPrefetch: boolean;
+    // (undocumented)
+    hasStartPin: boolean;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    index: number;
+    // (undocumented)
+    labels: Required<TableLabels>;
+    // (undocumented)
+    leads: PinLeads;
+    // (undocumented)
+    measureElement?: (element: Element | null) => void;
+    // (undocumented)
+    measureRef: ((element: Element | null) => void) | undefined;
+    // (undocumented)
+    measureRowPair?: RowPairMeasurer;
+    // (undocumented)
+    onPrefetch: (row: TRow) => void;
+    // (undocumented)
+    onRowClick: (row: TRow) => void;
+    // (undocumented)
+    onToggleExpand: (id: string) => void;
+    // (undocumented)
+    onToggleSelect: (id: string) => void;
+    // (undocumented)
+    onToggleTree?: (id: string) => void;
+    // (undocumented)
+    pinOffset?: (key: string) => PinOffset | undefined;
+    // (undocumented)
+    pinPart: ReturnType<typeof pinnedRowPart>;
+    // (undocumented)
+    pinRowSticky: boolean;
+    // (undocumented)
+    pinSignature: string;
+    // (undocumented)
+    pinSticky: ReturnType<typeof pinnedRowSticky>;
+    // (undocumented)
+    renderDetail: (row: TRow) => ReactNode;
+    // (undocumented)
+    renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
+    // (undocumented)
+    reorderPinned: boolean;
+    // (undocumented)
+    reorderSignature: string | null;
+    // (undocumented)
+    row: TRow;
+    // (undocumented)
+    rowActions: SharedTableRenderProps<TRow>["rowActions"];
+    // (undocumented)
+    rowActionsLayout: SharedTableRenderProps<TRow>["rowActionsLayout"];
+    // (undocumented)
+    rowClass: string | undefined;
+    // (undocumented)
+    rowCount: number;
+    rowDomProps: Record<string, unknown>;
+    // (undocumented)
+    rowPinOffset: number;
+    // (undocumented)
+    rowPinSide?: RowPinSide;
+    // (undocumented)
+    rowPinSignature: string | null;
+    // (undocumented)
+    rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
+    // (undocumented)
+    rows: readonly TRow[];
+    // (undocumented)
+    rowStyleSignature: string;
+    // (undocumented)
+    rowVisualStyle: CSSProperties | undefined;
+    // (undocumented)
+    selected: boolean | undefined;
+    // (undocumented)
+    showActions: boolean;
+    // (undocumented)
+    showReorder: boolean;
+    // (undocumented)
+    sourceIndex: number;
+    // (undocumented)
+    spanSignature: string;
+    // (undocumented)
+    table: UseDataTableResult<TRow>;
+    // (undocumented)
+    treeColumnKey?: string;
+    // (undocumented)
+    treeEntry?: TreeEntry<TRow>;
+    // (undocumented)
+    windowStart: number;
+}
+
+// @public
+export interface DesktopTableAssembly<TRow> {
+    // (undocumented)
+    bodySlots: readonly DesktopBodySlot<TRow>[];
+    // (undocumented)
+    callbacks: {
+        onToggleSelect: (id: string) => void;
+        onToggleExpand: (id: string) => void;
+        onToggleGroup: (groupKey: string) => void;
+        handleRowClick: (row: TRow) => void;
+        handlePrefetch: (row: TRow) => void;
+        renderDetail: (row: TRow) => ReactNode;
+    };
+    // (undocumented)
+    gridProps: Record<string, unknown> | undefined;
+    // (undocumented)
+    header: {
+        leading: {
+            expand: boolean;
+            reorder: boolean;
+            selection: boolean;
+            spacerStart: boolean;
+        };
+        trailing: {
+            spacerEnd: boolean;
+            actions: boolean;
+        };
+        leaf: (column: ColumnDef<TRow>, headerIndex: number, rowSpan?: number) => DesktopHeaderLeaf<TRow>;
+        theadRef: RefCallback<HTMLElement>;
+        headerRowRef: RefCallback<HTMLElement>;
+        headerRowProps: Record<string, unknown>;
+    };
+    // (undocumented)
+    headerBand: number;
+    // (undocumented)
+    headerPlan: readonly (readonly HtmlGroupedHeaderCell[])[] | undefined;
+    model: TableRenderModel<TRow>;
+    // (undocumented)
+    pin: DesktopTablePin;
+    // (undocumented)
+    resizeHandleStyle: CSSProperties;
+    // (undocumented)
+    scroll: {
+        overflowing: boolean;
+        boxStyle: CSSProperties | undefined;
+        bindScrollBox: RefCallback<HTMLDivElement>;
+    };
+    // (undocumented)
+    showColumnFooter: boolean;
+    // (undocumented)
+    summary: Partial<Record<string, ReactNode>> | undefined;
+    // (undocumented)
+    tableProps: ReturnType<UseDataTableResult<TRow>["getTableProps"]>;
+    // (undocumented)
+    tableStyle: CSSProperties | undefined;
+    // (undocumented)
+    widths: Required<Pick<DesktopChromeWidths, "expansion" | "selection" | "actions">> & {
+        reorder: number;
+        includeExpansionInLeads: boolean;
+    };
+}
+
+// @public
+export interface DesktopTablePin {
+    // (undocumented)
+    edgeBodyStyle: (side: "start" | "end", active: boolean) => CSSProperties | undefined;
+    // (undocumented)
+    edgeHeadStyle: (side: "start" | "end", active: boolean) => CSSProperties | undefined;
+    // (undocumented)
+    expansionLead: number;
+    // (undocumented)
+    extraMinWidth: number;
+    // (undocumented)
+    hasEndPin: boolean;
+    // (undocumented)
+    hasPinned: boolean;
+    // (undocumented)
+    hasStartPin: boolean;
+    // (undocumented)
+    headerStickTop: number;
+    // (undocumented)
+    headStyle: (column: {
+        key: string;
+        width?: number | string;
+    }) => CSSProperties | undefined;
+    // (undocumented)
+    inScrollBox: boolean;
+    // (undocumented)
+    leads: PinLeads;
+    // (undocumented)
+    pinRowSticky: boolean;
+    // (undocumented)
+    reorderLead: number;
+    // (undocumented)
+    rowPinOffset: number;
+    // (undocumented)
+    selectionLead: number;
+    // (undocumented)
+    signature: string;
+    // (undocumented)
+    stickActions: boolean;
+    // (undocumented)
+    stickyAttr: true | undefined;
+    // (undocumented)
+    stickyStyle: CSSProperties | undefined;
+}
+
+// @public
+export interface DesktopVirtualPadSlot {
+    // (undocumented)
+    colSpan: number;
+    // (undocumented)
+    height: number;
+    // (undocumented)
+    key: "pad-top" | "pad-bottom";
+    // (undocumented)
+    kind: "virtualPad";
+}
 
 // @public
 export interface EditableCellActivateProps {
@@ -832,6 +1200,19 @@ export function extraUncoveredColSpans(columnSpan: number, coveredSlots: Readonl
 export function EyeIcon(input: Readonly<{
     off?: boolean;
 }>): ReactElement;
+
+// @public
+export interface FeatureNotice {
+    // (undocumented)
+    readonly appearance: FeatureNoticeAppearance;
+    // (undocumented)
+    readonly kind: FeatureNoticeKind;
+    // (undocumented)
+    readonly message: string;
+}
+
+// @public
+export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "reorder-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
 
 // @public
 export function FillHandleChrome(input: Readonly<FillHandleChromeProps>): ReactNode;
@@ -2256,6 +2637,7 @@ export interface StatusBarChromeProps {
     labels?: TableLabels;
     limit?: number;
     locale?: string;
+    notices?: readonly FeatureNotice[];
     page?: number;
     selected: number;
     shown: number;
@@ -2266,7 +2648,8 @@ export interface StatusBarChromeProps {
 
 // @public
 export interface StatusBarItem {
-    readonly key: "rows" | "selected";
+    readonly appearance?: FeatureNotice["appearance"];
+    readonly key: "rows" | "selected" | FeatureNoticeKind;
     readonly text: string;
 }
 
@@ -2602,7 +2985,10 @@ export function useDataTableShell<TRow>(props: DataTableShellProps<TRow>, render
 };
 
 // @public
-export function useExportHandler(handler: (() => void | Promise<void>) | undefined, labels?: TableLabels, format?: string): ExportHandlerState;
+export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;
+
+// @public
+export function useExportHandler(handler: (() => void | Promise<void>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean): ExportHandlerState;
 
 // @public
 export function useFullscreen(element: HTMLElement | null): FullscreenState;

@@ -83,7 +83,7 @@ import {
   type FeatureNotice,
 } from "./state/featureNotices";
 
-export type { FeatureNotice } from "./state/featureNotices";
+export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 import { nestedTableDetail } from "./tree/nestedTable";
 import {
   buildTreeEntries,

@@ -360,6 +360,8 @@ export {
 } from "./url/useDensityUrlState";
 export {
   type ChromeBodyData,
+  type FeatureNotice,
+  type FeatureNoticeKind,
   type TableChrome,
   useChromeBodyData,
   useChromeScrollReset,
