@@ -65,6 +65,59 @@ async function enable(page: Page, group: string): Promise<void> {
   await configureFeatureLab(page, group, "On");
 }
 
+/**
+ * HTML5 pointer-drag path. Playwright's `dragTo` mouse sequence does not
+ * start a drag on every kit's handle (MUI / Radix IconButton swallow the
+ * native gesture); dispatching the same DragEvents a completed pointer
+ * drag fires still goes through the live `dropProps` the digest exists for.
+ */
+async function pointerDragRow(grip: Locator, target: Locator): Promise<void> {
+  const toHandle = await target.elementHandle();
+  expect(toHandle).not.toBeNull();
+  await grip.evaluate(async (from, to) => {
+    if (!(from instanceof HTMLElement) || !(to instanceof HTMLElement)) {
+      throw new Error("missing drag nodes");
+    }
+    const dt = new DataTransfer();
+    const rowId = to.getAttribute("data-row-id");
+    from.dispatchEvent(
+      new DragEvent("dragstart", {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: dt,
+      })
+    );
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+    const live =
+      (rowId === null
+        ? null
+        : document.querySelector(`[data-row-id="${CSS.escape(rowId)}"]`)) ?? to;
+    live.dispatchEvent(
+      new DragEvent("dragover", {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: dt,
+      })
+    );
+    live.dispatchEvent(
+      new DragEvent("drop", {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: dt,
+      })
+    );
+    from.dispatchEvent(
+      new DragEvent("dragend", {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: dt,
+      })
+    );
+  }, toHandle);
+}
+
 async function grabOneDown(page: Page, key: "ArrowDown" | "ArrowLeft") {
   const grip = part(page, "row-reorder-handle").first();
   await expect(grip).toBeVisible();
@@ -92,6 +145,20 @@ for (const adapter of ADAPTERS) {
       await openDemo(page, adapter);
       await enable(page, "reorder");
       await grabOneDown(page, "ArrowDown");
+    });
+
+    test("reorders a row with a pointer drag", async ({ page }) => {
+      await openDemo(page, adapter);
+      await enable(page, "reorder");
+      const rows = demo(page).locator("[data-stagger]");
+      const firstName = await rowName(rows.nth(0));
+      const secondName = await rowName(rows.nth(1));
+      expect(firstName).not.toBe(secondName);
+      const grip = part(page, "row-reorder-handle").first();
+      await expect(grip).toBeVisible();
+      await pointerDragRow(grip, rows.nth(1));
+      await expect(rows.nth(0)).toContainText(secondName);
+      await expect(rows.nth(0)).not.toContainText(firstName);
     });
 
     test("mirrors the horizontal grab under RTL", async ({ page }) => {

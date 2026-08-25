@@ -142,7 +142,13 @@ export interface RowReorderState<TRow> {
 
 /**
  * Per-row digest so a memoized row repaints when IT is lifted or is the drop
- * target, and bails out when the drag is happening to someone else.
+ * target. The `L` bit is global — `reorder.lifted !== null` — so every visible
+ * row also repaints once when a drag starts and once when it ends. Without it
+ * a neighbour keeps a stale `dropProps` that closed over `lifted === null`,
+ * `onDragOver` never calls `preventDefault()`, and Chromium fires `dragend`
+ * instead of `drop`. Hover (`overIndex`) still does not repaint untouched
+ * rows; the extra cost is one visible-row pass per drag lifecycle, which is
+ * the point of this digest.
  */
 export function rowReorderSignature<TRow>(
   reorder: RowReorderState<TRow> | undefined,
@@ -150,10 +156,11 @@ export function rowReorderSignature<TRow>(
   localIndex: number
 ): string | null {
   if (!reorder) return null;
+  const inFlight = reorder.lifted !== null ? "L" : "";
   const lifted = reorder.isLifted(rowId) ? "d" : "";
   const targeted =
     reorder.overIndex === localIndex && reorder.lifted !== null ? "t" : "";
-  return `${lifted}${targeted}`;
+  return `${inFlight}${lifted}${targeted}`;
 }
 
 /** Whether the grip sits in a right-to-left context. */

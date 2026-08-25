@@ -1,5 +1,5 @@
 import { Theme } from "@radix-ui/themes";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -60,6 +60,29 @@ describe("row reorder (radix)", () => {
     fireEvent.keyDown(grip!, { key: "ArrowDown" });
     fireEvent.keyDown(grip!, { key: " " });
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
+  });
+
+  it("prevents default on a neighbour's dragover after a pointer lift", () => {
+    render(table({ onRowReorder: vi.fn() }));
+    const grip = part("row-reorder-handle");
+    expect(grip).not.toBeNull();
+    const store: Record<string, string> = {};
+    const dataTransfer = {
+      dropEffect: "none",
+      effectAllowed: "all",
+      setData: (type: string, value: string) => {
+        store[type] = value;
+      },
+      getData: (type: string) => store[type] ?? "",
+    };
+    fireEvent.dragStart(grip!, { dataTransfer });
+    const neighbour = document.querySelectorAll<HTMLElement>(
+      '[data-adapttable-part="row"]'
+    )[1];
+    expect(neighbour).toBeTruthy();
+    const over = createEvent.dragOver(neighbour!, { dataTransfer });
+    fireEvent(neighbour!, over);
+    expect(over.defaultPrevented).toBe(true);
   });
 
   it("moves a card with the up/down buttons", () => {

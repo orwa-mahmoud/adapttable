@@ -70,6 +70,43 @@ describe("rowReorderSignature", () => {
   it("is null when reorder is off, and fingerprints only this row", () => {
     expect(rowReorderSignature(undefined, "a", 0)).toBeNull();
   });
+
+  it("changes for an untouched row when a lift starts and when it ends", () => {
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    const idle = rowReorderSignature(result.current, "b", 1);
+    expect(idle).toBe("");
+    act(() => {
+      result.current.handleKeyDown(
+        { key: " ", preventDefault: vi.fn() } as never,
+        "a",
+        0,
+        ROWS[0]!,
+        0,
+        3
+      );
+    });
+    const inFlight = rowReorderSignature(result.current, "b", 1);
+    expect(inFlight).not.toBe(idle);
+    expect(inFlight).toBe("L");
+    act(() => {
+      result.current.handleKeyDown(
+        { key: "Escape", preventDefault: vi.fn() } as never,
+        "a",
+        0,
+        ROWS[0]!,
+        0,
+        3
+      );
+    });
+    expect(rowReorderSignature(result.current, "b", 1)).toBe("");
+  });
 });
 
 describe("rowReorderDropStyle", () => {
@@ -128,13 +165,13 @@ describe("useRowReorder", () => {
     });
     expect(result.current.lifted).toEqual({ rowId: "a", from: 0 });
     expect(result.current.announcement).toBe("Row 6 lifted");
-    expect(rowReorderSignature(result.current, "a", 0)).toBe("dt");
-    expect(rowReorderSignature(result.current, "b", 1)).toBe("");
+    expect(rowReorderSignature(result.current, "a", 0)).toBe("Ldt");
+    expect(rowReorderSignature(result.current, "b", 1)).toBe("L");
     act(() => {
       result.current.handleKeyDown(press("ArrowDown"), "a", 0, ROWS[0]!, 5, 3);
     });
     expect(result.current.overIndex).toBe(1);
-    expect(rowReorderSignature(result.current, "b", 1)).toBe("t");
+    expect(rowReorderSignature(result.current, "b", 1)).toBe("Lt");
     act(() => {
       result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 5, 3);
     });

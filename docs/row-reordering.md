@@ -77,7 +77,9 @@ is the host callback; `RowReorderLabels` names the grip and the live region)
 is the grab state. `datasetIndex(localIndex, windowStart)` turns a rendered
 slot into a dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is
 the memo digest so a virtualized row repaints when it is lifted or is the drop
-target, and bails out otherwise.
+target. It also carries a global in-flight bit so every visible row repaints
+once at lift and once at drop (live `dropProps` for the drag); hover still
+does not repaint untouched rows.
 
 Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderButtons` (`RowReorderButtonsProps`) over
