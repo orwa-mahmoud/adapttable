@@ -86,7 +86,7 @@ export const TITLES = {
 // Per-page meta descriptions — the SERP snippet + og:description Starlight
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
-const DESCRIPTIONS = {
+export const DESCRIPTIONS = {
   "getting-started.md":
     "Install AdaptTable for Mantine, MUI, Chakra, Ant, Radix, Base UI or shadcn — one CLI command, or a StackBlitz starter with no install.",
   "concepts.md":
@@ -167,6 +167,18 @@ const DESCRIPTIONS = {
     "When to stay on AG Grid, and when not to. For CRUD tables AdaptTable is ~300 kB lighter and ships URL state and filter UI under MIT.",
   "versioning.md":
     "Semantic versioning in practice: the committed-stable public API surface, how deprecations are handled, per-package releases.",
+  "filter-tree.md":
+    "Build nested AND/OR filter groups on a React data table — grouped conditions in the Filters popover, rendered by every kit's own controls.",
+  "pivot.md":
+    "Turn a React data table into a pivot table — row and column dimensions with aggregated measures, in Mantine, MUI, Chakra, Ant and more.",
+  "formulas.md":
+    "Add spreadsheet-style formulas to a React table — computed columns typed at runtime, with functions, references and live recalculation.",
+  "server-queries.md":
+    "Parse and validate AdaptTable's URL state on the server — typed queries for filtering, sorting and paging your backend can trust.",
+  "tree-data.md":
+    "Render hierarchical rows in a React data table — pass getChildren for expandable tree data with keyboard access and announcements.",
+  "migrate-from-v1.md":
+    "Migrate AdaptTable v1 to v2 — every rename and behavior change in one checklist, applied the same way across all eight adapters.",
 };
 
 const SITE = "https://orwa-mahmoud.github.io/adapttable";
@@ -177,7 +189,7 @@ function mdToText(md) {
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, "$1")
+    .replace(/(\*\*|__|[*_])([^*_]+)\1/g, "$2")
     .replace(/\s+/g, " ")
     .trim();
 }
