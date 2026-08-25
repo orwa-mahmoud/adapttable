@@ -23,7 +23,13 @@ export function Chips({
     >
       {chips.map((chip) => (
         <li key={chip.key} style={{ listStyle: "none" }}>
-          <Tag closable onClose={chip.onRemove} aria-label={chip.label}>
+          {/* The object form of `closable` forwards ARIA attributes onto the
+              close control itself, which otherwise announces antd's own
+              untranslated "Close". */}
+          <Tag
+            closable={{ "aria-label": `${labels.clearAll}: ${chip.label}` }}
+            onClose={chip.onRemove}
+          >
             {chip.label}
           </Tag>
         </li>

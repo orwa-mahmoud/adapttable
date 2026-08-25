@@ -34,8 +34,14 @@ export function ActiveFilterChips({
           component="li"
           withRemoveButton
           onRemove={chip.onRemove}
+          // Mantine's Pill defaults its close button to `aria-hidden` and
+          // `tabIndex={-1}`, on the assumption that a surrounding widget owns
+          // the keyboard. A filter chip has no such owner, so the button
+          // states its own name and takes its own place in the tab order.
           removeButtonProps={{
             "aria-label": `${clearAllLabel}: ${chip.label}`,
+            "aria-hidden": false,
+            tabIndex: 0,
           }}
         >
           {chip.label}
