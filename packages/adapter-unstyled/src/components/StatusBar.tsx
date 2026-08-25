@@ -30,6 +30,7 @@ function Bar({ items, stats, className }: StatusBarSlotProps) {
           key={item.key}
           data-adapttable-part="status-item"
           data-status={item.key}
+          data-appearance={item.appearance}
           className={statusItem}
         >
           {item.text}

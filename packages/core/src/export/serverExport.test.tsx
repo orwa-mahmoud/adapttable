@@ -110,15 +110,16 @@ describe('scope "all" over a server source', () => {
     expect(info.query.limit).toBe(25);
   });
 
-  it("offers no button at all when it cannot answer honestly", () => {
-    // Neither `request` nor `fetchAll`, and no rows to read: the wrong answer
-    // is a button that writes the current page and calls it everything.
+  it("keeps a this-page button when it cannot answer all", () => {
+    // Neither `request` nor `fetchAll`, and no rows to read: hiding the
+    // button left only a console warning. The person at the table gets
+    // a button that writes this page — the caption says so.
     const handler = makeExportCsvHandler(
       { scope: "all" },
       serverSource(),
       COLUMNS
     );
-    expect(handler).toBeUndefined();
+    expect(handler).toBeDefined();
   });
 
   it("keeps the button for a frontend source, which can answer", () => {
@@ -507,5 +508,19 @@ describe("useExportHandler", () => {
     const button = screen.getByRole("button");
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-busy", "false");
+  });
+
+  it("names the button Export this page when all falls back to the page", () => {
+    function Label() {
+      const { exportLabel } = useExportHandler(
+        () => undefined,
+        undefined,
+        "csv",
+        true
+      );
+      return <button type="button">{exportLabel}</button>;
+    }
+    render(<Label />);
+    expect(screen.getByRole("button")).toHaveTextContent("Export this page");
   });
 });

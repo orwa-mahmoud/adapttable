@@ -26,6 +26,7 @@ const slots: StatusBarSlots = {
           color="fg.muted"
           data-adapttable-part="status-item"
           data-status={item.key}
+          data-appearance={item.appearance}
         >
           {item.text}
         </Text>

@@ -1137,7 +1137,10 @@ to. Adapters export their kit-owned `StatusBar` over `StatusBarChrome` /
 `StatusBarItem` from `@adapttable/core/adapter`. It hosts the selection
 figures rather than repeating them: with `enabled` false the chrome renders
 those alone, which is why an adapter has one element here and no branch. The
-row range comes from the same arithmetic the pagination footer uses. See
+row range comes from the same arithmetic the pagination footer uses.
+`StatusBarChromeProps.notices` / `TableChrome.featureNotices` carry
+`FeatureNotice` values (`FeatureNoticeKind` names the inert opt-in) so a
+silent no-op stays visible even when `statusBar` is off. See
 [customization](./customization.md#toolbar-and-status-bar).
 
 **Toolbar regions and undo/redo.** `toolbar` fills the middle of the toolbar;
@@ -1325,6 +1328,16 @@ compile time). `tableRenderModel(props)` / `TableRenderModel` derive the
 shared render prelude from `SharedTableRenderProps`; `TableBodyRegion`
 names which body region renders (desktop rows, mobile cards);
 `VirtualTableRow` is one materialized virtual row/card entry.
+HTML kits assemble the desktop table through `useDesktopTableAssembly`
+(`DesktopAssemblyOptions` / `DesktopAssemblyProps` in,
+`DesktopTableAssembly` out) and `createDesktopRow` — wiring, not pixels.
+The reserved chrome widths are `DESKTOP_SELECTION_WIDTH`,
+`DESKTOP_EXPANSION_WIDTH`, `DESKTOP_ACTIONS_WIDTH` (override via
+`DesktopChromeWidths`). The plan names `DesktopHeaderLeaf`,
+`DesktopTablePin`, `DesktopRowWiring`, `DesktopRowSlot`, `DesktopBodySlot`,
+`DesktopGroupSlot`, `DesktopGroupEntry`, `DesktopExtraSlot`, and
+`DesktopVirtualPadSlot`. Ant Design stays on its native `<Table>`. See
+[customization](./customization.md#desktop-table-assembly).
 `useResolvedAdapter` resolves the URL backend the way the shell does;
 `PageSelector` projects a fetched page to rows, an optional total, and
 optional `facets`, and

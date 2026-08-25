@@ -243,13 +243,40 @@ export interface ExportInfo<TRow> {
   filename: string;
 }
 
+/** Boolean-or-options CSV export prop (off / on / configured). */
+type ExportCsvProp<TRow = unknown> =
+  | boolean
+  | ExportCsvOptions<TRow>
+  | undefined;
+
 /** Resolve a boolean-or-options prop into a concrete config, or `null` when off. */
 export function resolveExportCsv<TRow = unknown>(
-  value: boolean | ExportCsvOptions<TRow> | undefined
+  value: ExportCsvProp<TRow>
 ): ExportCsvOptions<TRow> | null {
   if (!value) return null;
   if (value === true) return {};
   return value;
+}
+
+/**
+ * Whether `scope: "all"` will write the current page instead of the
+ * full filtered set.
+ *
+ * A frontend source that exposes `allFilteredRows`, or a host that
+ * passed `request` / `fetchAll`, can answer honestly. Everything else
+ * is this page — the button should say so.
+ */
+export function exportAllFallsBackToPage<TRow = unknown>(
+  exportCsv: ExportCsvProp<TRow>,
+  source: Pick<TableSource<TRow>, "allFilteredRows">
+): boolean {
+  const options = resolveExportCsv(exportCsv);
+  return Boolean(
+    options?.scope === "all" &&
+    source.allFilteredRows === undefined &&
+    options.request === undefined &&
+    options.fetchAll === undefined
+  );
 }
 
 /** Columns that belong in a CSV (drop synthetic actions and reorder columns). */
@@ -605,18 +632,28 @@ export function makeExportCsvHandler<TRow>(
     };
   }
 
-  // Neither a backend handler nor an opt-in fetch, and no rows to read: the
-  // one thing the button must not do is write the current page and call it
-  // everything. It offers nothing instead, and says why.
+  // Neither a backend handler nor an opt-in fetch, and no rows to read:
+  // write this page and name the button that way.
   if (options.scope === "all" && !source.allFilteredRows) {
     devWarn(
-      'exportCsv scope "all" needs rows to export. A server-paginated source ' +
-        "holds one page, so pass `request` to hand the export to your backend, " +
-        "or `fetchAll` to let the table page the query itself. The Export " +
-        "button is not rendered until one of them is set — exporting the " +
-        "current page as if it were everything is the one wrong answer."
+      'exportCsv scope "all" needs the full filtered set. This source ' +
+        "exposes only the current page, so the Export button writes this " +
+        "page and names itself that way. Pass `request` or `fetchAll` to " +
+        "export everything from a server tier."
     );
-    return undefined;
+    return () =>
+      downloadTableCsv({
+        source,
+        columns,
+        filename: options.filename,
+        scope: "page",
+        columnScope: options.columns,
+        escapeFormulas: options.escapeFormulas,
+        context,
+        writer,
+        onBeforeExport: options.onBeforeExport,
+        onAfterExport: options.onAfterExport,
+      });
   }
 
   return () =>

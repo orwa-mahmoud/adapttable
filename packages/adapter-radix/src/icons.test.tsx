@@ -33,4 +33,11 @@ describe("icons", () => {
       expect(container.querySelector("svg")).not.toBeNull();
     }
   });
+
+  it("honors an explicit size on every glyph", () => {
+    const { container } = render(<FiltersIcon size={20} />);
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("width", "20");
+    expect(svg).toHaveAttribute("height", "20");
+  });
 });

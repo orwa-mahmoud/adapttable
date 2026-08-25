@@ -204,4 +204,17 @@ export const it: Required<TableLabels> = {
   gridCellPosition: (row, total) => `riga ${row} di ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `Righe da ${fromRow} a ${toRow}, colonne da ${fromColumn} a ${toColumn} selezionate, ${cells} celle`,
+  noticeVirtualizePaged:
+    "La virtualizzazione è disattivata: questa tabella paginata mostra una pagina alla volta.",
+  noticePinNested:
+    "Il blocco delle righe è disattivato con raggruppamento o albero attivi.",
+  noticeReorderNested:
+    "Il riordino delle righe è disattivato con raggruppamento o albero attivi.",
+  noticeGroupingUnavailable:
+    "Il raggruppamento è disattivato: questa origine non fornisce l’insieme filtrato completo.",
+  noticeExportAllPage:
+    "Esporta tutto è questa pagina: l’insieme filtrato completo non è disponibile.",
+  noticeEditWithoutWriter:
+    "La modifica è disattivata: nessun gestore di scrittura è collegato.",
+  exportThisPage: "Esporta questa pagina",
 };

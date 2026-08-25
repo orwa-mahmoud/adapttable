@@ -254,6 +254,8 @@ export {
   type SelectionStatsSlots,
 } from "./focus/SelectionStatsBar";
 export {
+  type FeatureNotice,
+  type FeatureNoticeKind,
   StatusBarChrome,
   type StatusBarChromeProps,
   type StatusBarItem,
@@ -273,6 +275,26 @@ export {
   useMountStagger,
 } from "./hooks/useMountStagger";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
+export {
+  createDesktopRow,
+  DESKTOP_ACTIONS_WIDTH,
+  DESKTOP_EXPANSION_WIDTH,
+  DESKTOP_SELECTION_WIDTH,
+  type DesktopAssemblyOptions,
+  type DesktopAssemblyProps,
+  type DesktopBodySlot,
+  type DesktopChromeWidths,
+  type DesktopExtraSlot,
+  type DesktopGroupEntry,
+  type DesktopGroupSlot,
+  type DesktopHeaderLeaf,
+  type DesktopRowSlot,
+  type DesktopRowWiring,
+  type DesktopTableAssembly,
+  type DesktopTablePin,
+  type DesktopVirtualPadSlot,
+  useDesktopTableAssembly,
+} from "./layout/desktopTableAssembly";
 export {
   SidePanelChrome,
   type SidePanelChromeProps,

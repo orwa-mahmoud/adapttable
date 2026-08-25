@@ -1681,6 +1681,19 @@ export interface FailedCellSave<TRow> {
 }
 
 // @public
+export interface FeatureNotice {
+    // (undocumented)
+    readonly appearance: FeatureNoticeAppearance;
+    // (undocumented)
+    readonly kind: FeatureNoticeKind;
+    // (undocumented)
+    readonly message: string;
+}
+
+// @public
+export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "reorder-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
+
+// @public
 export interface FetchAllExport<TRow> {
     fetchPage: (query: ExportQuery) => Promise<readonly TRow[]>;
     maxRows?: number;
@@ -3043,7 +3056,7 @@ export type ResolvedPaginationMode = "infinite" | "paged";
 export function resolveExportColumns<TRow>(scope: ExportColumnScope | undefined, visible: readonly ColumnDef<TRow>[], all: readonly ColumnDef<TRow>[] | undefined): ColumnDef<TRow>[];
 
 // @public
-export function resolveExportCsv<TRow = unknown>(value: boolean | ExportCsvOptions<TRow> | undefined): ExportCsvOptions<TRow> | null;
+export function resolveExportCsv<TRow = unknown>(value: ExportCsvProp<TRow>): ExportCsvOptions<TRow> | null;
 
 // @public
 export function resolveFilterDefs<TRow>(columns: readonly ColumnDef<TRow>[], filters: readonly FilterDef<TRow>[] | undefined, locale?: string): FilterDef<TRow>[];
@@ -3546,6 +3559,7 @@ export interface TableChrome<TRow> {
     editingRows: readonly TRow[];
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;
+    featureNotices: readonly FeatureNotice[];
     getRowId: (row: TRow) => string;
     grouping?: {
         groupBy: readonly string[];
@@ -3670,6 +3684,7 @@ export interface TableLabels {
     exportDone?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
+    exportThisPage?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;
@@ -3727,6 +3742,12 @@ export interface TableLabels {
     // (undocumented)
     noData?: string;
     noResults?: string;
+    noticeEditWithoutWriter?: string;
+    noticeExportAllPage?: string;
+    noticeGroupingUnavailable?: string;
+    noticePinNested?: string;
+    noticeReorderNested?: string;
+    noticeVirtualizePaged?: string;
     opAfter?: string;
     opAtLeast?: string;
     opAtMost?: string;

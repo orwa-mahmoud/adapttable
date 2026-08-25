@@ -206,4 +206,14 @@ export const tr: Required<TableLabels> = {
   gridCellPosition: (row, total) => `${total} satırdan ${row}. satır`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `${fromRow}-${toRow} satırları, ${fromColumn}-${toColumn} sütunları seçildi, ${cells} hücre`,
+  noticeVirtualizePaged:
+    "Sanallaştırma kapalı — bu sayfalanmış tablo her seferinde bir sayfa gösterir.",
+  noticePinNested: "Gruplama veya ağaç açıkken satır sabitleme kapalıdır.",
+  noticeReorderNested: "Gruplama veya ağaç açıkken satır sıralama kapalıdır.",
+  noticeGroupingUnavailable:
+    "Gruplama kapalı — bu kaynak tam filtrelenmiş kümeyi sağlamıyor.",
+  noticeExportAllPage:
+    "Tümünü dışa aktarma bu sayfadır — tam filtrelenmiş küme yok.",
+  noticeEditWithoutWriter: "Düzenleme kapalı — yazma işleyicisi bağlı değil.",
+  exportThisPage: "Bu sayfayı dışa aktar",
 };

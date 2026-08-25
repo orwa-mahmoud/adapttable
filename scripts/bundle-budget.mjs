@@ -300,12 +300,22 @@ const FIXTURES = [
   // headroom). The heavy capabilities are still shaken out: toCsv,
   // Blob, download and virtual stay absent. Every adapter imports that
   // hook, so the kit fixtures moved with it.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 130 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 129 },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 129 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 123 },
-  { name: "radix · table", pkg: "adapter-radix", budgetKB: 129 },
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 136 },
+  //
+  // Feature notices (~1 KB per kit) put the opted-in-but-inert features on
+  // `useTableChrome`, which every adapter imports: the reason each one cannot
+  // run, its localized label, and the status-bar strip that carries them when
+  // the bar itself is off. Ant Design pays only this, which is what sizes it.
+  //
+  // The shared desktop assembly (~1.5 KB per thinned kit) replaces six
+  // per-kit copies of the same header/pin/row/summary walk with one generic
+  // pass in core. It is one graph serving six kits, so a single kit's bundle
+  // carries paths its own copy specialised away; the trade is deliberate.
+  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 132 },
+  { name: "mui · table", pkg: "adapter-mui", budgetKB: 133 },
+  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 132 },
+  { name: "antd · table", pkg: "adapter-antd", budgetKB: 125 },
+  { name: "radix · table", pkg: "adapter-radix", budgetKB: 133 },
+  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 139 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.

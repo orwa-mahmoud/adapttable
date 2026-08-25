@@ -204,4 +204,14 @@ export const ar: Required<TableLabels> = {
   gridCellPosition: (row, total) => `الصف ${row} من ${total}`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `تم تحديد الصفوف ${fromRow} إلى ${toRow}، الأعمدة ${fromColumn} إلى ${toColumn}، ${cells} خلية`,
+  noticeVirtualizePaged:
+    "التصفح الافتراضي متوقف — يعرض هذا الجدول المقسّم صفحة واحدة في كل مرة.",
+  noticePinNested: "تثبيت الصفوف متوقف أثناء التجميع أو الشجرة.",
+  noticeReorderNested: "إعادة ترتيب الصفوف متوقفة أثناء التجميع أو الشجرة.",
+  noticeGroupingUnavailable:
+    "التجميع متوقف — لا يوفّر هذا المصدر المجموعة الكاملة المصفّاة.",
+  noticeExportAllPage:
+    "تصدير الكل هو هذه الصفحة — المجموعة الكاملة المصفّاة غير متاحة.",
+  noticeEditWithoutWriter: "التحرير متوقف — لم يُربَط معالج كتابة.",
+  exportThisPage: "تصدير هذه الصفحة",
 };

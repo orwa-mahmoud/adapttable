@@ -54,11 +54,14 @@ export interface ExportHandlerState {
  *   when the `exportCsv` prop is off.
  * @param labels - Resolved table labels, for the caption and the announcements.
  * @param format - The writer's extension. Defaults to `"csv"`, the built-in.
+ * @param pageOnly - The handler writes the current page even though the
+ *   host asked for `"all"`. The button says so instead of "Export CSV".
  */
 export function useExportHandler(
   handler: (() => void | Promise<void>) | undefined,
   labels?: TableLabels,
-  format = "csv"
+  format = "csv",
+  pageOnly = false
 ): ExportHandlerState {
   const [exportStatus, setExportStatus] = useState<ExportStatus>("idle");
   // Which run the current status belongs to. Exporting the same table twice
@@ -119,7 +122,9 @@ export function useExportHandler(
     exportBusy: exportStatus === "busy",
     exportStatus,
     exportAnnouncement: announcementFor(exportStatus, run, labels),
-    exportLabel: exportButtonLabel(labels, format),
+    exportLabel: pageOnly
+      ? (labels?.exportThisPage ?? "Export this page")
+      : exportButtonLabel(labels, format),
   };
 }
 

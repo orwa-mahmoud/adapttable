@@ -21,6 +21,9 @@
 import type { ReactNode } from "react";
 
 import { computePagination } from "../pagination/paginationMath";
+import type { FeatureNotice, FeatureNoticeKind } from "../state/featureNotices";
+
+export type { FeatureNotice, FeatureNoticeKind } from "../state/featureNotices";
 import type { TableLabels } from "../types";
 import type { SelectionStats } from "./selectionStats";
 import {
@@ -31,9 +34,14 @@ import {
 /** One piece of the status bar, in display order. */
 export interface StatusBarItem {
   /** What this figure is, for a kit that styles them differently. */
-  readonly key: "rows" | "selected";
+  readonly key: "rows" | "selected" | FeatureNoticeKind;
   /** The text to show, already localized and formatted. */
   readonly text: string;
+  /**
+   * How the matching feature looks at the table: off, disabled, or
+   * one page. Present on notices; omitted on the row/selected counts.
+   */
+  readonly appearance?: FeatureNotice["appearance"];
 }
 
 /** Props an adapter's status-bar component receives. */
@@ -82,6 +90,12 @@ export interface StatusBarChromeProps {
   locale?: string;
   /** A kit's own class for the strip. */
   className?: string;
+  /**
+   * Opted-in features that cannot run. Always shown — the person at the
+   * table must see them even when the host did not ask for `statusBar`.
+   * Row/selected counts still require `enabled`.
+   */
+  notices?: readonly FeatureNotice[];
   /** Adapter-owned visible components. */
   slots: StatusBarSlots;
 }
@@ -100,11 +114,26 @@ export interface StatusBarChromeProps {
 function itemsFor(
   props: Pick<
     StatusBarChromeProps,
-    "shown" | "page" | "limit" | "total" | "selected" | "labels"
+    | "enabled"
+    | "shown"
+    | "page"
+    | "limit"
+    | "total"
+    | "selected"
+    | "labels"
+    | "notices"
   >
 ): StatusBarItem[] {
   const labels = props.labels;
   const items: StatusBarItem[] = [];
+  for (const notice of props.notices ?? []) {
+    items.push({
+      key: notice.kind,
+      text: notice.message,
+      appearance: notice.appearance,
+    });
+  }
+  if (!props.enabled) return items;
   const total = props.total ?? props.shown;
   const { fromIndex, toIndex } = computePagination({
     page: props.page ?? 1,
@@ -146,8 +175,14 @@ export function StatusBarChrome(props: Readonly<StatusBarChromeProps>) {
       slots={props.slots.stats}
     />
   );
-  if (!props.enabled) return stats;
+  const items = itemsFor(props);
+  const showBar = props.enabled || items.length > 0;
+  if (!showBar) return stats;
   return (
-    <Bar items={itemsFor(props)} className={props.className} stats={stats} />
+    <Bar
+      items={items}
+      className={props.className}
+      stats={props.enabled ? stats : null}
+    />
   );
 }

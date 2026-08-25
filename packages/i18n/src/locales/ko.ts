@@ -205,4 +205,15 @@ export const ko: Required<TableLabels> = {
   gridCellPosition: (row, total) => `${total}행 중 ${row}행`,
   gridRangeSelection: ({ fromRow, toRow, fromColumn, toColumn, cells }) =>
     `${fromRow}행부터 ${toRow}행, ${fromColumn}열부터 ${toColumn}열 선택, ${cells}개 셀`,
+  noticeVirtualizePaged:
+    "가상화는 꺼져 있습니다. 이 페이지 테이블은 한 번에 한 페이지만 보여 줍니다.",
+  noticePinNested: "그룹화 또는 트리가 켜져 있으면 행 고정은 꺼집니다.",
+  noticeReorderNested: "그룹화 또는 트리가 켜져 있으면 행 재배치는 꺼집니다.",
+  noticeGroupingUnavailable:
+    "그룹화는 꺼져 있습니다. 이 소스는 필터된 전체 집합을 제공하지 않습니다.",
+  noticeExportAllPage:
+    "모두 내보내기는 이 페이지입니다. 필터된 전체 집합을 쓸 수 없습니다.",
+  noticeEditWithoutWriter:
+    "편집은 꺼져 있습니다. 쓰기 처리기가 연결되어 있지 않습니다.",
+  exportThisPage: "이 페이지 내보내기",
 };

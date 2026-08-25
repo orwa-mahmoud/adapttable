@@ -120,4 +120,67 @@ describe("context menu (unstyled)", () => {
     expect(screen.getByText("Delete")).toBeInTheDocument();
     expect(screen.getByText("Locked")).toBeInTheDocument();
   });
+
+  it("runs a built-in item and closes", () => {
+    table();
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="header-cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    fireEvent.click(screen.getByText("Sort ascending"));
+    expect(menu()).toBeNull();
+  });
+
+  it("walks entries with the arrow keys and closes on an outside click", () => {
+    table();
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="header-cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    const menuEl = menu()!;
+    fireEvent.keyDown(menuEl, { key: "ArrowDown" });
+    fireEvent.keyDown(menuEl, { key: "ArrowUp" });
+    fireEvent.mouseDown(document.body);
+    expect(menu()).toBeNull();
+  });
+
+  it("hides a column from the menu", () => {
+    table();
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="header-cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    fireEvent.click(screen.getByText("Hide column"));
+    expect(document.querySelector('[data-column-key="name"]')).toBeNull();
+  });
+
+  it("opens filters from the menu when the column can filter", () => {
+    table({
+      columns: [
+        {
+          key: "name",
+          header: "Name",
+          accessor: (r: Row) => r.name,
+          sortable: true,
+          filter: "text",
+        },
+      ],
+    });
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="header-cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    fireEvent.click(screen.getByText("Filter column"));
+    expect(menu()).toBeNull();
+  });
+
+  it("copies from a cell menu", () => {
+    table({ cellNavigation: true });
+    fireEvent.contextMenu(
+      document.querySelector('[data-adapttable-part="cell"]')!,
+      { clientX: 5, clientY: 5 }
+    );
+    fireEvent.click(screen.getByText("Copy"));
+    expect(menu()).toBeNull();
+  });
 });
