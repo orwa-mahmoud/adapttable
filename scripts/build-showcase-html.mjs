@@ -26,6 +26,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   adapterByKey,
+  builtAdapters,
   featureBySlug,
   fillTemplate,
   introFor,
@@ -244,6 +245,37 @@ const docsList = (slugs) =>
   slugs.map((slug) => `<a href="${DOCS}${slug}/">${slug}</a>`).join(", ");
 
 /**
+ * A navigation list, indented to sit inside the fallback `<main>`.
+ *
+ * The demo's kit and feature navigation is React's, so until the bundle mounts
+ * — and permanently for anything that does not run JavaScript — every one of
+ * these 152 pages is reachable only from the one page that happens to link it.
+ * A crawler that cannot walk between them treats them as orphans and spends its
+ * budget accordingly. So the served markup carries the same grid of links the
+ * mounted page offers: each page names its kit's other features, the same
+ * feature in the other kits, and the way back up.
+ *
+ * @param {{ href: string, text: string, note?: string }[]} items
+ */
+const linkList = (items) =>
+  [
+    "        <ul>",
+    ...items.map(({ href, text, note }) => {
+      const trailer = note ? ` — ${escapeHtml(note)}` : "";
+      return `          <li><a href="${href}">${escapeHtml(text)}</a>${trailer}</li>`;
+    }),
+    "        </ul>",
+  ].join("\n");
+
+/** The built kits other than this one, in matrix order. */
+const otherKits = (adapter) =>
+  builtAdapters().filter((other) => other.key !== adapter.key);
+
+/** This kit's features other than this one, in demand order. */
+const siblingFeatures = (feature) =>
+  MATRIX_FEATURES.filter((other) => other.slug !== feature.slug);
+
+/**
  * One feature page's static HTML: the words a crawler reads, and the mount
  * point React takes over.
  */
@@ -266,6 +298,22 @@ ${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
         <pre><code>${escapeHtml(fill(feature.snippet))}</code></pre>
         <h2>Install</h2>
         <pre><code>${escapeHtml(adapter.install)}</code></pre>
+        <h2>The same feature in the other kits</h2>
+${linkList(
+  otherKits(adapter).map((other) => ({
+    href: `../../${other.key}/${feature.slug}/`,
+    text: fillTemplate(feature.h1, other),
+    note: other.blurb,
+  }))
+)}
+        <h2>More ${escapeHtml(adapter.label)} features</h2>
+${linkList(
+  siblingFeatures(feature).map((sibling) => ({
+    href: `../${sibling.slug}/`,
+    text: fill(sibling.h1),
+    note: fill(sibling.card),
+  }))
+)}
         <p>
           Reference: ${docsList(feature.docs)}. More of this kit:
           <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
@@ -305,12 +353,22 @@ ${LANDING.intro.map((line) => `        <p>${paragraph(fill(line))}</p>`).join("\
         <h2>Install</h2>
         <pre><code>${escapeHtml(adapter.install)}</code></pre>
         <h2>Every feature, on its own page</h2>
-        <ul>
-${MATRIX_FEATURES.map(
-  (feature) =>
-    `          <li><a href="./${feature.slug}/">${escapeHtml(fill(feature.h1))}</a> — ${escapeHtml(fill(feature.card))}</li>`
-).join("\n")}
-        </ul>
+${linkList(
+  MATRIX_FEATURES.map((feature) => ({
+    href: `./${feature.slug}/`,
+    text: fill(feature.h1),
+    note: fill(feature.card),
+  }))
+)}
+        <h2>${escapeHtml(fill(LANDING.kitsTitle))}</h2>
+        <p>${paragraph(fill(LANDING.kitsLead))}</p>
+${linkList(
+  otherKits(adapter).map((other) => ({
+    href: `../${other.key}/`,
+    text: fillTemplate(LANDING.h1, other),
+    note: other.blurb,
+  }))
+)}
         <p>
           Reference: <a href="${DOCS}getting-started/">getting started</a>. Or
           open <a href="/adapttable/demo/">the live demo</a> and switch kits on
