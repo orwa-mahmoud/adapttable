@@ -364,7 +364,7 @@ interface DesktopRowProps<TRow> {
   onToggleTree?: (id: string) => void;
   rowActions?: RowAction<TRow>[];
   rowActionsLayout?: RowActionsLayout;
-  cellSpanAppearance?: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+  cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
   renderRowActions?: RowActionsRenderer<TRow>;
   confirm: ConfirmHandler;
   cancelLabel: string;

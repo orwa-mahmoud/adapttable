@@ -225,7 +225,7 @@ interface DesktopRowProps<TRow> {
   sourceIndex: number;
   rowActions?: RowAction<TRow>[];
   rowActionsLayout?: RowActionsLayout;
-  cellSpanAppearance?: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+  cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
   renderRowActions?: RowActionsRenderer<TRow>;
   confirm: ConfirmHandler;
   /** Full-width colSpan (expansion + selection + data + actions), core-computed. */

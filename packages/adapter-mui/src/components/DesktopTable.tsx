@@ -372,7 +372,7 @@ interface DesktopRowProps<TRow> {
   getRowProps: UseDataTableResult<TRow>["getRowProps"];
   rowActions?: RowAction<TRow>[];
   rowActionsLayout?: RowActionsLayout;
-  cellSpanAppearance?: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+  cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
   renderRowActions?: RowActionsRenderer<TRow>;
   confirm: ConfirmHandler;
   renderRowDetail?: (row: TRow) => ReactNode;

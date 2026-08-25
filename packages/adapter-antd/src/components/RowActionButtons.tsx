@@ -71,6 +71,11 @@ function ActionStrip<TRow>({
   );
 }
 
+/** Tags the dropdown surface with its part name for adapter styling hooks. */
+function renderMenuSurface(menu: ReactNode): ReactNode {
+  return <div data-adapttable-part="row-actions-menu">{menu}</div>;
+}
+
 function ActionMenu<TRow>({
   row,
   actions,
@@ -85,9 +90,7 @@ function ActionMenu<TRow>({
   return (
     <Dropdown
       trigger={["click"]}
-      popupRender={(menu) => (
-        <div data-adapttable-part="row-actions-menu">{menu}</div>
-      )}
+      popupRender={renderMenuSurface}
       menu={{
         items: actions.map((action) => {
           const reason = resolveDisabledReason(action.disabledReason?.(row));

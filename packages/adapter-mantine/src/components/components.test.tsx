@@ -1,5 +1,6 @@
 import type { SelectionState } from "@adapttable/core";
 import { fireEvent, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { defaultLabels } from "../index";
@@ -139,6 +140,29 @@ describe("ActiveFilterChips", () => {
     expect(onClearAll).toHaveBeenCalled();
     fireEvent.click(screen.getByLabelText("Clear all: Status: Active"));
     expect(onRemove).toHaveBeenCalled();
+  });
+
+  it("gives each chip a named remove button in the tab order", async () => {
+    const onRemove = vi.fn();
+    renderMantine(
+      <ActiveFilterChips
+        chips={[{ key: "k", label: "Status: Active", onRemove }]}
+        label="filters"
+        clearAllLabel="Clear all"
+      />
+    );
+
+    // `getByRole` searches the accessibility tree, so a control the kit
+    // hides from assistive tech never turns up here.
+    const remove = screen.getByRole("button", {
+      name: "Clear all: Status: Active",
+    });
+    expect(remove.tabIndex).toBe(0);
+
+    await userEvent.tab();
+    expect(remove).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    expect(onRemove).toHaveBeenCalledOnce();
   });
 
   it("hides clear-all when no handler is passed", () => {
