@@ -781,12 +781,12 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
             }
             if (slot.kind === "virtualPad") {
               return (
-                <tr key={slot.key} aria-hidden>
-                  <td
+                <Table.Row key={slot.key} aria-hidden>
+                  <Table.Cell
                     colSpan={slot.colSpan}
                     style={{ height: slot.height, padding: 0 }}
                   />
-                </tr>
+                </Table.Row>
               );
             }
             if (slot.kind === "group") {
