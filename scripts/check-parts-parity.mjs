@@ -120,13 +120,17 @@ const CONTRACT = [
 const CONTRACT_KITS = [...SHELL_KITS, "adapter-unstyled"];
 
 /**
- * Contract parts that arrive from one of core's prop-getters rather than a
- * literal in the kit. The getter names the part once for every kit that spreads
- * it, so a kit satisfies the contract by CALLING it — and each kit's
- * `RowParts.test.tsx` asserts the name on the rendered DOM, which is the only
- * place a spread can be proved.
+ * Contract parts that arrive from core rather than from a literal in the kit,
+ * with the core APIs that carry them. Each one names the part once for every
+ * kit that spreads what it returns, so a kit satisfies the contract by CALLING
+ * one of them — and each kit's `RowParts.test.tsx` asserts the name on the
+ * rendered DOM, which is the only place a spread can be proved.
+ *
+ * `row` has two such routes. A kit that lays out its own body spreads
+ * `getRowProps` directly; a kit thinned onto the shared desktop assembly
+ * receives the same props already merged, through `createDesktopRow`.
  */
-const CORE_GETTER_PARTS = { row: "getRowProps" };
+const CORE_GETTER_PARTS = { row: ["getRowProps", "createDesktopRow"] };
 
 /**
  * Parts adapter-unstyled names because adapter-unstyled builds the thing.
@@ -365,24 +369,26 @@ function callsCoreGetter(pkg, getter) {
  */
 function contractAccount(pkg, part, parts) {
   if (parts.has(part)) return null;
-  const getter = CORE_GETTER_PARTS[part];
-  if (getter && callsCoreGetter(pkg, getter)) return null;
+  const routes = CORE_GETTER_PARTS[part];
+  if (routes?.some((getter) => callsCoreGetter(pkg, getter))) return null;
   if (EXPECTED_GAPS[pkg]?.[part] !== undefined) return null;
-  return getter ? `neither names it nor calls ${getter}` : "not named";
+  return routes
+    ? `neither names it nor calls ${routes.join(" or ")}`
+    : "not named";
 }
 
 /**
- * The claim that core owns a contract name, checked for rot: a getter that stops
+ * The claim that core owns a contract name, checked for rot: a route that stops
  * emitting its part takes every kit down with it, so it fails here by name
  * rather than as seven identical kit failures.
  */
 function coreOwnershipFailures(coreParts) {
   return Object.entries(CORE_GETTER_PARTS)
     .filter(([part]) => !coreParts.has(part))
-    .map(([part, getter]) => ({
+    .map(([part, routes]) => ({
       part,
       pkg: "core",
-      why: `${getter} no longer emits it, so no kit spreads it`,
+      why: `${routes.join(" and ")} no longer emit it, so no kit spreads it`,
     }));
 }
 
