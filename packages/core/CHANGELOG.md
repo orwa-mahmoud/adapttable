@@ -1,5 +1,15 @@
 # @adapttable/core
 
+## 2.7.0
+
+### Minor Changes
+
+- 2524306: Add a desktop table assembly helper on `@adapttable/core/adapter` and thin the six HTML-table adapters onto it. `tableRenderModel` and `getRowProps` stay; adapters keep painting with kit tags.
+
+### Patch Changes
+
+- 3223a18: When an opted-in feature cannot run, the person at the table sees it (off, disabled, or this page) — not only a console warning. Chrome exposes kit-agnostic notices; export-all without a full dataset labels the button “Export this page”.
+
 ## 2.6.0
 
 ### Minor Changes
