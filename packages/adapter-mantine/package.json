@@ -48,6 +48,96 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
+    "./row-reorder": {
+      "import": {
+        "types": "./dist/row-reorder.d.ts",
+        "default": "./dist/row-reorder.js"
+      },
+      "require": {
+        "types": "./dist/row-reorder.d.cts",
+        "default": "./dist/row-reorder.cjs"
+      }
+    },
+    "./saved-views": {
+      "import": {
+        "types": "./dist/saved-views.d.ts",
+        "default": "./dist/saved-views.js"
+      },
+      "require": {
+        "types": "./dist/saved-views.d.cts",
+        "default": "./dist/saved-views.cjs"
+      }
+    },
+    "./grouping": {
+      "import": {
+        "types": "./dist/grouping.d.ts",
+        "default": "./dist/grouping.js"
+      },
+      "require": {
+        "types": "./dist/grouping.d.cts",
+        "default": "./dist/grouping.cjs"
+      }
+    },
+    "./editing": {
+      "import": {
+        "types": "./dist/editing.d.ts",
+        "default": "./dist/editing.js"
+      },
+      "require": {
+        "types": "./dist/editing.d.cts",
+        "default": "./dist/editing.cjs"
+      }
+    },
+    "./virtualize": {
+      "import": {
+        "types": "./dist/virtualize.d.ts",
+        "default": "./dist/virtualize.js"
+      },
+      "require": {
+        "types": "./dist/virtualize.d.cts",
+        "default": "./dist/virtualize.cjs"
+      }
+    },
+    "./column-menu": {
+      "import": {
+        "types": "./dist/column-menu.d.ts",
+        "default": "./dist/column-menu.js"
+      },
+      "require": {
+        "types": "./dist/column-menu.d.cts",
+        "default": "./dist/column-menu.cjs"
+      }
+    },
+    "./cell-navigation": {
+      "import": {
+        "types": "./dist/cell-navigation.d.ts",
+        "default": "./dist/cell-navigation.js"
+      },
+      "require": {
+        "types": "./dist/cell-navigation.d.cts",
+        "default": "./dist/cell-navigation.cjs"
+      }
+    },
+    "./pivot": {
+      "import": {
+        "types": "./dist/pivot.d.ts",
+        "default": "./dist/pivot.js"
+      },
+      "require": {
+        "types": "./dist/pivot.d.cts",
+        "default": "./dist/pivot.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

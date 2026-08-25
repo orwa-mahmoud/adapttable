@@ -20,6 +20,7 @@ const HEADER = `# AdaptTable — full documentation
 const DOCS = [
   "getting-started.md",
   "concepts.md",
+  "features.md",
   "data-tiers.md",
   "columns.md",
   "column-groups.md",

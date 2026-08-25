@@ -183,6 +183,8 @@ export {
   type ExportStatus,
   useExportHandler,
 } from "./export/useExportHandler";
+export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
+export { applyTableFeatures } from "./features/tableFeature";
 export {
   type ChecklistButtonProps,
   type ChecklistCheckboxProps,
@@ -428,10 +430,8 @@ export {
   type SavedViewsPanelSurfaceProps,
 } from "./url/SavedViewsPanelChrome";
 export { type SearchInputState } from "./useDataTable/useSearchInput";
-export {
-  type DataTableShellProps,
-  useDataTableShell,
-} from "./useDataTableShell";
+export type { DataTableShellProps } from "./useDataTableShell";
+export { useDataTableShell } from "./useDataTableShell";
 export {
   type BulkBarChromeProps,
   type FilterTriggerToggle,

@@ -5,6 +5,7 @@ import {
   type UseSavedViewsOptions,
 } from "@adapttable/core";
 import {
+  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -70,7 +71,8 @@ function SavedViewsSlot({
  *
  * @typeParam TRow - The row type.
  */
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = applyTableFeatures(incoming);
   const {
     dir,
     prefetch,

@@ -5,6 +5,10 @@
 ▶ **See it working:** [drag-reorder rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Pass `onRowReorder` and a drag handle appears in a reserved leading column.
+Or import `rowReorder` from `@adapttable/<kit>/row-reorder` and pass
+`features={[rowReorder(handler)]}` — same runtime, see
+[feature composition](./features.md). The enabling prop is deprecated and
+stays until v3.
 Omit it and nothing renders, nothing ships in the hot path — the same opt-in
 rule as `onCellEdit`. The table never mutates your array; you apply the move.
 

@@ -56,6 +56,7 @@ import {
   windowGroupedEntries,
 } from "@adapttable/core";
 import {
+  applyTableFeatures,
   DEFAULT_CARD_SIZE_PX,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
@@ -1495,7 +1496,8 @@ function useAntdGridState<TRow>(
   return { windowStart, find, gridFocus, stats };
 }
 
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = applyTableFeatures(incoming);
   const {
     slots,
     className,

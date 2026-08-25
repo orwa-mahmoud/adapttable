@@ -1,6 +1,7 @@
 import { act, fireEvent, render, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { rowReorder } from "./features/factories";
 import type { FilterDef } from "./filters/filterDefs";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef, RowAction } from "./types";
@@ -51,6 +52,23 @@ describe("useDataTableShell", () => {
     expect(result.current.tableProps.rowActions).toBeUndefined();
     expect(result.current.toolbarProps.hasFilters).toBe(false);
     expect(result.current.filtersNode).toBeUndefined();
+  });
+
+  it("arms row reorder from the features path", () => {
+    const onRowReorder = vi.fn();
+    const { result } = renderHook(() =>
+      useDataTableShell(
+        {
+          data: ROWS,
+          columns,
+          rowKey,
+          urlSync: false,
+          features: [rowReorder(onRowReorder)],
+        },
+        noForm
+      )
+    );
+    expect(result.current.hasRowReorder).toBe(true);
   });
 
   it("renders the auto-form for declarative filters", () => {

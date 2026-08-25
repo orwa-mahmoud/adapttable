@@ -88,6 +88,16 @@
         "default": "./dist/formula.cjs"
       }
     },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",

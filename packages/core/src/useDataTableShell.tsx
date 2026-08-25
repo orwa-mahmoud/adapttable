@@ -10,6 +10,7 @@ import { flattenColumnTree } from "./columns/columnTree";
 import { asGesture, useTableEditHistory } from "./editing/editHistory";
 import { makeExportCsvHandler, resolveExportCsv } from "./export/tableCsv";
 import { useExportHandler } from "./export/useExportHandler";
+import { applyTableFeatures } from "./features/tableFeature";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
 import type { FilterDef } from "./filters/filterDefs";
@@ -103,13 +104,14 @@ export type DataTableShellProps<TRow> = Omit<
  */
 
 export function useDataTableShell<TRow>(
-  props: DataTableShellProps<TRow>,
+  incoming: DataTableShellProps<TRow>,
   renderAutoForm: (
     defs: readonly FilterDef<TRow>[],
     source: TableSource<TRow>,
     registry: FilterTypeRegistry
   ) => ReactNode
 ) {
+  const props = applyTableFeatures(incoming);
   // ONE resolved URL backend for everything in this table: the tier hooks
   // AND chrome that reads URL state (saved views) share this instance, so
   // with `urlSync={false}` they share the same in-memory backend instead of

@@ -1,5 +1,6 @@
 import { showSimpleFilterFields } from "@adapttable/core";
 import {
+  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -46,7 +47,8 @@ import type { DataTableProps } from "./types";
  *
  * @typeParam TRow - The row type.
  */
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = applyTableFeatures(incoming);
   const { slots, accentColor, animate = false } = props;
   const { filtersMode = "popover" } = props;
   // Map row density to a Radix table `size` (independent of column pinning):

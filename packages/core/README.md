@@ -56,6 +56,7 @@ control via prop-getters.
 - **PDF export and print layout** (`@adapttable/core/pdf`) — optional entry; `pdfWriter()` on `exportCsv`, `printTable` for the browser dialog.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
 - **Saved views** — name a filter/sort/column arrangement and switch between them.
+- **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/core/features` or a kit subpath. Enabling props still work until v3; no bundle saving yet.
 - **CSV export** (`exportCsv`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
 - **Virtualization** (`virtualize`) — row/card windowing for very large lists.

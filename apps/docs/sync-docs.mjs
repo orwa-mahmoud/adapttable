@@ -32,6 +32,7 @@ const target = join(here, "src/content/docs");
 export const TITLES = {
   "getting-started.md": "Get started — a React table for your UI kit",
   "concepts.md": "AdaptTable concepts — headless core & source",
+  "features.md": "Feature composition — features={[rowReorder(fn)]}",
   "columns.md": "React table columns — ColumnDef & custom cells",
   "column-groups.md":
     "React table column groups — spanning headers, collapsible",
@@ -91,6 +92,8 @@ export const DESCRIPTIONS = {
     "Install AdaptTable for Mantine, MUI, Chakra, Ant, Radix, Base UI or shadcn — one CLI command, or a StackBlitz starter with no install.",
   "concepts.md":
     "One headless core, a TableSource data contract, and adapters that mount real Mantine, MUI, Chakra, Ant, Radix and shadcn components.",
+  "features.md":
+    "Compose AdaptTable features from kit subpath imports — features={[rowReorder(fn)]} — same runtime as the enabling props, which stay until v3.",
   "columns.md":
     "Define React table columns once with ColumnDef — accessors, sorting, per-column filters, alignment, pinning and custom cells — same API across every UI kit.",
   "column-groups.md":

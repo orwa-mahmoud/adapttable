@@ -63,6 +63,9 @@ export default defineConfig(
       // compiler rule set (it would flag those intentionally-kept manual memos).
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+      // TypeScript props are the contract. This rule still fires on
+      // intermediate bindings (`const props = applyTableFeatures(incoming)`).
+      "react/prop-types": "off",
       ...jsxA11y.flatConfigs.recommended.rules,
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",

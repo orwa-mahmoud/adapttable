@@ -18,6 +18,7 @@ export const sidebar = [
   {
     label: "Features",
     items: [
+      { label: "Feature composition", slug: "features" },
       { label: "Columns", slug: "columns" },
       { label: "Column groups", slug: "column-groups" },
       { label: "Sparkline columns", slug: "sparkline" },

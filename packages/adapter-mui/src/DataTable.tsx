@@ -1,5 +1,6 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
+  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -68,7 +69,8 @@ function tableSize(
  *
  * @typeParam TRow - The row type.
  */
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = applyTableFeatures(incoming);
   const { slots, className, classNames, animate = false } = props;
   const size = tableSize(props.size, props.density);
   const { filtersMode = "popover" } = props;

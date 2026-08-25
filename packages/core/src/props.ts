@@ -13,6 +13,7 @@ import type {
 import type { EditEventHandler } from "./editing/editingEvents";
 import type { RowValidator } from "./editing/validation";
 import type { ExportCsvOptions } from "./export/tableCsv";
+import type { TableFeature } from "./features/tableFeature";
 import type { FilterDef } from "./filters/filterDefs";
 import type { FilterTypeSpec } from "./filters/filterRegistry";
 import type {
@@ -41,6 +42,7 @@ import type {
   TableLabels,
   TableQueryParams,
 } from "./types";
+import type { UseSavedViewsOptions } from "./url/useSavedViews";
 
 /**
  * Where a host's own toolbar controls go.
@@ -94,6 +96,28 @@ export interface BaseDataTableProps<TRow> {
   columns: ColumnInput<TRow>[];
   /** Stable React key extractor for a row. */
   rowKey: (row: TRow) => string;
+  /**
+   * Compose opt-in features from `@adapttable/<kit>/<feature>` subpath
+   * imports. Identical runtime to the enabling props — those props are
+   * deprecated and remain until v3.
+   *
+   * There is no bundle saving yet: while the props still work, `DataTable`
+   * keeps its internal imports. The drop lands at v3. See
+   * [feature composition](https://orwa-mahmoud.github.io/adapttable/features/).
+   *
+   * Built-in factories and host plugins are the same {@link TableFeature}
+   * type in this one array.
+   */
+  features?: readonly TableFeature<TRow>[];
+  /**
+   * Saved views: capture the table's current URL state under a name and
+   * re-apply it on demand. Setting this renders a Saved-views menu in the
+   * toolbar. `adapter` / `urlKey` default to the table's own.
+   *
+   * Prefer `features={[savedViews(options)]}` from
+   * `@adapttable/<kit>/saved-views`. This prop still works until v3.
+   */
+  savedViews?: UseSavedViewsOptions;
 
   /* ── Display ─────────────────────────────────────────────────────── */
   /** Trailing per-row actions. */

@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
 import { DataTable } from "./DataTable";
+import { savedViews } from "./saved-views";
 
 /** Map-backed `LayoutStorage`, so views never leak between tests. */
 function memoryStorage(): LayoutStorage {
@@ -113,33 +114,39 @@ describe("SavedViewsMenu", () => {
   });
 });
 
-describe("DataTable savedViews prop", () => {
-  interface Row {
-    id: string;
-    name: string;
-  }
-  const rows: Row[] = [
-    { id: "a", name: "Alice" },
-    { id: "b", name: "Bob" },
-  ];
-  const columns: ColumnDef<Row>[] = [
-    { key: "name", header: "Name", accessor: (r) => r.name },
-  ];
+describe.each(["prop", "feature"] as const)(
+  "DataTable savedViews via %s",
+  (path) => {
+    interface Row {
+      id: string;
+      name: string;
+    }
+    const rows: Row[] = [
+      { id: "a", name: "Alice" },
+      { id: "b", name: "Bob" },
+    ];
+    const columns: ColumnDef<Row>[] = [
+      { key: "name", header: "Name", accessor: (r) => r.name },
+    ];
+    const views = { storageKey: "dt-views", storage: memoryStorage() };
 
-  it("renders the Saved views trigger in the toolbar when set", () => {
-    render(
-      <MantineProvider>
-        <DataTable<Row>
-          data={rows}
-          columns={columns}
-          rowKey={(r) => r.id}
-          urlAdapter={createMemoryAdapter("")}
-          savedViews={{ storageKey: "dt-views", storage: memoryStorage() }}
-        />
-      </MantineProvider>
-    );
-    expect(
-      screen.getByRole("button", { name: defaultLabels.savedViews })
-    ).toBeInTheDocument();
-  });
-});
+    it("renders the Saved views trigger in the toolbar when set", () => {
+      render(
+        <MantineProvider>
+          <DataTable<Row>
+            data={rows}
+            columns={columns}
+            rowKey={(r) => r.id}
+            urlAdapter={createMemoryAdapter("")}
+            {...(path === "feature"
+              ? { features: [savedViews(views)] }
+              : { savedViews: views })}
+          />
+        </MantineProvider>
+      );
+      expect(
+        screen.getByRole("button", { name: defaultLabels.savedViews })
+      ).toBeInTheDocument();
+    });
+  }
+);

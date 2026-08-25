@@ -1,5 +1,6 @@
 import { showSimpleFilterFields } from "@adapttable/core";
 import {
+  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -47,7 +48,8 @@ import { Box, Button, Flex, Progress, Text } from "./ui";
  *
  * @typeParam TRow - The row type.
  */
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = applyTableFeatures(incoming);
   ensureBaseUiStyles();
   const { slots, accentColor, animate = false } = props;
   const { filtersMode = "popover" } = props;

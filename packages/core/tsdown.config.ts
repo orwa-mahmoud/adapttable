@@ -53,6 +53,7 @@ export default defineConfig([
       "src/sparkline.ts",
       "src/pivot.ts",
       "src/formula.ts",
+      "src/features.ts",
     ],
   },
   { ...common, entry: ["src/query.ts"] },
