@@ -81,8 +81,8 @@ jobs:
           # exists. Publish is build → publint → changeset publish — not
           # verify:release. ONE command: the action execs its publish input
           # without a shell, so a `&&` here would be a literal argument.
-          publish: pnpm release:gated
-          version: pnpm version-packages
+          publish-script: pnpm release:gated
+          version-script: pnpm version-packages
         env:
           # A fine-grained PAT scoped to this repository alone, with Contents
           # and Pull requests write and nothing else. Repository settings deny
