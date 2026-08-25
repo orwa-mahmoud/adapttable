@@ -29,7 +29,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
-import { TITLES } from "../apps/docs/sync-docs.mjs";
+import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_DIR = join(REPO_ROOT, "docs");
@@ -243,6 +243,39 @@ function auditTitles() {
   };
 }
 
+/**
+ * A page missing from the `DESCRIPTIONS` map falls back to the site-wide
+ * Starlight description, so every such page shares one SERP snippet and one
+ * og:description. `stale` are entries whose markdown is gone.
+ */
+function auditDescriptions() {
+  const described = new Set(Object.keys(DESCRIPTIONS));
+  return {
+    undescribed: docPages.filter((name) => !described.has(name)),
+    stale: [...described]
+      .filter((name) => !docPages.includes(name))
+      .sort((a, b) => a.localeCompare(b)),
+  };
+}
+
+function printDescriptionFailures({ undescribed, stale }) {
+  if (undescribed.length > 0) {
+    console.error(
+      `\n${undescribed.length} docs page(s) have no entry in the DESCRIPTIONS ` +
+        `map of apps/docs/sync-docs.mjs — each ships the site-wide default ` +
+        `as its SERP snippet:`
+    );
+    for (const name of undescribed) console.error(`  - docs/${name}`);
+  }
+  if (stale.length > 0) {
+    console.error(
+      `\n${stale.length} DESCRIPTIONS entr(ies) in apps/docs/sync-docs.mjs ` +
+        `name a page that does not exist:`
+    );
+    for (const name of stale) console.error(`  - ${name}`);
+  }
+}
+
 function printTitleFailures({ untitled, stale }) {
   if (untitled.length > 0) {
     console.error(
@@ -267,6 +300,9 @@ function main() {
   const nav = auditNav();
   const titles = auditTitles();
   const titleFailures = titles.untitled.length + titles.stale.length;
+  const descriptions = auditDescriptions();
+  const descriptionFailures =
+    descriptions.undescribed.length + descriptions.stale.length;
   const navFailures = nav.orphans.length + nav.dead.length;
   const exportTotal = audits.reduce((sum, a) => sum + a.names.length, 0);
   const undocumentedTotal = audits.reduce(
@@ -290,17 +326,23 @@ function main() {
       `Titles: ${titles.untitled.length} page(s) with no TITLES entry, ` +
         `${titles.stale.length} entr(ies) without a page.`
     );
+    console.log(
+      `Descriptions: ${descriptions.undescribed.length} page(s) with no ` +
+        `DESCRIPTIONS entry, ${descriptions.stale.length} entr(ies) without a page.`
+    );
     return;
   }
   if (
     undocumentedTotal > 0 ||
     missingRefTotal > 0 ||
     navFailures > 0 ||
-    titleFailures > 0
+    titleFailures > 0 ||
+    descriptionFailures > 0
   ) {
     printFailures(audits, missingFromReference);
     printNavFailures(nav);
     printTitleFailures(titles);
+    printDescriptionFailures(descriptions);
     if (undocumentedTotal > 0) {
       console.error(
         `\n${undocumentedTotal} undocumented export(s). Document each name in docs/ or stop exporting it.`
@@ -324,11 +366,18 @@ function main() {
           `TITLES entry in apps/docs/sync-docs.mjs, and every entry needs its page.`
       );
     }
+    if (descriptionFailures > 0) {
+      console.error(
+        `${descriptionFailures} description mismatch(es). Every docs/*.md page ` +
+          `needs a DESCRIPTIONS entry in apps/docs/sync-docs.mjs, and every ` +
+          `entry needs its page.`
+      );
+    }
     process.exit(1);
   }
   console.log(
     `doc-surface: all ${exportTotal} exports documented, ` +
-      `all ${docPages.length} pages in the sidebar and titled.`
+      `all ${docPages.length} pages in the sidebar, titled and described.`
   );
 }
 
