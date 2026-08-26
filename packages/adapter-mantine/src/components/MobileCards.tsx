@@ -12,9 +12,11 @@ import {
   type TreeEntry,
 } from "@adapttable/core";
 import {
+  bindMobileCardList,
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
+  mobileCardListStyle,
   orderedCardEntries,
   resolveMobileLabel,
   resolveRowStyle,
@@ -77,6 +79,8 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "pinnedTopRows"
   | "pinnedBottomRows"
   | "extraRows"
+  | "maxHeight"
+  | "virtualScrollRef"
 > {
   bodyRef: RefObject<HTMLDivElement | null>;
   className?: string;
@@ -257,6 +261,7 @@ function MobileCardBase<TRow>({
       className={className}
       ref={measureElement}
       data-index={index}
+      data-adapttable-part="card"
       withBorder
       radius="md"
       padding={cardPadding}
@@ -374,6 +379,8 @@ export function MobileCards<TRow>({
   pinnedBottomRows = [],
   extraRows,
   renderCard,
+  maxHeight,
+  virtualScrollRef,
 }: Readonly<MobileCardsProps<TRow>>) {
   const { columns, selection, labels } = table;
   const compact = density === "compact";
@@ -451,9 +458,10 @@ export function MobileCards<TRow>({
   return (
     <Stack
       gap={compact ? "xs" : "sm"}
-      ref={bodyRef}
+      ref={bindMobileCardList(virtualScrollRef, bodyRef)}
       data-adapttable-part="cards"
       className={className}
+      style={mobileCardListStyle(maxHeight)}
       {...table.getTableProps({ role: "list" })}
     >
       {paddingTop > 0 && <div aria-hidden style={{ height: paddingTop }} />}

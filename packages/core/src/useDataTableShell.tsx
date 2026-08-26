@@ -334,9 +334,12 @@ export function useDataTableShell<TRow>(
   const virtualScrollRef = useCallback(
     (node: HTMLElement | null) => {
       scrollBoxElement.current = node;
-      // Name the element every kit scrolls, whatever it called it: both
-      // windows read it, and CSS and tests need to be able to find it.
-      node?.setAttribute("data-adapttable-part", "scroll-box");
+      // Desktop kits attach this to an unnamed overflow box. The mobile card
+      // list already names itself `cards` — overwriting that would hide the
+      // list from window-offset measurement and from every cards query.
+      if (node && !node.getAttribute("data-adapttable-part")) {
+        node.setAttribute("data-adapttable-part", "scroll-box");
+      }
       bodyScrollRef(node);
     },
     [bodyScrollRef]

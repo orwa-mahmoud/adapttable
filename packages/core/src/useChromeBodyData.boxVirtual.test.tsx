@@ -376,3 +376,71 @@ describe("useChromeBodyData rowHeight estimate", () => {
     expect(estimate(99)).toBe(56);
   });
 });
+
+describe("useChromeBodyData mobile card measurement", () => {
+  beforeEach(() => {
+    vi.mocked(useWindowVirtualizer).mockReturnValue(
+      IDLE as unknown as ReturnType<typeof useWindowVirtualizer>
+    );
+    vi.mocked(useVirtualizer).mockReturnValue(
+      IDLE as unknown as ReturnType<typeof useVirtualizer>
+    );
+  });
+
+  it("measures a mobile card as one element even when row detail is set", () => {
+    vi.mocked(useWindowVirtualizer).mockReturnValue(
+      ACTIVE_WINDOW as unknown as ReturnType<typeof useWindowVirtualizer>
+    );
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "infinite",
+      });
+      const props = {
+        source,
+        columns: cols,
+        rowKey: (r: Row) => r.id,
+        virtualize: true as const,
+        forceMobile: true,
+        renderRowDetail: () => "detail",
+      };
+      const chrome = useTableChrome<Row>(props);
+      return useChromeBodyData(chrome, props);
+    });
+    // Cards nest the detail inside the card, so the card is the item.
+    expect(result.current.virtualization.measureElement).toBe(
+      ACTIVE_WINDOW.measureElement
+    );
+    expect(result.current.virtualization.measureRowPair).toBeUndefined();
+  });
+
+  it("measures a desktop row as a pair when row detail is set", () => {
+    vi.mocked(useWindowVirtualizer).mockReturnValue(
+      ACTIVE_WINDOW as unknown as ReturnType<typeof useWindowVirtualizer>
+    );
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "infinite",
+      });
+      const props = {
+        source,
+        columns: cols,
+        rowKey: (r: Row) => r.id,
+        virtualize: true as const,
+        forceMobile: false,
+        renderRowDetail: () => "detail",
+      };
+      const chrome = useTableChrome<Row>(props);
+      return useChromeBodyData(chrome, props);
+    });
+    expect(result.current.virtualization.measureElement).toBeUndefined();
+    expect(result.current.virtualization.measureRowPair).toBeDefined();
+  });
+});

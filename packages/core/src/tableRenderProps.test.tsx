@@ -673,11 +673,12 @@ describe("useChromeBodyData", () => {
       result.current.virtualScrollRef(null);
     });
     expect(typeof result.current.virtualScrollRef).toBe("function");
-    // jsdom boxes have no layout, so the element window stays empty and
-    // every row falls back to materialized rendering — graceful, not blank.
-    expect(result.current.virtualization.enabled).toBe(false);
-    // 25 = the infinite tier's first page; every page row materializes.
-    expect(result.current.virtualization.rows).toHaveLength(25);
+    // jsdom boxes have no layout, so the element window stays empty. Hold
+    // the loaded page's height with a spacer — mounting every row here is
+    // what used to freeze a phone on a 50k card list.
+    expect(result.current.virtualization.enabled).toBe(true);
+    expect(result.current.virtualization.rows).toHaveLength(0);
+    expect(result.current.virtualization.paddingBottom).toBeGreaterThan(0);
   });
 
   it("disables virtualization and load-more in paged mode", () => {

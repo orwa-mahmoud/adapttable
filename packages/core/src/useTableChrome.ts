@@ -1465,10 +1465,10 @@ export function useChromeBodyData<TRow>(
     rows: partitioned.scroll,
     rowKey,
     enabled: virtualize && !groupingArmed && !treeArmed && bodyEligible,
-    // Detail panels are separate elements from their rows, so the window
-    // measures the two together rather than sizing an expanded row from its
-    // top half.
-    expandable: props.renderRowDetail !== undefined,
+    // Detail panels are separate elements from their rows on desktop, so the
+    // window measures the two together. A mobile card nests the detail inside
+    // the card, so the card element is the whole item — keep measureElement.
+    expandable: measureRowDetailAsPair(chrome.isMobile, props.renderRowDetail),
     ...scrollOpts,
   });
 
@@ -1554,6 +1554,17 @@ function isBodyEligible<TRow>(chrome: TableChrome<TRow>): boolean {
     !chrome.source.error &&
     (chrome.body === "desktop" || chrome.body === "mobile")
   );
+}
+
+/**
+ * Desktop detail is a sibling of the row, so the window measures the pair.
+ * A mobile card nests the detail inside the card — one element, not a pair.
+ */
+function measureRowDetailAsPair(
+  isMobile: boolean,
+  renderRowDetail: unknown
+): boolean {
+  return !isMobile && renderRowDetail !== undefined;
 }
 
 /** A card's height on a phone, a row's on a desktop — or `rowHeight`. */

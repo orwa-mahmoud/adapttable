@@ -16,6 +16,7 @@ import {
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
+  mobileCardListStyle,
   orderedCardEntries,
   resolveMobileLabel,
   resolveRowStyle,
@@ -220,6 +221,7 @@ function MobileCardBase<TRow>({
     <Card
       ref={measureElement}
       data-index={index}
+      data-adapttable-part="card"
       data-stagger=""
       data-selected={selected ? "" : undefined}
       data-dirty={rowIsDirty(editing, id) ? "" : undefined}
@@ -345,6 +347,8 @@ export function MobileCards<TRow>({
   pinnedBottomRows = [],
   extraRows,
   renderCard,
+  maxHeight,
+  virtualScrollRef,
 }: Readonly<SharedProps<TRow>>) {
   const { columns, selection, labels } = table;
   const entries = orderedCardEntries(
@@ -417,9 +421,11 @@ export function MobileCards<TRow>({
     <Flex
       direction="column"
       gap={compact ? "2" : "3"}
+      ref={virtualScrollRef}
       data-adapttable-part="cards"
       role="list"
       aria-label={table.getTableProps()["aria-label"]}
+      style={mobileCardListStyle(maxHeight)}
     >
       {paddingTop > 0 && <Box aria-hidden style={{ height: paddingTop }} />}
       {grouping

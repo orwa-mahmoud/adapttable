@@ -16,6 +16,7 @@ import {
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
+  mobileCardListStyle,
   orderedCardEntries,
   resolveMobileLabel,
   resolveRowStyle,
@@ -352,6 +353,8 @@ export function MobileCards<TRow>({
   pinnedBottomRows = [],
   extraRows,
   renderCard,
+  maxHeight,
+  virtualScrollRef,
 }: Readonly<SharedProps<TRow>>) {
   const { columns, selection, labels } = table;
   const entries = orderedCardEntries(
@@ -422,11 +425,12 @@ export function MobileCards<TRow>({
   return (
     <ul
       {...table.getTableProps({ role: undefined })}
+      ref={virtualScrollRef}
       data-adapttable-part="cards"
       className={classNames.cards}
       // No `list-style: none` here: Safari/VoiceOver strips list semantics
       // from such lists. Markers are suppressed per-item with display:block.
-      style={{ margin: 0, padding: 0 }}
+      style={{ margin: 0, padding: 0, ...mobileCardListStyle(maxHeight) }}
     >
       {paddingTop > 0 && (
         <li

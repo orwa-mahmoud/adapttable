@@ -16,6 +16,7 @@ import { MouseEvent as MouseEvent_2 } from 'react';
 import { PointerEvent as PointerEvent_2 } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
+import { Ref } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { SetStateAction } from 'react';
@@ -75,6 +76,9 @@ export interface BatchEditCellProps<TRow> {
     row: TRow;
     rowId: string;
 }
+
+// @public
+export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: Ref<HTMLElement | null>): RefCallback<HTMLElement>;
 
 // @public
 export interface BodyCell<TRow> {
@@ -1840,6 +1844,9 @@ export function logicalAlign(align: ColumnDef<unknown>["align"]): "start" | "cen
 
 // @public
 export function mergedCellStyle(colSpan: number, rowSpan: number, appearance?: CellSpanAppearance, fill?: "on" | "off"): CSSProperties | undefined;
+
+// @public
+export function mobileCardListStyle(maxHeight: number | undefined): CSSProperties | undefined;
 
 // @public
 export interface MountStaggerOptions {

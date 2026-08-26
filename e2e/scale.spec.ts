@@ -83,17 +83,11 @@ test.describe("scale — virtualization", () => {
 });
 
 /**
- * The scale page across kits.
- *
- * It mounts a table directly rather than through an adapter demo, so it was
- * single-kit until the provider registry existed — and virtualization is a
- * per-kit claim: the window is the shell's, but each kit renders the rows.
- */
-/**
  * The adapters whose own pages are built. Each feature page fixes its
  * kit, so the loop is over URLs rather than over clicks on a switcher
  * the page no longer needs — and it widens to the whole grid as the
- * remaining adapters' pages arrive.
+ * remaining adapters' pages arrive. Virtualization is a per-kit claim:
+ * the window is the shell's, but each kit renders the rows and cards.
  */
 const KITS = builtAdapters().map((adapter) => adapter.key);
 
@@ -108,5 +102,19 @@ for (const kit of KITS) {
     await expect(rows.first()).toBeVisible();
     // The whole point: the DOM holds a window, not the dataset.
     await expect.poll(async () => rows.count()).toBeLessThan(120);
+  });
+
+  test(`${kit}: windows mobile cards down to a phone viewport`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/${kit}/scale/`);
+    const cards = page.locator('[data-adapttable-part="card"]');
+    await expect(cards.first()).toBeVisible();
+    await expect.poll(async () => cards.count()).toBeLessThan(120);
+    await page.mouse.wheel(0, 6000);
+    await expect
+      .poll(async () => cards.count(), { timeout: 5000 })
+      .toBeLessThan(120);
   });
 }

@@ -450,6 +450,10 @@ export {
   useRowPairMeasurer,
 } from "./virtual/measureRowPair";
 export {
+  bindMobileCardList,
+  mobileCardListStyle,
+} from "./virtual/mobileCardList";
+export {
   type ColumnWindow,
   useColumnWindow,
   type UseColumnWindowOptions,

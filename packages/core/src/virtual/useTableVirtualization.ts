@@ -36,6 +36,21 @@ function asSizeEstimator(
   return typeof estimateSize === "function" ? estimateSize : () => estimateSize;
 }
 
+/**
+ * Spacer height while the virtualizer is armed but has not produced a
+ * window yet (null scroll element, first layout). Must not be 0: a 0-height
+ * list never intersects the viewport, so the window never appears.
+ */
+function pendingListSize(
+  count: number,
+  measured: number,
+  estimateSize: number | ((index: number) => number)
+): number {
+  if (measured > 0) return measured;
+  if (count === 0) return 0;
+  return count * asSizeEstimator(estimateSize)(0);
+}
+
 /** Dataset index for ARIA / focus — the window index when pinning is off. */
 export function rowSourceIndex(
   entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">
@@ -185,13 +200,14 @@ export function useTableVirtualization<TRow>({
   const active = enabled && virtualItems.length > 0;
   const measureRowPair = useRowPairMeasurer(virtualizer, enabled && expandable);
   const materializedRows = useMemo<readonly VirtualTableRow<TRow>[]>(() => {
-    if (!active) {
+    if (!enabled) {
       return rows.map((row, index) => ({
         row,
         index,
         key: rowKey(row),
       }));
     }
+    if (!active) return [];
     return virtualItems.flatMap((virtualItem) => {
       const row = rows[virtualItem.index];
       if (row === undefined) return [];
@@ -204,7 +220,7 @@ export function useTableVirtualization<TRow>({
         },
       ];
     });
-  }, [active, rowKey, rows, virtualItems]);
+  }, [active, enabled, rowKey, rows, virtualItems]);
 
   // `virtualItems` is a fresh array every render, so a naive effect would call
   // `onEndReached` on every render while the last row stays in view. Notify at
@@ -225,12 +241,30 @@ export function useTableVirtualization<TRow>({
     }
   }, [active, onEndReached, rows.length, virtualItems]);
 
-  if (!active) {
+  if (!enabled) {
     return {
       enabled: false,
       rows: materializedRows,
       paddingTop: 0,
       paddingBottom: 0,
+    };
+  }
+
+  if (!active) {
+    // Armed but no slice yet — a phone card list with a null scroll box used
+    // to take this path and mount the whole dataset. Hold the height with a
+    // spacer so layout can produce a window; never dump every row.
+    return {
+      enabled: true,
+      rows: materializedRows,
+      paddingTop: 0,
+      paddingBottom: pendingListSize(
+        rows.length,
+        virtualizer.getTotalSize(),
+        estimateSize
+      ),
+      measureElement: expandable ? undefined : virtualizer.measureElement,
+      measureRowPair: expandable ? measureRowPair : undefined,
     };
   }
 
@@ -310,9 +344,10 @@ export function useKeyedVirtualization(options: {
   const active = enabled && virtualItems.length > 0;
 
   const indices = useMemo<readonly number[]>(() => {
-    if (!active) return keys.map((_, index) => index);
+    if (!enabled) return keys.map((_, index) => index);
+    if (!active) return [];
     return virtualItems.map((item) => item.index);
-  }, [active, keys, virtualItems]);
+  }, [active, enabled, keys, virtualItems]);
 
   const notifiedAtCount = useRef(-1);
   useEffect(() => {
@@ -329,8 +364,22 @@ export function useKeyedVirtualization(options: {
     }
   }, [active, onEndReached, keys.length, virtualItems]);
 
-  if (!active) {
+  if (!enabled) {
     return { enabled: false, indices, paddingTop: 0, paddingBottom: 0 };
+  }
+
+  if (!active) {
+    return {
+      enabled: true,
+      indices,
+      paddingTop: 0,
+      paddingBottom: pendingListSize(
+        keys.length,
+        virtualizer.getTotalSize(),
+        estimateSize
+      ),
+      measureElement: virtualizer.measureElement,
+    };
   }
 
   const first = virtualItems[0]!;

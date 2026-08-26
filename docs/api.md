@@ -1421,6 +1421,7 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `ROW_DND_MIME`. Row pin chrome: `rowPinSignature`, `rowSourceIndex`,
 `pinnedRowStickyStyle`, `pinnedRowCellStyle`, `pinnedRowPart`,
 `pinnedRowSticky`, `orderedCardEntries`,
+`bindMobileCardList`, `mobileCardListStyle`,
 `useOffsetHeight`, `PINNED_TOP_PART`, `PINNED_BOTTOM_PART`.
 
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /

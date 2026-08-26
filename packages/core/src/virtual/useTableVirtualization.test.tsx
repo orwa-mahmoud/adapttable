@@ -171,7 +171,7 @@ describe("useTableVirtualization", () => {
     );
   });
 
-  it("falls back to every row before the virtualizer has a measured window", () => {
+  it("holds a spacer instead of mounting every row before the window exists", () => {
     vi.mocked(useWindowVirtualizer).mockReturnValue({
       getVirtualItems: () => [],
       getTotalSize: () => 0,
@@ -188,14 +188,30 @@ describe("useTableVirtualization", () => {
       })
     );
 
-    expect(result.current.enabled).toBe(false);
-    expect(result.current.rows.map((entry) => entry.row.id)).toEqual([
-      "0",
-      "1",
-      "2",
-      "3",
-      "4",
-    ]);
+    expect(result.current.enabled).toBe(true);
+    expect(result.current.rows).toEqual([]);
+    expect(result.current.paddingBottom).toBe(rows.length * 40);
+  });
+
+  it("uses the virtualizer's measured total when the window is still empty", () => {
+    vi.mocked(useWindowVirtualizer).mockReturnValue({
+      getVirtualItems: () => [],
+      getTotalSize: () => 800,
+      measureElement: vi.fn(),
+      options: { scrollMargin: 0 },
+    } as unknown as ReturnType<typeof useWindowVirtualizer>);
+
+    const { result } = renderHook(() =>
+      useTableVirtualization({
+        rows,
+        rowKey,
+        enabled: true,
+        estimateSize: 40,
+      })
+    );
+
+    expect(result.current.rows).toEqual([]);
+    expect(result.current.paddingBottom).toBe(800);
   });
 
   it("calls onEndReached when the virtual slice reaches the final row", () => {
@@ -396,6 +412,15 @@ describe("useKeyedVirtualization", () => {
     expect(result.current.paddingTop).toBe(0);
     expect(result.current.paddingBottom).toBe(0);
     expect(result.current.measureElement).toBeUndefined();
+  });
+
+  it("holds an empty index window before the virtualizer has items", () => {
+    const { result } = renderHook(() =>
+      useKeyedVirtualization({ keys, enabled: true, estimateSize: 40 })
+    );
+    expect(result.current.enabled).toBe(true);
+    expect(result.current.indices).toEqual([]);
+    expect(result.current.paddingBottom).toBe(keys.length * 40);
   });
 
   it("windows indices and paddings when the virtualizer has items", () => {

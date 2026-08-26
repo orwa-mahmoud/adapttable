@@ -429,6 +429,16 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
     expect(box.getAttribute("data-adapttable-part")).toBe("scroll-box");
   });
 
+  it("leaves a card list named cards so window-offset measurement can find it", () => {
+    const { result } = renderHook(() =>
+      useDataTableShell({ data: ROWS, columns, rowKey }, noForm)
+    );
+    const list = document.createElement("ul");
+    list.setAttribute("data-adapttable-part", "cards");
+    result.current.tableProps.virtualScrollRef(list);
+    expect(list.getAttribute("data-adapttable-part")).toBe("cards");
+  });
+
   it("sizes every rendered column to its content", () => {
     const onColumnLayoutChange = vi.fn();
     const { result } = renderHook(() =>

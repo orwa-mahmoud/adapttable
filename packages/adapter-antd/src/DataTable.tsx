@@ -60,6 +60,7 @@ import {
   GridFocusAnnouncer,
   insertExtraRows,
   isExtraEntry,
+  mobileCardListStyle,
   pinnedRowPart,
   pinnedRowStickyStyle,
   printToolbar,
@@ -109,6 +110,7 @@ import {
   type UIEventHandler,
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -911,9 +913,9 @@ function resolveSize(
 /**
  * Windowing props for the mobile card list. Desktop rows window through antd's
  * own native virtual `<Table>`, so this is gated to the card body and never
- * touches that path. Cards flow in the page (no inner scroll box), so the
- * page-level sentinel stays the single load-more trigger — the window needs no
- * second sentinel of its own.
+ * touches that path. Without `maxHeight` the cards flow in the page and the
+ * page-level sentinel stays the load-more trigger. With `maxHeight` the list
+ * itself is the scroll box, matching every other kit.
  */
 function useCardWindowing<TRow>(options: {
   rows: readonly TRow[];
@@ -925,7 +927,10 @@ function useCardWindowing<TRow>(options: {
   estimateCardSize?: number;
   overscan?: number;
   scrollMargin?: number;
+  maxHeight?: number;
 }) {
+  const scrollRef = useRef<HTMLElement | null>(null);
+  const inBox = options.maxHeight != null;
   const virtualization = useTableVirtualization({
     rows: options.rows,
     rowKey: options.rowKey,
@@ -937,12 +942,18 @@ function useCardWindowing<TRow>(options: {
     estimateSize: options.estimateCardSize ?? DEFAULT_CARD_SIZE_PX,
     overscan: options.overscan,
     scrollMargin: options.scrollMargin,
+    getScrollElement: inBox ? () => scrollRef.current : undefined,
   });
+  const listRef = useCallback((node: HTMLElement | null) => {
+    scrollRef.current = node;
+  }, []);
   return {
     rowEntries: virtualization.enabled ? virtualization.rows : undefined,
     paddingTop: virtualization.paddingTop,
     paddingBottom: virtualization.paddingBottom,
     measureElement: virtualization.measureElement,
+    listRef,
+    listStyle: mobileCardListStyle(options.maxHeight),
   };
 }
 
@@ -1745,6 +1756,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     estimateCardSize: props.estimateCardSize,
     overscan: props.virtualOverscan,
     scrollMargin: props.virtualScrollMargin,
+    maxHeight: props.maxHeight,
   });
 
   const treeEntries = c.tree?.entries;

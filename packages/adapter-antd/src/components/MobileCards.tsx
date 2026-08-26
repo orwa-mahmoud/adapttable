@@ -363,6 +363,8 @@ export function MobileCards<TRow>({
   pinnedBottomRows = [],
   extraRows,
   renderCard,
+  listRef,
+  listStyle,
 }: Readonly<{
   table: UseDataTableResult<TRow>;
   /** Class applied to every card (merged before `rowClassName`). */
@@ -426,6 +428,10 @@ export function MobileCards<TRow>({
   pinnedTopRows?: readonly TRow[];
   pinnedBottomRows?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
+  /** Attach the virtualizer to this list (window or maxHeight box). */
+  listRef?: (node: HTMLElement | null) => void;
+  /** Clip style when the host passed `maxHeight`. */
+  listStyle?: CSSProperties;
 }>) {
   const { labels, selection, columns } = table;
   // Either the virtual slice or every source row, resolved to render entries
@@ -458,6 +464,7 @@ export function MobileCards<TRow>({
         key={key}
         ref={measureElement}
         data-index={index}
+        data-adapttable-part="card"
         style={{
           ...treeCardStyle(treeEntry?.level ?? 0),
           ...resolveRowStyle(rowStyle, rowHeight, row, index),
@@ -535,6 +542,7 @@ export function MobileCards<TRow>({
 
   return (
     <ul
+      ref={listRef}
       data-adapttable-part="cards"
       aria-label={tableLabel}
       style={{
@@ -544,6 +552,7 @@ export function MobileCards<TRow>({
         display: "flex",
         flexDirection: "column",
         gap: compact ? 4 : 8,
+        ...listStyle,
       }}
     >
       {paddingTop > 0 && <li aria-hidden style={{ height: paddingTop }} />}
