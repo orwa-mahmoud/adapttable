@@ -9,7 +9,9 @@
  */
 import { useCallback, useMemo, useState } from "react";
 
-import { appendByKey, currentFeatureHost } from "../features/currentHost";
+import type { FeatureHostState } from "../features/currentHost";
+import { appendByKey } from "../features/currentHost";
+import { useFeatureHost } from "../features/featureHostContext";
 import type { TableLabels } from "../types";
 import {
   type Command,
@@ -41,6 +43,8 @@ export interface UseCommandPaletteOptions extends TableCommandOptions {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   commandPalette?: boolean | CommandPaletteOptions;
   labels: TableLabels;
+  /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
+  featureHost?: FeatureHostState;
 }
 
 /** What an adapter binds and renders. */
@@ -66,7 +70,8 @@ export function useCommandPalette(
   options: UseCommandPaletteOptions
 ): TableCommandPalette {
   const { commandPalette } = options;
-  const pluginCommands = currentFeatureHost()?.commands;
+  const fromTree = useFeatureHost();
+  const pluginCommands = (options.featureHost ?? fromTree)?.commands;
   const enabled =
     commandPalette !== false &&
     (commandPalette !== undefined || Boolean(pluginCommands?.length));

@@ -151,7 +151,10 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `extendFilterType`, `registerEditor`, `registerAggregator`, `registerWriter`,
 `registerColumnMenuAction`, `registerPanel`, `registerCommand`,
 `registerContextMenuItems`, `onDispose`. Adapters run this through
-`useTableFeatures`.
+`useTableFeatures`. The host belongs to that table: `featureHostOf` /
+`rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
+`useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
+scopes a mapper (summary, group aggregates) to the table that invoked it.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·

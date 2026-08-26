@@ -152,4 +152,7 @@ The per-seam registration APIs this supersedes (`FilterTypeRegistry.register`
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
 `columnSelectionCheckbox` · `feature` (ad-hoc patch) · `applyTableFeatures`
 (the merge used by every adapter) · `useTableFeatures` (apply + `setup(host)`,
-the hook every adapter runs).
+the hook every adapter runs) · `featureHostOf` / `rememberFeatureHost` (the
+host of one table, never a sibling's) · `FeatureHostProvider` /
+`useFeatureHost` (hooks under that table) · `bindFeatureHostFn` (a mapper
+created outside the table still resolves names for the table that invokes it).

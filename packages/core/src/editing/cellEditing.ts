@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
 import { currentFeatureHost } from "../features/currentHost";
 import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
@@ -240,9 +241,12 @@ const BUILTIN_EDITORS = new Set<string>([
   "time",
 ]);
 
-function resolveEditorValue(editor: CellEditor): CellEditor {
+function resolveEditorValue(
+  editor: CellEditor,
+  host?: FeatureHostState
+): CellEditor {
   if (typeof editor !== "string" || BUILTIN_EDITORS.has(editor)) return editor;
-  const render = currentFeatureHost()?.editors.get(editor);
+  const render = (host ?? currentFeatureHost())?.editors.get(editor);
   return render ? { type: "custom", render } : editor;
 }
 
@@ -257,10 +261,11 @@ function resolveEditorValue(editor: CellEditor): CellEditor {
  * `{ type: "custom", render }` so adapters stay on one path.
  */
 export function resolveCellEditor(
-  column: EditableColumnLike
+  column: EditableColumnLike,
+  host?: FeatureHostState
 ): CellEditor | null {
   if (column.editable === undefined || column.editable === false) return null;
-  return resolveEditorValue(column.editor ?? "text");
+  return resolveEditorValue(column.editor ?? "text", host);
 }
 
 /**
@@ -270,13 +275,14 @@ export function resolveCellEditor(
  */
 export function readEditableCellValue<TRow>(
   row: TRow,
-  column: EditableColumnLike<TRow>
+  column: EditableColumnLike<TRow>,
+  host?: FeatureHostState
 ): string {
   const seed = readSeed(row, column);
   // A date editor holds a day, a time editor holds a time of day: trim the
   // stored value to the part its own input can hold, or the browser rejects it
   // and the editor opens empty.
-  return trimToEditor(seed, resolveCellEditor(column));
+  return trimToEditor(seed, resolveCellEditor(column, host));
 }
 
 /** The raw seed, before the editor's own shape is applied. */
@@ -450,6 +456,7 @@ export function resolveCommitValue<TRow>(options: {
   rows: readonly TRow[];
   columns: readonly EditableColumnLike<TRow>[];
   rowKey: (row: TRow) => string;
+  featureHost?: FeatureHostState;
 }): { row: TRow; column: EditableColumnLike<TRow>; value: unknown } | null {
   const row = options.rows.find(
     (r) => options.rowKey(r) === options.commit.rowId
@@ -458,7 +465,7 @@ export function resolveCommitValue<TRow>(options: {
     (c) => c.key === options.commit.columnKey
   );
   if (!row || !column) return null;
-  const editor = resolveCellEditor(column) ?? "text";
+  const editor = resolveCellEditor(column, options.featureHost) ?? "text";
   // A column that states how to read its own drafts owns the conversion; the
   // editor's built-in parsing is the fallback, not an extra step on top.
   const value = column.parseValue
@@ -478,6 +485,7 @@ export function applyCellEditCommit<TRow>(options: {
   columns: readonly EditableColumnLike<TRow>[];
   rowKey: (row: TRow) => string;
   onCellEdit: (row: TRow, key: string, nextValue: unknown) => void;
+  featureHost?: FeatureHostState;
 }): boolean {
   const resolved = resolveCommitValue(options);
   if (!resolved) return false;

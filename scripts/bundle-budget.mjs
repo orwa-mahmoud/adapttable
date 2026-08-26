@@ -339,12 +339,17 @@ const FIXTURES = [
   // the attribute is never set — but the helper sits on the cell walk every
   // adapter already imports. Unstyled was on the 133 KB line and moved
   // 0.1 KB over it.
+  //
+  // The feature host is no longer a module stack: each table provides its
+  // own via FeatureHostProvider / useFeatureHost. That context is on the
+  // default path because export, menus, editors and aggregators resolve
+  // after render. ~0.2 KB gzip; the four kits already on the line move 1 KB.
   { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 133 },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 132 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 126 },
+  { name: "mui · table", pkg: "adapter-mui", budgetKB: 134 },
+  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 133 },
+  { name: "antd · table", pkg: "adapter-antd", budgetKB: 127 },
   { name: "radix · table", pkg: "adapter-radix", budgetKB: 133 },
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 139 },
+  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 140 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.

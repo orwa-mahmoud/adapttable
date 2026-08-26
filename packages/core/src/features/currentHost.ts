@@ -1,10 +1,14 @@
 /**
- * The live feature host for the table currently rendering.
+ * The feature host for ONE table, looked up from that table — never from
+ * "whoever rendered last".
  *
- * First-render compute (filters, summary rows, column menus) runs before
- * layout effects, so the host is assigned during render. Nested tables push
- * and pop a stack — a single slot would let the inner table steal the outer
- * one's registrations.
+ * A module-level stack that is pushed during render and popped on unmount
+ * leaves the last table on top for every later click, and lets an inner
+ * table steal the rest of the outer tree. Readers take the host from
+ * {@link FeatureHostContext} (hooks) or as an argument (plain functions).
+ * {@link currentFeatureHost} is only valid inside {@link runWithFeatureHost},
+ * which is how a mapper created outside the table (e.g. `aggregate()`)
+ * still resolves names for the table that is invoking it.
  */
 import type { Command } from "../actions/commandRegistry";
 import type {
@@ -73,31 +77,42 @@ export function appendByKey<T>(
   return [...map.values()];
 }
 
-const stack: FeatureHostState[] = [];
+const scoped: FeatureHostState[] = [];
 
-/** The host for the table whose render (or whose child's) is running. */
+/**
+ * Run `fn` with `host` as {@link currentFeatureHost}. The stack is empty
+ * again when `fn` returns, so a sibling or a later click cannot see it.
+ */
+export function runWithFeatureHost<T>(
+  host: FeatureHostState | undefined,
+  fn: () => T
+): T {
+  if (!host) return fn();
+  scoped.push(host);
+  try {
+    return fn();
+  } finally {
+    scoped.pop();
+  }
+}
+
+/**
+ * The host bound by {@link runWithFeatureHost}. Empty outside that call —
+ * a leftover here is the bug this module used to have.
+ */
 export function currentFeatureHost<TRow = unknown>():
   | FeatureHostState<TRow>
   | undefined {
-  return stack.at(-1) as FeatureHostState<TRow> | undefined;
+  return scoped.at(-1) as FeatureHostState<TRow> | undefined;
 }
 
-/** Replace this hook's previous host on the stack, then push `next`. */
-export function replaceFeatureHost(
-  previous: FeatureHostState | null,
-  next: FeatureHostState
-): void {
-  if (previous) {
-    const index = stack.lastIndexOf(previous);
-    if (index >= 0) stack.splice(index, 1);
-  }
-  stack.push(next);
-}
-
-/** Remove this table's host (unmount, or the host identity changed). */
-export function popFeatureHost(host: FeatureHostState): void {
-  const index = stack.lastIndexOf(host);
-  if (index >= 0) stack.splice(index, 1);
+/** Bind a callback so every invocation sees `host` via {@link currentFeatureHost}. */
+export function bindFeatureHostFn<Args extends unknown[], R>(
+  host: FeatureHostState | undefined,
+  fn: ((...args: Args) => R) | undefined
+): ((...args: Args) => R) | undefined {
+  if (!fn) return fn;
+  return (...args: Args) => runWithFeatureHost(host, () => fn(...args));
 }
 
 /** Apply host `registerFilterType` / `extendFilterType` onto a registry. */

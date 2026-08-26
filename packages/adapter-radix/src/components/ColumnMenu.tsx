@@ -17,6 +17,7 @@ import {
   hideAllColumns,
   showAllColumns,
   unpinAllColumns,
+  useFeatureHost,
 } from "@adapttable/core/adapter";
 import {
   EyeIcon,
@@ -166,7 +167,9 @@ function ColumnMenuRowItem<TRow>({
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
+  const featureHost = useFeatureHost<TRow>();
   const actions = columnMenuActions(row, {
+    featureHost,
     labels,
     layout,
     sortBy,

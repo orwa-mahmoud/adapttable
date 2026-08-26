@@ -576,7 +576,10 @@ The per-seam registration APIs this supersedes (`FilterTypeRegistry.register`
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
 `columnSelectionCheckbox` · `feature` (ad-hoc patch) · `applyTableFeatures`
 (the merge used by every adapter) · `useTableFeatures` (apply + `setup(host)`,
-the hook every adapter runs).
+the hook every adapter runs) · `featureHostOf` / `rememberFeatureHost` (the
+host of one table, never a sibling's) · `FeatureHostProvider` /
+`useFeatureHost` (hooks under that table) · `bindFeatureHostFn` (a mapper
+created outside the table still resolves names for the table that invokes it).
 
 ---
 
@@ -7724,7 +7727,10 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `extendFilterType`, `registerEditor`, `registerAggregator`, `registerWriter`,
 `registerColumnMenuAction`, `registerPanel`, `registerCommand`,
 `registerContextMenuItems`, `onDispose`. Adapters run this through
-`useTableFeatures`.
+`useTableFeatures`. The host belongs to that table: `featureHostOf` /
+`rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
+`useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
+scopes a mapper (summary, group aggregates) to the table that invoked it.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·

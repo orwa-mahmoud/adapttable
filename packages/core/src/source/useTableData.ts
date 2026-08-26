@@ -2,10 +2,8 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { resolveColumns } from "../columns/resolveColumns";
-import {
-  applyFilterExtends,
-  currentFeatureHost,
-} from "../features/currentHost";
+import type { FeatureHostState } from "../features/currentHost";
+import { applyFilterExtends } from "../features/currentHost";
 import { computeFilterFacets, type FacetMap } from "../filters/facets";
 import { resolveFilterRegistry } from "../filters/filterBuiltins";
 import {
@@ -94,6 +92,8 @@ export interface UseTableDataOptions<TRow> extends Pick<
   facetKeys?: readonly string[];
   /** Server tier: distinct-value counts from the last fetch. */
   facets?: FacetMap;
+  /** The host of THIS table — filter-type plugins resolve from here. */
+  featureHost?: FeatureHostState;
 }
 
 /** Result of {@link useTableData}. */
@@ -258,6 +258,7 @@ export function useTableData<TRow>(
     supports,
     facetKeys,
     facets: serverFacets,
+    featureHost,
     ...urlOptions
   } = options;
 
@@ -297,12 +298,17 @@ export function useTableData<TRow>(
     });
     return buildFilterRuntime(
       withAsync,
-      applyFilterExtends(
-        resolveFilterRegistry(filterTypes),
-        currentFeatureHost()
-      )
+      applyFilterExtends(resolveFilterRegistry(filterTypes), featureHost)
     );
-  }, [columns, declaredFilters, locale, data, loadedOptions, filterTypes]);
+  }, [
+    columns,
+    declaredFilters,
+    locale,
+    data,
+    loadedOptions,
+    filterTypes,
+    featureHost,
+  ]);
 
   useEffect(() => {
     let alive = true;

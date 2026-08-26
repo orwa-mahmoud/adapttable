@@ -1,4 +1,5 @@
 import {
+  FeatureHostProvider,
   GridFocusAnnouncer,
   RowReorderAnnouncer,
   type TableBodyRegion,
@@ -93,65 +94,67 @@ export function DataTable<TRow>(
   };
 
   return (
-    <div
-      ref={rootRef}
-      dir={props.dir}
-      className={`d-flex flex-column gap-3 ${props.classNames?.root ?? ""}`.trim()}
-      aria-busy={chrome.isRefreshing || undefined}
-    >
-      <GridFocusAnnouncer focus={shell.gridFocus} />
-      {shell.tableProps.rowReorder ? (
-        <RowReorderAnnouncer
-          announcement={shell.tableProps.rowReorder.announcement}
+    <FeatureHostProvider host={shell.featureHost}>
+      <div
+        ref={rootRef}
+        dir={props.dir}
+        className={`d-flex flex-column gap-3 ${props.classNames?.root ?? ""}`.trim()}
+        aria-busy={chrome.isRefreshing || undefined}
+      >
+        <GridFocusAnnouncer focus={shell.gridFocus} />
+        {shell.tableProps.rowReorder ? (
+          <RowReorderAnnouncer
+            announcement={shell.tableProps.rowReorder.announcement}
+          />
+        ) : null}
+
+        <Toolbar
+          {...toolbarProps}
+          className={props.classNames?.toolbar}
+          filtersMode={filtersMode}
+          filtersOpen={filtersOpen}
+          onToggleFilters={filtersTrigger.onClick}
+          onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+          onCloseFilters={() => setFiltersOpen(false)}
+          columnMenu={
+            props.enableColumnMenu && !chrome.isMobile ? (
+              <ColumnMenu
+                allColumns={chrome.allColumns}
+                layout={chrome.columnLayout}
+                labels={labels}
+                onAutoSize={shell.autoSizeColumns}
+                onAutoSizeColumn={shell.autoSizeColumn}
+                onSortColumn={(key, dir) => source.setSort(key, dir)}
+                onFilterColumn={() => setFiltersOpen(true)}
+                sortBy={source.sortBy}
+                sortDir={source.sortDir}
+                hasRowActions={hasRowActions}
+                hasRowReorder={hasRowReorder}
+                dir={props.dir}
+              />
+            ) : undefined
+          }
         />
-      ) : null}
 
-      <Toolbar
-        {...toolbarProps}
-        className={props.classNames?.toolbar}
-        filtersMode={filtersMode}
-        filtersOpen={filtersOpen}
-        onToggleFilters={filtersTrigger.onClick}
-        onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-        onCloseFilters={() => setFiltersOpen(false)}
-        columnMenu={
-          props.enableColumnMenu && !chrome.isMobile ? (
-            <ColumnMenu
-              allColumns={chrome.allColumns}
-              layout={chrome.columnLayout}
-              labels={labels}
-              onAutoSize={shell.autoSizeColumns}
-              onAutoSizeColumn={shell.autoSizeColumn}
-              onSortColumn={(key, dir) => source.setSort(key, dir)}
-              onFilterColumn={() => setFiltersOpen(true)}
-              sortBy={source.sortBy}
-              sortDir={source.sortDir}
-              hasRowActions={hasRowActions}
-              hasRowReorder={hasRowReorder}
-              dir={props.dir}
-            />
-          ) : undefined
-        }
-      />
+        {bodyByRegion[chrome.body]}
 
-      {bodyByRegion[chrome.body]}
+        {props.tableFooter ? (
+          <div data-adapttable-part="table-footer">{props.tableFooter}</div>
+        ) : null}
 
-      {props.tableFooter ? (
-        <div data-adapttable-part="table-footer">{props.tableFooter}</div>
-      ) : null}
-
-      {chrome.showFooter && (
-        <Footer
-          className={props.classNames?.footer}
-          pagination={table.pagination}
-          total={source.total}
-          limit={source.limit}
-          setPage={source.setPage}
-          setLimit={source.setLimit}
-          labels={labels}
-          showRowsPerPage={!chrome.grouping}
-        />
-      )}
-    </div>
+        {chrome.showFooter && (
+          <Footer
+            className={props.classNames?.footer}
+            pagination={table.pagination}
+            total={source.total}
+            limit={source.limit}
+            setPage={source.setPage}
+            setLimit={source.setLimit}
+            labels={labels}
+            showRowsPerPage={!chrome.grouping}
+          />
+        )}
+      </div>
+    </FeatureHostProvider>
   );
 }

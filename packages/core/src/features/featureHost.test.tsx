@@ -1,4 +1,5 @@
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
+import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useCommandPalette } from "../actions/useCommandPalette";
@@ -17,9 +18,15 @@ import {
   type FilterTypeSpec,
 } from "../filters/filterRegistry";
 import { defaultLabels } from "../labels";
-import { applyFilterExtends, currentFeatureHost } from "./currentHost";
+import {
+  applyFilterExtends,
+  currentFeatureHost,
+  type FeatureHostState,
+  runWithFeatureHost,
+} from "./currentHost";
 import { filterTypes } from "./factories";
-import { useTableFeatures } from "./featureHost";
+import { featureHostOf, useTableFeatures } from "./featureHost";
+import { FeatureHostProvider, useFeatureHost } from "./featureHostContext";
 import {
   applyTableFeatures,
   getAppliedFeatures,
@@ -58,7 +65,7 @@ describe("useTableFeatures", () => {
         props,
         spec: applyFilterExtends(
           resolveFilterRegistry(),
-          currentFeatureHost()
+          featureHostOf(props)
         ).get("currency"),
       };
     });
@@ -76,7 +83,7 @@ describe("useTableFeatures", () => {
         resolveFilterRegistry(
           (props as { filterTypes?: FilterTypeSpec[] }).filterTypes
         ),
-        currentFeatureHost()
+        featureHostOf(props)
       );
       return registry.types().filter((type) => type === "currency");
     });
@@ -129,9 +136,9 @@ describe("useTableFeatures", () => {
       toggleVisible: vi.fn(),
       setPinned: vi.fn(),
       setWidth: vi.fn(),
-    } as unknown as UseColumnLayoutResult<{ id: string }>;
+    } as unknown as UseColumnLayoutResult<unknown>;
     const { result } = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
+      const props = useTableFeatures({ features: [plugin] });
       return columnMenuActions(
         {
           column: { key: "name" },
@@ -147,7 +154,7 @@ describe("useTableFeatures", () => {
           canSort: false,
           canFilter: false,
         },
-        { labels: defaultLabels, layout }
+        { labels: defaultLabels, layout, featureHost: featureHostOf(props) }
       );
     });
     expect(result.current.map((action) => action.id)).toContain("freeze");
@@ -162,12 +169,15 @@ describe("useTableFeatures", () => {
       },
     };
     const { result } = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
-      return resolveCellEditor({
-        key: "tint",
-        editable: true,
-        editor: "color" as CellEditor,
-      });
+      const props = useTableFeatures({ features: [plugin] });
+      return resolveCellEditor(
+        {
+          key: "tint",
+          editable: true,
+          editor: "color" as CellEditor,
+        },
+        featureHostOf(props)
+      );
     });
     expect(result.current).toEqual({ type: "custom", render });
   });
@@ -180,12 +190,14 @@ describe("useTableFeatures", () => {
       },
     };
     const { result } = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
-      return aggregate({ team: "distinct" } as unknown as AggregateSpec)([
-        { team: "A" },
-        { team: "B" },
-        { team: "A" },
-      ]);
+      const props = useTableFeatures({ features: [plugin] });
+      return runWithFeatureHost(featureHostOf(props), () =>
+        aggregate({ team: "distinct" } as unknown as AggregateSpec)([
+          { team: "A" },
+          { team: "B" },
+          { team: "A" },
+        ])
+      );
     });
     expect(result.current).toEqual({ team: 3 });
   });
@@ -202,8 +214,11 @@ describe("useTableFeatures", () => {
       },
     };
     const { result } = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
-      return useCommandPalette({ labels: defaultLabels });
+      const props = useTableFeatures({ features: [plugin] });
+      return useCommandPalette({
+        labels: defaultLabels,
+        featureHost: featureHostOf(props),
+      });
     });
     expect(result.current.commands.map((command) => command.key)).toContain(
       "audit"
@@ -219,31 +234,31 @@ describe("useTableFeatures", () => {
       },
     };
     const armed = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
-      return resolveExportCsv(undefined);
+      const props = useTableFeatures({ features: [plugin] });
+      return resolveExportCsv(undefined, featureHostOf(props));
     }).result.current;
     expect(armed?.writer).toBe(writer);
 
     const merged = renderHook(() => {
       const exportCsv = { filename: "out.tsv" };
-      useTableFeatures({ features: [plugin], exportCsv });
-      return resolveExportCsv(exportCsv);
+      const props = useTableFeatures({ features: [plugin], exportCsv });
+      return resolveExportCsv(exportCsv, featureHostOf(props));
     }).result.current;
     expect(merged).toEqual({ filename: "out.tsv", writer });
 
     const kept = renderHook(() => {
       const csvWriter = { extension: "csv", build: vi.fn() };
-      useTableFeatures({
+      const props = useTableFeatures({
         features: [plugin],
         exportCsv: { writer: csvWriter },
       });
-      return resolveExportCsv({ writer: csvWriter });
+      return resolveExportCsv({ writer: csvWriter }, featureHostOf(props));
     }).result.current;
     expect(kept?.writer?.extension).toBe("csv");
 
     const off = renderHook(() => {
-      useTableFeatures({ features: [plugin], exportCsv: false });
-      return resolveExportCsv(false);
+      const props = useTableFeatures({ features: [plugin], exportCsv: false });
+      return resolveExportCsv(false, featureHostOf(props));
     }).result.current;
     expect(off).toBeNull();
   });
@@ -314,6 +329,7 @@ describe("useTableFeatures", () => {
         labels: defaultLabels,
         rowFor: () => undefined,
         actions: {},
+        featureHost: featureHostOf(props),
       });
       return (
         <div>
@@ -367,8 +383,8 @@ describe("useTableFeatures", () => {
       },
     };
     const { result } = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
-      return applyFilterExtends(defaultFilterRegistry, currentFeatureHost());
+      const props = useTableFeatures({ features: [plugin] });
+      return applyFilterExtends(defaultFilterRegistry, featureHostOf(props));
     });
     expect(filterTypeDefaultOp({ type: "text" }, result.current)).toBe(
       "contains"
@@ -420,9 +436,9 @@ describe("useTableFeatures", () => {
       toggleVisible: vi.fn(),
       setPinned: vi.fn(),
       setWidth: vi.fn(),
-    } as unknown as UseColumnLayoutResult<{ id: string }>;
+    } as unknown as UseColumnLayoutResult<unknown>;
     const { result } = renderHook(() => {
-      useTableFeatures({ features: [plugin] });
+      const props = useTableFeatures({ features: [plugin] });
       return columnMenuActions(
         {
           column: { key: "name" },
@@ -438,7 +454,7 @@ describe("useTableFeatures", () => {
           canSort: false,
           canFilter: false,
         },
-        { labels: defaultLabels, layout }
+        { labels: defaultLabels, layout, featureHost: featureHostOf(props) }
       );
     });
     expect(result.current.map((action) => action.id)).toEqual(
@@ -459,10 +475,11 @@ describe("useTableFeatures", () => {
     };
     const { result } = renderHook(() => {
       const commandPalette = { shortcuts: [] };
-      useTableFeatures({ features: [plugin], commandPalette });
+      const props = useTableFeatures({ features: [plugin], commandPalette });
       return useCommandPalette({
         commandPalette,
         labels: defaultLabels,
+        featureHost: featureHostOf(props),
       });
     });
     expect(result.current.commands.map((command) => command.key)).toContain(
@@ -486,5 +503,185 @@ describe("getAppliedFeatures", () => {
     const plugin: TableFeature = { id: "marker" };
     const resolved = applyTableFeatures({ features: [plugin], extra: 1 });
     expect(getAppliedFeatures(resolved)).toEqual([plugin]);
+  });
+});
+
+const menuRow = {
+  column: { key: "name" },
+  key: "name",
+  name: "Name",
+  hidden: false,
+  pinned: undefined,
+  index: 0,
+  canMove: true,
+  canHide: true,
+  canPin: true,
+  canResize: false,
+  canSort: false,
+  canFilter: false,
+};
+
+const menuLayout = {
+  state: { order: ["name"], hidden: {}, pinned: {}, widths: {} },
+  setOrder: () => undefined,
+  setHidden: () => undefined,
+  toggleVisible: () => undefined,
+  setPinned: () => undefined,
+  setWidth: () => undefined,
+} as unknown as UseColumnLayoutResult<unknown>;
+
+function HostMark({ testId }: Readonly<{ testId: string }>) {
+  return (
+    <output data-testid={testId}>
+      {useFeatureHost()?.writers[0]?.extension}
+    </output>
+  );
+}
+
+function ownerPlugin(id: string): TableFeature {
+  return {
+    id,
+    setup(host) {
+      host.registerWriter({
+        extension: id,
+        build: vi.fn(),
+      });
+      host.registerColumnMenuAction(() => ({
+        id,
+        label: id,
+        disabled: false,
+        run: () => undefined,
+      }));
+      host.registerCommand({
+        key: id,
+        label: id,
+        onSelect: () => undefined,
+      });
+    },
+  };
+}
+
+function NestedInner() {
+  const props = useTableFeatures({ features: [ownerPlugin("inner")] });
+  return (
+    <FeatureHostProvider host={featureHostOf(props)}>
+      <HostMark testId="inner-host" />
+    </FeatureHostProvider>
+  );
+}
+
+function NestedOuter() {
+  const props = useTableFeatures({ features: [ownerPlugin("outer")] });
+  return (
+    <FeatureHostProvider host={featureHostOf(props)}>
+      <NestedInner />
+      <HostMark testId="outer-host" />
+    </FeatureHostProvider>
+  );
+}
+
+function OwnedTable({
+  id,
+  onHost,
+}: Readonly<{
+  id: string;
+  onHost: (id: string, host: FeatureHostState) => void;
+}>) {
+  const props = useTableFeatures({ features: [ownerPlugin(id)] });
+  const host = featureHostOf(props);
+  if (host) onHost(id, host);
+  const palette = useCommandPalette({
+    labels: defaultLabels,
+    featureHost: host,
+  });
+  return (
+    <FeatureHostProvider host={host}>
+      <output data-testid={`palette-${id}`}>
+        {palette.commands.map((command) => command.key).join(",")}
+      </output>
+    </FeatureHostProvider>
+  );
+}
+
+function menuIds(host: FeatureHostState): string[] {
+  return columnMenuActions(menuRow, {
+    labels: defaultLabels,
+    layout: menuLayout,
+    featureHost: host,
+  }).map((action) => action.id);
+}
+
+function bothHosts(hosts: Record<string, FeatureHostState>): {
+  a: FeatureHostState;
+  b: FeatureHostState;
+} {
+  const a = hosts.a;
+  const b = hosts.b;
+  if (!a || !b) throw new Error("expected sibling hosts a and b");
+  return { a, b };
+}
+
+function assertOwned(hosts: {
+  a: FeatureHostState;
+  b: FeatureHostState;
+}): void {
+  expect(resolveExportCsv(undefined, hosts.a)?.writer?.extension).toBe("a");
+  expect(resolveExportCsv(undefined, hosts.b)?.writer?.extension).toBe("b");
+  expect(menuIds(hosts.a)).toContain("a");
+  expect(menuIds(hosts.a)).not.toContain("b");
+  expect(menuIds(hosts.b)).toContain("b");
+  expect(menuIds(hosts.b)).not.toContain("a");
+  expect(currentFeatureHost()).toBeUndefined();
+}
+
+describe("a table owns its feature host", () => {
+  it("keeps sibling registrations after the other table rendered last", () => {
+    const hosts: Record<string, FeatureHostState> = {};
+    const capture = (id: string, host: FeatureHostState) => {
+      hosts[id] = host;
+    };
+    const { rerender } = render(
+      <>
+        <OwnedTable id="a" onHost={capture} />
+        <OwnedTable id="b" onHost={capture} />
+      </>
+    );
+    assertOwned(bothHosts(hosts));
+    expect(screen.getByTestId("palette-a").textContent).toContain("a");
+    expect(screen.getByTestId("palette-b").textContent).toContain("b");
+
+    rerender(
+      <>
+        <OwnedTable id="b" onHost={capture} />
+        <OwnedTable id="a" onHost={capture} />
+      </>
+    );
+    assertOwned(bothHosts(hosts));
+    expect(screen.getByTestId("palette-a").textContent).toContain("a");
+    expect(screen.getByTestId("palette-b").textContent).toContain("b");
+  });
+
+  it("lets the outer subtree keep the outer host after an inner table mounts", () => {
+    render(<NestedOuter />);
+    expect(screen.getByTestId("outer-host").textContent).toBe("outer");
+    expect(screen.getByTestId("inner-host").textContent).toBe("inner");
+    expect(currentFeatureHost()).toBeUndefined();
+  });
+
+  it("keeps sibling and nested hosts under StrictMode", () => {
+    const hosts: Record<string, FeatureHostState> = {};
+    const capture = (id: string, host: FeatureHostState) => {
+      hosts[id] = host;
+    };
+    render(
+      <StrictMode>
+        <OwnedTable id="a" onHost={capture} />
+        <OwnedTable id="b" onHost={capture} />
+        <NestedOuter />
+      </StrictMode>
+    );
+    assertOwned(bothHosts(hosts));
+    expect(screen.getByTestId("outer-host").textContent).toBe("outer");
+    expect(screen.getByTestId("inner-host").textContent).toBe("inner");
   });
 });

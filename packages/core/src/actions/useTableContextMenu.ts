@@ -15,7 +15,8 @@
  */
 import { useCallback, useMemo } from "react";
 
-import { currentFeatureHost } from "../features/currentHost";
+import type { FeatureHostState } from "../features/currentHost";
+import { useFeatureHost } from "../features/featureHostContext";
 import type { ColumnDef, TableLabels } from "../types";
 import {
   type ContextMenuActions,
@@ -48,6 +49,8 @@ export interface TableContextMenuOptions<TRow> {
   sortBy?: string;
   sortDir?: "asc" | "desc";
   isPinned?: (columnKey: string) => boolean;
+  /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
+  featureHost?: FeatureHostState;
 }
 
 /** What an adapter binds and renders. */
@@ -72,7 +75,8 @@ export interface TableContextMenu {
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>
 ): TableContextMenu {
-  const pluginMenus = currentFeatureHost<TRow>()?.contextMenuItems;
+  const fromTree = useFeatureHost<TRow>();
+  const pluginMenus = (options.featureHost ?? fromTree)?.contextMenuItems;
   const enabled =
     options.contextMenu !== false &&
     (options.contextMenu !== undefined || Boolean(pluginMenus?.length));

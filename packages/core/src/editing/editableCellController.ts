@@ -1,5 +1,6 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
 import type { ColumnDef } from "../types";
 import type { BatchEditingState } from "./batchEditing";
 import {
@@ -76,6 +77,8 @@ export interface EditableCellEditing<TRow> {
     takeTheirs: string;
     theirsValue: (value: string) => string;
   };
+  /** The host of THIS table — plugin editors resolve from here. */
+  featureHost?: FeatureHostState;
 }
 
 /** Display / edit mode for one cell. */
@@ -179,7 +182,7 @@ export function editableCellController<TRow>(options: {
   if (!editing?.onCellEdit) return idle;
   const onCellEdit = editing.onCellEdit;
 
-  const editor = resolveCellEditor(column);
+  const editor = resolveCellEditor(column, editing.featureHost);
   if (!editor || !isCellEditable(column, row)) return idle;
 
   // Both kinds of chooser carry options; only the number chosen differs.

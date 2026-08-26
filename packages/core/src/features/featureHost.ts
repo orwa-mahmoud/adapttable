@@ -1,9 +1,8 @@
 /**
- * Live {@link TableFeatureHost}: `setup(host)` registrations. Chrome that
- * runs in the same render as this hook (filters, editors, aggregators,
- * export, palette, context menu, column menu) reads {@link currentFeatureHost}.
- * Side-panel panels overlay onto props because that chrome renders after
- * nested tables would otherwise steal the stack.
+ * Live {@link TableFeatureHost}: `setup(host)` registrations. The host is
+ * stored on the resolved props ({@link featureHostOf}) and provided to the
+ * tree by {@link FeatureHostProvider}. Chrome that runs in the same render
+ * receives it as an argument; it is not left on a module stack.
  */
 import { useLayoutEffect, useRef } from "react";
 
@@ -19,8 +18,6 @@ import {
   type ContextMenuItemsFactory,
   type FeatureHostState,
   type FilterTypeExtend,
-  popFeatureHost,
-  replaceFeatureHost,
 } from "./currentHost";
 import {
   applyTableFeatures,
@@ -156,16 +153,24 @@ export function useTableFeatures<P extends object>(incoming: P): P {
     rememberAppliedFeatures(props, getAppliedFeatures(applied) ?? []);
   }
 
-  const slot = useRef<FeatureHostState | null>(null);
-  replaceFeatureHost(slot.current, host);
-  slot.current = host;
-
   useLayoutEffect(() => {
     return () => {
-      popFeatureHost(host);
       if (host !== EMPTY_HOST) (host as LiveFeatureHost).dispose();
     };
   }, [host]);
 
   return props;
+}
+
+/** The host {@link useTableFeatures} created for these resolved props. */
+export function featureHostOf(props: object): FeatureHostState | undefined {
+  return hostOf.get(props);
+}
+
+/** Attach a host to a derived props object (chrome spreads a new one). */
+export function rememberFeatureHost(
+  props: object,
+  host: FeatureHostState | undefined
+): void {
+  if (host) hostOf.set(props, host);
 }

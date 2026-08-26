@@ -5,6 +5,7 @@ import {
   type UseSavedViewsOptions,
 } from "@adapttable/core";
 import {
+  FeatureHostProvider,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -159,6 +160,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     },
     sortBy: shell.source.sortBy,
     sortDir: shell.source.sortDir,
+    featureHost: shell.featureHost,
   });
 
   // The palette lists the table's own actions; its shortcut is bound here
@@ -170,6 +172,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     onExport: shell.toolbarProps.onExportCsv,
     onClearFilters: chrome.clearFilters,
     hasFilters: chrome.activeFilterCount > 0,
+    featureHost: shell.featureHost,
   });
   const { isMobile, confirm } = chrome;
   const stickyBar = useStickyToolbarLayout(
@@ -238,218 +241,220 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   }
 
   return (
-    <Paper
-      {...contextMenu.regionProps}
-      ref={rootRef}
-      p="xs"
-      radius="md"
-      withBorder
-      dir={dir}
-      aria-busy={chrome.isRefreshing || undefined}
-      className={classNames?.root}
-    >
-      <GridFocusAnnouncer focus={shell.gridFocus} />
-      {shell.tableProps.rowReorder ? (
-        <RowReorderAnnouncer
-          announcement={shell.tableProps.rowReorder.announcement}
-        />
-      ) : null}
-      <FindBar find={shell.find} labels={table.labels} />
-      <Stack gap="xs">
-        <Box
-          data-adapttable-part="toolbar"
-          ref={stickyBar.toolbarRef}
-          style={{
-            ...stickyBar.toolbarStyle,
-            ...(stickyBar.toolbarStyle
-              ? {
-                  background: SURFACE,
-                  paddingBottom: "var(--mantine-spacing-xs)",
+    <FeatureHostProvider host={shell.featureHost}>
+      <Paper
+        {...contextMenu.regionProps}
+        ref={rootRef}
+        p="xs"
+        radius="md"
+        withBorder
+        dir={dir}
+        aria-busy={chrome.isRefreshing || undefined}
+        className={classNames?.root}
+      >
+        <GridFocusAnnouncer focus={shell.gridFocus} />
+        {shell.tableProps.rowReorder ? (
+          <RowReorderAnnouncer
+            announcement={shell.tableProps.rowReorder.announcement}
+          />
+        ) : null}
+        <FindBar find={shell.find} labels={table.labels} />
+        <Stack gap="xs">
+          <Box
+            data-adapttable-part="toolbar"
+            ref={stickyBar.toolbarRef}
+            style={{
+              ...stickyBar.toolbarStyle,
+              ...(stickyBar.toolbarStyle
+                ? {
+                    background: SURFACE,
+                    paddingBottom: "var(--mantine-spacing-xs)",
+                  }
+                : {}),
+            }}
+            className={classNames?.toolbar}
+          >
+            <Stack gap="xs">
+              <Toolbar
+                {...toolbarProps}
+                filtersMode={filtersMode}
+                filtersOpen={drawerOpened}
+                onToggleFilters={filtersTrigger.onClick}
+                onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+                onCloseFilters={() => setDrawerOpened(false)}
+                savedViewsMenu={
+                  savedViews && (
+                    <SavedViewsSlot
+                      // The table's own URL backend/namespace are the
+                      // defaults — an explicit option still wins.
+                      options={{
+                        urlAdapter: shell.urlAdapter,
+                        urlKey: props.urlKey,
+                        ...savedViews,
+                      }}
+                      labels={table.labels}
+                    />
+                  )
                 }
-              : {}),
-          }}
-          className={classNames?.toolbar}
-        >
-          <Stack gap="xs">
-            <Toolbar
-              {...toolbarProps}
-              filtersMode={filtersMode}
-              filtersOpen={drawerOpened}
-              onToggleFilters={filtersTrigger.onClick}
-              onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-              onCloseFilters={() => setDrawerOpened(false)}
-              savedViewsMenu={
-                savedViews && (
-                  <SavedViewsSlot
-                    // The table's own URL backend/namespace are the
-                    // defaults — an explicit option still wins.
-                    options={{
-                      urlAdapter: shell.urlAdapter,
-                      urlKey: props.urlKey,
-                      ...savedViews,
-                    }}
+                columnMenu={
+                  <ColumnMenuSlot
+                    enabled={enableColumnMenu && !isMobile}
+                    onAutoSize={shell.autoSizeColumns}
+                    onAutoSizeColumn={shell.autoSizeColumn}
+                    onSortColumn={(key, dir) => viewSource.setSort(key, dir)}
+                    onFilterColumn={() => setDrawerOpened(true)}
+                    sortBy={viewSource.sortBy}
+                    sortDir={viewSource.sortDir}
+                    allColumns={chrome.allColumns}
+                    layout={chrome.columnLayout}
                     labels={table.labels}
+                    hasRowActions={hasRowActions}
+                    hasRowReorder={hasRowReorder}
+                    dir={dir}
                   />
-                )
-              }
-              columnMenu={
-                <ColumnMenuSlot
-                  enabled={enableColumnMenu && !isMobile}
-                  onAutoSize={shell.autoSizeColumns}
-                  onAutoSizeColumn={shell.autoSizeColumn}
-                  onSortColumn={(key, dir) => viewSource.setSort(key, dir)}
-                  onFilterColumn={() => setDrawerOpened(true)}
-                  sortBy={viewSource.sortBy}
-                  sortDir={viewSource.sortDir}
-                  allColumns={chrome.allColumns}
-                  layout={chrome.columnLayout}
+                }
+              />
+              <ActiveFilterChips
+                chips={chrome.mergedChips}
+                onClearAll={chrome.clearFilters}
+                label={table.labels.filters}
+                clearAllLabel={table.labels.clearAll}
+              />
+              {chrome.editing?.batch && (
+                <BatchEditBar
+                  batch={chrome.editing.batch}
                   labels={table.labels}
-                  hasRowActions={hasRowActions}
-                  hasRowReorder={hasRowReorder}
-                  dir={dir}
                 />
-              }
-            />
-            <ActiveFilterChips
-              chips={chrome.mergedChips}
-              onClearAll={chrome.clearFilters}
-              label={table.labels.filters}
-              clearAllLabel={table.labels.clearAll}
-            />
-            {chrome.editing?.batch && (
-              <BatchEditBar
-                batch={chrome.editing.batch}
-                labels={table.labels}
-              />
-            )}
+              )}
 
-            {table.selection && bulkActions && (
-              <BulkActionBar
-                selection={table.selection}
+              {table.selection && bulkActions && (
+                <BulkActionBar
+                  selection={table.selection}
+                  total={viewSource.total}
+                  bulkActions={bulkActions}
+                  confirm={confirm}
+                  labels={table.labels}
+                />
+              )}
+            </Stack>
+          </Box>
+
+          {chrome.isRefreshing && (
+            <Progress
+              size="xs"
+              animated
+              value={100}
+              aria-label={table.labels.loading}
+            />
+          )}
+
+          <CommandPalette
+            commands={palette.commands}
+            open={palette.open}
+            onClose={palette.close}
+            labels={table.labels}
+          />
+          <ContextMenu
+            items={contextMenu.items}
+            at={contextMenu.at}
+            onClose={contextMenu.close}
+            container={shell.fullscreen.container}
+            labels={table.labels}
+          />
+          <SidePanelLayout
+            side={props.sidePanel?.side}
+            body={
+              <>
+                {chrome.errorState
+                  ? (fillSlot(slots?.error, chrome.errorState) ?? (
+                      <ErrorState
+                        error={chrome.errorState.error}
+                        title={table.labels.errorTitle}
+                        message={table.labels.errorMessage}
+                        retryLabel={table.labels.retry}
+                        onRetry={chrome.errorState.retry}
+                        isRetrying={chrome.errorState.retrying}
+                      />
+                    ))
+                  : body}
+              </>
+            }
+            panel={
+              props.sidePanel?.open != null && (
+                <SidePanel
+                  panels={props.sidePanel.panels}
+                  openPanel={props.sidePanel.open}
+                  onOpenPanel={props.sidePanel.onOpenChange}
+                  onClose={() => {
+                    props.sidePanel?.onOpenChange(null);
+                  }}
+                  side={props.sidePanel.side}
+                  labels={table.labels}
+                />
+              )
+            }
+          />
+
+          {canLoadMore && viewSource.hasNextPage && (
+            <Group ref={loadMoreRef} justify="center" py="xs">
+              <Button
+                variant="default"
+                size="sm"
+                loading={viewSource.isFetchingNextPage}
+                onClick={() => viewSource.fetchNextPage()}
+              >
+                {table.labels.loadMore}
+              </Button>
+            </Group>
+          )}
+
+          {props.tableFooter ? (
+            <Box data-adapttable-part="table-footer">{props.tableFooter}</Box>
+          ) : null}
+
+          {chrome.showFooter && (
+            <Box className={classNames?.footer}>
+              <PaginationFooter
+                page={table.pagination.safePage}
+                totalPages={table.pagination.totalPages}
+                limit={viewSource.limit}
+                defaultLimit={viewSource.defaultLimit}
                 total={viewSource.total}
-                bulkActions={bulkActions}
-                confirm={confirm}
+                fromIndex={table.pagination.fromIndex}
+                toIndex={table.pagination.toIndex}
+                onPageChange={viewSource.setPage}
+                onLimitChange={viewSource.setLimit}
                 labels={table.labels}
+                showRowsPerPage={!chrome.grouping}
               />
-            )}
-          </Stack>
-        </Box>
+            </Box>
+          )}
+        </Stack>
 
-        {chrome.isRefreshing && (
-          <Progress
-            size="xs"
-            animated
-            value={100}
-            aria-label={table.labels.loading}
+        {filters && filtersMode === "drawer" && (
+          <FilterDrawer
+            opened={drawerOpened}
+            onClose={() => setDrawerOpened(false)}
+            filters={filters}
+            activeFilterCount={chrome.activeFilterCount}
+            onClearFilters={chrome.clearFilters}
+            labels={table.labels}
+            dir={dir}
           />
         )}
-
-        <CommandPalette
-          commands={palette.commands}
-          open={palette.open}
-          onClose={palette.close}
+        <StatusBar
+          enabled={props.statusBar === true}
+          notices={chrome.featureNotices}
+          shown={shell.source.rows.length}
+          page={shell.source.page}
+          limit={shell.source.limit}
+          total={shell.source.total}
+          selected={table.selection?.selectedCount ?? 0}
+          stats={shell.selectionStats}
           labels={table.labels}
+          locale={props.locale}
         />
-        <ContextMenu
-          items={contextMenu.items}
-          at={contextMenu.at}
-          onClose={contextMenu.close}
-          container={shell.fullscreen.container}
-          labels={table.labels}
-        />
-        <SidePanelLayout
-          side={props.sidePanel?.side}
-          body={
-            <>
-              {chrome.errorState
-                ? (fillSlot(slots?.error, chrome.errorState) ?? (
-                    <ErrorState
-                      error={chrome.errorState.error}
-                      title={table.labels.errorTitle}
-                      message={table.labels.errorMessage}
-                      retryLabel={table.labels.retry}
-                      onRetry={chrome.errorState.retry}
-                      isRetrying={chrome.errorState.retrying}
-                    />
-                  ))
-                : body}
-            </>
-          }
-          panel={
-            props.sidePanel?.open != null && (
-              <SidePanel
-                panels={props.sidePanel.panels}
-                openPanel={props.sidePanel.open}
-                onOpenPanel={props.sidePanel.onOpenChange}
-                onClose={() => {
-                  props.sidePanel?.onOpenChange(null);
-                }}
-                side={props.sidePanel.side}
-                labels={table.labels}
-              />
-            )
-          }
-        />
-
-        {canLoadMore && viewSource.hasNextPage && (
-          <Group ref={loadMoreRef} justify="center" py="xs">
-            <Button
-              variant="default"
-              size="sm"
-              loading={viewSource.isFetchingNextPage}
-              onClick={() => viewSource.fetchNextPage()}
-            >
-              {table.labels.loadMore}
-            </Button>
-          </Group>
-        )}
-
-        {props.tableFooter ? (
-          <Box data-adapttable-part="table-footer">{props.tableFooter}</Box>
-        ) : null}
-
-        {chrome.showFooter && (
-          <Box className={classNames?.footer}>
-            <PaginationFooter
-              page={table.pagination.safePage}
-              totalPages={table.pagination.totalPages}
-              limit={viewSource.limit}
-              defaultLimit={viewSource.defaultLimit}
-              total={viewSource.total}
-              fromIndex={table.pagination.fromIndex}
-              toIndex={table.pagination.toIndex}
-              onPageChange={viewSource.setPage}
-              onLimitChange={viewSource.setLimit}
-              labels={table.labels}
-              showRowsPerPage={!chrome.grouping}
-            />
-          </Box>
-        )}
-      </Stack>
-
-      {filters && filtersMode === "drawer" && (
-        <FilterDrawer
-          opened={drawerOpened}
-          onClose={() => setDrawerOpened(false)}
-          filters={filters}
-          activeFilterCount={chrome.activeFilterCount}
-          onClearFilters={chrome.clearFilters}
-          labels={table.labels}
-          dir={dir}
-        />
-      )}
-      <StatusBar
-        enabled={props.statusBar === true}
-        notices={chrome.featureNotices}
-        shown={shell.source.rows.length}
-        page={shell.source.page}
-        limit={shell.source.limit}
-        total={shell.source.total}
-        selected={table.selection?.selectedCount ?? 0}
-        stats={shell.selectionStats}
-        labels={table.labels}
-        locale={props.locale}
-      />
-    </Paper>
+      </Paper>
+    </FeatureHostProvider>
   );
 }

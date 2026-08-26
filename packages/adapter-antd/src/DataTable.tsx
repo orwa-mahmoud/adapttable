@@ -51,10 +51,13 @@ import {
   windowGroupedEntries,
 } from "@adapttable/core";
 import {
+  bindFeatureHostFn,
   bodyCellsHaveRowSpan,
   DEFAULT_CARD_SIZE_PX,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
+  featureHostOf,
+  FeatureHostProvider,
   fillSlot,
   flattenColumnTree,
   GridFocusAnnouncer,
@@ -64,6 +67,7 @@ import {
   pinnedRowPart,
   pinnedRowStickyStyle,
   printToolbar,
+  rememberFeatureHost,
   REORDER_COLUMN_WIDTH,
   resolveRowStyle,
   resolveStickyToolbar,
@@ -1512,6 +1516,7 @@ function useAntdGridState<TRow>(
 
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
+  const featureHost = featureHostOf(props);
   const {
     slots,
     className,
@@ -1559,6 +1564,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     supports: props.supports,
     facetKeys: props.facetKeys,
     facets: props.facets,
+    featureHost,
   });
   // A declarative `filters` array becomes the auto-built form; JSX passes
   // through untouched. Column-level `filter` shorthands alone (no `filters`
@@ -1598,7 +1604,10 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filterLabels,
     pinnedRowIds: pinChrome.pinnedRowIds,
     onPinnedRowIdsChange: pinChrome.onPinnedRowIdsChange,
+    summaryRow: bindFeatureHostFn(featureHost, props.summaryRow),
+    groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
   };
+  rememberFeatureHost(chromeProps, featureHost);
   const c = useTableChrome<TRow>(chromeProps);
   const { windowStart, find, gridFocus, stats } = useAntdGridState(
     props,
@@ -1639,6 +1648,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     },
     sortBy: source.sortBy,
     sortDir: source.sortDir,
+    featureHost,
   });
   const filtersTrigger = useFilterTriggerToggle(filtersOpen, setFiltersOpen);
   // Layout-visible columns WITHOUT device filtering: the same button must
@@ -1662,13 +1672,14 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         grouping: c.grouping,
         tree: c.tree,
         groupTotal: labels.groupTotal,
-        summaryRow: props.summaryRow,
-      }
+        summaryRow: chromeProps.summaryRow,
+      },
+      featureHost
     ),
     c.table.labels,
     // The button names the format it produces, so a spreadsheet writer relabels
     // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv)?.writer?.extension,
+    resolveExportCsv(props.exportCsv, featureHost)?.writer?.extension,
     c.featureNotices.some((notice) => notice.kind === "export-all-page")
   );
 
@@ -1681,6 +1692,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     onExport: exportHandler.onExportCsv,
     onClearFilters: c.clearFilters,
     hasFilters: c.activeFilterCount > 0,
+    featureHost,
   });
   // The chrome owns it: progressive column hiding measures this element.
   const rootRef = c.rootRef;
@@ -1887,7 +1899,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   // The summary row pads one leading cell per column antd injects (expand
   // first, then selection) so its cells stay aligned under the data columns.
   const summary = buildSummary(
-    props.summaryRow,
+    chromeProps.summaryRow,
     table.columns,
     summaryLeadingCells(rowSelection, expandable, Boolean(c.rowReorder)),
     hasRowActions
@@ -1950,7 +1962,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
       rowStyle={props.rowStyle}
       rowHeight={props.rowHeight}
       cardClassName={classNames?.card}
-      summaryRow={props.summaryRow}
+      summaryRow={chromeProps.summaryRow}
       renderCard={props.renderCard}
       skeletonRows={props.skeletonRows}
       size={size}
@@ -1978,178 +1990,182 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   );
 
   return (
-    <div
-      ref={rootRef}
-      {...contextMenu.regionProps}
-      dir={props.dir}
-      className={
-        [className, classNames?.root].filter(Boolean).join(" ") || undefined
-      }
-      aria-busy={c.isRefreshing || undefined}
-    >
-      <GridFocusAnnouncer focus={gridFocus} />
-      <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
-      <FindBar find={find} labels={c.table.labels} />
-      <Space orientation="vertical" size="small" style={{ width: "100%" }}>
-        <div
-          data-adapttable-part="toolbar"
-          ref={stickyBar.toolbarRef}
-          className={classNames?.toolbar}
-          style={stickyBar.toolbarStyle}
-        >
-          <Toolbar
-            table={table}
-            searchable={props.searchable !== false}
-            searchPlaceholder={props.searchPlaceholder}
-            sortByOptions={props.sortByOptions}
-            toolbar={props.toolbar}
-            toolbarSlots={props.toolbarSlots}
-            {...undoRedoToolbar(props.undoRedoButtons, history, labels)}
-            {...printToolbar(props.printButton, props.onPrint, labels)}
-            {...viewControls}
-            hasFilters={toolbarShowsFilters(
-              filtersMode,
-              Boolean(filtersNode),
-              Boolean(resolvedSource.setFilterTree)
-            )}
-            activeFilterCount={c.activeFilterCount}
-            filters={filtersNode}
-            filtersMode={filtersMode}
-            filtersOpen={filtersOpen}
-            onToggleFilters={filtersTrigger.onClick}
-            onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-            onCloseFilters={() => setFiltersOpen(false)}
-            onClearFilters={c.clearFilters}
-            onAddRow={c.rowMutations.canAdd ? c.rowMutations.addRow : undefined}
-            addRowLabel={labels.addRow}
-            isRefreshing={c.isRefreshing}
-            dir={props.dir}
-            columnMenu={
-              <ColumnMenuSlot
-                onAutoSize={onAutoSize}
-                onAutoSizeColumn={onAutoSizeColumn}
-                onSortColumn={(key, dir) => source.setSort(key, dir)}
-                onFilterColumn={() => setFiltersOpen(true)}
-                sortBy={source.sortBy}
-                sortDir={source.sortDir}
-                enabled={Boolean(props.enableColumnMenu) && !c.isMobile}
-                allColumns={c.allColumns}
-                layout={c.columnLayout}
-                labels={labels}
-                dir={props.dir}
-                hasRowActions={c.hasRowActions}
-                hasRowReorder={c.hasRowReorder}
-              />
-            }
-            {...exportHandler}
-            savedViewsMenu={
-              <SavedViewsSlot
-                options={props.savedViews}
-                urlAdapter={resolvedUrlAdapter}
-                urlKey={props.urlKey}
-                labels={labels}
-                dir={props.dir}
-              />
-            }
-            showRowsPerPage={!c.isPaged}
-          />
-        </div>
-        <Chips
-          chips={c.mergedChips}
-          onClearAll={c.clearFilters}
-          labels={labels}
-        />
-        {c.editing?.batch && (
-          <BatchEditBar batch={c.editing.batch} labels={labels} />
-        )}
-
-        {selection && props.bulkActions && (
-          <BulkBar
-            selection={selection}
-            total={source.total}
-            bulkActions={props.bulkActions}
-            confirm={confirm}
-            labels={labels}
-          />
-        )}
-        <div className={c.body === "desktop" ? classNames?.table : undefined}>
-          <SidePanelLayout
-            side={props.sidePanel?.side}
-            body={bodyRegion}
-            panel={
-              props.sidePanel?.open != null && (
-                <SidePanel
-                  panels={props.sidePanel.panels}
-                  openPanel={props.sidePanel.open}
-                  onOpenPanel={props.sidePanel.onOpenChange}
-                  onClose={() => {
-                    props.sidePanel?.onOpenChange(null);
-                  }}
-                  side={props.sidePanel.side}
-                  labels={labels}
-                />
-              )
-            }
-          />
-        </div>
-        <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
-        {c.isPaged && !source.error && c.body === "desktop" && (
-          <div className={classNames?.footer}>
-            <PagedFooter
+    <FeatureHostProvider host={featureHost}>
+      <div
+        ref={rootRef}
+        {...contextMenu.regionProps}
+        dir={props.dir}
+        className={
+          [className, classNames?.root].filter(Boolean).join(" ") || undefined
+        }
+        aria-busy={c.isRefreshing || undefined}
+      >
+        <GridFocusAnnouncer focus={gridFocus} />
+        <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
+        <FindBar find={find} labels={c.table.labels} />
+        <Space orientation="vertical" size="small" style={{ width: "100%" }}>
+          <div
+            data-adapttable-part="toolbar"
+            ref={stickyBar.toolbarRef}
+            className={classNames?.toolbar}
+            style={stickyBar.toolbarStyle}
+          >
+            <Toolbar
               table={table}
-              source={source}
-              labels={labels}
-              showRowsPerPage={!c.grouping}
+              searchable={props.searchable !== false}
+              searchPlaceholder={props.searchPlaceholder}
+              sortByOptions={props.sortByOptions}
+              toolbar={props.toolbar}
+              toolbarSlots={props.toolbarSlots}
+              {...undoRedoToolbar(props.undoRedoButtons, history, labels)}
+              {...printToolbar(props.printButton, props.onPrint, labels)}
+              {...viewControls}
+              hasFilters={toolbarShowsFilters(
+                filtersMode,
+                Boolean(filtersNode),
+                Boolean(resolvedSource.setFilterTree)
+              )}
+              activeFilterCount={c.activeFilterCount}
+              filters={filtersNode}
+              filtersMode={filtersMode}
+              filtersOpen={filtersOpen}
+              onToggleFilters={filtersTrigger.onClick}
+              onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+              onCloseFilters={() => setFiltersOpen(false)}
+              onClearFilters={c.clearFilters}
+              onAddRow={
+                c.rowMutations.canAdd ? c.rowMutations.addRow : undefined
+              }
+              addRowLabel={labels.addRow}
+              isRefreshing={c.isRefreshing}
+              dir={props.dir}
+              columnMenu={
+                <ColumnMenuSlot
+                  onAutoSize={onAutoSize}
+                  onAutoSizeColumn={onAutoSizeColumn}
+                  onSortColumn={(key, dir) => source.setSort(key, dir)}
+                  onFilterColumn={() => setFiltersOpen(true)}
+                  sortBy={source.sortBy}
+                  sortDir={source.sortDir}
+                  enabled={Boolean(props.enableColumnMenu) && !c.isMobile}
+                  allColumns={c.allColumns}
+                  layout={c.columnLayout}
+                  labels={labels}
+                  dir={props.dir}
+                  hasRowActions={c.hasRowActions}
+                  hasRowReorder={c.hasRowReorder}
+                />
+              }
+              {...exportHandler}
+              savedViewsMenu={
+                <SavedViewsSlot
+                  options={props.savedViews}
+                  urlAdapter={resolvedUrlAdapter}
+                  urlKey={props.urlKey}
+                  labels={labels}
+                  dir={props.dir}
+                />
+              }
+              showRowsPerPage={!c.isPaged}
             />
           </div>
+          <Chips
+            chips={c.mergedChips}
+            onClearAll={c.clearFilters}
+            labels={labels}
+          />
+          {c.editing?.batch && (
+            <BatchEditBar batch={c.editing.batch} labels={labels} />
+          )}
+
+          {selection && props.bulkActions && (
+            <BulkBar
+              selection={selection}
+              total={source.total}
+              bulkActions={props.bulkActions}
+              confirm={confirm}
+              labels={labels}
+            />
+          )}
+          <div className={c.body === "desktop" ? classNames?.table : undefined}>
+            <SidePanelLayout
+              side={props.sidePanel?.side}
+              body={bodyRegion}
+              panel={
+                props.sidePanel?.open != null && (
+                  <SidePanel
+                    panels={props.sidePanel.panels}
+                    openPanel={props.sidePanel.open}
+                    onOpenPanel={props.sidePanel.onOpenChange}
+                    onClose={() => {
+                      props.sidePanel?.onOpenChange(null);
+                    }}
+                    side={props.sidePanel.side}
+                    labels={labels}
+                  />
+                )
+              }
+            />
+          </div>
+          <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
+          {c.isPaged && !source.error && c.body === "desktop" && (
+            <div className={classNames?.footer}>
+              <PagedFooter
+                table={table}
+                source={source}
+                labels={labels}
+                showRowsPerPage={!c.grouping}
+              />
+            </div>
+          )}
+          {!c.isPaged && !source.error && source.hasNextPage && (
+            <Flex ref={loadMoreRef} justify="center">
+              <Button
+                loading={source.isFetchingNextPage}
+                onClick={() => source.fetchNextPage()}
+              >
+                {labels.loadMore}
+              </Button>
+            </Flex>
+          )}
+        </Space>
+        {filtersNode && filtersMode === "drawer" && (
+          <FilterDrawer
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            filters={filtersNode}
+            activeFilterCount={c.activeFilterCount}
+            onClearFilters={c.clearFilters}
+            labels={labels}
+            dir={props.dir}
+          />
         )}
-        {!c.isPaged && !source.error && source.hasNextPage && (
-          <Flex ref={loadMoreRef} justify="center">
-            <Button
-              loading={source.isFetchingNextPage}
-              onClick={() => source.fetchNextPage()}
-            >
-              {labels.loadMore}
-            </Button>
-          </Flex>
-        )}
-      </Space>
-      {filtersNode && filtersMode === "drawer" && (
-        <FilterDrawer
-          open={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
-          filters={filtersNode}
-          activeFilterCount={c.activeFilterCount}
-          onClearFilters={c.clearFilters}
+        <CommandPalette
+          commands={palette.commands}
+          open={palette.open}
+          onClose={palette.close}
           labels={labels}
-          dir={props.dir}
         />
-      )}
-      <CommandPalette
-        commands={palette.commands}
-        open={palette.open}
-        onClose={palette.close}
-        labels={labels}
-      />
-      <ContextMenu
-        items={contextMenu.items}
-        at={contextMenu.at}
-        onClose={contextMenu.close}
-        container={fullscreen.container}
-        labels={labels}
-      />
-      <StatusBar
-        enabled={props.statusBar === true}
-        notices={c.featureNotices}
-        shown={source.rows.length}
-        page={source.page}
-        limit={source.limit}
-        total={source.total}
-        selected={c.table.selection?.selectedCount ?? 0}
-        stats={stats}
-        labels={c.table.labels}
-        locale={props.locale}
-      />
-    </div>
+        <ContextMenu
+          items={contextMenu.items}
+          at={contextMenu.at}
+          onClose={contextMenu.close}
+          container={fullscreen.container}
+          labels={labels}
+        />
+        <StatusBar
+          enabled={props.statusBar === true}
+          notices={c.featureNotices}
+          shown={source.rows.length}
+          page={source.page}
+          limit={source.limit}
+          total={source.total}
+          selected={c.table.selection?.selectedCount ?? 0}
+          stats={stats}
+          labels={c.table.labels}
+          locale={props.locale}
+        />
+      </div>
+    </FeatureHostProvider>
   );
 }

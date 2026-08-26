@@ -1,5 +1,6 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
+  FeatureHostProvider,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -153,6 +154,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     },
     sortBy: shell.source.sortBy,
     sortDir: shell.source.sortDir,
+    featureHost: shell.featureHost,
   });
 
   // The palette lists the table's own actions; its shortcut is bound here
@@ -164,6 +166,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     onExport: shell.toolbarProps.onExportCsv,
     onClearFilters: c.clearFilters,
     hasFilters: c.activeFilterCount > 0,
+    featureHost: shell.featureHost,
   });
   const { confirm } = c;
   const tableProps = {
@@ -237,168 +240,170 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   }
 
   return (
-    <Paper
-      ref={rootRef}
-      {...contextMenu.regionProps}
-      variant="outlined"
-      dir={props.dir}
-      className={
-        [className, classNames?.root].filter(Boolean).join(" ") || undefined
-      }
-      aria-busy={c.isRefreshing || undefined}
-      sx={{ p: 1.5 }}
-    >
-      <GridFocusAnnouncer focus={shell.gridFocus} />
-      {shell.tableProps.rowReorder ? (
-        <RowReorderAnnouncer
-          announcement={shell.tableProps.rowReorder.announcement}
-        />
-      ) : null}
-      <FindBar find={shell.find} labels={labels} />
-      <Stack spacing={1.5}>
-        <Box
-          data-adapttable-part="toolbar"
-          ref={stickyBar.toolbarRef}
-          className={classNames?.toolbar}
-          sx={
-            stickyBar.toolbarStyle
-              ? {
-                  position: "sticky",
-                  top: stickyBar.toolbarStyle.top,
-                  zIndex: 3,
-                  bgcolor: "background.paper",
-                  pb: 1.5,
-                }
-              : undefined
-          }
-        >
-          <Toolbar
-            {...toolbarProps}
-            savedViewsMenu={savedViewsMenu}
-            filtersMode={filtersMode}
-            filtersOpen={filtersOpen}
-            onToggleFilters={filtersTrigger.onClick}
-            onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-            onCloseFilters={() => setFiltersOpen(false)}
-            columnMenu={columnMenu}
+    <FeatureHostProvider host={shell.featureHost}>
+      <Paper
+        ref={rootRef}
+        {...contextMenu.regionProps}
+        variant="outlined"
+        dir={props.dir}
+        className={
+          [className, classNames?.root].filter(Boolean).join(" ") || undefined
+        }
+        aria-busy={c.isRefreshing || undefined}
+        sx={{ p: 1.5 }}
+      >
+        <GridFocusAnnouncer focus={shell.gridFocus} />
+        {shell.tableProps.rowReorder ? (
+          <RowReorderAnnouncer
+            announcement={shell.tableProps.rowReorder.announcement}
           />
-        </Box>
-        {c.isRefreshing && <LinearProgress aria-label={labels.loading} />}
-        <Chips
-          chips={c.mergedChips}
-          onClearAll={c.clearFilters}
-          labels={labels}
-        />
-        {c.editing?.batch && (
-          <BatchEditBar batch={c.editing.batch} labels={labels} />
-        )}
-
-        {table.selection && props.bulkActions && (
-          <BulkBar
-            selection={table.selection}
-            total={viewSource.total}
-            bulkActions={props.bulkActions}
-            confirm={confirm}
-            labels={labels}
-          />
-        )}
-        <CommandPalette
-          commands={palette.commands}
-          open={palette.open}
-          onClose={palette.close}
-          labels={labels}
-        />
-        <ContextMenu
-          items={contextMenu.items}
-          at={contextMenu.at}
-          onClose={contextMenu.close}
-          container={shell.fullscreen.container}
-          labels={labels}
-        />
-        <SidePanelLayout
-          side={props.sidePanel?.side}
-          body={
-            <>
-              {c.errorState
-                ? (fillSlot(slots?.error, c.errorState) ?? (
-                    <ErrorState
-                      error={c.errorState.error}
-                      labels={labels}
-                      onRetry={c.errorState.retry}
-                    />
-                  ))
-                : body}
-            </>
-          }
-          panel={
-            props.sidePanel?.open != null && (
-              <SidePanel
-                panels={props.sidePanel.panels}
-                openPanel={props.sidePanel.open}
-                onOpenPanel={props.sidePanel.onOpenChange}
-                onClose={() => {
-                  props.sidePanel?.onOpenChange(null);
-                }}
-                side={props.sidePanel.side}
-                labels={labels}
-              />
-            )
-          }
-        />
-        {canLoadMore && viewSource.hasNextPage && (
+        ) : null}
+        <FindBar find={shell.find} labels={labels} />
+        <Stack spacing={1.5}>
           <Box
-            ref={loadMoreRef}
-            sx={{ display: "flex", justifyContent: "center", py: 1 }}
+            data-adapttable-part="toolbar"
+            ref={stickyBar.toolbarRef}
+            className={classNames?.toolbar}
+            sx={
+              stickyBar.toolbarStyle
+                ? {
+                    position: "sticky",
+                    top: stickyBar.toolbarStyle.top,
+                    zIndex: 3,
+                    bgcolor: "background.paper",
+                    pb: 1.5,
+                  }
+                : undefined
+            }
           >
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={viewSource.isFetchingNextPage}
-              onClick={() => viewSource.fetchNextPage()}
-            >
-              {labels.loadMore}
-            </Button>
-          </Box>
-        )}
-        <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
-        {c.showFooter && (
-          <Box className={classNames?.footer}>
-            <Footer
-              pagination={table.pagination}
-              total={viewSource.total}
-              limit={viewSource.limit}
-              defaultLimit={viewSource.defaultLimit}
-              setPage={viewSource.setPage}
-              setLimit={viewSource.setLimit}
-              labels={labels}
-              showRowsPerPage={!c.grouping}
+            <Toolbar
+              {...toolbarProps}
+              savedViewsMenu={savedViewsMenu}
+              filtersMode={filtersMode}
+              filtersOpen={filtersOpen}
+              onToggleFilters={filtersTrigger.onClick}
+              onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+              onCloseFilters={() => setFiltersOpen(false)}
+              columnMenu={columnMenu}
             />
           </Box>
+          {c.isRefreshing && <LinearProgress aria-label={labels.loading} />}
+          <Chips
+            chips={c.mergedChips}
+            onClearAll={c.clearFilters}
+            labels={labels}
+          />
+          {c.editing?.batch && (
+            <BatchEditBar batch={c.editing.batch} labels={labels} />
+          )}
+
+          {table.selection && props.bulkActions && (
+            <BulkBar
+              selection={table.selection}
+              total={viewSource.total}
+              bulkActions={props.bulkActions}
+              confirm={confirm}
+              labels={labels}
+            />
+          )}
+          <CommandPalette
+            commands={palette.commands}
+            open={palette.open}
+            onClose={palette.close}
+            labels={labels}
+          />
+          <ContextMenu
+            items={contextMenu.items}
+            at={contextMenu.at}
+            onClose={contextMenu.close}
+            container={shell.fullscreen.container}
+            labels={labels}
+          />
+          <SidePanelLayout
+            side={props.sidePanel?.side}
+            body={
+              <>
+                {c.errorState
+                  ? (fillSlot(slots?.error, c.errorState) ?? (
+                      <ErrorState
+                        error={c.errorState.error}
+                        labels={labels}
+                        onRetry={c.errorState.retry}
+                      />
+                    ))
+                  : body}
+              </>
+            }
+            panel={
+              props.sidePanel?.open != null && (
+                <SidePanel
+                  panels={props.sidePanel.panels}
+                  openPanel={props.sidePanel.open}
+                  onOpenPanel={props.sidePanel.onOpenChange}
+                  onClose={() => {
+                    props.sidePanel?.onOpenChange(null);
+                  }}
+                  side={props.sidePanel.side}
+                  labels={labels}
+                />
+              )
+            }
+          />
+          {canLoadMore && viewSource.hasNextPage && (
+            <Box
+              ref={loadMoreRef}
+              sx={{ display: "flex", justifyContent: "center", py: 1 }}
+            >
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={viewSource.isFetchingNextPage}
+                onClick={() => viewSource.fetchNextPage()}
+              >
+                {labels.loadMore}
+              </Button>
+            </Box>
+          )}
+          <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
+          {c.showFooter && (
+            <Box className={classNames?.footer}>
+              <Footer
+                pagination={table.pagination}
+                total={viewSource.total}
+                limit={viewSource.limit}
+                defaultLimit={viewSource.defaultLimit}
+                setPage={viewSource.setPage}
+                setLimit={viewSource.setLimit}
+                labels={labels}
+                showRowsPerPage={!c.grouping}
+              />
+            </Box>
+          )}
+        </Stack>
+        {filtersNode && filtersMode === "drawer" && (
+          <FilterDrawer
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            filters={filtersNode}
+            activeFilterCount={c.activeFilterCount}
+            onClearFilters={c.clearFilters}
+            labels={labels}
+            dir={props.dir}
+          />
         )}
-      </Stack>
-      {filtersNode && filtersMode === "drawer" && (
-        <FilterDrawer
-          open={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
-          filters={filtersNode}
-          activeFilterCount={c.activeFilterCount}
-          onClearFilters={c.clearFilters}
+        <StatusBar
+          enabled={props.statusBar === true}
+          notices={c.featureNotices}
+          shown={shell.source.rows.length}
+          page={shell.source.page}
+          limit={shell.source.limit}
+          total={shell.source.total}
+          selected={table.selection?.selectedCount ?? 0}
+          stats={shell.selectionStats}
           labels={labels}
-          dir={props.dir}
+          locale={props.locale}
         />
-      )}
-      <StatusBar
-        enabled={props.statusBar === true}
-        notices={c.featureNotices}
-        shown={shell.source.rows.length}
-        page={shell.source.page}
-        limit={shell.source.limit}
-        total={shell.source.total}
-        selected={table.selection?.selectedCount ?? 0}
-        stats={shell.selectionStats}
-        labels={labels}
-        locale={props.locale}
-      />
-    </Paper>
+      </Paper>
+    </FeatureHostProvider>
   );
 }

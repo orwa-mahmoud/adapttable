@@ -12,6 +12,7 @@
  */
 import { useCallback, useMemo, useRef, useState } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
 import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditableColumnLike } from "./cellEditing";
 import {
@@ -51,6 +52,8 @@ export interface RowEditingState<TRow> {
   isDirty: boolean;
   /** A digest of the open row's drafts, for a row memo comparator. */
   signature: string;
+  /** The table that owns these editors — never a sibling's host. */
+  featureHost?: FeatureHostState;
 }
 
 /** What {@link useRowEditing} needs. */
@@ -73,6 +76,8 @@ export interface UseRowEditingOptions<TRow> {
   onEditCancel?: EditEventHandler<TRow>;
   /** The host received the patch. */
   onEditCommit?: EditEventHandler<TRow>;
+  /** The table that owns these editors. */
+  featureHost?: FeatureHostState;
 }
 
 /** Every column a reader may edit on a given row. */
@@ -117,7 +122,11 @@ export function useRowEditing<TRow>(
     if (!enabled) return;
     const seeds: Record<string, string> = {};
     for (const column of editableColumns(options.columns, row)) {
-      seeds[column.key] = readEditableCellValue(row, column);
+      seeds[column.key] = readEditableCellValue(
+        row,
+        column,
+        options.featureHost
+      );
     }
     opened.current = { row, rowId, seeds };
     draftsRef.current = seeds;
@@ -167,7 +176,10 @@ export function useRowEditing<TRow>(
       if (draft === undefined || draft === open.seeds[column.key]) continue;
       patch[column.key] = column.parseValue
         ? column.parseValue(draft, open.row)
-        : parseCellEditValue(resolveCellEditor(column) ?? "text", draft);
+        : parseCellEditValue(
+            resolveCellEditor(column, options.featureHost) ?? "text",
+            draft
+          );
     }
     // Saving an untouched row is a write the host never asked for.
     if (Object.keys(patch).length > 0) {
@@ -226,6 +238,7 @@ export function useRowEditing<TRow>(
       },
       isDirty,
       signature,
+      featureHost: options.featureHost,
     }),
     [
       activeRowId,
@@ -238,6 +251,7 @@ export function useRowEditing<TRow>(
       close,
       isDirty,
       signature,
+      options.featureHost,
     ]
   );
 }

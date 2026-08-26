@@ -183,7 +183,13 @@ export {
   type ExportStatus,
   useExportHandler,
 } from "./export/useExportHandler";
+export { bindFeatureHostFn } from "./features/currentHost";
 export { useTableFeatures } from "./features/featureHost";
+export { featureHostOf, rememberFeatureHost } from "./features/featureHost";
+export {
+  FeatureHostProvider,
+  useFeatureHost,
+} from "./features/featureHostContext";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
 export {

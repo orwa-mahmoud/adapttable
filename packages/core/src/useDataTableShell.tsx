@@ -10,7 +10,12 @@ import { flattenColumnTree } from "./columns/columnTree";
 import { asGesture, useTableEditHistory } from "./editing/editHistory";
 import { makeExportCsvHandler, resolveExportCsv } from "./export/tableCsv";
 import { useExportHandler } from "./export/useExportHandler";
-import { useTableFeatures } from "./features/featureHost";
+import { bindFeatureHostFn } from "./features/currentHost";
+import {
+  featureHostOf,
+  rememberFeatureHost,
+  useTableFeatures,
+} from "./features/featureHost";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
 import type { FilterDef } from "./filters/filterDefs";
@@ -112,6 +117,7 @@ export function useDataTableShell<TRow>(
   ) => ReactNode
 ) {
   const props = useTableFeatures(incoming);
+  const featureHost = featureHostOf(props);
   // ONE resolved URL backend for everything in this table: the tier hooks
   // AND chrome that reads URL state (saved views) share this instance, so
   // with `urlSync={false}` they share the same in-memory backend instead of
@@ -144,6 +150,7 @@ export function useDataTableShell<TRow>(
     columns: dataColumns,
     filters: props.filters,
     filterTypes: props.filterTypes,
+    featureHost,
     defaults: props.defaults,
     paginationMode: props.paginationMode,
     supports: props.supports,
@@ -172,8 +179,11 @@ export function useDataTableShell<TRow>(
     filters: filtersNode,
     filterDefs: runtime.defs,
     filterLabels: { ...runtime.filterLabels, ...props.filterLabels },
+    summaryRow: bindFeatureHostFn(featureHost, props.summaryRow),
+    groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
     ...pinProps,
   };
+  rememberFeatureHost(chromeProps, featureHost);
   const chrome = useTableChrome<TRow>(chromeProps);
   const { table, confirm, getRowId } = chrome;
   const { labels } = table;
@@ -278,13 +288,14 @@ export function useDataTableShell<TRow>(
         grouping: chrome.grouping,
         tree: chrome.tree,
         groupTotal: labels.groupTotal,
-        summaryRow: props.summaryRow,
-      }
+        summaryRow: chromeProps.summaryRow,
+      },
+      featureHost
     ),
     labels,
     // The button names the format it produces, so a spreadsheet writer relabels
     // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv)?.writer?.extension,
+    resolveExportCsv(props.exportCsv, featureHost)?.writer?.extension,
     chrome.featureNotices.some((notice) => notice.kind === "export-all-page")
   );
   // The chrome owns it: progressive column hiding measures this element.
@@ -433,7 +444,7 @@ export function useDataTableShell<TRow>(
     rowHeight: props.rowHeight,
     renderRowDetail: chrome.detail?.render,
     renderCard: props.renderCard,
-    summaryRow: props.summaryRow,
+    summaryRow: chromeProps.summaryRow,
     expansion: chrome.detail?.expansion,
     editing: chrome.editing,
     grouping,
@@ -504,6 +515,8 @@ export function useDataTableShell<TRow>(
     hasRowReorder,
     tableProps,
     toolbarProps,
+    /** The host this table owns — adapters pass it into palette / menu hooks. */
+    featureHost,
   };
 }
 

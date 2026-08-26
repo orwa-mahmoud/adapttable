@@ -28,6 +28,7 @@ import { useCellSaveState } from "./editing/saveState";
 import { useCellEditing } from "./editing/useCellEditing";
 import { useEditValidation } from "./editing/validation";
 import type { ExportStatus } from "./export/useExportHandler";
+import { featureHostOf } from "./features/featureHost";
 import {
   type ActiveFilterChip,
   mergeFilterChips,
@@ -819,6 +820,7 @@ export function useTableChrome<TRow>(
     onEditStart: lifecycle.onEditStart,
     onEditCancel: lifecycle.onEditCancel,
     onEditCommit: lifecycle.onEditCommit,
+    featureHost: featureHostOf(props),
   });
   // Either channel arms the bundle: a host that wants row-level commits only
   // never passes `onCellEdit`, and its cells stay display-only until a reader
@@ -833,6 +835,7 @@ export function useTableChrome<TRow>(
     onEditStart: lifecycle.onEditStart,
     onEditCancel: lifecycle.onEditCancel,
     onEditCommit: lifecycle.onEditCommit,
+    featureHost: featureHostOf(props),
   });
   const editingArmed = onCellEdit !== undefined || rowModeArmed || batchArmed;
   const editing = useMemo(
@@ -856,6 +859,7 @@ export function useTableChrome<TRow>(
               takeTheirs: table.labels.takeTheirs,
               theirsValue: table.labels.theirsValue,
             },
+            featureHost: featureHostOf(props),
           }
         : undefined,
     [
@@ -875,6 +879,7 @@ export function useTableChrome<TRow>(
       table.labels.keepMine,
       table.labels.takeTheirs,
       table.labels.theirsValue,
+      props,
     ]
   );
   // Half-configured editing is a silent trap: `editable: true` on a column

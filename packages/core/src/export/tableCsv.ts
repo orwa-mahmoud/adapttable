@@ -4,7 +4,7 @@ import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
-import { currentFeatureHost } from "../features/currentHost";
+import type { FeatureHostState } from "../features/currentHost";
 import { type CellRange, cellRangeIndices } from "../focus/cellRange";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { GetCellSpan } from "../rows/cellSpan";
@@ -252,10 +252,11 @@ type ExportCsvProp<TRow = unknown> =
 
 /** Resolve a boolean-or-options prop into a concrete config, or `null` when off. */
 export function resolveExportCsv<TRow = unknown>(
-  value: ExportCsvProp<TRow>
+  value: ExportCsvProp<TRow>,
+  host?: FeatureHostState
 ): ExportCsvOptions<TRow> | null {
   if (value === false) return null;
-  const writers = currentFeatureHost()?.writers;
+  const writers = host?.writers;
   const writer = writers?.[writers.length - 1];
   if (value === undefined) return writer ? { writer } : null;
   if (value === true) return writer ? { writer } : {};
@@ -589,9 +590,10 @@ export function makeExportCsvHandler<TRow>(
   exportCsv: boolean | ExportCsvOptions<TRow> | undefined,
   source: TableSource<TRow>,
   columns: readonly ColumnDef<TRow>[],
-  context?: ExportContext<TRow>
+  context?: ExportContext<TRow>,
+  host?: FeatureHostState
 ): (() => void | Promise<void>) | undefined {
-  const options = resolveExportCsv(exportCsv);
+  const options = resolveExportCsv(exportCsv, host);
   if (!options) return undefined;
 
   // Handing the export to a backend replaces building it here entirely —
