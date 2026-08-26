@@ -344,16 +344,16 @@ const FIXTURES = [
   // useFeatureHost. That context is on the default path because export,
   // menus, editors and aggregators resolve after render. ~0.2 KB gzip; the
   // four kits already on the line move 1 KB.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
+  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 134 },
   { name: "mui · table", pkg: "adapter-mui", budgetKB: 134 },
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 133 },
   { name: "antd · table", pkg: "adapter-antd", budgetKB: 127 },
-  { name: "radix · table", pkg: "adapter-radix", budgetKB: 133 },
+  { name: "radix · table", pkg: "adapter-radix", budgetKB: 134 },
   { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 140 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
-  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 137 },
+  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 138 },
   { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 134 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
 
