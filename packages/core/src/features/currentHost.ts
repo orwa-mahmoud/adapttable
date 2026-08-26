@@ -97,8 +97,8 @@ export function runWithFeatureHost<T>(
 }
 
 /**
- * The host bound by {@link runWithFeatureHost}. Empty outside that call —
- * a leftover here is the bug this module used to have.
+ * The host bound by {@link runWithFeatureHost}. Empty outside that call, so a
+ * sibling table or a later click resolves its own host and never this one.
  */
 export function currentFeatureHost<TRow = unknown>():
   | FeatureHostState<TRow>

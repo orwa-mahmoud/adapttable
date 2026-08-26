@@ -340,10 +340,10 @@ const FIXTURES = [
   // adapter already imports. Unstyled was on the 133 KB line and moved
   // 0.1 KB over it.
   //
-  // The feature host is no longer a module stack: each table provides its
-  // own via FeatureHostProvider / useFeatureHost. That context is on the
-  // default path because export, menus, editors and aggregators resolve
-  // after render. ~0.2 KB gzip; the four kits already on the line move 1 KB.
+  // Each table provides its own feature host through FeatureHostProvider /
+  // useFeatureHost. That context is on the default path because export,
+  // menus, editors and aggregators resolve after render. ~0.2 KB gzip; the
+  // four kits already on the line move 1 KB.
   { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
   { name: "mui · table", pkg: "adapter-mui", budgetKB: 134 },
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 133 },
