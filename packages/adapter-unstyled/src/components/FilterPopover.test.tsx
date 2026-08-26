@@ -237,10 +237,10 @@ describe("FilterPopover", () => {
 
     it("caps the card width so it can never exceed the viewport", () => {
       renderPopover();
-      const card = document.querySelector(
+      const card = document.querySelector<HTMLElement>(
         '[data-adapttable-part="filters-popover"]'
       )!;
-      expect(card).toHaveStyle({ maxWidth: "calc(100vw - 16px)" });
+      expect(card.style.maxWidth).toBe("calc(100vw - 16px)");
     });
   });
 });
