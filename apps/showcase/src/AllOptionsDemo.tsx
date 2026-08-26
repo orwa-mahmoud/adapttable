@@ -1,5 +1,5 @@
 import type { ColumnDef, SidePanelEntry } from "@adapttable/core";
-import { useSavedViews } from "@adapttable/core";
+import { usePrefersReducedMotion, useSavedViews } from "@adapttable/core";
 import { buildFormulaColumns } from "@adapttable/core/formula";
 import {
   isPivotReady,
@@ -45,6 +45,7 @@ import {
   Segmented,
 } from "./kitDemos";
 import { kitPivotPanel, KitProvider, kitSavedViewsPanel } from "./kitProviders";
+import { LabCellFlash } from "./labCellFlash";
 import { PivotTableView } from "./PivotTableView";
 import { SectionHead } from "./sections";
 import { ADAPTER_TOKENS } from "./themeTokens";
@@ -250,16 +251,32 @@ function Toggle({
 }
 
 /**
- * Why the flash toggle is unavailable, or `undefined` when it is not: the
- * mark lands on the row a change touched, so with nothing changing there is
- * nothing to see.
+ * Why a change-mark toggle is unavailable, or `undefined` when it is not:
+ * the mark lands on the row or cells a change touched, so with nothing
+ * changing there is nothing to see.
  */
 function flashReasonFor(
   editingMode: EditingMode,
-  rowMutations: OnOff
+  rowMutations: OnOff,
+  mark: "highlight" | "flash"
 ): string | undefined {
   if (editingMode !== "off" || rowMutations !== "off") return undefined;
-  return "Turn on editing or row mutations first — the flash marks the row a change landed on.";
+  return mark === "flash"
+    ? "Turn on editing or row mutations first — the flash marks the cells a change landed on."
+    : "Turn on editing or row mutations first — the highlight marks the row a change landed on.";
+}
+
+function changeMarkReasons(
+  editingMode: EditingMode,
+  rowMutations: OnOff,
+  reducedMotion: boolean
+): { highlight: string | undefined; cellFlash: string | undefined } {
+  return {
+    highlight: flashReasonFor(editingMode, rowMutations, "highlight"),
+    cellFlash: reducedMotion
+      ? "Reduced motion is on — changed-cell flash does not run."
+      : flashReasonFor(editingMode, rowMutations, "flash"),
+  };
 }
 
 /** What the summary line calls each data source. */
@@ -402,6 +419,8 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
   const [columnSelect, setColumnSelect] = useState<OnOff>("off");
   const [chrome, setChrome] = useState<OnOff>("off");
   const [highlight, setHighlight] = useState<OnOff>("off");
+  const [cellFlash, setCellFlash] = useState<OnOff>("off");
+  const reducedMotion = usePrefersReducedMotion();
   const [failure, setFailure] = useState<Failure>("off");
   const [editingMode, setEditingMode] = useState<EditingMode>("off");
   const [rowMutations, setRowMutations] = useState<OnOff>("off");
@@ -469,7 +488,8 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     editingMode === "off"
       ? "Turn on an editing mode first — the checkbox selects into the cell grid."
       : undefined;
-  const flashReason = flashReasonFor(editingMode, rowMutations);
+  const { highlight: highlightReason, cellFlash: cellFlashReason } =
+    changeMarkReasons(editingMode, rowMutations, reducedMotion);
   // The retry the error state offers has to do something, or the demo is
   // showing a button that lies.
   const recoverFromFailure = useCallback(() => {
@@ -541,6 +561,8 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
       setFormulaColumn("off");
       setEditorShowcase("off");
       setEditingMode(next === "editing" ? "cell" : "off");
+      setHighlight("off");
+      setCellFlash("off");
       resetRows();
       if (next === "rows") {
         setRowMutations("on");
@@ -821,10 +843,16 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
                       />
                     </Control>
                     <Toggle
-                      label="Flash changed rows"
+                      label="Highlight changed rows"
                       value={highlight}
-                      disabledOn={flashReason}
+                      disabledOn={highlightReason}
                       onChange={(next) => customize(setHighlight, next)}
+                    />
+                    <Toggle
+                      label="Flash changed cells"
+                      value={cellFlash}
+                      disabledOn={cellFlashReason}
+                      onChange={(next) => customize(setCellFlash, next)}
                     />
                   </ControlPanel>
 
@@ -943,48 +971,50 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
                 <Suspense fallback={<DemoFallback />}>
                   <DemoFilterSetProvider value={filterSet}>
                     <AdvancedFiltersProvider value={advancedFilters}>
-                      <Demo
-                        mode={mode}
-                        locale={locale}
-                        dark={dark}
-                        density={density}
-                        filtersUi={filtersUi}
-                        headerFilters={filtersUi === "header"}
-                        columnGroups={columnGroups === "on"}
-                        sparkline={sparkline === "on"}
-                        formulaColumns={labFormulaColumns(formulaColumn)}
-                        editorShowcase={editorShowcase === "on"}
-                        statusBar={statusBar === "on"}
-                        contextMenu={contextMenu === "on"}
-                        densityChooser={chrome === "on"}
-                        onDensityChange={
-                          chrome === "on" ? setDensity : undefined
-                        }
-                        fullscreen={chrome === "on"}
-                        commandPalette={palette === "on"}
-                        onPrint={printLabTable}
-                        printButton={printButton === "on"}
-                        columnSelectionCheckbox={columnSelect === "on"}
-                        undoRedoButtons={undoRedo === "on"}
-                        sidePanel={sidePanel}
-                        animate={motion === "on"}
-                        grouping={structure === "grouped"}
-                        tree={structure === "tree"}
-                        nested={structure === "nested"}
-                        editing={editingMode === "cell"}
-                        rowMode={editingMode === "row"}
-                        batch={editingMode === "batch"}
-                        rowMutations={rowMutations === "on"}
-                        highlight={highlight === "on"}
-                        failure={failure}
-                        onRecover={recoverFromFailure}
-                        rowReorder={rowReorder === "on"}
-                        rowPinning={rowPinning === "on"}
-                        cellSpan={cellSpan === "on"}
-                        extraRows={extraRows === "on"}
-                        rowStyle={rowStyle === "on"}
-                        urlKey="lab"
-                      />
+                      <LabCellFlash enabled={cellFlash === "on"}>
+                        <Demo
+                          mode={mode}
+                          locale={locale}
+                          dark={dark}
+                          density={density}
+                          filtersUi={filtersUi}
+                          headerFilters={filtersUi === "header"}
+                          columnGroups={columnGroups === "on"}
+                          sparkline={sparkline === "on"}
+                          formulaColumns={labFormulaColumns(formulaColumn)}
+                          editorShowcase={editorShowcase === "on"}
+                          statusBar={statusBar === "on"}
+                          contextMenu={contextMenu === "on"}
+                          densityChooser={chrome === "on"}
+                          onDensityChange={
+                            chrome === "on" ? setDensity : undefined
+                          }
+                          fullscreen={chrome === "on"}
+                          commandPalette={palette === "on"}
+                          onPrint={printLabTable}
+                          printButton={printButton === "on"}
+                          columnSelectionCheckbox={columnSelect === "on"}
+                          undoRedoButtons={undoRedo === "on"}
+                          sidePanel={sidePanel}
+                          animate={motion === "on"}
+                          grouping={structure === "grouped"}
+                          tree={structure === "tree"}
+                          nested={structure === "nested"}
+                          editing={editingMode === "cell"}
+                          rowMode={editingMode === "row"}
+                          batch={editingMode === "batch"}
+                          rowMutations={rowMutations === "on"}
+                          highlight={highlight === "on"}
+                          failure={failure}
+                          onRecover={recoverFromFailure}
+                          rowReorder={rowReorder === "on"}
+                          rowPinning={rowPinning === "on"}
+                          cellSpan={cellSpan === "on"}
+                          extraRows={extraRows === "on"}
+                          rowStyle={rowStyle === "on"}
+                          urlKey="lab"
+                        />
+                      </LabCellFlash>
                     </AdvancedFiltersProvider>
                   </DemoFilterSetProvider>
                 </Suspense>

@@ -233,8 +233,12 @@ export function PivotPanelChrome({
   );
 }
 
+function isAggName(value: string): value is AggregateName {
+  return (AGGREGATIONS as readonly string[]).includes(value);
+}
+
 /** The aggregation shown for a measure, or `sum` for a custom one. */
 function aggNameAt(config: PivotConfig, index: number): AggregateName {
   const agg = config.measures[index]?.agg;
-  return typeof agg === "string" ? agg : "sum";
+  return typeof agg === "string" && isAggName(agg) ? agg : "sum";
 }

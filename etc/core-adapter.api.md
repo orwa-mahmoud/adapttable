@@ -16,6 +16,7 @@ import { MouseEvent as MouseEvent_2 } from 'react';
 import { PointerEvent as PointerEvent_2 } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
+import { Ref } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { SetStateAction } from 'react';
@@ -23,6 +24,9 @@ import { VirtualItem } from '@tanstack/react-virtual';
 
 // @public
 export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnDef<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnDef<TRow>[];
+
+// @public
+export function applyTableFeatures<P extends object>(props: P): P;
 
 // @public
 export function BatchEditBarChrome<TRow>(input: Readonly<BatchEditBarChromeProps<TRow>>): ReactElement | null;
@@ -74,6 +78,12 @@ export interface BatchEditCellProps<TRow> {
 }
 
 // @public
+export function bindFeatureHostFn<Args extends unknown[], R>(host: FeatureHostState | undefined, fn: ((...args: Args) => R) | undefined): ((...args: Args) => R) | undefined;
+
+// @public
+export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: Ref<HTMLElement | null>): RefCallback<HTMLElement>;
+
+// @public
 export interface BodyCell<TRow> {
     // (undocumented)
     colSpan: number;
@@ -117,6 +127,9 @@ export interface BulkBarState {
     scope: BulkActionContext | undefined;
     selectedCount: number;
 }
+
+// @public
+export function cellFlashAttr(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
 
 // @public
 export function cellHighlightStyle(props: Readonly<Record<string, unknown>> | undefined, base: CSSProperties | undefined, selected: CSSProperties): CSSProperties | undefined;
@@ -343,6 +356,7 @@ export interface ColumnMenuAction {
 
 // @public
 export interface ColumnMenuActionContext<TRow = unknown> {
+    featureHost?: FeatureHostState<TRow>;
     // (undocumented)
     labels: ColumnMenuLabels;
     // (undocumented)
@@ -816,6 +830,7 @@ export interface DesktopRowWiring<TRow> {
     editingSignature: string | null;
     // (undocumented)
     expanded: boolean | undefined;
+    flashSignature: string;
     // (undocumented)
     focusIndex: number;
     // (undocumented)
@@ -832,6 +847,8 @@ export interface DesktopRowWiring<TRow> {
     id: string;
     // (undocumented)
     index: number;
+    // (undocumented)
+    isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
     // (undocumented)
     labels: Required<TableLabels>;
     // (undocumented)
@@ -1200,6 +1217,15 @@ export function extraUncoveredColSpans(columnSpan: number, coveredSlots: Readonl
 export function EyeIcon(input: Readonly<{
     off?: boolean;
 }>): ReactElement;
+
+// @public
+export function featureHostOf(props: object): FeatureHostState | undefined;
+
+// @public
+export function FeatureHostProvider(input: Readonly<{
+    host: FeatureHostState | undefined;
+    children: ReactNode;
+}>): JSX.Element;
 
 // @public
 export interface FeatureNotice {
@@ -1839,6 +1865,9 @@ export function logicalAlign(align: ColumnDef<unknown>["align"]): "start" | "cen
 export function mergedCellStyle(colSpan: number, rowSpan: number, appearance?: CellSpanAppearance, fill?: "on" | "off"): CSSProperties | undefined;
 
 // @public
+export function mobileCardListStyle(maxHeight: number | undefined): CSSProperties | undefined;
+
+// @public
 export interface MountStaggerOptions {
     duration?: number;
     enabled: boolean;
@@ -1860,7 +1889,7 @@ export function nestedTableDetail<TRow>(options: {
 
 // @public
 export interface NestedTableParent {
-    density?: Density$1;
+    density?: Density;
     labels?: TableLabels;
 }
 
@@ -2036,6 +2065,9 @@ export interface PivotZoneProps {
 export function printToolbar(wanted: boolean | undefined, onPrint: (() => void) | undefined, labels: TableLabels): PrintToolbar;
 
 // @public
+export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
+
+// @public
 export const REORDER_COLUMN_WIDTH = 40;
 
 // @public
@@ -2170,6 +2202,11 @@ export interface RowEditControlsOptions<TRow> {
 
 // @public
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
+
+// @public
+export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
+    readonly key: string;
+}[]): string;
 
 // @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
@@ -2512,6 +2549,7 @@ export interface SharedTableRenderProps<TRow> {
         }) => void;
     };
     headerFilters?: boolean;
+    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     maxHeight?: number;
     measureElement?: (element: Element | null) => void;
     measureRowPair?: RowPairMeasurer;
@@ -2690,6 +2728,29 @@ export interface TableContextMenu {
 export function tableErrorState<TRow>(source: TableSource<TRow>): TableErrorState | undefined;
 
 // @public
+export interface TableFeature<TRow = unknown> {
+    apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly id: string;
+    setup?(host: TableFeatureHost<TRow>): void | (() => void);
+}
+
+// @public
+export interface TableFeatureHost<TRow = unknown> {
+    // (undocumented)
+    readonly __row?: TRow;
+    extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
+    onDispose(cleanup: () => void): void;
+    registerAggregator(name: string, aggregator: Aggregator): void;
+    registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined): void;
+    registerCommand(command: Command): void;
+    registerContextMenuItems(items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]): void;
+    registerEditor(type: string, render: CustomCellEditorRender): void;
+    registerFilterType(spec: FilterTypeSpec): void;
+    registerPanel(panel: SidePanelEntry): void;
+    registerWriter(writer: ExportWriter): void;
+}
+
+// @public
 export interface TableRenderModel<TRow> {
     cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
     // (undocumented)
@@ -2848,7 +2909,7 @@ export interface UseColumnWindowOptions<TRow> {
 export function useCommandPalette(options: UseCommandPaletteOptions): TableCommandPalette;
 
 // @public
-export function useDataTableShell<TRow>(props: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
+export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
     gridFocus: GridFocusState; /** What the selection adds up to; `null` unless `selectionStats` is set. */
     selectionStats: SelectionStats | null; /** Undo/redo controls; inert unless `editHistory` is set. */
     editHistory: EditHistoryState<TRow>; /** Find-bar state; inert unless `findInTable` is set. */
@@ -2917,6 +2978,7 @@ export function useDataTableShell<TRow>(props: DataTableShellProps<TRow>, render
         onRowClick: ((row: TRow) => void) | undefined;
         prefetch: ((row: TRow) => void) | undefined;
         rowClassName: ((row: TRow, index: number) => string | undefined) | undefined;
+        isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined;
         collapsibleColumnGroups: boolean;
         collapsedColumnGroups: readonly string[] | undefined;
         columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
@@ -2981,7 +3043,8 @@ export function useDataTableShell<TRow>(props: DataTableShellProps<TRow>, render
         onFiltersTriggerPointerDown?: (() => void) | undefined;
         savedViewsMenu?: ReactNode;
         columnMenu?: ReactNode;
-    };
+    }; /** The host this table owns — adapters pass it into palette / menu hooks. */
+    featureHost: FeatureHostState<unknown> | undefined;
 };
 
 // @public
@@ -2989,6 +3052,9 @@ export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>,
 
 // @public
 export function useExportHandler(handler: (() => void | Promise<void>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean): ExportHandlerState;
+
+// @public
+export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
 // @public
 export function useFullscreen(element: HTMLElement | null): FullscreenState;
@@ -3028,6 +3094,9 @@ export function useSummaryCells<TRow>(summaryRow: ((rows: readonly TRow[]) => Pa
 
 // @public
 export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>): TableContextMenu;
+
+// @public
+export function useTableFeatures<P extends object>(incoming: P): P;
 
 // @public
 export interface ViewControlsToolbar {

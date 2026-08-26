@@ -88,6 +88,16 @@
         "default": "./dist/formula.cjs"
       }
     },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",
@@ -106,6 +116,16 @@
       "require": {
         "types": "./dist/query.d.cts",
         "default": "./dist/query.cjs"
+      }
+    },
+    "./stream": {
+      "import": {
+        "types": "./dist/stream.d.ts",
+        "default": "./dist/stream.js"
+      },
+      "require": {
+        "types": "./dist/stream.d.cts",
+        "default": "./dist/stream.cjs"
       }
     },
     "./sparkline": {

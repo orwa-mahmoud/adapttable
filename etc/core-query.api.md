@@ -49,7 +49,7 @@ export interface PivotConfig {
 
 // @public
 export interface PivotMeasure {
-    agg: AggregateName | Aggregator;
+    agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }

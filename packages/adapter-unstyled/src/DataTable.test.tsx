@@ -969,6 +969,30 @@ describe("<DataTable> (unstyled)", () => {
     expect(screen.queryByRole("button", { name: /sort by/i })).toBeNull();
   });
 
+  it("does not mount every mobile card when virtualize is on", () => {
+    const many = Array.from({ length: 40 }, (_, i) => ({
+      id: String(i),
+      name: `Name ${i}`,
+      city: "Dubai",
+    }));
+    const { container } = renderHarness(
+      {
+        rows: many,
+        isMobile: true,
+        mode: "infinite",
+        override: { virtualize: true, maxHeight: 400 },
+      },
+      "limit=40"
+    );
+    const list = container.querySelector('[data-adapttable-part="cards"]');
+    expect(list).toHaveStyle({ maxHeight: "400px", overflowY: "auto" });
+    const cards = container.querySelectorAll('[data-adapttable-part="card"]');
+    expect(cards.length).toBeLessThan(15);
+    expect(
+      container.querySelector('[data-adapttable-part="virtual-spacer"]')
+    ).toBeInTheDocument();
+  });
+
   it("renders a column via the Cell render-prop", () => {
     renderHarness({
       override: {

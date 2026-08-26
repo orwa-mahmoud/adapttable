@@ -14,6 +14,7 @@ import {
   type DemoCells,
   demoConfirm,
   demoFilterTypes,
+  type DemoOrder,
   demoOrders,
   demoSavedViews,
   initials,
@@ -40,6 +41,10 @@ import {
   type PageMode,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
+import {
+  nestedInnerFeatures,
+  nestedOuterFeatures,
+} from "../nestedTablePlugins";
 
 /** Inline style carrying the avatar's hue as a CSS custom property, so the
  * Tailwind arbitrary values can theme it per light/dark. */
@@ -119,11 +124,12 @@ function withDensity(
 const nestedOrders = (row: Person) => ({
   label: `${row.name} — recent orders`,
   table: (defaults: NestedTableDefaults) => (
-    <DataTable
+    <DataTable<DemoOrder>
       {...defaults}
       data={demoOrders(row)}
       columns={DEMO_ORDER_COLUMNS}
       rowKey={(order) => order.id}
+      features={nestedInnerFeatures<DemoOrder>()}
     />
   ),
 });
@@ -313,6 +319,7 @@ export function UnstyledLike({
                   })
             }
             rowKey={(r) => r.id}
+            features={nested ? nestedOuterFeatures<Person>() : undefined}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

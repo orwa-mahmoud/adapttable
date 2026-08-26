@@ -1,22 +1,25 @@
-import type { Direction, UseColumnLayoutResult } from "@adapttable/core";
 import {
   ACTIONS_COLUMN_KEY,
-  columnMenuActions,
   columnMenuRows,
   columnReorderKeyProps,
+  type Direction,
+  REORDER_COLUMN_KEY,
+  useColumnDragState,
+  type UseColumnLayoutResult,
+} from "@adapttable/core";
+import {
+  columnMenuActions,
+  type ColumnMenuChromeProps,
+  type ColumnMenuLabels,
+  type ColumnMenuRow,
   filterColumnMenuRows,
   hideAllColumns,
-  REORDER_COLUMN_KEY,
+  nextPinSide,
+  pinActionLabel,
   showAllColumns,
   unpinAllColumns,
-  useColumnDragState,
-} from "@adapttable/core";
-import type {
-  ColumnMenuChromeProps,
-  ColumnMenuLabels,
-  ColumnMenuRow,
+  useFeatureHost,
 } from "@adapttable/core/adapter";
-import { nextPinSide, pinActionLabel } from "@adapttable/core/adapter";
 import { useState } from "react";
 import { Button, Dropdown, Form } from "react-bootstrap";
 
@@ -56,8 +59,9 @@ function ColumnMenuRowItem<TRow>({
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
-
+  const featureHost = useFeatureHost<TRow>();
   const actions = columnMenuActions(row, {
+    featureHost,
     labels,
     layout,
     sortBy,

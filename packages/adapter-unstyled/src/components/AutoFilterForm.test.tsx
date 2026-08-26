@@ -1,5 +1,5 @@
 import type { ExtraFilters, FilterOption, TableSource } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
+import { defaultFilterRegistry, resolveFilterRegistry } from "@adapttable/core";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -260,10 +260,7 @@ describe("<AutoFilterForm> standalone", () => {
 
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     const { source } = stubSource({});
     render(
       <AutoFilterForm<Row>
@@ -284,11 +281,13 @@ describe("<AutoFilterForm> standalone", () => {
 
   it("prefers a spec.render over the kit widget", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "custom",
-      render: () => <button type="button">Custom widget</button>,
-    });
+    const registry = resolveFilterRegistry([
+      {
+        ...text,
+        type: "custom",
+        render: () => <button type="button">Custom widget</button>,
+      },
+    ]);
     const { source } = stubSource({});
     render(
       <AutoFilterForm<Row>

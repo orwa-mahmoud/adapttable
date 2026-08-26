@@ -1,8 +1,5 @@
-import {
-  createMemoryAdapter,
-  flattenColumnTree,
-  useFrontendData,
-} from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { flattenColumnTree } from "@adapttable/core/adapter";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

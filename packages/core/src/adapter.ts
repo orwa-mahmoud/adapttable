@@ -183,6 +183,15 @@ export {
   type ExportStatus,
   useExportHandler,
 } from "./export/useExportHandler";
+export { bindFeatureHostFn } from "./features/currentHost";
+export { useTableFeatures } from "./features/featureHost";
+export { featureHostOf, rememberFeatureHost } from "./features/featureHost";
+export {
+  FeatureHostProvider,
+  useFeatureHost,
+} from "./features/featureHostContext";
+export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
+export { applyTableFeatures } from "./features/tableFeature";
 export {
   type ChecklistButtonProps,
   type ChecklistCheckboxProps,
@@ -326,6 +335,7 @@ export {
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
 } from "./pivot/PivotPanelChrome";
+export { cellFlashAttr, rowFlashSignature } from "./rows/cellFlashPaint";
 export {
   type BodyCell,
   bodyCellsHaveRowSpan,
@@ -428,10 +438,8 @@ export {
   type SavedViewsPanelSurfaceProps,
 } from "./url/SavedViewsPanelChrome";
 export { type SearchInputState } from "./useDataTable/useSearchInput";
-export {
-  type DataTableShellProps,
-  useDataTableShell,
-} from "./useDataTableShell";
+export type { DataTableShellProps } from "./useDataTableShell";
+export { useDataTableShell } from "./useDataTableShell";
 export {
   type BulkBarChromeProps,
   type FilterTriggerToggle,
@@ -448,6 +456,10 @@ export {
   type RowPairMeasurer,
   useRowPairMeasurer,
 } from "./virtual/measureRowPair";
+export {
+  bindMobileCardList,
+  mobileCardListStyle,
+} from "./virtual/mobileCardList";
 export {
   type ColumnWindow,
   useColumnWindow,

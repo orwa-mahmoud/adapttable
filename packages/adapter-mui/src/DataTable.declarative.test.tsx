@@ -11,7 +11,11 @@ import { describe, expect, it, vi } from "vitest";
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { DataTable } from "./DataTable";
 import type { ColumnDef, FilterDef, FilterOption, TableQuery } from "./index";
-import { defaultFilterRegistry, defaultLabels } from "./index";
+import {
+  defaultFilterRegistry,
+  defaultLabels,
+  resolveFilterRegistry,
+} from "./index";
 import { renderMui } from "./test-utils";
 
 interface Person {
@@ -538,10 +542,7 @@ describe("declarative DataTable (MUI)", () => {
 describe("<AutoFilterForm> (MUI)", () => {
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     renderMui(
       <AutoFilterForm
         defs={[

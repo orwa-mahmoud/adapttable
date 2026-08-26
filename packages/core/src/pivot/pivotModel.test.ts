@@ -181,6 +181,38 @@ describe("pivot", () => {
     expect(line(result, "Alpha")?.cells).toEqual(["2 sales"]);
   });
 
+  it("resolves a registered aggregator name when the caller passes the map", () => {
+    const range = (values: readonly unknown[]) => {
+      const numbers = values.filter(
+        (value): value is number =>
+          typeof value === "number" && Number.isFinite(value)
+      );
+      if (numbers.length === 0) return undefined;
+      return Math.max(...numbers) - Math.min(...numbers);
+    };
+    const result = pivot(
+      SALES,
+      {
+        ...base,
+        columns: [],
+        measures: [{ key: "amount", agg: "range" }],
+      },
+      { aggregators: new Map([["range", range]]) }
+    );
+
+    expect(line(result, "Alpha")?.cells).toEqual([10]);
+  });
+
+  it("an unknown name still computes nothing", () => {
+    const result = pivot(SALES, {
+      ...base,
+      columns: [],
+      measures: [{ key: "amount", agg: "no-such" }],
+    });
+
+    expect(line(result, "Alpha")?.cells).toEqual([undefined]);
+  });
+
   it("formats cells when asked", () => {
     const result = pivot(
       SALES,

@@ -10,6 +10,12 @@ import { flattenColumnTree } from "./columns/columnTree";
 import { asGesture, useTableEditHistory } from "./editing/editHistory";
 import { makeExportCsvHandler, resolveExportCsv } from "./export/tableCsv";
 import { useExportHandler } from "./export/useExportHandler";
+import { bindFeatureHostFn } from "./features/currentHost";
+import {
+  featureHostOf,
+  rememberFeatureHost,
+  useTableFeatures,
+} from "./features/featureHost";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
 import type { FilterDef } from "./filters/filterDefs";
@@ -103,13 +109,15 @@ export type DataTableShellProps<TRow> = Omit<
  */
 
 export function useDataTableShell<TRow>(
-  props: DataTableShellProps<TRow>,
+  incoming: DataTableShellProps<TRow>,
   renderAutoForm: (
     defs: readonly FilterDef<TRow>[],
     source: TableSource<TRow>,
     registry: FilterTypeRegistry
   ) => ReactNode
 ) {
+  const props = useTableFeatures(incoming);
+  const featureHost = featureHostOf(props);
   // ONE resolved URL backend for everything in this table: the tier hooks
   // AND chrome that reads URL state (saved views) share this instance, so
   // with `urlSync={false}` they share the same in-memory backend instead of
@@ -142,6 +150,7 @@ export function useDataTableShell<TRow>(
     columns: dataColumns,
     filters: props.filters,
     filterTypes: props.filterTypes,
+    featureHost,
     defaults: props.defaults,
     paginationMode: props.paginationMode,
     supports: props.supports,
@@ -170,8 +179,11 @@ export function useDataTableShell<TRow>(
     filters: filtersNode,
     filterDefs: runtime.defs,
     filterLabels: { ...runtime.filterLabels, ...props.filterLabels },
+    summaryRow: bindFeatureHostFn(featureHost, props.summaryRow),
+    groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
     ...pinProps,
   };
+  rememberFeatureHost(chromeProps, featureHost);
   const chrome = useTableChrome<TRow>(chromeProps);
   const { table, confirm, getRowId } = chrome;
   const { labels } = table;
@@ -276,13 +288,14 @@ export function useDataTableShell<TRow>(
         grouping: chrome.grouping,
         tree: chrome.tree,
         groupTotal: labels.groupTotal,
-        summaryRow: props.summaryRow,
-      }
+        summaryRow: chromeProps.summaryRow,
+      },
+      featureHost
     ),
     labels,
     // The button names the format it produces, so a spreadsheet writer relabels
     // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv)?.writer?.extension,
+    resolveExportCsv(props.exportCsv, featureHost)?.writer?.extension,
     chrome.featureNotices.some((notice) => notice.kind === "export-all-page")
   );
   // The chrome owns it: progressive column hiding measures this element.
@@ -332,9 +345,12 @@ export function useDataTableShell<TRow>(
   const virtualScrollRef = useCallback(
     (node: HTMLElement | null) => {
       scrollBoxElement.current = node;
-      // Name the element every kit scrolls, whatever it called it: both
-      // windows read it, and CSS and tests need to be able to find it.
-      node?.setAttribute("data-adapttable-part", "scroll-box");
+      // Desktop kits attach this to an unnamed overflow box. The mobile card
+      // list already names itself `cards` — overwriting that would hide the
+      // list from window-offset measurement and from every cards query.
+      if (node && !node.dataset.adapttablePart) {
+        node.dataset.adapttablePart = "scroll-box";
+      }
       bodyScrollRef(node);
     },
     [bodyScrollRef]
@@ -419,6 +435,7 @@ export function useDataTableShell<TRow>(
     onRowClick: props.onRowClick,
     prefetch: props.prefetch,
     rowClassName: props.rowClassName,
+    isCellFlashing: props.isCellFlashing,
     collapsibleColumnGroups: props.collapsibleColumnGroups === true,
     collapsedColumnGroups: chrome.columnLayout.state.collapsedGroups,
     columnGroups: chrome.columnGroups,
@@ -427,7 +444,7 @@ export function useDataTableShell<TRow>(
     rowHeight: props.rowHeight,
     renderRowDetail: chrome.detail?.render,
     renderCard: props.renderCard,
-    summaryRow: props.summaryRow,
+    summaryRow: chromeProps.summaryRow,
     expansion: chrome.detail?.expansion,
     editing: chrome.editing,
     grouping,
@@ -498,6 +515,8 @@ export function useDataTableShell<TRow>(
     hasRowReorder,
     tableProps,
     toolbarProps,
+    /** The host this table owns — adapters pass it into palette / menu hooks. */
+    featureHost,
   };
 }
 

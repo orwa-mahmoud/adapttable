@@ -60,8 +60,11 @@ export const PIVOT_BLANK = "—";
 export interface PivotMeasure {
   /** The column key whose values are aggregated. */
   key: string;
-  /** A built-in aggregate name, or your own function. */
-  agg: AggregateName | Aggregator;
+  /**
+   * A built-in name, a name registered on the table that called
+   * {@link pivot}, or your own function.
+   */
+  agg: AggregateName | (string & {}) | Aggregator;
   /** Header caption. Defaults to the column key. */
   label?: string;
 }
@@ -151,6 +154,13 @@ export interface PivotOptions<TRow> {
    * totals and drops everything beneath it.
    */
   collapsed?: ReadonlySet<string>;
+  /**
+   * Aggregators the calling table has registered by name. Built-in names
+   * resolve without this; a standalone `pivot()` that never passes a map
+   * keeps today's behaviour. The pivot entry must not look the host up
+   * itself — that would drag the feature host into every pivot import.
+   */
+  aggregators?: ReadonlyMap<string, Aggregator>;
 }
 
 /** The label for a dimension value, with a bucket for "no value". */
@@ -329,7 +339,12 @@ export function pivot<TRow>(
   config: PivotConfig,
   options: PivotOptions<TRow> = {}
 ): PivotResult {
-  const { columns, format, collapsed = new Set<string>() } = options;
+  const {
+    columns,
+    format,
+    collapsed = new Set<string>(),
+    aggregators,
+  } = options;
   const byKey = new Map(columns?.map((column) => [column.key, column]));
   const subtotals = config.subtotals ?? true;
   const grandTotals = config.grandTotals ?? true;
@@ -353,7 +368,7 @@ export function pivot<TRow>(
       columnLeaves,
       config.columns,
       byKey,
-      (leaf) => aggregatorOf(leaf.measure),
+      (leaf) => aggregatorOf(leaf.measure, aggregators),
       format
     );
 
@@ -466,17 +481,35 @@ function rowsUnder<TRow>(
   );
 }
 
+const BUILT_IN_NAMES: readonly AggregateName[] = [
+  "sum",
+  "avg",
+  "count",
+  "min",
+  "max",
+];
+
+function isBuiltInName(name: string): name is AggregateName {
+  return (BUILT_IN_NAMES as readonly string[]).includes(name);
+}
+
+/** What an unknown name computes: nothing, the same as today. */
+const unknownAggregator: Aggregator = () => undefined;
+
 /**
  * The aggregator a measure names.
  *
- * Resolved per measure rather than looked up per cell: a lookup would need a
- * fallback for a miss that cannot happen, and unreachable code is worse than
- * a function call.
+ * A function is used as-is. A built-in name is re-derived here so this
+ * entry never imports the aggregate module's table. Any other string is
+ * a registration the caller passed in — or, if they did not, nothing.
  */
-function aggregatorOf(measure: PivotMeasure): Aggregator {
-  return typeof measure.agg === "string"
-    ? builtInAggregator(measure.agg)
-    : measure.agg;
+function aggregatorOf(
+  measure: PivotMeasure,
+  extras?: ReadonlyMap<string, Aggregator>
+): Aggregator {
+  if (typeof measure.agg !== "string") return measure.agg;
+  if (isBuiltInName(measure.agg)) return builtInAggregator(measure.agg);
+  return extras?.get(measure.agg) ?? unknownAggregator;
 }
 
 /**

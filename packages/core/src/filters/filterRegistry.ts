@@ -25,8 +25,10 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
 
 /**
  * One registered filter type: widget + operators + predicate + chips +
- * tree projection. Register a new `type` string, or {@link FilterTypeRegistry.extend}
- * a built-in to add operators without forking the table.
+ * tree projection. Register a new `type` string via
+ * `TableFeatureHost.registerFilterType`, or extend a built-in with
+ * `TableFeatureHost.extendFilterType` to add operators without forking
+ * the table. `FilterTypeRegistry.register` / `extend` still work until v3.
  */
 export interface FilterTypeSpec {
   readonly type: string;
@@ -54,7 +56,15 @@ export interface FilterTypeRegistry {
   get(type: string): FilterTypeSpec | undefined;
   has(type: string): boolean;
   types(): readonly string[];
+  /**
+   * @deprecated Register with `TableFeatureHost.registerFilterType` in
+   * `feature.setup(host)` instead. Removed at v3.
+   */
   register(spec: FilterTypeSpec): FilterTypeRegistry;
+  /**
+   * @deprecated Use `TableFeatureHost.extendFilterType` in
+   * `feature.setup(host)` instead. Removed at v3.
+   */
   extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry;
 }
 
@@ -74,19 +84,47 @@ class MapRegistry implements FilterTypeRegistry {
   }
 
   register(spec: FilterTypeSpec): FilterTypeRegistry {
-    const next = new Map(this.specs);
-    next.set(spec.type, spec);
-    return new MapRegistry(next);
+    return withFilterType(this, spec);
   }
 
   extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry {
-    const current = this.specs.get(type);
-    if (!current) {
-      devWarn(`extendFilterType: unknown type "${type}"`);
-      return this;
-    }
-    return this.register({ ...current, ...patch, type });
+    return withExtendedFilterType(this, type, patch);
   }
+}
+
+/**
+ * Copy `registry` with `spec` added (same `type` replaces). Used internally
+ * so {@link FilterTypeRegistry.register} can stay deprecated without the
+ * library calling it.
+ */
+export function withFilterType(
+  registry: FilterTypeRegistry,
+  spec: FilterTypeSpec
+): FilterTypeRegistry {
+  const specs: FilterTypeSpec[] = [];
+  for (const type of registry.types()) {
+    const current = registry.get(type);
+    if (current) specs.push(current);
+  }
+  specs.push(spec);
+  return createFilterRegistry(specs);
+}
+
+/**
+ * Patch a named type on `registry`. Unknown types warn and return the
+ * same registry — same contract as {@link FilterTypeRegistry.extend}.
+ */
+export function withExtendedFilterType(
+  registry: FilterTypeRegistry,
+  type: string,
+  patch: Partial<FilterTypeSpec>
+): FilterTypeRegistry {
+  const current = registry.get(type);
+  if (!current) {
+    devWarn(`extendFilterType: unknown type "${type}"`);
+    return registry;
+  }
+  return withFilterType(registry, { ...current, ...patch, type });
 }
 
 /** Empty registry — used to seed {@link createFilterRegistry}. */

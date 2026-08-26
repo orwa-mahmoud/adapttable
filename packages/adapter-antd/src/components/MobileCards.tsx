@@ -9,13 +9,13 @@ import {
   type RowActionsLayout,
   type RowActionsRenderer,
   type RowExpansionState,
-  type RowReorderState,
   type TableLabels,
   treeCardStyle,
   type TreeEntry,
   type UseDataTableResult,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   EXTRA_ROW_PARTS,
   type ExtraRow,
   insertExtraRows,
@@ -25,8 +25,10 @@ import {
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
+  rowFlashSignature,
   rowIsDirty,
   rowReorderSignature,
+  type RowReorderState,
   rowStyleSignature,
   useSummaryCells,
   type VirtualTableRow,
@@ -101,6 +103,12 @@ interface CardItemProps<TRow> {
   /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
   style?: CSSProperties;
   styleSignature: string;
+  /**
+   * Flashing column keys for this card, joined. Compared instead of
+   * `isCellFlashing`, which stays referentially stable while the marks move.
+   */
+  flashSignature: string;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   selected: boolean;
   expanded: boolean;
   /** Selection toggle — present only when selection is enabled. */
@@ -158,6 +166,7 @@ function cardItemPropsEqual<TRow>(
     prev.renderRowActions === next.renderRowActions &&
     prev.className === next.className &&
     prev.styleSignature === next.styleSignature &&
+    prev.flashSignature === next.flashSignature &&
     prev.selected === next.selected &&
     prev.expanded === next.expanded &&
     prev.onToggleSelect === next.onToggleSelect &&
@@ -189,6 +198,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     renderRowActions,
     className,
     style,
+    isCellFlashing,
     selected,
     expanded,
     onToggleSelect,
@@ -297,7 +307,12 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         <Descriptions column={1} size="small" colon={false}>
           {fields.map(({ column, label, value }) => (
             <Descriptions.Item key={column.key} label={label}>
-              {value}
+              <span
+                data-adapttable-part="card-value"
+                data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
+              >
+                {value}
+              </span>
             </Descriptions.Item>
           ))}
         </Descriptions>
@@ -343,6 +358,7 @@ export function MobileCards<TRow>({
   prefetch,
   onRowClick,
   rowClassName,
+  isCellFlashing,
   rowStyle,
   rowHeight,
   tableLabel,
@@ -363,6 +379,8 @@ export function MobileCards<TRow>({
   pinnedBottomRows = [],
   extraRows,
   renderCard,
+  listRef,
+  listStyle,
 }: Readonly<{
   table: UseDataTableResult<TRow>;
   /** Class applied to every card (merged before `rowClassName`). */
@@ -378,6 +396,11 @@ export function MobileCards<TRow>({
   onRowClick?: (row: TRow) => void;
   /** Conditional per-row class — see `BaseDataTableProps.rowClassName`. */
   rowClassName?: (row: TRow, index: number) => string | undefined;
+  /**
+   * Mark cells a patch just changed — `data-flash` on the card value. Omit
+   * and nothing is marked.
+   */
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
   rowStyle?: (row: TRow, index: number) => CSSProperties | undefined;
   /** Per-row height — see `BaseDataTableProps.rowHeight`. */
@@ -426,6 +449,10 @@ export function MobileCards<TRow>({
   pinnedTopRows?: readonly TRow[];
   pinnedBottomRows?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
+  /** Attach the virtualizer to this list (window or maxHeight box). */
+  listRef?: (node: HTMLElement | null) => void;
+  /** Clip style when the host passed `maxHeight`. */
+  listStyle?: CSSProperties;
 }>) {
   const { labels, selection, columns } = table;
   // Either the virtual slice or every source row, resolved to render entries
@@ -458,6 +485,7 @@ export function MobileCards<TRow>({
         key={key}
         ref={measureElement}
         data-index={index}
+        data-adapttable-part="card"
         style={{
           ...treeCardStyle(treeEntry?.level ?? 0),
           ...resolveRowStyle(rowStyle, rowHeight, row, index),
@@ -482,6 +510,8 @@ export function MobileCards<TRow>({
           styleSignature={rowStyleSignature(
             resolveRowStyle(rowStyle, rowHeight, row, index)
           )}
+          flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
+          isCellFlashing={isCellFlashing}
           selected={selection ? selection.isSelected(id) : false}
           expanded={expansion ? expansion.isExpanded(id) : false}
           onToggleSelect={selection ? selection.toggle : undefined}
@@ -535,6 +565,7 @@ export function MobileCards<TRow>({
 
   return (
     <ul
+      ref={listRef}
       data-adapttable-part="cards"
       aria-label={tableLabel}
       style={{
@@ -544,6 +575,7 @@ export function MobileCards<TRow>({
         display: "flex",
         flexDirection: "column",
         gap: compact ? 4 : 8,
+        ...listStyle,
       }}
     >
       {paddingTop > 0 && <li aria-hidden style={{ height: paddingTop }} />}

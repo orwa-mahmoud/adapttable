@@ -20,6 +20,7 @@ import {
   type DemoCells,
   demoConfirm,
   demoFilterTypes,
+  type DemoOrder,
   demoOrders,
   demoSavedViews,
   initials,
@@ -46,6 +47,10 @@ import {
   type PageMode,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
+import {
+  nestedInnerFeatures,
+  nestedOuterFeatures,
+} from "../nestedTablePlugins";
 
 const ANTD_TAG_COLOR = {
   green: "green",
@@ -90,11 +95,12 @@ const ANTD_CELLS: DemoCells = {
 const nestedOrders = (row: Person) => ({
   label: `${row.name} — recent orders`,
   table: (defaults: NestedTableDefaults) => (
-    <DataTable
+    <DataTable<DemoOrder>
       {...defaults}
       data={demoOrders(row)}
       columns={DEMO_ORDER_COLUMNS}
       rowKey={(order) => order.id}
+      features={nestedInnerFeatures<DemoOrder>()}
     />
   ),
 });
@@ -292,6 +298,7 @@ export function AntdDemo({
                   })
             }
             rowKey={(r) => r.id}
+            features={nested ? nestedOuterFeatures<Person>() : undefined}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

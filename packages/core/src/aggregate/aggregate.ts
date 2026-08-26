@@ -20,6 +20,8 @@
  */
 import type { ReactNode } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
+import { currentFeatureHost } from "../features/currentHost";
 import type { ColumnDef, SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
@@ -55,6 +57,11 @@ export interface AggregateOptions<TRow> {
    * column key: `format: (v, key) => key === "budget" ? money.format(v) : v`.
    */
   format?: (value: ReactNode, key: string) => ReactNode;
+  /**
+   * The host of the table this mapper will run in. Omit it when the
+   * table binds the call with {@link runWithFeatureHost}.
+   */
+  host?: FeatureHostState;
 }
 
 /**
@@ -147,7 +154,7 @@ export function aggregate<TRow>(
   spec: AggregateSpec,
   options: AggregateOptions<TRow> = {}
 ): (rows: readonly TRow[]) => Partial<Record<string, ReactNode>> {
-  const { columns, format } = options;
+  const { columns, format, host: boundHost } = options;
   const byKey = new Map(columns?.map((c) => [c.key, c]));
   const entries = Object.entries(spec);
 
@@ -155,7 +162,12 @@ export function aggregate<TRow>(
     const out: Partial<Record<string, ReactNode>> = {};
     for (const [key, fn] of entries) {
       if (!fn) continue;
-      const aggregator = typeof fn === "string" ? BUILT_INS[fn] : fn;
+      const aggregator =
+        typeof fn === "string"
+          ? (BUILT_INS[fn] ??
+            (boundHost ?? currentFeatureHost())?.aggregators.get(fn))
+          : fn;
+      if (typeof aggregator !== "function") continue;
       const values: SortableValue[] = [];
       for (const row of rows) {
         const value = resolveAggregateValue(row, key, byKey.get(key));

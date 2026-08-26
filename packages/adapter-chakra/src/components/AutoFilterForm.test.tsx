@@ -7,6 +7,7 @@ import {
   type FilterDef,
   type FilterOption,
   type FilterValue,
+  resolveFilterRegistry,
   type TableLabels,
 } from "../index";
 import { renderChakra } from "../test-utils";
@@ -399,10 +400,7 @@ describe("<AutoFilterForm> (Chakra)", () => {
 
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     renderChakra(
       <AutoFilterForm
         defs={[

@@ -5,9 +5,12 @@ import {
   type ColumnDef,
   type ColumnLayoutState,
   evaluateFilterTree,
+  insertRow,
   type MobileCardModel,
   type MobileCardRenderer,
   type QueryFilterGroup,
+  removeRow,
+  type RowPatch,
   type Slot,
   type TableErrorState,
   type TableSource,
@@ -20,12 +23,9 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
-  type Dispatch,
   type ReactNode,
-  type SetStateAction,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -52,7 +52,6 @@ import {
   orderPeopleByTeam,
   PEOPLE,
   type Person,
-  personName,
   personSkills,
   personStatus,
   reportsTo,
@@ -64,6 +63,8 @@ import {
   utilization,
 } from "./data";
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
+import { usePatchSink } from "./patchSink";
+import { useRealtimeSlot } from "./realtimeSlot";
 
 /**
  * Where the rows come from.
@@ -115,7 +116,7 @@ function demoCard(row: Person, card: MobileCardModel<Person>): ReactNode {
   const [identity, ...rest] = card.fields;
   return (
     <div className="demo-person-card">
-      <p className="demo-person-card__name">{identity?.value}</p>
+      <div className="demo-person-card__name">{identity?.value}</div>
       <dl className="demo-person-card__grid">
         {rest.map(({ column, label, value }) => (
           <div key={column.key}>
@@ -222,6 +223,8 @@ export interface DemoColumnProps {
   onRowReorder?: (from: number, to: number, row: Person) => void;
   /** The flash on a changed row — a class, which every adapter honours. */
   rowClassName?: (row: Person, index: number) => string | undefined;
+  /** The pulse on a cell a patch just changed — `data-flash` on the cell. */
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** The host's own error state, when the lab is showing a replacement. */
   slots?: { error?: Slot<TableErrorState> };
   /** The demo's own mobile card layout, when that toggle is on. */
@@ -261,156 +264,6 @@ function usePeopleQuery(params: PeopleParams) {
     initialPageParam: params.page ?? 1,
     getNextPageParam: (last: PeoplePage) => last.nextPage ?? undefined,
   });
-}
-
-/** How often the realtime page applies a patch, in ms. */
-const REALTIME_INTERVAL_MS = 1200;
-
-/** How many rows the realtime page treats as "the top of the sheet". */
-const REALTIME_TOP = 6;
-
-/** Visual order — the same Budget direction the table is showing. */
-function rankByBudget(rows: readonly Person[], dir: "asc" | "desc"): Person[] {
-  return [...rows].sort((left, right) => {
-    const delta =
-      dir === "asc"
-        ? budget(left) - budget(right)
-        : budget(right) - budget(left);
-    return delta !== 0 ? delta : Number(left.id) - Number(right.id);
-  });
-}
-
-/** A value strictly between two neighbors, so the row stays in that seat. */
-function budgetBetween(left: number, right: number): number {
-  const lo = Math.min(left, right);
-  const hi = Math.max(left, right);
-  if (hi - lo >= 2) return lo + Math.floor((hi - lo) / 2);
-  return left < right ? left + 1 : left - 1;
-}
-
-/**
- * A budget that sorts `target` into `destRank` of the *visible* order
- * (0 = the row on screen first). Must sit between the two neighbors
- * already in that band — a 112k write against an ascending sheet is
- * how a patch used to vanish onto page 3.
- */
-function budgetForRank(
-  ranked: readonly Person[],
-  destRank: number,
-  targetId: string,
-  dir: "asc" | "desc"
-): number {
-  const others = ranked.filter((row) => row.id !== targetId);
-  const first = others[0];
-  const last = others[others.length - 1];
-  if (!first || !last) return 50_000;
-  const at = Math.min(Math.max(destRank, 0), others.length);
-  const beyondFirst = dir === "asc" ? -2500 : 2500;
-  if (at <= 0) return budget(first) + beyondFirst;
-  if (at >= others.length) return budget(last) - beyondFirst;
-  return budgetBetween(budget(others[at - 1]), budget(others[at]));
-}
-
-/**
- * Apply the nth live update.
- *
- * Through the patch API rather than by rebuilding the array: the log rides on
- * the returned rows, which is what lets the incremental engine re-run search,
- * filters and sort for the touched row only. Copying the result would drop it.
- *
- * Rank the way the table is ranked. Park the row between two people
- * already in seats 2–6 so the change stays on page 1.
- */
-function nextRealtimePatch(
-  rows: readonly Person[],
-  tick: number,
-  dir: "asc" | "desc"
-): { rows: readonly Person[]; id: string; line: string } | null {
-  if (rows.length < 2) return null;
-  const ranked = rankByBudget(rows, dir);
-  const belowFold = ranked.slice(REALTIME_TOP);
-  const destRank = 1 + (tick % (REALTIME_TOP - 1));
-  const fromBottom =
-    belowFold.length === 0
-      ? undefined
-      : belowFold[
-          belowFold.length - 1 - (Math.floor(tick / 2) % belowFold.length)
-        ];
-  const fromTop = ranked[(destRank + 2) % REALTIME_TOP];
-  const promote = tick % 2 === 0 && fromBottom !== undefined;
-  const target = promote ? fromBottom : (fromTop ?? ranked[destRank]);
-  if (!target) return null;
-  const nextBudget = budgetForRank(ranked, destRank, target.id, dir);
-  return {
-    rows: applyRowPatchesWithLog(
-      rows,
-      [updateRow<Person>(target.id, { budget: nextBudget })],
-      (row) => row.id
-    ).rows,
-    id: target.id,
-    line: `${personName(target, "en")} · budget → ${nextBudget}`,
-  };
-}
-
-/**
- * Drive a live feed of row patches, and report what was applied.
- *
- * Its own hook rather than an effect inside the table body: the timer, the
- * patch and the transcript are one concern, and inlining them pushed the
- * caller past its complexity budget.
- */
-function useRealtimeFeed(
-  enabled: boolean,
-  data: readonly Person[],
-  setData: Dispatch<SetStateAction<readonly Person[]>>,
-  sortDir: "asc" | "desc",
-  onPatched?: (id: string) => void
-): string[] {
-  const [feed, setFeed] = useState<string[]>([]);
-  const dataRef = useRef(data);
-  dataRef.current = data;
-  const sortDirRef = useRef(sortDir);
-  sortDirRef.current = sortDir;
-  useEffect(() => {
-    if (!enabled) return undefined;
-    let tick = 0;
-    const id = setInterval(() => {
-      const next = nextRealtimePatch(
-        dataRef.current,
-        tick++,
-        sortDirRef.current
-      );
-      if (!next) return;
-      setData(next.rows);
-      setFeed((lines) => [next.line, ...lines].slice(0, 4));
-      onPatched?.(next.id);
-    }, REALTIME_INTERVAL_MS);
-    return () => {
-      clearInterval(id);
-    };
-  }, [enabled, setData, onPatched]);
-  return feed;
-}
-
-/** What the live feed has applied, newest first. */
-function RealtimeFeed({ lines }: Readonly<{ lines: readonly string[] }>) {
-  return (
-    <div
-      className="demo-live-update demo-live-update--feed"
-      data-testid="realtime-feed"
-    >
-      <span>Applied updates</span>
-      {lines.length === 0 ? (
-        <span>waiting for the first patch…</span>
-      ) : (
-        <ol>
-          {lines.map((line, index) => (
-            <li key={`${line}-${String(index)}`}>{line}</li>
-          ))}
-        </ol>
-      )}
-    </div>
-  );
 }
 
 interface DataProps {
@@ -550,29 +403,19 @@ function blankPerson(rows: readonly Person[]): Person {
   };
 }
 
-/** Apply whichever of a batch's edits belongs to this row. */
-function applyEdits(
-  row: Person,
-  edits: readonly { row: Person; patch: Record<string, unknown> }[]
-): Person {
-  const edit = edits.find((one) => one.row.id === row.id);
-  return edit ? applyRowPatch(row, edit.patch) : row;
-}
-
 /**
- * Apply a row patch, mapping each column key to the field it edits — the same
- * mapping a single cell edit uses.
+ * Map editor column keys onto row fields — the same mapping a single cell
+ * edit uses — so a batch write is one `updateRow` per person.
  */
-function applyRowPatch(
-  row: Person,
+function columnChanges(
   patch: Readonly<Record<string, unknown>>
-): Person {
-  let next = row;
+): Partial<Person> {
+  const changes: Partial<Person> = {};
   for (const [key, value] of Object.entries(patch)) {
     const field = EDIT_FIELD[key] ?? (key as keyof Person);
-    next = { ...next, [field]: value as never };
+    (changes as Record<string, unknown>)[field] = value;
   }
-  return next;
+  return changes;
 }
 
 /** Column key → row field for composite cells (person shows name; load
@@ -583,6 +426,23 @@ const EDIT_FIELD: Record<string, keyof Person> = {
   // The timeline cell shows a range; its editor edits the start it sorts by.
   timeline: "start",
 };
+
+/**
+ * A patch records the row field that moved; the table asks about the
+ * column key. Composite cells (Person, Load, Timeline) use a different
+ * word for each, so a flash reader has to accept both.
+ */
+function columnOrFieldFlashing(
+  isFlashing: (rowId: string, columnKey: string) => boolean,
+  rowId: string,
+  columnKey: string
+): boolean {
+  if (isFlashing(rowId, columnKey)) return true;
+  return (
+    Object.hasOwn(EDIT_FIELD, columnKey) &&
+    isFlashing(rowId, EDIT_FIELD[columnKey])
+  );
+}
 
 function pickOther<T>(choices: readonly T[], current: T): T {
   for (const item of choices) {
@@ -658,6 +518,7 @@ function frontendColumnProps(
     failure?: Failure;
     data: readonly Person[];
     flashClass: (row: Person) => string | undefined;
+    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     onCellEdit: (row: Person, key: string, nextValue: unknown) => void;
     onEditStart: EditEventHandler<Person>;
     onEditCancel: EditEventHandler<Person>;
@@ -669,13 +530,14 @@ function frontendColumnProps(
     onDuplicateRow: (row: Person) => void;
     onDeleteRow: (row: Person) => void;
     onRowReorder: (from: number, to: number) => void;
-    setData: Dispatch<SetStateAction<readonly Person[]>>;
+    writePatches: (patches: readonly RowPatch<Person>[]) => void;
     flashRow: (id: Person["id"]) => void;
   }
 ): DemoColumnProps {
   const next: DemoColumnProps = {
     ...columns,
     rowClassName: flags.flashClass,
+    isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
     groupBy: null,
@@ -699,9 +561,7 @@ function frontendColumnProps(
     Object.assign(next, {
       rowEditing: true,
       onRowEdit: (row: Person, patch: Record<string, unknown>) => {
-        flags.setData((prev) =>
-          prev.map((r) => (r.id === row.id ? applyRowPatch(r, patch) : r))
-        );
+        flags.writePatches([updateRow(row.id, columnChanges(patch))]);
         flags.flashRow(row.id);
       },
     });
@@ -822,6 +682,23 @@ function Frontend({
     return cellSpan ? orderPeopleByTeam(rows) : rows;
   });
   const extraAnchorId = useRef(data[0]?.id).current;
+  const RealtimeSlot = useRealtimeSlot();
+  const patchSink = usePatchSink();
+  const isFlashingRef = useRef<(rowId: string, columnKey: string) => boolean>(
+    () => false
+  );
+  const sinkRef = useRef(patchSink);
+  sinkRef.current = patchSink;
+  const writePatches = useCallback((patches: readonly RowPatch<Person>[]) => {
+    setData((prev) => {
+      const log = applyRowPatchesWithLog(prev, patches, (row) => row.id);
+      if (log.events.length > 0) {
+        const events = log.events;
+        queueMicrotask(() => sinkRef.current?.onEvents(events));
+      }
+      return log.rows;
+    });
+  }, []);
   // The demo owns the data, so the demo is what knows which row changed —
   // exactly where a real app would flash it. Note there is no highlight prop
   // on the table: `rowClassName` is the seam, so this works in every kit.
@@ -829,21 +706,19 @@ function Frontend({
   const onCellEdit = useCallback(
     (row: Person, key: string, nextValue: unknown) => {
       const field = EDIT_FIELD[key] ?? (key as keyof Person);
-      setData((prev) =>
-        prev.map((r) =>
-          r.id === row.id ? { ...r, [field]: nextValue as never } : r
-        )
-      );
+      writePatches([updateRow(row.id, { [field]: nextValue as never })]);
       flash.flashRow(row.id);
     },
-    [flash]
+    [flash, writePatches]
   );
   const onBatchEdit = useCallback(
     (edits: readonly { row: Person; patch: Record<string, unknown> }[]) => {
-      setData((prev) => prev.map((row) => applyEdits(row, edits)));
+      writePatches(
+        edits.map((edit) => updateRow(edit.row.id, columnChanges(edit.patch)))
+      );
       for (const edit of edits) flash.flashRow(edit.row.id);
     },
-    [flash]
+    [flash, writePatches]
   );
   // Adding, copying and removing rows: the table asks, the demo owns the list —
   // the same one-way flow a real app's mutation would follow.
@@ -851,20 +726,23 @@ function Frontend({
   // updater must stay pure, and the flash needs the id it produced.
   const onAddRow = useCallback(() => {
     const added = blankPerson(data);
-    setData((prev) => [added, ...prev]);
+    writePatches([insertRow(added, 0)]);
     flash.flashRow(added.id);
-  }, [data, flash]);
+  }, [data, flash, writePatches]);
   const onDuplicateRow = useCallback(
     (row: Person) => {
       const copy = { ...row, id: nextId(data) };
-      setData((prev) => [copy, ...prev]);
+      writePatches([insertRow(copy, 0)]);
       flash.flashRow(copy.id);
     },
-    [data, flash]
+    [data, flash, writePatches]
   );
-  const onDeleteRow = useCallback((row: Person) => {
-    setData((prev) => prev.filter((r) => r.id !== row.id));
-  }, []);
+  const onDeleteRow = useCallback(
+    (row: Person) => {
+      writePatches([removeRow(row.id)]);
+    },
+    [writePatches]
+  );
   const onRowReorder = useCallback((from: number, to: number) => {
     setData((prev) => applyRowReorder(prev, from, to));
   }, []);
@@ -885,17 +763,15 @@ function Frontend({
     if (!activeEdit) return;
     const { rowId, columnKey } = activeEdit;
     const field = EDIT_FIELD[columnKey] ?? (columnKey as keyof Person);
-    setData((prev) =>
-      prev.map((row) => {
-        if (row.id !== rowId) return row;
-        return {
-          ...row,
-          [field]: incomingEditValue(row, columnKey) as never,
-          revision: (row.revision ?? 0) + 1,
-        };
-      })
-    );
-  }, [activeEdit]);
+    const row = data.find((person) => person.id === rowId);
+    if (!row) return;
+    writePatches([
+      updateRow(rowId, {
+        [field]: incomingEditValue(row, columnKey) as never,
+        revision: (row.revision ?? 0) + 1,
+      }),
+    ]);
+  }, [activeEdit, data, writePatches]);
   // Two classes, not one: the mark holds steady under reduced motion, so the
   // user still learns which row changed without anything moving.
   const flashClass = useCallback(
@@ -948,14 +824,8 @@ function Frontend({
     urlKey,
     urlSync,
   });
-  const feed = useRealtimeFeed(
-    realtime === true,
-    data,
-    setData,
-    source.sortDir === "asc" ? "asc" : "desc",
-    realtime === true ? flash.flashRow : undefined
-  );
   const tableSource = advancedFilters ? source : withoutFilterTree(source);
+  const live = realtime === true && RealtimeSlot !== null;
   return (
     <>
       {editing ? (
@@ -976,7 +846,15 @@ function Frontend({
           </button>
         </div>
       ) : null}
-      {realtime ? <RealtimeFeed lines={feed} /> : null}
+      {live ? (
+        <RealtimeSlot
+          data={data}
+          setData={setData}
+          sortDir={source.sortDir === "asc" ? "asc" : "desc"}
+          onPatched={flash.flashRow}
+          isFlashingRef={isFlashingRef}
+        />
+      ) : null}
       {render(
         tableSource,
         frontendColumnProps(columns, {
@@ -997,6 +875,22 @@ function Frontend({
           failure,
           data,
           flashClass,
+          isCellFlashing:
+            live || patchSink
+              ? (rowId, columnKey) =>
+                  columnOrFieldFlashing(
+                    isFlashingRef.current,
+                    rowId,
+                    columnKey
+                  ) ||
+                  (patchSink
+                    ? columnOrFieldFlashing(
+                        patchSink.isFlashingRef.current,
+                        rowId,
+                        columnKey
+                      )
+                    : false)
+              : undefined,
           onCellEdit,
           onEditStart,
           onEditCancel: onEditEnd,
@@ -1006,7 +900,7 @@ function Frontend({
           onDuplicateRow,
           onDeleteRow,
           onRowReorder,
-          setData,
+          writePatches,
           flashRow: flash.flashRow,
         })
       )}

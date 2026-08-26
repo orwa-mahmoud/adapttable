@@ -72,6 +72,8 @@ const FIXTURES = [
       "virtual",
       "PIVOT_BLANK",
       "parseFormula",
+      "useRowPatchStream",
+      "useChangedCellFlash",
     ],
   },
   {
@@ -88,7 +90,12 @@ const FIXTURES = [
     // whole main surface at once does not carry them. The marker is an
     // engine-only name, not the word "pivot" — the panel's LABELS are shared
     // table labels and do belong in the base bundle.
-    absent: ["PIVOT_BLANK", "parseFormula"],
+    absent: [
+      "PIVOT_BLANK",
+      "parseFormula",
+      "useRowPatchStream",
+      "useChangedCellFlash",
+    ],
   },
   {
     // What the pivot engine costs the tables that ask for it, and nothing to
@@ -122,6 +129,16 @@ const FIXTURES = [
     entryFile: "formula.js",
     budgetKB: 6,
     code: `export { buildFormulaColumns } from "PKG";`,
+  },
+  {
+    // Live patches over WebSocket or SSE. A table that never opens a
+    // socket never downloads one — `useRowPatchStream` is absent from
+    // the simple-table and every-export fixtures above.
+    name: "core · stream",
+    pkg: "core",
+    entryFile: "stream.js",
+    budgetKB: 5,
+    code: `export { useRowPatchStream } from "PKG";`,
   },
   {
     // The React-free half of the model, which a backend imports instead of the
@@ -310,17 +327,34 @@ const FIXTURES = [
   // per-kit copies of the same header/pin/row/summary walk with one generic
   // pass in core. It is one graph serving six kits, so a single kit's bundle
   // carries paths its own copy specialised away; the trade is deliberate.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 132 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 133 },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 132 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 125 },
+  //
+  // The public plugin host (`TableFeature.setup`) lives on the default path
+  // because editors, aggregators, column menus, filters, export, the palette
+  // and the context menu read it during the same render. It cannot sit behind
+  // an optional entry without becoming a second API. ~1 KB gzip; the four
+  // kits that were already against the ceiling move by that amount.
+  //
+  // Changed-cell flash (#324) paints `data-flash` on every kit's cell and
+  // card-value. The host still opts in with `isCellFlashing` — omit it and
+  // the attribute is never set — but the helper sits on the cell walk every
+  // adapter already imports. Unstyled was on the 133 KB line and moved
+  // 0.1 KB over it.
+  //
+  // Each table provides its own feature host through FeatureHostProvider /
+  // useFeatureHost. That context is on the default path because export,
+  // menus, editors and aggregators resolve after render. ~0.2 KB gzip; the
+  // four kits already on the line move 1 KB.
+  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
+  { name: "mui · table", pkg: "adapter-mui", budgetKB: 134 },
+  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 133 },
+  { name: "antd · table", pkg: "adapter-antd", budgetKB: 127 },
   { name: "radix · table", pkg: "adapter-radix", budgetKB: 133 },
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 139 },
+  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 140 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
-  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 135 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 132 },
+  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 137 },
+  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 134 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
 
 /**

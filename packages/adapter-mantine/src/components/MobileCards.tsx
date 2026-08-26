@@ -12,14 +12,18 @@ import {
   type TreeEntry,
 } from "@adapttable/core";
 import {
+  bindMobileCardList,
+  cellFlashAttr,
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
+  mobileCardListStyle,
   orderedCardEntries,
   resolveMobileLabel,
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
+  rowFlashSignature,
   rowIsDirty,
   rowReorderSignature,
   rowStyleSignature,
@@ -59,6 +63,7 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "getRowId"
   | "onRowClick"
   | "rowClassName"
+  | "isCellFlashing"
   | "rowStyle"
   | "rowHeight"
   | "renderRowDetail"
@@ -77,6 +82,8 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "pinnedTopRows"
   | "pinnedBottomRows"
   | "extraRows"
+  | "maxHeight"
+  | "virtualScrollRef"
 > {
   bodyRef: RefObject<HTMLDivElement | null>;
   className?: string;
@@ -106,6 +113,12 @@ interface MobileCardProps<TRow> {
   /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
   style?: CSSProperties;
   styleSignature: string;
+  /**
+   * Flashing column keys for this card, joined. Compared instead of
+   * `isCellFlashing`, which stays referentially stable while the marks move.
+   */
+  flashSignature: string;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   selected: boolean;
   expanded: boolean;
   /** Selection toggle — present only when selection is enabled. */
@@ -142,7 +155,8 @@ type UncomparedCardProp =
   | "rows"
   | "getRowId"
   | "rowReorder"
-  | "style";
+  | "style"
+  | "isCellFlashing";
 
 /** Every card prop the memo comparator checks with `Object.is`. */
 const COMPARED_CARD_PROPS: readonly Exclude<
@@ -160,6 +174,7 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "renderRowActions",
   "className",
   "styleSignature",
+  "flashSignature",
   "selected",
   "expanded",
   "onToggleSelect",
@@ -203,6 +218,7 @@ function MobileCardBase<TRow>({
   renderRowActions,
   className,
   style,
+  isCellFlashing,
   selected,
   expanded,
   onToggleSelect,
@@ -257,6 +273,7 @@ function MobileCardBase<TRow>({
       className={className}
       ref={measureElement}
       data-index={index}
+      data-adapttable-part="card"
       withBorder
       radius="md"
       padding={cardPadding}
@@ -301,7 +318,12 @@ function MobileCardBase<TRow>({
                 )}
                 {/* Cells are arbitrary ReactNode (often block elements) —
                 a <p> wrapper would be invalid HTML. */}
-                <Text component="div" fz="sm">
+                <Text
+                  component="div"
+                  fz="sm"
+                  data-adapttable-part="card-value"
+                  data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
+                >
                   {value}
                 </Text>
               </div>
@@ -360,6 +382,7 @@ export function MobileCards<TRow>({
   density = "comfortable",
   onRowClick,
   rowClassName,
+  isCellFlashing,
   rowStyle,
   rowHeight,
   renderRowDetail,
@@ -374,6 +397,8 @@ export function MobileCards<TRow>({
   pinnedBottomRows = [],
   extraRows,
   renderCard,
+  maxHeight,
+  virtualScrollRef,
 }: Readonly<MobileCardsProps<TRow>>) {
   const { columns, selection, labels } = table;
   const compact = density === "compact";
@@ -422,6 +447,8 @@ export function MobileCards<TRow>({
         styleSignature={rowStyleSignature(
           resolveRowStyle(rowStyle, rowHeight, row, index)
         )}
+        flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
+        isCellFlashing={isCellFlashing}
         selected={selection ? selection.isSelected(id) : false}
         expanded={expansion ? expansion.isExpanded(id) : false}
         onToggleSelect={selection ? selection.toggle : undefined}
@@ -451,9 +478,10 @@ export function MobileCards<TRow>({
   return (
     <Stack
       gap={compact ? "xs" : "sm"}
-      ref={bodyRef}
+      ref={bindMobileCardList(virtualScrollRef, bodyRef)}
       data-adapttable-part="cards"
       className={className}
+      style={mobileCardListStyle(maxHeight)}
       {...table.getTableProps({ role: "list" })}
     >
       {paddingTop > 0 && <div aria-hidden style={{ height: paddingTop }} />}

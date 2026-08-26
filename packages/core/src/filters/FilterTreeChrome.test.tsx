@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { QueryFilterGroup } from "../source/queryContract";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import type { FilterDef } from "./filterDefs";
+import { withFilterType } from "./filterRegistry";
 import { FilterTreeChrome, type FilterTreeSlots } from "./FilterTreeChrome";
 
 interface Row {
@@ -265,7 +266,7 @@ describe("FilterTreeChrome", () => {
 
   it("labels unknown-widget operators with the raw op token", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
+    const registry = withFilterType(defaultFilterRegistry, {
       ...text,
       type: "sku",
       widget: "select",

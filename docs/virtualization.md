@@ -54,6 +54,8 @@ real measured sizes (like the `140` above) when your cells differ.
   `virtualScrollMargin` only to override that measurement.
 - **Element mode** (any `maxHeight` box): the same prop virtualizes inside the
   scroll box instead — the box is the scroller and the window tracks it.
+  Mobile cards attach that box to the card list itself (desktop rows attach it
+  to the table assembly), so `maxHeight` + `virtualize` never mounts every card.
 - `rowHeight` overrides the estimate when set — a function is per row, so
   a variable-height table still windows. See [row styling and heights](./row-styling.md).
 - Rows/cards are measured after render; `estimateRowSize` (desktop rows) and

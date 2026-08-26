@@ -10,6 +10,7 @@
  *
  *   node scripts/bench.mjs                        # all scenarios
  *   node scripts/bench.mjs --smoke                # the CI subset
+ *   node scripts/bench.mjs --only patch --port 4321
  *   node scripts/bench.mjs --port 4321 --json     # machine-readable
  *
  * It serves the showcase itself when nothing is already on the port, and stops
@@ -43,6 +44,8 @@ const flag = (name, fallback) => {
 const PORT = flag("port", "5173");
 const SMOKE = args.includes("--smoke");
 const JSON_OUT = args.includes("--json");
+const onlyFlag = flag("only", "");
+const ONLY = typeof onlyFlag === "string" ? onlyFlag.toLowerCase() : "";
 
 /**
  * Every scenario is a URL against the scale demo plus the shape we expect.
@@ -176,7 +179,9 @@ async function sample(query, awaitPatches = 0) {
     .newContext({ viewport: { width: 1280, height: 900 } })
     .then((c) => c.newPage());
   const started = Date.now();
-  await page.goto(`http://localhost:${PORT}/scale/?${query}`, {
+  // `/scale/` is a meta-refresh to `/mantine/scale/` that drops the query
+  // string, so `?patch=200` never reached the demo and the A/B was a no-op.
+  await page.goto(`http://localhost:${PORT}/mantine/scale/?${query}`, {
     waitUntil: "domcontentloaded",
   });
   await page.waitForSelector("table tbody tr", {
@@ -197,7 +202,7 @@ async function sample(query, awaitPatches = 0) {
             ?.getAttribute("data-bench-patches")
         ) >= n,
       awaitPatches,
-      { timeout: 90000 }
+      { timeout: 180_000 }
     );
   }
 
@@ -336,7 +341,9 @@ if (started && !JSON_OUT) {
   console.log(`started the showcase on :${PORT} for this run\n`);
 }
 
-const chosen = SMOKE ? SCENARIOS.filter((s) => s.smoke) : SCENARIOS;
+const chosen = (SMOKE ? SCENARIOS.filter((s) => s.smoke) : SCENARIOS).filter(
+  (s) => !ONLY || s.name.toLowerCase().includes(ONLY)
+);
 const results = [];
 let failed = 0;
 

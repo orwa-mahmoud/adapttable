@@ -8,6 +8,7 @@ import {
   createFilterRegistry,
   type FilterTypeRegistry,
   type FilterTypeSpec,
+  withFilterType,
 } from "./filterRegistry";
 
 /** Built-in types — the registry's first consumers. */
@@ -33,7 +34,7 @@ export function resolveFilterRegistry(
 ): FilterTypeRegistry {
   if (!extras || extras.length === 0) return defaultFilterRegistry;
   return extras.reduce(
-    (registry, spec) => registry.register(spec),
+    (registry, spec) => withFilterType(registry, spec),
     defaultFilterRegistry
   );
 }

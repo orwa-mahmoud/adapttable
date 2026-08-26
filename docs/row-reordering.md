@@ -5,6 +5,10 @@
 ▶ **See it working:** [drag-reorder rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Pass `onRowReorder` and a drag handle appears in a reserved leading column.
+Or import `rowReorder` from `@adapttable/<kit>/row-reorder` and pass
+`features={[rowReorder(handler)]}` — same runtime, see
+[feature composition](./features.md). The enabling prop is deprecated and
+stays until v3.
 Omit it and nothing renders, nothing ships in the hot path — the same opt-in
 rule as `onCellEdit`. The table never mutates your array; you apply the move.
 
@@ -77,7 +81,9 @@ is the host callback; `RowReorderLabels` names the grip and the live region)
 is the grab state. `datasetIndex(localIndex, windowStart)` turns a rendered
 slot into a dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is
 the memo digest so a virtualized row repaints when it is lifted or is the drop
-target, and bails out otherwise.
+target. It also carries a global in-flight bit so every visible row repaints
+once at lift and once at drop (live `dropProps` for the drag); hover still
+does not repaint untouched rows.
 
 Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderButtons` (`RowReorderButtonsProps`) over

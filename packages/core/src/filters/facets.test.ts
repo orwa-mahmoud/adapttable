@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { computeFilterFacets, rowsExcludingFilter } from "./facets";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import type { FilterDef } from "./filterDefs";
+import { withFilterType } from "./filterRegistry";
 
 interface Row {
   team: string;
@@ -62,7 +63,7 @@ describe("computeFilterFacets", () => {
 
   it("counts a custom type whose widget is checklist", () => {
     const checklist = defaultFilterRegistry.get("checklist")!;
-    const registry = defaultFilterRegistry.register({
+    const registry = withFilterType(defaultFilterRegistry, {
       ...checklist,
       type: "teams",
     });

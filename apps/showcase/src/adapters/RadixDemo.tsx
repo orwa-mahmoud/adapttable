@@ -15,6 +15,7 @@ import {
   type DemoCells,
   demoConfirm,
   demoFilterTypes,
+  type DemoOrder,
   demoOrders,
   demoSavedViews,
   LIVE_DEFAULT_LAYOUT,
@@ -39,6 +40,10 @@ import {
   type PageMode,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
+import {
+  nestedInnerFeatures,
+  nestedOuterFeatures,
+} from "../nestedTablePlugins";
 
 /** Two-letter initials for the avatar fallback. */
 function initials(name: string): string {
@@ -77,11 +82,12 @@ const RADIX_CELLS: DemoCells = {
 const nestedOrders = (row: Person) => ({
   label: `${row.name} — recent orders`,
   table: (defaults: NestedTableDefaults) => (
-    <DataTable
+    <DataTable<DemoOrder>
       {...defaults}
       data={demoOrders(row)}
       columns={DEMO_ORDER_COLUMNS}
       rowKey={(order) => order.id}
+      features={nestedInnerFeatures<DemoOrder>()}
     />
   ),
 });
@@ -278,6 +284,7 @@ export function RadixDemo({
                   })
             }
             rowKey={(r) => r.id}
+            features={nested ? nestedOuterFeatures<Person>() : undefined}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

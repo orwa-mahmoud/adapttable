@@ -2,8 +2,8 @@ import type {
   BatchEditingState,
   QueryFilterGroup,
   RowEditingState,
-  RowReorderState,
 } from "@adapttable/core";
+import type { RowReorderState } from "@adapttable/core/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";

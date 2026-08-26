@@ -12,10 +12,11 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 
 ### Data
 
-| Prop     | Type                    | Default | Description                                                                                                              |
-| -------- | ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `source` | `TableSource<TRow>`     | —       | Data + state contract from `useFrontendData` / `useQuerySource`; adapters make it optional when you pass `data` instead. |
-| `rowKey` | `(row: TRow) => string` | —       | Stable React key extractor for a row (required).                                                                         |
+| Prop       | Type                            | Default | Description                                                                                                                                                                    |
+| ---------- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `source`   | `TableSource<TRow>`             | —       | Data + state contract from `useFrontendData` / `useQuerySource`; adapters make it optional when you pass `data` instead.                                                       |
+| `rowKey`   | `(row: TRow) => string`         | —       | Stable React key extractor for a row (required).                                                                                                                               |
+| `features` | `readonly TableFeature<TRow>[]` | —       | Compose opt-in features from `@adapttable/<kit>/<feature>` subpaths. Identical to the enabling props, which are deprecated until v3. See [feature composition](./features.md). |
 
 ### Columns & layout
 
@@ -45,7 +46,7 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `extraChips`                | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                                                                                                                                                                                                                                                                                      |
 | `activeFilterCount`         | `number`                            | chip count  | Override the active-filter count badge.                                                                                                                                                                                                                                                                                                                                                                                  |
 | `onClearFilters`            | `() => void`                        | —           | Clear-filters handler used by the panel + chip strip (built-in `clearExtras` fallback otherwise).                                                                                                                                                                                                                                                                                                                        |
-| `filterTypes`               | `FilterTypeSpec[]`                  | built-ins   | Extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces a built-in.                                                                                                                                                                                                                                                                                                                  |
+| `filterTypes`               | `FilterTypeSpec[]`                  | built-ins   | Extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces a built-in. **Deprecated:** prefer `features={[filterTypes(specs)]}` or `host.registerFilterType`. Removed at v3.                                                                                                                                                                                                            |
 | `searchable`                | `boolean`                           | `true`      | Render the built-in search box; pass `false` to hide it.                                                                                                                                                                                                                                                                                                                                                                 |
 | `searchPlaceholder`         | `string`                            | —           | Placeholder for the search input.                                                                                                                                                                                                                                                                                                                                                                                        |
 
@@ -84,6 +85,7 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `scrollToTopOnChange`       | `boolean`                                                       | `true`          | Scroll back to the table when search/filter/page changes.                                                                                                                                                                                                                                                                                                                        |
 | `scrollTopGap`              | `number`                                                        | `8`             | Extra gap below sticky chrome when scrolling back.                                                                                                                                                                                                                                                                                                                               |
 | `rowClassName`              | `(row: TRow, index: number) => string \| undefined`             | —               | Conditional per-row class, appended on desktop rows and mobile cards alike.                                                                                                                                                                                                                                                                                                      |
+| `isCellFlashing`            | `(rowId: string, columnKey: string) => boolean`                 | —               | Mark cells a patch just changed (`data-flash` on the cell and on the matching card value). Pair with `useChangedCellFlash` from `@adapttable/core/stream`. Omit and nothing is marked. See [realtime](./realtime.md).                                                                                                                                                            |
 | `rowStyle`                  | `(row: TRow, index: number) => CSSProperties \| undefined`      | —               | Conditional per-row inline style, on desktop rows and mobile cards alike. See [row styling and heights](./row-styling.md).                                                                                                                                                                                                                                                       |
 | `rowHeight`                 | `number \| ((row: TRow, index: number) => number)`              | —               | Row height in px. Sets the row and the virtualizer's `estimateSize`. `measureElement` still reports what the browser laid out. See [row styling and heights](./row-styling.md).                                                                                                                                                                                                  |
 | `renderRowDetail`           | `(row: TRow) => ReactNode`                                      | —               | Row expansion: its presence enables the expand chevron; multiple rows may be open, keyed by row id.                                                                                                                                                                                                                                                                              |
@@ -135,6 +137,36 @@ surface — see [Adapter extras](#adapter-extras) and
 | `onRowClick`   | `(row: TRow) => void`             | —       | Row activation on click/Enter; interactive children (actions, checkboxes, links) never trigger it. |
 | `onRowsChange` | `(rows: readonly TRow[]) => void` | —       | Called whenever the materialized source rows change.                                               |
 | `prefetch`     | `(row: TRow) => void`             | —       | Hover-prefetch callback fired on desktop row mouse-enter.                                          |
+
+## Feature composition
+
+`features={[rowReorder(fn)]}` from `@adapttable/<kit>/row-reorder` (or the
+`@adapttable/<kit>/features` barrel, or `@adapttable/core/features`). Same
+runtime as the enabling props; those props stay until v3 and there is **no
+bundle saving yet**. See [feature composition](./features.md).
+
+Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
+`FeatureApplyInput`. The merge is `applyTableFeatures`. Live registration is
+`setup(host)` on the same `TableFeature`: `registerFilterType`,
+`extendFilterType`, `registerEditor`, `registerAggregator`, `registerWriter`,
+`registerColumnMenuAction`, `registerPanel`, `registerCommand`,
+`registerContextMenuItems`, `onDispose`. Adapters run this through
+`useTableFeatures`. The host belongs to that table: `featureHostOf` /
+`rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
+`useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
+scopes a mapper (summary, group aggregates) to the table that invoked it.
+
+Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
+`extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
+`rowEditing` · `batchEditing` · `editHistory` · `dirtyIndicators` ·
+`grouping` · `tree` · `virtualize` · `columnMenu` · `resizableColumns` ·
+`collapsibleColumnGroups` · `exportCsv` · `cellNavigation` · `findInTable` ·
+`fullscreen` · `commandPalette` · `contextMenu` · `sidePanel` · `bulkActions` ·
+`filters` · `filterTypes` · `headerFilters` · `savedViews` · `selectionStats` ·
+`densityChooser` · `print` · `statusBar` · `undoRedoButtons` · `multiSort` ·
+`fitColumns` · `columnSelectionCheckbox`.
+
+Kit `/pivot` re-exports `PivotPanel` plus the `@adapttable/core/pivot` engine.
 
 ## ColumnDef
 
@@ -255,38 +287,40 @@ popover or drawer.
 (`builtInFilterSpecs` / `resolveFilterRegistry` / `createFilterRegistry` /
 `emptyFilterRegistry`). A spec supplies widget (`FilterWidgetKind`),
 operators, predicate, chips, tree projection, and optional `render`
-(`FilterWidgetRenderProps`). `FilterTypeRegistry.register` adds a type;
-`extend` patches a built-in. Lookups: `filterTypeSpec` /
-`filterWidgetKind` / `filterTypeOps` / `filterTypeDefaultOp` /
-`renderRegisteredFilter`.
+(`FilterWidgetRenderProps`). **Deprecated:** `FilterTypeRegistry.register` /
+`extend` and the `filterTypes` prop — register with
+`TableFeatureHost.registerFilterType` / `extendFilterType` in
+`feature.setup(host)`, or `features={[filterTypes(specs)]}`. Lookups:
+`filterTypeSpec` / `filterWidgetKind` / `filterTypeOps` /
+`filterTypeDefaultOp` / `renderRegisteredFilter`.
 
 ## Adapter extras
 
 Props beyond the core surface, with per-kit availability.
 
-| Prop                        | Type                                            | Default        | Available on                              | Description                                                                                                                                                                                               |
-| --------------------------- | ----------------------------------------------- | -------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`                      | `readonly TRow[]`                               | —              | all                                       | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                                                |
-| `total`                     | `number`                                        | —              | all                                       | Server tier: total row count across all pages (drives the pager).                                                                                                                                         |
-| `loading`                   | `boolean`                                       | —              | all                                       | Server tier: a request is in flight.                                                                                                                                                                      |
-| `onQueryChange`             | `(query: TableQuery, info: { signal }) => void` | —              | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`.                                                                                |
-| `supports`                  | `QuerySupport`                                  | —              | all                                       | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
-| `facetKeys`                 | `readonly string[]`                             | checklist keys | all                                       | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
-| `facets`                    | `FacetMap`                                      | —              | all                                       | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
-| `headerFilters`             | `boolean`                                       | `false`        | all                                       | Alias for `filtersMode="header"`: compact per-column row (desktop). Hides the toolbar Filters button. Same defs and extra bag as the panel.                                                               |
-| `closeHeaderFilterOnSelect` | `boolean`                                       | `false`        | all                                       | Close a header-filter overlay after a finished single-control write. Off by default so an operator pick on a multi-input field stays open.                                                                |
-| `filterTypes`               | `FilterTypeSpec[]`                              | built-ins      | all                                       | Extra or replacement filter types merged onto `defaultFilterRegistry`.                                                                                                                                    |
-| `urlKey`                    | `string`                                        | —              | all                                       | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
-| `urlAdapter`                | `UrlStateAdapter`                               | History API    | all                                       | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                                                |
-| `urlSync`                   | `boolean`                                       | `true`         | all                                       | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
-| `savedViews`                | `UseSavedViewsOptions`                          | —              | all                                       | Mounts a saved-views toolbar menu; `adapter`/`urlKey` default to the table's own, so usually only `storageKey` is needed.                                                                                 |
-| `slots`                     | `{ skeleton?, empty?, noResults?, error? }`     | —              | all                                       | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
-| `classNames`                | `DataTableClassNames`                           | —              | mantine, chakra, radix, base-ui, unstyled | Per-part class overrides — five parts on Mantine/Chakra/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled.                                                                 |
-| `className`                 | `string`                                        | —              | mui, antd                                 | Class name applied to the root wrapper.                                                                                                                                                                   |
-| `animate`                   | `boolean`                                       | `false`        | all                                       | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
-| `size`                      | kit-specific union                              | —              | mui, chakra, antd, radix                  | Explicit kit table size, overriding the density mapping (comfortable/compact → chakra `"md"`/`"sm"`, radix & base-ui `"2"`/`"1"`, mui `"medium"`/`"small"`, antd `"middle"`/`"small"`).                   |
-| `accentColor`               | kit accent union (chakra: `string`)             | —              | chakra, radix, base-ui                    | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
-| `bordered`                  | `boolean`                                       | `false`        | antd                                      | Render the table with cell borders.                                                                                                                                                                       |
+| Prop                        | Type                                            | Default        | Available on                                 | Description                                                                                                                                                                                                                                                     |
+| --------------------------- | ----------------------------------------------- | -------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`                      | `readonly TRow[]`                               | —              | all                                          | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                                                                                                      |
+| `total`                     | `number`                                        | —              | all                                          | Server tier: total row count across all pages (drives the pager).                                                                                                                                                                                               |
+| `loading`                   | `boolean`                                       | —              | all                                          | Server tier: a request is in flight.                                                                                                                                                                                                                            |
+| `onQueryChange`             | `(query: TableQuery, info: { signal }) => void` | —              | all                                          | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`.                                                                                                                                      |
+| `supports`                  | `QuerySupport`                                  | —              | all                                          | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                                                                      |
+| `facetKeys`                 | `readonly string[]`                             | checklist keys | all                                          | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                                                                             |
+| `facets`                    | `FacetMap`                                      | —              | all                                          | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                                                                               |
+| `headerFilters`             | `boolean`                                       | `false`        | all                                          | Alias for `filtersMode="header"`: compact per-column row (desktop). Hides the toolbar Filters button. Same defs and extra bag as the panel.                                                                                                                     |
+| `closeHeaderFilterOnSelect` | `boolean`                                       | `false`        | all                                          | Close a header-filter overlay after a finished single-control write. Off by default so an operator pick on a multi-input field stays open.                                                                                                                      |
+| `filterTypes`               | `FilterTypeSpec[]`                              | built-ins      | all                                          | Extra or replacement filter types merged onto `defaultFilterRegistry`. **Deprecated:** prefer `features={[filterTypes(specs)]}` or `host.registerFilterType`.                                                                                                   |
+| `urlKey`                    | `string`                                        | —              | all                                          | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                                                                             |
+| `urlAdapter`                | `UrlStateAdapter`                               | History API    | all                                          | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                                                                                                      |
+| `urlSync`                   | `boolean`                                       | `true`         | all                                          | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                                                                                 |
+| `savedViews`                | `UseSavedViewsOptions`                          | —              | all                                          | Mounts a saved-views toolbar menu; `adapter`/`urlKey` default to the table's own, so usually only `storageKey` is needed. **Deprecated:** prefer `features={[savedViews(options)]}` from `@adapttable/<kit>/saved-views`.                                       |
+| `slots`                     | `{ skeleton?, empty?, noResults?, error? }`     | —              | all                                          | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization).                                                       |
+| `classNames`                | `DataTableClassNames`                           | —              | mantine, chakra, radix, base-ui, unstyled    | Per-part class overrides — five parts on Mantine/Chakra/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled.                                                                                                                       |
+| `className`                 | `string`                                        | —              | mui, antd                                    | Class name applied to the root wrapper.                                                                                                                                                                                                                         |
+| `animate`                   | `boolean`                                       | `false`        | all                                          | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                                                                           |
+| `size`                      | kit-specific union                              | —              | mui, chakra, antd, radix, base-ui, bootstrap | Explicit kit table size, overriding the density mapping. **Deprecated on mui** (use `density` — `small`/`medium` are the same two values). Chakra / antd / radix / base-ui / bootstrap keep `size` — those kits expose a third native value density cannot say. |
+| `accentColor`               | kit accent union (chakra: `string`)             | —              | chakra, radix, base-ui                       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                                                                               |
+| `bordered`                  | `boolean`                                       | `false`        | antd                                         | Render the table with cell borders.                                                                                                                                                                                                                             |
 
 Each adapter also re-exports the core source builders and types, so one
 import path covers everything.
@@ -489,6 +523,7 @@ other.
 which cells hold an unconfirmed change, with `isDirty` / `isRowDirty`, a `count`,
 and `confirm` / `confirmRow` / `confirmAll` for a host that settles its own state.
 `rowIsDirty(editing, rowId)` from `@adapttable/core/adapter` is what a row reads.
+`cellFlashAttr` / `rowFlashSignature` are the same door for `data-flash`.
 
 **Validation gates the commit.** A column's `validate` (`CellValidator`) judges
 one value; the table's `validateRow` (`RowValidator`) judges the row an edit
@@ -589,10 +624,25 @@ aggregates for touched rows only. `configureIncrementalView` merges
 grouping / summary extras without walking the set when only those
 changed. `incrementalViewOf` / `attachIncrementalView` link a derived
 array to the snapshot (`incrementalViewConfig` reads it back);
-`incrementalSearchText` is the default projector. See
-[cell editing](./cell-editing.md).
+`incrementalSearchText` is the default projector.
 
-**Row reordering.** `onRowReorder` (`RowReorderHandler`) is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
+**Live row patches.** `useRowPatchStream` from `@adapttable/core/stream`
+(`UseRowPatchStreamOptions` in, `RowPatchStreamState` out) binds a
+WebSocket or SSE endpoint to the rows a host owns: frames become ordinary
+row patches and go back through the host's own setter.
+`openRowPatchStream` (`OpenRowPatchStreamOptions`, `RowPatchStreamHandle`,
+`RowPatchStreamReconnect`) is the connector without React, over a
+`StreamSocket` / `StreamSocketEvent` a host can supply itself.
+`parseRowPatchFrame` reads the table's patch shape as JSON and drops
+anything malformed. `RowPatchStreamStatus` is what the connection is
+doing, with `isStreamLive` and `isStreamSettled` as the two questions
+worth asking. `useChangedCellFlash` (`UseChangedCellFlashOptions` in,
+`ChangedCellFlashState` out) tracks the cells a patch just changed so
+the host can pass `isCellFlashing` — a pulse, not a locate-the-row
+highlight, and never against `prefers-reduced-motion`. See
+[realtime](./realtime.md).
+
+**Row reordering.** `onRowReorder` (`RowReorderHandler`) is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
 `RowReorderHandleChrome` / `RowReorderHandleChromeProps` /
 `RowReorderHandleSlots` / `RowReorderHandleSlotProps` and
@@ -1180,6 +1230,11 @@ by its tag: `ar`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
 `pt`, `ru`, `tr`, `ur`, `zh`, `zhTW` — seventeen in all. See
 [i18n & RTL](./i18n-rtl.md).
 
+Adapter-machinery names (`headerGroupRows`, `insertExtraRows`, `useFullscreen`,
+`columnMenuActions`, `BodyCell`, …) still resolve from `@adapttable/core` until
+v3 with a deprecation strikethrough — import them from
+`@adapttable/core/adapter`.
+
 Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 (CSV export — or pass `exportCsv` on `<DataTable>` for a built-in button),
 `sortRows` / `sortRowsMulti` / `compareValues` / `nextSort`,
@@ -1247,7 +1302,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `UrlStateAdapter`                                                                                                                                                                                                                                                                                                        | The router seam: `getSearch()`, `setSearch(search, { push? })`, `subscribe(onChange)`.                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `SavedView`                                                                                                                                                                                                                                                                                                              | `{ name, search }` — one captured view.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `FilterDef` / `FilterType` / `FilterOption` / `FilterOptionsSource`                                                                                                                                                                                                                                                      | The declarative filter surface (see [FilterDef](#filterdef)).                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `FilterTypeSpec` / `FilterTypeRegistry` / `FilterWidgetKind`                                                                                                                                                                                                                                                             | One registered type / the immutable registry / which built-in widget to draw.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `FilterTypeSpec` / `FilterTypeRegistry` / `FilterWidgetKind`                                                                                                                                                                                                                                                             | One registered type / the immutable registry / which built-in widget to draw. `register` / `extend` are deprecated — use `TableFeatureHost.registerFilterType` / `extendFilterType`.                                                                                                                                                                                                                                                                                                                 |
 | `FilterWidgetRenderProps`                                                                                                                                                                                                                                                                                                | Props a custom `FilterTypeSpec.render` receives.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `CellProps<TRow>`                                                                                                                                                                                                                                                                                                        | `{ row, rowIndex }` — what a `Cell` component receives.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `SortDirection` / `SortLevel`                                                                                                                                                                                                                                                                                            | `"asc" \| "desc"` / one entry in the multi-sort chain.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -1371,6 +1426,7 @@ handlers). Editing/grouping glue: `focusEditorOnMount`,
 utilities: `logicalAlign` (logical → physical alignment),
 `mergedCellStyle` (spreadsheet merge paint for a spanned cell),
 `cellSpanMark` (`"2x1"` on the origin),
+`cellFlashAttr` / `rowFlashSignature` (`data-flash` on a patched cell),
 `resolveMobileLabel` (a card field's caption), `isSelectedCell` (whether a
 cell's props put it inside the selected range, for a kit applying its own fill),
 `shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,
@@ -1386,6 +1442,7 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `ROW_DND_MIME`. Row pin chrome: `rowPinSignature`, `rowSourceIndex`,
 `pinnedRowStickyStyle`, `pinnedRowCellStyle`, `pinnedRowPart`,
 `pinnedRowSticky`, `orderedCardEntries`,
+`bindMobileCardList`, `mobileCardListStyle`,
 `useOffsetHeight`, `PINNED_TOP_PART`, `PINNED_BOTTOM_PART`.
 
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /

@@ -349,6 +349,29 @@ describe("useSavedViews", () => {
       );
     });
 
+    it("applies a view that names a registered aggregator", () => {
+      const storage = fakeStorage({
+        views: JSON.stringify([
+          { name: "Spread", search: "t.pivot=rows:team;range:budget" },
+        ]),
+      });
+      const adapter = createMemoryAdapter("");
+      const { result } = renderHook(() =>
+        useSavedViews({
+          storageKey: "views",
+          storage,
+          urlAdapter: adapter,
+          urlKey: "t",
+        })
+      );
+
+      act(() => result.current.apply("Spread"));
+
+      expect(new URLSearchParams(adapter.getSearch()).get("t.pivot")).toBe(
+        "rows:team;range:budget"
+      );
+    });
+
     it("stamps the current version on what it read", () => {
       const storage = fakeStorage({ views: LEGACY_FIXTURE });
       const { result } = renderHook(() =>

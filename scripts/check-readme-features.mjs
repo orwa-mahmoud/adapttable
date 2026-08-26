@@ -30,6 +30,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
  */
 const FEATURES = {
   "cell-editing": /cell edit/i,
+  features: /feature composition/i,
   "cell-navigation": /keyboard navigation|cell navigation/i,
   "column-groups": /column group/i,
   "column-management": /column management/i,

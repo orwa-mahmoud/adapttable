@@ -14,6 +14,7 @@
  */
 import { useCallback, useMemo, useRef, useState } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
 import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditableColumnLike } from "./cellEditing";
 import {
@@ -61,6 +62,8 @@ export interface BatchEditingState<TRow> {
   cancelRow: (rowId: string) => void;
   /** A digest of the pending drafts, for a row memo comparator. */
   signature: string;
+  /** The table that owns these editors — never a sibling's host. */
+  featureHost?: FeatureHostState;
 }
 
 /** What {@link useBatchEditing} needs. */
@@ -83,6 +86,8 @@ export interface UseBatchEditingOptions<TRow> {
   onEditCancel?: EditEventHandler<TRow>;
   /** The host received the batch. */
   onEditCommit?: EditEventHandler<TRow>;
+  /** The table that owns these editors. */
+  featureHost?: FeatureHostState;
 }
 
 /** The drafts of one row, by column key. */
@@ -120,7 +125,7 @@ export function useBatchEditing<TRow>(
       if (!enabled) return;
       const column = options.columns.find((entry) => entry.key === columnKey);
       if (!column) return;
-      const stored = readEditableCellValue(row, column);
+      const stored = readEditableCellValue(row, column, options.featureHost);
       const current = pendingRef.current[rowId];
       const drafts = { ...current?.drafts, [columnKey]: value };
       // A value typed back to what it was is not a change, and a row left with
@@ -156,7 +161,10 @@ export function useBatchEditing<TRow>(
         if (!column) continue;
         patch[columnKey] = column.parseValue
           ? column.parseValue(draft, row)
-          : parseCellEditValue(resolveCellEditor(column) ?? "text", draft);
+          : parseCellEditValue(
+              resolveCellEditor(column, options.featureHost) ?? "text",
+              draft
+            );
       }
       edits.push({ row, rowId, patch });
     }
@@ -219,9 +227,11 @@ export function useBatchEditing<TRow>(
       const draft = pending[rowId]?.drafts[columnKey];
       if (draft !== undefined) return draft;
       const column = options.columns.find((entry) => entry.key === columnKey);
-      return column ? readEditableCellValue(row, column) : "";
+      return column
+        ? readEditableCellValue(row, column, options.featureHost)
+        : "";
     },
-    [pending, options.columns]
+    [pending, options.columns, options.featureHost]
   );
 
   const signature = useMemo(
@@ -251,6 +261,7 @@ export function useBatchEditing<TRow>(
       cancelAll,
       cancelRow,
       signature,
+      featureHost: options.featureHost,
     }),
     [
       count,
@@ -262,6 +273,7 @@ export function useBatchEditing<TRow>(
       cancelAll,
       cancelRow,
       signature,
+      options.featureHost,
     ]
   );
 }

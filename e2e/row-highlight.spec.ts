@@ -3,7 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { configureFeatureLab } from "./feature-lab";
 
 /**
- * Flashing the row a change just landed on, in every kit.
+ * Highlighting the row a change just landed on, in every kit.
  *
  * The point of this test is what it does NOT need. There is no highlight prop
  * on any table here: `useHighlight` decides which row is marked and the demo
@@ -45,7 +45,7 @@ for (const adapter of ADAPTERS) {
     test("marks the added row, then clears itself", async ({ page }) => {
       await openDemo(page, adapter);
       await configureFeatureLab(page, "add / delete", "On");
-      await configureFeatureLab(page, "flash changed rows", "On");
+      await configureFeatureLab(page, "highlight changed rows", "On");
 
       const rows = demo(page).locator(
         `[data-adapter="${adapter}"] [data-stagger]`
@@ -71,7 +71,7 @@ for (const adapter of ADAPTERS) {
     }) => {
       await openDemo(page, adapter);
       await configureFeatureLab(page, "editing mode", "Cell");
-      await configureFeatureLab(page, "flash changed rows", "On");
+      await configureFeatureLab(page, "highlight changed rows", "On");
 
       const rows = demo(page).locator(
         `[data-adapter="${adapter}"] [data-stagger]`

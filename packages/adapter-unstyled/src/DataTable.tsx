@@ -1,6 +1,7 @@
 import { showSimpleFilterFields, type TableSource } from "@adapttable/core";
 import {
   ExportAnnouncer,
+  FeatureHostProvider,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -11,6 +12,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableContextMenu,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
 import type { ReactElement, ReactNode, RefObject } from "react";
 
@@ -128,7 +130,8 @@ function DataTableBody<TRow>({
  *
  * @typeParam TRow - The row type.
  */
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = useTableFeatures(incoming);
   const {
     searchPlaceholder,
     sortByOptions,
@@ -228,6 +231,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     },
     sortBy: viewSource.sortBy,
     sortDir: viewSource.sortDir,
+    featureHost: shell.featureHost,
   });
 
   // The palette lists the table's own actions; its shortcut is bound here
@@ -239,6 +243,7 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
     onExport: shell.toolbarProps.onExportCsv,
     onClearFilters: chrome.clearFilters,
     hasFilters: chrome.activeFilterCount > 0,
+    featureHost: shell.featureHost,
   });
   const chromeProps: ResolvedDataTableProps<TRow> = {
     ...props,
@@ -316,400 +321,402 @@ export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   } = shell.toolbarProps;
 
   return (
-    <div
-      ref={rootRef}
-      dir={dir}
-      {...contextMenu.regionProps}
-      data-adapttable-part="root"
-      data-mobile={chrome.isMobile || undefined}
-      data-density={density}
-      data-refreshing={chrome.isRefreshing || undefined}
-      // The root wraps the whole table region, so a background refresh marks
-      // it busy for assistive tech (the indicator below is decorative-ish).
-      aria-busy={chrome.isRefreshing || undefined}
-      className={cx("adapttable", classNames.root)}
-    >
-      <GridFocusAnnouncer focus={shell.gridFocus} />
-      {shell.tableProps.rowReorder ? (
-        <RowReorderAnnouncer
-          announcement={shell.tableProps.rowReorder.announcement}
-        />
-      ) : null}
-      <FindBar find={shell.find} labels={labels} />
+    <FeatureHostProvider host={shell.featureHost}>
       <div
-        data-adapttable-part="toolbar"
-        ref={stickyBar.toolbarRef}
-        className={classNames.toolbar}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          rowGap: 8,
-          ...stickyBar.toolbarStyle,
-        }}
+        ref={rootRef}
+        dir={dir}
+        {...contextMenu.regionProps}
+        data-adapttable-part="root"
+        data-mobile={chrome.isMobile || undefined}
+        data-density={density}
+        data-refreshing={chrome.isRefreshing || undefined}
+        // The root wraps the whole table region, so a background refresh marks
+        // it busy for assistive tech (the indicator below is decorative-ish).
+        aria-busy={chrome.isRefreshing || undefined}
+        className={cx("adapttable", classNames.root)}
       >
-        {toolbarSlots?.start}
-        {props.searchable !== false && (
-          <span
-            data-adapttable-part="search-field"
-            className={classNames.searchField}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              display: "inline-flex",
-              alignItems: "center",
-            }}
-          >
+        <GridFocusAnnouncer focus={shell.gridFocus} />
+        {shell.tableProps.rowReorder ? (
+          <RowReorderAnnouncer
+            announcement={shell.tableProps.rowReorder.announcement}
+          />
+        ) : null}
+        <FindBar find={shell.find} labels={labels} />
+        <div
+          data-adapttable-part="toolbar"
+          ref={stickyBar.toolbarRef}
+          className={classNames.toolbar}
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            rowGap: 8,
+            ...stickyBar.toolbarStyle,
+          }}
+        >
+          {toolbarSlots?.start}
+          {props.searchable !== false && (
             <span
-              data-adapttable-part="search-icon"
-              className={classNames.searchIcon}
-              style={{ display: "inline-flex" }}
+              data-adapttable-part="search-field"
+              className={classNames.searchField}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                display: "inline-flex",
+                alignItems: "center",
+              }}
             >
-              <SearchIcon size={14} />
+              <span
+                data-adapttable-part="search-icon"
+                className={classNames.searchIcon}
+                style={{ display: "inline-flex" }}
+              >
+                <SearchIcon size={14} />
+              </span>
+              <input
+                {...searchProps}
+                data-adapttable-part="search"
+                className={classNames.search}
+                style={{ flex: 1, minWidth: 0 }}
+              />
             </span>
-            <input
-              {...searchProps}
-              data-adapttable-part="search"
-              className={classNames.search}
-              style={{ flex: 1, minWidth: 0 }}
-            />
-          </span>
-        )}
-        {sortOptions && sortOptions.length > 0 && (
-          <label>
-            {labels.sortBy}{" "}
-            <select
-              aria-label={labels.sortBy}
-              data-adapttable-part="sort-select"
-              className={classNames.sortSelect}
-              value={viewSource.sortBy ?? ""}
-              onChange={(e) =>
-                viewSource.setSort(
-                  e.currentTarget.value || undefined,
-                  viewSource.sortDir ?? "asc"
-                )
-              }
-            >
-              <option value="">—</option>
-              {sortOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {toolbar}
-        {filters &&
-          (filtersMode === "popover" ? (
-            <FilterPopover
-              open={filtersOpen}
-              onClose={() => setFiltersOpen(false)}
-              filters={filters}
-              activeFilterCount={chrome.activeFilterCount}
-              onClearFilters={chrome.clearFilters}
+          )}
+          {sortOptions && sortOptions.length > 0 && (
+            <label>
+              {labels.sortBy}{" "}
+              <select
+                aria-label={labels.sortBy}
+                data-adapttable-part="sort-select"
+                className={classNames.sortSelect}
+                value={viewSource.sortBy ?? ""}
+                onChange={(e) =>
+                  viewSource.setSort(
+                    e.currentTarget.value || undefined,
+                    viewSource.sortDir ?? "asc"
+                  )
+                }
+              >
+                <option value="">—</option>
+                {sortOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {toolbar}
+          {filters &&
+            (filtersMode === "popover" ? (
+              <FilterPopover
+                open={filtersOpen}
+                onClose={() => setFiltersOpen(false)}
+                filters={filters}
+                activeFilterCount={chrome.activeFilterCount}
+                onClearFilters={chrome.clearFilters}
+                labels={labels}
+                dir={dir}
+                classNames={classNames}
+              >
+                {filtersButton}
+              </FilterPopover>
+            ) : (
+              filtersButton
+            ))}
+          {props.savedViews && (
+            // The menu must capture/apply through the SAME URL backend and
+            // namespace the table reads, so those default from the table's
+            // own props (explicit option values still win).
+            <SavedViewsMenu
+              options={{
+                urlAdapter: shell.urlAdapter,
+                urlKey: props.urlKey,
+                ...props.savedViews,
+              }}
               labels={labels}
-              dir={dir}
               classNames={classNames}
-            >
-              {filtersButton}
-            </FilterPopover>
-          ) : (
-            filtersButton
-          ))}
-        {props.savedViews && (
-          // The menu must capture/apply through the SAME URL backend and
-          // namespace the table reads, so those default from the table's
-          // own props (explicit option values still win).
-          <SavedViewsMenu
-            options={{
-              urlAdapter: shell.urlAdapter,
-              urlKey: props.urlKey,
-              ...props.savedViews,
-            }}
-            labels={labels}
-            classNames={classNames}
-          />
-        )}
-        {props.enableColumnMenu && !chrome.isMobile && (
-          <ColumnMenu
-            allColumns={chrome.allColumns}
-            onAutoSize={shell.autoSizeColumns}
-            layout={chrome.columnLayout}
-            labels={labels}
-            classNames={classNames}
-            hasRowActions={shell.hasRowActions}
-            hasRowReorder={shell.hasRowReorder}
-            onAutoSizeColumn={shell.autoSizeColumn}
-            onSortColumn={(key, dir) => viewSource.setSort(key, dir)}
-            onFilterColumn={() => shell.setFiltersOpen(true)}
-            sortBy={viewSource.sortBy}
-            sortDir={viewSource.sortDir}
-            dir={dir}
-          />
-        )}
-        {onUndo && onRedo && (
-          <>
-            <button
-              type="button"
-              data-adapttable-part="undo-button"
-              className={classNames.undoButton}
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </button>
-            <button
-              type="button"
-              data-adapttable-part="redo-button"
-              className={classNames.redoButton}
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </button>
-          </>
-        )}
-        {onExportCsv && (
-          <>
-            <button
-              type="button"
-              data-adapttable-part="export-csv-button"
-              className={classNames.exportCsvButton}
-              style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-              onClick={onExportCsv}
-              disabled={exportBusy}
-              aria-busy={exportBusy}
-            >
-              {/* No kit to borrow a loading button from, so the affordance is an
+            />
+          )}
+          {props.enableColumnMenu && !chrome.isMobile && (
+            <ColumnMenu
+              allColumns={chrome.allColumns}
+              onAutoSize={shell.autoSizeColumns}
+              layout={chrome.columnLayout}
+              labels={labels}
+              classNames={classNames}
+              hasRowActions={shell.hasRowActions}
+              hasRowReorder={shell.hasRowReorder}
+              onAutoSizeColumn={shell.autoSizeColumn}
+              onSortColumn={(key, dir) => viewSource.setSort(key, dir)}
+              onFilterColumn={() => shell.setFiltersOpen(true)}
+              sortBy={viewSource.sortBy}
+              sortDir={viewSource.sortDir}
+              dir={dir}
+            />
+          )}
+          {onUndo && onRedo && (
+            <>
+              <button
+                type="button"
+                data-adapttable-part="undo-button"
+                className={classNames.undoButton}
+                disabled={canUndo !== true}
+                onClick={onUndo}
+              >
+                {undoLabel}
+              </button>
+              <button
+                type="button"
+                data-adapttable-part="redo-button"
+                className={classNames.redoButton}
+                disabled={canRedo !== true}
+                onClick={onRedo}
+              >
+                {redoLabel}
+              </button>
+            </>
+          )}
+          {onExportCsv && (
+            <>
+              <button
+                type="button"
+                data-adapttable-part="export-csv-button"
+                className={classNames.exportCsvButton}
+                style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+                onClick={onExportCsv}
+                disabled={exportBusy}
+                aria-busy={exportBusy}
+              >
+                {/* No kit to borrow a loading button from, so the affordance is an
                   element the host can style — `aria-hidden` because the
                   announcement below is what a screen reader should hear, not a
                   decoration. */}
-              {exportBusy && (
-                <span
-                  aria-hidden="true"
-                  data-adapttable-part="export-spinner"
-                  className={classNames.exportSpinner}
-                />
-              )}
-              {exportLabel}
+                {exportBusy && (
+                  <span
+                    aria-hidden="true"
+                    data-adapttable-part="export-spinner"
+                    className={classNames.exportSpinner}
+                  />
+                )}
+                {exportLabel}
+              </button>
+              <ExportAnnouncer announcement={exportAnnouncement} />
+            </>
+          )}
+          {onAddRow && (
+            <button
+              type="button"
+              data-adapttable-part="add-row"
+              className={classNames.addRow}
+              style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+              onClick={onAddRow}
+            >
+              {addRowLabel}
             </button>
-            <ExportAnnouncer announcement={exportAnnouncement} />
-          </>
+          )}
+          {onPrint && (
+            <button
+              type="button"
+              data-adapttable-part="print-button"
+              className={classNames.printButton}
+              onClick={onPrint}
+            >
+              {printLabel}
+            </button>
+          )}
+          {onDensityChange && (
+            <button
+              type="button"
+              aria-label={labels.density}
+              data-adapttable-part="density-toggle"
+              className={classNames.densityToggle}
+              onClick={() => {
+                onDensityChange(
+                  toolbarDensity === "compact" ? "comfortable" : "compact"
+                );
+              }}
+            >
+              {toolbarDensity === "compact"
+                ? labels.densityCompact
+                : labels.densityComfortable}
+            </button>
+          )}
+          {onToggleFullscreen && (
+            <button
+              type="button"
+              aria-label={
+                isFullscreen === true
+                  ? labels.exitFullscreen
+                  : labels.enterFullscreen
+              }
+              data-adapttable-part="fullscreen-toggle"
+              className={classNames.fullscreenToggle}
+              onClick={onToggleFullscreen}
+            >
+              {isFullscreen === true ? "\u2715" : "\u26f6"}
+            </button>
+          )}
+          {toolbarSlots?.end}
+          {canLoadMore && !chrome.grouping && (
+            <RowsPerPageSelect
+              source={viewSource}
+              labels={labels}
+              classNames={classNames}
+            />
+          )}
+        </div>
+
+        {filters && filtersMode === "drawer" && (
+          <FilterPanel
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            filters={filters}
+            activeFilterCount={chrome.activeFilterCount}
+            onClearFilters={chrome.clearFilters}
+            labels={labels}
+            dir={dir}
+            classNames={classNames}
+          />
         )}
-        {onAddRow && (
-          <button
-            type="button"
-            data-adapttable-part="add-row"
-            className={classNames.addRow}
-            style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-            onClick={onAddRow}
-          >
-            {addRowLabel}
-          </button>
+
+        <Chips
+          chips={chrome.mergedChips}
+          onClearAll={chrome.clearFilters}
+          labels={labels}
+          classNames={classNames}
+        />
+
+        {chrome.editing?.batch && (
+          <BatchEditBar batch={chrome.editing.batch} labels={labels} />
         )}
-        {onPrint && (
-          <button
-            type="button"
-            data-adapttable-part="print-button"
-            className={classNames.printButton}
-            onClick={onPrint}
-          >
-            {printLabel}
-          </button>
-        )}
-        {onDensityChange && (
-          <button
-            type="button"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            className={classNames.densityToggle}
-            onClick={() => {
-              onDensityChange(
-                toolbarDensity === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {toolbarDensity === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </button>
-        )}
-        {onToggleFullscreen && (
-          <button
-            type="button"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            className={classNames.fullscreenToggle}
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
-          </button>
-        )}
-        {toolbarSlots?.end}
-        {canLoadMore && !chrome.grouping && (
-          <RowsPerPageSelect
-            source={viewSource}
+
+        {table.selection && bulkActions && (
+          <BulkBar
+            selection={table.selection}
+            total={viewSource.total}
+            bulkActions={bulkActions}
+            confirm={chrome.confirm}
             labels={labels}
             classNames={classNames}
           />
         )}
-      </div>
 
-      {filters && filtersMode === "drawer" && (
-        <FilterPanel
-          open={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
-          filters={filters}
-          activeFilterCount={chrome.activeFilterCount}
-          onClearFilters={chrome.clearFilters}
-          labels={labels}
-          dir={dir}
-          classNames={classNames}
-        />
-      )}
+        {chrome.isRefreshing && (
+          // Native indeterminate progress (no `value`) — implicit progressbar
+          // role with correct semantics on every device.
+          <progress
+            aria-label={labels.loading}
+            data-adapttable-part="refresh-indicator"
+            className={classNames.refreshIndicator}
+          />
+        )}
 
-      <Chips
-        chips={chrome.mergedChips}
-        onClearAll={chrome.clearFilters}
-        labels={labels}
-        classNames={classNames}
-      />
-
-      {chrome.editing?.batch && (
-        <BatchEditBar batch={chrome.editing.batch} labels={labels} />
-      )}
-
-      {table.selection && bulkActions && (
-        <BulkBar
-          selection={table.selection}
-          total={viewSource.total}
-          bulkActions={bulkActions}
-          confirm={chrome.confirm}
+        <CommandPalette
+          commands={palette.commands}
+          open={palette.open}
+          onClose={palette.close}
           labels={labels}
           classNames={classNames}
         />
-      )}
-
-      {chrome.isRefreshing && (
-        // Native indeterminate progress (no `value`) — implicit progressbar
-        // role with correct semantics on every device.
-        <progress
-          aria-label={labels.loading}
-          data-adapttable-part="refresh-indicator"
-          className={classNames.refreshIndicator}
+        <ContextMenu
+          items={contextMenu.items}
+          at={contextMenu.at}
+          onClose={contextMenu.close}
+          container={shell.fullscreen.container}
+          labels={labels}
+          classNames={classNames}
         />
-      )}
-
-      <CommandPalette
-        commands={palette.commands}
-        open={palette.open}
-        onClose={palette.close}
-        labels={labels}
-        classNames={classNames}
-      />
-      <ContextMenu
-        items={contextMenu.items}
-        at={contextMenu.at}
-        onClose={contextMenu.close}
-        container={shell.fullscreen.container}
-        labels={labels}
-        classNames={classNames}
-      />
-      <SidePanelLayout
-        side={props.sidePanel?.side}
-        body={
-          <>
-            {chrome.errorState ? (
-              (fillSlot(props.slots?.error, chrome.errorState) ?? (
-                <ErrorState
-                  error={chrome.errorState.error}
-                  labels={labels}
-                  onRetry={chrome.errorState.retry}
+        <SidePanelLayout
+          side={props.sidePanel?.side}
+          body={
+            <>
+              {chrome.errorState ? (
+                (fillSlot(props.slots?.error, chrome.errorState) ?? (
+                  <ErrorState
+                    error={chrome.errorState.error}
+                    labels={labels}
+                    onRetry={chrome.errorState.retry}
+                    classNames={classNames}
+                  />
+                ))
+              ) : (
+                <DataTableBody
+                  chrome={chrome}
+                  props={chromeProps}
                   classNames={classNames}
+                  labels={labels}
+                  tableProps={tableProps}
                 />
-              ))
-            ) : (
-              <DataTableBody
-                chrome={chrome}
-                props={chromeProps}
-                classNames={classNames}
+              )}
+            </>
+          }
+          panel={
+            props.sidePanel?.open != null && (
+              <SidePanel
+                panels={props.sidePanel.panels}
+                openPanel={props.sidePanel.open}
+                onOpenPanel={props.sidePanel.onOpenChange}
+                onClose={() => {
+                  props.sidePanel?.onOpenChange(null);
+                }}
+                side={props.sidePanel.side}
                 labels={labels}
-                tableProps={tableProps}
+                classNames={classNames}
               />
-            )}
-          </>
-        }
-        panel={
-          props.sidePanel?.open != null && (
-            <SidePanel
-              panels={props.sidePanel.panels}
-              openPanel={props.sidePanel.open}
-              onOpenPanel={props.sidePanel.onOpenChange}
-              onClose={() => {
-                props.sidePanel?.onOpenChange(null);
-              }}
-              side={props.sidePanel.side}
-              labels={labels}
-              classNames={classNames}
-            />
-          )
-        }
-      />
-
-      {canLoadMore && viewSource.hasNextPage && (
-        <div
-          ref={loadMoreRef}
-          data-adapttable-part="load-more"
-          className={classNames.loadMore}
-        >
-          <button
-            type="button"
-            disabled={viewSource.isFetchingNextPage}
-            data-adapttable-part="load-more-button"
-            className={classNames.loadMoreButton}
-            onClick={() => viewSource.fetchNextPage()}
-          >
-            {labels.loadMore}
-          </button>
-        </div>
-      )}
-
-      {props.tableFooter ? (
-        <div
-          data-adapttable-part="table-footer"
-          className={classNames.tableFooter}
-        >
-          {props.tableFooter}
-        </div>
-      ) : null}
-
-      {chrome.showFooter && (
-        <Footer
-          pagination={table.pagination}
-          source={viewSource}
-          labels={labels}
-          classNames={classNames}
-          showRowsPerPage={!chrome.grouping}
+            )
+          }
         />
-      )}
-      <StatusBar
-        enabled={props.statusBar === true}
-        notices={chrome.featureNotices}
-        shown={viewSource.rows.length}
-        page={viewSource.page}
-        limit={viewSource.limit}
-        total={viewSource.total}
-        selected={table.selection?.selectedCount ?? 0}
-        stats={shell.selectionStats}
-        labels={labels}
-        locale={props.locale}
-        classNames={classNames}
-      />
-    </div>
+
+        {canLoadMore && viewSource.hasNextPage && (
+          <div
+            ref={loadMoreRef}
+            data-adapttable-part="load-more"
+            className={classNames.loadMore}
+          >
+            <button
+              type="button"
+              disabled={viewSource.isFetchingNextPage}
+              data-adapttable-part="load-more-button"
+              className={classNames.loadMoreButton}
+              onClick={() => viewSource.fetchNextPage()}
+            >
+              {labels.loadMore}
+            </button>
+          </div>
+        )}
+
+        {props.tableFooter ? (
+          <div
+            data-adapttable-part="table-footer"
+            className={classNames.tableFooter}
+          >
+            {props.tableFooter}
+          </div>
+        ) : null}
+
+        {chrome.showFooter && (
+          <Footer
+            pagination={table.pagination}
+            source={viewSource}
+            labels={labels}
+            classNames={classNames}
+            showRowsPerPage={!chrome.grouping}
+          />
+        )}
+        <StatusBar
+          enabled={props.statusBar === true}
+          notices={chrome.featureNotices}
+          shown={viewSource.rows.length}
+          page={viewSource.page}
+          limit={viewSource.limit}
+          total={viewSource.total}
+          selected={table.selection?.selectedCount ?? 0}
+          stats={shell.selectionStats}
+          labels={labels}
+          locale={props.locale}
+          classNames={classNames}
+        />
+      </div>
+    </FeatureHostProvider>
   );
 }

@@ -1,13 +1,14 @@
 /** The desktop table: header, pinned columns, rows and summary. */
 import {
-  columnGroupHeaderCaption,
   edgePinStyle,
   PIN_Z,
   resolveColumnFooter,
   type TableLabels,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   cellSpanMark,
+  columnGroupHeaderCaption,
   ColumnSpacer,
   createDesktopRow,
   type DesktopHeaderLeaf,
@@ -154,6 +155,7 @@ function DesktopRowBase<TRow>(
     hasEndPin,
     actionsPinned,
     rowClass,
+    isCellFlashing,
     hasPrefetch,
     editing,
     rows,
@@ -268,6 +270,7 @@ function DesktopRowBase<TRow>(
               })}
               {...focusProps}
               data-adapttable-part="cell"
+              data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-pinned={pinOffset?.(column.key)?.side}
               className={[
                 classNames.cell,

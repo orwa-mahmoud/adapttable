@@ -7,7 +7,6 @@ import {
   startTransition,
 } from "react";
 
-import { MantineDemo } from "./adapters/MantineDemo";
 import { cssVars } from "./cssVars";
 import type { Locale, Person } from "./data";
 import {
@@ -109,9 +108,15 @@ export type KitDemoProps = Readonly<{
 
 export type DemoComponent = ComponentType<KitDemoProps>;
 
-/** Default kit stays eager so first paint doesn't wait on a chunk. */
+/**
+ * Every kit is its own chunk, the default one included. The shell paints
+ * while that chunk arrives in parallel rather than after it — `lazy` starts
+ * the import on the first render, so the table is not waiting on a click.
+ */
 export const ADAPTERS: Record<string, DemoComponent> = {
-  mantine: MantineDemo,
+  mantine: lazy(() =>
+    import("./adapters/MantineDemo").then((m) => ({ default: m.MantineDemo }))
+  ),
   mui: lazy(() =>
     import("./adapters/MuiDemo").then((m) => ({ default: m.MuiDemo }))
   ),
@@ -192,8 +197,11 @@ export function ControlPanel({
 }
 
 export function DemoFallback() {
+  // `aria-busy` alone: a placeholder is a state, not an announcement, and the
+  // accessibility page mirrors every live region into its transcript — a kit
+  // chunk arriving is not something a screen reader should read out.
   return (
-    <div className="demo-surface__fallback" aria-busy="true" aria-live="polite">
+    <div className="demo-surface__fallback" aria-busy="true">
       Loading adapter…
     </div>
   );

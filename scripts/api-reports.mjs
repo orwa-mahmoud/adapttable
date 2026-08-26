@@ -11,7 +11,7 @@
  *
  * Entries: every importable entry point every library package advertises,
  * read from its `exports` map the way smoke-dist reads it — so core's
- * `/adapter`, `/xlsx`, `/pdf`, `/formula`, `/pivot`, `/query` and `/sparkline`
+ * `/adapter`, `/xlsx`, `/pdf`, `/formula`, `/pivot`, `/query`, `/stream` and `/sparkline`
  * are each extracted, and a subpath added tomorrow is covered the day it
  * ships. The cli scaffolder has no importable API and is skipped, matching
  * smoke-dist.
@@ -101,6 +101,11 @@ function extractOne({ dir, report, entry }) {
             lib: ["ES2022", "DOM", "DOM.Iterable"],
             types: ["react"],
             skipLibCheck: true,
+            // Kit `/pivot` (and similar) re-export `@adapttable/core/pivot`.
+            // Classic resolution cannot read package `exports` subpaths, and
+            // API Extractor then InternalError's instead of rolling the types.
+            module: "ESNext",
+            moduleResolution: "bundler",
           },
         },
       },

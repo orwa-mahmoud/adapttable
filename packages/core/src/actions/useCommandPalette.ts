@@ -9,6 +9,9 @@
  */
 import { useCallback, useMemo, useState } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
+import { appendByKey } from "../features/currentHost";
+import { useFeatureHost } from "../features/featureHostContext";
 import type { TableLabels } from "../types";
 import {
   type Command,
@@ -40,6 +43,8 @@ export interface UseCommandPaletteOptions extends TableCommandOptions {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   commandPalette?: boolean | CommandPaletteOptions;
   labels: TableLabels;
+  /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
+  featureHost?: FeatureHostState;
 }
 
 /** What an adapter binds and renders. */
@@ -65,7 +70,11 @@ export function useCommandPalette(
   options: UseCommandPaletteOptions
 ): TableCommandPalette {
   const { commandPalette } = options;
-  const enabled = commandPalette !== undefined && commandPalette !== false;
+  const fromTree = useFeatureHost();
+  const pluginCommands = (options.featureHost ?? fromTree)?.commands;
+  const enabled =
+    commandPalette !== false &&
+    (commandPalette !== undefined || Boolean(pluginCommands?.length));
   const [open, setOpen] = useState(false);
   const config =
     typeof commandPalette === "object" ? commandPalette : undefined;
@@ -99,11 +108,16 @@ export function useCommandPalette(
               onClearFilters: options.onClearFilters,
               hasFilters: options.hasFilters,
             }),
-            ...(config?.commands ?? []),
+            ...appendByKey(
+              config?.commands ?? [],
+              pluginCommands ?? [],
+              (command) => command.key
+            ),
           ],
     [
       enabled,
       config?.commands,
+      pluginCommands,
       options.labels,
       options.onPrint,
       options.onExport,

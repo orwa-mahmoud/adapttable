@@ -59,10 +59,21 @@ test("answers the search phrase without JavaScript", async ({ browser }) => {
   await context.close();
 });
 
-test("the feed fills as patches land", async ({ page }) => {
+test("the feed says it is waiting until a patch arrives", async ({ page }) => {
+  // With the stream held off, the empty state is a fact rather than a race:
+  // on a fast machine the first patch can land before an assertion can see it.
+  await page.route("**/__adapttable/patches", (route) => route.abort());
   await page.goto(`/${KIT}/realtime/`);
   await expect(feed(page)).toContainText("waiting for the first patch");
-  // The updates are on a timer; the point is that they arrive at all.
+  await expect(feed(page).locator("li")).toHaveCount(0);
+});
+
+test("the feed fills as patches land", async ({ page }) => {
+  await page.goto(`/${KIT}/realtime/`);
+  await expect(feed(page)).toHaveAttribute("data-stream-status", "open", {
+    timeout: 10_000,
+  });
+  // The updates arrive over the patch stream; the point is that they arrive at all.
   await expect(feed(page).locator("li").first()).toBeVisible({
     timeout: 10_000,
   });
@@ -101,6 +112,25 @@ test("a selection survives the updates", async ({ page }) => {
   expect(await root.locator("tbody tr:visible").count()).toBe(before);
 });
 
+test("a patched cell carries data-flash", async ({ page }) => {
+  await page.goto(`/${KIT}/realtime/`);
+  await expect(page.locator("[data-flash]").first()).toBeVisible({
+    timeout: 15_000,
+  });
+});
+
+test("reduced motion never marks a cell", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`/${KIT}/realtime/`);
+  await expect(feed(page).locator("li").first()).toBeVisible({
+    timeout: 10_000,
+  });
+  await expect
+    .poll(async () => feed(page).locator("li").count(), { timeout: 10_000 })
+    .toBeGreaterThan(1);
+  await expect(page.locator("[data-flash]")).toHaveCount(0);
+});
+
 for (const kit of KITS) {
   test(`${kit}: renders the live table and its feed`, async ({ page }) => {
     await page.goto(`/${kit}/realtime/`);
@@ -110,5 +140,8 @@ for (const kit of KITS) {
       timeout: 10_000,
     });
     await expect(root.locator("tbody tr:visible").first()).toBeVisible();
+    await expect(page.locator("[data-flash]").first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 }

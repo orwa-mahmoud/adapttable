@@ -1,27 +1,27 @@
-import type { Direction, UseColumnLayoutResult } from "@adapttable/core";
 import {
   ACTIONS_COLUMN_KEY,
-  columnMenuActions,
   columnMenuRows,
   columnReorderKeyProps,
-  filterColumnMenuRows,
-  hideAllColumns,
+  type Direction,
   REORDER_COLUMN_KEY,
-  showAllColumns,
-  unpinAllColumns,
   useColumnDragState,
+  type UseColumnLayoutResult,
 } from "@adapttable/core";
-import type {
-  ColumnMenuChromeProps,
-  ColumnMenuLabels,
-  ColumnMenuRow,
-} from "@adapttable/core/adapter";
 import {
+  columnMenuActions,
+  type ColumnMenuChromeProps,
+  type ColumnMenuLabels,
+  type ColumnMenuRow,
   EyeIcon,
+  filterColumnMenuRows,
   GripIcon,
+  hideAllColumns,
   nextPinSide,
   pinActionLabel,
   PinIcon,
+  showAllColumns,
+  unpinAllColumns,
+  useFeatureHost,
 } from "@adapttable/core/adapter";
 import {
   Button,
@@ -164,7 +164,9 @@ function ColumnMenuRowItem<TRow>({
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
+  const featureHost = useFeatureHost<TRow>();
   const actions = columnMenuActions(row, {
+    featureHost,
     labels,
     layout,
     sortBy,

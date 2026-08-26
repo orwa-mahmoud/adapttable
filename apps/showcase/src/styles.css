@@ -1316,6 +1316,28 @@ a {
 .demo-flash--animated[data-adapttable-part="mobile-card"] {
   animation: demo-flash-fade 1.5s ease-out;
 }
+
+/* A patch that changes a cell nobody touched should say so, briefly. The
+   table only sets `data-flash`; this is the host's paint, the same way
+   `demo-flash` is. Reduced motion gets no pulse — the hook never marks. */
+[data-adapttable-part="cell"][data-flash],
+[data-adapttable-part="card-value"][data-flash] {
+  animation: demo-cell-flash 1.2s ease-out;
+}
+@keyframes demo-cell-flash {
+  from {
+    background-color: color-mix(in srgb, var(--c) 40%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-adapttable-part="cell"][data-flash],
+  [data-adapttable-part="card-value"][data-flash] {
+    animation: none;
+  }
+}
 @keyframes demo-flash-fade {
   from {
     background-color: color-mix(in srgb, var(--c) 45%, transparent);

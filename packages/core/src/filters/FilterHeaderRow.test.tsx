@@ -13,6 +13,7 @@ import {
   FilterHeaderControlChrome,
   headerFilterStickTop,
 } from "./FilterHeaderRow";
+import { withFilterType } from "./filterRegistry";
 
 interface Row {
   name: string;
@@ -268,7 +269,7 @@ describe("FilterHeaderChrome", () => {
 
   it("draws a registered custom type via its widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
+    const registry = withFilterType(defaultFilterRegistry, {
       ...text,
       type: "personText",
     });
@@ -295,7 +296,7 @@ describe("FilterHeaderChrome", () => {
 
   it("draws a registered custom render instead of the kit widget", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
+    const registry = withFilterType(defaultFilterRegistry, {
       ...text,
       type: "personCard",
       render: () => <output>custom-person</output>,

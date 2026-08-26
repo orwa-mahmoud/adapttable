@@ -30,6 +30,7 @@ import ts from "typescript";
 
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
+import { DOCS, unlistedDocs } from "./build-llms-full.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_DIR = join(REPO_ROOT, "docs");
@@ -276,6 +277,35 @@ function printDescriptionFailures({ undescribed, stale }) {
   }
 }
 
+/**
+ * `docs/` and the `DOCS` reading order in `build-llms-full.mjs` compared
+ * both ways. A page missing from that array still builds the site and
+ * still appears in `llms.txt`; it just never lands in `llms-full.txt`.
+ */
+function auditLlmsOrder() {
+  return {
+    unlisted: unlistedDocs(DOCS_DIR),
+    stale: DOCS.filter((name) => !docPages.includes(name)),
+  };
+}
+
+function printLlmsOrderFailures({ unlisted, stale }) {
+  if (unlisted.length > 0) {
+    console.error(
+      `\n${unlisted.length} docs page(s) are missing from the DOCS reading ` +
+        `order in scripts/build-llms-full.mjs — llms-full.txt will omit them:`
+    );
+    for (const name of unlisted) console.error(`  - docs/${name}`);
+  }
+  if (stale.length > 0) {
+    console.error(
+      `\n${stale.length} DOCS entr(ies) in scripts/build-llms-full.mjs name ` +
+        `a page that does not exist:`
+    );
+    for (const name of stale) console.error(`  - ${name}`);
+  }
+}
+
 function printTitleFailures({ untitled, stale }) {
   if (untitled.length > 0) {
     console.error(
@@ -303,6 +333,8 @@ function main() {
   const descriptions = auditDescriptions();
   const descriptionFailures =
     descriptions.undescribed.length + descriptions.stale.length;
+  const llmsOrder = auditLlmsOrder();
+  const llmsOrderFailures = llmsOrder.unlisted.length + llmsOrder.stale.length;
   const navFailures = nav.orphans.length + nav.dead.length;
   const exportTotal = audits.reduce((sum, a) => sum + a.names.length, 0);
   const undocumentedTotal = audits.reduce(
@@ -330,6 +362,10 @@ function main() {
       `Descriptions: ${descriptions.undescribed.length} page(s) with no ` +
         `DESCRIPTIONS entry, ${descriptions.stale.length} entr(ies) without a page.`
     );
+    console.log(
+      `llms-full: ${llmsOrder.unlisted.length} page(s) missing from DOCS, ` +
+        `${llmsOrder.stale.length} entr(ies) without a page.`
+    );
     return;
   }
   if (
@@ -337,12 +373,14 @@ function main() {
     missingRefTotal > 0 ||
     navFailures > 0 ||
     titleFailures > 0 ||
-    descriptionFailures > 0
+    descriptionFailures > 0 ||
+    llmsOrderFailures > 0
   ) {
     printFailures(audits, missingFromReference);
     printNavFailures(nav);
     printTitleFailures(titles);
     printDescriptionFailures(descriptions);
+    printLlmsOrderFailures(llmsOrder);
     if (undocumentedTotal > 0) {
       console.error(
         `\n${undocumentedTotal} undocumented export(s). Document each name in docs/ or stop exporting it.`
@@ -373,11 +411,18 @@ function main() {
           `entry needs its page.`
       );
     }
+    if (llmsOrderFailures > 0) {
+      console.error(
+        `${llmsOrderFailures} llms-full reading-order mismatch(es). Every ` +
+          `docs/*.md page belongs in the DOCS array of ` +
+          `scripts/build-llms-full.mjs, and every entry there needs its page.`
+      );
+    }
     process.exit(1);
   }
   console.log(
     `doc-surface: all ${exportTotal} exports documented, ` +
-      `all ${docPages.length} pages in the sidebar, titled and described.`
+      `all ${docPages.length} pages in the sidebar, titled, described and in llms-full.`
   );
 }
 

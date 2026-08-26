@@ -1,3 +1,4 @@
+import type { FeatureHostState } from "../features/currentHost";
 import type { ColumnDef } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
@@ -182,6 +183,8 @@ export interface ColumnMenuActionContext<TRow = unknown> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
+  /** The host of THIS table — plugin menu actions resolve from here. */
+  featureHost?: FeatureHostState<TRow>;
 }
 
 /** Sort, pin, hide, autosize, filter, reset — disabled when locked. */
@@ -258,7 +261,33 @@ export function columnMenuActions<TRow>(
     disabled: !row.canHide && !row.canPin && !row.canResize,
     run: () => resetColumnLayout(row, ctx.layout),
   });
+  appendPluginColumnMenuActions(actions, row, ctx);
   return actions;
+}
+
+function appendPluginColumnMenuActions<TRow>(
+  actions: ColumnMenuAction[],
+  row: ColumnMenuRow<TRow>,
+  ctx: ColumnMenuActionContext<TRow>
+): void {
+  const extras = ctx.featureHost?.columnMenuActions;
+  if (!extras) return;
+  for (const factory of extras) {
+    const extra = factory(row, ctx);
+    if (!extra) continue;
+    pushColumnMenuExtra(actions, extra);
+  }
+}
+
+function pushColumnMenuExtra(
+  actions: ColumnMenuAction[],
+  extra: ColumnMenuAction | readonly ColumnMenuAction[]
+): void {
+  if ("id" in extra) {
+    actions.push(extra);
+    return;
+  }
+  for (const action of extra) actions.push(action);
 }
 
 /**

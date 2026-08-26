@@ -24,10 +24,10 @@
  * backward compatible: a link or a saved view from before these fields existed
  * says nothing about them and reads back exactly as it always did.
  *
- * Custom aggregators cannot be serialized — a function has no URL form. A
- * configuration carrying one keeps working in memory and simply does not write
- * that measure to the URL, because a link that silently turned a custom
- * aggregation into `sum` would be worse than a link that omits it.
+ * A function has no URL form, so a configuration carrying one keeps working
+ * in memory and simply does not write that measure. A registered name is a
+ * string, so it writes and reads like `sum` — the table that opens the link
+ * still has to have registered the same name, or the cells stay empty.
  *
  * The codec lives apart from {@link usePivotUrlState} because the two ends of
  * that link do not run in the same place: the table writes the parameter in a
@@ -35,18 +35,9 @@
  * of React is what lets `@adapttable/core/query` — and `@adapttable/server`
  * through it — decode the same string a backend never renders.
  */
-import type { AggregateName } from "../aggregate/aggregate";
 import { EMPTY_PIVOT_CONFIG } from "./pivotConfigModel";
 import { PATH_SEP } from "./pivotKeys";
 import type { PivotConfig, PivotMeasure } from "./pivotModel";
-
-const AGGREGATIONS: readonly AggregateName[] = [
-  "sum",
-  "avg",
-  "count",
-  "min",
-  "max",
-];
 
 /** The segment heads that are not an aggregation. */
 const ROWS = "rows";
@@ -77,10 +68,14 @@ export interface PivotUrlState {
   collapsed: readonly string[];
 }
 
-/** Whether a string names a built-in aggregation. */
-function isAggregateName(value: string): value is AggregateName {
-  return (AGGREGATIONS as readonly string[]).includes(value);
-}
+/** Segment heads the grammar already uses — not a measure name. */
+const RESERVED = new Set<string>([
+  ROWS,
+  COLUMNS,
+  SUBTOTALS,
+  GRAND_TOTALS,
+  COLLAPSED,
+]);
 
 /**
  * Decode one field, tolerating the malformed input a hand-edited URL brings.
@@ -183,7 +178,9 @@ export function deserializePivotState(raw: string | null): PivotUrlState {
         // An empty entry — `hide:,EU` from a hand-edited URL — names no group.
         .filter((key) => key !== "")
         .map((key) => decodeCollapsed(key));
-    } else if (isAggregateName(head)) measures.push({ key: body, agg: head });
+    } else if (!RESERVED.has(head)) {
+      measures.push({ key: body, agg: head });
+    }
   }
   return {
     config: {

@@ -6,6 +6,7 @@ import {
   tableMinWidth,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   columnFlexShares,
   columnSizeStyle,
   fittedTableStyle,
@@ -246,6 +247,12 @@ export function DesktopTable<TRow>(
                 return (
                   <td
                     key={key}
+                    data-adapttable-part="cell"
+                    data-flash={cellFlashAttr(
+                      props.isCellFlashing,
+                      table.getRowKey(row),
+                      column.key
+                    )}
                     {...table.getCellProps(column)}
                     style={{
                       position: pinStyle.position,

@@ -74,6 +74,13 @@ test("opens already pivoted, with a header row per column value", async ({
   ).toContainText("Team");
 });
 
+test("a registered aggregator name in the URL is the measure", async ({
+  page,
+}) => {
+  await page.goto(`/${KIT}/pivot/?pivot=rows:team;cols:status;range:budget`);
+  await expect(table(page).locator("thead")).toContainText(/range/i);
+});
+
 test("totals every column, and the grand total agrees with the rows", async ({
   page,
 }) => {

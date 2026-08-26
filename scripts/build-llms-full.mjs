@@ -17,15 +17,17 @@ const HEADER = `# AdaptTable — full documentation
 `;
 
 /** Docs in reading order. Each file's own H1 is kept as the section break. */
-const DOCS = [
+export const DOCS = [
   "getting-started.md",
   "concepts.md",
+  "features.md",
   "data-tiers.md",
   "columns.md",
   "column-groups.md",
   "sparkline.md",
   "sorting.md",
   "filtering.md",
+  "filter-tree.md",
   "pagination.md",
   "selection.md",
   "row-expansion.md",
@@ -65,16 +67,27 @@ const DOCS = [
   "versioning.md",
 ];
 
+/**
+ * Docs pages that exist on disk but are missing from {@link DOCS}.
+ *
+ * The reading order is the third registration a guide needs, after its
+ * title and description. A warning here is how a page shipped in the
+ * sidebar and `llms.txt` while staying out of `llms-full.txt`.
+ */
+export function unlistedDocs(docsDir) {
+  const listed = new Set(DOCS);
+  return readdirSync(docsDir)
+    .filter((file) => file.endsWith(".md") && !listed.has(file))
+    .sort();
+}
+
 /** Rebuild `<repoRoot>/llms-full.txt` from `<repoRoot>/docs`. */
 export function buildLlmsFull(repoRoot) {
   const docsDir = join(repoRoot, "docs");
-  const listed = new Set(DOCS);
-  const unlisted = readdirSync(docsDir).filter(
-    (file) => file.endsWith(".md") && !listed.has(file)
-  );
+  const unlisted = unlistedDocs(docsDir);
   if (unlisted.length > 0) {
-    console.warn(
-      `build-llms-full: docs missing from the DOCS reading order — add them: ${unlisted.join(", ")}`
+    throw new Error(
+      `docs missing from the DOCS reading order — add them: ${unlisted.join(", ")}`
     );
   }
   const sections = DOCS.map((name) =>

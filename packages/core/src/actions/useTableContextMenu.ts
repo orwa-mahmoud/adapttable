@@ -15,6 +15,8 @@
  */
 import { useCallback, useMemo } from "react";
 
+import type { FeatureHostState } from "../features/currentHost";
+import { useFeatureHost } from "../features/featureHostContext";
 import type { ColumnDef, TableLabels } from "../types";
 import {
   type ContextMenuActions,
@@ -47,6 +49,8 @@ export interface TableContextMenuOptions<TRow> {
   sortBy?: string;
   sortDir?: "asc" | "desc";
   isPinned?: (columnKey: string) => boolean;
+  /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
+  featureHost?: FeatureHostState;
 }
 
 /** What an adapter binds and renders. */
@@ -71,8 +75,11 @@ export interface TableContextMenu {
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>
 ): TableContextMenu {
+  const fromTree = useFeatureHost<TRow>();
+  const pluginMenus = (options.featureHost ?? fromTree)?.contextMenuItems;
   const enabled =
-    options.contextMenu !== undefined && options.contextMenu !== false;
+    options.contextMenu !== false &&
+    (options.contextMenu !== undefined || Boolean(pluginMenus?.length));
   const menu = useContextMenu<TRow>(enabled);
   const { rowFor } = options;
 
@@ -177,6 +184,15 @@ export function useTableContextMenu<TRow>(
       typeof options.contextMenu === "object"
         ? options.contextMenu.items
         : undefined;
+    const plugins = extra
+      ? pluginMenus?.filter((factory) => factory !== extra)
+      : pluginMenus;
+    const itemsFor = plugins?.length
+      ? (target: ContextMenuTarget<TRow>) => [
+          ...(extra?.(target) ?? []),
+          ...plugins.flatMap((factory) => [...factory(target)]),
+        ]
+      : extra;
     return contextMenuItems<TRow>({
       target: menu.open.target,
       columns: options.columns,
@@ -185,9 +201,9 @@ export function useTableContextMenu<TRow>(
       sortBy: options.sortBy,
       sortDir: options.sortDir,
       isPinned: options.isPinned,
-      extra,
+      extra: itemsFor,
     });
-  }, [menu.open, options]);
+  }, [menu.open, options, pluginMenus]);
 
   return { regionProps, items, at: menu.open?.at ?? null, close: menu.close };
 }

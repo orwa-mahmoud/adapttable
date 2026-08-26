@@ -65,7 +65,7 @@ export function RowEditCell<TRow>({
   takesFocus,
   renderEditor,
 }: Readonly<RowEditCellProps<TRow>>): ReactElement {
-  const editor = resolveCellEditor(column);
+  const editor = resolveCellEditor(column, rowEditing.featureHost);
   if (!editor) return <>{display}</>;
   const focusRef = takesFocus ? focusEditorOnMount : () => undefined;
 
@@ -315,7 +315,7 @@ export function BatchEditCell<TRow>({
   editLabel,
   renderEditor,
 }: Readonly<BatchEditCellProps<TRow>>): ReactElement {
-  const editor = resolveCellEditor(column);
+  const editor = resolveCellEditor(column, batch.featureHost);
   if (!editor) return <>{display}</>;
 
   const ctrl: EditableCellEditorCtrl = {

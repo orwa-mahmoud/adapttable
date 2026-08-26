@@ -7,6 +7,7 @@ import {
   type FilterDef,
   type FilterOption,
   type FilterValue,
+  resolveFilterRegistry,
   type TableLabels,
 } from "../index";
 import { renderRadix } from "../test-utils";
@@ -389,10 +390,7 @@ describe("<AutoFilterForm> (Radix)", () => {
 
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     renderRadix(
       <AutoFilterForm
         defs={[
