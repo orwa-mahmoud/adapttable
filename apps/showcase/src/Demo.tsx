@@ -116,7 +116,7 @@ function demoCard(row: Person, card: MobileCardModel<Person>): ReactNode {
   const [identity, ...rest] = card.fields;
   return (
     <div className="demo-person-card">
-      <p className="demo-person-card__name">{identity?.value}</p>
+      <div className="demo-person-card__name">{identity?.value}</div>
       <dl className="demo-person-card__grid">
         {rest.map(({ column, label, value }) => (
           <div key={column.key}>
