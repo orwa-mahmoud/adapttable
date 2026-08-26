@@ -23,7 +23,7 @@
     "@adapttable/shadcn": "workspace:*",
     "@adapttable/unstyled": "workspace:*",
     "@base-ui/react": "^1.6.0",
-    "@chakra-ui/react": "^3.36.0",
+    "@chakra-ui/react": "^3.36.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mantine/core": "^9.3.1",
