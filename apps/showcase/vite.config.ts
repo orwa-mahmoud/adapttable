@@ -114,6 +114,36 @@ const microsoftClarity = (): Plugin => ({
   ],
 });
 
+/**
+ * A real EventSource of patch ticks for the realtime page.
+ *
+ * The frames are just a clock — the demo's `parse` turns each tick into a
+ * ranked budget patch so the row stays on page 1. GitHub Pages has no
+ * server; the demo falls back to a scripted source with the same frames.
+ */
+const PATCH_STREAM_PATH = "/__adapttable/patches";
+const PATCH_STREAM_INTERVAL_MS = 1200;
+
+const patchStream = (): Plugin => ({
+  name: "adapttable-patch-stream",
+  configureServer(server) {
+    server.middlewares.use(PATCH_STREAM_PATH, (req, res) => {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      });
+      res.write("data: tick\n\n");
+      const id = setInterval(() => {
+        res.write("data: tick\n\n");
+      }, PATCH_STREAM_INTERVAL_MS);
+      req.on("close", () => {
+        clearInterval(id);
+      });
+    });
+  },
+});
+
 // Resolve each @adapttable/* package to its TypeScript source so the showcase
 // always reflects the current library (and hot-reloads). The adapters are still
 // the REAL ones — each section mounts a genuine kit component, never a mock.
@@ -126,7 +156,13 @@ const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
 export default defineConfig({
   base: "./",
-  plugins: [react(), tailwindcss(), googleAnalytics(), microsoftClarity()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    googleAnalytics(),
+    microsoftClarity(),
+    patchStream(),
+  ],
   // Multi-page app: each demo page is its own static HTML entry, linked
   // with plain anchors — no client router, no GitHub Pages 404 tricks.
   build: {
@@ -164,6 +200,7 @@ export default defineConfig({
       "@adapttable/core/sparkline": pkg("core", "sparkline"),
       "@adapttable/core/pivot": pkg("core", "pivot"),
       "@adapttable/core/formula": pkg("core", "formula"),
+      "@adapttable/core/stream": pkg("core", "stream"),
       "@adapttable/core": pkg("core"),
       "@adapttable/mantine": pkg("adapter-mantine"),
       "@adapttable/mui": pkg("adapter-mui"),

@@ -11,7 +11,7 @@
  *
  * Entries: every importable entry point every library package advertises,
  * read from its `exports` map the way smoke-dist reads it — so core's
- * `/adapter`, `/xlsx`, `/pdf`, `/formula`, `/pivot`, `/query` and `/sparkline`
+ * `/adapter`, `/xlsx`, `/pdf`, `/formula`, `/pivot`, `/query`, `/stream` and `/sparkline`
  * are each extracted, and a subpath added tomorrow is covered the day it
  * ships. The cli scaffolder has no importable API and is skipped, matching
  * smoke-dist.

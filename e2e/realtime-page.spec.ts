@@ -62,7 +62,10 @@ test("answers the search phrase without JavaScript", async ({ browser }) => {
 test("the feed fills as patches land", async ({ page }) => {
   await page.goto(`/${KIT}/realtime/`);
   await expect(feed(page)).toContainText("waiting for the first patch");
-  // The updates are on a timer; the point is that they arrive at all.
+  await expect(feed(page)).toHaveAttribute("data-stream-status", "open", {
+    timeout: 10_000,
+  });
+  // The updates arrive over the patch stream; the point is that they arrive at all.
   await expect(feed(page).locator("li").first()).toBeVisible({
     timeout: 10_000,
   });

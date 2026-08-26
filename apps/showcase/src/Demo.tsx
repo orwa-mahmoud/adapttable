@@ -1,6 +1,5 @@
 import type { EditEventHandler, GroupNode } from "@adapttable/core";
 import {
-  applyRowPatchesWithLog,
   applyRowReorder,
   type ColumnDef,
   type ColumnLayoutState,
@@ -17,6 +16,7 @@ import {
   useHighlight,
   useQuerySource,
 } from "@adapttable/core";
+import { type StreamSocket, useRowPatchStream } from "@adapttable/core/stream";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -25,7 +25,6 @@ import {
   type SetStateAction,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -314,18 +313,20 @@ function budgetForRank(
 /**
  * Apply the nth live update.
  *
- * Through the patch API rather than by rebuilding the array: the log rides on
- * the returned rows, which is what lets the incremental engine re-run search,
- * filters and sort for the touched row only. Copying the result would drop it.
- *
  * Rank the way the table is ranked. Park the row between two people
- * already in seats 2–6 so the change stays on page 1.
+ * already in seats 2–6 so the change stays on page 1. The stream applies
+ * the patch through `useRowPatchStream`, so the incremental log stays on
+ * the array the table already holds.
  */
 function nextRealtimePatch(
   rows: readonly Person[],
   tick: number,
   dir: "asc" | "desc"
-): { rows: readonly Person[]; id: string; line: string } | null {
+): {
+  patch: ReturnType<typeof updateRow<Person>>;
+  id: string;
+  line: string;
+} | null {
   if (rows.length < 2) return null;
   const ranked = rankByBudget(rows, dir);
   const belowFold = ranked.slice(REALTIME_TOP);
@@ -342,22 +343,81 @@ function nextRealtimePatch(
   if (!target) return null;
   const nextBudget = budgetForRank(ranked, destRank, target.id, dir);
   return {
-    rows: applyRowPatchesWithLog(
-      rows,
-      [updateRow<Person>(target.id, { budget: nextBudget })],
-      (row) => row.id
-    ).rows,
+    patch: updateRow<Person>(target.id, { budget: nextBudget }),
     id: target.id,
     line: `${personName(target, "en")} · budget → ${nextBudget}`,
   };
 }
 
+/** Vite's SSE endpoint — only the dev server has it. */
+const PATCH_STREAM_URL = "/__adapttable/patches";
+
+/**
+ * An EventSource stand-in for the static GitHub Pages build, where the
+ * showcase has no server to stream from. Same interval, same frames as
+ * the Vite middleware, so parse / apply / status stay one path.
+ */
+class ScriptedTickSource implements StreamSocket {
+  readyState = 0;
+  private readonly listeners = new Map<
+    string,
+    Set<(event: { data?: unknown }) => void>
+  >();
+  private timer: ReturnType<typeof setInterval> | undefined;
+
+  constructor() {
+    queueMicrotask(() => {
+      if (this.readyState !== 0) return;
+      this.readyState = 1;
+      this.emit("open", {});
+      this.emit("message", { data: "tick" });
+      this.timer = setInterval(() => {
+        this.emit("message", { data: "tick" });
+      }, REALTIME_INTERVAL_MS);
+    });
+  }
+
+  addEventListener(
+    type: string,
+    listener: (event: { data?: unknown }) => void
+  ): void {
+    const set = this.listeners.get(type) ?? new Set();
+    set.add(listener);
+    this.listeners.set(type, set);
+  }
+
+  removeEventListener(
+    type: string,
+    listener: (event: { data?: unknown }) => void
+  ): void {
+    this.listeners.get(type)?.delete(listener);
+  }
+
+  close(): void {
+    this.readyState = 2;
+    if (this.timer !== undefined) clearInterval(this.timer);
+  }
+
+  private emit(type: string, event: { data?: unknown }): void {
+    for (const listener of [...(this.listeners.get(type) ?? [])]) {
+      listener(event);
+    }
+  }
+}
+
+function createDemoPatchSource(url: string): StreamSocket {
+  if (import.meta.env.DEV && typeof EventSource !== "undefined") {
+    return new EventSource(url);
+  }
+  return new ScriptedTickSource();
+}
+
 /**
  * Drive a live feed of row patches, and report what was applied.
  *
- * Its own hook rather than an effect inside the table body: the timer, the
- * patch and the transcript are one concern, and inlining them pushed the
- * caller past its complexity budget.
+ * The ticks arrive over SSE on the Vite server (a real EventSource) and
+ * from a scripted source on the static GitHub Pages build. Both go through
+ * `useRowPatchStream`, so the host's setter is the only write.
  */
 function useRealtimeFeed(
   enabled: boolean,
@@ -365,41 +425,69 @@ function useRealtimeFeed(
   setData: Dispatch<SetStateAction<readonly Person[]>>,
   sortDir: "asc" | "desc",
   onPatched?: (id: string) => void
-): string[] {
+): { lines: string[]; status: string } {
   const [feed, setFeed] = useState<string[]>([]);
   const dataRef = useRef(data);
   dataRef.current = data;
   const sortDirRef = useRef(sortDir);
   sortDirRef.current = sortDir;
-  useEffect(() => {
-    if (!enabled) return undefined;
-    let tick = 0;
-    const id = setInterval(() => {
+  const onPatchedRef = useRef(onPatched);
+  onPatchedRef.current = onPatched;
+  const tickRef = useRef(0);
+  const pendingRef = useRef<{ id: string; line: string } | null>(null);
+
+  const stream = useRowPatchStream<Person>({
+    eventSource: enabled ? PATCH_STREAM_URL : undefined,
+    enabled,
+    getRowId: (row) => row.id,
+    onPatch: setData,
+    createEventSource: createDemoPatchSource,
+    parse: () => {
       const next = nextRealtimePatch(
         dataRef.current,
-        tick++,
+        tickRef.current,
         sortDirRef.current
       );
-      if (!next) return;
-      setData(next.rows);
-      setFeed((lines) => [next.line, ...lines].slice(0, 4));
-      onPatched?.(next.id);
-    }, REALTIME_INTERVAL_MS);
-    return () => {
-      clearInterval(id);
-    };
-  }, [enabled, setData, onPatched]);
-  return feed;
+      if (!next) return [];
+      tickRef.current += 1;
+      pendingRef.current = { id: next.id, line: next.line };
+      return [next.patch];
+    },
+    onPatches: () => {
+      const pending = pendingRef.current;
+      if (!pending) return;
+      pendingRef.current = null;
+      setFeed((lines) => [pending.line, ...lines].slice(0, 4));
+      onPatchedRef.current?.(pending.id);
+    },
+  });
+
+  return { lines: feed, status: stream.status };
+}
+
+/** Spoken connection state for the realtime feed's live region. */
+function streamStatusLabel(status: string): string {
+  if (status === "open") return "Live patch stream connected";
+  if (status === "reconnecting") return "Reconnecting to the patch stream";
+  if (status === "error") return "Patch stream disconnected";
+  return "";
 }
 
 /** What the live feed has applied, newest first. */
-function RealtimeFeed({ lines }: Readonly<{ lines: readonly string[] }>) {
+function RealtimeFeed({
+  lines,
+  status,
+}: Readonly<{ lines: readonly string[]; status: string }>) {
   return (
     <div
       className="demo-live-update demo-live-update--feed"
       data-testid="realtime-feed"
+      data-stream-status={status}
     >
       <span>Applied updates</span>
+      <span className="visually-hidden" aria-live="polite">
+        {streamStatusLabel(status)}
+      </span>
       {lines.length === 0 ? (
         <span>waiting for the first patch…</span>
       ) : (
@@ -976,7 +1064,9 @@ function Frontend({
           </button>
         </div>
       ) : null}
-      {realtime ? <RealtimeFeed lines={feed} /> : null}
+      {realtime ? (
+        <RealtimeFeed lines={feed.lines} status={feed.status} />
+      ) : null}
       {render(
         tableSource,
         frontendColumnProps(columns, {

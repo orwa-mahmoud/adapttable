@@ -56,6 +56,94 @@ and `?patch=200&incremental=1` keeps the log. `node scripts/bench.mjs
 **13.5 s** full rebuild → **9.9 s** incremental (**1.4×**) for 200 updates
 on 20,000 rows through the live Mantine table.
 
+## Live patches over WebSocket or SSE
+
+`@adapttable/core/stream` is a separate entry, so a table that never opens
+a socket never downloads one. `useRowPatchStream` binds a WebSocket or an
+SSE endpoint to the rows you already own. Frames become ordinary row
+patches and go back through your setter — filters, sort, grouping and
+aggregates happen the way they do for any other change.
+
+```tsx
+import { useRowPatchStream } from "@adapttable/core/stream";
+import { DataTable } from "@adapttable/mantine";
+
+function LiveTable({ initial, columns }) {
+  const [rows, setRows] = useState(initial);
+  const stream = useRowPatchStream({
+    websocket: "wss://api.example.com/rows",
+    getRowId: (row) => row.id,
+    onPatch: setRows,
+  });
+
+  return (
+    <>
+      {stream.status === "reconnecting" && <span>Reconnecting…</span>}
+      <DataTable data={rows} columns={columns} rowKey={(row) => row.id} />
+    </>
+  );
+}
+```
+
+### The wire format is the patch shape
+
+A frame is one patch, or an array of them, as JSON — the same four shapes
+`applyRowPatches` already takes:
+
+```json
+[
+  { "type": "insert", "row": { "id": "9", "name": "Ada" }, "at": 0 },
+  { "type": "update", "id": "3", "changes": { "status": "active" } },
+  { "type": "upsert", "row": { "id": "4", "name": "Bo" } },
+  { "type": "remove", "id": "7" }
+]
+```
+
+A server that already speaks this needs no translation. One that speaks
+something else supplies `parse`. **Nothing from the wire is trusted.** A
+frame that is not JSON, an entry that is not an object, an update with no
+`changes`, a remove with no id — each is dropped rather than applied. One
+malformed frame cannot empty a table, and it does not take the connection
+down either.
+
+### Connection state
+
+`status` is one of `idle`, `connecting`, `open`, `reconnecting`, `error` or
+`closed`, with `error` carrying the reason. `isStreamLive` and
+`isStreamSettled` are the two questions worth asking:
+
+|                |                                                            |
+| -------------- | ---------------------------------------------------------- |
+| `idle`         | No url, or `enabled: false`. Nothing is open.              |
+| `connecting`   | Opening for the first time.                                |
+| `open`         | Receiving.                                                 |
+| `reconnecting` | Dropped; a retry is scheduled.                             |
+| `error`        | Gave up — retries spent, or no socket in this environment. |
+| `closed`       | You closed it. Final.                                      |
+
+A dropped **WebSocket** is reopened here, after `reconnect.delayMs`
+(1000 ms by default) and at most `reconnect.maxAttempts` times. An
+**EventSource** reconnects on its own, so it is left to do that and simply
+reported as `reconnecting` — retrying alongside it would give the server
+two subscriptions for one table.
+
+```tsx
+useRowPatchStream({
+  eventSource: "https://api.example.com/rows/stream",
+  event: "patch", // defaults to "message"
+  getRowId: (row) => row.id,
+  onPatch: setRows,
+});
+```
+
+An authenticated connection, a wrapper, or a test double is
+`createWebSocket` / `createEventSource`. `openRowPatchStream` is the same
+connector without React — frames in, status out.
+
+`enabled: false` keeps everything idle — nothing is opened, nothing retries.
+The table never owns your rows. `onPatch` hands you an updater, so it drops
+straight into a `useState` setter and never races a concurrent update.
+
 ## What this page is not
 
 A websocket that changes the row **under an open editor** is a conflict, not

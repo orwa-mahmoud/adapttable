@@ -118,6 +118,16 @@
         "default": "./dist/query.cjs"
       }
     },
+    "./stream": {
+      "import": {
+        "types": "./dist/stream.d.ts",
+        "default": "./dist/stream.js"
+      },
+      "require": {
+        "types": "./dist/stream.d.cts",
+        "default": "./dist/stream.cjs"
+      }
+    },
     "./sparkline": {
       "import": {
         "types": "./dist/sparkline.d.ts",

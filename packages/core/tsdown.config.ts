@@ -54,6 +54,7 @@ export default defineConfig([
       "src/pivot.ts",
       "src/formula.ts",
       "src/features.ts",
+      "src/stream.ts",
     ],
   },
   { ...common, entry: ["src/query.ts"] },

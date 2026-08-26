@@ -72,6 +72,7 @@ const FIXTURES = [
       "virtual",
       "PIVOT_BLANK",
       "parseFormula",
+      "useRowPatchStream",
     ],
   },
   {
@@ -88,7 +89,7 @@ const FIXTURES = [
     // whole main surface at once does not carry them. The marker is an
     // engine-only name, not the word "pivot" — the panel's LABELS are shared
     // table labels and do belong in the base bundle.
-    absent: ["PIVOT_BLANK", "parseFormula"],
+    absent: ["PIVOT_BLANK", "parseFormula", "useRowPatchStream"],
   },
   {
     // What the pivot engine costs the tables that ask for it, and nothing to
@@ -122,6 +123,16 @@ const FIXTURES = [
     entryFile: "formula.js",
     budgetKB: 6,
     code: `export { buildFormulaColumns } from "PKG";`,
+  },
+  {
+    // Live patches over WebSocket or SSE. A table that never opens a
+    // socket never downloads one — `useRowPatchStream` is absent from
+    // the simple-table and every-export fixtures above.
+    name: "core · stream",
+    pkg: "core",
+    entryFile: "stream.js",
+    budgetKB: 5,
+    code: `export { useRowPatchStream } from "PKG";`,
   },
   {
     // The React-free half of the model, which a backend imports instead of the
