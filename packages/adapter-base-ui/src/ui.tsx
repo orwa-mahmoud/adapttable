@@ -46,8 +46,11 @@ export function Flex({
     direction?: "row" | "column";
     gap?: string | number;
     wrap?: "wrap" | "nowrap";
-    justify?: CSSProperties["justifyContent"] | "between" | "end" | "start";
-    align?: CSSProperties["alignItems"] | "center" | "start";
+    // csstype admits any string here, so the shorthand aliases below
+    // (`between`, `end`, `start`, `center`) are already assignable; justifyMap
+    // and alignMap translate them to their flexbox values.
+    justify?: NonNullable<CSSProperties["justifyContent"]>;
+    align?: NonNullable<CSSProperties["alignItems"]>;
     py?: string | number;
     mt?: string | number;
     className?: string;
