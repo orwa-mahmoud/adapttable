@@ -24,6 +24,9 @@ export { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
 /** Width (px) of the injected reorder column — shared so pin leads agree. */
 export const REORDER_COLUMN_WIDTH = 40;
 
+/** How far a lifted row is dimmed while it is being dragged. */
+export const ROW_REORDER_LIFTED_OPACITY = 0.45;
+
 /**
  * Dim the lifted row and draw an insertion line on the drop target.
  * Kits apply this so a host without CSS still sees the gesture; unstyled
@@ -36,7 +39,8 @@ export function rowReorderDropStyle(
   const edge = attrs["data-drop"];
   const offset = edge === "before" ? "2px" : "-2px";
   return {
-    opacity: attrs["data-dragging"] === "" ? 0.45 : undefined,
+    opacity:
+      attrs["data-dragging"] === "" ? ROW_REORDER_LIFTED_OPACITY : undefined,
     boxShadow: edge ? `inset 0 ${offset} 0 0 currentColor` : undefined,
   };
 }
