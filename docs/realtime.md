@@ -33,6 +33,29 @@ export function People({ rows, columns, setRows }) {
 `insertRow`, `updateRow`, `upsertRow` and `removeRow` build the batch. A later
 patch sees what an earlier one did.
 
+## Incremental re-evaluation
+
+Hand the array `applyRowPatches` returns back as `data` — do not spread it.
+The result carries a `rowPatchLog`; `useFrontendData` continues the live
+view and re-runs search, filters, sort, grouping and aggregates for the
+rows the patch touched, not the whole set. A copy (`[...patched]`) drops
+the log and rebuilds everything, which is how the scale bench's full-rebuild
+arm is built.
+
+```tsx
+setRows(applyRowPatches(rows, [updateRow(id, { budget })], byId));
+```
+
+`createIncrementalView` / `applyRowPatchesToView` /
+`applyRowPatchLogToView` are the same engine if you hold the snapshot
+yourself. All eight adapters share it, including the mobile card layout.
+
+The scale demo measures both pipelines: `?patch=200` spreads (full rebuild)
+and `?patch=200&incremental=1` keeps the log. `node scripts/bench.mjs
+--only patch` prints the burst times. A 2026-08-26 run on this machine was
+**13.5 s** full rebuild → **9.9 s** incremental (**1.4×**) for 200 updates
+on 20,000 rows through the live Mantine table.
+
 ## What this page is not
 
 A websocket that changes the row **under an open editor** is a conflict, not

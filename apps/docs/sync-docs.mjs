@@ -149,7 +149,7 @@ export const DESCRIPTIONS = {
   "accessibility.md":
     "Accessible React data table: semantic markup, labelled controls and screen-reader announcements — on by default, no prop to turn on. Try it from the keyboard in the live demo.",
   "realtime.md":
-    "Realtime React data table: patch rows as a websocket or poll delivers them with applyRowPatches, so sort, filters and selection survive. No realtime prop — you own the socket.",
+    "Realtime React data table: patch rows as a websocket or poll delivers them with applyRowPatches. Keep the returned array so filters, sort, grouping and aggregates re-evaluate incrementally. No realtime prop — you own the socket.",
   "api.md":
     "Complete AdaptTable API reference — DataTable props, ColumnDef, filters, source builders, prop-getters and the headless useDataTable hook for React.",
   "faq.md":

@@ -442,7 +442,9 @@ function FrontendScaleTable({
       });
       done += 1;
       setApplied(done);
-      if (done < patches) queueMicrotask(tick);
+      // Yield so React can paint `data-bench-patches` between updates;
+      // `queueMicrotask` starves the waiter until the whole burst is queued.
+      if (done < patches) setTimeout(tick, 0);
     };
     burstStart.current = startedAt;
     tick();

@@ -620,7 +620,7 @@ grouping / summary extras without walking the set when only those
 changed. `incrementalViewOf` / `attachIncrementalView` link a derived
 array to the snapshot (`incrementalViewConfig` reads it back);
 `incrementalSearchText` is the default projector. See
-[cell editing](./cell-editing.md).
+[realtime](./realtime.md).
 
 **Row reordering.** `onRowReorder` (`RowReorderHandler`) is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
