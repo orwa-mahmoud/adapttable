@@ -301,9 +301,15 @@ function partsOf(pkg) {
     // A kit whose third-party component owns the element sets the name on it
     // through a ref: Radix Themes' `Table.Root` renders the real `<table>`
     // inside a ScrollArea and forwards loose props to the wrapper div, so the
-    // only way to name the same element every other kit names is `setAttribute`.
+    // only way to name the same element every other kit names is `setAttribute`
+    // or the equivalent `dataset.adapttablePart` write.
     for (const match of text.matchAll(
       /setAttribute\(\s*["']data-adapttable-part["']\s*,\s*["']([a-z0-9-]+)["']/g
+    )) {
+      found.add(match[1]);
+    }
+    for (const match of text.matchAll(
+      /dataset\.adapttablePart\s*=\s*["']([a-z0-9-]+)["']/g
     )) {
       found.add(match[1]);
     }
@@ -317,9 +323,10 @@ function partsOf(pkg) {
  * Core names a part in four ways, and only the first looks like the others:
  * the attribute it renders itself, the `part` prop it hands a kit's slot to put
  * on the kit's own element, a `*_PARTS` table the kits render through, and a
- * `setAttribute` on a ref where the element belongs to the kit but the naming
- * does not. All four land in every kit by construction, which is exactly why
- * none of them shows up in an adapter's source.
+ * `setAttribute` / `dataset.adapttablePart` on a ref where the element belongs
+ * to the kit but the naming does not. All four land in every kit by
+ * construction, which is exactly why none of them shows up in an adapter's
+ * source.
  */
 function corePartNames() {
   const found = new Set();
@@ -335,6 +342,11 @@ function corePartNames() {
     }
     for (const match of text.matchAll(
       /setAttribute\(\s*["']data-adapttable-part["']\s*,\s*["']([a-z0-9-]+)["']/g
+    )) {
+      found.add(match[1]);
+    }
+    for (const match of text.matchAll(
+      /dataset\.adapttablePart\s*=\s*["']([a-z0-9-]+)["']/g
     )) {
       found.add(match[1]);
     }

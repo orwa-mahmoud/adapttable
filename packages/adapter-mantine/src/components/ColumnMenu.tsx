@@ -1,30 +1,27 @@
-import type { Direction, UseColumnLayoutResult } from "@adapttable/core";
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
   columnReorderKeyProps,
+  type Direction,
   REORDER_COLUMN_KEY,
   useColumnDragState,
+  type UseColumnLayoutResult,
 } from "@adapttable/core";
-import type {
-  ColumnMenuChromeProps,
-  ColumnMenuLabels,
-  ColumnMenuRow,
-} from "@adapttable/core/adapter";
 import {
   columnMenuActions,
-  filterColumnMenuRows,
-  hideAllColumns,
-  showAllColumns,
-  unpinAllColumns,
-  useFeatureHost,
-} from "@adapttable/core/adapter";
-import {
+  type ColumnMenuChromeProps,
+  type ColumnMenuLabels,
+  type ColumnMenuRow,
   EyeIcon,
+  filterColumnMenuRows,
   GripIcon,
+  hideAllColumns,
   nextPinSide,
   pinActionLabel,
   PinIcon,
+  showAllColumns,
+  unpinAllColumns,
+  useFeatureHost,
 } from "@adapttable/core/adapter";
 import {
   ActionIcon,

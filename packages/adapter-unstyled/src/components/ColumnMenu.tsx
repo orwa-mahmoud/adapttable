@@ -8,23 +8,21 @@ import {
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import {
-  columnMenuActions,
-  filterColumnMenuRows,
-  hideAllColumns,
-  showAllColumns,
-  unpinAllColumns,
-  useFeatureHost,
-} from "@adapttable/core/adapter";
-import {
   type ColumnDragState,
+  columnMenuActions,
   type ColumnMenuChromeProps,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   EyeIcon,
+  filterColumnMenuRows,
   GripIcon,
+  hideAllColumns,
   nextPinSide,
   pinActionLabel,
   PinIcon,
+  showAllColumns,
+  unpinAllColumns,
+  useFeatureHost,
 } from "@adapttable/core/adapter";
 import { useState } from "react";
 import { createPortal } from "react-dom";

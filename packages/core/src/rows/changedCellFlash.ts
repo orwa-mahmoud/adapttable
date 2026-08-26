@@ -11,7 +11,7 @@
  * already works. And it never animates against
  * `prefers-reduced-motion` — a flash nobody asked for is a bug, not a feature.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDebugValue, useEffect, useRef, useState } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import type { RowPatchEvent } from "./patch";
@@ -87,7 +87,8 @@ export function useChangedCellFlash(
 
   // `version` only exists to repaint; the marks themselves live in the ref so
   // a burst of patches does not queue a render per patch.
-  const [, bump] = useState(0);
+  const [generation, setGeneration] = useState(0);
+  useDebugValue(generation);
   const marks = useRef(new Map<string, Set<string>>());
   const rowMarks = useRef(new Set<string>());
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
@@ -96,7 +97,7 @@ export function useChangedCellFlash(
     marks.current.delete(rowId);
     rowMarks.current.delete(rowId);
     timers.current.delete(rowId);
-    bump((n) => n + 1);
+    setGeneration((n) => n + 1);
   }, []);
 
   const clear = useCallback(() => {
@@ -104,7 +105,7 @@ export function useChangedCellFlash(
     timers.current.clear();
     marks.current.clear();
     rowMarks.current.clear();
-    bump((n) => n + 1);
+    setGeneration((n) => n + 1);
   }, []);
 
   const mark = useCallback(
@@ -133,7 +134,7 @@ export function useChangedCellFlash(
           }, durationMs)
         );
       }
-      if (touched) bump((n) => n + 1);
+      if (touched) setGeneration((n) => n + 1);
     },
     [live, durationMs, forget]
   );

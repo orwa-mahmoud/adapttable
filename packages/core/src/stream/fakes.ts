@@ -68,7 +68,9 @@ export class FakeSocket implements StreamSocket {
   }
 
   private emit(type: string, event: StreamSocketEvent): void {
-    for (const listener of [...(this.listeners.get(type) ?? [])]) {
+    const listeners = this.listeners.get(type);
+    if (!listeners) return;
+    for (const listener of new Set(listeners)) {
       listener(event);
     }
   }

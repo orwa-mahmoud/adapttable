@@ -348,8 +348,8 @@ export function useDataTableShell<TRow>(
       // Desktop kits attach this to an unnamed overflow box. The mobile card
       // list already names itself `cards` — overwriting that would hide the
       // list from window-offset measurement and from every cards query.
-      if (node && !node.getAttribute("data-adapttable-part")) {
-        node.setAttribute("data-adapttable-part", "scroll-box");
+      if (node && !node.dataset.adapttablePart) {
+        node.dataset.adapttablePart = "scroll-box";
       }
       bodyScrollRef(node);
     },
