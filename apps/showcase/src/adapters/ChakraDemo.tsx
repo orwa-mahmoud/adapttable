@@ -194,7 +194,7 @@ export function ChakraDemo({
   editorShowcase?: boolean;
   /** Show the Columns menu. Defaults to on unless the page is focused. */
   /** The toolbar Export button's configuration. */
-  exportCsv?: DataTableProps<Person>["exportCsv"];
+  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   /** Show the Filters control. Defaults to on unless the page is focused. */
   filterControls?: boolean;
@@ -210,7 +210,7 @@ export function ChakraDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: DataTableProps<Person>["sidePanel"];
+  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;

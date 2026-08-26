@@ -107,7 +107,7 @@ export function ShadcnDemo({
   derivedFields?: boolean;
   editorShowcase?: boolean;
   /** The toolbar Export button's configuration. */
-  exportCsv?: DataTableProps<Person>["exportCsv"];
+  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   filterControls?: boolean;
   bulkActions?: boolean;
@@ -120,7 +120,7 @@ export function ShadcnDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: DataTableProps<Person>["sidePanel"];
+  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;

@@ -196,7 +196,7 @@ export function AntdDemo({
    * the current page; the columns demo overrides it to write the highlighted
    * cell range as a spreadsheet.
    */
-  exportCsv?: DataTableProps<Person>["exportCsv"];
+  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
   headerFilters?: boolean;
   filterFields?: boolean;
   columnGroups?: boolean;
@@ -223,7 +223,7 @@ export function AntdDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: DataTableProps<Person>["sidePanel"];
+  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
   forceMobile?: boolean;
   /** Dedicated pages hide unrelated filter/action/view chrome. */
   focused?: boolean;

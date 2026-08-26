@@ -72,7 +72,7 @@ export interface PivotTableViewProps<TRow> {
   /** Fold or unfold one subtotal group. */
   onToggleFold: (key: string) => void;
   /** A panel docked beside the table — the Feature Lab docks the pivot builder. */
-  sidePanel?: DataTableProps<PivotRow>["sidePanel"];
+  sidePanel?: NonNullable<DataTableProps<PivotRow>["sidePanel"]>;
 }
 
 /** What a line is called, and — on a subtotal — the control that folds it. */

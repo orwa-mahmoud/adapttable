@@ -23,7 +23,7 @@ function Harness({
   classNames,
   density,
 }: {
-  classNames?: Parameters<typeof DataTable<Row>>[0]["classNames"];
+  classNames?: NonNullable<Parameters<typeof DataTable<Row>>[0]["classNames"]>;
   density?: "comfortable" | "compact";
 }) {
   const source = useFrontendData<Row>({
