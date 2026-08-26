@@ -1,15 +1,20 @@
 import type { EditEventHandler, GroupNode } from "@adapttable/core";
 import {
+  applyRowPatchesWithLog,
   applyRowReorder,
   type ColumnDef,
   type ColumnLayoutState,
   evaluateFilterTree,
+  insertRow,
   type MobileCardModel,
   type MobileCardRenderer,
   type QueryFilterGroup,
+  removeRow,
+  type RowPatch,
   type Slot,
   type TableErrorState,
   type TableSource,
+  updateRow,
   useColumnLayoutUrlState,
   useFrontendData,
   useHighlight,
@@ -18,9 +23,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
-  type Dispatch,
   type ReactNode,
-  type SetStateAction,
   useCallback,
   useContext,
   useMemo,
@@ -60,6 +63,7 @@ import {
   utilization,
 } from "./data";
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
+import { usePatchSink } from "./patchSink";
 import { useRealtimeSlot } from "./realtimeSlot";
 
 /**
@@ -399,29 +403,19 @@ function blankPerson(rows: readonly Person[]): Person {
   };
 }
 
-/** Apply whichever of a batch's edits belongs to this row. */
-function applyEdits(
-  row: Person,
-  edits: readonly { row: Person; patch: Record<string, unknown> }[]
-): Person {
-  const edit = edits.find((one) => one.row.id === row.id);
-  return edit ? applyRowPatch(row, edit.patch) : row;
-}
-
 /**
- * Apply a row patch, mapping each column key to the field it edits — the same
- * mapping a single cell edit uses.
+ * Map editor column keys onto row fields — the same mapping a single cell
+ * edit uses — so a batch write is one `updateRow` per person.
  */
-function applyRowPatch(
-  row: Person,
+function columnChanges(
   patch: Readonly<Record<string, unknown>>
-): Person {
-  let next = row;
+): Partial<Person> {
+  const changes: Partial<Person> = {};
   for (const [key, value] of Object.entries(patch)) {
     const field = EDIT_FIELD[key] ?? (key as keyof Person);
-    next = { ...next, [field]: value as never };
+    (changes as Record<string, unknown>)[field] = value;
   }
-  return next;
+  return changes;
 }
 
 /** Column key → row field for composite cells (person shows name; load
@@ -432,6 +426,23 @@ const EDIT_FIELD: Record<string, keyof Person> = {
   // The timeline cell shows a range; its editor edits the start it sorts by.
   timeline: "start",
 };
+
+/**
+ * A patch records the row field that moved; the table asks about the
+ * column key. Composite cells (Person, Load, Timeline) use a different
+ * word for each, so a flash reader has to accept both.
+ */
+function columnOrFieldFlashing(
+  isFlashing: (rowId: string, columnKey: string) => boolean,
+  rowId: string,
+  columnKey: string
+): boolean {
+  if (isFlashing(rowId, columnKey)) return true;
+  return (
+    Object.hasOwn(EDIT_FIELD, columnKey) &&
+    isFlashing(rowId, EDIT_FIELD[columnKey])
+  );
+}
 
 function pickOther<T>(choices: readonly T[], current: T): T {
   for (const item of choices) {
@@ -519,7 +530,7 @@ function frontendColumnProps(
     onDuplicateRow: (row: Person) => void;
     onDeleteRow: (row: Person) => void;
     onRowReorder: (from: number, to: number) => void;
-    setData: Dispatch<SetStateAction<readonly Person[]>>;
+    writePatches: (patches: readonly RowPatch<Person>[]) => void;
     flashRow: (id: Person["id"]) => void;
   }
 ): DemoColumnProps {
@@ -550,9 +561,7 @@ function frontendColumnProps(
     Object.assign(next, {
       rowEditing: true,
       onRowEdit: (row: Person, patch: Record<string, unknown>) => {
-        flags.setData((prev) =>
-          prev.map((r) => (r.id === row.id ? applyRowPatch(r, patch) : r))
-        );
+        flags.writePatches([updateRow(row.id, columnChanges(patch))]);
         flags.flashRow(row.id);
       },
     });
@@ -674,9 +683,22 @@ function Frontend({
   });
   const extraAnchorId = useRef(data[0]?.id).current;
   const RealtimeSlot = useRealtimeSlot();
+  const patchSink = usePatchSink();
   const isFlashingRef = useRef<(rowId: string, columnKey: string) => boolean>(
     () => false
   );
+  const sinkRef = useRef(patchSink);
+  sinkRef.current = patchSink;
+  const writePatches = useCallback((patches: readonly RowPatch<Person>[]) => {
+    setData((prev) => {
+      const log = applyRowPatchesWithLog(prev, patches, (row) => row.id);
+      if (log.events.length > 0) {
+        const events = log.events;
+        queueMicrotask(() => sinkRef.current?.onEvents(events));
+      }
+      return log.rows;
+    });
+  }, []);
   // The demo owns the data, so the demo is what knows which row changed —
   // exactly where a real app would flash it. Note there is no highlight prop
   // on the table: `rowClassName` is the seam, so this works in every kit.
@@ -684,21 +706,19 @@ function Frontend({
   const onCellEdit = useCallback(
     (row: Person, key: string, nextValue: unknown) => {
       const field = EDIT_FIELD[key] ?? (key as keyof Person);
-      setData((prev) =>
-        prev.map((r) =>
-          r.id === row.id ? { ...r, [field]: nextValue as never } : r
-        )
-      );
+      writePatches([updateRow(row.id, { [field]: nextValue as never })]);
       flash.flashRow(row.id);
     },
-    [flash]
+    [flash, writePatches]
   );
   const onBatchEdit = useCallback(
     (edits: readonly { row: Person; patch: Record<string, unknown> }[]) => {
-      setData((prev) => prev.map((row) => applyEdits(row, edits)));
+      writePatches(
+        edits.map((edit) => updateRow(edit.row.id, columnChanges(edit.patch)))
+      );
       for (const edit of edits) flash.flashRow(edit.row.id);
     },
-    [flash]
+    [flash, writePatches]
   );
   // Adding, copying and removing rows: the table asks, the demo owns the list —
   // the same one-way flow a real app's mutation would follow.
@@ -706,20 +726,23 @@ function Frontend({
   // updater must stay pure, and the flash needs the id it produced.
   const onAddRow = useCallback(() => {
     const added = blankPerson(data);
-    setData((prev) => [added, ...prev]);
+    writePatches([insertRow(added, 0)]);
     flash.flashRow(added.id);
-  }, [data, flash]);
+  }, [data, flash, writePatches]);
   const onDuplicateRow = useCallback(
     (row: Person) => {
       const copy = { ...row, id: nextId(data) };
-      setData((prev) => [copy, ...prev]);
+      writePatches([insertRow(copy, 0)]);
       flash.flashRow(copy.id);
     },
-    [data, flash]
+    [data, flash, writePatches]
   );
-  const onDeleteRow = useCallback((row: Person) => {
-    setData((prev) => prev.filter((r) => r.id !== row.id));
-  }, []);
+  const onDeleteRow = useCallback(
+    (row: Person) => {
+      writePatches([removeRow(row.id)]);
+    },
+    [writePatches]
+  );
   const onRowReorder = useCallback((from: number, to: number) => {
     setData((prev) => applyRowReorder(prev, from, to));
   }, []);
@@ -740,17 +763,15 @@ function Frontend({
     if (!activeEdit) return;
     const { rowId, columnKey } = activeEdit;
     const field = EDIT_FIELD[columnKey] ?? (columnKey as keyof Person);
-    setData((prev) =>
-      prev.map((row) => {
-        if (row.id !== rowId) return row;
-        return {
-          ...row,
-          [field]: incomingEditValue(row, columnKey) as never,
-          revision: (row.revision ?? 0) + 1,
-        };
-      })
-    );
-  }, [activeEdit]);
+    const row = data.find((person) => person.id === rowId);
+    if (!row) return;
+    writePatches([
+      updateRow(rowId, {
+        [field]: incomingEditValue(row, columnKey) as never,
+        revision: (row.revision ?? 0) + 1,
+      }),
+    ]);
+  }, [activeEdit, data, writePatches]);
   // Two classes, not one: the mark holds steady under reduced motion, so the
   // user still learns which row changed without anything moving.
   const flashClass = useCallback(
@@ -854,9 +875,22 @@ function Frontend({
           failure,
           data,
           flashClass,
-          isCellFlashing: live
-            ? (rowId, columnKey) => isFlashingRef.current(rowId, columnKey)
-            : undefined,
+          isCellFlashing:
+            live || patchSink
+              ? (rowId, columnKey) =>
+                  columnOrFieldFlashing(
+                    isFlashingRef.current,
+                    rowId,
+                    columnKey
+                  ) ||
+                  (patchSink
+                    ? columnOrFieldFlashing(
+                        patchSink.isFlashingRef.current,
+                        rowId,
+                        columnKey
+                      )
+                    : false)
+              : undefined,
           onCellEdit,
           onEditStart,
           onEditCancel: onEditEnd,
@@ -866,7 +900,7 @@ function Frontend({
           onDuplicateRow,
           onDeleteRow,
           onRowReorder,
-          setData,
+          writePatches,
           flashRow: flash.flashRow,
         })
       )}
