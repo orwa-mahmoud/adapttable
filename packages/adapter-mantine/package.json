@@ -169,8 +169,8 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.12.1",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "vitest-axe": "^0.1.0"
   },
   "publishConfig": {

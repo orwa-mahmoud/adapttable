@@ -12,8 +12,8 @@
     "@adapttable/mantine": "^2.0.0",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

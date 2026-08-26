@@ -11,8 +11,8 @@
     "@adapttable/base-ui": "^2.0.0",
     "@adapttable/core": "^2.0.0",
     "@base-ui/react": "^1.6.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

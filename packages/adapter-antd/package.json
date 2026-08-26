@@ -161,8 +161,8 @@
     "@testing-library/react": "^16.3.2",
     "antd": "^6.4.4",
     "axe-core": "^4.12.1",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "vitest-axe": "^0.1.0"
   },
   "publishConfig": {

@@ -11,8 +11,8 @@
     "@adapttable/core": "^2.0.0",
     "@adapttable/radix": "^2.0.0",
     "@radix-ui/themes": "^3.3.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
