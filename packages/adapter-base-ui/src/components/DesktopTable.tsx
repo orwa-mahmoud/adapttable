@@ -412,10 +412,7 @@ function LeafHeader<TRow>({
 }>): ReactElement {
   const { column } = leaf;
   const ariaSort = leaf.headerProps["aria-sort"] as
-    | "ascending"
-    | "descending"
-    | "none"
-    | undefined;
+    "ascending" | "descending" | "none" | undefined;
   const style = stickify({
     ...leaf.style,
     ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),

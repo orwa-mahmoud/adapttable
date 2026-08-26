@@ -24,8 +24,7 @@ export function bulkActionErrorMessage(error: unknown): string | null {
 
 /** How a bulk-action run ended — passed to `onComplete` on every run. */
 export type BulkActionOutcome =
-  | { status: "success" }
-  | { status: "error"; error: unknown };
+  { status: "success" } | { status: "error"; error: unknown };
 
 /** Options for {@link useBulkActionRunner}. */
 export interface UseBulkActionRunnerOptions {

@@ -20,8 +20,7 @@ export function isBrowser(): boolean {
  * @returns The storage object, or `undefined` under SSR / blocked storage.
  */
 export function safeLocalStorage():
-  | Pick<Storage, "getItem" | "setItem" | "removeItem">
-  | undefined {
+  Pick<Storage, "getItem" | "setItem" | "removeItem"> | undefined {
   if (!isBrowser()) return undefined;
   try {
     return globalThis.localStorage;

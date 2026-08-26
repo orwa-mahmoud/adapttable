@@ -144,10 +144,7 @@ export interface QueryRejection {
 
 /** Anything a route handler might have in its hands. */
 export type QueryInput =
-  | string
-  | URL
-  | URLSearchParams
-  | { readonly url: string };
+  string | URL | URLSearchParams | { readonly url: string };
 
 /** The search params, whatever shape the caller had. */
 function toParams(input: QueryInput): URLSearchParams {

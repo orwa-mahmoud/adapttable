@@ -50,8 +50,7 @@ export type LocaleKey = keyof typeof locales;
  */
 function resolveLocaleKey(locale: string): LocaleKey | undefined {
   return resolveLocaleTag(Object.keys(locales), locale) as
-    | LocaleKey
-    | undefined;
+    LocaleKey | undefined;
 }
 
 /** Whether a locale has a bundled preset. */

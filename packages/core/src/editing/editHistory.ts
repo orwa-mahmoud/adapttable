@@ -226,8 +226,7 @@ export interface TableEditHistoryProps<TRow> {
 export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
   history: EditHistoryState<TRow>;
   onCellEdit:
-    | ((row: TRow, key: string, nextValue: unknown) => unknown)
-    | undefined;
+    ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
 } {
   const { editHistory, columns, onCellEdit } = props;
   const history = useEditHistory<TRow>({

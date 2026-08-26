@@ -14,8 +14,7 @@ const mqlCacheByImpl = new WeakMap<
 
 function cachedMatchMedia(query: string): MediaQueryList | null {
   const impl = globalThis.matchMedia as
-    | typeof globalThis.matchMedia
-    | undefined;
+    typeof globalThis.matchMedia | undefined;
   if (typeof impl !== "function") return null;
   let cache = mqlCacheByImpl.get(impl);
   if (!cache) {

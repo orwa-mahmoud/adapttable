@@ -27,7 +27,6 @@ export function FeatureHostProvider({
 
 /** The host of the nearest table, or nothing outside one. */
 export function useFeatureHost<TRow = unknown>():
-  | FeatureHostState<TRow>
-  | undefined {
+  FeatureHostState<TRow> | undefined {
   return useContext(FeatureHostContext) as FeatureHostState<TRow> | undefined;
 }

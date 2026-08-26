@@ -246,9 +246,7 @@ export interface ExportInfo<TRow> {
 
 /** Boolean-or-options CSV export prop (off / on / configured). */
 type ExportCsvProp<TRow = unknown> =
-  | boolean
-  | ExportCsvOptions<TRow>
-  | undefined;
+  boolean | ExportCsvOptions<TRow> | undefined;
 
 /** Resolve a boolean-or-options prop into a concrete config, or `null` when off. */
 export function resolveExportCsv<TRow = unknown>(

@@ -101,8 +101,7 @@ export function runWithFeatureHost<T>(
  * sibling table or a later click resolves its own host and never this one.
  */
 export function currentFeatureHost<TRow = unknown>():
-  | FeatureHostState<TRow>
-  | undefined {
+  FeatureHostState<TRow> | undefined {
   return scoped.at(-1) as FeatureHostState<TRow> | undefined;
 }
 

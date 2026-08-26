@@ -19,9 +19,7 @@ export const RELATIVE_NAMED = [
 
 /** A stored relative-date token (`last:7`, `today`, …). */
 export type RelativeDateToken =
-  | (typeof RELATIVE_NAMED)[number]
-  | `last:${number}`
-  | `next:${number}`;
+  (typeof RELATIVE_NAMED)[number] | `last:${number}` | `next:${number}`;
 
 /** Inclusive local-time window a token resolves to. */
 export interface RelativeDateRange {

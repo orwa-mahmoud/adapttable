@@ -21,10 +21,7 @@ import {
 
 /** Paper the print stylesheet asks the browser for. */
 export type PrintPageSize =
-  | "a4"
-  | "a4-landscape"
-  | "letter"
-  | "letter-landscape";
+  "a4" | "a4-landscape" | "letter" | "letter-landscape";
 
 /** How groups meet a page boundary. */
 export type PrintPageBreak = "auto" | "group";

@@ -134,11 +134,7 @@ const TRASH = [
 
 /** Which control a cluster entry is. Stable across kits, and across renders. */
 export type SavedViewControlKey =
-  | "rename"
-  | "moveUp"
-  | "moveDown"
-  | "default"
-  | "remove";
+  "rename" | "moveUp" | "moveDown" | "default" | "remove";
 
 /**
  * One control in a row's cluster.

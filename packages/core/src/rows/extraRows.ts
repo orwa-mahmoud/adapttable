@@ -233,8 +233,7 @@ export function inflateBodyCellRowSpans<
 }
 
 type VisualSlot =
-  | { kind: "extra"; beforeId: string }
-  | { kind: "row"; id: string };
+  { kind: "extra"; beforeId: string } | { kind: "row"; id: string };
 
 function visualBodySlots(
   visualIds: readonly string[],

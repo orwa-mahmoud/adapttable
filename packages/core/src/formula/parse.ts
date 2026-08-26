@@ -39,17 +39,7 @@
 
 /** A binary operator the grammar accepts. */
 export type BinaryOp =
-  | "+"
-  | "-"
-  | "*"
-  | "/"
-  | "&"
-  | "="
-  | "<>"
-  | "<"
-  | "<="
-  | ">"
-  | ">=";
+  "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
 
 /** One node of a parsed formula. */
 export type FormulaNode =

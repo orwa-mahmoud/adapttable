@@ -477,8 +477,7 @@ export function tableRenderModel<TRow>(
  */
 export function useSummaryCells<TRow>(
   summaryRow:
-    | ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>)
-    | undefined,
+    ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined,
   rows: readonly TRow[]
 ): Partial<Record<string, ReactNode>> | undefined {
   const fromView = incrementalViewOf(rows)?.aggregates;

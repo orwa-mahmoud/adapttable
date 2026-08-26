@@ -135,10 +135,7 @@ export function DesktopTable<TRow>(
               const sortClick = sortButton?.onClick;
               const sortIndex = sortButton?.["data-sort-index"];
               const ariaSort = table.getHeaderCellProps(column)["aria-sort"] as
-                | "ascending"
-                | "descending"
-                | "none"
-                | undefined;
+                "ascending" | "descending" | "none" | undefined;
 
               const caption = resolveColumnHeader(
                 column,

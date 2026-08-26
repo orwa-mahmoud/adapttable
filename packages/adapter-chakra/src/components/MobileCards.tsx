@@ -112,12 +112,7 @@ interface MobileCardProps<TRow> {
 
 /** The card props the memo comparator deliberately skips (see `editing`). */
 type UncomparedCardProp =
-  | "editing"
-  | "rows"
-  | "getRowId"
-  | "rowReorder"
-  | "style"
-  | "isCellFlashing";
+  "editing" | "rows" | "getRowId" | "rowReorder" | "style" | "isCellFlashing";
 
 /** Every card prop the memo comparator checks with `Object.is`. */
 const COMPARED_CARD_PROPS: readonly Exclude<

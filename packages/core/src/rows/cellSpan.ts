@@ -144,7 +144,7 @@ export function clipColSpanAtPin<TRow>(
   if (!pinOffset || colSpan <= 1) return colSpan;
   const startSide = pinOffset(columns[start]?.key ?? "")?.side;
   let span = 1;
-  for (let offset = 1; offset < colSpan && start + offset < columns.length; ) {
+  for (let offset = 1; offset < colSpan && start + offset < columns.length;) {
     const next = columns[start + offset];
     if (!next || pinOffset(next.key)?.side !== startSide) break;
     span += 1;

@@ -64,9 +64,7 @@ export interface FilterOption {
  * sorted), or an async loader resolved lazily when the form first renders.
  */
 export type FilterOptionsSource =
-  | readonly FilterOption[]
-  | "auto"
-  | (() => Promise<readonly FilterOption[]>);
+  readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
 
 /** Most distinct values `"auto"` will derive before truncating. */
 export const AUTO_OPTIONS_LIMIT = 50;
@@ -105,8 +103,7 @@ export interface FilterDef<TRow = unknown> {
  * `label` (both inherited from the column).
  */
 export type ColumnFilter<TRow = unknown> =
-  | FilterType
-  | (Omit<FilterDef<TRow>, "key" | "label"> & { label?: string });
+  FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & { label?: string });
 
 /** Suffix pair used by the two-field range types. */
 export const RANGE_SUFFIXES = {

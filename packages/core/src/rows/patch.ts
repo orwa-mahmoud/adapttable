@@ -58,10 +58,7 @@ export interface RemovePatch {
 
 /** One change to a row set. */
 export type RowPatch<TRow> =
-  | InsertPatch<TRow>
-  | UpdatePatch<TRow>
-  | UpsertPatch<TRow>
-  | RemovePatch;
+  InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
 
 /** Insert a row, optionally at a position. */
 export function insertRow<TRow>(row: TRow, at?: number): InsertPatch<TRow> {

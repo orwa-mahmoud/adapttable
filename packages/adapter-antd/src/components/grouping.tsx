@@ -64,9 +64,7 @@ export function isAdaptTableExtraRow(
 
 /** dataSource entry when grouping is armed: group header, extra slot, or leaf. */
 export type GroupedDataRecord<TRow> =
-  | AdaptTableGroupRow
-  | AdaptTableExtraRow
-  | TRow;
+  AdaptTableGroupRow | AdaptTableExtraRow | TRow;
 
 /** Type guard for synthetic group header records. */
 export function isAdaptTableGroupRow(

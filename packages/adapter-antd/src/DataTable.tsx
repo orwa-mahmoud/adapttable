@@ -709,8 +709,7 @@ function sentinelEnabled(
  */
 function buildSummary<TRow>(
   summaryRow:
-    | ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>)
-    | undefined,
+    ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined,
   columns: readonly ColumnDef<TRow>[],
   leadingCells: number,
   hasActions: boolean
