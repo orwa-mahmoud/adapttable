@@ -4,6 +4,7 @@ import {
   type ExtraFilters,
   type FilterDef,
   type FilterOption,
+  resolveFilterRegistry,
 } from "@adapttable/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
@@ -414,10 +415,7 @@ describe("<AutoFilterForm> operator-first range widgets (Ant Design)", () => {
 
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     render(
       <AutoFilterForm
         defs={[

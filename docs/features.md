@@ -137,8 +137,8 @@ the table), not when `aggregate()` is called in the parent.
 `open` / `onOpenChange`. Registering a command or a context-menu factory with
 no matching prop is enough to arm that chrome.
 
-The per-seam props this supersedes are deprecated in the v3 sweep and removed
-at v3.
+The per-seam registration APIs this supersedes (`FilterTypeRegistry.register`
+/ `extend`, the `filterTypes` prop) are deprecated and removed at v3.
 
 ## Every factory
 

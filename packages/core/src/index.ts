@@ -143,8 +143,6 @@ export {
 } from "./filters/filterForm";
 export {
   filterDefForColumn,
-  type FilterHeaderClassNames,
-  type FilterHeaderRowProps,
   headerFilterStickTop,
 } from "./filters/FilterHeaderRow";
 export {
@@ -311,7 +309,6 @@ export {
   type UseGridFocusOptions,
 } from "./focus/useGridFocus";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
-export { type FullscreenState, useFullscreen } from "./layout/useFullscreen";
 export type {
   BaseDataTableProps,
   SidePanelOptions,
@@ -489,15 +486,9 @@ export {
   ACTIONS_COLUMN_KEY,
   type ColumnMenuAction,
   type ColumnMenuActionContext,
-  columnMenuActions,
   columnMenuLabel,
   columnMenuRows,
-  filterColumnMenuRows,
-  hideAllColumns,
   REORDER_COLUMN_KEY,
-  resetColumnLayout,
-  showAllColumns,
-  unpinAllColumns,
 } from "./columns/columnMenuModel";
 export {
   columnDropProps,
@@ -507,11 +498,9 @@ export {
 } from "./columns/columnReorder";
 export { columnResizeHandleProps } from "./columns/columnResize";
 export {
-  applyCollapsedColumnGroups,
   type ColumnGroupDef,
   type ColumnGroupRecord,
   type ColumnInput,
-  flattenColumnTree,
   type FlattenedColumns,
   isColumnGroup,
   marriedOrderHolds,
@@ -521,29 +510,6 @@ export {
   resolveColumnWidth,
   tableMinWidth,
 } from "./columns/columnWidths";
-export {
-  COLUMN_GROUP_ID_SEP,
-  COLUMN_GROUP_RENDER_PREFIX,
-  COLUMN_GROUP_STUB_PREFIX,
-  COLUMN_GROUP_STUB_WIDTH,
-  columnGroupHeaderCaption,
-  columnGroupId,
-  columnGroupPath,
-  columnGroupStubStyle,
-  groupedHeaderAlign,
-  groupedHeaderCellStyle,
-  groupedHeaderChildRule,
-  groupedHeaderLabelStyle,
-  type HeaderGroupCell,
-  headerGroupRow,
-  headerGroupRows,
-  type HtmlGroupedHeaderCell,
-  htmlGroupedHeaderPlan,
-  isColumnGroupRenderKey,
-  isColumnGroupStubKey,
-  isColumnGroupSummaryKey,
-  toggleCollapsedColumnGroup,
-} from "./columns/headerGroups";
 export {
   type ColumnLayoutState,
   edgePinStyle,
@@ -599,7 +565,6 @@ export { useSearchInput } from "./useDataTable/useSearchInput";
 
 /* ── Virtualization ───────────────────────────────────────────────── */
 export {
-  rowSourceIndex,
   type TableVirtualization,
   useTableVirtualization,
   type UseTableVirtualizationOptions,
@@ -613,36 +578,18 @@ export { stableKey } from "./utils/stableKey";
 /* ── Rows ──────────────────────────────────────────────────────────── */
 
 export {
-  type BodyCell,
-  bodyCellsHaveRowSpan,
   buildBodyCells,
-  cellsForRow,
   type CellSpanAppearance,
-  cellSpanMark,
   type CellSpanRequest,
   coveredAddressSet,
   type GetCellSpan,
   type GetCellSpanArgs,
-  rowSpanSignature,
   spanningArmed,
 } from "./rows/cellSpan";
 export {
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
-  extraCountBeforeRowIds,
-  extraCoveredTableSlots,
-  type ExtraEntry,
-  extraHostFillStyle,
   type ExtraRow,
   type ExtraRowKind,
   extraRowsArmed,
-  extraRowsForSection,
-  extraUncoveredColSpans,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-  isExtraEntry,
 } from "./rows/extraRows";
 export {
   applyRowPatchesToView,
@@ -673,16 +620,6 @@ export {
   upsertRow,
 } from "./rows/patch";
 export {
-  orderedCardEntries,
-  PINNED_BOTTOM_PART,
-  PINNED_TOP_PART,
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
-  pinnedRowStickyStyle,
-  useOffsetHeight,
-} from "./rows/pinnedRowChrome";
-export {
   type RowActionsLayout,
   type RowActionsRenderContext,
   type RowActionsRenderer,
@@ -705,7 +642,6 @@ export {
   type RowPinLabels,
   type RowPinningState,
   type RowPinSide,
-  rowPinSignature,
   type RowPinState,
   UNPIN_ROW_ACTION_KEY,
   useRowPinning,
@@ -713,23 +649,15 @@ export {
 export {
   applyRowReorder,
   datasetIndex,
-  REORDER_COLUMN_WIDTH,
-  ROW_DND_MIME,
-  rowReorderDropStyle,
   type RowReorderHandler,
   type RowReorderLabels,
-  rowReorderSignature,
-  type RowReorderState,
   useRowReorder,
 } from "./rows/rowReorder";
 export {
   estimateFromRowHeight,
-  resolveRowHeight,
-  resolveRowStyle,
   type RowHeight,
   type RowStyle,
   rowStyleArmed,
-  rowStyleSignature,
 } from "./rows/rowStyle";
 export {
   type RowExpansionState,
@@ -806,12 +734,9 @@ export {
   type EditableCellMode,
 } from "./editing/editableCellController";
 export {
-  type EditableCellActivateProps,
-  type EditableCellButtonProps,
   type EditableCellEditorCtrl,
   EditableCellGate,
   type EditableCellGateProps,
-  type EditableCellSlots,
 } from "./editing/EditableCellGate";
 export {
   type EditConflict,
@@ -960,3 +885,6 @@ export {
   resolveExportColumns,
   resolveExportCsv,
 } from "./export/tableCsv";
+
+/* ── Adapter machinery (deprecated on the main entry; gone at v3) ──── */
+export * from "./mainEntryAliases";

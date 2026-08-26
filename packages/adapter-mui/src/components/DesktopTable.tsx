@@ -1,14 +1,10 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
-import {
-  columnGroupHeaderCaption,
-  PIN_Z,
-  resolveColumnFooter,
-  type TableLabels,
-} from "@adapttable/core";
+import { PIN_Z, resolveColumnFooter, type TableLabels } from "@adapttable/core";
 import {
   cellHighlightStyle,
   cellSpanMark,
   columnFlexShares,
+  columnGroupHeaderCaption,
   columnSizeStyle,
   ColumnSpacer,
   createDesktopRow,

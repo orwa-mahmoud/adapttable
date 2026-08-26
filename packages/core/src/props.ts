@@ -736,6 +736,9 @@ export interface BaseDataTableProps<TRow> {
    * Extra or replacement filter types merged onto the built-in registry.
    * A spec whose `type` matches a built-in replaces it. Omit and only
    * the built-ins are available.
+   *
+   * Prefer `features={[filterTypes(specs)]}` or `host.registerFilterType`
+   * in `TableFeature.setup`. This prop still works until v3.
    */
   filterTypes?: readonly FilterTypeSpec[];
   /**

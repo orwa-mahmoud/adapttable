@@ -66,7 +66,7 @@ function mount(
         columns={COLUMNS}
         rowKey={(row) => row.id}
         urlSync={false}
-        size="small"
+        density="compact"
         {...override}
       />
     </ThemeProvider>

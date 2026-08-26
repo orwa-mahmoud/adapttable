@@ -38,6 +38,21 @@ import { subtleText } from "./styles";
 import type { DataTableProps } from "./types";
 
 /**
+ * Map row density to Chakra's table `size`. An explicit `size` prop still
+ * wins for backward compatibility.
+ */
+function tableSize(
+  bits: Readonly<{
+    size?: "sm" | "md" | "lg";
+    density?: "comfortable" | "compact";
+  }>
+): "sm" | "md" | "lg" {
+  return (
+    bits.size ?? ((bits.density ?? "comfortable") === "compact" ? "sm" : "md")
+  );
+}
+
+/**
  * Batteries-included Chakra UI data table. Drop in `columns`, a `rowKey`,
  * and either raw `data` (frontend tier — add `onQueryChange` for the server
  * tier) or a prebuilt `source`, for a fully styled, sortable, filterable,
@@ -55,9 +70,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   // Map row density to Chakra's table `size` (independent of column pinning):
   // compact → "sm", comfortable (default) → "md". An explicit `size` prop, if
   // given, still wins for backward compatibility.
-  const size =
-    props.size ??
-    ((props.density ?? "comfortable") === "compact" ? "sm" : "md");
+  const size = tableSize(props);
 
   const headerFiltersOn =
     props.headerFilters === true || props.filtersMode === "header";

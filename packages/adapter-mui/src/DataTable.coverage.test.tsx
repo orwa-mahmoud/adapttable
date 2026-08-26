@@ -71,7 +71,9 @@ beforeEach(() => {
 });
 
 function mount(
-  override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
+  override: Partial<
+    Omit<Parameters<typeof DataTable<Row>>[0], "mode" | "size">
+  > & { size?: "small" | "medium" } = {},
   mode: "paged" | "infinite" = "paged",
   url = ""
 ) {

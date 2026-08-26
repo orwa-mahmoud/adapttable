@@ -25,6 +25,9 @@ import { VirtualItem } from '@tanstack/react-virtual';
 export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnDef<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnDef<TRow>[];
 
 // @public
+export function applyTableFeatures<P extends object>(props: P): P;
+
+// @public
 export function BatchEditBarChrome<TRow>(input: Readonly<BatchEditBarChromeProps<TRow>>): ReactElement | null;
 
 // @public
@@ -1860,7 +1863,7 @@ export function nestedTableDetail<TRow>(options: {
 
 // @public
 export interface NestedTableParent {
-    density?: Density$1;
+    density?: Density;
     labels?: TableLabels;
 }
 
@@ -2690,6 +2693,29 @@ export interface TableContextMenu {
 export function tableErrorState<TRow>(source: TableSource<TRow>): TableErrorState | undefined;
 
 // @public
+export interface TableFeature<TRow = unknown> {
+    apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+    readonly id: string;
+    setup?(host: TableFeatureHost<TRow>): void | (() => void);
+}
+
+// @public
+export interface TableFeatureHost<TRow = unknown> {
+    // (undocumented)
+    readonly __row?: TRow;
+    extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
+    onDispose(cleanup: () => void): void;
+    registerAggregator(name: string, aggregator: Aggregator): void;
+    registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined): void;
+    registerCommand(command: Command): void;
+    registerContextMenuItems(items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]): void;
+    registerEditor(type: string, render: CustomCellEditorRender): void;
+    registerFilterType(spec: FilterTypeSpec): void;
+    registerPanel(panel: SidePanelEntry): void;
+    registerWriter(writer: ExportWriter): void;
+}
+
+// @public
 export interface TableRenderModel<TRow> {
     cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
     // (undocumented)
@@ -2848,7 +2874,7 @@ export interface UseColumnWindowOptions<TRow> {
 export function useCommandPalette(options: UseCommandPaletteOptions): TableCommandPalette;
 
 // @public
-export function useDataTableShell<TRow>(props: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
+export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
     gridFocus: GridFocusState; /** What the selection adds up to; `null` unless `selectionStats` is set. */
     selectionStats: SelectionStats | null; /** Undo/redo controls; inert unless `editHistory` is set. */
     editHistory: EditHistoryState<TRow>; /** Find-bar state; inert unless `findInTable` is set. */
@@ -3028,6 +3054,9 @@ export function useSummaryCells<TRow>(summaryRow: ((rows: readonly TRow[]) => Pa
 
 // @public
 export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>): TableContextMenu;
+
+// @public
+export function useTableFeatures<P extends object>(incoming: P): P;
 
 // @public
 export interface ViewControlsToolbar {

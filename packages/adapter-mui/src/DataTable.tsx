@@ -52,11 +52,13 @@ function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
  * explicit `size` prop still wins for backward compatibility.
  */
 function tableSize(
-  size: "small" | "medium" | undefined,
-  density: "comfortable" | "compact" | undefined
+  bits: Readonly<{
+    size?: "small" | "medium";
+    density?: "comfortable" | "compact";
+  }>
 ): "small" | "medium" {
-  if (size) return size;
-  return density === "compact" ? "small" : "medium";
+  if (bits.size) return bits.size;
+  return bits.density === "compact" ? "small" : "medium";
 }
 
 /**
@@ -72,7 +74,7 @@ function tableSize(
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const { slots, className, classNames, animate = false } = props;
-  const size = tableSize(props.size, props.density);
+  const size = tableSize(props);
   const { filtersMode = "popover" } = props;
   // The whole shared orchestration lives in core's shell; MUI adds only its
   // kit's row `size` over the returned bundles.

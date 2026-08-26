@@ -1,9 +1,9 @@
 import {
   createMemoryAdapter,
-  flattenColumnTree,
   type TableSource,
   useFrontendData,
 } from "@adapttable/core";
+import { flattenColumnTree } from "@adapttable/core/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

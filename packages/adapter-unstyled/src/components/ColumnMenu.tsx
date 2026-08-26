@@ -1,17 +1,19 @@
 import {
   ACTIONS_COLUMN_KEY,
-  columnMenuActions,
   columnMenuRows,
   columnReorderKeyProps,
   type Direction,
-  filterColumnMenuRows,
-  hideAllColumns,
   REORDER_COLUMN_KEY,
-  showAllColumns,
-  unpinAllColumns,
   useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import {
+  columnMenuActions,
+  filterColumnMenuRows,
+  hideAllColumns,
+  showAllColumns,
+  unpinAllColumns,
+} from "@adapttable/core/adapter";
 import {
   type ColumnDragState,
   type ColumnMenuChromeProps,

@@ -167,7 +167,7 @@ export { CustomCellEditorRender }
 export { DataModeProps }
 
 // @public
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>): JSX.Element;
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.Element;
 
 // @public
 export interface DataTableClassNames {

@@ -101,6 +101,11 @@ function extractOne({ dir, report, entry }) {
             lib: ["ES2022", "DOM", "DOM.Iterable"],
             types: ["react"],
             skipLibCheck: true,
+            // Kit `/pivot` (and similar) re-export `@adapttable/core/pivot`.
+            // Classic resolution cannot read package `exports` subpaths, and
+            // API Extractor then InternalError's instead of rolling the types.
+            module: "ESNext",
+            moduleResolution: "bundler",
           },
         },
       },

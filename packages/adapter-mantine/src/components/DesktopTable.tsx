@@ -1,5 +1,4 @@
 import {
-  columnGroupHeaderCaption,
   edgePinStyle,
   PIN_Z,
   pinnedCellStyle,
@@ -9,6 +8,7 @@ import {
 import {
   cellHighlightStyle,
   cellSpanMark,
+  columnGroupHeaderCaption,
   ColumnSpacer,
   createDesktopRow,
   type DesktopHeaderLeaf,

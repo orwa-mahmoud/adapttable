@@ -11,6 +11,8 @@ import {
   type FilterTypeSpec,
   filterTypeSpec,
   filterWidgetKind,
+  withExtendedFilterType,
+  withFilterType,
 } from "./filterRegistry";
 import { TEXT_OPS } from "./operators";
 
@@ -58,7 +60,7 @@ describe("createFilterRegistry", () => {
 
 describe("register / extend", () => {
   it("register is immutable and adds a custom type", () => {
-    const next = defaultFilterRegistry.register(SKU);
+    const next = withFilterType(defaultFilterRegistry, SKU);
     expect(defaultFilterRegistry.has("sku")).toBe(false);
     expect(next.has("sku")).toBe(true);
     expect(filterWidgetKind({ type: "sku" }, next)).toBe("text");
@@ -68,7 +70,7 @@ describe("register / extend", () => {
   });
 
   it("extend adds operators to a built-in without forking the table", () => {
-    const next = defaultFilterRegistry.extend("text", {
+    const next = withExtendedFilterType(defaultFilterRegistry, "text", {
       ops: [...TEXT_OPS, "soundsLike"],
       defaultOp: "soundsLike",
     });
@@ -80,10 +82,27 @@ describe("register / extend", () => {
     expect(next.get("text")?.widget).toBe("text");
   });
 
+  it("deprecated register/extend still delegate to the helpers", () => {
+    const live = defaultFilterRegistry as unknown as {
+      register(spec: FilterTypeSpec): typeof defaultFilterRegistry;
+      extend(
+        type: string,
+        patch: Partial<FilterTypeSpec>
+      ): typeof defaultFilterRegistry;
+    };
+    const added = live.register(SKU);
+    expect(added.has("sku")).toBe(true);
+    expect(defaultFilterRegistry.has("sku")).toBe(false);
+    const patched = live.extend("text", { defaultOp: "contains" });
+    expect(filterTypeDefaultOp({ type: "text" }, patched)).toBe("contains");
+  });
+
   it("extend of an unknown type warns and returns the same registry", () => {
     resetDevWarnings();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const next = defaultFilterRegistry.extend("nope", { defaultOp: "eq" });
+    const next = withExtendedFilterType(defaultFilterRegistry, "nope", {
+      defaultOp: "eq",
+    });
     expect(next).toBe(defaultFilterRegistry);
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('unknown type "nope"')

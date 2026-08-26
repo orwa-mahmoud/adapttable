@@ -111,6 +111,8 @@ interface DataTablePropsBase<TRow> extends Omit<
   /**
    * Explicit MUI table size override. When omitted, the size is derived from
    * `density`: `"comfortable"` → `"medium"`, `"compact"` → `"small"`.
+   *
+   * @deprecated Use `density` instead. Removed at v3.
    */
   size?: "small" | "medium";
   /**

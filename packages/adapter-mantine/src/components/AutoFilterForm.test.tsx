@@ -3,6 +3,7 @@ import {
   defaultLabels,
   type ExtraFilters,
   type FilterDef,
+  resolveFilterRegistry,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
@@ -526,11 +527,13 @@ describe("<AutoFilterForm>", () => {
 
   it("renders a custom registry widget and ignores an unknown type", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personPick",
-      render: () => <div data-testid="custom-filter">picked</div>,
-    });
+    const registry = resolveFilterRegistry([
+      {
+        ...text,
+        type: "personPick",
+        render: () => <div data-testid="custom-filter">picked</div>,
+      },
+    ]);
     const { source } = makeSource();
     renderMantine(
       <AutoFilterForm
@@ -549,10 +552,7 @@ describe("<AutoFilterForm>", () => {
 
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     const { source } = makeSource();
     renderMantine(
       <AutoFilterForm

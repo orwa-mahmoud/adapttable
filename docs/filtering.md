@@ -224,8 +224,10 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   predicate, chips, tree projection, optional `render`. Built-ins
   (`builtInFilterSpecs` / `defaultFilterRegistry`) are the first
   consumers; `filterTypes` on the table merges extras via
-  `resolveFilterRegistry` / `createFilterRegistry` / `register` /
-  `extend`. `filterWidgetKind` / `filterTypeOps` /
+  `resolveFilterRegistry` / `createFilterRegistry`. `register` /
+  `extend` still work until v3; prefer `TableFeatureHost.registerFilterType`
+  / `extendFilterType` in `feature.setup(host)`, or
+  `features={[filterTypes(specs)]}`. `filterWidgetKind` / `filterTypeOps` /
   `filterTypeDefaultOp` / `filterTypeSpec` / `renderRegisteredFilter`
   look a spec up. A custom type with `widget: "text"` draws the text
   widget; `extend("text", { ops })` adds operators without forking.

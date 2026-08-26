@@ -19,7 +19,12 @@ import type {
 } from "../columns/columnMenuModel";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
-import type { FilterTypeSpec } from "../filters/filterRegistry";
+import {
+  type FilterTypeRegistry,
+  type FilterTypeSpec,
+  withExtendedFilterType,
+  withFilterType,
+} from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 
 /** Extra column-menu actions a plugin appends after the built-ins. */
@@ -96,20 +101,17 @@ export function popFeatureHost(host: FeatureHostState): void {
 }
 
 /** Apply host `registerFilterType` / `extendFilterType` onto a registry. */
-export function applyFilterExtends<
-  R extends {
-    register?: (spec: FilterTypeSpec) => R;
-    extend: (type: string, patch: Partial<FilterTypeSpec>) => R;
-  },
->(registry: R, host: FeatureHostState | undefined): R {
+export function applyFilterExtends(
+  registry: FilterTypeRegistry,
+  host: FeatureHostState | undefined
+): FilterTypeRegistry {
   if (!host) return registry;
   let next = registry;
   for (const spec of host.filterTypes) {
-    if (typeof next.register !== "function") break;
-    next = next.register(spec);
+    next = withFilterType(next, spec);
   }
   for (const { type, patch } of host.filterExtends) {
-    next = next.extend(type, patch);
+    next = withExtendedFilterType(next, type, patch);
   }
   return next;
 }

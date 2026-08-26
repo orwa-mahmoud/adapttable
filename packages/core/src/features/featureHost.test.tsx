@@ -8,8 +8,14 @@ import { columnMenuActions } from "../columns/columnMenuModel";
 import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
 import { type CellEditor, resolveCellEditor } from "../editing/cellEditing";
 import { resolveExportCsv } from "../export/tableCsv";
-import { resolveFilterRegistry } from "../filters/filterBuiltins";
-import type { FilterTypeSpec } from "../filters/filterRegistry";
+import {
+  defaultFilterRegistry,
+  resolveFilterRegistry,
+} from "../filters/filterBuiltins";
+import {
+  filterTypeDefaultOp,
+  type FilterTypeSpec,
+} from "../filters/filterRegistry";
 import { defaultLabels } from "../labels";
 import { applyFilterExtends, currentFeatureHost } from "./currentHost";
 import { filterTypes } from "./factories";
@@ -354,18 +360,19 @@ describe("useTableFeatures", () => {
   });
 
   it("applies extendFilterType patches onto a registry", () => {
-    const extend = vi.fn((_type: string, patch: object) => ({ extend, patch }));
     const plugin: TableFeature = {
       id: "ops",
       setup(host) {
         host.extendFilterType("text", { defaultOp: "contains" });
       },
     };
-    renderHook(() => {
+    const { result } = renderHook(() => {
       useTableFeatures({ features: [plugin] });
-      applyFilterExtends({ extend }, currentFeatureHost());
+      return applyFilterExtends(defaultFilterRegistry, currentFeatureHost());
     });
-    expect(extend).toHaveBeenCalledWith("text", { defaultOp: "contains" });
+    expect(filterTypeDefaultOp({ type: "text" }, result.current)).toBe(
+      "contains"
+    );
   });
 
   it("reuses the host when the shell calls the hook on the resolved props", () => {

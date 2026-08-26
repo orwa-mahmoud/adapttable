@@ -1,6 +1,5 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
 import {
-  columnGroupHeaderCaption,
   type Direction,
   PIN_Z,
   type PinSide,
@@ -11,6 +10,7 @@ import {
   cellHighlightStyle,
   cellSpanMark,
   columnFlexShares,
+  columnGroupHeaderCaption,
   columnSizeStyle,
   ColumnSpacer,
   createDesktopRow,

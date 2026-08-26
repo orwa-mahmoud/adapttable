@@ -1,11 +1,11 @@
 import {
-  type ExtraEntry,
   type GroupedFlatEntry,
   groupSelectionState,
   type SelectionState,
   type TableLabels,
 } from "@adapttable/core";
 import {
+  type ExtraEntry,
   groupIndentStyle,
   GroupToggleSpacer,
   isExtraEntry,

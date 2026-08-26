@@ -7,6 +7,7 @@ import {
   type FilterDef,
   type FilterOption,
   type FilterValue,
+  resolveFilterRegistry,
   type TableLabels,
 } from "../index";
 import { renderBaseUi } from "../test-utils";
@@ -402,10 +403,7 @@ describe("<AutoFilterForm> (Base UI)", () => {
 
   it("renders a custom type through the registry widget kind", () => {
     const text = defaultFilterRegistry.get("text")!;
-    const registry = defaultFilterRegistry.register({
-      ...text,
-      type: "personText",
-    });
+    const registry = resolveFilterRegistry([{ ...text, type: "personText" }]);
     renderBaseUi(
       <AutoFilterForm
         defs={[

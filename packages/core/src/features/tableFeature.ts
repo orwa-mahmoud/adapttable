@@ -77,9 +77,9 @@ export interface TableFeature<TRow = unknown> {
 export interface TableFeatureHost<TRow = unknown> {
   /** Forget a registration when the table unmounts or features change. */
   onDispose(cleanup: () => void): void;
-  /** Same contract as the `filterTypes` prop / {@link FilterTypeRegistry.register}. */
+  /** Same contract as the `filterTypes` prop / `FilterTypeRegistry.register` (deprecated). */
   registerFilterType(spec: FilterTypeSpec): void;
-  /** Same contract as {@link FilterTypeRegistry.extend}. */
+  /** Same contract as `FilterTypeRegistry.extend` (deprecated). */
   extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
   /**
    * Named custom editor. `column.editor` as that string resolves to

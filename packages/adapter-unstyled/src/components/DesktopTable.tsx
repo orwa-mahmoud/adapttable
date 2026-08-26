@@ -1,6 +1,5 @@
 /** The desktop table: header, pinned columns, rows and summary. */
 import {
-  columnGroupHeaderCaption,
   edgePinStyle,
   PIN_Z,
   resolveColumnFooter,
@@ -8,6 +7,7 @@ import {
 } from "@adapttable/core";
 import {
   cellSpanMark,
+  columnGroupHeaderCaption,
   ColumnSpacer,
   createDesktopRow,
   type DesktopHeaderLeaf,

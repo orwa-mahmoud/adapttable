@@ -71,7 +71,7 @@ export { ConfirmRequest }
 export { createFilterRegistry }
 
 // @public (undocumented)
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>): ReactNode;
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): ReactNode;
 
 // @public
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
