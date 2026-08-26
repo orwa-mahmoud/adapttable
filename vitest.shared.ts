@@ -24,13 +24,15 @@ export const sharedConfig = defineConfig({
     css: true,
     clearMocks: true,
     restoreMocks: true,
-    // On the 2-core CI runner `turbo` already runs every package's suite in
-    // parallel; letting each vitest ALSO fan its files across worker threads
-    // oversubscribed the cores ~20×, and antd 6's cold cssinjs render (paid
-    // once, by the first test of the suite) blew past the per-test timeout
-    // under that thrash. Run files serially on CI so the aggregate thread
-    // count stays near the core count — locally we keep full parallelism.
-    fileParallelism: !process.env.CI,
+    // `turbo` already runs every package's suite in parallel, so the aggregate
+    // thread count is what matters, not one suite's. Letting each vitest ALSO
+    // fan its files across worker threads oversubscribes the cores several
+    // times over — on the 2-core CI runner and equally on a 10-core laptop
+    // running ten suites at once — and antd 6's cold cssinjs render (paid once,
+    // by the first test of the suite) blows past the per-test timeout under
+    // that thrash. One thread per suite keeps the total near the core count and
+    // makes the full gate deterministic.
+    fileParallelism: false,
     // Generous per-test budget for that same cold first render on a loaded CI
     // runner. This only widens the time limit — assertions are unchanged.
     testTimeout: 30000,
