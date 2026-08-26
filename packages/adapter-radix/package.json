@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/radix",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Radix Themes adapter for AdaptTable — a batteries-included Radix data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",

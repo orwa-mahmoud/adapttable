@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/antd",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Ant Design adapter for AdaptTable — a batteries-included antd data table with sorting, filtering, URL state, selection, RTL, and dark mode on antd's high-level Table.",
   "keywords": [
     "react",
