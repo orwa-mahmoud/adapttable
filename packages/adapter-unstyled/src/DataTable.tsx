@@ -1,6 +1,5 @@
 import { showSimpleFilterFields, type TableSource } from "@adapttable/core";
 import {
-  applyTableFeatures,
   ExportAnnouncer,
   fillSlot,
   GridFocusAnnouncer,
@@ -12,6 +11,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableContextMenu,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
 import type { ReactElement, ReactNode, RefObject } from "react";
 
@@ -130,7 +130,7 @@ function DataTableBody<TRow>({
  * @typeParam TRow - The row type.
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = applyTableFeatures(incoming);
+  const props = useTableFeatures(incoming);
   const {
     searchPlaceholder,
     sortByOptions,

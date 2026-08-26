@@ -15,6 +15,7 @@
  */
 import { useCallback, useMemo } from "react";
 
+import { currentFeatureHost } from "../features/currentHost";
 import type { ColumnDef, TableLabels } from "../types";
 import {
   type ContextMenuActions,
@@ -71,8 +72,10 @@ export interface TableContextMenu {
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>
 ): TableContextMenu {
+  const pluginMenus = currentFeatureHost<TRow>()?.contextMenuItems;
   const enabled =
-    options.contextMenu !== undefined && options.contextMenu !== false;
+    options.contextMenu !== false &&
+    (options.contextMenu !== undefined || Boolean(pluginMenus?.length));
   const menu = useContextMenu<TRow>(enabled);
   const { rowFor } = options;
 
@@ -177,6 +180,15 @@ export function useTableContextMenu<TRow>(
       typeof options.contextMenu === "object"
         ? options.contextMenu.items
         : undefined;
+    const plugins = extra
+      ? pluginMenus?.filter((factory) => factory !== extra)
+      : pluginMenus;
+    const itemsFor = plugins?.length
+      ? (target: ContextMenuTarget<TRow>) => [
+          ...(extra?.(target) ?? []),
+          ...plugins.flatMap((factory) => [...factory(target)]),
+        ]
+      : extra;
     return contextMenuItems<TRow>({
       target: menu.open.target,
       columns: options.columns,
@@ -185,9 +197,9 @@ export function useTableContextMenu<TRow>(
       sortBy: options.sortBy,
       sortDir: options.sortDir,
       isPinned: options.isPinned,
-      extra,
+      extra: itemsFor,
     });
-  }, [menu.open, options]);
+  }, [menu.open, options, pluginMenus]);
 
   return { regionProps, items, at: menu.open?.at ?? null, close: menu.close };
 }

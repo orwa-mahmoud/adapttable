@@ -20,6 +20,7 @@
  */
 import type { ReactNode } from "react";
 
+import { currentFeatureHost } from "../features/currentHost";
 import type { ColumnDef, SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
@@ -155,7 +156,11 @@ export function aggregate<TRow>(
     const out: Partial<Record<string, ReactNode>> = {};
     for (const [key, fn] of entries) {
       if (!fn) continue;
-      const aggregator = typeof fn === "string" ? BUILT_INS[fn] : fn;
+      const aggregator =
+        typeof fn === "string"
+          ? (BUILT_INS[fn] ?? currentFeatureHost()?.aggregators.get(fn))
+          : fn;
+      if (typeof aggregator !== "function") continue;
       const values: SortableValue[] = [];
       for (const row of rows) {
         const value = resolveAggregateValue(row, key, byKey.get(key));

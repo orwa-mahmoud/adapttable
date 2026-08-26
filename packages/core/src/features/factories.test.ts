@@ -231,6 +231,7 @@ describe("feature factories", () => {
       },
     ];
     expect(patch(filterTypes(specs))).toEqual({ filterTypes: specs });
+    expect(filterTypes(specs).setup).toEqual(expect.any(Function));
   });
 
   it("savedViews writes the options", () => {
@@ -248,5 +249,31 @@ describe("feature factories", () => {
     const built = feature("audit", { statusBar: true });
     expect(built.id).toBe("audit");
     expect(patch(built)).toEqual({ statusBar: true });
+  });
+
+  it("registers extras through setup so a plugin is not a second API", () => {
+    const writer = { extension: "tsv", build: vi.fn() };
+    const registerWriter = vi.fn();
+    exportCsv({ writer }).setup?.({ registerWriter } as never);
+    expect(registerWriter).toHaveBeenCalledWith(writer);
+
+    const commands = [{ key: "x", label: "X", onSelect: vi.fn() }];
+    const registerCommand = vi.fn();
+    commandPalette({ commands }).setup?.({ registerCommand } as never);
+    expect(registerCommand).toHaveBeenCalledWith(commands[0]);
+
+    const items = vi.fn(() => []);
+    const registerContextMenuItems = vi.fn();
+    contextMenu({ items }).setup?.({ registerContextMenuItems } as never);
+    expect(registerContextMenuItems).toHaveBeenCalledWith(items);
+
+    const panel = { key: "p", label: "P", content: null };
+    const registerPanel = vi.fn();
+    sidePanel({
+      panels: [panel],
+      open: null,
+      onOpenChange: vi.fn(),
+    }).setup?.({ registerPanel } as never);
+    expect(registerPanel).toHaveBeenCalledWith(panel);
   });
 });

@@ -4,6 +4,7 @@ import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import { currentFeatureHost } from "../features/currentHost";
 import { type CellRange, cellRangeIndices } from "../focus/cellRange";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { GetCellSpan } from "../rows/cellSpan";
@@ -253,9 +254,13 @@ type ExportCsvProp<TRow = unknown> =
 export function resolveExportCsv<TRow = unknown>(
   value: ExportCsvProp<TRow>
 ): ExportCsvOptions<TRow> | null {
-  if (!value) return null;
-  if (value === true) return {};
-  return value;
+  if (value === false) return null;
+  const writers = currentFeatureHost()?.writers;
+  const writer = writers?.[writers.length - 1];
+  if (value === undefined) return writer ? { writer } : null;
+  if (value === true) return writer ? { writer } : {};
+  if (value.writer || !writer) return value;
+  return { ...value, writer };
 }
 
 /**

@@ -5,7 +5,6 @@ import {
   type UseSavedViewsOptions,
 } from "@adapttable/core";
 import {
-  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -15,6 +14,7 @@ import {
   useDataTableShell,
   useStickyToolbarLayout,
   useTableContextMenu,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
 import { Box, Button, Group, Paper, Progress, Stack } from "@mantine/core";
 import { useRef } from "react";
@@ -72,7 +72,7 @@ function SavedViewsSlot({
  * @typeParam TRow - The row type.
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = applyTableFeatures(incoming);
+  const props = useTableFeatures(incoming);
   const {
     dir,
     prefetch,

@@ -58,6 +58,7 @@ export {
   undoRedoButtons,
   virtualize,
 } from "./features/factories";
+export { useTableFeatures } from "./features/featureHost";
 export type {
   FeatureApplyInput,
   FeaturePatch,

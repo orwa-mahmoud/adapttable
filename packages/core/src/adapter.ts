@@ -183,6 +183,7 @@ export {
   type ExportStatus,
   useExportHandler,
 } from "./export/useExportHandler";
+export { useTableFeatures } from "./features/featureHost";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
 export {

@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { currentFeatureHost } from "../features/currentHost";
 import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
@@ -230,17 +231,36 @@ export function isCellEditable<TRow>(
   return flag(row);
 }
 
+const BUILTIN_EDITORS = new Set<string>([
+  "text",
+  "number",
+  "boolean",
+  "date",
+  "datetime",
+  "time",
+]);
+
+function resolveEditorValue(editor: CellEditor): CellEditor {
+  if (typeof editor !== "string" || BUILTIN_EDITORS.has(editor)) return editor;
+  const render = currentFeatureHost()?.editors.get(editor);
+  return render ? { type: "custom", render } : editor;
+}
+
 /**
  * Resolve the editor for a column that opts into editing.
  * Returns `null` when the column is not editable — adapters must not
  * render an editor affordance without a non-null result AND a table-level
  * `onCellEdit` handler.
+ *
+ * A string that is not a built-in name is a plugin type registered with
+ * {@link TableFeatureHost.registerEditor}; it resolves to
+ * `{ type: "custom", render }` so adapters stay on one path.
  */
 export function resolveCellEditor(
   column: EditableColumnLike
 ): CellEditor | null {
   if (column.editable === undefined || column.editable === false) return null;
-  return column.editor ?? "text";
+  return resolveEditorValue(column.editor ?? "text");
 }
 
 /**

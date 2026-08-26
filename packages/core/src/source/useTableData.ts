@@ -2,6 +2,10 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { resolveColumns } from "../columns/resolveColumns";
+import {
+  applyFilterExtends,
+  currentFeatureHost,
+} from "../features/currentHost";
 import { computeFilterFacets, type FacetMap } from "../filters/facets";
 import { resolveFilterRegistry } from "../filters/filterBuiltins";
 import {
@@ -291,7 +295,13 @@ export function useTableData<TRow>(
       }
       return { ...def, options: cached };
     });
-    return buildFilterRuntime(withAsync, resolveFilterRegistry(filterTypes));
+    return buildFilterRuntime(
+      withAsync,
+      applyFilterExtends(
+        resolveFilterRegistry(filterTypes),
+        currentFeatureHost()
+      )
+    );
   }, [columns, declaredFilters, locale, data, loadedOptions, filterTypes]);
 
   useEffect(() => {

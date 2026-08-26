@@ -9,6 +9,7 @@
  */
 import { useCallback, useMemo, useState } from "react";
 
+import { appendByKey, currentFeatureHost } from "../features/currentHost";
 import type { TableLabels } from "../types";
 import {
   type Command,
@@ -65,7 +66,10 @@ export function useCommandPalette(
   options: UseCommandPaletteOptions
 ): TableCommandPalette {
   const { commandPalette } = options;
-  const enabled = commandPalette !== undefined && commandPalette !== false;
+  const pluginCommands = currentFeatureHost()?.commands;
+  const enabled =
+    commandPalette !== false &&
+    (commandPalette !== undefined || Boolean(pluginCommands?.length));
   const [open, setOpen] = useState(false);
   const config =
     typeof commandPalette === "object" ? commandPalette : undefined;
@@ -99,11 +103,16 @@ export function useCommandPalette(
               onClearFilters: options.onClearFilters,
               hasFilters: options.hasFilters,
             }),
-            ...(config?.commands ?? []),
+            ...appendByKey(
+              config?.commands ?? [],
+              pluginCommands ?? [],
+              (command) => command.key
+            ),
           ],
     [
       enabled,
       config?.commands,
+      pluginCommands,
       options.labels,
       options.onPrint,
       options.onExport,

@@ -140,7 +140,9 @@ export interface ColumnDef<TRow> {
   editable?: boolean | ((row: TRow) => boolean);
   /**
    * Editor widget when {@link ColumnDef.editable} is set. Defaults to
-   * `"text"`. Select options may be `{ value, label }` or plain strings.
+   * `"text"`. A registered plugin name (`host.registerEditor`) is a string
+   * that is not a built-in. Select options may be `{ value, label }` or
+   * plain strings.
    */
   editor?: CellEditor;
   /**

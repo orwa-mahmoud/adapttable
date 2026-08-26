@@ -25,9 +25,10 @@ import type { FeaturePatch, TableFeature } from "./tableFeature";
 
 function define<TRow>(
   id: string,
-  patch: FeaturePatch<TRow>
+  patch: FeaturePatch<TRow>,
+  setup?: TableFeature<TRow>["setup"]
 ): TableFeature<TRow> {
-  return { id, apply: () => patch };
+  return setup ? { id, apply: () => patch, setup } : { id, apply: () => patch };
 }
 
 /**
@@ -39,9 +40,10 @@ function define<TRow>(
  */
 export function feature<TRow>(
   id: string,
-  patch: FeaturePatch<TRow>
+  patch: FeaturePatch<TRow> = {},
+  setup?: TableFeature<TRow>["setup"]
 ): TableFeature<TRow> {
-  return define(id, patch);
+  return define(id, patch, setup);
 }
 
 export function rowReorder<TRow>(
@@ -188,7 +190,12 @@ export function collapsibleColumnGroups<TRow>(): TableFeature<TRow> {
 export function exportCsv<TRow>(
   options: boolean | ExportCsvOptions<TRow> = true
 ): TableFeature<TRow> {
-  return define("export-csv", { exportCsv: options });
+  const writer = typeof options === "object" ? options.writer : undefined;
+  return define(
+    "export-csv",
+    { exportCsv: options },
+    writer ? (host) => host.registerWriter(writer) : undefined
+  );
 }
 
 export function cellNavigation<TRow>(): TableFeature<TRow> {
@@ -206,17 +213,33 @@ export function fullscreen<TRow>(): TableFeature<TRow> {
 export function commandPalette<TRow>(
   options: boolean | CommandPaletteOptions = true
 ): TableFeature<TRow> {
-  return define("command-palette", { commandPalette: options });
+  const commands = typeof options === "object" ? options.commands : undefined;
+  return define(
+    "command-palette",
+    { commandPalette: options },
+    commands?.length
+      ? (host) => {
+          for (const command of commands) host.registerCommand(command);
+        }
+      : undefined
+  );
 }
 
 export function contextMenu<TRow>(
   options: boolean | ContextMenuOptions<TRow> = true
 ): TableFeature<TRow> {
-  return define("context-menu", { contextMenu: options });
+  const items = typeof options === "object" ? options.items : undefined;
+  return define(
+    "context-menu",
+    { contextMenu: options },
+    items ? (host) => host.registerContextMenuItems(items) : undefined
+  );
 }
 
 export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
-  return define("side-panel", { sidePanel: options });
+  return define("side-panel", { sidePanel: options }, (host) => {
+    for (const panel of options.panels) host.registerPanel(panel);
+  });
 }
 
 export function bulkActions<TRow>(
@@ -234,7 +257,9 @@ export function filters<TRow>(
 export function filterTypes<TRow>(
   specs: readonly FilterTypeSpec[]
 ): TableFeature<TRow> {
-  return define("filter-types", { filterTypes: specs });
+  return define("filter-types", { filterTypes: specs }, (host) => {
+    for (const spec of specs) host.registerFilterType(spec);
+  });
 }
 
 export function headerFilters<TRow>(): TableFeature<TRow> {

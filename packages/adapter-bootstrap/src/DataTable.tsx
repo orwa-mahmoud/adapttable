@@ -1,10 +1,10 @@
 import {
-  applyTableFeatures,
   GridFocusAnnouncer,
   RowReorderAnnouncer,
   type TableBodyRegion,
   useDataTableShell,
   useMountStagger,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
@@ -21,7 +21,7 @@ function renderNoAutoForm() {
 export function DataTable<TRow>(
   incoming: Readonly<DataTableProps<TRow>>
 ): ReactNode {
-  const props = applyTableFeatures(incoming);
+  const props = useTableFeatures(incoming);
   const { animate = false, slots } = props;
   const { filtersMode = "popover" } = props;
 

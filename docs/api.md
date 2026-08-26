@@ -145,7 +145,12 @@ runtime as the enabling props; those props stay until v3 and there is **no
 bundle saving yet**. See [feature composition](./features.md).
 
 Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
-`FeatureApplyInput`. The merge is `applyTableFeatures`.
+`FeatureApplyInput`. The merge is `applyTableFeatures`. Live registration is
+`setup(host)` on the same `TableFeature`: `registerFilterType`,
+`extendFilterType`, `registerEditor`, `registerAggregator`, `registerWriter`,
+`registerColumnMenuAction`, `registerPanel`, `registerCommand`,
+`registerContextMenuItems`, `onDispose`. Adapters run this through
+`useTableFeatures`.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·

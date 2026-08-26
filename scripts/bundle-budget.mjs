@@ -310,17 +310,23 @@ const FIXTURES = [
   // per-kit copies of the same header/pin/row/summary walk with one generic
   // pass in core. It is one graph serving six kits, so a single kit's bundle
   // carries paths its own copy specialised away; the trade is deliberate.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 132 },
+  //
+  // The public plugin host (`TableFeature.setup`) lives on the default path
+  // because editors, aggregators, column menus, filters, export, the palette
+  // and the context menu read it during the same render. It cannot sit behind
+  // an optional entry without becoming a second API. ~1 KB gzip; the four
+  // kits that were already against the ceiling move by that amount.
+  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
   { name: "mui · table", pkg: "adapter-mui", budgetKB: 133 },
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 132 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 125 },
+  { name: "antd · table", pkg: "adapter-antd", budgetKB: 126 },
   { name: "radix · table", pkg: "adapter-radix", budgetKB: 133 },
   { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 139 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
-  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 135 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 132 },
+  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 137 },
+  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 133 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
 
 /**

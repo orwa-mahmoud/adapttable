@@ -56,7 +56,6 @@ import {
   windowGroupedEntries,
 } from "@adapttable/core";
 import {
-  applyTableFeatures,
   DEFAULT_CARD_SIZE_PX,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
@@ -84,6 +83,7 @@ import {
   useResolvedAdapter,
   useStickyToolbarLayout,
   useTableContextMenu,
+  useTableFeatures,
   viewControlsToolbar,
 } from "@adapttable/core/adapter";
 import {
@@ -1497,7 +1497,7 @@ function useAntdGridState<TRow>(
 }
 
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = applyTableFeatures(incoming);
+  const props = useTableFeatures(incoming);
   const {
     slots,
     className,

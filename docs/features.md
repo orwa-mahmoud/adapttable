@@ -75,8 +75,70 @@ An explicit prop wins if both are set. Development mode warns once when a
 deprecated enabling prop is used. The props are removed in v3.
 
 A host plugin is the same object: `feature("audit-log", { statusBar: true })`,
-or a `TableFeature` with `setup(host)` for live registration (custom filter
-types, editors, aggregators, exporters, menu items, panels, commands).
+or a `TableFeature` with `setup(host)` for live registration.
+
+## Host plugins — `setup(host)`
+
+The enabling props (`filterTypes`, `exportCsv.writer`, `commandPalette.commands`,
+`contextMenu.items`, `sidePanel.panels`) still work until v3. The public
+registration surface is the same `TableFeature` as the factories: one array,
+one host, lifecycle via `onDispose` or a function returned from `setup`.
+
+```tsx
+import type { TableFeature } from "@adapttable/mantine/features";
+
+const currencyFilter: TableFeature = {
+  id: "currency-filter",
+  setup(host) {
+    host.registerFilterType({
+      type: "currency",
+      widget: "number",
+      ops: ["eq", "gt", "lt"],
+      defaultOp: "eq",
+      stateKeys: (def) => [def.key],
+      match: () => true,
+      chips: () => ({}),
+      conditionToExtra: () => ({}),
+    });
+    return () => {
+      /* table unmounted, or `features` changed */
+    };
+  },
+};
+
+<DataTable features={[currencyFilter, rowReorder(onReorder)]} … />;
+```
+
+Every seam is a method on `TableFeatureHost`. Built-in factories that carry
+extras (`filterTypes`, `exportCsv` with a writer, `commandPalette` with extra
+commands, `contextMenu` with extra items, `sidePanel` panels) call the same
+methods in `setup`, so a plugin is not a second API.
+
+| Host method                | Same as                                     |
+| -------------------------- | ------------------------------------------- |
+| `registerFilterType`       | `filterTypes={[spec]}`                      |
+| `extendFilterType`         | `FilterTypeRegistry.extend`                 |
+| `registerEditor`           | `column.editor: { type: "custom", render }` |
+| `registerAggregator`       | `aggregate({ key: fn })`                    |
+| `registerWriter`           | `exportCsv={{ writer }}`                    |
+| `registerColumnMenuAction` | appended after the built-in Columns actions |
+| `registerPanel`            | `sidePanel.panels` (needs an open dock)     |
+| `registerCommand`          | `commandPalette.commands`                   |
+| `registerContextMenuItems` | `contextMenu.items`                         |
+| `onDispose`                | cleanup when the table unmounts             |
+
+A named editor is a string `column.editor` that is not a built-in (`"text"`,
+`"number"`, …). `resolveCellEditor` turns it into `{ type: "custom", render }`
+so adapters keep one custom-editor path. A named aggregator is a string
+`aggregate()` looks up after the built-ins, when the mapper **runs** (inside
+the table), not when `aggregate()` is called in the parent.
+
+`registerPanel` appends to an existing `sidePanel` dock — the host still owns
+`open` / `onOpenChange`. Registering a command or a context-menu factory with
+no matching prop is enough to arm that chrome.
+
+The per-seam props this supersedes are deprecated in the v3 sweep and removed
+at v3.
 
 ## Every factory
 
@@ -89,4 +151,5 @@ types, editors, aggregators, exporters, menu items, panels, commands).
 `headerFilters` · `savedViews` · `selectionStats` · `densityChooser` ·
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
 `columnSelectionCheckbox` · `feature` (ad-hoc patch) · `applyTableFeatures`
-(the merge used by every adapter).
+(the merge used by every adapter) · `useTableFeatures` (apply + `setup(host)`,
+the hook every adapter runs).

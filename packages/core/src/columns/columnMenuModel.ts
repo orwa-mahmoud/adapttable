@@ -1,3 +1,4 @@
+import { currentFeatureHost } from "../features/currentHost";
 import type { ColumnDef } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
@@ -258,7 +259,33 @@ export function columnMenuActions<TRow>(
     disabled: !row.canHide && !row.canPin && !row.canResize,
     run: () => resetColumnLayout(row, ctx.layout),
   });
+  appendPluginColumnMenuActions(actions, row, ctx);
   return actions;
+}
+
+function appendPluginColumnMenuActions<TRow>(
+  actions: ColumnMenuAction[],
+  row: ColumnMenuRow<TRow>,
+  ctx: ColumnMenuActionContext<TRow>
+): void {
+  const extras = currentFeatureHost<TRow>()?.columnMenuActions;
+  if (!extras) return;
+  for (const factory of extras) {
+    const extra = factory(row, ctx);
+    if (!extra) continue;
+    pushColumnMenuExtra(actions, extra);
+  }
+}
+
+function pushColumnMenuExtra(
+  actions: ColumnMenuAction[],
+  extra: ColumnMenuAction | readonly ColumnMenuAction[]
+): void {
+  if ("id" in extra) {
+    actions.push(extra);
+    return;
+  }
+  for (const action of extra) actions.push(action);
 }
 
 /**

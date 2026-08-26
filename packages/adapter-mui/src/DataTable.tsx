@@ -1,6 +1,5 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
-  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -11,6 +10,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableContextMenu,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
 import {
   Box,
@@ -70,7 +70,7 @@ function tableSize(
  * @typeParam TRow - The row type.
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = applyTableFeatures(incoming);
+  const props = useTableFeatures(incoming);
   const { slots, className, classNames, animate = false } = props;
   const size = tableSize(props.size, props.density);
   const { filtersMode = "popover" } = props;

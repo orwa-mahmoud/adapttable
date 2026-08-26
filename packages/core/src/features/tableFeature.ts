@@ -14,6 +14,21 @@
  * types, editors, aggregators, exporters, menu items, panels and commands
  * register here rather than through a parallel API.
  */
+import type { Command } from "../actions/commandRegistry";
+import type {
+  ContextMenuItem,
+  ContextMenuTarget,
+} from "../actions/contextMenuModel";
+import type { Aggregator } from "../aggregate/aggregate";
+import type {
+  ColumnMenuAction,
+  ColumnMenuActionContext,
+  ColumnMenuRow,
+} from "../columns/columnMenuModel";
+import type { CustomCellEditorRender } from "../editing/cellEditing";
+import type { ExportWriter } from "../export/exportWriter";
+import type { FilterTypeSpec } from "../filters/filterRegistry";
+import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import { devWarn } from "../utils/devWarn";
 
 /** Props a feature may write. Keys match `<DataTable>` enabling props. */
@@ -62,10 +77,61 @@ export interface TableFeature<TRow = unknown> {
 export interface TableFeatureHost<TRow = unknown> {
   /** Forget a registration when the table unmounts or features change. */
   onDispose(cleanup: () => void): void;
+  /** Same contract as the `filterTypes` prop / {@link FilterTypeRegistry.register}. */
+  registerFilterType(spec: FilterTypeSpec): void;
+  /** Same contract as {@link FilterTypeRegistry.extend}. */
+  extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
+  /**
+   * Named custom editor. `column.editor` as that string resolves to
+   * `{ type: "custom", render }` through the same {@link resolveCellEditor}
+   * path built-ins use.
+   */
+  registerEditor(type: string, render: CustomCellEditorRender): void;
+  /**
+   * Named aggregator. {@link aggregate} looks this up after the built-in
+   * names, so a plugin `"distinct"` is not a second API beside `Aggregator`.
+   */
+  registerAggregator(name: string, aggregator: Aggregator): void;
+  /** Same {@link ExportWriter} as `exportCsv.writer`. */
+  registerWriter(writer: ExportWriter): void;
+  /**
+   * Extra Columns-menu actions, appended after the built-ins. The factory
+   * sees the same row and context the built-in actions do.
+   */
+  registerColumnMenuAction(
+    factory: (
+      row: ColumnMenuRow<TRow>,
+      ctx: ColumnMenuActionContext<TRow>
+    ) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined
+  ): void;
+  /** Same {@link SidePanelEntry} as `sidePanel.panels`. */
+  registerPanel(panel: SidePanelEntry): void;
+  /** Same {@link Command} as `commandPalette.commands`. */
+  registerCommand(command: Command): void;
+  /** Same extra-items factory as `contextMenu.items`. */
+  registerContextMenuItems(
+    items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]
+  ): void;
   readonly __row?: TRow;
 }
 
 const applied = new WeakSet<object>();
+const appliedFeatures = new WeakMap<object, readonly TableFeature[]>();
+
+/** Features that produced this resolved props object, if any. */
+export function getAppliedFeatures(
+  props: object
+): readonly TableFeature[] | undefined {
+  return appliedFeatures.get(props);
+}
+
+/** Remember the feature list on a resolved (or overlaid) props object. */
+export function rememberAppliedFeatures(
+  props: object,
+  list: readonly TableFeature[]
+): void {
+  appliedFeatures.set(props, list);
+}
 
 function definedEntries(value: object): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -137,6 +203,7 @@ export function applyTableFeatures<P extends object>(props: P): P {
   if (list.length === 0) {
     const rest = omitFeatures(props);
     applied.add(rest);
+    rememberAppliedFeatures(rest, list);
     return rest;
   }
 
@@ -151,5 +218,6 @@ export function applyTableFeatures<P extends object>(props: P): P {
     ...definedEntries(omitFeatures(props)),
   } as P;
   applied.add(resolved);
+  rememberAppliedFeatures(resolved, list);
   return resolved;
 }

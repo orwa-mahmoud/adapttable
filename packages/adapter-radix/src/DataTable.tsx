@@ -1,6 +1,5 @@
 import { showSimpleFilterFields } from "@adapttable/core";
 import {
-  applyTableFeatures,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -12,6 +11,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableContextMenu,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
 import { Box, Button, Flex, Progress, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
@@ -48,7 +48,7 @@ import type { DataTableProps } from "./types";
  * @typeParam TRow - The row type.
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = applyTableFeatures(incoming);
+  const props = useTableFeatures(incoming);
   const { slots, accentColor, animate = false } = props;
   const { filtersMode = "popover" } = props;
   // Map row density to a Radix table `size` (independent of column pinning):
