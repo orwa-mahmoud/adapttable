@@ -197,8 +197,11 @@ export function ControlPanel({
 }
 
 export function DemoFallback() {
+  // `aria-busy` alone: a placeholder is a state, not an announcement, and the
+  // accessibility page mirrors every live region into its transcript — a kit
+  // chunk arriving is not something a screen reader should read out.
   return (
-    <div className="demo-surface__fallback" aria-busy="true" aria-live="polite">
+    <div className="demo-surface__fallback" aria-busy="true">
       Loading adapter…
     </div>
   );
