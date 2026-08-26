@@ -1,5 +1,17 @@
 # @adapttable/shadcn
 
+## 2.5.0
+
+### Minor Changes
+
+- 1c4b8bf: Compose opt-in features from kit subpath imports (`features={[rowReorder(fn)]}`). Enabling props stay until v3 with a deprecation warning; there is no bundle saving yet.
+
+### Patch Changes
+
+- Updated dependencies [1c4b8bf]
+- Updated dependencies [192fb7a]
+  - @adapttable/unstyled@2.5.0
+
 ## 2.4.0
 
 ### Minor Changes

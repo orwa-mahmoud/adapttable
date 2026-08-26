@@ -1,5 +1,46 @@
 # @adapttable/core
 
+## 2.8.0
+
+### Minor Changes
+
+- 5009373: Flash the cells a patch changed
+  
+  `useChangedCellFlash` from `@adapttable/core/stream` tracks the cells a
+  row patch just changed. Pass `isCellFlashing` into the table and every kit
+  sets `data-flash` on the cell and on the matching mobile card value — a
+  brief pulse, honoring `prefers-reduced-motion`, so a number that moved is
+  a number the reader can see.
+- 1c4b8bf: Compose opt-in features from kit subpath imports (`features={[rowReorder(fn)]}`). Enabling props stay until v3 with a deprecation warning; there is no bundle saving yet.
+- efc02f6: Public plugin API: `TableFeature.setup(host)` registers filter types, editors, aggregators, exporters, column-menu actions, panels, commands and context-menu items on the same surface as the built-in factories.
+- 65e17bd: Live row patches over WebSocket or SSE
+  
+  `useRowPatchStream` from `@adapttable/core/stream` binds a socket to the rows
+  you already own: frames arrive as ordinary row patches and go back through
+  your own setter, so filters, sort, grouping and aggregates all happen the way
+  they do for any other change.
+  
+  The wire format is the patch shape the table already has — one patch or an
+  array of them, as JSON — so a server that speaks it needs no translation, and
+  one that does not supplies `parse`. Nothing from the wire is trusted: a frame
+  that will not parse, an update with no changes, a remove with no id are each
+  dropped rather than applied.
+  
+  A dropped WebSocket is reopened on a configurable delay and attempt cap. An
+  EventSource is left to its own reconnect and simply reported, so the server
+  never gets two subscriptions for one table. `status` covers idle, connecting,
+  open, reconnecting, error and closed.
+  
+  `openRowPatchStream` is the same connector without React.
+- 192fb7a: Virtualize the mobile card list through the same `virtualize` switch as desktop rows. Cards attach the `maxHeight` scroll box, measure their own height (including nested row detail), and never dump the whole dataset while the window is empty. `bindMobileCardList` / `mobileCardListStyle` are the adapter helpers.
+
+### Patch Changes
+
+- 2dc46ca: Deprecate adapter-machinery re-exports on `@adapttable/core` (import from `/adapter`), `FilterTypeRegistry.register` / `extend`, and the mui `size` prop. All still work until v3.
+- 5d32aa7: Plugin registrations resolve on the table that owns them. Sibling and nested tables no longer share a module-level host stack, so an export, menu, or aggregator click cannot pick up another table's plugins.
+- 8b3e01d: A pivot measure can name a plugin-registered aggregator. The table passes its registrations into `pivot()`; a standalone call is unchanged. The URL and Saved Views carry the name the same way they carry `sum`.
+- 4d881e2: Pointer row-reorder now completes on every kit: memoized rows repaint once when a drag starts and once when it ends, so each row holds a live drop target instead of a stale closure that Chromium treats as a cancelled drag.
+
 ## 2.7.0
 
 ### Minor Changes

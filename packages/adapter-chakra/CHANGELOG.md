@@ -1,5 +1,25 @@
 # @adapttable/chakra
 
+## 2.5.0
+
+### Minor Changes
+
+- 1c4b8bf: Compose opt-in features from kit subpath imports (`features={[rowReorder(fn)]}`). Enabling props stay until v3 with a deprecation warning; there is no bundle saving yet.
+
+### Patch Changes
+
+- 192fb7a: Virtualize the mobile card list through the same `virtualize` switch as desktop rows. Cards attach the `maxHeight` scroll box, measure their own height (including nested row detail), and never dump the whole dataset while the window is empty. `bindMobileCardList` / `mobileCardListStyle` are the adapter helpers.
+- Updated dependencies [5009373]
+- Updated dependencies [2dc46ca]
+- Updated dependencies [1c4b8bf]
+- Updated dependencies [5d32aa7]
+- Updated dependencies [8b3e01d]
+- Updated dependencies [efc02f6]
+- Updated dependencies [4d881e2]
+- Updated dependencies [65e17bd]
+- Updated dependencies [192fb7a]
+  - @adapttable/core@2.8.0
+
 ## 2.4.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/core",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Headless, UI-agnostic React data table engine — state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
   "keywords": [
     "react",
