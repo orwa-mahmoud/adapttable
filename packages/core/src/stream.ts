@@ -17,7 +17,15 @@
  *   onPatch: setRows,
  * });
  * ```
+ * `useChangedCellFlash` lives here too: a patch that changes a cell nobody
+ * touched should say so, briefly, and only when the reader has not asked for
+ * reduced motion.
  */
+export {
+  type ChangedCellFlashState,
+  useChangedCellFlash,
+  type UseChangedCellFlashOptions,
+} from "./rows/changedCellFlash";
 export {
   openRowPatchStream,
   type OpenRowPatchStreamOptions,

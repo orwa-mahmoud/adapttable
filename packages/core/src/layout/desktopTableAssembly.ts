@@ -38,6 +38,7 @@ import { filterDefForColumn } from "../filters/FilterHeaderRow";
 import { columnSelectLabel } from "../focus/ColumnSelectCheckbox";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
+import { rowFlashSignature } from "../rows/cellFlashPaint";
 import type { BodyCell } from "../rows/cellSpan";
 import {
   bodyCellsHaveRowSpan,
@@ -216,6 +217,13 @@ export interface DesktopRowWiring<TRow> {
   rowClass: string | undefined;
   rowVisualStyle: CSSProperties | undefined;
   rowStyleSignature: string;
+  /**
+   * Flashing column keys for this row, joined. Memoized rows compare this
+   * rather than the `isCellFlashing` function, which stays referentially
+   * stable while the marks move.
+   */
+  flashSignature: string;
+  isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
   clickable: boolean;
   hasPrefetch: boolean;
   editing: EditableCellEditing<TRow> | undefined;
@@ -587,6 +595,7 @@ const WIRING_EQUAL_KEYS = [
   "actionsPinned",
   "rowClass",
   "rowStyleSignature",
+  "flashSignature",
   "clickable",
   "hasPrefetch",
   "editingSignature",
@@ -697,6 +706,7 @@ interface DesktopRowWiringContext<TRow> {
   hasEndPin: boolean;
   stickActions: boolean;
   rowClassName: SharedTableRenderProps<TRow>["rowClassName"];
+  isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
   getRowId: (row: TRow) => string;
   onToggleSelect: (id: string) => void;
   onToggleExpand: (id: string) => void;
@@ -771,6 +781,7 @@ function buildDesktopRowWiring<TRow>(
     hasEndPin,
     stickActions,
     rowClassName,
+    isCellFlashing,
     getRowId,
     onToggleSelect,
     onToggleExpand,
@@ -849,6 +860,8 @@ function buildDesktopRowWiring<TRow>(
     rowClass: rowClassName?.(row, sourceIndex),
     rowVisualStyle: visualStyle,
     rowStyleSignature: rowStyleSignature(visualStyle),
+    flashSignature: rowFlashSignature(isCellFlashing, id, columns),
+    isCellFlashing,
     clickable: Boolean(onRowClick),
     hasPrefetch: Boolean(prefetch),
     editing,
@@ -1026,6 +1039,7 @@ export function useDesktopTableAssembly<TRow>(
     prefetch,
     onRowClick,
     rowClassName,
+    isCellFlashing,
     collapsibleColumnGroups,
     collapsedColumnGroups,
     columnGroups,
@@ -1267,6 +1281,7 @@ export function useDesktopTableAssembly<TRow>(
     hasEndPin,
     stickActions,
     rowClassName,
+    isCellFlashing,
     getRowId,
     onToggleSelect,
     onToggleExpand,

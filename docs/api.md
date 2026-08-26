@@ -85,6 +85,7 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `scrollToTopOnChange`       | `boolean`                                                       | `true`          | Scroll back to the table when search/filter/page changes.                                                                                                                                                                                                                                                                                                                        |
 | `scrollTopGap`              | `number`                                                        | `8`             | Extra gap below sticky chrome when scrolling back.                                                                                                                                                                                                                                                                                                                               |
 | `rowClassName`              | `(row: TRow, index: number) => string \| undefined`             | —               | Conditional per-row class, appended on desktop rows and mobile cards alike.                                                                                                                                                                                                                                                                                                      |
+| `isCellFlashing`            | `(rowId: string, columnKey: string) => boolean`                 | —               | Mark cells a patch just changed (`data-flash` on the cell and on the matching card value). Pair with `useChangedCellFlash` from `@adapttable/core/stream`. Omit and nothing is marked. See [realtime](./realtime.md).                                                                                                                                                            |
 | `rowStyle`                  | `(row: TRow, index: number) => CSSProperties \| undefined`      | —               | Conditional per-row inline style, on desktop rows and mobile cards alike. See [row styling and heights](./row-styling.md).                                                                                                                                                                                                                                                       |
 | `rowHeight`                 | `number \| ((row: TRow, index: number) => number)`              | —               | Row height in px. Sets the row and the virtualizer's `estimateSize`. `measureElement` still reports what the browser laid out. See [row styling and heights](./row-styling.md).                                                                                                                                                                                                  |
 | `renderRowDetail`           | `(row: TRow) => ReactNode`                                      | —               | Row expansion: its presence enables the expand chevron; multiple rows may be open, keyed by row id.                                                                                                                                                                                                                                                                              |
@@ -519,6 +520,7 @@ other.
 which cells hold an unconfirmed change, with `isDirty` / `isRowDirty`, a `count`,
 and `confirm` / `confirmRow` / `confirmAll` for a host that settles its own state.
 `rowIsDirty(editing, rowId)` from `@adapttable/core/adapter` is what a row reads.
+`cellFlashAttr` / `rowFlashSignature` are the same door for `data-flash`.
 
 **Validation gates the commit.** A column's `validate` (`CellValidator`) judges
 one value; the table's `validateRow` (`RowValidator`) judges the row an edit
@@ -631,7 +633,11 @@ row patches and go back through the host's own setter.
 `parseRowPatchFrame` reads the table's patch shape as JSON and drops
 anything malformed. `RowPatchStreamStatus` is what the connection is
 doing, with `isStreamLive` and `isStreamSettled` as the two questions
-worth asking. See [realtime](./realtime.md).
+worth asking. `useChangedCellFlash` (`UseChangedCellFlashOptions` in,
+`ChangedCellFlashState` out) tracks the cells a patch just changed so
+the host can pass `isCellFlashing` — a pulse, not a locate-the-row
+highlight, and never against `prefers-reduced-motion`. See
+[realtime](./realtime.md).
 
 **Row reordering.** `onRowReorder` (`RowReorderHandler`) is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
@@ -1417,6 +1423,7 @@ handlers). Editing/grouping glue: `focusEditorOnMount`,
 utilities: `logicalAlign` (logical → physical alignment),
 `mergedCellStyle` (spreadsheet merge paint for a spanned cell),
 `cellSpanMark` (`"2x1"` on the origin),
+`cellFlashAttr` / `rowFlashSignature` (`data-flash` on a patched cell),
 `resolveMobileLabel` (a card field's caption), `isSelectedCell` (whether a
 cell's props put it inside the selected range, for a kit applying its own fill),
 `shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,

@@ -15,6 +15,7 @@ import {
   type UseDataTableResult,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   EXTRA_ROW_PARTS,
   type ExtraRow,
   insertExtraRows,
@@ -24,6 +25,7 @@ import {
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
+  rowFlashSignature,
   rowIsDirty,
   rowReorderSignature,
   type RowReorderState,
@@ -101,6 +103,12 @@ interface CardItemProps<TRow> {
   /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
   style?: CSSProperties;
   styleSignature: string;
+  /**
+   * Flashing column keys for this card, joined. Compared instead of
+   * `isCellFlashing`, which stays referentially stable while the marks move.
+   */
+  flashSignature: string;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   selected: boolean;
   expanded: boolean;
   /** Selection toggle — present only when selection is enabled. */
@@ -158,6 +166,7 @@ function cardItemPropsEqual<TRow>(
     prev.renderRowActions === next.renderRowActions &&
     prev.className === next.className &&
     prev.styleSignature === next.styleSignature &&
+    prev.flashSignature === next.flashSignature &&
     prev.selected === next.selected &&
     prev.expanded === next.expanded &&
     prev.onToggleSelect === next.onToggleSelect &&
@@ -189,6 +198,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     renderRowActions,
     className,
     style,
+    isCellFlashing,
     selected,
     expanded,
     onToggleSelect,
@@ -297,7 +307,12 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         <Descriptions column={1} size="small" colon={false}>
           {fields.map(({ column, label, value }) => (
             <Descriptions.Item key={column.key} label={label}>
-              {value}
+              <span
+                data-adapttable-part="card-value"
+                data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
+              >
+                {value}
+              </span>
             </Descriptions.Item>
           ))}
         </Descriptions>
@@ -343,6 +358,7 @@ export function MobileCards<TRow>({
   prefetch,
   onRowClick,
   rowClassName,
+  isCellFlashing,
   rowStyle,
   rowHeight,
   tableLabel,
@@ -380,6 +396,11 @@ export function MobileCards<TRow>({
   onRowClick?: (row: TRow) => void;
   /** Conditional per-row class — see `BaseDataTableProps.rowClassName`. */
   rowClassName?: (row: TRow, index: number) => string | undefined;
+  /**
+   * Mark cells a patch just changed — `data-flash` on the card value. Omit
+   * and nothing is marked.
+   */
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
   rowStyle?: (row: TRow, index: number) => CSSProperties | undefined;
   /** Per-row height — see `BaseDataTableProps.rowHeight`. */
@@ -489,6 +510,8 @@ export function MobileCards<TRow>({
           styleSignature={rowStyleSignature(
             resolveRowStyle(rowStyle, rowHeight, row, index)
           )}
+          flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
+          isCellFlashing={isCellFlashing}
           selected={selection ? selection.isSelected(id) : false}
           expanded={expansion ? expansion.isExpanded(id) : false}
           onToggleSelect={selection ? selection.toggle : undefined}

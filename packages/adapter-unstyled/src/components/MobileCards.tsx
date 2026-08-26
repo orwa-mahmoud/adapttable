@@ -13,6 +13,7 @@ import {
   type TreeEntry,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
@@ -22,6 +23,7 @@ import {
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
+  rowFlashSignature,
   rowIsDirty,
   rowReorderSignature,
   rowStyleSignature,
@@ -63,6 +65,12 @@ interface MobileCardProps<TRow> {
   /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
   style?: CSSProperties;
   styleSignature: string;
+  /**
+   * Flashing column keys for this card, joined. Compared instead of
+   * `isCellFlashing`, which stays referentially stable while the marks move.
+   */
+  flashSignature: string;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   selected: boolean;
   expanded: boolean;
   /** Selection toggle — present only when selection is enabled. */
@@ -98,7 +106,8 @@ type UncomparedCardProp =
   | "rows"
   | "getRowId"
   | "rowReorder"
-  | "style";
+  | "style"
+  | "isCellFlashing";
 
 /** Every card prop the memo comparator checks with `Object.is`. */
 const COMPARED_CARD_PROPS: readonly Exclude<
@@ -117,6 +126,7 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "classNames",
   "className",
   "styleSignature",
+  "flashSignature",
   "selected",
   "expanded",
   "onToggleSelect",
@@ -160,6 +170,7 @@ function MobileCardBase<TRow>({
   classNames,
   className,
   style,
+  isCellFlashing,
   selected,
   expanded,
   onToggleSelect,
@@ -268,6 +279,7 @@ function MobileCardBase<TRow>({
               )}
               <span
                 data-adapttable-part="card-value"
+                data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
                 className={classNames.cardValue}
               >
                 {value}
@@ -333,6 +345,7 @@ export function MobileCards<TRow>({
   classNames,
   onRowClick,
   rowClassName,
+  isCellFlashing,
   rowStyle,
   rowHeight,
   renderRowDetail,
@@ -399,6 +412,8 @@ export function MobileCards<TRow>({
         styleSignature={rowStyleSignature(
           resolveRowStyle(rowStyle, rowHeight, row, index)
         )}
+        flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
+        isCellFlashing={isCellFlashing}
         selected={selection ? selection.isSelected(id) : false}
         expanded={expansionState ? expansionState.isExpanded(id) : false}
         onToggleSelect={selection ? selection.toggle : undefined}

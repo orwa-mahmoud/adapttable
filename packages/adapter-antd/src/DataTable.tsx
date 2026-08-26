@@ -1039,6 +1039,7 @@ interface DataTableBodyRegionProps<TRow> {
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
   rowClassName: DataTableProps<TRow>["rowClassName"];
+  isCellFlashing: DataTableProps<TRow>["isCellFlashing"];
   rowStyle: DataTableProps<TRow>["rowStyle"];
   rowHeight: DataTableProps<TRow>["rowHeight"];
   cardClassName: string | undefined;
@@ -1306,6 +1307,7 @@ function DataTableBodyRegion<TRow>(
     prefetch,
     onRowClick,
     rowClassName,
+    isCellFlashing,
     rowStyle,
     rowHeight,
     cardClassName,
@@ -1371,6 +1373,7 @@ function DataTableBodyRegion<TRow>(
         prefetch={prefetch}
         onRowClick={onRowClick}
         rowClassName={rowClassName}
+        isCellFlashing={isCellFlashing}
         rowStyle={rowStyle}
         rowHeight={rowHeight}
         tableLabel={tableLabel}
@@ -1847,6 +1850,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     cellSpanAppearance: props.cellSpanAppearance,
     headerFilters: filtersMode === "header",
     filterDefs: runtime.defs,
+    isCellFlashing: props.isCellFlashing,
     filterSource: resolvedSource,
     filterRegistry: runtime.registry,
     closeHeaderFilterOnSelect: props.closeHeaderFilterOnSelect === true,
@@ -1942,6 +1946,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
       prefetch={props.prefetch}
       onRowClick={props.onRowClick}
       rowClassName={props.rowClassName}
+      isCellFlashing={props.isCellFlashing}
       rowStyle={props.rowStyle}
       rowHeight={props.rowHeight}
       cardClassName={classNames?.card}

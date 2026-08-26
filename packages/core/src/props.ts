@@ -291,6 +291,12 @@ export interface BaseDataTableProps<TRow> {
    */
   rowClassName?: (row: TRow, index: number) => string | undefined;
   /**
+   * Mark cells a patch just changed — `data-flash` on the cell and on the
+   * matching card value. Pair with `useChangedCellFlash` from
+   * `@adapttable/core/stream`. Omit and nothing is marked.
+   */
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+  /**
    * Conditional per-row inline style: `(row, index) => ({ background })`.
    * Applied on desktop rows and mobile cards alike. Omit and nothing is set.
    */

@@ -256,7 +256,7 @@ const UNNAMED_IN_KITS = {
     "expand-cell",
     "expand-header",
   ],
-  "mobile cards": ["card-actions", "card-label", "card-row", "card-value"],
+  "mobile cards": ["card-actions", "card-label", "card-row"],
   "toolbar controls": ["search", "search-field", "search-icon"],
   "filter chips": ["chip", "chip-remove", "chips"],
   "empty and error states": ["empty", "error"],

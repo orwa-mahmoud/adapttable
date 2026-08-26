@@ -171,6 +171,7 @@ describe("desktopRowWiringEqual", () => {
       actionsPinned: false,
       rowClass: undefined,
       rowStyleSignature: "",
+      flashSignature: "",
       clickable: false,
       hasPrefetch: false,
       editingSignature: null,
@@ -188,6 +189,9 @@ describe("desktopRowWiringEqual", () => {
     expect(desktopRowWiringEqual(base, { ...next, selected: true })).toBe(
       false
     );
+    expect(
+      desktopRowWiringEqual(base, { ...next, flashSignature: "budget" })
+    ).toBe(false);
   });
 });
 
@@ -448,6 +452,7 @@ describe("createDesktopRow", () => {
       actionsPinned: false,
       rowClass: undefined,
       rowStyleSignature: "",
+      flashSignature: "",
       clickable: false,
       hasPrefetch: false,
       editingSignature: null,

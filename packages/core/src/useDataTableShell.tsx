@@ -424,6 +424,7 @@ export function useDataTableShell<TRow>(
     onRowClick: props.onRowClick,
     prefetch: props.prefetch,
     rowClassName: props.rowClassName,
+    isCellFlashing: props.isCellFlashing,
     collapsibleColumnGroups: props.collapsibleColumnGroups === true,
     collapsedColumnGroups: chrome.columnLayout.state.collapsedGroups,
     columnGroups: chrome.columnGroups,

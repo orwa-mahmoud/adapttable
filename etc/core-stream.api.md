@@ -5,6 +5,17 @@
 ```ts
 
 // @public
+export interface ChangedCellFlashState {
+    clear: () => void;
+    flashProps: (rowId: string, columnKey: string) => {
+        "data-flash"?: "";
+    } | Record<string, never>;
+    isFlashing: (rowId: string, columnKey: string) => boolean;
+    isRowFlashing: (rowId: string) => boolean;
+    mark: (events: readonly RowPatchEvent<unknown>[]) => void;
+}
+
+// @public
 export function isStreamLive(status: RowPatchStreamStatus): boolean;
 
 // @public
@@ -67,6 +78,15 @@ export interface StreamSocket {
 export interface StreamSocketEvent {
     // (undocumented)
     data?: unknown;
+}
+
+// @public
+export function useChangedCellFlash(options?: UseChangedCellFlashOptions): ChangedCellFlashState;
+
+// @public
+export interface UseChangedCellFlashOptions {
+    durationMs?: number;
+    enabled?: boolean;
 }
 
 // @public

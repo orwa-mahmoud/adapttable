@@ -13,6 +13,7 @@ import {
 } from "@adapttable/core";
 import {
   bindMobileCardList,
+  cellFlashAttr,
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
@@ -22,6 +23,7 @@ import {
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
+  rowFlashSignature,
   rowIsDirty,
   rowReorderSignature,
   rowStyleSignature,
@@ -61,6 +63,7 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "getRowId"
   | "onRowClick"
   | "rowClassName"
+  | "isCellFlashing"
   | "rowStyle"
   | "rowHeight"
   | "renderRowDetail"
@@ -110,6 +113,12 @@ interface MobileCardProps<TRow> {
   /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
   style?: CSSProperties;
   styleSignature: string;
+  /**
+   * Flashing column keys for this card, joined. Compared instead of
+   * `isCellFlashing`, which stays referentially stable while the marks move.
+   */
+  flashSignature: string;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   selected: boolean;
   expanded: boolean;
   /** Selection toggle — present only when selection is enabled. */
@@ -146,7 +155,8 @@ type UncomparedCardProp =
   | "rows"
   | "getRowId"
   | "rowReorder"
-  | "style";
+  | "style"
+  | "isCellFlashing";
 
 /** Every card prop the memo comparator checks with `Object.is`. */
 const COMPARED_CARD_PROPS: readonly Exclude<
@@ -164,6 +174,7 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "renderRowActions",
   "className",
   "styleSignature",
+  "flashSignature",
   "selected",
   "expanded",
   "onToggleSelect",
@@ -207,6 +218,7 @@ function MobileCardBase<TRow>({
   renderRowActions,
   className,
   style,
+  isCellFlashing,
   selected,
   expanded,
   onToggleSelect,
@@ -306,7 +318,12 @@ function MobileCardBase<TRow>({
                 )}
                 {/* Cells are arbitrary ReactNode (often block elements) —
                 a <p> wrapper would be invalid HTML. */}
-                <Text component="div" fz="sm">
+                <Text
+                  component="div"
+                  fz="sm"
+                  data-adapttable-part="card-value"
+                  data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
+                >
                   {value}
                 </Text>
               </div>
@@ -365,6 +382,7 @@ export function MobileCards<TRow>({
   density = "comfortable",
   onRowClick,
   rowClassName,
+  isCellFlashing,
   rowStyle,
   rowHeight,
   renderRowDetail,
@@ -429,6 +447,8 @@ export function MobileCards<TRow>({
         styleSignature={rowStyleSignature(
           resolveRowStyle(rowStyle, rowHeight, row, index)
         )}
+        flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
+        isCellFlashing={isCellFlashing}
         selected={selection ? selection.isSelected(id) : false}
         expanded={expansion ? expansion.isExpanded(id) : false}
         onToggleSelect={selection ? selection.toggle : undefined}

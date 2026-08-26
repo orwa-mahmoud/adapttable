@@ -25,6 +25,7 @@ import {
 } from "@adapttable/core";
 import {
   type BodyCell,
+  cellFlashAttr,
   cellHighlightStyle,
   cellsForRow,
   cellSpanMark,
@@ -444,6 +445,11 @@ export interface BuildColumnsOptions<TRow> {
   /** Type registry so a custom `filterTypes` entry can render in the header. */
   filterRegistry?: FilterTypeRegistry;
   closeHeaderFilterOnSelect?: boolean;
+  /**
+   * Mark cells a patch just changed — `data-flash` on the cell. Omit and
+   * nothing is marked.
+   */
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
 }
 
 /**
@@ -655,6 +661,7 @@ export function buildColumns<TRow>({
   filterSource,
   filterRegistry,
   closeHeaderFilterOnSelect,
+  isCellFlashing,
 }: BuildColumnsOptions<TRow>): TableColumnsType<GroupedDataRecord<TRow>> {
   const cellOpts = {
     editing,
@@ -790,6 +797,11 @@ export function buildColumns<TRow>({
             rowSpan: cell.rowSpan,
             "data-adapttable-part": "cell",
             "data-column-key": column.key,
+            "data-flash": cellFlashAttr(
+              isCellFlashing,
+              getRowId(record),
+              column.key
+            ),
             ...(mark ? { "data-cell-span": mark } : {}),
             style: cellHighlightStyle(
               focus,

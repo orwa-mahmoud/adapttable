@@ -104,6 +104,25 @@ test("a selection survives the updates", async ({ page }) => {
   expect(await root.locator("tbody tr:visible").count()).toBe(before);
 });
 
+test("a patched cell carries data-flash", async ({ page }) => {
+  await page.goto(`/${KIT}/realtime/`);
+  await expect(page.locator("[data-flash]").first()).toBeVisible({
+    timeout: 15_000,
+  });
+});
+
+test("reduced motion never marks a cell", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`/${KIT}/realtime/`);
+  await expect(feed(page).locator("li").first()).toBeVisible({
+    timeout: 10_000,
+  });
+  await expect
+    .poll(async () => feed(page).locator("li").count(), { timeout: 10_000 })
+    .toBeGreaterThan(1);
+  await expect(page.locator("[data-flash]")).toHaveCount(0);
+});
+
 for (const kit of KITS) {
   test(`${kit}: renders the live table and its feed`, async ({ page }) => {
     await page.goto(`/${kit}/realtime/`);
@@ -113,5 +132,8 @@ for (const kit of KITS) {
       timeout: 10_000,
     });
     await expect(root.locator("tbody tr:visible").first()).toBeVisible();
+    await expect(page.locator("[data-flash]").first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 }

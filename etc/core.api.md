@@ -161,6 +161,7 @@ export interface BaseDataTableProps<TRow> {
     groupSort?: GroupSort<TRow>;
     hasChildren?: (row: TRow) => boolean;
     headerFilters?: boolean;
+    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     labels?: TableLabels;
     locale?: string;
     maxHeight?: number;

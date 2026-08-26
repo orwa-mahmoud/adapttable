@@ -7,6 +7,7 @@ import {
   type TableLabels,
 } from "@adapttable/core";
 import {
+  cellFlashAttr,
   cellHighlightStyle,
   cellSpanMark,
   columnFlexShares,
@@ -186,6 +187,7 @@ function DesktopRowBase<TRow>(
     hasEndPin,
     actionsPinned,
     rowClass,
+    isCellFlashing,
     hasPrefetch,
     editing,
     rows,
@@ -293,6 +295,7 @@ function DesktopRowBase<TRow>(
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
               data-adapttable-part="cell"
+              data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
               {...focusProps}
               justify={

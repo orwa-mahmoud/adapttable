@@ -7,6 +7,8 @@ import {
   type MobileCardModel,
   type MobileCardRenderer,
   type QueryFilterGroup,
+  type RowPatchEvent,
+  rowPatchLog,
   type Slot,
   type TableErrorState,
   type TableSource,
@@ -16,7 +18,11 @@ import {
   useHighlight,
   useQuerySource,
 } from "@adapttable/core";
-import { type StreamSocket, useRowPatchStream } from "@adapttable/core/stream";
+import {
+  type StreamSocket,
+  useChangedCellFlash,
+  useRowPatchStream,
+} from "@adapttable/core/stream";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -221,6 +227,8 @@ export interface DemoColumnProps {
   onRowReorder?: (from: number, to: number, row: Person) => void;
   /** The flash on a changed row — a class, which every adapter honours. */
   rowClassName?: (row: Person, index: number) => string | undefined;
+  /** The pulse on a cell a patch just changed — `data-flash` on the cell. */
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** The host's own error state, when the lab is showing a replacement. */
   slots?: { error?: Slot<TableErrorState> };
   /** The demo's own mobile card layout, when that toggle is on. */
@@ -424,7 +432,8 @@ function useRealtimeFeed(
   data: readonly Person[],
   setData: Dispatch<SetStateAction<readonly Person[]>>,
   sortDir: "asc" | "desc",
-  onPatched?: (id: string) => void
+  onPatched?: (id: string) => void,
+  onPatchEvents?: (events: readonly RowPatchEvent<Person>[]) => void
 ): { lines: string[]; status: string } {
   const [feed, setFeed] = useState<string[]>([]);
   const dataRef = useRef(data);
@@ -433,14 +442,26 @@ function useRealtimeFeed(
   sortDirRef.current = sortDir;
   const onPatchedRef = useRef(onPatched);
   onPatchedRef.current = onPatched;
+  const onPatchEventsRef = useRef(onPatchEvents);
+  onPatchEventsRef.current = onPatchEvents;
   const tickRef = useRef(0);
   const pendingRef = useRef<{ id: string; line: string } | null>(null);
+  const pendingEventsRef = useRef<readonly RowPatchEvent<Person>[] | null>(
+    null
+  );
 
   const stream = useRowPatchStream<Person>({
     eventSource: enabled ? PATCH_STREAM_URL : undefined,
     enabled,
     getRowId: (row) => row.id,
-    onPatch: setData,
+    onPatch: (update) => {
+      setData((prev) => {
+        const next = update(prev);
+        const log = rowPatchLog(next);
+        if (log) pendingEventsRef.current = log.events;
+        return next;
+      });
+    },
     createEventSource: createDemoPatchSource,
     parse: () => {
       const next = nextRealtimePatch(
@@ -459,6 +480,9 @@ function useRealtimeFeed(
       pendingRef.current = null;
       setFeed((lines) => [pending.line, ...lines].slice(0, 4));
       onPatchedRef.current?.(pending.id);
+      const events = pendingEventsRef.current;
+      pendingEventsRef.current = null;
+      if (events) onPatchEventsRef.current?.(events);
     },
   });
 
@@ -487,6 +511,9 @@ function RealtimeFeed({
       <span>Applied updates</span>
       <span className="visually-hidden" aria-live="polite">
         {streamStatusLabel(status)}
+      </span>
+      <span className="visually-hidden" aria-live="polite">
+        {lines[0] ?? ""}
       </span>
       {lines.length === 0 ? (
         <span>waiting for the first patch…</span>
@@ -746,6 +773,7 @@ function frontendColumnProps(
     failure?: Failure;
     data: readonly Person[];
     flashClass: (row: Person) => string | undefined;
+    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     onCellEdit: (row: Person, key: string, nextValue: unknown) => void;
     onEditStart: EditEventHandler<Person>;
     onEditCancel: EditEventHandler<Person>;
@@ -764,6 +792,7 @@ function frontendColumnProps(
   const next: DemoColumnProps = {
     ...columns,
     rowClassName: flags.flashClass,
+    isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
     groupBy: null,
@@ -914,6 +943,7 @@ function Frontend({
   // exactly where a real app would flash it. Note there is no highlight prop
   // on the table: `rowClassName` is the seam, so this works in every kit.
   const flash = useHighlight(highlight === true || realtime === true);
+  const cellFlash = useChangedCellFlash({ enabled: realtime === true });
   const onCellEdit = useCallback(
     (row: Person, key: string, nextValue: unknown) => {
       const field = EDIT_FIELD[key] ?? (key as keyof Person);
@@ -1041,7 +1071,8 @@ function Frontend({
     data,
     setData,
     source.sortDir === "asc" ? "asc" : "desc",
-    realtime === true ? flash.flashRow : undefined
+    realtime === true ? flash.flashRow : undefined,
+    realtime === true ? cellFlash.mark : undefined
   );
   const tableSource = advancedFilters ? source : withoutFilterTree(source);
   return (
@@ -1087,6 +1118,7 @@ function Frontend({
           failure,
           data,
           flashClass,
+          isCellFlashing: realtime === true ? cellFlash.isFlashing : undefined,
           onCellEdit,
           onEditStart,
           onEditCancel: onEditEnd,

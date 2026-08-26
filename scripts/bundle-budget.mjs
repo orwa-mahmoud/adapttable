@@ -73,6 +73,7 @@ const FIXTURES = [
       "PIVOT_BLANK",
       "parseFormula",
       "useRowPatchStream",
+      "useChangedCellFlash",
     ],
   },
   {
@@ -89,7 +90,12 @@ const FIXTURES = [
     // whole main surface at once does not carry them. The marker is an
     // engine-only name, not the word "pivot" — the panel's LABELS are shared
     // table labels and do belong in the base bundle.
-    absent: ["PIVOT_BLANK", "parseFormula", "useRowPatchStream"],
+    absent: [
+      "PIVOT_BLANK",
+      "parseFormula",
+      "useRowPatchStream",
+      "useChangedCellFlash",
+    ],
   },
   {
     // What the pivot engine costs the tables that ask for it, and nothing to
@@ -327,6 +333,12 @@ const FIXTURES = [
   // and the context menu read it during the same render. It cannot sit behind
   // an optional entry without becoming a second API. ~1 KB gzip; the four
   // kits that were already against the ceiling move by that amount.
+  //
+  // Changed-cell flash (#324) paints `data-flash` on every kit's cell and
+  // card-value. The host still opts in with `isCellFlashing` — omit it and
+  // the attribute is never set — but the helper sits on the cell walk every
+  // adapter already imports. Unstyled was on the 133 KB line and moved
+  // 0.1 KB over it.
   { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
   { name: "mui · table", pkg: "adapter-mui", budgetKB: 133 },
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 132 },
@@ -337,7 +349,7 @@ const FIXTURES = [
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
   { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 137 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 133 },
+  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 134 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
 
 /**

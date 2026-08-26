@@ -329,6 +329,7 @@ export {
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
 } from "./pivot/PivotPanelChrome";
+export { cellFlashAttr, rowFlashSignature } from "./rows/cellFlashPaint";
 export {
   type BodyCell,
   bodyCellsHaveRowSpan,

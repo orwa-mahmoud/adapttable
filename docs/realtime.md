@@ -144,6 +144,55 @@ connector without React — frames in, status out.
 The table never owns your rows. `onPatch` hands you an updater, so it drops
 straight into a `useState` setter and never races a concurrent update.
 
+## Flash the cells that moved
+
+A number that quietly becomes a different number is a number nobody
+notices. `useChangedCellFlash` from the same `/stream` entry tracks the
+cells a patch changed and answers `isCellFlashing(rowId, columnKey)`. Pass
+that into the table; kits set `data-flash` on the cell and on the matching
+card value, and your stylesheet decides what the pulse looks like — the
+same seam `data-dirty` already uses.
+
+It is off by default. `prefers-reduced-motion` is a hard opt-out of the
+pulse (unlike `useHighlight`, which still marks the row and holds it
+steady). An update is diffed, so a field sent back unchanged stays dark.
+An insert marks the whole row; a remove has no cells left to mark.
+
+```tsx
+import {
+  useChangedCellFlash,
+  useRowPatchStream,
+} from "@adapttable/core/stream";
+import { rowPatchLog } from "@adapttable/core";
+import { DataTable } from "@adapttable/mantine";
+
+function LiveTable({ initial, columns }) {
+  const [rows, setRows] = useState(initial);
+  const flash = useChangedCellFlash({ enabled: true });
+  useRowPatchStream({
+    websocket: "wss://api.example.com/rows",
+    getRowId: (row) => row.id,
+    onPatch: (update) => {
+      setRows((prev) => {
+        const next = update(prev);
+        const log = rowPatchLog(next);
+        if (log) flash.mark(log.events);
+        return next;
+      });
+    },
+  });
+
+  return (
+    <DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(row) => row.id}
+      isCellFlashing={flash.isFlashing}
+    />
+  );
+}
+```
+
 ## What this page is not
 
 A websocket that changes the row **under an open editor** is a conflict, not

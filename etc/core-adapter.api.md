@@ -126,6 +126,9 @@ export interface BulkBarState {
 }
 
 // @public
+export function cellFlashAttr(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
+
+// @public
 export function cellHighlightStyle(props: Readonly<Record<string, unknown>> | undefined, base: CSSProperties | undefined, selected: CSSProperties): CSSProperties | undefined;
 
 // @public
@@ -823,6 +826,7 @@ export interface DesktopRowWiring<TRow> {
     editingSignature: string | null;
     // (undocumented)
     expanded: boolean | undefined;
+    flashSignature: string;
     // (undocumented)
     focusIndex: number;
     // (undocumented)
@@ -839,6 +843,8 @@ export interface DesktopRowWiring<TRow> {
     id: string;
     // (undocumented)
     index: number;
+    // (undocumented)
+    isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
     // (undocumented)
     labels: Required<TableLabels>;
     // (undocumented)
@@ -2182,6 +2188,11 @@ export interface RowEditControlsOptions<TRow> {
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
 // @public
+export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
+    readonly key: string;
+}[]): string;
+
+// @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 
 // @public
@@ -2522,6 +2533,7 @@ export interface SharedTableRenderProps<TRow> {
         }) => void;
     };
     headerFilters?: boolean;
+    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     maxHeight?: number;
     measureElement?: (element: Element | null) => void;
     measureRowPair?: RowPairMeasurer;
@@ -2950,6 +2962,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onRowClick: ((row: TRow) => void) | undefined;
         prefetch: ((row: TRow) => void) | undefined;
         rowClassName: ((row: TRow, index: number) => string | undefined) | undefined;
+        isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined;
         collapsibleColumnGroups: boolean;
         collapsedColumnGroups: readonly string[] | undefined;
         columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
