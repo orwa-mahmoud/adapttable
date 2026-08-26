@@ -78,6 +78,9 @@ export interface BatchEditCellProps<TRow> {
 }
 
 // @public
+export function bindFeatureHostFn<Args extends unknown[], R>(host: FeatureHostState | undefined, fn: ((...args: Args) => R) | undefined): ((...args: Args) => R) | undefined;
+
+// @public
 export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: Ref<HTMLElement | null>): RefCallback<HTMLElement>;
 
 // @public
@@ -353,6 +356,7 @@ export interface ColumnMenuAction {
 
 // @public
 export interface ColumnMenuActionContext<TRow = unknown> {
+    featureHost?: FeatureHostState<TRow>;
     // (undocumented)
     labels: ColumnMenuLabels;
     // (undocumented)
@@ -1215,6 +1219,15 @@ export function EyeIcon(input: Readonly<{
 }>): ReactElement;
 
 // @public
+export function featureHostOf(props: object): FeatureHostState | undefined;
+
+// @public
+export function FeatureHostProvider(input: Readonly<{
+    host: FeatureHostState | undefined;
+    children: ReactNode;
+}>): JSX.Element;
+
+// @public
 export interface FeatureNotice {
     // (undocumented)
     readonly appearance: FeatureNoticeAppearance;
@@ -2050,6 +2063,9 @@ export interface PivotZoneProps {
 
 // @public
 export function printToolbar(wanted: boolean | undefined, onPrint: (() => void) | undefined, labels: TableLabels): PrintToolbar;
+
+// @public
+export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
 
 // @public
 export const REORDER_COLUMN_WIDTH = 40;
@@ -3027,7 +3043,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onFiltersTriggerPointerDown?: (() => void) | undefined;
         savedViewsMenu?: ReactNode;
         columnMenu?: ReactNode;
-    };
+    }; /** The host this table owns — adapters pass it into palette / menu hooks. */
+    featureHost: FeatureHostState<unknown> | undefined;
 };
 
 // @public
@@ -3035,6 +3052,9 @@ export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>,
 
 // @public
 export function useExportHandler(handler: (() => void | Promise<void>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean): ExportHandlerState;
+
+// @public
+export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
 // @public
 export function useFullscreen(element: HTMLElement | null): FullscreenState;

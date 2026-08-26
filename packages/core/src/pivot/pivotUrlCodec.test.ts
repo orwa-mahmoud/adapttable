@@ -72,11 +72,22 @@ describe("deserializePivot", () => {
 
   it("degrades a hand-edited value instead of throwing", () => {
     // A URL is user input. A simpler pivot beats an error page.
-    const config = deserializePivot("rows:team;nonsense;bogus:x;cols:");
+    const config = deserializePivot("rows:team;nonsense;cols:");
 
     expect(config.rows).toEqual(["team"]);
     expect(config.columns).toEqual([]);
     expect(config.measures).toEqual([]);
+  });
+
+  it("round-trips a registered aggregator name", () => {
+    const config: PivotConfig = {
+      ...EMPTY_PIVOT_CONFIG,
+      rows: ["team"],
+      measures: [{ key: "amount", agg: "range" }],
+    };
+
+    expect(serializePivot(config)).toBe("rows:team;range:amount");
+    expect(deserializePivot(serializePivot(config))).toEqual(config);
   });
 
   it("reads a value written before the flags existed, unchanged", () => {

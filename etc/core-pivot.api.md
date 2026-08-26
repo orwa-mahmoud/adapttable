@@ -80,13 +80,14 @@ export interface PivotField {
 
 // @public
 export interface PivotMeasure {
-    agg: AggregateName | Aggregator;
+    agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }
 
 // @public
 export interface PivotOptions<TRow> {
+    aggregators?: ReadonlyMap<string, Aggregator>;
     collapsed?: ReadonlySet<string>;
     columns?: readonly ColumnDef<TRow>[];
     format?: (value: ReactNode, measure: PivotMeasure) => ReactNode;

@@ -56,6 +56,7 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 export interface AggregateOptions<TRow> {
     columns?: readonly ColumnDef<TRow>[];
     format?: (value: ReactNode, key: string) => ReactNode;
+    host?: FeatureHostState;
 }
 
 // @public
@@ -256,6 +257,7 @@ export interface BatchEditingState<TRow> {
     cancelRow: (rowId: string) => void;
     count: number;
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    featureHost?: FeatureHostState;
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
     pending: boolean;
@@ -840,6 +842,7 @@ export interface ColumnMenuAction {
 
 // @public
 export interface ColumnMenuActionContext<TRow = unknown> {
+    featureHost?: FeatureHostState<TRow>;
     // (undocumented)
     labels: ColumnMenuLabels;
     // (undocumented)
@@ -1200,6 +1203,7 @@ export interface EditableCellEditing<TRow> {
         theirsValue: (value: string) => string;
     };
     dirty?: DirtyCellState;
+    featureHost?: FeatureHostState;
     lifecycle?: EditLifecycle<TRow>;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
     rowEditing?: RowEditingState<TRow>;
@@ -2343,7 +2347,7 @@ export function liveRowChanged<TRow>(input: {
 export function localizedColumnPath(column: Pick<ColumnDef<unknown>, "key" | "i18n">, locale: string | undefined): string;
 
 // @public
-export function makeExportCsvHandler<TRow>(exportCsv: boolean | ExportCsvOptions<TRow> | undefined, source: TableSource<TRow>, columns: readonly ColumnDef<TRow>[], context?: ExportContext<TRow>): (() => void | Promise<void>) | undefined;
+export function makeExportCsvHandler<TRow>(exportCsv: boolean | ExportCsvOptions<TRow> | undefined, source: TableSource<TRow>, columns: readonly ColumnDef<TRow>[], context?: ExportContext<TRow>, host?: FeatureHostState): (() => void | Promise<void>) | undefined;
 
 // @public
 export function marriedOrderHolds<TRow>(nextOrder: readonly string[], groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>): boolean;
@@ -2846,7 +2850,7 @@ export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly num
 export const resetColumnLayout: typeof resetColumnLayout_2;
 
 // @public
-export function resolveCellEditor(column: EditableColumnLike): CellEditor | null;
+export function resolveCellEditor(column: EditableColumnLike, host?: FeatureHostState): CellEditor | null;
 
 // @public
 export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
@@ -2873,7 +2877,7 @@ export type ResolvedPaginationMode = "infinite" | "paged";
 export function resolveExportColumns<TRow>(scope: ExportColumnScope | undefined, visible: readonly ColumnDef<TRow>[], all: readonly ColumnDef<TRow>[] | undefined): ColumnDef<TRow>[];
 
 // @public
-export function resolveExportCsv<TRow = unknown>(value: ExportCsvProp<TRow>): ExportCsvOptions<TRow> | null;
+export function resolveExportCsv<TRow = unknown>(value: ExportCsvProp<TRow>, host?: FeatureHostState): ExportCsvOptions<TRow> | null;
 
 // @public
 export function resolveFilterDefs<TRow>(columns: readonly ColumnDef<TRow>[], filters: readonly FilterDef<TRow>[] | undefined, locale?: string): FilterDef<TRow>[];
@@ -2954,6 +2958,7 @@ export interface RowEditingState<TRow> {
     cancel: () => void;
     draftFor: (columnKey: string) => string;
     drafts: RowEditDrafts;
+    featureHost?: FeatureHostState;
     isDirty: boolean;
     isEditing: (rowId: string) => boolean;
     save: () => void;
@@ -3920,6 +3925,7 @@ export function useBatchEditing<TRow>(options: UseBatchEditingOptions<TRow>): Ba
 export interface UseBatchEditingOptions<TRow> {
     columns: readonly EditableColumnLike<TRow>[];
     enabled?: boolean;
+    featureHost?: FeatureHostState;
     onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
     onEditCancel?: EditEventHandler<TRow>;
     onEditCommit?: EditEventHandler<TRow>;
@@ -4354,6 +4360,7 @@ export function useRowEditing<TRow>(options: UseRowEditingOptions<TRow>): RowEdi
 export interface UseRowEditingOptions<TRow> {
     columns: readonly EditableColumnLike<TRow>[];
     enabled?: boolean;
+    featureHost?: FeatureHostState;
     onEditCancel?: EditEventHandler<TRow>;
     onEditCommit?: EditEventHandler<TRow>;
     onEditStart?: EditEventHandler<TRow>;
@@ -4497,6 +4504,7 @@ export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions,
     error?: Error | null;
     facetKeys?: readonly string[];
     facets?: FacetMap;
+    featureHost?: FeatureHostState;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     filters?: readonly FilterDef<TRow>[] | ReactNode;
     filterTypes?: readonly FilterTypeSpec[];

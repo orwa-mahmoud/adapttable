@@ -23,7 +23,6 @@ const START = {
 export function PivotDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const { config, onConfigChange, collapsed, onCollapsedChange } =
     usePivotUrlState({
-      urlSync: false,
       defaultConfig: START,
     });
   const onToggleFold = (key: string) => {

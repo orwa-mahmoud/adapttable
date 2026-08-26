@@ -1,3 +1,4 @@
+import type { TableFeature } from "@adapttable/core";
 import {
   pivot,
   type PivotConfig,
@@ -10,6 +11,25 @@ import type { DataTableProps } from "@adapttable/mantine";
 import { Suspense, useMemo } from "react";
 
 import { kitClassNames, kitTable } from "./kitProviders";
+
+/** Max minus min — a named aggregator the URL can carry as `range:budget`. */
+function rangeOf(values: readonly unknown[]): number | undefined {
+  const numbers = values.filter(
+    (value): value is number =>
+      typeof value === "number" && Number.isFinite(value)
+  );
+  if (numbers.length === 0) return undefined;
+  return Math.max(...numbers) - Math.min(...numbers);
+}
+
+const RANGE_FEATURE: TableFeature<PivotRow> = {
+  id: "range",
+  setup(host) {
+    host.registerAggregator("range", rangeOf);
+  },
+};
+
+const RANGE_BY_NAME = new Map([["range", rangeOf]]);
 
 /**
  * A pivot, rendered by whichever kit the reader picked.
@@ -97,6 +117,7 @@ export function PivotTableView<TRow>({
   const model = useMemo(() => {
     const result = pivot(rows, config, {
       collapsed,
+      aggregators: RANGE_BY_NAME,
       format: (value) =>
         typeof value === "number" ? money.format(value) : value,
     });
@@ -124,6 +145,7 @@ export function PivotTableView<TRow>({
     <div className="pivot-table-wrap" data-testid="pivot-table">
       <Suspense fallback={null}>
         <Table
+          features={[RANGE_FEATURE]}
           data={model.rows}
           columns={model.columns}
           rowKey={model.rowKey}

@@ -18,6 +18,7 @@ import {
   type FilterTypeSpec,
 } from "../filters/filterRegistry";
 import { defaultLabels } from "../labels";
+import { pivot } from "../pivot/pivotModel";
 import {
   applyFilterExtends,
   currentFeatureHost,
@@ -200,6 +201,40 @@ describe("useTableFeatures", () => {
       );
     });
     expect(result.current).toEqual({ team: 3 });
+  });
+
+  it("a registered name resolves in a table-hosted pivot", () => {
+    const plugin: TableFeature = {
+      id: "range",
+      setup(host) {
+        host.registerAggregator("range", (values) => {
+          const numbers = values.filter(
+            (value): value is number =>
+              typeof value === "number" && Number.isFinite(value)
+          );
+          if (numbers.length === 0) return undefined;
+          return Math.max(...numbers) - Math.min(...numbers);
+        });
+      },
+    };
+    const { result } = renderHook(() => {
+      const props = useTableFeatures({ features: [plugin] });
+      const host = featureHostOf(props);
+      return pivot(
+        [
+          { team: "Alpha", amount: 10 },
+          { team: "Alpha", amount: 20 },
+        ],
+        {
+          rows: ["team"],
+          columns: [],
+          measures: [{ key: "amount", agg: "range" }],
+          grandTotals: false,
+        },
+        { aggregators: host?.aggregators }
+      ).rows[0]?.cells;
+    });
+    expect(result.current).toEqual([10]);
   });
 
   it("arms the command palette from registerCommand alone", () => {
