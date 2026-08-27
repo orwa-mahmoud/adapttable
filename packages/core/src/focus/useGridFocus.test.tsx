@@ -73,6 +73,8 @@ function Grid(props: {
   editable?: boolean;
   /** Offer the per-column header checkbox. */
   headerCheckbox?: boolean;
+  /** The rendered columns are a window over the full set. */
+  columnsWindowed?: boolean;
 }) {
   const rows = props.rows ?? makeRows(3);
   const columns = props.editable === true ? EDITABLE : COLUMNS;
@@ -81,6 +83,7 @@ function Grid(props: {
     headerCheckbox: props.headerCheckbox,
     rowCount: props.rowCount ?? rows.length,
     columns,
+    columnsWindowed: props.columnsWindowed,
     rows,
     firstRowIndex: props.firstRowIndex,
     pageSize: props.pageSize,
@@ -514,8 +517,8 @@ describe("useGridFocus", () => {
     it("states the real row count", () => {
       render(<Grid enabled={false} rowCount={40_000} rows={makeRows(3)} />);
       expect(table()).toHaveAttribute("aria-rowcount", "40000");
-      // Only the rows are a window, so no aria-colcount: it would promise an
-      // aria-colindex per cell that nothing outside cell navigation sets.
+      // Only the rows are a window here. The column axis states itself, and
+      // only when it is windowed too — see the block below.
       expect(table()).not.toHaveAttribute("aria-colcount");
       // Still not a grid: nothing here provides grid keyboard semantics.
       expect(screen.queryByRole("grid")).toBeNull();
@@ -550,6 +553,53 @@ describe("useGridFocus", () => {
         "40000"
       );
       expect(rows()[0]).toHaveAttribute("aria-rowindex", "1");
+    });
+
+    /**
+     * The horizontal axis fails the same way and needs the same answer. The
+     * count and the per-cell index ship together: a count whose cells cannot
+     * say where they are is worse than saying nothing, because a reader then
+     * trusts a position it counted off the DOM.
+     */
+    it("states the real column count when the column axis is windowed", () => {
+      render(<Grid enabled={false} columnsWindowed />);
+
+      expect(table()).toHaveAttribute("aria-colcount", String(COLUMNS.length));
+      // The rows are all present, so their axis stays quiet.
+      expect(table()).not.toHaveAttribute("aria-rowcount");
+      expect(screen.queryByRole("grid")).toBeNull();
+    });
+
+    it("numbers each mounted cell from its absolute column", () => {
+      render(<Grid enabled={false} columnsWindowed />);
+      const cells = [...document.querySelectorAll("tbody tr:first-child td")];
+
+      expect(cells.map((c) => c.getAttribute("aria-colindex"))).toEqual(
+        COLUMNS.map((_, index) => String(index + 1))
+      );
+    });
+
+    it("says nothing when every column is already in the DOM", () => {
+      render(<Grid enabled={false} />);
+
+      expect(table()).not.toHaveAttribute("aria-colcount");
+      expect(
+        document.querySelector("tbody tr:first-child td")
+      ).not.toHaveAttribute("aria-colindex");
+    });
+
+    it("states both axes when both are windowed", () => {
+      render(
+        <Grid
+          enabled={false}
+          rowCount={40_000}
+          rows={makeRows(3)}
+          columnsWindowed
+        />
+      );
+
+      expect(table()).toHaveAttribute("aria-rowcount", "40000");
+      expect(table()).toHaveAttribute("aria-colcount", String(COLUMNS.length));
     });
   });
 });

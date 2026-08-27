@@ -84,8 +84,19 @@ export interface UseGridFocusOptions<TRow> {
    * bounds below.
    */
   rowCount: number;
-  /** Columns in the order they are rendered. */
+  /**
+   * Every visible column, whether or not the horizontal axis is windowed — this
+   * is the ARIA number (`aria-colcount`) and the address space cell indices are
+   * counted in, so a windowed table still reports absolute positions.
+   */
   columns: readonly ColumnDef<TRow>[];
+  /**
+   * Whether the rendered columns are a window over {@link columns} rather than
+   * all of them. Windowing the horizontal axis has the same consequence as
+   * windowing rows: the cells in the DOM are a slice, so their position has to
+   * be stated rather than counted.
+   */
+  columnsWindowed?: boolean;
   /** The rendered rows, for reading a cell's text when focus lands. */
   rows: readonly TRow[];
   /**
@@ -265,6 +276,7 @@ export function useGridFocus<TRow>(
     headerCheckbox = false,
     rowCount,
     columns,
+    columnsWindowed = false,
     rows,
     firstRowIndex = 0,
     pageSize,
@@ -665,7 +677,12 @@ export function useGridFocus<TRow>(
     // that only cell navigation provides. Only the ROWS are a window — every
     // column is in the DOM — so `aria-colcount` stays out of it: it would
     // promise a matching `aria-colindex` per cell that nothing here sets.
-    if (!enabled) return windowed ? { "aria-rowcount": rowCount } : {};
+    if (!enabled) {
+      return {
+        ...(windowed ? { "aria-rowcount": rowCount } : {}),
+        ...(columnsWindowed ? { "aria-colcount": columns.length } : {}),
+      };
+    }
     return {
       role: "grid",
       "aria-rowcount": rowCount,
@@ -675,11 +692,16 @@ export function useGridFocus<TRow>(
         container.current = node;
       },
     };
-  }, [enabled, windowed, rowCount, columns.length, onKeyDown]);
+  }, [enabled, windowed, columnsWindowed, rowCount, columns.length, onKeyDown]);
 
   const getCellProps = useCallback(
     (cell: GridCell) => {
-      if (!enabled) return {};
+      // A windowed column axis states each cell's absolute position, or a
+      // reader counting the cells in the DOM calls column 17 "column 3 of 40".
+      // The count without the per-cell index would be worse than neither.
+      if (!enabled) {
+        return columnsWindowed ? { "aria-colindex": cell.col + 1 } : {};
+      }
       const isActive = sameGridCell(cell, active);
       // Exactly one cell is tabbable. Before the grid has ever been entered
       // that is its first cell, so Tab reaches the table at all.
@@ -735,6 +757,7 @@ export function useGridFocus<TRow>(
     },
     [
       enabled,
+      columnsWindowed,
       active,
       firstRowIndex,
       range,

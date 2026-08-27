@@ -69,6 +69,52 @@ test.describe("scale — virtualization", () => {
     await expect(table).toHaveAttribute("aria-rowcount", "50000");
   });
 
+  /**
+   * The horizontal axis fails the same way as the vertical one and needs the
+   * same answer. jsdom can show the attributes exist; only a real browser
+   * measures a scroll box, which is what arms the column window at all.
+   */
+  test("states the real column count while the DOM holds a window", async ({
+    page,
+  }) => {
+    await page.goto(`/${KIT}/scale/?cols=60&virtualizeColumns=1`);
+    const table = page.locator("table").first();
+    await expect(table).toBeVisible();
+    // Cell navigation is off here too, so nothing claims the grid contract.
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    await expect(table).toHaveAttribute("aria-colcount", "60");
+
+    const cells = page.locator(
+      '[data-adapttable-part="row"]:first-of-type [data-adapttable-part="cell"]'
+    );
+    await expect(cells.first()).toBeVisible();
+    // A window, not the axis: 60 columns never all render at once.
+    expect(await cells.count()).toBeLessThan(60);
+
+    /** The furthest column in the DOM, read off the cells themselves. */
+    const furthestColumn = async () =>
+      Math.max(
+        ...(await cells.evaluateAll((nodes) =>
+          nodes.map((node) => Number(node.getAttribute("aria-colindex") ?? 0))
+        ))
+      );
+    const before = await furthestColumn();
+    expect(before).toBeGreaterThan(0);
+
+    // Scroll the axis and the indices follow the dataset, not the DOM.
+    await page
+      .locator('[data-adapttable-part="scroll-box"]')
+      .first()
+      .evaluate((box) => {
+        box.scrollLeft = 4000;
+      });
+    await expect
+      .poll(furthestColumn, { timeout: 5000 })
+      .toBeGreaterThan(before);
+    // And the total never moves with the window.
+    await expect(table).toHaveAttribute("aria-colcount", "60");
+  });
+
   // Radix is listed explicitly: its Table.Root ScrollArea used to trap the
   // sticky header inside the table, so this only failing on the first kit
   // (usually Mantine) would miss the regression.

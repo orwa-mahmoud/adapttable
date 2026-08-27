@@ -230,6 +230,22 @@ export function useDataTableShell<TRow>(
       coveredCells.has(`${cell.row}:${cell.col}`),
     [coveredCells]
   );
+  // One scroll box, two windows: the rows track its vertical scrolling and the
+  // columns its horizontal, so the adapters attach a single ref.
+  const scrollBoxElement = useRef<HTMLElement | null>(null);
+  // The horizontal window reads the same scroll box the vertical one does.
+  const columnWindow = useColumnWindow<TRow>({
+    columns: chrome.columnLayout.visibleColumns,
+    enabled: props.virtualizeColumns === true,
+    widths: chrome.columnLayout.state.widths,
+    pinnedKeys: new Set(
+      Object.keys(chrome.columnLayout.state.pinned).filter(
+        (key) => chrome.columnLayout.state.pinned[key] !== undefined
+      )
+    ),
+    getScrollElement: () => scrollBoxElement.current,
+  });
+
   const gridFocus = useGridFocus<TRow>({
     enabled: props.cellNavigation === true,
     headerCheckbox: props.columnSelectionCheckbox === true,
@@ -238,6 +254,7 @@ export function useDataTableShell<TRow>(
       windowStart + chrome.source.rows.length
     ),
     columns: chrome.columnLayout.visibleColumns,
+    columnsWindowed: columnWindow.enabled,
     rows: chrome.source.rows,
     firstRowIndex: windowStart,
     dir: props.dir,
@@ -339,9 +356,6 @@ export function useDataTableShell<TRow>(
     pinnedTopRows,
     pinnedBottomRows,
   } = useChromeBodyData(chrome, chromeProps);
-  // One scroll box, two windows: the rows track its vertical scrolling and the
-  // columns its horizontal, so the adapters attach a single ref.
-  const scrollBoxElement = useRef<HTMLElement | null>(null);
   const virtualScrollRef = useCallback(
     (node: HTMLElement | null) => {
       scrollBoxElement.current = node;
@@ -365,19 +379,6 @@ export function useDataTableShell<TRow>(
     chrome.columnLayout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
   const reorderPinned =
     chrome.columnLayout.state.pinned[REORDER_COLUMN_KEY] === "start";
-
-  // The horizontal window reads the same scroll box the vertical one does.
-  const columnWindow = useColumnWindow<TRow>({
-    columns: chrome.columnLayout.visibleColumns,
-    enabled: props.virtualizeColumns === true,
-    widths: chrome.columnLayout.state.widths,
-    pinnedKeys: new Set(
-      Object.keys(chrome.columnLayout.state.pinned).filter(
-        (key) => chrome.columnLayout.state.pinned[key] !== undefined
-      )
-    ),
-    getScrollElement: () => scrollBoxElement.current,
-  });
 
   const grouping =
     chrome.grouping && groupingEntries

@@ -4231,6 +4231,7 @@ export function useGridFocus<TRow>(options: UseGridFocusOptions<TRow>): GridFocu
 // @public
 export interface UseGridFocusOptions<TRow> {
     columns: readonly ColumnDef<TRow>[];
+    columnsWindowed?: boolean;
     currentMatch?: GridCell | null;
     dir?: Direction;
     enabled: boolean;
