@@ -14,7 +14,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { RowAction, TableLabels } from "../types";
+import type { RowAction } from "../types";
 
 /** Which edge a pinned row sticks to. */
 export type RowPinSide = "top" | "bottom";
@@ -208,9 +208,3 @@ export function useRowPinning<TRow>(options: {
     [actions, pin, sideOf, state, unpin]
   );
 }
-
-/** Labels a host may override; resolved through {@link TableLabels}. */
-export type RowPinTableLabels = Pick<
-  Required<TableLabels>,
-  "pinToTop" | "pinToBottom" | "unpinRow"
->;

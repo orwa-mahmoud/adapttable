@@ -66,12 +66,6 @@ export const Database = make([
   "M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6",
   "M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3",
 ]);
-export const Server = make([
-  "M4 5h16v6H4z",
-  "M4 13h16v6H4z",
-  "M8 8h.01",
-  "M8 16h.01",
-]);
 export const Globe = make([
   "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
   "M3 12h18",
