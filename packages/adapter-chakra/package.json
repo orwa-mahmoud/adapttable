@@ -163,7 +163,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "axe-core": "^4.13.0",
-    "framer-motion": "^12.40.0",
+    "framer-motion": "^13.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "vitest-axe": "^0.1.0"
