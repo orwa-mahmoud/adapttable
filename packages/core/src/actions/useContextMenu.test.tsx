@@ -197,7 +197,7 @@ describe("useContextMenu", () => {
     render(<Harness />);
     const trigger = screen.getByTestId("trigger");
     fireEvent.contextMenu(trigger, { clientX: 1, clientY: 1 });
-    screen.getByTestId("close").focus();
+    act(() => screen.getByTestId("close").focus());
     fireEvent.click(screen.getByTestId("close"));
 
     expect(state()).toBe("closed");

@@ -1,5 +1,5 @@
 import { defaultLabels } from "@adapttable/core";
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { FilterPanel } from "./FilterPanel";
@@ -71,7 +71,7 @@ describe("FilterPanel", () => {
     const panel = document.querySelector<HTMLElement>(
       '[data-adapttable-part="filters-panel"]'
     )!;
-    panel.focus();
+    act(() => panel.focus());
     fireEvent.keyDown(panel, { key: "Tab", shiftKey: true });
     const last = document.querySelector(
       '[data-adapttable-part="filters-done"]'
@@ -93,7 +93,7 @@ describe("FilterPanel", () => {
     const stray = document.createElement("button");
     stray.textContent = "outside";
     document.body.appendChild(stray);
-    stray.focus();
+    act(() => stray.focus());
     fireEvent.keyDown(document, { key: "Tab" });
     const first = document.querySelector(
       '[data-adapttable-part="filters-close"]'

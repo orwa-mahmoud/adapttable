@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { rowClickProps } from "./rowClickProps";
@@ -116,7 +116,7 @@ describe("rowClickProps", () => {
     );
     const r1 = screen.getByTestId("r1");
     const r2 = screen.getByTestId("r2");
-    r1.focus();
+    act(() => r1.focus());
     fireEvent.keyDown(r1, { key: "ArrowDown" });
     expect(r2).toHaveFocus();
     fireEvent.keyDown(r2, { key: "ArrowUp" });
@@ -125,7 +125,7 @@ describe("rowClickProps", () => {
     fireEvent.keyDown(r1, { key: "ArrowUp" });
     expect(r1).toHaveFocus();
     const r3 = screen.getByTestId("r3");
-    r3.focus();
+    act(() => r3.focus());
     fireEvent.keyDown(r3, { key: "ArrowDown" });
     expect(r3).toHaveFocus();
     // Arrows never activate the row.
@@ -154,7 +154,7 @@ describe("rowClickProps", () => {
       </table>
     );
     const inner = screen.getByTestId("inner");
-    inner.focus();
+    act(() => inner.focus());
     fireEvent.keyDown(inner, { key: "ArrowDown" });
     expect(inner).toHaveFocus();
   });
@@ -189,7 +189,7 @@ describe("rowClickProps", () => {
       </table>
     );
     const row = screen.getByTestId("row");
-    row.focus();
+    act(() => row.focus());
     fireEvent.keyDown(row, { key: " " });
     expect(onRowClick).toHaveBeenCalledTimes(1);
   });
@@ -218,7 +218,7 @@ describe("rowClickProps", () => {
     // Only the first row is a Tab stop; the rest are arrow-reachable.
     expect(first.tabIndex).toBe(0);
     expect(second.tabIndex).toBe(-1);
-    first.focus();
+    act(() => first.focus());
     fireEvent.keyDown(first, { key: "ArrowDown" });
     expect(second).toHaveFocus();
     // The stop roved along with the focus.

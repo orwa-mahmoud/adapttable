@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -17,8 +17,15 @@ const COLS: ColumnDef<Task>[] = [
 const part = (name: string) =>
   document.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
 
+/**
+ * A commit's save-state bookkeeping settles in a microtask after the host's
+ * handler has already run. Flushing it inside `act` keeps that update inside
+ * the test, which is what React asks for.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("edit lifecycle (base-ui)", () => {
-  it("fires start, commit and cancel from the cell the reader typed in", () => {
+  it("fires start, commit and cancel from the cell the reader typed in", async () => {
     const onEditStart = vi.fn();
     const onEditCommit = vi.fn();
     const onEditCancel = vi.fn();
@@ -40,6 +47,7 @@ describe("edit lifecycle (base-ui)", () => {
     const editor = part("edit-cell-editor")!;
     fireEvent.change(editor, { target: { value: "Ship it" } });
     fireEvent.keyDown(editor, { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledOnce();
     expect(onEditCommit).toHaveBeenCalledOnce();
 

@@ -7,7 +7,7 @@
  */
 import type { SavedView } from "@adapttable/core";
 import { Theme } from "@radix-ui/themes";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -110,7 +110,7 @@ describe("SavedViewsPanel", () => {
     const handlers = renderPanel();
 
     const down = screen.getAllByRole("button", { name: "Move view down" })[0]!;
-    down.focus();
+    act(() => down.focus());
     expect(down).toHaveFocus();
     fireEvent.click(down);
 

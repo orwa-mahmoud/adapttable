@@ -6,7 +6,13 @@
  * tab stop and their ABSOLUTE column index, that a row carries its absolute
  * row index, and that omitting the prop leaves all of it absent.
  */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -119,7 +125,7 @@ describe("antd — paste reaches the edit channel", () => {
         onCellEdit={onCellEdit}
       />
     );
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "v", ctrlKey: true });
     await waitFor(() => expect(onCellEdit).toHaveBeenCalledTimes(2));
     expect(onCellEdit).toHaveBeenNthCalledWith(1, ROWS[0], "name", "P");

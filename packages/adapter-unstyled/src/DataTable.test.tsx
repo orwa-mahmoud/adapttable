@@ -912,7 +912,7 @@ describe("<DataTable> (unstyled)", () => {
     const done = document.querySelector<HTMLElement>(
       '[data-adapttable-part="filters-done"]'
     )!;
-    close.focus();
+    act(() => close.focus());
     fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(done);
     fireEvent.keyDown(document, { key: "Tab" });

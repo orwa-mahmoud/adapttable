@@ -8,7 +8,7 @@ import {
   type FilterDef,
   useFrontendData,
 } from "@adapttable/core";
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -97,7 +97,7 @@ describe("keyboard flows (unstyled)", () => {
   it("drawer: focus is trapped inside and restored to the trigger on Escape", () => {
     render(<Harness override={{ filters, filtersMode: "drawer" }} />);
     const trigger = part("filters-button")!;
-    trigger.focus();
+    act(() => trigger.focus());
     fireEvent.click(trigger);
 
     const panel = part("filters-panel")!;
@@ -109,7 +109,7 @@ describe("keyboard flows (unstyled)", () => {
       "button, input, select, textarea"
     );
     const last = focusables[focusables.length - 1]!;
-    last.focus();
+    act(() => last.focus());
     fireEvent.keyDown(document, { key: "Tab" });
     expect(panel.contains(document.activeElement)).toBe(true);
 
@@ -122,7 +122,7 @@ describe("keyboard flows (unstyled)", () => {
   it("committing an inline edit keeps keyboard focus in the table", () => {
     render(<Harness override={{ onCellEdit: vi.fn() }} />);
     const activate = part("edit-cell-activate")!;
-    activate.focus();
+    act(() => activate.focus());
     fireEvent.keyDown(activate, { key: "Enter" });
 
     const editor = part("edit-cell-editor")!;

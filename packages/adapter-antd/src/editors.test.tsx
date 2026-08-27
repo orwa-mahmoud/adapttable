@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -61,6 +61,13 @@ const editor = () =>
  * the stored value seeds the editor in the shape that control holds, and what it
  * commits is a value the host can store back without parsing.
  */
+/**
+ * A commit's save-state bookkeeping settles in a microtask after the host's
+ * handler has already run. Flushing it inside `act` keeps that update inside
+ * the test, which is what React asks for.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("editor set (antd)", () => {
   const table = () => {
     const onCellEdit = vi.fn();
@@ -79,13 +86,14 @@ describe("editor set (antd)", () => {
     fireEvent.doubleClick(activates()[index]!);
   };
 
-  it("commits a boolean in one gesture", () => {
+  it("commits a boolean in one gesture", async () => {
     const { onCellEdit } = table();
     open(0);
     expect(editor()).toHaveAttribute("type", "checkbox");
     expect(editor()).not.toBeChecked();
     fireEvent.click(editor());
     // A checkbox has one gesture: no Enter, no blur.
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "approved",
@@ -93,13 +101,14 @@ describe("editor set (antd)", () => {
     );
   });
 
-  it("seeds a date editor with the day it holds, and commits one back", () => {
+  it("seeds a date editor with the day it holds, and commits one back", async () => {
     const { onCellEdit } = table();
     open(1);
     expect(editor()).toHaveAttribute("type", "date");
     expect(editor()).toHaveValue("2026-08-13");
     fireEvent.change(editor(), { target: { value: "2026-09-01" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "day",
@@ -107,13 +116,14 @@ describe("editor set (antd)", () => {
     );
   });
 
-  it("uses the platform's time control", () => {
+  it("uses the platform's time control", async () => {
     const { onCellEdit } = table();
     open(2);
     expect(editor()).toHaveAttribute("type", "time");
     expect(editor()).toHaveValue("09:30");
     fireEvent.change(editor(), { target: { value: "07:15" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "startsAt",
@@ -121,13 +131,14 @@ describe("editor set (antd)", () => {
     );
   });
 
-  it("uses the platform's datetime control", () => {
+  it("uses the platform's datetime control", async () => {
     const { onCellEdit } = table();
     open(3);
     expect(editor()).toHaveAttribute("type", "datetime-local");
     expect(editor()).toHaveValue("2026-08-13T14:05");
     fireEvent.change(editor(), { target: { value: "2026-08-14T08:00" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "reviewedAt",
@@ -153,7 +164,7 @@ describe("editor set (antd)", () => {
       document.querySelector<HTMLElement>(".ant-select-dropdown")!
     ).getByTitle(name);
 
-  it("commits a multi-select as the array it chose", () => {
+  it("commits a multi-select as the array it chose", async () => {
     const { onCellEdit } = table();
     open(4);
     expect(document.querySelector(".ant-select-multiple")).not.toBeNull();
@@ -163,19 +174,21 @@ describe("editor set (antd)", () => {
     openMenu();
     fireEvent.click(option("billable"));
     fireEvent.blur(document.querySelector(".ant-select-input")!);
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "tags", [
       "urgent",
       "billable",
     ]);
   });
 
-  it("commits an empty multi-select as an empty array, not an empty string", () => {
+  it("commits an empty multi-select as an empty array, not an empty string", async () => {
     const { onCellEdit } = table();
     open(4);
     openMenu();
     // Clicking a chosen value again un-chooses it, leaving nothing selected.
     fireEvent.click(option("urgent"));
     fireEvent.blur(document.querySelector(".ant-select-input")!);
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "tags", []);
   });
 });

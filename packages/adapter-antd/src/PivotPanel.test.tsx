@@ -7,7 +7,7 @@
  * drag-only pivot UI breaks.
  */
 import { EMPTY_PIVOT_CONFIG, type PivotConfig } from "@adapttable/core/pivot";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -63,7 +63,7 @@ describe("PivotPanel", () => {
     );
 
     const up = screen.getByRole("button", { name: "Move up: Team" });
-    up.focus();
+    act(() => up.focus());
     expect(up).toHaveFocus();
     fireEvent.click(up);
 

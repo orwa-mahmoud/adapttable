@@ -77,7 +77,7 @@ describe("EditableCellGate", () => {
     const onCellEdit = vi.fn();
     render(<Harness onCellEdit={onCellEdit} />);
     const activate = screen.getByRole("button", { name: "Ada" });
-    activate.focus();
+    act(() => activate.focus());
     fireEvent.keyDown(activate, { key: "Enter" });
     const editor = screen.getByRole("textbox", { name: "Edit cell" });
     fireEvent.change(editor, { target: { value: "Augusta" } });
@@ -89,7 +89,7 @@ describe("EditableCellGate", () => {
     const onCellEdit = vi.fn();
     render(<Harness onCellEdit={onCellEdit} />);
     const activate = screen.getByRole("button", { name: "Ada" });
-    activate.focus();
+    act(() => activate.focus());
     fireEvent.keyDown(activate, { key: "Enter" });
     const editor = screen.getByRole("textbox", { name: "Edit cell" });
     fireEvent.keyDown(editor, { key: "Escape" });
@@ -110,7 +110,7 @@ describe("EditableCellGate", () => {
       key: "Escape",
     });
     const again = screen.getByRole("button", { name: "Ada" });
-    again.focus();
+    act(() => again.focus());
     fireEvent.keyDown(again, { key: "F2" });
     expect(
       screen.getByRole("textbox", { name: "Edit cell" })
@@ -348,7 +348,7 @@ describe("EditableCellGate", () => {
     }
     render(<RollbackHarness />);
     const activate = screen.getByRole("button", { name: "Ada" });
-    activate.focus();
+    act(() => activate.focus());
     fireEvent.keyDown(activate, { key: "Enter" });
     await act(async () => {
       fireEvent.keyDown(screen.getByRole("textbox", { name: "Edit cell" }), {

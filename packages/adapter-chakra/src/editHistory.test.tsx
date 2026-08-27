@@ -24,6 +24,13 @@ const COLS: ColumnDef<Row>[] = [
  * hand the keys to the grid. The boundary shows up here: an undo is a COMMIT
  * of the old value back through onCellEdit, never a mutation of the rows.
  */
+/**
+ * An undo or redo commits through the same async save path as an edit, so the
+ * bookkeeping settles a microtask later. Flushing it inside `act` keeps that
+ * update inside the test.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("undo and redo (chakra)", () => {
   const table = (extra?: Record<string, unknown>) =>
     render(
@@ -50,12 +57,13 @@ describe("undo and redo (chakra)", () => {
     paste("Z");
     const onCellEdit = vi.fn();
     table({ onCellEdit, editHistory: true });
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     await act(async () => {
       fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
       await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
     });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "A");
     vi.unstubAllGlobals();
   });
@@ -64,13 +72,14 @@ describe("undo and redo (chakra)", () => {
     paste("Z");
     const onCellEdit = vi.fn();
     table({ onCellEdit, editHistory: true });
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     await act(async () => {
       fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
       await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
     });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true, shiftKey: true });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "Z");
     vi.unstubAllGlobals();
   });
@@ -79,12 +88,13 @@ describe("undo and redo (chakra)", () => {
     paste("Z");
     const onCellEdit = vi.fn();
     table({ onCellEdit });
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     await act(async () => {
       fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
       await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
     });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledOnce();
     vi.unstubAllGlobals();
   });

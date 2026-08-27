@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -125,7 +125,7 @@ describe("virtualization compatibility (unstyled)", () => {
     const first = document.querySelector<HTMLElement>(
       '[data-grid-cell="0:0"]'
     )!;
-    first.focus();
+    act(() => first.focus());
     fireEvent.keyDown(first, { key: "ArrowDown" });
     expect(document.activeElement?.getAttribute("data-grid-cell")).toBe("1:0");
   });
