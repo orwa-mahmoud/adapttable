@@ -505,10 +505,12 @@ describe("useGridFocus", () => {
     const table = () => document.querySelector("table");
     const rows = () => [...document.querySelectorAll("tbody tr")];
 
-    it("states the real row and column count", () => {
+    it("states the real row count", () => {
       render(<Grid enabled={false} rowCount={40_000} rows={makeRows(3)} />);
       expect(table()).toHaveAttribute("aria-rowcount", "40000");
-      expect(table()).toHaveAttribute("aria-colcount", "2");
+      // Only the rows are a window, so no aria-colcount: it would promise an
+      // aria-colindex per cell that nothing outside cell navigation sets.
+      expect(table()).not.toHaveAttribute("aria-colcount");
       // Still not a grid: nothing here provides grid keyboard semantics.
       expect(screen.queryByRole("grid")).toBeNull();
     });

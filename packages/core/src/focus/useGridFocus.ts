@@ -662,11 +662,10 @@ export function useGridFocus<TRow>(
   const getGridProps = useCallback(() => {
     // `aria-rowcount` is valid on the implicit `role="table"`, so a windowed
     // table can state its size without claiming the grid keyboard semantics
-    // that only cell navigation provides.
-    if (!enabled)
-      return windowed
-        ? { "aria-rowcount": rowCount, "aria-colcount": columns.length }
-        : {};
+    // that only cell navigation provides. Only the ROWS are a window — every
+    // column is in the DOM — so `aria-colcount` stays out of it: it would
+    // promise a matching `aria-colindex` per cell that nothing here sets.
+    if (!enabled) return windowed ? { "aria-rowcount": rowCount } : {};
     return {
       role: "grid",
       "aria-rowcount": rowCount,
