@@ -6,6 +6,7 @@
  * tab stop and their ABSOLUTE column index, that a row carries its absolute
  * row index, and that omitting the prop leaves all of it absent.
  */
+import { createMemoryAdapter } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
@@ -43,6 +44,41 @@ const table = (extra?: { cellNavigation?: boolean }) => (
 
 const cellAt = (row: number, col: number) =>
   document.querySelector<HTMLElement>(`[data-grid-cell="${row}:${col}"]`);
+
+/**
+ * A page is a window over the dataset, so the size has to reach assistive tech
+ * whether or not cell navigation is on — core decides, the adapter only has to
+ * carry it to the element.
+ */
+describe("unstyled windowed dataset size", () => {
+  it("states the dataset size and absolute row index without cell navigation", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlAdapter={createMemoryAdapter("limit=1")}
+        forceMobile={false}
+      />
+    );
+    const rendered = document.querySelectorAll("tbody tr");
+    expect(rendered).toHaveLength(1);
+    expect(document.querySelector("table")).toHaveAttribute(
+      "aria-rowcount",
+      "2"
+    );
+    expect(rendered[0]).toHaveAttribute("aria-rowindex", "1");
+    // Nothing here claims the grid keyboard contract.
+    expect(screen.queryByRole("grid")).toBeNull();
+  });
+
+  it("says nothing when the whole dataset is on the page", () => {
+    render(table());
+    expect(document.querySelector("table")).not.toHaveAttribute(
+      "aria-rowcount"
+    );
+  });
+});
 
 describe("unstyled cell navigation", () => {
   it("marks the table as a grid and carries the dataset dimensions", () => {

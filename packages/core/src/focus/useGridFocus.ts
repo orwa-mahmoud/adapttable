@@ -652,8 +652,21 @@ export function useGridFocus<TRow>(
     return () => window.removeEventListener("mouseup", end);
   }, [enabled, commitFill]);
 
+  /**
+   * Whether the rendered rows are a slice of a bigger set — virtualization, or
+   * a server page. Assistive tech counts the rows it can reach, so a windowed
+   * table has to state the real size even when cell navigation is off.
+   */
+  const windowed = rowCount > rows.length;
+
   const getGridProps = useCallback(() => {
-    if (!enabled) return {};
+    // `aria-rowcount` is valid on the implicit `role="table"`, so a windowed
+    // table can state its size without claiming the grid keyboard semantics
+    // that only cell navigation provides.
+    if (!enabled)
+      return windowed
+        ? { "aria-rowcount": rowCount, "aria-colcount": columns.length }
+        : {};
     return {
       role: "grid",
       "aria-rowcount": rowCount,
@@ -663,7 +676,7 @@ export function useGridFocus<TRow>(
         container.current = node;
       },
     };
-  }, [enabled, rowCount, columns.length, onKeyDown]);
+  }, [enabled, windowed, rowCount, columns.length, onKeyDown]);
 
   const getCellProps = useCallback(
     (cell: GridCell) => {
@@ -838,8 +851,9 @@ export function useGridFocus<TRow>(
   );
 
   const getRowProps = useCallback(
-    (rowIndex: number) => (enabled ? { "aria-rowindex": rowIndex + 1 } : {}),
-    [enabled]
+    (rowIndex: number) =>
+      enabled || windowed ? { "aria-rowindex": rowIndex + 1 } : {},
+    [enabled, windowed]
   );
 
   const getCellPropsAt = useCallback(

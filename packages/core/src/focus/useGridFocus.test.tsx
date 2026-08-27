@@ -495,6 +495,55 @@ describe("useGridFocus", () => {
     expect(screen.queryByRole("grid")).toBeNull();
     expect(cellAt(0, 0)).toBeNull();
   });
+
+  /**
+   * A windowed table only has a slice of its rows in the DOM, so assistive
+   * tech counts what it can reach and calls a 40,000-row dataset three rows
+   * long. The size is a fact about the table, not about cell navigation.
+   */
+  describe("a window's size, with cell navigation off", () => {
+    const table = () => document.querySelector("table");
+    const rows = () => [...document.querySelectorAll("tbody tr")];
+
+    it("states the real row and column count", () => {
+      render(<Grid enabled={false} rowCount={40_000} rows={makeRows(3)} />);
+      expect(table()).toHaveAttribute("aria-rowcount", "40000");
+      expect(table()).toHaveAttribute("aria-colcount", "2");
+      // Still not a grid: nothing here provides grid keyboard semantics.
+      expect(screen.queryByRole("grid")).toBeNull();
+    });
+
+    it("numbers each mounted row from its absolute position", () => {
+      render(
+        <Grid
+          enabled={false}
+          rowCount={40_000}
+          rows={makeRows(3, 120)}
+          firstRowIndex={120}
+        />
+      );
+      expect(rows().map((r) => r.getAttribute("aria-rowindex"))).toEqual([
+        "121",
+        "122",
+        "123",
+      ]);
+    });
+
+    it("says nothing when every row is already in the DOM", () => {
+      render(<Grid enabled={false} />);
+      expect(table()).not.toHaveAttribute("aria-rowcount");
+      expect(rows()[0]).not.toHaveAttribute("aria-rowindex");
+    });
+
+    it("leaves the counts alone when cell navigation is on", () => {
+      render(<Grid rowCount={40_000} rows={makeRows(3)} />);
+      expect(screen.getByRole("grid")).toHaveAttribute(
+        "aria-rowcount",
+        "40000"
+      );
+      expect(rows()[0]).toHaveAttribute("aria-rowindex", "1");
+    });
+  });
 });
 
 /**
