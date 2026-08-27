@@ -131,7 +131,7 @@ describe("TreeCell", () => {
         <span>lib</span>
       </TreeCellChrome>
     );
-    part("tree-toggle")!.click();
+    fireEvent.click(part("tree-toggle")!);
     expect(part("tree-toggle")).toHaveAttribute("aria-expanded", "false");
   });
 });

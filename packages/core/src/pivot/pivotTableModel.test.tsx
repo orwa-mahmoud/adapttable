@@ -9,7 +9,7 @@
  * both there and in the body, which is how a pivot ends up showing its total
  * twice.
  */
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { headerGroupRows } from "../columns/headerGroups";
@@ -215,7 +215,7 @@ describe("pivotTableModel", () => {
     const alpha = model.rows[0]!;
 
     render(<>{model.columns[0]?.accessor?.(alpha)}</>);
-    screen.getByRole("button", { name: "Alpha" }).click();
+    fireEvent.click(screen.getByRole("button", { name: "Alpha" }));
 
     expect(onFold).toHaveBeenCalledWith(alpha.key);
     // …and it does not reach the footer: a fold control on the grand total

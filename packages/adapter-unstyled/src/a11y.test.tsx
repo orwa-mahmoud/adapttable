@@ -1,5 +1,5 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
@@ -60,7 +60,7 @@ describe("accessibility (axe)", () => {
     const checkbox = container.querySelector<HTMLInputElement>(
       'input[aria-label="Select all"]'
     );
-    checkbox?.click();
+    fireEvent.click(checkbox!);
     expect(
       await axe(container, { rules: { "color-contrast": { enabled: false } } })
     ).toHaveNoViolations();

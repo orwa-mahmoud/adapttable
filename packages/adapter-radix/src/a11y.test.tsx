@@ -1,6 +1,6 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { Theme } from "@radix-ui/themes";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
@@ -55,9 +55,9 @@ describe("accessibility (axe) — Radix", () => {
       rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
       filterLabels: { status: (v) => `Status: ${v}` },
     });
-    container
-      .querySelector<HTMLButtonElement>('[aria-label="Select all"]')
-      ?.click();
+    fireEvent.click(
+      container.querySelector<HTMLButtonElement>('[aria-label="Select all"]')!
+    );
     expect(await axe(container, axeOpts)).toHaveNoViolations();
   });
 });

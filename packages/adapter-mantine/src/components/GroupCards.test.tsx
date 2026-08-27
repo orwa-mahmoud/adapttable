@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@adapttable/core";
 import { resolveLabels } from "@adapttable/core";
 import { MantineProvider } from "@mantine/core";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { GroupHeaderCard } from "./GroupHeader";
@@ -72,7 +72,7 @@ describe("group cards (mantine)", () => {
         />
       </MantineProvider>
     );
-    screen.getByText("Show 7 more groups").click();
+    fireEvent.click(screen.getByText("Show 7 more groups"));
     expect(onShowMore).toHaveBeenCalledExactlyOnceWith({
       scope: "groups",
       groupKey: undefined,
