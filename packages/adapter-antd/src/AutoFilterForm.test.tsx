@@ -344,7 +344,7 @@ describe("<AutoFilterForm> operator-first range widgets (Ant Design)", () => {
 
   it("mounts Equal from a matching (numeric) pair and allowClear clears it", () => {
     const onPatch = vi.fn<(updates: ExtraFilters) => void>();
-    const { container } = render(
+    render(
       <RangeHarness
         defs={BUDGET}
         initial={{ budgetMin: 5, budgetMax: 5 }}
@@ -354,7 +354,9 @@ describe("<AutoFilterForm> operator-first range widgets (Ant Design)", () => {
     // Persisted equal bounds read back as Equal + the mirrored value.
     expect(screen.getByTitle("Equal")).toBeInTheDocument();
     expect(screen.getByLabelText("Budget Value")).toHaveValue("5");
-    fireEvent.mouseDown(container.querySelector(".ant-select-clear")!);
+    // antd 6.6 makes the clear control a real button that names itself, so it
+    // is reachable by role and answers a click rather than a raw mousedown.
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
     expect(onPatch.mock.lastCall?.[0]).toMatchObject({
       budgetMin: undefined,
       budgetMax: undefined,
