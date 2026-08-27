@@ -231,7 +231,7 @@ describe("useBulkActionRunner", () => {
 });
 
 describe("all-matching bulk scope", () => {
-  it("threads the scope into onClick and sizes the confirm by total", () => {
+  it("threads the scope into onClick and sizes the confirm by total", async () => {
     const onClick = vi.fn();
     const confirm = vi.fn(({ onConfirm }: { onConfirm: () => void }) =>
       onConfirm()
@@ -239,7 +239,7 @@ describe("all-matching bulk scope", () => {
     const { result } = renderHook(() =>
       useBulkActionRunner({ confirm, cancelLabel: "Cancel" })
     );
-    act(() =>
+    await act(async () => {
       result.current.run(
         {
           key: "x",
@@ -253,8 +253,10 @@ describe("all-matching bulk scope", () => {
         },
         ["a", "b"],
         { allMatching: true, total: 57 }
-      )
-    );
+      );
+      // `run` is typed void but settles asynchronously; flush it here.
+      await Promise.resolve();
+    });
     expect(confirm).toHaveBeenCalledWith(
       expect.objectContaining({ message: "Delete 57?" })
     );

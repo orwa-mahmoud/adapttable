@@ -456,7 +456,7 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
     document.body.append(root);
     result.current.rootRef.current = root;
 
-    result.current.autoSizeColumns();
+    act(() => result.current.autoSizeColumns());
     expect(onColumnLayoutChange).toHaveBeenCalledOnce();
     expect(onColumnLayoutChange.mock.calls[0]?.[0].widths).toMatchObject({
       name: 224,
@@ -472,7 +472,7 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
         noForm
       )
     );
-    result.current.autoSizeColumns();
+    act(() => result.current.autoSizeColumns());
     expect(onColumnLayoutChange).not.toHaveBeenCalled();
   });
 

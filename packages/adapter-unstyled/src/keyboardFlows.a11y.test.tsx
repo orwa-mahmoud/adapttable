@@ -68,6 +68,12 @@ function Harness(props: {
 const part = (name: string): HTMLElement | null =>
   document.body.querySelector(`[data-adapttable-part="${name}"]`);
 
+/**
+ * A commit's save-state bookkeeping settles a microtask after the host's handler
+ * runs. Flushing it inside `act` keeps that update inside the test.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("keyboard flows (unstyled)", () => {
   it("sorts by keyboard, including a shift multi-sort chain", () => {
     render(<Harness override={{ multiSort: true }} />);
@@ -119,7 +125,7 @@ describe("keyboard flows (unstyled)", () => {
     expect(trigger).toHaveFocus();
   });
 
-  it("committing an inline edit keeps keyboard focus in the table", () => {
+  it("committing an inline edit keeps keyboard focus in the table", async () => {
     render(<Harness override={{ onCellEdit: vi.fn() }} />);
     const activate = part("edit-cell-activate")!;
     act(() => activate.focus());
@@ -128,6 +134,7 @@ describe("keyboard flows (unstyled)", () => {
     const editor = part("edit-cell-editor")!;
     fireEvent.change(editor, { target: { value: "42" } });
     fireEvent.keyDown(editor, { key: "Enter" });
+    await settleCommit();
 
     // Focus lands back on the activate control — never on <body>.
     expect(document.activeElement).toBe(part("edit-cell-activate"));

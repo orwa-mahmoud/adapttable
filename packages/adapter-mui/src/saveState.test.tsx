@@ -24,6 +24,13 @@ const part = (name: string) =>
  * finds out about only when it fails — so what these check is that the cell says
  * it is working, says why it failed, and offers the value back.
  */
+/**
+ * A synchronous host still commits through the async save path, so the dirty-cell
+ * bookkeeping lands a microtask later. Flushing it inside `act` keeps that update
+ * inside the test.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("async save states (mui)", () => {
   const table = (
     onCellEdit: (row: Row, key: string, next: unknown) => unknown,
@@ -53,9 +60,10 @@ describe("async save states (mui)", () => {
     });
   };
 
-  it("says nothing extra for a host that saves synchronously", () => {
+  it("says nothing extra for a host that saves synchronously", async () => {
     table(() => undefined);
     edit("Augusta");
+    await settleCommit();
     expect(part("edit-cell-activate")).not.toHaveAttribute("aria-busy");
     expect(part("edit-cell-save-error")).toBeNull();
   });
