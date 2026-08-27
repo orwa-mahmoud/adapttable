@@ -16,9 +16,10 @@ Every table you render already:
 - uses a real `<table>` with header and body cells
 - names every control it draws (Filters, checkboxes, close, Done — not icon-only)
 - marks sortable headers with `aria-sort`
-- states the real dataset size on a windowed table — a virtualized or paged table carries
-  `aria-rowcount` with each row's absolute `aria-rowindex`, so a screen reader says "row
-  40,001 of 50,000" instead of counting the handful of rows in the DOM
+- states the real dataset size when only part of it is in the DOM — a virtualized or paged
+  table carries `aria-rowcount` with each row's absolute `aria-rowindex`, and the mobile card
+  list carries `aria-setsize` with each card's `aria-posinset`, so a screen reader says "row
+  40,001 of 50,000" instead of counting the handful of rows it can reach
 - honours `prefers-reduced-motion` when rows animate in
 
 Every adapter is audited with `axe` in CI, on desktop and mobile card layouts.

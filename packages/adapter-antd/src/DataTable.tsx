@@ -1065,6 +1065,8 @@ interface DataTableBodyRegionProps<TRow> {
   hasRowActions: boolean;
   rowReorder: RowReorderState<TRow> | undefined;
   windowStart: number;
+  /** Rows in the whole dataset, for the cards' `aria-setsize`. */
+  cardSetSize: number;
   rowPinning: RowPinningState<TRow> | undefined;
   pinnedTopRows: readonly TRow[];
   pinnedBottomRows: readonly TRow[];
@@ -1333,6 +1335,7 @@ function DataTableBodyRegion<TRow>(
     hasRowActions,
     rowReorder,
     windowStart,
+    cardSetSize,
     rowPinning,
     pinnedTopRows,
     pinnedBottomRows,
@@ -1391,6 +1394,7 @@ function DataTableBodyRegion<TRow>(
         {...cardWindow}
         rowReorder={rowReorder}
         windowStart={windowStart}
+        cardSetSize={cardSetSize}
         pinnedTopRows={pinnedTopRows}
         pinnedBottomRows={pinnedBottomRows}
         extraRows={extraRows}
@@ -1510,7 +1514,13 @@ function useAntdGridState<TRow>(
     columns: c.columnLayout.visibleColumns,
     firstRowIndex: windowStart,
   });
-  return { windowStart, find, gridFocus, stats };
+  // The same dataset size the grid reports through `aria-rowcount`; the card
+  // list needs it per item, as `aria-setsize`.
+  const cardSetSize = Math.max(
+    c.source.total,
+    windowStart + c.source.rows.length
+  );
+  return { windowStart, cardSetSize, find, gridFocus, stats };
 }
 
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
@@ -1608,7 +1618,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   };
   rememberFeatureHost(chromeProps, featureHost);
   const c = useTableChrome<TRow>(chromeProps);
-  const { windowStart, find, gridFocus, stats } = useAntdGridState(
+  const { windowStart, cardSetSize, find, gridFocus, stats } = useAntdGridState(
     props,
     c,
     history
@@ -1980,6 +1990,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
       hasRowActions={hasRowActions}
       rowReorder={c.rowReorder}
       windowStart={windowStart}
+      cardSetSize={cardSetSize}
       rowPinning={c.rowPinning}
       pinnedTopRows={pinnedTopRows}
       pinnedBottomRows={pinnedBottomRows}

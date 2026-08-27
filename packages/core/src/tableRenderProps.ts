@@ -118,6 +118,12 @@ export interface SharedTableRenderProps<TRow> {
    * dataset-relative `from` / `to`.
    */
   windowStart?: number;
+  /**
+   * Rows in the whole dataset, for the card list's `aria-setsize`. A card list
+   * is a real `<ul>`, so a windowed one states its size per item rather than
+   * through the table's `aria-rowcount`.
+   */
+  cardSetSize?: number;
   /** Whether the injected reorder column is start-pinned. */
   reorderPinned?: boolean;
   /**

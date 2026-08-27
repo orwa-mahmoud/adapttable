@@ -107,6 +107,8 @@ interface MobileCardProps<TRow> {
   rowReorder: SharedProps<TRow>["rowReorder"];
   windowStart: number;
   rowCount: number;
+  /** Rows in the whole dataset, for `aria-setsize`. */
+  setSize: number;
   reorderSignature: string | null;
 }
 
@@ -145,6 +147,7 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "reorderSignature",
   "windowStart",
   "rowCount",
+  "setSize",
   // Or a folder opens and its own chevron never turns.
   "treeEntry",
 ];
@@ -193,6 +196,7 @@ function MobileCardBase<TRow>({
   rowReorder,
   windowStart,
   rowCount,
+  setSize,
   renderCard,
 }: Readonly<MobileCardProps<TRow>>) {
   // Built once and used by both paths, so a custom card shows the very
@@ -227,6 +231,11 @@ function MobileCardBase<TRow>({
     <Card.Root
       ref={measureElement}
       data-index={index}
+      // A windowed list has only a slice of its items in the DOM, so each
+      // one states where it sits and how many there are; a complete list
+      // needs neither, because assistive tech can simply count.
+      aria-posinset={setSize > rowCount ? windowStart + index + 1 : undefined}
+      aria-setsize={setSize > rowCount ? setSize : undefined}
       data-adapttable-part="card"
       data-stagger=""
       data-selected={selected ? "" : undefined}
@@ -351,6 +360,7 @@ export function MobileCards<TRow>({
   measureElement,
   rowReorder,
   windowStart = 0,
+  cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
   extraRows,
@@ -421,6 +431,7 @@ export function MobileCards<TRow>({
         rowReorder={rowReorder}
         windowStart={windowStart}
         rowCount={rows.length}
+        setSize={cardSetSize}
         reorderSignature={rowReorderSignature(rowReorder, id, index)}
         renderCard={renderCard}
       />
