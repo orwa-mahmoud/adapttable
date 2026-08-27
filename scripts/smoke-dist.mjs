@@ -324,6 +324,25 @@ for (const pkg of LIB_PACKAGES) {
   }
 }
 
+// A package's declaration program must stay inside its own `src`. When it
+// reaches a file above the package — a vitest config importing the root's
+// shared config, say — the dts build writes a stray declaration into the
+// repository root, which is invisible until formatting or a diff trips over
+// it. Each package builds through its own `tsconfig.build.json` to prevent
+// that; this is the tripwire if one ever loses it.
+const strayRootTypes = readdirSync(process.cwd()).filter(
+  (name) => name.endsWith(".d.ts") || name.endsWith(".d.ts.map")
+);
+if (strayRootTypes.length > 0) {
+  failures += 1;
+  console.error(
+    `✗ the build wrote declaration file(s) into the repository root:\n  ` +
+      `${strayRootTypes.join("\n  ")}\n  ` +
+      `A package's dts program is reaching outside its own src — check that ` +
+      `its tsdown config still points at tsconfig.build.json.`
+  );
+}
+
 if (failures > 0) {
   console.error(`\nsmoke-dist: ${failures} package(s) failed.`);
   process.exit(1);
