@@ -25,10 +25,10 @@ export const FORMULA_BLANK: FormulaValue;
 
 // @public
 export const FORMULA_ERRORS: {
-    readonly name: "#NAME?"; /** A number was needed and the value was not one. */
-    readonly value: "#VALUE!"; /** Division by zero. */
-    readonly divideByZero: "#DIV/0!"; /** The formula depends on itself, directly or through others. */
-    readonly cycle: "#CYCLE!"; /** The formula could not be parsed at all. */
+    readonly name: "#NAME?";
+    readonly value: "#VALUE!";
+    readonly divideByZero: "#DIV/0!";
+    readonly cycle: "#CYCLE!";
     readonly syntax: "#ERROR!";
 };
 

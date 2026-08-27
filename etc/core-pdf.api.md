@@ -30,7 +30,7 @@ export type ExportViewEntry<TRow> = {
 } | {
     role: "group" | "aggregate";
     label: string;
-    level: number; /** Column that receives the label when that cell would otherwise be empty. */
+    level: number;
     labelKey?: string;
     values?: Readonly<Partial<Record<string, unknown>>>;
 };

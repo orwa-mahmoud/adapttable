@@ -238,7 +238,7 @@ export interface ChecklistSlots {
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
 // @public
-export const COLUMN_GROUP_ID_SEP = "\u001F";
+export const COLUMN_GROUP_ID_SEP = "";
 
 // @public
 export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
@@ -656,7 +656,7 @@ export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(Ro
 
 // @public
 export type DataModeProps<TRow> = {
-    mode: "server"; /** The data contract: run the request, hand back `data` + `total`. */
+    mode: "server";
     onQueryChange: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
 } | {
     mode?: "frontend";
@@ -665,16 +665,16 @@ export type DataModeProps<TRow> = {
 
 // @public
 export type DataTableShellProps<TRow> = Omit<BaseDataTableProps<TRow>, "source"> & {
-    source?: TableSource<TRow>; /** Frontend tier: the raw rows. */
-    data?: readonly TRow[]; /** Server tier: total row count across all pages. */
-    total?: number; /** Server tier: a request is in flight. */
-    loading?: boolean; /** Forwarded error to display in the table's error state. */
-    error?: Error | null; /** URL-state backend (defaults to the History API). */
-    urlAdapter?: UrlStateAdapter; /** Sync table state to the URL (default `true`). */
-    urlSync?: boolean; /** Namespace for this table's URL params. */
+    source?: TableSource<TRow>;
+    data?: readonly TRow[];
+    total?: number;
+    loading?: boolean;
+    error?: Error | null;
+    urlAdapter?: UrlStateAdapter;
+    urlSync?: boolean;
     urlKey?: string;
     supports?: QuerySupport;
-    facetKeys?: readonly string[]; /** Server tier: distinct-value counts from the last fetch. */
+    facetKeys?: readonly string[];
     facets?: FacetMap;
 } & DataModeProps<TRow>;
 
@@ -1882,7 +1882,7 @@ export function nestedTableDefaults(label: string, parent?: NestedTableParent): 
 
 // @public
 export function nestedTableDetail<TRow>(options: {
-    nestedTable: NestedTableFor<TRow> | undefined; /** The host's own detail panel, used for rows with no nested table. */
+    nestedTable: NestedTableFor<TRow> | undefined;
     renderRowDetail?: (row: TRow) => ReactNode;
     parent?: NestedTableParent;
 }): ((row: TRow) => ReactNode) | undefined;
@@ -2518,6 +2518,7 @@ export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected"
 
 // @public (undocumented)
 export interface SharedTableRenderProps<TRow> {
+    cardSetSize?: number;
     cellSpanAppearance?: CellSpanAppearance;
     closeHeaderFilterOnSelect?: boolean;
     collapsedColumnGroups?: readonly string[];
@@ -2539,10 +2540,10 @@ export interface SharedTableRenderProps<TRow> {
         groupBy: readonly string[];
         collapsed: GroupCollapseState;
         entries: readonly GroupedFlatEntry<TRow>[];
-        setGroupBy: (key: GroupByInput) => void; /** Open every group. */
-        expandAll: () => void; /** Close every group, at every level. */
-        collapseAll: () => void; /** Show the tree down to `depth` and no further. */
-        collapseToDepth: (depth: number) => void; /** Reveal the next page of groups, or of one group's rows. */
+        setGroupBy: (key: GroupByInput) => void;
+        expandAll: () => void;
+        collapseAll: () => void;
+        collapseToDepth: (depth: number) => void;
         showMore: (entry: {
             scope: "groups" | "rows";
             groupKey?: string;
@@ -2583,8 +2584,8 @@ export interface SharedTableRenderProps<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         expansion: TreeExpansionState;
-        columnKey?: string; /** Nodes fetching their children right now (`onLoadChildren`). */
-        loadingIds?: ReadonlySet<string>; /** Nodes whose last fetch rejected — closed, and clickable again. */
+        columnKey?: string;
+        loadingIds?: ReadonlySet<string>;
         failedIds?: ReadonlySet<string>;
     };
     virtualScrollRef?: (node: HTMLElement | null) => void;
@@ -2910,12 +2911,12 @@ export function useCommandPalette(options: UseCommandPaletteOptions): TableComma
 
 // @public
 export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
-    gridFocus: GridFocusState; /** What the selection adds up to; `null` unless `selectionStats` is set. */
-    selectionStats: SelectionStats | null; /** Undo/redo controls; inert unless `editHistory` is set. */
-    editHistory: EditHistoryState<TRow>; /** Find-bar state; inert unless `findInTable` is set. */
+    gridFocus: GridFocusState;
+    selectionStats: SelectionStats | null;
+    editHistory: EditHistoryState<TRow>;
     find: FindInTableState;
     source: TableSource<TRow>;
-    runtime: FilterRuntime<TRow>; /** The table's resolved URL backend — pass to saved-views UIs. */
+    runtime: FilterRuntime<TRow>;
     urlAdapter: UrlStateAdapter;
     chrome: TableChrome<TRow>;
     table: UseDataTableResult<TRow>;
@@ -2924,8 +2925,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
     filtersOpen: boolean;
     setFiltersOpen: Dispatch<SetStateAction<boolean>>;
     filtersTrigger: FilterTriggerToggle;
-    rootRef: RefObject<HTMLDivElement | null>; /** Fullscreen state, and the portal container overlays need with it. */
-    fullscreen: FullscreenState; /** Size every rendered column to its content. */
+    rootRef: RefObject<HTMLDivElement | null>;
+    fullscreen: FullscreenState;
     autoSizeColumns: () => number;
     autoSizeColumn: (key: string) => number;
     loadMoreRef: RefObject<HTMLDivElement | null>;
@@ -2949,6 +2950,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         cellSpanAppearance: CellSpanAppearance | undefined;
         extraRows: readonly ExtraRow[] | undefined;
         windowStart: number;
+        cardSetSize: number;
         confirm: ConfirmHandler;
         getRowId: (row: TRow) => string;
         rowEntries: readonly VirtualTableRow<TRow>[] | undefined;
@@ -3043,7 +3045,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onFiltersTriggerPointerDown?: (() => void) | undefined;
         savedViewsMenu?: ReactNode;
         columnMenu?: ReactNode;
-    }; /** The host this table owns — adapters pass it into palette / menu hooks. */
+    };
     featureHost: FeatureHostState<unknown> | undefined;
 };
 

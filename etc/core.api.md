@@ -461,7 +461,15 @@ export interface CellEditNavigation {
 }
 
 // @public
-export type CellEditor = "text" | "number" /** A checkbox. Commits `true` / `false`, never a string. */ | "boolean" /** A date. Commits `YYYY-MM-DD`, the value a date input holds. */ | "date" /** A date and a time. Commits `YYYY-MM-DDTHH:mm`. */ | "datetime" /** A time of day. Commits `HH:mm`. */ | "time" | {
+export type CellEditor = "text" | "number" |
+/** A checkbox. Commits `true` / `false`, never a string. */
+"boolean" |
+/** A date. Commits `YYYY-MM-DD`, the value a date input holds. */
+"date" |
+/** A date and a time. Commits `YYYY-MM-DDTHH:mm`. */
+"datetime" |
+/** A time of day. Commits `HH:mm`. */
+"time" | {
     type: "select";
     options: readonly CellEditorOption[] | readonly string[];
 } | {
@@ -562,10 +570,10 @@ export interface CellSaveState<TRow> {
     statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
     track: (options: {
         rowId: string;
-        columnKey: string; /** The row before the edit — what a rollback restores. */
-        previous: TRow; /** The value being saved. */
+        columnKey: string;
+        previous: TRow;
         attempted: unknown;
-        previousValue?: unknown; /** Whatever `onCellEdit` returned. */
+        previousValue?: unknown;
         result: unknown;
     }) => Promise<boolean>;
 }
@@ -670,7 +678,7 @@ export function collectChecklistValues<TRow>(def: FilterDef<TRow>, rows: readonl
 export type ColorScheme = "light" | "dark" | "auto";
 
 // @public @deprecated (undocumented)
-export const COLUMN_GROUP_ID_SEP = "\u001F";
+export const COLUMN_GROUP_ID_SEP = "";
 
 // @public @deprecated (undocumented)
 export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
@@ -1512,7 +1520,7 @@ export type ExportViewEntry<TRow> = {
 } | {
     role: "group" | "aggregate";
     label: string;
-    level: number; /** Column that receives the label when that cell would otherwise be empty. */
+    level: number;
     labelKey?: string;
     values?: Readonly<Partial<Record<string, unknown>>>;
 };
@@ -1526,7 +1534,7 @@ export function exportViewFromChrome<TRow>(options: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
     };
-    groupTotal?: (label: string) => string; /** Folded or paged-away leaves, for `scope: "all"` / `"selected"`. */
+    groupTotal?: (label: string) => string;
     includeHiddenLeaves?: boolean;
 }): ExportViewEntry<TRow>[] | undefined;
 
@@ -1756,7 +1764,7 @@ export type FilterTreeNode = QueryCondition | QueryFilterGroup;
 // @public
 export function filterTreeRows<TRow>(options: {
     rows: readonly TRow[];
-    getChildren: (row: TRow) => readonly TRow[] | undefined; /** Rebuild a row with the children that survived — the host owns its shape. */
+    getChildren: (row: TRow) => readonly TRow[] | undefined;
     withChildren: (row: TRow, children: readonly TRow[]) => TRow;
     match: (row: TRow) => boolean;
 }): TRow[];
@@ -1988,34 +1996,34 @@ export interface GroupCollapseState {
 
 // @public
 export type GroupedFlatEntry<TRow> = {
-    kind: "group"; /** Stable id: `group:${keys}:${valueKeys}`, unique down the whole tree. */
-    key: string; /** Raw group value (from sortValue / path). */
-    value: unknown; /** Display label for the header (stringified value, or "(blank)"). */
+    kind: "group";
+    key: string;
+    value: unknown;
     label: string;
-    level: number; /** Which column this level groups by. */
-    groupBy: string; /** The value keys from the root down to here — the node's address. */
+    level: number;
+    groupBy: string;
     path: readonly string[];
     leafRows: readonly TRow[];
     leafIds: readonly string[];
-    serverCount?: number; /** Present when the host passed `groupAggregates`. */
+    serverCount?: number;
     aggregateCells?: Partial<Record<string, ReactNode>>;
     collapsed: boolean;
 } | {
-    kind: "groupFooter"; /** Stable id: the group's key with a `:footer` suffix. */
-    key: string; /** The group this closes. */
-    groupKey: string; /** Depth of the group it closes. */
-    level: number; /** Which column that group is grouped by. */
-    groupBy: string; /** The group's display label, for a "Core total" caption. */
+    kind: "groupFooter";
+    key: string;
+    groupKey: string;
+    level: number;
+    groupBy: string;
     label: string;
     leafRows: readonly TRow[];
     leafIds: readonly string[];
     aggregateCells?: Partial<Record<string, ReactNode>>;
 } | {
-    kind: "groupMore"; /** Stable id. */
-    key: string; /** Which group's leaves are being paged, or absent for top-level groups. */
-    groupKey?: string; /** Depth the row sits at, so it indents with what it belongs to. */
-    level: number; /** Whether this offers more groups or more rows inside one. */
-    scope: "groups" | "rows"; /** How many are still hidden. */
+    kind: "groupMore";
+    key: string;
+    groupKey?: string;
+    level: number;
+    scope: "groups" | "rows";
     remaining: number;
     leafRows: readonly TRow[];
     leafIds: readonly string[];
@@ -2023,7 +2031,7 @@ export type GroupedFlatEntry<TRow> = {
 } | {
     kind: "row";
     key: string;
-    row: TRow; /** Index among leaves in the flat model (stable for selection chrome). */
+    row: TRow;
     index: number;
     groupKey: string;
 } | ExtraEntry_2;
@@ -2398,7 +2406,7 @@ export type MobileCardRenderer<TRow> = (row: TRow, card: MobileCardModel<TRow>) 
 export function moveGridFocus(from: GridCell, move: GridFocusMove, bounds: GridBounds, covered?: (cell: GridCell) => boolean): GridCell;
 
 // @public
-export const MULTI_SEPARATOR = "\u001F";
+export const MULTI_SEPARATOR = "";
 
 // @public
 export interface MultiSelectEditorCheckboxProps {
@@ -2579,8 +2587,8 @@ export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
 
 // @public
 export const PIN_Z: {
-    readonly body: 1; /** Sticky pinned rows — above scrolled body, below the header. */
-    readonly rowPinned: 2; /** A pinned column cell inside a pinned row. */
+    readonly body: 1;
+    readonly rowPinned: 2;
     readonly rowPinnedColumn: 3;
     readonly header: 4;
     readonly headerPinned: 5;
@@ -2679,7 +2687,7 @@ export const RANGE_OP_LABEL_KEYS: {
         readonly between: "opBetween";
         readonly in: "opIn";
         readonly notIn: "opNotIn";
-    }; /** `eq` stays as the historical spelling of `on` for existing widgets. */
+    };
     readonly date: {
         readonly eq: "opOn";
         readonly before: "opBefore";
@@ -3347,7 +3355,7 @@ export interface TableChrome<TRow> {
     columnLayout: UseColumnLayoutResult<TRow>;
     confirm: ConfirmHandler;
     detail?: {
-        render: (row: TRow) => ReactNode; /** Expansion state for the chevrons. */
+        render: (row: TRow) => ReactNode;
         expansion: RowExpansionState;
     };
     droppedColumns: readonly string[];
@@ -3360,12 +3368,12 @@ export interface TableChrome<TRow> {
     grouping?: {
         groupBy: readonly string[];
         collapsed: GroupCollapseState;
-        aggregates?: GroupAggregatesFn<TRow>; /** Flat group-header + leaf entries for adapters to render. */
+        aggregates?: GroupAggregatesFn<TRow>;
         entries: readonly GroupedFlatEntry<TRow>[];
-        setGroupBy: (key: GroupByInput) => void; /** Open every group. */
-        expandAll: () => void; /** Close every group, at every level. */
+        setGroupBy: (key: GroupByInput) => void;
+        expandAll: () => void;
         collapseAll: () => void;
-        collapseToDepth: (depth: number) => void; /** Reveal the next page of groups, or of one group's rows. */
+        collapseToDepth: (depth: number) => void;
         showMore: (entry: {
             scope: "groups" | "rows";
             groupKey?: string;
@@ -3386,8 +3394,8 @@ export interface TableChrome<TRow> {
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;
     tree?: {
-        entries: readonly TreeEntry<TRow>[]; /** Which nodes are open. */
-        expansion: TreeExpansionState; /** Which column carries the chevron and the indent. */
+        entries: readonly TreeEntry<TRow>[];
+        expansion: TreeExpansionState;
         columnKey?: string;
     };
 }
@@ -4407,7 +4415,7 @@ export interface UseRowPinningUrlStateResult {
 export function useRowReorder<TRow>(options: {
     enabled: boolean;
     onRowReorder?: RowReorderHandler<TRow>;
-    labels: RowReorderLabels; /** Look up a row in the current source by its rendered index. */
+    labels: RowReorderLabels;
     rowAt: (localIndex: number) => TRow | undefined;
 }): RowReorderState_2<TRow>;
 

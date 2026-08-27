@@ -51,7 +51,7 @@ export { CustomCellEditorRender }
 
 // @public
 export type DataModeProps<TRow> = {
-    mode: "server"; /** The data contract: run the request, hand back `data` + `total`. */
+    mode: "server";
     onQueryChange: NonNullable<UseServerDataOptions$1<TRow>["onQueryChange"]>;
 } | {
     mode?: "frontend";

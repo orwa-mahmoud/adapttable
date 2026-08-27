@@ -36,10 +36,10 @@ export function moveField(config: PivotConfig, zone: PivotZone, index: number, d
 export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
 
 // @public
-export const PIVOT_BLANK = "\u2014";
+export const PIVOT_BLANK = "—";
 
 // @public
-export const PIVOT_GRAND_TOTAL_KEY = "\u0002grand";
+export const PIVOT_GRAND_TOTAL_KEY = "grand";
 
 // @public
 export const PIVOT_ROW_COLUMN_KEY = "pivot-row";

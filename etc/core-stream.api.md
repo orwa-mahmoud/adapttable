@@ -60,7 +60,19 @@ export interface RowPatchStreamState {
 }
 
 // @public
-export type RowPatchStreamStatus = /** No url wired, or `enabled: false`. Nothing is open and nothing will be. */"idle" /** A socket is being opened for the first time. */ | "connecting" /** Open and receiving. */ | "open" /** Dropped, and a retry is scheduled. */ | "reconnecting" /** Given up — the retry budget is spent, or the environment has no socket. */ | "error" /** The host closed it. Final: nothing reopens on its own. */ | "closed";
+export type RowPatchStreamStatus =
+/** No url wired, or `enabled: false`. Nothing is open and nothing will be. */
+"idle" |
+/** A socket is being opened for the first time. */
+"connecting" |
+/** Open and receiving. */
+"open" |
+/** Dropped, and a retry is scheduled. */
+"reconnecting" |
+/** Given up — the retry budget is spent, or the environment has no socket. */
+"error" |
+/** The host closed it. Final: nothing reopens on its own. */
+"closed";
 
 // @public
 export interface StreamSocket {
