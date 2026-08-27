@@ -1161,9 +1161,10 @@ function DesktopTableBody<TRow>({
   const virtualBody = virtualize && !grouping;
   const components = useMemo(
     () => ({
-      table: tableComponent(
-        gridEnabled && getGridProps ? getGridProps() : undefined
-      ),
+      // Core decides what belongs here: the grid role and handlers only with
+      // cell navigation, but a windowed table's `aria-rowcount` regardless —
+      // so this asks unconditionally rather than gating on the feature.
+      table: tableComponent(getGridProps ? getGridProps() : undefined),
       header: {
         // A bounded height splits the grid into a header table and a body
         // table, and antd resolves the header one through `header.table`. It
