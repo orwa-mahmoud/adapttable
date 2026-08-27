@@ -37,6 +37,38 @@ test.describe("scale — virtualization", () => {
     expect(await rows.count()).toBeGreaterThan(0);
   });
 
+  /**
+   * A windowed table has a few dozen rows in the DOM and tens of thousands in
+   * the dataset. jsdom can prove the attributes exist; only a real browser
+   * proves they survive a live virtualizer as the window moves.
+   */
+  test("states the real dataset size while the DOM holds a window", async ({
+    page,
+  }) => {
+    await page.goto(`/${KIT}/scale/`);
+    const table = page.locator("table").first();
+    await expect(table).toBeVisible();
+    // Cell navigation is off on this page, so nothing claims the grid contract.
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    // The default scale dataset is 50,000 rows.
+    await expect(table).toHaveAttribute("aria-rowcount", "50000");
+
+    const rows = page.locator('[data-adapttable-part="row"]');
+    await expect(rows.first()).toHaveAttribute("aria-rowindex", "1");
+    expect(await rows.count()).toBeLessThan(120);
+
+    // The window advances; the indices count the dataset, not the DOM.
+    await page.mouse.wheel(0, 6000);
+    await expect
+      .poll(
+        async () => Number(await rows.first().getAttribute("aria-rowindex")),
+        { timeout: 5000 }
+      )
+      .toBeGreaterThan(1);
+    // And the total never moves with the window.
+    await expect(table).toHaveAttribute("aria-rowcount", "50000");
+  });
+
   // Radix is listed explicitly: its Table.Root ScrollArea used to trap the
   // sticky header inside the table, so this only failing on the first kit
   // (usually Mantine) would miss the regression.
