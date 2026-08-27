@@ -13,6 +13,9 @@
     "typescript"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "author": "Orwa Mahmoud",
   "homepage": "https://orwa-mahmoud.github.io/adapttable/",
   "repository": {
