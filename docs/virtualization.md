@@ -137,5 +137,10 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
 - The headless hook is exported as `useTableVirtualization` for custom markup;
   when disabled it returns every row with no spacers, so one render path
   serves both cases.
+- A windowed table still tells assistive technology how big the data really
+  is: the table carries `aria-rowcount` with each row's absolute
+  `aria-rowindex`, and the mobile card list carries `aria-setsize` with each
+  card's `aria-posinset`. Without that a screen reader would count only the
+  few rows in the DOM. See [Accessibility](./accessibility.md).
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
