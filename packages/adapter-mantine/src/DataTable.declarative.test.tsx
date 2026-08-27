@@ -118,7 +118,11 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
       />
     );
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
-    expect(await screen.findByLabelText("Status")).toBeInTheDocument();
+    // Mantine 9.5 labels the options listbox from the same label as its
+    // combobox, so the control is asked for by role rather than by label.
+    expect(
+      await screen.findByRole("combobox", { name: "Status" })
+    ).toBeInTheDocument();
   });
 
   it("zero ceremony: the auto-built select filters rows, raises a chip, and clear-all resets", async () => {
