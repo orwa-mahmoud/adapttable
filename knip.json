@@ -1,0 +1,39 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs", "vitest.shared.ts", "eslint.config.mjs"],
+      "project": ["scripts/**/*.mjs", "*.ts", "*.mjs"]
+    },
+    "packages/*": {
+      "entry": ["src/*.ts!", "src/*.tsx!"],
+      "project": ["src/**/*.{ts,tsx}!"]
+    },
+    "apps/showcase": {
+      "entry": [
+        "index.html",
+        "src/entry-*.tsx",
+        "src/main.tsx",
+        "vite.config.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "apps/docs": {
+      "entry": [
+        "astro.config.mjs",
+        "src/content/**/*.{md,mdx}",
+        "sync-docs.mjs"
+      ],
+      "project": ["src/**/*.{ts,tsx,astro}", "*.mjs"]
+    },
+    "examples": {
+      "entry": ["*.tsx"],
+      "project": ["*.{ts,tsx}"]
+    },
+    "starters/*": {
+      "entry": ["src/main.tsx", "vite.config.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  },
+  "ignoreExportsUsedInFile": true
+}
