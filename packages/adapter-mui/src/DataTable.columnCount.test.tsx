@@ -97,6 +97,25 @@ describe("windowed column axis — dataset width (mui)", () => {
     }
   });
 
+  it("numbers the header cells from the same absolute positions", () => {
+    const { container } = mount({ virtualizeColumns: true });
+    armWindow(container);
+
+    const headers = realCells("thead th");
+    expect(headers.length).toBeLessThan(COLUMN_COUNT);
+    // A header names its column, so the header row has to agree with the body
+    // row beneath it — otherwise a reader hears two different positions for one
+    // column.
+    for (const header of headers) {
+      const column = /^C(\d+)$/.exec(header.textContent?.trim() ?? "")?.[1];
+      expect(column, header.textContent ?? "").toBeDefined();
+      expect(header, header.textContent ?? "").toHaveAttribute(
+        "aria-colindex",
+        String(Number(column) + 1)
+      );
+    }
+  });
+
   it("claims no grid keyboard contract on the way", () => {
     const { container } = mount({ virtualizeColumns: true });
     armWindow(container);

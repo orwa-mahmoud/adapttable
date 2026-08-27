@@ -832,8 +832,14 @@ export function useGridFocus<TRow>(
   /** Props for a column header that selects its column when clicked. */
   const getColumnHeaderProps = useCallback(
     (col: number, options?: { sortable?: boolean }) => {
-      if (!enabled) return {};
+      // A header cell is a cell: wherever the table states `aria-colcount`, the
+      // header row has to say which column it names, or a reader counts the
+      // rendered headers and lands one window off.
+      const position =
+        enabled || columnsWindowed ? { "aria-colindex": col + 1 } : {};
+      if (!enabled) return position;
       return {
+        ...position,
         onClick: (event: { ctrlKey?: boolean; metaKey?: boolean }) => {
           const modified = event.ctrlKey === true || event.metaKey === true;
           // A sortable header's plain click already sorts, and the two cannot
@@ -844,7 +850,7 @@ export function useGridFocus<TRow>(
         },
       };
     },
-    [enabled, selectColumn]
+    [enabled, columnsWindowed, selectColumn]
   );
 
   // The handle sits on the selection's bottom inline-end corner — the last row

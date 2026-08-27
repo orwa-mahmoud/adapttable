@@ -588,6 +588,25 @@ describe("useGridFocus", () => {
       ).not.toHaveAttribute("aria-colindex");
     });
 
+    it("numbers the header cells from the same absolute positions", () => {
+      render(<Grid enabled={false} columnsWindowed />);
+      const headers = [...document.querySelectorAll("thead th")];
+
+      // A header names its column, so it has to agree with the body cell under
+      // it — two different positions for one column is worse than none.
+      expect(headers.map((h) => h.getAttribute("aria-colindex"))).toEqual(
+        COLUMNS.map((_, index) => String(index + 1))
+      );
+    });
+
+    it("leaves the header row unnumbered when no axis is windowed", () => {
+      render(<Grid enabled={false} />);
+
+      expect(document.querySelector("thead th")).not.toHaveAttribute(
+        "aria-colindex"
+      );
+    });
+
     it("states both axes when both are windowed", () => {
       render(
         <Grid

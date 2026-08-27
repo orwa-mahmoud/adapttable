@@ -66,5 +66,8 @@ describe("windowed column axis — dataset width (antd)", () => {
       "aria-colcount"
     );
     expect(bodyCells()[0]).not.toHaveAttribute("aria-colindex");
+    expect(document.querySelector("thead th")).not.toHaveAttribute(
+      "aria-colindex"
+    );
   });
 });

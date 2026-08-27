@@ -113,6 +113,16 @@ test.describe("scale — virtualization", () => {
       .toBeGreaterThan(before);
     // And the total never moves with the window.
     await expect(table).toHaveAttribute("aria-colcount", "60");
+
+    // The header row names the same columns as the body row beneath it.
+    const headerIndices = await page
+      .locator('[data-adapttable-part="header-cell"]')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("aria-colindex"))
+      );
+    expect(headerIndices.length).toBeGreaterThan(0);
+    expect(headerIndices.every((index) => index !== null)).toBe(true);
+    expect(Math.max(...headerIndices.map(Number))).toBeGreaterThan(before);
   });
 
   // Radix is listed explicitly: its Table.Root ScrollArea used to trap the

@@ -1317,6 +1317,14 @@ export function useDesktopTableAssembly<TRow>(
       chainDir ?? (table.sortBy === column.key ? table.sortDir : undefined);
     const sortButtonProps = table.getSortButtonProps(column);
     const sortIndex = sortButtonProps["data-sort-index"];
+    // Focus addresses columns in the FULL visible list, while a windowed header
+    // is handed its position within the rendered slice. Resolve the absolute
+    // index so column selection, the header checkbox and `aria-colindex` all
+    // name the same column whether or not the horizontal axis is windowed.
+    const absoluteIndex = table.columns.findIndex(
+      (candidate) => candidate.key === column.key
+    );
+    const focusIndex = absoluteIndex === -1 ? headerIndex : absoluteIndex;
     const headerController = columnHeaderController(column, {
       sortDir: effectiveDir,
       sortIndex: typeof sortIndex === "number" ? sortIndex : undefined,
@@ -1339,7 +1347,7 @@ export function useDesktopTableAssembly<TRow>(
       rowSpan,
       headerProps,
       columnHeaderProps:
-        gridFocus?.getColumnHeaderProps(headerIndex, {
+        gridFocus?.getColumnHeaderProps(focusIndex, {
           sortable: column.sortable,
         }) ?? {},
       style,
@@ -1359,9 +1367,9 @@ export function useDesktopTableAssembly<TRow>(
         : undefined,
       columnName,
       showColumnCheckbox: gridFocus?.columnCheckbox === true,
-      columnCheckboxChecked: gridFocus?.isColumnSelected(headerIndex) ?? false,
+      columnCheckboxChecked: gridFocus?.isColumnSelected(focusIndex) ?? false,
       onToggleColumn: gridFocus
-        ? () => gridFocus.toggleColumn(headerIndex)
+        ? () => gridFocus.toggleColumn(focusIndex)
         : undefined,
       columnSelectAriaLabel: columnSelectLabel(labels.selectColumn, column),
     };

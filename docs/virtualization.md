@@ -145,7 +145,8 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
   `aria-rowindex`, and the mobile card list carries `aria-setsize` with each
   card's `aria-posinset`. `virtualizeColumns` does the same for the horizontal
   axis — `aria-colcount` on the table and an absolute `aria-colindex` on every
-  cell — so a reader is never left counting the cells it can reach. Without
+  body and header cell — so a reader is never left counting the cells it can
+  reach. Without
   that a screen reader would count only the few rows in the DOM. See
   [Accessibility](./accessibility.md).
 
