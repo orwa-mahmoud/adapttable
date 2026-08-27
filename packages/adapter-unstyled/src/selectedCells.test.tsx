@@ -1,4 +1,4 @@
-import { fireEvent } from "@testing-library/react";
+import { act, fireEvent } from "@testing-library/react";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
@@ -38,7 +38,7 @@ describe("selected cells are visible (unstyled)", () => {
     );
     const cells = container.querySelectorAll<HTMLElement>("[data-grid-cell]");
     expect(cells.length).toBeGreaterThan(0);
-    cells[0]!.focus();
+    act(() => cells[0]!.focus());
     fireEvent.keyDown(cells[0]!, { key: "ArrowRight", shiftKey: true });
     // Two cells: the anchor and the head.
     expect(container.querySelectorAll("[data-cell-selected]")).toHaveLength(2);
