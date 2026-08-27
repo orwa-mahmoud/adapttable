@@ -460,6 +460,14 @@ export const Table = {
     className,
     children,
     tableStyle,
+    // The grid semantics belong to the <table>, not to the scroll wrapper this
+    // component owns: a role-less div carrying `aria-rowcount` states the
+    // dataset size to nothing, and the same div carrying `aria-label` names
+    // nothing. Both are pulled out of the rest spread and applied below.
+    role,
+    "aria-rowcount": ariaRowCount,
+    "aria-colcount": ariaColCount,
+    "aria-label": ariaLabel,
     ...rest
   }: Readonly<
     {
@@ -477,7 +485,14 @@ export const Table = {
         data-size={size}
         {...rest}
       >
-        <table data-adapttable-part="table" style={tableStyle}>
+        <table
+          data-adapttable-part="table"
+          style={tableStyle}
+          role={role}
+          aria-rowcount={ariaRowCount}
+          aria-colcount={ariaColCount}
+          aria-label={ariaLabel}
+        >
           {children}
         </table>
       </div>
