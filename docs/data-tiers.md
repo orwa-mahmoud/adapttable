@@ -324,7 +324,7 @@ the way you configured it, and these guarantees do not apply.
   `baseParams` (static params merged into every call, e.g. a parent scope
   id), and `sanitizeParams`. Its query argument is typed structurally as
   `InfiniteQueryLike`, so TanStack Query stays a type-only peer. See
-  [`examples/mui-backend.tsx`](../examples/mui-backend.tsx) for a complete
+  [`examples/mui-query-source.tsx`](../examples/mui-query-source.tsx) for a complete
   runnable version.
 - On the server tier, `source.refetch()` re-emits the current query;
   out-of-range pages and stale responses are handled for you via the abort
