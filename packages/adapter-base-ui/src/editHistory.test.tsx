@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -48,8 +48,10 @@ describe("undo and redo (base-ui)", () => {
     const onCellEdit = vi.fn();
     table({ onCellEdit, editHistory: true });
     cell(0, 0).focus();
-    fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
-    await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
+    await act(async () => {
+      fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
+      await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
+    });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true });
     expect(onCellEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "A");
     vi.unstubAllGlobals();
@@ -60,8 +62,10 @@ describe("undo and redo (base-ui)", () => {
     const onCellEdit = vi.fn();
     table({ onCellEdit, editHistory: true });
     cell(0, 0).focus();
-    fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
-    await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
+    await act(async () => {
+      fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
+      await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
+    });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true, shiftKey: true });
     expect(onCellEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "Z");
@@ -73,8 +77,10 @@ describe("undo and redo (base-ui)", () => {
     const onCellEdit = vi.fn();
     table({ onCellEdit });
     cell(0, 0).focus();
-    fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
-    await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
+    await act(async () => {
+      fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });
+      await vi.waitFor(() => expect(onCellEdit).toHaveBeenCalledOnce());
+    });
     fireEvent.keyDown(cell(0, 0), { key: "z", ctrlKey: true });
     expect(onCellEdit).toHaveBeenCalledOnce();
     vi.unstubAllGlobals();
