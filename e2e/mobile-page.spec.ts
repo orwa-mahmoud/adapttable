@@ -92,3 +92,30 @@ for (const kit of KITS) {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 }
+
+/**
+ * The card list is a real <ul>, so a windowed one has to state its size per
+ * item. jsdom can show the attributes exist; only a real phone-sized browser
+ * shows them holding while a live virtualizer moves the window.
+ */
+test("states the real dataset size on a windowed card list", async ({
+  page,
+}) => {
+  await page.goto(`/${KIT}/scale/`);
+  const cards = page.locator('[data-adapttable-part="card"]');
+  await expect(cards.first()).toBeVisible();
+  // A window, not the dataset: the phone holds a handful of the 50,000 rows.
+  expect(await cards.count()).toBeLessThan(120);
+  await expect(cards.first()).toHaveAttribute("aria-setsize", "50000");
+  await expect(cards.first()).toHaveAttribute("aria-posinset", "1");
+
+  // The window advances; the positions count the dataset, not the DOM.
+  await page.mouse.wheel(0, 6000);
+  await expect
+    .poll(
+      async () => Number(await cards.first().getAttribute("aria-posinset")),
+      { timeout: 5000 }
+    )
+    .toBeGreaterThan(1);
+  await expect(cards.first()).toHaveAttribute("aria-setsize", "50000");
+});
