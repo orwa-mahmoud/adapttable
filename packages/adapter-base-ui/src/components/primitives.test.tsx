@@ -1,5 +1,5 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { type ReactElement, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderBaseUi } from "../test-utils";
@@ -168,6 +168,51 @@ describe("NativeSelect primitive (Base UI)", () => {
     expect(screen.getByRole("option", { name: "…" })).toHaveAttribute(
       "data-disabled"
     );
+  });
+});
+
+/**
+ * A rows-per-page select offers the current size plus the standard ones, so
+ * choosing a new size changes the length of the list. The kit reconciles its
+ * own value when the item registry changes shape, and that reconciliation
+ * reports the value the select mounted with — so a caller that commits through
+ * a round trip (the URL) must not see it, or the selection it just made is
+ * reverted under it.
+ */
+describe("NativeSelect with a value-dependent option list (Base UI)", () => {
+  function Sizes() {
+    const [limit, setLimit] = useState("1");
+    // The "1" entry exists only while 1 is the current size — exactly the
+    // shrinking list the reconciliation reacts to.
+    const options = [
+      ...(limit === "1" ? [{ value: "1", label: "1" }] : []),
+      { value: "10", label: "10" },
+      { value: "25", label: "25" },
+    ];
+    return (
+      <>
+        <NativeSelect
+          aria-label="Rows per page"
+          value={limit}
+          options={options}
+          onValueChange={setLimit}
+        />
+        <output>{limit}</output>
+      </>
+    );
+  }
+
+  it("keeps the size the user chose when the list loses an entry", () => {
+    renderNode(<Sizes />);
+    fireEvent.pointerDown(
+      screen.getByRole("combobox", { name: "Rows per page" })
+    );
+    fireEvent.click(screen.getByRole("combobox", { name: "Rows per page" }));
+    const ten = screen.getByRole("option", { name: "10" });
+    fireEvent.pointerDown(ten);
+    fireEvent.click(ten);
+
+    expect(screen.getByRole("status")).toHaveTextContent("10");
   });
 });
 
