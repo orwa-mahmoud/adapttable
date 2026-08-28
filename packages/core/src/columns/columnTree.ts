@@ -13,6 +13,7 @@ import {
   isColumnGroupStubKey,
 } from "./headerGroups";
 
+export type { ColumnDef, GroupedHeaderAlign };
 /**
  * A parent header with its own children. Collapse options live here, not
  * on the table: each group decides whether a collapsed state is an arrow

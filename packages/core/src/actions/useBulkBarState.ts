@@ -7,6 +7,8 @@ import {
   useBulkActionRunner,
 } from "./useBulkActionRunner";
 
+export type { BulkActionContext };
+
 /**
  * Options for {@link useBulkBarState}.
  *

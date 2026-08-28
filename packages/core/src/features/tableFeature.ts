@@ -31,6 +31,20 @@ import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import { devWarn } from "../utils/devWarn";
 
+export type {
+  Aggregator,
+  ColumnMenuAction,
+  ColumnMenuActionContext,
+  ColumnMenuRow,
+  Command,
+  ContextMenuItem,
+  ContextMenuTarget,
+  CustomCellEditorRender,
+  ExportWriter,
+  FilterTypeSpec,
+  SidePanelEntry,
+};
+
 /**
  * Props a feature may write. Keys match `<DataTable>` enabling props.
  *

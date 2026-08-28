@@ -32,6 +32,8 @@ import {
 } from "./pivotConfigModel";
 import type { PivotConfig } from "./pivotModel";
 
+export type { AggregateName, PivotConfig, PivotField, PivotZone };
+
 /** The aggregations the panel offers. */
 const AGGREGATIONS: readonly AggregateName[] = [
   "sum",

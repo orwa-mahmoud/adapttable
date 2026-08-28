@@ -5949,7 +5949,7 @@ load `buildPrintDocument` into a hidden iframe and call `window.print()`.
 stylesheet — repeating `thead`, `break-inside: avoid` on rows and groups,
 column widths from the table, `padding-inline-start` so a tree or a
 group indents under RTL. `PrintLayoutOptions` / `PdfWriterOptions` /
-`PrintPageSize` configure title, direction, paper and whether a
+`PrintPageSize` / `PrintPageBreak` configure title, direction, paper and whether a
 top-level group starts a new page (`pageBreak: "group"`). Paper defaults
 to A4 landscape; direction inherits `document.documentElement.dir` when
 omitted, so print matches what the reader is looking at.
@@ -8278,8 +8278,9 @@ the export button and `buildTablePdf` for a host assembling rows by hand.
 Print is a different verb: `openPrintLayout` (an `ExportTable`) and
 `printTable` (rows and columns) load `buildPrintDocument` into a hidden
 iframe. `buildPrintTableHtml` is the `<table>` alone; `printStyles` is the
-stylesheet. `PrintLayoutOptions` / `PdfWriterOptions` / `PrintPageSize`
-configure title, direction and paper. Both option types take `font` — a
+stylesheet. `PrintLayoutOptions` / `PdfWriterOptions` / `PrintPageSize` /
+`PrintPageBreak` configure title, direction, paper and how groups meet a
+page boundary. Both option types take `font` — a
 TrueType file as bytes — which the PDF writer subsets and embeds so the
 download draws Arabic, CJK or any script the built-in face cannot; Arabic
 is shaped into its contextual forms and reordered right to left. See
@@ -8825,7 +8826,8 @@ elsewhere. Adapters build theirs over `CommandPaletteChrome` /
 `CommandPaletteChromeProps` / `CommandPaletteSlots` /
 `CommandPaletteSurfaceProps` / `CommandPaletteInputProps` /
 `CommandPaletteItemProps` and arm it with `useCommandPalette` (returning a
-`TableCommandPalette`), from `@adapttable/core/adapter`. See
+`TableCommandPalette`; `UseCommandPaletteOptions` is the hook's input), from
+`@adapttable/core/adapter`. See
 [customization](./customization.md#command-palette).
 
 **Context menus.** `contextMenu` arms right-click menus for headers, rows and
@@ -8836,9 +8838,11 @@ append your own behind a divider. `ContextMenuItem` is one entry (`key`,
 the built-in entries call. Every route in works: right-click, Shift+F10, the
 menu key, and a long press. Adapters build theirs over `ContextMenuChrome` /
 `ContextMenuChromeProps` / `ContextMenuSlots` / `ContextMenuSurfaceProps` /
-`ContextMenuItemProps` and arm it with `useTableContextMenu` (returning a
+`ContextMenuItemProps` and arm it with `useTableContextMenu`
+(`TableContextMenuOptions` is the hook's input; it returns a
 `TableContextMenu`: `regionProps` to bind once, plus `items`, `at` and
-`close`), all from `@adapttable/core/adapter`. The surface slot receives an
+`close`). `ContextMenuPoint` is the click coordinates the chrome hands the
+surface. All from `@adapttable/core/adapter`. The surface slot receives an
 `anchorRef` — a zero-size element at the click point — because every kit's
 menu positions against an element rather than coordinates. See
 [customization](./customization.md#context-menus).
@@ -8884,7 +8888,8 @@ armed and disable rather than disappear; `undoRedoToolbar(wanted, history,
 labels)` from `@adapttable/core/adapter` is the one rule both wiring paths
 resolve that with. Labels are `undoEdit` and `redoEdit`. `printButton` adds a
 Print button, which renders only when `onPrint` is also wired;
-`printToolbar(wanted, onPrint, labels)` resolves that pair the same way, and
+`printToolbar(wanted, onPrint, labels)` resolves that pair the same way
+(`PrintToolbar` is the resolved `{ onPrint, label }`), and
 the caption is `labels.print`. See
 [customization](./customization.md#toolbar-and-status-bar).
 

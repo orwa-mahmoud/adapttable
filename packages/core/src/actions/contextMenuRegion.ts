@@ -20,6 +20,8 @@
  */
 import type { ContextMenuTarget } from "./contextMenuModel";
 
+export type { ContextMenuTarget };
+
 /**
  * The attribute a row carries so its menu knows which row it is.
  *

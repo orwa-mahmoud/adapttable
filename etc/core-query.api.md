@@ -7,6 +7,12 @@
 import { ReactNode } from 'react';
 
 // @public
+export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
+
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
@@ -28,6 +34,23 @@ export interface FormulaColumnSpec {
     header?: string;
     key: string;
 }
+
+// @public
+export type FormulaValue = {
+    readonly kind: "number";
+    readonly value: number;
+} | {
+    readonly kind: "text";
+    readonly value: string;
+} | {
+    readonly kind: "boolean";
+    readonly value: boolean;
+} | {
+    readonly kind: "blank";
+} | {
+    readonly kind: "error";
+    readonly code: FormulaErrorCode;
+};
 
 // @public
 export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is QueryFilterGroup;

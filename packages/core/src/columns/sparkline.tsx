@@ -7,7 +7,27 @@
  */
 import { createElement, type ReactElement, type ReactNode } from "react";
 
-import type { ColumnDef } from "../types";
+import type { CellEditor } from "../editing/cellEditing";
+import type { ColumnFilter } from "../filters/filterDefs";
+import type {
+  CellProps,
+  ColumnDef,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+
+export type {
+  CellEditor,
+  CellProps,
+  ColumnDef,
+  ColumnFilter,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+};
 
 /**
  * The three marks this entry draws.

@@ -34,6 +34,8 @@ import {
   type UseServerDataOptions,
 } from "./useServerData";
 
+export type { UseServerDataOptions };
+
 /**
  * Options for {@link useTableData}.
  *

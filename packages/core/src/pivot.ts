@@ -22,6 +22,7 @@
  * <DataTable {...pivotTableModel(result)} />;
  * ```
  */
+export type { AggregateName, Aggregator } from "./aggregate/aggregate";
 export {
   assignField,
   availableFields,
@@ -72,3 +73,5 @@ export {
   type ServerPivotOptions,
   serverPivotResult,
 } from "./pivot/serverPivot";
+export type { ColumnDef, TableLabels } from "./types";
+export type { UrlStateAdapter } from "./url/adapter";

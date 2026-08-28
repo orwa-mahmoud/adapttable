@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { SelectionStats } from "./selectionStats";
 
+export type { SelectionStats };
+
 /**
  * Props for {@link SelectionStatsChrome}.
  *

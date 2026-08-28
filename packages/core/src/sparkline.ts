@@ -26,3 +26,4 @@ export {
   type SparklineProps,
   sparklineSummary,
 } from "./columns/sparkline";
+export type { ColumnDef } from "./types";

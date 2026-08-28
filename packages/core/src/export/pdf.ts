@@ -23,11 +23,23 @@
  * honoured here because a PDF that ignores them is a screenshot of the
  * wrong table.
  */
-import type { ColumnDef } from "../types";
+import type { CellEditor } from "../editing/cellEditing";
+import type { ColumnFilter } from "../filters/filterDefs";
+import type {
+  CellProps,
+  ColumnDef,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
 import {
   buildExportTable,
+  type ExportPayload,
+  type ExportRowMeta,
   type ExportTable,
   type ExportViewEntry,
+  type ExportWriteContext,
   type ExportWriter,
 } from "./exportWriter";
 import {
@@ -45,6 +57,22 @@ import {
   resolvePrintDirection,
 } from "./printLayout";
 import { parseSfnt } from "./sfnt";
+
+export type {
+  CellEditor,
+  CellProps,
+  ColumnDef,
+  ColumnFilter,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  ExportPayload,
+  ExportRowMeta,
+  ExportWriteContext,
+  ExportWriter,
+  PrintPageBreak,
+  SortableValue,
+};
 
 /**
  * Options the writer and {@link buildTablePdf} share.

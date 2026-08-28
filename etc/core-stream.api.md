@@ -41,6 +41,28 @@ export interface OpenRowPatchStreamOptions {
 export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
 
 // @public
+export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
+
+// @public
+export type RowPatchEvent<TRow> = {
+    type: "insert";
+    id: string;
+    row: TRow;
+    index: number;
+} | {
+    type: "remove";
+    id: string;
+    row: TRow;
+    index: number;
+} | {
+    type: "update";
+    id: string;
+    prev: TRow;
+    next: TRow;
+    index: number;
+};
+
+// @public
 export interface RowPatchStreamHandle {
     close: () => void;
     readonly status: RowPatchStreamStatus;

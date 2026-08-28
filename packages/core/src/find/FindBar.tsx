@@ -8,6 +8,8 @@ import { focusEditorOnMount } from "../editing/editableCellController";
 import type { TableLabels } from "../types";
 import type { FindInTableState } from "./useFindInTable";
 
+export type { FindInTableState };
+
 /**
  * Props for an adapter `FindBar` — no slots on the public API.
  *

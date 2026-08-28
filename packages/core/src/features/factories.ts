@@ -23,6 +23,27 @@ import type { BulkAction } from "../types";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import type { FeaturePatch, TableFeature } from "./tableFeature";
 
+export type {
+  BatchRowEdit,
+  BulkAction,
+  CellSpanAppearance,
+  CommandPaletteOptions,
+  ContextMenuOptions,
+  ExportCsvOptions,
+  ExtraRow,
+  FilterDef,
+  FilterTypeSpec,
+  GetCellSpan,
+  GroupSort,
+  NestedTableFor,
+  RowHeight,
+  RowPinState,
+  RowReorderHandler,
+  RowStyle,
+  SidePanelOptions,
+  UseSavedViewsOptions,
+};
+
 function define<TRow>(
   id: string,
   patch: FeaturePatch<TRow>,

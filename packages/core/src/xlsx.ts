@@ -11,5 +11,6 @@
  * <DataTable exportCsv={{ writer: xlsxWriter() }} … />
  * ```
  */
-export type { ExportViewEntry } from "./export/exportWriter";
+export type { ExportViewEntry, ExportWriter } from "./export/exportWriter";
 export { buildTableXlsx, xlsxWriter } from "./export/xlsx";
+export type { ColumnDef } from "./types";

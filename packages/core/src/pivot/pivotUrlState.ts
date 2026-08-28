@@ -25,6 +25,8 @@ import {
 } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
+
+export type { UrlStateAdapter };
 import { PARAM_PIVOT } from "../url/serialize";
 import { EMPTY_PIVOT_CONFIG } from "./pivotConfigModel";
 import type { PivotConfig } from "./pivotModel";

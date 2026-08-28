@@ -9,6 +9,47 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
 // @public
+export interface ColumnDef<TRow> {
+    accessor?: (row: TRow) => ReactNode;
+    align?: "start" | "center" | "end";
+    Cell?: ComponentType<CellProps<TRow>>;
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
+    editor?: CellEditor;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
+    filter?: ColumnFilter<TRow>;
+    flex?: number;
+    formatValue?: (row: TRow) => string;
+    group?: string | readonly string[];
+    groupShow?: ColumnGroupShow;
+    header?: ReactNode;
+    headerActions?: ReactNode;
+    headerTooltip?: string;
+    hideOnDesktop?: boolean;
+    hideOnMobile?: boolean;
+    i18n?: Readonly<Record<string, string>>;
+    key: string;
+    lockPin?: boolean;
+    lockPosition?: boolean;
+    lockVisibility?: boolean;
+    lockWidth?: boolean;
+    maxWidth?: number;
+    meta?: Record<string, unknown>;
+    minWidth?: number;
+    mobileLabel?: string;
+    parseValue?: (draft: string, row: TRow) => unknown;
+    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
+    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
+    responsivePriority?: number;
+    rowSpan?: number | ((row: TRow) => number);
+    sortable?: boolean;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    width?: number | string;
+}
+
+// @public
 export function finiteSparklineValues(values: readonly number[]): number[];
 
 // @public

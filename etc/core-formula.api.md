@@ -15,6 +15,47 @@ export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | "
 export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): FormulaColumnsResult<TRow>;
 
 // @public
+export interface ColumnDef<TRow> {
+    accessor?: (row: TRow) => ReactNode;
+    align?: "start" | "center" | "end";
+    Cell?: ComponentType<CellProps<TRow>>;
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
+    editor?: CellEditor;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
+    filter?: ColumnFilter<TRow>;
+    flex?: number;
+    formatValue?: (row: TRow) => string;
+    group?: string | readonly string[];
+    groupShow?: ColumnGroupShow;
+    header?: ReactNode;
+    headerActions?: ReactNode;
+    headerTooltip?: string;
+    hideOnDesktop?: boolean;
+    hideOnMobile?: boolean;
+    i18n?: Readonly<Record<string, string>>;
+    key: string;
+    lockPin?: boolean;
+    lockPosition?: boolean;
+    lockVisibility?: boolean;
+    lockWidth?: boolean;
+    maxWidth?: number;
+    meta?: Record<string, unknown>;
+    minWidth?: number;
+    mobileLabel?: string;
+    parseValue?: (draft: string, row: TRow) => unknown;
+    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
+    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
+    responsivePriority?: number;
+    rowSpan?: number | ((row: TRow) => number);
+    sortable?: boolean;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    width?: number | string;
+}
+
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
@@ -138,7 +179,19 @@ export interface ParseResult {
 export function serializeFormulaColumns(specs: readonly FormulaColumnSpec[]): string;
 
 // @public
+export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
 export function toFormulaValue(raw: unknown): FormulaValue;
+
+// @public
+export interface UrlStateAdapter {
+    getSearch(): string;
+    setSearch(search: string, options?: {
+        push?: boolean;
+    }): void;
+    subscribe(onChange: () => void): () => void;
+}
 
 // @public
 export function useFormulaUrlState(options?: UseFormulaUrlStateOptions): UseFormulaUrlStateResult;

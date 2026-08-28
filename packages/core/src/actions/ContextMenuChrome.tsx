@@ -26,6 +26,8 @@ import type { TableLabels } from "../types";
 import type { ContextMenuItem } from "./contextMenuModel";
 import type { ContextMenuPoint } from "./useContextMenu";
 
+export type { ContextMenuItem, ContextMenuPoint };
+
 /**
  * Props an adapter's menu surface receives.
  *

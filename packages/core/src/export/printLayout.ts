@@ -19,6 +19,8 @@ import {
   type ExportViewEntry,
 } from "./exportWriter";
 
+export type { ExportTable };
+
 /**
  * Paper the print stylesheet asks the browser for.
  *
@@ -27,7 +29,11 @@ import {
 export type PrintPageSize =
   "a4" | "a4-landscape" | "letter" | "letter-landscape";
 
-/** How groups meet a page boundary. */
+/**
+ * How groups meet a page boundary.
+ *
+ * @public
+ */
 export type PrintPageBreak = "auto" | "group";
 
 /**

@@ -17,6 +17,23 @@
  *
  * @packageDocumentation
  */
+export type { Command } from "./actions/commandRegistry";
+export type {
+  ContextMenuItem,
+  ContextMenuTarget,
+} from "./actions/contextMenuModel";
+export type { CommandPaletteOptions } from "./actions/useCommandPalette";
+export type { ContextMenuOptions } from "./actions/useTableContextMenu";
+export type { Aggregator } from "./aggregate/aggregate";
+export type {
+  ColumnMenuAction,
+  ColumnMenuActionContext,
+  ColumnMenuRow,
+} from "./columns/columnMenuModel";
+export type { BatchRowEdit } from "./editing/batchEditing";
+export type { CustomCellEditorRender } from "./editing/cellEditing";
+export type { ExportWriter } from "./export/exportWriter";
+export type { ExportCsvOptions } from "./export/tableCsv";
 export {
   batchEditing,
   bulkActions,
@@ -66,3 +83,16 @@ export type {
   TableFeatureHost,
 } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
+export type { FilterDef } from "./filters/filterDefs";
+export type { FilterTypeSpec } from "./filters/filterRegistry";
+export type { GroupSort } from "./grouping/groupRows";
+export type { SidePanelEntry } from "./layout/SidePanelChrome";
+export type { SidePanelOptions } from "./props";
+export type { CellSpanAppearance, GetCellSpan } from "./rows/cellSpan";
+export type { ExtraRow } from "./rows/extraRows";
+export type { RowPinState } from "./rows/rowPinning";
+export type { RowReorderHandler } from "./rows/rowReorder";
+export type { RowHeight, RowStyle } from "./rows/rowStyle";
+export type { NestedTableFor } from "./tree/nestedTable";
+export type { BulkAction } from "./types";
+export type { UseSavedViewsOptions } from "./url/useSavedViews";

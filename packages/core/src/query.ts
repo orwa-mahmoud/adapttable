@@ -34,6 +34,7 @@
  *
  * @packageDocumentation
  */
+export type { AggregateName, Aggregator } from "./aggregate/aggregate";
 export {
   FILTER_TREE_PARAM,
   FILTER_TREE_VERSION,
@@ -41,6 +42,7 @@ export {
   parseFilterTree,
   serializeFilterTree,
 } from "./filters/filterTreeCodec";
+export type { FormulaValue } from "./formula/evaluate";
 export type { FormulaColumnSpec } from "./formula/formulaColumn";
 export {
   deserializeFormulaColumns,

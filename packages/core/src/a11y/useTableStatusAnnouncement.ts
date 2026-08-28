@@ -20,6 +20,8 @@ import { useEffect, useRef, useState } from "react";
 import { computePagination } from "../pagination/paginationMath";
 import type { SortDirection, TableLabels } from "../types";
 
+export type { SortDirection };
+
 /**
  * Options for {@link useTableStatusAnnouncement}.
  *

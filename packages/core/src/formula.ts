@@ -52,3 +52,5 @@ export {
   type UseFormulaUrlStateOptions,
   type UseFormulaUrlStateResult,
 } from "./formula/useFormulaUrlState";
+export type { ColumnDef, SortableValue } from "./types";
+export type { UrlStateAdapter } from "./url/adapter";

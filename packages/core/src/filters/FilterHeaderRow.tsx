@@ -22,6 +22,8 @@ import {
 } from "./filterRegistry";
 import { useFilterOptions } from "./useFilterOptions";
 
+export type { FilterFormSource, FilterTypeRegistry };
+
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
  *

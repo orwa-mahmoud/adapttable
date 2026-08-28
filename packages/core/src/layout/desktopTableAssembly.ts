@@ -83,6 +83,17 @@ import type {
 import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import { useHorizontalOverflow } from "./useHorizontalOverflow";
 
+export type {
+  CellElementProps,
+  EditableCellEditing,
+  GridFocusState,
+  GroupedFlatEntry,
+  RowPinSide,
+  SortButtonElementProps,
+  TreeEntry,
+  UseDataTableResult,
+};
+
 /**
  * Width (px) reserved for the leading selection column.
  *

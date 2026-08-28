@@ -36,6 +36,8 @@ import {
 import type { TableLabels } from "../types";
 import { type Command, filterCommands } from "./commandRegistry";
 
+export type { Command };
+
 /**
  * Props an adapter's palette surface receives.
  *

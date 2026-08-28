@@ -15,10 +15,18 @@
  * <DataTable exportCsv={{ writer: pdfWriter() }} … />
  * ```
  */
-export type { ExportViewEntry } from "./export/exportWriter";
+export type {
+  ExportTable,
+  ExportViewEntry,
+  ExportWriter,
+} from "./export/exportWriter";
 export type { PdfWriterOptions } from "./export/pdf";
 export { buildTablePdf, pdfWriter } from "./export/pdf";
-export type { PrintLayoutOptions, PrintPageSize } from "./export/printLayout";
+export type {
+  PrintLayoutOptions,
+  PrintPageBreak,
+  PrintPageSize,
+} from "./export/printLayout";
 export {
   buildPrintDocument,
   buildPrintTableHtml,
@@ -26,3 +34,4 @@ export {
   printStyles,
   printTable,
 } from "./export/printLayout";
+export type { ColumnDef } from "./types";

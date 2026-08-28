@@ -16,6 +16,8 @@ import { useCallback, useDebugValue, useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import type { RowPatchEvent } from "./patch";
 
+export type { RowPatchEvent };
+
 /** How long a mark lasts, in milliseconds. */
 const DEFAULT_DURATION_MS = 1200;
 

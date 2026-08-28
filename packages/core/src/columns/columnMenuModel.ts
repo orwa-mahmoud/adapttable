@@ -3,6 +3,8 @@ import type { ColumnDef } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
 
+export type { UseColumnLayoutResult };
+
 /**
  * Readable label for a column in the menu (header string → mobileLabel → key).
  *

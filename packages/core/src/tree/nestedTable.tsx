@@ -18,6 +18,7 @@ import type { ReactElement, ReactNode } from "react";
 
 import type { TableLabels } from "../types";
 
+export type { Density };
 /** Row density, as the table's own prop spells it. */
 type Density = "comfortable" | "compact";
 

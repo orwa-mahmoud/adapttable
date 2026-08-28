@@ -116,6 +116,13 @@ import {
 } from "./virtual/useTableVirtualization";
 import { useMeasuredWindowScrollMargin } from "./virtual/windowScrollMargin";
 
+export type {
+  BulkAction,
+  ConfirmHandler,
+  EditHistoryState,
+  SelectionState,
+  ToolbarSlots,
+};
 /**
  * The shared prop surface every adapter's toolbar sub-component needs.
  * Adapters render kit-specific markup from this; extracting it keeps the

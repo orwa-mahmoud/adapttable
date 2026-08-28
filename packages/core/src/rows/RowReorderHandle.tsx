@@ -5,7 +5,10 @@
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
+import type { SortByOption } from "../types";
 import type { RowReorderLabels, RowReorderState } from "./rowReorder";
+
+export type { RowReorderLabels, SortByOption };
 
 /**
  * Props for an adapter `RowReorderHandle` — no slots on the public API.

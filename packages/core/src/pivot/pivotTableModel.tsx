@@ -35,6 +35,8 @@ import type { ReactNode } from "react";
 
 import { resolveLabels } from "../labels";
 import type { ColumnDef, TableLabels } from "../types";
+
+export type { TableLabels };
 import { measureLabel, type PivotField } from "./pivotConfigModel";
 import type { PivotColumnLeaf, PivotResult, PivotRow } from "./pivotModel";
 

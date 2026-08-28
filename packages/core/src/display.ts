@@ -10,6 +10,8 @@ import {
 import { type CellSpanAppearance, cellSpanMark } from "./rows/cellSpan";
 import type { ColumnDef } from "./types";
 
+export type { PinSide };
+
 /**
  * Kit-independent display helpers shared by every adapter's table chrome —
  * logical alignment, the sort-indicator glyph, sticky pinned-cell styles, and

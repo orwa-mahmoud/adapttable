@@ -22,6 +22,8 @@ import {
 } from "./checklistWindow";
 import { type FilterDef, filterLabel } from "./filterDefs";
 
+export type { FilterDef, TableSource };
+
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
  *

@@ -26,6 +26,7 @@ export {
   useChangedCellFlash,
   type UseChangedCellFlashOptions,
 } from "./rows/changedCellFlash";
+export type { RowPatch, RowPatchEvent } from "./rows/patch";
 export {
   openRowPatchStream,
   type OpenRowPatchStreamOptions,

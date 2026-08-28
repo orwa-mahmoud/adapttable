@@ -19,6 +19,8 @@ import {
 } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
+
+export type { UrlStateAdapter };
 import { PARAM_FORMULA } from "../url/serialize";
 import type { FormulaColumnSpec } from "./formulaColumn";
 import {

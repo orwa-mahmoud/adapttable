@@ -23,6 +23,14 @@ import { focusEditorOnMount } from "./editableCellController";
 import type { EditableCellEditorCtrl } from "./EditableCellGate";
 import type { RowEditingState } from "./rowEditing";
 
+export type {
+  BatchEditingState,
+  EditableCellEditorCtrl,
+  EditableColumnLike,
+  RowEditingState,
+  TableLabels,
+};
+
 /**
  * Props for {@link RowEditCell}.
  *

@@ -17,6 +17,8 @@
 import type { SortableValue } from "../types";
 import type { FormulaNode } from "./parse";
 
+export type { SortableValue };
+
 /**
  * The error values a formula can produce, spelled as a spreadsheet spells them.
  *

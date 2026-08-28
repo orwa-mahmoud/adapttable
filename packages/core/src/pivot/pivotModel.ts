@@ -38,8 +38,30 @@ import {
   type Aggregator,
   resolveAggregateValue,
 } from "../aggregate/aggregate";
+import type { CellEditor } from "../editing/cellEditing";
+import type { ColumnFilter } from "../filters/filterDefs";
 import { compareValues } from "../sort/compare";
-import type { ColumnDef, SortableValue } from "../types";
+import type {
+  CellProps,
+  ColumnDef,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+
+export type {
+  AggregateName,
+  Aggregator,
+  CellEditor,
+  CellProps,
+  ColumnDef,
+  ColumnFilter,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+};
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,

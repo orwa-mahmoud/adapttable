@@ -19,12 +19,13 @@ import {
 } from "./features/featureHost";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
-import type { FilterDef } from "./filters/filterDefs";
+import type { FilterDef, FilterRuntime } from "./filters/filterDefs";
 import type { FilterTypeRegistry } from "./filters/filterRegistry";
 import { useFindFocus, useFindInTable } from "./find/useFindInTable";
 import { cellFillHandler, cellPasteHandler } from "./focus/pasteRange";
 import { selectionStats } from "./focus/selectionStats";
 import { useGridFocus } from "./focus/useGridFocus";
+import type { GroupAggregatesFn } from "./grouping/groupRows";
 import { useFullscreen } from "./layout/useFullscreen";
 import type { BaseDataTableProps } from "./props";
 import { coveredAddressSet } from "./rows/cellSpan";
@@ -36,10 +37,12 @@ import {
   isDeclarativeFilters,
   useTableData,
 } from "./source/useTableData";
+import type { Direction } from "./types";
 import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
 import { useRowPinningUrlState } from "./url/useRowPinningUrlState";
 import {
   printToolbar,
+  type TableChrome,
   undoRedoToolbar,
   useChromeBodyData,
   useChromeScrollReset,
@@ -48,6 +51,16 @@ import {
   viewControlsToolbar,
 } from "./useTableChrome";
 import { useColumnWindow } from "./virtual/useColumnWindow";
+
+export type {
+  Direction,
+  FacetMap,
+  FilterRuntime,
+  GroupAggregatesFn,
+  QuerySupport,
+  TableChrome,
+  UrlStateAdapter,
+};
 
 /**
  * The kit-agnostic prop surface every batteries-included `<DataTable>` shares:

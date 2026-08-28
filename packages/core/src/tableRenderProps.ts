@@ -55,6 +55,18 @@ import {
   type VirtualTableRow,
 } from "./virtual/useTableVirtualization";
 
+export type {
+  GetCellSpan,
+  GroupByInput,
+  GroupCollapseState,
+  MobileCardRenderer,
+  RowAction,
+  RowActionsLayout,
+  RowActionsRenderer,
+  RowExpansionState,
+  TreeExpansionState,
+};
+
 /**
  * Everything a kit's desktop table and mobile cards both receive. The render
  * model resolves it once, so the two layouts cannot disagree.
