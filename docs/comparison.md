@@ -19,8 +19,14 @@ libraries.
 | i18n + **RTL / Arabic** first-class            |  partial  |          ✗           |         ✗         |    partial     |           **✓**           |
 | Dark mode                                      |     ✓     |         n/a          |         ✓         |       ✓        |      **✓ seamless**       |
 | MIT / free                                     | open-core |          ✓           |         ✓         |   open-core    |           **✓**           |
+| Pivoting                                       | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    | **✓ engine + panel, MIT** |
+| Cell-range selection                           | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    |  **✓ MIT (cell nav on)**  |
+| Fill handle (drag to fill)                     | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    | **✓ MIT (cell nav+edit)** |
+| Clipboard copy / paste of a range              | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    |         **✓ MIT**         |
+| Excel (.xlsx) export                           | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    |         **✓ MIT**         |
+| Tree data (self-referencing rows)              | ✓ (paid)  |  build it yourself   |         ✗         |    ✓ (paid)    |         **✓ MIT**         |
 
-<sub>Comparison as of July 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
+<sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT — cell-range selection and the fill handle need `cellNavigation` (the handle also needs editable cells), and pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
 ## Head-to-head
 
@@ -39,13 +45,15 @@ the escape hatch.
 
 ### AdaptTable vs AG Grid
 
-AG Grid is the enterprise heavyweight — pivoting, range selection, Excel-style
-editing. Much of that power lives in the paid Enterprise tier, and it renders
-its own look rather than your design system's. AdaptTable is MIT and free
-end to end (including server data and infinite scroll) and renders as your UI
-kit's real components. Reach for AG Grid when you need a spreadsheet-grade
-enterprise grid today; reach for AdaptTable for application data tables that
-match your app and stay free.
+AG Grid is the enterprise heavyweight, and its spreadsheet stack is the more
+integrated one. It puts pivoting, range selection, the fill handle, tree data,
+clipboard operations and Excel export in the paid Enterprise tier, and it
+renders its own look rather than your design system's. AdaptTable ships those
+same capabilities under MIT — assembled from parts rather than one spreadsheet
+surface — and is free end to end, server data and infinite scroll included,
+rendering as your UI kit's real components. Reach for AG Grid when you want that
+integrated spreadsheet product and are happy to licence it; reach for AdaptTable
+for application data tables that match your app and stay free.
 
 → [Migrate from ag-Grid](./migrate-from-ag-grid.md) (CRUD tables only — the
 guide starts with when to stay).
@@ -121,8 +129,11 @@ matches unstyled feature-for-feature.
 
 ## When another library may fit better
 
-- You need a heavyweight enterprise grid with pivoting, range selection, and
-  Excel-style editing today → **AG Grid** / **MUI X DataGrid (paid)**.
+- You want a mature, deeply integrated spreadsheet-analytics product and are
+  happy to licence it → **AG Grid Enterprise** / **MUI X Premium**. AdaptTable
+  has pivoting, range selection, the fill handle, clipboard and Excel export
+  under MIT, but they are assembled from parts rather than one spreadsheet
+  surface.
 - You're on a framework other than React → **TanStack Table** (multi-
   framework). AdaptTable is React-only.
 - You need a spreadsheet-like editing surface today, not a responsive data
