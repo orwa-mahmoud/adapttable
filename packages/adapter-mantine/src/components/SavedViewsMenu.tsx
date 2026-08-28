@@ -14,13 +14,21 @@ import { useState } from "react";
 import { CloseIcon } from "../icons";
 import { useEscapeClose } from "./useEscapeClose";
 
-/** The label strings the saved-views menu renders. */
+/**
+ * The label strings the saved-views menu renders.
+ *
+ * @public
+ */
 export type SavedViewsLabels = Pick<
   Required<TableLabels>,
   "savedViews" | "saveView" | "viewName" | "deleteView"
 >;
 
-/** Props for {@link SavedViewsMenu}. */
+/**
+ * Props for {@link SavedViewsMenu}.
+ *
+ * @public
+ */
 export interface SavedViewsMenuProps {
   /** Storage + URL backend wiring, forwarded to core's `useSavedViews`. */
   options: UseSavedViewsOptions;
@@ -34,6 +42,8 @@ export interface SavedViewsMenuProps {
  * table's CURRENT URL state under the typed name. Pairs with core's
  * `useSavedViews` and composes into the `toolbar` slot — or let
  * `<DataTable savedViews>` mount it for you next to the Columns menu.
+ *
+ * @public
  */
 export function SavedViewsMenu({
   options,

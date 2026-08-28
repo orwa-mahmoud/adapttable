@@ -41,7 +41,11 @@ const FILTER_LABEL_STYLES = { label: { marginBottom: 16 } };
 /** Above the filter popover (`zIndex={10050}`) so a Select is clickable. */
 const FILTER_COMBOBOX_PROPS = { withinPortal: true, zIndex: 10051 } as const;
 
-/** Props for `AutoFilterForm`. */
+/**
+ * Props for `AutoFilterForm`.
+ *
+ * @public
+ */
 export interface AutoFilterFormProps<TRow> {
   /** The resolved declarative definitions, in render order. */
   defs: readonly FilterDef<TRow>[];
@@ -386,6 +390,8 @@ function FilterControl<TRow>({
  * input (two for "Between"), persisted as the inclusive pair.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function AutoFilterForm<TRow>({
   defs,

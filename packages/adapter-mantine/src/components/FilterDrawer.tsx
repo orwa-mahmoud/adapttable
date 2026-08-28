@@ -2,7 +2,11 @@ import type { Direction, TableLabels } from "@adapttable/core";
 import { Button, Drawer, Group, Stack } from "@mantine/core";
 import type { ReactNode } from "react";
 
-/** Props for {@link FilterDrawer}. */
+/**
+ * Props for {@link FilterDrawer}.
+ *
+ * @public
+ */
 export interface FilterDrawerProps {
   opened: boolean;
   onClose: () => void;
@@ -14,7 +18,11 @@ export interface FilterDrawerProps {
   dir?: Direction;
 }
 
-/** Side drawer holding the caller's filter widgets + a pinned apply/clear bar. */
+/**
+ * Side drawer holding the caller's filter widgets + a pinned apply/clear bar.
+ *
+ * @public
+ */
 export function FilterDrawer({
   opened,
   onClose,

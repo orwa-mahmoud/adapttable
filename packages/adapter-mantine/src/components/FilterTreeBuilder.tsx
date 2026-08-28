@@ -130,7 +130,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** Mantine AND/OR builder — compact kit Select / TextInput / Button, no stacked labels. */
+/**
+ * Mantine AND/OR builder — compact kit Select / TextInput / Button, no stacked labels.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

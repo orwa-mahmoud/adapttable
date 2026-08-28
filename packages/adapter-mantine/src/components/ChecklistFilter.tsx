@@ -78,7 +78,11 @@ const slots: ChecklistSlots = {
   Checkbox: ChecklistBox,
 };
 
-/** Mantine checklist — wrapping kit checkboxes, not one value per row. */
+/**
+ * Mantine checklist — wrapping kit checkboxes, not one value per row.
+ *
+ * @public
+ */
 export function ChecklistFilter<TRow>(
   props: Readonly<ChecklistFilterProps<TRow>>
 ) {

@@ -72,6 +72,8 @@ function SavedViewsSlot({
  * mode, and optional entrance animation.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);

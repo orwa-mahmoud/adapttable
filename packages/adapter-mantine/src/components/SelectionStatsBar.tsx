@@ -34,7 +34,11 @@ function Stats({ parts, className }: SelectionStatsSlotProps) {
 /** The kit's stats rendering, shared with the status bar that hosts it. */
 export const statsSlots: SelectionStatsSlots = { Stats };
 
-/** Mantine-owned status bar for the headless selection statistics. */
+/**
+ * Mantine-owned status bar for the headless selection statistics.
+ *
+ * @public
+ */
 export function SelectionStatsBar(
   props: Readonly<Omit<SelectionStatsChromeProps, "slots">>
 ) {

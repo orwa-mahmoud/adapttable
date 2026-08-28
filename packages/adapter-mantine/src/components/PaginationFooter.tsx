@@ -1,7 +1,11 @@
 import { pageSizeOptions, type TableLabels } from "@adapttable/core";
 import { Group, Pagination, Select, Text } from "@mantine/core";
 
-/** Props for {@link PaginationFooter}. */
+/**
+ * Props for {@link PaginationFooter}.
+ *
+ * @public
+ */
 export interface PaginationFooterProps {
   page: number;
   totalPages: number;
@@ -17,7 +21,11 @@ export interface PaginationFooterProps {
   showRowsPerPage?: boolean;
 }
 
-/** Desktop pagination bar: page-size + range on the left, pager on the right. */
+/**
+ * Desktop pagination bar: page-size + range on the left, pager on the right.
+ *
+ * @public
+ */
 export function PaginationFooter({
   page,
   totalPages,
