@@ -740,9 +740,7 @@ export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "
 
 // @public
 export interface ColumnFooterContext<TRow> {
-    // (undocumented)
     column: ColumnDef<TRow>;
-    // (undocumented)
     value: ReactNode;
 }
 
@@ -794,18 +792,14 @@ export const columnGroupStubStyle: typeof columnGroupStubStyle_2;
 
 // @public
 export interface ColumnHeaderContext<TRow> {
-    // (undocumented)
     column: ColumnDef<TRow>;
-    // (undocumented)
     controller: ColumnHeaderController;
 }
 
 // @public
 export interface ColumnHeaderController {
     label: ReactNode;
-    // (undocumented)
     sortDir?: "asc" | "desc";
-    // (undocumented)
     sortIndex?: number;
     toggleSort: (event?: {
         shiftKey?: boolean;
@@ -2504,12 +2498,9 @@ export function pageSizeOptions(limit: number | readonly number[], sizes?: reado
 export interface PaginatedResponse<TRow> {
     facets?: FacetMap;
     hasNextPage?: boolean;
-    // (undocumented)
     limit: number;
-    // (undocumented)
     page: number;
     rows?: TRow[];
-    // (undocumented)
     total: number;
 }
 
@@ -3304,9 +3295,7 @@ export interface SortButtonElementProps extends Props {
 
 // @public
 export interface SortByOption {
-    // (undocumented)
     label: string;
-    // (undocumented)
     value: string;
 }
 
@@ -3454,7 +3443,6 @@ export interface TableFeatureHost<TRow = unknown> {
 
 // @public
 export interface TableLabels {
-    // (undocumented)
     actions?: string;
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
@@ -3464,13 +3452,11 @@ export interface TableLabels {
     boolAny?: string;
     boolFalse?: string;
     boolTrue?: string;
-    // (undocumented)
     cancel?: string;
     cancelAll?: string;
     checklistClear?: string;
     checklistNoValues?: string;
     checklistSearch?: string;
-    // (undocumented)
     clearAll?: string;
     closePanel?: string;
     collapseColumnGroup?: string;
@@ -3499,9 +3485,7 @@ export interface TableLabels {
     editRow?: string;
     editUndone?: (cells: number) => string;
     enterFullscreen?: string;
-    // (undocumented)
     errorMessage?: string;
-    // (undocumented)
     errorTitle?: string;
     exitFullscreen?: string;
     expandColumnGroup?: string;
@@ -3520,7 +3504,6 @@ export interface TableLabels {
     filterField?: string;
     filterRemoveCondition?: string;
     filterRemoveGroup?: string;
-    // (undocumented)
     filters?: string;
     filtersDone?: string;
     filterTree?: string;
@@ -3552,13 +3535,10 @@ export interface TableLabels {
     hideAllColumns?: string;
     hideColumn?: string;
     keepMine?: string;
-    // (undocumented)
     loading?: string;
-    // (undocumented)
     loadMore?: string;
     moreGroups?: (remaining: number) => string;
     moreRowsInGroup?: (remaining: number) => string;
-    // (undocumented)
     moveEnd?: string;
     moveRowDown?: string;
     moveRowUp?: string;
@@ -3566,7 +3546,6 @@ export interface TableLabels {
     moveViewDown?: string;
     moveViewUp?: string;
     nextPage?: string;
-    // (undocumented)
     noData?: string;
     noResults?: string;
     noticeEditWithoutWriter?: string;
@@ -3603,7 +3582,6 @@ export interface TableLabels {
     }) => string;
     pageSelected?: (count: number) => string;
     pendingRows?: (count: number) => string;
-    // (undocumented)
     pinEnd?: string;
     pinStart?: string;
     pinToBottom?: string;
@@ -3636,25 +3614,20 @@ export interface TableLabels {
     resetColumn?: string;
     resetColumns?: string;
     resizeColumn?: string;
-    // (undocumented)
     retry?: string;
     rowActionsMenu?: string;
     rowLifted?: (position: number) => string;
     rowMoved?: (from: number, to: number) => string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
-    // (undocumented)
     rowsPerPage?: string;
     saveAll?: string;
     savedViews?: string;
     saveRow?: string;
     saveView?: string;
-    // (undocumented)
     search?: string;
     searchColumns?: string;
-    // (undocumented)
     searchPlaceholder?: string;
-    // (undocumented)
     selectAll?: string;
     selectAllMatching?: (total: number) => string;
     selectColumn?: string;
@@ -3664,7 +3637,6 @@ export interface TableLabels {
     selectionMax?: string;
     selectionMin?: string;
     selectionSum?: string;
-    // (undocumented)
     selectRow?: string;
     setDefaultView?: string;
     showAllColumns?: string;
@@ -3676,7 +3648,6 @@ export interface TableLabels {
     }) => string;
     sidePanel?: string;
     sortAscending?: string;
-    // (undocumented)
     sortBy?: string;
     sortDescending?: string;
     sortedBy?: (info: {
@@ -3689,7 +3660,6 @@ export interface TableLabels {
     theirsValue?: (value: string) => string;
     to?: string;
     undoEdit?: string;
-    // (undocumented)
     unpin?: string;
     unpinAllColumns?: string;
     unpinRow?: string;
@@ -3733,15 +3703,10 @@ export interface TableQueryParams {
     cursor?: string;
     filters?: ExtraFilters;
     groupBy?: string;
-    // (undocumented)
     limit?: number;
-    // (undocumented)
     page?: number;
-    // (undocumented)
     search?: string;
-    // (undocumented)
     sortBy?: string;
-    // (undocumented)
     sortDir?: SortDirection;
 }
 

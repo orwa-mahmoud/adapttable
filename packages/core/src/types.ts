@@ -317,7 +317,9 @@ export interface ColumnDef<TRow> {
 export interface ColumnHeaderController {
   /** Default caption (`header`, else the humanized key). */
   label: ReactNode;
+  /** This column's sort direction, absent when it is not sorted. */
   sortDir?: "asc" | "desc";
+  /** 1-based position in a multi-column sort, absent when unsorted. */
   sortIndex?: number;
   /** Cycle this column's sort. No-op when the column is not sortable. */
   toggleSort: (event?: { shiftKey?: boolean }) => void;
@@ -329,7 +331,9 @@ export interface ColumnHeaderController {
  * @public
  */
 export interface ColumnHeaderContext<TRow> {
+  /** The column being rendered. */
   column: ColumnDef<TRow>;
+  /** Caption and sort state for this header. */
   controller: ColumnHeaderController;
 }
 
@@ -339,7 +343,9 @@ export interface ColumnHeaderContext<TRow> {
  * @public
  */
 export interface ColumnFooterContext<TRow> {
+  /** The column being rendered. */
   column: ColumnDef<TRow>;
+  /** The aggregate this column resolved to, already formatted. */
   value: ReactNode;
 }
 
@@ -444,7 +450,9 @@ export interface BulkActionContext {
  * @public
  */
 export interface SortByOption {
+  /** Column key this option sorts by. */
   value: string;
+  /** Caption shown in the select. */
   label: string;
 }
 
@@ -454,10 +462,15 @@ export interface SortByOption {
  * @public
  */
 export interface TableQueryParams {
+  /** 1-based page number. */
   page?: number;
+  /** Rows per page. */
   limit?: number;
+  /** The free-text search term, as typed. */
   search?: string;
+  /** Column key to sort by. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: SortDirection;
   /** Single-level row grouping column key (URL-synced; frontend chrome only). */
   groupBy?: string;
@@ -482,8 +495,11 @@ export interface TableQueryParams {
 export interface PaginatedResponse<TRow> {
   /** The page of rows. */
   rows?: TRow[];
+  /** Rows in the whole matching set, not just this page. */
   total: number;
+  /** 1-based page number this payload answers for. */
   page: number;
+  /** Rows per page this payload was built with. */
   limit: number;
   /** Whether a page exists after this one. */
   hasNextPage?: boolean;
@@ -504,8 +520,11 @@ export interface PaginatedResponse<TRow> {
 export interface TableLabels {
   /** Accessible label for an unlabeled table. */
   table?: string;
+  /** Accessible name for the search box. */
   search?: string;
+  /** Placeholder text inside the search box. */
   searchPlaceholder?: string;
+  /** Empty state when the table has no rows at all. */
   noData?: string;
   /** Empty state when an active search/filter matched nothing. */
   noResults?: string;
@@ -613,9 +632,13 @@ export interface TableLabels {
   selectAllMatching?: (total: number) => string;
   /** Banner: the whole matching set is selected. */
   allMatchingSelected?: (total: number) => string;
+  /** Shown while rows are being fetched. */
   loading?: string;
+  /** Action that appends the next page to the rows on screen. */
   loadMore?: string;
+  /** Name of the filters trigger, panel and column menu section. */
   filters?: string;
+  /** Action that removes every active filter at once. */
   clearAll?: string;
   /** Accessible name for a single filter chip's remove button. */
   removeFilter?: (label: string) => string;
@@ -649,19 +672,28 @@ export interface TableLabels {
   checklistNoValues?: string;
   /** Accessible name of the compact header filter row. */
   headerFilters?: string;
+  /** Prefix for a sort control's accessible name, before the column. */
   sortBy?: string;
+  /** Accessible name for the page-size select. */
   rowsPerPage?: string;
+  /** Header of the per-row actions column. */
   actions?: string;
+  /** Accessible name for the header checkbox that selects the page. */
   selectAll?: string;
+  /** Accessible name for a row's selection checkbox. */
   selectRow?: string;
   /**
    * Accessible name for the header checkbox that selects a column
    * (`columnSelectionCheckbox`). The column's own name is appended.
    */
   selectColumn?: string;
+  /** Action that abandons an edit or closes a prompt. */
   cancel?: string;
+  /** Action that re-runs a failed load. */
   retry?: string;
+  /** Heading of the error state. */
   errorTitle?: string;
+  /** Body of the error state, under the heading. */
   errorMessage?: string;
   /** Accessible label for the previous-page control. */
   previousPage?: string;
@@ -679,10 +711,13 @@ export interface TableLabels {
   columns?: string;
   /** Pin-column menu actions. */
   pinStart?: string;
+  /** Column-menu action that pins the column to the trailing edge. */
   pinEnd?: string;
+  /** Column-menu action that returns a pinned column to the scroll area. */
   unpin?: string;
   /** Reorder-column menu actions. */
   moveStart?: string;
+  /** Column-menu action that moves the column to the last position. */
   moveEnd?: string;
   /** Reset the column layout to defaults. */
   resetColumns?: string;

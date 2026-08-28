@@ -716,17 +716,11 @@ export interface DesktopChromeWidths {
 
 // @public
 export interface DesktopExtraSlot {
-    // (undocumented)
     colSpan: number;
-    // (undocumented)
     extraKind: "separator" | "fullWidth";
-    // (undocumented)
     fillStyle?: CSSProperties;
-    // (undocumented)
     key: string;
-    // (undocumented)
     kind: "extra";
-    // (undocumented)
     render?: () => ReactNode;
 }
 
@@ -737,204 +731,115 @@ export type DesktopGroupEntry<TRow> = Extract<GroupedFlatEntry<TRow>, {
 
 // @public
 export interface DesktopGroupSlot<TRow> {
-    // (undocumented)
     entry: DesktopGroupEntry<TRow>;
-    // (undocumented)
     key: string;
-    // (undocumented)
     kind: "group";
 }
 
 // @public
 export interface DesktopHeaderLeaf<TRow> {
-    // (undocumented)
     caption: ReactNode;
-    // (undocumented)
     column: ColumnDef<TRow>;
-    // (undocumented)
     columnCheckboxChecked: boolean;
-    // (undocumented)
     columnHeaderProps: Record<string, unknown>;
-    // (undocumented)
     columnName: string;
-    // (undocumented)
     columnSelectAriaLabel: string;
-    // (undocumented)
     headerDef: FilterDef<TRow> | undefined;
-    // (undocumented)
     headerIndex: number;
-    // (undocumented)
     headerProps: CellElementProps;
-    // (undocumented)
     onToggleColumn: (() => void) | undefined;
-    // (undocumented)
     pinSide: PinOffset["side"] | undefined;
-    // (undocumented)
     resizeHandleProps: ColumnResizeHandleProps | undefined;
-    // (undocumented)
     rowSpan: number;
-    // (undocumented)
     showColumnCheckbox: boolean;
-    // (undocumented)
     sortActive: boolean;
-    // (undocumented)
     sortButtonProps: SortButtonElementProps;
-    // (undocumented)
     sortDir: "asc" | "desc" | undefined;
-    // (undocumented)
     sortIndex: number | undefined;
-    // (undocumented)
     style: CSSProperties;
 }
 
 // @public
 export interface DesktopRowSlot<TRow> {
-    // (undocumented)
     key: string;
-    // (undocumented)
     kind: "row";
-    // (undocumented)
     wiring: DesktopRowWiring<TRow>;
 }
 
 // @public
 export interface DesktopRowWiring<TRow> {
-    // (undocumented)
     actionsPinned: boolean;
-    // (undocumented)
     bodyCells: readonly BodyCell<TRow>[];
-    // (undocumented)
     bodyPinStyle: (key: string) => CSSProperties | undefined;
-    // (undocumented)
     cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
-    // (undocumented)
     clickable: boolean;
-    // (undocumented)
     columns: readonly ColumnDef<TRow>[];
-    // (undocumented)
     columnSpacers?: {
         start: number;
         end: number;
     };
-    // (undocumented)
     columnSpan: number;
-    // (undocumented)
     columnWidths?: Readonly<Record<string, number>>;
-    // (undocumented)
     confirm: ConfirmHandler;
-    // (undocumented)
     edgeRowPin: ReturnType<typeof pinnedRowCellStyle>;
-    // (undocumented)
     editing: EditableCellEditing<TRow> | undefined;
-    // (undocumented)
     editingSignature: string | null;
-    // (undocumented)
     expanded: boolean | undefined;
     flashSignature: string;
-    // (undocumented)
     focusIndex: number;
-    // (undocumented)
     getRowId: (row: TRow) => string;
-    // (undocumented)
     gridFocus?: GridFocusState;
-    // (undocumented)
     hasEndPin: boolean;
-    // (undocumented)
     hasPrefetch: boolean;
-    // (undocumented)
     hasStartPin: boolean;
-    // (undocumented)
     id: string;
-    // (undocumented)
     index: number;
-    // (undocumented)
     isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     leads: PinLeads;
-    // (undocumented)
     measureElement?: (element: Element | null) => void;
-    // (undocumented)
     measureRef: ((element: Element | null) => void) | undefined;
-    // (undocumented)
     measureRowPair?: RowPairMeasurer;
-    // (undocumented)
     onPrefetch: (row: TRow) => void;
-    // (undocumented)
     onRowClick: (row: TRow) => void;
-    // (undocumented)
     onToggleExpand: (id: string) => void;
-    // (undocumented)
     onToggleSelect: (id: string) => void;
-    // (undocumented)
     onToggleTree?: (id: string) => void;
-    // (undocumented)
     pinOffset?: (key: string) => PinOffset | undefined;
-    // (undocumented)
     pinPart: ReturnType<typeof pinnedRowPart>;
-    // (undocumented)
     pinRowSticky: boolean;
-    // (undocumented)
     pinSignature: string;
-    // (undocumented)
     pinSticky: ReturnType<typeof pinnedRowSticky>;
-    // (undocumented)
     renderDetail: (row: TRow) => ReactNode;
-    // (undocumented)
     renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
-    // (undocumented)
     reorderPinned: boolean;
-    // (undocumented)
     reorderSignature: string | null;
-    // (undocumented)
     row: TRow;
-    // (undocumented)
     rowActions: SharedTableRenderProps<TRow>["rowActions"];
-    // (undocumented)
     rowActionsLayout: SharedTableRenderProps<TRow>["rowActionsLayout"];
-    // (undocumented)
     rowClass: string | undefined;
-    // (undocumented)
     rowCount: number;
     rowDomProps: Record<string, unknown>;
-    // (undocumented)
     rowPinOffset: number;
-    // (undocumented)
     rowPinSide?: RowPinSide;
-    // (undocumented)
     rowPinSignature: string | null;
-    // (undocumented)
     rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
-    // (undocumented)
     rows: readonly TRow[];
-    // (undocumented)
     rowStyleSignature: string;
-    // (undocumented)
     rowVisualStyle: CSSProperties | undefined;
-    // (undocumented)
     selected: boolean | undefined;
-    // (undocumented)
     showActions: boolean;
-    // (undocumented)
     showReorder: boolean;
-    // (undocumented)
     sourceIndex: number;
-    // (undocumented)
     spanSignature: string;
-    // (undocumented)
     table: UseDataTableResult<TRow>;
-    // (undocumented)
     treeColumnKey?: string;
-    // (undocumented)
     treeEntry?: TreeEntry<TRow>;
-    // (undocumented)
     windowStart: number;
 }
 
 // @public
 export interface DesktopTableAssembly<TRow> {
-    // (undocumented)
     bodySlots: readonly DesktopBodySlot<TRow>[];
     // (undocumented)
     callbacks: {
@@ -945,7 +850,6 @@ export interface DesktopTableAssembly<TRow> {
         handlePrefetch: (row: TRow) => void;
         renderDetail: (row: TRow) => ReactNode;
     };
-    // (undocumented)
     gridProps: Record<string, unknown> | undefined;
     // (undocumented)
     header: {
@@ -964,14 +868,10 @@ export interface DesktopTableAssembly<TRow> {
         headerRowRef: RefCallback<HTMLElement>;
         headerRowProps: Record<string, unknown>;
     };
-    // (undocumented)
     headerBand: number;
-    // (undocumented)
     headerPlan: readonly (readonly HtmlGroupedHeaderCell[])[] | undefined;
     model: TableRenderModel<TRow>;
-    // (undocumented)
     pin: DesktopTablePin;
-    // (undocumented)
     resizeHandleStyle: CSSProperties;
     // (undocumented)
     scroll: {
@@ -979,15 +879,10 @@ export interface DesktopTableAssembly<TRow> {
         boxStyle: CSSProperties | undefined;
         bindScrollBox: RefCallback<HTMLDivElement>;
     };
-    // (undocumented)
     showColumnFooter: boolean;
-    // (undocumented)
     summary: Partial<Record<string, ReactNode>> | undefined;
-    // (undocumented)
     tableProps: ReturnType<UseDataTableResult<TRow>["getTableProps"]>;
-    // (undocumented)
     tableStyle: CSSProperties | undefined;
-    // (undocumented)
     widths: Required<Pick<DesktopChromeWidths, "expansion" | "selection" | "actions">> & {
         reorder: number;
         includeExpansionInLeads: boolean;
@@ -996,58 +891,35 @@ export interface DesktopTableAssembly<TRow> {
 
 // @public
 export interface DesktopTablePin {
-    // (undocumented)
     edgeBodyStyle: (side: "start" | "end", active: boolean) => CSSProperties | undefined;
-    // (undocumented)
     edgeHeadStyle: (side: "start" | "end", active: boolean) => CSSProperties | undefined;
-    // (undocumented)
     expansionLead: number;
-    // (undocumented)
     extraMinWidth: number;
-    // (undocumented)
     hasEndPin: boolean;
-    // (undocumented)
     hasPinned: boolean;
-    // (undocumented)
     hasStartPin: boolean;
-    // (undocumented)
     headerStickTop: number;
-    // (undocumented)
     headStyle: (column: {
         key: string;
         width?: number | string;
     }) => CSSProperties | undefined;
-    // (undocumented)
     inScrollBox: boolean;
-    // (undocumented)
     leads: PinLeads;
-    // (undocumented)
     pinRowSticky: boolean;
-    // (undocumented)
     reorderLead: number;
-    // (undocumented)
     rowPinOffset: number;
-    // (undocumented)
     selectionLead: number;
-    // (undocumented)
     signature: string;
-    // (undocumented)
     stickActions: boolean;
-    // (undocumented)
     stickyAttr: true | undefined;
-    // (undocumented)
     stickyStyle: CSSProperties | undefined;
 }
 
 // @public
 export interface DesktopVirtualPadSlot {
-    // (undocumented)
     colSpan: number;
-    // (undocumented)
     height: number;
-    // (undocumented)
     key: "pad-top" | "pad-bottom";
-    // (undocumented)
     kind: "virtualPad";
 }
 
@@ -1277,29 +1149,19 @@ export function FilterHeaderChrome<TRow>(input: Readonly<FilterHeaderChromeProps
 
 // @public
 export interface FilterHeaderChromeProps<TRow> extends FilterHeaderRowProps<TRow> {
-    // (undocumented)
     readonly slots: FilterHeaderSlots;
 }
 
 // @public
 export interface FilterHeaderClassNames {
-    // (undocumented)
     actionsHeader?: string;
-    // (undocumented)
     expandHeader?: string;
-    // (undocumented)
     filterHeaderCell?: string;
-    // (undocumented)
     filterHeaderInput?: string;
-    // (undocumented)
     filterHeaderMenu?: string;
-    // (undocumented)
     filterHeaderRow?: string;
-    // (undocumented)
     headerCell?: string;
-    // (undocumented)
     reorderHeader?: string;
-    // (undocumented)
     selectionHeader?: string;
 }
 
@@ -1308,138 +1170,90 @@ export function FilterHeaderControlChrome<TRow>(input: Readonly<FilterHeaderCont
 
 // @public
 export interface FilterHeaderControlChromeProps<TRow> extends FilterHeaderControlProps<TRow> {
-    // (undocumented)
     readonly slots: FilterHeaderSlots;
 }
 
 // @public
 export interface FilterHeaderControlProps<TRow> {
-    // (undocumented)
     readonly className?: string;
     readonly closeOnSelect?: boolean;
-    // (undocumented)
     readonly def: FilterDef<TRow>;
-    // (undocumented)
     readonly labels: Required<TableLabels>;
-    // (undocumented)
     readonly registry?: FilterTypeRegistry;
-    // (undocumented)
     readonly source: FilterFormSource<TRow>;
 }
 
 // @public
 export interface FilterHeaderMultiProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly menuClassName?: string;
-    // (undocumented)
     readonly onToggle: (value: string, checked: boolean) => void;
-    // (undocumented)
     readonly options: readonly FilterHeaderOption[];
-    // (undocumented)
     readonly selected: readonly string[];
-    // (undocumented)
     readonly summary: string;
 }
 
 // @public
 export interface FilterHeaderOption {
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterHeaderRangeProps {
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly type: "text" | "number" | "date";
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterHeaderRowProps<TRow> {
-    // (undocumented)
     readonly cellStyle?: (column: ColumnDef<TRow>) => CSSProperties | undefined;
-    // (undocumented)
     readonly classNames?: FilterHeaderClassNames;
-    // (undocumented)
     readonly columns: readonly ColumnDef<TRow>[];
-    // (undocumented)
     readonly columnSpacers?: {
         start: number;
         end: number;
     };
-    // (undocumented)
     readonly defs: readonly FilterDef<TRow>[];
     readonly enabled?: boolean;
-    // (undocumented)
     readonly expandable?: boolean;
-    // (undocumented)
     readonly labels: Required<TableLabels>;
-    // (undocumented)
     readonly padStyle?: CSSProperties;
-    // (undocumented)
     readonly pinSide?: (key: string) => "start" | "end" | undefined;
-    // (undocumented)
     readonly registry?: FilterTypeRegistry;
-    // (undocumented)
     readonly selection?: boolean;
-    // (undocumented)
     readonly showActions?: boolean;
-    // (undocumented)
     readonly showReorder?: boolean;
-    // (undocumented)
     readonly source: FilterFormSource<TRow>;
-    // (undocumented)
     readonly stickyAttr?: true;
 }
 
 // @public
 export interface FilterHeaderSearchProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly placeholder: string;
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterHeaderSelectProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly options: readonly FilterHeaderOption[];
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterHeaderSlots {
-    // (undocumented)
     readonly Multi: (props: FilterHeaderMultiProps) => ReactNode;
-    // (undocumented)
     readonly Range: (props: FilterHeaderRangeProps) => ReactNode;
-    // (undocumented)
     readonly Search: (props: FilterHeaderSearchProps) => ReactNode;
-    // (undocumented)
     readonly Select: (props: FilterHeaderSelectProps) => ReactNode;
 }
 
@@ -1448,28 +1262,19 @@ export function FiltersIcon(): ReactElement;
 
 // @public
 export interface FilterTreeBuilderProps<TRow> {
-    // (undocumented)
     readonly classNames?: FilterTreeClassNames;
     readonly defaultExpanded?: boolean;
-    // (undocumented)
     readonly defs: readonly FilterDef<TRow>[];
-    // (undocumented)
     readonly labels?: TableLabels;
-    // (undocumented)
     readonly registry?: FilterTypeRegistry;
-    // (undocumented)
     readonly source: Pick<TableSource<TRow>, "filterTree" | "setFilterTree">;
 }
 
 // @public
 export interface FilterTreeButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
-    // (undocumented)
     readonly part?: string;
 }
 
@@ -1478,109 +1283,69 @@ export function FilterTreeChrome<TRow>(input: Readonly<FilterTreeChromeProps<TRo
 
 // @public
 export interface FilterTreeChromeProps<TRow> extends FilterTreeBuilderProps<TRow> {
-    // (undocumented)
     readonly slots: FilterTreeSlots;
 }
 
 // @public
 export interface FilterTreeClassNames {
-    // (undocumented)
     filterField?: string;
-    // (undocumented)
     filterInput?: string;
-    // (undocumented)
     filterLabel?: string;
-    // (undocumented)
     filterOperator?: string;
-    // (undocumented)
     filterSelect?: string;
-    // (undocumented)
     filtersForm?: string;
-    // (undocumented)
     filterTree?: string;
-    // (undocumented)
     filterTreeActions?: string;
-    // (undocumented)
     filterTreeCondition?: string;
-    // (undocumented)
     filterTreeGroup?: string;
-    // (undocumented)
     filterTreeRemove?: string;
-    // (undocumented)
     filterTreeSummary?: string;
 }
 
 // @public
 export interface FilterTreeDisclosureProps {
-    // (undocumented)
     readonly children: ReactNode;
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly expanded: boolean;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onExpandedChange: (expanded: boolean) => void;
-    // (undocumented)
     readonly summaryClassName?: string;
 }
 
 // @public
 export interface FilterTreeInputProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly fieldClassName?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly labelClassName?: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly type: "text" | "number" | "date";
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterTreeOption {
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterTreeSelectProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly fieldClassName?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly labelClassName?: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly options: readonly FilterTreeOption[];
-    // (undocumented)
     readonly part: string;
-    // (undocumented)
     readonly value: string;
 }
 
 // @public
 export interface FilterTreeSlots {
-    // (undocumented)
     readonly Button: (props: FilterTreeButtonProps) => ReactNode;
-    // (undocumented)
     readonly Disclosure: (props: FilterTreeDisclosureProps) => ReactNode;
-    // (undocumented)
     readonly Input: (props: FilterTreeInputProps) => ReactNode;
-    // (undocumented)
     readonly Select: (props: FilterTreeSelectProps) => ReactNode;
 }
 
