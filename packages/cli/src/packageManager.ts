@@ -1,4 +1,8 @@
-/** Supported package managers. */
+/**
+ * Supported package managers.
+ *
+ * @public
+ */
 export type PackageManager = "pnpm" | "yarn" | "bun" | "npm";
 
 /** Lockfile → package manager, in detection order. */
@@ -15,6 +19,7 @@ const LOCKFILES: readonly [string, PackageManager][] = [
  *
  * @param files - File names present at the project root.
  * @returns The detected manager, or `"npm"` when none match.
+ * @public
  */
 export function choosePackageManager(files: readonly string[]): PackageManager {
   const present = new Set(files);
@@ -30,6 +35,7 @@ export function choosePackageManager(files: readonly string[]): PackageManager {
  * @param pm - The package manager.
  * @param packages - Packages to install (preserves order).
  * @returns A runnable install command string.
+ * @public
  */
 export function installCommand(
   pm: PackageManager,

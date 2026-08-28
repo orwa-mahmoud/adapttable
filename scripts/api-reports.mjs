@@ -13,8 +13,9 @@
  * read from its `exports` map the way smoke-dist reads it — so core's
  * `/adapter`, `/xlsx`, `/pdf`, `/formula`, `/pivot`, `/query`, `/stream` and `/sparkline`
  * are each extracted, and a subpath added tomorrow is covered the day it
- * ships. The cli scaffolder has no importable API and is skipped, matching
- * smoke-dist.
+ * ships. `@adapttable/cli`'s main entry is extracted too — its building
+ * blocks are a published programmatic API. `./package.json` and the
+ * `adapttable` binary are not typed entrypoints.
  *
  * Packages must be built first (`pnpm build`).
  */
@@ -74,10 +75,8 @@ let deferredSubpathWarnings = 0;
 let frontDoorWarnings = 0;
 let compilerNoticeShown = false;
 
-/** Library packages (cli ships a bin, not an API). */
-const PACKAGES = readdirSync(join(REPO_ROOT, "packages")).filter(
-  (dir) => dir !== "cli"
-);
+/** Every published package under `packages/` — reports follow `exports`. */
+const PACKAGES = readdirSync(join(REPO_ROOT, "packages"));
 
 /**
  * One extraction target per public entry point, taken from the `exports` map.

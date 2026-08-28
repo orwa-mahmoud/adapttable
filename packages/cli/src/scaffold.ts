@@ -1,6 +1,10 @@
 import type { KitInfo } from "./detect";
 
-/** A file the scaffolder will write. */
+/**
+ * A file the scaffolder will write.
+ *
+ * @public
+ */
 export interface ScaffoldFile {
   /** Path relative to the project root. */
   path: string;
@@ -15,6 +19,7 @@ export interface ScaffoldFile {
  *
  * @param info - The chosen kit.
  * @returns The starter component source.
+ * @public
  */
 export function starterComponent(info: KitInfo): string {
   return `"use client";
@@ -51,7 +56,11 @@ export function PeopleTable() {
 `;
 }
 
-/** Default path the starter component is written to. */
+/**
+ * Default path the starter component is written to.
+ *
+ * @public
+ */
 export const STARTER_PATH = "src/PeopleTable.tsx";
 
 /**
@@ -59,6 +68,7 @@ export const STARTER_PATH = "src/PeopleTable.tsx";
  *
  * @param info - The chosen kit.
  * @returns The files to write.
+ * @public
  */
 export function scaffoldFiles(info: KitInfo): ScaffoldFile[] {
   return [{ path: STARTER_PATH, contents: starterComponent(info) }];
@@ -69,6 +79,7 @@ export function scaffoldFiles(info: KitInfo): ScaffoldFile[] {
  *
  * @param info - The chosen kit.
  * @returns The ordered package list.
+ * @public
  */
 export function packagesFor(info: KitInfo): string[] {
   return ["@adapttable/core", info.adapter, ...info.extras];

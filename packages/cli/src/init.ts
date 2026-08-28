@@ -6,7 +6,11 @@ import {
 } from "./packageManager";
 import { packagesFor, scaffoldFiles } from "./scaffold";
 
-/** The filesystem + logging surface `runInit` depends on (injectable). */
+/**
+ * The filesystem + logging surface `runInit` depends on (injectable).
+ *
+ * @public
+ */
 export interface InitIO {
   /** Read a file relative to the project root; `undefined` when missing. */
   readFile(relativePath: string): string | undefined;
@@ -20,37 +24,45 @@ export interface InitIO {
   log(message: string): void;
 }
 
-/** Options for {@link runInit}. */
+/**
+ * Options for {@link runInit}.
+ *
+ * @public
+ */
 export interface InitOptions {
   /** Overwrite existing scaffold files. Defaults to `false`. */
   force?: boolean;
 }
 
-/** The outcome of a successful {@link runInit}. */
+/**
+ * The outcome of a successful {@link runInit}.
+ *
+ * @public
+ */
 export interface InitResult {
+  /** The detected kit identifier. */
   kit: Kit;
+  /** The adapter package that was scaffolded. */
   adapter: string;
+  /** The package manager chosen from lockfiles. */
   packageManager: PackageManager;
+  /** Packages the printed install command will add. */
   packages: string[];
+  /** The runnable install command. */
   installCommand: string;
+  /** Scaffold paths that were written. */
   written: string[];
+  /** Scaffold paths skipped because they already existed. */
   skipped: string[];
 }
 
-/** Thrown when init cannot proceed (e.g. no package.json). */
+/**
+ * Thrown when init cannot proceed (e.g. no package.json).
+ *
+ * @public
+ */
 export class InitError extends Error {}
 
-/**
- * Detect the project's UI kit, choose a package manager, write a starter
- * table component, and report the install command — all through injected
- * IO so it is fully testable. Side-effect-free except for the writes and
- * logs performed via {@link InitIO}.
- *
- * @param io - The injected filesystem + logger.
- * @param options - See {@link InitOptions}.
- * @returns The {@link InitResult}.
- * @throws {InitError} When no readable `package.json` is found.
- */
 /**
  * A heads-up when the detected Chakra is older than v3: `@adapttable/chakra`
  * targets Chakra v3, so a v2 project's scaffold would not compile as-is.
@@ -65,6 +77,18 @@ function chakraVersionWarning(
   return `   Note: @chakra-ui/react ${chakraSpec} detected — @adapttable/chakra targets Chakra v3. Upgrade @chakra-ui/react to v3, or use @adapttable/unstyled.`;
 }
 
+/**
+ * Detect the project's UI kit, choose a package manager, write a starter
+ * table component, and report the install command — all through injected
+ * IO so it is fully testable. Side-effect-free except for the writes and
+ * logs performed via {@link InitIO}.
+ *
+ * @param io - The injected filesystem + logger.
+ * @param options - See {@link InitOptions}.
+ * @returns The {@link InitResult}.
+ * @throws {InitError} When no readable `package.json` is found.
+ * @public
+ */
 export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
   const raw = io.readFile("package.json");
   if (raw === undefined) {
