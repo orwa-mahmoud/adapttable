@@ -204,3 +204,63 @@ test("every kit groups the pivot panel's zones the same way", async ({
     ).toEqual(shapes.get(reference!));
   }
 });
+
+/**
+ * The saved-views panel, also core's chrome in every kit. Its controls are the
+ * ones a keyboard user reaches to rename, apply and delete a view, so what
+ * matters is that each of them is named — an unnamed button here reads as
+ * "button" and gives no way to tell apply from delete.
+ */
+test("every kit names every control in the saved-views panel", async ({
+  page,
+}) => {
+  const shapes = new Map<string, unknown>();
+
+  for (const kit of KITS) {
+    await page.goto(`/${kit}/saved-views/`);
+    const panel = page
+      .locator('[data-adapttable-part="saved-views-panel"]')
+      .first();
+    await panel.waitFor();
+
+    const shape = await panel.evaluate((root) => {
+      const controls = [...root.querySelectorAll("button, input, select")];
+      const named = (el: Element) =>
+        el.getAttribute("aria-label") ??
+        ((el.getAttribute("aria-labelledby") ??
+          (el.textContent ?? "").trim()) ||
+          (el as HTMLInputElement).placeholder ||
+          (el.id
+            ? (root.querySelector(`label[for="${el.id}"]`)?.textContent ?? "")
+            : "") ||
+          (el.closest("label")?.textContent ?? ""));
+      return {
+        rows: root.querySelectorAll('[data-adapttable-part="saved-view-row"]')
+          .length,
+        controls: controls.length,
+        unnamed: controls
+          .filter(
+            (el) =>
+              el.getAttribute("aria-hidden") !== "true" &&
+              el.getAttribute("tabindex") !== "-1" &&
+              !String(named(el)).trim()
+          )
+          .map((el) => el.tagName.toLowerCase()),
+      };
+    });
+
+    expect(
+      shape.unnamed,
+      `${kit} has unnamed controls in the saved-views panel`
+    ).toEqual([]);
+    shapes.set(kit, shape);
+  }
+
+  const [reference, ...rest] = [...shapes.keys()];
+  for (const kit of rest) {
+    expect(
+      shapes.get(kit),
+      `${kit} builds a different saved-views panel from ${reference}`
+    ).toEqual(shapes.get(reference!));
+  }
+});
