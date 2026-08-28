@@ -158,3 +158,49 @@ test("every kit opens a named column menu", async ({ page }) => {
     ).toEqual(shapes.get(reference!));
   }
 });
+
+/**
+ * The pivot panel, which every kit builds from core's chrome rather than from
+ * its own components. Its three zones are the drop targets a keyboard user has
+ * to tell apart, so each one is a `fieldset` named by its `legend` — the same
+ * shape the column menu settled on. Nothing here may vary by kit.
+ */
+test("every kit groups the pivot panel's zones the same way", async ({
+  page,
+}) => {
+  const shapes = new Map<string, unknown>();
+
+  for (const kit of KITS) {
+    await page.goto(`/${kit}/pivot/`);
+    const panel = page.locator('[data-adapttable-part="pivot-panel"]').first();
+    await panel.waitFor();
+
+    shapes.set(
+      kit,
+      await panel.evaluate((root) => ({
+        zones: [
+          ...root.querySelectorAll('[data-adapttable-part="pivot-zone"]'),
+        ].map((zone) => ({
+          tag: zone.tagName.toLowerCase(),
+          legend:
+            zone.querySelector(":scope > legend")?.textContent?.trim() ?? null,
+        })),
+      }))
+    );
+
+    for (const zone of ["Rows", "Columns", "Measures"]) {
+      expect(
+        await page.getByRole("group", { name: zone }).count(),
+        `${kit} has no named "${zone}" zone in the pivot panel`
+      ).toBeGreaterThan(0);
+    }
+  }
+
+  const [reference, ...rest] = [...shapes.keys()];
+  for (const kit of rest) {
+    expect(
+      shapes.get(kit),
+      `${kit} groups the pivot panel differently from ${reference}`
+    ).toEqual(shapes.get(reference!));
+  }
+});
