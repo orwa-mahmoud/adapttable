@@ -14,17 +14,12 @@ import {
 import {
   commitBooleanDraft,
   editorValidationProps,
+  stopEditKeys,
 } from "@adapttable/core/adapter";
 import { Checkbox, Input, Select } from "antd";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { editableCellSlots } from "./kitControls";
-
-function stopEditKeys(event: KeyboardEvent): void {
-  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
-    event.stopPropagation();
-  }
-}
 
 /** Ant Design text / number / select editor for the active cell. */
 export function AntdCellEditor({

@@ -2711,6 +2711,12 @@ export interface StatusBarSlots {
 }
 
 // @public
+export function stopEditKeys(event: Readonly<{
+    key: string;
+    stopPropagation: () => void;
+}>): void;
+
+// @public
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 // @public

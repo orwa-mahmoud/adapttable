@@ -161,6 +161,7 @@ export {
   editorBusyProps,
   editorValidationProps,
   multiDraftFromSelect,
+  stopEditKeys,
 } from "./editing/EditableCellGate";
 export {
   BatchEditBarChrome,

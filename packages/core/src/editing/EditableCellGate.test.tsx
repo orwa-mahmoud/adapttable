@@ -18,6 +18,7 @@ import {
   editorBusyProps,
   editorValidationProps,
   multiDraftFromSelect,
+  stopEditKeys,
 } from "./EditableCellGate";
 import { useEditConflict } from "./editConflict";
 import { useCellSaveState } from "./saveState";
@@ -434,3 +435,28 @@ function baseCtrl() {
     focusRef: () => undefined,
   };
 }
+
+/**
+ * Enter, Escape and Tab mean something to both an open editor and the grid
+ * around it. The editor is where the user is typing, so it wins — and the table
+ * must never see the press. Every other key has to keep travelling, or the
+ * table's own shortcuts stop working while a cell is open.
+ */
+describe("stopEditKeys", () => {
+  const press = (key: string) => {
+    const stopPropagation = vi.fn();
+    stopEditKeys({ key, stopPropagation });
+    return stopPropagation;
+  };
+
+  it.each(["Enter", "Escape", "Tab"])("keeps %s inside the editor", (key) => {
+    expect(press(key)).toHaveBeenCalledOnce();
+  });
+
+  it.each(["a", "ArrowDown", "ArrowRight", "Home", "End", "PageDown", " "])(
+    "lets %s reach the table",
+    (key) => {
+      expect(press(key)).not.toHaveBeenCalled();
+    }
+  );
+});

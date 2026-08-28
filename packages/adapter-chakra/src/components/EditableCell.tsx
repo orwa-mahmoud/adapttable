@@ -14,18 +14,13 @@ import {
   commitBooleanDraft,
   editorValidationProps,
   multiDraftFromSelect,
+  stopEditKeys,
 } from "@adapttable/core/adapter";
 import { Input } from "@chakra-ui/react";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { editableCellSlots } from "./kitControls";
 import { Checkbox, NativeSelect } from "./primitives";
-
-function stopEditKeys(event: KeyboardEvent): void {
-  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
-    event.stopPropagation();
-  }
-}
 
 /** Chakra text / number / select editor for the active cell. */
 export function ChakraCellEditor({

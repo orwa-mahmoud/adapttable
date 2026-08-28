@@ -535,7 +535,9 @@ are still checking — behind `EditValidationState` (`UseEditValidationOptions` 
 sees before the host does. `editorValidationProps(ctrl)` from
 `@adapttable/core/adapter` is the `aria-invalid` / `aria-describedby` /
 `aria-busy` a kit's editor spreads, and `editorBusyProps(ctrl)` is just the busy
-flag for a kit whose own input owns the other two.
+flag for a kit whose own input owns the other two. `stopEditKeys(event)` keeps
+Enter, Escape and Tab inside the open editor: all three mean something to the
+grid as well, and the editor is where the user is typing.
 See [cell editing](./cell-editing.md).
 
 **The grouped row model.** `buildGroupedFlatModel` turns rows into the flat

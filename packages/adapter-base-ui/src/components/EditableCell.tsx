@@ -15,6 +15,7 @@ import {
 import {
   commitBooleanDraft,
   editorValidationProps,
+  stopEditKeys,
 } from "@adapttable/core/adapter";
 import {
   type KeyboardEvent,
@@ -51,12 +52,6 @@ function MultiSelectOption({
 const multiSelectSlots: MultiSelectEditorSlots = {
   Checkbox: MultiSelectOption,
 };
-
-function stopEditKeys(event: KeyboardEvent): void {
-  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
-    event.stopPropagation();
-  }
-}
 
 /**
  * Hand the control inside to the table's focus ref.

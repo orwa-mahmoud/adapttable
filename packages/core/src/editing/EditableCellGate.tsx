@@ -155,6 +155,25 @@ export interface EditableCellSlots {
 }
 
 /**
+ * Keep an editor's own keys out of the table's key handler.
+ *
+ * Enter, Escape and Tab all mean something to BOTH an open editor and the grid
+ * around it: the editor commits, cancels or moves to the next field, and the
+ * table would also move focus or leave edit mode on the same press. The editor
+ * is the one the user is typing in, so it wins — and the table never sees it.
+ *
+ * Structural event on purpose, so this stays usable from any framework's
+ * handler and from a plain listener.
+ */
+export function stopEditKeys(
+  event: Readonly<{ key: string; stopPropagation: () => void }>
+): void {
+  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
+    event.stopPropagation();
+  }
+}
+
+/**
  * The ARIA a kit's editor needs when validation is in play.
  *
  * Spread onto the input or select: invalid marks the field, `describedby`
