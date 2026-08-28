@@ -130,7 +130,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
 /**
  * Default searchable-text projector: flatten a row's own values.
  *
- * @public
+ * @internal
  */
 export function defaultSearchText<TRow>(row: TRow): string {
   return incrementalSearchText(row);
@@ -139,7 +139,7 @@ export function defaultSearchText<TRow>(row: TRow): string {
 /**
  * Default row id: `String(row.id)` when the row has a string/number id.
  *
- * @public
+ * @internal
  */
 export function defaultFrontendRowId<TRow>(row: TRow): string {
   if (row && typeof row === "object" && "id" in row) {

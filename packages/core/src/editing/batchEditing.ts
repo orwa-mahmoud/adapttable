@@ -42,7 +42,7 @@ export interface BatchRowEdit<TRow> {
 /**
  * Headless batch-editing state.
  *
- * @public
+ * @internal
  */
 export interface BatchEditingState<TRow> {
   /** How many rows are waiting — what a "3 unsaved rows" line reads. */
@@ -77,7 +77,7 @@ export interface BatchEditingState<TRow> {
 /**
  * What {@link useBatchEditing} needs.
  *
- * @public
+ * @internal
  */
 export interface UseBatchEditingOptions<TRow> {
   /**
@@ -117,7 +117,7 @@ type PendingDrafts = Readonly<
  * @param options - See {@link UseBatchEditingOptions}.
  * @returns The state; inert unless `enabled`.
  *
- * @public
+ * @internal
  */
 export function useBatchEditing<TRow>(
   options: UseBatchEditingOptions<TRow>

@@ -60,7 +60,7 @@ const NOTHING_COLLAPSED: readonly string[] = [];
 /**
  * Everything the pivot parameter carries.
  *
- * @public
+ * @internal
  */
 export interface PivotUrlState {
   /** What to pivot, and how. */
@@ -120,7 +120,7 @@ function decodeCollapsed(value: string): string {
  * @param state - The configuration, and which groups are folded.
  * @returns The parameter value, or `""` when there is nothing to say.
  *
- * @public
+ * @internal
  */
 export function serializePivotState(state: PivotUrlState): string {
   const { config, collapsed } = state;
@@ -160,7 +160,7 @@ export function serializePivotState(state: PivotUrlState): string {
  * @param raw - The parameter value.
  * @returns The configuration it describes, and which groups are folded.
  *
- * @public
+ * @internal
  */
 export function deserializePivotState(raw: string | null): PivotUrlState {
   if (!raw) return { config: EMPTY_PIVOT_CONFIG, collapsed: NOTHING_COLLAPSED };
@@ -210,7 +210,7 @@ export function deserializePivotState(raw: string | null): PivotUrlState {
  * @param config - The configuration to serialize.
  * @returns The parameter value, or `""` when there is nothing to say.
  *
- * @public
+ * @internal
  */
 export function serializePivot(config: PivotConfig): string {
   return serializePivotState({ config, collapsed: NOTHING_COLLAPSED });
@@ -222,7 +222,7 @@ export function serializePivot(config: PivotConfig): string {
  * @param raw - The parameter value.
  * @returns The configuration it describes.
  *
- * @public
+ * @internal
  */
 export function deserializePivot(raw: string | null): PivotConfig {
   return deserializePivotState(raw).config;

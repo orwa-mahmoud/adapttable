@@ -14,7 +14,7 @@ import type { RowPatchStreamStatus } from "./status";
 /**
  * The slice of WebSocket / EventSource this needs. Anything else can stand in.
  *
- * @public
+ * @internal
  */
 export interface StreamSocket {
   /** Subscribes to a socket event. */
@@ -36,7 +36,7 @@ export interface StreamSocket {
 /**
  * An `open` / `message` / `error` / `close` payload.
  *
- * @public
+ * @internal
  */
 export interface StreamSocketEvent {
   /** The frame's payload. */
@@ -46,7 +46,7 @@ export interface StreamSocketEvent {
 /**
  * How long to wait, and how many times, before giving up.
  *
- * @public
+ * @internal
  */
 export interface RowPatchStreamReconnect {
   /** Delay before the next open. Defaults to 1000 ms. */
@@ -58,7 +58,7 @@ export interface RowPatchStreamReconnect {
 /**
  * What {@link openRowPatchStream} needs.
  *
- * @public
+ * @internal
  */
 export interface OpenRowPatchStreamOptions {
   /** WebSocket url. Takes precedence over `eventSource`. */
@@ -87,7 +87,7 @@ export interface OpenRowPatchStreamOptions {
 /**
  * A live connection, and the one thing a host does to it.
  *
- * @public
+ * @internal
  */
 export interface RowPatchStreamHandle {
   /** The current status. */
@@ -137,7 +137,7 @@ function makeEventSource(
  * @param options - See {@link OpenRowPatchStreamOptions}.
  * @returns The handle; call `close()` when the host is done.
  *
- * @public
+ * @internal
  */
 export function openRowPatchStream(
   options: OpenRowPatchStreamOptions

@@ -42,7 +42,7 @@ import type { PivotColumnLeaf, PivotResult, PivotRow } from "./pivotModel";
  * The key of the row-header column — the one down the side, holding each
  * line's label. Stable, so a host can style or address it.
  *
- * @public
+ * @internal
  */
 export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
 
@@ -54,7 +54,7 @@ function leafColumnKey(index: number): string {
 /**
  * Options for {@link pivotTableModel}.
  *
- * @public
+ * @internal
  */
 export interface PivotTableModelOptions {
   /**
@@ -94,7 +94,7 @@ export interface PivotTableModelOptions {
 /**
  * A pivot as table props. Spread the parts a `DataTable` takes.
  *
- * @public
+ * @internal
  */
 export interface PivotTableModel {
   /** The row-header column, then one column per entry of `columnLeaves`. */
@@ -168,7 +168,7 @@ function rowHeaderCell(
  * <DataTable {...model} />;
  * ```
  *
- * @public
+ * @internal
  */
 export function pivotTableModel(
   result: PivotResult,

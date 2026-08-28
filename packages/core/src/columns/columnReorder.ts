@@ -6,7 +6,7 @@ import { isRtlElement } from "../layout/writingDirection";
 /**
  * MIME type carrying the dragged column key during a reorder drag.
  *
- * @public
+ * @internal
  */
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
@@ -14,7 +14,7 @@ export const COLUMN_DND_MIME = "application/x-adapttable-column";
  * Props that make a whole menu ROW draggable (so the browser's drag image is
  * the full row — you see the column move). Pair with `columnDropProps`.
  *
- * @public
+ * @internal
  */
 export interface ColumnRowDragProps {
   /** Always true — the whole row is the drag source. */
@@ -29,7 +29,7 @@ export interface ColumnRowDragProps {
  *
  * @param key - Column key being reordered.
  *
- * @public
+ * @internal
  */
 export function columnRowDragProps(key: string): ColumnRowDragProps {
   return {
@@ -59,7 +59,7 @@ export function columnRowDragProps(key: string): ColumnRowDragProps {
 /**
  * Props for a small, focusable reorder grip — keyboard a11y for the row drag.
  *
- * @public
+ * @internal
  */
 export interface ColumnReorderKeyProps {
   /** `button`, so the grip is announced as an action. */
@@ -94,7 +94,7 @@ function isRtl(grip: HTMLElement | null): boolean {
  * @param move - Layout mutator that moves a column to a new index.
  * @param label - Accessible label for the grip.
  *
- * @public
+ * @internal
  */
 export function columnReorderKeyProps(
   key: string,
@@ -127,7 +127,7 @@ export function columnReorderKeyProps(
 /**
  * Props for a row that accepts a dropped column, moving it to this index.
  *
- * @public
+ * @internal
  */
 export interface ColumnDropProps {
   /** Marks the row as a valid drop target while a column is over it. */
@@ -143,7 +143,7 @@ export interface ColumnDropProps {
  * @param index - Target index the dragged column moves to.
  * @param move - Layout mutator that moves a column to a new index.
  *
- * @public
+ * @internal
  */
 export function columnDropProps(
   index: number,
@@ -167,7 +167,7 @@ export function columnDropProps(
 /**
  * Indicator attributes for a column-menu row during a reorder drag.
  *
- * @public
+ * @internal
  */
 export interface ColumnDragRowAttrs {
   /** Present on the row being dragged (kits dim it). */
@@ -179,7 +179,7 @@ export interface ColumnDragRowAttrs {
 /**
  * Live drag state + composed prop builders from `useColumnDragState`.
  *
- * @public
+ * @internal
  */
 export interface ColumnDragState {
   /** Key currently being dragged, or `null` outside a drag. */
@@ -210,7 +210,7 @@ export interface ColumnDragState {
  * carries `data-drop="before" | "after"` (draw an insertion line on that
  * edge). State clears on drop, drag end, and drag cancel alike.
  *
- * @public
+ * @internal
  */
 export function useColumnDragState(): ColumnDragState {
   const [drag, setDrag] = useState<{ key: string; from: number } | null>(null);

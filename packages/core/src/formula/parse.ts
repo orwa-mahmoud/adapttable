@@ -40,7 +40,7 @@
 /**
  * A binary operator the grammar accepts.
  *
- * @public
+ * @internal
  */
 export type BinaryOp =
   "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
@@ -48,7 +48,7 @@ export type BinaryOp =
 /**
  * One node of a parsed formula.
  *
- * @public
+ * @internal
  */
 export type FormulaNode =
   | { readonly kind: "number"; readonly value: number }
@@ -70,7 +70,7 @@ export type FormulaNode =
 /**
  * What {@link parseFormula} answers with.
  *
- * @public
+ * @internal
  */
 export interface ParseResult {
   /** Whether the text parsed. */
@@ -288,7 +288,7 @@ function expression(cursor: Cursor): FormulaNode {
  * @param text - The formula as the user typed it.
  * @returns The tree, or the reason it could not be parsed. Never throws.
  *
- * @public
+ * @internal
  */
 export function parseFormula(text: string): ParseResult {
   const body = text.trim().replace(/^=/, "");
@@ -314,7 +314,7 @@ export function parseFormula(text: string): ParseResult {
  * @param node - A parsed formula.
  * @returns The referenced keys, each once, in the order first seen.
  *
- * @public
+ * @internal
  */
 export function formulaRefs(node: FormulaNode): string[] {
   const seen: string[] = [];

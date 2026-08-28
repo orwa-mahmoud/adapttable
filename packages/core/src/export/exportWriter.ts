@@ -58,7 +58,7 @@ export interface ExportRowMeta {
  * the view the reader can see — headers, leaves, footers — instead of a
  * denormalised leaf list.
  *
- * @public
+ * @internal
  */
 export type ExportViewEntry<TRow> =
   | { role: "data"; row: TRow; level: number }
@@ -206,7 +206,7 @@ function viewRowValues<TRow>(
  * @param columns - The columns a scope resolved to, in file order.
  * @returns The resolved table a writer receives.
  *
- * @public
+ * @internal
  */
 export function buildExportTable<TRow>(
   rows: readonly TRow[],
@@ -280,7 +280,7 @@ const BOM = "\uFEFF";
  * unicode correctly. This is what the export button uses when no writer is
  * given.
  *
- * @public
+ * @internal
  */
 export const csvWriter: ExportWriter = {
   extension: "csv",
@@ -302,7 +302,7 @@ export function defaultExportFilename(writer: ExportWriter): string {
  * @param filename - Download name, e.g. `"people.xlsx"`.
  * @param payload - The file from `ExportWriter.build`.
  *
- * @public
+ * @internal
  */
 export function downloadExportFile(
   filename: string,

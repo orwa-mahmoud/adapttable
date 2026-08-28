@@ -68,7 +68,7 @@ function toPatch<TRow>(entry: unknown): RowPatch<TRow> | undefined {
  * @param frame - The raw text from the socket.
  * @returns Every well-formed patch in the frame; empty when there are none.
  *
- * @public
+ * @internal
  */
 export function parseRowPatchFrame<TRow>(
   frame: string

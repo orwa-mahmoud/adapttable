@@ -16,7 +16,7 @@ const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
 /**
  * The kit checkbox {@link ColumnSelectCheckboxChrome} calls.
  *
- * @public
+ * @internal
  */
 export interface ColumnSelectCheckboxProps {
   /** Accessible name, already localized and already naming the column. */
@@ -30,7 +30,7 @@ export interface ColumnSelectCheckboxProps {
 /**
  * Adapter-supplied control for {@link ColumnSelectCheckboxChrome}.
  *
- * @public
+ * @internal
  */
 export interface ColumnSelectSlots {
   /** Renders a checkbox. */
@@ -40,7 +40,7 @@ export interface ColumnSelectSlots {
 /**
  * Props for {@link ColumnSelectCheckboxChrome}.
  *
- * @public
+ * @internal
  */
 export interface ColumnSelectCheckboxChromeProps {
   /** Accessible name for the control, already localized. */
@@ -77,7 +77,7 @@ export interface ColumnSelectCheckboxChromeProps {
  * never moves, and a selected column shows its state whether or not the pointer
  * is near. Where there is no hover, it is always visible.
  *
- * @public
+ * @internal
  */
 export function ColumnSelectCheckboxChrome({
   label,
@@ -131,7 +131,7 @@ export function ColumnSelectCheckboxChrome({
  * "Select column" twelve times over names nothing — a screen reader user
  * hearing it has no idea which column is about to be selected.
  *
- * @public
+ * @internal
  */
 export function columnSelectLabel(
   label: string | undefined,

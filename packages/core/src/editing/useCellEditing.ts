@@ -22,14 +22,14 @@ import { observeEdit } from "./editingEvents";
 /**
  * Keyboard outcome from {@link CellEditingState.handleKeyDown}.
  *
- * @public
+ * @internal
  */
 export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
 
 /**
  * Row/column context for Tab / Shift+Tab advance.
  *
- * @public
+ * @internal
  */
 export interface CellEditNavigation {
   /** The rendered rows. */
@@ -43,7 +43,7 @@ export interface CellEditNavigation {
 /**
  * Outcome of {@link CellEditingState.handleKeyDown}.
  *
- * @public
+ * @internal
  */
 export interface CellEditKeyOutcome {
   /** What the key press resolved to. */
@@ -57,7 +57,7 @@ export interface CellEditKeyOutcome {
 /**
  * Headless cell-editing state returned by {@link useCellEditing}.
  *
- * @public
+ * @internal
  */
 export interface CellEditingState {
   /** The cell currently being edited, or `null` when idle. */
@@ -137,7 +137,7 @@ export interface CellEditingState {
 /**
  * What {@link useCellEditing} observes, when the host wired lifecycle events.
  *
- * @public
+ * @internal
  */
 export interface UseCellEditingOptions<TRow = unknown> {
   /** An editor opened. */
@@ -154,7 +154,7 @@ export interface UseCellEditingOptions<TRow = unknown> {
  * @param options - Optional start/cancel observers.
  * @returns The state machine.
  *
- * @public
+ * @internal
  */
 export function useCellEditing<TRow = unknown>(
   options: UseCellEditingOptions<TRow> = {}

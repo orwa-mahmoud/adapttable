@@ -20,7 +20,7 @@ export interface PaginationInfo {
  * @param input - Current `page`, `limit`, and `total`.
  * @returns The derived {@link PaginationInfo}.
  *
- * @public
+ * @internal
  */
 export function computePagination(input: {
   page: number;
@@ -42,7 +42,7 @@ export function computePagination(input: {
 /**
  * One slot in a numbered pager: a page number, or a gap where pages were elided.
  *
- * @public
+ * @internal
  */
 export type PaginationItem = number | "ellipsis";
 
@@ -58,7 +58,7 @@ function range(start: number, end: number): number[] {
  * instead of indexing into {@link paginationItems} so list keys never depend on
  * the array position.
  *
- * @public
+ * @internal
  */
 export interface PaginationSlot {
   /** The page number or `"ellipsis"` marker. */
@@ -78,7 +78,7 @@ export interface PaginationSlot {
  * @param siblings - Pages to show on each side of the current page.
  * @returns Keyed pager slots.
  *
- * @public
+ * @internal
  */
 export function paginationSlots(
   page: number,
@@ -109,7 +109,7 @@ export function paginationSlots(
  * @param siblings - Pages to show on each side of the current page.
  * @returns Ordered page numbers interleaved with `"ellipsis"` gaps.
  *
- * @public
+ * @internal
  */
 export function paginationItems(
   page: number,

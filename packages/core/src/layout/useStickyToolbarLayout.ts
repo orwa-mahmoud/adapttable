@@ -10,7 +10,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
  * detaches search from the card while the rows still scroll inside, which
  * is the ugly double-scroller.
  *
- * @public
+ * @internal
  */
 export function resolveStickyToolbar(
   stickyHeader?: boolean,
@@ -25,7 +25,7 @@ export function resolveStickyToolbar(
  * Measure the toolbar and return the styles that park it at `stickyTop`,
  * plus the header inset that keeps thead from sliding under it.
  *
- * @public
+ * @internal
  */
 export function useStickyToolbarLayout(
   enabled: boolean,

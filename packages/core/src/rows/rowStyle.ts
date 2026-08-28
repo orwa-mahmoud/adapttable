@@ -31,7 +31,7 @@ export type RowStyle<TRow> = (
 /**
  * Resolve `rowHeight` for one row.
  *
- * @public
+ * @internal
  */
 export function resolveRowHeight<TRow>(
   rowHeight: RowHeight<TRow> | undefined,
@@ -46,7 +46,7 @@ export function resolveRowHeight<TRow>(
  * Merge `rowStyle` with an explicit height. Height wins when both name it —
  * `rowHeight` is the dedicated override.
  *
- * @public
+ * @internal
  */
 export function resolveRowStyle<TRow>(
   rowStyle: RowStyle<TRow> | undefined,
@@ -64,7 +64,7 @@ export function resolveRowStyle<TRow>(
 /**
  * Stable compare key for a memoized row's resolved style.
  *
- * @public
+ * @internal
  */
 export function rowStyleSignature(style: CSSProperties | undefined): string {
   if (style === undefined) return "";
@@ -74,7 +74,7 @@ export function rowStyleSignature(style: CSSProperties | undefined): string {
 /**
  * True when the host asked for a style or a height.
  *
- * @public
+ * @internal
  */
 export function rowStyleArmed(
   rowStyle: RowStyle<unknown> | undefined,
@@ -87,7 +87,7 @@ export function rowStyleArmed(
  * Virtualizer estimate: a constant, or a per-index read of `rowHeight`.
  * Group/extra slots fall back to `fallback` — they are not data rows.
  *
- * @public
+ * @internal
  */
 export function estimateFromRowHeight<TRow>(
   rowHeight: RowHeight<TRow> | undefined,

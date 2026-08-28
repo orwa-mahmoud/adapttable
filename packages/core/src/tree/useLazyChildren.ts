@@ -20,7 +20,7 @@ import { useEventCallback } from "../hooks/useEventCallback";
 /**
  * What {@link useLazyChildren} needs.
  *
- * @public
+ * @internal
  */
 export interface UseLazyChildrenOptions<TRow> {
   /**
@@ -38,7 +38,7 @@ export interface UseLazyChildrenOptions<TRow> {
 /**
  * Lazy-loading state for a tree.
  *
- * @public
+ * @internal
  */
 export interface LazyChildrenState<TRow> {
   /** Nodes being fetched right now — what the chevron shows a spinner for. */
@@ -60,7 +60,7 @@ export interface LazyChildrenState<TRow> {
  * @param options - See {@link UseLazyChildrenOptions}.
  * @returns The state; inert when no `onLoadChildren` is given.
  *
- * @public
+ * @internal
  */
 export function useLazyChildren<TRow>(
   options: UseLazyChildrenOptions<TRow>

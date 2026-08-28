@@ -45,7 +45,7 @@ import {
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeClassNames {
   /** Class for the whole builder. */
@@ -77,7 +77,7 @@ export interface FilterTreeClassNames {
 /**
  * Props for an adapter `FilterTreeBuilder` — no slots on the public API.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeBuilderProps<TRow> {
   /** Filter definitions the builder can offer. */
@@ -97,7 +97,7 @@ export interface FilterTreeBuilderProps<TRow> {
 /**
  * One option in a tree Select.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeOption {
   /** Value stored when this option is chosen. */
@@ -109,7 +109,7 @@ export interface FilterTreeOption {
 /**
  * Kit Select the tree layout calls.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeSelectProps {
   /** Accessible name for the select. */
@@ -133,7 +133,7 @@ export interface FilterTreeSelectProps {
 /**
  * Kit text/number/date field the tree layout calls.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeInputProps {
   /** Accessible name for the field. */
@@ -155,7 +155,7 @@ export interface FilterTreeInputProps {
 /**
  * Kit button the tree layout calls.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeButtonProps {
   /** Caption and accessible name. */
@@ -171,7 +171,7 @@ export interface FilterTreeButtonProps {
 /**
  * Kit disclosure that owns the Advanced section's visible chrome.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeDisclosureProps {
   /** Caption on the summary. */
@@ -191,7 +191,7 @@ export interface FilterTreeDisclosureProps {
 /**
  * Adapter-supplied controls for {@link FilterTreeChrome}.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeSlots {
   /** Renders a choice control. */
@@ -261,7 +261,7 @@ const TREE_LEGEND_HIDDEN: CSSProperties = {
 /**
  * Props for {@link FilterTreeChrome}.
  *
- * @public
+ * @internal
  */
 export interface FilterTreeChromeProps<
   TRow,
@@ -681,7 +681,7 @@ function GroupView<TRow>({
  * versioned `ft` param through `source.setFilterTree`. Adapters supply
  * the kit controls via {@link FilterTreeSlots}.
  *
- * @public
+ * @internal
  */
 export function FilterTreeChrome<TRow>({
   defs,

@@ -60,14 +60,14 @@ import { pasteRangeEdits } from "./pasteRange";
 /**
  * The attribute a focusable cell carries, so focus can find it in the DOM.
  *
- * @public
+ * @internal
  */
 export const GRID_CELL_ATTR = "data-grid-cell";
 
 /**
  * `data-grid-cell` value for one address — `"row:col"`, both absolute.
  *
- * @public
+ * @internal
  */
 export function gridCellAttr(cell: GridCell): string {
   return `${cell.row}:${cell.col}`;
@@ -76,7 +76,7 @@ export function gridCellAttr(cell: GridCell): string {
 /**
  * Options for {@link useGridFocus}.
  *
- * @public
+ * @internal
  */
 export interface UseGridFocusOptions<TRow> {
   /** Off unless the host asked for it; when false the hook does nothing. */
@@ -184,7 +184,7 @@ export interface UseGridFocusOptions<TRow> {
 /**
  * What {@link useGridFocus} returns.
  *
- * @public
+ * @internal
  */
 export interface GridFocusState {
   /**
@@ -284,7 +284,7 @@ export interface GridFocusState {
  *
  * @typeParam TRow - The row type.
  *
- * @public
+ * @internal
  */
 export function useGridFocus<TRow>(
   options: UseGridFocusOptions<TRow>

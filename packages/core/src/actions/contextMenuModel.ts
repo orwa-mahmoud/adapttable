@@ -51,7 +51,7 @@ export interface ContextMenuItem {
 /**
  * The handlers a built-in entry needs, each optional.
  *
- * @public
+ * @internal
  */
 export interface ContextMenuActions<TRow> {
   /** Copy the selection, or this cell when nothing is selected. */

@@ -3,7 +3,7 @@ import type { KeyboardEvent, MouseEvent } from "react";
 /**
  * Handlers + affordance for an activatable (clickable) row.
  *
- * @public
+ * @internal
  */
 export interface RowClickProps {
   /** Called when pressed. */
@@ -74,7 +74,7 @@ function moveRowFocus(current: HTMLElement, delta: -1 | 1): void {
  *   row 0 is a Tab stop (roving tabindex); omit it and every row stays
  *   tabbable.
  *
- * @public
+ * @internal
  */
 export function rowClickProps<TRow>(
   row: TRow,

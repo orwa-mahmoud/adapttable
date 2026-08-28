@@ -135,7 +135,7 @@ const TRASH = [
 /**
  * Which control a cluster entry is. Stable across kits, and across renders.
  *
- * @public
+ * @internal
  */
 export type SavedViewControlKey =
   "rename" | "moveUp" | "moveDown" | "default" | "remove";
@@ -147,7 +147,7 @@ export type SavedViewControlKey =
  * cannot render four of them, order them differently, or miss the disabled
  * state on the one control this reader may not use.
  *
- * @public
+ * @internal
  */
 export interface SavedViewRowControl {
   /** Which control this is — the React key, and what a test asks for. */
@@ -172,7 +172,7 @@ export interface SavedViewRowControl {
 /**
  * Props an adapter's panel surface receives.
  *
- * @public
+ * @internal
  */
 export interface SavedViewsPanelSurfaceProps {
   /** The card's heading, already localized. */
@@ -194,7 +194,7 @@ export interface SavedViewsPanelSurfaceProps {
 /**
  * Props an adapter's row receives — one saved view and its controls.
  *
- * @public
+ * @internal
  */
 export interface SavedViewsPanelRowProps {
   /** The view's name, or the rename input while it is being edited. */
@@ -241,7 +241,7 @@ export interface SavedViewsPanelRowProps {
 /**
  * Props an adapter's rename input receives.
  *
- * @public
+ * @internal
  */
 export interface SavedViewsPanelInputProps {
   /** Accessible name. */
@@ -270,7 +270,7 @@ export interface SavedViewsPanelInputProps {
 /**
  * Props an adapter's empty state receives.
  *
- * @public
+ * @internal
  */
 export interface SavedViewsPanelEmptyProps {
   /** Body text under the heading. */
@@ -280,7 +280,7 @@ export interface SavedViewsPanelEmptyProps {
 /**
  * The kit-native pieces the panel is built from.
  *
- * @public
+ * @internal
  */
 export interface SavedViewsPanelSlots {
   /** The titled card. */
@@ -296,7 +296,7 @@ export interface SavedViewsPanelSlots {
 /**
  * What the panel needs to render.
  *
- * @public
+ * @internal
  */
 export interface SavedViewsPanelChromeProps {
   /** The saved views, in list order. */
@@ -327,7 +327,7 @@ export interface SavedViewsPanelChromeProps {
  * @param props - The views, the operations, and the adapter's slots.
  * @returns The panel, built from the adapter's own controls.
  *
- * @public
+ * @internal
  */
 export function SavedViewsPanelChrome({
   views,

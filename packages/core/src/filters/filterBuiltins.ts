@@ -14,7 +14,7 @@ import {
 /**
  * Built-in types — the registry's first consumers.
  *
- * @public
+ * @internal
  */
 export const builtInFilterSpecs: readonly FilterTypeSpec[] =
   // PURE: a table that never imports the registry must not evaluate this.
@@ -29,7 +29,7 @@ export const builtInFilterSpecs: readonly FilterTypeSpec[] =
  * the moment a new entry point changed the chunk layout, and handed this an
  * empty spec list. With no cross-binding there is no order to get wrong.
  *
- * @public
+ * @internal
  */
 export const defaultFilterRegistry: FilterTypeRegistry =
   /*#__PURE__*/ createFilterRegistry(/*#__PURE__*/ createBuiltInFilterSpecs());
@@ -37,7 +37,7 @@ export const defaultFilterRegistry: FilterTypeRegistry =
 /**
  * Merge host `filterTypes` onto the built-ins (same `type` replaces).
  *
- * @public
+ * @internal
  */
 export function resolveFilterRegistry(
   extras?: readonly FilterTypeSpec[]

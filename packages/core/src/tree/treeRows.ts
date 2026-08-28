@@ -17,7 +17,7 @@ import type { ColumnDef } from "../types";
 /**
  * One visual row of a tree: the row itself, plus where it sits.
  *
- * @public
+ * @internal
  */
 export interface TreeEntry<TRow> {
   /** The row. */
@@ -44,7 +44,7 @@ export interface TreeEntry<TRow> {
 /**
  * How a host declares the hierarchy.
  *
- * @public
+ * @internal
  */
 export interface TreeShape<TRow> {
   /** Nested data: the children of a row, if any. */
@@ -62,7 +62,7 @@ export interface TreeShape<TRow> {
 /**
  * What {@link buildTreeEntries} needs.
  *
- * @public
+ * @internal
  */
 export interface BuildTreeEntriesOptions<TRow> extends TreeShape<TRow> {
   /** The rows, nested or flat. */
@@ -87,7 +87,7 @@ export interface BuildTreeEntriesOptions<TRow> extends TreeShape<TRow> {
  * @param options - See {@link BuildTreeEntriesOptions}.
  * @returns The entries, in render order.
  *
- * @public
+ * @internal
  */
 export function buildTreeEntries<TRow>(
   options: BuildTreeEntriesOptions<TRow>
@@ -184,7 +184,7 @@ function childrenFromParentIds<TRow>(
  * @param options - The shape, the rows, and the predicate.
  * @returns The rows that survive, nested exactly as they arrived.
  *
- * @public
+ * @internal
  */
 export function filterTreeRows<TRow>(options: {
   rows: readonly TRow[];
@@ -216,7 +216,7 @@ export function filterTreeRows<TRow>(options: {
  * @param level - Depth from zero.
  * @returns The style for the tree column's cell.
  *
- * @public
+ * @internal
  */
 export function treeIndentStyle(level: number): {
   paddingInlineStart?: string;
@@ -235,7 +235,7 @@ export function treeIndentStyle(level: number): {
  * @param level - Depth from zero.
  * @returns The style for the card.
  *
- * @public
+ * @internal
  */
 export function treeCardStyle(level: number): {
   marginInlineStart?: string;
@@ -246,7 +246,7 @@ export function treeCardStyle(level: number): {
 /**
  * Which column renders the chevron and the indent.
  *
- * @public
+ * @internal
  */
 export function treeColumnKey<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -259,7 +259,7 @@ export function treeColumnKey<TRow>(
 /**
  * One body row an adapter renders, tree or flat.
  *
- * @public
+ * @internal
  */
 export interface BodyRowEntry<TRow> {
   /** The row. */
@@ -290,7 +290,7 @@ export interface BodyRowEntry<TRow> {
  * @param tree - The tree bundle, when one is armed.
  * @returns What to render, in reading order.
  *
- * @public
+ * @internal
  */
 export function bodyRowEntries<TRow>(
   rows: readonly {

@@ -32,7 +32,7 @@ export type Direction = "ltr" | "rtl";
  * Colour scheme preference. `"auto"` follows the host /
  * `prefers-color-scheme`; adapters resolve it to their theming.
  *
- * @public
+ * @internal
  */
 export type ColorScheme = "light" | "dark" | "auto";
 

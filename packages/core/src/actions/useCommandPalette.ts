@@ -55,7 +55,7 @@ export interface UseCommandPaletteOptions extends TableCommandOptions {
 /**
  * What an adapter binds and renders.
  *
- * @public
+ * @internal
  */
 export interface TableCommandPalette {
   /** Whether it is showing. */
@@ -75,7 +75,7 @@ export interface TableCommandPalette {
  *   built-in commands.
  * @returns The open state and the commands.
  *
- * @public
+ * @internal
  */
 export function useCommandPalette(
   options: UseCommandPaletteOptions

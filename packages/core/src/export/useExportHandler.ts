@@ -22,14 +22,14 @@ import { exportButtonLabel } from "./exportLabel";
 /**
  * Where an export is in its life.
  *
- * @public
+ * @internal
  */
 export type ExportStatus = "idle" | "busy" | "done" | "failed";
 
 /**
  * What {@link useExportHandler} returns.
  *
- * @public
+ * @internal
  */
 export interface ExportHandlerState {
   /** Bind to the Export button, or `undefined` when export is off. */
@@ -65,7 +65,7 @@ export interface ExportHandlerState {
  * @param pageOnly - The handler writes the current page even though the
  *   host asked for `"all"`. The button says so instead of "Export CSV".
  *
- * @public
+ * @internal
  */
 export function useExportHandler(
   handler: (() => void | Promise<void>) | undefined,

@@ -19,7 +19,7 @@ import { type CellRange, cellRangeIndices, cellRangeSize } from "./cellRange";
 /**
  * The numbers behind a selection.
  *
- * @public
+ * @internal
  */
 export interface SelectionStats {
   /** Every selected cell, numeric or not. */
@@ -39,7 +39,7 @@ export interface SelectionStats {
 /**
  * What the statistics need: the rectangle, and the data under it.
  *
- * @public
+ * @internal
  */
 export interface SelectionStatsOptions<TRow> {
   /**
@@ -83,7 +83,7 @@ function numeric(value: unknown): number | null {
  * @param options - See {@link SelectionStatsOptions}.
  * @returns The statistics, or `null` when nothing is selected.
  *
- * @public
+ * @internal
  */
 export function selectionStats<TRow>(
   options: SelectionStatsOptions<TRow>

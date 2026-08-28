@@ -34,7 +34,7 @@ import type { CellValidator, EditValidationState } from "./validation";
 /**
  * Opt-in editing bundle from {@link TableChrome.editing}.
  *
- * @public
+ * @internal
  */
 export interface EditableCellEditing<TRow> {
   /**
@@ -89,14 +89,14 @@ export interface EditableCellEditing<TRow> {
 /**
  * Display / edit mode for one cell.
  *
- * @public
+ * @internal
  */
 export type EditableCellMode = "display" | "activatable" | "editing";
 
 /**
  * Controller returned by `editableCellController`.
  *
- * @public
+ * @internal
  */
 export interface EditableCellController<TRow = unknown> {
   /** Which editing mode is active. */
@@ -450,7 +450,7 @@ export function stopCellEditKeyboard(
  * cell enters edit mode — replaces the `autoFocus` attribute (axe/a11y).
  * Accepts DOM nodes and kit refs that expose `.focus()` (e.g. antd InputRef).
  *
- * @public
+ * @internal
  */
 export function focusEditorOnMount(node: { focus: () => void } | null): void {
   node?.focus();
@@ -468,7 +468,7 @@ export function focusEditorOnMount(node: { focus: () => void } | null): void {
  * @param rowId - The row's stable id.
  * @returns Whether to mark the row.
  *
- * @public
+ * @internal
  */
 export function rowIsDirty<TRow>(
   editing: EditableCellEditing<TRow> | undefined,
@@ -482,7 +482,7 @@ export function rowIsDirty<TRow>(
  * never passed `onCellEdit`); empty string when this row is idle; otherwise
  * `columnKey:draft` so only the active edit row re-renders on keystrokes.
  *
- * @public
+ * @internal
  */
 export function rowEditingSignature<TRow>(
   editing: EditableCellEditing<TRow> | undefined,

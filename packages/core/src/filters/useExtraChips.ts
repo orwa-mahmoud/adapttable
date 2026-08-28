@@ -10,7 +10,7 @@ import {
 /**
  * Options for {@link useExtraChips}.
  *
- * @public
+ * @internal
  */
 export interface UseExtraChipsOptions {
   /** A source's `extra` bag. */
@@ -33,7 +33,7 @@ export interface UseExtraChipsOptions {
  * @param options - See {@link UseExtraChipsOptions}.
  * @returns The derived chips.
  *
- * @public
+ * @internal
  */
 export function useExtraChips({
   extra,

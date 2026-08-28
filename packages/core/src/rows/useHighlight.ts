@@ -36,7 +36,7 @@ const STEADY_MS = 2500;
 /**
  * One highlighted cell.
  *
- * @public
+ * @internal
  */
 export interface HighlightedCell {
   /** Identity of the row. */
@@ -48,7 +48,7 @@ export interface HighlightedCell {
 /**
  * What {@link useHighlight} returns.
  *
- * @public
+ * @internal
  */
 export interface HighlightState {
   /** Mark a row. Repeating it restarts the clock rather than stacking. */
@@ -76,7 +76,7 @@ const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
  * @param enabled - Off unless the host asked; every call is then inert.
  * @returns The controls and the current marks.
  *
- * @public
+ * @internal
  */
 export function useHighlight(enabled: boolean): HighlightState {
   const reduced = usePrefersReducedMotion();

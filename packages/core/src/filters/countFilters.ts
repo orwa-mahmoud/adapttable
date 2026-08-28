@@ -3,7 +3,7 @@ import type { ExtraFilters, FilterValue } from "../types";
 /**
  * Numeric comparison operators for count/usage filters.
  *
- * @public
+ * @internal
  */
 export const COUNT_OPERATORS = [
   "eq",
@@ -17,14 +17,14 @@ export const COUNT_OPERATORS = [
 /**
  * Numeric comparison operator.
  *
- * @public
+ * @internal
  */
 export type CountOperator = (typeof COUNT_OPERATORS)[number];
 
 /**
  * State for one operator-driven count filter.
  *
- * @public
+ * @internal
  */
 export interface CountFilterState {
   /** The operator in force. */
@@ -40,7 +40,7 @@ export interface CountFilterState {
 /**
  * Symbols used in compact chip labels.
  *
- * @public
+ * @internal
  */
 export const COUNT_OPERATOR_SYMBOL: Record<CountOperator, string> = {
   eq: "=",
@@ -91,7 +91,7 @@ function toOperator(value: unknown): CountOperator | undefined {
 /**
  * Whether a count-filter state is complete enough to affect a query.
  *
- * @public
+ * @internal
  */
 export function isCountFilterComplete(state: CountFilterState): boolean {
   if (!state.op) return false;
@@ -104,7 +104,7 @@ export function isCountFilterComplete(state: CountFilterState): boolean {
 /**
  * Convert a state update to URL-extra values for one bucket.
  *
- * @public
+ * @internal
  */
 export function countFilterExtra(
   bucket: string,
@@ -121,7 +121,7 @@ export function countFilterExtra(
 /**
  * URL-extra update that clears every value for one bucket.
  *
- * @public
+ * @internal
  */
 export function clearCountFilterExtra(bucket: string): ExtraFilters {
   return {
@@ -135,7 +135,7 @@ export function clearCountFilterExtra(bucket: string): ExtraFilters {
 /**
  * Rehydrate one bucket's count-filter state from an extra-filter bag.
  *
- * @public
+ * @internal
  */
 export function countFilterStateFromExtra(
   bucket: string,
@@ -154,7 +154,7 @@ export function countFilterStateFromExtra(
  * unrelated params. This lets a UI keep partial state in the URL without
  * sending invalid operator/value pairs to an API.
  *
- * @public
+ * @internal
  */
 export function sanitizeCountFilterParams<P extends Record<string, unknown>>(
   params: P,
@@ -180,7 +180,7 @@ export function sanitizeCountFilterParams<P extends Record<string, unknown>>(
 /**
  * Build a compact chip label for a complete count filter.
  *
- * @public
+ * @internal
  */
 export function countFilterChipLabel(
   label: string,

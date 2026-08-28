@@ -30,7 +30,7 @@ export const TOTAL_PREFIX = "\u0002";
 /**
  * The key of the grand-total line, distinct from every real row path.
  *
- * @public
+ * @internal
  */
 export const PIVOT_GRAND_TOTAL_KEY = `${TOTAL_PREFIX}grand`;
 

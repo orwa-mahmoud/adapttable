@@ -11,7 +11,7 @@ import type { GridFocusState } from "./useGridFocus";
 /**
  * Props passed to an adapter's visible fill-handle component.
  *
- * @public
+ * @internal
  */
 export interface FillHandleSlotProps {
   /** Localized accessible title for the pointer affordance. */
@@ -25,7 +25,7 @@ export interface FillHandleSlotProps {
 /**
  * Adapter-owned rendering for {@link FillHandleChrome}.
  *
- * @public
+ * @internal
  */
 export interface FillHandleSlots {
   /** Renders the drag handle. */
@@ -35,7 +35,7 @@ export interface FillHandleSlots {
 /**
  * Props for {@link FillHandleChrome}.
  *
- * @public
+ * @internal
  */
 export interface FillHandleChromeProps {
   /** The grid focus state, straight from `table.gridFocus`. */
@@ -57,7 +57,7 @@ export interface FillHandleChromeProps {
  * nothing at all otherwise — so an adapter renders it unconditionally in every
  * cell and the opt-in promise still holds.
  *
- * @public
+ * @internal
  */
 export function FillHandleChrome({
   focus,

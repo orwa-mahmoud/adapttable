@@ -51,7 +51,7 @@ export type RowActionsRenderer<TRow> = (
  *
  * @typeParam TRow - The row type.
  *
- * @public
+ * @internal
  */
 export function visibleRowActions<TRow>(
   actions: readonly RowAction<TRow>[],

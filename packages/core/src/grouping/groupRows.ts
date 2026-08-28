@@ -8,7 +8,7 @@ import { getPath } from "../utils/path";
  * One visual row in a single-level grouped body: a group header, or a leaf
  * data row belonging to a group. Adapters switch on `kind`.
  *
- * @public
+ * @internal
  */
 export type GroupedFlatEntry<TRow> =
   | {
@@ -144,7 +144,7 @@ export type GroupSort<TRow> =
 /**
  * Same mapper signature as `summaryRow` — one API for page footer + groups.
  *
- * @public
+ * @internal
  */
 export type GroupAggregatesFn<TRow> = (
   rows: readonly TRow[]
@@ -196,7 +196,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
 /**
  * How much of a paged group model the reader has asked to see.
  *
- * @public
+ * @internal
  */
 export interface GroupPaging {
   /** Extra top-level groups revealed beyond the first page. */
@@ -228,7 +228,7 @@ export function resolveGroupValue<TRow>(
  * render the same blank label; splitting them would show several
  * identical "(blank)" groups).
  *
- * @public
+ * @internal
  */
 export function groupValueKey(value: unknown): string {
   if (value == null || value === "") return "";
@@ -248,7 +248,7 @@ export function groupValueKey(value: unknown): string {
 /**
  * Render a group's value as its header caption.
  *
- * @public
+ * @internal
  */
 export function formatGroupLabel(
   value: unknown,
@@ -516,7 +516,7 @@ export function flattenGroupPartitions<TRow>(
  * @param options - See `BuildGroupedFlatModelOptions`.
  * @returns The entries, in render order.
  *
- * @public
+ * @internal
  */
 export function buildGroupedFlatModel<TRow>(
   options: BuildGroupedFlatModelOptions<TRow>

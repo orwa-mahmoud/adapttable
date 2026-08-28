@@ -56,14 +56,14 @@ export { PIVOT_GRAND_TOTAL_KEY };
 /**
  * The label a dimension value gets when the row has none.
  *
- * @public
+ * @internal
  */
 export const PIVOT_BLANK = "—";
 
 /**
  * One computed value per cell.
  *
- * @public
+ * @internal
  */
 export interface PivotMeasure {
   /** The column key whose values are aggregated. */
@@ -80,7 +80,7 @@ export interface PivotMeasure {
 /**
  * What to pivot, and how.
  *
- * @public
+ * @internal
  */
 export interface PivotConfig {
   /** Dimensions down the side, outermost first. Empty pivots to one line. */
@@ -98,7 +98,7 @@ export interface PivotConfig {
 /**
  * A node in the column header tree.
  *
- * @public
+ * @internal
  */
 export interface PivotColumnNode {
   /** The dimension value this node stands for. */
@@ -114,7 +114,7 @@ export interface PivotColumnNode {
 /**
  * One rendered column: a column path plus the measure shown in it.
  *
- * @public
+ * @internal
  */
 export interface PivotColumnLeaf {
   /** Stable key for React and for column-level state. */
@@ -130,14 +130,14 @@ export interface PivotColumnLeaf {
 /**
  * What a line in the body is.
  *
- * @public
+ * @internal
  */
 export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
 
 /**
  * One rendered line.
  *
- * @public
+ * @internal
  */
 export interface PivotRow {
   /** Stable id — also the collapse key for a `subtotal` line. */
@@ -159,7 +159,7 @@ export interface PivotRow {
 /**
  * The whole pivot, ready to render.
  *
- * @public
+ * @internal
  */
 export interface PivotResult {
   /** The column header tree; empty when there are no column dimensions. */
@@ -175,7 +175,7 @@ export interface PivotResult {
 /**
  * Options for `pivot`.
  *
- * @public
+ * @internal
  */
 export interface PivotOptions<TRow> {
   /**
@@ -370,7 +370,7 @@ function hiddenByCollapse(
  * @param options - Columns for value resolution, formatting, collapse state.
  * @returns The column tree, the rendered columns and every body line.
  *
- * @public
+ * @internal
  */
 export function pivot<TRow>(
   rows: readonly TRow[],

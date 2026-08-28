@@ -11,7 +11,7 @@ export const FALLBACK_PIN_WIDTH = 150;
  * pixel value (relative units like `%`, `rem`, `fr` have no px here, so
  * `parseInt("50%")` → 50 would silently corrupt a sticky inset / min-width).
  *
- * @public
+ * @internal
  */
 export function parsePxWidth(
   width: number | string | undefined
@@ -31,7 +31,7 @@ export function parsePxWidth(
  * `widths` map) wins over the declared width. `undefined` when neither
  * resolves to pixels.
  *
- * @public
+ * @internal
  */
 export function resolveColumnWidth(
   column: WidthColumn,
@@ -55,7 +55,7 @@ export function resolveColumnWidth(
  * @param options - `widths` resize overrides; `extra` px for non-data columns.
  * @returns The min table width in px, or `0` when no column declares a width.
  *
- * @public
+ * @internal
  */
 export function tableMinWidth<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -78,7 +78,7 @@ export function tableMinWidth<TRow>(
  * @param column - The pinned column.
  * @param widths - Resize overrides from the column layout.
  *
- * @public
+ * @internal
  */
 export function pinnedColumnWidth(
   column: WidthColumn,

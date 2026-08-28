@@ -50,7 +50,7 @@ const NOTHING_COLLAPSED: readonly string[] = [];
 /**
  * What {@link usePivotUrlState} needs.
  *
- * @public
+ * @internal
  */
 export interface UsePivotUrlStateOptions {
   /** Reads and writes the URL. */
@@ -66,7 +66,7 @@ export interface UsePivotUrlStateOptions {
 /**
  * The controlled state to hand the panel and the engine.
  *
- * @public
+ * @internal
  */
 export interface UsePivotUrlStateResult {
   /** What to pivot, and how. Give it to the panel and to `pivot`. */
@@ -88,7 +88,7 @@ export interface UsePivotUrlStateResult {
  * @param options - See {@link UsePivotUrlStateOptions}.
  * @returns The configuration, the folded set, and the setters for both.
  *
- * @public
+ * @internal
  */
 export function usePivotUrlState(
   options: UsePivotUrlStateOptions = {}

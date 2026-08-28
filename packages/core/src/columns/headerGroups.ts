@@ -5,35 +5,35 @@ import type { ColumnDef } from "../types";
 /**
  * Pixel lock for a collapsed arrow stub — chevron only, no leftover strip.
  *
- * @public
+ * @internal
  */
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 /**
  * Path separator inside a column-group id — labels may contain `/`.
  *
- * @public
+ * @internal
  */
 export const COLUMN_GROUP_ID_SEP = "\u001f";
 
 /**
  * Synthetic leaf shown when a collapsed group has no summary column.
  *
- * @public
+ * @internal
  */
 export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 
 /**
  * Synthetic leaf shown when a collapsed group uses `collapsedRender`.
  *
- * @public
+ * @internal
  */
 export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
 
 /**
  * True when this key is a collapsed-group arrow stub.
  *
- * @public
+ * @internal
  */
 export function isColumnGroupStubKey(key: string): boolean {
   return key.startsWith(COLUMN_GROUP_STUB_PREFIX);
@@ -42,7 +42,7 @@ export function isColumnGroupStubKey(key: string): boolean {
 /**
  * True when this key is a collapsed-group `collapsedRender` column.
  *
- * @public
+ * @internal
  */
 export function isColumnGroupRenderKey(key: string): boolean {
   return key.startsWith(COLUMN_GROUP_RENDER_PREFIX);
@@ -51,7 +51,7 @@ export function isColumnGroupRenderKey(key: string): boolean {
 /**
  * True when this key is a stub or `collapsedRender` summary leaf.
  *
- * @public
+ * @internal
  */
 export function isColumnGroupSummaryKey(key: string): boolean {
   return isColumnGroupStubKey(key) || isColumnGroupRenderKey(key);
@@ -61,7 +61,7 @@ export function isColumnGroupSummaryKey(key: string): boolean {
  * Inset hairline under a group title that still has child headers below.
  * Stops Assignment and Delivery sharing one stroke across the gap.
  *
- * @public
+ * @internal
  */
 export function groupedHeaderChildRule(hairline: string): {
   readonly borderBottom: string;
@@ -82,7 +82,7 @@ export function groupedHeaderChildRule(hairline: string): {
 /**
  * One cell of a group header row.
  *
- * @public
+ * @internal
  */
 export interface HeaderGroupCell {
   /** Stable key for React lists. */
@@ -120,7 +120,7 @@ export type GroupedHeaderAlign = "start" | "center" | "end";
  * auto table layout; min + max stop the table from stretching the blank
  * strip to a data-column width.
  *
- * @public
+ * @internal
  */
 export function columnGroupStubStyle(): CSSProperties {
   return {
@@ -137,7 +137,7 @@ export function columnGroupStubStyle(): CSSProperties {
  * Alignment for a group header. Omit / unknown → `"center"`, so existing
  * tables keep the hardcoded look; pass `"start"` or `"end"` to opt out.
  *
- * @public
+ * @internal
  */
 export function groupedHeaderAlign(
   align?: GroupedHeaderAlign
@@ -151,7 +151,7 @@ export function groupedHeaderAlign(
  * as wide as that leaf, so without this the button wraps onto the line above
  * the caption — worst when every neighbor is also collapsed.
  *
- * @public
+ * @internal
  */
 export function groupedHeaderLabelStyle(): CSSProperties {
   return {
@@ -168,7 +168,7 @@ export function groupedHeaderLabelStyle(): CSSProperties {
  * Style on one HTML group header cell: inset hairline while children sit
  * below, and the stub lock when the caption is hidden.
  *
- * @public
+ * @internal
  */
 export function groupedHeaderCellStyle(
   cell: Readonly<{ rowSpan: number; cell: HeaderGroupCell }>,
@@ -187,7 +187,7 @@ export function groupedHeaderCellStyle(
 /**
  * `column.group` as a root-to-leaf path. A string is one level.
  *
- * @public
+ * @internal
  */
 export function columnGroupPath<TRow>(
   column: Pick<ColumnDef<TRow>, "group">
@@ -199,7 +199,7 @@ export function columnGroupPath<TRow>(
 /**
  * Stable id for a group path.
  *
- * @public
+ * @internal
  */
 export function columnGroupId(path: readonly string[]): string {
   return path.join(COLUMN_GROUP_ID_SEP);
@@ -208,7 +208,7 @@ export function columnGroupId(path: readonly string[]): string {
 /**
  * Add or drop a group id in the collapsed set.
  *
- * @public
+ * @internal
  */
 export function toggleCollapsedColumnGroup(
   collapsedIds: readonly string[],
@@ -224,7 +224,7 @@ export function toggleCollapsedColumnGroup(
  * column declares a group. Contiguous same-path cells merge; a reorder that
  * breaks adjacency splits the group rather than teleporting it.
  *
- * @public
+ * @internal
  */
 export function headerGroupRows<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -285,7 +285,7 @@ function headerGroupRowAt<TRow>(
  * Groups are adjacency-based — if the user reorders columns apart, the
  * group SPLITS rather than lying about the layout.
  *
- * @public
+ * @internal
  */
 export function headerGroupRow<TRow>(
   columns: readonly ColumnDef<TRow>[]
@@ -296,7 +296,7 @@ export function headerGroupRow<TRow>(
 /**
  * Visible group caption; `null` when the collapsed stub hides the name.
  *
- * @public
+ * @internal
  */
 export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null {
   if (cell.hideLabel) return null;
@@ -311,7 +311,7 @@ export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null {
  * same way: no second header row, no line under the title. `collapsedKey`
  * keeps the child header, so that group stays two rows.
  *
- * @public
+ * @internal
  */
 export type HtmlGroupedHeaderCell =
   | {
@@ -333,7 +333,7 @@ export type HtmlGroupedHeaderCell =
  * Ant folds the same model into native `children`; this plan is that tree
  * flattened into `rowSpan` / `colSpan` so Mantine, MUI, and the rest match.
  *
- * @public
+ * @internal
  */
 export function htmlGroupedHeaderPlan<TRow>(
   columns: readonly ColumnDef<TRow>[],

@@ -8,7 +8,7 @@ import { ComponentType } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
-// @public
+// @internal
 export function buildTableXlsx<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly ColumnDef<TRow>[];
@@ -17,7 +17,7 @@ export function buildTableXlsx<TRow>(options: {
     summary?: Readonly<Partial<Record<string, unknown>>>;
 }): Uint8Array<ArrayBuffer>;
 
-// @public
+// @internal
 export type ExportViewEntry<TRow> = {
     role: "data";
     row: TRow;
@@ -30,7 +30,7 @@ export type ExportViewEntry<TRow> = {
     values?: Readonly<Partial<Record<string, unknown>>>;
 };
 
-// @public
+// @internal
 export function xlsxWriter(options?: {
     sheetName?: string;
 }): ExportWriter;

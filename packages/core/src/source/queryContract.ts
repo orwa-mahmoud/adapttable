@@ -101,7 +101,7 @@ export interface QueryFilterGroup {
 /**
  * Narrows a filter-tree child to a nested group.
  *
- * @public
+ * @internal
  */
 export function isFilterGroup(
   node: QueryCondition | QueryFilterGroup

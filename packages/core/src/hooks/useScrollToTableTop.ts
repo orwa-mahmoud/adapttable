@@ -3,7 +3,7 @@ import { type RefObject, useEffect, useRef } from "react";
 /**
  * Options for {@link useScrollToTableTop}.
  *
- * @public
+ * @internal
  */
 export interface UseScrollToTableTopOptions {
   /** Table/container element to bring back below sticky chrome. */
@@ -25,7 +25,7 @@ export interface UseScrollToTableTopOptions {
  * The initial render is skipped so deep links and restored browser positions
  * are not disturbed on first paint.
  *
- * @public
+ * @internal
  */
 export function useScrollToTableTop({
   ref,

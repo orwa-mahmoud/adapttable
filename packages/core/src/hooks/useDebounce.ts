@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
  * @param delay - Debounce delay in milliseconds. Defaults to 300.
  * @returns The debounced value.
  *
- * @public
+ * @internal
  */
 export function useDebounce<T>(value: T, delay = 300): T {
   const [debounced, setDebounced] = useState<T>(value);

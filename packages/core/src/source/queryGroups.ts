@@ -52,7 +52,7 @@ export interface QueryGroupRow<TRow = unknown> {
 /**
  * A page of grouped results.
  *
- * @public
+ * @internal
  */
 export interface QueryGroupsPage<TRow = unknown> {
   /** The top-level groups, in the order the server wants them shown. */
@@ -64,7 +64,7 @@ export interface QueryGroupsPage<TRow = unknown> {
 /**
  * What {@link serverGroupEntries} needs to lay a server's answer out.
  *
- * @public
+ * @internal
  */
 export interface ServerGroupEntriesOptions<TRow> {
   /** The groups the server returned. */
@@ -93,7 +93,7 @@ export interface ServerGroupEntriesOptions<TRow> {
  * @param options - See {@link ServerGroupEntriesOptions}.
  * @returns The entries, in render order.
  *
- * @public
+ * @internal
  */
 export function serverGroupEntries<TRow>(
   options: ServerGroupEntriesOptions<TRow>

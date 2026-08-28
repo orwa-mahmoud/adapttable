@@ -11,7 +11,7 @@ import { type RowPairMeasurer, useRowPairMeasurer } from "./measureRowPair";
 /**
  * One row/card entry materialized from a virtual window.
  *
- * @public
+ * @internal
  */
 export interface VirtualTableRow<TRow> {
   /** Row data for this visual slot. */
@@ -58,7 +58,7 @@ function pendingListSize(
 /**
  * Dataset index for ARIA / focus — the window index when pinning is off.
  *
- * @public
+ * @internal
  */
 export function rowSourceIndex(
   entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">
@@ -130,7 +130,7 @@ export interface UseTableVirtualizationOptions<TRow> {
 /**
  * Resolve either virtual entries or the full source rows into render entries.
  *
- * @public
+ * @internal
  */
 export function resolveVirtualRows<TRow>(
   rows: readonly TRow[],
@@ -313,7 +313,7 @@ export function useTableVirtualization<TRow>({
 /**
  * Result of {@link useKeyedVirtualization} — index window over a keyed list.
  *
- * @public
+ * @internal
  */
 export interface KeyedVirtualization {
   /** Whether virtualization is on. */
@@ -332,7 +332,7 @@ export interface KeyedVirtualization {
  * Virtualize an opaque keyed list (e.g. grouped flat entries). Same window /
  * element modes as `useTableVirtualization`.
  *
- * @public
+ * @internal
  */
 export function useKeyedVirtualization(options: {
   keys: readonly string[];
@@ -433,7 +433,7 @@ export function useKeyedVirtualization(options: {
 /**
  * Slice a flat grouped model to the virtual window indices.
  *
- * @public
+ * @internal
  */
 export function windowGroupedEntries<TEntry>(
   entries: readonly TEntry[],

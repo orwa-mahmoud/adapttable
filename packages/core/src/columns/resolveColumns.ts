@@ -23,7 +23,7 @@ function pathCell(value: unknown): string | null {
  * Works for flat per-language fields and nested objects alike — both are
  * just paths.
  *
- * @public
+ * @internal
  */
 export function localizedColumnPath(
   column: Pick<ColumnDef<unknown>, "key" | "i18n">,
@@ -45,7 +45,7 @@ export function localizedColumnPath(
  * columns sort by the localized text. Already-complete columns pass through
  * untouched, so the resolution is idempotent and cheap to repeat.
  *
- * @public
+ * @internal
  */
 export function resolveColumns<TRow>(
   columns: readonly ColumnDef<TRow>[],

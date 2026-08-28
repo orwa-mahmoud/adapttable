@@ -40,7 +40,7 @@ import type {
 /**
  * One line of a server-computed pivot.
  *
- * @public
+ * @internal
  */
 export interface QueryPivotRow {
   /**
@@ -76,7 +76,7 @@ export interface QueryPivotRow {
 /**
  * A page of server-computed pivot results.
  *
- * @public
+ * @internal
  */
 export interface QueryPivotPage {
   /**
@@ -94,7 +94,7 @@ export interface QueryPivotPage {
 /**
  * What {@link serverPivotResult} needs.
  *
- * @public
+ * @internal
  */
 export interface ServerPivotOptions {
   /** The configuration that was sent, for the measures and their order. */
@@ -144,7 +144,7 @@ function treeOf(
  * @param options - The configuration that was asked for, and formatting.
  * @returns The same `PivotResult` shape the local engine returns.
  *
- * @public
+ * @internal
  */
 export function serverPivotResult(
   page: QueryPivotPage,

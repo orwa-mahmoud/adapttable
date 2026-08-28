@@ -5,7 +5,7 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 /**
  * Tuning for the mount stagger.
  *
- * @public
+ * @internal
  */
 export interface MountStaggerOptions {
   /** Master switch. When `false`, the hook is a no-op. */
@@ -29,7 +29,7 @@ export interface MountStaggerOptions {
  * @param deps - Re-run the stagger when these change (e.g. the row set).
  * @param options - See {@link MountStaggerOptions}.
  *
- * @public
+ * @internal
  */
 export function useMountStagger(
   ref: RefObject<HTMLElement | null>,

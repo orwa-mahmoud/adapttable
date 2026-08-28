@@ -14,7 +14,7 @@ export const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
  * @param preference - `"light" | "dark" | "auto"`. Defaults to `"auto"`.
  * @returns The resolved scheme, `"light"` or `"dark"`.
  *
- * @public
+ * @internal
  */
 export function useColorScheme(
   preference: ColorScheme = "auto"

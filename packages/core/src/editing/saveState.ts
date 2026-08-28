@@ -22,14 +22,14 @@ import { observeEdit } from "./editingEvents";
 /**
  * What a cell's last save is doing.
  *
- * @public
+ * @internal
  */
 export type CellSaveStatus = "saving" | "failed";
 
 /**
  * One cell's failed save, with what it takes to retry or undo it.
  *
- * @public
+ * @internal
  */
 export interface FailedCellSave<TRow> {
   /** The row as it was before the edit — what a rollback restores. */
@@ -43,7 +43,7 @@ export interface FailedCellSave<TRow> {
 /**
  * What {@link useCellSaveState} needs.
  *
- * @public
+ * @internal
  */
 export interface UseCellSaveStateOptions<TRow> {
   /**
@@ -61,7 +61,7 @@ export interface UseCellSaveStateOptions<TRow> {
 /**
  * Per-cell save state for the whole table.
  *
- * @public
+ * @internal
  */
 export interface CellSaveState<TRow> {
   /** What this cell's last save is doing, if anything. */
@@ -133,7 +133,7 @@ function isThenable(value: unknown): value is Promise<unknown> {
  * @param options - See {@link UseCellSaveStateOptions}.
  * @returns The state; inert until a commit returns a promise that rejects.
  *
- * @public
+ * @internal
  */
 export function useCellSaveState<TRow>(
   options: UseCellSaveStateOptions<TRow> = {}

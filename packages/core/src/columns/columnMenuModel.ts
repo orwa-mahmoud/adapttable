@@ -6,7 +6,7 @@ import { applyColumnOrder } from "./useColumnLayout";
 /**
  * Readable label for a column in the menu (header string → mobileLabel → key).
  *
- * @public
+ * @internal
  */
 export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string {
   if (typeof column.header === "string") return column.header;
@@ -60,7 +60,7 @@ export interface ColumnMenuRow<TRow> {
  * trailing edge has no value: it just sticky-travels across the row and
  * collides with the actions column.
  *
- * @public
+ * @internal
  */
 export function nextPinSide(current: PinnedSide): PinnedSide {
   return current === undefined ? "start" : undefined;
@@ -71,7 +71,7 @@ export function nextPinSide(current: PinnedSide): PinnedSide {
  * "Unpin" when pinned — so the accessible name always matches what the click
  * will do. (The actions column uses its own "Pin to end" / "Unpin" label.)
  *
- * @public
+ * @internal
  */
 export function pinActionLabel(
   current: PinnedSide,
@@ -94,7 +94,7 @@ export function pinActionLabel(
  * in the Columns menu with a visibility toggle and an end-pin toggle (no
  * reorder/resize; it always trails).
  *
- * @public
+ * @internal
  */
 export const ACTIONS_COLUMN_KEY = "actions";
 
@@ -103,14 +103,14 @@ export const ACTIONS_COLUMN_KEY = "actions";
  * {@link ACTIONS_COLUMN_KEY}: not a `ColumnDef`, but hideable and
  * start-pinnable through the layout because the key is just a string.
  *
- * @public
+ * @internal
  */
 export const REORDER_COLUMN_KEY = "reorder";
 
 /**
  * Build one menu row per column, with what may be done to each.
  *
- * @public
+ * @internal
  */
 export function columnMenuRows<TRow>(
   allColumns: readonly ColumnDef<TRow>[],
@@ -137,7 +137,7 @@ export function columnMenuRows<TRow>(
 /**
  * Keep rows whose name or key contains the query (case-insensitive).
  *
- * @public
+ * @internal
  */
 export function filterColumnMenuRows<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
@@ -155,7 +155,7 @@ export function filterColumnMenuRows<TRow>(
 /**
  * Show every unlocked hidden column.
  *
- * @public
+ * @internal
  */
 export function showAllColumns<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
@@ -171,7 +171,7 @@ export function showAllColumns<TRow>(
 /**
  * Hide every unlocked visible column.
  *
- * @public
+ * @internal
  */
 export function hideAllColumns<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
@@ -187,7 +187,7 @@ export function hideAllColumns<TRow>(
 /**
  * Unpin every unlocked pinned column.
  *
- * @public
+ * @internal
  */
 export function unpinAllColumns<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
@@ -203,7 +203,7 @@ export function unpinAllColumns<TRow>(
 /**
  * Restore one column's visibility, pin and width. Locks still apply.
  *
- * @public
+ * @internal
  */
 export function resetColumnLayout<TRow>(
   row: ColumnMenuRow<TRow>,
@@ -257,7 +257,7 @@ export interface ColumnMenuActionContext<TRow = unknown> {
 /**
  * Sort, pin, hide, autosize, filter, reset — disabled when locked.
  *
- * @public
+ * @internal
  */
 export function columnMenuActions<TRow>(
   row: ColumnMenuRow<TRow>,
@@ -414,7 +414,7 @@ export interface ColumnMenuLabels {
 /**
  * The shared prop surface of every adapter's `<ColumnMenu>`.
  *
- * @public
+ * @internal
  */
 export interface ColumnMenuChromeProps<TRow> {
   /** All declared columns (pre layout filtering). */

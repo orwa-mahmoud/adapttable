@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 /**
  * Expansion state + actions returned by {@link useRowExpansion}.
  *
- * @public
+ * @internal
  */
 export interface RowExpansionState {
   /** Ids of the currently expanded rows. */
@@ -21,7 +21,7 @@ export interface RowExpansionState {
  *
  * @param defaultExpandedIds - Row ids whose panel starts open.
  *
- * @public
+ * @internal
  */
 export function useRowExpansion(
   defaultExpandedIds?: readonly string[]

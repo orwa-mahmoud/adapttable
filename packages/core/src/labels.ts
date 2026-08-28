@@ -232,7 +232,7 @@ export const defaultLabels: Required<TableLabels> = {
  * @param overrides - A partial set of label overrides.
  * @returns A fully-populated, immutable label set.
  *
- * @public
+ * @internal
  */
 export function resolveLabels(
   overrides: TableLabels | undefined

@@ -16,7 +16,7 @@ function sortsLast(value: SortableValue): boolean {
  *
  * @returns Negative if `a < b`, positive if `a > b`, `0` if equal.
  *
- * @public
+ * @internal
  */
 export function compareValues(a: SortableValue, b: SortableValue): number {
   // All unorderable values are EQUAL to each other (null vs undefined vs
@@ -117,7 +117,7 @@ export function sortedInsertIndex<T>(
  * @param direction - Sort direction.
  * @returns A new, sorted array.
  *
- * @public
+ * @internal
  */
 export function sortRows<TRow>(
   rows: readonly TRow[],
@@ -147,7 +147,7 @@ export interface SortLevel {
  * N+1. Null-ish values sort last per level regardless of direction, same
  * as {@link sortRows}.
  *
- * @public
+ * @internal
  */
 export function sortRowsMulti<TRow>(
   rows: readonly TRow[],

@@ -29,7 +29,7 @@ import type { ContextMenuPoint } from "./useContextMenu";
 /**
  * Props an adapter's menu surface receives.
  *
- * @public
+ * @internal
  */
 export interface ContextMenuSurfaceProps {
   /** Where the menu was opened, in viewport coordinates. */
@@ -59,7 +59,7 @@ export interface ContextMenuSurfaceProps {
 /**
  * Props an adapter's menu entry receives.
  *
- * @public
+ * @internal
  */
 export interface ContextMenuItemProps {
   /** The entry being rendered. */
@@ -74,7 +74,7 @@ export interface ContextMenuItemProps {
 /**
  * Adapter-owned rendering for {@link ContextMenuChrome}.
  *
- * @public
+ * @internal
  */
 export interface ContextMenuSlots {
   /** The kit's menu, positioned at the point it was opened from. */
@@ -88,7 +88,7 @@ export interface ContextMenuSlots {
 /**
  * What the context menu needs to render.
  *
- * @public
+ * @internal
  */
 export interface ContextMenuChromeProps {
   /** The entries. Nothing renders when this is empty. */
@@ -119,7 +119,7 @@ export interface ContextMenuChromeProps {
  * @param props - The entries, where they were opened, and the kit's slots.
  * @returns The menu.
  *
- * @public
+ * @internal
  */
 export function ContextMenuChrome(props: Readonly<ContextMenuChromeProps>) {
   const { at, items, onClose, slots } = props;

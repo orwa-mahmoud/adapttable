@@ -164,7 +164,7 @@ export function withExtendedFilterType(
 /**
  * Empty registry — used to seed {@link createFilterRegistry}.
  *
- * @public
+ * @internal
  */
 export function emptyFilterRegistry(): FilterTypeRegistry {
   return new MapRegistry(new Map());
@@ -173,7 +173,7 @@ export function emptyFilterRegistry(): FilterTypeRegistry {
 /**
  * Registry from an explicit spec list (last write wins on a repeated type).
  *
- * @public
+ * @internal
  */
 export function createFilterRegistry(
   specs: readonly FilterTypeSpec[]
@@ -186,7 +186,7 @@ export function createFilterRegistry(
 /**
  * Look up a spec, or `undefined` for an unknown type.
  *
- * @public
+ * @internal
  */
 export function filterTypeSpec(
   type: string,
@@ -198,7 +198,7 @@ export function filterTypeSpec(
 /**
  * Widget kind a kit should draw for this def.
  *
- * @public
+ * @internal
  */
 export function filterWidgetKind(
   def: Pick<FilterDef, "type">,
@@ -210,7 +210,7 @@ export function filterWidgetKind(
 /**
  * Operators the tree builder offers for this def.
  *
- * @public
+ * @internal
  */
 export function filterTypeOps(
   def: Pick<FilterDef, "type">,
@@ -222,7 +222,7 @@ export function filterTypeOps(
 /**
  * Default operator when a tree condition is first added.
  *
- * @public
+ * @internal
  */
 export function filterTypeDefaultOp(
   def: Pick<FilterDef, "type">,
@@ -234,7 +234,7 @@ export function filterTypeDefaultOp(
 /**
  * Custom `render` for this def, or `undefined` to use the kit widget.
  *
- * @public
+ * @internal
  */
 export function renderRegisteredFilter<TRow>(
   def: FilterDef<TRow>,

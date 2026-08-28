@@ -42,7 +42,7 @@ export interface UrlStateAdapter {
  *
  * @returns A `UrlStateAdapter` backed by `window.history` + `popstate`.
  *
- * @public
+ * @internal
  */
 export function createHistoryAdapter(): UrlStateAdapter {
   const listeners = new Set<() => void>();
@@ -89,7 +89,7 @@ export function createHistoryAdapter(): UrlStateAdapter {
  * @param initialSearch - Optional starting query string (without `"?"`).
  * @returns A self-contained `UrlStateAdapter`.
  *
- * @public
+ * @internal
  */
 export function createMemoryAdapter(initialSearch = ""): UrlStateAdapter {
   let current = initialSearch.replace(/^\?/, "");
@@ -118,7 +118,7 @@ let historySingleton: UrlStateAdapter | undefined;
  *
  * @returns The shared history adapter, or a memory adapter under SSR.
  *
- * @public
+ * @internal
  */
 export function getHistoryAdapter(): UrlStateAdapter {
   if (!isBrowser()) {
@@ -147,7 +147,7 @@ export function resetHistoryAdapter(): void {
  * @param enabled - When false, always use the local memory adapter.
  * @returns The adapter to read/write the query string through.
  *
- * @public
+ * @internal
  */
 export function useResolvedAdapter(
   adapter: UrlStateAdapter | undefined,

@@ -37,7 +37,7 @@ function cachedMatchMedia(query: string): MediaQueryList | null {
  * @param defaultValue - Value used when `matchMedia` is unavailable (SSR).
  * @returns Whether the query currently matches.
  *
- * @public
+ * @internal
  */
 export function useMediaQuery(query: string, defaultValue = false): boolean {
   const subscribe = useCallback(

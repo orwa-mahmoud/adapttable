@@ -39,7 +39,7 @@ import { type Command, filterCommands } from "./commandRegistry";
 /**
  * Props an adapter's palette surface receives.
  *
- * @public
+ * @internal
  */
 export interface CommandPaletteSurfaceProps {
   /** Accessible name for the dialog. */
@@ -55,7 +55,7 @@ export interface CommandPaletteSurfaceProps {
 /**
  * Props an adapter's search input receives.
  *
- * @public
+ * @internal
  */
 export interface CommandPaletteInputProps {
   /** Spread onto the input: value, handlers, and the combobox wiring. */
@@ -77,7 +77,7 @@ export interface CommandPaletteInputProps {
 /**
  * Props an adapter's command row receives.
  *
- * @public
+ * @internal
  */
 export interface CommandPaletteItemProps {
   /** The command being rendered. */
@@ -99,7 +99,7 @@ export interface CommandPaletteItemProps {
 /**
  * Adapter-owned rendering for {@link CommandPaletteChrome}.
  *
- * @public
+ * @internal
  */
 export interface CommandPaletteSlots {
   /** The modal surface. */
@@ -115,7 +115,7 @@ export interface CommandPaletteSlots {
 /**
  * What the palette needs to render.
  *
- * @public
+ * @internal
  */
 export interface CommandPaletteChromeProps {
   /** Every command available right now. */
@@ -161,7 +161,7 @@ function focusablesIn(root: HTMLElement | null): HTMLElement[] {
  * @param props - The commands, whether it is open, and the kit's slots.
  * @returns The palette.
  *
- * @public
+ * @internal
  */
 export function CommandPaletteChrome(
   props: Readonly<CommandPaletteChromeProps>

@@ -22,7 +22,7 @@ import {
 /**
  * Paper the print stylesheet asks the browser for.
  *
- * @public
+ * @internal
  */
 export type PrintPageSize =
   "a4" | "a4-landscape" | "letter" | "letter-landscape";
@@ -33,7 +33,7 @@ export type PrintPageBreak = "auto" | "group";
 /**
  * Options for the printable document and the print dialog.
  *
- * @public
+ * @internal
  */
 export interface PrintLayoutOptions {
   /** Document title and table caption. */
@@ -289,7 +289,7 @@ function fontDataUrl(font: Uint8Array | ArrayBuffer): string {
  * @param options - Paper size, page-break behaviour, and a font to embed.
  * @returns A CSS string, ready for a `<style>` element.
  *
- * @public
+ * @internal
  */
 export function printStyles(options?: PrintLayoutOptions): string {
   const paper = pageSizeCss(options?.pageSize);
@@ -332,7 +332,7 @@ export function printStyles(options?: PrintLayoutOptions): string {
  * The table element alone — for a host that already has a page and a
  * stylesheet, and only needs the rows.
  *
- * @public
+ * @internal
  */
 export function buildPrintTableHtml(
   table: ExportTable,
@@ -356,7 +356,7 @@ export function buildPrintTableHtml(
  * A complete HTML document: doctype, direction, the print stylesheet, and
  * the table. This is what {@link openPrintLayout} loads into the iframe.
  *
- * @public
+ * @internal
  */
 export function buildPrintDocument(
   table: ExportTable,
@@ -382,7 +382,7 @@ export function buildPrintDocument(
  * a popup blocker never sees a window. No-op outside a browser, so a
  * server render that reaches this does nothing rather than throwing.
  *
- * @public
+ * @internal
  */
 export function openPrintLayout(
   table: ExportTable,
@@ -419,7 +419,7 @@ export function openPrintLayout(
  * Print rows and columns the same way the PDF builder writes a file:
  * resolve once, then open the dialog.
  *
- * @public
+ * @internal
  */
 export function printTable<TRow>(
   options: {

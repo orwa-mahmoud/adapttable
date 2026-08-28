@@ -34,7 +34,7 @@ function asScalar(value: unknown): string | undefined {
  * Project one tree condition onto the extra-filter bag the existing
  * per-def predicate already understands.
  *
- * @public
+ * @internal
  */
 export function conditionToExtra<TRow>(
   def: FilterDef<TRow>,
@@ -67,7 +67,7 @@ function matchCondition<TRow>(
  * Evaluate a tree against one row. An empty / missing tree matches
  * every row. Unknown condition keys match (stale links do not hide data).
  *
- * @public
+ * @internal
  */
 export function evaluateFilterTree<TRow>(
   tree: QueryFilterGroup | undefined,

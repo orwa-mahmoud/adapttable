@@ -75,7 +75,7 @@ export { rowPatchLog } from "./patch";
 /**
  * How the table turns a row set into a filtered, sorted, grouped view.
  *
- * @public
+ * @internal
  */
 export interface IncrementalViewConfig<TRow> {
   /** How a row's id is derived; the table's own `rowKey`. */
@@ -145,7 +145,7 @@ export interface IncrementalViewConfig<TRow> {
  * {@link applyRowPatchesToView} may be called on — applying to a stale
  * snapshot rebuilds from its `rows` instead of continuing incrementally.
  *
- * @public
+ * @internal
  */
 export interface IncrementalView<TRow> {
   /** Source rows after patches — same contract as {@link applyRowPatches}. */
@@ -191,7 +191,7 @@ const VIEWS = new WeakMap<readonly unknown[], IncrementalView<unknown>>();
  * attached). Spreading that array drops the link, same as
  * {@link rowPatchLog}.
  *
- * @public
+ * @internal
  */
 export function incrementalViewOf<TRow>(
   rows: readonly TRow[]
@@ -204,7 +204,7 @@ export function incrementalViewOf<TRow>(
  * {@link incrementalViewOf} can find aggregates / groups without a
  * second argument.
  *
- * @public
+ * @internal
  */
 export function attachIncrementalView<TRow>(
   rows: readonly TRow[],
@@ -216,7 +216,7 @@ export function attachIncrementalView<TRow>(
 /**
  * The config the snapshot was last built or reconfigured with.
  *
- * @public
+ * @internal
  */
 export function incrementalViewConfig<TRow>(
   view: IncrementalView<TRow>
@@ -239,7 +239,7 @@ export function incrementalViewConfig<TRow>(
  * @param view - The latest snapshot.
  * @param patch - Fields to merge. `undefined` entries are ignored.
  *
- * @public
+ * @internal
  */
 export function configureIncrementalView<TRow>(
   view: IncrementalView<TRow>,
@@ -270,7 +270,7 @@ export function configureIncrementalView<TRow>(
  * here so this module does not import the React hook that publishes the
  * same helper on `useFrontendData`.
  *
- * @public
+ * @internal
  */
 export function incrementalSearchText<TRow>(row: TRow): string {
   if (row && typeof row === "object") {
@@ -294,7 +294,7 @@ export function incrementalSearchText<TRow>(row: TRow): string {
  * @param rows - The current source rows.
  * @param config - Filter / sort / group / aggregate settings.
  *
- * @public
+ * @internal
  */
 export function createIncrementalView<TRow>(
   rows: readonly TRow[],
@@ -353,7 +353,7 @@ export function createIncrementalView<TRow>(
  * @param view - The latest snapshot.
  * @param patches - The changes to apply, in order.
  *
- * @public
+ * @internal
  */
 export function applyRowPatchesToView<TRow>(
   view: IncrementalView<TRow>,
@@ -380,7 +380,7 @@ export function applyRowPatchesToView<TRow>(
  * @param view - The snapshot taken against the pre-patch rows.
  * @param log - The log attached to the post-patch array.
  *
- * @public
+ * @internal
  */
 export function applyRowPatchLogToView<TRow>(
   view: IncrementalView<TRow>,

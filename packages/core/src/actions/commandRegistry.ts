@@ -64,7 +64,7 @@ function searchable(item: Command): Searchable {
  * @param query - What the user has typed.
  * @returns The matches.
  *
- * @public
+ * @internal
  */
 export function filterCommands(
   commands: readonly Command[],
@@ -107,7 +107,7 @@ export interface TableCommandOptions {
  * @param options - The handlers and their labels.
  * @returns The table-wide commands, in display order.
  *
- * @public
+ * @internal
  */
 export function tableCommands(options: TableCommandOptions): Command[] {
   const { labels } = options;

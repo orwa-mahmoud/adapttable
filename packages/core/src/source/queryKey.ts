@@ -42,7 +42,7 @@ import type { TableQuery } from "./useServerData";
 /**
  * Options for {@link tableQueryKey} and {@link tableQueryBaseKey}.
  *
- * @public
+ * @internal
  */
 export interface TableQueryKeyOptions {
   /**
@@ -71,7 +71,7 @@ function identityOf(query: TableQuery): Record<string, unknown> {
  * @param query - The query the table emitted.
  * @param options - See {@link TableQueryKeyOptions}.
  *
- * @public
+ * @internal
  */
 export function tableQueryKey(
   query: TableQuery,
@@ -91,7 +91,7 @@ export function tableQueryKey(
  * @param query - The query the table emitted.
  * @param options - See {@link TableQueryKeyOptions}.
  *
- * @public
+ * @internal
  */
 export function tableQueryBaseKey(
   query: TableQuery,

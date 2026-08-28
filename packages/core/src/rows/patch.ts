@@ -32,7 +32,7 @@
 /**
  * Insert a row. Without `at`, it goes on the end.
  *
- * @public
+ * @internal
  */
 export interface InsertPatch<TRow> {
   /** Discriminant for the patch union. */
@@ -46,7 +46,7 @@ export interface InsertPatch<TRow> {
 /**
  * Merge changes into the row with this id. Absent id: nothing happens.
  *
- * @public
+ * @internal
  */
 export interface UpdatePatch<TRow> {
   /** Discriminant for the patch union. */
@@ -60,7 +60,7 @@ export interface UpdatePatch<TRow> {
 /**
  * Replace the row with this id, or append it when it is not there yet.
  *
- * @public
+ * @internal
  */
 export interface UpsertPatch<TRow> {
   /** Discriminant for the patch union. */
@@ -72,7 +72,7 @@ export interface UpsertPatch<TRow> {
 /**
  * Drop the row with this id. Absent id: nothing happens.
  *
- * @public
+ * @internal
  */
 export interface RemovePatch {
   /** Discriminant for the patch union. */
@@ -84,7 +84,7 @@ export interface RemovePatch {
 /**
  * One change to a row set.
  *
- * @public
+ * @internal
  */
 export type RowPatch<TRow> =
   InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
@@ -92,7 +92,7 @@ export type RowPatch<TRow> =
 /**
  * Insert a row, optionally at a position.
  *
- * @public
+ * @internal
  */
 export function insertRow<TRow>(row: TRow, at?: number): InsertPatch<TRow> {
   return { type: "insert", row, at };
@@ -101,7 +101,7 @@ export function insertRow<TRow>(row: TRow, at?: number): InsertPatch<TRow> {
 /**
  * Merge changes into one row.
  *
- * @public
+ * @internal
  */
 export function updateRow<TRow>(
   id: string,
@@ -113,7 +113,7 @@ export function updateRow<TRow>(
 /**
  * Replace a row, or add it if it is new.
  *
- * @public
+ * @internal
  */
 export function upsertRow<TRow>(row: TRow): UpsertPatch<TRow> {
   return { type: "upsert", row };
@@ -122,7 +122,7 @@ export function upsertRow<TRow>(row: TRow): UpsertPatch<TRow> {
 /**
  * Remove a row by id.
  *
- * @public
+ * @internal
  */
 export function removeRow(id: string): RemovePatch {
   return { type: "remove", id };
@@ -158,7 +158,7 @@ function indexOfId<TRow>(
  * to find what changed. Indices are taken at the moment the event ran, so a
  * later event sees the array the earlier one left behind.
  *
- * @public
+ * @internal
  */
 export type RowPatchEvent<TRow> =
   | { type: "insert"; id: string; row: TRow; index: number }
@@ -169,7 +169,7 @@ export type RowPatchEvent<TRow> =
  * The result of applying patches, plus the events an incremental view needs
  * so it does not have to diff two 20k-row arrays to find one update.
  *
- * @public
+ * @internal
  */
 export interface RowPatchLog<TRow> {
   /** The row set after the patches — same contract as {@link applyRowPatches}. */
@@ -194,7 +194,7 @@ const PATCH_LOGS = new WeakMap<WeakKey, RowPatchLog<unknown>>();
  * @returns The log, or `undefined` when this array was not produced by a
  *   changing patch (or was copied).
  *
- * @public
+ * @internal
  */
 export function rowPatchLog<TRow>(
   rows: readonly TRow[]
@@ -264,7 +264,7 @@ function applyOne<TRow>(
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
  *
- * @public
+ * @internal
  */
 export function applyRowPatches<TRow>(
   rows: readonly TRow[],
@@ -286,7 +286,7 @@ export function applyRowPatches<TRow>(
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
  *
- * @public
+ * @internal
  */
 export function applyRowPatchesWithLog<TRow>(
   rows: readonly TRow[],

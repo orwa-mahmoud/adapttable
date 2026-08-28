@@ -20,7 +20,7 @@ import { useEventCallback } from "../hooks/useEventCallback";
 /**
  * Dirty state for the whole table.
  *
- * @public
+ * @internal
  */
 export interface DirtyCellState {
   /** Whether this cell holds a change nobody has confirmed. */
@@ -44,7 +44,7 @@ export interface DirtyCellState {
 /**
  * What {@link useDirtyCells} needs.
  *
- * @public
+ * @internal
  */
 export interface UseDirtyCellsOptions {
   /**
@@ -63,7 +63,7 @@ const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
  * @param options - See {@link UseDirtyCellsOptions}.
  * @returns The state; inert unless `enabled`.
  *
- * @public
+ * @internal
  */
 export function useDirtyCells(
   options: UseDirtyCellsOptions = {}

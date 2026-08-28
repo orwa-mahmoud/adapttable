@@ -9,14 +9,14 @@ export const MOBILE_BREAKPOINT_PX = 768;
 /**
  * Default rows-per-page.
  *
- * @public
+ * @internal
  */
 export const DEFAULT_LIMIT = 25;
 
 /**
  * Page-size options offered by adapter pagination controls.
  *
- * @public
+ * @internal
  */
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
@@ -34,7 +34,7 @@ export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
  * @param sizes - The standard options to offer (defaults to {@link PAGE_SIZE_OPTIONS}).
  * @returns The options to render, with every given size guaranteed present.
  *
- * @public
+ * @internal
  */
 export function pageSizeOptions(
   limit: number | readonly number[],
@@ -49,7 +49,7 @@ export function pageSizeOptions(
 /**
  * Default debounce (ms) for the search input before it commits to state.
  *
- * @public
+ * @internal
  */
 export const SEARCH_DEBOUNCE_MS = 300;
 
@@ -59,7 +59,7 @@ export const DEFAULT_ROW_SIZE_PX = 56;
 /**
  * Default card-height estimate (px) for virtualized mobile layouts.
  *
- * @public
+ * @internal
  */
 export const DEFAULT_CARD_SIZE_PX = 132;
 

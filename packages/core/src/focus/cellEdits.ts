@@ -37,7 +37,7 @@ export interface CellEdit<TRow> {
  * @returns The handler, or `undefined` when the table takes no edits at all —
  *   which leaves the gesture's key or drag to the browser.
  *
- * @public
+ * @internal
  */
 export function batchEditHandler<TRow>(
   batch: ((edits: CellEdit<TRow>[]) => void) | undefined,

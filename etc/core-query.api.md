@@ -6,22 +6,22 @@
 
 import { ReactNode } from 'react';
 
-// @public
+// @internal
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
-// @public
+// @internal
 export function deserializePivot(raw: string | null): PivotConfig;
 
-// @public
+// @internal
 export function deserializePivotState(raw: string | null): PivotUrlState;
 
-// @public
+// @internal
 export const FILTER_TREE_PARAM = "ft";
 
-// @public
+// @internal
 export const FILTER_TREE_VERSION = 1;
 
-// @public
+// @internal
 export interface FormulaColumnSpec {
     format?: (value: FormulaValue) => string;
     formula: string;
@@ -29,16 +29,16 @@ export interface FormulaColumnSpec {
     key: string;
 }
 
-// @public
+// @internal
 export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is QueryFilterGroup;
 
-// @public
+// @internal
 export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is QueryFilterGroup;
 
-// @public
+// @internal
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
 
-// @public
+// @internal
 export interface PivotConfig {
     columns: readonly string[];
     grandTotals?: boolean;
@@ -47,14 +47,14 @@ export interface PivotConfig {
     subtotals?: boolean;
 }
 
-// @public
+// @internal
 export interface PivotMeasure {
     agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }
 
-// @public
+// @internal
 export interface PivotUrlState {
     collapsed: readonly string[];
     config: PivotConfig;
@@ -73,16 +73,16 @@ export interface QueryFilterGroup {
     conditions: readonly (QueryCondition | QueryFilterGroup)[];
 }
 
-// @public
+// @internal
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;
 
-// @public
+// @internal
 export function serializeFormulaColumns(specs: readonly FormulaColumnSpec[]): string;
 
-// @public
+// @internal
 export function serializePivot(config: PivotConfig): string;
 
-// @public
+// @internal
 export function serializePivotState(state: PivotUrlState): string;
 
 // @public

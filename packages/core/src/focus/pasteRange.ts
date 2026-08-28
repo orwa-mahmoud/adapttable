@@ -27,7 +27,7 @@ import { type CellRange, cellRangeBounds } from "./cellRange";
  * @param text - The clipboard's text.
  * @returns Rows of raw cell strings; empty when there is nothing to paste.
  *
- * @public
+ * @internal
  */
 export function parseClipboardTable(text: string): string[][] {
   if (text === "") return [];
@@ -95,7 +95,7 @@ function readQuotedField(
 /**
  * What a paste needs to know to become edits.
  *
- * @public
+ * @internal
  */
 export interface PasteRangeOptions<TRow> {
   /** The clipboard's text. */
@@ -126,7 +126,7 @@ export interface PasteRangeOptions<TRow> {
  * @param options - See {@link PasteRangeOptions}.
  * @returns The edits, in row-major order.
  *
- * @public
+ * @internal
  */
 export function pasteRangeEdits<TRow>(
   options: PasteRangeOptions<TRow>
@@ -158,7 +158,7 @@ export function pasteRangeEdits<TRow>(
 /**
  * The two ways a table can receive a paste.
  *
- * @public
+ * @internal
  */
 export interface CellPasteHandlerOptions<TRow> {
   /** Takes the batch whole — one transaction, one undo entry. */
@@ -176,7 +176,7 @@ export interface CellPasteHandlerOptions<TRow> {
  * @returns The handler, or `undefined` when the table takes no edits at all —
  *   which leaves Ctrl/Cmd+V to the browser.
  *
- * @public
+ * @internal
  */
 export function cellPasteHandler<TRow>(
   options: CellPasteHandlerOptions<TRow>
@@ -187,7 +187,7 @@ export function cellPasteHandler<TRow>(
 /**
  * The two ways a table can receive a fill.
  *
- * @public
+ * @internal
  */
 export interface CellFillHandlerOptions<TRow> {
   /** Takes the batch whole — one transaction, one undo entry. */
@@ -205,7 +205,7 @@ export interface CellFillHandlerOptions<TRow> {
  * @returns The handler, or `undefined` when the table takes no edits at all —
  *   which is also when the fill handle is not rendered.
  *
- * @public
+ * @internal
  */
 export function cellFillHandler<TRow>(
   options: CellFillHandlerOptions<TRow>

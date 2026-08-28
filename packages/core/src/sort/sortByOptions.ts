@@ -14,7 +14,7 @@ import type { ColumnDef, SortByOption } from "../types";
  * @param columns - The columns to derive from (already layout-filtered).
  * @returns One option per labellable sortable column, in column order.
  *
- * @public
+ * @internal
  */
 export function deriveSortByOptions<TRow>(
   columns: readonly ColumnDef<TRow>[]

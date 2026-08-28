@@ -17,7 +17,7 @@ import type { GridFocusState } from "./useGridFocus";
 /**
  * Props for {@link GridFocusAnnouncer}.
  *
- * @public
+ * @internal
  */
 export interface GridFocusAnnouncerProps {
   /** The grid focus state, straight from `table.gridFocus`. */
@@ -30,7 +30,7 @@ export interface GridFocusAnnouncerProps {
  * promise still holds. When on, the region is present from the first render and
  * empty until focus moves, which is the order screen readers need.
  *
- * @public
+ * @internal
  */
 export function GridFocusAnnouncer({
   focus,

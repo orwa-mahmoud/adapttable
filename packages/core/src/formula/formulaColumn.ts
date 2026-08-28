@@ -31,7 +31,7 @@ import { formulaRefs, parseFormula, type ParseResult } from "./parse";
 /**
  * One user-typed formula column.
  *
- * @public
+ * @internal
  */
 export interface FormulaColumnSpec {
   /** Column key — also the name other formulas reference it by. */
@@ -47,7 +47,7 @@ export interface FormulaColumnSpec {
 /**
  * What {@link buildFormulaColumns} reports back.
  *
- * @public
+ * @internal
  */
 export interface FormulaColumnsResult<TRow> {
   /** The columns, ready to concatenate with the declared ones. */
@@ -125,7 +125,7 @@ function formatValue(
  * @param specs - The formula columns, in the order to show them.
  * @returns The columns, plus any formula that would not parse and any cycle.
  *
- * @public
+ * @internal
  */
 export function buildFormulaColumns<TRow extends object>(
   specs: readonly FormulaColumnSpec[]

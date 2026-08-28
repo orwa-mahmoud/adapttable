@@ -100,7 +100,7 @@ export interface UseColumnLayoutResult<TRow> {
 /**
  * A pinned column's side plus its sticky inset in px.
  *
- * @public
+ * @internal
  */
 export interface PinOffset {
   /** Which edge the column sticks to. */
@@ -115,7 +115,7 @@ export interface PinOffset {
  * a `"start"`-pinned column sticks to the inline START (the right edge under
  * `dir="rtl"`), matching antd's native `fixed` behaviour.
  *
- * @public
+ * @internal
  */
 export interface PinnedCellStyle {
   /** Always `sticky` — that is what makes the cell pin. */
@@ -135,7 +135,7 @@ export interface PinnedCellStyle {
  * column's body cells paint over the sticky header on vertical scroll, and
  * later headers paint over a pinned header on horizontal scroll.
  *
- * @public
+ * @internal
  */
 export const PIN_Z = {
   body: 1,
@@ -152,7 +152,7 @@ export const PIN_Z = {
  * in front of the pinned data columns, so a start-pinned column sits just after
  * a pinned checkbox and an end-pinned column just before pinned actions.
  *
- * @public
+ * @internal
  */
 export interface PinLeads {
   /** Width reserved at the leading edge. */
@@ -173,7 +173,7 @@ function insetProp(side: PinSide): "insetInlineStart" | "insetInlineEnd" {
  * undefined for an unpinned cell. The inset is logical (`insetInlineStart` /
  * `insetInlineEnd`), so the same style pins to the correct edge in RTL.
  *
- * @public
+ * @internal
  */
 export function pinnedCellStyle(
   offset: PinOffset | undefined,
@@ -196,7 +196,7 @@ export function pinnedCellStyle(
  * nothing on that side is pinned, in which case the column stays in normal
  * flow. Insets are logical, so the edge follows the writing direction.
  *
- * @public
+ * @internal
  */
 export function edgePinStyle(
   side: PinSide,

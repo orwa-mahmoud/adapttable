@@ -9,57 +9,57 @@ import { CSSProperties } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
-// @public
+// @internal
 export function applyTableFeatures<P extends object>(props: P): P;
 
-// @public
+// @internal
 export function batchEditing<TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-// @public
+// @internal
 export function bulkActions<TRow>(actions: readonly BulkAction[]): TableFeature<TRow>;
 
-// @public
+// @internal
 export function cellNavigation<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearance?: CellSpanAppearance): TableFeature<TRow>;
 
-// @public
+// @internal
 export function collapsibleColumnGroups<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function columnMenu<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function columnSelectionCheckbox<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function commandPalette<TRow>(options?: boolean | CommandPaletteOptions): TableFeature<TRow>;
 
-// @public
+// @internal
 export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
-// @public
+// @internal
 export function densityChooser<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function dirtyIndicators<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function editHistory<TRow>(options?: boolean | {
     depth?: number;
 }): TableFeature<TRow>;
 
-// @public
+// @internal
 export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-// @public
+// @internal
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 
-// @public
+// @internal
 export function extraRows<TRow>(rows: readonly ExtraRow[]): TableFeature<TRow>;
 
-// @public
+// @internal
 export function feature<TRow>(id: string, patch?: FeaturePatch<TRow>, setup?: TableFeature<TRow>["setup"]): TableFeature<TRow>;
 
 // @public
@@ -73,22 +73,22 @@ export interface FeaturePatch<TRow = unknown> {
     readonly __row?: TRow;
 }
 
-// @public
+// @internal
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
-// @public
+// @internal
 export function filterTypes<TRow>(specs: readonly FilterTypeSpec[]): TableFeature<TRow>;
 
-// @public
+// @internal
 export function findInTable<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function fitColumns<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function fullscreen<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function grouping<TRow>(groupBy: string | readonly string[], extras?: {
     onGroupByChange?: (groupBy: readonly string[]) => void;
     groupAggregates?: (rows: readonly TRow[]) => unknown;
@@ -102,54 +102,54 @@ export function grouping<TRow>(groupBy: string | readonly string[], extras?: {
     onGroupLoadMore?: (groupKey: string) => void;
 }): TableFeature<TRow>;
 
-// @public
+// @internal
 export function headerFilters<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function multiSort<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function nestedTable<TRow>(nested: NestedTableFor<TRow>): TableFeature<TRow>;
 
 // @public
 function print_2<TRow>(onPrint: () => void, printButton?: boolean): TableFeature<TRow>;
 export { print_2 as print }
 
-// @public
+// @internal
 export function resizableColumns<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function rowAppearance<TRow>(options: {
     rowClassName?: (row: TRow, index: number) => string | undefined;
     rowStyle?: RowStyle<TRow>;
     rowHeight?: RowHeight<TRow>;
 }): TableFeature<TRow>;
 
-// @public
+// @internal
 export function rowDetail<TRow>(renderRowDetail: (row: TRow) => unknown, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;
 
-// @public
+// @internal
 export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-// @public
+// @internal
 export function rowPinning<TRow>(options: {
     pinnedRowIds?: RowPinState;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
 }): TableFeature<TRow>;
 
-// @public
+// @internal
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>): TableFeature<TRow>;
 
-// @public
+// @internal
 export function savedViews<TRow>(options: UseSavedViewsOptions): TableFeature<TRow>;
 
-// @public
+// @internal
 export function selectionStats<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow>;
 
-// @public
+// @internal
 export function statusBar<TRow>(): TableFeature<TRow>;
 
 // @public
@@ -174,7 +174,7 @@ export interface TableFeatureHost<TRow = unknown> {
     registerWriter(writer: ExportWriter): void;
 }
 
-// @public
+// @internal
 export function tree<TRow>(options: {
     getChildren?: (row: TRow) => readonly TRow[] | undefined;
     getParentId?: (row: TRow) => string | undefined;
@@ -185,13 +185,13 @@ export function tree<TRow>(options: {
     onExpandedIdsChange?: (ids: string[]) => void;
 }): TableFeature<TRow>;
 
-// @public
+// @internal
 export function undoRedoButtons<TRow>(): TableFeature<TRow>;
 
-// @public
+// @internal
 export function useTableFeatures<P extends object>(incoming: P): P;
 
-// @public
+// @internal
 export function virtualize<TRow>(options?: boolean | {
     virtualizeColumns?: boolean;
     estimateRowSize?: number;

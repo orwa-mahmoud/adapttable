@@ -10,7 +10,7 @@ import type { ReactElement } from "react";
 /**
  * Three-line funnel glyph for the Filters button.
  *
- * @public
+ * @internal
  */
 export function FiltersIcon(): ReactElement {
   return (
@@ -34,7 +34,7 @@ export function FiltersIcon(): ReactElement {
 /**
  * Magnifier glyph for the search field.
  *
- * @public
+ * @internal
  */
 export function SearchIcon(): ReactElement {
   return (
@@ -61,7 +61,7 @@ export function SearchIcon(): ReactElement {
  * point down while the detail panel is open. Shared by every adapter's
  * desktop row + mobile card so the expand affordance is identical.
  *
- * @public
+ * @internal
  */
 export function ExpandChevron({
   open,

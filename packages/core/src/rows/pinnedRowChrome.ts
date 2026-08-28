@@ -16,20 +16,20 @@ import type { RowPinSide } from "./rowPinning";
 /**
  * `data-adapttable-part` on a pinned row in the shared tbody.
  *
- * @public
+ * @internal
  */
 export const PINNED_TOP_PART = "pinned-top";
 /**
  * Bottom pin marker on that row.
  *
- * @public
+ * @internal
  */
 export const PINNED_BOTTOM_PART = "pinned-bottom";
 
 /**
  * Part name for a pinned row, or `undefined` when the row is not pinned.
  *
- * @public
+ * @internal
  */
 export function pinnedRowPart(
   side: RowPinSide | undefined
@@ -42,7 +42,7 @@ export function pinnedRowPart(
 /**
  * Sticky style when the row is pinned and the kit asked for sticky pins.
  *
- * @public
+ * @internal
  */
 export function pinnedRowSticky(
   side: RowPinSide | undefined,
@@ -57,7 +57,7 @@ export function pinnedRowSticky(
 /**
  * Sticky style for a pinned-row section (tbody or the row itself).
  *
- * @public
+ * @internal
  */
 export function pinnedRowStickyStyle(
   side: RowPinSide,
@@ -81,7 +81,7 @@ export function pinnedRowStickyStyle(
  * Extra sticky inset a cell in a pinned row needs, and the z-index when
  * that cell is also a pinned column.
  *
- * @public
+ * @internal
  */
 export function pinnedRowCellStyle(
   side: RowPinSide | undefined,
@@ -105,7 +105,7 @@ export function pinnedRowCellStyle(
 /**
  * Measure an element's offset height; used for the sticky header offset.
  *
- * @public
+ * @internal
  */
 export function useOffsetHeight(): [
   (node: HTMLElement | null) => void,
@@ -133,7 +133,7 @@ export function useOffsetHeight(): [
  * Desktop sticky sections use the same three lists; cards are a list, so
  * this is the only "chrome" they get.
  *
- * @public
+ * @internal
  */
 export function orderedCardEntries<TRow>(
   rows: readonly TRow[],

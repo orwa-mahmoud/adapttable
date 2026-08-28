@@ -18,7 +18,7 @@ const SESSION_ATTR = "data-adapttable-header-filter";
 /**
  * Props that keep one header filter's overlay session together.
  *
- * @public
+ * @internal
  */
 export interface HeaderFilterSessionProps {
   /** Ties the trigger and its overlay to one editing session. */
@@ -31,7 +31,7 @@ export interface HeaderFilterSessionProps {
  * is on. Operator-only writes, typed terms, and multi-select toggles are
  * incomplete: another control is still waiting.
  *
- * @public
+ * @internal
  */
 export function headerFilterFieldIsComplete<TRow>(
   def: FilterDef<TRow>,
@@ -65,7 +65,7 @@ export function headerFilterFieldIsComplete<TRow>(
  * Wrap a filter source so a complete write can dismiss the overlay.
  * Off unless `closeOnSelect` is true — the default is stay open.
  *
- * @public
+ * @internal
  */
 export function bindHeaderFilterDismiss<TRow>(
   source: FilterFormSource<TRow>,
@@ -99,7 +99,7 @@ export function bindHeaderFilterDismiss<TRow>(
  * Dismiss on a true outside press or Escape. Nested kit dropdowns (and a
  * focused native `<select>` whose OS list is open) are not outside.
  *
- * @public
+ * @internal
  */
 export function usePointerDismiss(
   open: boolean,
@@ -148,7 +148,7 @@ export function usePointerDismiss(
 /**
  * Open state + a source that honours {@link bindHeaderFilterDismiss}.
  *
- * @public
+ * @internal
  */
 export function useHeaderFilterOverlay<TRow>(
   props: {

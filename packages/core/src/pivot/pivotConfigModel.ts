@@ -23,14 +23,14 @@ import type { PivotConfig, PivotMeasure } from "./pivotModel";
 /**
  * Where a field can sit.
  *
- * @public
+ * @internal
  */
 export type PivotZone = "rows" | "columns" | "measures";
 
 /**
  * The zones a field can be moved between, in panel order.
  *
- * @public
+ * @internal
  */
 export const PIVOT_ZONES: readonly PivotZone[] = [
   "rows",
@@ -41,7 +41,7 @@ export const PIVOT_ZONES: readonly PivotZone[] = [
 /**
  * A field the user can put on an axis.
  *
- * @public
+ * @internal
  */
 export interface PivotField {
   /** The column key. */
@@ -53,7 +53,7 @@ export interface PivotField {
 /**
  * An empty configuration — nothing on any axis.
  *
- * @public
+ * @internal
  */
 export const EMPTY_PIVOT_CONFIG: PivotConfig = {
   rows: [],
@@ -64,7 +64,7 @@ export const EMPTY_PIVOT_CONFIG: PivotConfig = {
 /**
  * The fields not yet used on either axis.
  *
- * @public
+ * @internal
  */
 export function availableFields(
   fields: readonly PivotField[],
@@ -90,7 +90,7 @@ function placed(list: readonly string[], key: string, index: number): string[] {
  * @param index - Position within that zone. Past the end appends.
  * @returns A new configuration.
  *
- * @public
+ * @internal
  */
 export function assignField(
   config: PivotConfig,
@@ -124,7 +124,7 @@ export function assignField(
  * @param index - The position to remove.
  * @returns A new configuration.
  *
- * @public
+ * @internal
  */
 export function removeField(
   config: PivotConfig,
@@ -153,7 +153,7 @@ export function removeField(
  * @param delta - `-1` to move it out one level, `1` to move it in.
  * @returns A new configuration.
  *
- * @public
+ * @internal
  */
 export function moveField(
   config: PivotConfig,
@@ -186,7 +186,7 @@ export function moveField(
  * @param agg - The new aggregation.
  * @returns A new configuration.
  *
- * @public
+ * @internal
  */
 export function setMeasureAgg(
   config: PivotConfig,
@@ -208,7 +208,7 @@ export function setMeasureAgg(
  * half-built configuration rather than an error — the panel shows it and the
  * table waits.
  *
- * @public
+ * @internal
  */
 export function isPivotReady(config: PivotConfig): boolean {
   return config.measures.length > 0;
@@ -217,7 +217,7 @@ export function isPivotReady(config: PivotConfig): boolean {
 /**
  * The display label for one measure, for the panel and the column header.
  *
- * @public
+ * @internal
  */
 export function measureLabel(
   measure: PivotMeasure,

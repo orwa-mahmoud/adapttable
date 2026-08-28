@@ -12,7 +12,7 @@ import type { ColumnDef } from "../types";
 /**
  * The three marks this entry draws.
  *
- * @public
+ * @internal
  */
 export type SparklineKind = "bar" | "line" | "area";
 
@@ -27,7 +27,7 @@ interface SparklineBar {
 /**
  * Props for {@link Sparkline}.
  *
- * @public
+ * @internal
  */
 export interface SparklineProps {
   /** The series, oldest first. Non-finite values are dropped. */
@@ -47,7 +47,7 @@ export interface SparklineProps {
 /**
  * How {@link sparklineColumn} is declared.
  *
- * @public
+ * @internal
  */
 export interface SparklineColumnSpec<TRow> {
   /** Stable key for the entry. */
@@ -78,7 +78,7 @@ const BAR_GAP = 1;
 /**
  * Drop NaN / Infinity so a bad point cannot collapse the scale.
  *
- * @public
+ * @internal
  */
 export function finiteSparklineValues(values: readonly number[]): number[] {
   return values.filter((value) => Number.isFinite(value));
@@ -87,7 +87,7 @@ export function finiteSparklineValues(values: readonly number[]): number[] {
 /**
  * Default accessible summary — numbers only, so it is locale-neutral.
  *
- * @public
+ * @internal
  */
 export function sparklineSummary(values: readonly number[]): string {
   const series = finiteSparklineValues(values);
@@ -109,7 +109,7 @@ export function sparklineSummary(values: readonly number[]): string {
 /**
  * CSV / xlsx fallback — the numbers, not the SVG.
  *
- * @public
+ * @internal
  */
 export function sparklineExportValue(values: readonly number[]): string {
   return finiteSparklineValues(values).join(", ");
@@ -212,7 +212,7 @@ function sparklineAreaPath(
  * A mini chart sized to a cell. Fixed width/height — no observers — so a
  * virtualized row can mount and unmount it without measuring.
  *
- * @public
+ * @internal
  */
 export function Sparkline({
   values,
@@ -288,7 +288,7 @@ export function Sparkline({
  *
  * Sort and export read the numbers, never the SVG.
  *
- * @public
+ * @internal
  */
 export function sparklineColumn<TRow>(
   spec: SparklineColumnSpec<TRow>

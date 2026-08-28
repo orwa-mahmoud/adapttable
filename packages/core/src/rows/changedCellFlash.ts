@@ -22,7 +22,7 @@ const DEFAULT_DURATION_MS = 1200;
 /**
  * What {@link useChangedCellFlash} needs.
  *
- * @public
+ * @internal
  */
 export interface UseChangedCellFlashOptions {
   /**
@@ -37,7 +37,7 @@ export interface UseChangedCellFlashOptions {
 /**
  * Marks a host can read while rendering.
  *
- * @public
+ * @internal
  */
 export interface ChangedCellFlashState {
   /** Whether this cell changed recently enough to still be marked. */
@@ -86,7 +86,7 @@ function touchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null {
  * @param options - See {@link UseChangedCellFlashOptions}.
  * @returns The marks; every reader is inert while disabled.
  *
- * @public
+ * @internal
  */
 export function useChangedCellFlash(
   options: UseChangedCellFlashOptions = {}

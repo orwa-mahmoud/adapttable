@@ -21,7 +21,7 @@ import { TreeToggleChrome, type TreeToggleSlots } from "./TreeToggle";
 /**
  * Props for an adapter `TreeCell` — no slots on the public API.
  *
- * @public
+ * @internal
  */
 export interface TreeCellProps<TRow> {
   /** The row's place in the tree; absent on a flat table. */
@@ -47,7 +47,7 @@ export interface TreeCellProps<TRow> {
 /**
  * Props for {@link TreeCellChrome}.
  *
- * @public
+ * @internal
  */
 export interface TreeCellChromeProps<TRow> extends TreeCellProps<TRow> {
   /** The kit's components for each part. */
@@ -64,7 +64,7 @@ const WRAPPER = {
  * Wrap a cell in its tree chrome when it is the tree column, and pass it
  * through unchanged when it is not.
  *
- * @public
+ * @internal
  */
 export function TreeCellChrome<TRow>({
   entry,

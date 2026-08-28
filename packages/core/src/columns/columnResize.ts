@@ -20,7 +20,7 @@ export const COLUMN_RESIZE_STEP = 16;
  * `separator`/splitter would require `aria-valuenow/min/max`); ArrowLeft/Right
  * resize it for keyboard users.
  *
- * @public
+ * @internal
  */
 export interface ColumnResizeHandleProps {
   /** ARIA role for the element. */
@@ -63,7 +63,7 @@ function isRtl(handle: HTMLElement): boolean {
  * @param setWidth - Layout mutator that persists the new width.
  * @param label - Accessible label for the handle.
  *
- * @public
+ * @internal
  */
 export function columnResizeHandleProps(
   key: string,

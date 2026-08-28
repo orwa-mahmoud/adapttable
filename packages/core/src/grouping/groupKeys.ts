@@ -11,7 +11,7 @@
 /**
  * How the grouping keys are written down: one key, a list, or nothing.
  *
- * @public
+ * @internal
  */
 export type GroupByInput = string | readonly string[] | null | undefined;
 
@@ -24,7 +24,7 @@ export type GroupByInput = string | readonly string[] | null | undefined;
  * @param value - The prop, the source value, or the URL parameter.
  * @returns The keys, possibly empty.
  *
- * @public
+ * @internal
  */
 export function parseGroupBy(value: GroupByInput): string[] {
   if (value === null || value === undefined) return [];
@@ -38,7 +38,7 @@ export function parseGroupBy(value: GroupByInput): string[] {
  * @param value - The keys.
  * @returns The joined string, or `undefined` when nothing is grouped.
  *
- * @public
+ * @internal
  */
 export function formatGroupBy(value: GroupByInput): string | undefined {
   const keys = parseGroupBy(value);

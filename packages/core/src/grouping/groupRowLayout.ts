@@ -22,7 +22,7 @@ import type { ColumnDef } from "../types";
 /**
  * One cell of a group header row, after the leading label cell.
  *
- * @public
+ * @internal
  */
 export interface GroupRowCell<TRow> {
   /** The column this cell sits under. */
@@ -34,7 +34,7 @@ export interface GroupRowCell<TRow> {
 /**
  * How to build a group header row.
  *
- * @public
+ * @internal
  */
 export interface GroupRowLayout<TRow> {
   /**
@@ -63,7 +63,7 @@ export interface GroupRowLayout<TRow> {
  * @param aggregateCells - Per-column aggregate nodes, keyed by column key.
  * @returns The row's shape.
  *
- * @public
+ * @internal
  */
 export function groupRowLayout<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -105,7 +105,7 @@ export function groupRowLayout<TRow>(
  * @param aggregateCells - Per-column aggregate nodes, keyed by column key.
  * @returns One entry per column that has an aggregate.
  *
- * @public
+ * @internal
  */
 export function groupAggregateEntries<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -127,7 +127,7 @@ export function groupAggregateEntries<TRow>(
  * @param entry - The group entry.
  * @returns The count to display.
  *
- * @public
+ * @internal
  */
 export function groupLeafCount(entry: {
   leafIds: readonly string[];

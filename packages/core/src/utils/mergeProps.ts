@@ -31,7 +31,7 @@ function isEventHandler(
  * Prop-getter plumbing: reach for the prop-getters on `useDataTable` rather
  * than merging by hand.
  *
- * @public
+ * @internal
  */
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T {
   if (!overrides) return base;

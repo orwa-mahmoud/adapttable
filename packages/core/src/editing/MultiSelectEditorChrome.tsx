@@ -23,7 +23,7 @@ import {
 /**
  * One option's checkbox, rendered by the adapter with its kit's control.
  *
- * @public
+ * @internal
  */
 export interface MultiSelectEditorCheckboxProps {
   /** The option's visible text. */
@@ -51,7 +51,7 @@ export interface MultiSelectEditorCheckboxProps {
 /**
  * Adapter-supplied controls for {@link MultiSelectEditorChrome}.
  *
- * @public
+ * @internal
  */
 export interface MultiSelectEditorSlots {
   /** Renders a checkbox. */
@@ -61,7 +61,7 @@ export interface MultiSelectEditorSlots {
 /**
  * Props for {@link MultiSelectEditorChrome}.
  *
- * @public
+ * @internal
  */
 export interface MultiSelectEditorChromeProps {
   /** The active cell's editor controller. */
@@ -80,7 +80,7 @@ export interface MultiSelectEditorChromeProps {
  * @param props - See {@link MultiSelectEditorChromeProps}.
  * @returns The editor, named and focusable as one control.
  *
- * @public
+ * @internal
  */
 export function MultiSelectEditorChrome({
   ctrl,

@@ -119,7 +119,7 @@ export function currentFeatureHost<TRow = unknown>():
 /**
  * Bind a callback so every invocation sees `host` via `currentFeatureHost`.
  *
- * @public
+ * @internal
  */
 export function bindFeatureHostFn<Args extends unknown[], R>(
   host: FeatureHostState | undefined,

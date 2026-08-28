@@ -8,14 +8,14 @@ import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
 /**
  * URL param for the versioned tree (`ft=1.{…}`).
  *
- * @public
+ * @internal
  */
 export const FILTER_TREE_PARAM = "ft";
 
 /**
  * Current encoding version. Unknown versions are dropped, never reinterpreted.
  *
- * @public
+ * @internal
  */
 export const FILTER_TREE_VERSION = 1;
 
@@ -24,7 +24,7 @@ const VERSION_PREFIX = `${FILTER_TREE_VERSION}.`;
 /**
  * True when a tree has at least one condition (nested groups count).
  *
- * @public
+ * @internal
  */
 export function isActiveFilterTree(
   tree: QueryFilterGroup | undefined
@@ -67,7 +67,7 @@ function sanitizeGroup(raw: unknown): QueryFilterGroup | undefined {
  * strings return `undefined` so an old or hand-edited link never
  * silently becomes a different query.
  *
- * @public
+ * @internal
  */
 export function parseFilterTree(
   raw: string | null | undefined
@@ -84,7 +84,7 @@ export function parseFilterTree(
 /**
  * Encode a tree for the URL. Empty / undefined trees omit the param.
  *
- * @public
+ * @internal
  */
 export function serializeFilterTree(
   tree: QueryFilterGroup | undefined

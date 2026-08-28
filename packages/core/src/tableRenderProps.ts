@@ -59,7 +59,7 @@ import {
  * Everything a kit's desktop table and mobile cards both receive. The render
  * model resolves it once, so the two layouts cannot disagree.
  *
- * @public
+ * @internal
  */
 export interface SharedTableRenderProps<TRow> {
   /** The resolved table model from `useDataTable`. */
@@ -260,7 +260,7 @@ export interface SharedTableRenderProps<TRow> {
 /**
  * The shared prelude every table/card renderer derives before rendering.
  *
- * @public
+ * @internal
  */
 export interface TableRenderModel<TRow> {
   /** Visible columns, in order. */
@@ -341,7 +341,7 @@ function extraCoveredSlotMap<TRow>(
  *
  * @typeParam TRow - The row type.
  *
- * @public
+ * @internal
  */
 export function tableRenderModel<TRow>(
   props: Pick<
@@ -496,7 +496,7 @@ export function tableRenderModel<TRow>(
  * @param rows - The rows the summary describes.
  * @returns The aggregate cells, or `undefined` when no builder is set.
  *
- * @public
+ * @internal
  */
 export function useSummaryCells<TRow>(
   summaryRow:

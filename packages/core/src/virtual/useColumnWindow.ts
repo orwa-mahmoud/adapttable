@@ -28,7 +28,7 @@ const DEFAULT_COLUMN_WIDTH = 160;
 /**
  * What {@link useColumnWindow} needs.
  *
- * @public
+ * @internal
  */
 export interface UseColumnWindowOptions<TRow> {
   /** The columns as rendered, in order. */
@@ -48,7 +48,7 @@ export interface UseColumnWindowOptions<TRow> {
 /**
  * The windowed columns and the space the rest occupies.
  *
- * @public
+ * @internal
  */
 export interface ColumnWindow<TRow> {
   /** Whether the returned columns are a window rather than everything. */
@@ -68,7 +68,7 @@ export interface ColumnWindow<TRow> {
  * @param options - See {@link UseColumnWindowOptions}.
  * @returns The window; every column and no spacers when disabled.
  *
- * @public
+ * @internal
  */
 export function useColumnWindow<TRow>(
   options: UseColumnWindowOptions<TRow>

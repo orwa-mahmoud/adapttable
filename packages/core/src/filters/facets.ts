@@ -27,7 +27,7 @@ export type FacetMap = Readonly<Record<string, FacetCounts>>;
  * each remaining value is "how many rows you would keep if you picked
  * it", not "how many remain after you already picked it".
  *
- * @public
+ * @internal
  */
 export function rowsExcludingFilter<TRow>(
   rows: readonly TRow[],
@@ -43,7 +43,7 @@ export function rowsExcludingFilter<TRow>(
  * Facet counts for every `checklist` definition. Other types are
  * ignored — they do not show per-value counts.
  *
- * @public
+ * @internal
  */
 export function computeFilterFacets<TRow>(
   defs: readonly FilterDef<TRow>[],

@@ -44,7 +44,7 @@ const AGGREGATIONS: readonly AggregateName[] = [
 /**
  * Props an adapter's panel surface receives.
  *
- * @public
+ * @internal
  */
 export interface PivotPanelSurfaceProps {
   /** Content rendered inside. */
@@ -58,7 +58,7 @@ export interface PivotPanelSurfaceProps {
 /**
  * Props an adapter's zone receives — one titled list.
  *
- * @public
+ * @internal
  */
 export interface PivotZoneProps {
   /** Which zone this is, for styling and testing. */
@@ -74,7 +74,7 @@ export interface PivotZoneProps {
 /**
  * Props an adapter's field row receives.
  *
- * @public
+ * @internal
  */
 export interface PivotFieldProps {
   /** What to call the field. */
@@ -100,7 +100,7 @@ export interface PivotFieldProps {
 /**
  * Props an adapter's "add a field" control receives.
  *
- * @public
+ * @internal
  */
 export interface PivotAddProps {
   /** Accessible name. */
@@ -114,7 +114,7 @@ export interface PivotAddProps {
 /**
  * Props an adapter's aggregation chooser receives.
  *
- * @public
+ * @internal
  */
 export interface PivotAggProps {
   /** Accessible name. */
@@ -130,7 +130,7 @@ export interface PivotAggProps {
 /**
  * The kit-native pieces the panel is built from.
  *
- * @public
+ * @internal
  */
 export interface PivotPanelSlots {
   /** The panel body. */
@@ -148,7 +148,7 @@ export interface PivotPanelSlots {
 /**
  * What the panel needs to render.
  *
- * @public
+ * @internal
  */
 export interface PivotPanelChromeProps {
   /** Every field the user can pivot on. */
@@ -178,7 +178,7 @@ function zoneLabel(zone: PivotZone, labels: Required<TableLabels>): string {
  * @param props - Fields, the configuration, a change handler and the slots.
  * @returns The panel, built from the adapter's own controls.
  *
- * @public
+ * @internal
  */
 export function PivotPanelChrome({
   fields,

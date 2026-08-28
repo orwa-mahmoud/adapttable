@@ -18,7 +18,7 @@ import { readCollapsedGroups, writeCollapsedGroups } from "./serialize";
 /**
  * What {@link useGroupCollapseUrlState} needs.
  *
- * @public
+ * @internal
  */
 export interface UseGroupCollapseUrlStateOptions {
   /** URL backend; defaults to the History API. */
@@ -34,7 +34,7 @@ export interface UseGroupCollapseUrlStateOptions {
 /**
  * The controlled pair `<DataTable>` takes.
  *
- * @public
+ * @internal
  */
 export interface UseGroupCollapseUrlStateResult {
   /** The collapsed group keys. */
@@ -49,7 +49,7 @@ export interface UseGroupCollapseUrlStateResult {
  * @param options - See {@link UseGroupCollapseUrlStateOptions}.
  * @returns The controlled pair to spread onto the table.
  *
- * @public
+ * @internal
  */
 export function useGroupCollapseUrlState(
   options: UseGroupCollapseUrlStateOptions = {}

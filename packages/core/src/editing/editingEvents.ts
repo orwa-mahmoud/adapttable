@@ -51,7 +51,7 @@ export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
 /**
  * The five observers a host may wire. All optional, all inert when omitted.
  *
- * @public
+ * @internal
  */
 export interface EditLifecycle<TRow> {
   /** An editor opened. */
