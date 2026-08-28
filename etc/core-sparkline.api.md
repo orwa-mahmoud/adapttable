@@ -8,16 +8,16 @@ import { ComponentType } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
-// @internal
+// @public
 export function finiteSparklineValues(values: readonly number[]): number[];
 
-// @internal
+// @public
 export function Sparkline(input: Readonly<SparklineProps>): ReactElement;
 
-// @internal
+// @public
 export function sparklineColumn<TRow>(spec: SparklineColumnSpec<TRow>): ColumnDef<TRow>;
 
-// @internal
+// @public
 export interface SparklineColumnSpec<TRow> {
     color?: string;
     column?: Partial<ColumnDef<TRow>>;
@@ -30,13 +30,13 @@ export interface SparklineColumnSpec<TRow> {
     width?: number;
 }
 
-// @internal
+// @public
 export function sparklineExportValue(values: readonly number[]): string;
 
-// @internal
+// @public
 export type SparklineKind = "bar" | "line" | "area";
 
-// @internal
+// @public
 export interface SparklineProps {
     color?: string;
     height?: number;
@@ -46,7 +46,7 @@ export interface SparklineProps {
     width?: number;
 }
 
-// @internal
+// @public
 export function sparklineSummary(values: readonly number[]): string;
 
 // (No @packageDocumentation comment for this package)

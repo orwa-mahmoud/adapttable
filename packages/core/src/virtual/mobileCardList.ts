@@ -12,7 +12,7 @@ import type { CSSProperties, Ref, RefCallback } from "react";
  * Clip the card list to `maxHeight` so it becomes the scroll element the
  * virtualizer tracks. Omit `maxHeight` and the page is the scroller.
  *
- * @internal
+ * @public
  */
 export function mobileCardListStyle(
   maxHeight: number | undefined
@@ -26,7 +26,7 @@ export function mobileCardListStyle(
  * keeps the list node for its own layout) so both observers see the same
  * element.
  *
- * @internal
+ * @public
  */
 export function bindMobileCardList(
   virtualScrollRef: ((node: HTMLElement | null) => void) | undefined,

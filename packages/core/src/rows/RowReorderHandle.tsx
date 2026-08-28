@@ -10,7 +10,7 @@ import type { RowReorderLabels, RowReorderState } from "./rowReorder";
 /**
  * Props for an adapter `RowReorderHandle` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface RowReorderHandleProps<TRow> {
   /** Row-reorder state: what is being dragged and where it may land. */
@@ -34,7 +34,7 @@ export interface RowReorderHandleProps<TRow> {
 /**
  * Kit grip the reorder chrome calls.
  *
- * @internal
+ * @public
  */
 export interface RowReorderHandleSlotProps {
   /** Accessible name for the control. */
@@ -54,7 +54,7 @@ export interface RowReorderHandleSlotProps {
 /**
  * Adapter-supplied controls for {@link RowReorderHandleChrome}.
  *
- * @internal
+ * @public
  */
 export interface RowReorderHandleSlots {
   /** Renders the drag grip. */
@@ -64,7 +64,7 @@ export interface RowReorderHandleSlots {
 /**
  * Props for {@link RowReorderHandleChrome}.
  *
- * @internal
+ * @public
  */
 export interface RowReorderHandleChromeProps<
   TRow,
@@ -77,7 +77,7 @@ export interface RowReorderHandleChromeProps<
  * Desktop grip: pointer drag plus Space-lift keyboard. Kits wrap this in
  * their own `<td>` / `<th>` so the cell looks like the rest of the row.
  *
- * @internal
+ * @public
  */
 export function RowReorderHandleChrome<TRow>({
   reorder,
@@ -116,7 +116,7 @@ export function RowReorderHandleChrome<TRow>({
 /**
  * Props for an adapter `RowReorderButtons` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface RowReorderButtonsProps<TRow> {
   /** Row-reorder state: what is being dragged and where it may land. */
@@ -142,7 +142,7 @@ export interface RowReorderButtonsProps<TRow> {
 /**
  * Kit button the mobile reorder chrome calls.
  *
- * @internal
+ * @public
  */
 export interface RowReorderMoveButtonProps {
   /** Accessible name for the control. */
@@ -160,7 +160,7 @@ export interface RowReorderMoveButtonProps {
 /**
  * Adapter-supplied controls for {@link RowReorderButtonsChrome}.
  *
- * @internal
+ * @public
  */
 export interface RowReorderButtonsSlots {
   /** Renders one move button. */
@@ -170,7 +170,7 @@ export interface RowReorderButtonsSlots {
 /**
  * Props for {@link RowReorderButtonsChrome}.
  *
- * @internal
+ * @public
  */
 export interface RowReorderButtonsChromeProps<
   TRow,
@@ -183,7 +183,7 @@ export interface RowReorderButtonsChromeProps<
  * Mobile up/down — a drag handle on a card is unusable. Each press swaps
  * with the neighbour; the ends disable rather than wrapping.
  *
- * @internal
+ * @public
  */
 export function RowReorderButtonsChrome<TRow>({
   reorder,
@@ -225,7 +225,7 @@ export function RowReorderButtonsChrome<TRow>({
 /**
  * The live region for row reorder. Kits mount this only when reorder is armed.
  *
- * @internal
+ * @public
  */
 export function RowReorderAnnouncer(
   props: Readonly<{ announcement: string }>

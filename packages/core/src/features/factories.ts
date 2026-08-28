@@ -38,7 +38,7 @@ function define<TRow>(
  * features={[feature("audit-log", { toolbarSlots: { end: <Audit /> } })]}
  * ```
  *
- * @internal
+ * @public
  */
 export function feature<TRow>(
   id: string,
@@ -51,7 +51,7 @@ export function feature<TRow>(
 /**
  * Let rows be dragged into a new order.
  *
- * @internal
+ * @public
  */
 export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>
@@ -62,7 +62,7 @@ export function rowReorder<TRow>(
 /**
  * Let rows be pinned to the top or bottom.
  *
- * @internal
+ * @public
  */
 export function rowPinning<TRow>(options: {
   pinnedRowIds?: RowPinState;
@@ -74,7 +74,7 @@ export function rowPinning<TRow>(options: {
 /**
  * Merge cells that share a value across rows or columns.
  *
- * @internal
+ * @public
  */
 export function cellSpan<TRow>(
   getCellSpan: GetCellSpan<TRow>,
@@ -86,7 +86,7 @@ export function cellSpan<TRow>(
 /**
  * Inject separator or full-width rows between the data rows.
  *
- * @internal
+ * @public
  */
 export function extraRows<TRow>(rows: readonly ExtraRow[]): TableFeature<TRow> {
   return define("extra-rows", { extraRows: rows });
@@ -95,7 +95,7 @@ export function extraRows<TRow>(rows: readonly ExtraRow[]): TableFeature<TRow> {
 /**
  * Class, style and height per row.
  *
- * @internal
+ * @public
  */
 export function rowAppearance<TRow>(options: {
   rowClassName?: (row: TRow, index: number) => string | undefined;
@@ -108,7 +108,7 @@ export function rowAppearance<TRow>(options: {
 /**
  * Give each row an expandable detail panel.
  *
- * @internal
+ * @public
  */
 export function rowDetail<TRow>(
   renderRowDetail: (row: TRow) => unknown,
@@ -120,7 +120,7 @@ export function rowDetail<TRow>(
 /**
  * Render a whole table inside a row's detail panel.
  *
- * @internal
+ * @public
  */
 export function nestedTable<TRow>(
   nested: NestedTableFor<TRow>
@@ -131,7 +131,7 @@ export function nestedTable<TRow>(
 /**
  * Edit a single cell in place.
  *
- * @internal
+ * @public
  */
 export function editing<TRow>(
   onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown,
@@ -143,7 +143,7 @@ export function editing<TRow>(
 /**
  * Edit a whole row at once, saved or cancelled together.
  *
- * @internal
+ * @public
  */
 export function rowEditing<TRow>(
   onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown,
@@ -155,7 +155,7 @@ export function rowEditing<TRow>(
 /**
  * Collect edits and save them in one batch.
  *
- * @internal
+ * @public
  */
 export function batchEditing<TRow>(
   onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown,
@@ -171,7 +171,7 @@ export function batchEditing<TRow>(
 /**
  * Track edits so they can be undone and redone.
  *
- * @internal
+ * @public
  */
 export function editHistory<TRow>(
   options: boolean | { depth?: number } = true
@@ -182,7 +182,7 @@ export function editHistory<TRow>(
 /**
  * Mark cells and rows that have unsaved edits.
  *
- * @internal
+ * @public
  */
 export function dirtyIndicators<TRow>(): TableFeature<TRow> {
   return define("dirty-indicators", { dirtyIndicators: true });
@@ -191,7 +191,7 @@ export function dirtyIndicators<TRow>(): TableFeature<TRow> {
 /**
  * Group rows under collapsible headers.
  *
- * @internal
+ * @public
  */
 export function grouping<TRow>(
   groupBy: string | readonly string[],
@@ -214,7 +214,7 @@ export function grouping<TRow>(
 /**
  * Render rows as an expandable tree.
  *
- * @internal
+ * @public
  */
 export function tree<TRow>(options: {
   getChildren?: (row: TRow) => readonly TRow[] | undefined;
@@ -231,7 +231,7 @@ export function tree<TRow>(options: {
 /**
  * Render only the rows in view.
  *
- * @internal
+ * @public
  */
 export function virtualize<TRow>(
   options:
@@ -253,7 +253,7 @@ export function virtualize<TRow>(
 /**
  * Add the per-column menu: pin, hide, move, resize, sort.
  *
- * @internal
+ * @public
  */
 export function columnMenu<TRow>(): TableFeature<TRow> {
   return define("column-menu", { enableColumnMenu: true });
@@ -262,7 +262,7 @@ export function columnMenu<TRow>(): TableFeature<TRow> {
 /**
  * Let columns be resized by dragging their edge.
  *
- * @internal
+ * @public
  */
 export function resizableColumns<TRow>(): TableFeature<TRow> {
   return define("resizable-columns", { resizableColumns: true });
@@ -271,7 +271,7 @@ export function resizableColumns<TRow>(): TableFeature<TRow> {
 /**
  * Let grouped column headers collapse to a summary.
  *
- * @internal
+ * @public
  */
 export function collapsibleColumnGroups<TRow>(): TableFeature<TRow> {
   return define("collapsible-column-groups", {
@@ -282,7 +282,7 @@ export function collapsibleColumnGroups<TRow>(): TableFeature<TRow> {
 /**
  * Add CSV export of the current view.
  *
- * @internal
+ * @public
  */
 export function exportCsv<TRow>(
   options: boolean | ExportCsvOptions<TRow> = true
@@ -298,7 +298,7 @@ export function exportCsv<TRow>(
 /**
  * Make the table a keyboard grid with a focused cell.
  *
- * @internal
+ * @public
  */
 export function cellNavigation<TRow>(): TableFeature<TRow> {
   return define("cell-navigation", { cellNavigation: true });
@@ -307,7 +307,7 @@ export function cellNavigation<TRow>(): TableFeature<TRow> {
 /**
  * Add the find bar, opened with Ctrl/Cmd+F.
  *
- * @internal
+ * @public
  */
 export function findInTable<TRow>(): TableFeature<TRow> {
   return define("find-in-table", { findInTable: true });
@@ -316,7 +316,7 @@ export function findInTable<TRow>(): TableFeature<TRow> {
 /**
  * Add a control that takes the table fullscreen.
  *
- * @internal
+ * @public
  */
 export function fullscreen<TRow>(): TableFeature<TRow> {
   return define("fullscreen", { fullscreen: true });
@@ -325,7 +325,7 @@ export function fullscreen<TRow>(): TableFeature<TRow> {
 /**
  * Add the command palette, opened with Ctrl/Cmd+K.
  *
- * @internal
+ * @public
  */
 export function commandPalette<TRow>(
   options: boolean | CommandPaletteOptions = true
@@ -345,7 +345,7 @@ export function commandPalette<TRow>(
 /**
  * Add right-click menus on rows, cells and headers.
  *
- * @internal
+ * @public
  */
 export function contextMenu<TRow>(
   options: boolean | ContextMenuOptions<TRow> = true
@@ -361,7 +361,7 @@ export function contextMenu<TRow>(
 /**
  * Add the side panel of table settings.
  *
- * @internal
+ * @public
  */
 export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
   return define("side-panel", { sidePanel: options }, (host) => {
@@ -372,7 +372,7 @@ export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
 /**
  * Add actions that run against the selected rows.
  *
- * @internal
+ * @public
  */
 export function bulkActions<TRow>(
   actions: readonly BulkAction[]
@@ -383,7 +383,7 @@ export function bulkActions<TRow>(
 /**
  * Add the filter panel for the given definitions.
  *
- * @internal
+ * @public
  */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
@@ -394,7 +394,7 @@ export function filters<TRow>(
 /**
  * Register custom filter types the panel can render.
  *
- * @internal
+ * @public
  */
 export function filterTypes<TRow>(
   specs: readonly FilterTypeSpec[]
@@ -407,7 +407,7 @@ export function filterTypes<TRow>(
 /**
  * Add a filter control under each column header.
  *
- * @internal
+ * @public
  */
 export function headerFilters<TRow>(): TableFeature<TRow> {
   return define("header-filters", { headerFilters: true });
@@ -416,7 +416,7 @@ export function headerFilters<TRow>(): TableFeature<TRow> {
 /**
  * Let the current view be saved, named and restored.
  *
- * @internal
+ * @public
  */
 export function savedViews<TRow>(
   options: UseSavedViewsOptions
@@ -427,7 +427,7 @@ export function savedViews<TRow>(
 /**
  * Show aggregates for the selected rows.
  *
- * @internal
+ * @public
  */
 export function selectionStats<TRow>(): TableFeature<TRow> {
   return define("selection-stats", { selectionStats: true });
@@ -436,7 +436,7 @@ export function selectionStats<TRow>(): TableFeature<TRow> {
 /**
  * Add a control that switches row density.
  *
- * @internal
+ * @public
  */
 export function densityChooser<TRow>(): TableFeature<TRow> {
   return define("density-chooser", { densityChooser: true });
@@ -457,7 +457,7 @@ export function print<TRow>(
 /**
  * Add the status bar under the table.
  *
- * @internal
+ * @public
  */
 export function statusBar<TRow>(): TableFeature<TRow> {
   return define("status-bar", { statusBar: true });
@@ -466,7 +466,7 @@ export function statusBar<TRow>(): TableFeature<TRow> {
 /**
  * Add undo and redo controls for edits.
  *
- * @internal
+ * @public
  */
 export function undoRedoButtons<TRow>(): TableFeature<TRow> {
   return define("undo-redo-buttons", { undoRedoButtons: true });
@@ -475,7 +475,7 @@ export function undoRedoButtons<TRow>(): TableFeature<TRow> {
 /**
  * Allow sorting by more than one column at a time.
  *
- * @internal
+ * @public
  */
 export function multiSort<TRow>(): TableFeature<TRow> {
   return define("multi-sort", { multiSort: true });
@@ -484,7 +484,7 @@ export function multiSort<TRow>(): TableFeature<TRow> {
 /**
  * Size columns to their content.
  *
- * @internal
+ * @public
  */
 export function fitColumns<TRow>(): TableFeature<TRow> {
   return define("fit-columns", { fitColumns: true });
@@ -493,7 +493,7 @@ export function fitColumns<TRow>(): TableFeature<TRow> {
 /**
  * Add a checkbox per column header for column selection.
  *
- * @internal
+ * @public
  */
 export function columnSelectionCheckbox<TRow>(): TableFeature<TRow> {
   return define("column-selection-checkbox", {

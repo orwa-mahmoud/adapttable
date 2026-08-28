@@ -117,7 +117,7 @@ export interface ReconcileLiveEdit<TRow> {
  * moved. Without it, only the edited column's stored value counts, so an
  * unrelated field updating does not steal the draft.
  *
- * @internal
+ * @public
  */
 export function liveRowChanged<TRow>(input: {
   opened: TRow;
@@ -161,7 +161,7 @@ export function resolveConflictChoice<TRow>(
  * Headless conflict state. Inert until {@link EditConflictState.reconcile}
  * sees a live row that disagrees with the open editor.
  *
- * @internal
+ * @public
  */
 export function useEditConflict<TRow>(): EditConflictState<TRow> {
   const [current, setCurrent] = useState<EditConflict<TRow> | null>(null);

@@ -15,21 +15,21 @@ import { listFilterValues } from "./filterForm";
 /**
  * Window the list once it is long enough that a full render would hitch.
  *
- * @internal
+ * @public
  */
 export const CHECKLIST_VIRTUALIZE_AT = 40;
 
 /**
  * Fixed row height the virtual window measures against, in px.
  *
- * @internal
+ * @public
  */
 export const CHECKLIST_ITEM_HEIGHT = 28;
 
 /**
  * Visible viewport of a virtualized list, in px.
  *
- * @internal
+ * @public
  */
 export const CHECKLIST_LIST_HEIGHT = 240;
 
@@ -102,7 +102,7 @@ function rowValue<TRow>(def: FilterDef<TRow>, row: TRow): string {
  * Distinct values + counts from a row set. Static `options` only supply
  * labels — the values themselves always come from the rows.
  *
- * @internal
+ * @public
  */
 export function collectChecklistValues<TRow>(
   def: FilterDef<TRow>,

@@ -137,7 +137,7 @@ export interface CellEditingState {
 /**
  * What {@link useCellEditing} observes, when the host wired lifecycle events.
  *
- * @internal
+ * @public
  */
 export interface UseCellEditingOptions<TRow = unknown> {
   /** An editor opened. */
@@ -154,7 +154,7 @@ export interface UseCellEditingOptions<TRow = unknown> {
  * @param options - Optional start/cancel observers.
  * @returns The state machine.
  *
- * @internal
+ * @public
  */
 export function useCellEditing<TRow = unknown>(
   options: UseCellEditingOptions<TRow> = {}

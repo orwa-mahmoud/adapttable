@@ -18,7 +18,7 @@ import type { ColumnDef } from "../types";
 /**
  * What a find needs to know.
  *
- * @internal
+ * @public
  */
 export interface FindMatchesOptions<TRow> {
   /** What to look for. An empty or blank query matches nothing. */
@@ -43,7 +43,7 @@ export interface FindMatchesOptions<TRow> {
  * @param options - See {@link FindMatchesOptions}.
  * @returns The matching cells, in absolute addresses.
  *
- * @internal
+ * @public
  */
 export function findMatches<TRow>(
   options: FindMatchesOptions<TRow>
@@ -66,7 +66,7 @@ export function findMatches<TRow>(
 /**
  * A cell address as a string, for set membership without a nested scan.
  *
- * @internal
+ * @public
  */
 export function matchKey(cell: GridCell): string {
   return `${cell.row}:${cell.col}`;
@@ -82,7 +82,7 @@ export function matchKey(cell: GridCell): string {
  * @param matches - The matches, from {@link findMatches}.
  * @returns Their keys.
  *
- * @internal
+ * @public
  */
 export function matchKeySet(matches: readonly GridCell[]): ReadonlySet<string> {
   return new Set(matches.map(matchKey));
@@ -100,7 +100,7 @@ export function matchKeySet(matches: readonly GridCell[]): ReadonlySet<string> {
  * @param step - `1` for next, `-1` for previous.
  * @returns The next index, or `-1` when there is nothing to step through.
  *
- * @internal
+ * @public
  */
 export function stepMatch(index: number, total: number, step: number): number {
   if (total === 0) return -1;

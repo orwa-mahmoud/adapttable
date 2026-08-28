@@ -14,7 +14,7 @@ import type { GroupPaging } from "./groupRows";
 /**
  * Paging state and the one action that changes it.
  *
- * @internal
+ * @public
  */
 export interface GroupPagingState {
   /** What the model reads. */
@@ -33,7 +33,7 @@ export interface GroupPagingState {
  *
  * @returns The state; inert until something calls `showMore`.
  *
- * @internal
+ * @public
  */
 export function useGroupPaging(): GroupPagingState {
   const [paging, setPaging] = useState<GroupPaging>({});

@@ -17,7 +17,7 @@ import type { TableLabels } from "../types";
 /**
  * Which opted-in feature is inert.
  *
- * @internal
+ * @public
  */
 export type FeatureNoticeKind =
   | "virtualize-paged"
@@ -37,7 +37,7 @@ export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 /**
  * One inert feature, ready for a status slot or a root attribute.
  *
- * @internal
+ * @public
  */
 export interface FeatureNotice {
   /** Which feature could not run. */

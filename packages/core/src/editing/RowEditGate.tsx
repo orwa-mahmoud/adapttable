@@ -26,7 +26,7 @@ import type { RowEditingState } from "./rowEditing";
 /**
  * Props for {@link RowEditCell}.
  *
- * @internal
+ * @public
  */
 export interface RowEditCellProps<TRow> {
   /** The row-editing state from the chrome. */
@@ -61,7 +61,7 @@ export interface RowEditCellProps<TRow> {
  * @param props - See {@link RowEditCellProps}.
  * @returns The editor, or the display content.
  *
- * @internal
+ * @public
  */
 export function RowEditCell<TRow>({
   rowEditing,
@@ -132,7 +132,7 @@ function selectOptionsFor(editor: CellEditor) {
 /**
  * Props for {@link rowEditControls}.
  *
- * @internal
+ * @public
  */
 export interface RowEditControlsOptions<TRow> {
   /** The row-editing state from the chrome. */
@@ -148,7 +148,7 @@ export interface RowEditControlsOptions<TRow> {
 /**
  * What a kit needs to render the row's edit / save / cancel controls.
  *
- * @internal
+ * @public
  */
 export interface RowEditControls {
   /** Whether this row is the one being edited. */
@@ -179,7 +179,7 @@ export interface RowEditControls {
  * @param options - See {@link RowEditControlsOptions}.
  * @returns The controls to render.
  *
- * @internal
+ * @public
  */
 export function rowEditControls<TRow>({
   rowEditing,
@@ -204,7 +204,7 @@ export function rowEditControls<TRow>({
 /**
  * Props for an adapter `RowEditActions` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface RowEditActionsProps<
   TRow,
@@ -218,7 +218,7 @@ export interface RowEditActionsProps<
 /**
  * Kit button the row-edit chrome calls.
  *
- * @internal
+ * @public
  */
 export interface RowEditButtonProps {
   /** Accessible name for the control. */
@@ -234,7 +234,7 @@ export interface RowEditButtonProps {
 /**
  * Adapter-supplied controls for {@link RowEditActionsChrome}.
  *
- * @internal
+ * @public
  */
 export interface RowEditActionsSlots {
   /** Renders a button. */
@@ -244,7 +244,7 @@ export interface RowEditActionsSlots {
 /**
  * Props for {@link RowEditActionsChrome}.
  *
- * @internal
+ * @public
  */
 export interface RowEditActionsChromeProps<
   TRow,
@@ -264,7 +264,7 @@ export interface RowEditActionsChromeProps<
  * @param props - See {@link RowEditActionsChromeProps}.
  * @returns The controls for this row.
  *
- * @internal
+ * @public
  */
 export function RowEditActionsChrome<TRow>({
   className,
@@ -318,7 +318,7 @@ export function RowEditActionsChrome<TRow>({
 /**
  * Props for {@link BatchEditCell}.
  *
- * @internal
+ * @public
  */
 export interface BatchEditCellProps<TRow> {
   /** The batch state from the chrome. */
@@ -350,7 +350,7 @@ export interface BatchEditCellProps<TRow> {
  * @param props - See {@link BatchEditCellProps}.
  * @returns The field, or the display content.
  *
- * @internal
+ * @public
  */
 export function BatchEditCell<TRow>({
   batch,
@@ -411,7 +411,7 @@ export function BatchEditCell<TRow>({
 /**
  * Props for an adapter `BatchEditBar` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface BatchEditBarProps<TRow> {
   /** The batch state from the chrome. */
@@ -427,7 +427,7 @@ export interface BatchEditBarProps<TRow> {
 /**
  * Kit button the batch-edit bar calls.
  *
- * @internal
+ * @public
  */
 export interface BatchEditButtonProps {
   /** Accessible name for the control. */
@@ -443,7 +443,7 @@ export interface BatchEditButtonProps {
 /**
  * Adapter-supplied controls for {@link BatchEditBarChrome}.
  *
- * @internal
+ * @public
  */
 export interface BatchEditBarSlots {
   /** Renders a button. */
@@ -453,7 +453,7 @@ export interface BatchEditBarSlots {
 /**
  * Props for {@link BatchEditBarChrome}.
  *
- * @internal
+ * @public
  */
 export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
   /** The kit's components for each part. */
@@ -470,7 +470,7 @@ export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
  * @param props - See {@link BatchEditBarChromeProps}.
  * @returns The bar, or nothing.
  *
- * @internal
+ * @public
  */
 export function BatchEditBarChrome<TRow>({
   batch,

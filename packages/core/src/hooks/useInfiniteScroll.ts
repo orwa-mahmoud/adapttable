@@ -5,7 +5,7 @@ import { useEventCallback } from "./useEventCallback";
 /**
  * Options for {@link useInfiniteScroll}.
  *
- * @internal
+ * @public
  */
 export interface UseInfiniteScrollOptions {
   /** Whether more pages remain to be fetched. */
@@ -50,7 +50,7 @@ export interface UseInfiniteScrollOptions {
  * @param options - See {@link UseInfiniteScrollOptions}.
  * @returns A ref to attach to the sentinel element.
  *
- * @internal
+ * @public
  */
 export function useInfiniteScroll<
   TElement extends HTMLElement = HTMLDivElement,

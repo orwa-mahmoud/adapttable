@@ -11,7 +11,7 @@ import type { TableLabels } from "../types";
 /**
  * Props for an adapter `GroupMoreButton` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface GroupMoreButtonProps {
   /** Whether this offers more groups or more rows inside one. */
@@ -29,7 +29,7 @@ export interface GroupMoreButtonProps {
 /**
  * Kit button the group-more chrome calls.
  *
- * @internal
+ * @public
  */
 export interface GroupMoreButtonSlotProps {
   /** Accessible name for the control. */
@@ -41,7 +41,7 @@ export interface GroupMoreButtonSlotProps {
 /**
  * Adapter-supplied controls for {@link GroupMoreButtonChrome}.
  *
- * @internal
+ * @public
  */
 export interface GroupMoreButtonSlots {
   /** Renders a button. */
@@ -51,7 +51,7 @@ export interface GroupMoreButtonSlots {
 /**
  * Props for {@link GroupMoreButtonChrome}.
  *
- * @internal
+ * @public
  */
 export interface GroupMoreButtonChromeProps extends GroupMoreButtonProps {
   /** The kit's components for each part. */
@@ -61,7 +61,7 @@ export interface GroupMoreButtonChromeProps extends GroupMoreButtonProps {
 /**
  * Renders the offer through the adapter's button.
  *
- * @internal
+ * @public
  */
 export function GroupMoreButtonChrome({
   scope,

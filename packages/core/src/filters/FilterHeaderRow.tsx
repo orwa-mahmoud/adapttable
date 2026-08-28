@@ -25,7 +25,7 @@ import { useFilterOptions } from "./useFilterOptions";
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderClassNames {
   /** Class for the filter row. */
@@ -51,7 +51,7 @@ export interface FilterHeaderClassNames {
 /**
  * Overlay a sticky `top` on a cell or pad style.
  *
- * @internal
+ * @public
  */
 export function headerFilterStickTop(
   sticky: boolean,
@@ -66,7 +66,7 @@ export function headerFilterStickTop(
 /**
  * Props for an adapter `FilterHeaderRow` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderRowProps<TRow> {
   /** When false the row does not render, even if defs exist. */
@@ -106,7 +106,7 @@ export interface FilterHeaderRowProps<TRow> {
 /**
  * Props for an adapter `FilterHeaderControl` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderControlProps<TRow> {
   /** The filter this control edits. */
@@ -158,7 +158,7 @@ export function hasActiveHeaderFilter<TRow>(
 /**
  * One option in a header Select or multi menu.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderOption {
   /** Value stored when this option is chosen. */
@@ -170,7 +170,7 @@ export interface FilterHeaderOption {
 /**
  * Kit search field a text header cell calls.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderSearchProps {
   /** Accessible name for the box. */
@@ -188,7 +188,7 @@ export interface FilterHeaderSearchProps {
 /**
  * Kit Select a select/boolean header cell calls.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderSelectProps {
   /** Accessible name for the select. */
@@ -206,7 +206,7 @@ export interface FilterHeaderSelectProps {
 /**
  * Kit number/date field a range header cell calls.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderRangeProps {
   /** Accessible name for the field. */
@@ -222,7 +222,7 @@ export interface FilterHeaderRangeProps {
 /**
  * Kit compact multi menu a checklist/multiSelect header cell calls.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderMultiProps {
   /** Accessible name for the trigger. */
@@ -244,7 +244,7 @@ export interface FilterHeaderMultiProps {
 /**
  * Adapter-supplied controls for {@link FilterHeaderChrome}.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderSlots {
   /** Renders a free-text filter. */
@@ -260,7 +260,7 @@ export interface FilterHeaderSlots {
 /**
  * Props for {@link FilterHeaderChrome}.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderChromeProps<
   TRow,
@@ -272,7 +272,7 @@ export interface FilterHeaderChromeProps<
 /**
  * Props for {@link FilterHeaderControlChrome}.
  *
- * @internal
+ * @public
  */
 export interface FilterHeaderControlChromeProps<
   TRow,
@@ -284,7 +284,7 @@ export interface FilterHeaderControlChromeProps<
 /**
  * The definition that drives a column's header filter, if any.
  *
- * @internal
+ * @public
  */
 export function filterDefForColumn<TRow>(
   defs: readonly FilterDef<TRow>[],
@@ -578,7 +578,7 @@ function FilterHeaderCell<TRow>({
 /**
  * Compact control for one filter definition — used in the header row and antd titles.
  *
- * @internal
+ * @public
  */
 export function FilterHeaderControlChrome<TRow>({
   def,
@@ -604,7 +604,7 @@ export function FilterHeaderControlChrome<TRow>({
  * Second header row of per-column quick filters. Pads and spacers match
  * the leaf header so sticky, pin offsets, and column windowing stay aligned.
  *
- * @internal
+ * @public
  */
 export function FilterHeaderChrome<TRow>({
   enabled = true,

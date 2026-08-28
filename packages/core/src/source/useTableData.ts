@@ -123,7 +123,7 @@ type DataTier = "source" | "server" | "frontend";
  *
  * @typeParam TRow - The row type.
  *
- * @internal
+ * @public
  */
 export type DataModeProps<TRow> =
   | {
@@ -227,7 +227,7 @@ function useQueryNotification<TRow>(
 /**
  * True when the `filters` prop is the declarative array form.
  *
- * @internal
+ * @public
  */
 export function isDeclarativeFilters<TRow>(
   filters: readonly FilterDef<TRow>[] | ReactNode

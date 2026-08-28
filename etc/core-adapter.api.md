@@ -22,21 +22,21 @@ import { RefObject } from 'react';
 import { SetStateAction } from 'react';
 import { VirtualItem } from '@tanstack/react-virtual';
 
-// @internal
+// @public
 export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnDef<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnDef<TRow>[];
 
-// @internal
+// @public
 export function applyTableFeatures<P extends object>(props: P): P;
 
-// @internal
+// @public
 export function BatchEditBarChrome<TRow>(input: Readonly<BatchEditBarChromeProps<TRow>>): ReactElement | null;
 
-// @internal
+// @public
 export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
     readonly slots: BatchEditBarSlots;
 }
 
-// @internal
+// @public
 export interface BatchEditBarProps<TRow> {
     batch: BatchEditingState<TRow>;
     buttonClassName?: string;
@@ -44,12 +44,12 @@ export interface BatchEditBarProps<TRow> {
     labels?: TableLabels;
 }
 
-// @internal
+// @public
 export interface BatchEditBarSlots {
     readonly Button: (props: BatchEditButtonProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface BatchEditButtonProps {
     readonly className?: string;
     readonly label: string;
@@ -57,10 +57,10 @@ export interface BatchEditButtonProps {
     readonly part: string;
 }
 
-// @internal
+// @public
 export function BatchEditCell<TRow>(input: Readonly<BatchEditCellProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface BatchEditCellProps<TRow> {
     batch: BatchEditingState<TRow>;
     column: EditableColumnLike<TRow>;
@@ -71,13 +71,13 @@ export interface BatchEditCellProps<TRow> {
     rowId: string;
 }
 
-// @internal
+// @public
 export function bindFeatureHostFn<Args extends unknown[], R>(host: FeatureHostState | undefined, fn: ((...args: Args) => R) | undefined): ((...args: Args) => R) | undefined;
 
-// @internal
+// @public
 export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: Ref<HTMLElement | null>): RefCallback<HTMLElement>;
 
-// @internal
+// @public
 export interface BodyCell<TRow> {
     colSpan: number;
     column: ColumnDef<TRow>;
@@ -85,15 +85,15 @@ export interface BodyCell<TRow> {
     rowSpan: number;
 }
 
-// @internal
+// @public
 export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
     rowSpan: number;
 }[]>): boolean;
 
-// @internal
+// @public
 export function bulkActionErrorMessage(error: unknown): string | null;
 
-// @internal
+// @public
 export interface BulkBarChromeProps {
     bulkActions: BulkAction[];
     confirm: ConfirmHandler;
@@ -102,7 +102,7 @@ export interface BulkBarChromeProps {
     total: number;
 }
 
-// @internal
+// @public
 export interface BulkBarState {
     banner: {
         text: string;
@@ -119,28 +119,28 @@ export interface BulkBarState {
     selectedCount: number;
 }
 
-// @internal
+// @public
 export function cellFlashAttr(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
 
-// @internal
+// @public
 export function cellHighlightStyle(props: Readonly<Record<string, unknown>> | undefined, base: CSSProperties | undefined, selected: CSSProperties): CSSProperties | undefined;
 
-// @internal
+// @public
 export function cellsForRow<TRow>(cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined, rowKey: string): readonly BodyCell<TRow>[];
 
 // @public
 export type CellSpanAppearance = "merged" | "plain";
 
-// @internal
+// @public
 export function cellSpanMark(colSpan: number, rowSpan: number): string | undefined;
 
-// @internal
+// @public
 export interface ChecklistButtonProps {
     readonly label: string;
     readonly onClick: () => void;
 }
 
-// @internal
+// @public
 export interface ChecklistCheckboxProps {
     readonly checked: boolean;
     readonly className?: string;
@@ -150,15 +150,15 @@ export interface ChecklistCheckboxProps {
     readonly onChange: (checked: boolean) => void;
 }
 
-// @internal
+// @public
 export function ChecklistChrome<TRow>(input: Readonly<ChecklistChromeProps<TRow>>): JSX.Element | null;
 
-// @internal
+// @public
 export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
     readonly slots: ChecklistSlots;
 }
 
-// @internal
+// @public
 export interface ChecklistClassNames {
     filterCheckbox?: string;
     filterCheckboxGroup?: string;
@@ -172,7 +172,7 @@ export interface ChecklistClassNames {
     filterLabel?: string;
 }
 
-// @internal
+// @public
 export interface ChecklistFilterProps<TRow> {
     readonly classNames?: ChecklistClassNames;
     readonly def: FilterDef<TRow>;
@@ -180,7 +180,7 @@ export interface ChecklistFilterProps<TRow> {
     readonly source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
 }
 
-// @internal
+// @public
 export interface ChecklistSearchProps {
     readonly className?: string;
     readonly label: string;
@@ -188,26 +188,26 @@ export interface ChecklistSearchProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface ChecklistSlots {
     readonly Button: (props: ChecklistButtonProps) => ReactNode;
     readonly Checkbox: (props: ChecklistCheckboxProps) => ReactNode;
     readonly Search: (props: ChecklistSearchProps) => ReactNode;
 }
 
-// @internal
+// @public
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
-// @internal
+// @public
 export const COLUMN_GROUP_ID_SEP = "";
 
-// @internal
+// @public
 export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
 
-// @internal
+// @public
 export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 
-// @internal
+// @public
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
@@ -233,7 +233,7 @@ export interface ColumnDropProps {
     onDrop: (event: DragEvent_2<HTMLElement>) => void;
 }
 
-// @internal
+// @public
 export function columnFlexShares<TRow>(options: ColumnSizingOptions<TRow>): Readonly<Record<string, number>>;
 
 // @public
@@ -247,19 +247,19 @@ export interface ColumnGroupDef<TRow> {
     readonly marryChildren?: boolean;
 }
 
-// @internal
+// @public
 export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null;
 
-// @internal
+// @public
 export function columnGroupId(path: readonly string[]): string;
 
-// @internal
+// @public
 export function columnGroupPath<TRow>(column: Pick<ColumnDef<TRow>, "group">): readonly string[];
 
-// @internal
+// @public
 export function columnGroupStubStyle(): CSSProperties;
 
-// @internal
+// @public
 export interface ColumnGroupToggleButtonProps {
     readonly className?: string;
     readonly expanded: boolean;
@@ -267,15 +267,15 @@ export interface ColumnGroupToggleButtonProps {
     readonly onClick: () => void;
 }
 
-// @internal
+// @public
 export function ColumnGroupToggleChrome(input: Readonly<ColumnGroupToggleChromeProps>): ReactElement;
 
-// @internal
+// @public
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
     readonly slots: ColumnGroupToggleSlots;
 }
 
-// @internal
+// @public
 export interface ColumnGroupToggleProps {
     cell: HeaderGroupCell;
     className?: string;
@@ -283,7 +283,7 @@ export interface ColumnGroupToggleProps {
     onToggle: (id: string) => void;
 }
 
-// @internal
+// @public
 export interface ColumnGroupToggleSlots {
     readonly Button: (props: ColumnGroupToggleButtonProps) => ReactNode;
 }
@@ -311,10 +311,10 @@ export interface ColumnMenuActionContext<TRow = unknown> {
     sortDir?: "asc" | "desc";
 }
 
-// @internal
+// @public
 export function columnMenuActions<TRow>(row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>): ColumnMenuAction[];
 
-// @internal
+// @public
 export interface ColumnMenuChromeProps<TRow> {
     allColumns: ColumnDef<TRow>[];
     labels: ColumnMenuLabels;
@@ -386,10 +386,10 @@ export interface ColumnRowDragProps {
     onDragStart: (event: DragEvent_2<HTMLElement>) => void;
 }
 
-// @internal
+// @public
 export function ColumnSelectCheckboxChrome(input: Readonly<ColumnSelectCheckboxChromeProps>): JSX.Element;
 
-// @internal
+// @public
 export interface ColumnSelectCheckboxChromeProps {
     readonly checked: boolean;
     readonly className?: string;
@@ -398,45 +398,45 @@ export interface ColumnSelectCheckboxChromeProps {
     readonly slots: ColumnSelectSlots;
 }
 
-// @internal
+// @public
 export interface ColumnSelectCheckboxProps {
     readonly checked: boolean;
     readonly label: string;
     readonly onToggle: () => void;
 }
 
-// @internal
+// @public
 export function columnSelectLabel(label: string | undefined, column: {
     header?: ReactNode;
     key: string;
 }): string;
 
-// @internal
+// @public
 export interface ColumnSelectSlots {
     readonly Checkbox: (props: ColumnSelectCheckboxProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function columnSizeStyle<TRow>(column: ColumnDef<TRow>, shares?: Readonly<Record<string, number>>, userWidth?: number): CSSProperties | undefined;
 
-// @internal
+// @public
 export interface ColumnSizingOptions<TRow> {
     columns: readonly ColumnDef<TRow>[];
     fitColumns?: boolean;
     widths?: Readonly<Record<string, number>>;
 }
 
-// @internal
+// @public
 export function ColumnSpacer(input: Readonly<ColumnSpacerProps>): ReactElement | null;
 
-// @internal
+// @public
 export interface ColumnSpacerProps {
     as?: "td" | "th";
     side: "start" | "end";
     width: number;
 }
 
-// @internal
+// @public
 export interface ColumnWindow<TRow> {
     columns: readonly ColumnDef<TRow>[];
     enabled: boolean;
@@ -444,10 +444,10 @@ export interface ColumnWindow<TRow> {
     paddingStart: number;
 }
 
-// @internal
+// @public
 export function CommandPaletteChrome(props: Readonly<CommandPaletteChromeProps>): JSX.Element | null;
 
-// @internal
+// @public
 export interface CommandPaletteChromeProps {
     className?: string;
     commands: readonly Command[];
@@ -457,7 +457,7 @@ export interface CommandPaletteChromeProps {
     slots: CommandPaletteSlots;
 }
 
-// @internal
+// @public
 export interface CommandPaletteInputProps {
     readonly inputProps: {
         readonly value: string;
@@ -474,7 +474,7 @@ export interface CommandPaletteInputProps {
     };
 }
 
-// @internal
+// @public
 export interface CommandPaletteItemProps {
     readonly active: boolean;
     readonly command: Command;
@@ -489,7 +489,7 @@ export interface CommandPaletteItemProps {
     };
 }
 
-// @internal
+// @public
 export interface CommandPaletteSlots {
     readonly Empty: (props: {
         readonly message: string;
@@ -499,7 +499,7 @@ export interface CommandPaletteSlots {
     readonly Surface: (props: CommandPaletteSurfaceProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface CommandPaletteSurfaceProps {
     readonly children: ReactNode;
     readonly className?: string;
@@ -507,13 +507,13 @@ export interface CommandPaletteSurfaceProps {
     readonly onClose: () => void;
 }
 
-// @internal
+// @public
 export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolean): void;
 
-// @internal
+// @public
 export function ContextMenuChrome(props: Readonly<ContextMenuChromeProps>): JSX.Element | null;
 
-// @internal
+// @public
 export interface ContextMenuChromeProps {
     at: ContextMenuPoint | null;
     className?: string;
@@ -524,20 +524,20 @@ export interface ContextMenuChromeProps {
     slots: ContextMenuSlots;
 }
 
-// @internal
+// @public
 export interface ContextMenuItemProps {
     readonly item: ContextMenuItem;
     readonly onSelect: () => void;
 }
 
-// @internal
+// @public
 export interface ContextMenuSlots {
     readonly Item: (props: ContextMenuItemProps) => ReactNode;
     readonly Separator: () => ReactNode;
     readonly Surface: (props: ContextMenuSurfaceProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface ContextMenuSurfaceProps {
     readonly anchorRef: RefObject<HTMLElement | null>;
     readonly at: ContextMenuPoint;
@@ -548,10 +548,10 @@ export interface ContextMenuSurfaceProps {
     readonly onClose: () => void;
 }
 
-// @internal
+// @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
 
-// @internal
+// @public
 export type DataModeProps<TRow> = {
     mode: "server";
     onQueryChange: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
@@ -560,7 +560,7 @@ export type DataModeProps<TRow> = {
     onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
 };
 
-// @internal
+// @public
 export type DataTableShellProps<TRow> = Omit<BaseDataTableProps<TRow>, "source"> & {
     source?: TableSource<TRow>;
     data?: readonly TRow[];
@@ -575,35 +575,35 @@ export type DataTableShellProps<TRow> = Omit<BaseDataTableProps<TRow>, "source">
     facets?: FacetMap;
 } & DataModeProps<TRow>;
 
-// @internal
+// @public
 export const DEFAULT_CARD_SIZE_PX = 132;
 
-// @internal
+// @public
 export function deriveSortByOptions<TRow>(columns: readonly ColumnDef<TRow>[]): SortByOption[];
 
-// @internal
+// @public
 export const DESKTOP_ACTIONS_WIDTH = 120;
 
-// @internal
+// @public
 export const DESKTOP_EXPANSION_WIDTH = 32;
 
-// @internal
+// @public
 export const DESKTOP_SELECTION_WIDTH = 48;
 
-// @internal
+// @public
 export interface DesktopAssemblyOptions {
     widths?: DesktopChromeWidths;
 }
 
-// @internal
+// @public
 export type DesktopAssemblyProps<TRow> = SharedTableRenderProps<TRow> & {
     actionsPinned?: boolean;
 };
 
-// @internal
+// @public
 export type DesktopBodySlot<TRow> = DesktopExtraSlot | DesktopVirtualPadSlot | DesktopGroupSlot<TRow> | DesktopRowSlot<TRow>;
 
-// @internal
+// @public
 export interface DesktopChromeWidths {
     actions?: number;
     expansion?: number;
@@ -611,7 +611,7 @@ export interface DesktopChromeWidths {
     selection?: number;
 }
 
-// @internal
+// @public
 export interface DesktopExtraSlot {
     colSpan: number;
     extraKind: "separator" | "fullWidth";
@@ -621,19 +621,19 @@ export interface DesktopExtraSlot {
     render?: () => ReactNode;
 }
 
-// @internal
+// @public
 export type DesktopGroupEntry<TRow> = Extract<GroupedFlatEntry<TRow>, {
     kind: "group" | "groupFooter" | "groupMore";
 }>;
 
-// @internal
+// @public
 export interface DesktopGroupSlot<TRow> {
     entry: DesktopGroupEntry<TRow>;
     key: string;
     kind: "group";
 }
 
-// @internal
+// @public
 export interface DesktopHeaderLeaf<TRow> {
     caption: ReactNode;
     column: ColumnDef<TRow>;
@@ -656,14 +656,14 @@ export interface DesktopHeaderLeaf<TRow> {
     style: CSSProperties;
 }
 
-// @internal
+// @public
 export interface DesktopRowSlot<TRow> {
     key: string;
     kind: "row";
     wiring: DesktopRowWiring<TRow>;
 }
 
-// @internal
+// @public
 export interface DesktopRowWiring<TRow> {
     actionsPinned: boolean;
     bodyCells: readonly BodyCell<TRow>[];
@@ -735,7 +735,7 @@ export interface DesktopRowWiring<TRow> {
     windowStart: number;
 }
 
-// @internal
+// @public
 export interface DesktopTableAssembly<TRow> {
     bodySlots: readonly DesktopBodySlot<TRow>[];
     callbacks: {
@@ -783,7 +783,7 @@ export interface DesktopTableAssembly<TRow> {
     };
 }
 
-// @internal
+// @public
 export interface DesktopTablePin {
     edgeBodyStyle: (side: "start" | "end", active: boolean) => CSSProperties | undefined;
     edgeHeadStyle: (side: "start" | "end", active: boolean) => CSSProperties | undefined;
@@ -809,7 +809,7 @@ export interface DesktopTablePin {
     stickyStyle: CSSProperties | undefined;
 }
 
-// @internal
+// @public
 export interface DesktopVirtualPadSlot {
     colSpan: number;
     height: number;
@@ -817,7 +817,7 @@ export interface DesktopVirtualPadSlot {
     kind: "virtualPad";
 }
 
-// @internal
+// @public
 export interface EditableCellActivateProps {
     readonly activateRef: (node: HTMLButtonElement | null) => void;
     readonly className?: string;
@@ -839,7 +839,7 @@ export interface EditableCellActivateProps {
     readonly title: string;
 }
 
-// @internal
+// @public
 export interface EditableCellButtonProps {
     readonly className?: string;
     readonly label: string;
@@ -852,20 +852,20 @@ export interface EditableCellButtonProps {
     readonly part: string;
 }
 
-// @internal
+// @public
 export interface EditableCellSlots {
     readonly Activate: (props: EditableCellActivateProps) => ReactNode;
     readonly Button: (props: EditableCellButtonProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
     "aria-busy"?: true;
     "aria-describedby"?: string;
     "data-conflict"?: "";
 };
 
-// @internal
+// @public
 export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
     "aria-invalid"?: true;
     "aria-describedby"?: string;
@@ -873,24 +873,24 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
     "data-conflict"?: "";
 };
 
-// @internal
+// @public
 export function ExpandChevron(input: Readonly<{
     open: boolean;
     dir?: "rtl" | "ltr";
 }>): ReactElement;
 
-// @internal
+// @public
 export function ExportAnnouncer(input: Readonly<ExportAnnouncerProps>): ReactElement;
 
-// @internal
+// @public
 export interface ExportAnnouncerProps {
     announcement: string;
 }
 
-// @internal
+// @public
 export function exportButtonLabel(labels: TableLabels | undefined, format: string): string;
 
-// @internal
+// @public
 export interface ExportHandlerState {
     exportAnnouncement: string;
     exportBusy: boolean;
@@ -899,16 +899,16 @@ export interface ExportHandlerState {
     onExportCsv: (() => void) | undefined;
 }
 
-// @internal
+// @public
 export type ExportStatus = "idle" | "busy" | "done" | "failed";
 
-// @internal
+// @public
 export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties;
 
-// @internal
+// @public
 export const EXTRA_OVER_SPAN_STYLE: CSSProperties;
 
-// @internal
+// @public
 export const EXTRA_ROW_PARTS: {
     readonly separator: {
         readonly row: "separator-row";
@@ -920,10 +920,10 @@ export const EXTRA_ROW_PARTS: {
     };
 };
 
-// @internal
+// @public
 export function extraCountBeforeRowIds(extraRows: readonly ExtraRow[] | undefined, ids: ReadonlySet<string>): number;
 
-// @internal
+// @public
 export function extraCoveredTableSlots(beforeRowId: string, options: {
     visualIds: readonly string[];
     cellsByRow: ReadonlyMap<string, readonly {
@@ -935,7 +935,7 @@ export function extraCoveredTableSlots(beforeRowId: string, options: {
     leadingCells: number;
 }): ReadonlySet<number>;
 
-// @internal
+// @public
 export type ExtraEntry = {
     kind: "separator";
     key: string;
@@ -945,7 +945,7 @@ export type ExtraEntry = {
     render?: () => ReactNode;
 };
 
-// @internal
+// @public
 export function extraHostFillStyle<TRow>(extraKey: string, extraRows: readonly ExtraRow[] | undefined, rows: readonly TRow[], getRowId: (row: TRow) => string, rowStyle: RowStyle<TRow> | undefined): CSSProperties | undefined;
 
 // @public
@@ -956,40 +956,40 @@ export interface ExtraRow {
     render?: () => ReactNode;
 }
 
-// @internal
+// @public
 export function extraRowsForSection(extraRows: readonly ExtraRow[] | undefined, rowIds: ReadonlySet<string>, appendUntargeted?: boolean): readonly ExtraRow[] | undefined;
 
-// @internal
+// @public
 export function extraUncoveredColSpans(columnSpan: number, coveredSlots: ReadonlySet<number> | undefined): readonly number[];
 
-// @internal
+// @public
 export function EyeIcon(input: Readonly<{
     off?: boolean;
 }>): ReactElement;
 
-// @internal
+// @public
 export function featureHostOf(props: object): FeatureHostState | undefined;
 
-// @internal
+// @public
 export function FeatureHostProvider(input: Readonly<{
     host: FeatureHostState | undefined;
     children: ReactNode;
 }>): JSX.Element;
 
-// @internal
+// @public
 export interface FeatureNotice {
     readonly appearance: FeatureNoticeAppearance;
     readonly kind: FeatureNoticeKind;
     readonly message: string;
 }
 
-// @internal
+// @public
 export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "reorder-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
 
-// @internal
+// @public
 export function FillHandleChrome(input: Readonly<FillHandleChromeProps>): ReactNode;
 
-// @internal
+// @public
 export interface FillHandleChromeProps {
     readonly className?: string;
     readonly col: number;
@@ -999,33 +999,33 @@ export interface FillHandleChromeProps {
     readonly windowIndex: number;
 }
 
-// @internal
+// @public
 export interface FillHandleSlotProps {
     readonly className?: string;
     readonly handleProps: Readonly<Record<string, unknown>>;
     readonly label: string;
 }
 
-// @internal
+// @public
 export interface FillHandleSlots {
     readonly Handle: (props: FillHandleSlotProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): ReactNode;
 
-// @internal
+// @public
 export function filterColumnMenuRows<TRow>(rows: readonly ColumnMenuRow<TRow>[], query: string): ColumnMenuRow<TRow>[];
 
-// @internal
+// @public
 export function FilterHeaderChrome<TRow>(input: Readonly<FilterHeaderChromeProps<TRow>>): ReactElement | null;
 
-// @internal
+// @public
 export interface FilterHeaderChromeProps<TRow> extends FilterHeaderRowProps<TRow> {
     readonly slots: FilterHeaderSlots;
 }
 
-// @internal
+// @public
 export interface FilterHeaderClassNames {
     actionsHeader?: string;
     expandHeader?: string;
@@ -1038,15 +1038,15 @@ export interface FilterHeaderClassNames {
     selectionHeader?: string;
 }
 
-// @internal
+// @public
 export function FilterHeaderControlChrome<TRow>(input: Readonly<FilterHeaderControlChromeProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface FilterHeaderControlChromeProps<TRow> extends FilterHeaderControlProps<TRow> {
     readonly slots: FilterHeaderSlots;
 }
 
-// @internal
+// @public
 export interface FilterHeaderControlProps<TRow> {
     readonly className?: string;
     readonly closeOnSelect?: boolean;
@@ -1056,7 +1056,7 @@ export interface FilterHeaderControlProps<TRow> {
     readonly source: FilterFormSource<TRow>;
 }
 
-// @internal
+// @public
 export interface FilterHeaderMultiProps {
     readonly className?: string;
     readonly label: string;
@@ -1067,13 +1067,13 @@ export interface FilterHeaderMultiProps {
     readonly summary: string;
 }
 
-// @internal
+// @public
 export interface FilterHeaderOption {
     readonly label: string;
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterHeaderRangeProps {
     readonly label: string;
     readonly onChange: (value: string) => void;
@@ -1081,7 +1081,7 @@ export interface FilterHeaderRangeProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterHeaderRowProps<TRow> {
     readonly cellStyle?: (column: ColumnDef<TRow>) => CSSProperties | undefined;
     readonly classNames?: FilterHeaderClassNames;
@@ -1104,7 +1104,7 @@ export interface FilterHeaderRowProps<TRow> {
     readonly stickyAttr?: true;
 }
 
-// @internal
+// @public
 export interface FilterHeaderSearchProps {
     readonly className?: string;
     readonly label: string;
@@ -1113,7 +1113,7 @@ export interface FilterHeaderSearchProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterHeaderSelectProps {
     readonly className?: string;
     readonly label: string;
@@ -1122,7 +1122,7 @@ export interface FilterHeaderSelectProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterHeaderSlots {
     readonly Multi: (props: FilterHeaderMultiProps) => ReactNode;
     readonly Range: (props: FilterHeaderRangeProps) => ReactNode;
@@ -1130,10 +1130,10 @@ export interface FilterHeaderSlots {
     readonly Select: (props: FilterHeaderSelectProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function FiltersIcon(): ReactElement;
 
-// @internal
+// @public
 export interface FilterTreeBuilderProps<TRow> {
     readonly classNames?: FilterTreeClassNames;
     readonly defaultExpanded?: boolean;
@@ -1143,7 +1143,7 @@ export interface FilterTreeBuilderProps<TRow> {
     readonly source: Pick<TableSource<TRow>, "filterTree" | "setFilterTree">;
 }
 
-// @internal
+// @public
 export interface FilterTreeButtonProps {
     readonly className?: string;
     readonly label: string;
@@ -1151,15 +1151,15 @@ export interface FilterTreeButtonProps {
     readonly part?: string;
 }
 
-// @internal
+// @public
 export function FilterTreeChrome<TRow>(input: Readonly<FilterTreeChromeProps<TRow>>): JSX.Element | null;
 
-// @internal
+// @public
 export interface FilterTreeChromeProps<TRow> extends FilterTreeBuilderProps<TRow> {
     readonly slots: FilterTreeSlots;
 }
 
-// @internal
+// @public
 export interface FilterTreeClassNames {
     filterField?: string;
     filterInput?: string;
@@ -1175,7 +1175,7 @@ export interface FilterTreeClassNames {
     filterTreeSummary?: string;
 }
 
-// @internal
+// @public
 export interface FilterTreeDisclosureProps {
     readonly children: ReactNode;
     readonly className?: string;
@@ -1185,7 +1185,7 @@ export interface FilterTreeDisclosureProps {
     readonly summaryClassName?: string;
 }
 
-// @internal
+// @public
 export interface FilterTreeInputProps {
     readonly className?: string;
     readonly fieldClassName?: string;
@@ -1196,13 +1196,13 @@ export interface FilterTreeInputProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterTreeOption {
     readonly label: string;
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterTreeSelectProps {
     readonly className?: string;
     readonly fieldClassName?: string;
@@ -1214,7 +1214,7 @@ export interface FilterTreeSelectProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface FilterTreeSlots {
     readonly Button: (props: FilterTreeButtonProps) => ReactNode;
     readonly Disclosure: (props: FilterTreeDisclosureProps) => ReactNode;
@@ -1228,31 +1228,31 @@ export interface FilterTriggerToggle {
     onPointerDown: () => void;
 }
 
-// @internal
+// @public
 export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement | null;
 
-// @internal
+// @public
 export interface FindBarChromeProps extends FindBarProps {
     readonly slots: FindBarSlots;
 }
 
-// @internal
+// @public
 export interface FindBarProps {
     className?: string;
     find: FindInTableState;
     labels?: TableLabels;
 }
 
-// @internal
+// @public
 export interface FindBarSlots {
     readonly Button: (props: FindButtonProps) => ReactNode;
     readonly Search: (props: FindSearchProps) => ReactNode;
 }
 
-// @internal
+// @public
 export type FindButtonKind = "previous" | "next" | "close";
 
-// @internal
+// @public
 export interface FindButtonProps {
     readonly disabled?: boolean;
     readonly kind: FindButtonKind;
@@ -1261,7 +1261,7 @@ export interface FindButtonProps {
     readonly part: string;
 }
 
-// @internal
+// @public
 export interface FindSearchProps {
     readonly focusRef: (node: {
         focus: () => void;
@@ -1273,18 +1273,18 @@ export interface FindSearchProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export function fittedTableStyle(fitColumns?: boolean): CSSProperties | undefined;
 
-// @internal
+// @public
 export function flattenColumnTree<TRow>(columns: readonly ColumnInput<TRow>[]): FlattenedColumns<TRow>;
 
-// @internal
+// @public
 export function focusEditorOnMount(node: {
     focus: () => void;
 } | null): void;
 
-// @internal
+// @public
 export interface FullscreenState {
     active: boolean;
     container: HTMLElement | undefined;
@@ -1293,27 +1293,27 @@ export interface FullscreenState {
     toggle: () => void;
 }
 
-// @internal
+// @public
 export function GridFocusAnnouncer(input: Readonly<GridFocusAnnouncerProps>): ReactElement | null;
 
-// @internal
+// @public
 export interface GridFocusAnnouncerProps {
     focus: GridFocusState;
 }
 
-// @internal
+// @public
 export function GripIcon(): ReactElement;
 
-// @internal
+// @public
 export function groupedHeaderAlign(align?: GroupedHeaderAlign): GroupedHeaderAlign;
 
-// @internal
+// @public
 export function groupedHeaderCellStyle(cell: Readonly<{
     rowSpan: number;
     cell: HeaderGroupCell;
 }>, hairline: string): CSSProperties;
 
-// @internal
+// @public
 export function groupedHeaderChildRule(hairline: string): {
     readonly borderBottom: string;
     readonly backgroundImage: string;
@@ -1322,21 +1322,21 @@ export function groupedHeaderChildRule(hairline: string): {
     readonly backgroundSize: string;
 };
 
-// @internal
+// @public
 export function groupedHeaderLabelStyle(): CSSProperties;
 
-// @internal
+// @public
 export function groupIndentStyle(level: number): CSSProperties;
 
-// @internal
+// @public
 export function GroupMoreButtonChrome(input: Readonly<GroupMoreButtonChromeProps>): ReactElement;
 
-// @internal
+// @public
 export interface GroupMoreButtonChromeProps extends GroupMoreButtonProps {
     readonly slots: GroupMoreButtonSlots;
 }
 
-// @internal
+// @public
 export interface GroupMoreButtonProps {
     groupKey?: string;
     labels: Required<TableLabels>;
@@ -1348,21 +1348,21 @@ export interface GroupMoreButtonProps {
     scope: "groups" | "rows";
 }
 
-// @internal
+// @public
 export interface GroupMoreButtonSlotProps {
     readonly label: string;
     readonly onClick: () => void;
 }
 
-// @internal
+// @public
 export interface GroupMoreButtonSlots {
     readonly Button: (props: GroupMoreButtonSlotProps) => ReactNode;
 }
 
-// @internal
+// @public
 export type GroupRowKind = "group" | "groupFooter" | "groupMore";
 
-// @internal
+// @public
 export function groupRowParts(kind: GroupRowKind): {
     row: string;
     cell: string;
@@ -1370,13 +1370,13 @@ export function groupRowParts(kind: GroupRowKind): {
     label: string;
 };
 
-// @internal
+// @public
 export function GroupToggleSpacer(): ReactElement;
 
 // @internal
 export function hasActiveHeaderFilter<TRow>(props: Readonly<Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">>): boolean;
 
-// @internal
+// @public
 export interface HeaderGroupCell {
     align?: GroupedHeaderAlign;
     collapsed: boolean;
@@ -1388,18 +1388,18 @@ export interface HeaderGroupCell {
     span: number;
 }
 
-// @internal
+// @public
 export function headerGroupRow<TRow>(columns: readonly ColumnDef<TRow>[]): HeaderGroupCell[] | null;
 
-// @internal
+// @public
 export function headerGroupRows<TRow>(columns: readonly ColumnDef<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
     readonly align?: GroupedHeaderAlign;
 }>): HeaderGroupCell[][] | null;
 
-// @internal
+// @public
 export function hideAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
-// @internal
+// @public
 export type HtmlGroupedHeaderCell = {
     readonly kind: "group";
     readonly key: string;
@@ -1413,51 +1413,51 @@ export type HtmlGroupedHeaderCell = {
     readonly rowSpan: number;
 };
 
-// @internal
+// @public
 export function htmlGroupedHeaderPlan<TRow>(columns: readonly ColumnDef<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
     readonly align?: GroupedHeaderAlign;
 }>): HtmlGroupedHeaderCell[][] | null;
 
-// @internal
+// @public
 export function inflateBodyCellRowSpans<TCell extends {
     columnIndex: number;
     colSpan: number;
     rowSpan: number;
 }>(cellsByRow: ReadonlyMap<string, readonly TCell[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined): ReadonlyMap<string, readonly TCell[]>;
 
-// @internal
+// @public
 export function insertExtraRows<T extends {
     key: string;
 }>(entries: readonly T[], extraRows: readonly ExtraRow[] | undefined, dataKey: (entry: T) => string | undefined): readonly (T | ExtraEntry)[];
 
-// @internal
+// @public
 export function insertExtrasBeforeRows<TRow>(rows: readonly TRow[], extraRows: readonly ExtraRow[] | undefined, getRowId: (row: TRow) => string): readonly ({
     key: string;
     row: TRow;
 } | ExtraEntry)[];
 
-// @internal
+// @public
 export function isColumnGroupRenderKey(key: string): boolean;
 
-// @internal
+// @public
 export function isColumnGroupStubKey(key: string): boolean;
 
-// @internal
+// @public
 export function isColumnGroupSummaryKey(key: string): boolean;
 
-// @internal
+// @public
 export function isCurrentMatchCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
-// @internal
+// @public
 export function isExtraEntry(entry: object): entry is ExtraEntry;
 
-// @internal
+// @public
 export function isMatchedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
-// @internal
+// @public
 export function isSelectedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
-// @internal
+// @public
 export interface KeyedVirtualization {
     enabled: boolean;
     indices: readonly number[];
@@ -1466,55 +1466,55 @@ export interface KeyedVirtualization {
     paddingTop: number;
 }
 
-// @internal
+// @public
 export function LiveRegion(input: Readonly<LiveRegionProps>): ReactElement;
 
-// @internal
+// @public
 export interface LiveRegionProps {
     children: string;
     part: string;
     statusRole?: boolean;
 }
 
-// @internal
+// @public
 export function logicalAlign(align: ColumnDef<unknown>["align"]): "start" | "center" | "end";
 
-// @internal
+// @public
 export function mergedCellStyle(colSpan: number, rowSpan: number, appearance?: CellSpanAppearance, fill?: "on" | "off"): CSSProperties | undefined;
 
-// @internal
+// @public
 export function mobileCardListStyle(maxHeight: number | undefined): CSSProperties | undefined;
 
-// @internal
+// @public
 export interface MountStaggerOptions {
     duration?: number;
     enabled: boolean;
     step?: number;
 }
 
-// @internal
+// @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;
 
-// @internal
+// @public
 export function nestedTableDefaults(label: string, parent?: NestedTableParent): NestedTableDefaults;
 
-// @internal
+// @public
 export function nestedTableDetail<TRow>(options: {
     nestedTable: NestedTableFor<TRow> | undefined;
     renderRowDetail?: (row: TRow) => ReactNode;
     parent?: NestedTableParent;
 }): ((row: TRow) => ReactNode) | undefined;
 
-// @internal
+// @public
 export interface NestedTableParent {
     density?: Density;
     labels?: TableLabels;
 }
 
-// @internal
+// @public
 export function nextPinSide(current: PinnedSide): PinnedSide;
 
-// @internal
+// @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[]): readonly VirtualTableRow<TRow>[];
 
 // @internal
@@ -1531,28 +1531,28 @@ export interface OverlayTransition {
     state: "open" | "closed";
 }
 
-// @internal
+// @public
 export type PaginationItem = number | "ellipsis";
 
-// @internal
+// @public
 export function paginationItems(page: number, totalPages: number, siblings?: number): PaginationItem[];
 
-// @internal
+// @public
 export interface PaginationSlot {
     item: PaginationItem;
     key: string;
 }
 
-// @internal
+// @public
 export function paginationSlots(page: number, totalPages: number, siblings?: number): PaginationSlot[];
 
-// @internal
+// @public
 export function pinActionLabel(current: PinnedSide, labels: {
     pinStart: string;
     unpin: string;
 }): string;
 
-// @internal
+// @public
 export function PinIcon(): ReactElement;
 
 // @public
@@ -1561,10 +1561,10 @@ export interface PinLeads {
     start?: number;
 }
 
-// @internal
+// @public
 export const PINNED_BOTTOM_PART = "pinned-bottom";
 
-// @internal
+// @public
 export const PINNED_TOP_PART = "pinned-top";
 
 // @public
@@ -1575,16 +1575,16 @@ export interface PinnedCellStyle {
     zIndex: number;
 }
 
-// @internal
+// @public
 export function pinnedColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number;
 
-// @internal
+// @public
 export function pinnedDataCellStyle(pin: PinOffset | undefined, z: number, leads: PinLeads, bg: string): CSSProperties | undefined;
 
-// @internal
+// @public
 export function pinnedEdgeCellStyle(side: PinSide, active: boolean, z: number, bg: string, shift?: number): CSSProperties | undefined;
 
-// @internal
+// @public
 export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx: number, columnPinned: boolean): {
     position?: "sticky";
     top?: number;
@@ -1592,13 +1592,13 @@ export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx:
     zIndex?: number;
 };
 
-// @internal
+// @public
 export function pinnedRowPart(side: RowPinSide | undefined): typeof PINNED_TOP_PART | typeof PINNED_BOTTOM_PART | undefined;
 
-// @internal
+// @public
 export function pinnedRowSticky(side: RowPinSide | undefined, sticky: boolean, headerOffsetPx: number): ReturnType<typeof pinnedRowStickyStyle> | undefined;
 
-// @internal
+// @public
 export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): {
     position: "sticky";
     top?: number;
@@ -1615,14 +1615,14 @@ export interface PinOffset {
     side: PinSide;
 }
 
-// @internal
+// @public
 export interface PivotAddProps {
     readonly label: string;
     readonly onAdd: (key: string) => void;
     readonly options: readonly PivotField[];
 }
 
-// @internal
+// @public
 export interface PivotAggProps {
     readonly label: string;
     readonly onChange: (next: AggregateName) => void;
@@ -1630,7 +1630,7 @@ export interface PivotAggProps {
     readonly value: AggregateName;
 }
 
-// @internal
+// @public
 export interface PivotFieldProps {
     readonly "data-adapttable-part": "pivot-field";
     readonly aggregation?: ReactNode;
@@ -1643,10 +1643,10 @@ export interface PivotFieldProps {
     readonly removeLabel: string;
 }
 
-// @internal
+// @public
 export function PivotPanelChrome(input: Readonly<PivotPanelChromeProps>): JSX.Element;
 
-// @internal
+// @public
 export interface PivotPanelChromeProps {
     className?: string;
     config: PivotConfig;
@@ -1656,7 +1656,7 @@ export interface PivotPanelChromeProps {
     slots: PivotPanelSlots;
 }
 
-// @internal
+// @public
 export interface PivotPanelSlots {
     readonly Add: (props: PivotAddProps) => ReactNode;
     readonly Agg: (props: PivotAggProps) => ReactNode;
@@ -1665,14 +1665,14 @@ export interface PivotPanelSlots {
     readonly Zone: (props: PivotZoneProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface PivotPanelSurfaceProps {
     readonly "data-adapttable-part": "pivot-panel";
     readonly children: ReactNode;
     readonly className?: string;
 }
 
-// @internal
+// @public
 export interface PivotZoneProps {
     readonly "data-adapttable-part": "pivot-zone";
     readonly children: ReactNode;
@@ -1680,57 +1680,57 @@ export interface PivotZoneProps {
     readonly zone: PivotZone;
 }
 
-// @internal
+// @public
 export function printToolbar(wanted: boolean | undefined, onPrint: (() => void) | undefined, labels: TableLabels): PrintToolbar;
 
-// @internal
+// @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
 
-// @internal
+// @public
 export const REORDER_COLUMN_WIDTH = 40;
 
-// @internal
+// @public
 export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseColumnLayoutResult<TRow>): void;
 
-// @internal
+// @public
 export interface ResizableVirtualizer {
     resizeItem: (index: number, size: number) => void;
 }
 
-// @internal
+// @public
 export function resolveContextTarget<TRow>(from: Element, rowFor: (rowId: string) => TRow | undefined): ResolvedContextTarget<TRow> | null;
 
-// @internal
+// @public
 export interface ResolvedContextTarget<TRow> {
     element: HTMLElement;
     target: ContextMenuTarget<TRow>;
 }
 
-// @internal
+// @public
 export function resolveDisabledReason(reason: string | undefined): string | undefined;
 
-// @internal
+// @public
 export function resolveMobileLabel<TRow>(column: ColumnDef<TRow>): string | undefined;
 
-// @internal
+// @public
 export function resolveRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): number | undefined;
 
-// @internal
+// @public
 export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CSSProperties | undefined;
 
-// @internal
+// @public
 export function resolveStickyToolbar(stickyHeader?: boolean, stickyToolbar?: boolean, inScrollBox?: boolean): boolean;
 
-// @internal
+// @public
 export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
 
-// @internal
+// @public
 export const ROW_DND_MIME = "application/x-adapttable-row";
 
-// @internal
+// @public
 export const ROW_ID_ATTRIBUTE = "data-row-id";
 
-// @internal
+// @public
 export interface RowClickProps {
     "data-adapttable-row": "";
     onClick: (event: MouseEvent_2<HTMLElement>) => void;
@@ -1741,29 +1741,29 @@ export interface RowClickProps {
     tabIndex: 0 | -1;
 }
 
-// @internal
+// @public
 export function rowClickProps<TRow>(row: TRow, onRowClick: ((row: TRow) => void) | undefined, index?: number): RowClickProps | undefined;
 
-// @internal
+// @public
 export function RowEditActionsChrome<TRow>(input: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface RowEditActionsChromeProps<TRow> extends RowEditActionsProps<TRow> {
     readonly slots: RowEditActionsSlots;
 }
 
-// @internal
+// @public
 export interface RowEditActionsProps<TRow> extends RowEditControlsOptions<TRow> {
     buttonClassName?: string;
     className?: string;
 }
 
-// @internal
+// @public
 export interface RowEditActionsSlots {
     readonly Button: (props: RowEditButtonProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface RowEditButtonProps {
     readonly className?: string;
     readonly label: string;
@@ -1773,10 +1773,10 @@ export interface RowEditButtonProps {
     readonly part: string;
 }
 
-// @internal
+// @public
 export function RowEditCell<TRow>(input: Readonly<RowEditCellProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface RowEditCellProps<TRow> {
     column: EditableColumnLike<TRow>;
     display: ReactElement | string | number | null;
@@ -1786,7 +1786,7 @@ export interface RowEditCellProps<TRow> {
     takesFocus: boolean;
 }
 
-// @internal
+// @public
 export interface RowEditControls {
     begin: () => void;
     cancel: () => void;
@@ -1798,10 +1798,10 @@ export interface RowEditControls {
     saveLabel: string;
 }
 
-// @internal
+// @public
 export function rowEditControls<TRow>(input: Readonly<RowEditControlsOptions<TRow>>): RowEditControls;
 
-// @internal
+// @public
 export interface RowEditControlsOptions<TRow> {
     labels?: TableLabels;
     row: TRow;
@@ -1809,10 +1809,10 @@ export interface RowEditControlsOptions<TRow> {
     rowId: string;
 }
 
-// @internal
+// @public
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
-// @internal
+// @public
 export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
     readonly key: string;
 }[]): string;
@@ -1820,7 +1820,7 @@ export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: st
 // @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 
-// @internal
+// @public
 export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
 
 // @public
@@ -1829,23 +1829,23 @@ export interface RowPairMeasurer {
     row: (index: number) => (node: Element | null) => void;
 }
 
-// @internal
+// @public
 export function rowPinSignature(pinning: Pick<RowPinningState<unknown>, "sideOf"> | undefined, rowId: string): string | null;
 
-// @internal
+// @public
 export function RowReorderAnnouncer(props: Readonly<{
     announcement: string;
 }>): ReactElement;
 
-// @internal
+// @public
 export function RowReorderButtonsChrome<TRow>(input: Readonly<RowReorderButtonsChromeProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface RowReorderButtonsChromeProps<TRow> extends RowReorderButtonsProps<TRow> {
     readonly slots: RowReorderButtonsSlots;
 }
 
-// @internal
+// @public
 export interface RowReorderButtonsProps<TRow> {
     className?: string;
     downClassName?: string;
@@ -1858,26 +1858,26 @@ export interface RowReorderButtonsProps<TRow> {
     windowStart: number;
 }
 
-// @internal
+// @public
 export interface RowReorderButtonsSlots {
     readonly Button: (props: RowReorderMoveButtonProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function rowReorderDropStyle(attrs: {
     "data-dragging"?: "";
     "data-drop"?: "before" | "after";
 } | undefined): CSSProperties;
 
-// @internal
+// @public
 export function RowReorderHandleChrome<TRow>(input: Readonly<RowReorderHandleChromeProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface RowReorderHandleChromeProps<TRow> extends RowReorderHandleProps<TRow> {
     readonly slots: RowReorderHandleSlots;
 }
 
-// @internal
+// @public
 export interface RowReorderHandleProps<TRow> {
     className?: string;
     labels: RowReorderLabels;
@@ -1889,7 +1889,7 @@ export interface RowReorderHandleProps<TRow> {
     windowStart: number;
 }
 
-// @internal
+// @public
 export interface RowReorderHandleSlotProps {
     readonly className?: string;
     readonly dragging: boolean;
@@ -1899,12 +1899,12 @@ export interface RowReorderHandleSlotProps {
     readonly pressed: boolean;
 }
 
-// @internal
+// @public
 export interface RowReorderHandleSlots {
     readonly Handle: (props: RowReorderHandleSlotProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface RowReorderMoveButtonProps {
     readonly className?: string;
     readonly disabled: boolean;
@@ -1913,10 +1913,10 @@ export interface RowReorderMoveButtonProps {
     readonly part: string;
 }
 
-// @internal
+// @public
 export function rowReorderSignature<TRow>(reorder: RowReorderState<TRow> | undefined, rowId: string, localIndex: number): string | null;
 
-// @internal
+// @public
 export interface RowReorderState<TRow> {
     announcement: string;
     dragProps: (rowId: string, localIndex: number) => {
@@ -1942,22 +1942,22 @@ export interface RowReorderState<TRow> {
     };
 }
 
-// @internal
+// @public
 export function rowSourceIndex(entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">): number;
 
-// @internal
+// @public
 export function rowSpanSignature<TRow>(cells: readonly BodyCell<TRow>[] | undefined): string;
 
 // @public
 export type RowStyle<TRow> = (row: TRow, index: number) => CSSProperties | undefined;
 
-// @internal
+// @public
 export function rowStyleSignature(style: CSSProperties | undefined): string;
 
-// @internal
+// @public
 export type SavedViewControlKey = "rename" | "moveUp" | "moveDown" | "default" | "remove";
 
-// @internal
+// @public
 export interface SavedViewRowControl {
     readonly danger?: boolean;
     readonly icon: ReactNode;
@@ -1967,10 +1967,10 @@ export interface SavedViewRowControl {
     readonly pressed?: boolean;
 }
 
-// @internal
+// @public
 export function SavedViewsPanelChrome(input: Readonly<SavedViewsPanelChromeProps>): JSX.Element;
 
-// @internal
+// @public
 export interface SavedViewsPanelChromeProps {
     className?: string;
     footer?: ReactNode;
@@ -1984,12 +1984,12 @@ export interface SavedViewsPanelChromeProps {
     views: readonly SavedView[];
 }
 
-// @internal
+// @public
 export interface SavedViewsPanelEmptyProps {
     readonly message: string;
 }
 
-// @internal
+// @public
 export interface SavedViewsPanelInputProps {
     readonly label: string;
     readonly onCancel: () => void;
@@ -1999,7 +1999,7 @@ export interface SavedViewsPanelInputProps {
     readonly value: string;
 }
 
-// @internal
+// @public
 export interface SavedViewsPanelRowProps {
     readonly "data-adapttable-part": "saved-view-row";
     readonly applyLabel: string;
@@ -2020,7 +2020,7 @@ export interface SavedViewsPanelRowProps {
     readonly viewName: string;
 }
 
-// @internal
+// @public
 export interface SavedViewsPanelSlots {
     readonly Empty: (props: SavedViewsPanelEmptyProps) => ReactNode;
     readonly Input: (props: SavedViewsPanelInputProps) => ReactNode;
@@ -2028,7 +2028,7 @@ export interface SavedViewsPanelSlots {
     readonly Surface: (props: SavedViewsPanelSurfaceProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface SavedViewsPanelSurfaceProps {
     readonly "data-adapttable-part": "saved-views-panel";
     readonly children: ReactNode;
@@ -2037,7 +2037,7 @@ export interface SavedViewsPanelSurfaceProps {
     readonly title: string;
 }
 
-// @internal
+// @public
 export function SearchIcon(): ReactElement;
 
 // @public
@@ -2046,16 +2046,16 @@ export interface SearchInputState {
     value: string;
 }
 
-// @internal
+// @public
 export interface SelectionStatPart {
     readonly key: "count" | "sum" | "average" | "min" | "max";
     readonly text: string;
 }
 
-// @internal
+// @public
 export function SelectionStatsChrome(input: Readonly<SelectionStatsChromeProps>): ReactNode;
 
-// @internal
+// @public
 export interface SelectionStatsChromeProps {
     className?: string;
     labels?: TableLabels;
@@ -2064,24 +2064,24 @@ export interface SelectionStatsChromeProps {
     stats: SelectionStats | null;
 }
 
-// @internal
+// @public
 export interface SelectionStatsSlotProps {
     readonly className?: string;
     readonly parts: readonly SelectionStatPart[];
 }
 
-// @internal
+// @public
 export interface SelectionStatsSlots {
     readonly Stats: (props: SelectionStatsSlotProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function shallowEqualByKeys<T>(keys: readonly (keyof T)[], prev: Readonly<T>, next: Readonly<T>): boolean;
 
-// @internal
+// @public
 export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected", "expanded", "size", "dir", "columns", "columnWidths", "pinSignature", "className", "labels", "hasSelection", "expandable", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "spanSignature", "hasRowClick", "columnSpan", "gridFocus", "treeEntry", "treeColumnKey", "rowActionsLayout", "renderRowActions", "cellSpanAppearance"];
 
-// @internal
+// @public
 export interface SharedTableRenderProps<TRow> {
     cardSetSize?: number;
     cellSpanAppearance?: CellSpanAppearance;
@@ -2157,13 +2157,13 @@ export interface SharedTableRenderProps<TRow> {
     windowStart?: number;
 }
 
-// @internal
+// @public
 export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
-// @internal
+// @public
 export function SidePanelChrome(props: Readonly<SidePanelChromeProps>): JSX.Element | null;
 
-// @internal
+// @public
 export interface SidePanelChromeProps {
     className?: string;
     idPrefix?: string;
@@ -2176,37 +2176,37 @@ export interface SidePanelChromeProps {
     slots: SidePanelSlots;
 }
 
-// @internal
+// @public
 export interface SidePanelCloseProps {
     readonly label: string;
     readonly onClose: () => void;
 }
 
-// @internal
+// @public
 export interface SidePanelFrameProps {
     readonly children: ReactNode;
     readonly className?: string;
     readonly side: "start" | "end";
 }
 
-// @internal
+// @public
 export function SidePanelLayout(props: Readonly<SidePanelLayoutProps>): JSX.Element;
 
-// @internal
+// @public
 export interface SidePanelLayoutProps {
     body: ReactNode;
     panel?: ReactNode;
     side?: "start" | "end";
 }
 
-// @internal
+// @public
 export interface SidePanelSlots {
     readonly Close: (props: SidePanelCloseProps) => ReactNode;
     readonly Frame: (props: SidePanelFrameProps) => ReactNode;
     readonly Tab: (props: SidePanelTabProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface SidePanelTabProps {
     readonly buttonProps: {
         readonly id: string;
@@ -2223,13 +2223,13 @@ export interface SidePanelTabProps {
     readonly selected: boolean;
 }
 
-// @internal
+// @public
 export function sortArrow(sort: unknown): string;
 
-// @internal
+// @public
 export function StatusBarChrome(props: Readonly<StatusBarChromeProps>): JSX.Element;
 
-// @internal
+// @public
 export interface StatusBarChromeProps {
     className?: string;
     enabled: boolean;
@@ -2245,21 +2245,21 @@ export interface StatusBarChromeProps {
     total?: number;
 }
 
-// @internal
+// @public
 export interface StatusBarItem {
     readonly appearance?: FeatureNotice["appearance"];
     readonly key: "rows" | "selected" | FeatureNoticeKind;
     readonly text: string;
 }
 
-// @internal
+// @public
 export interface StatusBarSlotProps {
     readonly className?: string;
     readonly items: readonly StatusBarItem[];
     readonly stats: ReactNode;
 }
 
-// @internal
+// @public
 export interface StatusBarSlots {
     readonly Bar: (props: StatusBarSlotProps) => ReactNode;
     readonly stats: SelectionStatsSlots;
@@ -2274,7 +2274,7 @@ export function stopEditKeys(event: Readonly<{
 // @public
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
-// @internal
+// @public
 export interface TableCommandPalette {
     close: () => void;
     commands: readonly Command[];
@@ -2282,7 +2282,7 @@ export interface TableCommandPalette {
     show: () => void;
 }
 
-// @internal
+// @public
 export interface TableContextMenu {
     at: ContextMenuPoint | null;
     close: () => void;
@@ -2290,7 +2290,7 @@ export interface TableContextMenu {
     regionProps: Record<string, unknown>;
 }
 
-// @internal
+// @public
 export function tableErrorState<TRow>(source: TableSource<TRow>): TableErrorState | undefined;
 
 // @public
@@ -2315,7 +2315,7 @@ export interface TableFeatureHost<TRow = unknown> {
     registerWriter(writer: ExportWriter): void;
 }
 
-// @internal
+// @public
 export interface TableRenderModel<TRow> {
     cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
     columns: readonly ColumnDef<TRow>[];
@@ -2333,7 +2333,7 @@ export interface TableRenderModel<TRow> {
     showReorder: boolean;
 }
 
-// @internal
+// @public
 export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "rowActions" | "getRowId" | "rowEntries" | "renderRowDetail" | "expansion" | "columnWindow" | "editing" | "rowReorder" | "pinnedTopRows" | "pinnedBottomRows" | "getCellSpan" | "pinOffset" | "tree" | "grouping" | "extraRows">): TableRenderModel<TRow>;
 
 // @internal
@@ -2357,10 +2357,10 @@ export interface TableStatusAnnouncerProps {
     announcement: string;
 }
 
-// @internal
+// @public
 export function toggleCollapsedColumnGroup(collapsedIds: readonly string[], id: string): string[];
 
-// @internal
+// @public
 export interface ToolbarChromeProps<TRow> {
     activeFilterCount: number;
     addRowLabel?: string;
@@ -2398,15 +2398,15 @@ export interface ToolbarChromeProps<TRow> {
     undoLabel?: string;
 }
 
-// @internal
+// @public
 export function TreeCellChrome<TRow>(input: Readonly<TreeCellChromeProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface TreeCellChromeProps<TRow> extends TreeCellProps<TRow> {
     readonly slots: TreeToggleSlots;
 }
 
-// @internal
+// @public
 export interface TreeCellProps<TRow> {
     children: ReactNode;
     className?: string;
@@ -2419,7 +2419,7 @@ export interface TreeCellProps<TRow> {
     treeColumnKey: string | undefined;
 }
 
-// @internal
+// @public
 export interface TreeToggleButtonProps {
     readonly className?: string;
     readonly expanded: boolean;
@@ -2428,15 +2428,15 @@ export interface TreeToggleButtonProps {
     readonly onClick: () => void;
 }
 
-// @internal
+// @public
 export function TreeToggleChrome<TRow>(input: Readonly<TreeToggleChromeProps<TRow>>): ReactElement;
 
-// @internal
+// @public
 export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
     readonly slots: TreeToggleSlots;
 }
 
-// @internal
+// @public
 export interface TreeToggleProps<TRow> {
     entry: TreeEntry<TRow>;
     labels?: TableLabels;
@@ -2445,21 +2445,21 @@ export interface TreeToggleProps<TRow> {
     toggleClassName?: string;
 }
 
-// @internal
+// @public
 export interface TreeToggleSlots {
     readonly Button: (props: TreeToggleButtonProps) => ReactNode;
 }
 
-// @internal
+// @public
 export function undoRedoToolbar<TRow>(wanted: boolean | undefined, history: EditHistoryState<TRow>, labels: TableLabels): Partial<ToolbarChromeProps<TRow>>;
 
-// @internal
+// @public
 export function unpinAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
-// @internal
+// @public
 export function useBulkBarState(input: Readonly<UseBulkBarStateOptions>): BulkBarState;
 
-// @internal
+// @public
 export interface UseBulkBarStateOptions {
     confirm: ConfirmHandler;
     labels: Required<TableLabels>;
@@ -2467,10 +2467,10 @@ export interface UseBulkBarStateOptions {
     total: number;
 }
 
-// @internal
+// @public
 export function useColumnWindow<TRow>(options: UseColumnWindowOptions<TRow>): ColumnWindow<TRow>;
 
-// @internal
+// @public
 export interface UseColumnWindowOptions<TRow> {
     columns: readonly ColumnDef<TRow>[];
     enabled: boolean;
@@ -2480,10 +2480,10 @@ export interface UseColumnWindowOptions<TRow> {
     widths?: Readonly<Record<string, number>>;
 }
 
-// @internal
+// @public
 export function useCommandPalette(options: UseCommandPaletteOptions): TableCommandPalette;
 
-// @internal
+// @public
 export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
     gridFocus: GridFocusState;
     statusAnnouncement: string;
@@ -2624,19 +2624,19 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
     featureHost: FeatureHostState<unknown> | undefined;
 };
 
-// @internal
+// @public
 export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;
 
-// @internal
+// @public
 export function useExportHandler(handler: (() => void | Promise<void>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean): ExportHandlerState;
 
-// @internal
+// @public
 export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
-// @internal
+// @public
 export function useFullscreen(element: HTMLElement | null): FullscreenState;
 
-// @internal
+// @public
 export function useKeyedVirtualization(options: {
     keys: readonly string[];
     enabled?: boolean;
@@ -2647,41 +2647,41 @@ export function useKeyedVirtualization(options: {
     onEndReached?: () => void;
 }): KeyedVirtualization;
 
-// @internal
+// @public
 export function useMountStagger(ref: RefObject<HTMLElement | null>, deps: DependencyList, options: MountStaggerOptions): void;
 
-// @internal
+// @public
 export function useOffsetHeight(): [(node: HTMLElement | null) => void, number];
 
 // @internal
 export function useOverlayTransition(open: boolean, exitMs?: number): OverlayTransition;
 
-// @internal
+// @public
 export function useResolvedAdapter(adapter: UrlStateAdapter | undefined, enabled: boolean): UrlStateAdapter;
 
-// @internal
+// @public
 export function useRowPairMeasurer(virtualizer: ResizableVirtualizer | undefined, enabled: boolean): RowPairMeasurer;
 
-// @internal
+// @public
 export function useStickyToolbarLayout(enabled: boolean, stickyTop?: number): {
     toolbarRef: RefCallback<HTMLElement | null>;
     toolbarStyle: CSSProperties | undefined;
     headerOffset: number;
 };
 
-// @internal
+// @public
 export function useSummaryCells<TRow>(summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined, rows: readonly TRow[]): Partial<Record<string, ReactNode>> | undefined;
 
-// @internal
+// @public
 export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>): TableContextMenu;
 
-// @internal
+// @public
 export function useTableFeatures<P extends object>(incoming: P): P;
 
 // @internal
 export function useTableStatusAnnouncement(options: TableStatusAnnouncementOptions): string;
 
-// @internal
+// @public
 export interface ViewControlsToolbar {
     density?: "comfortable" | "compact";
     isFullscreen?: boolean;
@@ -2689,7 +2689,7 @@ export interface ViewControlsToolbar {
     onToggleFullscreen?: () => void;
 }
 
-// @internal
+// @public
 export function viewControlsToolbar(props: {
     densityChooser?: boolean;
     density?: "comfortable" | "compact";

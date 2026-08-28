@@ -22,7 +22,7 @@ import { getPath } from "../utils/path";
 /**
  * One undoable gesture: what it wrote, and what was there before.
  *
- * @internal
+ * @public
  */
 export interface EditHistoryEntry<TRow> {
   /** The edits the gesture made, in the order it made them. */
@@ -34,7 +34,7 @@ export interface EditHistoryEntry<TRow> {
 /**
  * What {@link useEditHistory} needs.
  *
- * @internal
+ * @public
  */
 export interface UseEditHistoryOptions<TRow> {
   /** Off unless the host asked for it; when false nothing is recorded. */
@@ -50,7 +50,7 @@ export interface UseEditHistoryOptions<TRow> {
 /**
  * What {@link useEditHistory} returns.
  *
- * @internal
+ * @public
  */
 export interface EditHistoryState<TRow> {
   /**
@@ -101,7 +101,7 @@ export interface EditHistoryState<TRow> {
  * @param column - The column being read.
  * @returns The current value, in whatever type the row holds it.
  *
- * @internal
+ * @public
  */
 export function readCellValue<TRow>(
   row: TRow,
@@ -122,7 +122,7 @@ const DEFAULT_DEPTH = 50;
  * @param options - See {@link UseEditHistoryOptions}.
  * @returns The history controls; inert when `enabled` is false.
  *
- * @internal
+ * @public
  */
 export function useEditHistory<TRow>(
   options: UseEditHistoryOptions<TRow>
@@ -217,7 +217,7 @@ export function useEditHistory<TRow>(
 /**
  * The props a table needs for its history — the `editHistory` prop, resolved.
  *
- * @internal
+ * @public
  */
 export interface TableEditHistoryProps<TRow> {
   /** The `editHistory` prop as the host wrote it. */
@@ -243,7 +243,7 @@ export interface TableEditHistoryProps<TRow> {
  * @param props - See {@link TableEditHistoryProps}.
  * @returns The history state and the commit channel to give the chrome.
  *
- * @internal
+ * @public
  */
 export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
   history: EditHistoryState<TRow>;
@@ -283,7 +283,7 @@ export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
  * @param record - The history recorder.
  * @returns The wrapped handler, or `undefined` when there was none to wrap.
  *
- * @internal
+ * @public
  */
 export function asGesture<TRow>(
   apply: ((edits: CellEdit<TRow>[]) => void) | undefined,

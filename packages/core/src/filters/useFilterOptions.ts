@@ -7,7 +7,7 @@ import type { FilterDef, FilterOption } from "./filterDefs";
 /**
  * Resolved choices for a select/multiSelect control.
  *
- * @internal
+ * @public
  */
 export interface ResolvedFilterOptions {
   /** The choices to render (empty while an async loader is in flight). */
@@ -25,7 +25,7 @@ const EMPTY: readonly FilterOption[] = [];
  * the server/source tiers, where there is no full dataset to derive from —
  * resolves to no options with a development warning.
  *
- * @internal
+ * @public
  */
 export function useFilterOptions<TRow>(
   def: Pick<FilterDef<TRow>, "key" | "options">

@@ -84,7 +84,7 @@ export interface ColumnGroupRecord<TRow> {
 /**
  * True when this column input is a parent with children.
  *
- * @internal
+ * @public
  */
 export function isColumnGroup<TRow>(
   column: ColumnInput<TRow>
@@ -96,7 +96,7 @@ export function isColumnGroup<TRow>(
  * Flatten a mixed column tree into leaves. Tree parents become `group`
  * paths on those leaves; collapse options are in `FlattenedColumns.groups`.
  *
- * @internal
+ * @public
  */
 export function flattenColumnTree<TRow>(
   columns: readonly ColumnInput<TRow>[]
@@ -121,7 +121,7 @@ export function flattenColumnTree<TRow>(
 /**
  * Leaves plus the parent records {@link flattenColumnTree} collected.
  *
- * @internal
+ * @public
  */
 export interface FlattenedColumns<TRow> {
   /** The columns themselves, in render order. */
@@ -136,7 +136,7 @@ export interface FlattenedColumns<TRow> {
  * Default (no `collapsedKey`, no `collapsedRender`, no `groupShow: "closed"`
  * child): a thin stub column. `collapsedRender` wins over `collapsedKey`.
  *
- * @internal
+ * @public
  */
 export function applyCollapsedColumnGroups<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -175,7 +175,7 @@ export function applyCollapsedColumnGroups<TRow>(
  * True when `nextOrder` still keeps every married group's children in one
  * contiguous block. Used to reject a reorder that would split a tree group.
  *
- * @internal
+ * @public
  */
 export function marriedOrderHolds<TRow>(
   nextOrder: readonly string[],

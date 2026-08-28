@@ -25,7 +25,7 @@ import type { UrlStateAdapter } from "./adapter";
 /**
  * What {@link routerUrlAdapter} needs from the router.
  *
- * @internal
+ * @public
  */
 export interface RouterUrlAdapterOptions {
   /**
@@ -84,7 +84,7 @@ export interface RouterUrlAdapterOptions {
  * @param options - The router's current search, and how to navigate.
  * @returns An adapter to hand the table as `urlAdapter`.
  *
- * @internal
+ * @public
  */
 export function routerUrlAdapter({
   search,

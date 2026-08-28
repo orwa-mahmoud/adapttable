@@ -5,7 +5,7 @@
  * ceremony in user code. Also tolerates an empty/undefined `path` (returns
  * `undefined`) so a transiently-malformed column key can never crash a render.
  *
- * @internal
+ * @public
  */
 export function getPath(value: unknown, path: string): unknown {
   if (!path) return undefined;

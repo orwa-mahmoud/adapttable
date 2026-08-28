@@ -20,7 +20,7 @@ import type { GridCell } from "./gridFocus";
 /**
  * Which way a fill runs. Fills are one-axis, as in every spreadsheet.
  *
- * @internal
+ * @public
  */
 export type FillDirection = "down" | "up" | "right" | "left";
 
@@ -35,7 +35,7 @@ export type FillDirection = "down" | "up" | "right" | "left";
  * @param to - The cell the pointer has reached.
  * @returns The direction, or `null` when `to` is still inside the selection.
  *
- * @internal
+ * @public
  */
 export function fillDirection(
   source: CellRange,
@@ -63,7 +63,7 @@ export function fillDirection(
  * @param to - The cell the pointer has reached.
  * @returns The union rectangle, or the source itself when nothing is added.
  *
- * @internal
+ * @public
  */
 export function fillTargetRange(source: CellRange, to: GridCell): CellRange {
   const bounds = cellRangeBounds(source);
@@ -85,7 +85,7 @@ export function fillTargetRange(source: CellRange, to: GridCell): CellRange {
 /**
  * What a fill needs to know to become edits.
  *
- * @internal
+ * @public
  */
 export interface FillRangeOptions<TRow> {
   /** The selected rectangle the values come from. */
@@ -201,7 +201,7 @@ function fillAxis(
  * @param options - See {@link FillRangeOptions}.
  * @returns The edits, in reading order.
  *
- * @internal
+ * @public
  */
 export function fillRangeEdits<TRow>(
   options: FillRangeOptions<TRow>

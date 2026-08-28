@@ -18,7 +18,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 /**
  * What a virtualizer must offer for a pair to be measurable.
  *
- * @internal
+ * @public
  */
 export interface ResizableVirtualizer {
   /** Tell the virtualizer an item's real size. */
@@ -55,7 +55,7 @@ interface Pair {
  *   which case the returned refs do nothing at all.
  * @returns Ref callbacks for a row and its detail.
  *
- * @internal
+ * @public
  */
 export function useRowPairMeasurer(
   virtualizer: ResizableVirtualizer | undefined,

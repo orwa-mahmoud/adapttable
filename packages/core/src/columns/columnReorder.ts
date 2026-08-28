@@ -6,7 +6,7 @@ import { isRtlElement } from "../layout/writingDirection";
 /**
  * MIME type carrying the dragged column key during a reorder drag.
  *
- * @internal
+ * @public
  */
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
@@ -29,7 +29,7 @@ export interface ColumnRowDragProps {
  *
  * @param key - Column key being reordered.
  *
- * @internal
+ * @public
  */
 export function columnRowDragProps(key: string): ColumnRowDragProps {
   return {
@@ -94,7 +94,7 @@ function isRtl(grip: HTMLElement | null): boolean {
  * @param move - Layout mutator that moves a column to a new index.
  * @param label - Accessible label for the grip.
  *
- * @internal
+ * @public
  */
 export function columnReorderKeyProps(
   key: string,
@@ -143,7 +143,7 @@ export interface ColumnDropProps {
  * @param index - Target index the dragged column moves to.
  * @param move - Layout mutator that moves a column to a new index.
  *
- * @internal
+ * @public
  */
 export function columnDropProps(
   index: number,
@@ -210,7 +210,7 @@ export interface ColumnDragState {
  * carries `data-drop="before" | "after"` (draw an insertion line on that
  * edge). State clears on drop, drag end, and drag cancel alike.
  *
- * @internal
+ * @public
  */
 export function useColumnDragState(): ColumnDragState {
   const [drag, setDrag] = useState<{ key: string; from: number } | null>(null);

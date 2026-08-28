@@ -20,7 +20,7 @@
  * stableKey({ b: 1, a: 2 }) === stableKey({ a: 2, b: 1 }); // true
  * ```
  *
- * @internal
+ * @public
  */
 export function stableKey(input: unknown): string {
   return JSON.stringify(normalize(input));

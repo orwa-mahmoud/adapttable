@@ -17,7 +17,7 @@ import { columnGroupStubStyle, isColumnGroupStubKey } from "./headerGroups";
 /**
  * What the sizing needs to know about the table as a whole.
  *
- * @internal
+ * @public
  */
 export interface ColumnSizingOptions<TRow> {
   /** The columns as rendered. */
@@ -40,7 +40,7 @@ export interface ColumnSizingOptions<TRow> {
  * @param options - See {@link ColumnSizingOptions}.
  * @returns Total flex weight, and each flexible column's percentage.
  *
- * @internal
+ * @public
  */
 export function columnFlexShares<TRow>(
   options: ColumnSizingOptions<TRow>
@@ -73,7 +73,7 @@ export function columnFlexShares<TRow>(
  * @param userWidth - The width from the layout state, when the user set one.
  * @returns The style, or `undefined` when the column says nothing about size.
  *
- * @internal
+ * @public
  */
 export function columnSizeStyle<TRow>(
   column: ColumnDef<TRow>,
@@ -112,7 +112,7 @@ export function columnSizeStyle<TRow>(
  * @param fitColumns - Whether the table fits its container.
  * @returns The style, or `undefined` when it overflows as usual.
  *
- * @internal
+ * @public
  */
 export function fittedTableStyle(
   fitColumns?: boolean

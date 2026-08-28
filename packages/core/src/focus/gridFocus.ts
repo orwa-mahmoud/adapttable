@@ -29,7 +29,7 @@ export interface GridCell {
 /**
  * The grid's shape, as the mover needs to see it.
  *
- * @internal
+ * @public
  */
 export interface GridBounds {
   /** Total rows the user can reach — the dataset, not the rendered slice. */
@@ -48,7 +48,7 @@ export interface GridBounds {
  * is testable on its own and an adapter can bind a kit's own control to the
  * same intent.
  *
- * @internal
+ * @public
  */
 export type GridFocusMove =
   | "up"
@@ -132,7 +132,7 @@ function stepGridFocus(
  * @param covered - True for a cell that must not receive focus.
  * @returns The new address, which may equal `from` at an edge.
  *
- * @internal
+ * @public
  */
 export function moveGridFocus(
   from: GridCell,
@@ -156,7 +156,7 @@ export function moveGridFocus(
 /**
  * The key press, as much of it as the mapping needs.
  *
- * @internal
+ * @public
  */
 export interface GridKeyPress {
   /** Stable key for the entry. */
@@ -179,7 +179,7 @@ export interface GridKeyPress {
  * @param dir - The table's text direction.
  * @returns The intended move, or `null` to let the event through untouched.
  *
- * @internal
+ * @public
  */
 export function gridFocusMoveForKey(
   press: GridKeyPress,
@@ -214,7 +214,7 @@ export function gridFocusMoveForKey(
 /**
  * Are two addresses the same cell?
  *
- * @internal
+ * @public
  */
 export function sameGridCell(a: GridCell | null, b: GridCell | null): boolean {
   if (!a || !b) return a === b;

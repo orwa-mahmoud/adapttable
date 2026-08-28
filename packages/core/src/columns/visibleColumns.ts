@@ -3,7 +3,7 @@ import type { ColumnDef } from "../types";
 /**
  * Which layout a table is rendering in.
  *
- * @internal
+ * @public
  */
 export type TableLayout = "desktop" | "mobile";
 
@@ -23,7 +23,7 @@ export type TableLayout = "desktop" | "mobile";
  * @param layout - The current layout.
  * @returns The columns to render, in declared order.
  *
- * @internal
+ * @public
  */
 export function visibleColumns<TRow>(
   columns: readonly ColumnDef<TRow>[],

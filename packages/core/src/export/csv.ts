@@ -4,7 +4,7 @@ import { isBrowser } from "../utils/env";
 /**
  * Options for {@link rowsToCsv}.
  *
- * @internal
+ * @public
  */
 export interface RowsToCsvOptions<TRow> {
   /**
@@ -103,7 +103,7 @@ export function defaultCsvValue<TRow>(
  * @param options - See {@link RowsToCsvOptions}.
  * @returns The CSV text (no BOM; {@link downloadCsv} adds one for Excel).
  *
- * @internal
+ * @public
  */
 export function rowsToCsv<TRow>(
   rows: readonly TRow[],
@@ -134,7 +134,7 @@ export function rowsToCsv<TRow>(
  * @param options - Delimiter and formula escaping.
  * @returns The CSV text (no BOM).
  *
- * @internal
+ * @public
  */
 export function matrixToCsv(
   table: {
@@ -162,7 +162,7 @@ export function matrixToCsv(
  * @param filename - Download name, e.g. `"people.csv"`.
  * @param csv - The CSV text from {@link rowsToCsv}.
  *
- * @internal
+ * @public
  */
 export function downloadCsv(filename: string, csv: string): void {
   if (!isBrowser()) return;

@@ -23,14 +23,14 @@ import type { ContextMenuTarget } from "./contextMenuModel";
 /**
  * The attribute a row carries so its menu knows which row it is.
  *
- * @internal
+ * @public
  */
 export const ROW_ID_ATTRIBUTE = "data-row-id";
 
 /**
  * What {@link resolveContextTarget} found.
  *
- * @internal
+ * @public
  */
 export interface ResolvedContextTarget<TRow> {
   /** What the menu was opened on. */
@@ -54,7 +54,7 @@ function partAncestor(from: Element, part: string): HTMLElement | null {
  * @returns The target and the element to restore focus to, or `null` when
  *   the event happened somewhere with no menu of its own.
  *
- * @internal
+ * @public
  */
 export function resolveContextTarget<TRow>(
   from: Element,

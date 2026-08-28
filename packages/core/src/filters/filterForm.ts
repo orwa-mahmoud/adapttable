@@ -42,7 +42,7 @@ export type FilterFormSource<TRow> = Pick<
 /**
  * A scalar filter value as input text ("" when unset; numbers stringify).
  *
- * @internal
+ * @public
  */
 export function scalarFilterText(value: FilterValue): string {
   return value == null ? "" : String(value);
@@ -51,7 +51,7 @@ export function scalarFilterText(value: FilterValue): string {
 /**
  * A multi-select value as a list — tolerating a scalar from the URL.
  *
- * @internal
+ * @public
  */
 export function listFilterValues(value: FilterValue): string[] {
   if (Array.isArray(value)) return [...value];
@@ -263,7 +263,7 @@ export function useTextFilterWidget<TRow>(
 /**
  * Resolve a `TableLabels` key to the string the widget should show.
  *
- * @internal
+ * @public
  */
 export function filterOpLabel(
   labels: Required<TableLabels>,
@@ -278,14 +278,14 @@ export type { DateOp, NumberOp, TextOp } from "./operators";
 /**
  * One choice in a tri-state boolean filter (`""` = any).
  *
- * @internal
+ * @public
  */
 export type BooleanChoice = "" | "true" | "false";
 
 /**
  * Read a boolean filter slot as a tri-state choice.
  *
- * @internal
+ * @public
  */
 export function parseBooleanChoice(value: FilterValue): BooleanChoice {
   if (value === "true" || value === 1) return "true";
@@ -296,7 +296,7 @@ export function parseBooleanChoice(value: FilterValue): BooleanChoice {
 /**
  * Computed state + writer driving a tri-state boolean field.
  *
- * @internal
+ * @public
  */
 export interface BooleanFieldWidget {
   /** The field's display label. */
@@ -311,7 +311,7 @@ export interface BooleanFieldWidget {
  * Kit-agnostic logic for a `boolean` filter: any / true / false, never a
  * checkbox. The token is stored as `f_<key>=true|false`; omitting it is any.
  *
- * @internal
+ * @public
  */
 export function useBooleanFilterWidget<TRow>(
   def: FilterDef<TRow>,

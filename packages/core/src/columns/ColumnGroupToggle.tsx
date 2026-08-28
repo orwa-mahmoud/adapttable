@@ -6,7 +6,7 @@ import type { HeaderGroupCell } from "./headerGroups";
 /**
  * Props for an adapter `ColumnGroupToggle` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface ColumnGroupToggleProps {
   /** The cell being rendered. */
@@ -22,7 +22,7 @@ export interface ColumnGroupToggleProps {
 /**
  * Kit button the column-group chrome calls.
  *
- * @internal
+ * @public
  */
 export interface ColumnGroupToggleButtonProps {
   /** Accessible name for the control. */
@@ -38,7 +38,7 @@ export interface ColumnGroupToggleButtonProps {
 /**
  * Adapter-supplied controls for {@link ColumnGroupToggleChrome}.
  *
- * @internal
+ * @public
  */
 export interface ColumnGroupToggleSlots {
   /** Renders a button. */
@@ -48,7 +48,7 @@ export interface ColumnGroupToggleSlots {
 /**
  * Props for {@link ColumnGroupToggleChrome}.
  *
- * @internal
+ * @public
  */
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
   /** The kit's components for each part. */
@@ -58,7 +58,7 @@ export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
 /**
  * Collapse/expand control for one column-group header cell.
  *
- * @internal
+ * @public
  */
 export function ColumnGroupToggleChrome({
   cell,

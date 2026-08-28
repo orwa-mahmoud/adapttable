@@ -7,7 +7,7 @@ import type { SelectionStats } from "./selectionStats";
 /**
  * Props for {@link SelectionStatsChrome}.
  *
- * @internal
+ * @public
  */
 export interface SelectionStatsChromeProps {
   /** The statistics, straight from `shell.selectionStats`. */
@@ -25,7 +25,7 @@ export interface SelectionStatsChromeProps {
 /**
  * One formatted statistic in display order.
  *
- * @internal
+ * @public
  */
 export interface SelectionStatPart {
   /** Which statistic this part reports. */
@@ -37,7 +37,7 @@ export interface SelectionStatPart {
 /**
  * Props passed to an adapter's selection-status component.
  *
- * @internal
+ * @public
  */
 export interface SelectionStatsSlotProps {
   /** The statistics to render, already formatted. */
@@ -49,7 +49,7 @@ export interface SelectionStatsSlotProps {
 /**
  * Adapter-owned rendering for {@link SelectionStatsChrome}.
  *
- * @internal
+ * @public
  */
 export interface SelectionStatsSlots {
   /** Renders the selection statistics. */
@@ -75,7 +75,7 @@ function figure(
  * the range announcement rather than interrupting it, which is the order the
  * two belong in.
  *
- * @internal
+ * @public
  */
 export function SelectionStatsChrome({
   stats,

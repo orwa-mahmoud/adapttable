@@ -175,7 +175,7 @@ export interface CellEditCommit {
 /**
  * Whether this editor is the host's own component.
  *
- * @internal
+ * @public
  */
 export function isCustomEditor(
   editor: CellEditor | null
@@ -188,7 +188,7 @@ export function isCustomEditor(
 /**
  * Whether this editor is a checkbox.
  *
- * @internal
+ * @public
  */
 export function isBooleanEditor(editor: CellEditor | null): boolean {
   return editor === "boolean";
@@ -197,7 +197,7 @@ export function isBooleanEditor(editor: CellEditor | null): boolean {
 /**
  * Whether this editor chooses several of a fixed set.
  *
- * @internal
+ * @public
  */
 export function isMultiSelectEditor(
   editor: CellEditor | null
@@ -212,7 +212,7 @@ export function isMultiSelectEditor(
 /**
  * Whether this editor chooses one of a fixed set.
  *
- * @internal
+ * @public
  */
 export function isSelectEditor(
   editor: CellEditor | null
@@ -236,7 +236,7 @@ export function isSelectEditor(
  * @param editor - The column's editor descriptor.
  * @returns The `type` attribute for the editor's input.
  *
- * @internal
+ * @public
  */
 export function editorInputType(
   editor: CellEditor | null
@@ -251,7 +251,7 @@ export function editorInputType(
 /**
  * The draft string a checkbox holds.
  *
- * @internal
+ * @public
  */
 export function booleanDraft(checked: boolean): string {
   return checked ? "true" : "false";
@@ -260,7 +260,7 @@ export function booleanDraft(checked: boolean): string {
 /**
  * Whether a boolean editor's draft is on.
  *
- * @internal
+ * @public
  */
 export function isDraftChecked(draft: string): boolean {
   return draft === "true";
@@ -282,7 +282,7 @@ export function normalizeEditorOptions(
 /**
  * Whether any column opts into editing (ignores per-row predicates).
  *
- * @internal
+ * @public
  */
 export function hasEditableColumns(
   columns: readonly EditableColumnLike[]
@@ -295,7 +295,7 @@ export function hasEditableColumns(
 /**
  * Whether a column is editable for a given row.
  *
- * @internal
+ * @public
  */
 export function isCellEditable<TRow>(
   column: EditableColumnLike<TRow>,
@@ -335,7 +335,7 @@ function resolveEditorValue(
  * {@link TableFeatureHost.registerEditor}; it resolves to
  * `{ type: "custom", render }` so adapters stay on one path.
  *
- * @internal
+ * @public
  */
 export function resolveCellEditor(
   column: EditableColumnLike,
@@ -414,7 +414,7 @@ function localDateTimeParts(value: Date): string {
  * Number editors yield `number | null` (empty / invalid → `null`);
  * select and text stay strings.
  *
- * @internal
+ * @public
  */
 export function parseCellEditValue(editor: CellEditor, draft: string): unknown {
   if (editor === "number") return parseNumberDraft(draft);
@@ -449,7 +449,7 @@ function parseMultiDraft(draft: string): string[] {
 /**
  * The separator {@link formatMultiDraft} joins a multi-select's values with.
  *
- * @internal
+ * @public
  */
 export const MULTI_SEPARATOR = "\u001f";
 
@@ -459,7 +459,7 @@ export const MULTI_SEPARATOR = "\u001f";
  * @param values - The chosen values.
  * @returns The draft the editing state holds.
  *
- * @internal
+ * @public
  */
 export function formatMultiDraft(values: readonly string[]): string {
   return values.join(MULTI_SEPARATOR);
@@ -471,7 +471,7 @@ export function formatMultiDraft(values: readonly string[]): string {
  * @param draft - The draft the editing state holds.
  * @returns The chosen values, in the order they were joined.
  *
- * @internal
+ * @public
  */
 export function readMultiDraft(draft: string): string[] {
   return parseMultiDraft(draft);

@@ -10,7 +10,7 @@ import { humanizeKey } from "../utils/humanizeKey";
 /**
  * Default header caption: the explicit header, else a humanized key.
  *
- * @internal
+ * @public
  */
 export function columnHeaderLabel<TRow>(column: ColumnDef<TRow>): ReactNode {
   return column.header ?? humanizeKey(column.key);
@@ -19,7 +19,7 @@ export function columnHeaderLabel<TRow>(column: ColumnDef<TRow>): ReactNode {
 /**
  * Build the controller a custom header receives.
  *
- * @internal
+ * @public
  */
 export function columnHeaderController<TRow>(
   column: ColumnDef<TRow>,
@@ -40,7 +40,7 @@ export function columnHeaderController<TRow>(
 /**
  * Custom `renderHeader`, or the default caption.
  *
- * @internal
+ * @public
  */
 export function resolveColumnHeader<TRow>(
   column: ColumnDef<TRow>,
@@ -54,7 +54,7 @@ export function resolveColumnHeader<TRow>(
 /**
  * Custom `renderFooter`, or the summary value as-is.
  *
- * @internal
+ * @public
  */
 export function resolveColumnFooter<TRow>(
   column: ColumnDef<TRow>,
@@ -67,7 +67,7 @@ export function resolveColumnFooter<TRow>(
 /**
  * True when any column wants a footer cell of its own.
  *
- * @internal
+ * @public
  */
 export function columnsHaveFooter<TRow>(
   columns: readonly ColumnDef<TRow>[]

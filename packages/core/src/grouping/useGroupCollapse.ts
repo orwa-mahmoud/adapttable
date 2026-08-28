@@ -5,7 +5,7 @@ import { useEventCallback } from "../hooks/useEventCallback";
 /**
  * Collapse state + actions returned by {@link useGroupCollapse}.
  *
- * @internal
+ * @public
  */
 export interface GroupCollapseState {
   /** Ids of currently collapsed groups (`group:…` keys). */
@@ -33,7 +33,7 @@ export interface GroupCollapseState {
  * Headless collapse state for row groups, at any depth. Ephemeral — not
  * URL-synced (punch-list #62). Groups default to expanded (empty set).
  *
- * @internal
+ * @public
  */
 export function useGroupCollapse(controlled?: {
   collapsedGroupIds?: readonly string[];

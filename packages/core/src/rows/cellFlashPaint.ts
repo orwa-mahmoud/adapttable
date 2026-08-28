@@ -16,7 +16,7 @@
  * @param rowId - The row's stable id.
  * @param columnKey - The column whose cell might be marked.
  *
- * @internal
+ * @public
  */
 export function cellFlashAttr(
   isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined,
@@ -35,7 +35,7 @@ export function cellFlashAttr(
  * @param rowId - The row's stable id.
  * @param columns - The columns that row paints.
  *
- * @internal
+ * @public
  */
 export function rowFlashSignature(
   isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined,

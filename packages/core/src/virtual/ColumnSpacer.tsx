@@ -11,7 +11,7 @@ import type { ReactElement } from "react";
 /**
  * Props for {@link ColumnSpacer}.
  *
- * @internal
+ * @public
  */
 export interface ColumnSpacerProps {
   /** Pixel width of the columns this cell stands in for. */
@@ -25,7 +25,7 @@ export interface ColumnSpacerProps {
 /**
  * Renders the spacer, or nothing when there is nothing to hold open.
  *
- * @internal
+ * @public
  */
 export function ColumnSpacer({
   width,

@@ -20,7 +20,7 @@ export interface HorizontalOverflow<E extends HTMLElement> {
  * scroll container and trap page-scroll sticky headers even when nothing
  * overflows. Under SSR (no `ResizeObserver`) it stays `false`.
  *
- * @internal
+ * @public
  */
 export function useHorizontalOverflow<
   E extends HTMLElement,

@@ -65,7 +65,7 @@ export interface TableContextMenuOptions<TRow> {
 /**
  * What an adapter binds and renders.
  *
- * @internal
+ * @public
  */
 export interface TableContextMenu {
   /** Spread onto the element containing the headers, rows and cells. */
@@ -85,7 +85,7 @@ export interface TableContextMenu {
  *   built-in entries.
  * @returns The props to bind and the state to render.
  *
- * @internal
+ * @public
  */
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>

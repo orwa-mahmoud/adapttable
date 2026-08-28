@@ -49,7 +49,7 @@ export { CustomCellEditorCtrl }
 
 export { CustomCellEditorRender }
 
-// @internal
+// @public
 export type DataModeProps<TRow> = {
     mode: "server";
     onQueryChange: NonNullable<UseServerDataOptions$1<TRow>["onQueryChange"]>;

@@ -58,7 +58,7 @@ function pendingListSize(
 /**
  * Dataset index for ARIA / focus — the window index when pinning is off.
  *
- * @internal
+ * @public
  */
 export function rowSourceIndex(
   entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">
@@ -130,7 +130,7 @@ export interface UseTableVirtualizationOptions<TRow> {
 /**
  * Resolve either virtual entries or the full source rows into render entries.
  *
- * @internal
+ * @public
  */
 export function resolveVirtualRows<TRow>(
   rows: readonly TRow[],
@@ -313,7 +313,7 @@ export function useTableVirtualization<TRow>({
 /**
  * Result of {@link useKeyedVirtualization} — index window over a keyed list.
  *
- * @internal
+ * @public
  */
 export interface KeyedVirtualization {
   /** Whether virtualization is on. */
@@ -332,7 +332,7 @@ export interface KeyedVirtualization {
  * Virtualize an opaque keyed list (e.g. grouped flat entries). Same window /
  * element modes as `useTableVirtualization`.
  *
- * @internal
+ * @public
  */
 export function useKeyedVirtualization(options: {
   keys: readonly string[];
@@ -433,7 +433,7 @@ export function useKeyedVirtualization(options: {
 /**
  * Slice a flat grouped model to the virtual window indices.
  *
- * @internal
+ * @public
  */
 export function windowGroupedEntries<TEntry>(
   entries: readonly TEntry[],

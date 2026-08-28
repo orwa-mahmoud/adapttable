@@ -18,7 +18,7 @@ import { BatchEditCell, RowEditCell } from "./RowEditGate";
 /**
  * Props for a kit-native editor while a cell is active.
  *
- * @internal
+ * @public
  */
 export interface EditableCellEditorCtrl {
   /** The value being edited, as text. */
@@ -87,7 +87,7 @@ function isFirstEditableColumn(
  * When `editing` is omitted this is a pure pass-through of `display` —
  * zero DOM / behavior change for tables that never opted into cell edit.
  *
- * @internal
+ * @public
  */
 export interface EditableCellGateProps<TRow> {
   /** Cell-editing state; the gate is a pass-through when absent. */
@@ -142,7 +142,7 @@ export interface EditableCellGateProps<TRow> {
 /**
  * Kit activate control the gate calls while the cell is idle.
  *
- * @internal
+ * @public
  */
 export interface EditableCellActivateProps {
   /** Tooltip for the control. */
@@ -175,7 +175,7 @@ export interface EditableCellActivateProps {
 /**
  * Kit button the gate calls for conflict choices and undo.
  *
- * @internal
+ * @public
  */
 export interface EditableCellButtonProps {
   /** Accessible name for the control. */
@@ -193,7 +193,7 @@ export interface EditableCellButtonProps {
 /**
  * Adapter-supplied controls for `EditableCellGate`.
  *
- * @internal
+ * @public
  */
 export interface EditableCellSlots {
   /** Renders the idle cell that opens the editor. */
@@ -233,7 +233,7 @@ export function stopEditKeys(
  * @param ctrl - The editor controller the gate handed the kit.
  * @returns Attributes to spread; empty while the value is fine.
  *
- * @internal
+ * @public
  */
 export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
   "aria-invalid"?: true;
@@ -259,7 +259,7 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
  * @returns Attributes to spread; empty unless a check is running or a
  *   conflict is being asked.
  *
- * @internal
+ * @public
  */
 export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
   "aria-busy"?: true;
@@ -338,7 +338,7 @@ function ConflictNotice(
  * @param ctrl - The editor controller the gate handed the kit.
  * @param checked - The box's new state.
  *
- * @internal
+ * @public
  */
 export function commitBooleanDraft(
   ctrl: EditableCellEditorCtrl,
@@ -354,7 +354,7 @@ export function commitBooleanDraft(
  * @param select - The select element.
  * @returns The draft string the editing state holds.
  *
- * @internal
+ * @public
  */
 export function multiDraftFromSelect(select: HTMLSelectElement): string {
   return formatMultiDraft(
@@ -365,7 +365,7 @@ export function multiDraftFromSelect(select: HTMLSelectElement): string {
 /**
  * Opt out of the React Compiler: early returns swap trees of different memo sizes.
  *
- * @internal
+ * @public
  */
 export function EditableCellGate<TRow>(
   props: EditableCellGateProps<TRow>

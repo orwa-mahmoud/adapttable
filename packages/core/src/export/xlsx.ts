@@ -292,7 +292,7 @@ export function safeSheetName(name: string): string {
  * @param options - Rows, columns, and the sheet's name.
  * @returns The workbook bytes, ready to download.
  *
- * @internal
+ * @public
  */
 export function buildTableXlsx<TRow>(options: {
   rows: readonly TRow[];
@@ -337,7 +337,7 @@ const XLSX_MIME =
  * @param options - The sheet's name inside the workbook. Defaults to `"Sheet1"`.
  * @returns A writer to hand to `exportCsv`.
  *
- * @internal
+ * @public
  */
 export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
   return {

@@ -11,7 +11,7 @@ import type { FindInTableState } from "./useFindInTable";
 /**
  * Props for an adapter `FindBar` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface FindBarProps {
   /** The find state, straight from `shell.find`. */
@@ -25,7 +25,7 @@ export interface FindBarProps {
 /**
  * Kit search field the find bar calls.
  *
- * @internal
+ * @public
  */
 export interface FindSearchProps {
   /** Accessible name for the control. */
@@ -45,14 +45,14 @@ export interface FindSearchProps {
 /**
  * One find-bar glyph.
  *
- * @internal
+ * @public
  */
 export type FindButtonKind = "previous" | "next" | "close";
 
 /**
  * Kit button the find bar calls.
  *
- * @internal
+ * @public
  */
 export interface FindButtonProps {
   /** Accessible name for the control. */
@@ -70,7 +70,7 @@ export interface FindButtonProps {
 /**
  * Adapter-supplied controls for {@link FindBarChrome}.
  *
- * @internal
+ * @public
  */
 export interface FindBarSlots {
   /** Renders the search box. */
@@ -82,7 +82,7 @@ export interface FindBarSlots {
 /**
  * Props for {@link FindBarChrome}.
  *
- * @internal
+ * @public
  */
 export interface FindBarChromeProps extends FindBarProps {
   /** The kit's components for each part. */
@@ -96,7 +96,7 @@ export interface FindBarChromeProps extends FindBarProps {
  * Enter walks forward, Shift+Enter walks back and Escape closes, which is what
  * every find bar does and therefore what nobody should have to learn.
  *
- * @internal
+ * @public
  */
 export function FindBarChrome({
   find,

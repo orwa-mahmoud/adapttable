@@ -9,14 +9,14 @@ import type { ExtraFilters, FilterValue, TableLabels } from "../types";
 /**
  * Suffix on the filter key that stores the operator token (`name` → `nameOp`).
  *
- * @internal
+ * @public
  */
 export const FILTER_OP_SUFFIX = "Op";
 
 /**
  * The extra-bag / `f_` key that holds one definition's operator.
  *
- * @internal
+ * @public
  */
 export function filterOpKey(key: string): string {
   return key + FILTER_OP_SUFFIX;
@@ -25,7 +25,7 @@ export function filterOpKey(key: string): string {
 /**
  * True when `key` is an operator slot (`nameOp`), not a value slot.
  *
- * @internal
+ * @public
  */
 export function isFilterOpKey(key: string): boolean {
   return key.endsWith(FILTER_OP_SUFFIX) && key.length > FILTER_OP_SUFFIX.length;
@@ -102,7 +102,7 @@ export type DateOp = (typeof DATE_OPS)[number];
 /**
  * Any built-in operator token.
  *
- * @internal
+ * @public
  */
 export type FilterOp = TextOp | NumberOp | DateOp;
 
@@ -113,7 +113,7 @@ const DATE_OP_SET = new Set<string>(DATE_OPS);
 /**
  * True for operators that take no operand (`empty` / `notEmpty`).
  *
- * @internal
+ * @public
  */
 export function isValuelessFilterOp(op: string): boolean {
   return op === "empty" || op === "notEmpty";
@@ -122,7 +122,7 @@ export function isValuelessFilterOp(op: string): boolean {
 /**
  * True for operators that take a comma-separated list (`in` / `notIn`).
  *
- * @internal
+ * @public
  */
 export function isListFilterOp(op: string): boolean {
   return op === "in" || op === "notIn";
@@ -131,7 +131,7 @@ export function isListFilterOp(op: string): boolean {
 /**
  * True for the two-bound `between` operator.
  *
- * @internal
+ * @public
  */
 export function isBetweenFilterOp(op: string): boolean {
   return op === "between";
@@ -189,7 +189,7 @@ export const DATE_OP_LABEL_KEYS = {
 /**
  * Parse a text operator; unknown / missing → `contains` (historical default).
  *
- * @internal
+ * @public
  */
 export function parseTextOp(raw: FilterValue | undefined): TextOp {
   if (typeof raw === "string" && TEXT_OP_SET.has(raw)) return raw as TextOp;
@@ -199,7 +199,7 @@ export function parseTextOp(raw: FilterValue | undefined): TextOp {
 /**
  * Parse a number operator, or `undefined` when the token is absent/unknown.
  *
- * @internal
+ * @public
  */
 export function parseNumberOp(
   raw: FilterValue | undefined
@@ -213,7 +213,7 @@ export function parseNumberOp(
 /**
  * Parse a date operator, accepting `eq` as the historical spelling of `on`.
  *
- * @internal
+ * @public
  */
 export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined {
   if (raw === "eq") return "on";
@@ -224,7 +224,7 @@ export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined {
 /**
  * Read the operator token stored beside a filter key.
  *
- * @internal
+ * @public
  */
 export function readFilterOp(
   extra: ExtraFilters,
@@ -236,7 +236,7 @@ export function readFilterOp(
 /**
  * True when a row value counts as empty for `empty` / `notEmpty`.
  *
- * @internal
+ * @public
  */
 export function isEmptyRowValue(value: unknown): boolean {
   if (value == null) return true;
@@ -248,7 +248,7 @@ export function isEmptyRowValue(value: unknown): boolean {
 /**
  * Split a list operand (`in` / `notIn`) into trimmed, non-empty tokens.
  *
- * @internal
+ * @public
  */
 export function parseListOperand(value: FilterValue | undefined): string[] {
   if (Array.isArray(value)) {
@@ -264,7 +264,7 @@ export function parseListOperand(value: FilterValue | undefined): string[] {
 /**
  * Parse a list operand as finite numbers (unknown tokens dropped).
  *
- * @internal
+ * @public
  */
 export function parseNumberList(value: FilterValue | undefined): number[] {
   const out: number[] = [];
@@ -279,7 +279,7 @@ export function parseNumberList(value: FilterValue | undefined): number[] {
  * Chip text: `Name contains Ada`, or `Name is empty` when there is no
  * operand. The operator word is already localized by the caller.
  *
- * @internal
+ * @public
  */
 export function formatFilterChip(
   fieldLabel: string,

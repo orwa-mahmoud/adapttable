@@ -77,7 +77,7 @@ export interface BatchEditingState<TRow> {
 /**
  * What {@link useBatchEditing} needs.
  *
- * @internal
+ * @public
  */
 export interface UseBatchEditingOptions<TRow> {
   /**
@@ -117,7 +117,7 @@ type PendingDrafts = Readonly<
  * @param options - See {@link UseBatchEditingOptions}.
  * @returns The state; inert unless `enabled`.
  *
- * @internal
+ * @public
  */
 export function useBatchEditing<TRow>(
   options: UseBatchEditingOptions<TRow>

@@ -16,7 +16,7 @@ import { readRowPins, writeRowPins } from "./serialize";
 /**
  * What {@link useRowPinningUrlState} needs.
  *
- * @internal
+ * @public
  */
 export interface UseRowPinningUrlStateOptions {
   /** URL backend; defaults to the History API. */
@@ -30,7 +30,7 @@ export interface UseRowPinningUrlStateOptions {
 /**
  * The controlled pair `<DataTable>` takes.
  *
- * @internal
+ * @public
  */
 export interface UseRowPinningUrlStateResult {
   /** The pin lists. */
@@ -45,7 +45,7 @@ export interface UseRowPinningUrlStateResult {
  * @param options - See {@link UseRowPinningUrlStateOptions}.
  * @returns The controlled pair to spread onto the table.
  *
- * @internal
+ * @public
  */
 export function useRowPinningUrlState(
   options: UseRowPinningUrlStateOptions = {}

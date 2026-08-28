@@ -8,46 +8,46 @@ import { ComponentType } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
-// @internal
+// @public
 export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
 
-// @internal
+// @public
 export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
-// @internal
+// @public
 export function deserializePivot(raw: string | null): PivotConfig;
 
-// @internal
+// @public
 export function deserializePivotState(raw: string | null): PivotUrlState;
 
-// @internal
+// @public
 export const EMPTY_PIVOT_CONFIG: PivotConfig;
 
-// @internal
+// @public
 export function isPivotReady(config: PivotConfig): boolean;
 
-// @internal
+// @public
 export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[]): string;
 
-// @internal
+// @public
 export function moveField(config: PivotConfig, zone: PivotZone, index: number, delta: -1 | 1): PivotConfig;
 
-// @internal
+// @public
 export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
 
-// @internal
+// @public
 export const PIVOT_BLANK = "—";
 
-// @internal
+// @public
 export const PIVOT_GRAND_TOTAL_KEY = "grand";
 
-// @internal
+// @public
 export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
 
-// @internal
+// @public
 export const PIVOT_ZONES: readonly PivotZone[];
 
-// @internal
+// @public
 export interface PivotColumnLeaf {
     key: string;
     measure: PivotMeasure;
@@ -55,7 +55,7 @@ export interface PivotColumnLeaf {
     total: boolean;
 }
 
-// @internal
+// @public
 export interface PivotColumnNode {
     children: readonly PivotColumnNode[];
     label: string;
@@ -63,7 +63,7 @@ export interface PivotColumnNode {
     span: number;
 }
 
-// @internal
+// @public
 export interface PivotConfig {
     columns: readonly string[];
     grandTotals?: boolean;
@@ -72,20 +72,20 @@ export interface PivotConfig {
     subtotals?: boolean;
 }
 
-// @internal
+// @public
 export interface PivotField {
     key: string;
     label: string;
 }
 
-// @internal
+// @public
 export interface PivotMeasure {
     agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }
 
-// @internal
+// @public
 export interface PivotOptions<TRow> {
     aggregators?: ReadonlyMap<string, Aggregator>;
     collapsed?: ReadonlySet<string>;
@@ -93,7 +93,7 @@ export interface PivotOptions<TRow> {
     format?: (value: ReactNode, measure: PivotMeasure) => ReactNode;
 }
 
-// @internal
+// @public
 export interface PivotResult {
     columnLeaves: readonly PivotColumnLeaf[];
     columnTree: readonly PivotColumnNode[];
@@ -101,7 +101,7 @@ export interface PivotResult {
     rows: readonly PivotRow[];
 }
 
-// @internal
+// @public
 export interface PivotRow {
     cells: readonly ReactNode[];
     count: number;
@@ -112,10 +112,10 @@ export interface PivotRow {
     path: readonly string[];
 }
 
-// @internal
+// @public
 export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
 
-// @internal
+// @public
 export interface PivotTableModel {
     columns: ColumnDef<PivotRow>[];
     rowKey: (row: PivotRow) => string;
@@ -123,10 +123,10 @@ export interface PivotTableModel {
     summaryRow?: (rows: readonly PivotRow[]) => Partial<Record<string, ReactNode>>;
 }
 
-// @internal
+// @public
 export function pivotTableModel(result: PivotResult, options?: PivotTableModelOptions): PivotTableModel;
 
-// @internal
+// @public
 export interface PivotTableModelOptions {
     fields?: readonly PivotField[];
     indent?: number;
@@ -135,23 +135,23 @@ export interface PivotTableModelOptions {
     rowHeader?: ReactNode;
 }
 
-// @internal
+// @public
 export interface PivotUrlState {
     collapsed: readonly string[];
     config: PivotConfig;
 }
 
-// @internal
+// @public
 export type PivotZone = "rows" | "columns" | "measures";
 
-// @internal
+// @public
 export interface QueryPivotPage {
     columns: readonly (readonly string[])[];
     rows: readonly QueryPivotRow[];
     total?: QueryPivotRow;
 }
 
-// @internal
+// @public
 export interface QueryPivotRow {
     cells: readonly unknown[];
     count?: number;
@@ -160,31 +160,31 @@ export interface QueryPivotRow {
     totals?: readonly unknown[];
 }
 
-// @internal
+// @public
 export function removeField(config: PivotConfig, zone: PivotZone, index: number): PivotConfig;
 
-// @internal
+// @public
 export function serializePivot(config: PivotConfig): string;
 
-// @internal
+// @public
 export function serializePivotState(state: PivotUrlState): string;
 
-// @internal
+// @public
 export interface ServerPivotOptions {
     config: PivotConfig;
     format?: (value: ReactNode, measure: PivotConfig["measures"][number]) => ReactNode;
 }
 
-// @internal
+// @public
 export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOptions): PivotResult;
 
-// @internal
+// @public
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
-// @internal
+// @public
 export function usePivotUrlState(options?: UsePivotUrlStateOptions): UsePivotUrlStateResult;
 
-// @internal
+// @public
 export interface UsePivotUrlStateOptions {
     defaultConfig?: PivotConfig;
     urlAdapter?: UrlStateAdapter;
@@ -192,7 +192,7 @@ export interface UsePivotUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @internal
+// @public
 export interface UsePivotUrlStateResult {
     collapsed: ReadonlySet<string>;
     config: PivotConfig;

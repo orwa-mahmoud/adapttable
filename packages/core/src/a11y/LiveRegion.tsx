@@ -17,7 +17,7 @@ import type { ReactElement } from "react";
 /**
  * Props for {@link LiveRegion}.
  *
- * @internal
+ * @public
  */
 export interface LiveRegionProps {
   /** What to announce. Empty until there is something. */
@@ -57,7 +57,7 @@ const VISUALLY_HIDDEN = {
  *
  * @param props - See {@link LiveRegionProps}.
  *
- * @internal
+ * @public
  */
 export function LiveRegion({
   children,

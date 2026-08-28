@@ -452,7 +452,7 @@ export function stopCellEditKeyboard(
  * cell enters edit mode — replaces the `autoFocus` attribute (axe/a11y).
  * Accepts DOM nodes and kit refs that expose `.focus()` (e.g. antd InputRef).
  *
- * @internal
+ * @public
  */
 export function focusEditorOnMount(node: { focus: () => void } | null): void {
   node?.focus();
@@ -470,7 +470,7 @@ export function focusEditorOnMount(node: { focus: () => void } | null): void {
  * @param rowId - The row's stable id.
  * @returns Whether to mark the row.
  *
- * @internal
+ * @public
  */
 export function rowIsDirty<TRow>(
   editing: EditableCellEditing<TRow> | undefined,
@@ -484,7 +484,7 @@ export function rowIsDirty<TRow>(
  * never passed `onCellEdit`); empty string when this row is idle; otherwise
  * `columnKey:draft` so only the active edit row re-renders on keystrokes.
  *
- * @internal
+ * @public
  */
 export function rowEditingSignature<TRow>(
   editing: EditableCellEditing<TRow> | undefined,

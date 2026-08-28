@@ -19,7 +19,7 @@ import { isRtlElement } from "../layout/writingDirection";
 /**
  * MIME type carrying the dragged row id during a reorder drag.
  *
- * @internal
+ * @public
  */
 export const ROW_DND_MIME = "application/x-adapttable-row";
 
@@ -28,7 +28,7 @@ export { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
 /**
  * Width (px) of the injected reorder column — shared so pin leads agree.
  *
- * @internal
+ * @public
  */
 export const REORDER_COLUMN_WIDTH = 40;
 
@@ -40,7 +40,7 @@ export const ROW_REORDER_LIFTED_OPACITY = 0.45;
  * Kits apply this so a host without CSS still sees the gesture; unstyled
  * hosts can also target `data-dragging` / `data-drop` from classNames.
  *
- * @internal
+ * @public
  */
 export function rowReorderDropStyle(
   attrs: { "data-dragging"?: ""; "data-drop"?: "before" | "after" } | undefined
@@ -58,7 +58,7 @@ export function rowReorderDropStyle(
 /**
  * Move `from` to `to` in a copy of `rows`. Out-of-range is a no-op copy.
  *
- * @internal
+ * @public
  */
 export function applyRowReorder<T>(
   rows: readonly T[],
@@ -84,7 +84,7 @@ export function applyRowReorder<T>(
 /**
  * Dataset-relative index: the rendered slot plus the page/window offset.
  *
- * @internal
+ * @public
  */
 export function datasetIndex(localIndex: number, windowStart: number): number {
   return windowStart + localIndex;
@@ -93,7 +93,7 @@ export function datasetIndex(localIndex: number, windowStart: number): number {
 /**
  * What a host receives when the reader drops a row.
  *
- * @internal
+ * @public
  */
 export type RowReorderHandler<TRow> = (
   from: number,
@@ -104,7 +104,7 @@ export type RowReorderHandler<TRow> = (
 /**
  * Labels the reorder handle and the live region need.
  *
- * @internal
+ * @public
  */
 export interface RowReorderLabels {
   /** Accessible name for the drag grip. */
@@ -124,7 +124,7 @@ export interface RowReorderLabels {
 /**
  * Headless reorder state returned by `useRowReorder`.
  *
- * @internal
+ * @public
  */
 export interface RowReorderState<TRow> {
   /** The lifted row, or `null` when idle. */
@@ -190,7 +190,7 @@ export interface RowReorderState<TRow> {
  * rows; the extra cost is one visible-row pass per drag lifecycle, which is
  * the point of this digest.
  *
- * @internal
+ * @public
  */
 export function rowReorderSignature<TRow>(
   reorder: RowReorderState<TRow> | undefined,
@@ -214,7 +214,7 @@ function isRtl(grip: HTMLElement | null): boolean {
  * Headless row reorder. Inert until the host passes {@link RowReorderHandler};
  * omit it and this hook still runs (Rules of Hooks) but every builder no-ops.
  *
- * @internal
+ * @public
  */
 export function useRowReorder<TRow>(options: {
   enabled: boolean;

@@ -43,7 +43,7 @@ export interface FailedCellSave<TRow> {
 /**
  * What {@link useCellSaveState} needs.
  *
- * @internal
+ * @public
  */
 export interface UseCellSaveStateOptions<TRow> {
   /**
@@ -133,7 +133,7 @@ function isThenable(value: unknown): value is Promise<unknown> {
  * @param options - See {@link UseCellSaveStateOptions}.
  * @returns The state; inert until a commit returns a promise that rejects.
  *
- * @internal
+ * @public
  */
 export function useCellSaveState<TRow>(
   options: UseCellSaveStateOptions<TRow> = {}

@@ -8,7 +8,7 @@
 /**
  * Normalize a BCP-47-ish tag: trim, `_` → `-`, lower-case.
  *
- * @internal
+ * @public
  */
 export function normalizeLocaleTag(locale: string): string {
   return locale.trim().replaceAll("_", "-").toLowerCase();
@@ -19,7 +19,7 @@ export function normalizeLocaleTag(locale: string): string {
  * (case- and separator-insensitive), then its primary subtag. Returns the
  * ORIGINAL available tag so callers can index their own maps with it.
  *
- * @internal
+ * @public
  */
 export function resolveLocaleTag(
   available: Iterable<string>,

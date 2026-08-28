@@ -75,7 +75,7 @@ export type SavedViewVisibility = "private" | "team";
  * upgrades what it reads. Views stored before versioning existed have no
  * number and are treated as version 1, which is what they are.
  *
- * @internal
+ * @public
  */
 export const SAVED_VIEW_VERSION = 2;
 

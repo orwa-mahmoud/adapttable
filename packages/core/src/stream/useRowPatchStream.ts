@@ -31,7 +31,7 @@ import type { RowPatchStreamStatus } from "./status";
 /**
  * What {@link useRowPatchStream} needs.
  *
- * @internal
+ * @public
  */
 export interface UseRowPatchStreamOptions<TRow> {
   /** WebSocket url. Takes precedence over `eventSource`. */
@@ -76,7 +76,7 @@ export interface UseRowPatchStreamOptions<TRow> {
 /**
  * What the hook reports back.
  *
- * @internal
+ * @public
  */
 export interface RowPatchStreamState {
   /** What the connection is doing. */
@@ -94,7 +94,7 @@ export interface RowPatchStreamState {
  * @param options - See {@link UseRowPatchStreamOptions}.
  * @returns The connection state; inert while `enabled` is false.
  *
- * @internal
+ * @public
  */
 export function useRowPatchStream<TRow>(
   options: UseRowPatchStreamOptions<TRow>

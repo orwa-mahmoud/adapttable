@@ -25,7 +25,7 @@ import { type FilterDef, filterLabel } from "./filterDefs";
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
  *
- * @internal
+ * @public
  */
 export interface ChecklistClassNames {
   /** Class for the checklist as a whole. */
@@ -53,7 +53,7 @@ export interface ChecklistClassNames {
 /**
  * Props for an adapter `ChecklistFilter` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface ChecklistFilterProps<TRow> {
   /** The checklist filter to render. */
@@ -72,7 +72,7 @@ export interface ChecklistFilterProps<TRow> {
 /**
  * Kit search field the checklist layout calls.
  *
- * @internal
+ * @public
  */
 export interface ChecklistSearchProps {
   /** Accessible name for the control. */
@@ -88,7 +88,7 @@ export interface ChecklistSearchProps {
 /**
  * Kit button the checklist layout calls.
  *
- * @internal
+ * @public
  */
 export interface ChecklistButtonProps {
   /** Accessible name for the control. */
@@ -100,7 +100,7 @@ export interface ChecklistButtonProps {
 /**
  * Kit checkbox row the checklist layout calls.
  *
- * @internal
+ * @public
  */
 export interface ChecklistCheckboxProps {
   /** Accessible name for the control. */
@@ -120,7 +120,7 @@ export interface ChecklistCheckboxProps {
 /**
  * Adapter-supplied controls for {@link ChecklistChrome}.
  *
- * @internal
+ * @public
  */
 export interface ChecklistSlots {
   /** Renders the search box. */
@@ -134,7 +134,7 @@ export interface ChecklistSlots {
 /**
  * Props for {@link ChecklistChrome}.
  *
- * @internal
+ * @public
  */
 export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
   /** The kit's components for each part. */
@@ -189,7 +189,7 @@ const SPACER: CSSProperties = { flexBasis: "100%", height: 0 };
  * `allFilteredRows` and no facets — a server page must declare facets
  * before this widget can count a set it does not hold.
  *
- * @internal
+ * @public
  */
 export function ChecklistChrome<TRow>({
   def,

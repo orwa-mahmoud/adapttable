@@ -71,7 +71,7 @@ export type CellSpanAppearance = "merged" | "plain";
 /**
  * `"2x1"` when this cell owns more than one slot; otherwise nothing.
  *
- * @internal
+ * @public
  */
 export function cellSpanMark(
   colSpan: number,
@@ -84,7 +84,7 @@ export function cellSpanMark(
 /**
  * One body cell a kit renders — covered cells never appear.
  *
- * @internal
+ * @public
  */
 export interface BodyCell<TRow> {
   /** The column being measured. */
@@ -100,7 +100,7 @@ export interface BodyCell<TRow> {
 /**
  * True when any origin cell is taller than one row.
  *
- * @internal
+ * @public
  */
 export function bodyCellsHaveRowSpan(
   cellsByRow: ReadonlyMap<string, readonly { rowSpan: number }[]>
@@ -116,7 +116,7 @@ export function bodyCellsHaveRowSpan(
 /**
  * True when the host asked for any span.
  *
- * @internal
+ * @public
  */
 export function spanningArmed<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -394,7 +394,7 @@ function emitRowCells<TRow>(
  * does not split one Team run. HTML `rowSpan` still needs those rows in
  * one tbody.
  *
- * @internal
+ * @public
  */
 export function buildBodyCells<TRow>(options: {
   rows: readonly TRow[];
@@ -449,7 +449,7 @@ function markCoveredRectangle(
 /**
  * Addresses (`row:col`, dataset-relative) covered by a span, not origins.
  *
- * @internal
+ * @public
  */
 export function coveredAddressSet<TRow>(options: {
   rows: readonly TRow[];
@@ -497,7 +497,7 @@ export function coveredAddressSet<TRow>(options: {
 /**
  * Memo digest so a virtualized row repaints when its spans change.
  *
- * @internal
+ * @public
  */
 export function rowSpanSignature<TRow>(
   cells: readonly BodyCell<TRow>[] | undefined
@@ -511,7 +511,7 @@ export function rowSpanSignature<TRow>(
 /**
  * Look up a row's cells; empty when the row is unknown.
  *
- * @internal
+ * @public
  */
 export function cellsForRow<TRow>(
   cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined,

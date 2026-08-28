@@ -22,7 +22,7 @@ import type { RowAction, TableLabels } from "../types";
 /**
  * How a table asks for a row to be added, copied or removed.
  *
- * @internal
+ * @public
  */
 export interface RowMutationHandlers<TRow> {
   /**
@@ -55,7 +55,7 @@ export interface RowMutationHandlers<TRow> {
 /**
  * Row-mutation state: the toolbar's control and the per-row actions.
  *
- * @internal
+ * @public
  */
 export interface RowMutationsState<TRow> {
   /** Whether an Add control should render. */
@@ -72,7 +72,7 @@ export interface RowMutationsState<TRow> {
 /**
  * What {@link useRowMutations} needs.
  *
- * @internal
+ * @public
  */
 export interface UseRowMutationsOptions<
   TRow,
@@ -84,13 +84,13 @@ export interface UseRowMutationsOptions<
 /**
  * The key of the synthesized duplicate action.
  *
- * @internal
+ * @public
  */
 export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 /**
  * The key of the synthesized delete action.
  *
- * @internal
+ * @public
  */
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
 
@@ -101,7 +101,7 @@ export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
  * @param options - See {@link UseRowMutationsOptions}.
  * @returns The state; every action is absent until its handler is wired.
  *
- * @internal
+ * @public
  */
 export function useRowMutations<TRow>(
   options: UseRowMutationsOptions<TRow>

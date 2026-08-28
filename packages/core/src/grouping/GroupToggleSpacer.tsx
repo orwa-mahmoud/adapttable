@@ -12,7 +12,7 @@ import type { ReactElement } from "react";
 /**
  * Renders an inert element the size of a group's toggle button.
  *
- * @internal
+ * @public
  */
 export function GroupToggleSpacer(): ReactElement {
   return (

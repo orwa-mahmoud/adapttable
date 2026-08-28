@@ -124,7 +124,7 @@ import { useMeasuredWindowScrollMargin } from "./virtual/windowScrollMargin";
  *
  * @typeParam TRow - The row type.
  *
- * @internal
+ * @public
  */
 export interface ToolbarChromeProps<TRow> {
   /** The headless table state + prop-getters. */
@@ -248,7 +248,7 @@ export interface ToolbarChromeProps<TRow> {
  * so the identical shape isn't re-declared (and flagged as duplication) in
  * each adapter's chrome.
  *
- * @internal
+ * @public
  */
 export interface BulkBarChromeProps {
   /** Current selection state. */
@@ -278,7 +278,7 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 /**
  * The shared, UI-agnostic orchestration result for an adapter table.
  *
- * @internal
+ * @public
  */
 export interface TableChrome<TRow> {
   /**
@@ -479,7 +479,7 @@ export interface TableChrome<TRow> {
  * browser will allow it at all: a toggle that cannot work is worse than no
  * toggle, and an embedded webview is a real place where it cannot.
  *
- * @internal
+ * @public
  */
 export interface ViewControlsToolbar {
   /** Current row density. */
@@ -495,7 +495,7 @@ export interface ViewControlsToolbar {
 /**
  * The density and fullscreen half of a toolbar's props.
  *
- * @internal
+ * @public
  */
 export function viewControlsToolbar(
   props: {
@@ -525,7 +525,7 @@ export function viewControlsToolbar(
 /**
  * The undo/redo half of a toolbar's props.
  *
- * @internal
+ * @public
  */
 export function undoRedoToolbar<TRow>(
   wanted: boolean | undefined,
@@ -562,7 +562,7 @@ export interface PrintToolbar {
  * type, and a `Partial<ToolbarChromeProps<TRow>>` return with no `TRow` in the
  * arguments infers `unknown` and widens the whole spread at every call site.
  *
- * @internal
+ * @public
  */
 export function printToolbar(
   wanted: boolean | undefined,
@@ -576,7 +576,7 @@ export function printToolbar(
 /**
  * Assemble every piece of chrome a kit's toolbar and footer need.
  *
- * @internal
+ * @public
  */
 export function useTableChrome<TRow>(
   props: BaseDataTableProps<TRow>
@@ -1391,7 +1391,7 @@ export function useTableChrome<TRow>(
 /**
  * Result of {@link useChromeBodyData}.
  *
- * @internal
+ * @public
  */
 export interface ChromeBodyData<TRow> {
   /** Row/card window virtualization state (disabled unless eligible). */
@@ -1434,7 +1434,7 @@ export interface ChromeBodyData<TRow> {
  * @param props - The adapter's `BaseDataTableProps`.
  * @returns Virtualization state + the load-more sentinel.
  *
- * @internal
+ * @public
  */
 export function useChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
@@ -1672,7 +1672,7 @@ function resolveBodyVirtualization<TRow>(
  * @param chrome - The {@link useTableChrome} result.
  * @param props - The adapter's `BaseDataTableProps`.
  *
- * @internal
+ * @public
  */
 export function useChromeScrollReset<TRow>(
   ref: RefObject<HTMLElement | null>,
@@ -1751,7 +1751,7 @@ function useChromeRowPinning<TRow>(options: {
 /**
  * Pointer and click handlers that open the filters overlay without double-firing.
  *
- * @internal
+ * @public
  */
 export function useFilterTriggerToggle(
   open: boolean,

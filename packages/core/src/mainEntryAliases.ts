@@ -103,7 +103,7 @@ import { rowSourceIndex as rowSourceIndexImpl } from "./virtual/useTableVirtuali
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const COLUMN_GROUP_ID_SEP = COLUMN_GROUP_ID_SEP_IMPL;
 /**
@@ -111,7 +111,7 @@ export const COLUMN_GROUP_ID_SEP = COLUMN_GROUP_ID_SEP_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const COLUMN_GROUP_RENDER_PREFIX = COLUMN_GROUP_RENDER_PREFIX_IMPL;
 /**
@@ -119,7 +119,7 @@ export const COLUMN_GROUP_RENDER_PREFIX = COLUMN_GROUP_RENDER_PREFIX_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const COLUMN_GROUP_STUB_PREFIX = COLUMN_GROUP_STUB_PREFIX_IMPL;
 /**
@@ -127,7 +127,7 @@ export const COLUMN_GROUP_STUB_PREFIX = COLUMN_GROUP_STUB_PREFIX_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const COLUMN_GROUP_STUB_WIDTH = COLUMN_GROUP_STUB_WIDTH_IMPL;
 /**
@@ -135,7 +135,7 @@ export const COLUMN_GROUP_STUB_WIDTH = COLUMN_GROUP_STUB_WIDTH_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const columnGroupHeaderCaption = columnGroupHeaderCaptionImpl;
 /**
@@ -143,7 +143,7 @@ export const columnGroupHeaderCaption = columnGroupHeaderCaptionImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const columnGroupId = columnGroupIdImpl;
 /**
@@ -151,7 +151,7 @@ export const columnGroupId = columnGroupIdImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const columnGroupPath = columnGroupPathImpl;
 /**
@@ -159,7 +159,7 @@ export const columnGroupPath = columnGroupPathImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const columnGroupStubStyle = columnGroupStubStyleImpl;
 /**
@@ -167,7 +167,7 @@ export const columnGroupStubStyle = columnGroupStubStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const groupedHeaderAlign = groupedHeaderAlignImpl;
 /**
@@ -175,7 +175,7 @@ export const groupedHeaderAlign = groupedHeaderAlignImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const groupedHeaderCellStyle = groupedHeaderCellStyleImpl;
 /**
@@ -183,7 +183,7 @@ export const groupedHeaderCellStyle = groupedHeaderCellStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const groupedHeaderChildRule = groupedHeaderChildRuleImpl;
 /**
@@ -191,7 +191,7 @@ export const groupedHeaderChildRule = groupedHeaderChildRuleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const groupedHeaderLabelStyle = groupedHeaderLabelStyleImpl;
 /**
@@ -199,7 +199,7 @@ export const groupedHeaderLabelStyle = groupedHeaderLabelStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type HeaderGroupCell = HeaderGroupCellType;
 /**
@@ -207,7 +207,7 @@ export type HeaderGroupCell = HeaderGroupCellType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const headerGroupRow = headerGroupRowImpl;
 /**
@@ -215,7 +215,7 @@ export const headerGroupRow = headerGroupRowImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const headerGroupRows = headerGroupRowsImpl;
 /**
@@ -223,7 +223,7 @@ export const headerGroupRows = headerGroupRowsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCellType;
 /**
@@ -231,7 +231,7 @@ export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCellType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const htmlGroupedHeaderPlan = htmlGroupedHeaderPlanImpl;
 /**
@@ -239,7 +239,7 @@ export const htmlGroupedHeaderPlan = htmlGroupedHeaderPlanImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const isColumnGroupRenderKey = isColumnGroupRenderKeyImpl;
 /**
@@ -247,7 +247,7 @@ export const isColumnGroupRenderKey = isColumnGroupRenderKeyImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const isColumnGroupStubKey = isColumnGroupStubKeyImpl;
 /**
@@ -255,7 +255,7 @@ export const isColumnGroupStubKey = isColumnGroupStubKeyImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const isColumnGroupSummaryKey = isColumnGroupSummaryKeyImpl;
 /**
@@ -263,7 +263,7 @@ export const isColumnGroupSummaryKey = isColumnGroupSummaryKeyImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const toggleCollapsedColumnGroup = toggleCollapsedColumnGroupImpl;
 
@@ -272,7 +272,7 @@ export const toggleCollapsedColumnGroup = toggleCollapsedColumnGroupImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const EXTRA_OVER_SPAN_ROW_STYLE = EXTRA_OVER_SPAN_ROW_STYLE_IMPL;
 /**
@@ -280,7 +280,7 @@ export const EXTRA_OVER_SPAN_ROW_STYLE = EXTRA_OVER_SPAN_ROW_STYLE_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const EXTRA_OVER_SPAN_STYLE = EXTRA_OVER_SPAN_STYLE_IMPL;
 /**
@@ -288,7 +288,7 @@ export const EXTRA_OVER_SPAN_STYLE = EXTRA_OVER_SPAN_STYLE_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const EXTRA_ROW_PARTS = EXTRA_ROW_PARTS_IMPL;
 /**
@@ -296,7 +296,7 @@ export const EXTRA_ROW_PARTS = EXTRA_ROW_PARTS_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const extraCountBeforeRowIds = extraCountBeforeRowIdsImpl;
 /**
@@ -304,7 +304,7 @@ export const extraCountBeforeRowIds = extraCountBeforeRowIdsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const extraCoveredTableSlots = extraCoveredTableSlotsImpl;
 /**
@@ -312,7 +312,7 @@ export const extraCoveredTableSlots = extraCoveredTableSlotsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type ExtraEntry = ExtraEntryType;
 /**
@@ -320,7 +320,7 @@ export type ExtraEntry = ExtraEntryType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const extraHostFillStyle = extraHostFillStyleImpl;
 /**
@@ -328,7 +328,7 @@ export const extraHostFillStyle = extraHostFillStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const extraRowsForSection = extraRowsForSectionImpl;
 /**
@@ -336,7 +336,7 @@ export const extraRowsForSection = extraRowsForSectionImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const extraUncoveredColSpans = extraUncoveredColSpansImpl;
 /**
@@ -344,7 +344,7 @@ export const extraUncoveredColSpans = extraUncoveredColSpansImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const inflateBodyCellRowSpans = inflateBodyCellRowSpansImpl;
 /**
@@ -352,7 +352,7 @@ export const inflateBodyCellRowSpans = inflateBodyCellRowSpansImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const insertExtraRows = insertExtraRowsImpl;
 /**
@@ -360,7 +360,7 @@ export const insertExtraRows = insertExtraRowsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const insertExtrasBeforeRows = insertExtrasBeforeRowsImpl;
 /**
@@ -368,7 +368,7 @@ export const insertExtrasBeforeRows = insertExtrasBeforeRowsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const isExtraEntry = isExtraEntryImpl;
 
@@ -377,7 +377,7 @@ export const isExtraEntry = isExtraEntryImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const orderedCardEntries = orderedCardEntriesImpl;
 /**
@@ -385,7 +385,7 @@ export const orderedCardEntries = orderedCardEntriesImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const PINNED_BOTTOM_PART = PINNED_BOTTOM_PART_IMPL;
 /**
@@ -393,7 +393,7 @@ export const PINNED_BOTTOM_PART = PINNED_BOTTOM_PART_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const PINNED_TOP_PART = PINNED_TOP_PART_IMPL;
 /**
@@ -401,7 +401,7 @@ export const PINNED_TOP_PART = PINNED_TOP_PART_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const pinnedRowCellStyle = pinnedRowCellStyleImpl;
 /**
@@ -409,7 +409,7 @@ export const pinnedRowCellStyle = pinnedRowCellStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const pinnedRowPart = pinnedRowPartImpl;
 /**
@@ -417,7 +417,7 @@ export const pinnedRowPart = pinnedRowPartImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const pinnedRowSticky = pinnedRowStickyImpl;
 /**
@@ -425,7 +425,7 @@ export const pinnedRowSticky = pinnedRowStickyImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const pinnedRowStickyStyle = pinnedRowStickyStyleImpl;
 /**
@@ -433,7 +433,7 @@ export const pinnedRowStickyStyle = pinnedRowStickyStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const useOffsetHeight = useOffsetHeightImpl;
 
@@ -442,7 +442,7 @@ export const useOffsetHeight = useOffsetHeightImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const columnMenuActions = columnMenuActionsImpl;
 /**
@@ -450,7 +450,7 @@ export const columnMenuActions = columnMenuActionsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const filterColumnMenuRows = filterColumnMenuRowsImpl;
 /**
@@ -458,7 +458,7 @@ export const filterColumnMenuRows = filterColumnMenuRowsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const hideAllColumns = hideAllColumnsImpl;
 /**
@@ -466,7 +466,7 @@ export const hideAllColumns = hideAllColumnsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const resetColumnLayout = resetColumnLayoutImpl;
 /**
@@ -474,7 +474,7 @@ export const resetColumnLayout = resetColumnLayoutImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const showAllColumns = showAllColumnsImpl;
 /**
@@ -482,7 +482,7 @@ export const showAllColumns = showAllColumnsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const unpinAllColumns = unpinAllColumnsImpl;
 
@@ -491,7 +491,7 @@ export const unpinAllColumns = unpinAllColumnsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type BodyCell<TRow> = BodyCellType<TRow>;
 /**
@@ -499,7 +499,7 @@ export type BodyCell<TRow> = BodyCellType<TRow>;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const bodyCellsHaveRowSpan = bodyCellsHaveRowSpanImpl;
 /**
@@ -507,7 +507,7 @@ export const bodyCellsHaveRowSpan = bodyCellsHaveRowSpanImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const cellsForRow = cellsForRowImpl;
 /**
@@ -515,7 +515,7 @@ export const cellsForRow = cellsForRowImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const cellSpanMark = cellSpanMarkImpl;
 /**
@@ -523,7 +523,7 @@ export const cellSpanMark = cellSpanMarkImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const rowSpanSignature = rowSpanSignatureImpl;
 
@@ -532,7 +532,7 @@ export const rowSpanSignature = rowSpanSignatureImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const REORDER_COLUMN_WIDTH = REORDER_COLUMN_WIDTH_IMPL;
 /**
@@ -540,7 +540,7 @@ export const REORDER_COLUMN_WIDTH = REORDER_COLUMN_WIDTH_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const ROW_DND_MIME = ROW_DND_MIME_IMPL;
 /**
@@ -548,7 +548,7 @@ export const ROW_DND_MIME = ROW_DND_MIME_IMPL;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const rowReorderDropStyle = rowReorderDropStyleImpl;
 /**
@@ -556,7 +556,7 @@ export const rowReorderDropStyle = rowReorderDropStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const rowReorderSignature = rowReorderSignatureImpl;
 /**
@@ -564,7 +564,7 @@ export const rowReorderSignature = rowReorderSignatureImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type RowReorderState<TRow> = RowReorderStateType<TRow>;
 
@@ -573,7 +573,7 @@ export type RowReorderState<TRow> = RowReorderStateType<TRow>;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const resolveRowHeight = resolveRowHeightImpl;
 /**
@@ -581,7 +581,7 @@ export const resolveRowHeight = resolveRowHeightImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const resolveRowStyle = resolveRowStyleImpl;
 /**
@@ -589,7 +589,7 @@ export const resolveRowStyle = resolveRowStyleImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const rowStyleSignature = rowStyleSignatureImpl;
 
@@ -598,7 +598,7 @@ export const rowStyleSignature = rowStyleSignatureImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type EditableCellActivateProps = EditableCellActivatePropsType;
 /**
@@ -606,7 +606,7 @@ export type EditableCellActivateProps = EditableCellActivatePropsType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type EditableCellButtonProps = EditableCellButtonPropsType;
 /**
@@ -614,7 +614,7 @@ export type EditableCellButtonProps = EditableCellButtonPropsType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type EditableCellSlots = EditableCellSlotsType;
 
@@ -623,7 +623,7 @@ export type EditableCellSlots = EditableCellSlotsType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type FilterHeaderClassNames = FilterHeaderClassNamesType;
 /**
@@ -631,7 +631,7 @@ export type FilterHeaderClassNames = FilterHeaderClassNamesType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type FilterHeaderRowProps<TRow> = FilterHeaderRowPropsType<TRow>;
 
@@ -640,7 +640,7 @@ export type FilterHeaderRowProps<TRow> = FilterHeaderRowPropsType<TRow>;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const applyCollapsedColumnGroups = applyCollapsedColumnGroupsImpl;
 /**
@@ -648,7 +648,7 @@ export const applyCollapsedColumnGroups = applyCollapsedColumnGroupsImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const flattenColumnTree = flattenColumnTreeImpl;
 
@@ -657,7 +657,7 @@ export const flattenColumnTree = flattenColumnTreeImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export type FullscreenState = FullscreenStateType;
 /**
@@ -665,7 +665,7 @@ export type FullscreenState = FullscreenStateType;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const useFullscreen = useFullscreenImpl;
 
@@ -674,7 +674,7 @@ export const useFullscreen = useFullscreenImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const rowPinSignature = rowPinSignatureImpl;
 /**
@@ -682,6 +682,6 @@ export const rowPinSignature = rowPinSignatureImpl;
  *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
- * @internal
+ * @public
  */
 export const rowSourceIndex = rowSourceIndexImpl;

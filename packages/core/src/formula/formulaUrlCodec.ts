@@ -63,7 +63,7 @@ function decodeField(value: string): string {
  * @param specs - The columns to serialize, in the order to show them.
  * @returns The parameter value, or `""` when there is nothing to say.
  *
- * @internal
+ * @public
  */
 export function serializeFormulaColumns(
   specs: readonly FormulaColumnSpec[]
@@ -96,7 +96,7 @@ export function serializeFormulaColumns(
  * @param raw - The parameter value.
  * @returns The columns it describes, in order, each key appearing once.
  *
- * @internal
+ * @public
  */
 export function deserializeFormulaColumns(
   raw: string | null

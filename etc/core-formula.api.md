@@ -8,22 +8,22 @@ import { ComponentType } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
-// @internal
+// @public
 export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
 
-// @internal
+// @public
 export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): FormulaColumnsResult<TRow>;
 
-// @internal
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
-// @internal
+// @public
 export function evaluateFormula(node: FormulaNode, scope: FormulaScope): FormulaValue;
 
-// @internal
+// @public
 export const FORMULA_BLANK: FormulaValue;
 
-// @internal
+// @public
 export const FORMULA_ERRORS: {
     readonly name: "#NAME?";
     readonly value: "#VALUE!";
@@ -32,16 +32,16 @@ export const FORMULA_ERRORS: {
     readonly syntax: "#ERROR!";
 };
 
-// @internal
+// @public
 export const FORMULA_FUNCTIONS: readonly string[];
 
-// @internal
+// @public
 export const FORMULA_URL_WRITE_DEBOUNCE_MS = 150;
 
-// @internal
+// @public
 export function formulaBoolean(value: boolean): FormulaValue;
 
-// @internal
+// @public
 export interface FormulaColumnSpec {
     format?: (value: FormulaValue) => string;
     formula: string;
@@ -49,23 +49,23 @@ export interface FormulaColumnSpec {
     key: string;
 }
 
-// @internal
+// @public
 export interface FormulaColumnsResult<TRow> {
     columns: readonly ColumnDef<TRow>[];
     cycles: readonly string[];
     errors: Readonly<Record<string, string>>;
 }
 
-// @internal
+// @public
 export function formulaDisplay(value: FormulaValue): string;
 
-// @internal
+// @public
 export function formulaError(code: FormulaErrorCode): FormulaValue;
 
-// @internal
+// @public
 export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
 
-// @internal
+// @public
 export type FormulaNode = {
     readonly kind: "number";
     readonly value: number;
@@ -89,22 +89,22 @@ export type FormulaNode = {
     readonly args: readonly FormulaNode[];
 };
 
-// @internal
+// @public
 export function formulaNumber(value: number): FormulaValue;
 
-// @internal
+// @public
 export function formulaRefs(node: FormulaNode): string[];
 
-// @internal
+// @public
 export type FormulaScope = (key: string) => FormulaValue | undefined;
 
-// @internal
+// @public
 export function formulaSortValue(value: FormulaValue): SortableValue;
 
-// @internal
+// @public
 export function formulaText(value: string): FormulaValue;
 
-// @internal
+// @public
 export type FormulaValue = {
     readonly kind: "number";
     readonly value: number;
@@ -121,29 +121,29 @@ export type FormulaValue = {
     readonly code: FormulaErrorCode;
 };
 
-// @internal
+// @public
 export function isFormulaError(value: FormulaValue): boolean;
 
-// @internal
+// @public
 export function parseFormula(text: string): ParseResult;
 
-// @internal
+// @public
 export interface ParseResult {
     readonly message?: string;
     readonly node?: FormulaNode;
     readonly ok: boolean;
 }
 
-// @internal
+// @public
 export function serializeFormulaColumns(specs: readonly FormulaColumnSpec[]): string;
 
-// @internal
+// @public
 export function toFormulaValue(raw: unknown): FormulaValue;
 
-// @internal
+// @public
 export function useFormulaUrlState(options?: UseFormulaUrlStateOptions): UseFormulaUrlStateResult;
 
-// @internal
+// @public
 export interface UseFormulaUrlStateOptions {
     defaultFormulas?: readonly FormulaColumnSpec[];
     urlAdapter?: UrlStateAdapter;
@@ -151,7 +151,7 @@ export interface UseFormulaUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @internal
+// @public
 export interface UseFormulaUrlStateResult {
     formulas: readonly FormulaColumnSpec[];
     onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;

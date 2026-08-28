@@ -10,7 +10,7 @@ import {
 /**
  * Options for {@link useBulkBarState}.
  *
- * @internal
+ * @public
  */
 export interface UseBulkBarStateOptions {
   /** Current selection state. */
@@ -26,7 +26,7 @@ export interface UseBulkBarStateOptions {
 /**
  * The derived bulk-bar state every adapter renders from.
  *
- * @internal
+ * @public
  */
 export interface BulkBarState {
   /** Number of rows currently selected. */
@@ -62,7 +62,7 @@ export interface BulkBarState {
  * Call unconditionally (it uses a hook); do the `selectedCount === 0` early
  * return in the adapter AFTER calling this.
  *
- * @internal
+ * @public
  */
 export function useBulkBarState({
   selection,

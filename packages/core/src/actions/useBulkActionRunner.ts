@@ -6,7 +6,7 @@ import type { ConfirmHandler } from "./confirm";
 /**
  * A bulk-action rejection as display text, or `null` when there is none.
  *
- * @internal
+ * @public
  */
 export function bulkActionErrorMessage(error: unknown): string | null {
   if (error == null) return null;
@@ -29,7 +29,7 @@ export function bulkActionErrorMessage(error: unknown): string | null {
 /**
  * How a bulk-action run ended — passed to `onComplete` on every run.
  *
- * @internal
+ * @public
  */
 export type BulkActionOutcome =
   { status: "success" } | { status: "error"; error: unknown };
@@ -37,7 +37,7 @@ export type BulkActionOutcome =
 /**
  * Options for {@link useBulkActionRunner}.
  *
- * @internal
+ * @public
  */
 export interface UseBulkActionRunnerOptions {
   /** Confirmation handler for actions that declare a `confirm` block. */
@@ -55,7 +55,7 @@ export interface UseBulkActionRunnerOptions {
 /**
  * The runner returned by {@link useBulkActionRunner}.
  *
- * @internal
+ * @public
  */
 export interface BulkActionRunner {
   /** Key of the action currently running, or `null`. */
@@ -81,7 +81,7 @@ export interface BulkActionRunner {
  * @param options - See {@link UseBulkActionRunnerOptions}.
  * @returns The {@link BulkActionRunner}.
  *
- * @internal
+ * @public
  */
 export function useBulkActionRunner({
   confirm,

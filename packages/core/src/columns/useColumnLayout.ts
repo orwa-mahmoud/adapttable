@@ -135,7 +135,7 @@ export interface PinnedCellStyle {
  * column's body cells paint over the sticky header on vertical scroll, and
  * later headers paint over a pinned header on horizontal scroll.
  *
- * @internal
+ * @public
  */
 export const PIN_Z = {
   body: 1,
@@ -173,7 +173,7 @@ function insetProp(side: PinSide): "insetInlineStart" | "insetInlineEnd" {
  * undefined for an unpinned cell. The inset is logical (`insetInlineStart` /
  * `insetInlineEnd`), so the same style pins to the correct edge in RTL.
  *
- * @internal
+ * @public
  */
 export function pinnedCellStyle(
   offset: PinOffset | undefined,
@@ -196,7 +196,7 @@ export function pinnedCellStyle(
  * nothing on that side is pinned, in which case the column stays in normal
  * flow. Insets are logical, so the edge follows the writing direction.
  *
- * @internal
+ * @public
  */
 export function edgePinStyle(
   side: PinSide,

@@ -71,7 +71,7 @@ function conditionOpWord<TRow>(
 /**
  * Build one chip label for a tree leaf.
  *
- * @internal
+ * @public
  */
 export function filterTreeChipLabel<TRow>(
   condition: QueryCondition,
@@ -106,7 +106,7 @@ export interface UseFilterTreeChipsOptions<TRow> {
 /**
  * Flatten the tree into removable chips.
  *
- * @internal
+ * @public
  */
 export function useFilterTreeChips<TRow>(
   options: UseFilterTreeChipsOptions<TRow>

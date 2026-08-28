@@ -4,7 +4,7 @@
 
 ```ts
 
-// @internal
+// @public
 export interface ChangedCellFlashState {
     clear: () => void;
     flashProps: (rowId: string, columnKey: string) => {
@@ -15,16 +15,16 @@ export interface ChangedCellFlashState {
     mark: (events: readonly RowPatchEvent<unknown>[]) => void;
 }
 
-// @internal
+// @public
 export function isStreamLive(status: RowPatchStreamStatus): boolean;
 
-// @internal
+// @public
 export function isStreamSettled(status: RowPatchStreamStatus): boolean;
 
-// @internal
+// @public
 export function openRowPatchStream(options: OpenRowPatchStreamOptions): RowPatchStreamHandle;
 
-// @internal
+// @public
 export interface OpenRowPatchStreamOptions {
     createEventSource?: (url: string) => StreamSocket | undefined;
     createWebSocket?: (url: string, protocols?: string | string[]) => StreamSocket | undefined;
@@ -37,29 +37,29 @@ export interface OpenRowPatchStreamOptions {
     websocket?: string;
 }
 
-// @internal
+// @public
 export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
 
-// @internal
+// @public
 export interface RowPatchStreamHandle {
     close: () => void;
     readonly status: RowPatchStreamStatus;
 }
 
-// @internal
+// @public
 export interface RowPatchStreamReconnect {
     delayMs?: number;
     maxAttempts?: number;
 }
 
-// @internal
+// @public
 export interface RowPatchStreamState {
     close: () => void;
     error: Error | null;
     status: RowPatchStreamStatus;
 }
 
-// @internal
+// @public
 export type RowPatchStreamStatus =
 /** No url wired, or `enabled: false`. Nothing is open and nothing will be. */
 "idle" |
@@ -74,7 +74,7 @@ export type RowPatchStreamStatus =
 /** The host closed it. Final: nothing reopens on its own. */
 "closed";
 
-// @internal
+// @public
 export interface StreamSocket {
     addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
     close(): void;
@@ -82,24 +82,24 @@ export interface StreamSocket {
     removeEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
 }
 
-// @internal
+// @public
 export interface StreamSocketEvent {
     data?: unknown;
 }
 
-// @internal
+// @public
 export function useChangedCellFlash(options?: UseChangedCellFlashOptions): ChangedCellFlashState;
 
-// @internal
+// @public
 export interface UseChangedCellFlashOptions {
     durationMs?: number;
     enabled?: boolean;
 }
 
-// @internal
+// @public
 export function useRowPatchStream<TRow>(options: UseRowPatchStreamOptions<TRow>): RowPatchStreamState;
 
-// @internal
+// @public
 export interface UseRowPatchStreamOptions<TRow> {
     createEventSource?: (url: string) => StreamSocket | undefined;
     createWebSocket?: (url: string, protocols?: string | string[]) => StreamSocket | undefined;

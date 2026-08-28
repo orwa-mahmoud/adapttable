@@ -47,7 +47,7 @@ export interface SidePanelEntry {
 /**
  * Props an adapter's panel frame receives.
  *
- * @internal
+ * @public
  */
 export interface SidePanelFrameProps {
   /** The tab strip and the panel body, in order. */
@@ -61,7 +61,7 @@ export interface SidePanelFrameProps {
 /**
  * Props an adapter's tab button receives.
  *
- * @internal
+ * @public
  */
 export interface SidePanelTabProps {
   /** The side-panel tab being rendered. */
@@ -85,7 +85,7 @@ export interface SidePanelTabProps {
 /**
  * Props an adapter's close control receives.
  *
- * @internal
+ * @public
  */
 export interface SidePanelCloseProps {
   /** Accessible name for the control. */
@@ -97,7 +97,7 @@ export interface SidePanelCloseProps {
 /**
  * Adapter-owned rendering for {@link SidePanelChrome}.
  *
- * @internal
+ * @public
  */
 export interface SidePanelSlots {
   /** The docked frame around everything. */
@@ -111,7 +111,7 @@ export interface SidePanelSlots {
 /**
  * What the side panel needs to render.
  *
- * @internal
+ * @public
  */
 export interface SidePanelChromeProps {
   /** The panels, in tab order. Rendering nothing when empty. */
@@ -154,7 +154,7 @@ function nextIndex(key: string, at: number, count: number): number | undefined {
  * @param props - The panels, which one is open, and the kit's slots.
  * @returns The docked panel.
  *
- * @internal
+ * @public
  */
 export function SidePanelChrome(props: Readonly<SidePanelChromeProps>) {
   const { panels, openPanel, onOpenPanel, onClose, slots } = props;
@@ -260,7 +260,7 @@ export function SidePanelChrome(props: Readonly<SidePanelChromeProps>) {
 /**
  * What {@link SidePanelLayout} arranges.
  *
- * @internal
+ * @public
  */
 export interface SidePanelLayoutProps {
   /** The table itself — everything the panel sits beside. */
@@ -289,7 +289,7 @@ export interface SidePanelLayoutProps {
  * @param props - The body, the panel, and which side it docks to.
  * @returns The arranged region.
  *
- * @internal
+ * @public
  */
 export function SidePanelLayout(props: Readonly<SidePanelLayoutProps>) {
   if (!props.panel) return <>{props.body}</>;

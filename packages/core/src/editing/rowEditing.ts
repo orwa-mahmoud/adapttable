@@ -67,7 +67,7 @@ export interface RowEditingState<TRow> {
 /**
  * What {@link useRowEditing} needs.
  *
- * @internal
+ * @public
  */
 export interface UseRowEditingOptions<TRow> {
   /**
@@ -111,7 +111,7 @@ function editableColumns<TRow>(
  * @param options - See {@link UseRowEditingOptions}.
  * @returns The state; inert unless `enabled`.
  *
- * @internal
+ * @public
  */
 export function useRowEditing<TRow>(
   options: UseRowEditingOptions<TRow>

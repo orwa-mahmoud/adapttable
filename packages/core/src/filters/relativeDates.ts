@@ -10,7 +10,7 @@ const END_OF_DAY_MS = DAY_MS - 1;
 /**
  * Named windows that need no extra number.
  *
- * @internal
+ * @public
  */
 export const RELATIVE_NAMED = [
   "today",
@@ -24,7 +24,7 @@ export const RELATIVE_NAMED = [
 /**
  * A stored relative-date token (`last:7`, `today`, …).
  *
- * @internal
+ * @public
  */
 export type RelativeDateToken =
   (typeof RELATIVE_NAMED)[number] | `last:${number}` | `next:${number}`;
@@ -32,7 +32,7 @@ export type RelativeDateToken =
 /**
  * Inclusive local-time window a token resolves to.
  *
- * @internal
+ * @public
  */
 export interface RelativeDateRange {
   /** Start of the range, inclusive, in epoch milliseconds. */
@@ -67,7 +67,7 @@ function startOfIsoWeek(now: Date): Date {
  * Parse a stored token. Unknown strings (including ISO dates) return
  * `undefined` so a historical absolute bound is never treated as relative.
  *
- * @internal
+ * @public
  */
 export function parseRelativeToken(
   raw: string | undefined
@@ -84,7 +84,7 @@ export function parseRelativeToken(
 /**
  * True when `raw` is a relative token, not an absolute date.
  *
- * @internal
+ * @public
  */
 export function isRelativeDateToken(raw: string | undefined): boolean {
   return parseRelativeToken(raw) !== undefined;
@@ -125,7 +125,7 @@ function namedRange(
  * frontend predicate and the server query path must both call this so a
  * shared link and a live table agree.
  *
- * @internal
+ * @public
  */
 export function resolveRelativeRange(
   raw: string | undefined,
@@ -152,7 +152,7 @@ export function resolveRelativeRange(
 /**
  * Build a counted token (`last:7`). `n` below 1 becomes 1.
  *
- * @internal
+ * @public
  */
 export function countedRelativeToken(
   kind: "last" | "next",
@@ -174,14 +174,14 @@ const NAMED_LABEL_KEYS = {
 /**
  * Named window or a counted last/next kind (the N lives beside the select).
  *
- * @internal
+ * @public
  */
 export type RelativePreset = (typeof RELATIVE_NAMED)[number] | "last" | "next";
 
 /**
  * Presets offered by the relative-date widget, in display order.
  *
- * @internal
+ * @public
  */
 export const RELATIVE_PRESETS: readonly RelativePreset[] = [
   ...RELATIVE_NAMED,
@@ -192,7 +192,7 @@ export const RELATIVE_PRESETS: readonly RelativePreset[] = [
 /**
  * `TableLabels` key for each relative preset.
  *
- * @internal
+ * @public
  */
 export const RELATIVE_PRESET_LABEL_KEYS = {
   /** Today, midnight to midnight. */
@@ -216,7 +216,7 @@ export const RELATIVE_PRESET_LABEL_KEYS = {
 /**
  * Split a stored token into the widget's preset + N (N defaults to 7).
  *
- * @internal
+ * @public
  */
 export function splitRelativeToken(raw: string): {
   preset: RelativePreset;
@@ -238,7 +238,7 @@ export function splitRelativeToken(raw: string): {
 /**
  * Join a widget preset + N back into the stored token.
  *
- * @internal
+ * @public
  */
 export function joinRelativeToken(
   preset: RelativePreset,
@@ -253,7 +253,7 @@ export function joinRelativeToken(
 /**
  * Chip / select wording for a stored token.
  *
- * @internal
+ * @public
  */
 export function relativeTokenLabel(
   raw: string,

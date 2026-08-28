@@ -17,7 +17,7 @@ import { type CellRange, cellRangeIndices } from "./cellRange";
 /**
  * What a copy needs to know: the rectangle, and the data under it.
  *
- * @internal
+ * @public
  */
 export interface ClipboardRangeOptions<TRow> {
   /** The selected rectangle, in absolute addresses. */
@@ -57,7 +57,7 @@ function cellText(value: unknown): string {
  * @param options - See {@link ClipboardRangeOptions}.
  * @returns TSV text; an empty string when the range covers nothing loaded.
  *
- * @internal
+ * @public
  */
 export function clipboardRangeText<TRow>(
   options: ClipboardRangeOptions<TRow>
@@ -95,7 +95,7 @@ export function clipboardRangeText<TRow>(
  * @param text - What to write.
  * @returns Whether the clipboard accepted it.
  *
- * @internal
+ * @public
  */
 export async function writeClipboardText(text: string): Promise<boolean> {
   const clipboard = globalThis.navigator?.clipboard;
@@ -118,7 +118,7 @@ export async function writeClipboardText(text: string): Promise<boolean> {
  *
  * @returns The clipboard's text, or `null` when it is unavailable.
  *
- * @internal
+ * @public
  */
 export async function readClipboardText(): Promise<string | null> {
   const clipboard = globalThis.navigator?.clipboard;

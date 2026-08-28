@@ -10,7 +10,7 @@ import type { TreeEntry } from "./treeRows";
 /**
  * Props for an adapter `TreeToggle` — no slots on the public API.
  *
- * @internal
+ * @public
  */
 export interface TreeToggleProps<TRow> {
   /** The row's place in the tree. */
@@ -28,7 +28,7 @@ export interface TreeToggleProps<TRow> {
 /**
  * Kit chevron the tree layout calls.
  *
- * @internal
+ * @public
  */
 export interface TreeToggleButtonProps {
   /** Accessible name for the control. */
@@ -46,7 +46,7 @@ export interface TreeToggleButtonProps {
 /**
  * Adapter-supplied controls for {@link TreeToggleChrome}.
  *
- * @internal
+ * @public
  */
 export interface TreeToggleSlots {
   /** Renders a button. */
@@ -56,7 +56,7 @@ export interface TreeToggleSlots {
 /**
  * Props for {@link TreeToggleChrome}.
  *
- * @internal
+ * @public
  */
 export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
   /** The kit's components for each part. */
@@ -67,7 +67,7 @@ export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
  * Renders the chevron for a row with children, or an equal-width spacer for a
  * leaf so the column stays aligned.
  *
- * @internal
+ * @public
  */
 export function TreeToggleChrome<TRow>({
   entry,

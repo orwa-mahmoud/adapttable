@@ -37,7 +37,7 @@ export interface Shortcut {
 /**
  * The shortcuts a table has unless the host says otherwise.
  *
- * @internal
+ * @public
  */
 export const DEFAULT_SHORTCUTS: readonly Shortcut[] = [
   { chord: "mod+k", command: "command-palette" },
@@ -124,7 +124,7 @@ export interface UseShortcutsOptions {
  *
  * @param options - The shortcuts and what to do when one fires.
  *
- * @internal
+ * @public
  */
 export function useShortcuts(options: UseShortcutsOptions): void {
   const { enabled, onCommand } = options;

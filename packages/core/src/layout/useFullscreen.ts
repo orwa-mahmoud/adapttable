@@ -25,7 +25,7 @@ import { useCallback, useEffect, useState } from "react";
 /**
  * What {@link useFullscreen} returns.
  *
- * @internal
+ * @public
  */
 export interface FullscreenState {
   /** Whether the table is the fullscreen element right now. */
@@ -56,7 +56,7 @@ function canFullscreen(): boolean {
  * @param element - The table's root. Nothing happens without one.
  * @returns The state, the toggle, and the portal container.
  *
- * @internal
+ * @public
  */
 export function useFullscreen(element: HTMLElement | null): FullscreenState {
   const [active, setActive] = useState(false);

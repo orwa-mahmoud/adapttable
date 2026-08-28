@@ -28,7 +28,7 @@ import { getPath } from "../utils/path";
 /**
  * The aggregate functions available by name.
  *
- * @internal
+ * @public
  */
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
@@ -51,14 +51,14 @@ export type Aggregator<TValue = SortableValue> = (
 /**
  * What to compute per column: a built-in name, or your own function.
  *
- * @internal
+ * @public
  */
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
 /**
  * Options for `aggregate`.
  *
- * @internal
+ * @public
  */
 export interface AggregateOptions<TRow> {
   /**
@@ -134,7 +134,7 @@ const BUILT_INS: Record<AggregateName, Aggregator> = {
 /**
  * Every built-in aggregate name, for a UI that offers a choice.
  *
- * @internal
+ * @public
  */
 export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
 
@@ -168,7 +168,7 @@ export function resolveAggregateValue<TRow>(
  * />
  * ```
  *
- * @internal
+ * @public
  */
 export function aggregate<TRow>(
   spec: AggregateSpec,

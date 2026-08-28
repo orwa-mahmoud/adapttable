@@ -85,7 +85,7 @@ export type FilterOptionsSource =
 /**
  * Most distinct values `"auto"` will derive before truncating.
  *
- * @internal
+ * @public
  */
 export const AUTO_OPTIONS_LIMIT = 50;
 
@@ -134,7 +134,7 @@ export type ColumnFilter<TRow = unknown> =
 /**
  * Suffix pair used by the two-field range types.
  *
- * @internal
+ * @public
  */
 export const RANGE_SUFFIXES = {
   dateRange: { start: "From", end: "To" },
@@ -144,7 +144,7 @@ export const RANGE_SUFFIXES = {
 /**
  * The state keys a definition reads/writes in the filter bag.
  *
- * @internal
+ * @public
  */
 export function filterStateKeys(
   def: Pick<FilterDef, "key" | "type">,
@@ -158,7 +158,7 @@ export function filterStateKeys(
 /**
  * Coerce a row value to a boolean, or `undefined` when it has no truth.
  *
- * @internal
+ * @public
  */
 export function coerceBooleanValue(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
@@ -185,7 +185,7 @@ function booleanChoiceOn(value: FilterValue): boolean {
  * column filter WINS — documented override semantics, with a development
  * warning so accidental duplication is visible.
  *
- * @internal
+ * @public
  */
 export function resolveFilterDefs<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -227,7 +227,7 @@ export function resolveFilterDefs<TRow>(
 /**
  * Resolved label for a definition (explicit, else humanized key).
  *
- * @internal
+ * @public
  */
 export function filterLabel(def: Pick<FilterDef, "key" | "label">): string {
   return def.label ?? humanizeKey(def.key);
@@ -686,7 +686,7 @@ export function createBuiltInFilterSpecs(): FilterTypeSpec[] {
 /**
  * Build one definition's client-side predicate (true = row matches).
  *
- * @internal
+ * @public
  */
 export function filterPredicate<TRow>(
   def: FilterDef<TRow>,
@@ -798,7 +798,7 @@ function emptyOpChip(field: string, token: string): string {
 /**
  * Derive the full runtime (URL keys, chips, predicate) from definitions.
  *
- * @internal
+ * @public
  */
 export function buildFilterRuntime<TRow>(
   defs: readonly FilterDef<TRow>[],
@@ -833,7 +833,7 @@ export function buildFilterRuntime<TRow>(
 /**
  * The cleared state for every key a definition list owns.
  *
- * @internal
+ * @public
  */
 export function clearedFilterExtras<TRow>(
   defs: readonly FilterDef<TRow>[],
@@ -853,7 +853,7 @@ export function clearedFilterExtras<TRow>(
  * untouched. Run BEFORE {@link buildFilterRuntime} so chips can label the
  * derived values.
  *
- * @internal
+ * @public
  */
 export function materializeAutoOptions<TRow>(
   defs: readonly FilterDef<TRow>[],

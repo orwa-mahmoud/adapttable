@@ -33,7 +33,7 @@ import type { ColumnDef, SortableValue } from "../types";
 /**
  * How a computed column is declared.
  *
- * @internal
+ * @public
  */
 export interface ComputedColumnSpec<TRow, TValue> {
   /** Column key — also the filter/sort key, as with any column. */
@@ -95,7 +95,7 @@ function depsMatch(a: readonly unknown[], b: readonly unknown[]): boolean {
  * @typeParam TRow - The row type.
  * @typeParam TValue - What the derivation produces.
  *
- * @internal
+ * @public
  */
 export function computed<TRow extends object, TValue = SortableValue>(
   spec: ComputedColumnSpec<TRow, TValue>

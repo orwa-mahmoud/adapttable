@@ -78,7 +78,7 @@ export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 /**
  * What the parent contributes to its nested tables.
  *
- * @internal
+ * @public
  */
 export interface NestedTableParent {
   /** The parent's density. */
@@ -97,7 +97,7 @@ const DEFAULT_LABEL = "Row details";
  * @param parent - What the parent table contributes.
  * @returns Props to spread onto the kit's own table.
  *
- * @internal
+ * @public
  */
 export function nestedTableDefaults(
   label: string,
@@ -120,7 +120,7 @@ export function nestedTableDefaults(
  * @param options - The declaration, the host's own panel, and the parent chrome.
  * @returns A `renderRowDetail`, or `undefined` when neither is declared.
  *
- * @internal
+ * @public
  */
 export function nestedTableDetail<TRow>(options: {
   nestedTable: NestedTableFor<TRow> | undefined;

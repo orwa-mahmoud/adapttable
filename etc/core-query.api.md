@@ -6,22 +6,22 @@
 
 import { ReactNode } from 'react';
 
-// @internal
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
-// @internal
+// @public
 export function deserializePivot(raw: string | null): PivotConfig;
 
-// @internal
+// @public
 export function deserializePivotState(raw: string | null): PivotUrlState;
 
-// @internal
+// @public
 export const FILTER_TREE_PARAM = "ft";
 
-// @internal
+// @public
 export const FILTER_TREE_VERSION = 1;
 
-// @internal
+// @public
 export interface FormulaColumnSpec {
     format?: (value: FormulaValue) => string;
     formula: string;
@@ -29,16 +29,16 @@ export interface FormulaColumnSpec {
     key: string;
 }
 
-// @internal
+// @public
 export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is QueryFilterGroup;
 
-// @internal
+// @public
 export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is QueryFilterGroup;
 
-// @internal
+// @public
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
 
-// @internal
+// @public
 export interface PivotConfig {
     columns: readonly string[];
     grandTotals?: boolean;
@@ -47,14 +47,14 @@ export interface PivotConfig {
     subtotals?: boolean;
 }
 
-// @internal
+// @public
 export interface PivotMeasure {
     agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }
 
-// @internal
+// @public
 export interface PivotUrlState {
     collapsed: readonly string[];
     config: PivotConfig;
@@ -73,16 +73,16 @@ export interface QueryFilterGroup {
     conditions: readonly (QueryCondition | QueryFilterGroup)[];
 }
 
-// @internal
+// @public
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;
 
-// @internal
+// @public
 export function serializeFormulaColumns(specs: readonly FormulaColumnSpec[]): string;
 
-// @internal
+// @public
 export function serializePivot(config: PivotConfig): string;
 
-// @internal
+// @public
 export function serializePivotState(state: PivotUrlState): string;
 
 // @public

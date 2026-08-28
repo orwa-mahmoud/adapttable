@@ -8,13 +8,13 @@ import { ComponentType } from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
-// @internal
+// @public
 export function buildPrintDocument(table: ExportTable, options?: PrintLayoutOptions): string;
 
-// @internal
+// @public
 export function buildPrintTableHtml(table: ExportTable, options?: PrintLayoutOptions): string;
 
-// @internal
+// @public
 export function buildTablePdf<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly ColumnDef<TRow>[];
@@ -22,7 +22,7 @@ export function buildTablePdf<TRow>(options: {
     summary?: Readonly<Partial<Record<string, unknown>>>;
 } & PdfWriterOptions): Uint8Array<ArrayBuffer>;
 
-// @internal
+// @public
 export type ExportViewEntry<TRow> = {
     role: "data";
     row: TRow;
@@ -35,13 +35,13 @@ export type ExportViewEntry<TRow> = {
     values?: Readonly<Partial<Record<string, unknown>>>;
 };
 
-// @internal
+// @public
 export function openPrintLayout(table: ExportTable, options?: PrintLayoutOptions): void;
 
-// @internal
+// @public
 export function pdfWriter(options?: PdfWriterOptions): ExportWriter;
 
-// @internal
+// @public
 export interface PdfWriterOptions {
     direction?: "ltr" | "rtl";
     font?: Uint8Array | ArrayBuffer;
@@ -50,7 +50,7 @@ export interface PdfWriterOptions {
     title?: string;
 }
 
-// @internal
+// @public
 export interface PrintLayoutOptions {
     caption?: string;
     direction?: "ltr" | "rtl";
@@ -61,13 +61,13 @@ export interface PrintLayoutOptions {
     title?: string;
 }
 
-// @internal
+// @public
 export type PrintPageSize = "a4" | "a4-landscape" | "letter" | "letter-landscape";
 
-// @internal
+// @public
 export function printStyles(options?: PrintLayoutOptions): string;
 
-// @internal
+// @public
 export function printTable<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly ColumnDef<TRow>[];

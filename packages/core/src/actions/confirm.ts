@@ -37,7 +37,7 @@ export type ConfirmHandler = (request: ConfirmRequest) => void;
  * destructive action on the user's behalf. Integrators in dialogless
  * environments pass their own `confirm` handler.
  *
- * @internal
+ * @public
  */
 export const defaultConfirm: ConfirmHandler = ({ message, onConfirm }) => {
   const native = (globalThis as { confirm?: (m?: string) => boolean }).confirm;
@@ -57,7 +57,7 @@ export const defaultConfirm: ConfirmHandler = ({ message, onConfirm }) => {
  * fall back to the action label for tooltips. (A plain `|| undefined` would
  * trip `prefer-nullish-coalescing`; this keeps the falsy-empty intent.)
  *
- * @internal
+ * @public
  */
 export function resolveDisabledReason(
   reason: string | undefined
@@ -75,7 +75,7 @@ export function resolveDisabledReason(
  * @param confirm - The confirmation handler.
  * @param cancelLabel - Cancel label for the dialog.
  *
- * @internal
+ * @public
  */
 export function runRowAction<TRow>(
   action: RowAction<TRow>,

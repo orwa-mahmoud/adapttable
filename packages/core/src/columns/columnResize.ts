@@ -63,7 +63,7 @@ function isRtl(handle: HTMLElement): boolean {
  * @param setWidth - Layout mutator that persists the new width.
  * @param label - Accessible label for the handle.
  *
- * @internal
+ * @public
  */
 export function columnResizeHandleProps(
   key: string,

@@ -8,7 +8,7 @@ import { getPath } from "../utils/path";
  * One visual row in a grouped body: a group header at some depth, or a leaf
  * data row belonging to a group. Adapters switch on `kind`.
  *
- * @internal
+ * @public
  */
 export type GroupedFlatEntry<TRow> =
   | {
@@ -234,7 +234,7 @@ export function resolveGroupValue<TRow>(
  * render the same blank label; splitting them would show several
  * identical "(blank)" groups).
  *
- * @internal
+ * @public
  */
 export function groupValueKey(value: unknown): string {
   if (value == null || value === "") return "";
@@ -254,7 +254,7 @@ export function groupValueKey(value: unknown): string {
 /**
  * Render a group's value as its header caption.
  *
- * @internal
+ * @public
  */
 export function formatGroupLabel(
   value: unknown,
@@ -522,7 +522,7 @@ export function flattenGroupPartitions<TRow>(
  * @param options - See `BuildGroupedFlatModelOptions`.
  * @returns The entries, in render order.
  *
- * @internal
+ * @public
  */
 export function buildGroupedFlatModel<TRow>(
   options: BuildGroupedFlatModelOptions<TRow>

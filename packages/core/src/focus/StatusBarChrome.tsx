@@ -34,7 +34,7 @@ import {
 /**
  * One piece of the status bar, in display order.
  *
- * @internal
+ * @public
  */
 export interface StatusBarItem {
   /** What this figure is, for a kit that styles them differently. */
@@ -51,7 +51,7 @@ export interface StatusBarItem {
 /**
  * Props an adapter's status-bar component receives.
  *
- * @internal
+ * @public
  */
 export interface StatusBarSlotProps {
   /** The figures, in the order they should read. */
@@ -65,7 +65,7 @@ export interface StatusBarSlotProps {
 /**
  * Adapter-owned rendering for {@link StatusBarChrome}.
  *
- * @internal
+ * @public
  */
 export interface StatusBarSlots {
   /** The strip itself. */
@@ -77,7 +77,7 @@ export interface StatusBarSlots {
 /**
  * What the status bar needs to describe the table.
  *
- * @internal
+ * @public
  */
 export interface StatusBarChromeProps {
   /**
@@ -182,7 +182,7 @@ function itemsFor(
  * @param props - The counts, the selection figures, and the kit's slots.
  * @returns The strip.
  *
- * @internal
+ * @public
  */
 export function StatusBarChrome(props: Readonly<StatusBarChromeProps>) {
   const { Bar } = props.slots;

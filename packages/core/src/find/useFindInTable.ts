@@ -17,7 +17,7 @@ import { findMatches, matchKeySet, stepMatch } from "./findMatches";
 /**
  * What {@link useFindInTable} needs.
  *
- * @internal
+ * @public
  */
 export interface UseFindInTableOptions<TRow> {
   /** Off unless the host asked for it; when false nothing is searched. */
@@ -33,7 +33,7 @@ export interface UseFindInTableOptions<TRow> {
 /**
  * What {@link useFindInTable} returns.
  *
- * @internal
+ * @public
  */
 export interface FindInTableState {
   /** Whether the bar is showing. */
@@ -71,7 +71,7 @@ export interface FindInTableState {
  * @param options - See {@link UseFindInTableOptions}.
  * @returns The state; inert with `enabled` false.
  *
- * @internal
+ * @public
  */
 export function useFindInTable<TRow>(
   options: UseFindInTableOptions<TRow>
@@ -172,7 +172,7 @@ export function useFindInTable<TRow>(
  * @param focusCell - The grid's `focusCell`.
  * @param selectRange - The grid's `selectRange`.
  *
- * @internal
+ * @public
  */
 export function useFindFocus(
   current: GridCell | null,

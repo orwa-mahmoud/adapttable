@@ -115,7 +115,7 @@ function groupFooterEntry<TRow>(
  * @param includeHiddenLeaves - When true, a collapsed or paged group
  *   contributes every leaf it holds, not only the ones on screen.
  *
- * @internal
+ * @public
  */
 export function viewFromGroupedEntries<TRow>(
   entries: readonly GroupedFlatEntry<TRow>[],
@@ -158,7 +158,7 @@ export function viewFromGroupedEntries<TRow>(
  * @typeParam TRow - The row type.
  * @param entries - The flattened tree, in render order.
  *
- * @internal
+ * @public
  */
 export function viewFromTreeEntries<TRow>(
   entries: readonly TreeEntry<TRow>[]
@@ -231,7 +231,7 @@ function markKeptFooters(
  * @param scopedIds - Row ids the scope resolved to.
  * @param getRowId - How a row's id is derived.
  *
- * @internal
+ * @public
  */
 export function filterExportView<TRow>(
   view: readonly ExportViewEntry<TRow>[],
@@ -252,7 +252,7 @@ export function filterExportView<TRow>(
  *
  * @typeParam TRow - The row type.
  *
- * @internal
+ * @public
  */
 export function exportViewFromChrome<TRow>(options: {
   grouping?: { entries: readonly GroupedFlatEntry<TRow>[] };
@@ -286,7 +286,7 @@ export function exportViewFromChrome<TRow>(options: {
 /**
  * `summaryRow` as file values — JSX cells drop out.
  *
- * @internal
+ * @public
  */
 export function summaryExportValues(
   cells: Readonly<Partial<Record<string, unknown>>> | undefined

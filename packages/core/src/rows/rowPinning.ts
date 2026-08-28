@@ -19,7 +19,7 @@ import type { RowAction } from "../types";
 /**
  * Which edge a pinned row sticks to.
  *
- * @internal
+ * @public
  */
 export type RowPinSide = "top" | "bottom";
 
@@ -38,33 +38,33 @@ export interface RowPinState {
 /**
  * Empty pin lists — omit `pinnedRowIds` and this is what the table holds.
  *
- * @internal
+ * @public
  */
 export const EMPTY_ROW_PIN_STATE: RowPinState = { top: [], bottom: [] };
 
 /**
  * Synthesized "Pin to top" action.
  *
- * @internal
+ * @public
  */
 export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
 /**
  * Synthesized "Pin to bottom" action.
  *
- * @internal
+ * @public
  */
 export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
 /**
  * Synthesized "Unpin" action.
  *
- * @internal
+ * @public
  */
 export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
 
 /**
  * Labels the pin actions and the live region need.
  *
- * @internal
+ * @public
  */
 export interface RowPinLabels {
   /** Pin the row to the top. */
@@ -78,7 +78,7 @@ export interface RowPinLabels {
 /**
  * Headless pin state adapters read.
  *
- * @internal
+ * @public
  */
 export interface RowPinningState<TRow> {
   /** Current lists. */
@@ -96,7 +96,7 @@ export interface RowPinningState<TRow> {
 /**
  * Split a row list into top pins, the scroll window, and bottom pins.
  *
- * @internal
+ * @public
  */
 export function partitionPinnedRows<TRow>(
   rows: readonly TRow[],
@@ -128,7 +128,7 @@ export function partitionPinnedRows<TRow>(
 /**
  * Memo digest so a virtualized row repaints when it is pinned or unpinned.
  *
- * @internal
+ * @public
  */
 export function rowPinSignature(
   pinning: Pick<RowPinningState<unknown>, "sideOf"> | undefined,
@@ -149,7 +149,7 @@ function withId(ids: readonly string[], rowId: string): string[] {
 /**
  * Apply a pin or unpin to a copy of the state.
  *
- * @internal
+ * @public
  */
 export function applyRowPin(
   state: RowPinState,
@@ -176,7 +176,7 @@ function sameState(a: RowPinState, b: RowPinState): boolean {
  * Headless row pinning. Inert until the host passes `enabled`;
  * omit the prop and this hook still runs (Rules of Hooks) but every action no-ops.
  *
- * @internal
+ * @public
  */
 export function useRowPinning<TRow>(options: {
   enabled: boolean;

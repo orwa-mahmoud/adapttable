@@ -15,7 +15,7 @@ import { LiveRegion } from "../a11y/LiveRegion";
 /**
  * Props for {@link ExportAnnouncer}.
  *
- * @internal
+ * @public
  */
 export interface ExportAnnouncerProps {
   /** `exportAnnouncement` from `useExportHandler`. Empty until an export ends. */
@@ -28,7 +28,7 @@ export interface ExportAnnouncerProps {
  *
  * @param props - See {@link ExportAnnouncerProps}.
  *
- * @internal
+ * @public
  */
 export function ExportAnnouncer({
   announcement,

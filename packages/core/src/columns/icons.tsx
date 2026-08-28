@@ -9,7 +9,7 @@ import type { ReactElement } from "react";
 /**
  * Six-dot drag grip.
  *
- * @internal
+ * @public
  */
 export function GripIcon(): ReactElement {
   return (
@@ -29,7 +29,7 @@ export function GripIcon(): ReactElement {
 /**
  * Eye (visible) / eye with slash (hidden) toggle glyph.
  *
- * @internal
+ * @public
  */
 export function EyeIcon({
   off = false,
@@ -56,7 +56,7 @@ export function EyeIcon({
 /**
  * Pin glyph.
  *
- * @internal
+ * @public
  */
 export function PinIcon(): ReactElement {
   return (

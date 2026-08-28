@@ -44,7 +44,7 @@ export interface DirtyCellState {
 /**
  * What {@link useDirtyCells} needs.
  *
- * @internal
+ * @public
  */
 export interface UseDirtyCellsOptions {
   /**
@@ -63,7 +63,7 @@ const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
  * @param options - See {@link UseDirtyCellsOptions}.
  * @returns The state; inert unless `enabled`.
  *
- * @internal
+ * @public
  */
 export function useDirtyCells(
   options: UseDirtyCellsOptions = {}

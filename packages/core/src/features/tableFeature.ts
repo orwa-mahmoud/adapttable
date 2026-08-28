@@ -204,7 +204,7 @@ function featuresOf(props: object): readonly TableFeature[] | undefined {
  * stripped from the result. Calling twice on the same object is a no-op
  * so adapters and `useDataTableShell` can both apply.
  *
- * @internal
+ * @public
  */
 export function applyTableFeatures<P extends object>(props: P): P {
   if (applied.has(props)) {

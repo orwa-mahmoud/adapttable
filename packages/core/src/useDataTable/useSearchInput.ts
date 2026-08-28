@@ -25,7 +25,7 @@ export interface SearchInputState {
  * @param debounceMs - Debounce delay; defaults to 300.
  * @returns The controlled input state.
  *
- * @internal
+ * @public
  */
 export function useSearchInput(
   search: string,

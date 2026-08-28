@@ -125,7 +125,7 @@ function readStored(
  * @param options - See {@link UseColumnLayoutStorageStateOptions}.
  * @returns The current layout and a change handler that persists it.
  *
- * @internal
+ * @public
  */
 export function useColumnLayoutStorageState(
   options: UseColumnLayoutStorageStateOptions

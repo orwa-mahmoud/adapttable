@@ -1,7 +1,7 @@
 /**
  * How the table presents filters — one container, never stacked.
  *
- * @internal
+ * @public
  */
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
@@ -10,7 +10,7 @@ export type FilterChromeMode = "popover" | "drawer" | "header";
  * `"header"`. Header mode wins when both are passed so a host cannot
  * mount the toolbar overlay and the header row at once.
  *
- * @internal
+ * @public
  */
 export function resolveFilterMode(
   mode?: FilterChromeMode,
@@ -26,7 +26,7 @@ export function resolveFilterMode(
  * for the simple form (the icons own those fields) but keeps it when the
  * AND/OR tree is on — the tree has no column of its own.
  *
- * @internal
+ * @public
  */
 export function toolbarShowsFilters(
   mode: FilterChromeMode,
@@ -41,7 +41,7 @@ export function toolbarShowsFilters(
  * Whether the per-field form mounts inside Filters. Header icons own those
  * fields; `filterFields={false}` keeps only the AND/OR tree.
  *
- * @internal
+ * @public
  */
 export function showSimpleFilterFields(
   headerFiltersOn: boolean,

@@ -32,7 +32,7 @@ import {
  * trips Safari's limit (~100 calls per 30s, then it throws). Reads stay instant
  * through the optimistic overlay below; only the URL write waits.
  *
- * @internal
+ * @public
  */
 export const FORMULA_URL_WRITE_DEBOUNCE_MS = 150;
 
@@ -42,7 +42,7 @@ const NO_FORMULAS: readonly FormulaColumnSpec[] = [];
 /**
  * What {@link useFormulaUrlState} needs.
  *
- * @internal
+ * @public
  */
 export interface UseFormulaUrlStateOptions {
   /** URL-state backend. Defaults to the browser History API. */
@@ -58,7 +58,7 @@ export interface UseFormulaUrlStateOptions {
 /**
  * The controlled pair to hand a formula bar and {@link buildFormulaColumns}.
  *
- * @internal
+ * @public
  */
 export interface UseFormulaUrlStateResult {
   /** The columns — from the URL, or the default while the URL is silent. */
@@ -73,7 +73,7 @@ export interface UseFormulaUrlStateResult {
  * @param options - See {@link UseFormulaUrlStateOptions}.
  * @returns The current columns and a change handler that persists them.
  *
- * @internal
+ * @public
  */
 export function useFormulaUrlState(
   options: UseFormulaUrlStateOptions = {}

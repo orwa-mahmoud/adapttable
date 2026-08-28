@@ -28,7 +28,7 @@ export function mobileMediaQuery(px: number): string {
  * @param px - The breakpoint in pixels. Defaults to 768.
  * @returns `true` on viewports at or below it.
  *
- * @internal
+ * @public
  */
 export function useIsMobile(px: number = MOBILE_BREAKPOINT_PX): boolean {
   return useMediaQuery(mobileMediaQuery(px));

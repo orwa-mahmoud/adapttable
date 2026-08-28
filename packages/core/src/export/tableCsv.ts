@@ -179,7 +179,7 @@ export interface FetchAllExport<TRow> {
 /**
  * The default {@link FetchAllExport.maxRows}.
  *
- * @internal
+ * @public
  */
 export const EXPORT_FETCH_ALL_MAX_ROWS = 50_000;
 
@@ -191,7 +191,7 @@ export const EXPORT_FETCH_ALL_MAX_ROWS = 50_000;
  * @param config - See {@link FetchAllExport}.
  * @returns Every row the query matches, up to the cap.
  *
- * @internal
+ * @public
  */
 export async function fetchAllExportRows<TRow>(
   source: TableSource<TRow>,
@@ -292,7 +292,7 @@ export type ExportCsvProp<TRow = unknown> =
 /**
  * Resolve a boolean-or-options prop into a concrete config, or `null` when off.
  *
- * @internal
+ * @public
  */
 export function resolveExportCsv<TRow = unknown>(
   value: ExportCsvProp<TRow>,
@@ -331,7 +331,7 @@ export function exportAllFallsBackToPage<TRow = unknown>(
 /**
  * Columns that belong in a CSV (drop synthetic actions and reorder columns).
  *
- * @internal
+ * @public
  */
 export function exportableColumns<TRow>(
   columns: readonly ColumnDef<TRow>[]
@@ -349,7 +349,7 @@ export function exportableColumns<TRow>(
  * Every field is optional. A caller that passes none gets exactly the
  * behaviour this function always had.
  *
- * @internal
+ * @public
  */
 export interface ExportContext<TRow> {
   /** The checked row ids. */
@@ -399,7 +399,7 @@ export interface ExportContext<TRow> {
 /**
  * Pick the column set an export scope asks for, minus the actions column.
  *
- * @internal
+ * @public
  */
 export function resolveExportColumns<TRow>(
   scope: ExportColumnScope | undefined,
@@ -570,7 +570,7 @@ function exportTableOptions<TRow>(
  *
  * @typeParam TRow - The row type.
  *
- * @internal
+ * @public
  */
 export function buildTableCsv<TRow>(options: {
   source: TableSource<TRow>;
@@ -598,7 +598,7 @@ export function buildTableCsv<TRow>(options: {
  *
  * @typeParam TRow - The row type.
  *
- * @internal
+ * @public
  */
 export function downloadTableCsv<TRow>(options: {
   source: TableSource<TRow>;
@@ -643,7 +643,7 @@ export function downloadTableCsv<TRow>(options: {
  *
  * @typeParam TRow - The row type.
  *
- * @internal
+ * @public
  */
 export function makeExportCsvHandler<TRow>(
   exportCsv: boolean | ExportCsvOptions<TRow> | undefined,

@@ -27,7 +27,7 @@ export interface CellRange {
 /**
  * The rectangle's edges, normalized so `from` is always the top-left.
  *
- * @internal
+ * @public
  */
 export interface CellRangeBounds {
   /** First row in the range. */
@@ -46,7 +46,7 @@ export interface CellRangeBounds {
  * A range dragged upward has an anchor below its head, so every consumer would
  * otherwise repeat the same min/max dance and one of them would forget.
  *
- * @internal
+ * @public
  */
 export function cellRangeBounds(range: CellRange): CellRangeBounds {
   return {
@@ -60,7 +60,7 @@ export function cellRangeBounds(range: CellRange): CellRangeBounds {
 /**
  * Is this cell inside the range?
  *
- * @internal
+ * @public
  */
 export function isInCellRange(
   range: CellRange | null,
@@ -79,7 +79,7 @@ export function isInCellRange(
 /**
  * How many cells the range covers — rows × columns, never enumerated.
  *
- * @internal
+ * @public
  */
 export function cellRangeSize(range: CellRange | null): number {
   if (!range) return 0;
@@ -90,7 +90,7 @@ export function cellRangeSize(range: CellRange | null): number {
 /**
  * A single cell selected on its own.
  *
- * @internal
+ * @public
  */
 export function singleCellRange(cell: GridCell): CellRange {
   return { anchor: cell, head: cell };
@@ -102,7 +102,7 @@ export function singleCellRange(cell: GridCell): CellRange {
  * Starting from nothing anchors at the cell that had focus, so the first
  * Shift+Down selects two cells rather than one.
  *
- * @internal
+ * @public
  */
 export function extendCellRange(
   range: CellRange | null,
@@ -115,7 +115,7 @@ export function extendCellRange(
 /**
  * Is the range a single cell? Useful for deciding whether to show chrome.
  *
- * @internal
+ * @public
  */
 export function isSingleCell(range: CellRange | null): boolean {
   return range !== null && sameGridCell(range.anchor, range.head);
@@ -128,7 +128,7 @@ export function isSingleCell(range: CellRange | null): boolean {
  * them — and it is a deliberate boundary: the model stays two corners, and
  * anything that needs the cells asks for them explicitly.
  *
- * @internal
+ * @public
  */
 export function cellRangeIndices(range: CellRange): {
   rows: number[];
