@@ -131,17 +131,23 @@ export interface UseDataTableResult<TRow> {
 
   /* ── Prop-getters (merge caller overrides) ───────────────────────── */
   getTableProps: (props?: Props) => TableElementProps;
+  /** Props for the header row. */
   getHeaderRowProps: (props?: Props) => Props;
+  /** Props for one header cell, `scope` and sort state included. */
   getHeaderCellProps: (
     column: ColumnDef<TRow>,
     props?: Props
   ) => CellElementProps;
+  /** Props for a column's sort control, its accessible name included. */
   getSortButtonProps: (
     column: ColumnDef<TRow>,
     props?: Props
   ) => SortButtonElementProps;
+  /** Props for a body row. Spread-clean: never carries a React `key`. */
   getRowProps: (row: TRow, index: number, props?: Props) => RowElementProps;
+  /** Props for a body cell. */
   getCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
+  /** Props for the search box. */
   getSearchInputProps: (props?: Props) => SearchInputElementProps;
   /**
    * The row's stable React key. Kept OUT of `getRowProps` so its
@@ -170,7 +176,9 @@ export interface UseDataTableResult<TRow> {
  * @public
  */
 export interface TableElementProps extends Props {
+  /** `grid` with cell navigation, `table` otherwise. */
   role: string;
+  /** Writing direction, present only when the table sets it. */
   dir?: Direction;
   "aria-label": string;
 }
@@ -183,11 +191,13 @@ export interface TableElementProps extends Props {
  * @public
  */
 export interface RowElementProps extends Props {
+  /** `row`. */
   role: string;
   /** The structural part name every kit's body row carries. */
   "data-adapttable-part": "row";
   /** The row's id, so an event can be traced back to the row it happened in. */
   "data-row-id": string;
+  /** The row's position in the rendered window. */
   "data-index": number;
   "aria-selected"?: boolean;
 }
@@ -198,6 +208,7 @@ export interface RowElementProps extends Props {
  * @public
  */
 export interface SortButtonElementProps extends Props {
+  /** Always `button`, so the control never submits a form. */
   type: "button";
   /** Whether the control is offered but not available. */
   disabled: boolean;
@@ -213,6 +224,7 @@ export interface SortButtonElementProps extends Props {
  * @public
  */
 export interface CellElementProps extends Props {
+  /** `gridcell` or `columnheader` inside a grid, `cell` otherwise. */
   role: string;
   /** Inline style for the element. */
   style?: CSSProperties;
@@ -225,7 +237,9 @@ export interface CellElementProps extends Props {
  * @public
  */
 export interface SearchInputElementProps extends Props {
+  /** `search`. */
   type: string;
+  /** `searchbox`. */
   role: string;
   /** Current value. */
   value: string;

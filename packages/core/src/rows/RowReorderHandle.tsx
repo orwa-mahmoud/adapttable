@@ -13,14 +13,19 @@ import type { RowReorderLabels, RowReorderState } from "./rowReorder";
  * @public
  */
 export interface RowReorderHandleProps<TRow> {
+  /** Row-reorder state: what is being dragged and where it may land. */
   reorder: RowReorderState<TRow>;
   /** Resolved labels, every key filled. */
   labels: RowReorderLabels;
+  /** Identity of the row this control moves. */
   rowId: string;
+  /** The row's index within the rendered window. */
   localIndex: number;
   /** The row being rendered. */
   row: TRow;
+  /** Index of the first rendered row, so a windowed index maps back. */
   windowStart: number;
+  /** Rows in the whole dataset, for the move bounds. */
   rowCount: number;
   /** Class for the element. */
   className?: string;
@@ -34,11 +39,15 @@ export interface RowReorderHandleProps<TRow> {
 export interface RowReorderHandleSlotProps {
   /** Accessible name for the control. */
   readonly label: string;
+  /** Whether the grip is held. */
   readonly pressed: boolean;
+  /** Whether a drag is in progress. */
   readonly dragging: boolean;
   /** Class for the element. */
   readonly className?: string;
+  /** Pointer bindings that start and track the drag. */
   readonly dragProps: ReturnType<RowReorderState<unknown>["dragProps"]>;
+  /** Handles the keyboard move keys. */
   readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
@@ -48,6 +57,7 @@ export interface RowReorderHandleSlotProps {
  * @public
  */
 export interface RowReorderHandleSlots {
+  /** Renders the drag grip. */
   readonly Handle: (props: RowReorderHandleSlotProps) => ReactNode;
 }
 
@@ -109,17 +119,23 @@ export function RowReorderHandleChrome<TRow>({
  * @public
  */
 export interface RowReorderButtonsProps<TRow> {
+  /** Row-reorder state: what is being dragged and where it may land. */
   reorder: RowReorderState<TRow>;
   /** Resolved labels, every key filled. */
   labels: RowReorderLabels;
+  /** The row's index within the rendered window. */
   localIndex: number;
   /** The row being rendered. */
   row: TRow;
+  /** Index of the first rendered row, so a windowed index maps back. */
   windowStart: number;
+  /** Rows in the whole dataset, for the move bounds. */
   rowCount: number;
   /** Class for the element. */
   className?: string;
+  /** Class for the move-up button. */
   upClassName?: string;
+  /** Class for the move-down button. */
   downClassName?: string;
 }
 
@@ -147,6 +163,7 @@ export interface RowReorderMoveButtonProps {
  * @public
  */
 export interface RowReorderButtonsSlots {
+  /** Renders one move button. */
   readonly Button: (props: RowReorderMoveButtonProps) => ReactNode;
 }
 

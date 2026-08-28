@@ -28,15 +28,25 @@ import { type FilterDef, filterLabel } from "./filterDefs";
  * @public
  */
 export interface ChecklistClassNames {
+  /** Class for the checklist as a whole. */
   filterChecklist?: string;
+  /** Class for its search box. */
   filterChecklistSearch?: string;
+  /** Class for its select-all and clear actions. */
   filterChecklistActions?: string;
+  /** Class for the list of options. */
   filterChecklistList?: string;
+  /** Class for an option's match count. */
   filterChecklistCount?: string;
+  /** Class for one field wrapper. */
   filterField?: string;
+  /** Class for a field's label. */
   filterLabel?: string;
+  /** Class for a text input. */
   filterInput?: string;
+  /** Class for the checkbox group. */
   filterCheckboxGroup?: string;
+  /** Class for one checkbox. */
   filterCheckbox?: string;
 }
 
@@ -46,6 +56,7 @@ export interface ChecklistClassNames {
  * @public
  */
 export interface ChecklistFilterProps<TRow> {
+  /** The checklist filter to render. */
   readonly def: FilterDef<TRow>;
   /** Reads and writes the table's state. */
   readonly source: Pick<
@@ -100,6 +111,7 @@ export interface ChecklistCheckboxProps {
   readonly checked: boolean;
   /** Class for the element. */
   readonly className?: string;
+  /** Class for the match count. */
   readonly countClassName?: string;
   /** Called with the new value. */
   readonly onChange: (checked: boolean) => void;
@@ -111,8 +123,11 @@ export interface ChecklistCheckboxProps {
  * @public
  */
 export interface ChecklistSlots {
+  /** Renders the search box. */
   readonly Search: (props: ChecklistSearchProps) => ReactNode;
+  /** Renders one action button. */
   readonly Button: (props: ChecklistButtonProps) => ReactNode;
+  /** Renders one option's checkbox. */
   readonly Checkbox: (props: ChecklistCheckboxProps) => ReactNode;
 }
 

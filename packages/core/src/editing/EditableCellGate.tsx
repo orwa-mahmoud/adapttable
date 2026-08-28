@@ -21,15 +21,21 @@ import { BatchEditCell, RowEditCell } from "./RowEditGate";
  * @public
  */
 export interface EditableCellEditorCtrl {
+  /** The value being edited, as text. */
   draft: string;
+  /** Replaces the draft on every keystroke. */
   setDraft: (value: string) => void;
+  /** Handles Enter, Escape and Tab for the editor. */
   onEditorKeyDown: (event: {
     key: string;
     preventDefault: () => void;
     shiftKey?: boolean;
   }) => void;
+  /** Commits the draft when focus leaves the editor. */
   commitOnBlur: () => void;
+  /** The editor shape this column declared. */
   editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
+  /** Choices for a select editor, empty for other shapes. */
   selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
   /**
    * A validator's message for this cell, when the last commit was rejected.
@@ -84,16 +90,19 @@ function isFirstEditableColumn(
  * @public
  */
 export interface EditableCellGateProps<TRow> {
+  /** Cell-editing state; the gate is a pass-through when absent. */
   readonly editing: EditableCellEditing<TRow> | undefined;
   /** The row being rendered. */
   readonly row: TRow;
   /** The column being rendered. */
   readonly column: ColumnDef<TRow>;
+  /** Identity of the row being edited. */
   readonly rowId: string;
   /** The rendered rows. */
   readonly rows: readonly TRow[];
   /** Visible columns, in order. */
   readonly columns: readonly ColumnDef<TRow>[];
+  /** Row identity function. */
   readonly rowKey: (row: TRow) => string;
   /** Accessible name for the activate control. */
   readonly editLabel: string;
@@ -119,6 +128,7 @@ export interface EditableCellGateProps<TRow> {
    * the kit.
    */
   readonly kitRendersError?: boolean;
+  /** What the cell shows when it is not being edited. */
   readonly display: ReactNode;
   /**
    * Kit-native editor. Only called while this cell is the active edit.
@@ -131,13 +141,17 @@ export interface EditableCellGateProps<TRow> {
 
 /** Kit activate control the gate calls while the cell is idle. */
 export interface EditableCellActivateProps {
-  /** Heading text. */
+  /** Tooltip for the control. */
   readonly title: string;
   /** Class for the element. */
   readonly className?: string;
+  /** Save state for this cell, when one is being reported. */
   readonly saveStatus: string | undefined;
+  /** Whether the cell holds an unsaved edit. */
   readonly dirty: boolean;
+  /** Ref to the control, so the gate can put focus back. */
   readonly activateRef: (node: HTMLButtonElement | null) => void;
+  /** What the cell shows while idle. */
   readonly display: ReactNode;
   readonly onDoubleClick: (event: {
     preventDefault: () => void;
@@ -160,6 +174,7 @@ export interface EditableCellButtonProps {
   readonly part: string;
   /** Class for the element. */
   readonly className?: string;
+  /** Called on press, before focus moves. */
   readonly onMouseDown?: (event: { preventDefault: () => void }) => void;
   /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
@@ -167,7 +182,9 @@ export interface EditableCellButtonProps {
 
 /** Adapter-supplied controls for `EditableCellGate`. */
 export interface EditableCellSlots {
+  /** Renders the idle cell that opens the editor. */
   readonly Activate: (props: EditableCellActivateProps) => ReactNode;
+  /** Renders a conflict-resolution button. */
   readonly Button: (props: EditableCellButtonProps) => ReactNode;
 }
 

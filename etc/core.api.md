@@ -500,7 +500,6 @@ export interface CellEditTarget {
 export interface CellElementProps extends Props {
     // (undocumented)
     "data-sort-index"?: number;
-    // (undocumented)
     role: string;
     style?: CSSProperties;
 }
@@ -1205,27 +1204,21 @@ export interface EditableCellEditing<TRow> {
 
 // @public
 export interface EditableCellEditorCtrl {
-    // (undocumented)
     commitOnBlur: () => void;
     conflict?: boolean;
-    // (undocumented)
     draft: string;
-    // (undocumented)
     editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
     error?: string;
     errorId: string;
     focusRef: (node: {
         focus: () => void;
     } | null) => void;
-    // (undocumented)
     onEditorKeyDown: (event: {
         key: string;
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    // (undocumented)
     selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-    // (undocumented)
     setDraft: (value: string) => void;
     validating: boolean;
 }
@@ -1238,9 +1231,7 @@ export interface EditableCellGateProps<TRow> {
     readonly activateClassName?: string;
     readonly column: ColumnDef<TRow>;
     readonly columns: readonly ColumnDef<TRow>[];
-    // (undocumented)
     readonly display: ReactNode;
-    // (undocumented)
     readonly editing: EditableCellEditing<TRow> | undefined;
     readonly editLabel: string;
     readonly errorClassName?: string;
@@ -1248,9 +1239,7 @@ export interface EditableCellGateProps<TRow> {
     readonly renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
     readonly rollbackClassName?: string;
     readonly row: TRow;
-    // (undocumented)
     readonly rowId: string;
-    // (undocumented)
     readonly rowKey: (row: TRow) => string;
     readonly rows: readonly TRow[];
     readonly saveErrorClassName?: string;
@@ -2950,10 +2939,8 @@ export interface RowElementProps extends Props {
     // (undocumented)
     "aria-selected"?: boolean;
     "data-adapttable-part": "row";
-    // (undocumented)
     "data-index": number;
     "data-row-id": string;
-    // (undocumented)
     role: string;
 }
 
@@ -3155,9 +3142,7 @@ export interface SearchInputElementProps extends Props {
         };
     }) => void;
     placeholder: string;
-    // (undocumented)
     role: string;
-    // (undocumented)
     type: string;
     value: string;
 }
@@ -3264,7 +3249,6 @@ export interface SortButtonElementProps extends Props {
     onClick: (event?: {
         shiftKey?: boolean;
     }) => void;
-    // (undocumented)
     type: "button";
 }
 
@@ -3380,9 +3364,7 @@ export interface TableEditHistoryProps<TRow> {
 export interface TableElementProps extends Props {
     // (undocumented)
     "aria-label": string;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     role: string;
 }
 
@@ -4025,18 +4007,12 @@ export interface UseDataTableResult<TRow> {
     dir: Direction;
     filterChips: ActiveFilterChip[];
     getCellContent: (column: ColumnDef<TRow>, row: TRow, rowIndex: number) => ReactNode;
-    // (undocumented)
     getCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
-    // (undocumented)
     getHeaderCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
-    // (undocumented)
     getHeaderRowProps: (props?: Props) => Props;
     getRowKey: (row: TRow) => string;
-    // (undocumented)
     getRowProps: (row: TRow, index: number, props?: Props) => RowElementProps;
-    // (undocumented)
     getSearchInputProps: (props?: Props) => SearchInputElementProps;
-    // (undocumented)
     getSortButtonProps: (column: ColumnDef<TRow>, props?: Props) => SortButtonElementProps;
     // (undocumented)
     getTableProps: (props?: Props) => TableElementProps;

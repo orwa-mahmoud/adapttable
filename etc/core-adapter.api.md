@@ -149,7 +149,6 @@ export interface ChecklistCheckboxProps {
     readonly checked: boolean;
     readonly className?: string;
     readonly count: string;
-    // (undocumented)
     readonly countClassName?: string;
     readonly label: string;
     readonly onChange: (checked: boolean) => void;
@@ -165,32 +164,21 @@ export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
 
 // @public
 export interface ChecklistClassNames {
-    // (undocumented)
     filterCheckbox?: string;
-    // (undocumented)
     filterCheckboxGroup?: string;
-    // (undocumented)
     filterChecklist?: string;
-    // (undocumented)
     filterChecklistActions?: string;
-    // (undocumented)
     filterChecklistCount?: string;
-    // (undocumented)
     filterChecklistList?: string;
-    // (undocumented)
     filterChecklistSearch?: string;
-    // (undocumented)
     filterField?: string;
-    // (undocumented)
     filterInput?: string;
-    // (undocumented)
     filterLabel?: string;
 }
 
 // @public
 export interface ChecklistFilterProps<TRow> {
     readonly classNames?: ChecklistClassNames;
-    // (undocumented)
     readonly def: FilterDef<TRow>;
     readonly labels?: TableLabels;
     readonly source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
@@ -206,11 +194,8 @@ export interface ChecklistSearchProps {
 
 // @public
 export interface ChecklistSlots {
-    // (undocumented)
     readonly Button: (props: ChecklistButtonProps) => ReactNode;
-    // (undocumented)
     readonly Checkbox: (props: ChecklistCheckboxProps) => ReactNode;
-    // (undocumented)
     readonly Search: (props: ChecklistSearchProps) => ReactNode;
 }
 
@@ -863,12 +848,9 @@ export interface DesktopVirtualPadSlot {
 
 // @public
 export interface EditableCellActivateProps {
-    // (undocumented)
     readonly activateRef: (node: HTMLButtonElement | null) => void;
     readonly className?: string;
-    // (undocumented)
     readonly dirty: boolean;
-    // (undocumented)
     readonly display: ReactNode;
     readonly onClick: (event: {
         stopPropagation: () => void;
@@ -884,7 +866,6 @@ export interface EditableCellActivateProps {
         preventDefault: () => void;
         stopPropagation: () => void;
     }) => void;
-    // (undocumented)
     readonly saveStatus: string | undefined;
     readonly title: string;
 }
@@ -896,7 +877,6 @@ export interface EditableCellButtonProps {
     readonly onClick: (event: {
         stopPropagation: () => void;
     }) => void;
-    // (undocumented)
     readonly onMouseDown?: (event: {
         preventDefault: () => void;
     }) => void;
@@ -905,9 +885,7 @@ export interface EditableCellButtonProps {
 
 // @public
 export interface EditableCellSlots {
-    // (undocumented)
     readonly Activate: (props: EditableCellActivateProps) => ReactNode;
-    // (undocumented)
     readonly Button: (props: EditableCellButtonProps) => ReactNode;
 }
 
@@ -1917,25 +1895,18 @@ export interface RowReorderButtonsChromeProps<TRow> extends RowReorderButtonsPro
 // @public
 export interface RowReorderButtonsProps<TRow> {
     className?: string;
-    // (undocumented)
     downClassName?: string;
     labels: RowReorderLabels;
-    // (undocumented)
     localIndex: number;
-    // (undocumented)
     reorder: RowReorderState<TRow>;
     row: TRow;
-    // (undocumented)
     rowCount: number;
-    // (undocumented)
     upClassName?: string;
-    // (undocumented)
     windowStart: number;
 }
 
 // @public
 export interface RowReorderButtonsSlots {
-    // (undocumented)
     readonly Button: (props: RowReorderMoveButtonProps) => ReactNode;
 }
 
@@ -1957,36 +1928,26 @@ export interface RowReorderHandleChromeProps<TRow> extends RowReorderHandleProps
 export interface RowReorderHandleProps<TRow> {
     className?: string;
     labels: RowReorderLabels;
-    // (undocumented)
     localIndex: number;
-    // (undocumented)
     reorder: RowReorderState<TRow>;
     row: TRow;
-    // (undocumented)
     rowCount: number;
-    // (undocumented)
     rowId: string;
-    // (undocumented)
     windowStart: number;
 }
 
 // @public
 export interface RowReorderHandleSlotProps {
     readonly className?: string;
-    // (undocumented)
     readonly dragging: boolean;
-    // (undocumented)
     readonly dragProps: ReturnType<RowReorderState<unknown>["dragProps"]>;
     readonly label: string;
-    // (undocumented)
     readonly onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    // (undocumented)
     readonly pressed: boolean;
 }
 
 // @public
 export interface RowReorderHandleSlots {
-    // (undocumented)
     readonly Handle: (props: RowReorderHandleSlotProps) => ReactNode;
 }
 
