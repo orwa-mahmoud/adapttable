@@ -52,7 +52,7 @@ data, infinite scroll, filtering and selection. MUI X DataGrid and ag-Grid are
 **open-core**: their advanced server-side data and infinite-loading
 capabilities sit behind paid Pro/Premium or Enterprise tiers.
 
-So do six more that AdaptTable ships under MIT:
+Six more sit in those same paid tiers and are MIT here:
 [pivoting](./pivot.md), [tree data](./tree-data.md),
 [cell-range selection, range clipboard copy/paste and the fill
 handle](./cell-navigation.md), and
