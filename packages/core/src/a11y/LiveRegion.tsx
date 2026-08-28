@@ -58,15 +58,19 @@ export function LiveRegion({
   part,
   statusRole = true,
 }: Readonly<LiveRegionProps>): ReactElement {
-  return (
-    <div
-      role={statusRole ? "status" : undefined}
-      aria-live="polite"
-      aria-atomic="true"
-      data-adapttable-part={part}
-      style={VISUALLY_HIDDEN}
-    >
-      {children}
-    </div>
+  // `<output>` IS the status role, so the element carries the semantics instead
+  // of an attribute restating them. The region that is present on every table
+  // stays a plain `<div>` on purpose: it must announce without becoming a second
+  // permanent status landmark beside the empty state and the feature announcers.
+  const props = {
+    "aria-live": "polite",
+    "aria-atomic": "true",
+    "data-adapttable-part": part,
+    style: VISUALLY_HIDDEN,
+  } as const;
+  return statusRole ? (
+    <output {...props}>{children}</output>
+  ) : (
+    <div {...props}>{children}</div>
   );
 }

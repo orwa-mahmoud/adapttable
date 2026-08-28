@@ -370,12 +370,18 @@ export function ColumnMenu<TRow>({
   // and width belong to us; `styles.content` below zeroes antd's own padding
   // so this is the single source of it.
   const content = (
-    <div
-      // antd's own popover wrapper is a tooltip, which is the wrong thing for a
-      // panel of controls, so the panel names itself as a group inside it.
-      role="group"
+    // antd's own popover wrapper is a tooltip, which is the wrong thing for a
+    // panel of controls, so the panel names itself inside it. A fieldset is the
+    // element form of the group role — the same choice the unstyled adapter
+    // makes for this panel — so the semantics come from the markup rather than
+    // from an attribute.
+    <fieldset
       aria-label={labels.columns}
       style={{
+        border: 0,
+        margin: 0,
+        // Without it a fieldset sizes to min-content and ignores minWidth.
+        minInlineSize: 0,
         padding: 8,
         minWidth: 260,
         maxHeight: "min(70vh, 480px)",
@@ -462,7 +468,7 @@ export function ColumnMenu<TRow>({
       <Button size="small" type="text" onClick={() => layout.reset()}>
         {labels.resetColumns}
       </Button>
-    </div>
+    </fieldset>
   );
   return (
     <Popover
