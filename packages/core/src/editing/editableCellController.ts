@@ -84,7 +84,7 @@ export interface EditableCellEditing<TRow> {
 /** Display / edit mode for one cell. */
 export type EditableCellMode = "display" | "activatable" | "editing";
 
-/** Controller returned by {@link editableCellController}. */
+/** Controller returned by `editableCellController`. */
 export interface EditableCellController<TRow = unknown> {
   mode: EditableCellMode;
   /** The validator's message for this cell, if it rejected the last commit. */

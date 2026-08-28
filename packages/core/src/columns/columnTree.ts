@@ -48,7 +48,7 @@ export interface ColumnGroupDef<TRow> {
   readonly align?: GroupedHeaderAlign;
 }
 
-/** A leaf {@link ColumnDef} or a {@link ColumnGroupDef} parent. */
+/** A leaf `ColumnDef` or a {@link ColumnGroupDef} parent. */
 export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
 
 /** Collapse policy recorded for one parent while flattening a tree. */
@@ -72,7 +72,7 @@ export function isColumnGroup<TRow>(
 
 /**
  * Flatten a mixed column tree into leaves. Tree parents become `group`
- * paths on those leaves; collapse options are in {@link FlattenedColumns.groups}.
+ * paths on those leaves; collapse options are in `FlattenedColumns.groups`.
  */
 export function flattenColumnTree<TRow>(
   columns: readonly ColumnInput<TRow>[]

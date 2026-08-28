@@ -488,7 +488,7 @@ export function flattenGroupPartitions<TRow>(
  * one step.
  *
  * @typeParam TRow - The row type.
- * @param options - See {@link BuildGroupedFlatModelOptions}.
+ * @param options - See `BuildGroupedFlatModelOptions`.
  * @returns The entries, in render order.
  */
 export function buildGroupedFlatModel<TRow>(

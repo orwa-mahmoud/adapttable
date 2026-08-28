@@ -518,7 +518,7 @@ function FilterField<TRow>({
   }
 }
 
-/** Props for {@link AutoFilterForm}. */
+/** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
   /** The resolved filter definitions, in render order. */
   defs: readonly FilterDef<TRow>[];

@@ -46,7 +46,7 @@ export function headerFilterStickTop(
   return { ...stickyExtras, ...base, top };
 }
 
-/** Props for an adapter {@link FilterHeaderRow} — no slots on the public API. */
+/** Props for an adapter `FilterHeaderRow` — no slots on the public API. */
 export interface FilterHeaderRowProps<TRow> {
   /** When false the row does not render, even if defs exist. */
   readonly enabled?: boolean;
@@ -67,7 +67,7 @@ export interface FilterHeaderRowProps<TRow> {
   readonly classNames?: FilterHeaderClassNames;
 }
 
-/** Props for an adapter {@link FilterHeaderControl} — no slots on the public API. */
+/** Props for an adapter `FilterHeaderControl` — no slots on the public API. */
 export interface FilterHeaderControlProps<TRow> {
   readonly def: FilterDef<TRow>;
   readonly source: FilterFormSource<TRow>;

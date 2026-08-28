@@ -7,7 +7,7 @@ import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { RowReorderLabels, RowReorderState } from "./rowReorder";
 
-/** Props for an adapter {@link RowReorderHandle} — no slots on the public API. */
+/** Props for an adapter `RowReorderHandle` — no slots on the public API. */
 export interface RowReorderHandleProps<TRow> {
   reorder: RowReorderState<TRow>;
   labels: RowReorderLabels;
@@ -79,7 +79,7 @@ export function RowReorderHandleChrome<TRow>({
   );
 }
 
-/** Props for an adapter {@link RowReorderButtons} — no slots on the public API. */
+/** Props for an adapter `RowReorderButtons` — no slots on the public API. */
 export interface RowReorderButtonsProps<TRow> {
   reorder: RowReorderState<TRow>;
   labels: RowReorderLabels;

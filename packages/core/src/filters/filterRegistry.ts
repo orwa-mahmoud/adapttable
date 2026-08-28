@@ -32,7 +32,7 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
  */
 export interface FilterTypeSpec {
   readonly type: string;
-  /** Which built-in kit widget to draw. Ignored when {@link render} is set. */
+  /** Which built-in kit widget to draw. Ignored when `render` is set. */
   readonly widget: FilterWidgetKind;
   readonly ops: readonly string[];
   readonly defaultOp: string;

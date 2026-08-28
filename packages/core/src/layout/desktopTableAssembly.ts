@@ -1019,7 +1019,7 @@ function collectDesktopBodySlots<TRow>(
 
 /**
  * Shared desktop-table assembly. Calls {@link tableRenderModel} and
- * {@link UseDataTableResult.getRowProps}; does not replace them.
+ * `UseDataTableResult.getRowProps`; does not replace them.
  *
  * @typeParam TRow - The row type.
  * @param props - The shared render contract plus actionsPinned.

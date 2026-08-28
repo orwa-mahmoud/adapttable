@@ -91,7 +91,7 @@ export interface UseGridFocusOptions<TRow> {
    */
   columns: readonly ColumnDef<TRow>[];
   /**
-   * Whether the rendered columns are a window over {@link columns} rather than
+   * Whether the rendered columns are a window over `columns` rather than
    * all of them. Windowing the horizontal axis has the same consequence as
    * windowing rows: the cells in the DOM are a slice, so their position has to
    * be stated rather than counted.

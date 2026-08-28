@@ -79,7 +79,7 @@ export interface FilterDef<TRow = unknown> {
   key: string;
   /**
    * Column key the header filter row places this widget under.
-   * Defaults to {@link key} when the filter bag and the column share a
+   * Defaults to `key` when the filter bag and the column share a
    * name; set it when they differ (`key: "name"` under `column: "person"`).
    */
   column?: string;

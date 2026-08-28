@@ -58,7 +58,7 @@ export interface FilterTreeClassNames {
   filterOperator?: string;
 }
 
-/** Props for an adapter {@link FilterTreeBuilder} — no slots on the public API. */
+/** Props for an adapter `FilterTreeBuilder` — no slots on the public API. */
 export interface FilterTreeBuilderProps<TRow> {
   readonly defs: readonly FilterDef<TRow>[];
   readonly source: Pick<TableSource<TRow>, "filterTree" | "setFilterTree">;
@@ -592,7 +592,7 @@ function GroupView<TRow>({
 }
 
 /**
- * Recursive AND/OR layout over {@link QueryFilterGroup}. Writes the
+ * Recursive AND/OR layout over `QueryFilterGroup`. Writes the
  * versioned `ft` param through `source.setFilterTree`. Adapters supply
  * the kit controls via {@link FilterTreeSlots}.
  */

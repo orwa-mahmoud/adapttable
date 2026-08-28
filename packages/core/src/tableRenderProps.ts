@@ -159,7 +159,7 @@ export interface SharedTableRenderProps<TRow> {
   editing?: EditableCellEditing<TRow>;
   /**
    * Tree bundle — present iff the host declared a hierarchy. Adapters render
-   * `tree.entries` in place of plain rows and put a {@link TreeToggle} plus
+   * `tree.entries` in place of plain rows and put a `TreeToggle` plus
    * `treeIndentStyle` in the `tree.columnKey` cell.
    */
   tree?: {
@@ -218,12 +218,12 @@ export interface SharedTableRenderProps<TRow> {
   fitColumns?: boolean;
   /**
    * Compact per-column filter row under the header. Desktop only.
-   * Driven by {@link filterDefs} and the source extra bag.
+   * Driven by `filterDefs` and the source extra bag.
    */
   headerFilters?: boolean;
   /**
    * Close a header-filter overlay after a finished single-control write.
-   * Default off — see {@link BaseDataTableProps.closeHeaderFilterOnSelect}.
+   * Default off — see `BaseDataTableProps.closeHeaderFilterOnSelect`.
    */
   closeHeaderFilterOnSelect?: boolean;
   /** Declarative filter defs the header row matches to columns. */

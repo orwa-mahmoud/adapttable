@@ -35,7 +35,7 @@ export interface TableSource<TRow> extends TableStateMutators {
   readonly allSearchedRows?: readonly TRow[];
   /**
    * Distinct-value counts per filter key. Frontend chrome computes them
-   * from {@link allSearchedRows} with each facet's own filter removed.
+   * from `allSearchedRows` with each facet's own filter removed.
    * A server that declared `supports.facets` supplies the same shape
    * from `query.facets`.
    */
@@ -45,18 +45,18 @@ export interface TableSource<TRow> extends TableStateMutators {
   /**
    * True during the FIRST load only (no load has completed yet). A
    * background refresh never re-raises it — not even one that empties
-   * `rows`; watch {@link isFetching} for those.
+   * `rows`; watch `isFetching` for those.
    */
   readonly isLoading: boolean;
   /** True whenever a fetch is in flight (initial or background). */
   readonly isFetching: boolean;
   /**
-   * True while an APPEND fetch started by {@link fetchNextPage} is in
+   * True while an APPEND fetch started by `fetchNextPage` is in
    * flight. Always false in paged mode.
    */
   readonly isFetchingNextPage: boolean;
   /**
-   * Whether {@link fetchNextPage} can append more rows. Infinite mode
+   * Whether `fetchNextPage` can append more rows. Infinite mode
    * only — always false in paged mode, where navigation is `setPage`.
    */
   readonly hasNextPage: boolean;

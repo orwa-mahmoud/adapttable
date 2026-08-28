@@ -89,7 +89,7 @@ export interface RowReorderLabels {
   rowReorderCancelled: string;
 }
 
-/** Headless reorder state returned by {@link useRowReorder}. */
+/** Headless reorder state returned by `useRowReorder`. */
 export interface RowReorderState<TRow> {
   /** The lifted row, or `null` when idle. */
   lifted: { rowId: string; from: number } | null;

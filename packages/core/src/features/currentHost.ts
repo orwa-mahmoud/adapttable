@@ -6,7 +6,7 @@
  * leaves the last table on top for every later click, and lets an inner
  * table steal the rest of the outer tree. Readers take the host from
  * {@link FeatureHostContext} (hooks) or as an argument (plain functions).
- * {@link currentFeatureHost} is only valid inside {@link runWithFeatureHost},
+ * `currentFeatureHost` is only valid inside `runWithFeatureHost`,
  * which is how a mapper created outside the table (e.g. `aggregate()`)
  * still resolves names for the table that is invoking it.
  */
@@ -80,7 +80,7 @@ export function appendByKey<T>(
 const scoped: FeatureHostState[] = [];
 
 /**
- * Run `fn` with `host` as {@link currentFeatureHost}. The stack is empty
+ * Run `fn` with `host` as `currentFeatureHost`. The stack is empty
  * again when `fn` returns, so a sibling or a later click cannot see it.
  */
 export function runWithFeatureHost<T>(
@@ -97,7 +97,7 @@ export function runWithFeatureHost<T>(
 }
 
 /**
- * The host bound by {@link runWithFeatureHost}. Empty outside that call, so a
+ * The host bound by `runWithFeatureHost`. Empty outside that call, so a
  * sibling table or a later click resolves its own host and never this one.
  */
 export function currentFeatureHost<TRow = unknown>():
@@ -105,7 +105,7 @@ export function currentFeatureHost<TRow = unknown>():
   return scoped.at(-1) as FeatureHostState<TRow> | undefined;
 }
 
-/** Bind a callback so every invocation sees `host` via {@link currentFeatureHost}. */
+/** Bind a callback so every invocation sees `host` via `currentFeatureHost`. */
 export function bindFeatureHostFn<Args extends unknown[], R>(
   host: FeatureHostState | undefined,
   fn: ((...args: Args) => R) | undefined

@@ -1,7 +1,7 @@
 /**
  * AND/OR filter tree — the engine behind advanced filters (#278).
  * The URL and Saved Views store a versioned encoding; the frontend
- * predicate and the server query both read the same {@link QueryFilterGroup}.
+ * predicate and the server query both read the same `QueryFilterGroup`.
  * The builder UI is #279; this file is the evaluator.
  */
 import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";

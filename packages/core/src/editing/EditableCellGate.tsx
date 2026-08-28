@@ -148,7 +148,7 @@ export interface EditableCellButtonProps {
   readonly onClick: (event: { stopPropagation: () => void }) => void;
 }
 
-/** Adapter-supplied controls for {@link EditableCellGate}. */
+/** Adapter-supplied controls for `EditableCellGate`. */
 export interface EditableCellSlots {
   readonly Activate: (props: EditableCellActivateProps) => ReactNode;
   readonly Button: (props: EditableCellButtonProps) => ReactNode;

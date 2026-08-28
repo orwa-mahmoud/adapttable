@@ -82,7 +82,7 @@ export interface UseTableDataOptions<TRow> extends Pick<
   locale?: string;
   /**
    * Server tier: what this endpoint can answer. `supports.facets`
-   * unlocks `query.facets` (checklist keys, or {@link facetKeys}).
+   * unlocks `query.facets` (checklist keys, or `facetKeys`).
    */
   supports?: QuerySupport;
   /**

@@ -7,7 +7,7 @@ import { isRtlElement } from "../layout/writingDirection";
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
 /** Props that make a whole menu ROW draggable (so the browser's drag image is
- * the full row — you see the column move). Pair with {@link columnDropProps}. */
+ * the full row — you see the column move). Pair with `columnDropProps`. */
 export interface ColumnRowDragProps {
   draggable: true;
   onDragStart: (event: DragEvent<HTMLElement>) => void;
@@ -141,20 +141,20 @@ export interface ColumnDragRowAttrs {
   "data-drop"?: "before" | "after";
 }
 
-/** Live drag state + composed prop builders from {@link useColumnDragState}. */
+/** Live drag state + composed prop builders from `useColumnDragState`. */
 export interface ColumnDragState {
   /** Key currently being dragged, or `null` outside a drag. */
   draggingKey: string | null;
   /** Hovered drop index, or `null`. */
   overIndex: number | null;
-  /** Drag props for a row — {@link columnRowDragProps} + state tracking. */
+  /** Drag props for a row — `columnRowDragProps` + state tracking. */
   rowDragProps: (
     key: string,
     index: number
   ) => ColumnRowDragProps & {
     onDragEnd: () => void;
   };
-  /** Drop props for a row — {@link columnDropProps} + hover tracking. */
+  /** Drop props for a row — `columnDropProps` + hover tracking. */
   dropProps: (
     index: number,
     move: (key: string, toIndex: number) => void

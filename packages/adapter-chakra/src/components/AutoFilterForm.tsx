@@ -37,7 +37,7 @@ import { FormField, NativeSelect } from "./primitives";
 
 /**
  * A labelled GROUP wrapper for multi-control fields (the multiSelect checkbox
- * group). Unlike {@link FormField} it does NOT use Ark's `Field.Root`, whose
+ * group). Unlike `FormField` it does NOT use Ark's `Field.Root`, whose
  * single-control labelling would hijack the first checkbox's id and name. The
  * label carries an `id` so the group references it via `aria-labelledby`.
  */
@@ -56,7 +56,7 @@ function GroupField({
   );
 }
 
-/** Props for {@link AutoFilterForm}. */
+/** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
   /** Writing direction (flips the select chevron). */
   dir?: Direction;
@@ -125,7 +125,7 @@ function RelativeTokenField({
  * Operator-first range widget (`numberRange` / `dateRange`): a comparison
  * select, then ONE bound input — or a From/To pair for "Between". The widget
  * logic (operator seeding, bound derivation, writes) lives in core's
- * {@link useRangeFilterWidget}; this renders the Chakra controls over it.
+ * `useRangeFilterWidget`; this renders the Chakra controls over it.
  */
 function RangeField<TRow>({
   def,
@@ -410,7 +410,7 @@ function AutoFilterField<TRow>({
 
 /**
  * The auto-built filter form: one kit-native Chakra control per declarative
- * {@link FilterDef}, reading and writing the source's extra-filter bag —
+ * `FilterDef`, reading and writing the source's extra-filter bag —
  * `""` / `[]` clears a key. Rendered inside the filter popover or drawer
  * when the `filters` prop is the declarative array form.
  *

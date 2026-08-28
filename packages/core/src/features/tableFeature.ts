@@ -83,16 +83,16 @@ export interface TableFeatureHost<TRow = unknown> {
   extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
   /**
    * Named custom editor. `column.editor` as that string resolves to
-   * `{ type: "custom", render }` through the same {@link resolveCellEditor}
+   * `{ type: "custom", render }` through the same `resolveCellEditor`
    * path built-ins use.
    */
   registerEditor(type: string, render: CustomCellEditorRender): void;
   /**
-   * Named aggregator. {@link aggregate} looks this up after the built-in
+   * Named aggregator. `aggregate` looks this up after the built-in
    * names, so a plugin `"distinct"` is not a second API beside `Aggregator`.
    */
   registerAggregator(name: string, aggregator: Aggregator): void;
-  /** Same {@link ExportWriter} as `exportCsv.writer`. */
+  /** Same `ExportWriter` as `exportCsv.writer`. */
   registerWriter(writer: ExportWriter): void;
   /**
    * Extra Columns-menu actions, appended after the built-ins. The factory
@@ -104,9 +104,9 @@ export interface TableFeatureHost<TRow = unknown> {
       ctx: ColumnMenuActionContext<TRow>
     ) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined
   ): void;
-  /** Same {@link SidePanelEntry} as `sidePanel.panels`. */
+  /** Same `SidePanelEntry` as `sidePanel.panels`. */
   registerPanel(panel: SidePanelEntry): void;
-  /** Same {@link Command} as `commandPalette.commands`. */
+  /** Same `Command` as `commandPalette.commands`. */
   registerCommand(command: Command): void;
   /** Same extra-items factory as `contextMenu.items`. */
   registerContextMenuItems(

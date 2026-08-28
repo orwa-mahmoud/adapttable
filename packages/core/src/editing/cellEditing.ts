@@ -97,7 +97,7 @@ export interface CustomCellEditorCtrl {
 }
 
 /**
- * Minimal column surface the editing helpers need. {@link ColumnDef}
+ * Minimal column surface the editing helpers need. `ColumnDef`
  * satisfies this; using a narrow shape avoids `ColumnDef<T>` variance
  * issues when Tab-navigation crosses generic boundaries.
  *

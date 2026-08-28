@@ -64,7 +64,7 @@ export function hasLocale(locale: string): boolean {
  * (e.g. `"ar-EG"` → Arabic). Falls back to English for unknown locales.
  *
  * @param locale - A BCP-47 locale such as `"en"`, `"ar"`, `"zh-TW"`, or `"ar-EG"`.
- * @returns The matching {@link TableLabels} preset, or English.
+ * @returns The matching `TableLabels` preset, or English.
  */
 export function getLabels(locale: string): Required<TableLabels> {
   const key = resolveLocaleKey(locale);

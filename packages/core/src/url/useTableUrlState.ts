@@ -99,7 +99,7 @@ const NO_KEYS: readonly string[] = [];
  * Headless URL-synced table state. Keeps page / limit / search / sort and
  * an arbitrary `extra` filter bag in the query string (or a local store
  * when disabled), so reloads, shared links, and back/forward all restore
- * the exact slice. Decoupled from any router via {@link UrlStateAdapter}.
+ * the exact slice. Decoupled from any router via `UrlStateAdapter`.
  *
  * `defaults` apply only while the URL is silent about a key. When the user
  * explicitly clears a defaulted value (clearing the search, removing a

@@ -60,7 +60,7 @@ export interface PivotTableModelOptions {
   /**
    * Localized labels. Only the pivot captions are read: the grand-total
    * column's group header, the grand-total footer's caption, and the
-   * row-header column's own header when {@link rowHeader} is absent.
+   * row-header column's own header when `rowHeader` is absent.
    */
   labels?: TableLabels;
   /**

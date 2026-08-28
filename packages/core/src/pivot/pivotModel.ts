@@ -62,7 +62,7 @@ export interface PivotMeasure {
   key: string;
   /**
    * A built-in name, a name registered on the table that called
-   * {@link pivot}, or your own function.
+   * `pivot`, or your own function.
    */
   agg: AggregateName | (string & {}) | Aggregator;
   /** Header caption. Defaults to the column key. */
@@ -140,7 +140,7 @@ export interface PivotResult {
   rowDepth: number;
 }
 
-/** Options for {@link pivot}. */
+/** Options for `pivot`. */
 export interface PivotOptions<TRow> {
   /**
    * Columns, so dimension and measure values resolve through `sortValue`

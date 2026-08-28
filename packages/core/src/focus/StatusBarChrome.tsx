@@ -76,7 +76,7 @@ export interface StatusBarChromeProps {
   shown: number;
   /** The page being shown, for the row range. Defaults to the first. */
   page?: number;
-  /** The page size, for the row range. Defaults to {@link shown}. */
+  /** The page size, for the row range. Defaults to `shown`. */
   limit?: number;
   /** How many rows the whole filtered set holds, when the source knows. */
   total?: number;

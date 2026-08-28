@@ -8,7 +8,7 @@ import type { ReactElement, ReactNode } from "react";
 
 import type { TableLabels } from "../types";
 
-/** Props for an adapter {@link GroupMoreButton} — no slots on the public API. */
+/** Props for an adapter `GroupMoreButton` — no slots on the public API. */
 export interface GroupMoreButtonProps {
   /** Whether this offers more groups or more rows inside one. */
   scope: "groups" | "rows";

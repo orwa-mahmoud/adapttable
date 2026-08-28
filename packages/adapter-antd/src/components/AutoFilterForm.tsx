@@ -25,7 +25,7 @@ import { ChecklistFilter } from "./ChecklistFilter";
 /** Localized strings the operator-first widgets render. */
 export type RangeFilterLabels = Required<TableLabels>;
 
-/** Props for {@link AutoFilterForm}. */
+/** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
   /** The merged, ordered filter definitions from the filter runtime. */
   defs: readonly FilterDef<TRow>[];

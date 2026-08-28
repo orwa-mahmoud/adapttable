@@ -3,7 +3,7 @@
  *
  * Everything the eight built-in adapters are made of, published for anyone
  * wiring a ninth: the shared `<DataTable>` orchestration
- * ({@link useDataTableShell}), the render prelude, chrome prop bundles,
+ * (`useDataTableShell`), the render prelude, chrome prop bundles,
  * pinning and pager math, keyed virtualization, and the inline icon set.
  * Same package, same semver promise as the main entry — split out so the
  * app-facing API at `@adapttable/core` stays small. App code should rarely

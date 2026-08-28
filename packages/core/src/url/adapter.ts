@@ -34,7 +34,7 @@ export interface UrlStateAdapter {
  * (the query string is global state), so this is safe to memoise as a
  * module singleton via {@link getHistoryAdapter}.
  *
- * @returns A {@link UrlStateAdapter} backed by `window.history` + `popstate`.
+ * @returns A `UrlStateAdapter` backed by `window.history` + `popstate`.
  */
 export function createHistoryAdapter(): UrlStateAdapter {
   const listeners = new Set<() => void>();
@@ -79,7 +79,7 @@ export function createHistoryAdapter(): UrlStateAdapter {
  * (the table still gets fully working local state).
  *
  * @param initialSearch - Optional starting query string (without `"?"`).
- * @returns A self-contained {@link UrlStateAdapter}.
+ * @returns A self-contained `UrlStateAdapter`.
  */
 export function createMemoryAdapter(initialSearch = ""): UrlStateAdapter {
   let current = initialSearch.replace(/^\?/, "");
@@ -127,7 +127,7 @@ export function resetHistoryAdapter(): void {
 }
 
 /**
- * Resolve which {@link UrlStateAdapter} a URL-synced hook should use: an
+ * Resolve which `UrlStateAdapter` a URL-synced hook should use: an
  * explicit `adapter` wins; otherwise the shared history adapter in the
  * browser, or a stable per-hook memory adapter when disabled or under SSR.
  *

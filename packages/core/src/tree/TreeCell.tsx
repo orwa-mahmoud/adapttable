@@ -18,7 +18,7 @@ import type { TreeEntry } from "./treeRows";
 import { treeIndentStyle } from "./treeRows";
 import { TreeToggleChrome, type TreeToggleSlots } from "./TreeToggle";
 
-/** Props for an adapter {@link TreeCell} — no slots on the public API. */
+/** Props for an adapter `TreeCell` — no slots on the public API. */
 export interface TreeCellProps<TRow> {
   /** The row's place in the tree; absent on a flat table. */
   entry: TreeEntry<TRow> | undefined;

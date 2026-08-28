@@ -7,7 +7,7 @@ import type { ReactElement, ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { TreeEntry } from "./treeRows";
 
-/** Props for an adapter {@link TreeToggle} — no slots on the public API. */
+/** Props for an adapter `TreeToggle` — no slots on the public API. */
 export interface TreeToggleProps<TRow> {
   /** The row's place in the tree. */
   entry: TreeEntry<TRow>;

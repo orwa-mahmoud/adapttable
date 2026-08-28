@@ -123,7 +123,7 @@ function overlayPanels<P extends object>(props: P, host: FeatureHostState): P {
 /**
  * Apply `features`, run `setup(host)`, overlay side-panel panels onto props.
  *
- * Safe to call from an adapter and again from {@link useDataTableShell}:
+ * Safe to call from an adapter and again from `useDataTableShell`:
  * the second call reuses the host and does not re-register.
  */
 export function useTableFeatures<P extends object>(incoming: P): P {

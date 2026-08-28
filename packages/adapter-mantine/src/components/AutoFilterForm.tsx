@@ -41,7 +41,7 @@ const FILTER_LABEL_STYLES = { label: { marginBottom: 16 } };
 /** Above the filter popover (`zIndex={10050}`) so a Select is clickable. */
 const FILTER_COMBOBOX_PROPS = { withinPortal: true, zIndex: 10051 } as const;
 
-/** Props for {@link AutoFilterForm}. */
+/** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
   /** The resolved declarative definitions, in render order. */
   defs: readonly FilterDef<TRow>[];
@@ -208,7 +208,7 @@ function RangeField<TRow>({
 }
 
 /**
- * Single-choice control. Options resolve through {@link useFilterOptions}
+ * Single-choice control. Options resolve through `useFilterOptions`
  * (static array, async loader, or none); while a loader is in flight the
  * select shows one disabled placeholder option.
  */
@@ -267,7 +267,7 @@ function SelectControl<TRow>({
 }
 
 /**
- * Searchable multi-select. Options resolve through {@link useFilterOptions};
+ * Searchable multi-select. Options resolve through `useFilterOptions`;
  * while a loader is in flight the field shows a small spinner.
  */
 function MultiSelectControl<TRow>({
@@ -379,7 +379,7 @@ function FilterControl<TRow>({
 
 /**
  * The auto-built filter form: one labeled, Mantine-native control per
- * declarative {@link FilterDef}. Values live in the source's `extra` bag
+ * declarative `FilterDef`. Values live in the source's `extra` bag
  * (so the URL, chips and — on frontend data — the predicate all follow);
  * clearing a control writes the empty value, which drops the URL param.
  * Range types render operator-first: an operator select plus one value

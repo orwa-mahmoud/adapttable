@@ -70,7 +70,7 @@ export interface UseDataTableOptions<TRow> {
   bulkActions?: BulkAction[];
   /** Selection id extractor; defaults to `rowKey` when bulk actions exist. */
   selectionGetId?: (row: TRow) => string;
-  /** Controlled selection value (see {@link BaseDataTableProps.selectedIds}). */
+  /** Controlled selection value (see `BaseDataTableProps.selectedIds`). */
   selectedIds?: readonly string[];
   /** Change handler for the controlled selection. */
   onSelectedIdsChange?: (selectedIds: string[]) => void;
@@ -136,7 +136,7 @@ export interface UseDataTableResult<TRow> {
   getCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
   getSearchInputProps: (props?: Props) => SearchInputElementProps;
   /**
-   * The row's stable React key. Kept OUT of {@link getRowProps} so its
+   * The row's stable React key. Kept OUT of `getRowProps` so its
    * result spreads clean — React forbids spreading a `key`.
    */
   getRowKey: (row: TRow) => string;
@@ -156,7 +156,7 @@ export interface UseDataTableResult<TRow> {
    compatible) while typing the known keys — so adapters read them without
    casts. */
 
-/** Props from {@link UseDataTableResult.getTableProps}. */
+/** Props from `UseDataTableResult.getTableProps`. */
 export interface TableElementProps extends Props {
   role: string;
   dir?: Direction;
@@ -164,8 +164,8 @@ export interface TableElementProps extends Props {
 }
 
 /**
- * Props from {@link UseDataTableResult.getRowProps}. Spread-clean by
- * contract: never contains `key` — read {@link UseDataTableResult.getRowKey}
+ * Props from `UseDataTableResult.getRowProps`. Spread-clean by
+ * contract: never contains `key` — read `UseDataTableResult.getRowKey`
  * for the React key.
  */
 export interface RowElementProps extends Props {
@@ -178,7 +178,7 @@ export interface RowElementProps extends Props {
   "aria-selected"?: boolean;
 }
 
-/** Props from {@link UseDataTableResult.getSortButtonProps}. */
+/** Props from `UseDataTableResult.getSortButtonProps`. */
 export interface SortButtonElementProps extends Props {
   type: "button";
   disabled: boolean;
@@ -187,14 +187,14 @@ export interface SortButtonElementProps extends Props {
   "aria-label": string;
 }
 
-/** Props from {@link UseDataTableResult.getCellProps} / `getHeaderCellProps`. */
+/** Props from `UseDataTableResult.getCellProps` / `getHeaderCellProps`. */
 export interface CellElementProps extends Props {
   role: string;
   style?: CSSProperties;
   "data-sort-index"?: number;
 }
 
-/** Props from {@link UseDataTableResult.getSearchInputProps}. */
+/** Props from `UseDataTableResult.getSearchInputProps`. */
 export interface SearchInputElementProps extends Props {
   type: string;
   role: string;
@@ -250,7 +250,7 @@ type TRowAny = Record<string, unknown>;
  *
  * @typeParam TRow - The row type.
  * @param options - See {@link UseDataTableOptions}.
- * @returns Derived state and prop-getters — see {@link UseDataTableResult}.
+ * @returns Derived state and prop-getters — see `UseDataTableResult`.
  */
 export function useDataTable<TRow>(
   options: UseDataTableOptions<TRow>

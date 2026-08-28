@@ -185,7 +185,7 @@ export function rowEditControls<TRow>({
   };
 }
 
-/** Props for an adapter {@link RowEditActions} — no slots on the public API. */
+/** Props for an adapter `RowEditActions` — no slots on the public API. */
 export interface RowEditActionsProps<
   TRow,
 > extends RowEditControlsOptions<TRow> {
@@ -362,7 +362,7 @@ export function BatchEditCell<TRow>({
   );
 }
 
-/** Props for an adapter {@link BatchEditBar} — no slots on the public API. */
+/** Props for an adapter `BatchEditBar` — no slots on the public API. */
 export interface BatchEditBarProps<TRow> {
   /** The batch state from the chrome. */
   batch: BatchEditingState<TRow>;

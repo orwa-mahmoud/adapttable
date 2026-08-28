@@ -47,7 +47,7 @@ export type FilterValue = string | string[] | number | undefined;
 /** The bag of extra (caller-defined) filter values keyed by filter name. */
 export type ExtraFilters = Record<string, FilterValue>;
 
-/** Props every {@link ColumnDef.Cell} component receives. */
+/** Props every `ColumnDef.Cell` component receives. */
 export interface CellProps<TRow> {
   /** The row being rendered. */
   readonly row: TRow;
@@ -58,9 +58,9 @@ export interface CellProps<TRow> {
 /**
  * Definition of a single column. `TRow` is the row item type.
  *
- * Provide either a {@link ColumnDef.Cell} component (stable identity →
+ * Provide either a `ColumnDef.Cell` component (stable identity →
  * memoisable sub-trees, preferred for statically-known columns) or the
- * lighter {@link ColumnDef.accessor} function.
+ * lighter `ColumnDef.accessor` function.
  */
 export interface ColumnDef<TRow> {
   /**
@@ -139,7 +139,7 @@ export interface ColumnDef<TRow> {
    */
   editable?: boolean | ((row: TRow) => boolean);
   /**
-   * Editor widget when {@link ColumnDef.editable} is set. Defaults to
+   * Editor widget when `ColumnDef.editable` is set. Defaults to
    * `"text"`. A registered plugin name (`host.registerEditor`) is a string
    * that is not a built-in. Select options may be `{ value, label }` or
    * plain strings.
@@ -155,7 +155,7 @@ export interface ColumnDef<TRow> {
    * Turn the edited text back into the value to commit.
    *
    * A column can show one thing, seed the editor with another, and commit a
-   * third: `accessor` renders `"$1,240.00"`, {@link ColumnDef.editValue} seeds
+   * third: `accessor` renders `"$1,240.00"`, `ColumnDef.editValue` seeds
    * the editor with `"1240"`, and this parses what the user typed back into a
    * number. Without it, a `number` editor commits `number | null` and every
    * other editor commits the raw string.
@@ -166,7 +166,7 @@ export interface ColumnDef<TRow> {
   parseValue?: (draft: string, row: TRow) => unknown;
   /**
    * Gate a commit on this column's own rule. Receives the value
-   * {@link ColumnDef.parseValue} produced, plus the row being edited; return a
+   * `ColumnDef.parseValue` produced, plus the row being edited; return a
    * message to reject it, nothing to allow it.
    *
    * May be async — "is this SKU real" is a request — and the editor stays open
@@ -183,7 +183,7 @@ export interface ColumnDef<TRow> {
    * its identity is stable across renders.
    */
   Cell?: ComponentType<CellProps<TRow>>;
-  /** Lightweight alternative to {@link ColumnDef.Cell}; returns cell content. */
+  /** Lightweight alternative to `ColumnDef.Cell`; returns cell content. */
   accessor?: (row: TRow) => ReactNode;
   /**
    * Primitive extractor used by the client-side sort comparator
@@ -206,14 +206,14 @@ export interface ColumnDef<TRow> {
   /**
    * The cell as plain text, for every context that cannot render JSX.
    *
-   * {@link ColumnDef.accessor} returns a `ReactNode`, so a screen-reader
+   * `ColumnDef.accessor` returns a `ReactNode`, so a screen-reader
    * announcement, an `aria-label`, a tooltip or the clipboard have nothing to
    * read: a badge or an avatar is a React element, not a word. Return the text
    * those places should use.
    *
    * Resolution order when this is absent — text is always available, this only
-   * makes it accurate: {@link ColumnDef.formatValue}, then
-   * {@link ColumnDef.exportValue}, then `accessor` when it happens to yield a
+   * makes it accurate: `ColumnDef.formatValue`, then
+   * `ColumnDef.exportValue`, then `accessor` when it happens to yield a
    * primitive, then the key's data path. So only columns whose rendered cell is
    * not already its own text need one.
    */
@@ -281,13 +281,13 @@ export interface ColumnHeaderController {
   toggleSort: (event?: { shiftKey?: boolean }) => void;
 }
 
-/** Arguments for {@link ColumnDef.renderHeader}. */
+/** Arguments for `ColumnDef.renderHeader`. */
 export interface ColumnHeaderContext<TRow> {
   column: ColumnDef<TRow>;
   controller: ColumnHeaderController;
 }
 
-/** Arguments for {@link ColumnDef.renderFooter}. */
+/** Arguments for `ColumnDef.renderFooter`. */
 export interface ColumnFooterContext<TRow> {
   column: ColumnDef<TRow>;
   value: ReactNode;
@@ -650,7 +650,7 @@ export interface TableLabels {
    * produces (`"xlsx"`, or whatever a custom one names itself), return the
    * button's caption. Defaults to `"Export XLSX"` and its translations.
    *
-   * CSV keeps {@link TableLabels.exportCsv}, so its existing translations stand
+   * CSV keeps `TableLabels.exportCsv`, so its existing translations stand
    * and a host that overrode that string keeps their own wording.
    */
   exportFile?: (format: string) => string;
@@ -747,7 +747,7 @@ export interface TableLabels {
   rowActionsMenu?: string;
   /**
    * The message on an editor whose row changed under it. Keep mine / Take
-   * theirs sit beside it, and {@link TableLabels.theirsValue} names the
+   * theirs sit beside it, and `TableLabels.theirsValue` names the
    * incoming value so the reader can see what they would take.
    */
   editConflict?: string;

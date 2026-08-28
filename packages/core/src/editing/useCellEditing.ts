@@ -60,7 +60,7 @@ export interface CellEditingState {
   /**
    * Commit the draft. Returns the commit payload, or `null` when idle.
    * Clears the active cell. The table never mutates rows — callers must
-   * apply the result through `onCellEdit` (see {@link applyCellEditCommit}).
+   * apply the result through `onCellEdit` (see `applyCellEditCommit`).
    */
   commit: () => CellEditCommit | null;
   /**

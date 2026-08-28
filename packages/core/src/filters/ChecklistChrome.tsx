@@ -36,7 +36,7 @@ export interface ChecklistClassNames {
   filterCheckbox?: string;
 }
 
-/** Props for an adapter {@link ChecklistFilter} — no slots on the public API. */
+/** Props for an adapter `ChecklistFilter` — no slots on the public API. */
 export interface ChecklistFilterProps<TRow> {
   readonly def: FilterDef<TRow>;
   readonly source: Pick<

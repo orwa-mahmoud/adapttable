@@ -5,7 +5,7 @@
  * Both props take the same mapper: rows in, a record of cells out. Writing
  * that mapper by hand is fine for one total and tedious for five, and every
  * hand-rolled version re-solves the same edge cases — non-numeric values,
- * blanks, an empty group. {@link aggregate} builds the mapper from a
+ * blanks, an empty group. `aggregate` builds the mapper from a
  * declaration instead:
  *
  * ```ts
@@ -45,7 +45,7 @@ export type Aggregator<TValue = SortableValue> = (
 /** What to compute per column: a built-in name, or your own function. */
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
-/** Options for {@link aggregate}. */
+/** Options for `aggregate`. */
 export interface AggregateOptions<TRow> {
   /**
    * Columns, so values resolve through `sortValue` exactly as sorting and
@@ -59,7 +59,7 @@ export interface AggregateOptions<TRow> {
   format?: (value: ReactNode, key: string) => ReactNode;
   /**
    * The host of the table this mapper will run in. Omit it when the
-   * table binds the call with {@link runWithFeatureHost}.
+   * table binds the call with `runWithFeatureHost`.
    */
   host?: FeatureHostState;
 }

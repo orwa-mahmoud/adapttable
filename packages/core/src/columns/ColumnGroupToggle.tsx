@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { HeaderGroupCell } from "./headerGroups";
 
-/** Props for an adapter {@link ColumnGroupToggle} — no slots on the public API. */
+/** Props for an adapter `ColumnGroupToggle` — no slots on the public API. */
 export interface ColumnGroupToggleProps {
   cell: HeaderGroupCell;
   labels: Required<TableLabels>;

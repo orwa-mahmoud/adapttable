@@ -54,7 +54,7 @@ import { useColumnWindow } from "./virtual/useColumnWindow";
  * the base display props plus the three data tiers (`source` / `data` +
  * `onQueryChange`) and the URL-sync controls. Adapters extend this with
  * kit-specific extras (slots, classNames, colour, table size) and pass the
- * whole thing straight through to {@link useDataTableShell}.
+ * whole thing straight through to `useDataTableShell`.
  *
  * @typeParam TRow - The row type.
  */

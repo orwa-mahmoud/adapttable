@@ -81,7 +81,7 @@ export interface TableVirtualization<TRow> {
   measureRowPair?: RowPairMeasurer;
 }
 
-/** Options for {@link useTableVirtualization}. */
+/** Options for `useTableVirtualization`. */
 export interface UseTableVirtualizationOptions<TRow> {
   /** Source rows from the table source. */
   rows: readonly TRow[];
@@ -300,7 +300,7 @@ export interface KeyedVirtualization {
 
 /**
  * Virtualize an opaque keyed list (e.g. grouped flat entries). Same window /
- * element modes as {@link useTableVirtualization}.
+ * element modes as `useTableVirtualization`.
  */
 export function useKeyedVirtualization(options: {
   keys: readonly string[];

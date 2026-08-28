@@ -49,7 +49,7 @@ function isRtl(handle: HTMLElement): boolean {
 
 /**
  * Build the props for a column-resize handle. Pointer drag resizes live; arrow
- * keys nudge by {@link COLUMN_RESIZE_STEP} for keyboard a11y. Width is measured
+ * keys nudge by `COLUMN_RESIZE_STEP` for keyboard a11y. Width is measured
  * from the live cell, so columns need no preset width to be resizable.
  *
  * @param key - Column key being resized.

@@ -274,7 +274,7 @@ export function defaultExportFilename(writer: ExportWriter): string {
  * reaches this does nothing rather than throwing.
  *
  * @param filename - Download name, e.g. `"people.xlsx"`.
- * @param payload - The file from {@link ExportWriter.build}.
+ * @param payload - The file from `ExportWriter.build`.
  */
 export function downloadExportFile(
   filename: string,

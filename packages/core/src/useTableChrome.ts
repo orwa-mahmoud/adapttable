@@ -143,7 +143,7 @@ export interface ToolbarChromeProps<TRow> {
    * the pair on presence and never has to check two things.
    */
   onUndo?: () => void;
-  /** Do the last undone edit again. Present with {@link onUndo}. */
+  /** Do the last undone edit again. Present with `onUndo`. */
   onRedo?: () => void;
   /**
    * Whether there is anything to undo. The button is disabled, not
@@ -184,7 +184,7 @@ export interface ToolbarChromeProps<TRow> {
   onToggleFilters: () => void;
   /**
    * Bind to the trigger's `onPointerDown` (see
-   * {@link useFilterTriggerToggle}) so a click on the open trigger CLOSES
+   * `useFilterTriggerToggle`) so a click on the open trigger CLOSES
    * the popover instead of racing the kit's outside-close and reopening.
    */
   onFiltersTriggerPointerDown?: () => void;
@@ -192,7 +192,7 @@ export interface ToolbarChromeProps<TRow> {
   showRowsPerPage: boolean;
   /**
    * Built saved-views menu node, when the `savedViews` prop opts in. Renders
-   * ahead of {@link columnMenu} so every adapter's toolbar reads
+   * ahead of `columnMenu` so every adapter's toolbar reads
    * Filters · Saved views · Columns · Export CSV.
    */
   savedViewsMenu?: ReactNode;
@@ -200,7 +200,7 @@ export interface ToolbarChromeProps<TRow> {
   columnMenu?: ReactNode;
   /**
    * When set, render the Export CSV toolbar button and call this on click.
-   * Built by {@link makeExportCsvHandler} from the `exportCsv` prop.
+   * Built by `makeExportCsvHandler` from the `exportCsv` prop.
    */
   onExportCsv?: () => void;
   /**
@@ -449,7 +449,7 @@ export interface TableChrome<TRow> {
  * footer to show. Adapters then render their kit-specific markup from this.
  *
  * @typeParam TRow - The row type.
- * @param props - The adapter's {@link BaseDataTableProps}.
+ * @param props - The adapter's `BaseDataTableProps`.
  * @returns The {@link TableChrome} orchestration result.
  */
 /**
@@ -1392,7 +1392,7 @@ export interface ChromeBodyData<TRow> {
  *
  * @typeParam TRow - The row type.
  * @param chrome - The {@link useTableChrome} result.
- * @param props - The adapter's {@link BaseDataTableProps}.
+ * @param props - The adapter's `BaseDataTableProps`.
  * @returns Virtualization state + the load-more sentinel.
  */
 export function useChromeBodyData<TRow>(
@@ -1629,7 +1629,7 @@ function resolveBodyVirtualization<TRow>(
  * @typeParam TRow - The row type.
  * @param ref - The adapter's root element.
  * @param chrome - The {@link useTableChrome} result.
- * @param props - The adapter's {@link BaseDataTableProps}.
+ * @param props - The adapter's `BaseDataTableProps`.
  */
 export function useChromeScrollReset<TRow>(
   ref: RefObject<HTMLElement | null>,
@@ -1657,7 +1657,7 @@ export function useChromeScrollReset<TRow>(
   });
 }
 
-/** Pointer/click handlers returned by {@link useFilterTriggerToggle}. */
+/** Pointer/click handlers returned by `useFilterTriggerToggle`. */
 export interface FilterTriggerToggle {
   onPointerDown: () => void;
   onClick: () => void;

@@ -1,5 +1,5 @@
 /**
- * Incremental built-in aggregates — the same numbers {@link aggregate}
+ * Incremental built-in aggregates — the same numbers `aggregate`
  * would compute, updated from the rows a patch touched instead of a full
  * walk of the set.
  *
@@ -51,7 +51,7 @@ export interface IncrementalAggregate<TRow> {
  * Start a running total from the rows already in the set.
  *
  * @typeParam TRow - The row type.
- * @param spec - The same declaration {@link aggregate} takes.
+ * @param spec - The same declaration `aggregate` takes.
  * @param rows - The rows the total currently describes.
  * @param options - Column resolvers and an optional formatter.
  */
@@ -141,7 +141,7 @@ export function replaceAggregateRow<TRow>(
 
 /**
  * Read the current cells. When a built-in is dirty or a custom aggregator
- * is in play, rescans `rows` so the answer still matches {@link aggregate}.
+ * is in play, rescans `rows` so the answer still matches `aggregate`.
  *
  * @typeParam TRow - The row type.
  * @param state - The running total.
