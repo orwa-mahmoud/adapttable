@@ -188,72 +188,48 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.E
 
 // @public
 export interface DataTableClassNames {
-    // (undocumented)
     actionButton?: string;
-    // (undocumented)
     actionsCell?: string;
     actionsHeader?: string;
     addRow?: string;
-    // (undocumented)
     bulkBar?: string;
-    // (undocumented)
     bulkButton?: string;
     bulkError?: string;
     card?: string;
     cardActions?: string;
     cardDetail?: string;
-    // (undocumented)
     cardLabel?: string;
-    // (undocumented)
     cardRow?: string;
-    // (undocumented)
     cards?: string;
-    // (undocumented)
     cardValue?: string;
-    // (undocumented)
     cell?: string;
-    // (undocumented)
     cellMatch?: string;
     cellMatchCurrent?: string;
     cellSelected?: string;
     cellSpan?: string;
     checkbox?: string;
-    // (undocumented)
     chip?: string;
-    // (undocumented)
     chipRemove?: string;
-    // (undocumented)
     chips?: string;
     columnGroupToggle?: string;
-    // (undocumented)
     columnMenu?: string;
     columnMenuAction?: string;
     columnMenuAutoSize?: string;
     columnMenuBulk?: string;
     columnMenuBulkButton?: string;
-    // (undocumented)
     columnMenuButton?: string;
-    // (undocumented)
     columnMenuGrip?: string;
-    // (undocumented)
     columnMenuHeader?: string;
-    // (undocumented)
     columnMenuItem?: string;
-    // (undocumented)
     columnMenuLabel?: string;
     columnMenuMore?: string;
-    // (undocumented)
     columnMenuPanel?: string;
-    // (undocumented)
     columnMenuPin?: string;
-    // (undocumented)
     columnMenuReset?: string;
     columnMenuSearch?: string;
     columnMenuSeparator?: string;
     columnMenuSubmenu?: string;
-    // (undocumented)
     columnMenuTitle?: string;
-    // (undocumented)
     columnMenuVisibility?: string;
     columnSelect?: string;
     commandEmpty?: string;
@@ -271,10 +247,8 @@ export interface DataTableClassNames {
     editCellError?: string;
     editCellRollback?: string;
     editCellSaveError?: string;
-    // (undocumented)
     empty?: string;
     emptyClear?: string;
-    // (undocumented)
     error?: string;
     expandButton?: string;
     expandCell?: string;
@@ -298,34 +272,21 @@ export interface DataTableClassNames {
     filterLabel?: string;
     filterOperator?: string;
     filterOptionsLoading?: string;
-    // (undocumented)
     filtersAnchor?: string;
-    // (undocumented)
     filtersBackdrop?: string;
-    // (undocumented)
     filtersBody?: string;
-    // (undocumented)
     filtersButton?: string;
-    // (undocumented)
     filtersClear?: string;
-    // (undocumented)
     filtersClose?: string;
-    // (undocumented)
     filtersCount?: string;
-    // (undocumented)
     filtersDone?: string;
     filterSelect?: string;
-    // (undocumented)
     filtersFooter?: string;
     filtersForm?: string;
-    // (undocumented)
     filtersHeader?: string;
     filtersIcon?: string;
-    // (undocumented)
     filtersPanel?: string;
-    // (undocumented)
     filtersPopover?: string;
-    // (undocumented)
     filtersTitle?: string;
     filterTree?: string;
     filterTreeActions?: string;
@@ -350,13 +311,10 @@ export interface DataTableClassNames {
     groupSelect?: string;
     groupToggle?: string;
     headerActions?: string;
-    // (undocumented)
     headerCell?: string;
     headerGroupCell?: string;
     headerGroupRow?: string;
-    // (undocumented)
     headerRow?: string;
-    // (undocumented)
     loading?: string;
     loadingCard?: string;
     loadingCards?: string;
@@ -366,9 +324,7 @@ export interface DataTableClassNames {
     loadingLine?: string;
     loadingRow?: string;
     loadingTable?: string;
-    // (undocumented)
     loadMore?: string;
-    // (undocumented)
     loadMoreButton?: string;
     pageEllipsis?: string;
     pageNext?: string;
@@ -380,12 +336,9 @@ export interface DataTableClassNames {
     refreshIndicator?: string;
     reorderCell?: string;
     reorderHeader?: string;
-    // (undocumented)
     resizeHandle?: string;
-    // (undocumented)
     retryButton?: string;
     root?: string;
-    // (undocumented)
     row?: string;
     rowActionsMenu?: string;
     rowActionsTrigger?: string;
@@ -395,14 +348,12 @@ export interface DataTableClassNames {
     rowReorderUp?: string;
     rowsPerPage?: string;
     scrollBox?: string;
-    // (undocumented)
     search?: string;
     searchField?: string;
     searchIcon?: string;
     selectAllBanner?: string;
     selectAllButton?: string;
     selectAllText?: string;
-    // (undocumented)
     selectionCell?: string;
     selectionHeader?: string;
     separatorCell?: string;
@@ -410,10 +361,8 @@ export interface DataTableClassNames {
     sidePanel?: string;
     sidePanelClose?: string;
     sidePanelTab?: string;
-    // (undocumented)
     sortButton?: string;
     sortIndex?: string;
-    // (undocumented)
     sortSelect?: string;
     statusBar?: string;
     statusItem?: string;
@@ -423,9 +372,7 @@ export interface DataTableClassNames {
     summaryRow?: string;
     table?: string;
     tableFooter?: string;
-    // (undocumented)
     tbody?: string;
-    // (undocumented)
     thead?: string;
     toolbar?: string;
     treeCell?: string;

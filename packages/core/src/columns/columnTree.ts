@@ -63,13 +63,21 @@ export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
  * @public
  */
 export interface ColumnGroupRecord<TRow> {
+  /** Stable id built from the group's path. */
   readonly id: string;
+  /** Caption on the group header. */
   readonly label: string;
+  /** Column shown as the summary while the group is collapsed. */
   readonly collapsedKey?: string;
+  /** Renders a synthetic summary cell while collapsed. */
   readonly collapsedRender?: (row: TRow) => ReactNode;
+  /** Keeps the group's columns together when columns are reordered. */
   readonly marryChildren: boolean;
+  /** Tooltip on the group header. */
   readonly headerTooltip?: string;
+  /** How the group header's caption aligns. */
   readonly align?: GroupedHeaderAlign;
+  /** Keys of the columns under this group. */
   readonly childKeys: readonly string[];
 }
 
@@ -116,7 +124,9 @@ export function flattenColumnTree<TRow>(
  * @public
  */
 export interface FlattenedColumns<TRow> {
+  /** The columns themselves, in render order. */
   readonly leaves: ColumnDef<TRow>[];
+  /** The header rows above them. */
   readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 }
 

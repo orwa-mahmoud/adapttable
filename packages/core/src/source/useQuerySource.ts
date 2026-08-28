@@ -29,13 +29,21 @@ import type { TableSource } from "./TableSource";
  * @public
  */
 export interface InfiniteQueryLike<TPage> {
+  /** The pages fetched so far, absent before the first one lands. */
   data: { pages: TPage[]; pageParams: unknown[] } | undefined;
+  /** Whether the first page is still in flight. */
   isLoading: boolean;
+  /** Whether any fetch is in flight, first page or not. */
   isFetching: boolean;
+  /** Whether the next page in particular is in flight. */
   isFetchingNextPage: boolean;
+  /** Whether another page exists to fetch. */
   hasNextPage: boolean;
+  /** Fetches the next page. */
   fetchNextPage: () => Promise<unknown> | void;
+  /** Re-fetches from the first page. */
   refetch: () => Promise<unknown> | void;
+  /** The failure from the last fetch, or null. */
   error: Error | null;
 }
 
@@ -45,8 +53,11 @@ export interface InfiniteQueryLike<TPage> {
  * @public
  */
 export type PageSelector<TRow, TPage> = (page: TPage) => {
+  /** The rows this page carries. */
   rows: readonly TRow[];
+  /** Rows in the whole matching set, when the page reports it. */
   total?: number;
+  /** Distinct-value counts, when the endpoint answered them. */
   facets?: FacetMap;
 };
 

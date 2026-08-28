@@ -19,7 +19,9 @@ import type { ColumnDef } from "../types";
  * @public
  */
 export interface CellSpanRequest {
+  /** Columns this cell covers. */
   colSpan?: number;
+  /** Rows this cell covers. */
   rowSpan?: number;
 }
 
@@ -29,7 +31,9 @@ export interface CellSpanRequest {
  * @public
  */
 export interface GetCellSpanArgs<TRow> {
+  /** The row being measured. */
   row: TRow;
+  /** The column being measured. */
   column: ColumnDef<TRow>;
   /** Dataset-relative row index (page offset included). */
   rowIndex: number;
@@ -83,10 +87,13 @@ export function cellSpanMark(
  * @public
  */
 export interface BodyCell<TRow> {
+  /** The column being measured. */
   column: ColumnDef<TRow>;
   /** Index in the full visible column list — what focus addresses. */
   columnIndex: number;
+  /** Columns this cell covers. */
   colSpan: number;
+  /** Rows this cell covers. */
   rowSpan: number;
 }
 

@@ -31,7 +31,9 @@
 
 /** Insert a row. Without `at`, it goes on the end. */
 export interface InsertPatch<TRow> {
+  /** Discriminant for the patch union. */
   type: "insert";
+  /** The row to write. */
   row: TRow;
   /** Zero-based position. Clamped into range; negative counts from the end. */
   at?: number;
@@ -43,8 +45,11 @@ export interface InsertPatch<TRow> {
  * @public
  */
 export interface UpdatePatch<TRow> {
+  /** Discriminant for the patch union. */
   type: "update";
+  /** Identity of the row to change. */
   id: string;
+  /** Fields to merge into that row. */
   changes: Partial<TRow>;
 }
 
@@ -54,7 +59,9 @@ export interface UpdatePatch<TRow> {
  * @public
  */
 export interface UpsertPatch<TRow> {
+  /** Discriminant for the patch union. */
   type: "upsert";
+  /** The row to write. */
   row: TRow;
 }
 
@@ -64,7 +71,9 @@ export interface UpsertPatch<TRow> {
  * @public
  */
 export interface RemovePatch {
+  /** Discriminant for the patch union. */
   type: "remove";
+  /** Identity of the row to change. */
   id: string;
 }
 

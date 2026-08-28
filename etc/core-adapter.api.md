@@ -80,12 +80,9 @@ export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null)
 
 // @public
 export interface BodyCell<TRow> {
-    // (undocumented)
     colSpan: number;
-    // (undocumented)
     column: ColumnDef<TRow>;
     columnIndex: number;
-    // (undocumented)
     rowSpan: number;
 }
 
@@ -1010,11 +1007,8 @@ export function FeatureHostProvider(input: Readonly<{
 
 // @public
 export interface FeatureNotice {
-    // (undocumented)
     readonly appearance: FeatureNoticeAppearance;
-    // (undocumented)
     readonly kind: FeatureNoticeKind;
-    // (undocumented)
     readonly message: string;
 }
 

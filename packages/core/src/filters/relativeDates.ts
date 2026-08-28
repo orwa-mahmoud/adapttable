@@ -35,7 +35,9 @@ export type RelativeDateToken =
  * @public
  */
 export interface RelativeDateRange {
+  /** Start of the range, inclusive, in epoch milliseconds. */
   startMs: number;
+  /** End of the range, exclusive, in epoch milliseconds. */
   endMs: number;
 }
 
@@ -193,13 +195,21 @@ export const RELATIVE_PRESETS: readonly RelativePreset[] = [
  * @public
  */
 export const RELATIVE_PRESET_LABEL_KEYS = {
+  /** Today, midnight to midnight. */
   today: "relToday",
+  /** The day before today. */
   yesterday: "relYesterday",
+  /** The day after today. */
   tomorrow: "relTomorrow",
+  /** The current week. */
   thisWeek: "relThisWeek",
+  /** The current calendar month. */
   thisMonth: "relThisMonth",
+  /** The month before this one. */
   previousMonth: "relPreviousMonth",
+  /** The last N days, weeks or months up to now. */
   last: "relLastN",
+  /** The next N days, weeks or months from now. */
   next: "relNextN",
 } as const;
 

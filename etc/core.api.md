@@ -409,10 +409,8 @@ export interface CellEdit<TRow> {
 
 // @public
 export interface CellEditCommit {
-    // (undocumented)
     columnKey: string;
     draft: string;
-    // (undocumented)
     rowId: string;
 }
 
@@ -482,17 +480,13 @@ export type CellEditor = "text" | "number" |
 
 // @public
 export interface CellEditorOption {
-    // (undocumented)
     label: string;
-    // (undocumented)
     value: string;
 }
 
 // @public
 export interface CellEditTarget {
-    // (undocumented)
     columnKey: string;
-    // (undocumented)
     rowId: string;
 }
 
@@ -590,9 +584,7 @@ export const cellSpanMark: typeof cellSpanMark_2;
 
 // @public
 export interface CellSpanRequest {
-    // (undocumented)
     colSpan?: number;
-    // (undocumented)
     rowSpan?: number;
 }
 
@@ -764,21 +756,13 @@ export const columnGroupPath: typeof columnGroupPath_2;
 
 // @public
 export interface ColumnGroupRecord<TRow> {
-    // (undocumented)
     readonly align?: GroupedHeaderAlign;
-    // (undocumented)
     readonly childKeys: readonly string[];
-    // (undocumented)
     readonly collapsedKey?: string;
-    // (undocumented)
     readonly collapsedRender?: (row: TRow) => ReactNode;
-    // (undocumented)
     readonly headerTooltip?: string;
-    // (undocumented)
     readonly id: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly marryChildren: boolean;
 }
 
@@ -1255,23 +1239,18 @@ export type EditableCellSlots = EditableCellSlots$1;
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
-    // (undocumented)
     editable?: boolean | {
         bivarianceHack(row: TRow): boolean;
     }["bivarianceHack"];
-    // (undocumented)
     editor?: CellEditor;
-    // (undocumented)
     editValue?: {
         bivarianceHack(row: TRow): string;
     }["bivarianceHack"];
-    // (undocumented)
     key: string;
     // (undocumented)
     parseValue?: {
         bivarianceHack(draft: string, row: TRow): unknown;
     }["bivarianceHack"];
-    // (undocumented)
     sortValue?: {
         bivarianceHack(row: TRow): SortableValue;
     }["bivarianceHack"];
@@ -1590,11 +1569,8 @@ export interface FailedCellSave<TRow> {
 
 // @public
 export interface FeatureNotice {
-    // (undocumented)
     readonly appearance: FeatureNoticeAppearance;
-    // (undocumented)
     readonly kind: FeatureNoticeKind;
-    // (undocumented)
     readonly message: string;
 }
 
@@ -1833,9 +1809,7 @@ export const flattenColumnTree: typeof flattenColumnTree_2;
 
 // @public
 export interface FlattenedColumns<TRow> {
-    // (undocumented)
     readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-    // (undocumented)
     readonly leaves: ColumnDef<TRow>[];
 }
 
@@ -1859,10 +1833,8 @@ export type GetCellSpan<TRow> = (args: GetCellSpanArgs<TRow>) => CellSpanRequest
 
 // @public
 export interface GetCellSpanArgs<TRow> {
-    // (undocumented)
     column: ColumnDef<TRow>;
     columnIndex: number;
-    // (undocumented)
     row: TRow;
     rowIndex: number;
     sectionRowIndex: number;
@@ -2171,24 +2143,16 @@ export function incrementalViewOf<TRow>(rows: readonly TRow[]): IncrementalView<
 
 // @public
 export interface InfiniteQueryLike<TPage> {
-    // (undocumented)
     data: {
         pages: TPage[];
         pageParams: unknown[];
     } | undefined;
-    // (undocumented)
     error: Error | null;
-    // (undocumented)
     fetchNextPage: () => Promise<unknown> | void;
-    // (undocumented)
     hasNextPage: boolean;
-    // (undocumented)
     isFetching: boolean;
-    // (undocumented)
     isFetchingNextPage: boolean;
-    // (undocumented)
     isLoading: boolean;
-    // (undocumented)
     refetch: () => Promise<unknown> | void;
 }
 
@@ -2204,9 +2168,7 @@ export const insertExtrasBeforeRows: typeof insertExtrasBeforeRows_2;
 // @public
 export interface InsertPatch<TRow> {
     at?: number;
-    // (undocumented)
     row: TRow;
-    // (undocumented)
     type: "insert";
 }
 
@@ -2764,9 +2726,7 @@ export const RELATIVE_PRESETS: readonly RelativePreset[];
 
 // @public
 export interface RelativeDateRange {
-    // (undocumented)
     endMs: number;
-    // (undocumented)
     startMs: number;
 }
 
@@ -2793,9 +2753,7 @@ export function removeFilterTreeNode(tree: QueryFilterGroup, path: readonly numb
 
 // @public
 export interface RemovePatch {
-    // (undocumented)
     id: string;
-    // (undocumented)
     type: "remove";
 }
 
@@ -3812,11 +3770,8 @@ export const unpinAllColumns: typeof unpinAllColumns_2;
 
 // @public
 export interface UpdatePatch<TRow> {
-    // (undocumented)
     changes: Partial<TRow>;
-    // (undocumented)
     id: string;
-    // (undocumented)
     type: "update";
 }
 
@@ -3825,9 +3780,7 @@ export function updateRow<TRow>(id: string, changes: Partial<TRow>): UpdatePatch
 
 // @public
 export interface UpsertPatch<TRow> {
-    // (undocumented)
     row: TRow;
-    // (undocumented)
     type: "upsert";
 }
 

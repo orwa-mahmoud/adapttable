@@ -11,7 +11,9 @@ import { getPath } from "../utils/path";
  * @public
  */
 export interface CellEditorOption {
+  /** Value committed when this option is chosen. */
   value: string;
+  /** Caption shown for the option. */
   label: string;
 }
 
@@ -34,7 +36,9 @@ export type CellEditor =
   /** A time of day. Commits `HH:mm`. */
   | "time"
   | {
+      /** One of a fixed set. Commits the chosen value. */
       type: "select";
+      /** The choices, as values or value/label pairs. */
       options: readonly CellEditorOption[] | readonly string[];
     }
   | {
@@ -119,9 +123,13 @@ export interface CustomCellEditorCtrl {
  * @public
  */
 export interface EditableColumnLike<TRow = unknown> {
+  /** The column's key. */
   key: string;
+  /** Whether the column is editable, per row when it is a function. */
   editable?: boolean | { bivarianceHack(row: TRow): boolean }["bivarianceHack"];
+  /** Which editor the cell opens. Defaults to a text field. */
   editor?: CellEditor;
+  /** Turns the stored value into the draft text the editor starts with. */
   editValue?: { bivarianceHack(row: TRow): string }["bivarianceHack"];
   parseValue?: {
     bivarianceHack(draft: string, row: TRow): unknown;
@@ -132,6 +140,7 @@ export interface EditableColumnLike<TRow = unknown> {
       row: TRow
     ): string | undefined | Promise<string | undefined>;
   }["bivarianceHack"];
+  /** Value this column sorts by, when it differs from what is displayed. */
   sortValue?: { bivarianceHack(row: TRow): SortableValue }["bivarianceHack"];
 }
 
@@ -141,7 +150,9 @@ export interface EditableColumnLike<TRow = unknown> {
  * @public
  */
 export interface CellEditTarget {
+  /** Identity of the row being edited. */
   rowId: string;
+  /** Key of the column being edited. */
   columnKey: string;
 }
 
@@ -151,7 +162,9 @@ export interface CellEditTarget {
  * @public
  */
 export interface CellEditCommit {
+  /** Identity of the row that was edited. */
   rowId: string;
+  /** Key of the column that was edited. */
   columnKey: string;
   /** Raw draft string from the editor. */
   draft: string;

@@ -44,7 +44,9 @@ export type ContextMenuItemsFactory<TRow = unknown> = (
 
 /** A patch {@link TableFeatureHost.extendFilterType} queued for the registry. */
 export interface FilterTypeExtend {
+  /** The filter type being extended. */
   readonly type: string;
+  /** Fields to merge onto that type's spec. */
   readonly patch: Partial<FilterTypeSpec>;
 }
 
@@ -53,14 +55,23 @@ export interface FilterTypeExtend {
  * only has `register*` methods; the table reads these bags.
  */
 export interface FeatureHostState<TRow = unknown> {
+  /** Filter types features registered. */
   readonly filterTypes: readonly FilterTypeSpec[];
+  /** Patches queued against existing filter types. */
   readonly filterExtends: readonly FilterTypeExtend[];
+  /** Custom cell editors, by editor name. */
   readonly editors: ReadonlyMap<string, CustomCellEditorRender>;
+  /** Aggregators, by aggregate name. */
   readonly aggregators: ReadonlyMap<string, Aggregator>;
+  /** Export writers features added. */
   readonly writers: readonly ExportWriter[];
+  /** Factories that add entries to the column menu. */
   readonly columnMenuActions: readonly ColumnMenuActionFactory<TRow>[];
+  /** Side-panel tabs features added. */
   readonly panels: readonly SidePanelEntry[];
+  /** Commands features added to the palette. */
   readonly commands: readonly Command[];
+  /** Factories that add entries to the right-click menus. */
   readonly contextMenuItems: readonly ContextMenuItemsFactory<TRow>[];
 }
 
