@@ -107,11 +107,17 @@ export type RowReorderHandler<TRow> = (
  * @public
  */
 export interface RowReorderLabels {
+  /** Accessible name for the drag grip. */
   reorderRow: string;
+  /** Move the row up one place. */
   moveRowUp: string;
+  /** Move the row down one place. */
   moveRowDown: string;
+  /** Announced when a row is picked up. */
   rowLifted: (position: number) => string;
+  /** Announced when a row lands. */
   rowMoved: (from: number, to: number) => string;
+  /** Announced when a reorder is abandoned. */
   rowReorderCancelled: string;
 }
 

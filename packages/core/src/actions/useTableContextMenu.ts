@@ -44,14 +44,19 @@ export interface ContextMenuOptions<TRow> {
 export interface TableContextMenuOptions<TRow> {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   contextMenu?: boolean | ContextMenuOptions<TRow>;
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
   /** The row behind an id, since the DOM only carries the id. */
   rowFor: (rowId: string) => TRow | undefined;
   /** The handlers the built-in entries call. */
   actions: ContextMenuActions<TRow>;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
+  /** Whether a column is pinned. */
   isPinned?: (columnKey: string) => boolean;
   /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
   featureHost?: FeatureHostState;

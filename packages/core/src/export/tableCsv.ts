@@ -255,10 +255,15 @@ export interface ExportQuery {
   page: number | undefined;
   /** Undefined for `scope: "all"` — see {@link ExportQuery.page}. */
   limit: number | undefined;
+  /** The free-text search term, as typed. */
   search: string;
+  /** Column key currently sorted by, if any. */
   sortBy: string | undefined;
+  /** Direction for `sortBy`. */
   sortDir: SortDirection | undefined;
+  /** The active filter values. */
   filters: ExtraFilters;
+  /** Column key rows are grouped on. */
   groupBy: string | undefined;
 }
 

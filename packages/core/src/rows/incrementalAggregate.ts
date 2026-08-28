@@ -41,9 +41,13 @@ interface ColumnBinding {
  * @typeParam TRow - The row type.
  */
 export interface IncrementalAggregate<TRow> {
+  /** The aggregate being computed. */
   spec: AggregateSpec;
+  /** Options the aggregate was built with. */
   options: AggregateOptions<TRow>;
+  /** Columns by key. */
   columns: ReadonlyMap<string, ColumnDef<TRow>>;
+  /** Per-column bindings for the aggregate. */
   bindings: ColumnBinding[];
 }
 

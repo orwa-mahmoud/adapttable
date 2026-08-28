@@ -33,6 +33,7 @@ export const ROW_ID_ATTRIBUTE = "data-row-id";
  * @public
  */
 export interface ResolvedContextTarget<TRow> {
+  /** What the menu was opened on. */
   target: ContextMenuTarget<TRow>;
   /** The element the menu was opened from, for focus on the way back. */
   element: HTMLElement;

@@ -34,9 +34,11 @@ export interface FindSearchProps {
   readonly placeholder: string;
   /** Current value. */
   readonly value: string;
+  /** Ref the chrome focuses when the bar opens. */
   readonly focusRef: (node: { focus: () => void } | null) => void;
   /** Called with the new value. */
   readonly onChange: (value: string) => void;
+  /** Handles the keys this control owns. */
   readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
@@ -57,6 +59,7 @@ export interface FindButtonProps {
   readonly label: string;
   /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Which find-bar button this is. */
   readonly kind: FindButtonKind;
   /** Whether the control is offered but not available. */
   readonly disabled?: boolean;
@@ -70,7 +73,9 @@ export interface FindButtonProps {
  * @public
  */
 export interface FindBarSlots {
+  /** Renders the search box. */
   readonly Search: (props: FindSearchProps) => ReactNode;
+  /** Renders a button. */
   readonly Button: (props: FindButtonProps) => ReactNode;
 }
 

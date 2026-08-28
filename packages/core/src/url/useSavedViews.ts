@@ -31,6 +31,7 @@ import {
  * @public
  */
 export interface SavedView {
+  /** The view's name. */
   name: string;
   /** The table-scoped query string (only this table's params). */
   search: string;

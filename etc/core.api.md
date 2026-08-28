@@ -151,9 +151,7 @@ export interface BaseDataTableProps<TRow> {
     getCellSpan?: GetCellSpan<TRow>;
     getChildren?: (row: TRow) => readonly TRow[] | undefined;
     getParentId?: (row: TRow) => string | undefined;
-    // (undocumented)
     groupAggregates?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
-    // (undocumented)
     groupBy?: string | readonly string[] | null;
     groupFilter?: (group: GroupNode<TRow>) => boolean;
     groupFooters?: boolean;
@@ -177,7 +175,6 @@ export interface BaseDataTableProps<TRow> {
     onCellFill?: (edits: CellEdit<TRow>[]) => void;
     onCellPaste?: (edits: CellEdit<TRow>[]) => void;
     onClearFilters?: () => void;
-    // (undocumented)
     onCollapsedGroupIdsChange?: (ids: string[]) => void;
     onColumnLayoutChange?: (next: ColumnLayoutState) => void;
     onDeleteRow?: (row: TRow) => unknown;
@@ -440,21 +437,15 @@ export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
 
 // @public
 export interface CellEditKeyOutcome {
-    // (undocumented)
     action: CellEditKeyAction;
-    // (undocumented)
     advanceTarget: CellEditTarget | null;
-    // (undocumented)
     commit: CellEditCommit | null;
 }
 
 // @public
 export interface CellEditNavigation {
-    // (undocumented)
     columns: readonly EditableColumnLike[];
-    // (undocumented)
     rowKey: (row: unknown) => string;
-    // (undocumented)
     rows: readonly unknown[];
 }
 
@@ -530,13 +521,9 @@ export interface CellRange {
 
 // @public
 export interface CellRangeBounds {
-    // (undocumented)
     fromCol: number;
-    // (undocumented)
     fromRow: number;
-    // (undocumented)
     toCol: number;
-    // (undocumented)
     toRow: number;
 }
 
@@ -600,16 +587,12 @@ export const CHECKLIST_VIRTUALIZE_AT = 40;
 // @public
 export interface ChecklistFilterState {
     available: boolean;
-    // (undocumented)
     clear: () => void;
     items: readonly ChecklistValue[];
     query: string;
-    // (undocumented)
     selectAllVisible: () => void;
     selected: readonly string[];
-    // (undocumented)
     setQuery: (next: string) => void;
-    // (undocumented)
     toggle: (value: string, on: boolean) => void;
     virtualize: boolean;
     visible: readonly ChecklistValue[];
@@ -617,11 +600,8 @@ export interface ChecklistFilterState {
 
 // @public
 export interface ChecklistValue {
-    // (undocumented)
     count: number;
-    // (undocumented)
     label: string;
-    // (undocumented)
     value: string;
 }
 
@@ -967,13 +947,9 @@ export function countFilterExtra(bucket: string, state: CountFilterState): Extra
 
 // @public
 export interface CountFilterState {
-    // (undocumented)
     from?: number;
-    // (undocumented)
     op?: CountOperator;
-    // (undocumented)
     to?: number;
-    // (undocumented)
     value?: number;
 }
 
@@ -1128,7 +1104,6 @@ export type EditableCellButtonProps = EditableCellButtonProps$1;
 
 // @public
 export interface EditableCellController<TRow = unknown> {
-    // (undocumented)
     begin: () => void;
     cancel: () => void;
     canRollback: boolean;
@@ -1142,13 +1117,11 @@ export interface EditableCellController<TRow = unknown> {
         theirsValue: (value: string) => string;
     };
     dismissFailure: () => void;
-    // (undocumented)
     draft: string;
     editor: CellEditor | null;
     error?: string;
     isDirty: boolean;
     keepConflict: () => void;
-    // (undocumented)
     mode: EditableCellMode;
     onEditorKeyDown: (event: {
         key: string;
@@ -1159,7 +1132,6 @@ export interface EditableCellController<TRow = unknown> {
     saveFailure?: FailedCellSave<TRow>;
     saveStatus?: CellSaveStatus;
     selectOptions: ReturnType<typeof normalizeEditorOptions>;
-    // (undocumented)
     setDraft: (value: string) => void;
     takeConflict: () => void;
     validating: boolean;
@@ -1181,7 +1153,6 @@ export interface EditableCellEditing<TRow> {
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
     rowEditing?: RowEditingState<TRow>;
     saving?: CellSaveState<TRow>;
-    // (undocumented)
     state: CellEditingState;
     validation?: EditValidationState<TRow>;
 }
@@ -1416,17 +1387,12 @@ export interface ExportPayload {
 
 // @public
 export interface ExportQuery {
-    // (undocumented)
     filters: ExtraFilters;
-    // (undocumented)
     groupBy: string | undefined;
     limit: number | undefined;
     page: number | undefined;
-    // (undocumented)
     search: string;
-    // (undocumented)
     sortBy: string | undefined;
-    // (undocumented)
     sortDir: SortDirection | undefined;
 }
 
@@ -1537,7 +1503,6 @@ export const extraHostFillStyle: typeof extraHostFillStyle_2;
 export interface ExtraRow {
     beforeRowId?: string;
     key: string;
-    // (undocumented)
     kind: ExtraRowKind;
     render?: () => ReactNode;
 }
@@ -1673,9 +1638,7 @@ export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLab
 
 // @public
 export interface FilterOption {
-    // (undocumented)
     label: string;
-    // (undocumented)
     value: string;
 }
 
@@ -1765,7 +1728,6 @@ export function filterWidgetKind(def: Pick<FilterDef, "type">, registry: FilterT
 // @public
 export interface FilterWidgetRenderProps<TRow = unknown> {
     readonly className?: string;
-    // (undocumented)
     readonly def: FilterDef<TRow>;
     readonly labels: Required<TableLabels>;
     readonly source: FilterFormSource<TRow>;
@@ -1895,9 +1857,7 @@ export interface GridFocusState {
 // @public
 export interface GridKeyPress {
     ctrlKey?: boolean;
-    // (undocumented)
     key: string;
-    // (undocumented)
     metaKey?: boolean;
 }
 
@@ -2062,9 +2022,7 @@ export const hideAllColumns: typeof hideAllColumns_2;
 
 // @public
 export interface HighlightedCell {
-    // (undocumented)
     columnKey: string;
-    // (undocumented)
     rowId: string;
 }
 
@@ -2352,7 +2310,6 @@ export interface MultiSelectEditorChromeProps {
 
 // @public
 export interface MultiSelectEditorSlots {
-    // (undocumented)
     readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
 }
 
@@ -2687,12 +2644,9 @@ export interface ReconcileLiveEdit<TRow> {
     columns: readonly EditableColumnLike<TRow>[];
     draft: string;
     keep: (row: TRow) => void;
-    // (undocumented)
     onEditConflict?: EditConflictHandler<TRow>;
     openedRow: TRow | undefined;
-    // (undocumented)
     policy: EditConflictPolicy;
-    // (undocumented)
     rowKey: (row: TRow) => string;
     rows: readonly TRow[];
     rowVersion?: (row: TRow) => string | number;
@@ -2854,13 +2808,9 @@ export type RowActionsLayout = "buttons" | "menu";
 
 // @public
 export interface RowActionsRenderContext<TRow> {
-    // (undocumented)
     actions: readonly RowAction<TRow>[];
-    // (undocumented)
     confirm: ConfirmHandler;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     row: TRow;
 }
 
@@ -2953,11 +2903,8 @@ export function rowPatchLog<TRow>(rows: readonly TRow[]): RowPatchLog<TRow> | un
 
 // @public
 export interface RowPinLabels {
-    // (undocumented)
     pinToBottom: string;
-    // (undocumented)
     pinToTop: string;
-    // (undocumented)
     unpinRow: string;
 }
 
@@ -2978,9 +2925,7 @@ export const rowPinSignature: typeof rowPinSignature_2;
 
 // @public
 export interface RowPinState {
-    // (undocumented)
     readonly bottom: readonly string[];
-    // (undocumented)
     readonly top: readonly string[];
 }
 
@@ -2992,17 +2937,11 @@ export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => v
 
 // @public
 export interface RowReorderLabels {
-    // (undocumented)
     moveRowDown: string;
-    // (undocumented)
     moveRowUp: string;
-    // (undocumented)
     reorderRow: string;
-    // (undocumented)
     rowLifted: (position: number) => string;
-    // (undocumented)
     rowMoved: (from: number, to: number) => string;
-    // (undocumented)
     rowReorderCancelled: string;
 }
 
@@ -3055,7 +2994,6 @@ export const SAVED_VIEW_VERSION = 2;
 // @public
 export interface SavedView {
     isDefault?: boolean;
-    // (undocumented)
     name: string;
     readOnly?: boolean;
     search: string;
@@ -3214,9 +3152,7 @@ export type SortDirection = "asc" | "desc";
 
 // @public
 export interface SortLevel {
-    // (undocumented)
     dir: SortDirection;
-    // (undocumented)
     key: string;
 }
 
@@ -3335,7 +3271,6 @@ export interface TableFeature<TRow = unknown> {
 
 // @public
 export interface TableFeatureHost<TRow = unknown> {
-    // (undocumented)
     readonly __row?: TRow;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;
@@ -3986,19 +3921,14 @@ export function useDensityUrlState(options?: UseDensityUrlStateOptions): UseDens
 // @public
 export interface UseDensityUrlStateOptions {
     defaultDensity?: Density;
-    // (undocumented)
     urlAdapter?: UrlStateAdapter;
-    // (undocumented)
     urlKey?: string;
-    // (undocumented)
     urlSync?: boolean;
 }
 
 // @public
 export interface UseDensityUrlStateResult {
-    // (undocumented)
     density: Density;
-    // (undocumented)
     onDensityChange: (next: Density) => void;
 }
 
@@ -4042,13 +3972,9 @@ export function useFilterTreeChips<TRow>(options: UseFilterTreeChipsOptions<TRow
 
 // @public
 export interface UseFilterTreeChipsOptions<TRow> {
-    // (undocumented)
     readonly defs: readonly FilterDef<TRow>[];
-    // (undocumented)
     readonly labels: Required<TableLabels>;
-    // (undocumented)
     readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
-    // (undocumented)
     readonly tree: QueryFilterGroup | undefined;
 }
 

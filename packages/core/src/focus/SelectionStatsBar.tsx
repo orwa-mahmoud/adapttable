@@ -28,7 +28,9 @@ export interface SelectionStatsChromeProps {
  * @public
  */
 export interface SelectionStatPart {
+  /** Which statistic this part reports. */
   readonly key: "count" | "sum" | "average" | "min" | "max";
+  /** The text to render. */
   readonly text: string;
 }
 
@@ -38,6 +40,7 @@ export interface SelectionStatPart {
  * @public
  */
 export interface SelectionStatsSlotProps {
+  /** The statistics to render, already formatted. */
   readonly parts: readonly SelectionStatPart[];
   /** Class for the element. */
   readonly className?: string;
@@ -49,6 +52,7 @@ export interface SelectionStatsSlotProps {
  * @public
  */
 export interface SelectionStatsSlots {
+  /** Renders the selection statistics. */
   readonly Stats: (props: SelectionStatsSlotProps) => ReactNode;
 }
 

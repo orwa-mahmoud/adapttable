@@ -80,7 +80,9 @@ export interface CommandPaletteInputProps {
  * @public
  */
 export interface CommandPaletteItemProps {
+  /** The command being rendered. */
   readonly command: Command;
+  /** Whether this entry is the highlighted one. */
   readonly active: boolean;
   /** Spread onto the row: the option role, its id, and selection. */
   readonly itemProps: {

@@ -93,9 +93,13 @@ export function filterTreeChipLabel<TRow>(
  * @public
  */
 export interface UseFilterTreeChipsOptions<TRow> {
+  /** The filter tree being edited. */
   readonly tree: QueryFilterGroup | undefined;
+  /** Filter definitions available. */
   readonly defs: readonly FilterDef<TRow>[];
+  /** Resolved labels, every key filled. */
   readonly labels: Required<TableLabels>;
+  /** Replaces the filter tree. */
   readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
 }
 

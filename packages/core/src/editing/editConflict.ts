@@ -96,10 +96,13 @@ export interface ReconcileLiveEdit<TRow> {
   rows: readonly TRow[];
   /** Columns, to read the edited field. */
   columns: readonly EditableColumnLike<TRow>[];
+  /** Row identity function. */
   rowKey: (row: TRow) => string;
   /** Host version accessor — any change is a conflict, not just this cell. */
   rowVersion?: (row: TRow) => string | number;
+  /** How a conflicting edit is resolved. */
   policy: EditConflictPolicy;
+  /** Called when a live edit conflicts with an incoming change. */
   onEditConflict?: EditConflictHandler<TRow>;
   /** Keep: new snapshot, same draft. */
   keep: (row: TRow) => void;

@@ -62,6 +62,7 @@ export interface ContextMenuSurfaceProps {
  * @public
  */
 export interface ContextMenuItemProps {
+  /** The entry being rendered. */
   readonly item: ContextMenuItem;
   /**
    * Bind this rather than `item.onSelect`: it closes the menu first, which

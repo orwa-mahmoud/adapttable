@@ -187,11 +187,8 @@ export function usePivotUrlState(options?: UsePivotUrlStateOptions): UsePivotUrl
 // @public
 export interface UsePivotUrlStateOptions {
     defaultConfig?: PivotConfig;
-    // (undocumented)
     urlAdapter?: UrlStateAdapter;
-    // (undocumented)
     urlKey?: string;
-    // (undocumented)
     urlSync?: boolean;
 }
 

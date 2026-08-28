@@ -15,18 +15,27 @@ import type { ColumnDef } from "../types";
 
 /** One mutable bucket; `childMap` is the same nodes as `children`. */
 export interface MutablePartition<TRow> {
+  /** The value itself. */
   value: unknown;
+  /** Stable key for the partition's value. */
   valueKey: string;
+  /** Rows in this partition. */
   rows: TRow[];
+  /** Nested partitions under this one. */
   children?: MutablePartition<TRow>[];
+  /** Those children, by value key. */
   childMap: Map<string, MutablePartition<TRow>>;
 }
 
 /** The grouping keys and the live tree incremental updates mutate. */
 export interface IncrementalGroupTree<TRow> {
+  /** Columns the tree groups on, outermost first. */
   keys: readonly string[];
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Top-level partitions. */
   roots: MutablePartition<TRow>[];
+  /** Those roots, by value key. */
   rootMap: Map<string, MutablePartition<TRow>>;
 }
 

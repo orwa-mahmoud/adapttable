@@ -39,8 +39,11 @@ export const CHECKLIST_LIST_HEIGHT = 240;
  * @public
  */
 export interface ChecklistValue {
+  /** The value itself. */
   value: string;
+  /** Caption shown for the entry. */
   label: string;
+  /** How many rows carry this value. */
   count: number;
 }
 
@@ -58,13 +61,17 @@ export interface ChecklistFilterState {
   visible: readonly ChecklistValue[];
   /** Current search box text. */
   query: string;
+  /** Replaces the checklist's search text. */
   setQuery: (next: string) => void;
   /** Currently checked values. */
   selected: readonly string[];
   /** True when `visible` is long enough to window. */
   virtualize: boolean;
+  /** Checks every option the search left visible. */
   selectAllVisible: () => void;
+  /** Unchecks every option. */
   clear: () => void;
+  /** Checks or unchecks one option. */
   toggle: (value: string, on: boolean) => void;
 }
 

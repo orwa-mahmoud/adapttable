@@ -136,7 +136,9 @@ export function sortRows<TRow>(
  * @public
  */
 export interface SortLevel {
+  /** Stable key for the entry. */
   key: string;
+  /** Sort direction for this level. */
   dir: SortDirection;
 }
 

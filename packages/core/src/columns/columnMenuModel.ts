@@ -400,7 +400,9 @@ export interface ColumnMenuLabels {
   sortDescending: string;
   /** Open the column's filter. */
   filterColumn: string;
+  /** Heading for the per-column action group. */
   columnActions: string;
+  /** Size this column to its content. */
   autoSizeColumn: string;
 }
 

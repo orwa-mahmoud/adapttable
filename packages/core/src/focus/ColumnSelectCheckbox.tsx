@@ -33,6 +33,7 @@ export interface ColumnSelectCheckboxProps {
  * @public
  */
 export interface ColumnSelectSlots {
+  /** Renders a checkbox. */
   readonly Checkbox: (props: ColumnSelectCheckboxProps) => ReactNode;
 }
 

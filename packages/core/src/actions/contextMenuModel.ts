@@ -66,9 +66,13 @@ export interface ContextMenuActions<TRow> {
 
 /** What {@link contextMenuItems} needs to decide the entries. */
 export interface ContextMenuModelOptions<TRow> {
+  /** What the menu was opened on. */
   target: ContextMenuTarget<TRow>;
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
+  /** Actions to offer. */
   actions: ContextMenuActions<TRow>;
   /** Which column is sorted, so the current direction can be marked. */
   sortBy?: string;

@@ -46,7 +46,6 @@ export interface BatchEditBarProps<TRow> {
 
 // @public
 export interface BatchEditBarSlots {
-    // (undocumented)
     readonly Button: (props: BatchEditButtonProps) => ReactNode;
 }
 
@@ -278,7 +277,6 @@ export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
 
 // @public
 export interface ColumnGroupToggleProps {
-    // (undocumented)
     cell: HeaderGroupCell;
     className?: string;
     labels: Required<TableLabels>;
@@ -287,7 +285,6 @@ export interface ColumnGroupToggleProps {
 
 // @public
 export interface ColumnGroupToggleSlots {
-    // (undocumented)
     readonly Button: (props: ColumnGroupToggleButtonProps) => ReactNode;
 }
 
@@ -326,10 +323,8 @@ export interface ColumnMenuChromeProps<TRow> {
 
 // @public
 export interface ColumnMenuLabels {
-    // (undocumented)
     autoSizeColumn: string;
     autoSizeColumns: string;
-    // (undocumented)
     columnActions: string;
     columns: string;
     filterColumn: string;
@@ -382,13 +377,9 @@ export interface ColumnResizeHandleProps {
     // (undocumented)
     "aria-label": string;
     onDoubleClick: (event: MouseEvent_2<HTMLElement>) => void;
-    // (undocumented)
     onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    // (undocumented)
     onPointerDown: (event: PointerEvent_2<HTMLElement>) => void;
-    // (undocumented)
     role: "button";
-    // (undocumented)
     tabIndex: 0;
 }
 
@@ -425,7 +416,6 @@ export function columnSelectLabel(label: string | undefined, column: {
 
 // @public
 export interface ColumnSelectSlots {
-    // (undocumented)
     readonly Checkbox: (props: ColumnSelectCheckboxProps) => ReactNode;
 }
 
@@ -489,9 +479,7 @@ export interface CommandPaletteInputProps {
 
 // @public
 export interface CommandPaletteItemProps {
-    // (undocumented)
     readonly active: boolean;
-    // (undocumented)
     readonly command: Command;
     readonly itemProps: {
         readonly id: string;
@@ -541,7 +529,6 @@ export interface ContextMenuChromeProps {
 
 // @public
 export interface ContextMenuItemProps {
-    // (undocumented)
     readonly item: ContextMenuItem;
     readonly onSelect: () => void;
 }
@@ -764,7 +751,6 @@ export interface DesktopTableAssembly<TRow> {
         renderDetail: (row: TRow) => ReactNode;
     };
     gridProps: Record<string, unknown> | undefined;
-    // (undocumented)
     header: {
         leading: {
             expand: boolean;
@@ -850,7 +836,6 @@ export interface EditableCellActivateProps {
         preventDefault: () => void;
         stopPropagation: () => void;
     }) => void;
-    // (undocumented)
     readonly onKeyDown: (event: {
         key: string;
         preventDefault: () => void;
@@ -973,7 +958,6 @@ export function extraHostFillStyle<TRow>(extraKey: string, extraRows: readonly E
 export interface ExtraRow {
     beforeRowId?: string;
     key: string;
-    // (undocumented)
     kind: ExtraRowKind;
     render?: () => ReactNode;
 }
@@ -1030,7 +1014,6 @@ export interface FillHandleSlotProps {
 
 // @public
 export interface FillHandleSlots {
-    // (undocumented)
     readonly Handle: (props: FillHandleSlotProps) => ReactNode;
 }
 
@@ -1268,9 +1251,7 @@ export interface FindBarProps {
 
 // @public
 export interface FindBarSlots {
-    // (undocumented)
     readonly Button: (props: FindButtonProps) => ReactNode;
-    // (undocumented)
     readonly Search: (props: FindSearchProps) => ReactNode;
 }
 
@@ -1280,7 +1261,6 @@ export type FindButtonKind = "previous" | "next" | "close";
 // @public
 export interface FindButtonProps {
     readonly disabled?: boolean;
-    // (undocumented)
     readonly kind: FindButtonKind;
     readonly label: string;
     readonly onClick: () => void;
@@ -1289,13 +1269,11 @@ export interface FindButtonProps {
 
 // @public
 export interface FindSearchProps {
-    // (undocumented)
     readonly focusRef: (node: {
         focus: () => void;
     } | null) => void;
     readonly label: string;
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
     readonly placeholder: string;
     readonly value: string;
@@ -1384,7 +1362,6 @@ export interface GroupMoreButtonSlotProps {
 
 // @public
 export interface GroupMoreButtonSlots {
-    // (undocumented)
     readonly Button: (props: GroupMoreButtonSlotProps) => ReactNode;
 }
 
@@ -1488,14 +1465,10 @@ export function isSelectedCell(props: Readonly<Record<string, unknown>> | undefi
 
 // @public
 export interface KeyedVirtualization {
-    // (undocumented)
     enabled: boolean;
     indices: readonly number[];
-    // (undocumented)
     measureElement?: (node: Element | null) => void;
-    // (undocumented)
     paddingBottom: number;
-    // (undocumented)
     paddingTop: number;
 }
 
@@ -1654,13 +1627,11 @@ export interface PivotFieldProps {
     readonly "data-adapttable-part": "pivot-field";
     readonly aggregation?: ReactNode;
     readonly label: string;
-    // (undocumented)
     readonly moveDownLabel: string;
     readonly moveUpLabel: string;
     readonly onMoveDown?: () => void;
     readonly onMoveUp?: () => void;
     readonly onRemove: () => void;
-    // (undocumented)
     readonly removeLabel: string;
 }
 
@@ -1724,7 +1695,6 @@ export function resolveContextTarget<TRow>(from: Element, rowFor: (rowId: string
 // @public
 export interface ResolvedContextTarget<TRow> {
     element: HTMLElement;
-    // (undocumented)
     target: ContextMenuTarget<TRow>;
 }
 
@@ -1756,7 +1726,6 @@ export const ROW_ID_ATTRIBUTE = "data-row-id";
 export interface RowClickProps {
     "data-adapttable-row": "";
     onClick: (event: MouseEvent_2<HTMLElement>) => void;
-    // (undocumented)
     onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
     style: {
         cursor: "pointer";
@@ -1783,7 +1752,6 @@ export interface RowEditActionsProps<TRow> extends RowEditControlsOptions<TRow> 
 
 // @public
 export interface RowEditActionsSlots {
-    // (undocumented)
     readonly Button: (props: RowEditButtonProps) => ReactNode;
 }
 
@@ -2016,7 +1984,6 @@ export interface SavedViewsPanelEmptyProps {
 // @public
 export interface SavedViewsPanelInputProps {
     readonly label: string;
-    // (undocumented)
     readonly onCancel: () => void;
     readonly onChange: (next: string) => void;
     readonly onCommit: () => void;
@@ -2073,9 +2040,7 @@ export interface SearchInputState {
 
 // @public
 export interface SelectionStatPart {
-    // (undocumented)
     readonly key: "count" | "sum" | "average" | "min" | "max";
-    // (undocumented)
     readonly text: string;
 }
 
@@ -2094,13 +2059,11 @@ export interface SelectionStatsChromeProps {
 // @public
 export interface SelectionStatsSlotProps {
     readonly className?: string;
-    // (undocumented)
     readonly parts: readonly SelectionStatPart[];
 }
 
 // @public
 export interface SelectionStatsSlots {
-    // (undocumented)
     readonly Stats: (props: SelectionStatsSlotProps) => ReactNode;
 }
 
@@ -2208,7 +2171,6 @@ export interface SidePanelChromeProps {
 // @public
 export interface SidePanelCloseProps {
     readonly label: string;
-    // (undocumented)
     readonly onClose: () => void;
 }
 
@@ -2249,7 +2211,6 @@ export interface SidePanelTabProps {
         readonly onClick: () => void;
         readonly onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
     };
-    // (undocumented)
     readonly panel: SidePanelEntry;
     readonly selected: boolean;
 }
@@ -2333,7 +2294,6 @@ export interface TableFeature<TRow = unknown> {
 
 // @public
 export interface TableFeatureHost<TRow = unknown> {
-    // (undocumented)
     readonly __row?: TRow;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;
@@ -2350,7 +2310,6 @@ export interface TableFeatureHost<TRow = unknown> {
 // @public
 export interface TableRenderModel<TRow> {
     cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
-    // (undocumented)
     columns: readonly ColumnDef<TRow>[];
     columnSpacers?: {
         start: number;
@@ -2359,10 +2318,8 @@ export interface TableRenderModel<TRow> {
     columnSpan: number;
     entries: readonly VirtualTableRow<TRow>[];
     extraCoveredSlots: ReadonlyMap<string, ReadonlySet<number>>;
-    // (undocumented)
     labels: Required<TableLabels>;
     leadingCells: number;
-    // (undocumented)
     selection: SelectionState | null;
     showActions: boolean;
     showReorder: boolean;
@@ -2459,7 +2416,6 @@ export interface TreeToggleButtonProps {
     readonly className?: string;
     readonly expanded: boolean;
     readonly label: string;
-    // (undocumented)
     readonly loading: boolean;
     readonly onClick: () => void;
 }
@@ -2483,7 +2439,6 @@ export interface TreeToggleProps<TRow> {
 
 // @public
 export interface TreeToggleSlots {
-    // (undocumented)
     readonly Button: (props: TreeToggleButtonProps) => ReactNode;
 }
 

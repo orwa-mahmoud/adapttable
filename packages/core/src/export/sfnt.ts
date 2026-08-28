@@ -39,16 +39,23 @@ interface TableRecord {
 export interface Sfnt {
   /** Design units per em — 1000 for most, 2048 for many TrueType fonts. */
   readonly unitsPerEm: number;
+  /** Glyphs in the font. */
   readonly numGlyphs: number;
   /** PostScript name, used for `/BaseFont` after the subset tag. */
   readonly postScriptName: string;
+  /** Ascender height, in font units. */
   readonly ascent: number;
+  /** Descender depth, in font units. */
   readonly descent: number;
+  /** Capital height, in font units. */
   readonly capHeight: number;
+  /** Italic slant, in degrees. */
   readonly italicAngle: number;
   /** `[xMin, yMin, xMax, yMax]` in design units. */
   readonly bbox: readonly [number, number, number, number];
+  /** Whether every glyph shares one advance width. */
   readonly isFixedPitch: boolean;
+  /** Whether the face is serifed. */
   readonly isSerif: boolean;
   /** The glyph for a code point, or `0` (`.notdef`) when the font lacks it. */
   glyphFor(codePoint: number): number;
@@ -58,7 +65,9 @@ export interface Sfnt {
   bearingOf(glyph: number): number;
   /** The bytes, for the subsetter. */
   readonly bytes: Uint8Array;
+  /** The font's tables, by tag. */
   readonly tables: ReadonlyMap<string, TableRecord>;
+  /** Whether the glyph index uses 32-bit offsets. */
   readonly longLoca: boolean;
 }
 

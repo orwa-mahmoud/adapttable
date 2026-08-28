@@ -8,6 +8,7 @@ import type { KeyboardEvent, MouseEvent } from "react";
 export interface RowClickProps {
   /** Called when pressed. */
   onClick: (event: MouseEvent<HTMLElement>) => void;
+  /** Handles the keys this control owns. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   /**
    * Roving tab stop: the first row is the list's single Tab entry point;

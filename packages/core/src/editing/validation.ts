@@ -45,7 +45,9 @@ export type RowValidator<TRow> = (
 
 /** A cell address, as the editing state spells it. */
 export interface ValidationTarget {
+  /** Identity of the row. */
   rowId: string;
+  /** Key of the column. */
   columnKey: string;
 }
 

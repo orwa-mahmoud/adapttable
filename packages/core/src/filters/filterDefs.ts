@@ -66,7 +66,9 @@ export type FilterType = (typeof FILTER_TYPES)[number];
  * @public
  */
 export interface FilterOption {
+  /** The value itself. */
   value: string;
+  /** Caption shown for the entry. */
   label: string;
 }
 

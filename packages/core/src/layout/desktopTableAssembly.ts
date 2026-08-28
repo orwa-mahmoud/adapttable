@@ -490,6 +490,7 @@ export interface DesktopTableAssembly<TRow> {
   headerPlan: readonly (readonly HtmlGroupedHeaderCell[])[] | undefined;
   /** How many header rows the plan occupies. */
   headerBand: number;
+  /** Everything the header row needs: which chrome cells to draw, and the leaves. */
   header: {
     leading: {
       expand: boolean;

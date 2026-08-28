@@ -25,6 +25,7 @@ export type FilterWidgetKind = FilterType;
  * @public
  */
 export interface FilterWidgetRenderProps<TRow = unknown> {
+  /** The filter definition being rendered. */
   readonly def: FilterDef<TRow>;
   /** Reads and writes the table's state. */
   readonly source: FilterFormSource<TRow>;

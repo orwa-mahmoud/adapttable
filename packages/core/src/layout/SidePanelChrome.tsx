@@ -64,6 +64,7 @@ export interface SidePanelFrameProps {
  * @public
  */
 export interface SidePanelTabProps {
+  /** The side-panel tab being rendered. */
   readonly panel: SidePanelEntry;
   /** Whether this item is selected. */
   readonly selected: boolean;
@@ -89,6 +90,7 @@ export interface SidePanelTabProps {
 export interface SidePanelCloseProps {
   /** Accessible name for the control. */
   readonly label: string;
+  /** Closes the panel. */
   readonly onClose: () => void;
 }
 

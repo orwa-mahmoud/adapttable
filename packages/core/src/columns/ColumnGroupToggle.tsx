@@ -9,6 +9,7 @@ import type { HeaderGroupCell } from "./headerGroups";
  * @public
  */
 export interface ColumnGroupToggleProps {
+  /** The cell being rendered. */
   cell: HeaderGroupCell;
   /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
@@ -40,6 +41,7 @@ export interface ColumnGroupToggleButtonProps {
  * @public
  */
 export interface ColumnGroupToggleSlots {
+  /** Renders a button. */
   readonly Button: (props: ColumnGroupToggleButtonProps) => ReactNode;
 }
 

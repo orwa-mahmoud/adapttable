@@ -39,7 +39,9 @@ const STEADY_MS = 2500;
  * @public
  */
 export interface HighlightedCell {
+  /** Identity of the row. */
   rowId: string;
+  /** Key of the column. */
   columnKey: string;
 }
 

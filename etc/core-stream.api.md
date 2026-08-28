@@ -76,19 +76,14 @@ export type RowPatchStreamStatus =
 
 // @public
 export interface StreamSocket {
-    // (undocumented)
     addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
-    // (undocumented)
     close(): void;
-    // (undocumented)
     readonly readyState: number;
-    // (undocumented)
     removeEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
 }
 
 // @public
 export interface StreamSocketEvent {
-    // (undocumented)
     data?: unknown;
 }
 

@@ -27,9 +27,13 @@ export type CountOperator = (typeof COUNT_OPERATORS)[number];
  * @public
  */
 export interface CountFilterState {
+  /** The operator in force. */
   op?: CountOperator;
+  /** The value itself. */
   value?: number;
+  /** Lower bound, inclusive. */
   from?: number;
+  /** Upper bound, inclusive. */
   to?: number;
 }
 

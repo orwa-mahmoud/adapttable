@@ -237,6 +237,7 @@ export interface RowEditButtonProps {
  * @public
  */
 export interface RowEditActionsSlots {
+  /** Renders a button. */
   readonly Button: (props: RowEditButtonProps) => ReactNode;
 }
 
@@ -445,6 +446,7 @@ export interface BatchEditButtonProps {
  * @public
  */
 export interface BatchEditBarSlots {
+  /** Renders a button. */
   readonly Button: (props: BatchEditButtonProps) => ReactNode;
 }
 

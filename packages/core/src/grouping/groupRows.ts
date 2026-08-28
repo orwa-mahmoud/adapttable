@@ -158,7 +158,9 @@ export interface BuildGroupedFlatModelOptions<TRow> {
    * `["team", "status"]` puts each status inside its team.
    */
   groupBy: string | readonly string[];
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Row identity function. */
   getRowId: (row: TRow) => string;
   /** Collapsed group keys (from {@link useGroupCollapse}). */
   collapsedGroupIds: ReadonlySet<string>;

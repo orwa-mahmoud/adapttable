@@ -23,10 +23,14 @@ export const COLUMN_RESIZE_STEP = 16;
  * @public
  */
 export interface ColumnResizeHandleProps {
+  /** ARIA role for the element. */
   role: "button";
+  /** Tab order for the element. */
   tabIndex: 0;
   "aria-label": string;
+  /** Starts the drag. */
   onPointerDown: (event: PointerEvent<HTMLElement>) => void;
+  /** Handles the keys this control owns. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   /** Double-click sizes the column to its content, as every grid does. */
   onDoubleClick: (event: MouseEvent<HTMLElement>) => void;

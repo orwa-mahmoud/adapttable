@@ -29,7 +29,9 @@ export type RowPinSide = "top" | "bottom";
  * @public
  */
 export interface RowPinState {
+  /** Row ids pinned to the top. */
   readonly top: readonly string[];
+  /** Row ids pinned to the bottom. */
   readonly bottom: readonly string[];
 }
 
@@ -65,8 +67,11 @@ export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
  * @public
  */
 export interface RowPinLabels {
+  /** Pin the row to the top. */
   pinToTop: string;
+  /** Pin the row to the bottom. */
   pinToBottom: string;
+  /** Return the row to the scroll area. */
   unpinRow: string;
 }
 

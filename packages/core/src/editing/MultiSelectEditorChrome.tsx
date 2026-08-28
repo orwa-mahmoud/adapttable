@@ -54,6 +54,7 @@ export interface MultiSelectEditorCheckboxProps {
  * @public
  */
 export interface MultiSelectEditorSlots {
+  /** Renders a checkbox. */
   readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
 }
 

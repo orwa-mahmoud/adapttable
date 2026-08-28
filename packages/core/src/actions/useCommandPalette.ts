@@ -46,6 +46,7 @@ export interface CommandPaletteOptions {
 export interface UseCommandPaletteOptions extends TableCommandOptions {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   commandPalette?: boolean | CommandPaletteOptions;
+  /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
   /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
   featureHost?: FeatureHostState;

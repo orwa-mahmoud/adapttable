@@ -312,11 +312,15 @@ export function useTableVirtualization<TRow>({
  * @public
  */
 export interface KeyedVirtualization {
+  /** Whether virtualization is on. */
   enabled: boolean;
   /** Source indices in the virtual window (or every index when disabled). */
   indices: readonly number[];
+  /** Height standing in for the rows above the window. */
   paddingTop: number;
+  /** Height standing in for the rows below it. */
   paddingBottom: number;
+  /** Hands a row element to the virtualizer. */
   measureElement?: (node: Element | null) => void;
 }
 

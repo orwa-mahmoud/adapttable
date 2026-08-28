@@ -87,7 +87,9 @@ export interface PivotFieldProps {
   readonly onRemove: () => void;
   /** Accessible names for the three controls. */
   readonly moveUpLabel: string;
+  /** Accessible name for the move-down control. */
   readonly moveDownLabel: string;
+  /** Accessible name for the remove control. */
   readonly removeLabel: string;
   /** The aggregation chooser, for a measure. Absent on a dimension. */
   readonly aggregation?: ReactNode;

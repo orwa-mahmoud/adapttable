@@ -22,17 +22,12 @@ export interface SparklineColumnSpec<TRow> {
     // (undocumented)
     color?: string;
     column?: Partial<ColumnDef<TRow>>;
-    // (undocumented)
     header?: ReactNode;
-    // (undocumented)
     height?: number;
-    // (undocumented)
     key: string;
-    // (undocumented)
     kind?: SparklineKind;
     label?: (values: readonly number[], row: TRow) => string;
     values: (row: TRow) => readonly number[];
-    // (undocumented)
     width?: number;
 }
 

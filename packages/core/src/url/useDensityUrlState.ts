@@ -46,8 +46,11 @@ export const DENSITY_URL_WRITE_DEBOUNCE_MS = 150;
  * @public
  */
 export interface UseDensityUrlStateOptions {
+  /** Reads and writes the URL. */
   urlAdapter?: UrlStateAdapter;
+  /** Whether the state is mirrored into the URL. */
   urlSync?: boolean;
+  /** Query-parameter name to use. */
   urlKey?: string;
   /** The density before anyone has chosen one. Defaults to comfortable. */
   defaultDensity?: Density;
@@ -59,7 +62,9 @@ export interface UseDensityUrlStateOptions {
  * @public
  */
 export interface UseDensityUrlStateResult {
+  /** Current row density. */
   density: Density;
+  /** Switches density. */
   onDensityChange: (next: Density) => void;
 }
 

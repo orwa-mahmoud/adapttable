@@ -263,6 +263,7 @@ export interface SavedViewsPanelInputProps {
   readonly onChange: (next: string) => void;
   /** Enter commits, Escape abandons — bind both. */
   readonly onCommit: () => void;
+  /** Abandons the edit. */
   readonly onCancel: () => void;
 }
 

@@ -257,8 +257,11 @@ export interface SharedTableRenderProps<TRow> {
  * @public
  */
 export interface TableRenderModel<TRow> {
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Selection state for the rendered rows. */
   selection: SelectionState | null;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
   /** Whether a trailing actions column/section renders. */
   showActions: boolean;

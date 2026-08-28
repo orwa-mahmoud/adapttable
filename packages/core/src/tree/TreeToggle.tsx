@@ -35,6 +35,7 @@ export interface TreeToggleButtonProps {
   readonly label: string;
   /** Whether the section is open. */
   readonly expanded: boolean;
+  /** Whether the node's children are still loading. */
   readonly loading: boolean;
   /** Class for the element. */
   readonly className?: string;
@@ -48,6 +49,7 @@ export interface TreeToggleButtonProps {
  * @public
  */
 export interface TreeToggleSlots {
+  /** Renders a button. */
   readonly Button: (props: TreeToggleButtonProps) => ReactNode;
 }
 

@@ -159,6 +159,7 @@ export interface EditableCellActivateProps {
   }) => void;
   /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
+  /** Handles the keys this control owns. */
   readonly onKeyDown: (event: {
     key: string;
     preventDefault: () => void;

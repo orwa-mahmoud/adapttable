@@ -586,6 +586,7 @@ export interface BaseDataTableProps<TRow> {
   expandedIds?: readonly string[];
   /** Fired after the table opens or closes a node. */
   onExpandedIdsChange?: (ids: string[]) => void;
+  /** Column key rows are grouped on. */
   groupBy?: string | readonly string[] | null;
   /**
    * Notification fired AFTER the grouping change is applied — the table
@@ -647,6 +648,7 @@ export interface BaseDataTableProps<TRow> {
    * this decides which of the SURVIVING rows' groups are worth showing.
    */
   groupFilter?: (group: GroupNode<TRow>) => boolean;
+  /** Aggregates shown on each group header. */
   groupAggregates?: (
     rows: readonly TRow[]
   ) => Partial<Record<string, ReactNode>>;
@@ -655,6 +657,7 @@ export interface BaseDataTableProps<TRow> {
    * Uncontrolled: internal {@link useGroupCollapse}.
    */
   collapsedGroupIds?: readonly string[];
+  /** Called with the collapsed groups after a toggle. */
   onCollapsedGroupIdsChange?: (ids: string[]) => void;
   /** Disable the built-in search box. */
   /**

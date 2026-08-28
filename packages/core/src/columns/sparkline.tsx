@@ -46,12 +46,17 @@ export interface SparklineProps {
  * @public
  */
 export interface SparklineColumnSpec<TRow> {
+  /** Stable key for the entry. */
   key: string;
+  /** Caption for the column. */
   header?: ReactNode;
   /** The series on this row. */
   values: (row: TRow) => readonly number[];
+  /** Which sparkline to draw. */
   kind?: SparklineKind;
+  /** Width in pixels. */
   width?: number;
+  /** Height in pixels. */
   height?: number;
   color?: string;
   /** Override the default numeric summary. */

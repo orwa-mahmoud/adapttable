@@ -71,7 +71,6 @@ export type FeatureApplyInput<TRow = unknown> = object & {
 export interface FeaturePatch<TRow = unknown> {
     // (undocumented)
     readonly [key: string]: unknown;
-    // (undocumented)
     readonly __row?: TRow;
 }
 
@@ -163,7 +162,6 @@ export interface TableFeature<TRow = unknown> {
 
 // @public
 export interface TableFeatureHost<TRow = unknown> {
-    // (undocumented)
     readonly __row?: TRow;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;

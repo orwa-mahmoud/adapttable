@@ -28,6 +28,7 @@ export interface FillHandleSlotProps {
  * @public
  */
 export interface FillHandleSlots {
+  /** Renders the drag handle. */
   readonly Handle: (props: FillHandleSlotProps) => ReactNode;
 }
 

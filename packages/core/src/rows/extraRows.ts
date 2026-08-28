@@ -33,6 +33,7 @@ export type ExtraRowKind = "separator" | "fullWidth";
 export interface ExtraRow {
   /** Stable id — also the React key. */
   key: string;
+  /** Discriminant for the union. */
   kind: ExtraRowKind;
   /**
    * Insert immediately before this data row. Omit to append after the

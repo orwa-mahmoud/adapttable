@@ -32,8 +32,11 @@ export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
  * @public
  */
 export interface CellEditNavigation {
+  /** The rendered rows. */
   rows: readonly unknown[];
+  /** Visible columns, in order. */
   columns: readonly EditableColumnLike[];
+  /** Row identity function. */
   rowKey: (row: unknown) => string;
 }
 
@@ -43,8 +46,11 @@ export interface CellEditNavigation {
  * @public
  */
 export interface CellEditKeyOutcome {
+  /** What the key press resolved to. */
   action: CellEditKeyAction;
+  /** The commit to apply, when the press produced one. */
   commit: CellEditCommit | null;
+  /** Cell focus moves to next, when the press moves it. */
   advanceTarget: CellEditTarget | null;
 }
 

@@ -159,9 +159,11 @@ export function moveGridFocus(
  * @public
  */
 export interface GridKeyPress {
+  /** Stable key for the entry. */
   key: string;
   /** Ctrl or Cmd — either one means "to the end of the grid". */
   ctrlKey?: boolean;
+  /** Whether the Meta key was held. */
   metaKey?: boolean;
 }
 

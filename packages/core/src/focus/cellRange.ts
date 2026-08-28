@@ -30,9 +30,13 @@ export interface CellRange {
  * @public
  */
 export interface CellRangeBounds {
+  /** First row in the range. */
   fromRow: number;
+  /** Last row in the range. */
   toRow: number;
+  /** First column in the range. */
   fromCol: number;
+  /** Last column in the range. */
   toCol: number;
 }
 

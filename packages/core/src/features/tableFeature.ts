@@ -38,6 +38,7 @@ import { devWarn } from "../utils/devWarn";
  */
 export interface FeaturePatch<TRow = unknown> {
   readonly [key: string]: unknown;
+  /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;
 }
 
@@ -47,6 +48,7 @@ export interface FeaturePatch<TRow = unknown> {
  * @public
  */
 export type FeatureApplyInput<TRow = unknown> = object & {
+  /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;
 };
 
@@ -124,6 +126,7 @@ export interface TableFeatureHost<TRow = unknown> {
   registerContextMenuItems(
     items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]
   ): void;
+  /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;
 }
 

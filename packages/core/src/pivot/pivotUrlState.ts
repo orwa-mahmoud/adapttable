@@ -53,8 +53,11 @@ const NOTHING_COLLAPSED: readonly string[] = [];
  * @public
  */
 export interface UsePivotUrlStateOptions {
+  /** Reads and writes the URL. */
   urlAdapter?: UrlStateAdapter;
+  /** Whether the state is mirrored into the URL. */
   urlSync?: boolean;
+  /** Query-parameter name to use. */
   urlKey?: string;
   /** The pivot before anyone has built one. Defaults to empty. */
   defaultConfig?: PivotConfig;

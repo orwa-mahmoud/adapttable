@@ -90,9 +90,7 @@ export type SortDirection = "asc" | "desc";
 
 // @public
 export interface SortLevel {
-    // (undocumented)
     dir: SortDirection;
-    // (undocumented)
     key: string;
 }
 

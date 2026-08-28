@@ -44,6 +44,7 @@ export interface GroupMoreButtonSlotProps {
  * @public
  */
 export interface GroupMoreButtonSlots {
+  /** Renders a button. */
   readonly Button: (props: GroupMoreButtonSlotProps) => ReactNode;
 }
 

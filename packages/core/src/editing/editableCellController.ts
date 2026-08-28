@@ -46,6 +46,7 @@ export interface EditableCellEditing<TRow> {
    * the row.
    */
   onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+  /** Current editing state. */
   state: CellEditingState;
   /**
    * Validation, when the host declared any. A commit runs the validators first
@@ -98,6 +99,7 @@ export type EditableCellMode = "display" | "activatable" | "editing";
  * @public
  */
 export interface EditableCellController<TRow = unknown> {
+  /** Which editing mode is active. */
   mode: EditableCellMode;
   /** The validator's message for this cell, if it rejected the last commit. */
   error?: string;
@@ -119,8 +121,11 @@ export interface EditableCellController<TRow = unknown> {
   editor: CellEditor | null;
   /** Normalized select options (empty for text/number). */
   selectOptions: ReturnType<typeof normalizeEditorOptions>;
+  /** The value being edited, as text. */
   draft: string;
+  /** Opens the editor. */
   begin: () => void;
+  /** Replaces the draft. */
   setDraft: (value: string) => void;
   /** Commit the draft now, without waiting for Enter or a blur. */
   commit: () => void;

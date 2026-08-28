@@ -36,8 +36,11 @@ interface GlyphSpec {
 
 /** How a font under test should be put together. */
 export interface TestFontSpec {
+  /** Glyphs to synthesize. */
   glyphs: readonly GlyphSpec[];
+  /** Font units per em. */
   unitsPerEm?: number;
+  /** The face's PostScript name. */
   postScriptName?: string;
   /** Use the grouped character map instead of the segmented one. */
   cmapFormat?: 4 | 12;

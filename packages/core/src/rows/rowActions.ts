@@ -26,9 +26,13 @@ export type RowActionsLayout = "buttons" | "menu";
  * @public
  */
 export interface RowActionsRenderContext<TRow> {
+  /** The row being rendered. */
   row: TRow;
+  /** Actions to offer. */
   actions: readonly RowAction<TRow>[];
+  /** Confirmation gate a destructive action must pass. */
   confirm: ConfirmHandler;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
 }
 

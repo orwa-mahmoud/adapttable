@@ -17,15 +17,19 @@ import type { RowPatchStreamStatus } from "./status";
  * @public
  */
 export interface StreamSocket {
+  /** Subscribes to a socket event. */
   addEventListener(
     type: string,
     listener: (event: StreamSocketEvent) => void
   ): void;
+  /** Unsubscribes from a socket event. */
   removeEventListener(
     type: string,
     listener: (event: StreamSocketEvent) => void
   ): void;
+  /** Closes the socket. */
   close(): void;
+  /** The socket's current state. */
   readonly readyState: number;
 }
 
@@ -35,6 +39,7 @@ export interface StreamSocket {
  * @public
  */
 export interface StreamSocketEvent {
+  /** The frame's payload. */
   data?: unknown;
 }
 
