@@ -1156,7 +1156,6 @@ function DesktopTableBody<TRow>({
   // and `role="grid"` with the ARIA dimensions — reach them through the
   // `components` seam. Memoized: a new component identity here would remount
   // the whole table on every render.
-  const gridEnabled = gridFocus?.enabled ?? false;
   const getGridProps = gridFocus?.getGridProps;
   // Depends on the GETTER, not the whole state: the announcement changes on
   // every focus move, and rebuilding `components` would remount antd's table and
@@ -1186,7 +1185,7 @@ function DesktopTableBody<TRow>({
       },
       body: { wrapper: virtualBody ? VirtualTbodyWrapper : TbodyWrapper },
     }),
-    [gridEnabled, getGridProps, pinArmed, theadRef, virtualBody]
+    [getGridProps, pinArmed, theadRef, virtualBody]
   );
 
   return (
