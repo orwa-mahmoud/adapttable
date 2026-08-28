@@ -2381,7 +2381,7 @@ export function matrixToCsv(table: {
 // @public
 export function measureColumnWidth(root: Element | null, key: string): number | null;
 
-// @internal
+// @public
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
 
 // @public
@@ -2618,7 +2618,7 @@ export const pinnedRowStickyStyle: typeof pinnedRowStickyStyle$1;
 // @public
 export type PinSide = "start" | "end";
 
-// @internal
+// @public
 export type Props = Record<string, unknown>;
 
 // @public
