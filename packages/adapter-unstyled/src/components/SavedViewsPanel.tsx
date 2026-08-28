@@ -181,6 +181,8 @@ const slots: SavedViewsPanelSlots = {
  * Native markup carries no look of its own, so the panel takes the same
  * `classNames` map the table does and honors the `views*` keys — a panel
  * mounted beside a styled table would otherwise be raw HTML beside it.
+ *
+ * @public
  */
 export function SavedViewsPanel(
   props: Readonly<

@@ -34,7 +34,11 @@ function Handle({ label, handleProps, className }: FillHandleSlotProps) {
 
 const slots: FillHandleSlots = { Handle };
 
-/** Unstyled fill handle; core only decides which cell receives it. */
+/**
+ * Unstyled fill handle; core only decides which cell receives it.
+ *
+ * @public
+ */
 export function FillHandle(
   props: Readonly<Omit<FillHandleChromeProps, "slots">>
 ) {

@@ -391,6 +391,8 @@ export interface DataTableClassNames {
 
 /**
  * Overridable sub-components: the loading skeleton and the empty state.
+ *
+ * @public
  */
 export interface DataTableSlots {
   /** Replace the empty-state. */
@@ -475,6 +477,8 @@ interface DataTablePropsBase<TRow> extends Omit<
  * with core's data-mode union, so `mode="server"` requires
  * `onQueryChange` at compile time and `mode="frontend"` turns it into a
  * pure notification.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;

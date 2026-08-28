@@ -18,7 +18,11 @@ const ROW_STYLE: CSSProperties = {
   gap: 6,
 };
 
-/** The label strings the saved-views menu renders. */
+/**
+ * The label strings the saved-views menu renders.
+ *
+ * @public
+ */
 export type SavedViewsLabels = Pick<
   Required<TableLabels>,
   "savedViews" | "saveView" | "viewName" | "deleteView"
@@ -37,6 +41,8 @@ export interface SavedViewsMenuProps {
  * that captures the table's CURRENT state under a typed name. Built on core's
  * `useSavedViews`; closes on outside-click or Escape. Ships no styles —
  * target the `data-adapttable-part` hooks or the `views*` className slots.
+ *
+ * @public
  */
 export function SavedViewsMenu({
   options,

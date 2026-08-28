@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 
-/** Props for {@link FilterPanel}. */
+/**
+ * Props for {@link FilterPanel}.
+ *
+ * @public
+ */
 export interface FilterPanelProps {
   open: boolean;
   onClose: () => void;
@@ -17,7 +21,11 @@ export interface FilterPanelProps {
   classNames: DataTableClassNames;
 }
 
-/** Backdrop + side drawer for caller-provided filter widgets. */
+/**
+ * Backdrop + side drawer for caller-provided filter widgets.
+ *
+ * @public
+ */
 export function FilterPanel({
   open,
   onClose,

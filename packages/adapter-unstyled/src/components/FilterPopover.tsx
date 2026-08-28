@@ -10,7 +10,11 @@ import {
   VIEWPORT_GUTTER,
 } from "./overlayPlacement";
 
-/** Props for {@link FilterPopover}. */
+/**
+ * Props for {@link FilterPopover}.
+ *
+ * @public
+ */
 export interface FilterPopoverProps {
   open: boolean;
   onClose: () => void;
@@ -30,6 +34,8 @@ export interface FilterPopoverProps {
  * interactive; clicking outside the popover/anchor or pressing Escape closes
  * it. Portalled to `document.body` so sticky headers cannot paint over it.
  * Pair with `filtersMode="drawer"` for the slide-in panel (`FilterPanel`).
+ *
+ * @public
  */
 export function FilterPopover({
   open,

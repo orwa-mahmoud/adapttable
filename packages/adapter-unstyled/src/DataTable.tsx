@@ -130,6 +130,8 @@ function DataTableBody<TRow>({
  * ships no styles of its own. Built on the `@adapttable/core` prop-getters.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);

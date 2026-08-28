@@ -518,7 +518,11 @@ function FilterField<TRow>({
   }
 }
 
-/** Props for `AutoFilterForm`. */
+/**
+ * Props for `AutoFilterForm`.
+ *
+ * @public
+ */
 export interface AutoFilterFormProps<TRow> {
   /** The resolved filter definitions, in render order. */
   defs: readonly FilterDef<TRow>[];
@@ -544,6 +548,8 @@ export interface AutoFilterFormProps<TRow> {
  * `source.setExtra` / `source.setExtras` — an empty value clears its key.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function AutoFilterForm<TRow>({
   defs,
