@@ -3,9 +3,10 @@ import type { CSSProperties } from "react";
 /**
  * Any props object a prop-getter can produce or accept for merging.
  *
- * Prop-getter plumbing: twelve public prop-getters name this in their
- * signatures, so it is part of the published surface whether or not a consumer
- * writes it. Reach for the prop-getters on `useDataTable` rather than this.
+ * Prop-getter plumbing: seven public prop-getters and five public prop
+ * interfaces name this in their signatures, so it is part of the published
+ * surface whether or not a consumer writes it. Reach for the prop-getters on
+ * `useDataTable` rather than this.
  *
  * @public
  */

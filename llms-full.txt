@@ -9386,7 +9386,7 @@ your app already ships those:
 | ----------------------------------------- | ----------- |
 | `useFrontendData` + `useDataTable` (core) | ~18 kB      |
 | every core export                         | ~87 kB      |
-| `DataTable` from an adapter               | ~127–140 kB |
+| `DataTable` from an adapter               | ~127–141 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
