@@ -83,6 +83,8 @@ interface DataTablePropsBase<TRow> extends Omit<
  *
  * The base surface is intersected with core's data-mode union so the
  * appropriate data-mode requirements are enforced at compile time.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;
