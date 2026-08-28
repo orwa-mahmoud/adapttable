@@ -41,7 +41,11 @@ function Handle({ label, handleProps, className }: FillHandleSlotProps) {
 
 const slots: FillHandleSlots = { Handle };
 
-/** Radix-owned fill handle; core only decides which cell receives it. */
+/**
+ * Radix-owned fill handle; core only decides which cell receives it.
+ *
+ * @public
+ */
 export function FillHandle(
   props: Readonly<Omit<FillHandleChromeProps, "slots">>
 ) {

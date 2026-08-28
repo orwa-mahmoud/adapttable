@@ -48,6 +48,8 @@ import type { DataTableProps } from "./types";
  * core's `useDataTableShell`; this renders only Radix controls over it.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
