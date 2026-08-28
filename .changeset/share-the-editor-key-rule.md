@@ -11,5 +11,5 @@
 
 Share the rule that keeps an editor's own keys out of the table's key handler, as `stopEditKeys` on
 `@adapttable/core/adapter`. Enter, Escape and Tab mean something to both an open editor and the grid
-around it; six adapters carried a byte-identical helper for it and the seventh inlined the same
-condition. Behaviour is unchanged in all seven.
+around it, and custom adapters need the same rule. Behaviour is unchanged in the seven adapters that
+now share it.
