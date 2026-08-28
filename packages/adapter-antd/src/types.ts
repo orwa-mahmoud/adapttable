@@ -60,7 +60,13 @@ export interface DataTableClassNames {
   footer?: string;
 }
 
-interface DataTablePropsBase<TRow>
+/**
+ * The props every Ant Design table takes, before the data-mode half is added.
+ * `DataTableProps` is this plus one of the data modes.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow>
   extends
     Omit<BaseDataTableProps<TRow>, "source">,
     Pick<

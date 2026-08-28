@@ -7,8 +7,15 @@ import {
 } from "@adapttable/core";
 import type { ReactNode } from "react";
 
-interface IconProps {
+/**
+ * Props every icon in this adapter takes.
+ *
+ * @public
+ */
+export interface IconProps {
+  /** Pixel size for both axes. */
   size?: number;
+  /** Class for the svg element. */
   className?: string;
 }
 

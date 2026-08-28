@@ -477,8 +477,12 @@ export interface DataTableSlots {
   error?: Slot<TableErrorState>;
 }
 
-/** Props for the unstyled `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the unstyled `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {

@@ -90,8 +90,12 @@ export type RadixAccentColor =
   | "mint"
   | "sky";
 
-/** Props for the Radix Themes `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the Radix Themes `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {

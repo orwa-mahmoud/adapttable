@@ -57,8 +57,12 @@ export interface DataTableClassNames {
   footer?: string;
 }
 
-/** Props for the Chakra UI `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the Chakra UI `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {

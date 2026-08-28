@@ -143,3 +143,4 @@ export {
   type UseTableDataOptions,
 } from "@adapttable/core";
 export { type DataModeProps } from "@adapttable/core/adapter";
+export type { DataTablePropsBase } from "./types";

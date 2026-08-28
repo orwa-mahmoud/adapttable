@@ -57,8 +57,12 @@ export interface DataTableClassNames {
   footer?: string;
 }
 
-/** Props for the Mantine `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the Mantine `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {

@@ -7,7 +7,11 @@ import type {
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
-/** Overridable sub-components. */
+/**
+ * Overridable sub-components.
+ *
+ * @public
+ */
 export interface DataTableSlots {
   /** Replace the loading skeleton. */
   skeleton?: ReactNode;
@@ -35,8 +39,12 @@ export interface DataTableClassNames {
   footer?: string;
 }
 
-/** Props for the React Bootstrap `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the React Bootstrap `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {

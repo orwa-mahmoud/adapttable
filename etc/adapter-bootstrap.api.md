@@ -74,7 +74,40 @@ export { createFilterRegistry }
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): ReactNode;
 
 // @public
+export interface DataTableClassNames {
+    card?: string;
+    footer?: string;
+    root?: string;
+    table?: string;
+    toolbar?: string;
+}
+
+// @public
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
+
+// @public
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+    accentColor?: string;
+    animate?: boolean;
+    classNames?: DataTableClassNames;
+    data?: readonly TRow[];
+    loading?: boolean;
+    savedViews?: UseSavedViewsOptions;
+    size?: "sm" | "md" | "lg";
+    slots?: DataTableSlots;
+    source?: TableSource<TRow>;
+    total?: number;
+    urlAdapter?: UrlStateAdapter;
+    urlKey?: string;
+    urlSync?: boolean;
+}
+
+// @public
+export interface DataTableSlots {
+    empty?: ReactNode;
+    noResults?: ReactNode;
+    skeleton?: ReactNode;
+}
 
 export { defaultConfirm }
 

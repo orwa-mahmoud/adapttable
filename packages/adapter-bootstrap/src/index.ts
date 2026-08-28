@@ -45,3 +45,6 @@ export {
   type UseServerDataOptions,
   useTableUrlState,
 } from "@adapttable/core";
+export type { DataTablePropsBase } from "./types";
+export type { DataTableClassNames } from "./types";
+export type { DataTableSlots } from "./types";

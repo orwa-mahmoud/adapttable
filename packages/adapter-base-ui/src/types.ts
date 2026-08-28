@@ -92,8 +92,12 @@ export type BaseUiAccentColor =
   | "mint"
   | "sky";
 
-/** Props for the Base UI `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the Base UI `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {

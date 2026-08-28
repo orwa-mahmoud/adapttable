@@ -160,3 +160,5 @@ export {
   type ExportCsvOptions,
 } from "@adapttable/core";
 export { type DataModeProps } from "@adapttable/core/adapter";
+export type { DataTablePropsBase } from "./types";
+export type { IconProps } from "./components/icons";

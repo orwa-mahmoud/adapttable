@@ -178,6 +178,19 @@ export interface DataTableClassNames {
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
 
 // @public
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source">, Pick<UseTableDataOptions<TRow>, "source" | "data" | "total" | "loading" | "error" | "urlKey" | "supports" | "facetKeys" | "facets"> {
+    animate?: boolean;
+    bordered?: boolean;
+    className?: string;
+    classNames?: DataTableClassNames;
+    savedViews?: UseSavedViewsOptions;
+    size?: "small" | "middle" | "large";
+    slots?: DataTableSlots;
+    urlAdapter?: UrlStateAdapter;
+    urlSync?: boolean;
+}
+
+// @public
 export interface DataTableSlots {
     empty?: ReactNode;
     error?: Slot<TableErrorState>;
