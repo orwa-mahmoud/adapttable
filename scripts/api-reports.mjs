@@ -180,8 +180,8 @@ function extractOne({ dir, report, entry, isMainEntry }) {
       if (message.messageId === "ae-forgotten-export") {
         const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
         const symbol = named?.[1] ?? "";
-        const generated = /(\$|_)\d+$/.test(symbol);
-        const base = symbol.replace(/(\$|_)\d+$/, "");
+        const generated = /[$_]\d+$/.test(symbol);
+        const base = symbol.replace(/[$_]\d+$/, "");
         // A name the d.ts bundler invented while flattening a duplicate. No
         // edit to this repository can produce or remove it.
         if (generated || ALIAS_NAMES.has(base)) {

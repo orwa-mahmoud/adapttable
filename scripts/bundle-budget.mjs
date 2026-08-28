@@ -17,13 +17,15 @@
  * The bundler is rolldown, re-exported by tsdown, which builds this repo
  * already — the measurement adds no dependency of its own.
  */
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
 import { Rolldown } from "tsdown";
+
+import { publishedFigures } from "./published-figures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
@@ -490,24 +492,6 @@ const PUBLISHED = [
   },
 ];
 
-/** Every `N kB` (or `N–M kB`) figure on the line starting with `find`. */
-function publishedFigures(doc, find) {
-  const lines = readFileSync(join(ROOT, doc), "utf8").split("\n");
-  const at = lines.findIndex((l) => l.startsWith(find));
-  if (at === -1) return null;
-  // A prose figure can wrap to the next line; a table row cannot.
-  const text = find.startsWith("|")
-    ? lines[at]
-    : `${lines[at]} ${lines[at + 1] ?? ""}`;
-  return [
-    ...text.matchAll(/~?([\d.]+)(?:\s*[–-]\s*~?([\d.]+))?\s*kB/gi),
-  ].flatMap((m) =>
-    [Number(m[1]), m[2] === undefined ? null : Number(m[2])].filter(
-      (n) => n !== null
-    )
-  );
-}
-
 let stale = 0;
 for (const { doc, find, from } of PUBLISHED) {
   const measured = rows
@@ -515,12 +499,12 @@ for (const { doc, find, from } of PUBLISHED) {
     .map((r) => r.sizeKB);
   const want = [Math.min(...measured), Math.max(...measured)];
   const expected = want[0] === want[1] ? [want[0]] : want;
-  const figures = publishedFigures(doc, find);
+  const figures = publishedFigures(join(ROOT, doc), find);
 
   if (figures === null) {
     stale++;
     console.error(
-      `✗ ${doc}: no row starting "| ${row}" — the table moved or was renamed`
+      `✗ ${doc}: no line starting "${find}" — the text moved or was reworded`
     );
     continue;
   }
