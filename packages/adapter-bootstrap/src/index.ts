@@ -1,5 +1,8 @@
 export { DataTable } from "./DataTable";
 export type { DataTableProps } from "./types";
+export type { DataTablePropsBase } from "./types";
+export type { DataTableClassNames } from "./types";
+export type { DataTableSlots } from "./types";
 export {
   type ActiveFilterChip,
   type BulkAction,
@@ -45,6 +48,3 @@ export {
   type UseServerDataOptions,
   useTableUrlState,
 } from "@adapttable/core";
-export type { DataTablePropsBase } from "./types";
-export type { DataTableClassNames } from "./types";
-export type { DataTableSlots } from "./types";

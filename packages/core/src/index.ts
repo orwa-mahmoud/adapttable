@@ -900,23 +900,38 @@ export type {
   ColumnMenuLabels,
   ColumnMenuRow,
 } from "./columns/columnMenuModel";
+export type { PinnedSide } from "./columns/columnMenuModel";
 export type {
   ColumnDragState,
   ColumnDropProps,
   ColumnReorderKeyProps,
   ColumnRowDragProps,
 } from "./columns/columnReorder";
+export type { ColumnDragRowAttrs } from "./columns/columnReorder";
 export type { ColumnResizeHandleProps } from "./columns/columnResize";
+export type { WidthColumn } from "./columns/columnWidths";
 export type { GroupedHeaderAlign } from "./columns/headerGroups";
 export type {
   PinLeads,
-  PinOffset,
   PinnedCellStyle,
+  PinOffset,
 } from "./columns/useColumnLayout";
 export { editableCellController } from "./editing/editableCellController";
 export type { EditValidationState, RowValidator } from "./editing/validation";
+export type {
+  CellValidator,
+  ValidationCheckResult,
+  ValidationTarget,
+} from "./editing/validation";
+export type { ExportCsvProp } from "./export/tableCsv";
 export type { FeatureHostState } from "./features/currentHost";
+export type {
+  ColumnMenuActionFactory,
+  ContextMenuItemsFactory,
+  FilterTypeExtend,
+} from "./features/currentHost";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
+export { SESSION_ATTR } from "./filters/headerFilterOverlay";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
 export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
@@ -924,18 +939,3 @@ export type { SearchInputState } from "./useDataTable/useSearchInput";
 export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";
 export type { VirtualTableRow } from "./virtual/useTableVirtualization";
-export type { PinnedSide } from "./columns/columnMenuModel";
-export type { ColumnDragRowAttrs } from "./columns/columnReorder";
-export type {
-  CellValidator,
-  ValidationCheckResult,
-  ValidationTarget,
-} from "./editing/validation";
-export type {
-  ColumnMenuActionFactory,
-  ContextMenuItemsFactory,
-  FilterTypeExtend,
-} from "./features/currentHost";
-export type { ExportCsvProp } from "./export/tableCsv";
-export type { WidthColumn } from "./columns/columnWidths";
-export { SESSION_ATTR } from "./filters/headerFilterOverlay";

@@ -137,6 +137,11 @@ export {
 } from "@adapttable/core";
 export { deriveSortByOptions } from "@adapttable/core/adapter";
 
+/* The adapter's own names: the props base every DataTableProps is built
+   from, before the data mode is chosen, and the props its icons take. */
+export type { IconProps } from "./components/icons";
+export type { DataTablePropsBase } from "./types";
+
 /* Completed public surface (v2): every type a consumer's own code
    needs — CSV options, column layout, cell editors, tier props —
    without ever depending on @adapttable/core directly. */
@@ -160,5 +165,3 @@ export {
   type ExportCsvOptions,
 } from "@adapttable/core";
 export { type DataModeProps } from "@adapttable/core/adapter";
-export type { DataTablePropsBase } from "./types";
-export type { IconProps } from "./components/icons";
