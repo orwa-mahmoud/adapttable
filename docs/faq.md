@@ -48,10 +48,20 @@ you use.
 ## Is there a free alternative to MUI X DataGrid or ag-Grid?
 
 Yes — AdaptTable is **MIT-licensed and fully free**, including server-side
-data, infinite scroll, filtering, and selection. MUI X DataGrid and ag-Grid are
+data, infinite scroll, filtering and selection. MUI X DataGrid and ag-Grid are
 **open-core**: their advanced server-side data and infinite-loading
-capabilities sit behind paid Pro/Premium or Enterprise tiers. The MUI adapter
-gives a DataGrid-style experience at no cost.
+capabilities sit behind paid Pro/Premium or Enterprise tiers.
+
+So do six more that AdaptTable ships under MIT:
+[pivoting](./pivot.md), [tree data](./tree-data.md),
+[cell-range selection, range clipboard copy/paste and the fill
+handle](./cell-navigation.md), and
+[Excel (.xlsx) export](./customization.md#export). What the paid tiers still
+have is integration — one spreadsheet surface with its tool panels assembled —
+where AdaptTable gives you the parts. [Comparison](./comparison.md) has the
+table, with each vendor's tier named.
+
+The MUI adapter gives a DataGrid-style experience at no cost.
 
 ## Is AdaptTable free?
 
