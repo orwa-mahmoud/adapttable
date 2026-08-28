@@ -7,12 +7,12 @@ React ecosystem — and this page starts by telling you when **not** to migrate.
 
 The honest line is not a feature list. Pivoting, tree data, cell-range
 selection, the fill handle, clipboard range operations and Excel export all
-ship in AdaptTable, under MIT, where AG Grid puts them in its
-[paid Enterprise tier](https://www.ag-grid.com/license-pricing/). What AG Grid
-has that AdaptTable does not is **integration**: one spreadsheet surface, tool
-panels already assembled, and a decade of behaviour at the edges of it. In
-AdaptTable those are parts you compose — a pivot engine and its panel, a range
-model, a side-panel frame you fill.
+ship in AdaptTable, under MIT, where AG Grid puts them in its paid Enterprise
+tier — $999/developer when we checked in August 2026. What AG Grid has that
+AdaptTable does not is **integration**: one spreadsheet surface, tool panels
+already assembled, and a decade of behaviour at the edges of it. In AdaptTable
+those are parts you compose — a pivot engine and its panel, a range model, a
+side-panel frame you fill.
 
 So stay on AG Grid when the grid IS the product: an analytics surface where
 users pivot, drill and drag fields around all day, or a workflow that leans on
@@ -36,7 +36,9 @@ renders its own theme; AdaptTable renders _your_ UI kit's real components).
 - Drag-a-column-to-group: AdaptTable groups from `groupBy` — your code or the
   URL, no drag gesture
 
-Migrate the CRUD tables, keep the analytics grid — they can run side by side.
+If you rely on those and the Enterprise licence is worth it to you, that is the
+right tool. Migrate the CRUD tables, keep the analytics grid — they can run side
+by side.
 
 ## What you gain (for CRUD tables)
 
