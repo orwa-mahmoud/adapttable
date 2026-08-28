@@ -55,4 +55,13 @@ describe("accessibility (axe) — Base UI", () => {
     );
     expect(await axe(container, axeOpts)).toHaveNoViolations();
   });
+
+  it("mobile card layout has no violations", async () => {
+    // The cards are a different tree from the table — a list of items rather
+    // than rows and cells — so auditing the desktop layout says nothing about
+    // them.
+    const { container } = renderTable({ forceMobile: true });
+
+    expect(await axe(container, axeOpts)).toHaveNoViolations();
+  });
 });
