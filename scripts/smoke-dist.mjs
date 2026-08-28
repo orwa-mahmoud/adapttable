@@ -20,7 +20,7 @@
  * consumer resolution), pack with `pnpm pack` and install into a throwaway
  * Vite app manually — that step needs network + a temp project.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 
 import ts from "typescript";
@@ -340,6 +340,54 @@ if (strayRootTypes.length > 0) {
       `${strayRootTypes.join("\n  ")}\n  ` +
       `A package's dts program is reaching outside its own src — check that ` +
       `its tsdown config still points at tsconfig.build.json.`
+  );
+}
+
+/**
+ * Everything in `dist` should be something an entry can reach.
+ *
+ * A build restored from turbo's cache writes its own outputs but does not remove
+ * files an earlier build left behind, so tsdown's `clean` never runs and chunks
+ * whose content hash has since moved survive in the directory — where `pack`
+ * would ship them as dead weight. Nothing else here notices: `publint` and the
+ * entry check above both ask whether what the manifest points AT exists, never
+ * what else is sitting beside it.
+ */
+function distFiles(dir, into = []) {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) distFiles(full, into);
+    // Runtime modules only. Declaration chunks reference each other through
+    // specifiers that resolve to the RUNTIME sibling, so the walker below
+    // cannot see them and would report every one as unreachable. An orphaned
+    // build leaves both kinds behind, so the runtime half is enough to catch it.
+    else if (/\.(js|cjs|mjs)$/.test(name)) into.push(full);
+  }
+  return into;
+}
+
+for (const pkg of LIB_PACKAGES) {
+  const pkgDir = join(PACKAGES_DIR, pkg);
+  const distDir = join(pkgDir, "dist");
+  if (!existsSync(distDir)) continue;
+  const pkgJson = readPackageJson(pkg);
+  if (!pkgJson.exports && !pkgJson.main) continue;
+
+  const roots = exportTargets(pkgJson)
+    .map((target) => join(pkgDir, target.replace(/^\.\//, "")))
+    .filter((file) => existsSync(file));
+  if (roots.length === 0) continue;
+  const { files: reachable } = serverGraph(roots);
+  const orphans = distFiles(distDir)
+    .filter((file) => !reachable.has(file))
+    .map((file) => relative(pkgDir, file));
+  if (orphans.length === 0) continue;
+  failures += 1;
+  console.error(
+    `✗ @adapttable/${pkg.replace(/^adapter-/, "")}: ${orphans.length} file(s) ` +
+      `in dist that no entry reaches:\n  ${orphans.join("\n  ")}\n  ` +
+      `A cached build does not clean the directory it restores into — run ` +
+      `\`pnpm --filter <pkg> clean\` and build again.`
   );
 }
 
