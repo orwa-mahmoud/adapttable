@@ -308,6 +308,7 @@ export function ColumnMenu<TRow>({
       <KitPortal>
         <Popover.Positioner>
           <Popover.Content
+            aria-label={labels.columns}
             minW="260px"
             w="auto"
             dir={dir}

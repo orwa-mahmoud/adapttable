@@ -113,3 +113,48 @@ for (const page of PAGES) {
     }
   });
 }
+
+/**
+ * The column menu, opened.
+ *
+ * Each kit's popover decides whether the panel comes out a `dialog` or a
+ * `group`, and that is the kit's business. What is NOT the kit's business is
+ * whether the panel has a name: four kits opened an unnamed dialog, and two
+ * put the column list inside a wrapper their kit had already marked
+ * `presentation` or `tooltip`, so a screen reader was told the trigger had
+ * expanded something it could not identify.
+ */
+test("every kit opens a named column menu", async ({ page }) => {
+  const shapes = new Map<string, unknown>();
+  for (const kit of KITS) {
+    await page.goto(`/${kit}/columns/`);
+    const trigger = page
+      .locator('[data-adapttable-part="column-menu-button"]')
+      .first();
+    await trigger.waitFor();
+    await trigger.click();
+    await page
+      .locator('[data-adapttable-part="column-menu-item"]')
+      .first()
+      .waitFor();
+
+    const named =
+      (await page.getByRole("dialog", { name: "Columns" }).count()) +
+      (await page.getByRole("group", { name: "Columns" }).count());
+    expect(named, `${kit} opens a column menu with no accessible name`).toBe(1);
+    shapes.set(kit, {
+      expanded: await trigger.getAttribute("aria-expanded"),
+      items: await page
+        .locator('[data-adapttable-part="column-menu-item"]')
+        .count(),
+    });
+  }
+
+  const [reference, ...rest] = [...shapes.keys()];
+  for (const kit of rest) {
+    expect(
+      shapes.get(kit),
+      `${kit} opens a different column menu from ${reference}`
+    ).toEqual(shapes.get(reference!));
+  }
+});

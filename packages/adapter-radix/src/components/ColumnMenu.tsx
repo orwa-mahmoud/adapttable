@@ -313,6 +313,7 @@ export function ColumnMenu<TRow>({
         </Button>
       </Popover.Trigger>
       <Popover.Content
+        aria-label={labels.columns}
         align="end"
         side="bottom"
         avoidCollisions={false}

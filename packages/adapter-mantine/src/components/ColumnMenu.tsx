@@ -377,7 +377,7 @@ export function ColumnMenu<TRow>({
           {labels.columns}
         </Button>
       </Popover.Target>
-      <Popover.Dropdown dir={dir}>
+      <Popover.Dropdown dir={dir} aria-label={labels.columns}>
         <Box
           p={4}
           miw={250}

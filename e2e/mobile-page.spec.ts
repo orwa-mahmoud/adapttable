@@ -119,3 +119,29 @@ test("states the real dataset size on a windowed card list", async ({
     .toBeGreaterThan(1);
   await expect(cards.first()).toHaveAttribute("aria-setsize", "50000");
 });
+
+/**
+ * Five kits build the list from `div role="list"` and three from a native
+ * `<ul>`. Both reach a screen reader as the same thing, which is the point:
+ * the assertion is on the roles, not on the elements a kit chose.
+ */
+test("every kit exposes the same list to assistive tech", async ({ page }) => {
+  const shapes = new Map<string, unknown>();
+  for (const kit of KITS) {
+    await page.goto(`/${kit}/mobile-cards/`);
+    await page.locator('[data-adapttable-part="card"]').first().waitFor();
+    shapes.set(kit, {
+      lists: await page.getByRole("list").count(),
+      listitems: await page.getByRole("listitem").count(),
+      cards: await page.locator('[data-adapttable-part="card"]').count(),
+    });
+  }
+
+  const [reference, ...rest] = [...shapes.keys()];
+  for (const kit of rest) {
+    expect(
+      shapes.get(kit),
+      `${kit} exposes a different card list from ${reference}`
+    ).toEqual(shapes.get(reference!));
+  }
+});

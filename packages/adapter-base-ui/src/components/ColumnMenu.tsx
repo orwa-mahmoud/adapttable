@@ -318,6 +318,7 @@ export function ColumnMenu<TRow>({
           }}
         >
           <Popover.Popup
+            aria-label={labels.columns}
             className="adapttable-popup"
             dir={dir}
             style={{

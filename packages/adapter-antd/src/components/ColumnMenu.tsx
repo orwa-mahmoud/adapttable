@@ -371,6 +371,10 @@ export function ColumnMenu<TRow>({
   // so this is the single source of it.
   const content = (
     <div
+      // antd's own popover wrapper is a tooltip, which is the wrong thing for a
+      // panel of controls, so the panel names itself as a group inside it.
+      role="group"
+      aria-label={labels.columns}
       style={{
         padding: 8,
         minWidth: 260,

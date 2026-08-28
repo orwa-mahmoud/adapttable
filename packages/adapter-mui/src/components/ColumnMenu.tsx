@@ -391,6 +391,8 @@ export function ColumnMenu<TRow>({
         marginThreshold={0}
       >
         <Box
+          role="group"
+          aria-label={labels.columns}
           dir={dir}
           sx={{
             p: 0.75,
