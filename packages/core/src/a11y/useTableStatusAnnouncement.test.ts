@@ -5,12 +5,14 @@
  * the one that matters most and is easiest to get wrong: the FIRST settle, where
  * a table that has only just arrived must say nothing at all.
  */
+import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { defaultLabels } from "../labels";
 import {
   resolveTableStatus,
   type TableStatusAnnouncementOptions,
+  useTableStatusAnnouncement,
 } from "./useTableStatusAnnouncement";
 
 const base: TableStatusAnnouncementOptions = {
@@ -120,5 +122,56 @@ describe("resolveTableStatus", () => {
     expect(
       change({ limit: 0, paged: false }, { limit: 0, paged: false, total: 40 })
     ).toBe("Showing 1–25 of 40");
+  });
+});
+
+/**
+ * The hook, not the resolver. Both defects fixed here lived in the effect
+ * wiring rather than in the message: the resolver was right every time.
+ */
+describe("useTableStatusAnnouncement", () => {
+  it("clears the region on a silent settle, so the same message is heard twice", () => {
+    const { result, rerender } = renderHook(
+      (options: TableStatusAnnouncementOptions) =>
+        useTableStatusAnnouncement(options),
+      { initialProps: { ...base, total: 87 } }
+    );
+    // First settle is the table arriving — silent by design.
+    expect(result.current).toBe("");
+
+    rerender({ ...base, total: 50 });
+    expect(result.current).toBe("Page 1 of 2. Showing 1–25 of 50");
+
+    // No rows: the empty state owns that announcement, so this hook stays
+    // quiet — and must ALSO let go of what it last said. Holding the old text
+    // means the identical message below never reaches a screen reader, because
+    // the DOM string never changes.
+    rerender({ ...base, total: 0, shown: 0 });
+    expect(result.current).toBe("");
+
+    rerender({ ...base, total: 50 });
+    expect(result.current).toBe("Page 1 of 2. Showing 1–25 of 50");
+  });
+
+  it("re-announces when only `shown` moves and the source reports no limit", () => {
+    const { result, rerender } = renderHook(
+      (options: TableStatusAnnouncementOptions) =>
+        useTableStatusAnnouncement(options),
+      {
+        initialProps: {
+          ...base,
+          paged: false,
+          limit: 0,
+          shown: 25,
+          total: 40,
+        },
+      }
+    );
+    expect(result.current).toBe("");
+
+    // With no limit the bounds come from `shown`, so this moves the message
+    // even though total, page and limit all stand still.
+    rerender({ ...base, paged: false, limit: 0, shown: 40, total: 40 });
+    expect(result.current).toBe("Showing 1–40 of 40");
   });
 });

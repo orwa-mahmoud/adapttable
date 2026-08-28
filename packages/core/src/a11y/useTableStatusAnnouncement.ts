@@ -148,16 +148,22 @@ export function useTableStatusAnnouncement(
   const previous = useRef<StatusSignature | undefined>(undefined);
   const latest = useRef(options);
   latest.current = options;
-  const { sortBy, sortDir, total, page, limit } = options;
+  // `shown` is in here because it decides the bounds whenever the source
+  // reports no limit — leave it out and the message moves while the effect
+  // never runs.
+  const { sortBy, sortDir, total, page, limit, shown } = options;
   useEffect(() => {
     const { announcement: next, signature } = resolveTableStatus(
       latest.current,
       previous.current
     );
     previous.current = signature;
-    // An empty result means nothing changed that is worth saying; leaving the
-    // previous message in place would make a screen reader repeat it.
-    if (next !== "") setAnnouncement(next);
-  }, [sortBy, sortDir, total, page, limit]);
+    // Written every time, including the empty result. Silence has to CLEAR the
+    // region rather than leave the last message sitting in it: React skips the
+    // re-render when the value is unchanged, so a message repeated after a
+    // silent settle would never alter the DOM text, and `aria-live` fires on
+    // nothing.
+    setAnnouncement(next);
+  }, [sortBy, sortDir, total, page, limit, shown]);
   return announcement;
 }
