@@ -53,6 +53,32 @@ describe("table status announcements (radix)", () => {
     expect(status()).toHaveAttribute("aria-atomic", "true");
   });
 
+  it("announces in the host's language, under RTL", async () => {
+    // The sentence is built from labels, so a localized table must announce in
+    // its own words — and the region has to keep working when the table is laid
+    // out right-to-left, which is where a table that only ever ran in English
+    // would look fine and say the wrong thing.
+    renderRadix(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlAdapter={createMemoryAdapter("limit=25")}
+        forceMobile={false}
+        dir="rtl"
+        labels={{
+          sortedBy: ({ column, ascending }) =>
+            `مُرتَّب حسب ${column}، ${ascending ? "تصاعدي" : "تنازلي"}`,
+        }}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Sort by: Name" }));
+
+    await waitFor(() => {
+      expect(status()).toHaveTextContent("مُرتَّب حسب Name، تصاعدي");
+    });
+  });
+
   it("names the column and direction when the user sorts", async () => {
     mount("limit=25");
     fireEvent.click(screen.getByRole("button", { name: "Sort by: Name" }));
