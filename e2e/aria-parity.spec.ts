@@ -1,8 +1,30 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { configureFeatureLab } from "./feature-lab";
 
 const KITS = builtAdapters().map((adapter) => adapter.key);
+
+/**
+ * The Feature Lab renders every kit on one page and the card picks which one,
+ * so a cross-kit walk switches cards instead of URLs.
+ */
+async function selectKit(page: Page, kit: string): Promise<void> {
+  if (kit === KITS[0]) return;
+  await page.getByTestId(`adapter-${kit}`).scrollIntoViewIfNeeded();
+  await page.getByTestId(`adapter-${kit}`).click();
+}
+
+/** It says nothing about which shape is right — only that no kit is alone. */
+function assertOneShape(shapes: Map<string, unknown>, surface: string): void {
+  const [reference, ...rest] = [...shapes.keys()];
+  for (const kit of rest) {
+    expect(
+      shapes.get(kit),
+      `${kit} builds a different ${surface} from ${reference}`
+    ).toEqual(shapes.get(reference!));
+  }
+}
 
 /**
  * The same table, described the same way by every kit.
@@ -263,4 +285,94 @@ test("every kit names every control in the saved-views panel", async ({
       `${kit} builds a different saved-views panel from ${reference}`
     ).toEqual(shapes.get(reference!));
   }
+});
+
+/**
+ * Two Feature Lab surfaces, which every kit builds from core's chrome behind
+ * its own primitives. Both live on `/all-options/`, where the kit is chosen by
+ * card rather than by URL, so one test walks all eight on one page.
+ *
+ * Roles are compared as the browser COMPUTES them. `aria-modal` deliberately is
+ * NOT compared: Radix Themes traps focus instead of setting it, ARIA does not
+ * require it, and holding eight kits to one spelling of modality would be churn.
+ */
+test("every kit exposes the same side panel", async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.goto("/all-options/");
+  await configureFeatureLab(page, "side panel", "On");
+  const shapes = new Map<string, unknown>();
+
+  for (const kit of KITS) {
+    await selectKit(page, kit);
+    const root = page.locator(`[data-adapter="${kit}"]`);
+    // antd's first `tbody tr` is an aria-hidden measure row, so a visible-row
+    // wait has to key off content rather than position.
+    await expect(root.getByText("Ada Lovelace").first()).toBeVisible();
+
+    const tabs = root.getByRole("tablist", { name: "Table settings" });
+    await expect(
+      tabs,
+      `${kit} has no side panel tablist named "Table settings"`
+    ).toHaveCount(1);
+
+    shapes.set(kit, {
+      tabs: await tabs.getByRole("tab").count(),
+      selected: await tabs.getByRole("tab", { selected: true }).count(),
+      panels: await root.getByRole("tabpanel").count(),
+      unnamedTabs: await tabs
+        .getByRole("tab")
+        .evaluateAll(
+          (nodes) =>
+            nodes.filter(
+              (n) =>
+                !(n.getAttribute("aria-label") ?? n.textContent ?? "").trim()
+            ).length
+        ),
+    });
+  }
+
+  assertOneShape(shapes, "side panel");
+});
+
+test("every kit exposes the same command palette", async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.goto("/all-options/");
+  await configureFeatureLab(page, "command palette (⌘k)", "On");
+  const shapes = new Map<string, unknown>();
+
+  for (const kit of KITS) {
+    await selectKit(page, kit);
+    const root = page.locator(`[data-adapter="${kit}"]`);
+    const cell = root.getByText("Ada Lovelace").first();
+    await expect(cell).toBeVisible();
+    await cell.click();
+    await page.keyboard.press("Meta+k");
+
+    // The named DIALOG is the assertion, not the part attribute: MUI spreads
+    // unrecognised props onto a `role="presentation"` Modal root, so its name
+    // has to reach the paper to exist at all.
+    const dialog = page.getByRole("dialog", { name: "Command palette" });
+    await expect(
+      dialog,
+      `${kit} opens a command palette with no accessible name`
+    ).toHaveCount(1);
+
+    shapes.set(kit, {
+      combobox: await dialog.getByRole("combobox").count(),
+      listboxes: await dialog.getByRole("listbox").count(),
+      options: await dialog.getByRole("option").count(),
+      unnamedOptions: await dialog
+        .getByRole("option")
+        .evaluateAll(
+          (nodes) => nodes.filter((n) => !(n.textContent ?? "").trim()).length
+        ),
+    });
+
+    // The palette portals to the document, so a kit that leaves it open makes
+    // the next kit read this one's node.
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+  }
+
+  assertOneShape(shapes, "command palette");
 });
