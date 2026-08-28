@@ -112,6 +112,9 @@ export const ko: Required<TableLabels> = {
   resetColumn: "열 재설정",
   sortAscending: "오름차순 정렬",
   sortDescending: "내림차순 정렬",
+  sortedBy: ({ column, ascending }) =>
+    `${column} 기준 ${ascending ? "오름차순" : "내림차순"} 정렬`,
+  sortingCleared: "정렬 해제됨",
   filterColumn: "열 필터",
   columnActions: "열 작업",
   exportCsv: "CSV 내보내기",

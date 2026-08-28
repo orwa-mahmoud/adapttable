@@ -114,6 +114,9 @@ export const he: Required<TableLabels> = {
   resetColumn: "אפס עמודה",
   sortAscending: "מיין בסדר עולה",
   sortDescending: "מיין בסדר יורד",
+  sortedBy: ({ column, ascending }) =>
+    `ממוין לפי ${column}, ${ascending ? "בסדר עולה" : "בסדר יורד"}`,
+  sortingCleared: "המיון בוטל",
   filterColumn: "סנן עמודה",
   columnActions: "פעולות עמודה",
   exportCsv: "ייצוא CSV",

@@ -3,6 +3,7 @@ import {
   GridFocusAnnouncer,
   RowReorderAnnouncer,
   type TableBodyRegion,
+  TableStatusAnnouncer,
   useDataTableShell,
   useMountStagger,
   useTableFeatures,
@@ -102,6 +103,7 @@ export function DataTable<TRow>(
         aria-busy={chrome.isRefreshing || undefined}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

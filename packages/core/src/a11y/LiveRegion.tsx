@@ -20,6 +20,15 @@ export interface LiveRegionProps {
   children: string;
   /** `data-adapttable-part`, so a test or a style can find this one. */
   part: string;
+  /**
+   * Whether this region also claims `role="status"`. It is the default because
+   * a status role IS a polite atomic live region, and most callers are the only
+   * one on screen. Pass `false` for a region that is present on every table:
+   * `aria-live` alone announces identically, and a second permanent status role
+   * would make "the table's status" ambiguous to anything that looks for one —
+   * assistive technology and tests alike.
+   */
+  statusRole?: boolean;
 }
 
 /**
@@ -47,10 +56,11 @@ const VISUALLY_HIDDEN = {
 export function LiveRegion({
   children,
   part,
+  statusRole = true,
 }: Readonly<LiveRegionProps>): ReactElement {
   return (
     <div
-      role="status"
+      role={statusRole ? "status" : undefined}
       aria-live="polite"
       aria-atomic="true"
       data-adapttable-part={part}

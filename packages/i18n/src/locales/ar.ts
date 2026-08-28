@@ -114,6 +114,9 @@ export const ar: Required<TableLabels> = {
   resetColumn: "إعادة تعيين العمود",
   sortAscending: "ترتيب تصاعدي",
   sortDescending: "ترتيب تنازلي",
+  sortedBy: ({ column, ascending }) =>
+    `مُرتَّب حسب ${column}، ${ascending ? "تصاعدي" : "تنازلي"}`,
+  sortingCleared: "تم إلغاء الترتيب",
   filterColumn: "تصفية العمود",
   columnActions: "إجراءات العمود",
   exportCsv: "تصدير CSV",

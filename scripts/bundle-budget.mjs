@@ -344,17 +344,24 @@ const FIXTURES = [
   // useFeatureHost. That context is on the default path because export,
   // menus, editors and aggregators resolve after render. ~0.2 KB gzip; the
   // four kits already on the line move 1 KB.
+  //
+  // Every table now says what changed when its rows change — the status
+  // announcement's resolver, its region and two label strings. It is on the
+  // default path because a table that sorts, filters or pages silently is
+  // broken for a screen-reader user, and there is no version of that fix which
+  // the host has to remember to switch on. 0.1-0.4 KB gzip; the five kits
+  // already on their line move 1 KB, the other three had the slack.
   { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 134 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 134 },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 133 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 127 },
+  { name: "mui · table", pkg: "adapter-mui", budgetKB: 135 },
+  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
+  { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
   { name: "radix · table", pkg: "adapter-radix", budgetKB: 134 },
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 140 },
+  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 141 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
   { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 138 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 134 },
+  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 135 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
 
 /**

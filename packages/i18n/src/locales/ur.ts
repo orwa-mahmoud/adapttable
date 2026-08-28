@@ -114,6 +114,9 @@ export const ur: Required<TableLabels> = {
   resetColumn: "کالم ری سیٹ کریں",
   sortAscending: "صعودی ترتیب",
   sortDescending: "نزولی ترتیب",
+  sortedBy: ({ column, ascending }) =>
+    `${column} کے مطابق ترتیب: ${ascending ? "صعودی" : "نزولی"}`,
+  sortingCleared: "ترتیب ہٹا دی گئی",
   filterColumn: "کالم فلٹر کریں",
   columnActions: "کالم اعمال",
   exportCsv: "CSV برآمد کریں",

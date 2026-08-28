@@ -6,6 +6,7 @@ import {
   resolveStickyToolbar,
   RowReorderAnnouncer,
   SidePanelLayout,
+  TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
   useMountStagger,
@@ -253,6 +254,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         sx={{ p: 1.5 }}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

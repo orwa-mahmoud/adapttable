@@ -113,6 +113,9 @@ export const de: Required<TableLabels> = {
   resetColumn: "Spalte zurücksetzen",
   sortAscending: "Aufsteigend sortieren",
   sortDescending: "Absteigend sortieren",
+  sortedBy: ({ column, ascending }) =>
+    `Sortiert nach ${column}, ${ascending ? "aufsteigend" : "absteigend"}`,
+  sortingCleared: "Sortierung aufgehoben",
   filterColumn: "Spalte filtern",
   columnActions: "Spaltenaktionen",
   exportCsv: "CSV exportieren",

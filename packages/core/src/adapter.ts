@@ -14,6 +14,14 @@
 
 export { LiveRegion, type LiveRegionProps } from "./a11y/LiveRegion";
 export {
+  TableStatusAnnouncer,
+  type TableStatusAnnouncerProps,
+} from "./a11y/TableStatusAnnouncer";
+export {
+  type TableStatusAnnouncementOptions,
+  useTableStatusAnnouncement,
+} from "./a11y/useTableStatusAnnouncement";
+export {
   CommandPaletteChrome,
   type CommandPaletteChromeProps,
   type CommandPaletteInputProps,

@@ -1856,6 +1856,7 @@ export function LiveRegion(input: Readonly<LiveRegionProps>): ReactElement;
 export interface LiveRegionProps {
     children: string;
     part: string;
+    statusRole?: boolean;
 }
 
 // @public
@@ -2776,6 +2777,27 @@ export interface TableRenderModel<TRow> {
 export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "rowActions" | "getRowId" | "rowEntries" | "renderRowDetail" | "expansion" | "columnWindow" | "editing" | "rowReorder" | "pinnedTopRows" | "pinnedBottomRows" | "getCellSpan" | "pinOffset" | "tree" | "grouping" | "extraRows">): TableRenderModel<TRow>;
 
 // @public
+export interface TableStatusAnnouncementOptions {
+    labels: Required<TableLabels>;
+    limit: number;
+    page: number;
+    paged: boolean;
+    shown: number;
+    sortBy?: string;
+    sortColumnName?: string;
+    sortDir?: SortDirection;
+    total: number;
+}
+
+// @public
+export function TableStatusAnnouncer(input: Readonly<TableStatusAnnouncerProps>): ReactElement;
+
+// @public
+export interface TableStatusAnnouncerProps {
+    announcement: string;
+}
+
+// @public
 export function toggleCollapsedColumnGroup(collapsedIds: readonly string[], id: string): string[];
 
 // @public
@@ -2912,6 +2934,7 @@ export function useCommandPalette(options: UseCommandPaletteOptions): TableComma
 // @public
 export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): {
     gridFocus: GridFocusState;
+    statusAnnouncement: string;
     selectionStats: SelectionStats | null;
     editHistory: EditHistoryState<TRow>;
     find: FindInTableState;
@@ -3099,6 +3122,9 @@ export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>
 
 // @public
 export function useTableFeatures<P extends object>(incoming: P): P;
+
+// @public
+export function useTableStatusAnnouncement(options: TableStatusAnnouncementOptions): string;
 
 // @public
 export interface ViewControlsToolbar {

@@ -78,6 +78,7 @@ import {
   type RowReorderState,
   SidePanelLayout,
   tableRenderModel,
+  TableStatusAnnouncer,
   undoRedoToolbar,
   useCommandPalette,
   useExportHandler,
@@ -89,6 +90,7 @@ import {
   useStickyToolbarLayout,
   useTableContextMenu,
   useTableFeatures,
+  useTableStatusAnnouncement,
   viewControlsToolbar,
 } from "@adapttable/core/adapter";
 import {
@@ -1521,7 +1523,33 @@ function useAntdGridState<TRow>(
     c.source.total,
     windowStart + c.source.rows.length
   );
-  return { windowStart, cardSetSize, find, gridFocus, stats };
+  // Same derivation as the shell's: antd builds its own chrome, so it calls the
+  // status hook directly rather than reading `shell.statusAnnouncement`.
+  const sortedColumn = c.columnLayout.visibleColumns.find(
+    (column) => column.key === c.source.sortBy
+  );
+  const statusAnnouncement = useTableStatusAnnouncement({
+    labels: c.table.labels,
+    total: c.source.total,
+    shown: c.source.rows.length,
+    page: c.source.page,
+    limit: c.source.limit,
+    paged: c.source.paginationMode === "paged",
+    sortBy: c.source.sortBy,
+    sortDir: c.source.sortDir,
+    sortColumnName:
+      typeof sortedColumn?.header === "string"
+        ? sortedColumn.header
+        : sortedColumn?.key,
+  });
+  return {
+    windowStart,
+    cardSetSize,
+    find,
+    gridFocus,
+    stats,
+    statusAnnouncement,
+  };
 }
 
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
@@ -1619,11 +1647,14 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   };
   rememberFeatureHost(chromeProps, featureHost);
   const c = useTableChrome<TRow>(chromeProps);
-  const { windowStart, cardSetSize, find, gridFocus, stats } = useAntdGridState(
-    props,
-    c,
-    history
-  );
+  const {
+    windowStart,
+    cardSetSize,
+    find,
+    gridFocus,
+    stats,
+    statusAnnouncement,
+  } = useAntdGridState(props, c, history);
   const { table, confirm, getRowId } = c;
   const { labels, source, selection } = table;
   // The injected actions column is first-class in column management: it lives
@@ -2012,6 +2043,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         aria-busy={c.isRefreshing || undefined}
       >
         <GridFocusAnnouncer focus={gridFocus} />
+        <TableStatusAnnouncer announcement={statusAnnouncement} />
         <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
         <FindBar find={find} labels={c.table.labels} />
         <Space orientation="vertical" size="small" style={{ width: "100%" }}>

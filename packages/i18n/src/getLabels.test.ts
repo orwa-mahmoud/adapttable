@@ -138,6 +138,17 @@ const INTERPOLATION_CASES: Record<
     call: (fn) => (fn as (label: string) => string)("STATUS_X"),
     expects: ["STATUS_X"],
   },
+  sortedBy: {
+    // Only the column can be asserted by substring: the direction word is the
+    // part each locale translates, so it differs by design. That it BRANCHES on
+    // `ascending` is checked separately below.
+    call: (fn) =>
+      (fn as (a: { column: string; ascending: boolean }) => string)({
+        column: "COLUMN_X",
+        ascending: true,
+      }),
+    expects: ["COLUMN_X"],
+  },
   gridRangeSelection: {
     // Distinguishable values per edge: a translation that drops any one of them
     // — easy to do when four numbers read alike — fails here.
@@ -195,6 +206,22 @@ it("every function label in every locale interpolates ALL its arguments", () => 
         expect(one.length, `${tag}.${key}(1)`).toBeGreaterThan(0);
       }
     }
+  }
+});
+
+/**
+ * The sort announcement is the one label whose meaning lives in a branch, so a
+ * translation that drops the ternary still compiles, still interpolates the
+ * column, and quietly tells every user the order is ascending.
+ */
+it("every locale distinguishes ascending from descending", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const up = labels.sortedBy({ column: "C", ascending: true });
+    const down = labels.sortedBy({ column: "C", ascending: false });
+
+    expect(up.length, `${tag} ascending`).toBeGreaterThan(0);
+    expect(down.length, `${tag} descending`).toBeGreaterThan(0);
+    expect(down, `${tag} must not read the same both ways`).not.toBe(up);
   }
 });
 

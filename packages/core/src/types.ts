@@ -630,6 +630,15 @@ export interface TableLabels {
   sortAscending?: string;
   /** Sort this column descending from the column-menu submenu. */
   sortDescending?: string;
+  /**
+   * Announced politely once a sort settles, so a screen-reader user learns the
+   * order changed — the rows are re-read from the top with no visible cue and
+   * no change in row count. Names the column and the direction in one phrase,
+   * because a live region reads its whole message at once.
+   */
+  sortedBy?: (info: { column: string; ascending: boolean }) => string;
+  /** Announced politely when the last sort is removed. */
+  sortingCleared?: string;
   /** Open the table filters from a column-menu submenu. */
   filterColumn?: string;
   /** Accessible name of the per-column submenu trigger. */

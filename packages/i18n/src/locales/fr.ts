@@ -112,6 +112,9 @@ export const fr: Required<TableLabels> = {
   resetColumn: "Réinitialiser la colonne",
   sortAscending: "Trier par ordre croissant",
   sortDescending: "Trier par ordre décroissant",
+  sortedBy: ({ column, ascending }) =>
+    `Trié par ${column}, ordre ${ascending ? "croissant" : "décroissant"}`,
+  sortingCleared: "Tri supprimé",
   filterColumn: "Filtrer la colonne",
   columnActions: "Actions de colonne",
   exportCsv: "Exporter en CSV",

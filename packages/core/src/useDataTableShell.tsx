@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useTableStatusAnnouncement } from "./a11y/useTableStatusAnnouncement";
 import { autoSizeColumns as autoSizeAllColumns } from "./columns/autoSizeColumns";
 import {
   ACTIONS_COLUMN_KEY,
@@ -489,9 +490,32 @@ export function useDataTableShell<TRow>(
     dir: props.dir,
   };
 
+  // What the table says out loud when sorting, filtering or paging rewrites the
+  // body. Derived from the SETTLED source rather than from the controls, which
+  // is what keeps a filter being typed from announcing once per keystroke.
+  const sortedColumn = chrome.columnLayout.visibleColumns.find(
+    (column) => column.key === chrome.source.sortBy
+  );
+  const statusAnnouncement = useTableStatusAnnouncement({
+    labels,
+    total: chrome.source.total,
+    shown: chrome.source.rows.length,
+    page: chrome.source.page,
+    limit: chrome.source.limit,
+    paged: chrome.source.paginationMode === "paged",
+    sortBy: chrome.source.sortBy,
+    sortDir: chrome.source.sortDir,
+    sortColumnName:
+      typeof sortedColumn?.header === "string"
+        ? sortedColumn.header
+        : sortedColumn?.key,
+  });
+
   return {
     /** Cell-navigation state; inert unless `cellNavigation` is set. */
     gridFocus,
+    /** What to announce when the rows change; pass to `TableStatusAnnouncer`. */
+    statusAnnouncement,
     /** What the selection adds up to; `null` unless `selectionStats` is set. */
     selectionStats: stats,
     /** Undo/redo controls; inert unless `editHistory` is set. */

@@ -68,6 +68,30 @@ test("the grid takes arrow-key focus, and says where it went", async ({
   await expect(transcript(page).locator("li").first()).toBeVisible();
 });
 
+/**
+ * Sorting rewrites the body with nothing visible to say it worked. jsdom can
+ * show the region holds the right words; only a browser shows a real click on a
+ * real header reaching it.
+ */
+test("says what changed when a column is sorted", async ({ page }) => {
+  await page.goto(`/${KIT}/accessibility/`);
+  const status = demo(page)
+    .locator('[data-adapttable-part="table-status-announcer"]')
+    .first();
+  // Present before it has anything to say — a region that arrives with its text
+  // is frequently missed entirely.
+  await expect(status).toBeAttached();
+  await expect(status).toHaveText("");
+
+  await demo(page)
+    .getByRole("button", { name: /^Sort by:/ })
+    .first()
+    .click();
+
+  await expect(status).toContainText("Sorted by");
+  await expect(status).toContainText("ascending");
+});
+
 for (const kit of KITS) {
   test(`${kit}: exposes a grid with a focusable cell`, async ({ page }) => {
     await page.goto(`/${kit}/accessibility/`);

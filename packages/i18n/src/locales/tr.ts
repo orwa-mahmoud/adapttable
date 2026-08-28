@@ -113,6 +113,9 @@ export const tr: Required<TableLabels> = {
   resetColumn: "Sütunu sıfırla",
   sortAscending: "Artan sırala",
   sortDescending: "Azalan sırala",
+  sortedBy: ({ column, ascending }) =>
+    `${column} ölçütüne göre sıralandı: ${ascending ? "artan" : "azalan"}`,
+  sortingCleared: "Sıralama kaldırıldı",
   filterColumn: "Sütunu filtrele",
   columnActions: "Sütun işlemleri",
   exportCsv: "CSV olarak dışa aktar",

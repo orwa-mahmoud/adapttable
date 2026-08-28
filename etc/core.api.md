@@ -3679,6 +3679,11 @@ export interface TableLabels {
     // (undocumented)
     sortBy?: string;
     sortDescending?: string;
+    sortedBy?: (info: {
+        column: string;
+        ascending: boolean;
+    }) => string;
+    sortingCleared?: string;
     table?: string;
     takeTheirs?: string;
     theirsValue?: (value: string) => string;

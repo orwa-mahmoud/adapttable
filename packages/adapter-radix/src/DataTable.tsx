@@ -7,6 +7,7 @@ import {
   RowReorderAnnouncer,
   SidePanelLayout,
   type TableBodyRegion,
+  TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
   useMountStagger,
@@ -210,6 +211,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         p="3"
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

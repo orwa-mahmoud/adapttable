@@ -115,6 +115,9 @@ export const defaultLabels: Required<TableLabels> = {
   resetColumn: "Reset column",
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
+  sortedBy: ({ column, ascending }) =>
+    `Sorted by ${column}, ${ascending ? "ascending" : "descending"}`,
+  sortingCleared: "Sorting cleared",
   filterColumn: "Filter column",
   columnActions: "Column actions",
   exportCsv: "Export CSV",

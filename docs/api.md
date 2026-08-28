@@ -571,6 +571,18 @@ region underneath it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps`
 types the announcer itself. See
 [customization](./customization.md#export).
 
+**Status announcements.** Sorting, filtering and paging rewrite the body with
+nothing a screen reader can perceive, so the table says what changed through one
+polite region. `useDataTableShell` returns the message as `statusAnnouncement`
+and adapters render it with `TableStatusAnnouncer` (`TableStatusAnnouncerProps`)
+beside their table, so the region is in the DOM before it has anything to say.
+Custom markup composes the message itself with `useTableStatusAnnouncement`
+(`TableStatusAnnouncementOptions` in — the row set, the page window and the
+sorted column). The sort sentence comes from the `sortedBy` and `sortingCleared`
+labels; the counts reuse `showing`, `pageOf` and `noResults`, so what a user
+hears matches what the footer shows. See
+[accessibility](./accessibility.md).
+
 **File formats.** An `ExportWriter` turns an `ExportWriteContext` — an
 `ExportTable` of values resolved once by `buildExportTable`, plus the filename —
 into an `ExportPayload`, which `downloadExportFile` hands to the browser.

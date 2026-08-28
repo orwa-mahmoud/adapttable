@@ -113,6 +113,9 @@ export const es: Required<TableLabels> = {
   resetColumn: "Restablecer columna",
   sortAscending: "Ordenar ascendente",
   sortDescending: "Ordenar descendente",
+  sortedBy: ({ column, ascending }) =>
+    `Ordenado por ${column}, ${ascending ? "ascendente" : "descendente"}`,
+  sortingCleared: "Orden eliminado",
   filterColumn: "Filtrar columna",
   columnActions: "Acciones de columna",
   exportCsv: "Exportar CSV",

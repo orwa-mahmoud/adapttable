@@ -113,6 +113,9 @@ export const fa: Required<TableLabels> = {
   resetColumn: "بازنشانی ستون",
   sortAscending: "مرتب‌سازی صعودی",
   sortDescending: "مرتب‌سازی نزولی",
+  sortedBy: ({ column, ascending }) =>
+    `مرتب‌شده بر اساس ${column}، ${ascending ? "صعودی" : "نزولی"}`,
+  sortingCleared: "مرتب‌سازی حذف شد",
   filterColumn: "فیلتر ستون",
   columnActions: "اقدامات ستون",
   exportCsv: "خروجی CSV",
