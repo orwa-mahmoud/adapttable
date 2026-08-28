@@ -23,7 +23,11 @@ import { type Shortcut, useShortcuts } from "./useShortcuts";
 /** The command key the default shortcut runs. */
 export const OPEN_PALETTE_COMMAND = "command-palette";
 
-/** How a host arms the palette. */
+/**
+ * How a host arms the palette.
+ *
+ * @public
+ */
 export interface CommandPaletteOptions {
   /**
    * Extra commands, appended after the built-in ones. They are the same
@@ -47,7 +51,11 @@ export interface UseCommandPaletteOptions extends TableCommandOptions {
   featureHost?: FeatureHostState;
 }
 
-/** What an adapter binds and renders. */
+/**
+ * What an adapter binds and renders.
+ *
+ * @public
+ */
 export interface TableCommandPalette {
   /** Whether it is showing. */
   open: boolean;
@@ -65,6 +73,8 @@ export interface TableCommandPalette {
  * @param options - The prop, the labels, and the handlers behind the
  *   built-in commands.
  * @returns The open state and the commands.
+ *
+ * @public
  */
 export function useCommandPalette(
   options: UseCommandPaletteOptions

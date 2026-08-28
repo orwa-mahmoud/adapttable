@@ -18,7 +18,11 @@ import type { TreeEntry } from "./treeRows";
 import { treeIndentStyle } from "./treeRows";
 import { TreeToggleChrome, type TreeToggleSlots } from "./TreeToggle";
 
-/** Props for an adapter `TreeCell` — no slots on the public API. */
+/**
+ * Props for an adapter `TreeCell` — no slots on the public API.
+ *
+ * @public
+ */
 export interface TreeCellProps<TRow> {
   /** The row's place in the tree; absent on a flat table. */
   entry: TreeEntry<TRow> | undefined;
@@ -40,7 +44,11 @@ export interface TreeCellProps<TRow> {
   children: ReactNode;
 }
 
-/** Props for {@link TreeCellChrome}. */
+/**
+ * Props for {@link TreeCellChrome}.
+ *
+ * @public
+ */
 export interface TreeCellChromeProps<TRow> extends TreeCellProps<TRow> {
   readonly slots: TreeToggleSlots;
 }
@@ -54,6 +62,8 @@ const WRAPPER = {
 /**
  * Wrap a cell in its tree chrome when it is the tree column, and pass it
  * through unchanged when it is not.
+ *
+ * @public
  */
 export function TreeCellChrome<TRow>({
   entry,

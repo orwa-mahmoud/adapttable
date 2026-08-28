@@ -2,7 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/** Collapse state + actions returned by {@link useGroupCollapse}. */
+/**
+ * Collapse state + actions returned by {@link useGroupCollapse}.
+ *
+ * @public
+ */
 export interface GroupCollapseState {
   /** Ids of currently collapsed groups (`group:…` keys). */
   collapsedGroupIds: ReadonlySet<string>;
@@ -28,6 +32,8 @@ export interface GroupCollapseState {
 /**
  * Headless collapse state for single-level row groups. Ephemeral — not
  * URL-synced (punch-list #62). Groups default to expanded (empty set).
+ *
+ * @public
  */
 export function useGroupCollapse(controlled?: {
   collapsedGroupIds?: readonly string[];

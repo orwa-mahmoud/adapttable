@@ -1,6 +1,10 @@
 import type { ExtraFilters, FilterValue } from "../types";
 
-/** Numeric comparison operators for count/usage filters. */
+/**
+ * Numeric comparison operators for count/usage filters.
+ *
+ * @public
+ */
 export const COUNT_OPERATORS = [
   "eq",
   "gte",
@@ -10,10 +14,18 @@ export const COUNT_OPERATORS = [
   "between",
 ] as const;
 
-/** Numeric comparison operator. */
+/**
+ * Numeric comparison operator.
+ *
+ * @public
+ */
 export type CountOperator = (typeof COUNT_OPERATORS)[number];
 
-/** State for one operator-driven count filter. */
+/**
+ * State for one operator-driven count filter.
+ *
+ * @public
+ */
 export interface CountFilterState {
   op?: CountOperator;
   value?: number;
@@ -21,7 +33,11 @@ export interface CountFilterState {
   to?: number;
 }
 
-/** Symbols used in compact chip labels. */
+/**
+ * Symbols used in compact chip labels.
+ *
+ * @public
+ */
 export const COUNT_OPERATOR_SYMBOL: Record<CountOperator, string> = {
   eq: "=",
   gte: "≥",
@@ -68,7 +84,11 @@ function toOperator(value: unknown): CountOperator | undefined {
     : undefined;
 }
 
-/** Whether a count-filter state is complete enough to affect a query. */
+/**
+ * Whether a count-filter state is complete enough to affect a query.
+ *
+ * @public
+ */
 export function isCountFilterComplete(state: CountFilterState): boolean {
   if (!state.op) return false;
   if (state.op === "between") {
@@ -77,7 +97,11 @@ export function isCountFilterComplete(state: CountFilterState): boolean {
   return isNumber(state.value);
 }
 
-/** Convert a state update to URL-extra values for one bucket. */
+/**
+ * Convert a state update to URL-extra values for one bucket.
+ *
+ * @public
+ */
 export function countFilterExtra(
   bucket: string,
   state: CountFilterState
@@ -90,7 +114,11 @@ export function countFilterExtra(
   };
 }
 
-/** URL-extra update that clears every value for one bucket. */
+/**
+ * URL-extra update that clears every value for one bucket.
+ *
+ * @public
+ */
 export function clearCountFilterExtra(bucket: string): ExtraFilters {
   return {
     [opKey(bucket)]: undefined,
@@ -100,7 +128,11 @@ export function clearCountFilterExtra(bucket: string): ExtraFilters {
   };
 }
 
-/** Rehydrate one bucket's count-filter state from an extra-filter bag. */
+/**
+ * Rehydrate one bucket's count-filter state from an extra-filter bag.
+ *
+ * @public
+ */
 export function countFilterStateFromExtra(
   bucket: string,
   extra: Readonly<Record<string, FilterValue>>
@@ -117,6 +149,8 @@ export function countFilterStateFromExtra(
  * Remove incomplete count filters from backend params while preserving any
  * unrelated params. This lets a UI keep partial state in the URL without
  * sending invalid operator/value pairs to an API.
+ *
+ * @public
  */
 export function sanitizeCountFilterParams<P extends Record<string, unknown>>(
   params: P,
@@ -139,7 +173,11 @@ export function sanitizeCountFilterParams<P extends Record<string, unknown>>(
   return out as P;
 }
 
-/** Build a compact chip label for a complete count filter. */
+/**
+ * Build a compact chip label for a complete count filter.
+ *
+ * @public
+ */
 export function countFilterChipLabel(
   label: string,
   state: CountFilterState

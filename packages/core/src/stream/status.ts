@@ -6,7 +6,11 @@
  * only ever imported by a host that actually opens one.
  */
 
-/** The connection's state, as the host sees it. */
+/**
+ * The connection's state, as the host sees it.
+ *
+ * @public
+ */
 export type RowPatchStreamStatus =
   /** No url wired, or `enabled: false`. Nothing is open and nothing will be. */
   | "idle"
@@ -21,7 +25,11 @@ export type RowPatchStreamStatus =
   /** The host closed it. Final: nothing reopens on its own. */
   | "closed";
 
-/** Whether this status means a socket is currently carrying patches. */
+/**
+ * Whether this status means a socket is currently carrying patches.
+ *
+ * @public
+ */
 export function isStreamLive(status: RowPatchStreamStatus): boolean {
   return status === "open";
 }
@@ -31,6 +39,8 @@ export function isStreamLive(status: RowPatchStreamStatus): boolean {
  *
  * `error` and `closed` are terminal: the connector will not try again by
  * itself, so a host that wants another attempt has to ask for one.
+ *
+ * @public
  */
 export function isStreamSettled(status: RowPatchStreamStatus): boolean {
   return status === "error" || status === "closed";

@@ -15,7 +15,11 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import { readCollapsedGroups, writeCollapsedGroups } from "./serialize";
 
-/** What {@link useGroupCollapseUrlState} needs. */
+/**
+ * What {@link useGroupCollapseUrlState} needs.
+ *
+ * @public
+ */
 export interface UseGroupCollapseUrlStateOptions {
   /** URL backend; defaults to the History API. */
   urlAdapter?: UrlStateAdapter;
@@ -27,7 +31,11 @@ export interface UseGroupCollapseUrlStateOptions {
   defaultCollapsedGroupIds?: readonly string[];
 }
 
-/** The controlled pair `<DataTable>` takes. */
+/**
+ * The controlled pair `<DataTable>` takes.
+ *
+ * @public
+ */
 export interface UseGroupCollapseUrlStateResult {
   /** The collapsed group keys. */
   collapsedGroupIds: string[];
@@ -40,6 +48,8 @@ export interface UseGroupCollapseUrlStateResult {
  *
  * @param options - See {@link UseGroupCollapseUrlStateOptions}.
  * @returns The controlled pair to spread onto the table.
+ *
+ * @public
  */
 export function useGroupCollapseUrlState(
   options: UseGroupCollapseUrlStateOptions = {}

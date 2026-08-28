@@ -52,6 +52,8 @@ const VISUALLY_HIDDEN = {
  * Announce a message politely, showing nothing.
  *
  * @param props - See {@link LiveRegionProps}.
+ *
+ * @public
  */
 export function LiveRegion({
   children,

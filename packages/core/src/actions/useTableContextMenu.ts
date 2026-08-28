@@ -27,7 +27,11 @@ import {
 import { resolveContextTarget } from "./contextMenuRegion";
 import { type ContextMenuPoint, useContextMenu } from "./useContextMenu";
 
-/** How a host arms the context menu. */
+/**
+ * How a host arms the context menu.
+ *
+ * @public
+ */
 export interface ContextMenuOptions<TRow> {
   /**
    * Extra entries, appended behind a divider so a custom action is never
@@ -53,7 +57,11 @@ export interface TableContextMenuOptions<TRow> {
   featureHost?: FeatureHostState;
 }
 
-/** What an adapter binds and renders. */
+/**
+ * What an adapter binds and renders.
+ *
+ * @public
+ */
 export interface TableContextMenu {
   /** Spread onto the element containing the headers, rows and cells. */
   regionProps: Record<string, unknown>;
@@ -71,6 +79,8 @@ export interface TableContextMenu {
  * @param options - The prop, the columns, and the handlers behind the
  *   built-in entries.
  * @returns The props to bind and the state to render.
+ *
+ * @public
  */
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>

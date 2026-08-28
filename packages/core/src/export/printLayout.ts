@@ -26,7 +26,11 @@ export type PrintPageSize =
 /** How groups meet a page boundary. */
 export type PrintPageBreak = "auto" | "group";
 
-/** Options for the printable document and the print dialog. */
+/**
+ * Options for the printable document and the print dialog.
+ *
+ * @public
+ */
 export interface PrintLayoutOptions {
   /** Document title and table caption. */
   title?: string;
@@ -280,6 +284,8 @@ function fontDataUrl(font: Uint8Array | ArrayBuffer): string {
  *
  * @param options - Paper size, page-break behaviour, and a font to embed.
  * @returns A CSS string, ready for a `<style>` element.
+ *
+ * @public
  */
 export function printStyles(options?: PrintLayoutOptions): string {
   const paper = pageSizeCss(options?.pageSize);
@@ -321,6 +327,8 @@ export function printStyles(options?: PrintLayoutOptions): string {
 /**
  * The table element alone — for a host that already has a page and a
  * stylesheet, and only needs the rows.
+ *
+ * @public
  */
 export function buildPrintTableHtml(
   table: ExportTable,
@@ -343,6 +351,8 @@ export function buildPrintTableHtml(
 /**
  * A complete HTML document: doctype, direction, the print stylesheet, and
  * the table. This is what {@link openPrintLayout} loads into the iframe.
+ *
+ * @public
  */
 export function buildPrintDocument(
   table: ExportTable,
@@ -367,6 +377,8 @@ export function buildPrintDocument(
  * A hidden iframe holds the document so the host page is not rewritten and
  * a popup blocker never sees a window. No-op outside a browser, so a
  * server render that reaches this does nothing rather than throwing.
+ *
+ * @public
  */
 export function openPrintLayout(
   table: ExportTable,
@@ -402,6 +414,8 @@ export function openPrintLayout(
 /**
  * Print rows and columns the same way the PDF builder writes a file:
  * resolve once, then open the dialog.
+ *
+ * @public
  */
 export function printTable<TRow>(
   options: {

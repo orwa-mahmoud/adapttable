@@ -28,7 +28,11 @@ import {
 } from "./evaluate";
 import { formulaRefs, parseFormula, type ParseResult } from "./parse";
 
-/** One user-typed formula column. */
+/**
+ * One user-typed formula column.
+ *
+ * @public
+ */
 export interface FormulaColumnSpec {
   /** Column key — also the name other formulas reference it by. */
   key: string;
@@ -40,7 +44,11 @@ export interface FormulaColumnSpec {
   format?: (value: FormulaValue) => string;
 }
 
-/** What {@link buildFormulaColumns} reports back. */
+/**
+ * What {@link buildFormulaColumns} reports back.
+ *
+ * @public
+ */
 export interface FormulaColumnsResult<TRow> {
   /** The columns, ready to concatenate with the declared ones. */
   columns: readonly ColumnDef<TRow>[];
@@ -116,6 +124,8 @@ function formatValue(
  * @typeParam TRow - The row type.
  * @param specs - The formula columns, in the order to show them.
  * @returns The columns, plus any formula that would not parse and any cycle.
+ *
+ * @public
  */
 export function buildFormulaColumns<TRow extends object>(
   specs: readonly FormulaColumnSpec[]

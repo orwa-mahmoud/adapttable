@@ -105,7 +105,11 @@ export function currentFeatureHost<TRow = unknown>():
   return scoped.at(-1) as FeatureHostState<TRow> | undefined;
 }
 
-/** Bind a callback so every invocation sees `host` via `currentFeatureHost`. */
+/**
+ * Bind a callback so every invocation sees `host` via `currentFeatureHost`.
+ *
+ * @public
+ */
 export function bindFeatureHostFn<Args extends unknown[], R>(
   host: FeatureHostState | undefined,
   fn: ((...args: Args) => R) | undefined

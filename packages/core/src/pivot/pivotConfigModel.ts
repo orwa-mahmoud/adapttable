@@ -20,17 +20,29 @@
 import type { AggregateName } from "../aggregate/aggregate";
 import type { PivotConfig, PivotMeasure } from "./pivotModel";
 
-/** Where a field can sit. */
+/**
+ * Where a field can sit.
+ *
+ * @public
+ */
 export type PivotZone = "rows" | "columns" | "measures";
 
-/** The zones a field can be moved between, in panel order. */
+/**
+ * The zones a field can be moved between, in panel order.
+ *
+ * @public
+ */
 export const PIVOT_ZONES: readonly PivotZone[] = [
   "rows",
   "columns",
   "measures",
 ];
 
-/** A field the user can put on an axis. */
+/**
+ * A field the user can put on an axis.
+ *
+ * @public
+ */
 export interface PivotField {
   /** The column key. */
   key: string;
@@ -38,14 +50,22 @@ export interface PivotField {
   label: string;
 }
 
-/** An empty configuration — nothing on any axis. */
+/**
+ * An empty configuration — nothing on any axis.
+ *
+ * @public
+ */
 export const EMPTY_PIVOT_CONFIG: PivotConfig = {
   rows: [],
   columns: [],
   measures: [],
 };
 
-/** The fields not yet used on either axis. */
+/**
+ * The fields not yet used on either axis.
+ *
+ * @public
+ */
 export function availableFields(
   fields: readonly PivotField[],
   config: PivotConfig
@@ -69,6 +89,8 @@ function placed(list: readonly string[], key: string, index: number): string[] {
  * @param zone - Where it should go.
  * @param index - Position within that zone. Past the end appends.
  * @returns A new configuration.
+ *
+ * @public
  */
 export function assignField(
   config: PivotConfig,
@@ -101,6 +123,8 @@ export function assignField(
  * @param zone - Which axis to remove from.
  * @param index - The position to remove.
  * @returns A new configuration.
+ *
+ * @public
  */
 export function removeField(
   config: PivotConfig,
@@ -128,6 +152,8 @@ export function removeField(
  * @param index - Its current position.
  * @param delta - `-1` to move it out one level, `1` to move it in.
  * @returns A new configuration.
+ *
+ * @public
  */
 export function moveField(
   config: PivotConfig,
@@ -159,6 +185,8 @@ export function moveField(
  * @param index - Which measure.
  * @param agg - The new aggregation.
  * @returns A new configuration.
+ *
+ * @public
  */
 export function setMeasureAgg(
   config: PivotConfig,
@@ -179,12 +207,18 @@ export function setMeasureAgg(
  * A pivot with no measure has nothing to put in its cells, which is a
  * half-built configuration rather than an error — the panel shows it and the
  * table waits.
+ *
+ * @public
  */
 export function isPivotReady(config: PivotConfig): boolean {
   return config.measures.length > 0;
 }
 
-/** The display label for one measure, for the panel and the column header. */
+/**
+ * The display label for one measure, for the panel and the column header.
+ *
+ * @public
+ */
 export function measureLabel(
   measure: PivotMeasure,
   fields: readonly PivotField[]

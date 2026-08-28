@@ -14,7 +14,11 @@ import type { GridCell } from "../focus/gridFocus";
 import type { ColumnDef } from "../types";
 import { findMatches, matchKeySet, stepMatch } from "./findMatches";
 
-/** What {@link useFindInTable} needs. */
+/**
+ * What {@link useFindInTable} needs.
+ *
+ * @public
+ */
 export interface UseFindInTableOptions<TRow> {
   /** Off unless the host asked for it; when false nothing is searched. */
   enabled: boolean;
@@ -26,7 +30,11 @@ export interface UseFindInTableOptions<TRow> {
   firstRowIndex?: number;
 }
 
-/** What {@link useFindInTable} returns. */
+/**
+ * What {@link useFindInTable} returns.
+ *
+ * @public
+ */
 export interface FindInTableState {
   /** Whether the bar is showing. */
   open: boolean;
@@ -62,6 +70,8 @@ export interface FindInTableState {
  * @typeParam TRow - The row type.
  * @param options - See {@link UseFindInTableOptions}.
  * @returns The state; inert with `enabled` false.
+ *
+ * @public
  */
 export function useFindInTable<TRow>(
   options: UseFindInTableOptions<TRow>
@@ -161,6 +171,8 @@ export function useFindInTable<TRow>(
  * @param current - The match the walk is on, or `null`.
  * @param focusCell - The grid's `focusCell`.
  * @param selectRange - The grid's `selectRange`.
+ *
+ * @public
  */
 export function useFindFocus(
   current: GridCell | null,

@@ -37,7 +37,11 @@ import type {
   PivotRow,
 } from "./pivotModel";
 
-/** One line of a server-computed pivot. */
+/**
+ * One line of a server-computed pivot.
+ *
+ * @public
+ */
 export interface QueryPivotRow {
   /**
    * The row-dimension values, outermost first, as the server labelled them.
@@ -69,7 +73,11 @@ export interface QueryPivotRow {
   subtotal?: boolean;
 }
 
-/** A page of server-computed pivot results. */
+/**
+ * A page of server-computed pivot results.
+ *
+ * @public
+ */
 export interface QueryPivotPage {
   /**
    * The column-dimension paths, outermost value first, in the order the
@@ -83,7 +91,11 @@ export interface QueryPivotPage {
   total?: QueryPivotRow;
 }
 
-/** What {@link serverPivotResult} needs. */
+/**
+ * What {@link serverPivotResult} needs.
+ *
+ * @public
+ */
 export interface ServerPivotOptions {
   /** The configuration that was sent, for the measures and their order. */
   config: PivotConfig;
@@ -131,6 +143,8 @@ function treeOf(
  * @param page - What the server sent.
  * @param options - The configuration that was asked for, and formatting.
  * @returns The same `PivotResult` shape the local engine returns.
+ *
+ * @public
  */
 export function serverPivotResult(
   page: QueryPivotPage,

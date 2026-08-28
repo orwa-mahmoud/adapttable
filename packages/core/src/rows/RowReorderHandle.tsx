@@ -7,7 +7,11 @@ import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { RowReorderLabels, RowReorderState } from "./rowReorder";
 
-/** Props for an adapter `RowReorderHandle` — no slots on the public API. */
+/**
+ * Props for an adapter `RowReorderHandle` — no slots on the public API.
+ *
+ * @public
+ */
 export interface RowReorderHandleProps<TRow> {
   reorder: RowReorderState<TRow>;
   labels: RowReorderLabels;
@@ -19,7 +23,11 @@ export interface RowReorderHandleProps<TRow> {
   className?: string;
 }
 
-/** Kit grip the reorder chrome calls. */
+/**
+ * Kit grip the reorder chrome calls.
+ *
+ * @public
+ */
 export interface RowReorderHandleSlotProps {
   readonly label: string;
   readonly pressed: boolean;
@@ -29,12 +37,20 @@ export interface RowReorderHandleSlotProps {
   readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
-/** Adapter-supplied controls for {@link RowReorderHandleChrome}. */
+/**
+ * Adapter-supplied controls for {@link RowReorderHandleChrome}.
+ *
+ * @public
+ */
 export interface RowReorderHandleSlots {
   readonly Handle: (props: RowReorderHandleSlotProps) => ReactNode;
 }
 
-/** Props for {@link RowReorderHandleChrome}. */
+/**
+ * Props for {@link RowReorderHandleChrome}.
+ *
+ * @public
+ */
 export interface RowReorderHandleChromeProps<
   TRow,
 > extends RowReorderHandleProps<TRow> {
@@ -44,6 +60,8 @@ export interface RowReorderHandleChromeProps<
 /**
  * Desktop grip: pointer drag plus Space-lift keyboard. Kits wrap this in
  * their own `<td>` / `<th>` so the cell looks like the rest of the row.
+ *
+ * @public
  */
 export function RowReorderHandleChrome<TRow>({
   reorder,
@@ -79,7 +97,11 @@ export function RowReorderHandleChrome<TRow>({
   );
 }
 
-/** Props for an adapter `RowReorderButtons` — no slots on the public API. */
+/**
+ * Props for an adapter `RowReorderButtons` — no slots on the public API.
+ *
+ * @public
+ */
 export interface RowReorderButtonsProps<TRow> {
   reorder: RowReorderState<TRow>;
   labels: RowReorderLabels;
@@ -92,7 +114,11 @@ export interface RowReorderButtonsProps<TRow> {
   downClassName?: string;
 }
 
-/** Kit button the mobile reorder chrome calls. */
+/**
+ * Kit button the mobile reorder chrome calls.
+ *
+ * @public
+ */
 export interface RowReorderMoveButtonProps {
   readonly label: string;
   readonly part: string;
@@ -101,12 +127,20 @@ export interface RowReorderMoveButtonProps {
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link RowReorderButtonsChrome}. */
+/**
+ * Adapter-supplied controls for {@link RowReorderButtonsChrome}.
+ *
+ * @public
+ */
 export interface RowReorderButtonsSlots {
   readonly Button: (props: RowReorderMoveButtonProps) => ReactNode;
 }
 
-/** Props for {@link RowReorderButtonsChrome}. */
+/**
+ * Props for {@link RowReorderButtonsChrome}.
+ *
+ * @public
+ */
 export interface RowReorderButtonsChromeProps<
   TRow,
 > extends RowReorderButtonsProps<TRow> {
@@ -116,6 +150,8 @@ export interface RowReorderButtonsChromeProps<
 /**
  * Mobile up/down — a drag handle on a card is unusable. Each press swaps
  * with the neighbour; the ends disable rather than wrapping.
+ *
+ * @public
  */
 export function RowReorderButtonsChrome<TRow>({
   reorder,
@@ -154,7 +190,11 @@ export function RowReorderButtonsChrome<TRow>({
   );
 }
 
-/** The live region for row reorder. Kits mount this only when reorder is armed. */
+/**
+ * The live region for row reorder. Kits mount this only when reorder is armed.
+ *
+ * @public
+ */
 export function RowReorderAnnouncer(
   props: Readonly<{ announcement: string }>
 ): ReactElement {

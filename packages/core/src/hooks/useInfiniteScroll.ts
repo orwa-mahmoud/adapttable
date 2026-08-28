@@ -2,7 +2,11 @@ import { type RefObject, useEffect, useRef } from "react";
 
 import { useEventCallback } from "./useEventCallback";
 
-/** Options for {@link useInfiniteScroll}. */
+/**
+ * Options for {@link useInfiniteScroll}.
+ *
+ * @public
+ */
 export interface UseInfiniteScrollOptions {
   /** Whether more pages remain to be fetched. */
   hasNextPage: boolean;
@@ -45,6 +49,8 @@ export interface UseInfiniteScrollOptions {
  * @typeParam TElement - The sentinel element type.
  * @param options - See {@link UseInfiniteScrollOptions}.
  * @returns A ref to attach to the sentinel element.
+ *
+ * @public
  */
 export function useInfiniteScroll<
   TElement extends HTMLElement = HTMLDivElement,

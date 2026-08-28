@@ -68,7 +68,11 @@ function conditionOpWord<TRow>(
   return op;
 }
 
-/** Build one chip label for a tree leaf. */
+/**
+ * Build one chip label for a tree leaf.
+ *
+ * @public
+ */
 export function filterTreeChipLabel<TRow>(
   condition: QueryCondition,
   defs: readonly FilterDef<TRow>[],
@@ -83,7 +87,11 @@ export function filterTreeChipLabel<TRow>(
   );
 }
 
-/** Options for {@link useFilterTreeChips}. */
+/**
+ * Options for {@link useFilterTreeChips}.
+ *
+ * @public
+ */
 export interface UseFilterTreeChipsOptions<TRow> {
   readonly tree: QueryFilterGroup | undefined;
   readonly defs: readonly FilterDef<TRow>[];
@@ -91,7 +99,11 @@ export interface UseFilterTreeChipsOptions<TRow> {
   readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
 }
 
-/** Flatten the tree into removable chips. */
+/**
+ * Flatten the tree into removable chips.
+ *
+ * @public
+ */
 export function useFilterTreeChips<TRow>(
   options: UseFilterTreeChipsOptions<TRow>
 ): readonly ActiveFilterChip[] {

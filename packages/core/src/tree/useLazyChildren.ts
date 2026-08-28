@@ -17,7 +17,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/** What {@link useLazyChildren} needs. */
+/**
+ * What {@link useLazyChildren} needs.
+ *
+ * @public
+ */
 export interface UseLazyChildrenOptions<TRow> {
   /**
    * Fetch a node's children. Resolve once they are in the data the table
@@ -31,7 +35,11 @@ export interface UseLazyChildrenOptions<TRow> {
   getRowId: (row: TRow) => string;
 }
 
-/** Lazy-loading state for a tree. */
+/**
+ * Lazy-loading state for a tree.
+ *
+ * @public
+ */
 export interface LazyChildrenState<TRow> {
   /** Nodes being fetched right now — what the chevron shows a spinner for. */
   loadingIds: ReadonlySet<string>;
@@ -51,6 +59,8 @@ export interface LazyChildrenState<TRow> {
  * @typeParam TRow - The row type.
  * @param options - See {@link UseLazyChildrenOptions}.
  * @returns The state; inert when no `onLoadChildren` is given.
+ *
+ * @public
  */
 export function useLazyChildren<TRow>(
   options: UseLazyChildrenOptions<TRow>

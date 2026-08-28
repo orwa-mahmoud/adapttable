@@ -22,6 +22,8 @@ import { devWarn } from "../utils/devWarn";
  * Omit the whole object — or any field — and the table treats that capability
  * as unavailable: it keeps the work on the frontend where it can, and warns in
  * development where it cannot.
+ *
+ * @public
  */
 export interface QuerySupport {
   /** Grouping keys reach the server, which returns group rows. */
@@ -43,7 +45,11 @@ export interface QuerySupport {
   cursor?: boolean;
 }
 
-/** The aggregate functions every implementation is expected to understand. */
+/**
+ * The aggregate functions every implementation is expected to understand.
+ *
+ * @public
+ */
 export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
 
 /**
@@ -52,6 +58,8 @@ export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
  * `fn` accepts any string so a backend can expose its own aggregations
  * (`"median"`, `"p95"`) without waiting for this type to name them, while the
  * five standard ones still autocomplete.
+ *
+ * @public
  */
 export interface QueryAggregate {
   /** Column key to aggregate. */
@@ -60,7 +68,11 @@ export interface QueryAggregate {
   fn: AggregateFn | (string & {});
 }
 
-/** A single condition in a filter tree: one column, one operator, one value. */
+/**
+ * A single condition in a filter tree: one column, one operator, one value.
+ *
+ * @public
+ */
 export interface QueryCondition {
   /** Column or filter key. */
   key: string;
@@ -76,6 +88,8 @@ export interface QueryCondition {
 /**
  * A node in the filter tree: conditions combined with one operator, nestable
  * so `(a AND b) OR c` is expressible.
+ *
+ * @public
  */
 export interface QueryFilterGroup {
   /** How this group's children combine. */
@@ -84,7 +98,11 @@ export interface QueryFilterGroup {
   conditions: readonly (QueryCondition | QueryFilterGroup)[];
 }
 
-/** Narrows a filter-tree child to a nested group. */
+/**
+ * Narrows a filter-tree child to a nested group.
+ *
+ * @public
+ */
 export function isFilterGroup(
   node: QueryCondition | QueryFilterGroup
 ): node is QueryFilterGroup {
@@ -94,6 +112,8 @@ export function isFilterGroup(
 /**
  * Everything the table can additionally ask for, all optional. These ride on
  * {@link TableQuery} — see that type for the baseline fields.
+ *
+ * @public
  */
 export interface QueryExtensions {
   /**

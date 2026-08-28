@@ -132,7 +132,11 @@ const TRASH = [
   "M14 11v6",
 ];
 
-/** Which control a cluster entry is. Stable across kits, and across renders. */
+/**
+ * Which control a cluster entry is. Stable across kits, and across renders.
+ *
+ * @public
+ */
 export type SavedViewControlKey =
   "rename" | "moveUp" | "moveDown" | "default" | "remove";
 
@@ -142,6 +146,8 @@ export type SavedViewControlKey =
  * The adapter maps over these rather than hand-writing five buttons, so a kit
  * cannot render four of them, order them differently, or miss the disabled
  * state on the one control this reader may not use.
+ *
+ * @public
  */
 export interface SavedViewRowControl {
   /** Which control this is — the React key, and what a test asks for. */
@@ -163,7 +169,11 @@ export interface SavedViewRowControl {
   readonly danger?: boolean;
 }
 
-/** Props an adapter's panel surface receives. */
+/**
+ * Props an adapter's panel surface receives.
+ *
+ * @public
+ */
 export interface SavedViewsPanelSurfaceProps {
   /** The card's heading, already localized. */
   readonly title: string;
@@ -179,7 +189,11 @@ export interface SavedViewsPanelSurfaceProps {
   readonly "data-adapttable-part": "saved-views-panel";
 }
 
-/** Props an adapter's row receives — one saved view and its controls. */
+/**
+ * Props an adapter's row receives — one saved view and its controls.
+ *
+ * @public
+ */
 export interface SavedViewsPanelRowProps {
   /** The view's name, or the rename input while it is being edited. */
   readonly name: ReactNode;
@@ -222,7 +236,11 @@ export interface SavedViewsPanelRowProps {
   readonly "data-adapttable-part": "saved-view-row";
 }
 
-/** Props an adapter's rename input receives. */
+/**
+ * Props an adapter's rename input receives.
+ *
+ * @public
+ */
 export interface SavedViewsPanelInputProps {
   /** Accessible name. */
   readonly label: string;
@@ -244,12 +262,20 @@ export interface SavedViewsPanelInputProps {
   readonly onCancel: () => void;
 }
 
-/** Props an adapter's empty state receives. */
+/**
+ * Props an adapter's empty state receives.
+ *
+ * @public
+ */
 export interface SavedViewsPanelEmptyProps {
   readonly message: string;
 }
 
-/** The kit-native pieces the panel is built from. */
+/**
+ * The kit-native pieces the panel is built from.
+ *
+ * @public
+ */
 export interface SavedViewsPanelSlots {
   /** The titled card. */
   readonly Surface: (props: SavedViewsPanelSurfaceProps) => ReactNode;
@@ -261,7 +287,11 @@ export interface SavedViewsPanelSlots {
   readonly Empty: (props: SavedViewsPanelEmptyProps) => ReactNode;
 }
 
-/** What the panel needs to render. */
+/**
+ * What the panel needs to render.
+ *
+ * @public
+ */
 export interface SavedViewsPanelChromeProps {
   /** The saved views, in list order. */
   views: readonly SavedView[];
@@ -289,6 +319,8 @@ export interface SavedViewsPanelChromeProps {
  *
  * @param props - The views, the operations, and the adapter's slots.
  * @returns The panel, built from the adapter's own controls.
+ *
+ * @public
  */
 export function SavedViewsPanelChrome({
   views,

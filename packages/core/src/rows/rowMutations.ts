@@ -19,7 +19,11 @@ import { useMemo } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 import type { RowAction, TableLabels } from "../types";
 
-/** How a table asks for a row to be added, copied or removed. */
+/**
+ * How a table asks for a row to be added, copied or removed.
+ *
+ * @public
+ */
 export interface RowMutationHandlers<TRow> {
   /**
    * Add a row. Setting this puts an Add control in the toolbar; the host makes
@@ -48,7 +52,11 @@ export interface RowMutationHandlers<TRow> {
   confirmDeleteRow?: boolean;
 }
 
-/** Row-mutation state: the toolbar's control and the per-row actions. */
+/**
+ * Row-mutation state: the toolbar's control and the per-row actions.
+ *
+ * @public
+ */
 export interface RowMutationsState<TRow> {
   /** Whether an Add control should render. */
   canAdd: boolean;
@@ -61,7 +69,11 @@ export interface RowMutationsState<TRow> {
   actions: readonly RowAction<TRow>[];
 }
 
-/** What {@link useRowMutations} needs. */
+/**
+ * What {@link useRowMutations} needs.
+ *
+ * @public
+ */
 export interface UseRowMutationsOptions<
   TRow,
 > extends RowMutationHandlers<TRow> {
@@ -69,9 +81,17 @@ export interface UseRowMutationsOptions<
   labels: Required<TableLabels>;
 }
 
-/** The key of the synthesized duplicate action. */
+/**
+ * The key of the synthesized duplicate action.
+ *
+ * @public
+ */
 export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
-/** The key of the synthesized delete action. */
+/**
+ * The key of the synthesized delete action.
+ *
+ * @public
+ */
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
 
 /**
@@ -80,6 +100,8 @@ export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
  * @typeParam TRow - The row type.
  * @param options - See {@link UseRowMutationsOptions}.
  * @returns The state; every action is absent until its handler is wired.
+ *
+ * @public
  */
 export function useRowMutations<TRow>(
   options: UseRowMutationsOptions<TRow>

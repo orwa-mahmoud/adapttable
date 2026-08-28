@@ -19,6 +19,8 @@ export const COLUMN_RESIZE_STEP = 16;
  * Props for a column-resize handle element. Modeled as a `button` (a focusable
  * `separator`/splitter would require `aria-valuenow/min/max`); ArrowLeft/Right
  * resize it for keyboard users.
+ *
+ * @public
  */
 export interface ColumnResizeHandleProps {
   role: "button";
@@ -55,6 +57,8 @@ function isRtl(handle: HTMLElement): boolean {
  * @param key - Column key being resized.
  * @param setWidth - Layout mutator that persists the new width.
  * @param label - Accessible label for the handle.
+ *
+ * @public
  */
 export function columnResizeHandleProps(
   key: string,

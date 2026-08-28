@@ -6,7 +6,11 @@ import type { ReactElement } from "react";
  * toggle, and a pin.
  */
 
-/** Six-dot drag grip. */
+/**
+ * Six-dot drag grip.
+ *
+ * @public
+ */
 export function GripIcon(): ReactElement {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
@@ -22,7 +26,11 @@ export function GripIcon(): ReactElement {
   );
 }
 
-/** Eye (visible) / eye with slash (hidden) toggle glyph. */
+/**
+ * Eye (visible) / eye with slash (hidden) toggle glyph.
+ *
+ * @public
+ */
 export function EyeIcon({
   off = false,
 }: Readonly<{ off?: boolean }>): ReactElement {
@@ -45,7 +53,11 @@ export function EyeIcon({
   );
 }
 
-/** Pin glyph. */
+/**
+ * Pin glyph.
+ *
+ * @public
+ */
 export function PinIcon(): ReactElement {
   return (
     <svg

@@ -35,7 +35,11 @@ export interface FilterHeaderClassNames {
   actionsHeader?: string;
 }
 
-/** Overlay a sticky `top` on a cell or pad style. */
+/**
+ * Overlay a sticky `top` on a cell or pad style.
+ *
+ * @public
+ */
 export function headerFilterStickTop(
   sticky: boolean,
   base: CSSProperties | undefined,
@@ -67,7 +71,11 @@ export interface FilterHeaderRowProps<TRow> {
   readonly classNames?: FilterHeaderClassNames;
 }
 
-/** Props for an adapter `FilterHeaderControl` — no slots on the public API. */
+/**
+ * Props for an adapter `FilterHeaderControl` — no slots on the public API.
+ *
+ * @public
+ */
 export interface FilterHeaderControlProps<TRow> {
   readonly def: FilterDef<TRow>;
   readonly source: FilterFormSource<TRow>;
@@ -92,6 +100,8 @@ export interface FilterHeaderControlProps<TRow> {
  *
  * Every adapter drew this conclusion for itself with a byte-identical copy of
  * these six lines; it belongs here, where it can be wrong in one place only.
+ *
+ * @public
  */
 export function hasActiveHeaderFilter<TRow>(
   props: Readonly<
@@ -108,13 +118,21 @@ export function hasActiveHeaderFilter<TRow>(
   });
 }
 
-/** One option in a header Select or multi menu. */
+/**
+ * One option in a header Select or multi menu.
+ *
+ * @public
+ */
 export interface FilterHeaderOption {
   readonly value: string;
   readonly label: string;
 }
 
-/** Kit search field a text header cell calls. */
+/**
+ * Kit search field a text header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderSearchProps {
   readonly label: string;
   readonly placeholder: string;
@@ -123,7 +141,11 @@ export interface FilterHeaderSearchProps {
   readonly onChange: (value: string) => void;
 }
 
-/** Kit Select a select/boolean header cell calls. */
+/**
+ * Kit Select a select/boolean header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderSelectProps {
   readonly label: string;
   readonly value: string;
@@ -132,7 +154,11 @@ export interface FilterHeaderSelectProps {
   readonly onChange: (value: string) => void;
 }
 
-/** Kit number/date field a range header cell calls. */
+/**
+ * Kit number/date field a range header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderRangeProps {
   readonly label: string;
   readonly type: "text" | "number" | "date";
@@ -140,7 +166,11 @@ export interface FilterHeaderRangeProps {
   readonly onChange: (value: string) => void;
 }
 
-/** Kit compact multi menu a checklist/multiSelect header cell calls. */
+/**
+ * Kit compact multi menu a checklist/multiSelect header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderMultiProps {
   readonly label: string;
   readonly summary: string;
@@ -151,7 +181,11 @@ export interface FilterHeaderMultiProps {
   readonly onToggle: (value: string, checked: boolean) => void;
 }
 
-/** Adapter-supplied controls for {@link FilterHeaderChrome}. */
+/**
+ * Adapter-supplied controls for {@link FilterHeaderChrome}.
+ *
+ * @public
+ */
 export interface FilterHeaderSlots {
   readonly Search: (props: FilterHeaderSearchProps) => ReactNode;
   readonly Select: (props: FilterHeaderSelectProps) => ReactNode;
@@ -159,21 +193,33 @@ export interface FilterHeaderSlots {
   readonly Multi: (props: FilterHeaderMultiProps) => ReactNode;
 }
 
-/** Props for {@link FilterHeaderChrome}. */
+/**
+ * Props for {@link FilterHeaderChrome}.
+ *
+ * @public
+ */
 export interface FilterHeaderChromeProps<
   TRow,
 > extends FilterHeaderRowProps<TRow> {
   readonly slots: FilterHeaderSlots;
 }
 
-/** Props for {@link FilterHeaderControlChrome}. */
+/**
+ * Props for {@link FilterHeaderControlChrome}.
+ *
+ * @public
+ */
 export interface FilterHeaderControlChromeProps<
   TRow,
 > extends FilterHeaderControlProps<TRow> {
   readonly slots: FilterHeaderSlots;
 }
 
-/** The definition that drives a column's header filter, if any. */
+/**
+ * The definition that drives a column's header filter, if any.
+ *
+ * @public
+ */
 export function filterDefForColumn<TRow>(
   defs: readonly FilterDef<TRow>[],
   key: string
@@ -463,7 +509,11 @@ function FilterHeaderCell<TRow>({
   }
 }
 
-/** Compact control for one filter definition — used in the header row and antd titles. */
+/**
+ * Compact control for one filter definition — used in the header row and antd titles.
+ *
+ * @public
+ */
 export function FilterHeaderControlChrome<TRow>({
   def,
   source,
@@ -487,6 +537,8 @@ export function FilterHeaderControlChrome<TRow>({
 /**
  * Second header row of per-column quick filters. Pads and spacers match
  * the leaf header so sticky, pin offsets, and column windowing stay aligned.
+ *
+ * @public
  */
 export function FilterHeaderChrome<TRow>({
   enabled = true,

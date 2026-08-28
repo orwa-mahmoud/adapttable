@@ -3,7 +3,11 @@ import type { ReactElement, ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { HeaderGroupCell } from "./headerGroups";
 
-/** Props for an adapter `ColumnGroupToggle` — no slots on the public API. */
+/**
+ * Props for an adapter `ColumnGroupToggle` — no slots on the public API.
+ *
+ * @public
+ */
 export interface ColumnGroupToggleProps {
   cell: HeaderGroupCell;
   labels: Required<TableLabels>;
@@ -11,7 +15,11 @@ export interface ColumnGroupToggleProps {
   className?: string;
 }
 
-/** Kit button the column-group chrome calls. */
+/**
+ * Kit button the column-group chrome calls.
+ *
+ * @public
+ */
 export interface ColumnGroupToggleButtonProps {
   readonly label: string;
   readonly expanded: boolean;
@@ -19,17 +27,29 @@ export interface ColumnGroupToggleButtonProps {
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link ColumnGroupToggleChrome}. */
+/**
+ * Adapter-supplied controls for {@link ColumnGroupToggleChrome}.
+ *
+ * @public
+ */
 export interface ColumnGroupToggleSlots {
   readonly Button: (props: ColumnGroupToggleButtonProps) => ReactNode;
 }
 
-/** Props for {@link ColumnGroupToggleChrome}. */
+/**
+ * Props for {@link ColumnGroupToggleChrome}.
+ *
+ * @public
+ */
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
   readonly slots: ColumnGroupToggleSlots;
 }
 
-/** Collapse/expand control for one column-group header cell. */
+/**
+ * Collapse/expand control for one column-group header cell.
+ *
+ * @public
+ */
 export function ColumnGroupToggleChrome({
   cell,
   labels,

@@ -8,6 +8,8 @@ export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
  * this so AdaptTable never animates against an accessibility preference.
  *
  * @returns `true` when the user prefers reduced motion.
+ *
+ * @public
  */
 export function usePrefersReducedMotion(): boolean {
   return useMediaQuery(REDUCED_MOTION_QUERY);

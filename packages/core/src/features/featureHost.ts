@@ -162,12 +162,20 @@ export function useTableFeatures<P extends object>(incoming: P): P {
   return props;
 }
 
-/** The host {@link useTableFeatures} created for these resolved props. */
+/**
+ * The host {@link useTableFeatures} created for these resolved props.
+ *
+ * @public
+ */
 export function featureHostOf(props: object): FeatureHostState | undefined {
   return hostOf.get(props);
 }
 
-/** Attach a host to a derived props object (chrome spreads a new one). */
+/**
+ * Attach a host to a derived props object (chrome spreads a new one).
+ *
+ * @public
+ */
 export function rememberFeatureHost(
   props: object,
   host: FeatureHostState | undefined

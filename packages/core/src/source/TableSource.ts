@@ -16,6 +16,8 @@ import type { QueryGroupRow } from "./queryGroups";
  * captured here.
  *
  * @typeParam TRow - The row item type.
+ *
+ * @public
  */
 export interface TableSource<TRow> extends TableStateMutators {
   /* ── Data ────────────────────────────────────────────────────────── */

@@ -36,6 +36,8 @@ function cachedMatchMedia(query: string): MediaQueryList | null {
  * @param query - A CSS media query string, e.g. `"(max-width: 768px)"`.
  * @param defaultValue - Value used when `matchMedia` is unavailable (SSR).
  * @returns Whether the query currently matches.
+ *
+ * @public
  */
 export function useMediaQuery(query: string, defaultValue = false): boolean {
   const subscribe = useCallback(

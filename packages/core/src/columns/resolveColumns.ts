@@ -22,6 +22,8 @@ function pathCell(value: unknown): string | null {
  * first (`"ar-EG"`), then its primary subtag (`"ar"`), then the key itself.
  * Works for flat per-language fields and nested objects alike — both are
  * just paths.
+ *
+ * @public
  */
 export function localizedColumnPath(
   column: Pick<ColumnDef<unknown>, "key" | "i18n">,
@@ -42,6 +44,8 @@ export function localizedColumnPath(
  * values). Client-side sorting follows the generated accessor, so localized
  * columns sort by the localized text. Already-complete columns pass through
  * untouched, so the resolution is idempotent and cheap to repeat.
+ *
+ * @public
  */
 export function resolveColumns<TRow>(
   columns: readonly ColumnDef<TRow>[],

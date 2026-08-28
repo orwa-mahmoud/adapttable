@@ -24,7 +24,11 @@ export type ContextMenuTarget<TRow> =
   | { kind: "row"; row: TRow; rowId: string }
   | { kind: "cell"; row: TRow; rowId: string; columnKey: string };
 
-/** One entry in a context menu. */
+/**
+ * One entry in a context menu.
+ *
+ * @public
+ */
 export interface ContextMenuItem {
   /** Stable identity, and the React key. */
   key: string;
@@ -40,7 +44,11 @@ export interface ContextMenuItem {
   onSelect: () => void;
 }
 
-/** The handlers a built-in entry needs, each optional. */
+/**
+ * The handlers a built-in entry needs, each optional.
+ *
+ * @public
+ */
 export interface ContextMenuActions<TRow> {
   /** Copy the selection, or this cell when nothing is selected. */
   onCopy?: (target: ContextMenuTarget<TRow>) => void;

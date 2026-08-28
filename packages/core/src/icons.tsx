@@ -7,7 +7,11 @@ import type { ReactElement } from "react";
  * identical and avoids cross-adapter duplication of the SVG markup.
  */
 
-/** Three-line funnel glyph for the Filters button. */
+/**
+ * Three-line funnel glyph for the Filters button.
+ *
+ * @public
+ */
 export function FiltersIcon(): ReactElement {
   return (
     <svg
@@ -27,7 +31,11 @@ export function FiltersIcon(): ReactElement {
   );
 }
 
-/** Magnifier glyph for the search field. */
+/**
+ * Magnifier glyph for the search field.
+ *
+ * @public
+ */
 export function SearchIcon(): ReactElement {
   return (
     <svg
@@ -52,6 +60,8 @@ export function SearchIcon(): ReactElement {
  * Inline expand chevron: points into the row (flipped for RTL) and rotates to
  * point down while the detail panel is open. Shared by every adapter's
  * desktop row + mobile card so the expand affordance is identical.
+ *
+ * @public
  */
 export function ExpandChevron({
   open,

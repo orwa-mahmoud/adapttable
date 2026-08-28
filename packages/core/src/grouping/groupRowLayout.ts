@@ -19,7 +19,11 @@ import type { ReactNode } from "react";
 
 import type { ColumnDef } from "../types";
 
-/** One cell of a group header row, after the leading label cell. */
+/**
+ * One cell of a group header row, after the leading label cell.
+ *
+ * @public
+ */
 export interface GroupRowCell<TRow> {
   /** The column this cell sits under. */
   column: ColumnDef<TRow>;
@@ -27,7 +31,11 @@ export interface GroupRowCell<TRow> {
   node: ReactNode;
 }
 
-/** How to build a group header row. */
+/**
+ * How to build a group header row.
+ *
+ * @public
+ */
 export interface GroupRowLayout<TRow> {
   /**
    * Columns the leading label cell covers. Its `colSpan` is this length plus
@@ -54,6 +62,8 @@ export interface GroupRowLayout<TRow> {
  * @param columns - The columns as rendered, in order.
  * @param aggregateCells - Per-column aggregate nodes, keyed by column key.
  * @returns The row's shape.
+ *
+ * @public
  */
 export function groupRowLayout<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -94,6 +104,8 @@ export function groupRowLayout<TRow>(
  * @param columns - The columns as rendered, in order.
  * @param aggregateCells - Per-column aggregate nodes, keyed by column key.
  * @returns One entry per column that has an aggregate.
+ *
+ * @public
  */
 export function groupAggregateEntries<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -114,6 +126,8 @@ export function groupAggregateEntries<TRow>(
  *
  * @param entry - The group entry.
  * @returns The count to display.
+ *
+ * @public
  */
 export function groupLeafCount(entry: {
   leafIds: readonly string[];

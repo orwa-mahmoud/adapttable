@@ -3,16 +3,28 @@ import type { ColumnDef } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
 
-/** Readable label for a column in the menu (header string → mobileLabel → key). */
+/**
+ * Readable label for a column in the menu (header string → mobileLabel → key).
+ *
+ * @public
+ */
 export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string {
   if (typeof column.header === "string") return column.header;
   return column.mobileLabel ?? column.key;
 }
 
-/** Edge a column is pinned to, or `undefined` when unpinned. */
+/**
+ * Edge a column is pinned to, or `undefined` when unpinned.
+ *
+ * @public
+ */
 export type PinnedSide = PinSide | undefined;
 
-/** One row of the column-management menu, with its derived display state. */
+/**
+ * One row of the column-management menu, with its derived display state.
+ *
+ * @public
+ */
 export interface ColumnMenuRow<TRow> {
   column: ColumnDef<TRow>;
   key: string;
@@ -44,6 +56,8 @@ export interface ColumnMenuRow<TRow> {
  * which has its own end-pin toggle. Pinning a leading data column to the
  * trailing edge has no value: it just sticky-travels across the row and
  * collides with the actions column.
+ *
+ * @public
  */
 export function nextPinSide(current: PinnedSide): PinnedSide {
   return current === undefined ? "start" : undefined;
@@ -53,6 +67,8 @@ export function nextPinSide(current: PinnedSide): PinnedSide {
  * The label for a data column's pin toggle — "Pin to start" when unpinned,
  * "Unpin" when pinned — so the accessible name always matches what the click
  * will do. (The actions column uses its own "Pin to end" / "Unpin" label.)
+ *
+ * @public
  */
 export function pinActionLabel(
   current: PinnedSide,
@@ -74,6 +90,8 @@ export function pinActionLabel(
  * (`pinned: { actions: "end" }`) like any data column — adapters list it
  * in the Columns menu with a visibility toggle and an end-pin toggle (no
  * reorder/resize; it always trails).
+ *
+ * @public
  */
 export const ACTIONS_COLUMN_KEY = "actions";
 
@@ -81,6 +99,8 @@ export const ACTIONS_COLUMN_KEY = "actions";
  * Reserved layout key for the injected row-reorder column. Same deal as
  * {@link ACTIONS_COLUMN_KEY}: not a `ColumnDef`, but hideable and
  * start-pinnable through the layout because the key is just a string.
+ *
+ * @public
  */
 export const REORDER_COLUMN_KEY = "reorder";
 
@@ -106,7 +126,11 @@ export function columnMenuRows<TRow>(
   );
 }
 
-/** Keep rows whose name or key contains the query (case-insensitive). */
+/**
+ * Keep rows whose name or key contains the query (case-insensitive).
+ *
+ * @public
+ */
 export function filterColumnMenuRows<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
   query: string
@@ -120,7 +144,11 @@ export function filterColumnMenuRows<TRow>(
   );
 }
 
-/** Show every unlocked hidden column. */
+/**
+ * Show every unlocked hidden column.
+ *
+ * @public
+ */
 export function showAllColumns<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
   layout: UseColumnLayoutResult<TRow>
@@ -132,7 +160,11 @@ export function showAllColumns<TRow>(
   }
 }
 
-/** Hide every unlocked visible column. */
+/**
+ * Hide every unlocked visible column.
+ *
+ * @public
+ */
 export function hideAllColumns<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
   layout: UseColumnLayoutResult<TRow>
@@ -144,7 +176,11 @@ export function hideAllColumns<TRow>(
   }
 }
 
-/** Unpin every unlocked pinned column. */
+/**
+ * Unpin every unlocked pinned column.
+ *
+ * @public
+ */
 export function unpinAllColumns<TRow>(
   rows: readonly ColumnMenuRow<TRow>[],
   layout: UseColumnLayoutResult<TRow>
@@ -156,7 +192,11 @@ export function unpinAllColumns<TRow>(
   }
 }
 
-/** Restore one column's visibility, pin and width. Locks still apply. */
+/**
+ * Restore one column's visibility, pin and width. Locks still apply.
+ *
+ * @public
+ */
 export function resetColumnLayout<TRow>(
   row: ColumnMenuRow<TRow>,
   layout: UseColumnLayoutResult<TRow>
@@ -166,7 +206,11 @@ export function resetColumnLayout<TRow>(
   if (row.canResize) layout.setWidth(row.key, undefined);
 }
 
-/** One action in a per-column submenu. */
+/**
+ * One action in a per-column submenu.
+ *
+ * @public
+ */
 export interface ColumnMenuAction {
   id: string;
   label: string;
@@ -174,7 +218,11 @@ export interface ColumnMenuAction {
   run: () => void;
 }
 
-/** What a submenu needs besides the row itself. */
+/**
+ * What a submenu needs besides the row itself.
+ *
+ * @public
+ */
 export interface ColumnMenuActionContext<TRow = unknown> {
   labels: ColumnMenuLabels;
   layout: UseColumnLayoutResult<TRow>;
@@ -187,7 +235,11 @@ export interface ColumnMenuActionContext<TRow = unknown> {
   featureHost?: FeatureHostState<TRow>;
 }
 
-/** Sort, pin, hide, autosize, filter, reset — disabled when locked. */
+/**
+ * Sort, pin, hide, autosize, filter, reset — disabled when locked.
+ *
+ * @public
+ */
 export function columnMenuActions<TRow>(
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
@@ -294,6 +346,8 @@ function pushColumnMenuExtra(
  * Labels every adapter's column menu needs (pre-translated by the caller).
  * Hoisted here so the five adapters share one contract instead of
  * re-declaring it.
+ *
+ * @public
  */
 export interface ColumnMenuLabels {
   columns: string;
@@ -319,7 +373,11 @@ export interface ColumnMenuLabels {
   autoSizeColumn: string;
 }
 
-/** The shared prop surface of every adapter's `<ColumnMenu>`. */
+/**
+ * The shared prop surface of every adapter's `<ColumnMenu>`.
+ *
+ * @public
+ */
 export interface ColumnMenuChromeProps<TRow> {
   /** All declared columns (pre layout filtering). */
   allColumns: ColumnDef<TRow>[];

@@ -6,10 +6,18 @@
 /** Viewport width (px) below which `"auto"` pagination flips to infinite. */
 export const MOBILE_BREAKPOINT_PX = 768;
 
-/** Default rows-per-page. */
+/**
+ * Default rows-per-page.
+ *
+ * @public
+ */
 export const DEFAULT_LIMIT = 25;
 
-/** Page-size options offered by adapter pagination controls. */
+/**
+ * Page-size options offered by adapter pagination controls.
+ *
+ * @public
+ */
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 /**
@@ -25,6 +33,8 @@ export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
  *   stay listed (active + the table's default page size).
  * @param sizes - The standard options to offer (defaults to {@link PAGE_SIZE_OPTIONS}).
  * @returns The options to render, with every given size guaranteed present.
+ *
+ * @public
  */
 export function pageSizeOptions(
   limit: number | readonly number[],
@@ -36,13 +46,21 @@ export function pageSizeOptions(
   return extras.length > 0 ? [...extras, ...sizes] : sizes;
 }
 
-/** Default debounce (ms) for the search input before it commits to state. */
+/**
+ * Default debounce (ms) for the search input before it commits to state.
+ *
+ * @public
+ */
 export const SEARCH_DEBOUNCE_MS = 300;
 
 /** Default row-height estimate (px) for virtualized desktop tables. */
 export const DEFAULT_ROW_SIZE_PX = 56;
 
-/** Default card-height estimate (px) for virtualized mobile layouts. */
+/**
+ * Default card-height estimate (px) for virtualized mobile layouts.
+ *
+ * @public
+ */
 export const DEFAULT_CARD_SIZE_PX = 132;
 
 /** Default extra rows/cards rendered above and below the virtual window. */

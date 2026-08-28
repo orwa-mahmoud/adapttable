@@ -38,7 +38,11 @@ import {
 import { relativeTokenLabel, resolveRelativeRange } from "./relativeDates";
 import type { ChipLabelResolver } from "./useActiveFilterChips";
 
-/** Every built-in filter shape, exported so consumers never hand-type them. */
+/**
+ * Every built-in filter shape, exported so consumers never hand-type them.
+ *
+ * @public
+ */
 export const FILTER_TYPES = [
   "text",
   "select",
@@ -49,10 +53,18 @@ export const FILTER_TYPES = [
   "numberRange",
 ] as const;
 
-/** A built-in filter shape. */
+/**
+ * A built-in filter shape.
+ *
+ * @public
+ */
 export type FilterType = (typeof FILTER_TYPES)[number];
 
-/** One choice in a `select` / `multiSelect` filter. */
+/**
+ * One choice in a `select` / `multiSelect` filter.
+ *
+ * @public
+ */
 export interface FilterOption {
   value: string;
   label: string;
@@ -62,14 +74,24 @@ export interface FilterOption {
  * Where a select/multiSelect gets its choices: a static array, `"auto"`
  * (distinct values derived from the data — frontend tier; capped and
  * sorted), or an async loader resolved lazily when the form first renders.
+ *
+ * @public
  */
 export type FilterOptionsSource =
   readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
 
-/** Most distinct values `"auto"` will derive before truncating. */
+/**
+ * Most distinct values `"auto"` will derive before truncating.
+ *
+ * @public
+ */
 export const AUTO_OPTIONS_LIMIT = 50;
 
-/** A full, standalone filter definition (the `filters` array form). */
+/**
+ * A full, standalone filter definition (the `filters` array form).
+ *
+ * @public
+ */
 export interface FilterDef<TRow = unknown> {
   /**
    * State key in the filter bag (and the `f_<key>` URL param). Doubles as
@@ -101,17 +123,27 @@ export interface FilterDef<TRow = unknown> {
 /**
  * The column-level shorthand: a bare type, or a definition without `key` /
  * `label` (both inherited from the column).
+ *
+ * @public
  */
 export type ColumnFilter<TRow = unknown> =
   FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & { label?: string });
 
-/** Suffix pair used by the two-field range types. */
+/**
+ * Suffix pair used by the two-field range types.
+ *
+ * @public
+ */
 export const RANGE_SUFFIXES = {
   dateRange: { start: "From", end: "To" },
   numberRange: { start: "Min", end: "Max" },
 } as const;
 
-/** The state keys a definition reads/writes in the filter bag. */
+/**
+ * The state keys a definition reads/writes in the filter bag.
+ *
+ * @public
+ */
 export function filterStateKeys(
   def: Pick<FilterDef, "key" | "type">,
   registry?: FilterTypeRegistry
@@ -121,7 +153,11 @@ export function filterStateKeys(
   return [def.key];
 }
 
-/** Coerce a row value to a boolean, or `undefined` when it has no truth. */
+/**
+ * Coerce a row value to a boolean, or `undefined` when it has no truth.
+ *
+ * @public
+ */
 export function coerceBooleanValue(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
   if (value === 1 || value === "1") return true;
@@ -146,6 +182,8 @@ function booleanChoiceOn(value: FilterValue): boolean {
  * standalone definitions. A standalone definition with the same `key` as a
  * column filter WINS — documented override semantics, with a development
  * warning so accidental duplication is visible.
+ *
+ * @public
  */
 export function resolveFilterDefs<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -184,7 +222,11 @@ export function resolveFilterDefs<TRow>(
   return [...fromColumns, ...standalone];
 }
 
-/** Resolved label for a definition (explicit, else humanized key). */
+/**
+ * Resolved label for a definition (explicit, else humanized key).
+ *
+ * @public
+ */
 export function filterLabel(def: Pick<FilterDef, "key" | "label">): string {
   return def.label ?? humanizeKey(def.key);
 }
@@ -639,7 +681,11 @@ export function createBuiltInFilterSpecs(): FilterTypeSpec[] {
   ];
 }
 
-/** Build one definition's client-side predicate (true = row matches). */
+/**
+ * Build one definition's client-side predicate (true = row matches).
+ *
+ * @public
+ */
 export function filterPredicate<TRow>(
   def: FilterDef<TRow>,
   registry: FilterTypeRegistry
@@ -652,7 +698,11 @@ export function filterPredicate<TRow>(
   return (row, extra) => spec.match(def, extra, row);
 }
 
-/** Everything the table engine derives from the resolved definitions. */
+/**
+ * Everything the table engine derives from the resolved definitions.
+ *
+ * @public
+ */
 export interface FilterRuntime<TRow> {
   /** The merged, ordered definitions (drives the auto-built form). */
   defs: readonly FilterDef<TRow>[];
@@ -743,7 +793,11 @@ function emptyOpChip(field: string, token: string): string {
   return "";
 }
 
-/** Derive the full runtime (URL keys, chips, predicate) from definitions. */
+/**
+ * Derive the full runtime (URL keys, chips, predicate) from definitions.
+ *
+ * @public
+ */
 export function buildFilterRuntime<TRow>(
   defs: readonly FilterDef<TRow>[],
   registry: FilterTypeRegistry
@@ -774,7 +828,11 @@ export function buildFilterRuntime<TRow>(
   };
 }
 
-/** The cleared state for every key a definition list owns. */
+/**
+ * The cleared state for every key a definition list owns.
+ *
+ * @public
+ */
 export function clearedFilterExtras<TRow>(
   defs: readonly FilterDef<TRow>[],
   registry?: FilterTypeRegistry
@@ -792,6 +850,8 @@ export function clearedFilterExtras<TRow>(
  * {@link AUTO_OPTIONS_LIMIT}. Static arrays and async loaders pass through
  * untouched. Run BEFORE {@link buildFilterRuntime} so chips can label the
  * derived values.
+ *
+ * @public
  */
 export function materializeAutoOptions<TRow>(
   defs: readonly FilterDef<TRow>[],

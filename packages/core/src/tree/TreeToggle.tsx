@@ -7,7 +7,11 @@ import type { ReactElement, ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { TreeEntry } from "./treeRows";
 
-/** Props for an adapter `TreeToggle` — no slots on the public API. */
+/**
+ * Props for an adapter `TreeToggle` — no slots on the public API.
+ *
+ * @public
+ */
 export interface TreeToggleProps<TRow> {
   /** The row's place in the tree. */
   entry: TreeEntry<TRow>;
@@ -21,7 +25,11 @@ export interface TreeToggleProps<TRow> {
   spacerClassName?: string;
 }
 
-/** Kit chevron the tree layout calls. */
+/**
+ * Kit chevron the tree layout calls.
+ *
+ * @public
+ */
 export interface TreeToggleButtonProps {
   readonly label: string;
   readonly expanded: boolean;
@@ -30,12 +38,20 @@ export interface TreeToggleButtonProps {
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link TreeToggleChrome}. */
+/**
+ * Adapter-supplied controls for {@link TreeToggleChrome}.
+ *
+ * @public
+ */
 export interface TreeToggleSlots {
   readonly Button: (props: TreeToggleButtonProps) => ReactNode;
 }
 
-/** Props for {@link TreeToggleChrome}. */
+/**
+ * Props for {@link TreeToggleChrome}.
+ *
+ * @public
+ */
 export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
   readonly slots: TreeToggleSlots;
 }
@@ -43,6 +59,8 @@ export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
 /**
  * Renders the chevron for a row with children, or an equal-width spacer for a
  * leaf so the column stays aligned.
+ *
+ * @public
  */
 export function TreeToggleChrome<TRow>({
   entry,

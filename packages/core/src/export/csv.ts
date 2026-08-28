@@ -1,7 +1,11 @@
 import type { ColumnDef } from "../types";
 import { isBrowser } from "../utils/env";
 
-/** Options for {@link rowsToCsv}. */
+/**
+ * Options for {@link rowsToCsv}.
+ *
+ * @public
+ */
 export interface RowsToCsvOptions<TRow> {
   /**
    * Resolve a cell's CSV value. Defaults to the column's `accessor` when it
@@ -98,6 +102,8 @@ export function defaultCsvValue<TRow>(
  * @param columns - The columns to export, in order.
  * @param options - See {@link RowsToCsvOptions}.
  * @returns The CSV text (no BOM; {@link downloadCsv} adds one for Excel).
+ *
+ * @public
  */
 export function rowsToCsv<TRow>(
   rows: readonly TRow[],
@@ -127,6 +133,8 @@ export function rowsToCsv<TRow>(
  * @param table - Headers and one array of values per row.
  * @param options - Delimiter and formula escaping.
  * @returns The CSV text (no BOM).
+ *
+ * @public
  */
 export function matrixToCsv(
   table: {
@@ -153,6 +161,8 @@ export function matrixToCsv(
  *
  * @param filename - Download name, e.g. `"people.csv"`.
  * @param csv - The CSV text from {@link rowsToCsv}.
+ *
+ * @public
  */
 export function downloadCsv(filename: string, csv: string): void {
   if (!isBrowser()) return;

@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { useDebounce } from "../hooks/useDebounce";
 
-/** A controlled, debounced search input bound to a committed value. */
+/**
+ * A controlled, debounced search input bound to a committed value.
+ *
+ * @public
+ */
 export interface SearchInputState {
   /** The live (uncommitted) input value. */
   value: string;
@@ -20,6 +24,8 @@ export interface SearchInputState {
  * @param setSearch - Commit a new search value.
  * @param debounceMs - Debounce delay; defaults to 300.
  * @returns The controlled input state.
+ *
+ * @public
  */
 export function useSearchInput(
   search: string,

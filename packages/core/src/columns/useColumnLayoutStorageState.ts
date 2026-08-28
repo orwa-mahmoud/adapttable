@@ -5,10 +5,18 @@ import { safeLocalStorage } from "../utils/env";
 import { stableKey } from "../utils/stableKey";
 import { type ColumnLayoutState, EMPTY_COLUMN_LAYOUT } from "./useColumnLayout";
 
-/** The subset of the Web `Storage` API the hook needs (injectable for tests). */
+/**
+ * The subset of the Web `Storage` API the hook needs (injectable for tests).
+ *
+ * @public
+ */
 export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-/** Options for {@link useColumnLayoutStorageState}. */
+/**
+ * Options for {@link useColumnLayoutStorageState}.
+ *
+ * @public
+ */
 export interface UseColumnLayoutStorageStateOptions {
   /** Storage key for this table's layout, e.g. `"people-table-columns"`. */
   storageKey: string;
@@ -18,7 +26,11 @@ export interface UseColumnLayoutStorageStateOptions {
   defaultColumnLayout?: Partial<ColumnLayoutState>;
 }
 
-/** State + change handler returned by {@link useColumnLayoutStorageState}. */
+/**
+ * State + change handler returned by {@link useColumnLayoutStorageState}.
+ *
+ * @public
+ */
 export interface UseColumnLayoutStorageStateResult {
   /** Current layout — from storage, or the default when storage is empty. */
   layout: ColumnLayoutState;
@@ -112,6 +124,8 @@ function readStored(
  *
  * @param options - See {@link UseColumnLayoutStorageStateOptions}.
  * @returns The current layout and a change handler that persists it.
+ *
+ * @public
  */
 export function useColumnLayoutStorageState(
   options: UseColumnLayoutStorageStateOptions

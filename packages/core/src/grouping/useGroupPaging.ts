@@ -11,7 +11,11 @@ import { useCallback, useMemo, useState } from "react";
 
 import type { GroupPaging } from "./groupRows";
 
-/** Paging state and the one action that changes it. */
+/**
+ * Paging state and the one action that changes it.
+ *
+ * @public
+ */
 export interface GroupPagingState {
   /** What the model reads. */
   paging: GroupPaging;
@@ -28,6 +32,8 @@ export interface GroupPagingState {
  * Track how much of a paged group model is showing.
  *
  * @returns The state; inert until something calls `showMore`.
+ *
+ * @public
  */
 export function useGroupPaging(): GroupPagingState {
   const [paging, setPaging] = useState<GroupPaging>({});

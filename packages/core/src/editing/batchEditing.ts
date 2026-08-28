@@ -25,7 +25,11 @@ import {
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 
-/** One row's pending changes. */
+/**
+ * One row's pending changes.
+ *
+ * @public
+ */
 export interface BatchRowEdit<TRow> {
   /** The row as it was when the reader started changing it. */
   row: TRow;
@@ -35,7 +39,11 @@ export interface BatchRowEdit<TRow> {
   patch: Readonly<Record<string, unknown>>;
 }
 
-/** Headless batch-editing state. */
+/**
+ * Headless batch-editing state.
+ *
+ * @public
+ */
 export interface BatchEditingState<TRow> {
   /** How many rows are waiting — what a "3 unsaved rows" line reads. */
   count: number;
@@ -66,7 +74,11 @@ export interface BatchEditingState<TRow> {
   featureHost?: FeatureHostState;
 }
 
-/** What {@link useBatchEditing} needs. */
+/**
+ * What {@link useBatchEditing} needs.
+ *
+ * @public
+ */
 export interface UseBatchEditingOptions<TRow> {
   /**
    * Whether batch editing is armed. Off by default: it changes when a commit
@@ -104,6 +116,8 @@ type PendingDrafts = Readonly<
  * @typeParam TRow - The row type.
  * @param options - See {@link UseBatchEditingOptions}.
  * @returns The state; inert unless `enabled`.
+ *
+ * @public
  */
 export function useBatchEditing<TRow>(
   options: UseBatchEditingOptions<TRow>

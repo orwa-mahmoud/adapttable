@@ -12,10 +12,18 @@ import type { FilterDef, FilterType } from "./filterDefs";
 import type { FilterFormSource } from "./filterForm";
 import type { ChipLabelResolver } from "./useActiveFilterChips";
 
-/** Built-in widget a kit AutoFilterForm / header row already knows how to draw. */
+/**
+ * Built-in widget a kit AutoFilterForm / header row already knows how to draw.
+ *
+ * @public
+ */
 export type FilterWidgetKind = FilterType;
 
-/** Props a custom `render` function receives. */
+/**
+ * Props a custom `render` function receives.
+ *
+ * @public
+ */
 export interface FilterWidgetRenderProps<TRow = unknown> {
   readonly def: FilterDef<TRow>;
   readonly source: FilterFormSource<TRow>;
@@ -29,6 +37,8 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
  * `TableFeatureHost.registerFilterType`, or extend a built-in with
  * `TableFeatureHost.extendFilterType` to add operators without forking
  * the table. `FilterTypeRegistry.register` / `extend` still work until v3.
+ *
+ * @public
  */
 export interface FilterTypeSpec {
   readonly type: string;
@@ -51,7 +61,11 @@ export interface FilterTypeSpec {
   render?<TRow>(props: FilterWidgetRenderProps<TRow>): ReactElement;
 }
 
-/** Immutable registry of {@link FilterTypeSpec}s. */
+/**
+ * Immutable registry of {@link FilterTypeSpec}s.
+ *
+ * @public
+ */
 export interface FilterTypeRegistry {
   get(type: string): FilterTypeSpec | undefined;
   has(type: string): boolean;
@@ -127,12 +141,20 @@ export function withExtendedFilterType(
   return withFilterType(registry, { ...current, ...patch, type });
 }
 
-/** Empty registry — used to seed {@link createFilterRegistry}. */
+/**
+ * Empty registry — used to seed {@link createFilterRegistry}.
+ *
+ * @public
+ */
 export function emptyFilterRegistry(): FilterTypeRegistry {
   return new MapRegistry(new Map());
 }
 
-/** Registry from an explicit spec list (last write wins on a repeated type). */
+/**
+ * Registry from an explicit spec list (last write wins on a repeated type).
+ *
+ * @public
+ */
 export function createFilterRegistry(
   specs: readonly FilterTypeSpec[]
 ): FilterTypeRegistry {
@@ -141,7 +163,11 @@ export function createFilterRegistry(
   return new MapRegistry(map);
 }
 
-/** Look up a spec, or `undefined` for an unknown type. */
+/**
+ * Look up a spec, or `undefined` for an unknown type.
+ *
+ * @public
+ */
 export function filterTypeSpec(
   type: string,
   registry: FilterTypeRegistry
@@ -149,7 +175,11 @@ export function filterTypeSpec(
   return registry.get(type);
 }
 
-/** Widget kind a kit should draw for this def. */
+/**
+ * Widget kind a kit should draw for this def.
+ *
+ * @public
+ */
 export function filterWidgetKind(
   def: Pick<FilterDef, "type">,
   registry: FilterTypeRegistry
@@ -157,7 +187,11 @@ export function filterWidgetKind(
   return registry.get(def.type)?.widget;
 }
 
-/** Operators the tree builder offers for this def. */
+/**
+ * Operators the tree builder offers for this def.
+ *
+ * @public
+ */
 export function filterTypeOps(
   def: Pick<FilterDef, "type">,
   registry: FilterTypeRegistry
@@ -165,7 +199,11 @@ export function filterTypeOps(
   return registry.get(def.type)?.ops ?? ["eq"];
 }
 
-/** Default operator when a tree condition is first added. */
+/**
+ * Default operator when a tree condition is first added.
+ *
+ * @public
+ */
 export function filterTypeDefaultOp(
   def: Pick<FilterDef, "type">,
   registry: FilterTypeRegistry
@@ -173,7 +211,11 @@ export function filterTypeDefaultOp(
   return registry.get(def.type)?.defaultOp ?? "eq";
 }
 
-/** Custom `render` for this def, or `undefined` to use the kit widget. */
+/**
+ * Custom `render` for this def, or `undefined` to use the kit widget.
+ *
+ * @public
+ */
 export function renderRegisteredFilter<TRow>(
   def: FilterDef<TRow>,
   source: FilterFormSource<TRow>,

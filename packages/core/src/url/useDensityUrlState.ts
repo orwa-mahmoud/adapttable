@@ -23,7 +23,11 @@ import {
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import { PARAM_DENSITY } from "./serialize";
 
-/** The two layouts a table has. */
+/**
+ * The two layouts a table has.
+ *
+ * @public
+ */
 export type Density = "comfortable" | "compact";
 
 /**
@@ -36,7 +40,11 @@ export type Density = "comfortable" | "compact";
  */
 export const DENSITY_URL_WRITE_DEBOUNCE_MS = 150;
 
-/** What {@link useDensityUrlState} needs. */
+/**
+ * What {@link useDensityUrlState} needs.
+ *
+ * @public
+ */
 export interface UseDensityUrlStateOptions {
   urlAdapter?: UrlStateAdapter;
   urlSync?: boolean;
@@ -45,7 +53,11 @@ export interface UseDensityUrlStateOptions {
   defaultDensity?: Density;
 }
 
-/** The controlled pair to spread onto the table. */
+/**
+ * The controlled pair to spread onto the table.
+ *
+ * @public
+ */
 export interface UseDensityUrlStateResult {
   density: Density;
   onDensityChange: (next: Density) => void;
@@ -61,6 +73,8 @@ function readDensity(params: URLSearchParams, ns: string): Density | undefined {
  *
  * @param options - See {@link UseDensityUrlStateOptions}.
  * @returns The controlled pair to spread onto the table.
+ *
+ * @public
  */
 export function useDensityUrlState(
   options: UseDensityUrlStateOptions = {}

@@ -47,7 +47,11 @@ export const PIVOT_URL_WRITE_DEBOUNCE_MS = 150;
 /** Nothing folded, with a stable identity so a read cannot churn a memo. */
 const NOTHING_COLLAPSED: readonly string[] = [];
 
-/** What {@link usePivotUrlState} needs. */
+/**
+ * What {@link usePivotUrlState} needs.
+ *
+ * @public
+ */
 export interface UsePivotUrlStateOptions {
   urlAdapter?: UrlStateAdapter;
   urlSync?: boolean;
@@ -56,7 +60,11 @@ export interface UsePivotUrlStateOptions {
   defaultConfig?: PivotConfig;
 }
 
-/** The controlled state to hand the panel and the engine. */
+/**
+ * The controlled state to hand the panel and the engine.
+ *
+ * @public
+ */
 export interface UsePivotUrlStateResult {
   /** What to pivot, and how. Give it to the panel and to `pivot`. */
   config: PivotConfig;
@@ -76,6 +84,8 @@ export interface UsePivotUrlStateResult {
  *
  * @param options - See {@link UsePivotUrlStateOptions}.
  * @returns The configuration, the folded set, and the setters for both.
+ *
+ * @public
  */
 export function usePivotUrlState(
   options: UsePivotUrlStateOptions = {}

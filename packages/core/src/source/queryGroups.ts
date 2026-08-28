@@ -26,6 +26,8 @@ import {
  * Only `value` and `count` are required: a server that can count but not
  * aggregate, or group but not return children, is still useful and should not
  * have to send empty fields to say so.
+ *
+ * @public
  */
 export interface QueryGroupRow<TRow = unknown> {
   /** The grouping value at this level — what the table shows as the label. */
@@ -47,7 +49,11 @@ export interface QueryGroupRow<TRow = unknown> {
   rows?: readonly TRow[];
 }
 
-/** A page of grouped results. */
+/**
+ * A page of grouped results.
+ *
+ * @public
+ */
 export interface QueryGroupsPage<TRow = unknown> {
   /** The top-level groups, in the order the server wants them shown. */
   groups: readonly QueryGroupRow<TRow>[];
@@ -55,7 +61,11 @@ export interface QueryGroupsPage<TRow = unknown> {
   total?: number;
 }
 
-/** What {@link serverGroupEntries} needs to lay a server's answer out. */
+/**
+ * What {@link serverGroupEntries} needs to lay a server's answer out.
+ *
+ * @public
+ */
 export interface ServerGroupEntriesOptions<TRow> {
   /** The groups the server returned. */
   groups: readonly QueryGroupRow<TRow>[];
@@ -82,6 +92,8 @@ export interface ServerGroupEntriesOptions<TRow> {
  * @typeParam TRow - The row type.
  * @param options - See {@link ServerGroupEntriesOptions}.
  * @returns The entries, in render order.
+ *
+ * @public
  */
 export function serverGroupEntries<TRow>(
   options: ServerGroupEntriesOptions<TRow>

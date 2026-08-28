@@ -2,10 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { applyGroupLeafSelection } from "../grouping/groupSelection";
 
-/** Tri-state of the "select all visible" header control. */
+/**
+ * Tri-state of the "select all visible" header control.
+ *
+ * @public
+ */
 export type HeaderSelectionState = "all" | "some" | "none";
 
-/** Options for {@link useSelection}. */
+/**
+ * Options for {@link useSelection}.
+ *
+ * @public
+ */
 export interface UseSelectionOptions<TRow> {
   /** The currently visible rows. */
   rows: readonly TRow[];
@@ -28,7 +36,11 @@ export interface UseSelectionOptions<TRow> {
   onSelectionChange?: (selectedIds: string[]) => void;
 }
 
-/** Selection state + actions returned by {@link useSelection}. */
+/**
+ * Selection state + actions returned by {@link useSelection}.
+ *
+ * @public
+ */
 export interface SelectionState {
   /** The set of selected ids. */
   selectedIds: ReadonlySet<string>;
@@ -65,6 +77,8 @@ export interface SelectionState {
  * @typeParam TRow - The row type.
  * @param options - See {@link UseSelectionOptions}.
  * @returns Selection state and actions.
+ *
+ * @public
  */
 export function useSelection<TRow>(
   options: UseSelectionOptions<TRow>

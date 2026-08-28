@@ -23,10 +23,18 @@ import {
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 
-/** The drafts a row edit holds, by column key. */
+/**
+ * The drafts a row edit holds, by column key.
+ *
+ * @public
+ */
 export type RowEditDrafts = Readonly<Record<string, string>>;
 
-/** Headless row-editing state. */
+/**
+ * Headless row-editing state.
+ *
+ * @public
+ */
 export interface RowEditingState<TRow> {
   /** The row being edited, or `null` when none is. */
   activeRowId: string | null;
@@ -56,7 +64,11 @@ export interface RowEditingState<TRow> {
   featureHost?: FeatureHostState;
 }
 
-/** What {@link useRowEditing} needs. */
+/**
+ * What {@link useRowEditing} needs.
+ *
+ * @public
+ */
 export interface UseRowEditingOptions<TRow> {
   /**
    * Whether row editing is armed. Off by default: it changes the commit unit,
@@ -98,6 +110,8 @@ function editableColumns<TRow>(
  * @typeParam TRow - The row type.
  * @param options - See {@link UseRowEditingOptions}.
  * @returns The state; inert unless `enabled`.
+ *
+ * @public
  */
 export function useRowEditing<TRow>(
   options: UseRowEditingOptions<TRow>

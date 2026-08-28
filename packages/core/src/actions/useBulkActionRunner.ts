@@ -22,11 +22,19 @@ export function bulkActionErrorMessage(error: unknown): string | null {
   }
 }
 
-/** How a bulk-action run ended — passed to `onComplete` on every run. */
+/**
+ * How a bulk-action run ended — passed to `onComplete` on every run.
+ *
+ * @public
+ */
 export type BulkActionOutcome =
   { status: "success" } | { status: "error"; error: unknown };
 
-/** Options for {@link useBulkActionRunner}. */
+/**
+ * Options for {@link useBulkActionRunner}.
+ *
+ * @public
+ */
 export interface UseBulkActionRunnerOptions {
   /** Confirmation handler for actions that declare a `confirm` block. */
   confirm: ConfirmHandler;
@@ -40,7 +48,11 @@ export interface UseBulkActionRunnerOptions {
   onComplete?: (outcome: BulkActionOutcome) => void;
 }
 
-/** The runner returned by {@link useBulkActionRunner}. */
+/**
+ * The runner returned by {@link useBulkActionRunner}.
+ *
+ * @public
+ */
 export interface BulkActionRunner {
   /** Key of the action currently running, or `null`. */
   pending: string | null;
@@ -64,6 +76,8 @@ export interface BulkActionRunner {
  *
  * @param options - See {@link UseBulkActionRunnerOptions}.
  * @returns The {@link BulkActionRunner}.
+ *
+ * @public
  */
 export function useBulkActionRunner({
   confirm,

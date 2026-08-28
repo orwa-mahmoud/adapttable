@@ -33,13 +33,21 @@ const FADE_MS = 1500;
  */
 const STEADY_MS = 2500;
 
-/** One highlighted cell. */
+/**
+ * One highlighted cell.
+ *
+ * @public
+ */
 export interface HighlightedCell {
   rowId: string;
   columnKey: string;
 }
 
-/** What {@link useHighlight} returns. */
+/**
+ * What {@link useHighlight} returns.
+ *
+ * @public
+ */
 export interface HighlightState {
   /** Mark a row. Repeating it restarts the clock rather than stacking. */
   flashRow: (rowId: string) => void;
@@ -65,6 +73,8 @@ const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
  *
  * @param enabled - Off unless the host asked; every call is then inert.
  * @returns The controls and the current marks.
+ *
+ * @public
  */
 export function useHighlight(enabled: boolean): HighlightState {
   const reduced = usePrefersReducedMotion();

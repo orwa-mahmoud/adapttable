@@ -10,12 +10,16 @@ import { FALLBACK_PIN_WIDTH, parsePxWidth } from "./columnWidths";
 import { toggleCollapsedColumnGroup } from "./headerGroups";
 
 /** Edge a column can be pinned to — logical, so it follows the writing
+ *
+ * @public
  *  direction (`"start"` is the right edge under `dir="rtl"`). */
 export type PinSide = "start" | "end";
 
 /**
  * User-driven column layout: which columns are hidden, their order, pinning,
  * and widths. Keyed by column `key`. Empty `order` means "declared order".
+ *
+ * @public
  */
 export interface ColumnLayoutState {
   /** Column keys hidden by the user. */
@@ -38,7 +42,11 @@ export const EMPTY_COLUMN_LAYOUT: ColumnLayoutState = {
   widths: {},
 };
 
-/** Options for {@link useColumnLayout}. */
+/**
+ * Options for {@link useColumnLayout}.
+ *
+ * @public
+ */
 export interface UseColumnLayoutOptions<TRow> {
   /** All declared columns (already filtered for the current device layout). */
   columns: readonly ColumnDef<TRow>[];
@@ -57,7 +65,11 @@ export interface UseColumnLayoutOptions<TRow> {
   columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 }
 
-/** Result of {@link useColumnLayout}. */
+/**
+ * Result of {@link useColumnLayout}.
+ *
+ * @public
+ */
 export interface UseColumnLayoutResult<TRow> {
   /** The current layout state (controlled value or internal). */
   state: ColumnLayoutState;
@@ -83,7 +95,11 @@ export interface UseColumnLayoutResult<TRow> {
   toggleColumnGroup: (id: string) => void;
 }
 
-/** A pinned column's side plus its sticky inset in px. */
+/**
+ * A pinned column's side plus its sticky inset in px.
+ *
+ * @public
+ */
 export interface PinOffset {
   side: PinSide;
   inset: number;
@@ -94,6 +110,8 @@ export interface PinOffset {
  * Uses logical inset properties so pinning follows the writing direction:
  * a `"start"`-pinned column sticks to the inline START (the right edge under
  * `dir="rtl"`), matching antd's native `fixed` behaviour.
+ *
+ * @public
  */
 export interface PinnedCellStyle {
   position: "sticky";
@@ -108,6 +126,8 @@ export interface PinnedCellStyle {
  * and a pinned header (the corner) above everything — otherwise a pinned
  * column's body cells paint over the sticky header on vertical scroll, and
  * later headers paint over a pinned header on horizontal scroll.
+ *
+ * @public
  */
 export const PIN_Z = {
   body: 1,
@@ -123,6 +143,8 @@ export const PIN_Z = {
  * Extra inset (px) the leading selection column / trailing actions column add
  * in front of the pinned data columns, so a start-pinned column sits just after
  * a pinned checkbox and an end-pinned column just before pinned actions.
+ *
+ * @public
  */
 export interface PinLeads {
   start?: number;
@@ -140,6 +162,8 @@ function insetProp(side: PinSide): "insetInlineStart" | "insetInlineEnd" {
  * `leads` shifts the cell past a pinned selection/actions edge column. Returns
  * undefined for an unpinned cell. The inset is logical (`insetInlineStart` /
  * `insetInlineEnd`), so the same style pins to the correct edge in RTL.
+ *
+ * @public
  */
 export function pinnedCellStyle(
   offset: PinOffset | undefined,
@@ -161,6 +185,8 @@ export function pinnedCellStyle(
  * edge whenever a data column on that side is pinned. `active` is false when
  * nothing on that side is pinned, in which case the column stays in normal
  * flow. Insets are logical, so the edge follows the writing direction.
+ *
+ * @public
  */
 export function edgePinStyle(
   side: PinSide,
@@ -197,6 +223,8 @@ export function applyColumnOrder<TRow>(
  * URL, server). Returns the reordered, visibility-filtered columns to render.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function useColumnLayout<TRow>({
   columns,

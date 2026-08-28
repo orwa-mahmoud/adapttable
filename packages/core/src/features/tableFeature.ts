@@ -31,13 +31,21 @@ import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import { devWarn } from "../utils/devWarn";
 
-/** Props a feature may write. Keys match `<DataTable>` enabling props. */
+/**
+ * Props a feature may write. Keys match `<DataTable>` enabling props.
+ *
+ * @public
+ */
 export interface FeaturePatch<TRow = unknown> {
   readonly [key: string]: unknown;
   readonly __row?: TRow;
 }
 
-/** The table props a feature may read while applying. */
+/**
+ * The table props a feature may read while applying.
+ *
+ * @public
+ */
 export type FeatureApplyInput<TRow = unknown> = object & {
   readonly __row?: TRow;
 };
@@ -48,6 +56,8 @@ export type FeatureApplyInput<TRow = unknown> = object & {
  * `apply` maps onto the existing prop surface so both enabling paths are
  * the same runtime. `setup` is live-host registration; built-ins and
  * plugins share it, on this same object, in the same array.
+ *
+ * @public
  */
 export interface TableFeature<TRow = unknown> {
   /** Stable id (`"row-reorder"`, `"grouping"`, a host plugin's name). */
@@ -73,6 +83,8 @@ export interface TableFeature<TRow = unknown> {
  * Every extension seam — filter types, editors, aggregators, exporters,
  * menu items, panels, commands — lands here so a built-in is not a
  * special case.
+ *
+ * @public
  */
 export interface TableFeatureHost<TRow = unknown> {
   /** Forget a registration when the table unmounts or features change. */
@@ -187,6 +199,8 @@ function featuresOf(props: object): readonly TableFeature[] | undefined {
  * Later features win; defined host props win over both. `features` is
  * stripped from the result. Calling twice on the same object is a no-op
  * so adapters and `useDataTableShell` can both apply.
+ *
+ * @public
  */
 export function applyTableFeatures<P extends object>(props: P): P {
   if (applied.has(props)) {

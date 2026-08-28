@@ -15,7 +15,11 @@ import type { ReactElement } from "react";
 
 import { LiveRegion } from "./LiveRegion";
 
-/** Props for {@link TableStatusAnnouncer}. */
+/**
+ * Props for {@link TableStatusAnnouncer}.
+ *
+ * @public
+ */
 export interface TableStatusAnnouncerProps {
   /** What to announce, from `useDataTableShell().statusAnnouncement`. */
   announcement: string;
@@ -25,6 +29,8 @@ export interface TableStatusAnnouncerProps {
  * Announce a change to the table's rows politely.
  *
  * @param props - See {@link TableStatusAnnouncerProps}.
+ *
+ * @public
  */
 export function TableStatusAnnouncer({
   announcement,

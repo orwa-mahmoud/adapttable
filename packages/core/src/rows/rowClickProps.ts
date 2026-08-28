@@ -1,6 +1,10 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 
-/** Handlers + affordance for an activatable (clickable) row. */
+/**
+ * Handlers + affordance for an activatable (clickable) row.
+ *
+ * @public
+ */
 export interface RowClickProps {
   onClick: (event: MouseEvent<HTMLElement>) => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
@@ -66,6 +70,8 @@ function moveRowFocus(current: HTMLElement, delta: -1 | 1): void {
  * @param index - The row's index in the rendered list. When given, only
  *   row 0 is a Tab stop (roving tabindex); omit it and every row stays
  *   tabbable.
+ *
+ * @public
  */
 export function rowClickProps<TRow>(
   row: TRow,

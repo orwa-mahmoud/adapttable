@@ -19,24 +19,40 @@ import {
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 
-/** Keyboard outcome from {@link CellEditingState.handleKeyDown}. */
+/**
+ * Keyboard outcome from {@link CellEditingState.handleKeyDown}.
+ *
+ * @public
+ */
 export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
 
-/** Row/column context for Tab / Shift+Tab advance. */
+/**
+ * Row/column context for Tab / Shift+Tab advance.
+ *
+ * @public
+ */
 export interface CellEditNavigation {
   rows: readonly unknown[];
   columns: readonly EditableColumnLike[];
   rowKey: (row: unknown) => string;
 }
 
-/** Outcome of {@link CellEditingState.handleKeyDown}. */
+/**
+ * Outcome of {@link CellEditingState.handleKeyDown}.
+ *
+ * @public
+ */
 export interface CellEditKeyOutcome {
   action: CellEditKeyAction;
   commit: CellEditCommit | null;
   advanceTarget: CellEditTarget | null;
 }
 
-/** Headless cell-editing state returned by {@link useCellEditing}. */
+/**
+ * Headless cell-editing state returned by {@link useCellEditing}.
+ *
+ * @public
+ */
 export interface CellEditingState {
   /** The cell currently being edited, or `null` when idle. */
   active: CellEditTarget | null;
@@ -112,7 +128,11 @@ export interface CellEditingState {
   ) => CellEditKeyOutcome | null;
 }
 
-/** What {@link useCellEditing} observes, when the host wired lifecycle events. */
+/**
+ * What {@link useCellEditing} observes, when the host wired lifecycle events.
+ *
+ * @public
+ */
 export interface UseCellEditingOptions<TRow = unknown> {
   /** An editor opened. */
   onEditStart?: EditEventHandler<TRow>;
@@ -127,6 +147,8 @@ export interface UseCellEditingOptions<TRow = unknown> {
  * @typeParam TRow - The row type, when lifecycle observers are wired.
  * @param options - Optional start/cancel observers.
  * @returns The state machine.
+ *
+ * @public
  */
 export function useCellEditing<TRow = unknown>(
   options: UseCellEditingOptions<TRow> = {}

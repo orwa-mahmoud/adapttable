@@ -14,7 +14,11 @@ import {
 import type { TableSource } from "../source/TableSource";
 import type { TableLabels } from "../types";
 
-/** Which opted-in feature is inert. */
+/**
+ * Which opted-in feature is inert.
+ *
+ * @public
+ */
 export type FeatureNoticeKind =
   | "virtualize-paged"
   | "pin-nested"
@@ -26,7 +30,11 @@ export type FeatureNoticeKind =
 /** How the table already looks to the person sitting at it. */
 export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 
-/** One inert feature, ready for a status slot or a root attribute. */
+/**
+ * One inert feature, ready for a status slot or a root attribute.
+ *
+ * @public
+ */
 export interface FeatureNotice {
   readonly kind: FeatureNoticeKind;
   readonly appearance: FeatureNoticeAppearance;

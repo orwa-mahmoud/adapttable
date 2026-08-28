@@ -15,6 +15,8 @@ export interface HorizontalOverflow<E extends HTMLElement> {
  * container — an unconditional `overflow-x: auto` would make the wrapper a
  * scroll container and trap page-scroll sticky headers even when nothing
  * overflows. Under SSR (no `ResizeObserver`) it stays `false`.
+ *
+ * @public
  */
 export function useHorizontalOverflow<
   E extends HTMLElement,

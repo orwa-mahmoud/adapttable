@@ -251,7 +251,11 @@ export interface SharedTableRenderProps<TRow> {
   resizeLabel?: string;
 }
 
-/** The shared prelude every table/card renderer derives before rendering. */
+/**
+ * The shared prelude every table/card renderer derives before rendering.
+ *
+ * @public
+ */
 export interface TableRenderModel<TRow> {
   columns: readonly ColumnDef<TRow>[];
   selection: SelectionState | null;
@@ -327,6 +331,8 @@ function extraCoveredSlotMap<TRow>(
  * (and trip the duplication gate).
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function tableRenderModel<TRow>(
   props: Pick<
@@ -480,6 +486,8 @@ export function tableRenderModel<TRow>(
  * @param summaryRow - The caller's summary builder, or `undefined` when off.
  * @param rows - The rows the summary describes.
  * @returns The aggregate cells, or `undefined` when no builder is set.
+ *
+ * @public
  */
 export function useSummaryCells<TRow>(
   summaryRow:

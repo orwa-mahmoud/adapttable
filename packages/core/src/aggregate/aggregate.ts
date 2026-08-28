@@ -25,7 +25,11 @@ import { currentFeatureHost } from "../features/currentHost";
 import type { ColumnDef, SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
-/** The aggregate functions available by name. */
+/**
+ * The aggregate functions available by name.
+ *
+ * @public
+ */
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 /**
@@ -37,15 +41,25 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
  *
  * The return type is `ReactNode` so the built mapper is directly assignable
  * to `summaryRow` and `groupAggregates`, which is the whole point of it.
+ *
+ * @public
  */
 export type Aggregator<TValue = SortableValue> = (
   values: readonly TValue[]
 ) => ReactNode;
 
-/** What to compute per column: a built-in name, or your own function. */
+/**
+ * What to compute per column: a built-in name, or your own function.
+ *
+ * @public
+ */
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
-/** Options for `aggregate`. */
+/**
+ * Options for `aggregate`.
+ *
+ * @public
+ */
 export interface AggregateOptions<TRow> {
   /**
    * Columns, so values resolve through `sortValue` exactly as sorting and
@@ -117,7 +131,11 @@ const BUILT_INS: Record<AggregateName, Aggregator> = {
   },
 };
 
-/** Every built-in aggregate name, for a UI that offers a choice. */
+/**
+ * Every built-in aggregate name, for a UI that offers a choice.
+ *
+ * @public
+ */
 export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
 
 /**
@@ -149,6 +167,8 @@ export function resolveAggregateValue<TRow>(
  *   groupAggregates={aggregate({ budget: "sum" }, { columns })}
  * />
  * ```
+ *
+ * @public
  */
 export function aggregate<TRow>(
   spec: AggregateSpec,

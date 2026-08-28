@@ -3,6 +3,8 @@ import type { TableLabels } from "./types";
 /**
  * English default strings. Consumers override any subset via the
  * `labels` option; {@link resolveLabels} merges their overrides on top.
+ *
+ * @public
  */
 export const defaultLabels: Required<TableLabels> = {
   table: "Data table",
@@ -229,6 +231,8 @@ export const defaultLabels: Required<TableLabels> = {
  *
  * @param overrides - A partial set of label overrides.
  * @returns A fully-populated, immutable label set.
+ *
+ * @public
  */
 export function resolveLabels(
   overrides: TableLabels | undefined

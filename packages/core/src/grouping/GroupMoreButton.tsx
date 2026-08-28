@@ -8,7 +8,11 @@ import type { ReactElement, ReactNode } from "react";
 
 import type { TableLabels } from "../types";
 
-/** Props for an adapter `GroupMoreButton` — no slots on the public API. */
+/**
+ * Props for an adapter `GroupMoreButton` — no slots on the public API.
+ *
+ * @public
+ */
 export interface GroupMoreButtonProps {
   /** Whether this offers more groups or more rows inside one. */
   scope: "groups" | "rows";
@@ -22,23 +26,39 @@ export interface GroupMoreButtonProps {
   onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
 }
 
-/** Kit button the group-more chrome calls. */
+/**
+ * Kit button the group-more chrome calls.
+ *
+ * @public
+ */
 export interface GroupMoreButtonSlotProps {
   readonly label: string;
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link GroupMoreButtonChrome}. */
+/**
+ * Adapter-supplied controls for {@link GroupMoreButtonChrome}.
+ *
+ * @public
+ */
 export interface GroupMoreButtonSlots {
   readonly Button: (props: GroupMoreButtonSlotProps) => ReactNode;
 }
 
-/** Props for {@link GroupMoreButtonChrome}. */
+/**
+ * Props for {@link GroupMoreButtonChrome}.
+ *
+ * @public
+ */
 export interface GroupMoreButtonChromeProps extends GroupMoreButtonProps {
   readonly slots: GroupMoreButtonSlots;
 }
 
-/** Renders the offer through the adapter's button. */
+/**
+ * Renders the offer through the adapter's button.
+ *
+ * @public
+ */
 export function GroupMoreButtonChrome({
   scope,
   remaining,

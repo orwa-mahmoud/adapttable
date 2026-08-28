@@ -11,15 +11,25 @@ import { useEventCallback } from "../hooks/useEventCallback";
 import { devWarn } from "../utils/devWarn";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 
-/** How an unhandled conflict is resolved. */
+/**
+ * How an unhandled conflict is resolved.
+ *
+ * @public
+ */
 export type EditConflictPolicy = "keep" | "take" | "ask";
 
-/** The host's choice, when it makes one. */
+/**
+ * The host's choice, when it makes one.
+ *
+ * @public
+ */
 export type EditConflictChoice = "keep" | "take";
 
 /**
  * One conflict. `row` is what just arrived; `previous` is the snapshot the
  * editor opened against (or last accepted).
+ *
+ * @public
  */
 export interface EditConflict<TRow> {
   /** The incoming row. */
@@ -38,12 +48,20 @@ export interface EditConflict<TRow> {
   previousValue: string;
 }
 
-/** What a host returns from {@link EditConflictHandler}. `void` defers to policy. */
+/**
+ * What a host returns from {@link EditConflictHandler}. `void` defers to policy.
+ *
+ * @public
+ */
 export type EditConflictHandler<TRow> = (
   conflict: EditConflict<TRow>
 ) => EditConflictChoice | void;
 
-/** Headless conflict state for the active editor. */
+/**
+ * Headless conflict state for the active editor.
+ *
+ * @public
+ */
 export interface EditConflictState<TRow> {
   /** The conflict being asked about, or `null`. */
   current: EditConflict<TRow> | null;
@@ -62,7 +80,11 @@ export interface EditConflictState<TRow> {
   clear: () => void;
 }
 
-/** What {@link EditConflictState.reconcile} needs to judge one live update. */
+/**
+ * What {@link EditConflictState.reconcile} needs to judge one live update.
+ *
+ * @public
+ */
 export interface ReconcileLiveEdit<TRow> {
   /** The active cell, or `null` when idle. */
   active: { rowId: string; columnKey: string } | null;
@@ -91,6 +113,8 @@ export interface ReconcileLiveEdit<TRow> {
  * With `rowVersion`, any version change is a conflict — the host said the row
  * moved. Without it, only the edited column's stored value counts, so an
  * unrelated field updating does not steal the draft.
+ *
+ * @public
  */
 export function liveRowChanged<TRow>(input: {
   opened: TRow;
@@ -133,6 +157,8 @@ export function resolveConflictChoice<TRow>(
 /**
  * Headless conflict state. Inert until {@link EditConflictState.reconcile}
  * sees a live row that disagrees with the open editor.
+ *
+ * @public
  */
 export function useEditConflict<TRow>(): EditConflictState<TRow> {
   const [current, setCurrent] = useState<EditConflict<TRow> | null>(null);

@@ -19,10 +19,18 @@ import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { exportButtonLabel } from "./exportLabel";
 
-/** Where an export is in its life. */
+/**
+ * Where an export is in its life.
+ *
+ * @public
+ */
 export type ExportStatus = "idle" | "busy" | "done" | "failed";
 
-/** What {@link useExportHandler} returns. */
+/**
+ * What {@link useExportHandler} returns.
+ *
+ * @public
+ */
 export interface ExportHandlerState {
   /** Bind to the Export button, or `undefined` when export is off. */
   onExportCsv: (() => void) | undefined;
@@ -56,6 +64,8 @@ export interface ExportHandlerState {
  * @param format - The writer's extension. Defaults to `"csv"`, the built-in.
  * @param pageOnly - The handler writes the current page even though the
  *   host asked for `"all"`. The button says so instead of "Export CSV".
+ *
+ * @public
  */
 export function useExportHandler(
   handler: (() => void | Promise<void>) | undefined,

@@ -23,7 +23,11 @@ import { focusEditorOnMount } from "./editableCellController";
 import type { EditableCellEditorCtrl } from "./EditableCellGate";
 import type { RowEditingState } from "./rowEditing";
 
-/** Props for {@link RowEditCell}. */
+/**
+ * Props for {@link RowEditCell}.
+ *
+ * @public
+ */
 export interface RowEditCellProps<TRow> {
   /** The row-editing state from the chrome. */
   rowEditing: RowEditingState<TRow>;
@@ -56,6 +60,8 @@ export interface RowEditCellProps<TRow> {
  * @typeParam TRow - The row type.
  * @param props - See {@link RowEditCellProps}.
  * @returns The editor, or the display content.
+ *
+ * @public
  */
 export function RowEditCell<TRow>({
   rowEditing,
@@ -123,7 +129,11 @@ function selectOptionsFor(editor: CellEditor) {
   return [];
 }
 
-/** Props for {@link rowEditControls}. */
+/**
+ * Props for {@link rowEditControls}.
+ *
+ * @public
+ */
 export interface RowEditControlsOptions<TRow> {
   /** The row-editing state from the chrome. */
   rowEditing: RowEditingState<TRow>;
@@ -135,7 +145,11 @@ export interface RowEditControlsOptions<TRow> {
   labels?: TableLabels;
 }
 
-/** What a kit needs to render the row's edit / save / cancel controls. */
+/**
+ * What a kit needs to render the row's edit / save / cancel controls.
+ *
+ * @public
+ */
 export interface RowEditControls {
   /** Whether this row is the one being edited. */
   editing: boolean;
@@ -164,6 +178,8 @@ export interface RowEditControls {
  * @typeParam TRow - The row type.
  * @param options - See {@link RowEditControlsOptions}.
  * @returns The controls to render.
+ *
+ * @public
  */
 export function rowEditControls<TRow>({
   rowEditing,
@@ -185,7 +201,11 @@ export function rowEditControls<TRow>({
   };
 }
 
-/** Props for an adapter `RowEditActions` — no slots on the public API. */
+/**
+ * Props for an adapter `RowEditActions` — no slots on the public API.
+ *
+ * @public
+ */
 export interface RowEditActionsProps<
   TRow,
 > extends RowEditControlsOptions<TRow> {
@@ -195,7 +215,11 @@ export interface RowEditActionsProps<
   buttonClassName?: string;
 }
 
-/** Kit button the row-edit chrome calls. */
+/**
+ * Kit button the row-edit chrome calls.
+ *
+ * @public
+ */
 export interface RowEditButtonProps {
   readonly label: string;
   readonly part: string;
@@ -203,12 +227,20 @@ export interface RowEditButtonProps {
   readonly onClick: (event: { stopPropagation: () => void }) => void;
 }
 
-/** Adapter-supplied controls for {@link RowEditActionsChrome}. */
+/**
+ * Adapter-supplied controls for {@link RowEditActionsChrome}.
+ *
+ * @public
+ */
 export interface RowEditActionsSlots {
   readonly Button: (props: RowEditButtonProps) => ReactNode;
 }
 
-/** Props for {@link RowEditActionsChrome}. */
+/**
+ * Props for {@link RowEditActionsChrome}.
+ *
+ * @public
+ */
 export interface RowEditActionsChromeProps<
   TRow,
 > extends RowEditActionsProps<TRow> {
@@ -225,6 +257,8 @@ export interface RowEditActionsChromeProps<
  * @typeParam TRow - The row type.
  * @param props - See {@link RowEditActionsChromeProps}.
  * @returns The controls for this row.
+ *
+ * @public
  */
 export function RowEditActionsChrome<TRow>({
   className,
@@ -275,7 +309,11 @@ export function RowEditActionsChrome<TRow>({
   );
 }
 
-/** Props for {@link BatchEditCell}. */
+/**
+ * Props for {@link BatchEditCell}.
+ *
+ * @public
+ */
 export interface BatchEditCellProps<TRow> {
   /** The batch state from the chrome. */
   batch: BatchEditingState<TRow>;
@@ -305,6 +343,8 @@ export interface BatchEditCellProps<TRow> {
  * @typeParam TRow - The row type.
  * @param props - See {@link BatchEditCellProps}.
  * @returns The field, or the display content.
+ *
+ * @public
  */
 export function BatchEditCell<TRow>({
   batch,
@@ -362,7 +402,11 @@ export function BatchEditCell<TRow>({
   );
 }
 
-/** Props for an adapter `BatchEditBar` — no slots on the public API. */
+/**
+ * Props for an adapter `BatchEditBar` — no slots on the public API.
+ *
+ * @public
+ */
 export interface BatchEditBarProps<TRow> {
   /** The batch state from the chrome. */
   batch: BatchEditingState<TRow>;
@@ -374,7 +418,11 @@ export interface BatchEditBarProps<TRow> {
   buttonClassName?: string;
 }
 
-/** Kit button the batch-edit bar calls. */
+/**
+ * Kit button the batch-edit bar calls.
+ *
+ * @public
+ */
 export interface BatchEditButtonProps {
   readonly label: string;
   readonly part: string;
@@ -382,12 +430,20 @@ export interface BatchEditButtonProps {
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link BatchEditBarChrome}. */
+/**
+ * Adapter-supplied controls for {@link BatchEditBarChrome}.
+ *
+ * @public
+ */
 export interface BatchEditBarSlots {
   readonly Button: (props: BatchEditButtonProps) => ReactNode;
 }
 
-/** Props for {@link BatchEditBarChrome}. */
+/**
+ * Props for {@link BatchEditBarChrome}.
+ *
+ * @public
+ */
 export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
   readonly slots: BatchEditBarSlots;
 }
@@ -401,6 +457,8 @@ export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
  * @typeParam TRow - The row type.
  * @param props - See {@link BatchEditBarChromeProps}.
  * @returns The bar, or nothing.
+ *
+ * @public
  */
 export function BatchEditBarChrome<TRow>({
   batch,

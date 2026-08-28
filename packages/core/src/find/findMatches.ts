@@ -15,7 +15,11 @@ import { columnText } from "../columns/columnText";
 import type { GridCell } from "../focus/gridFocus";
 import type { ColumnDef } from "../types";
 
-/** What a find needs to know. */
+/**
+ * What a find needs to know.
+ *
+ * @public
+ */
 export interface FindMatchesOptions<TRow> {
   /** What to look for. An empty or blank query matches nothing. */
   query: string;
@@ -38,6 +42,8 @@ export interface FindMatchesOptions<TRow> {
  * @typeParam TRow - The row type.
  * @param options - See {@link FindMatchesOptions}.
  * @returns The matching cells, in absolute addresses.
+ *
+ * @public
  */
 export function findMatches<TRow>(
   options: FindMatchesOptions<TRow>
@@ -57,7 +63,11 @@ export function findMatches<TRow>(
   return matches;
 }
 
-/** A cell address as a string, for set membership without a nested scan. */
+/**
+ * A cell address as a string, for set membership without a nested scan.
+ *
+ * @public
+ */
 export function matchKey(cell: GridCell): string {
   return `${cell.row}:${cell.col}`;
 }
@@ -71,6 +81,8 @@ export function matchKey(cell: GridCell): string {
  *
  * @param matches - The matches, from {@link findMatches}.
  * @returns Their keys.
+ *
+ * @public
  */
 export function matchKeySet(matches: readonly GridCell[]): ReadonlySet<string> {
   return new Set(matches.map(matchKey));
@@ -87,6 +99,8 @@ export function matchKeySet(matches: readonly GridCell[]): ReadonlySet<string> {
  * @param total - How many matches there are.
  * @param step - `1` for next, `-1` for previous.
  * @returns The next index, or `-1` when there is nothing to step through.
+ *
+ * @public
  */
 export function stepMatch(index: number, total: number, step: number): number {
   if (total === 0) return -1;

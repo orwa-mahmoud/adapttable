@@ -19,7 +19,11 @@ import {
   writeColumnLayout,
 } from "./serialize";
 
-/** Options for {@link useColumnLayoutUrlState}. */
+/**
+ * Options for {@link useColumnLayoutUrlState}.
+ *
+ * @public
+ */
 export interface UseColumnLayoutUrlStateOptions {
   /** URL-state backend. Defaults to the browser History API. */
   urlAdapter?: UrlStateAdapter;
@@ -42,7 +46,11 @@ export interface UseColumnLayoutUrlStateOptions {
  */
 export const LAYOUT_URL_WRITE_DEBOUNCE_MS = 150;
 
-/** State + change handler returned by {@link useColumnLayoutUrlState}. */
+/**
+ * State + change handler returned by {@link useColumnLayoutUrlState}.
+ *
+ * @public
+ */
 export interface UseColumnLayoutUrlStateResult {
   /** Current layout — from the URL, or the default when the URL is empty. */
   layout: ColumnLayoutState;
@@ -65,6 +73,8 @@ export interface UseColumnLayoutUrlStateResult {
  *
  * @param options - See {@link UseColumnLayoutUrlStateOptions}.
  * @returns The current layout and a change handler that persists it.
+ *
+ * @public
  */
 export function useColumnLayoutUrlState(
   options: UseColumnLayoutUrlStateOptions = {}

@@ -22,7 +22,11 @@
  */
 import type { ContextMenuItem } from "./contextMenuModel";
 
-/** A command, which is exactly a menu entry. */
+/**
+ * A command, which is exactly a menu entry.
+ *
+ * @public
+ */
 export type Command = ContextMenuItem;
 
 /** One command, with the text a search matches against. */
@@ -59,6 +63,8 @@ function searchable(item: Command): Searchable {
  * @param commands - Every command available right now.
  * @param query - What the user has typed.
  * @returns The matches.
+ *
+ * @public
  */
 export function filterCommands(
   commands: readonly Command[],
@@ -100,6 +106,8 @@ export interface TableCommandOptions {
  *
  * @param options - The handlers and their labels.
  * @returns The table-wide commands, in display order.
+ *
+ * @public
  */
 export function tableCommands(options: TableCommandOptions): Command[] {
   const { labels } = options;

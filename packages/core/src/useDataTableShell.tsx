@@ -57,6 +57,8 @@ import { useColumnWindow } from "./virtual/useColumnWindow";
  * whole thing straight through to `useDataTableShell`.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export type DataTableShellProps<TRow> = Omit<
   BaseDataTableProps<TRow>,
@@ -107,6 +109,8 @@ export type DataTableShellProps<TRow> = Omit<
  *   filters (called only when there are declarative defs).
  * @returns The resolved source, chrome, filter node, refs, and the
  *   `tableProps` / `toolbarProps` bundles (sans kit-specific extras).
+ *
+ * @public
  */
 
 export function useDataTableShell<TRow>(

@@ -30,7 +30,11 @@ import { type KeyboardEvent, type ReactNode, useCallback, useRef } from "react";
 
 import type { TableLabels } from "../types";
 
-/** One panel in the side panel's strip. */
+/**
+ * One panel in the side panel's strip.
+ *
+ * @public
+ */
 export interface SidePanelEntry {
   /** Stable identity, used for the open-panel state and the URL. */
   key: string;
@@ -40,7 +44,11 @@ export interface SidePanelEntry {
   content: ReactNode;
 }
 
-/** Props an adapter's panel frame receives. */
+/**
+ * Props an adapter's panel frame receives.
+ *
+ * @public
+ */
 export interface SidePanelFrameProps {
   /** The tab strip and the panel body, in order. */
   readonly children: ReactNode;
@@ -49,7 +57,11 @@ export interface SidePanelFrameProps {
   readonly className?: string;
 }
 
-/** Props an adapter's tab button receives. */
+/**
+ * Props an adapter's tab button receives.
+ *
+ * @public
+ */
 export interface SidePanelTabProps {
   readonly panel: SidePanelEntry;
   readonly selected: boolean;
@@ -67,13 +79,21 @@ export interface SidePanelTabProps {
   };
 }
 
-/** Props an adapter's close control receives. */
+/**
+ * Props an adapter's close control receives.
+ *
+ * @public
+ */
 export interface SidePanelCloseProps {
   readonly label: string;
   readonly onClose: () => void;
 }
 
-/** Adapter-owned rendering for {@link SidePanelChrome}. */
+/**
+ * Adapter-owned rendering for {@link SidePanelChrome}.
+ *
+ * @public
+ */
 export interface SidePanelSlots {
   /** The docked frame around everything. */
   readonly Frame: (props: SidePanelFrameProps) => ReactNode;
@@ -83,7 +103,11 @@ export interface SidePanelSlots {
   readonly Close: (props: SidePanelCloseProps) => ReactNode;
 }
 
-/** What the side panel needs to render. */
+/**
+ * What the side panel needs to render.
+ *
+ * @public
+ */
 export interface SidePanelChromeProps {
   /** The panels, in tab order. Rendering nothing when empty. */
   panels: readonly SidePanelEntry[];
@@ -124,6 +148,8 @@ function nextIndex(key: string, at: number, count: number): number | undefined {
  *
  * @param props - The panels, which one is open, and the kit's slots.
  * @returns The docked panel.
+ *
+ * @public
  */
 export function SidePanelChrome(props: Readonly<SidePanelChromeProps>) {
   const { panels, openPanel, onOpenPanel, onClose, slots } = props;
@@ -226,7 +252,11 @@ export function SidePanelChrome(props: Readonly<SidePanelChromeProps>) {
   );
 }
 
-/** What {@link SidePanelLayout} arranges. */
+/**
+ * What {@link SidePanelLayout} arranges.
+ *
+ * @public
+ */
 export interface SidePanelLayoutProps {
   /** The table itself — everything the panel sits beside. */
   body: ReactNode;
@@ -253,6 +283,8 @@ export interface SidePanelLayoutProps {
  *
  * @param props - The body, the panel, and which side it docks to.
  * @returns The arranged region.
+ *
+ * @public
  */
 export function SidePanelLayout(props: Readonly<SidePanelLayoutProps>) {
   if (!props.panel) return <>{props.body}</>;

@@ -83,13 +83,25 @@ import type {
 import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import { useHorizontalOverflow } from "./useHorizontalOverflow";
 
-/** Width (px) reserved for the leading selection column. */
+/**
+ * Width (px) reserved for the leading selection column.
+ *
+ * @public
+ */
 export const DESKTOP_SELECTION_WIDTH = 48;
 
-/** Width (px) reserved for the trailing actions column. */
+/**
+ * Width (px) reserved for the trailing actions column.
+ *
+ * @public
+ */
 export const DESKTOP_ACTIONS_WIDTH = 120;
 
-/** Width (px) reserved for the leading expand-chevron column. */
+/**
+ * Width (px) reserved for the leading expand-chevron column.
+ *
+ * @public
+ */
 export const DESKTOP_EXPANSION_WIDTH = 32;
 
 /** Inline style for an absolutely-positioned column-resize handle. */
@@ -104,7 +116,11 @@ export const DESKTOP_RESIZE_HANDLE_STYLE: CSSProperties = {
   userSelect: "none",
 };
 
-/** Per-kit chrome column widths. */
+/**
+ * Per-kit chrome column widths.
+ *
+ * @public
+ */
 export interface DesktopChromeWidths {
   /** Leading expand-chevron column. Default {@link DESKTOP_EXPANSION_WIDTH}. */
   expansion?: number;
@@ -119,19 +135,31 @@ export interface DesktopChromeWidths {
   includeExpansionInLeads?: boolean;
 }
 
-/** Options for {@link useDesktopTableAssembly}. */
+/**
+ * Options for {@link useDesktopTableAssembly}.
+ *
+ * @public
+ */
 export interface DesktopAssemblyOptions {
   /** Chrome column widths. */
   widths?: DesktopChromeWidths;
 }
 
-/** Group-shaped body entries adapters hand to their group header. */
+/**
+ * Group-shaped body entries adapters hand to their group header.
+ *
+ * @public
+ */
 export type DesktopGroupEntry<TRow> = Extract<
   GroupedFlatEntry<TRow>,
   { kind: "group" | "groupFooter" | "groupMore" }
 >;
 
-/** One host-injected extra in the assembled body. */
+/**
+ * One host-injected extra in the assembled body.
+ *
+ * @public
+ */
 export interface DesktopExtraSlot {
   kind: "extra";
   key: string;
@@ -141,7 +169,11 @@ export interface DesktopExtraSlot {
   fillStyle?: CSSProperties;
 }
 
-/** Virtual-window spacer. */
+/**
+ * Virtual-window spacer.
+ *
+ * @public
+ */
 export interface DesktopVirtualPadSlot {
   kind: "virtualPad";
   key: "pad-top" | "pad-bottom";
@@ -149,21 +181,33 @@ export interface DesktopVirtualPadSlot {
   colSpan: number;
 }
 
-/** Group header / footer / more row. */
+/**
+ * Group header / footer / more row.
+ *
+ * @public
+ */
 export interface DesktopGroupSlot<TRow> {
   kind: "group";
   key: string;
   entry: DesktopGroupEntry<TRow>;
 }
 
-/** A data row, with wiring already assembled. */
+/**
+ * A data row, with wiring already assembled.
+ *
+ * @public
+ */
 export interface DesktopRowSlot<TRow> {
   kind: "row";
   key: string;
   wiring: DesktopRowWiring<TRow>;
 }
 
-/** One visual slot in the assembled tbody, in reading order. */
+/**
+ * One visual slot in the assembled tbody, in reading order.
+ *
+ * @public
+ */
 export type DesktopBodySlot<TRow> =
   | DesktopExtraSlot
   | DesktopVirtualPadSlot
@@ -173,6 +217,8 @@ export type DesktopBodySlot<TRow> =
 /**
  * Shared visual + behaviour inputs for one memoized desktop row.
  * Adapters extend this with kit extras and paint with their own tags.
+ *
+ * @public
  */
 export interface DesktopRowWiring<TRow> {
   gridFocus?: GridFocusState;
@@ -248,7 +294,11 @@ export interface DesktopRowWiring<TRow> {
   bodyPinStyle: (key: string) => CSSProperties | undefined;
 }
 
-/** Assembled sort / resize / filter state for one leaf header cell. */
+/**
+ * Assembled sort / resize / filter state for one leaf header cell.
+ *
+ * @public
+ */
 export interface DesktopHeaderLeaf<TRow> {
   column: ColumnDef<TRow>;
   headerIndex: number;
@@ -271,7 +321,11 @@ export interface DesktopHeaderLeaf<TRow> {
   columnSelectAriaLabel: string;
 }
 
-/** Pin / scroll / header geometry shared by every HTML-table adapter. */
+/**
+ * Pin / scroll / header geometry shared by every HTML-table adapter.
+ *
+ * @public
+ */
 export interface DesktopTablePin {
   hasPinned: boolean;
   hasStartPin: boolean;
@@ -303,7 +357,11 @@ export interface DesktopTablePin {
   ) => CSSProperties | undefined;
 }
 
-/** Result of {@link useDesktopTableAssembly}. */
+/**
+ * Result of {@link useDesktopTableAssembly}.
+ *
+ * @public
+ */
 export interface DesktopTableAssembly<TRow> {
   /** Prelude from {@link tableRenderModel} — called, not replaced. */
   model: TableRenderModel<TRow>;
@@ -358,7 +416,11 @@ export interface DesktopTableAssembly<TRow> {
   resizeHandleStyle: CSSProperties;
 }
 
-/** Props {@link useDesktopTableAssembly} reads. */
+/**
+ * Props {@link useDesktopTableAssembly} reads.
+ *
+ * @public
+ */
 export type DesktopAssemblyProps<TRow> = SharedTableRenderProps<TRow> & {
   /** Whether the injected actions column is user-pinned. */
   actionsPinned?: boolean;
@@ -624,6 +686,8 @@ export function desktopRowWiringEqual<TRow>(
  * @typeParam TProps - Wiring plus kit extras.
  * @param RowBase - Kit row painter.
  * @param extraEqual - Kit-extra comparator (classNames, size, dir).
+ *
+ * @public
  */
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(
   RowBase: (props: Readonly<TProps>) => ReactElement,
@@ -1024,6 +1088,8 @@ function collectDesktopBodySlots<TRow>(
  * @typeParam TRow - The row type.
  * @param props - The shared render contract plus actionsPinned.
  * @param options - Kit chrome widths.
+ *
+ * @public
  */
 export function useDesktopTableAssembly<TRow>(
   props: DesktopAssemblyProps<TRow>,

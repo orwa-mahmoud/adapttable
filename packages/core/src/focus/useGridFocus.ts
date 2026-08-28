@@ -57,15 +57,27 @@ import {
 } from "./gridFocus";
 import { pasteRangeEdits } from "./pasteRange";
 
-/** The attribute a focusable cell carries, so focus can find it in the DOM. */
+/**
+ * The attribute a focusable cell carries, so focus can find it in the DOM.
+ *
+ * @public
+ */
 export const GRID_CELL_ATTR = "data-grid-cell";
 
-/** `data-grid-cell` value for one address — `"row:col"`, both absolute. */
+/**
+ * `data-grid-cell` value for one address — `"row:col"`, both absolute.
+ *
+ * @public
+ */
 export function gridCellAttr(cell: GridCell): string {
   return `${cell.row}:${cell.col}`;
 }
 
-/** Options for {@link useGridFocus}. */
+/**
+ * Options for {@link useGridFocus}.
+ *
+ * @public
+ */
 export interface UseGridFocusOptions<TRow> {
   /** Off unless the host asked for it; when false the hook does nothing. */
   enabled: boolean;
@@ -169,7 +181,11 @@ export interface UseGridFocusOptions<TRow> {
   currentMatch?: GridCell | null;
 }
 
-/** What {@link useGridFocus} returns. */
+/**
+ * What {@link useGridFocus} returns.
+ *
+ * @public
+ */
 export interface GridFocusState {
   /**
    * Whether cell navigation is on. Consumers render the live region only when
@@ -267,6 +283,8 @@ export interface GridFocusState {
  * Keyboard focus over the cell grid.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function useGridFocus<TRow>(
   options: UseGridFocusOptions<TRow>

@@ -15,7 +15,11 @@ import {
 } from "./editableCellController";
 import { BatchEditCell, RowEditCell } from "./RowEditGate";
 
-/** Props for a kit-native editor while a cell is active. */
+/**
+ * Props for a kit-native editor while a cell is active.
+ *
+ * @public
+ */
 export interface EditableCellEditorCtrl {
   draft: string;
   setDraft: (value: string) => void;
@@ -76,6 +80,8 @@ function isFirstEditableColumn(
  *
  * When `editing` is omitted this is a pure pass-through of `display` —
  * zero DOM / behavior change for tables that never opted into cell edit.
+ *
+ * @public
  */
 export interface EditableCellGateProps<TRow> {
   readonly editing: EditableCellEditing<TRow> | undefined;
@@ -164,6 +170,8 @@ export interface EditableCellSlots {
  *
  * Structural event on purpose, so this stays usable from any framework's
  * handler and from a plain listener.
+ *
+ * @public
  */
 export function stopEditKeys(
   event: Readonly<{ key: string; stopPropagation: () => void }>
@@ -182,6 +190,8 @@ export function stopEditKeys(
  *
  * @param ctrl - The editor controller the gate handed the kit.
  * @returns Attributes to spread; empty while the value is fine.
+ *
+ * @public
  */
 export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
   "aria-invalid"?: true;
@@ -206,6 +216,8 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
  * @param ctrl - The editor controller the gate handed the kit.
  * @returns Attributes to spread; empty unless a check is running or a
  *   conflict is being asked.
+ *
+ * @public
  */
 export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
   "aria-busy"?: true;
@@ -283,6 +295,8 @@ function ConflictNotice(
  *
  * @param ctrl - The editor controller the gate handed the kit.
  * @param checked - The box's new state.
+ *
+ * @public
  */
 export function commitBooleanDraft(
   ctrl: EditableCellEditorCtrl,
@@ -297,6 +311,8 @@ export function commitBooleanDraft(
  *
  * @param select - The select element.
  * @returns The draft string the editing state holds.
+ *
+ * @public
  */
 export function multiDraftFromSelect(select: HTMLSelectElement): string {
   return formatMultiDraft(
@@ -304,7 +320,11 @@ export function multiDraftFromSelect(select: HTMLSelectElement): string {
   );
 }
 
-/** Opt out of the React Compiler: early returns swap trees of different memo sizes. */
+/**
+ * Opt out of the React Compiler: early returns swap trees of different memo sizes.
+ *
+ * @public
+ */
 export function EditableCellGate<TRow>(
   props: EditableCellGateProps<TRow>
 ): ReactElement {

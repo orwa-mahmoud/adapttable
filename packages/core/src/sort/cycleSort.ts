@@ -7,6 +7,8 @@ import type { SortLevel } from "./compare";
  * @param current - The current sort pair (both fields unset when inactive).
  * @param key - The column key that was clicked.
  * @returns The next sort state.
+ *
+ * @public
  */
 export function nextSort(
   current: Partial<SortLevel>,

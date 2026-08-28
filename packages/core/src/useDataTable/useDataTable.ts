@@ -34,7 +34,11 @@ import { useSearchInput } from "./useSearchInput";
 
 const EMPTY_LABELS: Readonly<Record<string, ChipLabelResolver>> = {};
 
-/** Options for {@link useDataTable}. */
+/**
+ * Options for {@link useDataTable}.
+ *
+ * @public
+ */
 export interface UseDataTableOptions<TRow> {
   /** The data + state contract, from `useFrontendData` / `useQuerySource`. */
   source: TableSource<TRow>;
@@ -80,7 +84,11 @@ export interface UseDataTableOptions<TRow> {
   multiSort?: boolean;
 }
 
-/** Everything a headless consumer needs to render a table. */
+/**
+ * Everything a headless consumer needs to render a table.
+ *
+ * @public
+ */
 export interface UseDataTableResult<TRow> {
   /** The materialised rows for the current slice. */
   rows: readonly TRow[];
@@ -156,7 +164,11 @@ export interface UseDataTableResult<TRow> {
    compatible) while typing the known keys — so adapters read them without
    casts. */
 
-/** Props from `UseDataTableResult.getTableProps`. */
+/**
+ * Props from `UseDataTableResult.getTableProps`.
+ *
+ * @public
+ */
 export interface TableElementProps extends Props {
   role: string;
   dir?: Direction;
@@ -167,6 +179,8 @@ export interface TableElementProps extends Props {
  * Props from `UseDataTableResult.getRowProps`. Spread-clean by
  * contract: never contains `key` — read `UseDataTableResult.getRowKey`
  * for the React key.
+ *
+ * @public
  */
 export interface RowElementProps extends Props {
   role: string;
@@ -178,7 +192,11 @@ export interface RowElementProps extends Props {
   "aria-selected"?: boolean;
 }
 
-/** Props from `UseDataTableResult.getSortButtonProps`. */
+/**
+ * Props from `UseDataTableResult.getSortButtonProps`.
+ *
+ * @public
+ */
 export interface SortButtonElementProps extends Props {
   type: "button";
   disabled: boolean;
@@ -187,14 +205,22 @@ export interface SortButtonElementProps extends Props {
   "aria-label": string;
 }
 
-/** Props from `UseDataTableResult.getCellProps` / `getHeaderCellProps`. */
+/**
+ * Props from `UseDataTableResult.getCellProps` / `getHeaderCellProps`.
+ *
+ * @public
+ */
 export interface CellElementProps extends Props {
   role: string;
   style?: CSSProperties;
   "data-sort-index"?: number;
 }
 
-/** Props from `UseDataTableResult.getSearchInputProps`. */
+/**
+ * Props from `UseDataTableResult.getSearchInputProps`.
+ *
+ * @public
+ */
 export interface SearchInputElementProps extends Props {
   type: string;
   role: string;
@@ -251,6 +277,8 @@ type TRowAny = Record<string, unknown>;
  * @typeParam TRow - The row type.
  * @param options - See {@link UseDataTableOptions}.
  * @returns Derived state and prop-getters — see `UseDataTableResult`.
+ *
+ * @public
  */
 export function useDataTable<TRow>(
   options: UseDataTableOptions<TRow>

@@ -31,13 +31,19 @@ import {
  * typed commits one list per keystroke, and `history.replaceState` at that rate
  * trips Safari's limit (~100 calls per 30s, then it throws). Reads stay instant
  * through the optimistic overlay below; only the URL write waits.
+ *
+ * @public
  */
 export const FORMULA_URL_WRITE_DEBOUNCE_MS = 150;
 
 /** Stable identity for "no formula columns", so a read cannot churn a memo. */
 const NO_FORMULAS: readonly FormulaColumnSpec[] = [];
 
-/** What {@link useFormulaUrlState} needs. */
+/**
+ * What {@link useFormulaUrlState} needs.
+ *
+ * @public
+ */
 export interface UseFormulaUrlStateOptions {
   /** URL-state backend. Defaults to the browser History API. */
   urlAdapter?: UrlStateAdapter;
@@ -49,7 +55,11 @@ export interface UseFormulaUrlStateOptions {
   defaultFormulas?: readonly FormulaColumnSpec[];
 }
 
-/** The controlled pair to hand a formula bar and {@link buildFormulaColumns}. */
+/**
+ * The controlled pair to hand a formula bar and {@link buildFormulaColumns}.
+ *
+ * @public
+ */
 export interface UseFormulaUrlStateResult {
   /** The columns — from the URL, or the default while the URL is silent. */
   formulas: readonly FormulaColumnSpec[];
@@ -62,6 +72,8 @@ export interface UseFormulaUrlStateResult {
  *
  * @param options - See {@link UseFormulaUrlStateOptions}.
  * @returns The current columns and a change handler that persists them.
+ *
+ * @public
  */
 export function useFormulaUrlState(
   options: UseFormulaUrlStateOptions = {}

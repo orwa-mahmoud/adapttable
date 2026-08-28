@@ -22,7 +22,11 @@ import {
 } from "./checklistWindow";
 import { type FilterDef, filterLabel } from "./filterDefs";
 
-/** Class hooks the unstyled adapter maps onto `DataTableClassNames`. */
+/**
+ * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
+ *
+ * @public
+ */
 export interface ChecklistClassNames {
   filterChecklist?: string;
   filterChecklistSearch?: string;
@@ -36,7 +40,11 @@ export interface ChecklistClassNames {
   filterCheckbox?: string;
 }
 
-/** Props for an adapter `ChecklistFilter` — no slots on the public API. */
+/**
+ * Props for an adapter `ChecklistFilter` — no slots on the public API.
+ *
+ * @public
+ */
 export interface ChecklistFilterProps<TRow> {
   readonly def: FilterDef<TRow>;
   readonly source: Pick<
@@ -47,7 +55,11 @@ export interface ChecklistFilterProps<TRow> {
   readonly classNames?: ChecklistClassNames;
 }
 
-/** Kit search field the checklist layout calls. */
+/**
+ * Kit search field the checklist layout calls.
+ *
+ * @public
+ */
 export interface ChecklistSearchProps {
   readonly label: string;
   readonly value: string;
@@ -55,13 +67,21 @@ export interface ChecklistSearchProps {
   readonly onChange: (value: string) => void;
 }
 
-/** Kit button the checklist layout calls. */
+/**
+ * Kit button the checklist layout calls.
+ *
+ * @public
+ */
 export interface ChecklistButtonProps {
   readonly label: string;
   readonly onClick: () => void;
 }
 
-/** Kit checkbox row the checklist layout calls. */
+/**
+ * Kit checkbox row the checklist layout calls.
+ *
+ * @public
+ */
 export interface ChecklistCheckboxProps {
   readonly label: string;
   readonly count: string;
@@ -71,14 +91,22 @@ export interface ChecklistCheckboxProps {
   readonly onChange: (checked: boolean) => void;
 }
 
-/** Adapter-supplied controls for {@link ChecklistChrome}. */
+/**
+ * Adapter-supplied controls for {@link ChecklistChrome}.
+ *
+ * @public
+ */
 export interface ChecklistSlots {
   readonly Search: (props: ChecklistSearchProps) => ReactNode;
   readonly Button: (props: ChecklistButtonProps) => ReactNode;
   readonly Checkbox: (props: ChecklistCheckboxProps) => ReactNode;
 }
 
-/** Props for {@link ChecklistChrome}. */
+/**
+ * Props for {@link ChecklistChrome}.
+ *
+ * @public
+ */
 export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
   readonly slots: ChecklistSlots;
 }
@@ -130,6 +158,8 @@ const SPACER: CSSProperties = { flexBasis: "100%", height: 0 };
  * Distinct-values checklist layout. Returns `null` when the source has no
  * `allFilteredRows` and no facets — a server page must declare facets
  * before this widget can count a set it does not hold.
+ *
+ * @public
  */
 export function ChecklistChrome<TRow>({
   def,

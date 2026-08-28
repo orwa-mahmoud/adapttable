@@ -30,7 +30,11 @@ export interface UseChangedCellFlashOptions {
   durationMs?: number;
 }
 
-/** Marks a host can read while rendering. */
+/**
+ * Marks a host can read while rendering.
+ *
+ * @public
+ */
 export interface ChangedCellFlashState {
   /** Whether this cell changed recently enough to still be marked. */
   isFlashing: (rowId: string, columnKey: string) => boolean;
@@ -77,6 +81,8 @@ function touchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null {
  *
  * @param options - See {@link UseChangedCellFlashOptions}.
  * @returns The marks; every reader is inert while disabled.
+ *
+ * @public
  */
 export function useChangedCellFlash(
   options: UseChangedCellFlashOptions = {}

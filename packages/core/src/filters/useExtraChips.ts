@@ -7,7 +7,11 @@ import {
   useActiveFilterChips,
 } from "./useActiveFilterChips";
 
-/** Options for {@link useExtraChips}. */
+/**
+ * Options for {@link useExtraChips}.
+ *
+ * @public
+ */
 export interface UseExtraChipsOptions {
   /** A source's `extra` bag. */
   readonly extra: ExtraFilters;
@@ -28,6 +32,8 @@ export interface UseExtraChipsOptions {
  *
  * @param options - See {@link UseExtraChipsOptions}.
  * @returns The derived chips.
+ *
+ * @public
  */
 export function useExtraChips({
   extra,

@@ -42,7 +42,11 @@ import {
   splitRelativeToken,
 } from "./relativeDates";
 
-/** Class hooks the unstyled adapter maps onto `DataTableClassNames`. */
+/**
+ * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
+ *
+ * @public
+ */
 export interface FilterTreeClassNames {
   filterTree?: string;
   filterTreeGroup?: string;
@@ -58,7 +62,11 @@ export interface FilterTreeClassNames {
   filterOperator?: string;
 }
 
-/** Props for an adapter `FilterTreeBuilder` — no slots on the public API. */
+/**
+ * Props for an adapter `FilterTreeBuilder` — no slots on the public API.
+ *
+ * @public
+ */
 export interface FilterTreeBuilderProps<TRow> {
   readonly defs: readonly FilterDef<TRow>[];
   readonly source: Pick<TableSource<TRow>, "filterTree" | "setFilterTree">;
@@ -69,13 +77,21 @@ export interface FilterTreeBuilderProps<TRow> {
   readonly defaultExpanded?: boolean;
 }
 
-/** One option in a tree Select. */
+/**
+ * One option in a tree Select.
+ *
+ * @public
+ */
 export interface FilterTreeOption {
   readonly value: string;
   readonly label: string;
 }
 
-/** Kit Select the tree layout calls. */
+/**
+ * Kit Select the tree layout calls.
+ *
+ * @public
+ */
 export interface FilterTreeSelectProps {
   readonly label: string;
   readonly value: string;
@@ -87,7 +103,11 @@ export interface FilterTreeSelectProps {
   readonly onChange: (value: string) => void;
 }
 
-/** Kit text/number/date field the tree layout calls. */
+/**
+ * Kit text/number/date field the tree layout calls.
+ *
+ * @public
+ */
 export interface FilterTreeInputProps {
   readonly label: string;
   readonly value: string;
@@ -98,7 +118,11 @@ export interface FilterTreeInputProps {
   readonly onChange: (value: string) => void;
 }
 
-/** Kit button the tree layout calls. */
+/**
+ * Kit button the tree layout calls.
+ *
+ * @public
+ */
 export interface FilterTreeButtonProps {
   readonly label: string;
   readonly part?: string;
@@ -106,7 +130,11 @@ export interface FilterTreeButtonProps {
   readonly onClick: () => void;
 }
 
-/** Kit disclosure that owns the Advanced section's visible chrome. */
+/**
+ * Kit disclosure that owns the Advanced section's visible chrome.
+ *
+ * @public
+ */
 export interface FilterTreeDisclosureProps {
   readonly label: string;
   readonly expanded: boolean;
@@ -116,7 +144,11 @@ export interface FilterTreeDisclosureProps {
   readonly onExpandedChange: (expanded: boolean) => void;
 }
 
-/** Adapter-supplied controls for {@link FilterTreeChrome}. */
+/**
+ * Adapter-supplied controls for {@link FilterTreeChrome}.
+ *
+ * @public
+ */
 export interface FilterTreeSlots {
   readonly Select: (props: FilterTreeSelectProps) => ReactNode;
   readonly Input: (props: FilterTreeInputProps) => ReactNode;
@@ -178,7 +210,11 @@ const TREE_LEGEND_HIDDEN: CSSProperties = {
   border: 0,
 };
 
-/** Props for {@link FilterTreeChrome}. */
+/**
+ * Props for {@link FilterTreeChrome}.
+ *
+ * @public
+ */
 export interface FilterTreeChromeProps<
   TRow,
 > extends FilterTreeBuilderProps<TRow> {
@@ -595,6 +631,8 @@ function GroupView<TRow>({
  * Recursive AND/OR layout over `QueryFilterGroup`. Writes the
  * versioned `ft` param through `source.setFilterTree`. Adapters supply
  * the kit controls via {@link FilterTreeSlots}.
+ *
+ * @public
  */
 export function FilterTreeChrome<TRow>({
   defs,

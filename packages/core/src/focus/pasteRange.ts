@@ -26,6 +26,8 @@ import { type CellRange, cellRangeBounds } from "./cellRange";
  *
  * @param text - The clipboard's text.
  * @returns Rows of raw cell strings; empty when there is nothing to paste.
+ *
+ * @public
  */
 export function parseClipboardTable(text: string): string[][] {
   if (text === "") return [];
@@ -90,7 +92,11 @@ function readQuotedField(
   return { value, next: i };
 }
 
-/** What a paste needs to know to become edits. */
+/**
+ * What a paste needs to know to become edits.
+ *
+ * @public
+ */
 export interface PasteRangeOptions<TRow> {
   /** The clipboard's text. */
   text: string;
@@ -119,6 +125,8 @@ export interface PasteRangeOptions<TRow> {
  * @typeParam TRow - The row type.
  * @param options - See {@link PasteRangeOptions}.
  * @returns The edits, in row-major order.
+ *
+ * @public
  */
 export function pasteRangeEdits<TRow>(
   options: PasteRangeOptions<TRow>
@@ -147,7 +155,11 @@ export function pasteRangeEdits<TRow>(
   return edits;
 }
 
-/** The two ways a table can receive a paste. */
+/**
+ * The two ways a table can receive a paste.
+ *
+ * @public
+ */
 export interface CellPasteHandlerOptions<TRow> {
   /** Takes the batch whole — one transaction, one undo entry. */
   onCellPaste?: (edits: CellEdit<TRow>[]) => void;
@@ -163,6 +175,8 @@ export interface CellPasteHandlerOptions<TRow> {
  * @param options - See {@link CellPasteHandlerOptions}.
  * @returns The handler, or `undefined` when the table takes no edits at all —
  *   which leaves Ctrl/Cmd+V to the browser.
+ *
+ * @public
  */
 export function cellPasteHandler<TRow>(
   options: CellPasteHandlerOptions<TRow>
@@ -170,7 +184,11 @@ export function cellPasteHandler<TRow>(
   return batchEditHandler(options.onCellPaste, options.onCellEdit);
 }
 
-/** The two ways a table can receive a fill. */
+/**
+ * The two ways a table can receive a fill.
+ *
+ * @public
+ */
 export interface CellFillHandlerOptions<TRow> {
   /** Takes the batch whole — one transaction, one undo entry. */
   onCellFill?: (edits: CellEdit<TRow>[]) => void;
@@ -186,6 +204,8 @@ export interface CellFillHandlerOptions<TRow> {
  * @param options - See {@link CellFillHandlerOptions}.
  * @returns The handler, or `undefined` when the table takes no edits at all —
  *   which is also when the fill handle is not rendered.
+ *
+ * @public
  */
 export function cellFillHandler<TRow>(
   options: CellFillHandlerOptions<TRow>

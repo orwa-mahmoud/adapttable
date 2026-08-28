@@ -39,7 +39,11 @@
 import { stableKey } from "../utils/stableKey";
 import type { TableQuery } from "./useServerData";
 
-/** Options for {@link tableQueryKey} and {@link tableQueryBaseKey}. */
+/**
+ * Options for {@link tableQueryKey} and {@link tableQueryBaseKey}.
+ *
+ * @public
+ */
 export interface TableQueryKeyOptions {
   /**
    * Namespace for this table, so two tables on one page never share a cache
@@ -66,6 +70,8 @@ function identityOf(query: TableQuery): Record<string, unknown> {
  *
  * @param query - The query the table emitted.
  * @param options - See {@link TableQueryKeyOptions}.
+ *
+ * @public
  */
 export function tableQueryKey(
   query: TableQuery,
@@ -84,6 +90,8 @@ export function tableQueryKey(
  *
  * @param query - The query the table emitted.
  * @param options - See {@link TableQueryKeyOptions}.
+ *
+ * @public
  */
 export function tableQueryBaseKey(
   query: TableQuery,

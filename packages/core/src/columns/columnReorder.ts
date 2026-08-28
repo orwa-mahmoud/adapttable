@@ -3,10 +3,16 @@ import { useCallback, useState } from "react";
 
 import { isRtlElement } from "../layout/writingDirection";
 
-/** MIME type carrying the dragged column key during a reorder drag. */
+/**
+ * MIME type carrying the dragged column key during a reorder drag.
+ *
+ * @public
+ */
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
 /** Props that make a whole menu ROW draggable (so the browser's drag image is
+ *
+ * @public
  * the full row — you see the column move). Pair with `columnDropProps`. */
 export interface ColumnRowDragProps {
   draggable: true;
@@ -18,6 +24,8 @@ export interface ColumnRowDragProps {
  * matching the native drag-image so the reorder feels physical.
  *
  * @param key - Column key being reordered.
+ *
+ * @public
  */
 export function columnRowDragProps(key: string): ColumnRowDragProps {
   return {
@@ -44,7 +52,11 @@ export function columnRowDragProps(key: string): ColumnRowDragProps {
   };
 }
 
-/** Props for a small, focusable reorder grip — keyboard a11y for the row drag. */
+/**
+ * Props for a small, focusable reorder grip — keyboard a11y for the row drag.
+ *
+ * @public
+ */
 export interface ColumnReorderKeyProps {
   role: "button";
   tabIndex: 0;
@@ -72,6 +84,8 @@ function isRtl(grip: HTMLElement | null): boolean {
  * @param index - The column's current index in the full order.
  * @param move - Layout mutator that moves a column to a new index.
  * @param label - Accessible label for the grip.
+ *
+ * @public
  */
 export function columnReorderKeyProps(
   key: string,
@@ -101,7 +115,11 @@ export function columnReorderKeyProps(
   };
 }
 
-/** Props for a row that accepts a dropped column, moving it to this index. */
+/**
+ * Props for a row that accepts a dropped column, moving it to this index.
+ *
+ * @public
+ */
 export interface ColumnDropProps {
   onDragOver: (event: DragEvent<HTMLElement>) => void;
   onDrop: (event: DragEvent<HTMLElement>) => void;
@@ -113,6 +131,8 @@ export interface ColumnDropProps {
  *
  * @param index - Target index the dragged column moves to.
  * @param move - Layout mutator that moves a column to a new index.
+ *
+ * @public
  */
 export function columnDropProps(
   index: number,
@@ -133,7 +153,11 @@ export function columnDropProps(
   };
 }
 
-/** Indicator attributes for a column-menu row during a reorder drag. */
+/**
+ * Indicator attributes for a column-menu row during a reorder drag.
+ *
+ * @public
+ */
 export interface ColumnDragRowAttrs {
   /** Present on the row being dragged (kits dim it). */
   "data-dragging"?: "";
@@ -141,7 +165,11 @@ export interface ColumnDragRowAttrs {
   "data-drop"?: "before" | "after";
 }
 
-/** Live drag state + composed prop builders from `useColumnDragState`. */
+/**
+ * Live drag state + composed prop builders from `useColumnDragState`.
+ *
+ * @public
+ */
 export interface ColumnDragState {
   /** Key currently being dragged, or `null` outside a drag. */
   draggingKey: string | null;
@@ -170,6 +198,8 @@ export interface ColumnDragState {
  * the dragged row carries `data-dragging` (dim it) and the hovered target
  * carries `data-drop="before" | "after"` (draw an insertion line on that
  * edge). State clears on drop, drag end, and drag cancel alike.
+ *
+ * @public
  */
 export function useColumnDragState(): ColumnDragState {
   const [drag, setDrag] = useState<{ key: string; from: number } | null>(null);

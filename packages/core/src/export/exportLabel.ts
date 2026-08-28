@@ -15,6 +15,8 @@ import type { TableLabels } from "../types";
  * @param labels - Resolved table labels.
  * @param format - The writer's extension, e.g. `"csv"` or `"xlsx"`.
  * @returns The button's text.
+ *
+ * @public
  */
 export function exportButtonLabel(
   labels: TableLabels | undefined,

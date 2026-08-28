@@ -8,7 +8,11 @@ import type { ReactNode } from "react";
 import { sameGridCell } from "./gridFocus";
 import type { GridFocusState } from "./useGridFocus";
 
-/** Props passed to an adapter's visible fill-handle component. */
+/**
+ * Props passed to an adapter's visible fill-handle component.
+ *
+ * @public
+ */
 export interface FillHandleSlotProps {
   /** Localized accessible title for the pointer affordance. */
   readonly label: string;
@@ -18,12 +22,20 @@ export interface FillHandleSlotProps {
   readonly className?: string;
 }
 
-/** Adapter-owned rendering for {@link FillHandleChrome}. */
+/**
+ * Adapter-owned rendering for {@link FillHandleChrome}.
+ *
+ * @public
+ */
 export interface FillHandleSlots {
   readonly Handle: (props: FillHandleSlotProps) => ReactNode;
 }
 
-/** Props for {@link FillHandleChrome}. */
+/**
+ * Props for {@link FillHandleChrome}.
+ *
+ * @public
+ */
 export interface FillHandleChromeProps {
   /** The grid focus state, straight from `table.gridFocus`. */
   readonly focus: GridFocusState | undefined;
@@ -43,6 +55,8 @@ export interface FillHandleChromeProps {
  * Renders the fill handle when this cell is the selection's corner, and
  * nothing at all otherwise — so an adapter renders it unconditionally in every
  * cell and the opt-in promise still holds.
+ *
+ * @public
  */
 export function FillHandleChrome({
   focus,

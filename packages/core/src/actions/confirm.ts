@@ -17,7 +17,11 @@ export interface ConfirmRequest {
   onConfirm: () => void;
 }
 
-/** Shows a confirmation, then runs `onConfirm` if accepted. */
+/**
+ * Shows a confirmation, then runs `onConfirm` if accepted.
+ *
+ * @public
+ */
 export type ConfirmHandler = (request: ConfirmRequest) => void;
 
 /**
@@ -28,6 +32,8 @@ export type ConfirmHandler = (request: ConfirmRequest) => void;
  * action is DENIED: an environment that cannot ask must never approve a
  * destructive action on the user's behalf. Integrators in dialogless
  * environments pass their own `confirm` handler.
+ *
+ * @public
  */
 export const defaultConfirm: ConfirmHandler = ({ message, onConfirm }) => {
   const native = (globalThis as { confirm?: (m?: string) => boolean }).confirm;
@@ -46,6 +52,8 @@ export const defaultConfirm: ConfirmHandler = ({ message, onConfirm }) => {
  * letting every adapter treat "disabled" as simply "reason is defined" and
  * fall back to the action label for tooltips. (A plain `|| undefined` would
  * trip `prefer-nullish-coalescing`; this keeps the falsy-empty intent.)
+ *
+ * @public
  */
 export function resolveDisabledReason(
   reason: string | undefined
@@ -62,6 +70,8 @@ export function resolveDisabledReason(
  * @param row - The row it was triggered on.
  * @param confirm - The confirmation handler.
  * @param cancelLabel - Cancel label for the dialog.
+ *
+ * @public
  */
 export function runRowAction<TRow>(
   action: RowAction<TRow>,

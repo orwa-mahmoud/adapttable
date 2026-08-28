@@ -5,7 +5,11 @@
  * missing the Arabic column paths.
  */
 
-/** Normalize a BCP-47-ish tag: trim, `_` → `-`, lower-case. */
+/**
+ * Normalize a BCP-47-ish tag: trim, `_` → `-`, lower-case.
+ *
+ * @public
+ */
 export function normalizeLocaleTag(locale: string): string {
   return locale.trim().replaceAll("_", "-").toLowerCase();
 }
@@ -14,6 +18,8 @@ export function normalizeLocaleTag(locale: string): string {
  * Resolve a locale against a set of available tags: the exact tag first
  * (case- and separator-insensitive), then its primary subtag. Returns the
  * ORIGINAL available tag so callers can index their own maps with it.
+ *
+ * @public
  */
 export function resolveLocaleTag(
   available: Iterable<string>,

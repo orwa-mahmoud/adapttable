@@ -2,7 +2,11 @@ import { type DependencyList, type RefObject, useEffect } from "react";
 
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
-/** Tuning for the mount stagger. */
+/**
+ * Tuning for the mount stagger.
+ *
+ * @public
+ */
 export interface MountStaggerOptions {
   /** Master switch. When `false`, the hook is a no-op. */
   enabled: boolean;
@@ -24,6 +28,8 @@ export interface MountStaggerOptions {
  * @param ref - Ref to the container whose `[data-stagger]` items animate.
  * @param deps - Re-run the stagger when these change (e.g. the row set).
  * @param options - See {@link MountStaggerOptions}.
+ *
+ * @public
  */
 export function useMountStagger(
   ref: RefObject<HTMLElement | null>,

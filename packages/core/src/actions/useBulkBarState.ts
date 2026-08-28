@@ -7,7 +7,11 @@ import {
   useBulkActionRunner,
 } from "./useBulkActionRunner";
 
-/** Options for {@link useBulkBarState}. */
+/**
+ * Options for {@link useBulkBarState}.
+ *
+ * @public
+ */
 export interface UseBulkBarStateOptions {
   /** Current selection state. */
   selection: SelectionState;
@@ -19,7 +23,11 @@ export interface UseBulkBarStateOptions {
   labels: Required<TableLabels>;
 }
 
-/** The derived bulk-bar state every adapter renders from. */
+/**
+ * The derived bulk-bar state every adapter renders from.
+ *
+ * @public
+ */
 export interface BulkBarState {
   /** Number of rows currently selected. */
   selectedCount: number;
@@ -53,6 +61,8 @@ export interface BulkBarState {
  *
  * Call unconditionally (it uses a hook); do the `selectedCount === 0` early
  * return in the adapter AFTER calling this.
+ *
+ * @public
  */
 export function useBulkBarState({
   selection,

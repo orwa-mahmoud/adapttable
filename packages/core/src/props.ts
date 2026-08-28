@@ -52,6 +52,8 @@ import type { UseSavedViewsOptions } from "./url/useSavedViews";
  * every kit. These name the two places outside it, so a control can be
  * put before everything or after everything without an adapter having to
  * know what the control is.
+ *
+ * @public
  */
 export interface ToolbarSlots {
   /** Ahead of the search input. */
@@ -67,6 +69,8 @@ export interface ToolbarSlots {
  * button in `toolbarSlots`, an item in your own app bar, a route. The
  * table never invents a trigger for it, and `open` is the panel's key or
  * `null` for closed.
+ *
+ * @public
  */
 export interface SidePanelOptions {
   /** The panels, in tab order. */
@@ -88,6 +92,8 @@ export interface SidePanelOptions {
  * classNames, animation, …) so the common contract lives in one place.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export interface BaseDataTableProps<TRow> {
   /** Data + state contract from `useFrontendData` / `useQuerySource`. */

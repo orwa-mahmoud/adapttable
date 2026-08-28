@@ -25,6 +25,8 @@ import type { TableSource } from "./TableSource";
  * optional, type-only peer dependency (no runtime import).
  *
  * @typeParam TPage - The page type returned by each fetch.
+ *
+ * @public
  */
 export interface InfiniteQueryLike<TPage> {
   data: { pages: TPage[]; pageParams: unknown[] } | undefined;
@@ -37,14 +39,22 @@ export interface InfiniteQueryLike<TPage> {
   error: Error | null;
 }
 
-/** Project a fetched page to its rows (and optional total). */
+/**
+ * Project a fetched page to its rows (and optional total).
+ *
+ * @public
+ */
 export type PageSelector<TRow, TPage> = (page: TPage) => {
   rows: readonly TRow[];
   total?: number;
   facets?: FacetMap;
 };
 
-/** Options for {@link useQuerySource}. */
+/**
+ * Options for {@link useQuerySource}.
+ *
+ * @public
+ */
 export interface UseQuerySourceOptions<
   TRow,
   TParams extends TableQueryParams,
@@ -129,6 +139,8 @@ const defaultSelectPage: PageSelector<unknown, PaginatedResponse<unknown>> = (
  * keeping query params in sync with URL state.
  *
  * @returns A {@link TableSource} backed by the server query.
+ *
+ * @public
  */
 export function useQuerySource<
   TRow,

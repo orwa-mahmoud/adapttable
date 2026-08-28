@@ -32,7 +32,11 @@ import {
   writeSortLevels,
 } from "./serialize";
 
-/** Options for {@link useTableUrlState}. */
+/**
+ * Options for {@link useTableUrlState}.
+ *
+ * @public
+ */
 export interface UseTableUrlStateOptions {
   /**
    * URL-state backend. Defaults to the browser History API. Supply a
@@ -60,7 +64,11 @@ export interface UseTableUrlStateOptions {
   urlKey?: string;
 }
 
-/** State + setters returned by {@link useTableUrlState}. */
+/**
+ * State + setters returned by {@link useTableUrlState}.
+ *
+ * @public
+ */
 export interface UseTableUrlStateResult extends TableStateMutators {
   /** Current 1-based page. */
   page: number;
@@ -110,6 +118,8 @@ const NO_KEYS: readonly string[] = [];
  *
  * @param options - See {@link UseTableUrlStateOptions}.
  * @returns The current state and its setters.
+ *
+ * @public
  */
 export function useTableUrlState(
   options: UseTableUrlStateOptions = {}

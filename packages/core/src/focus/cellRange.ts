@@ -12,7 +12,11 @@
  */
 import { type GridCell, sameGridCell } from "./gridFocus";
 
-/** A rectangle of cells, stored as the two corners that made it. */
+/**
+ * A rectangle of cells, stored as the two corners that made it.
+ *
+ * @public
+ */
 export interface CellRange {
   /** Where the selection began — fixed while the head moves. */
   anchor: GridCell;
@@ -20,7 +24,11 @@ export interface CellRange {
   head: GridCell;
 }
 
-/** The rectangle's edges, normalized so `from` is always the top-left. */
+/**
+ * The rectangle's edges, normalized so `from` is always the top-left.
+ *
+ * @public
+ */
 export interface CellRangeBounds {
   fromRow: number;
   toRow: number;
@@ -33,6 +41,8 @@ export interface CellRangeBounds {
  *
  * A range dragged upward has an anchor below its head, so every consumer would
  * otherwise repeat the same min/max dance and one of them would forget.
+ *
+ * @public
  */
 export function cellRangeBounds(range: CellRange): CellRangeBounds {
   return {
@@ -43,7 +53,11 @@ export function cellRangeBounds(range: CellRange): CellRangeBounds {
   };
 }
 
-/** Is this cell inside the range? */
+/**
+ * Is this cell inside the range?
+ *
+ * @public
+ */
 export function isInCellRange(
   range: CellRange | null,
   cell: GridCell
@@ -58,14 +72,22 @@ export function isInCellRange(
   );
 }
 
-/** How many cells the range covers — rows × columns, never enumerated. */
+/**
+ * How many cells the range covers — rows × columns, never enumerated.
+ *
+ * @public
+ */
 export function cellRangeSize(range: CellRange | null): number {
   if (!range) return 0;
   const b = cellRangeBounds(range);
   return (b.toRow - b.fromRow + 1) * (b.toCol - b.fromCol + 1);
 }
 
-/** A single cell selected on its own. */
+/**
+ * A single cell selected on its own.
+ *
+ * @public
+ */
 export function singleCellRange(cell: GridCell): CellRange {
   return { anchor: cell, head: cell };
 }
@@ -75,6 +97,8 @@ export function singleCellRange(cell: GridCell): CellRange {
  *
  * Starting from nothing anchors at the cell that had focus, so the first
  * Shift+Down selects two cells rather than one.
+ *
+ * @public
  */
 export function extendCellRange(
   range: CellRange | null,
@@ -84,7 +108,11 @@ export function extendCellRange(
   return { anchor: range?.anchor ?? fallbackAnchor, head };
 }
 
-/** Is the range a single cell? Useful for deciding whether to show chrome. */
+/**
+ * Is the range a single cell? Useful for deciding whether to show chrome.
+ *
+ * @public
+ */
 export function isSingleCell(range: CellRange | null): boolean {
   return range !== null && sameGridCell(range.anchor, range.head);
 }
@@ -95,6 +123,8 @@ export function isSingleCell(range: CellRange | null): boolean {
  * This is the one place that does enumerate, because an exporter has to walk
  * them — and it is a deliberate boundary: the model stays two corners, and
  * anything that needs the cells asks for them explicitly.
+ *
+ * @public
  */
 export function cellRangeIndices(range: CellRange): {
   rows: number[];

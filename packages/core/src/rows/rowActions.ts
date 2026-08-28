@@ -11,13 +11,19 @@ import type { ReactNode } from "react";
 import type { ConfirmHandler } from "../actions/confirm";
 import type { RowAction, TableLabels } from "../types";
 
-/** How the trailing actions column renders. Omit / `"buttons"` is today's strip. */
+/**
+ * How the trailing actions column renders. Omit / `"buttons"` is today's strip.
+ *
+ * @public
+ */
 export type RowActionsLayout = "buttons" | "menu";
 
 /**
  * Inputs a host `renderRowActions` receives. `actions` is the resolved list
  * (host entries plus built-in duplicate / delete / pin) — hidden ones are
  * still present so a custom cell can decide; the default layouts skip them.
+ *
+ * @public
  */
 export interface RowActionsRenderContext<TRow> {
   row: TRow;
@@ -26,7 +32,11 @@ export interface RowActionsRenderContext<TRow> {
   labels: Required<TableLabels>;
 }
 
-/** Host override for the trailing actions cell (desktop and mobile cards). */
+/**
+ * Host override for the trailing actions cell (desktop and mobile cards).
+ *
+ * @public
+ */
 export type RowActionsRenderer<TRow> = (
   ctx: RowActionsRenderContext<TRow>
 ) => ReactNode;
@@ -36,6 +46,8 @@ export type RowActionsRenderer<TRow> = (
  * the entry; everything else stays, including disabled ones.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function visibleRowActions<TRow>(
   actions: readonly RowAction<TRow>[],

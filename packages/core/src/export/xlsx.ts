@@ -334,6 +334,8 @@ const XLSX_MIME =
  *
  * @param options - The sheet's name inside the workbook. Defaults to `"Sheet1"`.
  * @returns A writer to hand to `exportCsv`.
+ *
+ * @public
  */
 export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
   return {

@@ -22,6 +22,8 @@ import type { ColumnDef } from "./types";
  * don't bleed through the pinned ones. Adapters pass their kit's surface
  * background token as `bg`; a raw `style` object keeps the pixel insets the
  * core layout computes from being mangled by a kit's prop-to-spacing scale.
+ *
+ * @public
  */
 export function pinnedDataCellStyle(
   pin: PinOffset | undefined,
@@ -38,6 +40,8 @@ export function pinnedDataCellStyle(
  * flush to its side when a data column on that side is pinned. `shift` insets a
  * left-edge cell past the leading expansion column so the chevron and the
  * selection checkbox pin side by side.
+ *
+ * @public
  */
 export function pinnedEdgeCellStyle(
   side: PinSide,
@@ -58,6 +62,8 @@ export function pinnedEdgeCellStyle(
  * desktop row's visuals — the memo guard re-renders a row only when one of
  * these differs. Each adapter appends its theming key (`accentColor`)
  * to this shared base.
+ *
+ * @public
  */
 export const SHARED_DESKTOP_ROW_KEYS = [
   "row",
@@ -100,7 +106,11 @@ export const SHARED_DESKTOP_ROW_KEYS = [
   "cellSpanAppearance",
 ] as const;
 
-/** Shallow-equal two objects across a fixed key set (the row-memo guard). */
+/**
+ * Shallow-equal two objects across a fixed key set (the row-memo guard).
+ *
+ * @public
+ */
 export function shallowEqualByKeys<T>(
   keys: readonly (keyof T)[],
   prev: Readonly<T>,
@@ -120,6 +130,8 @@ export function shallowEqualByKeys<T>(
  * @param appearance - `"merged"` (default) or `"plain"`.
  * @param fill - `"off"` keeps centering without a wash (unstyled selection
  *   classes need the background free).
+ *
+ * @public
  */
 export function mergedCellStyle(
   colSpan: number,
@@ -143,6 +155,8 @@ export function mergedCellStyle(
 /**
  * Map a column's logical alignment onto the `"start" | "center" | "end"`
  * value every kit's cell/justify prop accepts. `undefined` defaults to start.
+ *
+ * @public
  */
 export function logicalAlign(
   align: ColumnDef<unknown>["align"]
@@ -157,6 +171,8 @@ export function logicalAlign(
  * (`aria-sort` value): `↑` ascending, `↓` descending, `↕` unsorted. Kits that
  * render the bare arrows as emoji (e.g. Radix Themes' font) append a
  * text-presentation selector on top of this base string.
+ *
+ * @public
  */
 export function sortArrow(sort: unknown): string {
   if (sort === "ascending") return " ↑";
@@ -179,6 +195,8 @@ export function sortArrow(sort: unknown): string {
  *
  * @param props - The props from `getCellProps` / `getCellPropsAt`, or nothing.
  * @returns Whether the cell should render as selected.
+ *
+ * @public
  */
 export function isSelectedCell(
   props: Readonly<Record<string, unknown>> | undefined
@@ -191,6 +209,8 @@ export function isSelectedCell(
  *
  * @param props - The props from `getCellProps` / `getCellPropsAt`, or nothing.
  * @returns Whether the cell contains a match.
+ *
+ * @public
  */
 export function isMatchedCell(
   props: Readonly<Record<string, unknown>> | undefined
@@ -203,6 +223,8 @@ export function isMatchedCell(
  *
  * @param props - The props from `getCellProps` / `getCellPropsAt`, or nothing.
  * @returns Whether the cell is the current match.
+ *
+ * @public
  */
 export function isCurrentMatchCell(
   props: Readonly<Record<string, unknown>> | undefined
@@ -228,6 +250,8 @@ export function isCurrentMatchCell(
  * @param base - The kit's own cell style (pinning, alignment).
  * @param selected - The kit's fill for a selected cell.
  * @returns The merged style, or `base` when nothing highlights this cell.
+ *
+ * @public
  */
 export function cellHighlightStyle(
   props: Readonly<Record<string, unknown>> | undefined,
@@ -250,7 +274,11 @@ export function cellHighlightStyle(
   return isSelectedCell(props) ? { ...base, ...selected } : base;
 }
 
-/** The three rows a grouped body renders, all through one component. */
+/**
+ * The three rows a grouped body renders, all through one component.
+ *
+ * @public
+ */
 export type GroupRowKind = "group" | "groupFooter" | "groupMore";
 
 /**
@@ -262,6 +290,8 @@ export type GroupRowKind = "group" | "groupFooter" | "groupMore";
  *
  * @param kind - Which of the three the entry is.
  * @returns The part names for its row, cell, card and label.
+ *
+ * @public
  */
 export function groupRowParts(kind: GroupRowKind): {
   row: string;
@@ -303,6 +333,8 @@ export function groupRowParts(kind: GroupRowKind): {
  *
  * @param level - The header's depth, from zero.
  * @returns The style for the header's label cell.
+ *
+ * @public
  */
 export function groupIndentStyle(level: number): CSSProperties {
   return level > 0 ? { paddingInlineStart: `${level * 1.5}rem` } : {};
@@ -323,6 +355,8 @@ export function groupIndentStyle(level: number): CSSProperties {
  * @typeParam TRow - The row type.
  * @param column - The column being rendered in a card.
  * @returns The caption, or `undefined` when the card should show none.
+ *
+ * @public
  */
 export function resolveMobileLabel<TRow>(
   column: ColumnDef<TRow>

@@ -114,6 +114,8 @@ function groupFooterEntry<TRow>(
  * @param groupTotal - Optional caption for a footer (`"Core total"`).
  * @param includeHiddenLeaves - When true, a collapsed or paged group
  *   contributes every leaf it holds, not only the ones on screen.
+ *
+ * @public
  */
 export function viewFromGroupedEntries<TRow>(
   entries: readonly GroupedFlatEntry<TRow>[],
@@ -155,6 +157,8 @@ export function viewFromGroupedEntries<TRow>(
  *
  * @typeParam TRow - The row type.
  * @param entries - The flattened tree, in render order.
+ *
+ * @public
  */
 export function viewFromTreeEntries<TRow>(
   entries: readonly TreeEntry<TRow>[]
@@ -226,6 +230,8 @@ function markKeptFooters(
  * @param view - The full grouped or tree view.
  * @param scopedIds - Row ids the scope resolved to.
  * @param getRowId - How a row's id is derived.
+ *
+ * @public
  */
 export function filterExportView<TRow>(
   view: readonly ExportViewEntry<TRow>[],
@@ -245,6 +251,8 @@ export function filterExportView<TRow>(
  * the same rule the table uses when both are armed.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function exportViewFromChrome<TRow>(options: {
   grouping?: { entries: readonly GroupedFlatEntry<TRow>[] };
@@ -275,7 +283,11 @@ export function exportViewFromChrome<TRow>(options: {
   return undefined;
 }
 
-/** `summaryRow` as file values — JSX cells drop out. */
+/**
+ * `summaryRow` as file values — JSX cells drop out.
+ *
+ * @public
+ */
 export function summaryExportValues(
   cells: Readonly<Partial<Record<string, unknown>>> | undefined
 ): Partial<Record<string, unknown>> | undefined {

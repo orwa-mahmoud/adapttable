@@ -18,10 +18,18 @@ import type { CSSProperties, ReactNode } from "react";
 import { PIN_Z } from "../columns/useColumnLayout";
 import { resolveRowStyle, type RowStyle } from "./rowStyle";
 
-/** What the host may inject. */
+/**
+ * What the host may inject.
+ *
+ * @public
+ */
 export type ExtraRowKind = "separator" | "fullWidth";
 
-/** One host-injected slot. */
+/**
+ * One host-injected slot.
+ *
+ * @public
+ */
 export interface ExtraRow {
   /** Stable id — also the React key. */
   key: string;
@@ -35,19 +43,31 @@ export interface ExtraRow {
   render?: () => ReactNode;
 }
 
-/** A separator or full-width entry in a `kind`-tagged body list. */
+/**
+ * A separator or full-width entry in a `kind`-tagged body list.
+ *
+ * @public
+ */
 export type ExtraEntry =
   | { kind: "separator"; key: string }
   | { kind: "fullWidth"; key: string; render?: () => ReactNode };
 
-/** Narrow a body slot to a host-injected extra. */
+/**
+ * Narrow a body slot to a host-injected extra.
+ *
+ * @public
+ */
 export function isExtraEntry(entry: object): entry is ExtraEntry {
   if (!("kind" in entry)) return false;
   const kind = (entry as { kind?: unknown }).kind;
   return kind === "separator" || kind === "fullWidth";
 }
 
-/** True when the host asked for any extra slot. */
+/**
+ * True when the host asked for any extra slot.
+ *
+ * @public
+ */
 export function extraRowsArmed(
   extraRows: readonly ExtraRow[] | undefined
 ): boolean {
@@ -63,6 +83,8 @@ function toEntry(extra: ExtraRow): ExtraEntry {
  * Splice extras into a `kind`-tagged list. `dataKey` names the data row
  * an entry represents — group headers return `undefined` and are never
  * a splice target.
+ *
+ * @public
  */
 export function insertExtraRows<T extends { key: string }>(
   entries: readonly T[],
@@ -101,6 +123,8 @@ export function insertExtraRows<T extends { key: string }>(
  * Extras whose `beforeRowId` sits in this section. Untargeted extras
  * (no `beforeRowId`) are included only when `appendUntargeted` is true —
  * those still belong at the end of the scroll body, not in a pin section.
+ *
+ * @public
  */
 export function extraRowsForSection(
   extraRows: readonly ExtraRow[] | undefined,
@@ -118,6 +142,8 @@ export function extraRowsForSection(
 /**
  * Splice extras whose `beforeRowId` is in this row list. Use on a pin
  * section so a named extra stays in front of a pinned person.
+ *
+ * @public
  */
 export function insertExtrasBeforeRows<TRow>(
   rows: readonly TRow[],
@@ -137,13 +163,19 @@ export function insertExtrasBeforeRows<TRow>(
  * under it. Padding is the extra's own height — it is not folded into the
  * person below. Fill comes from that person's `rowStyle` (see
  * {@link extraHostFillStyle}); AdaptTable does not pick a colour.
+ *
+ * @public
  */
 export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties = {
   position: "relative",
   zIndex: PIN_Z.rowPinned,
 };
 
-/** Cell paint for an extra: RTL-safe align, and room for a line of text. */
+/**
+ * Cell paint for an extra: RTL-safe align, and room for a line of text.
+ *
+ * @public
+ */
 export const EXTRA_OVER_SPAN_STYLE: CSSProperties = {
   textAlign: "start",
   paddingBlock: "0.75rem",
@@ -153,6 +185,8 @@ export const EXTRA_OVER_SPAN_STYLE: CSSProperties = {
 /**
  * The fill the host already passed for this extra's person. Height is not
  * copied — extras size from their own padding, not `rowHeight`.
+ *
+ * @public
  */
 export function extraHostFillStyle<TRow>(
   extraKey: string,
@@ -175,13 +209,21 @@ export function extraHostFillStyle<TRow>(
   return Object.keys(fill).length > 0 ? fill : undefined;
 }
 
-/** Part names every kit stamps on an extra row. */
+/**
+ * Part names every kit stamps on an extra row.
+ *
+ * @public
+ */
 export const EXTRA_ROW_PARTS = {
   separator: { row: "separator-row", cell: "separator-cell" },
   fullWidth: { row: "full-width-row", cell: "full-width-cell" },
 } as const;
 
-/** How many extras sit immediately in front of any of these data-row ids. */
+/**
+ * How many extras sit immediately in front of any of these data-row ids.
+ *
+ * @public
+ */
 export function extraCountBeforeRowIds(
   extraRows: readonly ExtraRow[] | undefined,
   ids: ReadonlySet<string>
@@ -199,6 +241,8 @@ export function extraCountBeforeRowIds(
 /**
  * Grow a data-row `rowSpan` so it still reaches the last covered person
  * after extras in front of those people take `<tr>` slots.
+ *
+ * @public
  */
 export function inflateBodyCellRowSpans<
   TCell extends { columnIndex: number; colSpan: number; rowSpan: number },
@@ -312,6 +356,8 @@ function addSpanCoverage(
  * Table-slot indexes (leading chrome + data columns) a continuing row span
  * already owns on extras in front of this person — those extras omit a `<td>`
  * there so the merge can keep going.
+ *
+ * @public
  */
 export function extraCoveredTableSlots(
   beforeRowId: string,
@@ -342,7 +388,11 @@ export function extraCoveredTableSlots(
   return covered;
 }
 
-/** Uncovered colSpans for an extra row that has to leave holes for a row span. */
+/**
+ * Uncovered colSpans for an extra row that has to leave holes for a row span.
+ *
+ * @public
+ */
 export function extraUncoveredColSpans(
   columnSpan: number,
   coveredSlots: ReadonlySet<number> | undefined

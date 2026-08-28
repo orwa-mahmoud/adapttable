@@ -123,6 +123,8 @@ import { useMeasuredWindowScrollMargin } from "./virtual/windowScrollMargin";
  * each adapter.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export interface ToolbarChromeProps<TRow> {
   /** The headless table state + prop-getters. */
@@ -245,6 +247,8 @@ export interface ToolbarChromeProps<TRow> {
  * The shared prop surface every adapter's bulk-action bar needs. Extracted
  * so the identical shape isn't re-declared (and flagged as duplication) in
  * each adapter's chrome.
+ *
+ * @public
  */
 export interface BulkBarChromeProps {
   /** Current selection state. */
@@ -266,10 +270,16 @@ export interface BulkBarChromeProps {
  * Which body region a `DataTable` should render. Named `TableBodyRegion`
  * (not `TableBody`) so it never collides with MUI's `TableBody` component
  * in consumer imports.
+ *
+ * @public
  */
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
-/** The shared, UI-agnostic orchestration result for an adapter table. */
+/**
+ * The shared, UI-agnostic orchestration result for an adapter table.
+ *
+ * @public
+ */
 export interface TableChrome<TRow> {
   /**
    * The source as the VIEW sees it. Identical to the caller's source —
@@ -468,6 +478,8 @@ export interface TableChrome<TRow> {
  * adapter renders on presence. The fullscreen half folds in whether the
  * browser will allow it at all: a toggle that cannot work is worse than no
  * toggle, and an embedded webview is a real place where it cannot.
+ *
+ * @public
  */
 export interface ViewControlsToolbar {
   density?: "comfortable" | "compact";
@@ -533,6 +545,8 @@ export interface PrintToolbar {
  * Not generic, unlike {@link undoRedoToolbar}: neither prop mentions the row
  * type, and a `Partial<ToolbarChromeProps<TRow>>` return with no `TRow` in the
  * arguments infers `unknown` and widens the whole spread at every call site.
+ *
+ * @public
  */
 export function printToolbar(
   wanted: boolean | undefined,
@@ -1353,7 +1367,11 @@ export function useTableChrome<TRow>(
   };
 }
 
-/** Result of {@link useChromeBodyData}. */
+/**
+ * Result of {@link useChromeBodyData}.
+ *
+ * @public
+ */
 export interface ChromeBodyData<TRow> {
   /** Row/card window virtualization state (disabled unless eligible). */
   virtualization: TableVirtualization<TRow>;
@@ -1394,6 +1412,8 @@ export interface ChromeBodyData<TRow> {
  * @param chrome - The {@link useTableChrome} result.
  * @param props - The adapter's `BaseDataTableProps`.
  * @returns Virtualization state + the load-more sentinel.
+ *
+ * @public
  */
 export function useChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
@@ -1630,6 +1650,8 @@ function resolveBodyVirtualization<TRow>(
  * @param ref - The adapter's root element.
  * @param chrome - The {@link useTableChrome} result.
  * @param props - The adapter's `BaseDataTableProps`.
+ *
+ * @public
  */
 export function useChromeScrollReset<TRow>(
   ref: RefObject<HTMLElement | null>,
@@ -1657,7 +1679,11 @@ export function useChromeScrollReset<TRow>(
   });
 }
 
-/** Pointer/click handlers returned by `useFilterTriggerToggle`. */
+/**
+ * Pointer/click handlers returned by `useFilterTriggerToggle`.
+ *
+ * @public
+ */
 export interface FilterTriggerToggle {
   onPointerDown: () => void;
   onClick: () => void;

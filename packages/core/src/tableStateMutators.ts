@@ -7,6 +7,8 @@ import type { ExtraFilters, FilterValue, SortDirection } from "./types";
  * `useTableUrlState`: the same setters exist whether the state lives in
  * the URL, in memory, or behind a server query. Every mutation that
  * changes which rows are visible also resets to page 1.
+ *
+ * @public
  */
 export interface TableStateMutators {
   /** Set the 1-based page. Page `1` is the default (dropped from the URL). */

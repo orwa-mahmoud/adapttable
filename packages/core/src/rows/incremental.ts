@@ -72,7 +72,11 @@ import {
 
 export { rowPatchLog } from "./patch";
 
-/** How the table turns a row set into a filtered, sorted, grouped view. */
+/**
+ * How the table turns a row set into a filtered, sorted, grouped view.
+ *
+ * @public
+ */
 export interface IncrementalViewConfig<TRow> {
   /** How a row's id is derived; the table's own `rowKey`. */
   getRowId: (row: TRow) => string;
@@ -140,6 +144,8 @@ export interface IncrementalViewConfig<TRow> {
  * A derived snapshot of a row set. The latest snapshot is the only one
  * {@link applyRowPatchesToView} may be called on — applying to a stale
  * snapshot rebuilds from its `rows` instead of continuing incrementally.
+ *
+ * @public
  */
 export interface IncrementalView<TRow> {
   /** Source rows after patches — same contract as {@link applyRowPatches}. */
@@ -184,6 +190,8 @@ const VIEWS = new WeakMap<readonly unknown[], IncrementalView<unknown>>();
  * array (`rows` / `filtered` / `sorted`, or a page slice the host
  * attached). Spreading that array drops the link, same as
  * {@link rowPatchLog}.
+ *
+ * @public
  */
 export function incrementalViewOf<TRow>(
   rows: readonly TRow[]
@@ -195,6 +203,8 @@ export function incrementalViewOf<TRow>(
  * Point a derived array (a page slice) at the snapshot it came from, so
  * {@link incrementalViewOf} can find aggregates / groups without a
  * second argument.
+ *
+ * @public
  */
 export function attachIncrementalView<TRow>(
   rows: readonly TRow[],
@@ -203,7 +213,11 @@ export function attachIncrementalView<TRow>(
   VIEWS.set(rows, view);
 }
 
-/** The config the snapshot was last built or reconfigured with. */
+/**
+ * The config the snapshot was last built or reconfigured with.
+ *
+ * @public
+ */
 export function incrementalViewConfig<TRow>(
   view: IncrementalView<TRow>
 ): IncrementalViewConfig<TRow> | undefined {
@@ -224,6 +238,8 @@ export function incrementalViewConfig<TRow>(
  * @typeParam TRow - The row type.
  * @param view - The latest snapshot.
  * @param patch - Fields to merge. `undefined` entries are ignored.
+ *
+ * @public
  */
 export function configureIncrementalView<TRow>(
   view: IncrementalView<TRow>,
@@ -253,6 +269,8 @@ export function configureIncrementalView<TRow>(
  * Default searchable-text projector: flatten a row's own values. Kept
  * here so this module does not import the React hook that publishes the
  * same helper on `useFrontendData`.
+ *
+ * @public
  */
 export function incrementalSearchText<TRow>(row: TRow): string {
   if (row && typeof row === "object") {
@@ -275,6 +293,8 @@ export function incrementalSearchText<TRow>(row: TRow): string {
  * @typeParam TRow - The row type.
  * @param rows - The current source rows.
  * @param config - Filter / sort / group / aggregate settings.
+ *
+ * @public
  */
 export function createIncrementalView<TRow>(
   rows: readonly TRow[],
@@ -332,6 +352,8 @@ export function createIncrementalView<TRow>(
  * @typeParam TRow - The row type.
  * @param view - The latest snapshot.
  * @param patches - The changes to apply, in order.
+ *
+ * @public
  */
 export function applyRowPatchesToView<TRow>(
   view: IncrementalView<TRow>,
@@ -357,6 +379,8 @@ export function applyRowPatchesToView<TRow>(
  * @typeParam TRow - The row type.
  * @param view - The snapshot taken against the pre-patch rows.
  * @param log - The log attached to the post-patch array.
+ *
+ * @public
  */
 export function applyRowPatchLogToView<TRow>(
   view: IncrementalView<TRow>,

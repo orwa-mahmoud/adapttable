@@ -20,7 +20,11 @@ import { useEffect, useRef, useState } from "react";
 import { computePagination } from "../pagination/paginationMath";
 import type { SortDirection, TableLabels } from "../types";
 
-/** Options for {@link useTableStatusAnnouncement}. */
+/**
+ * Options for {@link useTableStatusAnnouncement}.
+ *
+ * @public
+ */
 export interface TableStatusAnnouncementOptions {
   /** Resolved labels — the announcements are built from them. */
   labels: Required<TableLabels>;
@@ -134,6 +138,8 @@ export function resolveTableStatus(
  *
  * @param options - See {@link TableStatusAnnouncementOptions}.
  * @returns The current announcement — `""` until something changes.
+ *
+ * @public
  */
 export function useTableStatusAnnouncement(
   options: TableStatusAnnouncementOptions

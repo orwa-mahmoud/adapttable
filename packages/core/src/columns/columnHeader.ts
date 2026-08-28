@@ -7,12 +7,20 @@ import type {
 } from "../types";
 import { humanizeKey } from "../utils/humanizeKey";
 
-/** Default header caption: the explicit header, else a humanized key. */
+/**
+ * Default header caption: the explicit header, else a humanized key.
+ *
+ * @public
+ */
 export function columnHeaderLabel<TRow>(column: ColumnDef<TRow>): ReactNode {
   return column.header ?? humanizeKey(column.key);
 }
 
-/** Build the controller a custom header receives. */
+/**
+ * Build the controller a custom header receives.
+ *
+ * @public
+ */
 export function columnHeaderController<TRow>(
   column: ColumnDef<TRow>,
   extras: {
@@ -29,7 +37,11 @@ export function columnHeaderController<TRow>(
   };
 }
 
-/** Custom `renderHeader`, or the default caption. */
+/**
+ * Custom `renderHeader`, or the default caption.
+ *
+ * @public
+ */
 export function resolveColumnHeader<TRow>(
   column: ColumnDef<TRow>,
   controller: ColumnHeaderController
@@ -39,7 +51,11 @@ export function resolveColumnHeader<TRow>(
   return column.renderHeader(ctx);
 }
 
-/** Custom `renderFooter`, or the summary value as-is. */
+/**
+ * Custom `renderFooter`, or the summary value as-is.
+ *
+ * @public
+ */
 export function resolveColumnFooter<TRow>(
   column: ColumnDef<TRow>,
   value: ReactNode
@@ -48,7 +64,11 @@ export function resolveColumnFooter<TRow>(
   return column.renderFooter({ column, value });
 }
 
-/** True when any column wants a footer cell of its own. */
+/**
+ * True when any column wants a footer cell of its own.
+ *
+ * @public
+ */
 export function columnsHaveFooter<TRow>(
   columns: readonly ColumnDef<TRow>[]
 ): boolean {

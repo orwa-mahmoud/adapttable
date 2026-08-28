@@ -1,6 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 
-/** Expansion state + actions returned by {@link useRowExpansion}. */
+/**
+ * Expansion state + actions returned by {@link useRowExpansion}.
+ *
+ * @public
+ */
 export interface RowExpansionState {
   /** Ids of the currently expanded rows. */
   expandedIds: ReadonlySet<string>;
@@ -16,6 +20,8 @@ export interface RowExpansionState {
  * (a row that leaves the page simply re-opens when it returns).
  *
  * @param defaultExpandedIds - Row ids whose panel starts open.
+ *
+ * @public
  */
 export function useRowExpansion(
   defaultExpandedIds?: readonly string[]

@@ -2,7 +2,11 @@ import { useMemo } from "react";
 
 import type { ExtraFilters, FilterValue } from "../types";
 
-/** A single removable filter chip. */
+/**
+ * A single removable filter chip.
+ *
+ * @public
+ */
 export interface ActiveFilterChip {
   /** Stable identifier, e.g. `"status:Active"`. */
   key: string;
@@ -12,7 +16,11 @@ export interface ActiveFilterChip {
   onRemove: () => void;
 }
 
-/** Translate a single raw filter value into a chip label. */
+/**
+ * Translate a single raw filter value into a chip label.
+ *
+ * @public
+ */
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 /**
@@ -48,7 +56,11 @@ export function resolveActiveFilterCount(
   return override && override > 0 ? override : chipCount;
 }
 
-/** Options for {@link useActiveFilterChips}. */
+/**
+ * Options for {@link useActiveFilterChips}.
+ *
+ * @public
+ */
 export interface UseActiveFilterChipsOptions {
   /** Map of filter key → current value (typically a source's `extra`). */
   readonly values: Readonly<Record<string, FilterValue>>;

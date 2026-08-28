@@ -14,40 +14,76 @@ import type { CellEditor } from "./editing/cellEditing";
 import type { FacetMap } from "./filters/facets";
 import type { ColumnFilter } from "./filters/filterDefs";
 
-/** Sort direction for a column. */
+/**
+ * Sort direction for a column.
+ *
+ * @public
+ */
 export type SortDirection = "asc" | "desc";
 
-/** Text direction. Adapters apply it; logical CSS does the rest. */
+/**
+ * Text direction. Adapters apply it; logical CSS does the rest.
+ *
+ * @public
+ */
 export type Direction = "ltr" | "rtl";
 
 /**
  * Colour scheme preference. `"auto"` follows the host /
  * `prefers-color-scheme`; adapters resolve it to their theming.
+ *
+ * @public
  */
 export type ColorScheme = "light" | "dark" | "auto";
 
-/** How the table paginates. `"auto"` resolves by viewport (mobile → infinite). */
+/**
+ * How the table paginates. `"auto"` resolves by viewport (mobile → infinite).
+ *
+ * @public
+ */
 export type PaginationMode = "infinite" | "paged" | "auto";
 
-/** The resolved (non-auto) pagination mode a source actually runs in. */
+/**
+ * The resolved (non-auto) pagination mode a source actually runs in.
+ *
+ * @public
+ */
 export type ResolvedPaginationMode = "infinite" | "paged";
 
-/** Comparable primitive returned by a sort-value extractor. */
+/**
+ * Comparable primitive returned by a sort-value extractor.
+ *
+ * @public
+ */
 export type SortableValue = string | number | boolean | null | undefined;
 
 /**
  * When a leaf under a collapsible column group is visible.
  * `"open"` — expanded group only; `"closed"` — collapsed only; `"always"` — both.
+ *
+ * @public
  */
 export type ColumnGroupShow = "open" | "closed" | "always";
 
-/** A single extra-filter value as it round-trips through URL state. */
+/**
+ * A single extra-filter value as it round-trips through URL state.
+ *
+ * @public
+ */
 export type FilterValue = string | string[] | number | undefined;
 
-/** The bag of extra (caller-defined) filter values keyed by filter name. */
+/**
+ * The bag of extra (caller-defined) filter values keyed by filter name.
+ *
+ * @public
+ */
 export type ExtraFilters = Record<string, FilterValue>;
 
-/** Props every `ColumnDef.Cell` component receives. */
+/**
+ * Props every `ColumnDef.Cell` component receives.
+ *
+ * @public
+ */
 export interface CellProps<TRow> {
   /** The row being rendered. */
   readonly row: TRow;
@@ -61,6 +97,8 @@ export interface CellProps<TRow> {
  * Provide either a `ColumnDef.Cell` component (stable identity →
  * memoisable sub-trees, preferred for statically-known columns) or the
  * lighter `ColumnDef.accessor` function.
+ *
+ * @public
  */
 export interface ColumnDef<TRow> {
   /**
@@ -271,7 +309,11 @@ export interface ColumnDef<TRow> {
   meta?: Record<string, unknown>;
 }
 
-/** Sort/resize state a custom header caption can read. */
+/**
+ * Sort/resize state a custom header caption can read.
+ *
+ * @public
+ */
 export interface ColumnHeaderController {
   /** Default caption (`header`, else the humanized key). */
   label: ReactNode;
@@ -281,19 +323,31 @@ export interface ColumnHeaderController {
   toggleSort: (event?: { shiftKey?: boolean }) => void;
 }
 
-/** Arguments for `ColumnDef.renderHeader`. */
+/**
+ * Arguments for `ColumnDef.renderHeader`.
+ *
+ * @public
+ */
 export interface ColumnHeaderContext<TRow> {
   column: ColumnDef<TRow>;
   controller: ColumnHeaderController;
 }
 
-/** Arguments for `ColumnDef.renderFooter`. */
+/**
+ * Arguments for `ColumnDef.renderFooter`.
+ *
+ * @public
+ */
 export interface ColumnFooterContext<TRow> {
   column: ColumnDef<TRow>;
   value: ReactNode;
 }
 
-/** Confirmation wiring shared by row and bulk actions. */
+/**
+ * Confirmation wiring shared by row and bulk actions.
+ *
+ * @public
+ */
 export interface ActionConfirm<TArg> {
   /** Dialog title (pre-translated). */
   title: string;
@@ -305,7 +359,11 @@ export interface ActionConfirm<TArg> {
   danger?: boolean;
 }
 
-/** A per-row action — trailing buttons on desktop, card buttons on mobile. */
+/**
+ * A per-row action — trailing buttons on desktop, card buttons on mobile.
+ *
+ * @public
+ */
 export interface RowAction<TRow> {
   /** Identifier — not shown to the user. */
   key: string;
@@ -334,7 +392,11 @@ export interface RowAction<TRow> {
   confirm?: ActionConfirm<TRow>;
 }
 
-/** A bulk action invoked from the selection toolbar with the selected ids. */
+/**
+ * A bulk action invoked from the selection toolbar with the selected ids.
+ *
+ * @public
+ */
 export interface BulkAction {
   /** Identifier — not shown to the user. */
   key: string;
@@ -364,7 +426,11 @@ export interface BulkAction {
   confirm?: ActionConfirm<number>;
 }
 
-/** Scope context handed to a bulk action. */
+/**
+ * Scope context handed to a bulk action.
+ *
+ * @public
+ */
 export interface BulkActionContext {
   /** True when the user chose "select all matching" across every page. */
   allMatching: boolean;
@@ -372,13 +438,21 @@ export interface BulkActionContext {
   total: number;
 }
 
-/** Option entry for a sort-by select control. */
+/**
+ * Option entry for a sort-by select control.
+ *
+ * @public
+ */
 export interface SortByOption {
   value: string;
   label: string;
 }
 
-/** Baseline query params a backend list endpoint receives. */
+/**
+ * Baseline query params a backend list endpoint receives.
+ *
+ * @public
+ */
 export interface TableQueryParams {
   page?: number;
   limit?: number;
@@ -400,7 +474,11 @@ export interface TableQueryParams {
   cursor?: string;
 }
 
-/** Standard paginated response envelope. */
+/**
+ * Standard paginated response envelope.
+ *
+ * @public
+ */
 export interface PaginatedResponse<TRow> {
   /** The page of rows. */
   rows?: TRow[];
@@ -420,6 +498,8 @@ export interface PaginatedResponse<TRow> {
  * Strings the table renders. Pass pre-translated values (or wire them to
  * your i18n stack). Every key is optional; sensible English defaults fill
  * the gaps — see {@link defaultLabels}.
+ *
+ * @public
  */
 export interface TableLabels {
   /** Accessible label for an unlabeled table. */

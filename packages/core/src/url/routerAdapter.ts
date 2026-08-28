@@ -22,7 +22,11 @@
  */
 import type { UrlStateAdapter } from "./adapter";
 
-/** What {@link routerUrlAdapter} needs from the router. */
+/**
+ * What {@link routerUrlAdapter} needs from the router.
+ *
+ * @public
+ */
 export interface RouterUrlAdapterOptions {
   /**
    * The current query string, WITHOUT the leading `"?"`. Must come from the
@@ -79,6 +83,8 @@ export interface RouterUrlAdapterOptions {
  *
  * @param options - The router's current search, and how to navigate.
  * @returns An adapter to hand the table as `urlAdapter`.
+ *
+ * @public
  */
 export function routerUrlAdapter({
   search,

@@ -2,29 +2,57 @@ import type { CSSProperties } from "react";
 
 import type { ColumnDef } from "../types";
 
-/** Pixel lock for a collapsed arrow stub — chevron only, no leftover strip. */
+/**
+ * Pixel lock for a collapsed arrow stub — chevron only, no leftover strip.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
-/** Path separator inside a column-group id — labels may contain `/`. */
+/**
+ * Path separator inside a column-group id — labels may contain `/`.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_ID_SEP = "\u001f";
 
-/** Synthetic leaf shown when a collapsed group has no summary column. */
+/**
+ * Synthetic leaf shown when a collapsed group has no summary column.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 
-/** Synthetic leaf shown when a collapsed group uses `collapsedRender`. */
+/**
+ * Synthetic leaf shown when a collapsed group uses `collapsedRender`.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
 
-/** True when this key is a collapsed-group arrow stub. */
+/**
+ * True when this key is a collapsed-group arrow stub.
+ *
+ * @public
+ */
 export function isColumnGroupStubKey(key: string): boolean {
   return key.startsWith(COLUMN_GROUP_STUB_PREFIX);
 }
 
-/** True when this key is a collapsed-group `collapsedRender` column. */
+/**
+ * True when this key is a collapsed-group `collapsedRender` column.
+ *
+ * @public
+ */
 export function isColumnGroupRenderKey(key: string): boolean {
   return key.startsWith(COLUMN_GROUP_RENDER_PREFIX);
 }
 
-/** True when this key is a stub or `collapsedRender` summary leaf. */
+/**
+ * True when this key is a stub or `collapsedRender` summary leaf.
+ *
+ * @public
+ */
 export function isColumnGroupSummaryKey(key: string): boolean {
   return isColumnGroupStubKey(key) || isColumnGroupRenderKey(key);
 }
@@ -32,6 +60,8 @@ export function isColumnGroupSummaryKey(key: string): boolean {
 /**
  * Inset hairline under a group title that still has child headers below.
  * Stops Assignment and Delivery sharing one stroke across the gap.
+ *
+ * @public
  */
 export function groupedHeaderChildRule(hairline: string): {
   readonly borderBottom: string;
@@ -49,7 +79,11 @@ export function groupedHeaderChildRule(hairline: string): {
   };
 }
 
-/** One cell of a group header row. */
+/**
+ * One cell of a group header row.
+ *
+ * @public
+ */
 export interface HeaderGroupCell {
   /** Stable key for React lists. */
   key: string;
@@ -85,6 +119,8 @@ export type GroupedHeaderAlign = "start" | "center" | "end";
  * Size lock for a collapsed arrow-stub column. `width` alone is a hint in
  * auto table layout; min + max stop the table from stretching the blank
  * strip to a data-column width.
+ *
+ * @public
  */
 export function columnGroupStubStyle(): CSSProperties {
   return {
@@ -100,6 +136,8 @@ export function columnGroupStubStyle(): CSSProperties {
 /**
  * Alignment for a group header. Omit / unknown → `"center"`, so existing
  * tables keep the hardcoded look; pass `"start"` or `"end"` to opt out.
+ *
+ * @public
  */
 export function groupedHeaderAlign(
   align?: GroupedHeaderAlign
@@ -112,6 +150,8 @@ export function groupedHeaderAlign(
  * Cluster for the collapse chevron + group title. A one-child group is only
  * as wide as that leaf, so without this the button wraps onto the line above
  * the caption — worst when every neighbor is also collapsed.
+ *
+ * @public
  */
 export function groupedHeaderLabelStyle(): CSSProperties {
   return {
@@ -127,6 +167,8 @@ export function groupedHeaderLabelStyle(): CSSProperties {
 /**
  * Style on one HTML group header cell: inset hairline while children sit
  * below, and the stub lock when the caption is hidden.
+ *
+ * @public
  */
 export function groupedHeaderCellStyle(
   cell: Readonly<{ rowSpan: number; cell: HeaderGroupCell }>,
@@ -142,7 +184,11 @@ export function groupedHeaderCellStyle(
   };
 }
 
-/** `column.group` as a root-to-leaf path. A string is one level. */
+/**
+ * `column.group` as a root-to-leaf path. A string is one level.
+ *
+ * @public
+ */
 export function columnGroupPath<TRow>(
   column: Pick<ColumnDef<TRow>, "group">
 ): readonly string[] {
@@ -150,12 +196,20 @@ export function columnGroupPath<TRow>(
   return typeof column.group === "string" ? [column.group] : column.group;
 }
 
-/** Stable id for a group path. */
+/**
+ * Stable id for a group path.
+ *
+ * @public
+ */
 export function columnGroupId(path: readonly string[]): string {
   return path.join(COLUMN_GROUP_ID_SEP);
 }
 
-/** Add or drop a group id in the collapsed set. */
+/**
+ * Add or drop a group id in the collapsed set.
+ *
+ * @public
+ */
 export function toggleCollapsedColumnGroup(
   collapsedIds: readonly string[],
   id: string
@@ -169,6 +223,8 @@ export function toggleCollapsedColumnGroup(
  * Every group-header row, top level first. Returns `null` when no visible
  * column declares a group. Contiguous same-path cells merge; a reorder that
  * breaks adjacency splits the group rather than teleporting it.
+ *
+ * @public
  */
 export function headerGroupRows<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -228,6 +284,8 @@ function headerGroupRowAt<TRow>(
  * The top group-header row. `null` when no visible column declares a group.
  * Groups are adjacency-based — if the user reorders columns apart, the
  * group SPLITS rather than lying about the layout.
+ *
+ * @public
  */
 export function headerGroupRow<TRow>(
   columns: readonly ColumnDef<TRow>[]
@@ -235,7 +293,11 @@ export function headerGroupRow<TRow>(
   return headerGroupRows(columns)?.[0] ?? null;
 }
 
-/** Visible group caption; `null` when the collapsed stub hides the name. */
+/**
+ * Visible group caption; `null` when the collapsed stub hides the name.
+ *
+ * @public
+ */
 export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null {
   if (cell.hideLabel) return null;
   return cell.label;
@@ -248,6 +310,8 @@ export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null {
  * an HTML table. A collapsed `collapsedRender` / stub group rowspans the
  * same way: no second header row, no line under the title. `collapsedKey`
  * keeps the child header, so that group stays two rows.
+ *
+ * @public
  */
 export type HtmlGroupedHeaderCell =
   | {
@@ -268,6 +332,8 @@ export type HtmlGroupedHeaderCell =
  * Header rows for HTML-table kits. `null` when no column declares a group.
  * Ant folds the same model into native `children`; this plan is that tree
  * flattened into `rowSpan` / `colSpan` so Mantine, MUI, and the rest match.
+ *
+ * @public
  */
 export function htmlGroupedHeaderPlan<TRow>(
   columns: readonly ColumnDef<TRow>[],
