@@ -24,6 +24,7 @@ import { useState } from "react";
 import { Button, Dropdown, Form } from "react-bootstrap";
 
 export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
+  /** Resolved labels, every key filled. */
   labels: ColumnMenuLabels & { actions: string; reorderRow: string };
   hasRowActions?: boolean;
   hasRowReorder?: boolean;
@@ -31,8 +32,11 @@ export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
   onAutoSizeColumn?: (key: string) => void;
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   onFilterColumn?: (key: string) => void;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
+  /** Writing direction, so the menu opens on the correct side. */
   dir?: Direction;
 }
 

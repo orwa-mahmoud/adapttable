@@ -3,6 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 import BTable from "react-bootstrap/Table";
 
 export interface TableProps extends ComponentProps<typeof BTable> {
+  /** Content rendered inside. */
   children?: ReactNode;
 }
 

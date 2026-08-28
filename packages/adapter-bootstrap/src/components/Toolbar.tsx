@@ -9,9 +9,11 @@ import Form from "react-bootstrap/Form";
 
 export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
   filtersMode: "header" | "popover" | "drawer";
+  /** The filter fields to render. */
   filters?: ReactNode;
   onCloseFilters: () => void;
   onClearFilters: () => void;
+  /** Class for the element. */
   className?: string;
 }
 
