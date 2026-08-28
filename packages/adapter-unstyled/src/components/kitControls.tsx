@@ -3,9 +3,7 @@
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
 import {
-  defaultFilterRegistry,
   filterLabel,
-  filterStateKeys,
   type TableSource,
   useHeaderFilterOverlay,
 } from "@adapttable/core";
@@ -36,6 +34,7 @@ import {
   GroupMoreButtonChrome,
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
+  hasActiveHeaderFilter,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -277,26 +276,13 @@ export function FilterHeaderControl<TRow>(
   return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
 }
 
-function headerFilterActive<TRow>(
-  props: FilterHeaderControlProps<TRow>
-): boolean {
-  return filterStateKeys(
-    props.def,
-    props.registry ?? defaultFilterRegistry
-  ).some((key) => {
-    const value = props.source.extra[key];
-    if (value == null || value === "") return false;
-    return !(Array.isArray(value) && value.length === 0);
-  });
-}
-
 /** Filters icon on the column header — the same field the Filters panel draws. */
 export function FilterHeaderTrigger<TRow>(
   props: Readonly<
     FilterHeaderControlProps<TRow> & { classNames?: DataTableClassNames }
   >
 ) {
-  const active = headerFilterActive(props);
+  const active = hasActiveHeaderFilter(props);
   const { open, setOpen, source, sessionProps, resetKey } =
     useHeaderFilterOverlay(props, { pointerDismiss: false });
   return (

@@ -224,6 +224,7 @@ export {
   type FilterHeaderSearchProps,
   type FilterHeaderSelectProps,
   type FilterHeaderSlots,
+  hasActiveHeaderFilter,
 } from "./filters/FilterHeaderRow";
 export {
   type FilterTreeBuilderProps,

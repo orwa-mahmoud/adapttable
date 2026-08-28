@@ -1756,6 +1756,9 @@ export function groupRowParts(kind: GroupRowKind): {
 export function GroupToggleSpacer(): ReactElement;
 
 // @public
+export function hasActiveHeaderFilter<TRow>(props: Readonly<Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">>): boolean;
+
+// @public
 export interface HeaderGroupCell {
     align?: GroupedHeaderAlign;
     collapsed: boolean;

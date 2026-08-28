@@ -8,7 +8,7 @@ import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { ColumnDef, TableLabels } from "../types";
 import { ColumnSpacer } from "../virtual/ColumnSpacer";
 import { defaultFilterRegistry } from "./filterBuiltins";
-import { type FilterDef, filterLabel } from "./filterDefs";
+import { type FilterDef, filterLabel, filterStateKeys } from "./filterDefs";
 import {
   type FilterFormSource,
   listFilterValues,
@@ -79,6 +79,33 @@ export interface FilterHeaderControlProps<TRow> {
    * Wired from the table's `closeHeaderFilterOnSelect`.
    */
   readonly closeOnSelect?: boolean;
+}
+
+/**
+ * Whether a header filter holds a value worth marking its column with.
+ *
+ * The emptiness rules are the whole point, and they are not obvious: a cleared
+ * text field leaves `""`, a cleared multi-select leaves `[]`, and a control
+ * nobody touched leaves `undefined`. None of those is a filter. A funnel that
+ * lights up for one is worse than no funnel at all, because a reader who trusts
+ * it goes looking for a filter that is not there.
+ *
+ * Every adapter drew this conclusion for itself with a byte-identical copy of
+ * these six lines; it belongs here, where it can be wrong in one place only.
+ */
+export function hasActiveHeaderFilter<TRow>(
+  props: Readonly<
+    Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">
+  >
+): boolean {
+  return filterStateKeys(
+    props.def,
+    props.registry ?? defaultFilterRegistry
+  ).some((key) => {
+    const value = props.source.extra[key];
+    if (value == null || value === "") return false;
+    return !(Array.isArray(value) && value.length === 0);
+  });
 }
 
 /** One option in a header Select or multi menu. */

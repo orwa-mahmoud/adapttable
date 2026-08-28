@@ -673,7 +673,10 @@ highlight, and never against `prefers-reduced-motion`. See
 
 **Filter internals.** `FILTER_TYPES` lists the built-in types, `filterLabel`
 resolves a filter's caption, `filterStateKeys` names the URL keys one filter
-owns, `FilterRuntime` is what `buildFilterRuntime` returns, and
+owns, `hasActiveHeaderFilter` says whether any of them holds a value worth
+marking the column with — a cleared text field leaves `""` and a cleared
+multi-select leaves `[]`, and neither is a filter — `FilterRuntime` is what
+`buildFilterRuntime` returns, and
 `ResolvedFilterOptions` is what `useFilterOptions` resolves.
 `isDeclarativeFilters` tells the array form from JSX. A form reads its values
 through `FilterFormSource` with `listFilterValues` and `scalarFilterText`.

@@ -2,12 +2,7 @@
  * Radix Themes kit controls — TextField / Button / IconButton / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import {
-  defaultFilterRegistry,
-  filterLabel,
-  filterStateKeys,
-  useHeaderFilterOverlay,
-} from "@adapttable/core";
+import { filterLabel, useHeaderFilterOverlay } from "@adapttable/core";
 import {
   BatchEditBarChrome,
   type BatchEditBarProps,
@@ -35,6 +30,7 @@ import {
   GroupMoreButtonChrome,
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
+  hasActiveHeaderFilter,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -225,24 +221,11 @@ export function FilterHeaderControl<TRow>(
   return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
 }
 
-function headerFilterActive<TRow>(
-  props: FilterHeaderControlProps<TRow>
-): boolean {
-  return filterStateKeys(
-    props.def,
-    props.registry ?? defaultFilterRegistry
-  ).some((key) => {
-    const value = props.source.extra[key];
-    if (value == null || value === "") return false;
-    return !(Array.isArray(value) && value.length === 0);
-  });
-}
-
 /** Funnel on the column header — the same field the Filters panel draws. */
 export function FilterHeaderTrigger<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
-  const active = headerFilterActive(props);
+  const active = hasActiveHeaderFilter(props);
   const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(props);
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
