@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -11,6 +11,7 @@ interface Shift {
   startsAt: string;
   reviewedAt: string;
   tags: string[];
+  team: string;
 }
 
 const ROWS: Shift[] = [
@@ -21,6 +22,7 @@ const ROWS: Shift[] = [
     startsAt: "09:30",
     reviewedAt: "2026-08-13T14:05",
     tags: ["urgent"],
+    team: "core",
   },
 ];
 
@@ -41,6 +43,19 @@ const COLS: ColumnDef<Shift>[] = [
     editor: {
       type: "multi-select",
       options: ["urgent", "billable", "remote"],
+    },
+  },
+  // Appended, so every open(index) above keeps the cell it means.
+  {
+    key: "team",
+    header: "Team",
+    editable: true,
+    editor: {
+      type: "select",
+      options: [
+        { value: "core", label: "Core" },
+        { value: "web", label: "Web" },
+      ],
     },
   },
 ];
@@ -151,6 +166,23 @@ describe("editor set (mui)", () => {
    * names, so the control is reached through the part rather than being it.
    */
   const multiSelect = () => editor().querySelector("select")!;
+
+  it("commits a single-select through the kit's own Select", async () => {
+    const { onCellEdit } = table();
+    open(5);
+    // MUI renders `TextField select` as its own Select: a combobox that opens a
+    // listbox, not a native <select> with an onChange.
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Edit cell" }));
+    fireEvent.click(screen.getByRole("option", { name: "Web" }));
+    // A select holds its draft until the edit is committed, the same as a text
+    // editor: choosing is not saving.
+    fireEvent.keyDown(screen.getByRole("combobox", { name: "Edit cell" }), {
+      key: "Enter",
+    });
+    await settleCommit();
+
+    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "team", "web");
+  });
 
   it("commits a multi-select as the array it chose", async () => {
     const { onCellEdit } = table();

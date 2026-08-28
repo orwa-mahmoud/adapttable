@@ -12,6 +12,7 @@ interface Shift {
   startsAt: string;
   reviewedAt: string;
   tags: string[];
+  team: string;
 }
 
 const ROWS: Shift[] = [
@@ -22,6 +23,7 @@ const ROWS: Shift[] = [
     startsAt: "09:30",
     reviewedAt: "2026-08-13T14:05",
     tags: ["urgent"],
+    team: "core",
   },
 ];
 
@@ -42,6 +44,19 @@ const COLS: ColumnDef<Shift>[] = [
     editor: {
       type: "multi-select",
       options: ["urgent", "billable", "remote"],
+    },
+  },
+  // Appended, so every open(index) above keeps the cell it means.
+  {
+    key: "team",
+    header: "Team",
+    editable: true,
+    editor: {
+      type: "select",
+      options: [
+        { value: "core", label: "Core" },
+        { value: "web", label: "Web" },
+      ],
     },
   },
 ];
@@ -150,6 +165,24 @@ describe("editor set (chakra)", () => {
       "reviewedAt",
       "2026-08-14T08:00"
     );
+  });
+
+  it("renders the single-select editor as the kit's own Select", () => {
+    table();
+    open(5);
+
+    // Committing through this kit's Select cannot be driven in jsdom — it needs
+    // the browser pointer and focus machinery the kit's own overlay relies on,
+    // which is why the filter-overlay suite skips the same gestures here. What
+    // jsdom can prove is that the editor IS the kit's Select and offers the
+    // options the column declared.
+    const trigger = screen.getByRole("combobox", { name: "Edit cell" });
+    fireEvent.click(trigger);
+
+    // Named rather than counted: this kit renders other selects' options into
+    // the same document, so a total would not be about this editor.
+    expect(screen.getByRole("option", { name: "Core" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Web" })).toBeInTheDocument();
   });
 
   it("commits a multi-select as the array it chose", async () => {

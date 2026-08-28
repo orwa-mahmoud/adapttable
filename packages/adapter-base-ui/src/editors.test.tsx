@@ -11,6 +11,7 @@ interface Shift {
   startsAt: string;
   reviewedAt: string;
   tags: string[];
+  team: string;
 }
 
 const ROWS: Shift[] = [
@@ -21,6 +22,7 @@ const ROWS: Shift[] = [
     startsAt: "09:30",
     reviewedAt: "2026-08-13T14:05",
     tags: ["urgent"],
+    team: "core",
   },
 ];
 
@@ -41,6 +43,19 @@ const COLS: ColumnDef<Shift>[] = [
     editor: {
       type: "multi-select",
       options: ["urgent", "billable", "remote"],
+    },
+  },
+  // Appended, so every open(index) above keeps the cell it means.
+  {
+    key: "team",
+    header: "Team",
+    editable: true,
+    editor: {
+      type: "select",
+      options: [
+        { value: "core", label: "Core" },
+        { value: "web", label: "Web" },
+      ],
     },
   },
 ];
@@ -149,6 +164,24 @@ describe("editor set (base-ui)", () => {
 
   /** This kit's select holds one value, so several values is a checkbox group. */
   const tag = (name: string) => screen.getByRole("checkbox", { name });
+
+  it("commits a single-select through the kit's own Select", async () => {
+    const { onCellEdit } = table();
+    open(5);
+    fireEvent.click(screen.getByRole("combobox", { name: "Edit cell" }));
+    // Base UI commits an item on the click that FOLLOWS a pointer press on it:
+    // a bare click on an unhighlighted item is ignored by design.
+    const web = screen.getByRole("option", { name: "Web" });
+    fireEvent.pointerDown(web);
+    fireEvent.click(web);
+    // Some kits close the editor on the pick itself; where the trigger is
+    // still there, Enter is what confirms the draft.
+    const stillOpen = screen.queryByRole("combobox", { name: "Edit cell" });
+    if (stillOpen) fireEvent.keyDown(stillOpen, { key: "Enter" });
+    await settleCommit();
+
+    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "team", "web");
+  });
 
   it("commits a multi-select as the array it chose", async () => {
     const { onCellEdit } = table();

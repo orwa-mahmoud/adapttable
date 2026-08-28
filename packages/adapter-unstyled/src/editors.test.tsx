@@ -11,6 +11,7 @@ interface Shift {
   startsAt: string;
   reviewedAt: string;
   tags: string[];
+  team: string;
 }
 
 const ROWS: Shift[] = [
@@ -21,6 +22,7 @@ const ROWS: Shift[] = [
     startsAt: "09:30",
     reviewedAt: "2026-08-13T14:05",
     tags: ["urgent"],
+    team: "core",
   },
 ];
 
@@ -41,6 +43,19 @@ const COLS: ColumnDef<Shift>[] = [
     editor: {
       type: "multi-select",
       options: ["urgent", "billable", "remote"],
+    },
+  },
+  // Appended, so every open(index) above keeps the cell it means.
+  {
+    key: "team",
+    header: "Team",
+    editable: true,
+    editor: {
+      type: "select",
+      options: [
+        { value: "core", label: "Core" },
+        { value: "web", label: "Web" },
+      ],
     },
   },
 ];
@@ -144,6 +159,19 @@ describe("editor set (unstyled)", () => {
       "reviewedAt",
       "2026-08-14T08:00"
     );
+  });
+
+  it("commits a single-select through the native select", async () => {
+    const { onCellEdit } = table();
+    open(5);
+    expect(editor().tagName.toLowerCase()).toBe("select");
+    fireEvent.change(editor(), { target: { value: "web" } });
+    // A select holds its draft until the edit is committed: choosing is not
+    // saving, the same as a text editor.
+    fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
+
+    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "team", "web");
   });
 
   it("commits a multi-select as the array it chose", async () => {
