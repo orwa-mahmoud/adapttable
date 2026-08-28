@@ -278,7 +278,7 @@ export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, op
     registry?: FilterTypeRegistry;
 }): FilterFormSource<TRow>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type BodyCell<TRow> = BodyCell_2<TRow>;
 
 // @public @deprecated
@@ -483,7 +483,6 @@ export interface CellEditTarget {
 
 // @public
 export interface CellElementProps extends Props {
-    // (undocumented)
     "data-sort-index"?: number;
     role: string;
     style?: CSSProperties;
@@ -818,7 +817,7 @@ export const columnMenuActions: typeof columnMenuActions_2;
 // @public
 export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string;
 
-// @public (undocumented)
+// @public
 export function columnMenuRows<TRow>(allColumns: readonly ColumnDef<TRow>[], layout: UseColumnLayoutResult<TRow>): ColumnMenuRow<TRow>[];
 
 // @public
@@ -1218,14 +1217,12 @@ export interface EditableColumnLike<TRow = unknown> {
         bivarianceHack(row: TRow): string;
     }["bivarianceHack"];
     key: string;
-    // (undocumented)
     parseValue?: {
         bivarianceHack(draft: string, row: TRow): unknown;
     }["bivarianceHack"];
     sortValue?: {
         bivarianceHack(row: TRow): SortableValue;
     }["bivarianceHack"];
-    // (undocumented)
     validate?: {
         bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
     }["bivarianceHack"];
@@ -1621,7 +1618,7 @@ export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra
 // @public @deprecated
 export type FilterHeaderClassNames = FilterHeaderClassNames$1;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type FilterHeaderRowProps<TRow> = FilterHeaderRowProps$1<TRow>;
 
 // @public
@@ -1664,7 +1661,7 @@ export function filterStateKeys(def: Pick<FilterDef, "key" | "type">, registry?:
 // @public
 export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>): string;
 
-// @public (undocumented)
+// @public
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
 
 // @public
@@ -1686,23 +1683,20 @@ export function filterTypeOps(def: Pick<FilterDef, "type">, registry: FilterType
 
 // @public
 export interface FilterTypeRegistry {
-    // @deprecated (undocumented)
+    // @deprecated
     extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry;
     get(type: string): FilterTypeSpec | undefined;
     has(type: string): boolean;
-    // @deprecated (undocumented)
+    // @deprecated
     register(spec: FilterTypeSpec): FilterTypeRegistry;
     types(): readonly string[];
 }
 
 // @public
 export interface FilterTypeSpec {
-    // (undocumented)
     chips<TRow>(def: FilterDef<TRow>): Record<string, ChipLabelResolver>;
-    // (undocumented)
     conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition): ExtraFilters;
     readonly defaultOp: string;
-    // (undocumented)
     match<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, row: TRow): boolean;
     readonly ops: readonly string[];
     render?<TRow>(props: FilterWidgetRenderProps<TRow>): ReactElement;
@@ -1774,7 +1768,7 @@ export function formatFilterChip(fieldLabel: string, opWord: string, value?: str
 // @public
 export function formatGroupBy(value: GroupByInput): string | undefined;
 
-// @public (undocumented)
+// @public
 export function formatGroupLabel(value: unknown, blankLabel?: string): string;
 
 // @public
@@ -1996,9 +1990,8 @@ export function hasEditableColumns(columns: readonly EditableColumnLike[]): bool
 // @public
 export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
 
-// @public (undocumented)
+// @public
 export interface HeaderFilterSessionProps {
-    // (undocumented)
     readonly [SESSION_ATTR]: string;
 }
 
@@ -2837,7 +2830,6 @@ export interface RowEditingState<TRow> {
 
 // @public
 export interface RowElementProps extends Props {
-    // (undocumented)
     "aria-selected"?: boolean;
     "data-adapttable-part": "row";
     "data-index": number;
@@ -2948,7 +2940,7 @@ export interface RowReorderLabels {
 // @public @deprecated
 export const rowReorderSignature: typeof rowReorderSignature_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type RowReorderState<TRow> = RowReorderState_2<TRow>;
 
 // @public
@@ -3023,7 +3015,6 @@ export const SEARCH_DEBOUNCE_MS = 300;
 
 // @public
 export interface SearchInputElementProps extends Props {
-    // (undocumented)
     "aria-label": string;
     onChange: (event: {
         currentTarget: {
@@ -3130,9 +3121,7 @@ export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
 export interface SortButtonElementProps extends Props {
-    // (undocumented)
     "aria-label": string;
-    // (undocumented)
     "data-sort-index"?: number;
     disabled: boolean;
     onClick: (event?: {
@@ -3249,7 +3238,6 @@ export interface TableEditHistoryProps<TRow> {
 
 // @public
 export interface TableElementProps extends Props {
-    // (undocumented)
     "aria-label": string;
     dir?: Direction;
     role: string;
@@ -3715,7 +3703,7 @@ export interface UpsertPatch<TRow> {
 // @public
 export function upsertRow<TRow>(row: TRow): UpsertPatch<TRow>;
 
-// @public (undocumented)
+// @public
 export interface UrlStateAdapter {
     getSearch(): string;
     setSearch(search: string, options?: {
@@ -3724,7 +3712,7 @@ export interface UrlStateAdapter {
     subscribe(onChange: () => void): () => void;
 }
 
-// @public (undocumented)
+// @public
 export function useActiveFilterChips(input: UseActiveFilterChipsOptions): ActiveFilterChip[];
 
 // @public
@@ -3895,7 +3883,6 @@ export interface UseDataTableResult<TRow> {
     getRowProps: (row: TRow, index: number, props?: Props) => RowElementProps;
     getSearchInputProps: (props?: Props) => SearchInputElementProps;
     getSortButtonProps: (column: ColumnDef<TRow>, props?: Props) => SortButtonElementProps;
-    // (undocumented)
     getTableProps: (props?: Props) => TableElementProps;
     isEmpty: boolean;
     isMobile: boolean;
@@ -3978,7 +3965,7 @@ export interface UseFilterTreeChipsOptions<TRow> {
     readonly tree: QueryFilterGroup | undefined;
 }
 
-// @public (undocumented)
+// @public
 export function useFilterTriggerToggle(open: boolean, setOpen: (next: boolean | ((current: boolean) => boolean)) => void): FilterTriggerToggle;
 
 // @public
@@ -4293,7 +4280,7 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
 // @public
 export function useShortcuts(options: UseShortcutsOptions): void;
 
-// @public (undocumented)
+// @public
 export function useTableChrome<TRow>(props: BaseDataTableProps<TRow>): TableChrome<TRow>;
 
 // @public

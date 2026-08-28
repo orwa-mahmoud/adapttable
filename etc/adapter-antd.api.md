@@ -162,7 +162,7 @@ export { CustomCellEditorRender }
 
 export { DataModeProps }
 
-// @public (undocumented)
+// @public
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.Element;
 
 // @public

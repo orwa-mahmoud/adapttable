@@ -66,7 +66,9 @@ export interface ColumnReorderKeyProps {
   role: "button";
   /** Always 0 — the grip is reachable by Tab. */
   tabIndex: 0;
+  /** The grip's accessible name, naming the column it moves. */
   "aria-label": string;
+  /** Marks the element as a reorder grip, for styling and tests. */
   "data-adapttable-grip": "";
   /** Moves the column on the arrow keys. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;

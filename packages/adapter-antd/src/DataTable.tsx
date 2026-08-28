@@ -1557,6 +1557,15 @@ function useAntdGridState<TRow>(
   };
 }
 
+/**
+ * The Ant Design table. Pass rows and columns — or a `query` (server), or a
+ * prebuilt `source` — to get a fully styled, sortable, filterable, paginated
+ * table with selection, bulk actions, RTL and dark mode.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);

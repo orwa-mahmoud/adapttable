@@ -58,6 +58,7 @@ export interface SparklineColumnSpec<TRow> {
   width?: number;
   /** Height in pixels. */
   height?: number;
+  /** Stroke or bar fill. Defaults to `currentColor` so the kit theme wins. */
   color?: string;
   /** Override the default numeric summary. */
   label?: (values: readonly number[], row: TRow) => string;

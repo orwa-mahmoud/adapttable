@@ -487,6 +487,8 @@ export const showAllColumns = showAllColumnsImpl;
 export const unpinAllColumns = unpinAllColumnsImpl;
 
 /**
+ * One body cell a kit renders — covered cells never appear.
+ *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
  * @public
@@ -558,6 +560,8 @@ export const rowReorderDropStyle = rowReorderDropStyleImpl;
  */
 export const rowReorderSignature = rowReorderSignatureImpl;
 /**
+ * Row-reorder state: what is being dragged and where it may land.
+ *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
  * @public
@@ -623,6 +627,8 @@ export type EditableCellSlots = EditableCellSlotsType;
  */
 export type FilterHeaderClassNames = FilterHeaderClassNamesType;
 /**
+ * Props for the filter row under the column headers.
+ *
  * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
  *
  * @public

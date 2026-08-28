@@ -131,9 +131,11 @@ export interface EditableColumnLike<TRow = unknown> {
   editor?: CellEditor;
   /** Turns the stored value into the draft text the editor starts with. */
   editValue?: { bivarianceHack(row: TRow): string }["bivarianceHack"];
+  /** Turns the draft text back into the stored value's type. */
   parseValue?: {
     bivarianceHack(draft: string, row: TRow): unknown;
   }["bivarianceHack"];
+  /** Rejects a value with a message; may be async. */
   validate?: {
     bivarianceHack(
       value: unknown,

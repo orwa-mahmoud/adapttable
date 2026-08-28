@@ -37,6 +37,7 @@ import { devWarn } from "../utils/devWarn";
  * @public
  */
 export interface FeaturePatch<TRow = unknown> {
+  /** Any other prop a feature wants to set on the table. */
   readonly [key: string]: unknown;
   /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;

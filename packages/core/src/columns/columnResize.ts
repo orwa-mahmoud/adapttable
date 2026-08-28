@@ -27,6 +27,7 @@ export interface ColumnResizeHandleProps {
   role: "button";
   /** Tab order for the element. */
   tabIndex: 0;
+  /** The handle's accessible name, naming the column it resizes. */
   "aria-label": string;
   /** Starts the drag. */
   onPointerDown: (event: PointerEvent<HTMLElement>) => void;

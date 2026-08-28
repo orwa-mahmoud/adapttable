@@ -5,6 +5,7 @@
 import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
 import { isFilterGroup } from "../source/queryContract";
 
+/** One node in a filter tree: a single condition, or a group of them. */
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
 
 /**

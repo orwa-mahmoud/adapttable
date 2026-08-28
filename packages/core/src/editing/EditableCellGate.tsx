@@ -153,6 +153,7 @@ export interface EditableCellActivateProps {
   readonly activateRef: (node: HTMLButtonElement | null) => void;
   /** What the cell shows while idle. */
   readonly display: ReactNode;
+  /** Opens the editor on a double click. */
   readonly onDoubleClick: (event: {
     preventDefault: () => void;
     stopPropagation: () => void;

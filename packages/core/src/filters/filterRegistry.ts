@@ -59,8 +59,11 @@ export interface FilterTypeSpec {
   readonly urlNumberKeys?: boolean;
   /** State keys this type owns for a definition — what the URL persists. */
   stateKeys(def: Pick<FilterDef, "key" | "type">): string[];
+  /** Whether a row passes this filter. */
   match<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, row: TRow): boolean;
+  /** Chip labels for this filter's active state, by state key. */
   chips<TRow>(def: FilterDef<TRow>): Record<string, ChipLabelResolver>;
+  /** Turns one tree condition into the flat filter values the table reads. */
   conditionToExtra<TRow>(
     def: FilterDef<TRow>,
     condition: QueryCondition
@@ -82,11 +85,15 @@ export interface FilterTypeRegistry {
   /** Every registered type name. */
   types(): readonly string[];
   /**
+   * Returns a registry with this spec added.
+   *
    * @deprecated Register with `TableFeatureHost.registerFilterType` in
    * `feature.setup(host)` instead. Removed at v3.
    */
   register(spec: FilterTypeSpec): FilterTypeRegistry;
   /**
+   * Returns a registry with one type's spec patched.
+   *
    * @deprecated Use `TableFeatureHost.extendFilterType` in
    * `feature.setup(host)` instead. Removed at v3.
    */
@@ -108,10 +115,12 @@ class MapRegistry implements FilterTypeRegistry {
     return [...this.specs.keys()];
   }
 
+  /** Returns a registry with this spec added. */
   register(spec: FilterTypeSpec): FilterTypeRegistry {
     return withFilterType(this, spec);
   }
 
+  /** Returns a registry with one type's spec patched. */
   extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry {
     return withExtendedFilterType(this, type, patch);
   }

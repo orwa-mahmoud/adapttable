@@ -15,7 +15,9 @@ import { readRangeWidget } from "./rangeWidget";
 
 const SESSION_ATTR = "data-adapttable-header-filter";
 
+/** Props that keep one header filter's overlay session together. */
 export interface HeaderFilterSessionProps {
+  /** Ties the trigger and its overlay to one editing session. */
   readonly [SESSION_ATTR]: string;
 }
 

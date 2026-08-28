@@ -20,6 +20,14 @@ function renderNoAutoForm() {
   return null;
 }
 
+/**
+ * The Bootstrap table. Pass rows and columns — or a `query` (server), or a
+ * prebuilt `source` — to get a styled, sortable, filterable, paginated table.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
 export function DataTable<TRow>(
   incoming: Readonly<DataTableProps<TRow>>
 ): ReactNode {

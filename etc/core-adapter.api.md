@@ -363,9 +363,7 @@ export interface ColumnMenuRow<TRow> {
 
 // @public
 export interface ColumnReorderKeyProps {
-    // (undocumented)
     "aria-label": string;
-    // (undocumented)
     "data-adapttable-grip": "";
     onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
     role: "button";
@@ -374,7 +372,6 @@ export interface ColumnReorderKeyProps {
 
 // @public
 export interface ColumnResizeHandleProps {
-    // (undocumented)
     "aria-label": string;
     onDoubleClick: (event: MouseEvent_2<HTMLElement>) => void;
     onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
@@ -741,7 +738,6 @@ export interface DesktopRowWiring<TRow> {
 // @public
 export interface DesktopTableAssembly<TRow> {
     bodySlots: readonly DesktopBodySlot<TRow>[];
-    // (undocumented)
     callbacks: {
         onToggleSelect: (id: string) => void;
         onToggleExpand: (id: string) => void;
@@ -772,7 +768,6 @@ export interface DesktopTableAssembly<TRow> {
     model: TableRenderModel<TRow>;
     pin: DesktopTablePin;
     resizeHandleStyle: CSSProperties;
-    // (undocumented)
     scroll: {
         overflowing: boolean;
         boxStyle: CSSProperties | undefined;
@@ -831,7 +826,6 @@ export interface EditableCellActivateProps {
     readonly onClick: (event: {
         stopPropagation: () => void;
     }) => void;
-    // (undocumented)
     readonly onDoubleClick: (event: {
         preventDefault: () => void;
         stopPropagation: () => void;
@@ -2073,7 +2067,7 @@ export function shallowEqualByKeys<T>(keys: readonly (keyof T)[], prev: Readonly
 // @public
 export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected", "expanded", "size", "dir", "columns", "columnWidths", "pinSignature", "className", "labels", "hasSelection", "expandable", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "spanSignature", "hasRowClick", "columnSpan", "gridFocus", "treeEntry", "treeColumnKey", "rowActionsLayout", "renderRowActions", "cellSpanAppearance"];
 
-// @public (undocumented)
+// @public
 export interface SharedTableRenderProps<TRow> {
     cardSetSize?: number;
     cellSpanAppearance?: CellSpanAppearance;
@@ -2442,7 +2436,7 @@ export interface TreeToggleSlots {
     readonly Button: (props: TreeToggleButtonProps) => ReactNode;
 }
 
-// @public (undocumented)
+// @public
 export function undoRedoToolbar<TRow>(wanted: boolean | undefined, history: EditHistoryState<TRow>, labels: TableLabels): Partial<ToolbarChromeProps<TRow>>;
 
 // @public
@@ -2678,7 +2672,7 @@ export interface ViewControlsToolbar {
     onToggleFullscreen?: () => void;
 }
 
-// @public (undocumented)
+// @public
 export function viewControlsToolbar(props: {
     densityChooser?: boolean;
     density?: "comfortable" | "compact";

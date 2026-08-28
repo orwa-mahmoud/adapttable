@@ -130,6 +130,7 @@ export interface UseDataTableResult<TRow> {
   source: TableSource<TRow>;
 
   /* ── Prop-getters (merge caller overrides) ───────────────────────── */
+  /** Props for the `<table>` element, its role and accessible name included. */
   getTableProps: (props?: Props) => TableElementProps;
   /** Props for the header row. */
   getHeaderRowProps: (props?: Props) => Props;
@@ -180,6 +181,7 @@ export interface TableElementProps extends Props {
   role: string;
   /** Writing direction, present only when the table sets it. */
   dir?: Direction;
+  /** The table's accessible name. */
   "aria-label": string;
 }
 
@@ -199,6 +201,7 @@ export interface RowElementProps extends Props {
   "data-row-id": string;
   /** The row's position in the rendered window. */
   "data-index": number;
+  /** Selection state, present only while selection is on. */
   "aria-selected"?: boolean;
 }
 
@@ -214,7 +217,9 @@ export interface SortButtonElementProps extends Props {
   disabled: boolean;
   /** Called when pressed. */
   onClick: (event?: { shiftKey?: boolean }) => void;
+  /** 1-based place in a multi-column sort, present only while sorted. */
   "data-sort-index"?: number;
+  /** The sort control's accessible name. */
   "aria-label": string;
 }
 
@@ -228,6 +233,7 @@ export interface CellElementProps extends Props {
   role: string;
   /** Inline style for the element. */
   style?: CSSProperties;
+  /** 1-based place in a multi-column sort, present only while sorted. */
   "data-sort-index"?: number;
 }
 
@@ -245,6 +251,7 @@ export interface SearchInputElementProps extends Props {
   value: string;
   /** Placeholder text. */
   placeholder: string;
+  /** The search box's accessible name. */
   "aria-label": string;
   /** Called with the new value. */
   onChange: (event: { currentTarget: { value: string } }) => void;

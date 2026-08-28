@@ -70,7 +70,7 @@ export { ConfirmRequest }
 
 export { createFilterRegistry }
 
-// @public (undocumented)
+// @public
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): ReactNode;
 
 // @public

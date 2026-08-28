@@ -55,6 +55,12 @@ import {
   type VirtualTableRow,
 } from "./virtual/useTableVirtualization";
 
+/**
+ * Everything a kit's desktop table and mobile cards both receive. The render
+ * model resolves it once, so the two layouts cannot disagree.
+ *
+ * @public
+ */
 export interface SharedTableRenderProps<TRow> {
   /** The resolved table model from `useDataTable`. */
   table: UseDataTableResult<TRow>;

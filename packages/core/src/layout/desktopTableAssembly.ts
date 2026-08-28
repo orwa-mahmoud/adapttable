@@ -513,6 +513,7 @@ export interface DesktopTableAssembly<TRow> {
   };
   /** Everything pinning needs: what sticks, where, and at what offset. */
   pin: DesktopTablePin;
+  /** The scroll box: whether it overflows, its style, and its ref. */
   scroll: {
     overflowing: boolean;
     boxStyle: CSSProperties | undefined;
@@ -524,6 +525,7 @@ export interface DesktopTableAssembly<TRow> {
   tableProps: ReturnType<UseDataTableResult<TRow>["getTableProps"]>;
   /** Grid role and ARIA dimensions, absent when the table is not a grid. */
   gridProps: Record<string, unknown> | undefined;
+  /** Row-level handlers an adapter wires to its markup. */
   callbacks: {
     onToggleSelect: (id: string) => void;
     onToggleExpand: (id: string) => void;

@@ -245,6 +245,7 @@ export function groupValueKey(value: unknown): string {
   }
 }
 
+/** Render a group's value as its header caption. */
 export function formatGroupLabel(
   value: unknown,
   blankLabel = "(blank)"

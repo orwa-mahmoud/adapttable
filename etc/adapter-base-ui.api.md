@@ -303,7 +303,7 @@ export type SavedViewsLabels = Pick<Required<TableLabels>, "savedViews" | "saveV
 // @public
 export function SavedViewsMenu(input: Readonly<SavedViewsMenuProps>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export interface SavedViewsMenuProps {
     accentColor?: BaseUiAccentColor;
     labels: SavedViewsLabels;

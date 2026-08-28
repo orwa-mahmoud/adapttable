@@ -93,6 +93,7 @@ function pushChip(
   chips.push({ key: `${key}:${entry}`, label, onRemove });
 }
 
+/** Chips for every active filter, each with the action that clears it. */
 export function useActiveFilterChips({
   values,
   labels,

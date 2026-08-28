@@ -69,7 +69,6 @@ export type FeatureApplyInput<TRow = unknown> = object & {
 
 // @public
 export interface FeaturePatch<TRow = unknown> {
-    // (undocumented)
     readonly [key: string]: unknown;
     readonly __row?: TRow;
 }

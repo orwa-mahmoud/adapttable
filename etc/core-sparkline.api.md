@@ -19,7 +19,6 @@ export function sparklineColumn<TRow>(spec: SparklineColumnSpec<TRow>): ColumnDe
 
 // @public
 export interface SparklineColumnSpec<TRow> {
-    // (undocumented)
     color?: string;
     column?: Partial<ColumnDef<TRow>>;
     header?: ReactNode;
