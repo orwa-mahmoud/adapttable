@@ -472,7 +472,7 @@ export interface TableQueryParams {
   sortBy?: string;
   /** Direction for `sortBy`. */
   sortDir?: SortDirection;
-  /** Single-level row grouping column key (URL-synced; frontend chrome only). */
+  /** Row grouping keys, comma-separated (URL-synced; frontend chrome only). */
   groupBy?: string;
   /**
    * The active filter values, namespaced so a user filter named like a

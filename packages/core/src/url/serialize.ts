@@ -44,7 +44,7 @@ export const PARAM_SORT_BY = "sortBy";
 export const PARAM_SORT_DIR = "sortDir";
 /** Multi-sort chain: `sort=name:asc,age:desc` (keys percent-encoded). */
 export const PARAM_SORT = "sort";
-/** Single-level row grouping column key. */
+/** Row grouping keys, comma-separated — outermost first. */
 export const PARAM_GROUP_BY = "groupBy";
 /** Keys under this prefix flow through as-is into the `extra` bag. */
 export const FILTER_PREFIX = "f_";

@@ -1,4 +1,4 @@
-# React table row grouping — group rows with aggregates & expand/collapse
+# React table row grouping — nested groups, aggregates & expand/collapse
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`groupBy="role"` + `groupAggregates`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -9,9 +9,10 @@ totals — on a mobile card, where there are no columns to align to, the same
 numbers appear captioned by their column instead. A custom renderer can place
 them the same way with `groupRowLayout` and `groupAggregateEntries`.
 
-Group rows by one column with `groupBy` and optional per-group subtotals via
-`groupAggregates` — the **same mapper signature as `summaryRow`**. Omit
-`groupBy` and the table never inserts group header rows (package DNA: opt-in).
+Group rows with `groupBy` — one column key, or an ordered list to nest — and
+add optional per-group subtotals via `groupAggregates`, the **same mapper
+signature as `summaryRow`**. Omit `groupBy` and the table never inserts group
+header rows (package DNA: opt-in).
 
 ## Paging groups, and paging inside one
 
@@ -332,8 +333,10 @@ export function People() {
 
 - **Opt-in.** Pass `groupBy` (a column key) or set `source.groupBy` via
   `useFrontendData` / URL state — without it, grouping stays fully dormant.
-- **Single level.** One grouping column at a time (no nested groups, no
-  drag-to-group panel).
+- **One key or a list.** `groupBy="team"` groups one level;
+  `groupBy={["team", "status"]}` nests each key inside the one before it, to
+  any depth. There is no drag-to-group panel — the keys come from your code or
+  the URL.
 - **Frontend tier only.** Grouping needs the full filtered row set in memory
   (`allFilteredRows`). Server-paginated sources log a dev-mode warning and
   ignore grouping — see [Data tiers](./data-tiers.md).
@@ -411,8 +414,8 @@ export contains exactly what you see, and the rows-per-page control hides
 
 ## Headless grouping
 
-The grouping model is exported so custom tables can render the same
-single-level flat structure the adapters do:
+The grouping model is exported so custom tables can render the same flat
+structure the adapters do, at one level or nested:
 
 | Export                                         | Purpose                                                                                        |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -430,8 +433,8 @@ single-level flat structure the adapters do:
   on the column key — never the JSX `accessor`.
 - Works on desktop rows and mobile cards, LTR and RTL, with and without
   `virtualize` (virtual windows count collapsed groups as one row).
-- Out of scope (by design): multi-level nesting, pivot mode, drag-to-group,
-  and Excel-style aggregation pickers.
+- Out of scope (by design): a drag-to-group panel and Excel-style aggregation
+  pickers. Pivoting is a separate model — see [Pivot](./pivot.md).
 - Ant Design maps group headers onto its high-level `Table` via custom row
   rendering; every other kit renders native group header rows/cards.
 

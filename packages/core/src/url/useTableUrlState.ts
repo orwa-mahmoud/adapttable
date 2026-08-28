@@ -85,7 +85,7 @@ export interface UseTableUrlStateResult extends TableStateMutators {
   sortBy: string | undefined;
   /** Active sort direction, if any. */
   sortDir: SortDirection | undefined;
-  /** Active single-level row-grouping column key, if any. */
+  /** Active row-grouping keys, comma-separated, if any. */
   groupBy: string | undefined;
   /** The extra-filter bag. */
   extra: ExtraFilters;

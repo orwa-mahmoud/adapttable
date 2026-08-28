@@ -5,7 +5,7 @@ import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
 
 /**
- * One visual row in a single-level grouped body: a group header, or a leaf
+ * One visual row in a grouped body: a group header at some depth, or a leaf
  * data row belonging to a group. Adapters switch on `kind`.
  *
  * @internal

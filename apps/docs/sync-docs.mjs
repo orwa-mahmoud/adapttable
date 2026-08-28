@@ -128,7 +128,7 @@ export const DESCRIPTIONS = {
   "cell-navigation.md":
     "Arrow-key cell navigation for a React table: one tab stop, correct ARIA grid semantics, absolute row indices under virtualization, and spoken announcements.",
   "row-grouping.md":
-    "Single-level React table row grouping — opt-in groupBy, per-group aggregates sharing the summaryRow mapper, expand/collapse, frontend tier only.",
+    "Nested React table row grouping — groupBy takes one key or an ordered list, per-group aggregates sharing the summaryRow mapper, expand/collapse, frontend tier only.",
   "column-management.md":
     "Let users show, hide, reorder, pin and resize columns — one prop per capability, persisted to the URL or localStorage.",
   "saved-views.md":

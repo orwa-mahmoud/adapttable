@@ -199,7 +199,7 @@ Hosted at **[orwa-mahmoud.github.io/adapttable](https://orwa-mahmoud.github.io/a
 - [x] Row reordering — opt-in `onRowReorder`, keyboard grab, dataset indices
 - [x] Row pinning — sticky top and bottom rows, `{ top, bottom }` id lists
 - [x] Row and column spanning — `getCellSpan`, covered cells omitted
-- [x] Row grouping — single-level `groupBy` with per-group aggregates
+- [x] Row grouping — `groupBy` at any depth, with per-group aggregates
 - [x] CSV export
 - [x] `v1.0` — stable, semver-committed public API
 - [x] `v2.0` — one name per concept across all eight adapters; React 18 & 19 proven in CI

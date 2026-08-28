@@ -3629,7 +3629,7 @@ because getting it wrong is invisible on screen.
 
 ---
 
-# React table row grouping — group rows with aggregates & expand/collapse
+# React table row grouping — nested groups, aggregates & expand/collapse
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`groupBy="role"` + `groupAggregates`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -3640,9 +3640,10 @@ totals — on a mobile card, where there are no columns to align to, the same
 numbers appear captioned by their column instead. A custom renderer can place
 them the same way with `groupRowLayout` and `groupAggregateEntries`.
 
-Group rows by one column with `groupBy` and optional per-group subtotals via
-`groupAggregates` — the **same mapper signature as `summaryRow`**. Omit
-`groupBy` and the table never inserts group header rows (package DNA: opt-in).
+Group rows with `groupBy` — one column key, or an ordered list to nest — and
+add optional per-group subtotals via `groupAggregates`, the **same mapper
+signature as `summaryRow`**. Omit `groupBy` and the table never inserts group
+header rows (package DNA: opt-in).
 
 ## Paging groups, and paging inside one
 
@@ -3963,8 +3964,10 @@ export function People() {
 
 - **Opt-in.** Pass `groupBy` (a column key) or set `source.groupBy` via
   `useFrontendData` / URL state — without it, grouping stays fully dormant.
-- **Single level.** One grouping column at a time (no nested groups, no
-  drag-to-group panel).
+- **One key or a list.** `groupBy="team"` groups one level;
+  `groupBy={["team", "status"]}` nests each key inside the one before it, to
+  any depth. There is no drag-to-group panel — the keys come from your code or
+  the URL.
 - **Frontend tier only.** Grouping needs the full filtered row set in memory
   (`allFilteredRows`). Server-paginated sources log a dev-mode warning and
   ignore grouping — see [Data tiers](./data-tiers.md).
@@ -4042,8 +4045,8 @@ export contains exactly what you see, and the rows-per-page control hides
 
 ## Headless grouping
 
-The grouping model is exported so custom tables can render the same
-single-level flat structure the adapters do:
+The grouping model is exported so custom tables can render the same flat
+structure the adapters do, at one level or nested:
 
 | Export                                         | Purpose                                                                                        |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -4061,8 +4064,8 @@ single-level flat structure the adapters do:
   on the column key — never the JSX `accessor`.
 - Works on desktop rows and mobile cards, LTR and RTL, with and without
   `virtualize` (virtual windows count collapsed groups as one row).
-- Out of scope (by design): multi-level nesting, pivot mode, drag-to-group,
-  and Excel-style aggregation pickers.
+- Out of scope (by design): a drag-to-group panel and Excel-style aggregation
+  pickers. Pivoting is a separate model — see [Pivot](./pivot.md).
 - Ant Design maps group headers onto its high-level `Table` via custom row
   rendering; every other kit renders native group header rows/cards.
 
@@ -7771,8 +7774,8 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `extraRows`                 | `readonly ExtraRow[]`                                           | —               | Host-injected separator and full-width slots, spliced in by `beforeRowId`. Omit and nothing is inserted. See [full-width and separator rows](./full-width-rows.md).                                                                                                                                                                                                              |
 | `summaryRow`                | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Map the current page's rows to per-column footer summary cells.                                                                                                                                                                                                                                                                                                                  |
 | `tableFooter`               | `ReactNode`                                                     | —               | Free slot under the table, above the pager. Not the column-aligned summary row.                                                                                                                                                                                                                                                                                                  |
-| `groupBy`                   | `string \| null`                                                | —               | Single-level row grouping by column key; frontend tier only (server sources devWarn and ignore). Omit and grouping stays dormant.                                                                                                                                                                                                                                                |
-| `onGroupByChange`           | `(groupBy: string \| null) => void`                             | —               | Controlled `groupBy` channel; falls back to `source.setGroupBy`. URL-synced when the source uses URL state.                                                                                                                                                                                                                                                                      |
+| `groupBy`                   | `string \| readonly string[] \| null`                           | —               | Row grouping by column key — one key, or an ordered list to nest. Frontend tier only (server sources devWarn and ignore). Omit and grouping stays dormant.                                                                                                                                                                                                                       |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —               | Notified after a grouping change, with the keys as a list. The chrome always applies the change itself; take full control via `source.setGroupBy`.                                                                                                                                                                                                                               |
 | `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Per-group aggregate cells — **same signature as `summaryRow`**. Called with each group's leaf rows.                                                                                                                                                                                                                                                                              |
 | `collapsedGroupIds`         | `readonly string[]`                                             | —               | Controlled collapsed group keys (ephemeral — not URL-synced).                                                                                                                                                                                                                                                                                                                    |
 | `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —               | Controlled collapse channel; uncontrolled mode uses internal state.                                                                                                                                                                                                                                                                                                              |

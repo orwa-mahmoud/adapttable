@@ -97,7 +97,7 @@ export interface TableSource<TRow> extends TableStateMutators {
   /** Nested AND/OR filter tree, when one is active. */
   readonly filterTree?: QueryFilterGroup;
   /**
-   * Active single-level row-grouping column key, if any. Frontend chrome
+   * Active row-grouping keys, comma-separated, if any. Frontend chrome
    * builds the grouped flat model when set; server sources may echo the URL
    * param but grouping stays dormant without `allFilteredRows`.
    */

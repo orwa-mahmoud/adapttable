@@ -40,7 +40,7 @@ export interface TableStateMutators {
   /** Clear search + sort + groupBy + page + every extra filter in one commit. */
   clearAll: () => void;
   /**
-   * Set or clear the single-level row-grouping column key; resets to page 1.
+   * Set or clear the row-grouping keys, comma-separated; resets to page 1.
    * Frontend tier only — server sources may carry the URL param but chrome
    * ignores grouping without `allFilteredRows`.
    */
