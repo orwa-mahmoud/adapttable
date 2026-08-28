@@ -124,7 +124,7 @@ function sameState(a: RowPinState, b: RowPinState): boolean {
 }
 
 /**
- * Headless row pinning. Inert until the host passes {@link UseRowPinningOptions.enabled};
+ * Headless row pinning. Inert until the host passes `enabled`;
  * omit the prop and this hook still runs (Rules of Hooks) but every action no-ops.
  */
 export function useRowPinning<TRow>(options: {
