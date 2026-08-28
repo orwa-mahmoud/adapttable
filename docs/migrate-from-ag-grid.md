@@ -1,39 +1,45 @@
-# Migrate from AG Grid to AdaptTable — CRUD tables, 300 kB lighter, MIT
+# Migrate from AG Grid to AdaptTable — CRUD tables in your UI kit, MIT
 
 ▶ **See it before you install:** [the live demo](https://orwa-mahmoud.github.io/adapttable/demo/) — flip between Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and Tailwind on the same data.
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.
-If your app uses pivoting, tree data, cell/range selection, or Excel
-export, keep AG Grid (those are its Enterprise tier, from
-$999/developer, and they're genuinely good). AdaptTable doesn't do analytics
-grids, and pretending otherwise would waste your week.
+
+The honest line is not a feature list. Pivoting, tree data, cell-range
+selection, the fill handle, clipboard range operations and Excel export all
+ship in AdaptTable, under MIT, where AG Grid puts them in its
+[paid Enterprise tier](https://www.ag-grid.com/license-pricing/). What AG Grid
+has that AdaptTable does not is **integration**: one spreadsheet surface, tool
+panels already assembled, and a decade of behaviour at the edges of it. In
+AdaptTable those are parts you compose — a pivot engine and its panel, a range
+model, a side-panel frame you fill.
+
+So stay on AG Grid when the grid IS the product: an analytics surface where
+users pivot, drill and drag fields around all day, or a workflow that leans on
+Excel-style editing at scale. That week is not worth spending, and the licence
+buys something real.
 
 This page is for the other — much larger — group: teams running **ordinary
-CRUD tables** on AG Grid Community, paying for spreadsheet power they don't
-use in three currencies: **bundle size** (the full Community setup is ~346 kB
-min+gzip of grid code vs ~51 kB for AdaptTable core + an adapter), **churn**
-(a new AG Grid major about every 6 months — v32.2 rewrote the selection API,
-v33 made module registration and the Theming API mandatory, v36 overhauled
-the DOM and CSS class names), and **look** (AG Grid renders its own theme;
-AdaptTable renders _your_ UI kit's real components).
+CRUD tables** on AG Grid Community, paying for spreadsheet power they don't use
+in two currencies: **churn** (a new AG Grid major about every 6 months — v32.2
+rewrote the selection API, v33 made module registration and the Theming API
+mandatory, v36 overhauled the DOM and CSS class names), and **look** (AG Grid
+renders its own theme; AdaptTable renders _your_ UI kit's real components).
 
 ## When to stay on AG Grid
 
-- Pivoting / aggregation dashboards (single-level [row grouping](./row-grouping.md)
-  with per-group aggregates IS built in — deep multi-level grouping is not)
-- Tree data, cell/range selection + fill handle, clipboard-heavy workflows
-- Excel export (not just CSV), tool panels / side bar
+- The grid is the product — an analytics surface users pivot and drill all day
 - Excel-style cell editing at scale
+- Assembled tool panels: AdaptTable's `sidePanel` is a frame with tabs that you
+  fill (the pivot, saved-views and filter-tree panels ship; arranging them is
+  yours)
+- Drag-a-column-to-group: AdaptTable groups from `groupBy` — your code or the
+  URL, no drag gesture
 
-All Enterprise features — if you rely on them and they're worth $999/dev to
-you, that's the right tool. Migrate the CRUD tables, keep the analytics grid.
+Migrate the CRUD tables, keep the analytics grid — they can run side by side.
 
 ## What you gain (for CRUD tables)
 
-- **~300 kB lighter** grid code (min+gzip, everything-registered Community
-  vs AdaptTable core + one adapter; AG Grid can shrink with module
-  cherry-picking, but that's work you maintain).
 - **Native look per kit** — MUI tables look like MUI, Mantine like Mantine.
   No Quartz theme to restyle, no CSS class renames on major upgrades.
 - **Declarative instead of imperative** — no `gridRef.current.api.*` calls;
@@ -164,16 +170,19 @@ table is your design system's, not a themed grid.
 
 ## Gotchas
 
-- **Don't migrate the analytics grids.** Pivoting, multi-level grouping,
-  tree data, range selection, clipboard, Excel export have no AdaptTable
-  equivalent — that's deliberate scope, not a roadmap gap. (Single-level
-  row grouping with aggregates DID ship — see
-  [Row grouping](./row-grouping.md).)
-- **Cell editing is opt-in, not spreadsheet-grade.** Map AG Grid `editable`
-  columns to `ColumnDef.editable` + table `onCellEdit` (see
-  [Inline cell editing](./cell-editing.md)). Full Excel-style fill-handle /
-  clipboard editing stays out of scope — use `rowActions` + your own form
-  when you need a multi-field edit dialog.
+- **The analytics features are parts, not a mode.** [Pivoting](./pivot.md) is
+  an engine plus its own panel; [nested grouping](./row-grouping.md) is a list
+  of keys in `groupBy`; [tree data](./tree-data.md) is `getChildren` or
+  `getParentId`; range selection, the fill handle and clipboard operations all
+  need `cellNavigation` armed (see
+  [Cell navigation](./cell-navigation.md)). Each works — none is the single
+  spreadsheet surface AG Grid hands you, so budget assembly time rather than a
+  prop rename.
+- **Cell editing is opt-in.** Map AG Grid `editable` columns to
+  `ColumnDef.editable` + table `onCellEdit` (see
+  [Inline cell editing](./cell-editing.md)). For a multi-field edit dialog,
+  `rowActions` + your own form is still the answer — that part AdaptTable
+  deliberately leaves to you.
 - **The imperative API disappears.** Anywhere you called
   `api.getSelectedRows()`, `api.setFilterModel()`, or `api.sizeColumnsToFit()`,
   you now read props/state (`onSelectionChange`, URL-synced filters, column
@@ -181,9 +190,11 @@ table is your design system's, not a themed grid.
   stops breaking on majors.
 - **Sorting is opt-in.** AG Grid columns sort by default; AdaptTable columns
   need `sortable: true`.
-- **CSV export is built-in.** Pass `exportCsv` for a toolbar button, or wire
-  `rowsToCsv` / `downloadCsv` to a custom `toolbar` control. (AG Grid's context
-  menu is Enterprise anyway.)
+- **Export is a writer, not three features.** `exportCsv` gives you the toolbar
+  button; the format is whatever writer you hand it — `csvWriter`,
+  `xlsxWriter` from `@adapttable/core/xlsx` for a real spreadsheet, or
+  `pdfWriter` from `@adapttable/core/pdf`. Excel export is AG Grid Enterprise;
+  here it is one import. (Its context menu is Enterprise anyway.)
 - **Row virtualization is opt-in** (`virtualize`) rather than always-on —
   enable it for genuinely large lists; a benchmark lives in the
   [virtualization docs](./virtualization.md).
