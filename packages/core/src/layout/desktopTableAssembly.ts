@@ -1300,6 +1300,14 @@ export function useDesktopTableAssembly<TRow>(
     wiring: wiringCtx,
   });
 
+  // Focus addresses columns by their position in the FULL visible list. Built
+  // once here rather than searched per header cell: the header row is the
+  // hottest prop path in this file, and a scan inside it would make the cost of
+  // naming a column quadratic in the number of columns.
+  const absoluteColumnIndex = new Map(
+    table.columns.map((column, index) => [column.key, index])
+  );
+
   const leaf = (
     column: ColumnDef<TRow>,
     headerIndex: number,
@@ -1317,14 +1325,10 @@ export function useDesktopTableAssembly<TRow>(
       chainDir ?? (table.sortBy === column.key ? table.sortDir : undefined);
     const sortButtonProps = table.getSortButtonProps(column);
     const sortIndex = sortButtonProps["data-sort-index"];
-    // Focus addresses columns in the FULL visible list, while a windowed header
-    // is handed its position within the rendered slice. Resolve the absolute
-    // index so column selection, the header checkbox and `aria-colindex` all
-    // name the same column whether or not the horizontal axis is windowed.
-    const absoluteIndex = table.columns.findIndex(
-      (candidate) => candidate.key === column.key
-    );
-    const focusIndex = absoluteIndex === -1 ? headerIndex : absoluteIndex;
+    // A windowed header is handed its position within the rendered slice, so the
+    // absolute index is what column selection, the header checkbox and
+    // `aria-colindex` all have to name — windowed or not.
+    const focusIndex = absoluteColumnIndex.get(column.key) ?? headerIndex;
     const headerController = columnHeaderController(column, {
       sortDir: effectiveDir,
       sortIndex: typeof sortIndex === "number" ? sortIndex : undefined,
