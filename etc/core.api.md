@@ -65,7 +65,7 @@ export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 // @public
 export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const applyCollapsedColumnGroups: typeof applyCollapsedColumnGroups_2;
 
 // @public
@@ -284,7 +284,7 @@ export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, op
 // @public @deprecated (undocumented)
 export type BodyCell<TRow> = BodyCell_2<TRow>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const bodyCellsHaveRowSpan: typeof bodyCellsHaveRowSpan_2;
 
 // @public
@@ -580,13 +580,13 @@ export interface CellSaveState<TRow> {
 // @public
 export type CellSaveStatus = "saving" | "failed";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const cellsForRow: typeof cellsForRow_2;
 
 // @public
 export type CellSpanAppearance = "merged" | "plain";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const cellSpanMark: typeof cellSpanMark_2;
 
 // @public
@@ -676,16 +676,16 @@ export function collectChecklistValues<TRow>(def: FilterDef<TRow>, rows: readonl
 // @public
 export type ColorScheme = "light" | "dark" | "auto";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_ID_SEP = "";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
@@ -754,13 +754,13 @@ export interface ColumnGroupDef<TRow> {
     readonly marryChildren?: boolean;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupHeaderCaption: typeof columnGroupHeaderCaption_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupId: typeof columnGroupId_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupPath: typeof columnGroupPath_2;
 
 // @public
@@ -786,7 +786,7 @@ export interface ColumnGroupRecord<TRow> {
 // @public
 export type ColumnGroupShow = "open" | "closed" | "always";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupStubStyle: typeof columnGroupStubStyle_2;
 
 // @public
@@ -849,7 +849,7 @@ export interface ColumnMenuActionContext<TRow = unknown> {
     sortDir?: "asc" | "desc";
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnMenuActions: typeof columnMenuActions_2;
 
 // @public
@@ -1137,10 +1137,10 @@ export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 // @public
 export function edgePinStyle(side: PinSide, active: boolean, zIndex?: number): PinnedCellStyle | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type EditableCellActivateProps = EditableCellActivateProps$1;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type EditableCellButtonProps = EditableCellButtonProps$1;
 
 // @public
@@ -1261,7 +1261,7 @@ export interface EditableCellGateProps<TRow> {
 // @public
 export type EditableCellMode = "display" | "activatable" | "editing";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type EditableCellSlots = EditableCellSlots$1;
 
 // @public
@@ -1532,13 +1532,13 @@ export interface ExportWriter {
 // @public
 export function extendCellRange(range: CellRange | null, head: GridCell, fallbackAnchor: GridCell): CellRange;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const EXTRA_OVER_SPAN_STYLE: CSSProperties;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const EXTRA_ROW_PARTS: {
     readonly separator: {
         readonly row: "separator-row";
@@ -1550,19 +1550,19 @@ export const EXTRA_ROW_PARTS: {
     };
 };
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraCountBeforeRowIds: typeof extraCountBeforeRowIds_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraCoveredTableSlots: typeof extraCoveredTableSlots_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type ExtraEntry = ExtraEntry_2;
 
 // @public
 export type ExtraFilters = Record<string, FilterValue>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraHostFillStyle: typeof extraHostFillStyle_2;
 
 // @public
@@ -1580,10 +1580,10 @@ export type ExtraRowKind = "separator" | "fullWidth";
 // @public
 export function extraRowsArmed(extraRows: readonly ExtraRow[] | undefined): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraRowsForSection: typeof extraRowsForSection_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraUncoveredColSpans: typeof extraUncoveredColSpans_2;
 
 // @public
@@ -1662,7 +1662,7 @@ export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist
 // @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const filterColumnMenuRows: typeof filterColumnMenuRows_2;
 
 // @public
@@ -1688,7 +1688,7 @@ export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], s
 // @public
 export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type FilterHeaderClassNames = FilterHeaderClassNames$1;
 
 // @public @deprecated (undocumented)
@@ -1839,7 +1839,7 @@ export interface FindMatchesOptions<TRow> {
     rows: readonly TRow[];
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const flattenColumnTree: typeof flattenColumnTree_2;
 
 // @public
@@ -1862,7 +1862,7 @@ export function formatGroupLabel(value: unknown, blankLabel?: string): string;
 // @public
 export function formatMultiDraft(values: readonly string[]): string;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type FullscreenState = FullscreenState$1;
 
 // @public
@@ -2011,16 +2011,16 @@ export type GroupedFlatEntry<TRow> = {
     groupKey: string;
 } | ExtraEntry_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderAlign: typeof groupedHeaderAlign_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderCellStyle: typeof groupedHeaderCellStyle_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderChildRule: typeof groupedHeaderChildRule_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderLabelStyle: typeof groupedHeaderLabelStyle_2;
 
 // @public
@@ -2091,19 +2091,19 @@ export interface HeaderFilterSessionProps {
 // @public
 export function headerFilterStickTop(sticky: boolean, base: CSSProperties | undefined, top: number, stickyExtras?: CSSProperties): CSSProperties | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type HeaderGroupCell = HeaderGroupCell_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const headerGroupRow: typeof headerGroupRow_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const headerGroupRows: typeof headerGroupRows_2;
 
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const hideAllColumns: typeof hideAllColumns_2;
 
 // @public
@@ -2124,10 +2124,10 @@ export interface HighlightState {
     isRowHighlighted: (rowId: string) => boolean;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCell_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const htmlGroupedHeaderPlan: typeof htmlGroupedHeaderPlan_2;
 
 // @public
@@ -2203,13 +2203,13 @@ export interface InfiniteQueryLike<TPage> {
     refetch: () => Promise<unknown> | void;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const inflateBodyCellRowSpans: typeof inflateBodyCellRowSpans_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const insertExtraRows: typeof insertExtraRows_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const insertExtrasBeforeRows: typeof insertExtrasBeforeRows_2;
 
 // @public
@@ -2239,13 +2239,13 @@ export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow
 // @public
 export function isColumnGroup<TRow>(column: ColumnInput<TRow>): column is ColumnGroupDef<TRow>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isColumnGroupRenderKey: typeof isColumnGroupRenderKey_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isColumnGroupStubKey: typeof isColumnGroupStubKey_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isColumnGroupSummaryKey: typeof isColumnGroupSummaryKey_2;
 
 // @public
@@ -2266,7 +2266,7 @@ export function isDraftChecked(draft: string): boolean;
 // @public
 export function isEmptyRowValue(value: unknown): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isExtraEntry: typeof isExtraEntry_2;
 
 // @public
@@ -2458,7 +2458,7 @@ export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "betwe
 // @public
 export type NumberOp = (typeof NUMBER_OPS)[number];
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const orderedCardEntries: typeof orderedCardEntries$1;
 
 // @public
@@ -2565,25 +2565,25 @@ export const PIN_Z: {
     readonly headerPinned: 5;
 };
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const PINNED_BOTTOM_PART = "pinned-bottom";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const PINNED_TOP_PART = "pinned-top";
 
 // @public
 export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowCellStyle: typeof pinnedRowCellStyle$1;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowPart: typeof pinnedRowPart$1;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowSticky: typeof pinnedRowSticky$1;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowStickyStyle: typeof pinnedRowStickyStyle$1;
 
 // @public
@@ -2819,13 +2819,13 @@ export function renderRegisteredFilter<TRow>(def: FilterDef<TRow>, source: Filte
 // @public
 export const REORDER_COLUMN_KEY = "reorder";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const REORDER_COLUMN_WIDTH = 40;
 
 // @public
 export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode): QueryFilterGroup;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const resetColumnLayout: typeof resetColumnLayout_2;
 
 // @public
@@ -2876,10 +2876,10 @@ export function resolveLocaleTag(available: Iterable<string>, locale: string): s
 // @public
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const resolveRowHeight: typeof resolveRowHeight_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const resolveRowStyle: typeof resolveRowStyle_2;
 
 // @public
@@ -2893,7 +2893,7 @@ export interface RouterUrlAdapterOptions {
     search: string;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const ROW_DND_MIME = "application/x-adapttable-row";
 
 // @public
@@ -3035,7 +3035,7 @@ export interface RowPinningState<TRow> {
 // @public
 export type RowPinSide = "top" | "bottom";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowPinSignature: typeof rowPinSignature_2;
 
 // @public
@@ -3046,7 +3046,7 @@ export interface RowPinState {
     readonly top: readonly string[];
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowReorderDropStyle: typeof rowReorderDropStyle_2;
 
 // @public
@@ -3068,7 +3068,7 @@ export interface RowReorderLabels {
     rowReorderCancelled: string;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowReorderSignature: typeof rowReorderSignature_2;
 
 // @public @deprecated (undocumented)
@@ -3077,10 +3077,10 @@ export type RowReorderState<TRow> = RowReorderState_2<TRow>;
 // @public
 export function rowsExcludingFilter<TRow>(rows: readonly TRow[], extra: ExtraFilters, key: string, filterFn: (row: TRow, extra: ExtraFilters) => boolean): readonly TRow[];
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowSourceIndex: typeof rowSourceIndex$1;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowSpanSignature: typeof rowSpanSignature_2;
 
 // @public
@@ -3099,7 +3099,7 @@ export type RowStyle<TRow> = (row: TRow, index: number) => CSSProperties | undef
 // @public
 export function rowStyleArmed(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowStyleSignature: typeof rowStyleSignature_2;
 
 // @public
@@ -3224,7 +3224,7 @@ export interface Shortcut {
     command: string;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const showAllColumns: typeof showAllColumns_2;
 
 // @public
@@ -3768,7 +3768,7 @@ export interface TextFieldWidget {
 // @public
 export type TextOp = (typeof TEXT_OPS)[number];
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const toggleCollapsedColumnGroup: typeof toggleCollapsedColumnGroup_2;
 
 // @public
@@ -3825,7 +3825,7 @@ export interface TreeShape<TRow> {
 // @public
 export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const unpinAllColumns: typeof unpinAllColumns_2;
 
 // @public
@@ -4167,7 +4167,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptio
     refetch?: () => Promise<unknown> | void;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const useFullscreen: typeof useFullscreen$1;
 
 // @public
@@ -4277,7 +4277,7 @@ export interface UseLazyChildrenOptions<TRow> {
 // @public
 export function useMediaQuery(query: string, defaultValue?: boolean): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const useOffsetHeight: typeof useOffsetHeight$1;
 
 // @public
