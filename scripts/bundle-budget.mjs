@@ -17,7 +17,7 @@
  * The bundler is rolldown, re-exported by tsdown, which builds this repo
  * already — the measurement adds no dependency of its own.
  */
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -444,12 +444,118 @@ if (UPDATE) {
   process.exit(0);
 }
 
-if (over) {
-  console.error(
-    `\n${over} fixture(s) over budget.\n` +
-      `Either the weight belongs behind an optional entry point, or the budget ` +
-      `needs raising — in the pull request, with a reason, never silently.`
+/**
+ * Every size figure this repo publishes, and the fixture each one comes from.
+ *
+ * A budget is a ceiling, so a fixture can sit well under one for months while
+ * the figure published beside it says something else entirely — which is how
+ * `~51 kB` outlived a 134 KB measurement. Several of these pages tell the
+ * reader the budget checks them; this is where that becomes true.
+ *
+ * `find` is the start of the line carrying the figure. `from` names the
+ * fixtures it summarises — more than one publishes a range.
+ */
+const PUBLISHED = [
+  {
+    doc: "docs/faq.md",
+    find: "| `useFrontendData` + `useDataTable` (core)",
+    from: ["core · simple table"],
+  },
+  {
+    doc: "docs/faq.md",
+    find: "| every core export",
+    from: ["core · every export"],
+  },
+  {
+    doc: "docs/faq.md",
+    find: "| `DataTable` from an adapter",
+    from: FIXTURES.filter((f) => f.pkg.startsWith("adapter-")).map(
+      (f) => f.name
+    ),
+  },
+  {
+    doc: "docs/formulas.md",
+    find: "columns never downloads a parser. It costs",
+    from: ["core · formula"],
+  },
+  {
+    doc: "docs/pivot.md",
+    find: "never downloads the engine. It costs",
+    from: ["core · pivot"],
+  },
+  {
+    doc: "packages/server/README.md",
+    find: "  no hooks and no client boundary, so an Express",
+    from: ["server · parse a query"],
+  },
+];
+
+/** Every `N kB` (or `N–M kB`) figure on the line starting with `find`. */
+function publishedFigures(doc, find) {
+  const lines = readFileSync(join(ROOT, doc), "utf8").split("\n");
+  const at = lines.findIndex((l) => l.startsWith(find));
+  if (at === -1) return null;
+  // A prose figure can wrap to the next line; a table row cannot.
+  const text = find.startsWith("|")
+    ? lines[at]
+    : `${lines[at]} ${lines[at + 1] ?? ""}`;
+  return [
+    ...text.matchAll(/~?([\d.]+)(?:\s*[–-]\s*~?([\d.]+))?\s*kB/gi),
+  ].flatMap((m) =>
+    [Number(m[1]), m[2] === undefined ? null : Number(m[2])].filter(
+      (n) => n !== null
+    )
   );
+}
+
+let stale = 0;
+for (const { doc, find, from } of PUBLISHED) {
+  const measured = rows
+    .filter((r) => from.includes(r.name))
+    .map((r) => r.sizeKB);
+  const want = [Math.min(...measured), Math.max(...measured)];
+  const expected = want[0] === want[1] ? [want[0]] : want;
+  const figures = publishedFigures(doc, find);
+
+  if (figures === null) {
+    stale++;
+    console.error(
+      `✗ ${doc}: no row starting "| ${row}" — the table moved or was renamed`
+    );
+    continue;
+  }
+  // The doc rounds to whole kB, so a figure is current when it rounds to what
+  // was just measured. Anything further apart is a number a reader would act on.
+  const off =
+    figures.length !== expected.length
+      ? true
+      : figures.some((f, i) => Math.abs(f - expected[i]) > 1);
+  if (off) {
+    stale++;
+    console.error(
+      `✗ ${doc} · ${find.trim()}: published ${figures.join("–")} kB, measured ` +
+        `${expected.map((n) => n.toFixed(1)).join("–")} KB`
+    );
+  }
+}
+if (!stale) {
+  console.log(`\n✓ ${PUBLISHED.length} published size figures match this run`);
+}
+
+if (over || stale) {
+  if (over) {
+    console.error(
+      `\n${over} fixture(s) over budget.\n` +
+        `Either the weight belongs behind an optional entry point, or the budget ` +
+        `needs raising — in the pull request, with a reason, never silently.`
+    );
+  }
+  if (stale) {
+    console.error(
+      `\n${stale} published size figure(s) no longer match the build.\n` +
+        `Correct the documented number; never widen the tolerance instead.`
+    );
+  }
   process.exit(1);
 }
 console.log(`\nAll ${rows.length} fixtures within budget.`);

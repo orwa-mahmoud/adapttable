@@ -29,7 +29,7 @@ stops being state and becomes **user input**: `limit=999999`,
   what you do with it is yours.
 - **No React** — the codecs come from `@adapttable/core/query`, the entry with
   no hooks and no client boundary, so an Express or Fastify service installs a
-  1.5 KB parser and not a UI library.
+  1.6 KB parser and not a UI library.
 
 ## Install
 

@@ -165,20 +165,28 @@ zero UI-kit dependencies.
 Measured on the published builds, with React and your UI kit external because
 your app already ships those:
 
-| What you import                           | min+gzip  |
-| ----------------------------------------- | --------- |
-| `useFrontendData` + `useDataTable` (core) | ~10 kB    |
-| every core export                         | ~34 kB    |
-| `DataTable` from an adapter               | ~51–57 kB |
+| What you import                           | min+gzip    |
+| ----------------------------------------- | ----------- |
+| `useFrontendData` + `useDataTable` (core) | ~18 kB      |
+| every core export                         | ~87 kB      |
+| `DataTable` from an adapter               | ~127–140 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
-land within a few kB of each other, so switching kits does not change what you
+land within ~13 kB of each other, so switching kits does not change what you
 pay.
 
+The third row is the one to understand. `DataTable` is a single component whose
+props can turn on every feature it has, and a bundler follows imports rather
+than prop values — so it carries them all whether or not you switch one on. To
+pay for what you use, name it: compose with `features` from the kit's subpath,
+or build on the headless hooks in row one. [Feature
+composition](./features.md#no-bundle-savings-yet) has the detail; v3 is where
+the props stop holding the imports open.
+
 These are not estimates. `pnpm budget` bundles each of those imports for real
-and fails the build if one crosses its ceiling, so the numbers on this page
-cannot quietly go stale.
+and fails the build if one crosses its ceiling, and it checks this table against
+what it just measured — so a figure here cannot drift from the build.
 
 ## How do I get started quickly?
 
