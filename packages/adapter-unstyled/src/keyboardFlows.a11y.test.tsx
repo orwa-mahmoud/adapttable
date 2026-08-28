@@ -8,7 +8,7 @@ import {
   type FilterDef,
   useFrontendData,
 } from "@adapttable/core";
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -100,7 +100,7 @@ describe("keyboard flows (unstyled)", () => {
     expect(part("sort-index")).not.toBeNull();
   });
 
-  it("drawer: focus is trapped inside and restored to the trigger on Escape", () => {
+  it("drawer: focus is trapped inside and restored to the trigger on Escape", async () => {
     render(<Harness override={{ filters, filtersMode: "drawer" }} />);
     const trigger = part("filters-button")!;
     act(() => trigger.focus());
@@ -119,10 +119,24 @@ describe("keyboard flows (unstyled)", () => {
     fireEvent.keyDown(document, { key: "Tab" });
     expect(panel.contains(document.activeElement)).toBe(true);
 
-    // Escape closes AND hands focus back to the trigger.
+    // Escape closes AND hands focus back to the trigger — on the same tick,
+    // not when the slide-out finishes.
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(part("filters-panel")).toBeNull();
     expect(trigger).toHaveFocus();
+
+    // The panel is still painted while it leaves, so it must stop being a
+    // dialog immediately: out of the accessibility tree, and inert so Tab
+    // cannot walk back into a dismissed overlay mid-animation.
+    const leaving = part("filters-panel")!;
+    expect(leaving).toHaveAttribute("aria-hidden", "true");
+    expect(leaving).toHaveAttribute("inert");
+    expect(leaving).not.toHaveAttribute("aria-modal");
+    expect(leaving).toHaveAttribute("data-state", "closed");
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(trigger).toHaveFocus();
+
+    // And then it is gone.
+    await waitFor(() => expect(part("filters-panel")).toBeNull());
   });
 
   it("committing an inline edit keeps keyboard focus in the table", async () => {

@@ -1518,6 +1518,20 @@ export function nextPinSide(current: PinnedSide): PinnedSide;
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[]): readonly VirtualTableRow<TRow>[];
 
 // @internal
+export const OVERLAY_MOTION: {
+    readonly enterMs: 340;
+    readonly exitMs: 240;
+    readonly enterEasing: "cubic-bezier(0.32, 0.72, 0, 1)";
+    readonly exitEasing: "cubic-bezier(0.4, 0, 1, 1)";
+};
+
+// @internal
+export interface OverlayTransition {
+    rendered: boolean;
+    state: "open" | "closed";
+}
+
+// @internal
 export type PaginationItem = number | "ellipsis";
 
 // @internal
@@ -2638,6 +2652,9 @@ export function useMountStagger(ref: RefObject<HTMLElement | null>, deps: Depend
 
 // @internal
 export function useOffsetHeight(): [(node: HTMLElement | null) => void, number];
+
+// @internal
+export function useOverlayTransition(open: boolean, exitMs?: number): OverlayTransition;
 
 // @internal
 export function useResolvedAdapter(adapter: UrlStateAdapter | undefined, enabled: boolean): UrlStateAdapter;

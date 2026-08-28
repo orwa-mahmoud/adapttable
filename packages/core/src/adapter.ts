@@ -293,6 +293,11 @@ export {
   type MountStaggerOptions,
   useMountStagger,
 } from "./hooks/useMountStagger";
+export {
+  OVERLAY_MOTION,
+  type OverlayTransition,
+  useOverlayTransition,
+} from "./hooks/useOverlayTransition";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
 export {
   createDesktopRow,

@@ -33,16 +33,35 @@ export function FilterDrawer({
   // outrank Radix's own centering/animation rules without `!important`.
   // The overlay itself has no z-index, so a sticky page header (z-index 40
   // on the showcase nav) paints over it unless we lift the overlay.
+  //
+  // Two details the motion depends on. Radix animates its own dialog content
+  // with `rt-dialog-content-hide`, which sets `opacity: 0` on the closed
+  // state — replacing only the transform left the panel blinking out and THEN
+  // sliding, so the keyframes carry opacity too. And Radix's scrim runs
+  // 200ms/160ms on a different curve from what the panel had, so the two
+  // finished at different moments; both now run on one pair of tokens, the
+  // same pair the base-ui and unstyled drawers use.
+  //
+  // Everything that moves lives inside `prefers-reduced-motion: no-preference`
+  // — the same query Radix wraps its own animation in — so a reader who asked
+  // for less motion gets Radix's unanimated dialog rather than ours at 1ms.
   const drawerClass = "adapttable-radix-drawer";
   const fromEdge = dir === "rtl" ? "-100%" : "100%";
+  const enter = "340ms cubic-bezier(.32,.72,0,1)";
+  const exit = "240ms cubic-bezier(.4,0,1,1)";
   const drawerCss = `
 .rt-DialogOverlay:has(.${drawerClass}){z-index:10050}
-.${drawerClass}{position:fixed;inset-block:0;inset-inline-end:0;inset-inline-start:auto;margin:0;width:min(420px,100vw);max-width:none;height:100dvh;max-height:100dvh;border-radius:0;display:flex;flex-direction:column}
-.${drawerClass}[data-state="open"]{animation:${drawerClass}-in 220ms cubic-bezier(.32,.72,0,1)}
-.${drawerClass}[data-state="closed"]{animation:${drawerClass}-out 200ms cubic-bezier(.32,.72,0,1)}
-@keyframes ${drawerClass}-in{from{transform:translateX(${fromEdge})}to{transform:translateX(0)}}
-@keyframes ${drawerClass}-out{from{transform:translateX(0)}to{transform:translateX(${fromEdge})}}
-@media(prefers-reduced-motion:reduce){.${drawerClass}[data-state]{animation-duration:1ms}}
+.${drawerClass}{position:fixed;inset-block:0;inset-inline-end:0;inset-inline-start:auto;margin:0;width:min(420px,100vw);max-width:none;height:100dvh;max-height:100dvh;border-radius:0;display:flex;flex-direction:column;box-shadow:var(--shadow-6)}
+@media(prefers-reduced-motion:no-preference){
+.${drawerClass}[data-state="open"]{animation:${drawerClass}-in ${enter}}
+.${drawerClass}[data-state="closed"]{animation:${drawerClass}-out ${exit}}
+.rt-DialogOverlay:has(.${drawerClass})[data-state="open"]::before{animation:${drawerClass}-scrim-in ${enter}}
+.rt-DialogOverlay:has(.${drawerClass})[data-state="closed"]::before{animation:${drawerClass}-scrim-out ${exit}}
+@keyframes ${drawerClass}-in{from{transform:translateX(${fromEdge});opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes ${drawerClass}-out{from{transform:translateX(0);opacity:1}to{transform:translateX(${fromEdge});opacity:0}}
+@keyframes ${drawerClass}-scrim-in{from{opacity:0}to{opacity:1}}
+@keyframes ${drawerClass}-scrim-out{from{opacity:1}to{opacity:0}}
+}
 `;
   return (
     <Dialog.Root

@@ -9131,7 +9131,12 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,
 `DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
 (virtualize an opaque keyed list, e.g. grouped entries),
-`useMountStagger` (the `animate` stagger), and the inline icon set
+`useMountStagger` (the `animate` stagger),
+`useOverlayTransition` / `OverlayTransition` (turns an `open` boolean into
+`{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
+has something to animate on the way out, and reduced motion skips both edges),
+`OVERLAY_MOTION` (the durations and curves the unstyled, shadcn, Base UI and
+Radix drawers share), and the inline icon set
 (`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
 `ExpandChevron`, `sortArrow`). Row reorder chrome (on each adapter):
 `RowReorderHandle`, `RowReorderHandleProps`, `RowReorderButtons`,
