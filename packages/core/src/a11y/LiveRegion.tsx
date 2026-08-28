@@ -14,7 +14,11 @@
  */
 import type { ReactElement } from "react";
 
-/** Props for {@link LiveRegion}. */
+/**
+ * Props for {@link LiveRegion}.
+ *
+ * @public
+ */
 export interface LiveRegionProps {
   /** What to announce. Empty until there is something. */
   children: string;

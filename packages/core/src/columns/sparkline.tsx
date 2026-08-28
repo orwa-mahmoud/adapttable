@@ -9,7 +9,11 @@ import { createElement, type ReactElement, type ReactNode } from "react";
 
 import type { ColumnDef } from "../types";
 
-/** The three marks this entry draws. */
+/**
+ * The three marks this entry draws.
+ *
+ * @public
+ */
 export type SparklineKind = "bar" | "line" | "area";
 
 /** One bar in the bar mark. */

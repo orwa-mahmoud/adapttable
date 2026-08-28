@@ -37,7 +37,11 @@
  * is the normal state of one being written.
  */
 
-/** A binary operator the grammar accepts. */
+/**
+ * A binary operator the grammar accepts.
+ *
+ * @public
+ */
 export type BinaryOp =
   "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
 

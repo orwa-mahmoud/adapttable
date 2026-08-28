@@ -3,7 +3,11 @@ import { useCallback, useState } from "react";
 import type { BulkAction, BulkActionContext } from "../types";
 import type { ConfirmHandler } from "./confirm";
 
-/** A bulk-action rejection as display text, or `null` when there is none. */
+/**
+ * A bulk-action rejection as display text, or `null` when there is none.
+ *
+ * @public
+ */
 export function bulkActionErrorMessage(error: unknown): string | null {
   if (error == null) return null;
   if (error instanceof Error) return error.message;

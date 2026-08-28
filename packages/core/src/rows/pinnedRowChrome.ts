@@ -13,12 +13,24 @@ import type { VirtualTableRow } from "../virtual/useTableVirtualization";
 import { resolveVirtualRows } from "../virtual/useTableVirtualization";
 import type { RowPinSide } from "./rowPinning";
 
-/** `data-adapttable-part` on a pinned row in the shared tbody. */
+/**
+ * `data-adapttable-part` on a pinned row in the shared tbody.
+ *
+ * @public
+ */
 export const PINNED_TOP_PART = "pinned-top";
-/** Bottom pin marker on that row. */
+/**
+ * Bottom pin marker on that row.
+ *
+ * @public
+ */
 export const PINNED_BOTTOM_PART = "pinned-bottom";
 
-/** Part name for a pinned row, or `undefined` when the row is not pinned. */
+/**
+ * Part name for a pinned row, or `undefined` when the row is not pinned.
+ *
+ * @public
+ */
 export function pinnedRowPart(
   side: RowPinSide | undefined
 ): typeof PINNED_TOP_PART | typeof PINNED_BOTTOM_PART | undefined {
@@ -27,7 +39,11 @@ export function pinnedRowPart(
   return undefined;
 }
 
-/** Sticky style when the row is pinned and the kit asked for sticky pins. */
+/**
+ * Sticky style when the row is pinned and the kit asked for sticky pins.
+ *
+ * @public
+ */
 export function pinnedRowSticky(
   side: RowPinSide | undefined,
   sticky: boolean,
@@ -38,7 +54,11 @@ export function pinnedRowSticky(
   return pinnedRowStickyStyle(side, offset);
 }
 
-/** Sticky style for a pinned-row section (tbody or the row itself). */
+/**
+ * Sticky style for a pinned-row section (tbody or the row itself).
+ *
+ * @public
+ */
 export function pinnedRowStickyStyle(
   side: RowPinSide,
   headerOffsetPx: number
@@ -60,6 +80,8 @@ export function pinnedRowStickyStyle(
 /**
  * Extra sticky inset a cell in a pinned row needs, and the z-index when
  * that cell is also a pinned column.
+ *
+ * @public
  */
 export function pinnedRowCellStyle(
   side: RowPinSide | undefined,
@@ -80,7 +102,11 @@ export function pinnedRowCellStyle(
   };
 }
 
-/** Measure an element's offset height; used for the sticky header offset. */
+/**
+ * Measure an element's offset height; used for the sticky header offset.
+ *
+ * @public
+ */
 export function useOffsetHeight(): [
   (node: HTMLElement | null) => void,
   number,
@@ -106,6 +132,8 @@ export function useOffsetHeight(): [
  * Card list order: top pins, then the scroll window, then bottom pins.
  * Desktop sticky sections use the same three lists; cards are a list, so
  * this is the only "chrome" they get.
+ *
+ * @public
  */
 export function orderedCardEntries<TRow>(
   rows: readonly TRow[],

@@ -74,7 +74,11 @@ const slots: ChecklistSlots = {
   Checkbox: ChecklistBox,
 };
 
-/** Base UI checklist — wrapping kit checkboxes, not one value per row. */
+/**
+ * Base UI checklist — wrapping kit checkboxes, not one value per row.
+ *
+ * @public
+ */
 export function ChecklistFilter<TRow>(
   props: Readonly<ChecklistFilterProps<TRow>>
 ) {

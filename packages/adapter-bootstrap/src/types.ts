@@ -17,7 +17,11 @@ export interface DataTableSlots {
   noResults?: ReactNode;
 }
 
-/** Per-part class hooks — restyle without replacing components. */
+/**
+ * Per-part class hooks — restyle without replacing components.
+ *
+ * @public
+ */
 export interface DataTableClassNames {
   /** Class for the outermost wrapper. */
   root?: string;

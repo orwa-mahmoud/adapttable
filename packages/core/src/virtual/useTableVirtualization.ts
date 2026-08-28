@@ -55,7 +55,11 @@ function pendingListSize(
   return count * asSizeEstimator(estimateSize)(0);
 }
 
-/** Dataset index for ARIA / focus — the window index when pinning is off. */
+/**
+ * Dataset index for ARIA / focus — the window index when pinning is off.
+ *
+ * @public
+ */
 export function rowSourceIndex(
   entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">
 ): number {

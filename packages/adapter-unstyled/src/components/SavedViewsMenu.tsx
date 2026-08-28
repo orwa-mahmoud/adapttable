@@ -28,7 +28,11 @@ export type SavedViewsLabels = Pick<
   "savedViews" | "saveView" | "viewName" | "deleteView"
 >;
 
-/** Props for the saved-views menu: the views, and what may be done to them. */
+/**
+ * Props for the saved-views menu: the views, and what may be done to them.
+ *
+ * @public
+ */
 export interface SavedViewsMenuProps {
   /** Wiring for core's `useSavedViews` — storage key, storage, adapter, urlKey. */
   options: UseSavedViewsOptions;

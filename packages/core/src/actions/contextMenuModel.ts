@@ -18,7 +18,11 @@
  */
 import type { ColumnDef, TableLabels } from "../types";
 
-/** Where the menu was opened. */
+/**
+ * Where the menu was opened.
+ *
+ * @public
+ */
 export type ContextMenuTarget<TRow> =
   | { kind: "header"; columnKey: string }
   | { kind: "row"; row: TRow; rowId: string }

@@ -49,6 +49,8 @@ import { Box, Button, Flex, Progress, Text } from "./ui";
  * core's `useDataTableShell`; this renders only Base UI controls over it.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);

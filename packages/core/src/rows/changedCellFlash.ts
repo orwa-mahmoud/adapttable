@@ -19,7 +19,11 @@ import type { RowPatchEvent } from "./patch";
 /** How long a mark lasts, in milliseconds. */
 const DEFAULT_DURATION_MS = 1200;
 
-/** What {@link useChangedCellFlash} needs. */
+/**
+ * What {@link useChangedCellFlash} needs.
+ *
+ * @public
+ */
 export interface UseChangedCellFlashOptions {
   /**
    * Turn it on. Off by default — a table that never patches rows should not

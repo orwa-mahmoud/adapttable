@@ -19,7 +19,11 @@ import {
   type ExportViewEntry,
 } from "./exportWriter";
 
-/** Paper the print stylesheet asks the browser for. */
+/**
+ * Paper the print stylesheet asks the browser for.
+ *
+ * @public
+ */
 export type PrintPageSize =
   "a4" | "a4-landscape" | "letter" | "letter-landscape";
 

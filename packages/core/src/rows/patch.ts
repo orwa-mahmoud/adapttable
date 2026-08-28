@@ -29,7 +29,11 @@
  * this does not make it start: you hold the rows, you apply the patch.
  */
 
-/** Insert a row. Without `at`, it goes on the end. */
+/**
+ * Insert a row. Without `at`, it goes on the end.
+ *
+ * @public
+ */
 export interface InsertPatch<TRow> {
   /** Discriminant for the patch union. */
   type: "insert";

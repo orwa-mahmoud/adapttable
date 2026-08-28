@@ -13,6 +13,8 @@ import { shadcnClassNames } from "./classNames";
  * with the {@link shadcnClassNames} preset applied, merged per part under your
  * own `classNames`. A panel mounted beside a shadcn table is styled like it,
  * from one import and with nothing to hand-wire.
+ *
+ * @public
  */
 export function SavedViewsPanel(
   props: Readonly<

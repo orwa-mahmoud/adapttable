@@ -37,6 +37,8 @@ function define<TRow>(
  * ```ts
  * features={[feature("audit-log", { toolbarSlots: { end: <Audit /> } })]}
  * ```
+ *
+ * @public
  */
 export function feature<TRow>(
   id: string,

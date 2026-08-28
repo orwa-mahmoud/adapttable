@@ -13,6 +13,8 @@ import type { ReactNode } from "react";
  * Per-part class-name hooks. Every node also carries a stable
  * `data-adapttable-part` attribute and `data-*` state attributes so you
  * can style with Tailwind, shadcn, or your own CSS.
+ *
+ * @public
  */
 export interface DataTableClassNames {
   /** Class for the outermost wrapper. */

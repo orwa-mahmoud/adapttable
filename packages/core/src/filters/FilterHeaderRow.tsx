@@ -22,7 +22,11 @@ import {
 } from "./filterRegistry";
 import { useFilterOptions } from "./useFilterOptions";
 
-/** Class hooks the unstyled adapter maps onto `DataTableClassNames`. */
+/**
+ * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
+ *
+ * @public
+ */
 export interface FilterHeaderClassNames {
   /** Class for the filter row. */
   filterHeaderRow?: string;
@@ -59,7 +63,11 @@ export function headerFilterStickTop(
   return { ...stickyExtras, ...base, top };
 }
 
-/** Props for an adapter `FilterHeaderRow` — no slots on the public API. */
+/**
+ * Props for an adapter `FilterHeaderRow` — no slots on the public API.
+ *
+ * @public
+ */
 export interface FilterHeaderRowProps<TRow> {
   /** When false the row does not render, even if defs exist. */
   readonly enabled?: boolean;

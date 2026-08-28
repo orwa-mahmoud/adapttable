@@ -83,7 +83,11 @@ const slots: ChecklistSlots = {
   Checkbox: ChecklistBox,
 };
 
-/** MUI checklist — wrapping kit checkboxes, not one value per row. */
+/**
+ * MUI checklist — wrapping kit checkboxes, not one value per row.
+ *
+ * @public
+ */
 export function ChecklistFilter<TRow>(
   props: Readonly<ChecklistFilterProps<TRow>>
 ) {

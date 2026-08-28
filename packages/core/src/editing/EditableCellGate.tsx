@@ -139,7 +139,11 @@ export interface EditableCellGateProps<TRow> {
   readonly slots: EditableCellSlots;
 }
 
-/** Kit activate control the gate calls while the cell is idle. */
+/**
+ * Kit activate control the gate calls while the cell is idle.
+ *
+ * @public
+ */
 export interface EditableCellActivateProps {
   /** Tooltip for the control. */
   readonly title: string;
@@ -168,7 +172,11 @@ export interface EditableCellActivateProps {
   }) => void;
 }
 
-/** Kit button the gate calls for conflict choices and undo. */
+/**
+ * Kit button the gate calls for conflict choices and undo.
+ *
+ * @public
+ */
 export interface EditableCellButtonProps {
   /** Accessible name for the control. */
   readonly label: string;
@@ -182,7 +190,11 @@ export interface EditableCellButtonProps {
   readonly onClick: (event: { stopPropagation: () => void }) => void;
 }
 
-/** Adapter-supplied controls for `EditableCellGate`. */
+/**
+ * Adapter-supplied controls for `EditableCellGate`.
+ *
+ * @public
+ */
 export interface EditableCellSlots {
   /** Renders the idle cell that opens the editor. */
   readonly Activate: (props: EditableCellActivateProps) => ReactNode;

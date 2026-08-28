@@ -1,7 +1,11 @@
 import type { RowAction } from "../types";
 import { devWarn } from "../utils/devWarn";
 
-/** A confirmation request raised by a row or bulk action. */
+/**
+ * A confirmation request raised by a row or bulk action.
+ *
+ * @public
+ */
 export interface ConfirmRequest {
   /** Dialog title. */
   title: string;

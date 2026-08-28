@@ -291,6 +291,8 @@ export function safeSheetName(name: string): string {
  * @typeParam TRow - The row type.
  * @param options - Rows, columns, and the sheet's name.
  * @returns The workbook bytes, ready to download.
+ *
+ * @public
  */
 export function buildTableXlsx<TRow>(options: {
   rows: readonly TRow[];

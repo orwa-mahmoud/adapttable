@@ -1,4 +1,8 @@
-/** Text direction. */
+/**
+ * Text direction.
+ *
+ * @public
+ */
 export type Direction = "ltr" | "rtl";
 
 /**

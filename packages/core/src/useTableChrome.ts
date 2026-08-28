@@ -492,7 +492,11 @@ export interface ViewControlsToolbar {
   isFullscreen?: boolean;
 }
 
-/** The density and fullscreen half of a toolbar's props. */
+/**
+ * The density and fullscreen half of a toolbar's props.
+ *
+ * @public
+ */
 export function viewControlsToolbar(
   props: {
     densityChooser?: boolean;
@@ -518,7 +522,11 @@ export function viewControlsToolbar(
   };
 }
 
-/** The undo/redo half of a toolbar's props. */
+/**
+ * The undo/redo half of a toolbar's props.
+ *
+ * @public
+ */
 export function undoRedoToolbar<TRow>(
   wanted: boolean | undefined,
   history: EditHistoryState<TRow>,
@@ -565,7 +573,11 @@ export function printToolbar(
   return { onPrint, printLabel: labels.print };
 }
 
-/** Assemble every piece of chrome a kit's toolbar and footer need. */
+/**
+ * Assemble every piece of chrome a kit's toolbar and footer need.
+ *
+ * @public
+ */
 export function useTableChrome<TRow>(
   props: BaseDataTableProps<TRow>
 ): TableChrome<TRow> {
@@ -1736,7 +1748,11 @@ function useChromeRowPinning<TRow>(options: {
   return enabled ? state : undefined;
 }
 
-/** Pointer and click handlers that open the filters overlay without double-firing. */
+/**
+ * Pointer and click handlers that open the filters overlay without double-firing.
+ *
+ * @public
+ */
 export function useFilterTriggerToggle(
   open: boolean,
   setOpen: (next: boolean | ((current: boolean) => boolean)) => void

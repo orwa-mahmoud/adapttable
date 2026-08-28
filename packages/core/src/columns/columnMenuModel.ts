@@ -107,7 +107,11 @@ export const ACTIONS_COLUMN_KEY = "actions";
  */
 export const REORDER_COLUMN_KEY = "reorder";
 
-/** Build one menu row per column, with what may be done to each. */
+/**
+ * Build one menu row per column, with what may be done to each.
+ *
+ * @public
+ */
 export function columnMenuRows<TRow>(
   allColumns: readonly ColumnDef<TRow>[],
   layout: UseColumnLayoutResult<TRow>
