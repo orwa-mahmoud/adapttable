@@ -8,6 +8,15 @@ import { builtAdapters } from "../apps/showcase/matrix.mjs";
  * them, and widens to the whole grid as the rest arrive.
  */
 const KIT = builtAdapters()[0]!.key;
+/**
+ * Kits whose column axis can be windowed. antd renders rows inside its own
+ * fixed-height scroller and never hands core a box to measure, so
+ * `virtualizeColumns` is inert there — its opposite contract (every column in
+ * the DOM, no count, no per-cell index) is pinned in its own suite instead.
+ */
+const WINDOWING_KITS = builtAdapters()
+  .map((adapter) => adapter.key)
+  .filter((kit) => kit !== "antd");
 
 /**
  * The scale demo windows tens of thousands of rows through the real Mantine
@@ -74,56 +83,58 @@ test.describe("scale — virtualization", () => {
    * same answer. jsdom can show the attributes exist; only a real browser
    * measures a scroll box, which is what arms the column window at all.
    */
-  test("states the real column count while the DOM holds a window", async ({
-    page,
-  }) => {
-    await page.goto(`/${KIT}/scale/?cols=60&virtualizeColumns=1`);
-    const table = page.locator("table").first();
-    await expect(table).toBeVisible();
-    // Cell navigation is off here too, so nothing claims the grid contract.
-    await expect(page.getByRole("grid")).toHaveCount(0);
-    await expect(table).toHaveAttribute("aria-colcount", "60");
+  for (const kit of WINDOWING_KITS) {
+    test(`${kit}: states the real column count while the DOM holds a window`, async ({
+      page,
+    }) => {
+      await page.goto(`/${kit}/scale/?cols=60&virtualizeColumns=1`);
+      const table = page.locator("table").first();
+      await expect(table).toBeVisible();
+      // Cell navigation is off here too, so nothing claims the grid contract.
+      await expect(page.getByRole("grid")).toHaveCount(0);
+      await expect(table).toHaveAttribute("aria-colcount", "60");
 
-    const cells = page.locator(
-      '[data-adapttable-part="row"]:first-of-type [data-adapttable-part="cell"]'
-    );
-    await expect(cells.first()).toBeVisible();
-    // A window, not the axis: 60 columns never all render at once.
-    expect(await cells.count()).toBeLessThan(60);
-
-    /** The furthest column in the DOM, read off the cells themselves. */
-    const furthestColumn = async () =>
-      Math.max(
-        ...(await cells.evaluateAll((nodes) =>
-          nodes.map((node) => Number(node.getAttribute("aria-colindex") ?? 0))
-        ))
+      const cells = page.locator(
+        '[data-adapttable-part="row"]:first-of-type [data-adapttable-part="cell"]'
       );
-    const before = await furthestColumn();
-    expect(before).toBeGreaterThan(0);
+      await expect(cells.first()).toBeVisible();
+      // A window, not the axis: 60 columns never all render at once.
+      expect(await cells.count()).toBeLessThan(60);
 
-    // Scroll the axis and the indices follow the dataset, not the DOM.
-    await page
-      .locator('[data-adapttable-part="scroll-box"]')
-      .first()
-      .evaluate((box) => {
-        box.scrollLeft = 4000;
-      });
-    await expect
-      .poll(furthestColumn, { timeout: 5000 })
-      .toBeGreaterThan(before);
-    // And the total never moves with the window.
-    await expect(table).toHaveAttribute("aria-colcount", "60");
+      /** The furthest column in the DOM, read off the cells themselves. */
+      const furthestColumn = async () =>
+        Math.max(
+          ...(await cells.evaluateAll((nodes) =>
+            nodes.map((node) => Number(node.getAttribute("aria-colindex") ?? 0))
+          ))
+        );
+      const before = await furthestColumn();
+      expect(before).toBeGreaterThan(0);
 
-    // The header row names the same columns as the body row beneath it.
-    const headerIndices = await page
-      .locator('[data-adapttable-part="header-cell"]')
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.getAttribute("aria-colindex"))
-      );
-    expect(headerIndices.length).toBeGreaterThan(0);
-    expect(headerIndices.every((index) => index !== null)).toBe(true);
-    expect(Math.max(...headerIndices.map(Number))).toBeGreaterThan(before);
-  });
+      // Scroll the axis and the indices follow the dataset, not the DOM.
+      await page
+        .locator('[data-adapttable-part="scroll-box"]')
+        .first()
+        .evaluate((box) => {
+          box.scrollLeft = 4000;
+        });
+      await expect
+        .poll(furthestColumn, { timeout: 5000 })
+        .toBeGreaterThan(before);
+      // And the total never moves with the window.
+      await expect(table).toHaveAttribute("aria-colcount", "60");
+
+      // The header row names the same columns as the body row beneath it.
+      const headerIndices = await page
+        .locator('[data-adapttable-part="header-cell"]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute("aria-colindex"))
+        );
+      expect(headerIndices.length).toBeGreaterThan(0);
+      expect(headerIndices.every((index) => index !== null)).toBe(true);
+      expect(Math.max(...headerIndices.map(Number))).toBeGreaterThan(before);
+    });
+  }
 
   // Radix is listed explicitly: its Table.Root ScrollArea used to trap the
   // sticky header inside the table, so this only failing on the first kit
