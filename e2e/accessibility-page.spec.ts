@@ -113,3 +113,38 @@ for (const kit of KITS) {
     await expect(root.locator("tbody td[tabindex]").first()).toBeAttached();
   });
 }
+
+/**
+ * Three live regions ship on every table — the focus announcer, the status
+ * announcer, and the reorder announcer — and two of them speaking for one
+ * gesture is heard as the same news twice. Sorting is the gesture that could
+ * plausibly drive both: it rewrites the body AND can move focus.
+ */
+for (const kit of KITS) {
+  test(`${kit}: only one live region speaks for a sort`, async ({ page }) => {
+    await page.goto(`/${kit}/accessibility/`);
+    const root = demo(page).locator(`[data-adapter="${kit}"]`);
+    const status = root
+      .locator('[data-adapttable-part="table-status-announcer"]')
+      .first();
+    await expect(status).toBeAttached();
+    await expect(status).toHaveText("");
+
+    const header = root.locator('[data-adapttable-part="header-cell"]').first();
+    const control = header.getByRole("button").first();
+    if ((await control.count()) > 0) await control.click();
+    else await header.click();
+    await expect(status).toContainText("Sorted by");
+
+    // Scoped to the parts this library owns: antd wraps the table in its own
+    // `ant-spin`, which carries `aria-live` of its own making.
+    const speaking = await root
+      .locator("[data-adapttable-part][aria-live]")
+      .evaluateAll((nodes) =>
+        nodes
+          .filter((node) => (node.textContent ?? "").trim() !== "")
+          .map((node) => node.getAttribute("data-adapttable-part"))
+      );
+    expect(speaking).toEqual(["table-status-announcer"]);
+  });
+}
