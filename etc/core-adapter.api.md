@@ -33,7 +33,6 @@ export function BatchEditBarChrome<TRow>(input: Readonly<BatchEditBarChromeProps
 
 // @public
 export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
-    // (undocumented)
     readonly slots: BatchEditBarSlots;
 }
 
@@ -53,13 +52,9 @@ export interface BatchEditBarSlots {
 
 // @public
 export interface BatchEditButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
-    // (undocumented)
     readonly part: string;
 }
 
@@ -145,25 +140,18 @@ export function cellSpanMark(colSpan: number, rowSpan: number): string | undefin
 
 // @public
 export interface ChecklistButtonProps {
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
 }
 
 // @public
 export interface ChecklistCheckboxProps {
-    // (undocumented)
     readonly checked: boolean;
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly count: string;
     // (undocumented)
     readonly countClassName?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onChange: (checked: boolean) => void;
 }
 
@@ -172,7 +160,6 @@ export function ChecklistChrome<TRow>(input: Readonly<ChecklistChromeProps<TRow>
 
 // @public
 export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
-    // (undocumented)
     readonly slots: ChecklistSlots;
 }
 
@@ -202,25 +189,18 @@ export interface ChecklistClassNames {
 
 // @public
 export interface ChecklistFilterProps<TRow> {
-    // (undocumented)
     readonly classNames?: ChecklistClassNames;
     // (undocumented)
     readonly def: FilterDef<TRow>;
-    // (undocumented)
     readonly labels?: TableLabels;
-    // (undocumented)
     readonly source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
 }
 
 // @public
 export interface ChecklistSearchProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
-    // (undocumented)
     readonly value: string;
 }
 
@@ -302,13 +282,9 @@ export function columnGroupStubStyle(): CSSProperties;
 
 // @public
 export interface ColumnGroupToggleButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly expanded: boolean;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
 }
 
@@ -317,7 +293,6 @@ export function ColumnGroupToggleChrome(input: Readonly<ColumnGroupToggleChromeP
 
 // @public
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
-    // (undocumented)
     readonly slots: ColumnGroupToggleSlots;
 }
 
@@ -325,11 +300,8 @@ export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
 export interface ColumnGroupToggleProps {
     // (undocumented)
     cell: HeaderGroupCell;
-    // (undocumented)
     className?: string;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     onToggle: (id: string) => void;
 }
 
@@ -344,32 +316,21 @@ export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
 
 // @public
 export interface ColumnMenuAction {
-    // (undocumented)
     disabled: boolean;
-    // (undocumented)
     id: string;
-    // (undocumented)
     label: string;
-    // (undocumented)
     run: () => void;
 }
 
 // @public
 export interface ColumnMenuActionContext<TRow = unknown> {
     featureHost?: FeatureHostState<TRow>;
-    // (undocumented)
     labels: ColumnMenuLabels;
-    // (undocumented)
     layout: UseColumnLayoutResult<TRow>;
-    // (undocumented)
     onAutoSizeColumn?: (key: string) => void;
-    // (undocumented)
     onFilterColumn?: (key: string) => void;
-    // (undocumented)
     onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-    // (undocumented)
     sortBy?: string;
-    // (undocumented)
     sortDir?: "asc" | "desc";
 }
 
@@ -390,39 +351,22 @@ export interface ColumnMenuLabels {
     autoSizeColumns: string;
     // (undocumented)
     columnActions: string;
-    // (undocumented)
     columns: string;
-    // (undocumented)
     filterColumn: string;
-    // (undocumented)
     hideAllColumns: string;
-    // (undocumented)
     hideColumn: string;
-    // (undocumented)
     moveEnd: string;
-    // (undocumented)
     moveStart: string;
-    // (undocumented)
     pinEnd: string;
-    // (undocumented)
     pinStart: string;
-    // (undocumented)
     resetColumn: string;
-    // (undocumented)
     resetColumns: string;
-    // (undocumented)
     searchColumns: string;
-    // (undocumented)
     showAllColumns: string;
-    // (undocumented)
     showColumn: string;
-    // (undocumented)
     sortAscending: string;
-    // (undocumented)
     sortDescending: string;
-    // (undocumented)
     unpin: string;
-    // (undocumented)
     unpinAllColumns: string;
 }
 
@@ -434,13 +378,10 @@ export interface ColumnMenuRow<TRow> {
     canPin: boolean;
     canResize: boolean;
     canSort: boolean;
-    // (undocumented)
     column: ColumnDef<TRow>;
     hidden: boolean;
     index: number;
-    // (undocumented)
     key: string;
-    // (undocumented)
     name: string;
     pinned: PinnedSide;
 }
@@ -600,9 +541,7 @@ export interface CommandPaletteSlots {
 
 // @public
 export interface CommandPaletteSurfaceProps {
-    // (undocumented)
     readonly children: ReactNode;
-    // (undocumented)
     readonly className?: string;
     readonly label: string;
     readonly onClose: () => void;
@@ -644,7 +583,6 @@ export interface ContextMenuSurfaceProps {
     readonly anchorRef: RefObject<HTMLElement | null>;
     readonly at: ContextMenuPoint;
     readonly children: ReactNode;
-    // (undocumented)
     readonly className?: string;
     readonly container?: HTMLElement;
     readonly label: string;
@@ -927,13 +865,11 @@ export interface DesktopVirtualPadSlot {
 export interface EditableCellActivateProps {
     // (undocumented)
     readonly activateRef: (node: HTMLButtonElement | null) => void;
-    // (undocumented)
     readonly className?: string;
     // (undocumented)
     readonly dirty: boolean;
     // (undocumented)
     readonly display: ReactNode;
-    // (undocumented)
     readonly onClick: (event: {
         stopPropagation: () => void;
     }) => void;
@@ -950,17 +886,13 @@ export interface EditableCellActivateProps {
     }) => void;
     // (undocumented)
     readonly saveStatus: string | undefined;
-    // (undocumented)
     readonly title: string;
 }
 
 // @public
 export interface EditableCellButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: (event: {
         stopPropagation: () => void;
     }) => void;
@@ -968,7 +900,6 @@ export interface EditableCellButtonProps {
     readonly onMouseDown?: (event: {
         preventDefault: () => void;
     }) => void;
-    // (undocumented)
     readonly part: string;
 }
 
@@ -1362,7 +1293,6 @@ export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement
 
 // @public
 export interface FindBarChromeProps extends FindBarProps {
-    // (undocumented)
     readonly slots: FindBarSlots;
 }
 
@@ -1386,15 +1316,11 @@ export type FindButtonKind = "previous" | "next" | "close";
 
 // @public
 export interface FindButtonProps {
-    // (undocumented)
     readonly disabled?: boolean;
     // (undocumented)
     readonly kind: FindButtonKind;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
-    // (undocumented)
     readonly part: string;
 }
 
@@ -1404,15 +1330,11 @@ export interface FindSearchProps {
     readonly focusRef: (node: {
         focus: () => void;
     } | null) => void;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onChange: (value: string) => void;
     // (undocumented)
     readonly onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    // (undocumented)
     readonly placeholder: string;
-    // (undocumented)
     readonly value: string;
 }
 
@@ -1476,7 +1398,6 @@ export function GroupMoreButtonChrome(input: Readonly<GroupMoreButtonChromeProps
 
 // @public
 export interface GroupMoreButtonChromeProps extends GroupMoreButtonProps {
-    // (undocumented)
     readonly slots: GroupMoreButtonSlots;
 }
 
@@ -1494,9 +1415,7 @@ export interface GroupMoreButtonProps {
 
 // @public
 export interface GroupMoreButtonSlotProps {
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
 }
 
@@ -1795,7 +1714,6 @@ export function PivotPanelChrome(input: Readonly<PivotPanelChromeProps>): JSX.El
 
 // @public
 export interface PivotPanelChromeProps {
-    // (undocumented)
     className?: string;
     config: PivotConfig;
     fields: readonly PivotField[];
@@ -1816,9 +1734,7 @@ export interface PivotPanelSlots {
 // @public
 export interface PivotPanelSurfaceProps {
     readonly "data-adapttable-part": "pivot-panel";
-    // (undocumented)
     readonly children: ReactNode;
-    // (undocumented)
     readonly className?: string;
 }
 
@@ -1884,11 +1800,9 @@ export const ROW_ID_ATTRIBUTE = "data-row-id";
 // @public
 export interface RowClickProps {
     "data-adapttable-row": "";
-    // (undocumented)
     onClick: (event: MouseEvent_2<HTMLElement>) => void;
     // (undocumented)
     onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    // (undocumented)
     style: {
         cursor: "pointer";
     };
@@ -1903,7 +1817,6 @@ export function RowEditActionsChrome<TRow>(input: Readonly<RowEditActionsChromeP
 
 // @public
 export interface RowEditActionsChromeProps<TRow> extends RowEditActionsProps<TRow> {
-    // (undocumented)
     readonly slots: RowEditActionsSlots;
 }
 
@@ -1921,15 +1834,11 @@ export interface RowEditActionsSlots {
 
 // @public
 export interface RowEditButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: (event: {
         stopPropagation: () => void;
     }) => void;
-    // (undocumented)
     readonly part: string;
 }
 
@@ -2002,23 +1911,19 @@ export function RowReorderButtonsChrome<TRow>(input: Readonly<RowReorderButtonsC
 
 // @public
 export interface RowReorderButtonsChromeProps<TRow> extends RowReorderButtonsProps<TRow> {
-    // (undocumented)
     readonly slots: RowReorderButtonsSlots;
 }
 
 // @public
 export interface RowReorderButtonsProps<TRow> {
-    // (undocumented)
     className?: string;
     // (undocumented)
     downClassName?: string;
-    // (undocumented)
     labels: RowReorderLabels;
     // (undocumented)
     localIndex: number;
     // (undocumented)
     reorder: RowReorderState<TRow>;
-    // (undocumented)
     row: TRow;
     // (undocumented)
     rowCount: number;
@@ -2045,21 +1950,17 @@ export function RowReorderHandleChrome<TRow>(input: Readonly<RowReorderHandleChr
 
 // @public
 export interface RowReorderHandleChromeProps<TRow> extends RowReorderHandleProps<TRow> {
-    // (undocumented)
     readonly slots: RowReorderHandleSlots;
 }
 
 // @public
 export interface RowReorderHandleProps<TRow> {
-    // (undocumented)
     className?: string;
-    // (undocumented)
     labels: RowReorderLabels;
     // (undocumented)
     localIndex: number;
     // (undocumented)
     reorder: RowReorderState<TRow>;
-    // (undocumented)
     row: TRow;
     // (undocumented)
     rowCount: number;
@@ -2071,13 +1972,11 @@ export interface RowReorderHandleProps<TRow> {
 
 // @public
 export interface RowReorderHandleSlotProps {
-    // (undocumented)
     readonly className?: string;
     // (undocumented)
     readonly dragging: boolean;
     // (undocumented)
     readonly dragProps: ReturnType<RowReorderState<unknown>["dragProps"]>;
-    // (undocumented)
     readonly label: string;
     // (undocumented)
     readonly onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
@@ -2093,15 +1992,10 @@ export interface RowReorderHandleSlots {
 
 // @public
 export interface RowReorderMoveButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly disabled: boolean;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly onClick: () => void;
-    // (undocumented)
     readonly part: string;
 }
 
@@ -2164,7 +2058,6 @@ export function SavedViewsPanelChrome(input: Readonly<SavedViewsPanelChromeProps
 
 // @public
 export interface SavedViewsPanelChromeProps {
-    // (undocumented)
     className?: string;
     footer?: ReactNode;
     labels?: TableLabels;
@@ -2179,7 +2072,6 @@ export interface SavedViewsPanelChromeProps {
 
 // @public
 export interface SavedViewsPanelEmptyProps {
-    // (undocumented)
     readonly message: string;
 }
 
@@ -2188,11 +2080,9 @@ export interface SavedViewsPanelInputProps {
     readonly label: string;
     // (undocumented)
     readonly onCancel: () => void;
-    // (undocumented)
     readonly onChange: (next: string) => void;
     readonly onCommit: () => void;
     readonly ref: (element: HTMLInputElement | null) => void;
-    // (undocumented)
     readonly value: string;
 }
 
@@ -2228,9 +2118,7 @@ export interface SavedViewsPanelSlots {
 // @public
 export interface SavedViewsPanelSurfaceProps {
     readonly "data-adapttable-part": "saved-views-panel";
-    // (undocumented)
     readonly children: ReactNode;
-    // (undocumented)
     readonly className?: string;
     readonly footer?: ReactNode;
     readonly title: string;
@@ -2267,7 +2155,6 @@ export interface SelectionStatsChromeProps {
 
 // @public
 export interface SelectionStatsSlotProps {
-    // (undocumented)
     readonly className?: string;
     // (undocumented)
     readonly parts: readonly SelectionStatPart[];
@@ -2382,7 +2269,6 @@ export interface SidePanelChromeProps {
 
 // @public
 export interface SidePanelCloseProps {
-    // (undocumented)
     readonly label: string;
     // (undocumented)
     readonly onClose: () => void;
@@ -2391,7 +2277,6 @@ export interface SidePanelCloseProps {
 // @public
 export interface SidePanelFrameProps {
     readonly children: ReactNode;
-    // (undocumented)
     readonly className?: string;
     readonly side: "start" | "end";
 }
@@ -2428,7 +2313,6 @@ export interface SidePanelTabProps {
     };
     // (undocumented)
     readonly panel: SidePanelEntry;
-    // (undocumented)
     readonly selected: boolean;
 }
 
@@ -2463,7 +2347,6 @@ export interface StatusBarItem {
 
 // @public
 export interface StatusBarSlotProps {
-    // (undocumented)
     readonly className?: string;
     readonly items: readonly StatusBarItem[];
     readonly stats: ReactNode;
@@ -2617,7 +2500,6 @@ export function TreeCellChrome<TRow>(input: Readonly<TreeCellChromeProps<TRow>>)
 
 // @public
 export interface TreeCellChromeProps<TRow> extends TreeCellProps<TRow> {
-    // (undocumented)
     readonly slots: TreeToggleSlots;
 }
 
@@ -2636,15 +2518,11 @@ export interface TreeCellProps<TRow> {
 
 // @public
 export interface TreeToggleButtonProps {
-    // (undocumented)
     readonly className?: string;
-    // (undocumented)
     readonly expanded: boolean;
-    // (undocumented)
     readonly label: string;
     // (undocumented)
     readonly loading: boolean;
-    // (undocumented)
     readonly onClick: () => void;
 }
 
@@ -2653,7 +2531,6 @@ export function TreeToggleChrome<TRow>(input: Readonly<TreeToggleChromeProps<TRo
 
 // @public
 export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
-    // (undocumented)
     readonly slots: TreeToggleSlots;
 }
 

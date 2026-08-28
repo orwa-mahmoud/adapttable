@@ -50,6 +50,7 @@ export interface TreeCellProps<TRow> {
  * @public
  */
 export interface TreeCellChromeProps<TRow> extends TreeCellProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: TreeToggleSlots;
 }
 

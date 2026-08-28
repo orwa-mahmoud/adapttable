@@ -52,6 +52,7 @@ export interface ContextMenuSurfaceProps {
   readonly container?: HTMLElement;
   /** The entries, already rendered through the Item and Separator slots. */
   readonly children: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
 }
 

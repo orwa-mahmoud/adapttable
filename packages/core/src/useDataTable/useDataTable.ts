@@ -199,7 +199,9 @@ export interface RowElementProps extends Props {
  */
 export interface SortButtonElementProps extends Props {
   type: "button";
+  /** Whether the control is offered but not available. */
   disabled: boolean;
+  /** Called when pressed. */
   onClick: (event?: { shiftKey?: boolean }) => void;
   "data-sort-index"?: number;
   "aria-label": string;
@@ -212,6 +214,7 @@ export interface SortButtonElementProps extends Props {
  */
 export interface CellElementProps extends Props {
   role: string;
+  /** Inline style for the element. */
   style?: CSSProperties;
   "data-sort-index"?: number;
 }
@@ -224,9 +227,12 @@ export interface CellElementProps extends Props {
 export interface SearchInputElementProps extends Props {
   type: string;
   role: string;
+  /** Current value. */
   value: string;
+  /** Placeholder text. */
   placeholder: string;
   "aria-label": string;
+  /** Called with the new value. */
   onChange: (event: { currentTarget: { value: string } }) => void;
 }
 

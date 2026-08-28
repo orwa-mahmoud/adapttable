@@ -6,6 +6,7 @@ import type { KeyboardEvent, MouseEvent } from "react";
  * @public
  */
 export interface RowClickProps {
+  /** Called when pressed. */
   onClick: (event: MouseEvent<HTMLElement>) => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   /**
@@ -16,6 +17,7 @@ export interface RowClickProps {
   tabIndex: 0 | -1;
   /** Marks the element as an arrow-key navigation stop among its siblings. */
   "data-adapttable-row": "";
+  /** Inline style for the element. */
   style: { cursor: "pointer" };
 }
 

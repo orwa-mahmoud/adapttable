@@ -10,8 +10,11 @@ import type { HeaderGroupCell } from "./headerGroups";
  */
 export interface ColumnGroupToggleProps {
   cell: HeaderGroupCell;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
+  /** Called with the new state. */
   onToggle: (id: string) => void;
+  /** Class for the element. */
   className?: string;
 }
 
@@ -21,9 +24,13 @@ export interface ColumnGroupToggleProps {
  * @public
  */
 export interface ColumnGroupToggleButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Whether the section is open. */
   readonly expanded: boolean;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -42,6 +49,7 @@ export interface ColumnGroupToggleSlots {
  * @public
  */
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
+  /** The kit's components for each part. */
   readonly slots: ColumnGroupToggleSlots;
 }
 

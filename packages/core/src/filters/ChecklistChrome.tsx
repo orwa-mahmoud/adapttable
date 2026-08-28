@@ -47,11 +47,14 @@ export interface ChecklistClassNames {
  */
 export interface ChecklistFilterProps<TRow> {
   readonly def: FilterDef<TRow>;
+  /** Reads and writes the table's state. */
   readonly source: Pick<
     TableSource<TRow>,
     "allFilteredRows" | "extra" | "setExtra" | "facets"
   >;
+  /** Label overrides; gaps fall back to English. */
   readonly labels?: TableLabels;
+  /** Per-part classes. */
   readonly classNames?: ChecklistClassNames;
 }
 
@@ -61,9 +64,13 @@ export interface ChecklistFilterProps<TRow> {
  * @public
  */
 export interface ChecklistSearchProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Current value. */
   readonly value: string;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called with the new value. */
   readonly onChange: (value: string) => void;
 }
 
@@ -73,7 +80,9 @@ export interface ChecklistSearchProps {
  * @public
  */
 export interface ChecklistButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -83,11 +92,16 @@ export interface ChecklistButtonProps {
  * @public
  */
 export interface ChecklistCheckboxProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** The count as text, already formatted. */
   readonly count: string;
+  /** Whether the box is ticked. */
   readonly checked: boolean;
+  /** Class for the element. */
   readonly className?: string;
   readonly countClassName?: string;
+  /** Called with the new value. */
   readonly onChange: (checked: boolean) => void;
 }
 
@@ -108,6 +122,7 @@ export interface ChecklistSlots {
  * @public
  */
 export interface ChecklistChromeProps<TRow> extends ChecklistFilterProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: ChecklistSlots;
 }
 

@@ -221,9 +221,13 @@ export interface RowEditActionsProps<
  * @public
  */
 export interface RowEditButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
 }
 
@@ -244,6 +248,7 @@ export interface RowEditActionsSlots {
 export interface RowEditActionsChromeProps<
   TRow,
 > extends RowEditActionsProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: RowEditActionsSlots;
 }
 
@@ -424,9 +429,13 @@ export interface BatchEditBarProps<TRow> {
  * @public
  */
 export interface BatchEditButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -445,6 +454,7 @@ export interface BatchEditBarSlots {
  * @public
  */
 export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: BatchEditBarSlots;
 }
 

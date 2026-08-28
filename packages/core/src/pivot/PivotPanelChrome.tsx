@@ -47,7 +47,9 @@ const AGGREGATIONS: readonly AggregateName[] = [
  * @public
  */
 export interface PivotPanelSurfaceProps {
+  /** Content rendered inside. */
   readonly children: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
   /** Spread onto the surface — the public part name. */
   readonly "data-adapttable-part": "pivot-panel";
@@ -157,6 +159,7 @@ export interface PivotPanelChromeProps {
   labels?: TableLabels;
   /** The kit's controls. */
   slots: PivotPanelSlots;
+  /** Class for the element. */
   className?: string;
 }
 

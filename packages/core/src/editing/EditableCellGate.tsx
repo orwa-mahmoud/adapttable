@@ -85,10 +85,14 @@ function isFirstEditableColumn(
  */
 export interface EditableCellGateProps<TRow> {
   readonly editing: EditableCellEditing<TRow> | undefined;
+  /** The row being rendered. */
   readonly row: TRow;
+  /** The column being rendered. */
   readonly column: ColumnDef<TRow>;
   readonly rowId: string;
+  /** The rendered rows. */
   readonly rows: readonly TRow[];
+  /** Visible columns, in order. */
   readonly columns: readonly ColumnDef<TRow>[];
   readonly rowKey: (row: TRow) => string;
   /** Accessible name for the activate control. */
@@ -127,7 +131,9 @@ export interface EditableCellGateProps<TRow> {
 
 /** Kit activate control the gate calls while the cell is idle. */
 export interface EditableCellActivateProps {
+  /** Heading text. */
   readonly title: string;
+  /** Class for the element. */
   readonly className?: string;
   readonly saveStatus: string | undefined;
   readonly dirty: boolean;
@@ -137,6 +143,7 @@ export interface EditableCellActivateProps {
     preventDefault: () => void;
     stopPropagation: () => void;
   }) => void;
+  /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
   readonly onKeyDown: (event: {
     key: string;
@@ -147,10 +154,14 @@ export interface EditableCellActivateProps {
 
 /** Kit button the gate calls for conflict choices and undo. */
 export interface EditableCellButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Class for the element. */
   readonly className?: string;
   readonly onMouseDown?: (event: { preventDefault: () => void }) => void;
+  /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
 }
 

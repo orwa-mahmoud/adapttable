@@ -28,10 +28,14 @@ export interface FindBarProps {
  * @public
  */
 export interface FindSearchProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Placeholder text. */
   readonly placeholder: string;
+  /** Current value. */
   readonly value: string;
   readonly focusRef: (node: { focus: () => void } | null) => void;
+  /** Called with the new value. */
   readonly onChange: (value: string) => void;
   readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
@@ -49,10 +53,14 @@ export type FindButtonKind = "previous" | "next" | "close";
  * @public
  */
 export interface FindButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
   readonly kind: FindButtonKind;
+  /** Whether the control is offered but not available. */
   readonly disabled?: boolean;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -72,6 +80,7 @@ export interface FindBarSlots {
  * @public
  */
 export interface FindBarChromeProps extends FindBarProps {
+  /** The kit's components for each part. */
   readonly slots: FindBarSlots;
 }
 

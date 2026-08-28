@@ -54,6 +54,7 @@ export interface SidePanelFrameProps {
   readonly children: ReactNode;
   /** Which edge the panel is docked to, already resolved for direction. */
   readonly side: "start" | "end";
+  /** Class for the element. */
   readonly className?: string;
 }
 
@@ -64,6 +65,7 @@ export interface SidePanelFrameProps {
  */
 export interface SidePanelTabProps {
   readonly panel: SidePanelEntry;
+  /** Whether this item is selected. */
   readonly selected: boolean;
   /** Spread onto the button: role, tabindex, aria wiring, id and keys. */
   readonly buttonProps: {
@@ -85,6 +87,7 @@ export interface SidePanelTabProps {
  * @public
  */
 export interface SidePanelCloseProps {
+  /** Accessible name for the control. */
   readonly label: string;
   readonly onClose: () => void;
 }

@@ -58,6 +58,7 @@ export interface StatusBarSlotProps {
   readonly items: readonly StatusBarItem[];
   /** The selection statistics, when there are any; render after the items. */
   readonly stats: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
 }
 

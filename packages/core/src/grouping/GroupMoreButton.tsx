@@ -32,7 +32,9 @@ export interface GroupMoreButtonProps {
  * @public
  */
 export interface GroupMoreButtonSlotProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -51,6 +53,7 @@ export interface GroupMoreButtonSlots {
  * @public
  */
 export interface GroupMoreButtonChromeProps extends GroupMoreButtonProps {
+  /** The kit's components for each part. */
   readonly slots: GroupMoreButtonSlots;
 }
 

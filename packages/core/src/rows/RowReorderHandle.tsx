@@ -14,12 +14,15 @@ import type { RowReorderLabels, RowReorderState } from "./rowReorder";
  */
 export interface RowReorderHandleProps<TRow> {
   reorder: RowReorderState<TRow>;
+  /** Resolved labels, every key filled. */
   labels: RowReorderLabels;
   rowId: string;
   localIndex: number;
+  /** The row being rendered. */
   row: TRow;
   windowStart: number;
   rowCount: number;
+  /** Class for the element. */
   className?: string;
 }
 
@@ -29,9 +32,11 @@ export interface RowReorderHandleProps<TRow> {
  * @public
  */
 export interface RowReorderHandleSlotProps {
+  /** Accessible name for the control. */
   readonly label: string;
   readonly pressed: boolean;
   readonly dragging: boolean;
+  /** Class for the element. */
   readonly className?: string;
   readonly dragProps: ReturnType<RowReorderState<unknown>["dragProps"]>;
   readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
@@ -54,6 +59,7 @@ export interface RowReorderHandleSlots {
 export interface RowReorderHandleChromeProps<
   TRow,
 > extends RowReorderHandleProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: RowReorderHandleSlots;
 }
 
@@ -104,11 +110,14 @@ export function RowReorderHandleChrome<TRow>({
  */
 export interface RowReorderButtonsProps<TRow> {
   reorder: RowReorderState<TRow>;
+  /** Resolved labels, every key filled. */
   labels: RowReorderLabels;
   localIndex: number;
+  /** The row being rendered. */
   row: TRow;
   windowStart: number;
   rowCount: number;
+  /** Class for the element. */
   className?: string;
   upClassName?: string;
   downClassName?: string;
@@ -120,10 +129,15 @@ export interface RowReorderButtonsProps<TRow> {
  * @public
  */
 export interface RowReorderMoveButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Whether the control is offered but not available. */
   readonly disabled: boolean;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -144,6 +158,7 @@ export interface RowReorderButtonsSlots {
 export interface RowReorderButtonsChromeProps<
   TRow,
 > extends RowReorderButtonsProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: RowReorderButtonsSlots;
 }
 

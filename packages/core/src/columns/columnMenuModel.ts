@@ -26,8 +26,11 @@ export type PinnedSide = PinSide | undefined;
  * @public
  */
 export interface ColumnMenuRow<TRow> {
+  /** The column this row controls. */
   column: ColumnDef<TRow>;
+  /** The column's key. */
   key: string;
+  /** The column's name in prose, for the row's label. */
   name: string;
   /** Hidden columns keep their position; only the eye toggles. */
   hidden: boolean;
@@ -212,9 +215,13 @@ export function resetColumnLayout<TRow>(
  * @public
  */
 export interface ColumnMenuAction {
+  /** Stable identity for the action. */
   id: string;
+  /** Caption shown in the menu. */
   label: string;
+  /** Whether the action is offered but not available. */
   disabled: boolean;
+  /** Performs the action. */
   run: () => void;
 }
 
@@ -224,12 +231,19 @@ export interface ColumnMenuAction {
  * @public
  */
 export interface ColumnMenuActionContext<TRow = unknown> {
+  /** Resolved column-menu labels. */
   labels: ColumnMenuLabels;
+  /** Column layout state the actions operate on. */
   layout: UseColumnLayoutResult<TRow>;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
+  /** Sorts a column, absent when sorting is not offered. */
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+  /** Sizes a column to its content, absent when unavailable. */
   onAutoSizeColumn?: (key: string) => void;
+  /** Opens a column's filter, absent when unavailable. */
   onFilterColumn?: (key: string) => void;
   /** The host of THIS table — plugin menu actions resolve from here. */
   featureHost?: FeatureHostState<TRow>;
@@ -350,24 +364,41 @@ function pushColumnMenuExtra(
  * @public
  */
 export interface ColumnMenuLabels {
+  /** Name of the menu itself. */
   columns: string;
+  /** Pin the column to the leading edge. */
   pinStart: string;
+  /** Pin the column to the trailing edge. */
   pinEnd: string;
+  /** Return a pinned column to the scroll area. */
   unpin: string;
+  /** Move the column to the first position. */
   moveStart: string;
+  /** Move the column to the last position. */
   moveEnd: string;
+  /** Restore every column's order, width and visibility. */
   resetColumns: string;
   /** "Size columns to content" — the menu's auto-size action. */
   autoSizeColumns: string;
+  /** Show a hidden column. */
   showColumn: string;
+  /** Hide a visible column. */
   hideColumn: string;
+  /** Placeholder for the column search box. */
   searchColumns: string;
+  /** Show every hidden column. */
   showAllColumns: string;
+  /** Hide every hideable column. */
   hideAllColumns: string;
+  /** Unpin every pinned column. */
   unpinAllColumns: string;
+  /** Restore one column's own state. */
   resetColumn: string;
+  /** Sort the column ascending. */
   sortAscending: string;
+  /** Sort the column descending. */
   sortDescending: string;
+  /** Open the column's filter. */
   filterColumn: string;
   columnActions: string;
   autoSizeColumn: string;

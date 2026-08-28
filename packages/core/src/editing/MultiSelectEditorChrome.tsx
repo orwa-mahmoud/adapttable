@@ -69,6 +69,7 @@ export interface MultiSelectEditorChromeProps {
   readonly label: string;
   /** The adapter's key handling, already wired to `ctrl.onEditorKeyDown`. */
   readonly onKeyDown: (event: KeyboardEvent) => void;
+  /** The kit's components for each part. */
   readonly slots: MultiSelectEditorSlots;
 }
 

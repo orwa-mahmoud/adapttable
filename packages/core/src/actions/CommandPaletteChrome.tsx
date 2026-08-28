@@ -46,7 +46,9 @@ export interface CommandPaletteSurfaceProps {
   readonly label: string;
   /** Close it — bind to the kit's own dismiss channel. */
   readonly onClose: () => void;
+  /** Content rendered inside. */
   readonly children: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
 }
 

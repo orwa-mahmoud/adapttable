@@ -31,10 +31,14 @@ export interface TreeToggleProps<TRow> {
  * @public
  */
 export interface TreeToggleButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Whether the section is open. */
   readonly expanded: boolean;
   readonly loading: boolean;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
@@ -53,6 +57,7 @@ export interface TreeToggleSlots {
  * @public
  */
 export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: TreeToggleSlots;
 }
 

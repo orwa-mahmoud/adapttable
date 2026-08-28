@@ -26,8 +26,11 @@ export type FilterWidgetKind = FilterType;
  */
 export interface FilterWidgetRenderProps<TRow = unknown> {
   readonly def: FilterDef<TRow>;
+  /** Reads and writes the table's state. */
   readonly source: FilterFormSource<TRow>;
+  /** Resolved labels, every key filled. */
   readonly labels: Required<TableLabels>;
+  /** Class for the element. */
   readonly className?: string;
 }
 

@@ -177,6 +177,7 @@ export interface SavedViewRowControl {
 export interface SavedViewsPanelSurfaceProps {
   /** The card's heading, already localized. */
   readonly title: string;
+  /** Content rendered inside. */
   readonly children: ReactNode;
   /**
    * Anything the host wants inside the card, under the list — a note about
@@ -184,6 +185,7 @@ export interface SavedViewsPanelSurfaceProps {
    * as a caption belonging to whatever follows it.
    */
   readonly footer?: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
   /** Spread onto the surface — the public part name. */
   readonly "data-adapttable-part": "saved-views-panel";
@@ -255,7 +257,9 @@ export interface SavedViewsPanelInputProps {
    * antd's `InputRef`, for one — unwrap it before calling this.
    */
   readonly ref: (element: HTMLInputElement | null) => void;
+  /** Current value. */
   readonly value: string;
+  /** Called with the new value. */
   readonly onChange: (next: string) => void;
   /** Enter commits, Escape abandons — bind both. */
   readonly onCommit: () => void;
@@ -268,6 +272,7 @@ export interface SavedViewsPanelInputProps {
  * @public
  */
 export interface SavedViewsPanelEmptyProps {
+  /** Body text under the heading. */
   readonly message: string;
 }
 
@@ -311,6 +316,7 @@ export interface SavedViewsPanelChromeProps {
   footer?: ReactNode;
   /** The kit's controls. */
   slots: SavedViewsPanelSlots;
+  /** Class for the element. */
   className?: string;
 }
 

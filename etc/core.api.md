@@ -502,7 +502,6 @@ export interface CellElementProps extends Props {
     "data-sort-index"?: number;
     // (undocumented)
     role: string;
-    // (undocumented)
     style?: CSSProperties;
 }
 
@@ -832,32 +831,21 @@ export interface ColumnLayoutState {
 
 // @public
 export interface ColumnMenuAction {
-    // (undocumented)
     disabled: boolean;
-    // (undocumented)
     id: string;
-    // (undocumented)
     label: string;
-    // (undocumented)
     run: () => void;
 }
 
 // @public
 export interface ColumnMenuActionContext<TRow = unknown> {
     featureHost?: FeatureHostState<TRow>;
-    // (undocumented)
     labels: ColumnMenuLabels;
-    // (undocumented)
     layout: UseColumnLayoutResult<TRow>;
-    // (undocumented)
     onAutoSizeColumn?: (key: string) => void;
-    // (undocumented)
     onFilterColumn?: (key: string) => void;
-    // (undocumented)
     onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-    // (undocumented)
     sortBy?: string;
-    // (undocumented)
     sortDir?: "asc" | "desc";
 }
 
@@ -1248,9 +1236,7 @@ export function EditableCellGate<TRow>(props: EditableCellGateProps<TRow>): Reac
 // @public
 export interface EditableCellGateProps<TRow> {
     readonly activateClassName?: string;
-    // (undocumented)
     readonly column: ColumnDef<TRow>;
-    // (undocumented)
     readonly columns: readonly ColumnDef<TRow>[];
     // (undocumented)
     readonly display: ReactNode;
@@ -1261,13 +1247,11 @@ export interface EditableCellGateProps<TRow> {
     readonly kitRendersError?: boolean;
     readonly renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
     readonly rollbackClassName?: string;
-    // (undocumented)
     readonly row: TRow;
     // (undocumented)
     readonly rowId: string;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
-    // (undocumented)
     readonly rows: readonly TRow[];
     readonly saveErrorClassName?: string;
     readonly slots: EditableCellSlots$1;
@@ -1822,13 +1806,10 @@ export function filterWidgetKind(def: Pick<FilterDef, "type">, registry: FilterT
 
 // @public
 export interface FilterWidgetRenderProps<TRow = unknown> {
-    // (undocumented)
     readonly className?: string;
     // (undocumented)
     readonly def: FilterDef<TRow>;
-    // (undocumented)
     readonly labels: Required<TableLabels>;
-    // (undocumented)
     readonly source: FilterFormSource<TRow>;
 }
 
@@ -2422,7 +2403,6 @@ export interface MultiSelectEditorChromeProps {
     readonly ctrl: EditableCellEditorCtrl;
     readonly label: string;
     readonly onKeyDown: (event: KeyboardEvent_2) => void;
-    // (undocumented)
     readonly slots: MultiSelectEditorSlots;
 }
 
@@ -3169,19 +3149,16 @@ export const SEARCH_DEBOUNCE_MS = 300;
 export interface SearchInputElementProps extends Props {
     // (undocumented)
     "aria-label": string;
-    // (undocumented)
     onChange: (event: {
         currentTarget: {
             value: string;
         };
     }) => void;
-    // (undocumented)
     placeholder: string;
     // (undocumented)
     role: string;
     // (undocumented)
     type: string;
-    // (undocumented)
     value: string;
 }
 
@@ -3283,9 +3260,7 @@ export interface SortButtonElementProps extends Props {
     "aria-label": string;
     // (undocumented)
     "data-sort-index"?: number;
-    // (undocumented)
     disabled: boolean;
-    // (undocumented)
     onClick: (event?: {
         shiftKey?: boolean;
     }) => void;

@@ -39,6 +39,7 @@ export interface SelectionStatPart {
  */
 export interface SelectionStatsSlotProps {
   readonly parts: readonly SelectionStatPart[];
+  /** Class for the element. */
   readonly className?: string;
 }
 
