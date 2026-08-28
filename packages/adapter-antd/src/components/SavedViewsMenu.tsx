@@ -7,13 +7,21 @@ import { useSavedViews } from "@adapttable/core";
 import { Button, Divider, Flex, Input, Popover } from "antd";
 import { useEffect, useRef, useState } from "react";
 
-/** The label strings the saved-views menu renders. */
+/**
+ * The label strings the saved-views menu renders.
+ *
+ * @public
+ */
 export type SavedViewsLabels = Pick<
   Required<TableLabels>,
   "savedViews" | "saveView" | "viewName" | "deleteView"
 >;
 
-/** Props for {@link SavedViewsMenu}. */
+/**
+ * Props for {@link SavedViewsMenu}.
+ *
+ * @public
+ */
 export interface SavedViewsMenuProps {
   /** Storage + URL wiring, forwarded to core's `useSavedViews`. */
   options: UseSavedViewsOptions;
@@ -29,6 +37,8 @@ export interface SavedViewsMenuProps {
  * state. Controlled open state so Escape dismisses it (antd's Popover has no
  * built-in Escape handling) and the trigger reports `aria-expanded`, matching
  * the ColumnMenu beside it.
+ *
+ * @public
  */
 export function SavedViewsMenu({
   options,

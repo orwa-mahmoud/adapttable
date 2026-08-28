@@ -9,7 +9,11 @@ import type {
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
-/** Overridable sub-components. */
+/**
+ * Overridable sub-components.
+ *
+ * @public
+ */
 export interface DataTableSlots {
   /** Replace the loading state shown while the first page loads. */
   skeleton?: ReactNode;
@@ -40,6 +44,8 @@ export interface DataTableSlots {
  * Structural class hooks for the antd adapter. Fine-grained per-part
  * styling belongs to `@adapttable/unstyled` / `@adapttable/shadcn`; here
  * the kit owns the visuals and these hooks target the wrapper elements.
+ *
+ * @public
  */
 export interface DataTableClassNames {
   /** The root wrapper (also reachable via `className`). */
@@ -116,6 +122,8 @@ interface DataTablePropsBase<TRow>
  * core's data-mode union, so `mode="server"` requires `onQueryChange`
  * at compile time and `mode="frontend"` turns it into a pure
  * notification.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;
