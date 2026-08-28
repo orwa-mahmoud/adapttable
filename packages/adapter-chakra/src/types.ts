@@ -9,7 +9,11 @@ import type {
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
-/** Overridable sub-components. */
+/**
+ * Overridable sub-components.
+ *
+ * @public
+ */
 export interface DataTableSlots {
   /** Replace the loading skeleton. */
   skeleton?: ReactNode;
@@ -35,7 +39,11 @@ export interface DataTableSlots {
   error?: Slot<TableErrorState>;
 }
 
-/** Per-part class hooks — restyle without replacing components. */
+/**
+ * Per-part class hooks — restyle without replacing components.
+ *
+ * @public
+ */
 export interface DataTableClassNames {
   root?: string;
   toolbar?: string;
@@ -113,6 +121,8 @@ interface DataTablePropsBase<TRow> extends Omit<
  * with core's data-mode union, so `mode="server"` requires
  * `onQueryChange` at compile time and `mode="frontend"` turns it into a
  * pure notification.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;

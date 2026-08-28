@@ -32,7 +32,11 @@ function CrossIcon() {
   );
 }
 
-/** The label strings the saved-views menu renders. */
+/**
+ * The label strings the saved-views menu renders.
+ *
+ * @public
+ */
 export type SavedViewsLabels = Pick<
   Required<TableLabels>,
   "savedViews" | "saveView" | "viewName" | "deleteView"
@@ -51,6 +55,8 @@ export interface SavedViewsMenuProps {
  * Saved-views toolbar menu on core's `useSavedViews`: a popover listing the
  * captured views (click applies and closes; the trailing × deletes) above a
  * save row that snapshots the table's CURRENT URL state under a typed name.
+ *
+ * @public
  */
 export function SavedViewsMenu({
   options,

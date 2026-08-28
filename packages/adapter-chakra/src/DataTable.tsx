@@ -63,6 +63,8 @@ function tableSize(
  * core's `useDataTableShell`; this renders only Chakra controls over it.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
