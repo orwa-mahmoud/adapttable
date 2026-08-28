@@ -19,6 +19,7 @@
  * Packages must be built first (`pnpm build`).
  */
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -40,6 +41,36 @@ const LOCAL = process.argv.includes("--local");
 // fails on WARNINGS, which would make undocumented-symbol notes block CI.
 // The gate here is exactly one question: did the public surface change?
 const OUT = LOCAL ? ETC : mkdtempSync(join(tmpdir(), "api-reports-"));
+if (!LOCAL && existsSync(ETC)) {
+  // Seed the throwaway folder with what is committed. Extracting into an empty
+  // directory makes API Extractor report every single report as newly created —
+  // 102 notices that say nothing about the code.
+  for (const file of readdirSync(ETC).filter((f) => f.endsWith(".api.md"))) {
+    copyFileSync(join(ETC, file), join(OUT, file));
+  }
+}
+
+/**
+ * Names the deprecated main-entry aliases re-export. The alias and its source
+ * module both land in core's rollup, so the d.ts bundler renames the second
+ * copy (`pinnedRowPart$1`) and API Extractor then reports a symbol that exists
+ * only because of the duplication. Keyed on the BASE name, never the generated
+ * one: `$1` is assigned by collision order, so a literal list would silently
+ * stop matching the day another duplicate appears. The set empties itself when
+ * the aliases are deleted.
+ */
+const ALIAS_NAMES = new Set(
+  [
+    ...readFileSync(
+      join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
+      "utf8"
+    ).matchAll(/^export\s+(?:type|const)\s+([A-Za-z_$][\w$]*)/gm),
+  ].map((m) => m[1])
+);
+
+/** Warnings deferred behind ALIAS_NAMES, counted for one closing summary. */
+let deferredAliasWarnings = 0;
+let compilerNoticeShown = false;
 
 /** Library packages (cli ships a bin, not an API). */
 const PACKAGES = readdirSync(join(REPO_ROOT, "packages")).filter(
@@ -126,6 +157,31 @@ function extractOne({ dir, report, entry }) {
   const result = Extractor.invoke(config, {
     localBuild: true,
     showVerboseMessages: false,
+    messageCallback: (message) => {
+      // Said once per report otherwise, and it is about api-extractor's own
+      // bundled TypeScript rather than anything in this repository.
+      if (message.messageId === "console-compiler-version-notice") {
+        if (compilerNoticeShown) message.logLevel = "none";
+        compilerNoticeShown = true;
+        return;
+      }
+      // This repository exports its internal machinery without an underscore
+      // prefix on purpose — renaming a published symbol to `_name` would be a
+      // breaking change. The tag states the support level; the name does not.
+      if (message.messageId === "ae-internal-missing-underscore") {
+        message.logLevel = "none";
+        return;
+      }
+      // A symbol the d.ts bundler invented for a deprecated alias's duplicate.
+      if (message.messageId === "ae-forgotten-export") {
+        const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
+        const base = named?.[1].replace(/(\$|_)\d+$/, "");
+        if (base && ALIAS_NAMES.has(base)) {
+          deferredAliasWarnings += 1;
+          message.logLevel = "none";
+        }
+      }
+    },
   });
   if (!result.succeeded) {
     console.error(`✗ ${report}: extraction errored`);
@@ -159,3 +215,9 @@ console.log(
     ? "\napi-reports: regenerated — commit any changes under etc/."
     : "\napi-reports: every committed report matches the built types."
 );
+if (deferredAliasWarnings > 0) {
+  console.log(
+    `api-reports: ${deferredAliasWarnings} forgotten-export warning(s) deferred — ` +
+      "duplicates of the deprecated main-entry aliases, which go when they do."
+  );
+}
