@@ -144,12 +144,18 @@ export type GroupSort<TRow> =
 /**
  * Same mapper signature as `summaryRow` — one API for page footer + groups.
  *
- * @internal
+ * @public
  */
 export type GroupAggregatesFn<TRow> = (
   rows: readonly TRow[]
 ) => Partial<Record<string, ReactNode>>;
 
+/**
+ * What `buildGroupedFlatModel` needs to flatten grouped rows into the single
+ * list a table renders.
+ *
+ * @public
+ */
 export interface BuildGroupedFlatModelOptions<TRow> {
   /** Leaf rows to partition (frontend: prefer `allFilteredRows`). */
   rows: readonly TRow[];
@@ -196,7 +202,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
 /**
  * How much of a paged group model the reader has asked to see.
  *
- * @internal
+ * @public
  */
 export interface GroupPaging {
   /** Extra top-level groups revealed beyond the first page. */

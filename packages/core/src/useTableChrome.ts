@@ -271,7 +271,7 @@ export interface BulkBarChromeProps {
  * (not `TableBody`) so it never collides with MUI's `TableBody` component
  * in consumer imports.
  *
- * @internal
+ * @public
  */
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
@@ -1703,7 +1703,7 @@ export function useChromeScrollReset<TRow>(
 /**
  * Pointer/click handlers returned by `useFilterTriggerToggle`.
  *
- * @internal
+ * @public
  */
 export interface FilterTriggerToggle {
   /** Records that the press began on the trigger. */

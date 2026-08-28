@@ -14,7 +14,7 @@ export const COLUMN_DND_MIME = "application/x-adapttable-column";
  * Props that make a whole menu ROW draggable (so the browser's drag image is
  * the full row — you see the column move). Pair with `columnDropProps`.
  *
- * @internal
+ * @public
  */
 export interface ColumnRowDragProps {
   /** Always true — the whole row is the drag source. */
@@ -59,7 +59,7 @@ export function columnRowDragProps(key: string): ColumnRowDragProps {
 /**
  * Props for a small, focusable reorder grip — keyboard a11y for the row drag.
  *
- * @internal
+ * @public
  */
 export interface ColumnReorderKeyProps {
   /** `button`, so the grip is announced as an action. */
@@ -127,7 +127,7 @@ export function columnReorderKeyProps(
 /**
  * Props for a row that accepts a dropped column, moving it to this index.
  *
- * @internal
+ * @public
  */
 export interface ColumnDropProps {
   /** Marks the row as a valid drop target while a column is over it. */
@@ -167,7 +167,7 @@ export function columnDropProps(
 /**
  * Indicator attributes for a column-menu row during a reorder drag.
  *
- * @internal
+ * @public
  */
 export interface ColumnDragRowAttrs {
   /** Present on the row being dragged (kits dim it). */
@@ -179,7 +179,7 @@ export interface ColumnDragRowAttrs {
 /**
  * Live drag state + composed prop builders from `useColumnDragState`.
  *
- * @internal
+ * @public
  */
 export interface ColumnDragState {
   /** Key currently being dragged, or `null` outside a drag. */

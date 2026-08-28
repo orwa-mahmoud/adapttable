@@ -11,7 +11,7 @@ import { type RowPairMeasurer, useRowPairMeasurer } from "./measureRowPair";
 /**
  * One row/card entry materialized from a virtual window.
  *
- * @internal
+ * @public
  */
 export interface VirtualTableRow<TRow> {
   /** Row data for this visual slot. */

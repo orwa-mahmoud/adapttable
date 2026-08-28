@@ -5,7 +5,7 @@ import { useDebounce } from "../hooks/useDebounce";
 /**
  * A controlled, debounced search input bound to a committed value.
  *
- * @internal
+ * @public
  */
 export interface SearchInputState {
   /** The live (uncommitted) input value. */

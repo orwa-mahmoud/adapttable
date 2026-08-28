@@ -20,7 +20,7 @@ export const COLUMN_RESIZE_STEP = 16;
  * `separator`/splitter would require `aria-valuenow/min/max`); ArrowLeft/Right
  * resize it for keyboard users.
  *
- * @internal
+ * @public
  */
 export interface ColumnResizeHandleProps {
   /** ARIA role for the element. */

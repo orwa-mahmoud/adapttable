@@ -99,7 +99,11 @@ function inTextEntry(target: EventTarget | null): boolean {
   );
 }
 
-/** What {@link useShortcuts} needs. */
+/**
+ * What {@link useShortcuts} needs.
+ *
+ * @public
+ */
 export interface UseShortcutsOptions {
   /** Off unless the host armed it; nothing is bound when false. */
   enabled: boolean;

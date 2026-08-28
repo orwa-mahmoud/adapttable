@@ -20,7 +20,7 @@ import { useEventCallback } from "../hooks/useEventCallback";
 /**
  * Dirty state for the whole table.
  *
- * @internal
+ * @public
  */
 export interface DirtyCellState {
   /** Whether this cell holds a change nobody has confirmed. */

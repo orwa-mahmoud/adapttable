@@ -1,7 +1,11 @@
 import type { ColumnDef } from "../types";
 
-/** A column identity for width resolution — just its key and declared width. */
-type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
+/**
+ * A column identity for width resolution — just its key and declared width.
+ *
+ * @public
+ */
+export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
 
 /** Fallback width (px) for a pinned column with no resolvable declared width. */
 export const FALLBACK_PIN_WIDTH = 150;

@@ -42,7 +42,7 @@ export interface BatchRowEdit<TRow> {
 /**
  * Headless batch-editing state.
  *
- * @internal
+ * @public
  */
 export interface BatchEditingState<TRow> {
   /** How many rows are waiting — what a "3 unsaved rows" line reads. */

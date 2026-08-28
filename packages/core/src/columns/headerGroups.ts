@@ -112,7 +112,11 @@ export interface HeaderGroupCell {
   align?: GroupedHeaderAlign;
 }
 
-/** Alignment of a spanning group header. */
+/**
+ * Alignment of a spanning group header.
+ *
+ * @public
+ */
 export type GroupedHeaderAlign = "start" | "center" | "end";
 
 /**

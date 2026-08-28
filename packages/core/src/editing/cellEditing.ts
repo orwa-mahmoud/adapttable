@@ -120,7 +120,7 @@ export interface CustomCellEditorCtrl {
  * `editable` uses a bivariant callback (same pattern as React's event
  * handlers) so `ColumnDef<Person>` is assignable to `EditableColumnLike`.
  *
- * @internal
+ * @public
  */
 export interface EditableColumnLike<TRow = unknown> {
   /** The column's key. */
@@ -149,7 +149,7 @@ export interface EditableColumnLike<TRow = unknown> {
 /**
  * The active cell being edited.
  *
- * @internal
+ * @public
  */
 export interface CellEditTarget {
   /** Identity of the row being edited. */
@@ -161,7 +161,7 @@ export interface CellEditTarget {
 /**
  * Result of a successful commit (host applies via `onCellEdit`).
  *
- * @internal
+ * @public
  */
 export interface CellEditCommit {
   /** Identity of the row that was edited. */
@@ -269,7 +269,7 @@ export function isDraftChecked(draft: string): boolean {
 /**
  * Normalize select options to `{ value, label }` pairs.
  *
- * @internal
+ * @public
  */
 export function normalizeEditorOptions(
   options: readonly CellEditorOption[] | readonly string[]

@@ -31,18 +31,30 @@ import {
 } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 
-/** Extra column-menu actions a plugin appends after the built-ins. */
+/**
+ * Extra column-menu actions a plugin appends after the built-ins.
+ *
+ * @public
+ */
 export type ColumnMenuActionFactory<TRow = unknown> = (
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
 ) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined;
 
-/** Extra context-menu entries a plugin appends after the built-ins. */
+/**
+ * Extra context-menu entries a plugin appends after the built-ins.
+ *
+ * @public
+ */
 export type ContextMenuItemsFactory<TRow = unknown> = (
   target: ContextMenuTarget<TRow>
 ) => readonly ContextMenuItem[];
 
-/** A patch {@link TableFeatureHost.extendFilterType} queued for the registry. */
+/**
+ * A patch {@link TableFeatureHost.extendFilterType} queued for the registry.
+ *
+ * @public
+ */
 export interface FilterTypeExtend {
   /** The filter type being extended. */
   readonly type: string;
@@ -53,6 +65,8 @@ export interface FilterTypeExtend {
 /**
  * Registrations collected during {@link TableFeature.setup}. The public host
  * only has `register*` methods; the table reads these bags.
+ *
+ * @public
  */
 export interface FeatureHostState<TRow = unknown> {
   /** Filter types features registered. */

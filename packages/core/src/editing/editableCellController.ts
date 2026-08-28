@@ -34,7 +34,7 @@ import type { CellValidator, EditValidationState } from "./validation";
 /**
  * Opt-in editing bundle from {@link TableChrome.editing}.
  *
- * @internal
+ * @public
  */
 export interface EditableCellEditing<TRow> {
   /**
@@ -89,14 +89,14 @@ export interface EditableCellEditing<TRow> {
 /**
  * Display / edit mode for one cell.
  *
- * @internal
+ * @public
  */
 export type EditableCellMode = "display" | "activatable" | "editing";
 
 /**
  * Controller returned by `editableCellController`.
  *
- * @internal
+ * @public
  */
 export interface EditableCellController<TRow = unknown> {
   /** Which editing mode is active. */
@@ -161,6 +161,8 @@ export interface EditableCellController<TRow = unknown> {
  * Derive the per-cell editing controller. When `editing` is omitted (host
  * did not pass `onCellEdit`), always returns `mode: "display"` — zero UI
  * change for tables that never opted in.
+ *
+ * @public
  */
 export function editableCellController<TRow>(options: {
   editing: EditableCellEditing<TRow> | undefined;

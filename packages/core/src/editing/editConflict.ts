@@ -60,7 +60,7 @@ export type EditConflictHandler<TRow> = (
 /**
  * Headless conflict state for the active editor.
  *
- * @internal
+ * @public
  */
 export interface EditConflictState<TRow> {
   /** The conflict being asked about, or `null`. */
@@ -83,7 +83,7 @@ export interface EditConflictState<TRow> {
 /**
  * What {@link EditConflictState.reconcile} needs to judge one live update.
  *
- * @internal
+ * @public
  */
 export interface ReconcileLiveEdit<TRow> {
   /** The active cell, or `null` when idle. */

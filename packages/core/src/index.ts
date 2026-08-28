@@ -888,3 +888,54 @@ export {
 
 /* ── Adapter machinery (deprecated on the main entry; gone at v3) ──── */
 export * from "./mainEntryAliases";
+
+/* ── Types the entry's own signatures hand back ────────────────────────
+ * A caller of `@adapttable/core` receives these from exported functions, so
+ * they have to be nameable from the same door. Value exports keep their
+ * runtime shape; the rest are types.
+ */
+export type { TableCommandOptions } from "./actions/commandRegistry";
+export type { UseShortcutsOptions } from "./actions/useShortcuts";
+export type {
+  ColumnMenuLabels,
+  ColumnMenuRow,
+} from "./columns/columnMenuModel";
+export type {
+  ColumnDragState,
+  ColumnDropProps,
+  ColumnReorderKeyProps,
+  ColumnRowDragProps,
+} from "./columns/columnReorder";
+export type { ColumnResizeHandleProps } from "./columns/columnResize";
+export type { GroupedHeaderAlign } from "./columns/headerGroups";
+export type {
+  PinLeads,
+  PinOffset,
+  PinnedCellStyle,
+} from "./columns/useColumnLayout";
+export { editableCellController } from "./editing/editableCellController";
+export type { EditValidationState, RowValidator } from "./editing/validation";
+export type { FeatureHostState } from "./features/currentHost";
+export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
+export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
+export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
+export type { FeatureNoticeAppearance } from "./state/featureNotices";
+export type { SearchInputState } from "./useDataTable/useSearchInput";
+export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
+export type { RowPairMeasurer } from "./virtual/measureRowPair";
+export type { VirtualTableRow } from "./virtual/useTableVirtualization";
+export type { PinnedSide } from "./columns/columnMenuModel";
+export type { ColumnDragRowAttrs } from "./columns/columnReorder";
+export type {
+  CellValidator,
+  ValidationCheckResult,
+  ValidationTarget,
+} from "./editing/validation";
+export type {
+  ColumnMenuActionFactory,
+  ContextMenuItemsFactory,
+  FilterTypeExtend,
+} from "./features/currentHost";
+export type { ExportCsvProp } from "./export/tableCsv";
+export type { WidthColumn } from "./columns/columnWidths";
+export { SESSION_ATTR } from "./filters/headerFilterOverlay";

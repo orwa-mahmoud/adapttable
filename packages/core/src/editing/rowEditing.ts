@@ -26,14 +26,14 @@ import { observeEdit } from "./editingEvents";
 /**
  * The drafts a row edit holds, by column key.
  *
- * @internal
+ * @public
  */
 export type RowEditDrafts = Readonly<Record<string, string>>;
 
 /**
  * Headless row-editing state.
  *
- * @internal
+ * @public
  */
 export interface RowEditingState<TRow> {
   /** The row being edited, or `null` when none is. */

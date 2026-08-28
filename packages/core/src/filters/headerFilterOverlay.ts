@@ -13,7 +13,13 @@ import { type FilterTypeRegistry, filterWidgetKind } from "./filterRegistry";
 import { filterOpKey, isValuelessFilterOp } from "./operators";
 import { readRangeWidget } from "./rangeWidget";
 
-const SESSION_ATTR = "data-adapttable-header-filter";
+/**
+ * Attribute tying a header filter's trigger to its overlay, so one editing
+ * session is identifiable across both.
+ *
+ * @public
+ */
+export const SESSION_ATTR = "data-adapttable-header-filter";
 
 /**
  * Props that keep one header filter's overlay session together.

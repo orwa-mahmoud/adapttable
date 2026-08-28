@@ -22,14 +22,14 @@ import { observeEdit } from "./editingEvents";
 /**
  * What a cell's last save is doing.
  *
- * @internal
+ * @public
  */
 export type CellSaveStatus = "saving" | "failed";
 
 /**
  * One cell's failed save, with what it takes to retry or undo it.
  *
- * @internal
+ * @public
  */
 export interface FailedCellSave<TRow> {
   /** The row as it was before the edit — what a rollback restores. */
@@ -61,7 +61,7 @@ export interface UseCellSaveStateOptions<TRow> {
 /**
  * Per-cell save state for the whole table.
  *
- * @internal
+ * @public
  */
 export interface CellSaveState<TRow> {
   /** What this cell's last save is doing, if anything. */

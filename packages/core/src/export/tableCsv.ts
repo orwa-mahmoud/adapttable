@@ -281,8 +281,12 @@ export interface ExportInfo<TRow> {
   filename: string;
 }
 
-/** Boolean-or-options CSV export prop (off / on / configured). */
-type ExportCsvProp<TRow = unknown> =
+/**
+ * Boolean-or-options CSV export prop (off / on / configured).
+ *
+ * @public
+ */
+export type ExportCsvProp<TRow = unknown> =
   boolean | ExportCsvOptions<TRow> | undefined;
 
 /**

@@ -210,13 +210,13 @@ export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 // @internal
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
-// @internal
+// @public
 export interface ColumnDragRowAttrs {
     "data-dragging"?: "";
     "data-drop"?: "before" | "after";
 }
 
-// @internal
+// @public
 export interface ColumnDragState {
     draggingKey: string | null;
     dropProps: (index: number, move: (key: string, toIndex: number) => void) => ColumnDropProps;
@@ -227,7 +227,7 @@ export interface ColumnDragState {
     };
 }
 
-// @internal
+// @public
 export interface ColumnDropProps {
     onDragOver: (event: DragEvent_2<HTMLElement>) => void;
     onDrop: (event: DragEvent_2<HTMLElement>) => void;
@@ -361,7 +361,7 @@ export interface ColumnMenuRow<TRow> {
     pinned: PinnedSide;
 }
 
-// @internal
+// @public
 export interface ColumnReorderKeyProps {
     "aria-label": string;
     "data-adapttable-grip": "";
@@ -370,7 +370,7 @@ export interface ColumnReorderKeyProps {
     tabIndex: 0;
 }
 
-// @internal
+// @public
 export interface ColumnResizeHandleProps {
     "aria-label": string;
     onDoubleClick: (event: MouseEvent_2<HTMLElement>) => void;
@@ -380,7 +380,7 @@ export interface ColumnResizeHandleProps {
     tabIndex: 0;
 }
 
-// @internal
+// @public
 export interface ColumnRowDragProps {
     draggable: true;
     onDragStart: (event: DragEvent_2<HTMLElement>) => void;
@@ -1222,7 +1222,7 @@ export interface FilterTreeSlots {
     readonly Select: (props: FilterTreeSelectProps) => ReactNode;
 }
 
-// @internal
+// @public
 export interface FilterTriggerToggle {
     onClick: () => void;
     onPointerDown: () => void;
@@ -1541,7 +1541,7 @@ export function pinActionLabel(current: PinnedSide, labels: {
 // @internal
 export function PinIcon(): ReactElement;
 
-// @internal
+// @public
 export interface PinLeads {
     end?: number;
     start?: number;
@@ -1553,7 +1553,7 @@ export const PINNED_BOTTOM_PART = "pinned-bottom";
 // @internal
 export const PINNED_TOP_PART = "pinned-top";
 
-// @internal
+// @public
 export interface PinnedCellStyle {
     insetInlineEnd?: number;
     insetInlineStart?: number;
@@ -1595,7 +1595,7 @@ export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): 
 // @public
 export type PinnedSide = PinSide | undefined;
 
-// @internal
+// @public
 export interface PinOffset {
     inset: number;
     side: PinSide;
@@ -1809,7 +1809,7 @@ export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 // @internal
 export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
 
-// @internal
+// @public
 export interface RowPairMeasurer {
     detail: (index: number) => (node: Element | null) => void;
     row: (index: number) => (node: Element | null) => void;
@@ -2026,7 +2026,7 @@ export interface SavedViewsPanelSurfaceProps {
 // @internal
 export function SearchIcon(): ReactElement;
 
-// @internal
+// @public
 export interface SearchInputState {
     setValue: (next: string) => void;
     value: string;
@@ -2257,7 +2257,7 @@ export function stopEditKeys(event: Readonly<{
     stopPropagation: () => void;
 }>): void;
 
-// @internal
+// @public
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 // @internal
@@ -2684,7 +2684,7 @@ export function viewControlsToolbar(props: {
     toggle: () => void;
 }): ViewControlsToolbar;
 
-// @internal
+// @public
 export interface VirtualTableRow<TRow> {
     index: number;
     key: string;

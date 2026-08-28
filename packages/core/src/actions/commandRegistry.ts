@@ -78,7 +78,11 @@ export function filterCommands(
     .map(({ item }) => item);
 }
 
-/** What {@link tableCommands} needs to build the table-wide actions. */
+/**
+ * What {@link tableCommands} needs to build the table-wide actions.
+ *
+ * @public
+ */
 export interface TableCommandOptions {
   /** Labels for the built-in commands. */
   labels: {

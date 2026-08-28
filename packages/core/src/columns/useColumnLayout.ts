@@ -100,7 +100,7 @@ export interface UseColumnLayoutResult<TRow> {
 /**
  * A pinned column's side plus its sticky inset in px.
  *
- * @internal
+ * @public
  */
 export interface PinOffset {
   /** Which edge the column sticks to. */
@@ -115,7 +115,7 @@ export interface PinOffset {
  * a `"start"`-pinned column sticks to the inline START (the right edge under
  * `dir="rtl"`), matching antd's native `fixed` behaviour.
  *
- * @internal
+ * @public
  */
 export interface PinnedCellStyle {
   /** Always `sticky` — that is what makes the cell pin. */
@@ -152,7 +152,7 @@ export const PIN_Z = {
  * in front of the pinned data columns, so a start-pinned column sits just after
  * a pinned checkbox and an end-pinned column just before pinned actions.
  *
- * @internal
+ * @public
  */
 export interface PinLeads {
   /** Width reserved at the leading edge. */

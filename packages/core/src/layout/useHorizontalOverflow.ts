@@ -1,6 +1,10 @@
 import { useCallback, useRef, useState } from "react";
 
-/** Result of {@link useHorizontalOverflow}. */
+/**
+ * Result of {@link useHorizontalOverflow}.
+ *
+ * @public
+ */
 export interface HorizontalOverflow<E extends HTMLElement> {
   /** Callback ref for the wrapper element to measure. */
   ref: (node: E | null) => void;

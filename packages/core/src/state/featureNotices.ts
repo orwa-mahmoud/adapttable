@@ -27,7 +27,11 @@ export type FeatureNoticeKind =
   | "export-all-page"
   | "edit-without-writer";
 
-/** How the table already looks to the person sitting at it. */
+/**
+ * How the table already looks to the person sitting at it.
+ *
+ * @public
+ */
 export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 
 /**

@@ -28,7 +28,7 @@ export interface ResizableVirtualizer {
 /**
  * Ref callbacks for the two halves of one row.
  *
- * @internal
+ * @public
  */
 export interface RowPairMeasurer {
   /** Ref for the row element itself. */
