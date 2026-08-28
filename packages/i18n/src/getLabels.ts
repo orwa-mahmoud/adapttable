@@ -18,7 +18,11 @@ import { ur } from "./locales/ur";
 import { zh } from "./locales/zh";
 import { zhTW } from "./locales/zh-TW";
 
-/** The bundled locale presets, keyed by BCP-47 tag (or primary subtag). */
+/**
+ * The bundled locale presets, keyed by BCP-47 tag (or primary subtag).
+ *
+ * @public
+ */
 export const locales = {
   en,
   ar,
@@ -39,7 +43,11 @@ export const locales = {
   "zh-TW": zhTW,
 } as const;
 
-/** A key of {@link locales}. */
+/**
+ * A key of {@link locales}.
+ *
+ * @public
+ */
 export type LocaleKey = keyof typeof locales;
 
 /**
@@ -53,7 +61,11 @@ function resolveLocaleKey(locale: string): LocaleKey | undefined {
     LocaleKey | undefined;
 }
 
-/** Whether a locale has a bundled preset. */
+/**
+ * Whether a locale has a bundled preset.
+ *
+ * @public
+ */
 export function hasLocale(locale: string): boolean {
   return resolveLocaleKey(locale) !== undefined;
 }
@@ -65,6 +77,8 @@ export function hasLocale(locale: string): boolean {
  *
  * @param locale - A BCP-47 locale such as `"en"`, `"ar"`, `"zh-TW"`, or `"ar-EG"`.
  * @returns The matching `TableLabels` preset, or English.
+ *
+ * @public
  */
 export function getLabels(locale: string): Required<TableLabels> {
   const key = resolveLocaleKey(locale);

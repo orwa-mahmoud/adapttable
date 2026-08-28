@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Korean (`ko`) label preset. */
+/**
+ * Korean (`ko`) label preset.
+ *
+ * @public
+ */
 export const ko: Required<TableLabels> = {
   table: "데이터 테이블",
   search: "검색",

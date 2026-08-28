@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Japanese (`ja`) label preset. */
+/**
+ * Japanese (`ja`) label preset.
+ *
+ * @public
+ */
 export const ja: Required<TableLabels> = {
   table: "データテーブル",
   search: "検索",

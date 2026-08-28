@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Traditional Chinese (`zh-TW`) label preset. */
+/**
+ * Traditional Chinese (`zh-TW`) label preset.
+ *
+ * @public
+ */
 export const zhTW: Required<TableLabels> = {
   table: "資料表",
   search: "搜尋",

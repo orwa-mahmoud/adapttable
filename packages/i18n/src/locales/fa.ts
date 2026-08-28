@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Persian / Farsi (`fa`) label preset. Pairs with `dir="rtl"`. */
+/**
+ * Persian / Farsi (`fa`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const fa: Required<TableLabels> = {
   table: "جدول داده",
   search: "جستجو",

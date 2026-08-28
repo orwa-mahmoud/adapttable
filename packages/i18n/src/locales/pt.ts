@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Portuguese (`pt`) label preset. */
+/**
+ * Portuguese (`pt`) label preset.
+ *
+ * @public
+ */
 export const pt: Required<TableLabels> = {
   table: "Tabela de dados",
   search: "Pesquisar",

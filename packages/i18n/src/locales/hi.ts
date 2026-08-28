@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Hindi (`hi`) label preset. */
+/**
+ * Hindi (`hi`) label preset.
+ *
+ * @public
+ */
 export const hi: Required<TableLabels> = {
   table: "डेटा तालिका",
   search: "खोजें",

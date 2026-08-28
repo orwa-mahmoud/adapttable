@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Italian (`it`) label preset. */
+/**
+ * Italian (`it`) label preset.
+ *
+ * @public
+ */
 export const it: Required<TableLabels> = {
   table: "Tabella dati",
   search: "Cerca",

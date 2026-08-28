@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Russian (`ru`) label preset. */
+/**
+ * Russian (`ru`) label preset.
+ *
+ * @public
+ */
 export const ru: Required<TableLabels> = {
   table: "Таблица данных",
   search: "Поиск",

@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Urdu (`ur`) label preset. Pairs with `dir="rtl"`. */
+/**
+ * Urdu (`ur`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const ur: Required<TableLabels> = {
   table: "ڈیٹا ٹیبل",
   search: "تلاش",

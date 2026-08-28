@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Turkish (`tr`) label preset. */
+/**
+ * Turkish (`tr`) label preset.
+ *
+ * @public
+ */
 export const tr: Required<TableLabels> = {
   table: "Veri tablosu",
   search: "Ara",
