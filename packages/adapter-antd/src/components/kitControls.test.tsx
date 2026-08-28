@@ -11,7 +11,11 @@ import {
 } from "../index";
 import { renderAntd } from "../test-utils";
 import { FilterTreeBuilder } from "./FilterTreeBuilder";
-import { FilterHeaderControl, FilterHeaderRow } from "./kitControls";
+import {
+  FilterHeaderControl,
+  FilterHeaderRow,
+  FilterHeaderTrigger,
+} from "./kitControls";
 
 interface Row {
   name: string;
@@ -22,8 +26,10 @@ interface Row {
   hired: string;
 }
 
+const NAME_DEF: FilterDef<Row> = { key: "name", type: "text", label: "Name" };
+
 const DEFS: FilterDef<Row>[] = [
-  { key: "name", type: "text", label: "Name" },
+  NAME_DEF,
   {
     key: "team",
     type: "select",
@@ -79,6 +85,23 @@ function HeaderHarness({ extra: initial = {} }: { extra?: ExtraFilters }) {
         />
       </thead>
     </table>
+  );
+}
+
+function TriggerHarness({ extra: initial = {} }: { extra?: ExtraFilters }) {
+  const [extra, setExtra] = useState<ExtraFilters>(initial);
+  return (
+    <FilterHeaderTrigger
+      def={NAME_DEF}
+      source={{
+        extra,
+        setExtra: (key: string, value: FilterValue) =>
+          setExtra((prev) => ({ ...prev, [key]: value })),
+        setExtras: (patch: ExtraFilters) =>
+          setExtra((prev) => ({ ...prev, ...patch })),
+      }}
+      labels={defaultLabels}
+    />
   );
 }
 
@@ -165,5 +188,77 @@ describe("kit filter tree (antd)", () => {
     const field = screen.getByRole("combobox", { name: "Field" });
     expect(field).toBeInTheDocument();
     expect(screen.getByTitle("Name")).toHaveTextContent("Name");
+  });
+});
+
+/**
+ * The funnel on a column header claims "this column is filtered". A funnel that
+ * lights up for a value the user cleared is worse than no funnel at all, so the
+ * emptiness rules are asserted one shape at a time rather than trusted.
+ */
+describe("kit header filter trigger (antd)", () => {
+  const trigger = () =>
+    document.querySelector('[data-adapttable-part="filter-header-trigger"]')!;
+
+  it("stays quiet with no filter at all", () => {
+    renderAntd(<TriggerHarness />);
+
+    expect(trigger()).not.toHaveAttribute("data-active");
+  });
+
+  it.each([
+    ["an empty string", ""],
+    ["a null", null],
+    ["an empty array", [] as string[]],
+  ])("treats %s as no filter", (_name, value) => {
+    renderAntd(<TriggerHarness extra={{ name: value as FilterValue }} />);
+
+    expect(trigger()).not.toHaveAttribute("data-active");
+  });
+
+  it.each([
+    ["a typed value", "Ada"],
+    ["a non-empty array", ["a"] as string[]],
+  ])("marks itself active for %s", (_name, value) => {
+    renderAntd(<TriggerHarness extra={{ name: value as FilterValue }} />);
+
+    expect(trigger()).toHaveAttribute("data-active");
+  });
+
+  it("opens the column's own filter field", () => {
+    renderAntd(<TriggerHarness />);
+    fireEvent.click(trigger());
+
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+  });
+});
+
+describe("kit multi-select header widget (antd)", () => {
+  const openTags = () => {
+    renderAntd(<HeaderHarness extra={{ tags: ["a"] }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Tags" }));
+  };
+
+  it("shows which options are already chosen", () => {
+    openTags();
+
+    expect(screen.getByRole("checkbox", { name: "A" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "B" })).not.toBeChecked();
+  });
+
+  it("adds an option that was not selected", () => {
+    openTags();
+    fireEvent.click(screen.getByRole("checkbox", { name: "B" }));
+
+    expect(screen.getByRole("checkbox", { name: "B" })).toBeChecked();
+  });
+
+  it("removes an option that was selected", () => {
+    openTags();
+    fireEvent.click(screen.getByRole("checkbox", { name: "A" }));
+
+    expect(screen.getByRole("checkbox", { name: "A" })).not.toBeChecked();
   });
 });
