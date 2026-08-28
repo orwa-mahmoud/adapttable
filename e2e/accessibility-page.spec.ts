@@ -73,24 +73,36 @@ test("the grid takes arrow-key focus, and says where it went", async ({
  * show the region holds the right words; only a browser shows a real click on a
  * real header reaching it.
  */
-test("says what changed when a column is sorted", async ({ page }) => {
-  await page.goto(`/${KIT}/accessibility/`);
-  const status = demo(page)
-    .locator('[data-adapttable-part="table-status-announcer"]')
-    .first();
-  // Present before it has anything to say — a region that arrives with its text
-  // is frequently missed entirely.
-  await expect(status).toBeAttached();
-  await expect(status).toHaveText("");
+for (const kit of KITS) {
+  test(`${kit}: says what changed when a column is sorted`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit}/accessibility/`);
+    const root = demo(page).locator(`[data-adapter="${kit}"]`);
+    const status = root
+      .locator('[data-adapttable-part="table-status-announcer"]')
+      .first();
+    // Present before it has anything to say — a region that arrives with its
+    // text is frequently missed entirely.
+    await expect(status).toBeAttached();
+    await expect(status).toHaveText("");
 
-  await demo(page)
-    .getByRole("button", { name: /^Sort by:/ })
-    .first()
-    .click();
+    // Each kit puts the sort affordance somewhere else, and names it its own
+    // way: most render a button labelled "Sort by: <column>", MUI a
+    // `<span role="button">` named by the column text, and antd makes the header
+    // cell itself the sorter with no inner control at all. The gesture that is
+    // true in every kit is "activate the first sortable header".
+    const header = root.locator('[data-adapttable-part="header-cell"]').first();
+    const control = header.getByRole("button").first();
+    if ((await control.count()) > 0) await control.click();
+    else await header.click();
 
-  await expect(status).toContainText("Sorted by");
-  await expect(status).toContainText("ascending");
-});
+    // The kit renders its own header control, so what this proves per adapter is
+    // that a real press on a real header reaches the region at all.
+    await expect(status).toContainText("Sorted by");
+    await expect(status).toContainText("ascending");
+  });
+}
 
 for (const kit of KITS) {
   test(`${kit}: exposes a grid with a focusable cell`, async ({ page }) => {

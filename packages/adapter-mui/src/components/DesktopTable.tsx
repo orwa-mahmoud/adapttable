@@ -469,6 +469,10 @@ function LeafHeader<TRow>({
         <TableSortLabel
           active={active}
           direction={ariaSort === "descending" ? "desc" : "asc"}
+          // Six other kits name this control "Sort by: <column>". Named only by
+          // its own text, it reads as "Person, button" — which does not say what
+          // pressing it does.
+          aria-label={leaf.sortButtonProps["aria-label"]}
           onClick={leaf.sortButtonProps.onClick}
           title={column.headerTooltip}
         >
