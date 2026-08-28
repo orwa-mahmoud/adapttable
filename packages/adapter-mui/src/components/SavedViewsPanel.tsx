@@ -148,7 +148,11 @@ const slots: SavedViewsPanelSlots = {
   ),
 };
 
-/** Manage saved views: apply, rename, reorder, default, delete. */
+/**
+ * Manage saved views: apply, rename, reorder, default, delete.
+ *
+ * @public
+ */
 export function SavedViewsPanel(
   props: Readonly<Omit<SavedViewsPanelChromeProps, "slots">>
 ) {

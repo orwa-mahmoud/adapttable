@@ -72,6 +72,8 @@ function tableSize(
  * `filters` (and column `filter` shorthands) render an auto-built form.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
