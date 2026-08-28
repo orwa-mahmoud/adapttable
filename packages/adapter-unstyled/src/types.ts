@@ -15,7 +15,9 @@ import type { ReactNode } from "react";
  * can style with Tailwind, shadcn, or your own CSS.
  */
 export interface DataTableClassNames {
+  /** Class for the outermost wrapper. */
   root?: string;
+  /** Class for the toolbar above the table. */
   toolbar?: string;
   search?: string;
   /** The search field wrapper (holds the search input + leading icon). */
@@ -228,6 +230,7 @@ export interface DataTableClassNames {
   selectAllText?: string;
   /** The banner's action button (select all matching / clear all). */
   selectAllButton?: string;
+  /** Class for the table element. */
   table?: string;
   thead?: string;
   headerRow?: string;
@@ -324,6 +327,7 @@ export interface DataTableClassNames {
   /** The active inline cell editor (input or select). */
   editCellEditor?: string;
   cards?: string;
+  /** Class for a mobile card. */
   card?: string;
   /** The trailing actions strip inside a mobile card. */
   cardActions?: string;

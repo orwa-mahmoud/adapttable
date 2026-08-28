@@ -108,7 +108,7 @@ export { ActiveFilterChip }
 
 export { BaseDataTableProps }
 
-// @public (undocumented)
+// @public
 export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>): JSX.Element;
 
 export { BatchEditBarProps }
@@ -138,7 +138,7 @@ export { ColumnGroupDef }
 
 export { ColumnGroupShow }
 
-// @public (undocumented)
+// @public
 export function ColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>): JSX.Element;
 
 export { ColumnGroupToggleProps }
@@ -168,15 +168,10 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.E
 
 // @public
 export interface DataTableClassNames {
-    // (undocumented)
     card?: string;
-    // (undocumented)
     footer?: string;
-    // (undocumented)
     root?: string;
-    // (undocumented)
     table?: string;
-    // (undocumented)
     toolbar?: string;
 }
 
@@ -230,12 +225,12 @@ export { FILTER_TYPES }
 
 export { FilterDef }
 
-// @public (undocumented)
+// @public
 export function FilterHeaderControl<TRow>(props: Readonly<FilterHeaderControlProps<TRow>>): JSX.Element;
 
 export { FilterHeaderControlProps }
 
-// @public (undocumented)
+// @public
 export function FilterHeaderRow<TRow>(props: Readonly<FilterHeaderRowProps<TRow>>): JSX.Element;
 
 export { FilterHeaderRowProps }
@@ -255,14 +250,14 @@ export { FilterTypeSpec }
 
 export { FilterValue }
 
-// @public (undocumented)
+// @public
 export function FindBar(props: Readonly<FindBarProps>): JSX.Element;
 
 export { FindBarProps }
 
 export { getHistoryAdapter }
 
-// @public (undocumented)
+// @public
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;
 
 export { GroupMoreButtonProps }
@@ -282,17 +277,17 @@ export { resolveFilterRegistry }
 
 export { RowAction }
 
-// @public (undocumented)
+// @public
 export function RowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): JSX.Element;
 
 export { RowEditActionsProps }
 
-// @public (undocumented)
+// @public
 export function RowReorderButtons<TRow>(props: Readonly<RowReorderButtonsProps<TRow>>): JSX.Element;
 
 export { RowReorderButtonsProps }
 
-// @public (undocumented)
+// @public
 export function RowReorderHandle<TRow>(props: Readonly<RowReorderHandleProps<TRow>>): JSX.Element;
 
 export { RowReorderHandleProps }
@@ -330,12 +325,12 @@ export { TableQuery }
 
 export { TableSource }
 
-// @public (undocumented)
+// @public
 export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): JSX.Element;
 
 export { TreeCellProps }
 
-// @public (undocumented)
+// @public
 export function TreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>): JSX.Element;
 
 export { TreeToggleProps }

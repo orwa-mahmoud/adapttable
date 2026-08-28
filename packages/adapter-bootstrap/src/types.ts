@@ -19,10 +19,15 @@ export interface DataTableSlots {
 
 /** Per-part class hooks — restyle without replacing components. */
 export interface DataTableClassNames {
+  /** Class for the outermost wrapper. */
   root?: string;
+  /** Class for the toolbar above the table. */
   toolbar?: string;
+  /** Class for the table element. */
   table?: string;
+  /** Class for a mobile card. */
   card?: string;
+  /** Class for the pagination footer. */
   footer?: string;
 }
 
