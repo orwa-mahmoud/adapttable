@@ -1,5 +1,5 @@
 ---
-"@adapttable/core": patch
+"@adapttable/core": minor
 "@adapttable/mantine": patch
 "@adapttable/mui": patch
 "@adapttable/chakra": patch

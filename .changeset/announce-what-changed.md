@@ -1,6 +1,6 @@
 ---
-"@adapttable/core": patch
-"@adapttable/i18n": patch
+"@adapttable/core": minor
+"@adapttable/i18n": minor
 ---
 
 Say what changed when the rows change. Sorting, filtering, paging and changing the page size rewrote

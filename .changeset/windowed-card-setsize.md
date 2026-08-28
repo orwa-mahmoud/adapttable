@@ -1,5 +1,5 @@
 ---
-"@adapttable/core": patch
+"@adapttable/core": minor
 "@adapttable/antd": patch
 "@adapttable/base-ui": patch
 "@adapttable/chakra": patch

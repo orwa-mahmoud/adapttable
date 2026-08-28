@@ -1,5 +1,5 @@
 ---
-"@adapttable/core": patch
+"@adapttable/core": minor
 ---
 
 State the real width of a windowed column axis, with cell navigation off. A table using
