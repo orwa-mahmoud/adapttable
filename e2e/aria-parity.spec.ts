@@ -376,3 +376,52 @@ test("every kit exposes the same command palette", async ({ page }) => {
 
   assertOneShape(shapes, "command palette");
 });
+
+/**
+ * The find bar, reached the way a user reaches it: Ctrl/Cmd+F on a focused
+ * cell. The chord lives in `useGridFocus`, so the gesture needs a focused cell
+ * and `findInTable` on — the lab ties the latter to cell editing.
+ */
+test("every kit exposes the same find bar", async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.goto("/all-options/");
+  await configureFeatureLab(page, "editing mode", "Cell");
+  const shapes = new Map<string, unknown>();
+
+  for (const kit of KITS) {
+    await selectKit(page, kit);
+    const root = page.locator(`[data-adapter="${kit}"]`);
+    const cell = root.getByText("Ada Lovelace").first();
+    await expect(cell).toBeVisible();
+    await cell.click();
+    await page.keyboard.press("Meta+f");
+
+    const bar = root.locator('[data-adapttable-part="find-bar"]');
+    await expect(
+      bar,
+      `${kit} does not open a find bar on the chord`
+    ).toHaveCount(1);
+
+    shapes.set(kit, {
+      // The match count is a live region by element, not by role.
+      countTag: await bar
+        .locator('[data-adapttable-part="find-count"]')
+        .evaluate((node) => node.tagName.toLowerCase()),
+      buttons: await bar.getByRole("button").count(),
+      namedInputs: await bar.getByRole("textbox").count(),
+      unnamedButtons: await bar
+        .getByRole("button")
+        .evaluateAll(
+          (nodes) =>
+            nodes.filter(
+              (n) =>
+                !(n.getAttribute("aria-label") ?? n.textContent ?? "").trim()
+            ).length
+        ),
+    });
+
+    await page.keyboard.press("Escape");
+  }
+
+  assertOneShape(shapes, "find bar");
+});
