@@ -11,6 +11,8 @@ import type { DataTableClassNames } from "@adapttable/unstyled";
  * `<DataTable classNames={shadcnClassNames} />`, or just import the pre-wired
  * `DataTable` from `@adapttable/shadcn`. Override any part by merging your own
  * classes over it.
+ *
+ * @public
  */
 export const shadcnClassNames = {
   root: "rounded-xl border border-border bg-card text-card-foreground shadow-sm",
