@@ -50,6 +50,18 @@ describe("command palette (mui)", () => {
     expect(palette()).toBeNull();
   });
 
+  it("names the dialog, not MUI's presentation wrapper", () => {
+    table();
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+
+    // MUI spreads unrecognised props onto its Modal root and marks that root
+    // `role="presentation"`, which discards a name left there. The paper is
+    // the node carrying `role="dialog"`.
+    expect(
+      screen.getByRole("dialog", { name: "Command palette" })
+    ).toBeVisible();
+  });
+
   it("opens on Cmd/Ctrl+K and lists the wired commands", () => {
     table();
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
