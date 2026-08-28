@@ -10,12 +10,16 @@ import { isRtlElement } from "../layout/writingDirection";
  */
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
-/** Props that make a whole menu ROW draggable (so the browser's drag image is
+/**
+ * Props that make a whole menu ROW draggable (so the browser's drag image is
+ * the full row — you see the column move). Pair with `columnDropProps`.
  *
  * @public
- * the full row — you see the column move). Pair with `columnDropProps`. */
+ */
 export interface ColumnRowDragProps {
+  /** Always true — the whole row is the drag source. */
   draggable: true;
+  /** Starts the drag and puts the column key on the dataTransfer. */
   onDragStart: (event: DragEvent<HTMLElement>) => void;
 }
 
@@ -58,10 +62,13 @@ export function columnRowDragProps(key: string): ColumnRowDragProps {
  * @public
  */
 export interface ColumnReorderKeyProps {
+  /** `button`, so the grip is announced as an action. */
   role: "button";
+  /** Always 0 — the grip is reachable by Tab. */
   tabIndex: 0;
   "aria-label": string;
   "data-adapttable-grip": "";
+  /** Moves the column on the arrow keys. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
@@ -121,7 +128,9 @@ export function columnReorderKeyProps(
  * @public
  */
 export interface ColumnDropProps {
+  /** Marks the row as a valid drop target while a column is over it. */
   onDragOver: (event: DragEvent<HTMLElement>) => void;
+  /** Completes the reorder. */
   onDrop: (event: DragEvent<HTMLElement>) => void;
 }
 

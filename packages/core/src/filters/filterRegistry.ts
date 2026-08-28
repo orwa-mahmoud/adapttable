@@ -44,15 +44,19 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
  * @public
  */
 export interface FilterTypeSpec {
+  /** The type's name, as a `FilterDef` references it. */
   readonly type: string;
   /** Which built-in kit widget to draw. Ignored when `render` is set. */
   readonly widget: FilterWidgetKind;
+  /** Operators this type offers, in menu order. */
   readonly ops: readonly string[];
+  /** Operator used until the reader picks another. */
   readonly defaultOp: string;
   /** Persist this key as a comma-separated array in the URL. */
   readonly urlArray?: boolean;
   /** Persist this type's range bounds as numbers in the URL. */
   readonly urlNumberKeys?: boolean;
+  /** State keys this type owns for a definition — what the URL persists. */
   stateKeys(def: Pick<FilterDef, "key" | "type">): string[];
   match<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, row: TRow): boolean;
   chips<TRow>(def: FilterDef<TRow>): Record<string, ChipLabelResolver>;
@@ -70,8 +74,11 @@ export interface FilterTypeSpec {
  * @public
  */
 export interface FilterTypeRegistry {
+  /** The spec for a type name, or `undefined` when it is not registered. */
   get(type: string): FilterTypeSpec | undefined;
+  /** Whether a type name is registered. */
   has(type: string): boolean;
+  /** Every registered type name. */
   types(): readonly string[];
   /**
    * @deprecated Register with `TableFeatureHost.registerFilterType` in

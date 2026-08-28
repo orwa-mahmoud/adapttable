@@ -9,10 +9,12 @@ import {
 import { FALLBACK_PIN_WIDTH, parsePxWidth } from "./columnWidths";
 import { toggleCollapsedColumnGroup } from "./headerGroups";
 
-/** Edge a column can be pinned to — logical, so it follows the writing
+/**
+ * Edge a column can be pinned to — logical, so it follows the writing
+ * direction (`"start"` is the right edge under `dir="rtl"`).
  *
  * @public
- *  direction (`"start"` is the right edge under `dir="rtl"`). */
+ */
 export type PinSide = "start" | "end";
 
 /**
@@ -101,7 +103,9 @@ export interface UseColumnLayoutResult<TRow> {
  * @public
  */
 export interface PinOffset {
+  /** Which edge the column sticks to. */
   side: PinSide;
+  /** Distance from that edge, past any columns already pinned there. */
   inset: number;
 }
 
@@ -114,9 +118,13 @@ export interface PinOffset {
  * @public
  */
 export interface PinnedCellStyle {
+  /** Always `sticky` — that is what makes the cell pin. */
   position: "sticky";
+  /** Offset from the inline start, for a start-pinned cell. */
   insetInlineStart?: number;
+  /** Offset from the inline end, for an end-pinned cell. */
   insetInlineEnd?: number;
+  /** Keeps pinned cells above the ones scrolling under them. */
   zIndex: number;
 }
 
@@ -147,7 +155,9 @@ export const PIN_Z = {
  * @public
  */
 export interface PinLeads {
+  /** Width reserved at the leading edge. */
   start?: number;
+  /** Width reserved at the trailing edge. */
   end?: number;
 }
 

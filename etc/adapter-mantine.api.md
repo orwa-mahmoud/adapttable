@@ -278,18 +278,12 @@ export function FilterDrawer(input: Readonly<FilterDrawerProps>): JSX.Element;
 
 // @public
 export interface FilterDrawerProps {
-    // (undocumented)
     activeFilterCount: number;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     filters: ReactNode;
-    // (undocumented)
     labels: Required<TableLabels>;
     onClearFilters: () => void;
-    // (undocumented)
     onClose: () => void;
-    // (undocumented)
     opened: boolean;
 }
 
@@ -343,26 +337,16 @@ export function PaginationFooter(input: Readonly<PaginationFooterProps>): JSX.El
 
 // @public
 export interface PaginationFooterProps {
-    // (undocumented)
     defaultLimit?: number;
-    // (undocumented)
     fromIndex: number;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     limit: number;
-    // (undocumented)
     onLimitChange: (limit: number) => void;
-    // (undocumented)
     onPageChange: (page: number) => void;
-    // (undocumented)
     page: number;
     showRowsPerPage?: boolean;
-    // (undocumented)
     toIndex: number;
-    // (undocumented)
     total: number;
-    // (undocumented)
     totalPages: number;
 }
 

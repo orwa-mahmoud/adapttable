@@ -301,7 +301,6 @@ export function SavedViewsMenu(input: Readonly<SavedViewsMenuProps>): JSX.Elemen
 
 // @public
 export interface SavedViewsMenuProps {
-    // (undocumented)
     dir?: Direction;
     labels: SavedViewsLabels;
     options: UseSavedViewsOptions;

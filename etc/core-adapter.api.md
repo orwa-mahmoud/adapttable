@@ -230,9 +230,7 @@ export interface ColumnDragState {
 
 // @public
 export interface ColumnDropProps {
-    // (undocumented)
     onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-    // (undocumented)
     onDrop: (event: DragEvent_2<HTMLElement>) => void;
 }
 
@@ -374,11 +372,8 @@ export interface ColumnReorderKeyProps {
     "aria-label": string;
     // (undocumented)
     "data-adapttable-grip": "";
-    // (undocumented)
     onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    // (undocumented)
     role: "button";
-    // (undocumented)
     tabIndex: 0;
 }
 
@@ -399,9 +394,7 @@ export interface ColumnResizeHandleProps {
 
 // @public
 export interface ColumnRowDragProps {
-    // (undocumented)
     draggable: true;
-    // (undocumented)
     onDragStart: (event: DragEvent_2<HTMLElement>) => void;
 }
 
@@ -1254,9 +1247,7 @@ export interface FilterTreeSlots {
 
 // @public
 export interface FilterTriggerToggle {
-    // (undocumented)
     onClick: () => void;
-    // (undocumented)
     onPointerDown: () => void;
 }
 
@@ -1585,9 +1576,7 @@ export function PinIcon(): ReactElement;
 
 // @public
 export interface PinLeads {
-    // (undocumented)
     end?: number;
-    // (undocumented)
     start?: number;
 }
 
@@ -1599,13 +1588,9 @@ export const PINNED_TOP_PART = "pinned-top";
 
 // @public
 export interface PinnedCellStyle {
-    // (undocumented)
     insetInlineEnd?: number;
-    // (undocumented)
     insetInlineStart?: number;
-    // (undocumented)
     position: "sticky";
-    // (undocumented)
     zIndex: number;
 }
 
@@ -1645,9 +1630,7 @@ export type PinnedSide = PinSide | undefined;
 
 // @public
 export interface PinOffset {
-    // (undocumented)
     inset: number;
-    // (undocumented)
     side: PinSide;
 }
 
@@ -2734,13 +2717,9 @@ export function useTableStatusAnnouncement(options: TableStatusAnnouncementOptio
 
 // @public
 export interface ViewControlsToolbar {
-    // (undocumented)
     density?: "comfortable" | "compact";
-    // (undocumented)
     isFullscreen?: boolean;
-    // (undocumented)
     onDensityChange?: (next: "comfortable" | "compact") => void;
-    // (undocumented)
     onToggleFullscreen?: () => void;
 }
 

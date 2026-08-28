@@ -1725,13 +1725,10 @@ export function filterTypeOps(def: Pick<FilterDef, "type">, registry: FilterType
 export interface FilterTypeRegistry {
     // @deprecated (undocumented)
     extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry;
-    // (undocumented)
     get(type: string): FilterTypeSpec | undefined;
-    // (undocumented)
     has(type: string): boolean;
     // @deprecated (undocumented)
     register(spec: FilterTypeSpec): FilterTypeRegistry;
-    // (undocumented)
     types(): readonly string[];
 }
 
@@ -1741,16 +1738,12 @@ export interface FilterTypeSpec {
     chips<TRow>(def: FilterDef<TRow>): Record<string, ChipLabelResolver>;
     // (undocumented)
     conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition): ExtraFilters;
-    // (undocumented)
     readonly defaultOp: string;
     // (undocumented)
     match<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, row: TRow): boolean;
-    // (undocumented)
     readonly ops: readonly string[];
     render?<TRow>(props: FilterWidgetRenderProps<TRow>): ReactElement;
-    // (undocumented)
     stateKeys(def: Pick<FilterDef, "key" | "type">): string[];
-    // (undocumented)
     readonly type: string;
     readonly urlArray?: boolean;
     readonly urlNumberKeys?: boolean;

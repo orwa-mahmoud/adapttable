@@ -482,9 +482,13 @@ export interface TableChrome<TRow> {
  * @public
  */
 export interface ViewControlsToolbar {
+  /** Current row density. */
   density?: "comfortable" | "compact";
+  /** Switches density, absent when the chooser is off. */
   onDensityChange?: (next: "comfortable" | "compact") => void;
+  /** Enters or leaves fullscreen, absent when it is unavailable. */
   onToggleFullscreen?: () => void;
+  /** Whether the table is currently fullscreen. */
   isFullscreen?: boolean;
 }
 
@@ -531,7 +535,9 @@ export function undoRedoToolbar<TRow>(
 
 /** The print button's half of a toolbar's props. */
 export interface PrintToolbar {
+  /** Runs the print layout, absent when printing is off. */
   onPrint?: () => void;
+  /** Caption for the print control. */
   printLabel?: string;
 }
 
@@ -1685,7 +1691,9 @@ export function useChromeScrollReset<TRow>(
  * @public
  */
 export interface FilterTriggerToggle {
+  /** Records that the press began on the trigger. */
   onPointerDown: () => void;
+  /** Opens or closes the overlay, ignoring a click that closed it already. */
   onClick: () => void;
 }
 

@@ -461,21 +461,13 @@ export function FilterPanel(input: Readonly<FilterPanelProps>): ReactPortal | nu
 
 // @public
 export interface FilterPanelProps {
-    // (undocumented)
     activeFilterCount: number;
-    // (undocumented)
     classNames: DataTableClassNames;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     filters: ReactNode;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     onClearFilters?: () => void;
-    // (undocumented)
     onClose: () => void;
-    // (undocumented)
     open: boolean;
 }
 
@@ -484,22 +476,14 @@ export function FilterPopover(input: Readonly<FilterPopoverProps>): JSX.Element;
 
 // @public
 export interface FilterPopoverProps {
-    // (undocumented)
     activeFilterCount: number;
     children: ReactNode;
-    // (undocumented)
     classNames: DataTableClassNames;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     filters: ReactNode;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     onClearFilters?: () => void;
-    // (undocumented)
     onClose: () => void;
-    // (undocumented)
     open: boolean;
 }
 
@@ -573,9 +557,7 @@ export function SavedViewsMenu(input: Readonly<SavedViewsMenuProps>): JSX.Elemen
 
 // @public (undocumented)
 export interface SavedViewsMenuProps {
-    // (undocumented)
     classNames: DataTableClassNames;
-    // (undocumented)
     labels: SavedViewsLabels;
     options: UseSavedViewsOptions;
 }
