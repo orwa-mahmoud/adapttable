@@ -115,7 +115,9 @@ const PIN_BG = "var(--chakra-colors-bg)";
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
   className?: string;
+  /** The kit's size token for the table. */
   size: "sm" | "md" | "lg";
+  /** The kit's accent, so chrome matches the table. */
   accentColor?: string;
   /** Text direction — flips the expand chevron for RTL. */
   dir?: Direction;

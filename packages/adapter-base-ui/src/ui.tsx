@@ -137,16 +137,27 @@ export function Box({
 
 /** Props for {@link Text}. */
 export interface TextProps {
+  /** Element or component to render as. */
   as?: "span" | "div" | "label" | "p";
+  /** The kit's size token for the table. */
   size?: Size;
+  /** Font weight token. */
   weight?: "bold" | "regular";
+  /** Text colour token. */
   color?: string;
+  /** Text alignment. */
   align?: "center" | "start" | "end";
+  /** Inline-start margin token. */
   ml?: string | number;
+  /** Class for the element. */
   className?: string;
+  /** Inline style for the element. */
   style?: CSSProperties;
+  /** Content rendered inside. */
   children?: ReactNode;
+  /** Element id. */
   id?: string;
+  /** ARIA role for the element. */
   role?: string;
   "aria-hidden"?: boolean | "true" | "false";
   "data-sort-index"?: number;

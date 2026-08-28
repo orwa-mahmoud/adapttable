@@ -31,7 +31,9 @@ export type SavedViewsLabels = Pick<
 export interface SavedViewsMenuProps {
   /** Wiring for core's `useSavedViews` — storage key, storage, adapter, urlKey. */
   options: UseSavedViewsOptions;
+  /** Resolved labels, every key filled. */
   labels: SavedViewsLabels;
+  /** Per-part classes. */
   classNames: DataTableClassNames;
 }
 

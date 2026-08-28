@@ -27,6 +27,7 @@ export interface SavedViewsMenuProps {
   options: UseSavedViewsOptions;
   /** Resolved labels. */
   labels: SavedViewsLabels;
+  /** Writing direction, so the overlay opens on the correct side. */
   dir?: Direction;
 }
 

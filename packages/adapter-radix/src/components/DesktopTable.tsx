@@ -170,7 +170,9 @@ const STICKY_FIX_CSS =
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
   className?: string;
+  /** The kit's size token for the table. */
   size: RadixSize;
+  /** The kit's accent, so chrome matches the table. */
   accentColor?: RadixAccentColor;
   /** Text direction — flips the expand chevron for RTL. */
   dir?: Direction;

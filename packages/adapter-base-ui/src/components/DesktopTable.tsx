@@ -121,7 +121,9 @@ const STICKY_FIX_CSS = `.${STICKY_FIX_CLASS} table{overflow:visible;min-width:va
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
   className?: string;
+  /** The kit's size token for the table. */
   size: TableSize;
+  /** The kit's accent, so chrome matches the table. */
   accentColor?: BaseUiAccentColor;
   /** Text direction — flips the expand chevron for RTL. */
   dir?: Direction;

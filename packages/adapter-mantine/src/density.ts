@@ -5,7 +5,9 @@ export type Density = "comfortable" | "compact";
 
 /** Mantine `<Table>` spacing props for a given density. */
 export interface DensitySpacing {
+  /** Cell padding along the block axis for this density. */
   verticalSpacing: MantineSpacing;
+  /** Cell padding along the inline axis for this density. */
   horizontalSpacing: MantineSpacing;
 }
 

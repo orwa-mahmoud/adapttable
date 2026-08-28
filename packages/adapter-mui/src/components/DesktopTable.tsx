@@ -94,6 +94,7 @@ export function muiColor(color: string | undefined): "default" | "error" {
 }
 
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
+  /** The kit's size token for the table. */
   size: "small" | "medium";
   /** Class applied to every mobile card (merged before `rowClassName`). */
   cardClassName?: string;

@@ -30,6 +30,7 @@ import { useEffect, useRef, useState } from "react";
 type MenuLabels = ColumnMenuLabels & { actions: string; reorderRow: string };
 
 export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
+  /** Writing direction, so the menu opens on the correct side. */
   dir?: Direction;
   /** Resolved labels, including the injected actions column's name. */
   labels: MenuLabels;
@@ -48,7 +49,9 @@ export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   /** Open the filter UI from the submenu. */
   onFilterColumn?: (key: string) => void;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
 }
 

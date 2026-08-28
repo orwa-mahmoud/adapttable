@@ -5,14 +5,21 @@ import { useEffect, useRef } from "react";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
+  /** Whether the overlay is showing. */
   open: boolean;
+  /** Closes the overlay. Filters apply live, so this only dismisses it. */
   onClose: () => void;
   /** The element the popover is anchored to (the Filters button). */
   anchorEl: HTMLElement | null;
+  /** The filter fields to render inside. */
   filters: ReactNode;
+  /** How many filters are currently set, for the header count. */
   activeFilterCount: number;
+  /** Clears every active filter. */
   onClearFilters: () => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
+  /** Writing direction, so the overlay opens on the correct side. */
   dir?: Direction;
 }
 

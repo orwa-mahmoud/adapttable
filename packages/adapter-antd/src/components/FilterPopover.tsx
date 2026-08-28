@@ -4,11 +4,17 @@ import { type ReactNode, useEffect, useRef } from "react";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
+  /** Whether the overlay is showing. */
   open: boolean;
+  /** Closes the overlay. Filters apply live, so this only dismisses it. */
   onClose: () => void;
+  /** The filter fields to render inside. */
   filters: ReactNode;
+  /** How many filters are currently set, for the header count. */
   activeFilterCount: number;
+  /** Clears every active filter. */
   onClearFilters: () => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
   /**
    * Text direction. The card portals to the body, so it would otherwise keep

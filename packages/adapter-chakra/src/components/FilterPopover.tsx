@@ -6,13 +6,21 @@ import { KitPortal } from "./kitPortal";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
+  /** Whether the overlay is showing. */
   open: boolean;
+  /** Closes the overlay. Filters apply live, so this only dismisses it. */
   onClose: () => void;
+  /** The filter fields to render inside. */
   filters: ReactNode;
+  /** How many filters are currently set, for the header count. */
   activeFilterCount: number;
+  /** Clears every active filter. */
   onClearFilters: () => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
+  /** The kit's accent, so the overlay matches the table. */
   accentColor?: string;
+  /** Writing direction, so the overlay opens on the correct side. */
   dir?: Direction;
   /** The Filters trigger button — becomes the popover anchor. */
   children: ReactNode;

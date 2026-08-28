@@ -18,9 +18,11 @@ export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
   onCloseFilters: () => void;
   /** Filter content + how to render its container. */
   filtersMode: "popover" | "drawer" | "header";
+  /** The filter fields to render. */
   filters?: ReactNode;
   /** Clear-filters handler used by the popover's clear-all button. */
   onClearFilters: () => void;
+  /** Class for the element. */
   className?: string;
 }
 

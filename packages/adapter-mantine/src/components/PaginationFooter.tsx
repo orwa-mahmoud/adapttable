@@ -7,15 +7,25 @@ import { Group, Pagination, Select, Text } from "@mantine/core";
  * @public
  */
 export interface PaginationFooterProps {
+  /** 1-based current page. */
   page: number;
+  /** Pages in the whole matching set. */
   totalPages: number;
+  /** Rows per page. */
   limit: number;
+  /** Page size offered alongside the standard ones when it is not one of them. */
   defaultLimit?: number;
+  /** Rows in the whole matching set. */
   total: number;
+  /** 1-based index of the first row on this page. */
   fromIndex: number;
+  /** 1-based index of the last row on this page. */
   toIndex: number;
+  /** Moves to a page. */
   onPageChange: (page: number) => void;
+  /** Changes the page size. */
   onLimitChange: (limit: number) => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
   /** Hidden in the grouped full-set view, where page size has no effect. */
   showRowsPerPage?: boolean;

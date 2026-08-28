@@ -8,13 +8,19 @@ import type { ReactNode } from "react";
  * @public
  */
 export interface FilterDrawerProps {
+  /** Whether the drawer is showing. */
   opened: boolean;
+  /** Closes the overlay. Filters apply live, so this only dismisses it. */
   onClose: () => void;
+  /** The filter fields to render inside. */
   filters: ReactNode;
+  /** How many filters are currently set, for the header count. */
   activeFilterCount: number;
   /** Clear-filters handler (always supplied by the table chrome). */
   onClearFilters: () => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
+  /** Writing direction, so the overlay opens on the correct side. */
   dir?: Direction;
 }
 
