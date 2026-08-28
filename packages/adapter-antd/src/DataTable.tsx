@@ -372,6 +372,12 @@ function antdOnRow<TRow>(options: {
     // antd builds its own <tr>, so the absolute aria-rowindex arrives
     // here rather than through a spread on the element.
     ...(rowIndex === undefined ? {} : gridFocus?.getRowPropsAt(rowIndex)),
+    // The other seven adapters state it through core's row props, which antd
+    // does not spread because it assembles its own <tr>. A <tr> is implicitly a
+    // row, so this restates rather than changes anything — but a row that is
+    // silent about its role in one kit and not the others is a difference
+    // waiting to be mistaken for a bug.
+    role: "row",
     // antd builds its own <tr>, so the part name and the row id arrive here
     // rather than through a spread on the element. The part goes BEFORE the
     // pin attrs on purpose: antd owns one tbody, so a pinned row marks its

@@ -355,7 +355,7 @@ const FIXTURES = [
   { name: "mui · table", pkg: "adapter-mui", budgetKB: 135 },
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
   { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
-  { name: "radix · table", pkg: "adapter-radix", budgetKB: 134 },
+  { name: "radix · table", pkg: "adapter-radix", budgetKB: 135 },
   { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 141 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both

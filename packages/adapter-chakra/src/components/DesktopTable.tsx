@@ -415,6 +415,9 @@ function LeafHeader<TRow>({
       key={column.key}
       data-adapttable-part="header-cell"
       {...leaf.columnHeaderProps}
+      // Chakra's own header cell does not set it, and this component takes
+      // named props from `leaf` rather than spreading `headerProps`.
+      scope="col"
       textAlign={logicalAlign(column.align)}
       width={column.width}
       aria-sort={ariaSort}

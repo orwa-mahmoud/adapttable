@@ -386,6 +386,10 @@ export function useDataTable<TRow>(
       mergeProps(
         {
           role: "columnheader",
+          // The HTML half of the same statement the role makes. Four kits set
+          // it on their own `<th>` and four did not, so a cell's header
+          // association depended on which kit you picked.
+          scope: "col",
           "aria-sort": ariaSort(
             column,
             chainLevel(source.sortLevels, column.key)?.key ?? source.sortBy,

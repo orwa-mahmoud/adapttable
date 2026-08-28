@@ -713,6 +713,12 @@ export function useGridFocus<TRow>(
       const matched = matchKeys?.has(key) === true;
       return {
         [GRID_CELL_ATTR]: gridCellAttr(cell),
+        // The table is a grid while this is on, and a grid's cells are
+        // `gridcell`. A bare `<td>` maps to that on its own, but the table-level
+        // cell props state `role="cell"` for the plain-table case — correct
+        // there, wrong here, and last write wins wherever an adapter spreads
+        // both. Saying it outright keeps every adapter on the same role.
+        role: "gridcell",
         tabIndex: isActive || firstEver ? 0 : -1,
         "aria-colindex": cell.col + 1,
         // Only meaningful once a real rectangle exists: marking every focused
