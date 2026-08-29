@@ -53,7 +53,12 @@ export default defineConfig(
       "jsx-a11y": jsxA11y,
       "simple-import-sort": simpleImportSort,
     },
-    settings: { react: { version: "detect" } },
+    // Pinned rather than detected. `detect` reads the installed `react`, and
+    // three lint contexts have none — `@adapttable/cli`, `@adapttable/server`
+    // and the root `scripts/` — so each printed a warning and fell back to
+    // "latest" anyway. The floor of core's peer range is what the rules should
+    // hold every package to, and it is the same answer detection gave.
+    settings: { react: { version: "18.0.0" } },
     rules: {
       ...react.configs.recommended.rules,
       ...react.configs["jsx-runtime"].rules,
