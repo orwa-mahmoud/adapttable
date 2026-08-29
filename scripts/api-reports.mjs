@@ -34,6 +34,8 @@ import { fileURLToPath } from "node:url";
 
 import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
+import { entrypoints } from "./api-entrypoints.mjs";
+
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ETC = join(REPO_ROOT, "etc");
 const LOCAL = process.argv.includes("--local");
@@ -74,42 +76,6 @@ let deferredAliasWarnings = 0;
 let deferredSubpathWarnings = 0;
 let frontDoorWarnings = 0;
 let compilerNoticeShown = false;
-
-/** Every published package under `packages/` — reports follow `exports`. */
-const PACKAGES = readdirSync(join(REPO_ROOT, "packages"));
-
-/**
- * One extraction target per public entry point, taken from the `exports` map.
- *
- * `./package.json` is not an API and `./styles.css` is not typed, so a subpath
- * counts only when it names a bare module. A hand-written list of entries is a
- * list that goes stale silently: core shipped `/xlsx`, `/pdf`, `/sparkline`,
- * `/query`, `/pivot` and `/formula` while only `.` and `/adapter` were
- * extracted, which left most of the public surface able to change shape with
- * no report to show it.
- */
-function targets() {
-  const list = [];
-  for (const dir of PACKAGES) {
-    const manifest = JSON.parse(
-      readFileSync(join(REPO_ROOT, "packages", dir, "package.json"), "utf8")
-    );
-    const subpaths = Object.keys(manifest.exports ?? { ".": {} }).filter(
-      (key) => key === "." || !key.slice(2).includes(".")
-    );
-    for (const key of subpaths.sort()) {
-      const name = key === "." ? "index" : key.slice(2);
-      const isMainEntry = key === ".";
-      list.push({
-        dir,
-        isMainEntry,
-        report: key === "." ? `${dir}.api.md` : `${dir}-${name}.api.md`,
-        entry: join(REPO_ROOT, "packages", dir, "dist", `${name}.d.ts`),
-      });
-    }
-  }
-  return list;
-}
 
 function extractOne({ dir, report, entry, isMainEntry }) {
   if (!existsSync(entry)) {
@@ -226,7 +192,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
 
 mkdirSync(ETC, { recursive: true });
 let ok = true;
-for (const target of targets()) {
+for (const target of entrypoints()) {
   ok = extractOne(target) && ok;
 }
 if (!LOCAL) rmSync(OUT, { recursive: true, force: true });
