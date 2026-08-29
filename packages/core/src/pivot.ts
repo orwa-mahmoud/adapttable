@@ -75,3 +75,57 @@ export {
 } from "./pivot/serverPivot";
 export type { ColumnDef, TableLabels } from "./types";
 export type { UrlStateAdapter } from "./url/adapter";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type { CellEditor } from "./editing/cellEditing";
+export type { ColumnFilter } from "./filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "./types";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type {
+  CellEditorOption,
+  CustomCellEditorRender,
+} from "./editing/cellEditing";
+export type { FilterDef, FilterType } from "./filters/filterDefs";
+export type { ColumnHeaderController } from "./types";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type { CustomCellEditorCtrl } from "./editing/cellEditing";
+export type { FilterOptionsSource } from "./filters/filterDefs";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type { FilterOption } from "./filters/filterDefs";

@@ -15,7 +15,7 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
  * accelerates and takes less time, because a dismissal the reader already
  * decided on should not be waited on.
  *
- * @internal
+ * @public
  */
 export const OVERLAY_MOTION = {
   /** Milliseconds for an overlay to arrive. */
@@ -31,7 +31,7 @@ export const OVERLAY_MOTION = {
 /**
  * Result of {@link useOverlayTransition}.
  *
- * @internal
+ * @public
  */
 export interface OverlayTransition {
   /**
@@ -72,7 +72,7 @@ export interface OverlayTransition {
  * for longer, or the node is removed mid-slide.
  * @returns Whether to render, and which end of the transition to render at.
  *
- * @internal
+ * @public
  */
 export function useOverlayTransition(
   open: boolean,

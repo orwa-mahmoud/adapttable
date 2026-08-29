@@ -730,6 +730,7 @@ export {
 } from "./editing/dirtyCells";
 export {
   type EditableCellController,
+  editableCellController,
   type EditableCellEditing,
   type EditableCellMode,
 } from "./editing/editableCellController";
@@ -916,7 +917,6 @@ export type {
   PinnedCellStyle,
   PinOffset,
 } from "./columns/useColumnLayout";
-export { editableCellController } from "./editing/editableCellController";
 export type { EditValidationState, RowValidator } from "./editing/validation";
 export type {
   CellValidator,

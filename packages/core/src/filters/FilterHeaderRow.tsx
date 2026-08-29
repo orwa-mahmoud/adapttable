@@ -140,7 +140,7 @@ export interface FilterHeaderControlProps<TRow> {
  * Every adapter drew this conclusion for itself with a byte-identical copy of
  * these six lines; it belongs here, where it can be wrong in one place only.
  *
- * @internal
+ * @public
  */
 export function hasActiveHeaderFilter<TRow>(
   props: Readonly<

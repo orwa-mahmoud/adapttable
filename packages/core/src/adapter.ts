@@ -566,3 +566,164 @@ export {
   useKeyedVirtualization,
   type VirtualTableRow,
 } from "./virtual/useTableVirtualization";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type { TableCommandOptions } from "./actions/commandRegistry";
+export type { ConfirmRequest } from "./actions/confirm";
+export type { ContextMenuActions } from "./actions/contextMenuModel";
+export type { CommandPaletteOptions } from "./actions/useCommandPalette";
+export type { ContextMenuOptions } from "./actions/useTableContextMenu";
+export type { ColumnLayoutState } from "./columns/useColumnLayout";
+export type { BatchRowEdit } from "./editing/batchEditing";
+export type { CellEditor, CustomCellEditorCtrl } from "./editing/cellEditing";
+export type { DirtyCellState } from "./editing/dirtyCells";
+export type {
+  EditConflictHandler,
+  EditConflictPolicy,
+  EditConflictState,
+} from "./editing/editConflict";
+export type { EditEventHandler, EditLifecycle } from "./editing/editingEvents";
+export type { RowEditDrafts } from "./editing/rowEditing";
+export type { CellSaveState } from "./editing/saveState";
+export type { CellEditingState } from "./editing/useCellEditing";
+export type { EditValidationState, RowValidator } from "./editing/validation";
+export type { ExportPayload, ExportWriteContext } from "./export/exportWriter";
+export type { ExportCsvOptions } from "./export/tableCsv";
+export type {
+  ColumnMenuActionFactory,
+  ContextMenuItemsFactory,
+  FilterTypeExtend,
+} from "./features/currentHost";
+export type { FacetCounts } from "./filters/facets";
+export type { ColumnFilter, FilterOptionsSource } from "./filters/filterDefs";
+export type {
+  FilterWidgetKind,
+  FilterWidgetRenderProps,
+} from "./filters/filterRegistry";
+export type {
+  ActiveFilterChip,
+  ChipLabelResolver,
+} from "./filters/useActiveFilterChips";
+export type { CellEdit } from "./focus/cellEdits";
+export type { CellRange } from "./focus/cellRange";
+export type { GridCell } from "./focus/gridFocus";
+export type { GroupNode, GroupSort } from "./grouping/groupRows";
+export type { PaginationInfo } from "./pagination/paginationMath";
+export type { PivotMeasure } from "./pivot/pivotModel";
+export type { SidePanelOptions } from "./props";
+export type { CellSpanRequest, GetCellSpanArgs } from "./rows/cellSpan";
+export type { MobileCardModel } from "./rows/mobileCard";
+export type { RowActionsRenderContext } from "./rows/rowActions";
+export type { RowMutationsState } from "./rows/rowMutations";
+export type { RowPinState } from "./rows/rowPinning";
+export type { HeaderSelectionState } from "./selection/useSelection";
+export type { QueryCondition, QueryFilterGroup } from "./source/queryContract";
+export type { QueryGroupRow } from "./source/queryGroups";
+export type { TableQuery } from "./source/useServerData";
+export type { TableStateMutators } from "./tableStateMutators";
+export type { NestedTable } from "./tree/nestedTable";
+export type {
+  ActionConfirm,
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  ExtraFilters,
+  PaginationMode,
+  ResolvedPaginationMode,
+  SortableValue,
+  TableQueryParams,
+} from "./types";
+export type {
+  SavedViewVisibility,
+  UseSavedViewsOptions,
+} from "./url/useSavedViews";
+export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
+export type {
+  RowElementProps,
+  SearchInputElementProps,
+  TableElementProps,
+} from "./useDataTable/useDataTable";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type { Shortcut } from "./actions/useShortcuts";
+export type { LayoutStorage } from "./columns/useColumnLayoutStorageState";
+export type {
+  CellEditCommit,
+  CellEditorOption,
+  CellEditTarget,
+} from "./editing/cellEditing";
+export type { EditableCellController } from "./editing/editableCellController";
+export type {
+  EditConflict,
+  EditConflictChoice,
+  ReconcileLiveEdit,
+} from "./editing/editConflict";
+export type { EditEvent } from "./editing/editingEvents";
+export type { CellSaveStatus, FailedCellSave } from "./editing/saveState";
+export type {
+  CellEditKeyOutcome,
+  CellEditNavigation,
+} from "./editing/useCellEditing";
+export type {
+  CellValidator,
+  ValidationCheckResult,
+  ValidationTarget,
+} from "./editing/validation";
+export type { ExportTable } from "./export/exportWriter";
+export type {
+  ExportColumnScope,
+  ExportInfo,
+  ExportRequest,
+  ExportRowScope,
+  FetchAllExport,
+} from "./export/tableCsv";
+export type { ChecklistValue } from "./filters/checklist";
+export type { FilterOption, FilterType } from "./filters/filterDefs";
+export type { MobileCardField } from "./rows/mobileCard";
+export type { SortLevel } from "./sort/compare";
+export type { QueryExtensions } from "./source/queryContract";
+export type { ColumnHeaderController, FilterValue } from "./types";
+export type { SavedViewMigration, SavedViewsStore } from "./url/useSavedViews";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export type { EditableCellMode } from "./editing/editableCellController";
+export type { EditUnit } from "./editing/editingEvents";
+export type { CellEditKeyAction } from "./editing/useCellEditing";
+export type { ExportRowMeta } from "./export/exportWriter";
+export type { ExportQuery } from "./export/tableCsv";
+export type { QueryAggregate } from "./source/queryContract";
+
+/**
+ * The member types the signatures above hand back.
+ *
+ * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * a consumer a type whose parts they cannot name. These are already
+ * public on `@adapttable/core`; this is the same declaration, reachable
+ * from the entry that returns it.
+ */
+export { normalizeEditorOptions } from "./editing/cellEditing";
+export { editableCellController } from "./editing/editableCellController";
+export type { ExportRowRole } from "./export/exportWriter";
+export type { AggregateFn } from "./source/queryContract";

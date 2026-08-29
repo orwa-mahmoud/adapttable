@@ -213,7 +213,7 @@ export interface EditableCellSlots {
  * Structural event on purpose, so this stays usable from any framework's
  * handler and from a plain listener.
  *
- * @internal
+ * @public
  */
 export function stopEditKeys(
   event: Readonly<{ key: string; stopPropagation: () => void }>
