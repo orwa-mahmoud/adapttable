@@ -10,12 +10,14 @@
  *   1. ESM import + the `@adapttable/core/adapter` subpath   (node, npm install)
  *   2. CommonJS require of the same three entrypoints         (node)
  *   3. Types under moduleResolution node16 / nodenext / bundler (tsc ×3)
- *   4. Every type a subpath hands back is nameable from that subpath
- *   5. The same install resolves under pnpm as well as npm
- *   6. Adapter CSS ships and is non-empty (base-ui styles.css)
- *   7. `@adapttable/server` parses a query in a backend with NO React
- *   8. A Vite production build of a real table                (vite build)
- *   9. A Next.js App Router build whose prerender renders rows (next build)
+ *   4. The beginner, v2-props, senior, customization and headless layers
+ *   5. Every type a subpath hands back is nameable from that subpath
+ *   6. Every compatibility alias is still a value at runtime
+ *   7. The same install resolves under pnpm as well as npm
+ *   8. Adapter CSS ships and is non-empty (base-ui styles.css)
+ *   9. `@adapttable/server` parses a query in a backend with NO React
+ *  10. A Vite production build of a real table                (vite build)
+ *  11. A Next.js App Router build whose prerender renders rows (next build)
  *
  * Monorepo tests can never see these failures: they resolve source, not
  * `exports` maps, tarball file lists, or bundler resolution rules.
@@ -38,6 +40,16 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  aliasesIn,
+  aliasRuntimeProbe,
+  aliasTypeProbe,
+  BEGINNER,
+  CUSTOMIZATION,
+  HEADLESS,
+  SENIOR,
+  V2_PROPS,
+} from "./layer-fixtures.mjs";
 import { missingNames, NAMEABLE, NAMEABLE_PROBE } from "./packed-names.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -184,7 +196,8 @@ function main() {
       .map(([name, file]) => `  "${name}": "file:${file}"`)
       .join("\n")}\n`;
 
-  // ── 1–6. Resolution scratch: ESM, CJS, tsc ×3, names, pnpm, CSS ──────
+  // ── 1–8. Resolution scratch: ESM, CJS, tsc ×3, layers, names, aliases,
+  //         pnpm, CSS ────────────────────────────────────────────────────
   const resDir = scratch("resolution");
   writeFileSync(
     join(resDir, "package.json"),
@@ -270,6 +283,24 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
 `
   );
   writeFileSync(join(resDir, "nameable.ts"), NAMEABLE_PROBE);
+  // The three product layers, compiled against the tarballs beside the probes.
+  const aliases = aliasesIn(
+    readFileSync(
+      join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
+      "utf8"
+    )
+  );
+  for (const [name, source] of [
+    ["beginner.tsx", BEGINNER],
+    ["v2props.tsx", V2_PROPS],
+    ["senior.tsx", SENIOR],
+    ["customization.tsx", CUSTOMIZATION],
+    ["headless.tsx", HEADLESS],
+    ["aliases.ts", aliasTypeProbe(aliases)],
+  ]) {
+    writeFileSync(join(resDir, name), source);
+  }
+  writeFileSync(join(resDir, "aliases.mjs"), aliasRuntimeProbe(aliases.values));
   for (const resolution of ["node16", "nodenext", "bundler"]) {
     writeFileSync(
       join(resDir, `tsconfig.${resolution}.json`),
@@ -285,7 +316,16 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
             skipLibCheck: true,
             noEmit: true,
           },
-          include: ["probe.ts", "nameable.ts"],
+          include: [
+            "probe.ts",
+            "nameable.ts",
+            "aliases.ts",
+            "beginner.tsx",
+            "v2props.tsx",
+            "senior.tsx",
+            "customization.tsx",
+            "headless.tsx",
+          ],
         },
         null,
         2
@@ -317,6 +357,10 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   }
 
   checkPackedNames(resDir);
+
+  process.stdout.write("compatibility aliases are still values … ");
+  run(process.execPath, ["aliases.mjs"], resDir, "compatibility aliases");
+  console.log("ok");
 
   process.stdout.write("adapter CSS ships (base-ui styles.css) … ");
   const cssPath = join(
@@ -355,7 +399,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   run(process.execPath, ["esm.mjs"], pnpmDir, "ESM import under pnpm");
   console.log("ok");
 
-  // ── 7. A backend with no React at all ─────────────────────────────────
+  // ── 9. A backend with no React at all ─────────────────────────────────
   //
   // Every scratch app above has React, because every one of them renders a
   // table. `@adapttable/server` renders nothing: it reads a query string inside
@@ -494,7 +538,7 @@ if (wrong.length > 0)
   run(process.execPath, ["parse.cjs"], nodeDir, "react-free CJS parse");
   console.log("ok");
 
-  // ── 8. Vite production build ──────────────────────────────────────────
+  // ── 10. Vite production build ─────────────────────────────────────────
   const viteDir = scratch("vite");
   mkdirSync(join(viteDir, "src"), { recursive: true });
   writeFileSync(
@@ -553,7 +597,7 @@ createRoot(document.getElementById("root")!).render(
   }
   console.log("ok");
 
-  // ── 9. Next.js App Router build + prerender ───────────────────────────
+  // ── 11. Next.js App Router build + prerender ──────────────────────────
   const nextDir = scratch("next");
   mkdirSync(join(nextDir, "app"), { recursive: true });
   writeFileSync(
