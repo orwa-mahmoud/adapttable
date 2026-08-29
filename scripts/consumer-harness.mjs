@@ -93,6 +93,41 @@ function run(cmd, args, cwd, label) {
   }
 }
 
+/**
+ * Every promised name arrives in the declaration a consumer installs.
+ *
+ * Read out of `node_modules`, not out of the workspace build: the tarball is
+ * what `exports` maps and file lists are actually resolved against, and a name
+ * can survive the build and still not ship.
+ */
+function checkPackedNames(resDir) {
+  process.stdout.write("packed declarations name their own types … ");
+  for (const [pkg, entry, names] of NAMEABLE) {
+    const route =
+      entry === "index" ? `@adapttable/${pkg}` : `@adapttable/${pkg}/${entry}`;
+    const dtsPath = join(
+      resDir,
+      "node_modules",
+      "@adapttable",
+      pkg,
+      "dist",
+      `${entry}.d.ts`
+    );
+    if (!existsSync(dtsPath)) {
+      console.error(`\n✗ the packed ${pkg} ships no dist/${entry}.d.ts`);
+      process.exit(1);
+    }
+    const missing = missingNames(readFileSync(dtsPath, "utf8"), names);
+    if (missing.length > 0) {
+      console.error(
+        `\n✗ ${route} hands back ${missing.join(", ")} but its packed declaration exports no such name — a consumer cannot write the type`
+      );
+      process.exit(1);
+    }
+  }
+  console.log("ok");
+}
+
 function main() {
   const packDir = mkdtempSync(join(tmpdir(), "consumer-packs-"));
   const scratches = [];
@@ -129,6 +164,11 @@ function main() {
   const SERVER = {
     "@adapttable/server": `file:${tarballs["@adapttable/server"]}`,
   };
+  // Only react and react-dom are peers, so the styled kit installs like any
+  // other package — and its own props type has to arrive from its own entry.
+  const SHADCN = {
+    "@adapttable/shadcn": `file:${tarballs["@adapttable/shadcn"]}`,
+  };
 
   // On a Version Packages PR the bumped versions exist only as tarballs —
   // the registry doesn't have them yet. Every scratch app therefore pins
@@ -154,7 +194,14 @@ function main() {
         version: "0.0.0",
         private: true,
         type: "module",
-        dependencies: { ...CORE, ...UNSTYLED, ...BASE_UI, ...SERVER, ...REACT },
+        dependencies: {
+          ...CORE,
+          ...UNSTYLED,
+          ...BASE_UI,
+          ...SERVER,
+          ...SHADCN,
+          ...REACT,
+        },
         overrides: OVERRIDES,
         devDependencies: {
           typescript: "^6.0.0",
@@ -269,29 +316,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
     console.log("ok");
   }
 
-  process.stdout.write("packed declarations name their own types … ");
-  for (const [entry, names] of NAMEABLE) {
-    const dtsPath = join(
-      resDir,
-      "node_modules",
-      "@adapttable",
-      "core",
-      "dist",
-      `${entry}.d.ts`
-    );
-    if (!existsSync(dtsPath)) {
-      console.error(`\n✗ the packed core ships no dist/${entry}.d.ts`);
-      process.exit(1);
-    }
-    const missing = missingNames(readFileSync(dtsPath, "utf8"), names);
-    if (missing.length > 0) {
-      console.error(
-        `\n✗ @adapttable/core/${entry} hands back ${missing.join(", ")} but its packed declaration exports no such name — a consumer cannot write the type`
-      );
-      process.exit(1);
-    }
-  }
-  console.log("ok");
+  checkPackedNames(resDir);
 
   process.stdout.write("adapter CSS ships (base-ui styles.css) … ");
   const cssPath = join(

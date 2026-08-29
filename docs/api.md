@@ -958,7 +958,11 @@ from your kit and pass `fields`, `config` and `onChange`. It is
 `PivotPanelChrome` with that kit's slots already filled.
 
 **`SavedViewsPanel`** is each adapter's pre-wired management panel — import it
-from your kit and pass the views plus the five handlers.
+from your kit and pass the views plus the five handlers. shadcn's names its own
+`SavedViewsPanelProps`: the views, the five handlers, `labels`, `footer`,
+`className`, and a `classNames` map merged per key over the shadcn preset. It
+is the panel's whole contract, with no slot type to fill in — the kit has
+already filled them.
 
 **Saved-view storage and versioning.** `useSavedViews` takes a
 `SavedViewsStore` (`list` / `save` / `remove`, all async) that replaces

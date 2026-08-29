@@ -10,7 +10,6 @@ import { CellEditor } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
-import { CSSProperties } from 'react';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { DataTableClassNames } from '@adapttable/unstyled';
@@ -29,6 +28,8 @@ import { FILTER_TYPES } from '@adapttable/core';
 import { JSX } from 'react';
 import { PivotPanel } from '@adapttable/unstyled';
 import { ReactNode } from 'react';
+import { SavedView } from '@adapttable/unstyled';
+import { TableLabels } from '@adapttable/unstyled';
 import { TableQuery } from '@adapttable/core';
 import { UseServerDataOptions } from '@adapttable/core';
 import { UseTableDataOptions } from '@adapttable/core';
@@ -86,9 +87,21 @@ export { FILTER_TYPES }
 export { PivotPanel }
 
 // @public
-export function SavedViewsPanel(props: Readonly<Omit<SavedViewsPanelChromeProps, "slots"> & {
-    classNames?: DataTableClassNames;
-}>): JSX.Element;
+export function SavedViewsPanel(props: SavedViewsPanelProps): JSX.Element;
+
+// @public
+export interface SavedViewsPanelProps {
+    readonly className?: string;
+    readonly classNames?: DataTableClassNames;
+    readonly footer?: ReactNode;
+    readonly labels?: TableLabels;
+    readonly onApply: (name: string) => void;
+    readonly onMove: (name: string, delta: -1 | 1) => void;
+    readonly onRemove: (name: string) => void;
+    readonly onRename: (from: string, to: string) => void;
+    readonly onSetDefault: (name: string) => void;
+    readonly views: readonly SavedView[];
+}
 
 // @public
 export const shadcnClassNames: {

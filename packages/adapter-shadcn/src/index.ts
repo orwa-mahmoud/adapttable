@@ -12,7 +12,7 @@ export { DataTable } from "./DataTable";
 // difference: the saved-views panel honors the `views*` keys and comes
 // pre-wired below, the same way `DataTable` does. The pivot panel has no keys
 // in the class map yet, so unstyled's is still the whole implementation.
-export { SavedViewsPanel } from "./SavedViewsPanel";
+export { SavedViewsPanel, type SavedViewsPanelProps } from "./SavedViewsPanel";
 export { PivotPanel } from "@adapttable/unstyled";
 export * from "@adapttable/unstyled";
 

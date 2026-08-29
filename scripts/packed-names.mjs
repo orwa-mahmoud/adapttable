@@ -14,14 +14,18 @@
  * a user installs; `packed-names.test.mjs` covers the reader itself.
  */
 
-/** `[entry, names]` — entry is the `dist/<entry>.d.ts` that must name them. */
+/**
+ * `[pkg, entry, names]` — `pkg` is the installed package directory under
+ * `@adapttable/`, `entry` the `dist/<entry>.d.ts` that must name them.
+ */
 export const NAMEABLE = [
-  ["features", ["BulkAction", "ExportWriter", "TableFeature"]],
-  ["sparkline", ["ColumnDef", "SparklineColumnSpec"]],
-  ["pivot", ["ColumnDef", "PivotConfig"]],
-  ["xlsx", ["ExportViewEntry", "ExportWriter"]],
-  ["pdf", ["ExportWriter", "PrintPageBreak"]],
+  ["core", "features", ["BulkAction", "ExportWriter", "TableFeature"]],
+  ["core", "sparkline", ["ColumnDef", "SparklineColumnSpec"]],
+  ["core", "pivot", ["ColumnDef", "PivotConfig"]],
+  ["core", "xlsx", ["ExportViewEntry", "ExportWriter"]],
+  ["core", "pdf", ["ExportWriter", "PrintPageBreak"]],
   [
+    "core",
     "adapter",
     [
       "ColumnDef",
@@ -32,6 +36,10 @@ export const NAMEABLE = [
       "UseCommandPaletteOptions",
     ],
   ],
+  // The panel's props are its own interface rather than core's chrome props,
+  // so the name has to arrive from shadcn itself — a star re-export of
+  // unstyled cannot supply it.
+  ["shadcn", "index", ["SavedViewsPanel", "SavedViewsPanelProps"]],
 ];
 
 /**
@@ -72,6 +80,7 @@ import type {
   ExportViewEntry,
   ExportWriter as XlsxExportWriter,
 } from "@adapttable/core/xlsx";
+import type { SavedViewsPanelProps } from "@adapttable/shadcn";
 
 type Row = { id: string; name: string };
 
@@ -99,6 +108,18 @@ export type Nameable = {
   point: ContextMenuPoint;
   contextMenu: TableContextMenuOptions<Row>;
   palette: UseCommandPaletteOptions;
+  savedViewsPanel: SavedViewsPanelProps;
+};
+
+// The panel's props name no core chrome type, so a consumer can write the
+// whole shape without importing @adapttable/core at all.
+export const panel: SavedViewsPanelProps = {
+  views: [],
+  onApply: () => {},
+  onRename: () => {},
+  onMove: () => {},
+  onSetDefault: () => {},
+  onRemove: () => {},
 };
 `;
 

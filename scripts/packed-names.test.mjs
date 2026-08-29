@@ -7,7 +7,9 @@ import { fileURLToPath } from "node:url";
 import { exportedNames, missingNames, NAMEABLE } from "./packed-names.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const CORE_DIST = join(REPO_ROOT, "packages", "core", "dist");
+/** An installed `@adapttable/<pkg>` maps to `packages/<dir>` in the tree. */
+const DIRS = { core: "core", shadcn: "adapter-shadcn" };
+const distOf = (pkg) => join(REPO_ROOT, "packages", DIRS[pkg], "dist");
 
 /** The shape a rolled-up entry ends with: one long export block. */
 const ROLLUP = `
@@ -80,14 +82,18 @@ describe("missingNames", () => {
 // before `pnpm build` in the gate's order, and a missing artifact is not a
 // finding about the code.
 describe("the built declarations honour NAMEABLE", () => {
-  for (const [entry, names] of NAMEABLE) {
-    const dts = join(CORE_DIST, `${entry}.d.ts`);
-    it(`${entry} names ${names.join(", ")}`, { skip: !existsSync(dts) }, () => {
-      assert.deepEqual(missingNames(readFileSync(dts, "utf8"), names), []);
-    });
+  for (const [pkg, entry, names] of NAMEABLE) {
+    const dts = join(distOf(pkg), `${entry}.d.ts`);
+    it(
+      `${pkg}/${entry} names ${names.join(", ")}`,
+      { skip: !existsSync(dts) },
+      () => {
+        assert.deepEqual(missingNames(readFileSync(dts, "utf8"), names), []);
+      }
+    );
   }
 
-  const sparkline = join(CORE_DIST, "sparkline.d.ts");
+  const sparkline = join(distOf("core"), "sparkline.d.ts");
   it(
     "and the reader is strict enough to fail",
     { skip: !existsSync(sparkline) },
