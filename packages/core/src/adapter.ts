@@ -543,6 +543,7 @@ export {
   type ViewControlsToolbar,
   viewControlsToolbar,
 } from "./useTableChrome";
+export type { Props } from "./utils/mergeProps";
 export { ColumnSpacer, type ColumnSpacerProps } from "./virtual/ColumnSpacer";
 export {
   type ResizableVirtualizer,

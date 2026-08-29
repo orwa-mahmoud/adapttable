@@ -2294,6 +2294,9 @@ export interface PrintToolbar {
 export function printToolbar(wanted: boolean | undefined, onPrint: (() => void) | undefined, labels: TableLabels): PrintToolbar;
 
 // @public
+export type Props = Record<string, unknown>;
+
+// @public
 export interface QuerySupport {
     aggregates?: boolean;
     cursor?: boolean;
