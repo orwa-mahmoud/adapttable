@@ -9432,13 +9432,21 @@ near-100% test coverage across every adapter.
 
 ## When might another library fit better?
 
-- You need a heavyweight enterprise grid with pivoting, range selection, and
-  Excel-style fill-handle editing _today_ → ag-Grid or MUI X DataGrid (paid).
-  (AdaptTable does ship opt-in single-cell editing — see
-  [Inline cell editing](./cell-editing.md).)
-- You're not on React → TanStack Table (multi-framework).
-- You need spreadsheet-grade enterprise features like pivoting, Excel fill
-  handles, or range selection _today_.
+- You want a mature, deeply integrated spreadsheet-analytics product and are
+  happy to licence it → **AG Grid Enterprise** or **MUI X Premium**. Their pivot
+  UI, tool panels and range tooling arrive as one assembled surface you switch
+  on. AdaptTable ships the same capabilities under MIT —
+  [pivoting](./pivot.md), [cell-range selection, range clipboard and the fill
+  handle](./cell-navigation.md), [tree data](./tree-data.md),
+  [inline editing](./cell-editing.md) and
+  [Excel (.xlsx) export](./customization.md#export) — but as parts you compose,
+  with their prerequisites stated, rather than one spreadsheet product.
+- You're not on React → **TanStack Table** (multi-framework). AdaptTable is
+  React-only.
+- You want the table to draw its own look rather than your design system's.
+  Every AdaptTable adapter renders your UI kit's real components, which is the
+  whole point of it — and the wrong trade if you would rather not own the
+  theming at all.
 
 ---
 
