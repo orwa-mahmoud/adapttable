@@ -27,8 +27,8 @@ import ts from "typescript";
 
 const PACKAGES_DIR = join(process.cwd(), "packages");
 
-/** Library packages that ship a runtime `dist` (excludes the cli scaffolder). */
-const LIB_PACKAGES = readdirSync(PACKAGES_DIR).filter((pkg) => pkg !== "cli");
+/** Every package under `packages/` — all of them ship a runtime `dist`. */
+const LIB_PACKAGES = readdirSync(PACKAGES_DIR);
 
 function readPackageJson(pkg) {
   return JSON.parse(
@@ -48,7 +48,16 @@ function conditionTargets(entry, into) {
   }
 }
 
-/** Resolve every subpath target the `exports` map + legacy fields advertise. */
+/**
+ * Resolve every target a package advertises: the `exports` map, the legacy
+ * fields, and `bin`.
+ *
+ * A binary is an entry point like any other — `npx adapttable init` runs it,
+ * and a `bin` pointing at a file the build did not emit is as broken as an
+ * `exports` target that does. It is not a TYPED entry point, so extraction
+ * ignores it; reaching it from here is what keeps its own graph honest and
+ * stops the reachability walk from calling it dead weight.
+ */
 function exportTargets(pkgJson) {
   const targets = new Set();
   for (const entry of Object.values(pkgJson.exports ?? {})) {
@@ -57,6 +66,7 @@ function exportTargets(pkgJson) {
   if (pkgJson.main) targets.add(pkgJson.main);
   if (pkgJson.module) targets.add(pkgJson.module);
   if (pkgJson.types) targets.add(pkgJson.types);
+  conditionTargets(pkgJson.bin, targets);
   return [...targets];
 }
 
@@ -98,6 +108,15 @@ const SERVER_SAFE = [
     // hook into a chunk the two of them share.
     pkg: "core",
     only: /^\.\/dist\/query\.(js|cjs)$/,
+    reactFree: true,
+  },
+  {
+    // The scaffolder runs under `npx` before the project it is creating
+    // exists, so React is not installed at that moment and never has to be.
+    // The graph promise is the load-bearing one here: `adapttable init`
+    // reaching a hook-bearing module would make the tool that sets up a table
+    // require the table.
+    pkg: "cli",
     reactFree: true,
   },
 ];
