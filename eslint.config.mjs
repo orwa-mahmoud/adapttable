@@ -17,6 +17,19 @@ const sonarRecommended = /** @type {import("eslint").Linter.Config} */ (
   /** @type {unknown} */ (sonarjs.configs?.recommended ?? {})
 );
 
+/**
+ * Where React actually runs: the engine, the nine adapters, and the two apps
+ * that mount them. Everything else in this repository is React-free by design
+ * or by job — the CLI scaffolds a project before one exists, the server parses
+ * a query string, and `scripts/` builds the repo.
+ */
+const REACT_SOURCES = [
+  "packages/core/**/*.{ts,tsx}",
+  "packages/adapter-*/**/*.{ts,tsx}",
+  "apps/showcase/**/*.{ts,tsx}",
+  "examples/**/*.{ts,tsx}",
+];
+
 export default defineConfig(
   {
     ignores: [
@@ -53,12 +66,31 @@ export default defineConfig(
       "jsx-a11y": jsxA11y,
       "simple-import-sort": simpleImportSort,
     },
-    // Pinned rather than detected. `detect` reads the installed `react`, and
-    // three lint contexts have none — `@adapttable/cli`, `@adapttable/server`
-    // and the root `scripts/` — so each printed a warning and fell back to
-    // "latest" anyway. The floor of core's peer range is what the rules should
-    // hold every package to, and it is the same answer detection gave.
-    settings: { react: { version: "18.0.0" } },
+    rules: {
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { prefer: "type-imports", fixStyle: "inline-type-imports" },
+      ],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-non-null-assertion": "off",
+    },
+  },
+  {
+    // The React rules run only where React does. `version: "detect"` reads the
+    // installed `react`, and three lint contexts have none — `@adapttable/cli`
+    // and `@adapttable/server` are React-free on purpose, and root `scripts/`
+    // is build tooling — so running them everywhere printed a startup warning
+    // per context and fell back to guessing a version.
+    //
+    // `@adapttable/i18n` is left out too: it carries react only as a dev
+    // dependency for its tests and ships no component.
+    files: REACT_SOURCES,
+    settings: { react: { version: "detect" } },
     rules: {
       ...react.configs.recommended.rules,
       ...react.configs["jsx-runtime"].rules,
@@ -72,17 +104,6 @@ export default defineConfig(
       // intermediate bindings (`const props = applyTableFeatures(incoming)`).
       "react/prop-types": "off",
       ...jsxA11y.flatConfigs.recommended.rules,
-      "simple-import-sort/imports": "error",
-      "simple-import-sort/exports": "error",
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports", fixStyle: "inline-type-imports" },
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
   {
@@ -116,7 +137,6 @@ export default defineConfig(
       "@typescript-eslint/unbound-method": "off",
       "sonarjs/no-nested-functions": "off",
       "sonarjs/prefer-read-only-props": "off",
-      "react/prop-types": "off",
     },
   },
   prettier
