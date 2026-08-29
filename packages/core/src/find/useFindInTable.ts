@@ -15,7 +15,7 @@ import type { ColumnDef } from "../types";
 import { findMatches, matchKeySet, stepMatch } from "./findMatches";
 
 /**
- * What {@link useFindInTable} needs.
+ * What `useFindInTable` needs.
  *
  * @public
  */
@@ -31,7 +31,7 @@ export interface UseFindInTableOptions<TRow> {
 }
 
 /**
- * What {@link useFindInTable} returns.
+ * What `useFindInTable` returns.
  *
  * @public
  */

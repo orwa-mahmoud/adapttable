@@ -45,7 +45,7 @@ export const EMPTY_COLUMN_LAYOUT: ColumnLayoutState = {
 };
 
 /**
- * Options for {@link useColumnLayout}.
+ * Options for `useColumnLayout`.
  *
  * @public
  */
@@ -68,7 +68,7 @@ export interface UseColumnLayoutOptions<TRow> {
 }
 
 /**
- * Result of {@link useColumnLayout}.
+ * Result of `useColumnLayout`.
  *
  * @public
  */

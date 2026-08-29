@@ -152,7 +152,7 @@ function indexOfId<TRow>(
 }
 
 /**
- * One mutation {@link applyRowPatchesWithLog} actually performed.
+ * One mutation `applyRowPatchesWithLog` actually performed.
  *
  * Incremental re-evaluation walks this list instead of scanning the row set
  * to find what changed. Indices are taken at the moment the event ran, so a

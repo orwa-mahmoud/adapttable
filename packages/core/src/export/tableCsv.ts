@@ -79,7 +79,7 @@ export interface ExportCsvOptions<TRow = unknown> {
   columns?: ExportColumnScope;
   /**
    * Neutralise spreadsheet formula injection (see
-   * {@link RowsToCsvOptions.escapeFormulas}). Disable ONLY for
+   * `RowsToCsvOptions.escapeFormulas`). Disable ONLY for
    * machine-consumed output that is never opened in a spreadsheet.
    * @defaultValue true
    */
@@ -229,7 +229,7 @@ export async function fetchAllExportRows<TRow>(
 export interface ExportRequest<TRow> extends ExportInfo<TRow> {
   /**
    * The query behind the current view: search, filters, sort and paging,
-   * exactly as {@link TableQuery} carries them to a server tier.
+   * exactly as `TableQuery` carries them to a server tier.
    */
   query: ExportQuery;
   /** Which rows were asked for. `rows` holds what the browser has of them. */

@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 
 /**
- * Collapse state + actions returned by {@link useGroupCollapse}.
+ * Collapse state + actions returned by `useGroupCollapse`.
  *
  * @public
  */

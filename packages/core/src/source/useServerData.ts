@@ -46,7 +46,7 @@ export interface TableQuery extends QueryExtensions {
 }
 
 /**
- * Options for {@link useServerData}.
+ * Options for `useServerData`.
  *
  * @public
  */

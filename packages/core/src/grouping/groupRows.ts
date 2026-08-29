@@ -168,7 +168,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
   columns: readonly ColumnDef<TRow>[];
   /** Row identity function. */
   getRowId: (row: TRow) => string;
-  /** Collapsed group keys (from {@link useGroupCollapse}). */
+  /** Collapsed group keys (from `useGroupCollapse`). */
   collapsedGroupIds: ReadonlySet<string>;
   /** Optional per-group cells — same shape as `summaryRow`. */
   aggregates?: GroupAggregatesFn<TRow>;

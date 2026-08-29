@@ -59,7 +59,7 @@ export interface UseColumnLayoutUrlStateResult {
 }
 
 /**
- * Headless URL-synced column layout. Mirrors {@link useTableUrlState} for the
+ * Headless URL-synced column layout. Mirrors `useTableUrlState` for the
  * column dimension: which columns are hidden, pinned, reordered, or resized is
  * kept in the query string (or a local store when disabled), so reloads,
  * shared links, and re-mounts restore the exact layout. Feed the result into

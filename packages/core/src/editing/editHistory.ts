@@ -32,7 +32,7 @@ export interface EditHistoryEntry<TRow> {
 }
 
 /**
- * What {@link useEditHistory} needs.
+ * What `useEditHistory` needs.
  *
  * @public
  */
@@ -48,7 +48,7 @@ export interface UseEditHistoryOptions<TRow> {
 }
 
 /**
- * What {@link useEditHistory} returns.
+ * What `useEditHistory` returns.
  *
  * @public
  */

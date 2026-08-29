@@ -79,7 +79,7 @@ export function filterCommands(
 }
 
 /**
- * What {@link tableCommands} needs to build the table-wide actions.
+ * What `tableCommands` needs to build the table-wide actions.
  *
  * @public
  */

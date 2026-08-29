@@ -82,7 +82,7 @@ export const SAVED_VIEW_VERSION = 2;
 /**
  * Bring one stored view up to date, or return `null` to drop it.
  *
- * Called for every view whose `version` is behind {@link SAVED_VIEW_VERSION},
+ * Called for every view whose `version` is behind `SAVED_VIEW_VERSION`,
  * oldest first, after the built-in migration has run. Dropping is a real
  * answer: a view whose columns no longer exist restores a table nobody asked
  * for, and silently applying it is worse than losing it.
@@ -136,7 +136,7 @@ export interface SavedViewsStore {
 }
 
 /**
- * Options for {@link useSavedViews}.
+ * Options for `useSavedViews`.
  *
  * @public
  */
@@ -174,7 +174,7 @@ export interface UseSavedViewsOptions {
 }
 
 /**
- * Result of {@link useSavedViews}.
+ * Result of `useSavedViews`.
  *
  * @public
  */

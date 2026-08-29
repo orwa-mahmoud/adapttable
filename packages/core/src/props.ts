@@ -654,7 +654,7 @@ export interface BaseDataTableProps<TRow> {
   ) => Partial<Record<string, ReactNode>>;
   /**
    * Controlled collapsed group keys (ephemeral — not URL-synced).
-   * Uncontrolled: internal {@link useGroupCollapse}.
+   * Uncontrolled: internal `useGroupCollapse`.
    */
   collapsedGroupIds?: readonly string[];
   /** Called with the collapsed groups after a toggle. */

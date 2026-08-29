@@ -142,7 +142,7 @@ export interface ColumnDef<TRow> {
    * path (`["Finance", "Q1"]`) stacks rows. Reordering columns apart
    * splits the group (adjacency-based, never lies about layout).
    *
-   * Prefer a {@link ColumnGroupDef} with `children` when the group has
+   * Prefer a `ColumnGroupDef` with `children` when the group has
    * collapse options (`collapsedKey`, `collapsedRender`) — `group` is
    * the shortcut for a spanning label only.
    */
@@ -513,7 +513,7 @@ export interface PaginatedResponse<TRow> {
 /**
  * Strings the table renders. Pass pre-translated values (or wire them to
  * your i18n stack). Every key is optional; sensible English defaults fill
- * the gaps — see {@link defaultLabels}.
+ * the gaps — see `defaultLabels`.
  *
  * @public
  */

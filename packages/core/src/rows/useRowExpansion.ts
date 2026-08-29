@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 
 /**
- * Expansion state + actions returned by {@link useRowExpansion}.
+ * Expansion state + actions returned by `useRowExpansion`.
  *
  * @public
  */

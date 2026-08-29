@@ -55,7 +55,7 @@ export interface CellEditKeyOutcome {
 }
 
 /**
- * Headless cell-editing state returned by {@link useCellEditing}.
+ * Headless cell-editing state returned by `useCellEditing`.
  *
  * @public
  */
@@ -135,7 +135,7 @@ export interface CellEditingState {
 }
 
 /**
- * What {@link useCellEditing} observes, when the host wired lifecycle events.
+ * What `useCellEditing` observes, when the host wired lifecycle events.
  *
  * @public
  */

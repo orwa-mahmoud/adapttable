@@ -33,7 +33,7 @@ import {
 } from "./serialize";
 
 /**
- * Options for {@link useTableUrlState}.
+ * Options for `useTableUrlState`.
  *
  * @public
  */
@@ -65,7 +65,7 @@ export interface UseTableUrlStateOptions {
 }
 
 /**
- * State + setters returned by {@link useTableUrlState}.
+ * State + setters returned by `useTableUrlState`.
  *
  * @public
  */

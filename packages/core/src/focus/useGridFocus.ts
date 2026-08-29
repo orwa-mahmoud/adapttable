@@ -74,7 +74,7 @@ export function gridCellAttr(cell: GridCell): string {
 }
 
 /**
- * Options for {@link useGridFocus}.
+ * Options for `useGridFocus`.
  *
  * @public
  */
@@ -182,7 +182,7 @@ export interface UseGridFocusOptions<TRow> {
 }
 
 /**
- * What {@link useGridFocus} returns.
+ * What `useGridFocus` returns.
  *
  * @public
  */

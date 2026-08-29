@@ -10,7 +10,7 @@ import { applyGroupLeafSelection } from "../grouping/groupSelection";
 export type HeaderSelectionState = "all" | "some" | "none";
 
 /**
- * Options for {@link useSelection}.
+ * Options for `useSelection`.
  *
  * @public
  */
@@ -37,7 +37,7 @@ export interface UseSelectionOptions<TRow> {
 }
 
 /**
- * Selection state + actions returned by {@link useSelection}.
+ * Selection state + actions returned by `useSelection`.
  *
  * @public
  */
