@@ -73,3 +73,62 @@ export function publishedFigures(file, find) {
     : `${lines[at]} ${lines[at + 1] ?? ""}`;
   return figuresIn(text);
 }
+
+/** How many decimals a published figure is written to: `2.7` is one, `18` none. */
+export function decimalsOf(figure) {
+  return (String(figure).split(".")[1] ?? "").length;
+}
+
+/** `value` rounded the way a figure written to `decimals` places would be. */
+export function roundTo(value, decimals) {
+  const scale = 10 ** decimals;
+  return Math.round(value * scale) / scale;
+}
+
+/**
+ * The figures a page should carry for these measurements.
+ *
+ * Each page picks its own precision — the adapter range reads `127–141 kB`,
+ * the pivot engine reads `1.5 KB` — and is held to exactly that. Rounding
+ * every figure to whole kilobytes would make an accurate `1.5` wrong and
+ * demand a less true `2` in its place; the rule that catches a stale number
+ * without coarsening a good one is "the figure equals the measurement, at the
+ * precision it is written to".
+ *
+ * No window either way. A tolerance is how a number drifts a kilobyte at a
+ * time while every run stays green, and the pages promise the opposite: that
+ * `pnpm budget` fails the build rather than let one quietly go stale.
+ *
+ * @param measuredKB - One or more measured sizes, in kilobytes.
+ * @param decimals - Places to round to, per end of the range.
+ * @returns `[n]`, or `[low, high]` when the ends differ once rounded.
+ */
+export function expectedFigures(measuredKB, decimals = [0, 0]) {
+  const low = roundTo(Math.min(...measuredKB), decimals[0]);
+  const high = roundTo(Math.max(...measuredKB), decimals[decimals.length - 1]);
+  return low === high ? [low] : [low, high];
+}
+
+/**
+ * Why a page's figures no longer match, or `null` when they do.
+ *
+ * Both ends of a range are checked, and each exactly: a correct low end does
+ * not excuse a wrong high one.
+ *
+ * @param figures - What the page prints, from {@link publishedFigures}.
+ * @param measuredKB - What this run measured, in kilobytes.
+ * @returns A sentence naming the disagreement, or `null`.
+ */
+export function staleReason(figures, measuredKB) {
+  const expected = expectedFigures(measuredKB, figures.map(decimalsOf));
+  if (figures.length !== expected.length) {
+    return `published ${figures.join("–") || "no figure"}, expected ${expected.join("–")} kB`;
+  }
+  if (!expected.some((want, i) => figures[i] !== want)) return null;
+  const ends = [Math.min(...measuredKB), Math.max(...measuredKB)];
+  const shown = ends[0] === ends[1] ? [ends[0]] : ends;
+  return (
+    `published ${figures.join("–")} kB, expected ${expected.join("–")} kB ` +
+    `(measured ${shown.map((n) => n.toFixed(1)).join("–")} KB)`
+  );
+}

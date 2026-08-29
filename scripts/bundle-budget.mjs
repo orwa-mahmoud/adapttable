@@ -25,7 +25,7 @@ import { gzipSync } from "node:zlib";
 
 import { Rolldown } from "tsdown";
 
-import { publishedFigures } from "./published-figures.mjs";
+import { publishedFigures, staleReason } from "./published-figures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
@@ -505,8 +505,6 @@ for (const { doc, find, from } of PUBLISHED) {
   const measured = rows
     .filter((r) => from.includes(r.name))
     .map((r) => r.sizeKB);
-  const want = [Math.min(...measured), Math.max(...measured)];
-  const expected = want[0] === want[1] ? [want[0]] : want;
   const figures = publishedFigures(join(ROOT, doc), find);
 
   if (figures === null) {
@@ -516,18 +514,10 @@ for (const { doc, find, from } of PUBLISHED) {
     );
     continue;
   }
-  // The doc rounds to whole kB, so a figure is current when it rounds to what
-  // was just measured. Anything further apart is a number a reader would act on.
-  const off =
-    figures.length !== expected.length
-      ? true
-      : figures.some((f, i) => Math.abs(f - expected[i]) > 1);
-  if (off) {
+  const reason = staleReason(figures, measured);
+  if (reason) {
     stale++;
-    console.error(
-      `✗ ${doc} · ${find.trim()}: published ${figures.join("–")} kB, measured ` +
-        `${expected.map((n) => n.toFixed(1)).join("–")} KB`
-    );
+    console.error(`✗ ${doc} · ${find.trim()}: ${reason}`);
   }
 }
 if (!stale) {
