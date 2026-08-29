@@ -233,11 +233,18 @@ for (const target of entrypoints()) {
   ok = extractOne(target) && ok;
 }
 if (!LOCAL) rmSync(OUT, { recursive: true, force: true });
-console.log(
-  LOCAL
-    ? "\napi-reports: regenerated — commit any changes under etc/."
-    : "\napi-reports: every committed report matches the built types."
-);
+// Only claim a match when every report actually matched. A run that prints
+// "every committed report matches" under the line saying one is out of date is
+// the same failure as reporting one warning class as if it were the total.
+if (LOCAL) {
+  console.log("\napi-reports: regenerated — commit any changes under etc/.");
+} else if (ok) {
+  console.log("\napi-reports: every committed report matches the built types.");
+} else {
+  console.error(
+    "\napi-reports: a committed report no longer matches the built types."
+  );
+}
 console.log(summarize(counts));
 // The front door is the promise: a type an exported signature hands back must
 // be nameable from the same import. Subpath entries publish the machinery —
