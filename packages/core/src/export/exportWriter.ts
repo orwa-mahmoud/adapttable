@@ -34,10 +34,16 @@ import { defaultCsvValue, matrixToCsv } from "./csv";
  * What a structured export row is: a data leaf, a group header, or a
  * total. CSV ignores the distinction; a spreadsheet uses it for outline
  * levels and for which rows are bold.
+ *
+ * @public
  */
 export type ExportRowRole = "data" | "group" | "aggregate";
 
-/** Per-row structure a writer may honour. Aligned with {@link ExportTable.rows}. */
+/**
+ * Per-row structure a writer may honour. Aligned with {@link ExportTable.rows}.
+ *
+ * @public
+ */
 export interface ExportRowMeta {
   /** What this row is. */
   role: ExportRowRole;
@@ -51,6 +57,8 @@ export interface ExportRowMeta {
  * A flat table never produces these. When they are present the file follows
  * the view the reader can see — headers, leaves, footers — instead of a
  * denormalised leaf list.
+ *
+ * @public
  */
 export type ExportViewEntry<TRow> =
   | { role: "data"; row: TRow; level: number }
@@ -66,6 +74,8 @@ export type ExportViewEntry<TRow> =
 /**
  * An export after the scopes are applied and the cells are resolved: headers,
  * keys, and one row of values per exported row.
+ *
+ * @public
  */
 export interface ExportTable {
   /** Column headings, in file order. */
@@ -87,7 +97,11 @@ export interface ExportTable {
   widths?: readonly (number | undefined)[];
 }
 
-/** What a writer is given: the resolved export, exactly as it will ship. */
+/**
+ * What a writer is given: the resolved export, exactly as it will ship.
+ *
+ * @public
+ */
 export interface ExportWriteContext {
   /** The values to write. */
   table: ExportTable;
@@ -97,7 +111,11 @@ export interface ExportWriteContext {
   escapeFormulas?: boolean;
 }
 
-/** A built file, ready to hand to the browser. */
+/**
+ * A built file, ready to hand to the browser.
+ *
+ * @public
+ */
 export interface ExportPayload {
   /** The content, in the pieces a `Blob` takes. */
   parts: readonly BlobPart[];
@@ -110,7 +128,11 @@ export interface ExportPayload {
   text: string;
 }
 
-/** A file format the export button can produce. */
+/**
+ * A file format the export button can produce.
+ *
+ * @public
+ */
 export interface ExportWriter {
   /** Extension used when no filename was given, e.g. `"xlsx"`. */
   extension: string;
@@ -183,6 +205,8 @@ function viewRowValues<TRow>(
  * @param rows - The rows a scope resolved to, in table order.
  * @param columns - The columns a scope resolved to, in file order.
  * @returns The resolved table a writer receives.
+ *
+ * @public
  */
 export function buildExportTable<TRow>(
   rows: readonly TRow[],
@@ -255,6 +279,8 @@ const BOM = "\uFEFF";
  * The built-in writer: comma-separated text, UTF-8 with a BOM so Excel opens
  * unicode correctly. This is what the export button uses when no writer is
  * given.
+ *
+ * @public
  */
 export const csvWriter: ExportWriter = {
   extension: "csv",
@@ -274,7 +300,9 @@ export function defaultExportFilename(writer: ExportWriter): string {
  * reaches this does nothing rather than throwing.
  *
  * @param filename - Download name, e.g. `"people.xlsx"`.
- * @param payload - The file from {@link ExportWriter.build}.
+ * @param payload - The file from `ExportWriter.build`.
+ *
+ * @public
  */
 export function downloadExportFile(
   filename: string,

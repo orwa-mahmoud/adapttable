@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Traditional Chinese (`zh-TW`) label preset. */
+/**
+ * Traditional Chinese (`zh-TW`) label preset.
+ *
+ * @public
+ */
 export const zhTW: Required<TableLabels> = {
   table: "資料表",
   search: "搜尋",
@@ -112,6 +116,9 @@ export const zhTW: Required<TableLabels> = {
   resetColumn: "重設欄位",
   sortAscending: "升冪排序",
   sortDescending: "降冪排序",
+  sortedBy: ({ column, ascending }) =>
+    `依 ${column} 排序，${ascending ? "升冪" : "降冪"}`,
+  sortingCleared: "已清除排序",
   filterColumn: "篩選欄位",
   columnActions: "欄位動作",
   exportCsv: "匯出 CSV",

@@ -7,7 +7,7 @@
  * focus back where it was. A palette that gets any one of these wrong looks
  * completely fine in a screenshot.
  */
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -204,7 +204,7 @@ describe("CommandPaletteChrome", () => {
 
   it("puts focus back where it came from when it closes", () => {
     const { view } = setup({ open: false });
-    screen.getByTestId("opener").focus();
+    act(() => screen.getByTestId("opener").focus());
     view.rerender(
       <>
         <button type="button" data-testid="opener">

@@ -3,9 +3,7 @@
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
 import {
-  defaultFilterRegistry,
   filterLabel,
-  filterStateKeys,
   type TableSource,
   useHeaderFilterOverlay,
 } from "@adapttable/core";
@@ -36,6 +34,7 @@ import {
   GroupMoreButtonChrome,
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
+  hasActiveHeaderFilter,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -265,29 +264,26 @@ const headerSlots: FilterHeaderSlots = {
   Multi: HeaderMulti,
 };
 
+/**
+ * The filter row under the column headers, drawn with this kit's controls.
+ *
+ * @public
+ */
 export function FilterHeaderRow<TRow>(
   props: Readonly<FilterHeaderRowProps<TRow>>
 ) {
   return <FilterHeaderChrome {...props} slots={headerSlots} />;
 }
 
+/**
+ * One column's header filter, drawn with this kit's controls.
+ *
+ * @public
+ */
 export function FilterHeaderControl<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
   return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
-}
-
-function headerFilterActive<TRow>(
-  props: FilterHeaderControlProps<TRow>
-): boolean {
-  return filterStateKeys(
-    props.def,
-    props.registry ?? defaultFilterRegistry
-  ).some((key) => {
-    const value = props.source.extra[key];
-    if (value == null || value === "") return false;
-    return !(Array.isArray(value) && value.length === 0);
-  });
 }
 
 /** Filters icon on the column header — the same field the Filters panel draws. */
@@ -296,7 +292,7 @@ export function FilterHeaderTrigger<TRow>(
     FilterHeaderControlProps<TRow> & { classNames?: DataTableClassNames }
   >
 ) {
-  const active = headerFilterActive(props);
+  const active = hasActiveHeaderFilter(props);
   const { open, setOpen, source, sessionProps, resetKey } =
     useHeaderFilterOverlay(props, { pointerDismiss: false });
   return (
@@ -389,6 +385,11 @@ function FindButton({ label, part, kind, disabled, onClick }: FindButtonProps) {
   );
 }
 
+/**
+ * The find bar, drawn with this kit's input and buttons.
+ *
+ * @public
+ */
 export function FindBar(props: Readonly<FindBarProps>) {
   return (
     <FindBarChrome
@@ -417,6 +418,11 @@ function RowEditButton({
   );
 }
 
+/**
+ * Save and cancel for a row being edited.
+ *
+ * @public
+ */
 export function RowEditActions<TRow>(
   props: Readonly<RowEditActionsProps<TRow>>
 ) {
@@ -441,6 +447,11 @@ function BatchButton({
   );
 }
 
+/**
+ * The bar that saves or discards a batch of edits.
+ *
+ * @public
+ */
 export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
 }
@@ -480,10 +491,20 @@ function TreeButton({
 
 const treeSlots: TreeToggleSlots = { Button: TreeButton };
 
+/**
+ * The expand/collapse control on a tree row.
+ *
+ * @public
+ */
 export function TreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>) {
   return <TreeToggleChrome {...props} slots={treeSlots} />;
 }
 
+/**
+ * A tree row's first cell: indentation, toggle and content.
+ *
+ * @public
+ */
 export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>) {
   return <TreeCellChrome {...props} slots={treeSlots} />;
 }
@@ -509,6 +530,11 @@ function GroupToggleButton({
   );
 }
 
+/**
+ * The control that collapses a grouped column header.
+ *
+ * @public
+ */
 export function ColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>) {
   return (
     <ColumnGroupToggleChrome {...props} slots={{ Button: GroupToggleButton }} />
@@ -536,6 +562,11 @@ function MoreButton({ label, onClick }: GroupMoreButtonSlotProps) {
   );
 }
 
+/**
+ * The control that reveals the rest of a truncated group.
+ *
+ * @public
+ */
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>) {
   return <GroupMoreButtonChrome {...props} slots={{ Button: MoreButton }} />;
 }
@@ -566,6 +597,11 @@ function ReorderHandle({
   );
 }
 
+/**
+ * The drag handle for reordering a row.
+ *
+ * @public
+ */
 export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
@@ -596,6 +632,11 @@ function ReorderMove({
   );
 }
 
+/**
+ * Keyboard-reachable move-up and move-down for a row.
+ *
+ * @public
+ */
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
@@ -662,6 +703,7 @@ function EditGateButton({
   );
 }
 
+/** This kit's controls for the editable-cell gate. */
 export const editableCellSlots: EditableCellSlots = {
   Activate: ActivateCell,
   Button: EditGateButton,

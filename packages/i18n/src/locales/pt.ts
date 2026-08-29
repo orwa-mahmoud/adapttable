@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Portuguese (`pt`) label preset. */
+/**
+ * Portuguese (`pt`) label preset.
+ *
+ * @public
+ */
 export const pt: Required<TableLabels> = {
   table: "Tabela de dados",
   search: "Pesquisar",
@@ -114,6 +118,9 @@ export const pt: Required<TableLabels> = {
   resetColumn: "Redefinir coluna",
   sortAscending: "Ordenar crescente",
   sortDescending: "Ordenar decrescente",
+  sortedBy: ({ column, ascending }) =>
+    `Ordenado por ${column}, ${ascending ? "crescente" : "decrescente"}`,
+  sortingCleared: "Ordenação removida",
   filterColumn: "Filtrar coluna",
   columnActions: "Ações da coluna",
   exportCsv: "Exportar CSV",

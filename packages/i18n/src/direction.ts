@@ -1,4 +1,8 @@
-/** Text direction. */
+/**
+ * Text direction.
+ *
+ * @public
+ */
 export type Direction = "ltr" | "rtl";
 
 /**
@@ -9,6 +13,8 @@ export type Direction = "ltr" | "rtl";
  * `ps` preset exists) because its content is RTL either way. Languages
  * written predominantly in Latin script today (e.g. Hausa) are NOT
  * listed — forcing RTL would mirror the whole table wrongly.
+ *
+ * @public
  */
 export const RTL_LANGUAGES = [
   "aii", // Assyrian Neo-Aramaic
@@ -28,7 +34,11 @@ export const RTL_LANGUAGES = [
   "yi", // Yiddish
 ] as const;
 
-/** The primary language subtag of a BCP-47 locale, lower-cased. */
+/**
+ * The primary language subtag of a BCP-47 locale, lower-cased.
+ *
+ * @public
+ */
 export function primarySubtag(locale: string): string {
   return locale.toLowerCase().split(/[-_]/, 1).join("");
 }
@@ -38,6 +48,8 @@ export function primarySubtag(locale: string): string {
  *
  * @param locale - A BCP-47 locale such as `"ar"`, `"ar-EG"`, or `"he-IL"`.
  * @returns `true` for RTL locales.
+ *
+ * @public
  */
 export function isRtlLocale(locale: string): boolean {
   return (RTL_LANGUAGES as readonly string[]).includes(primarySubtag(locale));
@@ -48,6 +60,8 @@ export function isRtlLocale(locale: string): boolean {
  *
  * @param locale - A BCP-47 locale.
  * @returns `"rtl"` for RTL locales, otherwise `"ltr"`.
+ *
+ * @public
  */
 export function getDirection(locale: string): Direction {
   return isRtlLocale(locale) ? "rtl" : "ltr";

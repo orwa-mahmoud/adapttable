@@ -26,16 +26,26 @@ import {
   type ExportWriter,
 } from "./exportWriter";
 
-/** Which rows an export covers. */
+/**
+ * Which rows an export covers.
+ *
+ * @public
+ */
 export type ExportRowScope = "page" | "all" | "selected" | "range";
 
 /**
  * Which columns an export covers: what the user can see, every defined
  * column, or an explicit list of keys in file order.
+ *
+ * @public
  */
 export type ExportColumnScope = "visible" | "all" | readonly string[];
 
-/** Opt-in CSV export config for the shared DataTable surface. */
+/**
+ * Opt-in CSV export config for the shared DataTable surface.
+ *
+ * @public
+ */
 export interface ExportCsvOptions<TRow = unknown> {
   /** Download filename. Defaults to `"export.csv"`. */
   filename?: string;
@@ -69,7 +79,7 @@ export interface ExportCsvOptions<TRow = unknown> {
   columns?: ExportColumnScope;
   /**
    * Neutralise spreadsheet formula injection (see
-   * {@link RowsToCsvOptions.escapeFormulas}). Disable ONLY for
+   * `RowsToCsvOptions.escapeFormulas`). Disable ONLY for
    * machine-consumed output that is never opened in a spreadsheet.
    * @defaultValue true
    */
@@ -139,7 +149,11 @@ export interface ExportCsvOptions<TRow = unknown> {
   fetchAll?: FetchAllExport<TRow>;
 }
 
-/** How `scope: "all"` pages a server source when the host opts in. */
+/**
+ * How `scope: "all"` pages a server source when the host opts in.
+ *
+ * @public
+ */
 export interface FetchAllExport<TRow> {
   /**
    * Fetch one page of the current query. Called with 1-based page numbers
@@ -162,7 +176,11 @@ export interface FetchAllExport<TRow> {
   onCapped?: (info: { rows: number; maxRows: number }) => void;
 }
 
-/** The default {@link FetchAllExport.maxRows}. */
+/**
+ * The default {@link FetchAllExport.maxRows}.
+ *
+ * @public
+ */
 export const EXPORT_FETCH_ALL_MAX_ROWS = 50_000;
 
 /**
@@ -172,6 +190,8 @@ export const EXPORT_FETCH_ALL_MAX_ROWS = 50_000;
  * @param source - The table's source, for the current query and page size.
  * @param config - See {@link FetchAllExport}.
  * @returns Every row the query matches, up to the cap.
+ *
+ * @public
  */
 export async function fetchAllExportRows<TRow>(
   source: TableSource<TRow>,
@@ -201,11 +221,15 @@ export async function fetchAllExportRows<TRow>(
   return out;
 }
 
-/** The view an export was asked for, as a server needs to hear it. */
+/**
+ * The view an export was asked for, as a server needs to hear it.
+ *
+ * @public
+ */
 export interface ExportRequest<TRow> extends ExportInfo<TRow> {
   /**
    * The query behind the current view: search, filters, sort and paging,
-   * exactly as {@link TableQuery} carries them to a server tier.
+   * exactly as `TableQuery` carries them to a server tier.
    */
   query: ExportQuery;
   /** Which rows were asked for. `rows` holds what the browser has of them. */
@@ -218,7 +242,11 @@ export interface ExportRequest<TRow> extends ExportInfo<TRow> {
   format: string;
 }
 
-/** The view-defining half of a table query, for an export request. */
+/**
+ * The view-defining half of a table query, for an export request.
+ *
+ * @public
+ */
 export interface ExportQuery {
   /**
    * Undefined for `scope: "all"`: "all" means every row the filters match, so
@@ -227,14 +255,23 @@ export interface ExportQuery {
   page: number | undefined;
   /** Undefined for `scope: "all"` — see {@link ExportQuery.page}. */
   limit: number | undefined;
+  /** The free-text search term, as typed. */
   search: string;
+  /** Column key currently sorted by, if any. */
   sortBy: string | undefined;
+  /** Direction for `sortBy`. */
   sortDir: SortDirection | undefined;
+  /** The active filter values. */
   filters: ExtraFilters;
+  /** Column key rows are grouped on. */
   groupBy: string | undefined;
 }
 
-/** What an export lifecycle hook is told about the file being written. */
+/**
+ * What an export lifecycle hook is told about the file being written.
+ *
+ * @public
+ */
 export interface ExportInfo<TRow> {
   /** The rows the chosen scope resolved to, in table order. */
   rows: readonly TRow[];
@@ -244,13 +281,19 @@ export interface ExportInfo<TRow> {
   filename: string;
 }
 
-/** Boolean-or-options CSV export prop (off / on / configured). */
-type ExportCsvProp<TRow = unknown> =
-  | boolean
-  | ExportCsvOptions<TRow>
-  | undefined;
+/**
+ * Boolean-or-options CSV export prop (off / on / configured).
+ *
+ * @public
+ */
+export type ExportCsvProp<TRow = unknown> =
+  boolean | ExportCsvOptions<TRow> | undefined;
 
-/** Resolve a boolean-or-options prop into a concrete config, or `null` when off. */
+/**
+ * Resolve a boolean-or-options prop into a concrete config, or `null` when off.
+ *
+ * @public
+ */
 export function resolveExportCsv<TRow = unknown>(
   value: ExportCsvProp<TRow>,
   host?: FeatureHostState
@@ -285,7 +328,11 @@ export function exportAllFallsBackToPage<TRow = unknown>(
   );
 }
 
-/** Columns that belong in a CSV (drop synthetic actions and reorder columns). */
+/**
+ * Columns that belong in a CSV (drop synthetic actions and reorder columns).
+ *
+ * @public
+ */
 export function exportableColumns<TRow>(
   columns: readonly ColumnDef<TRow>[]
 ): ColumnDef<TRow>[] {
@@ -301,6 +348,8 @@ export function exportableColumns<TRow>(
  *
  * Every field is optional. A caller that passes none gets exactly the
  * behaviour this function always had.
+ *
+ * @public
  */
 export interface ExportContext<TRow> {
   /** The checked row ids. */
@@ -347,7 +396,11 @@ export interface ExportContext<TRow> {
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
 }
 
-/** Pick the column set an export scope asks for, minus the actions column. */
+/**
+ * Pick the column set an export scope asks for, minus the actions column.
+ *
+ * @public
+ */
 export function resolveExportColumns<TRow>(
   scope: ExportColumnScope | undefined,
   visible: readonly ColumnDef<TRow>[],
@@ -516,6 +569,8 @@ function exportTableOptions<TRow>(
  * Build CSV text for the chosen row and column scopes.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function buildTableCsv<TRow>(options: {
   source: TableSource<TRow>;
@@ -542,6 +597,8 @@ export function buildTableCsv<TRow>(options: {
  * says otherwise.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function downloadTableCsv<TRow>(options: {
   source: TableSource<TRow>;
@@ -585,6 +642,8 @@ export function downloadTableCsv<TRow>(options: {
  * Adapters bind this to the toolbar Export button.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function makeExportCsvHandler<TRow>(
   exportCsv: boolean | ExportCsvOptions<TRow> | undefined,

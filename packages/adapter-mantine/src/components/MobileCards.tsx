@@ -79,6 +79,7 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "measureElement"
   | "rowReorder"
   | "windowStart"
+  | "cardSetSize"
   | "pinnedTopRows"
   | "pinnedBottomRows"
   | "extraRows"
@@ -146,17 +147,14 @@ interface MobileCardProps<TRow> {
   rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
   windowStart: number;
   rowCount: number;
+  /** Rows in the whole dataset, for `aria-setsize`. */
+  setSize: number;
   reorderSignature: string | null;
 }
 
 /** The card props the memo comparator deliberately skips (see `editing`). */
 type UncomparedCardProp =
-  | "editing"
-  | "rows"
-  | "getRowId"
-  | "rowReorder"
-  | "style"
-  | "isCellFlashing";
+  "editing" | "rows" | "getRowId" | "rowReorder" | "style" | "isCellFlashing";
 
 /** Every card prop the memo comparator checks with `Object.is`. */
 const COMPARED_CARD_PROPS: readonly Exclude<
@@ -188,6 +186,7 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "reorderSignature",
   "windowStart",
   "rowCount",
+  "setSize",
   // Or a folder opens and its own chevron never turns.
   "treeEntry",
 ];
@@ -236,6 +235,7 @@ function MobileCardBase<TRow>({
   rowReorder,
   windowStart,
   rowCount,
+  setSize,
   renderCard,
 }: Readonly<MobileCardProps<TRow>>) {
   // Built once and used by both paths, so a custom card shows the very
@@ -273,6 +273,11 @@ function MobileCardBase<TRow>({
       className={className}
       ref={measureElement}
       data-index={index}
+      // A windowed list has only a slice of its items in the DOM, so each
+      // one states where it sits and how many there are; a complete list
+      // needs neither, because assistive tech can simply count.
+      aria-posinset={setSize > rowCount ? windowStart + index + 1 : undefined}
+      aria-setsize={setSize > rowCount ? setSize : undefined}
       data-adapttable-part="card"
       withBorder
       radius="md"
@@ -393,6 +398,7 @@ export function MobileCards<TRow>({
   tree,
   rowReorder,
   windowStart = 0,
+  cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
   extraRows,
@@ -469,6 +475,7 @@ export function MobileCards<TRow>({
         rowReorder={rowReorder}
         windowStart={windowStart}
         rowCount={rows.length}
+        setSize={cardSetSize}
         reorderSignature={rowReorderSignature(rowReorder, id, index)}
         renderCard={renderCard}
       />

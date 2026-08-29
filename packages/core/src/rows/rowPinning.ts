@@ -14,35 +14,72 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { RowAction, TableLabels } from "../types";
+import type { RowAction } from "../types";
 
-/** Which edge a pinned row sticks to. */
+/**
+ * Which edge a pinned row sticks to.
+ *
+ * @public
+ */
 export type RowPinSide = "top" | "bottom";
 
-/** Controlled pin lists — ids in dataset order within each edge. */
+/**
+ * Controlled pin lists — ids in dataset order within each edge.
+ *
+ * @public
+ */
 export interface RowPinState {
+  /** Row ids pinned to the top. */
   readonly top: readonly string[];
+  /** Row ids pinned to the bottom. */
   readonly bottom: readonly string[];
 }
 
-/** Empty pin lists — omit `pinnedRowIds` and this is what the table holds. */
+/**
+ * Empty pin lists — omit `pinnedRowIds` and this is what the table holds.
+ *
+ * @public
+ */
 export const EMPTY_ROW_PIN_STATE: RowPinState = { top: [], bottom: [] };
 
-/** Synthesized "Pin to top" action. */
+/**
+ * Synthesized "Pin to top" action.
+ *
+ * @public
+ */
 export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
-/** Synthesized "Pin to bottom" action. */
+/**
+ * Synthesized "Pin to bottom" action.
+ *
+ * @public
+ */
 export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
-/** Synthesized "Unpin" action. */
+/**
+ * Synthesized "Unpin" action.
+ *
+ * @public
+ */
 export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
 
-/** Labels the pin actions and the live region need. */
+/**
+ * Labels the pin actions and the live region need.
+ *
+ * @public
+ */
 export interface RowPinLabels {
+  /** Pin the row to the top. */
   pinToTop: string;
+  /** Pin the row to the bottom. */
   pinToBottom: string;
+  /** Return the row to the scroll area. */
   unpinRow: string;
 }
 
-/** Headless pin state adapters read. */
+/**
+ * Headless pin state adapters read.
+ *
+ * @public
+ */
 export interface RowPinningState<TRow> {
   /** Current lists. */
   state: RowPinState;
@@ -56,7 +93,11 @@ export interface RowPinningState<TRow> {
   actions: readonly RowAction<TRow>[];
 }
 
-/** Split a row list into top pins, the scroll window, and bottom pins. */
+/**
+ * Split a row list into top pins, the scroll window, and bottom pins.
+ *
+ * @public
+ */
 export function partitionPinnedRows<TRow>(
   rows: readonly TRow[],
   state: RowPinState,
@@ -84,7 +125,11 @@ export function partitionPinnedRows<TRow>(
   return { top, scroll, bottom };
 }
 
-/** Memo digest so a virtualized row repaints when it is pinned or unpinned. */
+/**
+ * Memo digest so a virtualized row repaints when it is pinned or unpinned.
+ *
+ * @public
+ */
 export function rowPinSignature(
   pinning: Pick<RowPinningState<unknown>, "sideOf"> | undefined,
   rowId: string
@@ -101,7 +146,11 @@ function withId(ids: readonly string[], rowId: string): string[] {
   return ids.includes(rowId) ? [...ids] : [...ids, rowId];
 }
 
-/** Apply a pin or unpin to a copy of the state. */
+/**
+ * Apply a pin or unpin to a copy of the state.
+ *
+ * @public
+ */
 export function applyRowPin(
   state: RowPinState,
   rowId: string,
@@ -124,8 +173,10 @@ function sameState(a: RowPinState, b: RowPinState): boolean {
 }
 
 /**
- * Headless row pinning. Inert until the host passes {@link UseRowPinningOptions.enabled};
+ * Headless row pinning. Inert until the host passes `enabled`;
  * omit the prop and this hook still runs (Rules of Hooks) but every action no-ops.
+ *
+ * @public
  */
 export function useRowPinning<TRow>(options: {
   enabled: boolean;
@@ -208,9 +259,3 @@ export function useRowPinning<TRow>(options: {
     [actions, pin, sideOf, state, unpin]
   );
 }
-
-/** Labels a host may override; resolved through {@link TableLabels}. */
-export type RowPinTableLabels = Pick<
-  Required<TableLabels>,
-  "pinToTop" | "pinToBottom" | "unpinRow"
->;

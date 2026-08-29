@@ -25,6 +25,8 @@ import { gzipSync } from "node:zlib";
 
 import { Rolldown } from "tsdown";
 
+import { publishedFigures, staleReason } from "./published-figures.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
 
@@ -344,17 +346,32 @@ const FIXTURES = [
   // useFeatureHost. That context is on the default path because export,
   // menus, editors and aggregators resolve after render. ~0.2 KB gzip; the
   // four kits already on the line move 1 KB.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 133 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 134 },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 133 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 127 },
-  { name: "radix · table", pkg: "adapter-radix", budgetKB: 133 },
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 140 },
+  //
+  // Every table now says what changed when its rows change — the status
+  // announcement's resolver, its region and two label strings. It is on the
+  // default path because a table that sorts, filters or pages silently is
+  // broken for a screen-reader user, and there is no version of that fix which
+  // the host has to remember to switch on. 0.1-0.4 KB gzip; the five kits
+  // already on their line move 1 KB, the other three had the slack.
+  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 134 },
+  { name: "mui · table", pkg: "adapter-mui", budgetKB: 135 },
+  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
+  { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
+  { name: "radix · table", pkg: "adapter-radix", budgetKB: 135 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
-  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 137 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 134 },
+  //
+  // The filter drawer's enter/leave transition is the most recent weight on
+  // that path: the shared overlay-transition hook and the drawer's own
+  // keyframes ship on the default path, because a drawer that appears
+  // instantly reads as a rendering glitch rather than a panel. Measured
+  // 2026-08-29 at the commit that landed it: base-ui 141.1 KB and shadcn
+  // 138.2 KB, against ceilings of 141 and 138. unstyled and radix carried it
+  // inside the slack they already had.
+  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 142 },
+  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 139 },
+  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 135 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
 
 /**
@@ -437,12 +454,90 @@ if (UPDATE) {
   process.exit(0);
 }
 
-if (over) {
-  console.error(
-    `\n${over} fixture(s) over budget.\n` +
-      `Either the weight belongs behind an optional entry point, or the budget ` +
-      `needs raising — in the pull request, with a reason, never silently.`
-  );
+/**
+ * Every size figure this repo publishes, and the fixture each one comes from.
+ *
+ * A budget is a ceiling, so a fixture can sit well under one for months while
+ * the figure published beside it says something else entirely — which is how
+ * `~51 kB` outlived a 134 KB measurement. Several of these pages tell the
+ * reader the budget checks them; this is where that becomes true.
+ *
+ * `find` is the start of the line carrying the figure. `from` names the
+ * fixtures it summarises — more than one publishes a range.
+ */
+const PUBLISHED = [
+  {
+    doc: "docs/faq.md",
+    find: "| `useFrontendData` + `useDataTable` (core)",
+    from: ["core · simple table"],
+  },
+  {
+    doc: "docs/faq.md",
+    find: "| every core export",
+    from: ["core · every export"],
+  },
+  {
+    doc: "docs/faq.md",
+    find: "| `DataTable` from an adapter",
+    from: FIXTURES.filter((f) => f.pkg.startsWith("adapter-")).map(
+      (f) => f.name
+    ),
+  },
+  {
+    doc: "docs/formulas.md",
+    find: "columns never downloads a parser. It costs",
+    from: ["core · formula"],
+  },
+  {
+    doc: "docs/pivot.md",
+    find: "never downloads the engine. It costs",
+    from: ["core · pivot"],
+  },
+  {
+    doc: "packages/server/README.md",
+    find: "  no hooks and no client boundary, so an Express",
+    from: ["server · parse a query"],
+  },
+];
+
+let stale = 0;
+for (const { doc, find, from } of PUBLISHED) {
+  const measured = rows
+    .filter((r) => from.includes(r.name))
+    .map((r) => r.sizeKB);
+  const figures = publishedFigures(join(ROOT, doc), find);
+
+  if (figures === null) {
+    stale++;
+    console.error(
+      `✗ ${doc}: no line starting "${find}" — the text moved or was reworded`
+    );
+    continue;
+  }
+  const reason = staleReason(figures, measured);
+  if (reason) {
+    stale++;
+    console.error(`✗ ${doc} · ${find.trim()}: ${reason}`);
+  }
+}
+if (!stale) {
+  console.log(`\n✓ ${PUBLISHED.length} published size figures match this run`);
+}
+
+if (over || stale) {
+  if (over) {
+    console.error(
+      `\n${over} fixture(s) over budget.\n` +
+        `Either the weight belongs behind an optional entry point, or the budget ` +
+        `needs raising — in the pull request, with a reason, never silently.`
+    );
+  }
+  if (stale) {
+    console.error(
+      `\n${stale} published size figure(s) no longer match the build.\n` +
+        `Correct the documented number; never widen the tolerance instead.`
+    );
+  }
   process.exit(1);
 }
 console.log(`\nAll ${rows.length} fixtures within budget.`);

@@ -19,24 +19,46 @@ import {
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 
-/** Keyboard outcome from {@link CellEditingState.handleKeyDown}. */
+/**
+ * Keyboard outcome from {@link CellEditingState.handleKeyDown}.
+ *
+ * @public
+ */
 export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
 
-/** Row/column context for Tab / Shift+Tab advance. */
+/**
+ * Row/column context for Tab / Shift+Tab advance.
+ *
+ * @public
+ */
 export interface CellEditNavigation {
+  /** The rendered rows. */
   rows: readonly unknown[];
+  /** Visible columns, in order. */
   columns: readonly EditableColumnLike[];
+  /** Row identity function. */
   rowKey: (row: unknown) => string;
 }
 
-/** Outcome of {@link CellEditingState.handleKeyDown}. */
+/**
+ * Outcome of {@link CellEditingState.handleKeyDown}.
+ *
+ * @public
+ */
 export interface CellEditKeyOutcome {
+  /** What the key press resolved to. */
   action: CellEditKeyAction;
+  /** The commit to apply, when the press produced one. */
   commit: CellEditCommit | null;
+  /** Cell focus moves to next, when the press moves it. */
   advanceTarget: CellEditTarget | null;
 }
 
-/** Headless cell-editing state returned by {@link useCellEditing}. */
+/**
+ * Headless cell-editing state returned by `useCellEditing`.
+ *
+ * @public
+ */
 export interface CellEditingState {
   /** The cell currently being edited, or `null` when idle. */
   active: CellEditTarget | null;
@@ -60,7 +82,7 @@ export interface CellEditingState {
   /**
    * Commit the draft. Returns the commit payload, or `null` when idle.
    * Clears the active cell. The table never mutates rows — callers must
-   * apply the result through `onCellEdit` (see {@link applyCellEditCommit}).
+   * apply the result through `onCellEdit` (see `applyCellEditCommit`).
    */
   commit: () => CellEditCommit | null;
   /**
@@ -112,7 +134,11 @@ export interface CellEditingState {
   ) => CellEditKeyOutcome | null;
 }
 
-/** What {@link useCellEditing} observes, when the host wired lifecycle events. */
+/**
+ * What `useCellEditing` observes, when the host wired lifecycle events.
+ *
+ * @public
+ */
 export interface UseCellEditingOptions<TRow = unknown> {
   /** An editor opened. */
   onEditStart?: EditEventHandler<TRow>;
@@ -127,6 +153,8 @@ export interface UseCellEditingOptions<TRow = unknown> {
  * @typeParam TRow - The row type, when lifecycle observers are wired.
  * @param options - Optional start/cancel observers.
  * @returns The state machine.
+ *
+ * @public
  */
 export function useCellEditing<TRow = unknown>(
   options: UseCellEditingOptions<TRow> = {}

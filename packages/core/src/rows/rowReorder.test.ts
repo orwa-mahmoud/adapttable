@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   applyRowReorder,
   datasetIndex,
+  ROW_REORDER_LIFTED_OPACITY,
   rowReorderDropStyle,
   rowReorderSignature,
   useRowReorder,
@@ -112,7 +113,9 @@ describe("rowReorderSignature", () => {
 describe("rowReorderDropStyle", () => {
   it("dims a lifted row and draws the insertion line on the target", () => {
     expect(rowReorderDropStyle(undefined)).toEqual({});
-    expect(rowReorderDropStyle({ "data-dragging": "" }).opacity).toBe(0.45);
+    expect(rowReorderDropStyle({ "data-dragging": "" }).opacity).toBe(
+      ROW_REORDER_LIFTED_OPACITY
+    );
     expect(rowReorderDropStyle({ "data-drop": "before" }).boxShadow).toContain(
       "2px"
     );

@@ -125,7 +125,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** Chakra AND/OR builder — compact kit controls, no stacked field labels. */
+/**
+ * Chakra AND/OR builder — compact kit controls, no stacked field labels.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

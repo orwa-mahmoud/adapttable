@@ -18,6 +18,6 @@ describe("GroupToggleSpacer", () => {
     );
     expect(spacer).not.toBeNull();
     expect(spacer).toHaveAttribute("aria-hidden", "true");
-    expect(spacer).toHaveStyle({ width: "1.5em" });
+    expect(spacer?.style.width).toBe("1.5em");
   });
 });

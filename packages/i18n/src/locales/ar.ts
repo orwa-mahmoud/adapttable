@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Arabic (`ar`) label preset. Pairs with `dir="rtl"`. */
+/**
+ * Arabic (`ar`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const ar: Required<TableLabels> = {
   table: "جدول البيانات",
   search: "بحث",
@@ -114,6 +118,9 @@ export const ar: Required<TableLabels> = {
   resetColumn: "إعادة تعيين العمود",
   sortAscending: "ترتيب تصاعدي",
   sortDescending: "ترتيب تنازلي",
+  sortedBy: ({ column, ascending }) =>
+    `مُرتَّب حسب ${column}، ${ascending ? "تصاعدي" : "تنازلي"}`,
+  sortingCleared: "تم إلغاء الترتيب",
   filterColumn: "تصفية العمود",
   columnActions: "إجراءات العمود",
   exportCsv: "تصدير CSV",

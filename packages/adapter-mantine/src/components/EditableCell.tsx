@@ -15,17 +15,12 @@ import {
   commitBooleanDraft,
   editorBusyProps,
   editorValidationProps,
+  stopEditKeys,
 } from "@adapttable/core/adapter";
 import { Checkbox, MultiSelect, Select, TextInput } from "@mantine/core";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { editableCellSlots } from "./kitControls";
-
-function stopEditKeys(event: KeyboardEvent): void {
-  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
-    event.stopPropagation();
-  }
-}
 
 /** Mantine text / number / select editor for the active cell. */
 export function MantineCellEditor({

@@ -9,7 +9,11 @@ import type {
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
-/** Overridable sub-components. */
+/**
+ * Overridable sub-components.
+ *
+ * @public
+ */
 export interface DataTableSlots {
   /** Replace the loading skeleton. */
   skeleton?: ReactNode;
@@ -35,16 +39,29 @@ export interface DataTableSlots {
   error?: Slot<TableErrorState>;
 }
 
-/** Per-part class hooks — restyle without replacing components. */
+/**
+ * Per-part class hooks — restyle without replacing components.
+ *
+ * @public
+ */
 export interface DataTableClassNames {
+  /** Class for the outermost wrapper. */
   root?: string;
+  /** Class for the toolbar above the table. */
   toolbar?: string;
+  /** Class for the table element. */
   table?: string;
+  /** Class for a mobile card. */
   card?: string;
+  /** Class for the pagination footer. */
   footer?: string;
 }
 
-/** A Radix Themes accent color (forwarded to buttons, badges, active pages). */
+/**
+ * A Radix Themes accent color (forwarded to buttons, badges, active pages).
+ *
+ * @public
+ */
 export type RadixAccentColor =
   | "gray"
   | "gold"
@@ -73,8 +90,12 @@ export type RadixAccentColor =
   | "mint"
   | "sky";
 
-/** Props for the Radix Themes `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the Radix Themes `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {
@@ -139,6 +160,8 @@ interface DataTablePropsBase<TRow> extends Omit<
  * with core's data-mode union, so `mode="server"` requires
  * `onQueryChange` at compile time and `mode="frontend"` turns it into a
  * pure notification.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;

@@ -105,15 +105,23 @@ coverage where visual · tests with the coverage floors met.
 
 ## Changesets and version bumps
 
-**The default bump is `patch`.** `minor` and `major` are exceptional:
+**The bump follows the change, per SemVer.** Pick it from what the change does,
+not from habit:
 
 1. Check real versions first — `packages/*/package.json` **and**
    `npm view <pkg> version`. Never guess from memory or chat.
-2. Docs, demo media, changelog-only, bug fixes, UI corrections → `patch`.
-   New user-facing feature or new public export → `minor`, only with a
-   maintainer's agreement. Breaking API → maintainer decision, never a
-   default.
-3. Versioning is independent per package — never tell users to match
+2. Docs, demo media, changelog-only, bug fixes, UI corrections, internal
+   refactors → `patch`. New user-facing feature or new public export →
+   `minor`; that is what SemVer means and labelling one `patch` hides it from
+   everyone reading the changelog. Breaking API → `major`, **only with the
+   maintainer's approval** — never a default, never inferred from the work
+   being finished.
+3. A replaced path is deprecated in place and keeps working. Deprecations are
+   not removed piecemeal: they stay until the maintainer decides to ship a
+   major, and that release removes every deprecated path at once and carries
+   the breaking changes parked for it. Until then, `@deprecated` plus a note
+   naming the replacement is the whole of the change.
+4. Versioning is independent per package — never tell users to match
    versions; exact pins resolve core automatically.
 
 Release mechanics: merge the PR carrying its changeset → the bot opens a

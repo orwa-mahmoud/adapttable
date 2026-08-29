@@ -24,6 +24,8 @@ import {
 } from "./exportWriter";
 import { buildZip, utf8, type ZipEntry } from "./zip";
 
+export type { ColumnDef, ExportWriter };
+
 /** Escape the five characters XML cannot carry literally. */
 function xml(text: string): string {
   return text
@@ -291,6 +293,8 @@ export function safeSheetName(name: string): string {
  * @typeParam TRow - The row type.
  * @param options - Rows, columns, and the sheet's name.
  * @returns The workbook bytes, ready to download.
+ *
+ * @public
  */
 export function buildTableXlsx<TRow>(options: {
   rows: readonly TRow[];
@@ -334,6 +338,8 @@ const XLSX_MIME =
  *
  * @param options - The sheet's name inside the workbook. Defaults to `"Sheet1"`.
  * @returns A writer to hand to `exportCsv`.
+ *
+ * @public
  */
 export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
   return {
@@ -346,3 +352,14 @@ export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
     }),
   };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+export type { ExportPayload, ExportWriteContext } from "./exportWriter";

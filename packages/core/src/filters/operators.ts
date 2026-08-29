@@ -6,20 +6,36 @@
  */
 import type { ExtraFilters, FilterValue, TableLabels } from "../types";
 
-/** Suffix on the filter key that stores the operator token (`name` → `nameOp`). */
+/**
+ * Suffix on the filter key that stores the operator token (`name` → `nameOp`).
+ *
+ * @public
+ */
 export const FILTER_OP_SUFFIX = "Op";
 
-/** The extra-bag / `f_` key that holds one definition's operator. */
+/**
+ * The extra-bag / `f_` key that holds one definition's operator.
+ *
+ * @public
+ */
 export function filterOpKey(key: string): string {
   return key + FILTER_OP_SUFFIX;
 }
 
-/** True when `key` is an operator slot (`nameOp`), not a value slot. */
+/**
+ * True when `key` is an operator slot (`nameOp`), not a value slot.
+ *
+ * @public
+ */
 export function isFilterOpKey(key: string): boolean {
   return key.endsWith(FILTER_OP_SUFFIX) && key.length > FILTER_OP_SUFFIX.length;
 }
 
-/** Text comparison operators. Default when `f_<key>Op` is absent: `contains`. */
+/**
+ * Text comparison operators. Default when `f_<key>Op` is absent: `contains`.
+ *
+ * @public
+ */
 export const TEXT_OPS = [
   "eq",
   "neq",
@@ -31,7 +47,11 @@ export const TEXT_OPS = [
   "notEmpty",
 ] as const;
 
-/** Number comparison operators. Absent `Op` infers from the Min/Max pair. */
+/**
+ * Number comparison operators. Absent `Op` infers from the Min/Max pair.
+ *
+ * @public
+ */
 export const NUMBER_OPS = [
   "eq",
   "neq",
@@ -47,6 +67,8 @@ export const NUMBER_OPS = [
 /**
  * Date comparison operators. `on` / `gte` / `lte` keep the inclusive-day
  * behaviour existing links already encode; `before` / `after` are exclusive.
+ *
+ * @public
  */
 export const DATE_OPS = [
   "before",
@@ -59,35 +81,67 @@ export const DATE_OPS = [
   "empty",
 ] as const;
 
-/** One text operator token. */
+/**
+ * One text operator token.
+ *
+ * @public
+ */
 export type TextOp = (typeof TEXT_OPS)[number];
-/** One number operator token. */
+/**
+ * One number operator token.
+ *
+ * @public
+ */
 export type NumberOp = (typeof NUMBER_OPS)[number];
-/** One date operator token. */
+/**
+ * One date operator token.
+ *
+ * @public
+ */
 export type DateOp = (typeof DATE_OPS)[number];
-/** Any built-in operator token. */
+/**
+ * Any built-in operator token.
+ *
+ * @public
+ */
 export type FilterOp = TextOp | NumberOp | DateOp;
 
 const TEXT_OP_SET = new Set<string>(TEXT_OPS);
 const NUMBER_OP_SET = new Set<string>(NUMBER_OPS);
 const DATE_OP_SET = new Set<string>(DATE_OPS);
 
-/** True for operators that take no operand (`empty` / `notEmpty`). */
+/**
+ * True for operators that take no operand (`empty` / `notEmpty`).
+ *
+ * @public
+ */
 export function isValuelessFilterOp(op: string): boolean {
   return op === "empty" || op === "notEmpty";
 }
 
-/** True for operators that take a comma-separated list (`in` / `notIn`). */
+/**
+ * True for operators that take a comma-separated list (`in` / `notIn`).
+ *
+ * @public
+ */
 export function isListFilterOp(op: string): boolean {
   return op === "in" || op === "notIn";
 }
 
-/** True for the two-bound `between` operator. */
+/**
+ * True for the two-bound `between` operator.
+ *
+ * @public
+ */
 export function isBetweenFilterOp(op: string): boolean {
   return op === "between";
 }
 
-/** `TableLabels` key for each text operator (widget + chip wording). */
+/**
+ * `TableLabels` key for each text operator (widget + chip wording).
+ *
+ * @public
+ */
 export const TEXT_OP_LABEL_KEYS = {
   eq: "opEqual",
   neq: "opNotEqual",
@@ -99,7 +153,11 @@ export const TEXT_OP_LABEL_KEYS = {
   notEmpty: "opNotEmpty",
 } as const satisfies Record<TextOp, keyof TableLabels>;
 
-/** `TableLabels` key for each number operator. */
+/**
+ * `TableLabels` key for each number operator.
+ *
+ * @public
+ */
 export const NUMBER_OP_LABEL_KEYS = {
   eq: "opEqual",
   neq: "opNotEqual",
@@ -112,7 +170,11 @@ export const NUMBER_OP_LABEL_KEYS = {
   notIn: "opNotIn",
 } as const satisfies Record<NumberOp, keyof TableLabels>;
 
-/** `TableLabels` key for each date operator. */
+/**
+ * `TableLabels` key for each date operator.
+ *
+ * @public
+ */
 export const DATE_OP_LABEL_KEYS = {
   before: "opBefore",
   after: "opAfter",
@@ -124,13 +186,21 @@ export const DATE_OP_LABEL_KEYS = {
   empty: "opEmpty",
 } as const satisfies Record<DateOp, keyof TableLabels>;
 
-/** Parse a text operator; unknown / missing → `contains` (historical default). */
+/**
+ * Parse a text operator; unknown / missing → `contains` (historical default).
+ *
+ * @public
+ */
 export function parseTextOp(raw: FilterValue | undefined): TextOp {
   if (typeof raw === "string" && TEXT_OP_SET.has(raw)) return raw as TextOp;
   return "contains";
 }
 
-/** Parse a number operator, or `undefined` when the token is absent/unknown. */
+/**
+ * Parse a number operator, or `undefined` when the token is absent/unknown.
+ *
+ * @public
+ */
 export function parseNumberOp(
   raw: FilterValue | undefined
 ): NumberOp | undefined {
@@ -140,14 +210,22 @@ export function parseNumberOp(
   return undefined;
 }
 
-/** Parse a date operator, accepting `eq` as the historical spelling of `on`. */
+/**
+ * Parse a date operator, accepting `eq` as the historical spelling of `on`.
+ *
+ * @public
+ */
 export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined {
   if (raw === "eq") return "on";
   if (typeof raw === "string" && DATE_OP_SET.has(raw)) return raw as DateOp;
   return undefined;
 }
 
-/** Read the operator token stored beside a filter key. */
+/**
+ * Read the operator token stored beside a filter key.
+ *
+ * @public
+ */
 export function readFilterOp(
   extra: ExtraFilters,
   key: string
@@ -155,7 +233,11 @@ export function readFilterOp(
   return extra[filterOpKey(key)];
 }
 
-/** True when a row value counts as empty for `empty` / `notEmpty`. */
+/**
+ * True when a row value counts as empty for `empty` / `notEmpty`.
+ *
+ * @public
+ */
 export function isEmptyRowValue(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value === "string") return value.trim() === "";
@@ -163,7 +245,11 @@ export function isEmptyRowValue(value: unknown): boolean {
   return false;
 }
 
-/** Split a list operand (`in` / `notIn`) into trimmed, non-empty tokens. */
+/**
+ * Split a list operand (`in` / `notIn`) into trimmed, non-empty tokens.
+ *
+ * @public
+ */
 export function parseListOperand(value: FilterValue | undefined): string[] {
   if (Array.isArray(value)) {
     return value.map((entry) => String(entry).trim()).filter(Boolean);
@@ -175,7 +261,11 @@ export function parseListOperand(value: FilterValue | undefined): string[] {
     .filter(Boolean);
 }
 
-/** Parse a list operand as finite numbers (unknown tokens dropped). */
+/**
+ * Parse a list operand as finite numbers (unknown tokens dropped).
+ *
+ * @public
+ */
 export function parseNumberList(value: FilterValue | undefined): number[] {
   const out: number[] = [];
   for (const token of parseListOperand(value)) {
@@ -188,6 +278,8 @@ export function parseNumberList(value: FilterValue | undefined): number[] {
 /**
  * Chip text: `Name contains Ada`, or `Name is empty` when there is no
  * operand. The operator word is already localized by the caller.
+ *
+ * @public
  */
 export function formatFilterChip(
   fieldLabel: string,

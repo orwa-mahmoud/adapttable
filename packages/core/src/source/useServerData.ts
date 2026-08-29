@@ -25,6 +25,8 @@ import type { TableSource } from "./TableSource";
  * optional: a source receives one only after declaring it can answer it
  * (`supports`), so an endpoint written before a capability existed keeps
  * receiving exactly the query it was written against.
+ *
+ * @public
  */
 export interface TableQuery extends QueryExtensions {
   /** 1-based page. */
@@ -43,7 +45,11 @@ export interface TableQuery extends QueryExtensions {
   filters: ExtraFilters;
 }
 
-/** Options for {@link useServerData}. */
+/**
+ * Options for `useServerData`.
+ *
+ * @public
+ */
 export interface UseServerDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   | "urlAdapter"
@@ -131,6 +137,8 @@ export interface UseServerDataOptions<TRow> extends Pick<
  * them.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function useServerData<TRow>(
   options: UseServerDataOptions<TRow>

@@ -1,4 +1,8 @@
-/** A UI kit AdaptTable can scaffold for. */
+/**
+ * A UI kit AdaptTable can scaffold for.
+ *
+ * @public
+ */
 export type Kit =
   | "mantine"
   | "mui"
@@ -9,7 +13,11 @@ export type Kit =
   | "shadcn"
   | "unstyled";
 
-/** Metadata about a kit's adapter and the packages it needs. */
+/**
+ * Metadata about a kit's adapter and the packages it needs.
+ *
+ * @public
+ */
 export interface KitInfo {
   /** The kit identifier. */
   kit: Kit;
@@ -23,7 +31,11 @@ export interface KitInfo {
   label: string;
 }
 
-/** The kit registry, in detection-priority order. */
+/**
+ * The kit registry, in detection-priority order.
+ *
+ * @public
+ */
 export const KITS: readonly KitInfo[] = [
   {
     kit: "mantine",
@@ -91,7 +103,11 @@ export const KITS: readonly KitInfo[] = [
 
 const UNSTYLED = KITS.find((k) => k.kit === "unstyled")!;
 
-/** The shadcn/ui kit — selected by `runInit` when a `components.json` is found. */
+/**
+ * The shadcn/ui kit — selected by `runInit` when a `components.json` is found.
+ *
+ * @public
+ */
 export const SHADCN = KITS.find((k) => k.kit === "shadcn")!;
 
 /**
@@ -107,6 +123,7 @@ export const SHADCN = KITS.find((k) => k.kit === "shadcn")!;
  * @param dependencies - Merged `dependencies` + `devDependencies` map.
  * @param options - Extra detection context beyond the dependency map.
  * @returns The chosen {@link KitInfo}.
+ * @public
  */
 export function detectKit(
   dependencies: Readonly<Record<string, string>>,
@@ -127,6 +144,7 @@ export function detectKit(
  *
  * @param pkg - A parsed package.json (or a partial of it).
  * @returns The merged dependency map.
+ * @public
  */
 export function mergeDependencies(pkg: {
   dependencies?: Record<string, string>;

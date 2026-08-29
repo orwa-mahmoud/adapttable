@@ -1,7 +1,11 @@
 import type { ColumnDef } from "../types";
 
-/** A column identity for width resolution — just its key and declared width. */
-type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
+/**
+ * A column identity for width resolution — just its key and declared width.
+ *
+ * @public
+ */
+export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
 
 /** Fallback width (px) for a pinned column with no resolvable declared width. */
 export const FALLBACK_PIN_WIDTH = 150;
@@ -10,6 +14,8 @@ export const FALLBACK_PIN_WIDTH = 150;
  * Parse a declared column width to pixels, or `undefined` when it carries no
  * pixel value (relative units like `%`, `rem`, `fr` have no px here, so
  * `parseInt("50%")` → 50 would silently corrupt a sticky inset / min-width).
+ *
+ * @public
  */
 export function parsePxWidth(
   width: number | string | undefined
@@ -28,6 +34,8 @@ export function parsePxWidth(
  * A column's effective pixel width: a resize override (from the layout
  * `widths` map) wins over the declared width. `undefined` when neither
  * resolves to pixels.
+ *
+ * @public
  */
 export function resolveColumnWidth(
   column: WidthColumn,
@@ -50,6 +58,8 @@ export function resolveColumnWidth(
  * @param columns - The visible columns.
  * @param options - `widths` resize overrides; `extra` px for non-data columns.
  * @returns The min table width in px, or `0` when no column declares a width.
+ *
+ * @public
  */
 export function tableMinWidth<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -64,13 +74,15 @@ export function tableMinWidth<TRow>(
 
 /**
  * The pixel width to RENDER a pinned column at: its resolved width, else
- * {@link FALLBACK_PIN_WIDTH}. Pin insets are summed from these same numbers
+ * `FALLBACK_PIN_WIDTH`. Pin insets are summed from these same numbers
  * (see `pinOffset`), so applying this width to pinned header cells keeps
  * stacked pins flush — a natural-width pinned column would otherwise render
  * narrower or wider than the inset math assumed.
  *
  * @param column - The pinned column.
  * @param widths - Resize overrides from the column layout.
+ *
+ * @public
  */
 export function pinnedColumnWidth(
   column: WidthColumn,

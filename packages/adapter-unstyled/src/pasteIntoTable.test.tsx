@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -47,7 +47,7 @@ describe("pasting into the table (unstyled)", () => {
         onCellEdit={onCellEdit}
       />
     );
-    cell(container).focus();
+    act(() => cell(container).focus());
     fireEvent.keyDown(cell(container), { key: "v", ctrlKey: true });
     await waitFor(() => expect(onCellEdit).toHaveBeenCalledTimes(2));
     expect(onCellEdit).toHaveBeenNthCalledWith(1, ROWS[0], "name", "P");
@@ -70,7 +70,7 @@ describe("pasting into the table (unstyled)", () => {
         onCellPaste={onCellPaste}
       />
     );
-    cell(container).focus();
+    act(() => cell(container).focus());
     fireEvent.keyDown(cell(container), { key: "v", metaKey: true });
     await waitFor(() => expect(onCellPaste).toHaveBeenCalledOnce());
     // One call carrying all four cells — one transaction, one undo entry.
@@ -91,7 +91,7 @@ describe("pasting into the table (unstyled)", () => {
         cellNavigation
       />
     );
-    cell(container).focus();
+    act(() => cell(container).focus());
     fireEvent.keyDown(cell(container), { key: "v", ctrlKey: true });
     expect(readText).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
@@ -112,7 +112,7 @@ describe("pasting into the table (unstyled)", () => {
         onCellCut={onCellCut}
       />
     );
-    cell(container).focus();
+    act(() => cell(container).focus());
     fireEvent.keyDown(cell(container), { key: "ArrowRight", shiftKey: true });
     fireEvent.keyDown(cell(container), { key: "x", ctrlKey: true });
     await waitFor(() => expect(onCellCut).toHaveBeenCalledOnce());

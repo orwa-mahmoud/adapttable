@@ -3,8 +3,16 @@ import { defineConfig, type UserConfig } from "tsdown";
 
 /** Everything both passes below share: one toolchain, one output shape. */
 const common: UserConfig = {
+  // The published declarations come from `src` alone. The package's own
+  // tsconfig also covers its vitest and tsdown configs so typecheck sees
+  // them, and pulling those into the dts program makes it emit a stray
+  // declaration beside the root's vitest.shared.ts.
+  tsconfig: "./tsconfig.build.json",
   format: ["esm", "cjs"],
-  dts: true,
+  // The multi-entry surface shares types across several declaration graphs.
+  // Preparing the complete program before chunking keeps their placement and
+  // generated names deterministic across otherwise identical builds.
+  dts: { eager: true },
   sourcemap: true,
   clean: true,
   treeshake: true,

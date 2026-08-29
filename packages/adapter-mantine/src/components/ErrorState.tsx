@@ -2,7 +2,11 @@ import { Alert, Button, Group, Text } from "@mantine/core";
 
 import { AlertIcon, RefreshIcon } from "../icons";
 
-/** Props for {@link ErrorState}. */
+/**
+ * Props for {@link ErrorState}.
+ *
+ * @public
+ */
 export interface ErrorStateProps {
   /** The error to surface. */
   error: Error;
@@ -18,7 +22,11 @@ export interface ErrorStateProps {
   isRetrying?: boolean;
 }
 
-/** Inline error alert with an optional retry button. */
+/**
+ * Inline error alert with an optional retry button.
+ *
+ * @public
+ */
 export function ErrorState({
   error,
   title,

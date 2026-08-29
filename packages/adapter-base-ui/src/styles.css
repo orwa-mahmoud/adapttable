@@ -550,11 +550,43 @@
   outline: none;
 }
 
+/* Drawer motion. Base UI keeps the popup mounted through its exit and hands
+ * the state to CSS as [data-starting-style] / [data-ending-style], so the
+ * slide lives here rather than in JS. Two things move and nothing else: the
+ * panel travels, the backdrop fades.
+ *
+ * Enter decelerates into place over 340ms; leaving accelerates away in less,
+ * because a dismissal the reader already decided on should not be waited on.
+ * The same pair of curves is used by the radix and unstyled drawers.
+ *
+ * [data-swiping] drops the duration to zero so the panel tracks the finger
+ * instead of easing behind it, and --drawer-swipe-progress /
+ * --drawer-swipe-movement-x are the library's live gesture values. Without
+ * the transform below they are computed and discarded — the swipe is wired
+ * on the root and invisible on screen. */
 .adapttable-drawer-backdrop {
   position: fixed;
   inset: 0;
   background: rgb(0 0 0 / 40%);
   z-index: var(--adapttable-overlay-backdrop-z);
+  /* Fades with the gesture, so releasing a half-swipe does not snap the
+     scrim back to full before the panel has finished leaving. */
+  opacity: calc(1 - var(--drawer-swipe-progress, 0));
+  transition: opacity 340ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.adapttable-drawer-backdrop[data-starting-style],
+.adapttable-drawer-backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+.adapttable-drawer-backdrop[data-ending-style] {
+  transition-duration: calc(var(--drawer-swipe-strength, 1) * 240ms);
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.adapttable-drawer-backdrop[data-swiping] {
+  transition-duration: 0ms;
 }
 
 .adapttable-drawer {
@@ -573,6 +605,56 @@
   padding: 1rem 1.1rem;
   outline: none;
   box-shadow: -12px 0 32px rgb(0 0 0 / 16%);
+  /* The resting transform IS the swipe offset: the library writes movement
+     into the custom property and this is what puts it on screen. */
+  transform: translateX(var(--drawer-swipe-movement-x, 0px));
+  transition: transform 340ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+}
+
+/* Off-screen is the inline END edge, so RTL leaves the way it arrived. */
+.adapttable-drawer[data-starting-style],
+.adapttable-drawer[data-ending-style] {
+  transform: translateX(100%);
+}
+
+.adapttable-drawer[dir="rtl"][data-starting-style],
+.adapttable-drawer[dir="rtl"][data-ending-style] {
+  transform: translateX(-100%);
+}
+
+.adapttable-drawer[data-ending-style] {
+  transition-duration: calc(var(--drawer-swipe-strength, 1) * 240ms);
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.adapttable-drawer[data-swiping] {
+  transition-duration: 0ms;
+  user-select: none;
+}
+
+/* Reduced motion: the panel must still leave, so it fades rather than
+   travels — nothing crosses the screen. */
+@media (prefers-reduced-motion: reduce) {
+  .adapttable-drawer,
+  .adapttable-drawer[data-swiping] {
+    transition: opacity 120ms linear;
+    will-change: auto;
+  }
+
+  .adapttable-drawer[data-starting-style],
+  .adapttable-drawer[data-ending-style],
+  .adapttable-drawer[dir="rtl"][data-starting-style],
+  .adapttable-drawer[dir="rtl"][data-ending-style] {
+    transform: none;
+    opacity: 0;
+  }
+
+  .adapttable-drawer-backdrop,
+  .adapttable-drawer-backdrop[data-ending-style] {
+    transition-duration: 120ms;
+    transition-timing-function: linear;
+  }
 }
 
 [data-theme="dark"] .adapttable-drawer,

@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Simplified Chinese (`zh`) label preset. */
+/**
+ * Simplified Chinese (`zh`) label preset.
+ *
+ * @public
+ */
 export const zh: Required<TableLabels> = {
   table: "数据表",
   search: "搜索",
@@ -112,6 +116,9 @@ export const zh: Required<TableLabels> = {
   resetColumn: "重置列",
   sortAscending: "升序排序",
   sortDescending: "降序排序",
+  sortedBy: ({ column, ascending }) =>
+    `按 ${column} 排序，${ascending ? "升序" : "降序"}`,
+  sortingCleared: "已清除排序",
   filterColumn: "筛选列",
   columnActions: "列操作",
   exportCsv: "导出 CSV",

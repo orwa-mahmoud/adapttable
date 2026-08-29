@@ -17,7 +17,11 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/** Dirty state for the whole table. */
+/**
+ * Dirty state for the whole table.
+ *
+ * @public
+ */
 export interface DirtyCellState {
   /** Whether this cell holds a change nobody has confirmed. */
   isDirty: (rowId: string, columnKey: string) => boolean;
@@ -37,7 +41,11 @@ export interface DirtyCellState {
   signature: string;
 }
 
-/** What {@link useDirtyCells} needs. */
+/**
+ * What {@link useDirtyCells} needs.
+ *
+ * @public
+ */
 export interface UseDirtyCellsOptions {
   /**
    * Whether to mark at all. Off by default: a mark is a claim about what the
@@ -54,6 +62,8 @@ const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
  *
  * @param options - See {@link UseDirtyCellsOptions}.
  * @returns The state; inert unless `enabled`.
+ *
+ * @public
  */
 export function useDirtyCells(
   options: UseDirtyCellsOptions = {}

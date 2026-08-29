@@ -130,7 +130,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** Native AND/OR builder — compact unlabeled row; native is unstyled's kit. */
+/**
+ * Native AND/OR builder — compact unlabeled row; native is unstyled's kit.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

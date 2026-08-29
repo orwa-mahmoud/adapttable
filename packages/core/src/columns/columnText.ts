@@ -45,6 +45,8 @@ function asText(value: unknown): string | undefined {
  * @param column - The column being read.
  * @param row - The row being read.
  * @returns The cell as text, or `""` when the column holds nothing readable.
+ *
+ * @public
  */
 export function columnText<TRow>(column: ColumnDef<TRow>, row: TRow): string {
   if (column.formatValue) return column.formatValue(row);

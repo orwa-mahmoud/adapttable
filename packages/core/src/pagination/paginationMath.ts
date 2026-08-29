@@ -1,4 +1,8 @@
-/** Derived pagination figures for a paged view. */
+/**
+ * Derived pagination figures for a paged view.
+ *
+ * @public
+ */
 export interface PaginationInfo {
   /** Total number of pages (always ≥ 1). */
   totalPages: number;
@@ -15,6 +19,8 @@ export interface PaginationInfo {
  *
  * @param input - Current `page`, `limit`, and `total`.
  * @returns The derived {@link PaginationInfo}.
+ *
+ * @public
  */
 export function computePagination(input: {
   page: number;
@@ -33,7 +39,11 @@ export function computePagination(input: {
   return { totalPages, safePage, fromIndex, toIndex };
 }
 
-/** One slot in a numbered pager: a page number, or a gap where pages were elided. */
+/**
+ * One slot in a numbered pager: a page number, or a gap where pages were elided.
+ *
+ * @public
+ */
 export type PaginationItem = number | "ellipsis";
 
 function range(start: number, end: number): number[] {
@@ -47,6 +57,8 @@ function range(start: number, end: number): number[] {
  * ellipses on their semantic side (`ellipsis-left` / `ellipsis-right`). Use this
  * instead of indexing into {@link paginationItems} so list keys never depend on
  * the array position.
+ *
+ * @public
  */
 export interface PaginationSlot {
   /** The page number or `"ellipsis"` marker. */
@@ -65,6 +77,8 @@ export interface PaginationSlot {
  * @param totalPages - Total page count (coerced to ≥ 1).
  * @param siblings - Pages to show on each side of the current page.
  * @returns Keyed pager slots.
+ *
+ * @public
  */
 export function paginationSlots(
   page: number,
@@ -94,6 +108,8 @@ export function paginationSlots(
  * @param totalPages - Total page count (coerced to ≥ 1).
  * @param siblings - Pages to show on each side of the current page.
  * @returns Ordered page numbers interleaved with `"ellipsis"` gaps.
+ *
+ * @public
  */
 export function paginationItems(
   page: number,

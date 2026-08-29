@@ -27,7 +27,6 @@ function Surface({
     <Dialog
       open
       onClose={onClose}
-      aria-label={label}
       // Core moves focus into the search box and owns the trap; MUI's own
       // autofocus and focus enforcement would take it straight back.
       disableAutoFocus
@@ -36,7 +35,10 @@ function Surface({
       maxWidth="sm"
       className={className}
       data-adapttable-part="command-palette"
-      slotProps={{ paper: { sx: { p: 1 } } }}
+      // The name goes on the PAPER, not on `Dialog`: MUI spreads unrecognised
+      // props onto its Modal root, which it marks `role="presentation"`, and a
+      // name there is discarded. `role="dialog"` is on the paper.
+      slotProps={{ paper: { "aria-label": label, sx: { p: 1 } } }}
     >
       {children}
     </Dialog>

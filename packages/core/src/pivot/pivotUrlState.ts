@@ -25,6 +25,8 @@ import {
 } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
+
+export type { UrlStateAdapter };
 import { PARAM_PIVOT } from "../url/serialize";
 import { EMPTY_PIVOT_CONFIG } from "./pivotConfigModel";
 import type { PivotConfig } from "./pivotModel";
@@ -47,16 +49,27 @@ export const PIVOT_URL_WRITE_DEBOUNCE_MS = 150;
 /** Nothing folded, with a stable identity so a read cannot churn a memo. */
 const NOTHING_COLLAPSED: readonly string[] = [];
 
-/** What {@link usePivotUrlState} needs. */
+/**
+ * What {@link usePivotUrlState} needs.
+ *
+ * @public
+ */
 export interface UsePivotUrlStateOptions {
+  /** Reads and writes the URL. */
   urlAdapter?: UrlStateAdapter;
+  /** Whether the state is mirrored into the URL. */
   urlSync?: boolean;
+  /** Query-parameter name to use. */
   urlKey?: string;
   /** The pivot before anyone has built one. Defaults to empty. */
   defaultConfig?: PivotConfig;
 }
 
-/** The controlled state to hand the panel and the engine. */
+/**
+ * The controlled state to hand the panel and the engine.
+ *
+ * @public
+ */
 export interface UsePivotUrlStateResult {
   /** What to pivot, and how. Give it to the panel and to `pivot`. */
   config: PivotConfig;
@@ -76,6 +89,8 @@ export interface UsePivotUrlStateResult {
  *
  * @param options - See {@link UsePivotUrlStateOptions}.
  * @returns The configuration, the folded set, and the setters for both.
+ *
+ * @public
  */
 export function usePivotUrlState(
   options: UsePivotUrlStateOptions = {}

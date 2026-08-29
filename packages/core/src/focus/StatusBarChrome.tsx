@@ -31,7 +31,11 @@ import {
   type SelectionStatsSlots,
 } from "./SelectionStatsBar";
 
-/** One piece of the status bar, in display order. */
+/**
+ * One piece of the status bar, in display order.
+ *
+ * @public
+ */
 export interface StatusBarItem {
   /** What this figure is, for a kit that styles them differently. */
   readonly key: "rows" | "selected" | FeatureNoticeKind;
@@ -44,16 +48,25 @@ export interface StatusBarItem {
   readonly appearance?: FeatureNotice["appearance"];
 }
 
-/** Props an adapter's status-bar component receives. */
+/**
+ * Props an adapter's status-bar component receives.
+ *
+ * @public
+ */
 export interface StatusBarSlotProps {
   /** The figures, in the order they should read. */
   readonly items: readonly StatusBarItem[];
   /** The selection statistics, when there are any; render after the items. */
   readonly stats: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
 }
 
-/** Adapter-owned rendering for {@link StatusBarChrome}. */
+/**
+ * Adapter-owned rendering for {@link StatusBarChrome}.
+ *
+ * @public
+ */
 export interface StatusBarSlots {
   /** The strip itself. */
   readonly Bar: (props: StatusBarSlotProps) => ReactNode;
@@ -61,7 +74,11 @@ export interface StatusBarSlots {
   readonly stats: SelectionStatsSlots;
 }
 
-/** What the status bar needs to describe the table. */
+/**
+ * What the status bar needs to describe the table.
+ *
+ * @public
+ */
 export interface StatusBarChromeProps {
   /**
    * Whether the host asked for the strip.
@@ -76,7 +93,7 @@ export interface StatusBarChromeProps {
   shown: number;
   /** The page being shown, for the row range. Defaults to the first. */
   page?: number;
-  /** The page size, for the row range. Defaults to {@link shown}. */
+  /** The page size, for the row range. Defaults to `shown`. */
   limit?: number;
   /** How many rows the whole filtered set holds, when the source knows. */
   total?: number;
@@ -164,6 +181,8 @@ function itemsFor(
  *
  * @param props - The counts, the selection figures, and the kit's slots.
  * @returns The strip.
+ *
+ * @public
  */
 export function StatusBarChrome(props: Readonly<StatusBarChromeProps>) {
   const { Bar } = props.slots;

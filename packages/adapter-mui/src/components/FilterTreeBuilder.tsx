@@ -138,7 +138,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** MUI AND/OR builder — compact kit Select / TextField / Button, no stacked labels. */
+/**
+ * MUI AND/OR builder — compact kit Select / TextField / Button, no stacked labels.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

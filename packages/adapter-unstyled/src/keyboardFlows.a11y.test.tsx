@@ -8,7 +8,7 @@ import {
   type FilterDef,
   useFrontendData,
 } from "@adapttable/core";
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -68,6 +68,12 @@ function Harness(props: {
 const part = (name: string): HTMLElement | null =>
   document.body.querySelector(`[data-adapttable-part="${name}"]`);
 
+/**
+ * A commit's save-state bookkeeping settles a microtask after the host's handler
+ * runs. Flushing it inside `act` keeps that update inside the test.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("keyboard flows (unstyled)", () => {
   it("sorts by keyboard, including a shift multi-sort chain", () => {
     render(<Harness override={{ multiSort: true }} />);
@@ -94,10 +100,10 @@ describe("keyboard flows (unstyled)", () => {
     expect(part("sort-index")).not.toBeNull();
   });
 
-  it("drawer: focus is trapped inside and restored to the trigger on Escape", () => {
+  it("drawer: focus is trapped inside and restored to the trigger on Escape", async () => {
     render(<Harness override={{ filters, filtersMode: "drawer" }} />);
     const trigger = part("filters-button")!;
-    trigger.focus();
+    act(() => trigger.focus());
     fireEvent.click(trigger);
 
     const panel = part("filters-panel")!;
@@ -109,25 +115,40 @@ describe("keyboard flows (unstyled)", () => {
       "button, input, select, textarea"
     );
     const last = focusables[focusables.length - 1]!;
-    last.focus();
+    act(() => last.focus());
     fireEvent.keyDown(document, { key: "Tab" });
     expect(panel.contains(document.activeElement)).toBe(true);
 
-    // Escape closes AND hands focus back to the trigger.
+    // Escape closes AND hands focus back to the trigger — on the same tick,
+    // not when the slide-out finishes.
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(part("filters-panel")).toBeNull();
     expect(trigger).toHaveFocus();
+
+    // The panel is still painted while it leaves, so it must stop being a
+    // dialog immediately: out of the accessibility tree, and inert so Tab
+    // cannot walk back into a dismissed overlay mid-animation.
+    const leaving = part("filters-panel")!;
+    expect(leaving).toHaveAttribute("aria-hidden", "true");
+    expect(leaving).toHaveAttribute("inert");
+    expect(leaving).not.toHaveAttribute("aria-modal");
+    expect(leaving).toHaveAttribute("data-state", "closed");
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(trigger).toHaveFocus();
+
+    // And then it is gone.
+    await waitFor(() => expect(part("filters-panel")).toBeNull());
   });
 
-  it("committing an inline edit keeps keyboard focus in the table", () => {
+  it("committing an inline edit keeps keyboard focus in the table", async () => {
     render(<Harness override={{ onCellEdit: vi.fn() }} />);
     const activate = part("edit-cell-activate")!;
-    activate.focus();
+    act(() => activate.focus());
     fireEvent.keyDown(activate, { key: "Enter" });
 
     const editor = part("edit-cell-editor")!;
     fireEvent.change(editor, { target: { value: "42" } });
     fireEvent.keyDown(editor, { key: "Enter" });
+    await settleCommit();
 
     // Focus lands back on the activate control — never on <body>.
     expect(document.activeElement).toBe(part("edit-cell-activate"));

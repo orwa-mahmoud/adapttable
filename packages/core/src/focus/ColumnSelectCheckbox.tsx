@@ -13,7 +13,11 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
  */
 const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
 
-/** The kit checkbox {@link ColumnSelectCheckboxChrome} calls. */
+/**
+ * The kit checkbox {@link ColumnSelectCheckboxChrome} calls.
+ *
+ * @public
+ */
 export interface ColumnSelectCheckboxProps {
   /** Accessible name, already localized and already naming the column. */
   readonly label: string;
@@ -23,12 +27,21 @@ export interface ColumnSelectCheckboxProps {
   readonly onToggle: () => void;
 }
 
-/** Adapter-supplied control for {@link ColumnSelectCheckboxChrome}. */
+/**
+ * Adapter-supplied control for {@link ColumnSelectCheckboxChrome}.
+ *
+ * @public
+ */
 export interface ColumnSelectSlots {
+  /** Renders a checkbox. */
   readonly Checkbox: (props: ColumnSelectCheckboxProps) => ReactNode;
 }
 
-/** Props for {@link ColumnSelectCheckboxChrome}. */
+/**
+ * Props for {@link ColumnSelectCheckboxChrome}.
+ *
+ * @public
+ */
 export interface ColumnSelectCheckboxChromeProps {
   /** Accessible name for the control, already localized. */
   readonly label: string;
@@ -63,6 +76,8 @@ export interface ColumnSelectCheckboxChromeProps {
  * so a table of twelve columns is not a row of twelve checkboxes; the layout
  * never moves, and a selected column shows its state whether or not the pointer
  * is near. Where there is no hover, it is always visible.
+ *
+ * @public
  */
 export function ColumnSelectCheckboxChrome({
   label,
@@ -115,6 +130,8 @@ export function ColumnSelectCheckboxChrome({
  *
  * "Select column" twelve times over names nothing — a screen reader user
  * hearing it has no idea which column is about to be selected.
+ *
+ * @public
  */
 export function columnSelectLabel(
   label: string | undefined,

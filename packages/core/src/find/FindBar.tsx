@@ -8,7 +8,13 @@ import { focusEditorOnMount } from "../editing/editableCellController";
 import type { TableLabels } from "../types";
 import type { FindInTableState } from "./useFindInTable";
 
-/** Props for an adapter {@link FindBar} — no slots on the public API. */
+export type { FindInTableState };
+
+/**
+ * Props for an adapter `FindBar` — no slots on the public API.
+ *
+ * @public
+ */
 export interface FindBarProps {
   /** The find state, straight from `shell.find`. */
   find: FindInTableState;
@@ -18,36 +24,70 @@ export interface FindBarProps {
   className?: string;
 }
 
-/** Kit search field the find bar calls. */
+/**
+ * Kit search field the find bar calls.
+ *
+ * @public
+ */
 export interface FindSearchProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Placeholder text. */
   readonly placeholder: string;
+  /** Current value. */
   readonly value: string;
+  /** Ref the chrome focuses when the bar opens. */
   readonly focusRef: (node: { focus: () => void } | null) => void;
+  /** Called with the new value. */
   readonly onChange: (value: string) => void;
+  /** Handles the keys this control owns. */
   readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
-/** One find-bar glyph. */
+/**
+ * One find-bar glyph.
+ *
+ * @public
+ */
 export type FindButtonKind = "previous" | "next" | "close";
 
-/** Kit button the find bar calls. */
+/**
+ * Kit button the find bar calls.
+ *
+ * @public
+ */
 export interface FindButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Which find-bar button this is. */
   readonly kind: FindButtonKind;
+  /** Whether the control is offered but not available. */
   readonly disabled?: boolean;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link FindBarChrome}. */
+/**
+ * Adapter-supplied controls for {@link FindBarChrome}.
+ *
+ * @public
+ */
 export interface FindBarSlots {
+  /** Renders the search box. */
   readonly Search: (props: FindSearchProps) => ReactNode;
+  /** Renders a button. */
   readonly Button: (props: FindButtonProps) => ReactNode;
 }
 
-/** Props for {@link FindBarChrome}. */
+/**
+ * Props for {@link FindBarChrome}.
+ *
+ * @public
+ */
 export interface FindBarChromeProps extends FindBarProps {
+  /** The kit's components for each part. */
   readonly slots: FindBarSlots;
 }
 
@@ -57,6 +97,8 @@ export interface FindBarChromeProps extends FindBarProps {
  *
  * Enter walks forward, Shift+Enter walks back and Escape closes, which is what
  * every find bar does and therefore what nobody should have to learn.
+ *
+ * @public
  */
 export function FindBarChrome({
   find,

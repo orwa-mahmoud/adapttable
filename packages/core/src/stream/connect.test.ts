@@ -13,7 +13,7 @@ function wsStream(over: Record<string, unknown> = {}) {
   const onMessage = vi.fn();
   const onStatus = vi.fn();
   const handle = openRowPatchStream({
-    websocket: "ws://test/rows",
+    websocket: "wss://test/rows",
     createWebSocket: (url, protocols) => {
       const socket = new FakeSocket(url, protocols);
       sockets.push(socket);
@@ -39,7 +39,7 @@ describe("openRowPatchStream", () => {
   it("opens a websocket and forwards its text frames", () => {
     const { sockets, onMessage, handle } = wsStream({ protocols: "patch-v1" });
     expect(handle.status).toBe("connecting");
-    expect(sockets[0]?.url).toBe("ws://test/rows");
+    expect(sockets[0]?.url).toBe("wss://test/rows");
     expect(sockets[0]?.protocols).toBe("patch-v1");
     sockets[0]?.open();
     expect(handle.status).toBe("open");
@@ -127,7 +127,7 @@ describe("openRowPatchStream", () => {
     Reflect.deleteProperty(globalThis, "WebSocket");
     const onStatus = vi.fn();
     const handle = openRowPatchStream({
-      websocket: "ws://test/rows",
+      websocket: "wss://test/rows",
       onMessage: vi.fn(),
       onStatus,
     });
@@ -204,7 +204,7 @@ describe("openRowPatchStream — leaving a socket clean", () => {
     const sockets: FakeSocket[] = [];
     const onMessage = vi.fn();
     const handle = openRowPatchStream({
-      websocket: "ws://test/rows",
+      websocket: "wss://test/rows",
       createWebSocket: (url) => {
         const socket = new FakeSocket(url);
         sockets.push(socket);

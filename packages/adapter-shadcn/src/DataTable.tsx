@@ -16,6 +16,8 @@ import { shadcnClassNames } from "./classNames";
  * the preset, per part, so `classNames={{ root: "…" }}` only replaces the root.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
   const { classNames, ...rest } = props;

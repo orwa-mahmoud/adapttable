@@ -23,7 +23,11 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/** Validate one edited value. Return a message to reject it, nothing to allow. */
+/**
+ * Validate one edited value. Return a message to reject it, nothing to allow.
+ *
+ * @public
+ */
 export type CellValidator<TRow> = (
   value: unknown,
   row: TRow
@@ -34,6 +38,8 @@ export type CellValidator<TRow> = (
  *
  * Return a message for a row-level problem, a map of column key → message to
  * mark individual cells, or nothing to allow the commit.
+ *
+ * @public
  */
 export type RowValidator<TRow> = (
   row: TRow
@@ -43,9 +49,15 @@ export type RowValidator<TRow> = (
   | undefined
   | Promise<string | Record<string, string> | undefined>;
 
-/** A cell address, as the editing state spells it. */
+/**
+ * A cell address, as the editing state spells it.
+ *
+ * @public
+ */
 export interface ValidationTarget {
+  /** Identity of the row. */
   rowId: string;
+  /** Key of the column. */
   columnKey: string;
 }
 
@@ -61,7 +73,11 @@ export interface UseEditValidationOptions<TRow> {
   applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
 }
 
-/** Outcome of {@link EditValidationState.check}. */
+/**
+ * Outcome of {@link EditValidationState.check}.
+ *
+ * @public
+ */
 export interface ValidationCheckResult {
   /** Whether the commit may proceed. */
   allowed: boolean;
@@ -72,7 +88,11 @@ export interface ValidationCheckResult {
   error?: string;
 }
 
-/** Validation state for the whole table. */
+/**
+ * Validation state for the whole table.
+ *
+ * @public
+ */
 export interface EditValidationState<TRow> {
   /** The message on one cell, if any. */
   errorFor: (rowId: string, columnKey: string) => string | undefined;

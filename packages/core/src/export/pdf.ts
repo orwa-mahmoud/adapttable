@@ -46,7 +46,13 @@ import {
 } from "./printLayout";
 import { parseSfnt } from "./sfnt";
 
-/** Options the writer and {@link buildTablePdf} share. */
+export type { ColumnDef, ExportWriter, PrintPageBreak };
+
+/**
+ * Options the writer and {@link buildTablePdf} share.
+ *
+ * @public
+ */
 export interface PdfWriterOptions {
   /** Document title. Defaults to the download name without its extension. */
   title?: string;
@@ -597,6 +603,8 @@ function titleFromFilename(filename: string): string {
  * @typeParam TRow - The row type.
  * @param options - Rows, columns, and how the pages should look.
  * @returns The PDF bytes, ready to download.
+ *
+ * @public
  */
 export function buildTablePdf<TRow>(
   options: {
@@ -636,6 +644,8 @@ const PDF_MIME = "application/pdf";
  *
  * @param options - Title, direction, paper and page-break behaviour.
  * @returns A writer to hand to `exportCsv`.
+ *
+ * @public
  */
 export function pdfWriter(options?: PdfWriterOptions): ExportWriter {
   return {
@@ -653,3 +663,18 @@ export function pdfWriter(options?: PdfWriterOptions): ExportWriter {
     }),
   };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+export type {
+  ExportPayload,
+  ExportRowMeta,
+  ExportWriteContext,
+} from "./exportWriter";

@@ -55,7 +55,11 @@ import {
  */
 const TABLE_MAX_LIMIT = 500;
 
-/** What a client is allowed to ask for. */
+/**
+ * What a client is allowed to ask for.
+ *
+ * @public
+ */
 export interface QuerySchema {
   /**
    * The columns a client may sort, filter, group or pivot by.
@@ -80,10 +84,18 @@ export interface QuerySchema {
   urlKey?: string;
 }
 
-/** A filter value that survived validation. */
+/**
+ * A filter value that survived validation.
+ *
+ * @public
+ */
 export type ServerFilterValue = string | readonly string[];
 
-/** The query, parsed and checked against the schema. */
+/**
+ * The query, parsed and checked against the schema.
+ *
+ * @public
+ */
 export interface ServerTableQuery {
   /** 1-based page. Always at least 1. */
   page: number;
@@ -132,7 +144,11 @@ export interface ServerTableQuery {
   rejected: readonly QueryRejection[];
 }
 
-/** One thing the parser refused. */
+/**
+ * One thing the parser refused.
+ *
+ * @public
+ */
 export interface QueryRejection {
   /** The parameter it came from, without the namespace. */
   param: string;
@@ -142,12 +158,13 @@ export interface QueryRejection {
   reason: string;
 }
 
-/** Anything a route handler might have in its hands. */
+/**
+ * Anything a route handler might have in its hands.
+ *
+ * @public
+ */
 export type QueryInput =
-  | string
-  | URL
-  | URLSearchParams
-  | { readonly url: string };
+  string | URL | URLSearchParams | { readonly url: string };
 
 /** The search params, whatever shape the caller had. */
 function toParams(input: QueryInput): URLSearchParams {
@@ -192,6 +209,8 @@ function treeColumns(group: QueryFilterGroup): string[] {
  * @param input - A `Request`, a `URL`, a query string, or search params.
  * @param schema - The columns a client may name, and the page-size ceiling.
  * @returns The validated query, plus whatever was refused.
+ *
+ * @public
  */
 export function parseTableQuery(
   input: QueryInput,

@@ -4,7 +4,11 @@ import { useEventCallback } from "../hooks/useEventCallback";
 import { devWarn } from "../utils/devWarn";
 import type { FilterDef, FilterOption } from "./filterDefs";
 
-/** Resolved choices for a select/multiSelect control. */
+/**
+ * Resolved choices for a select/multiSelect control.
+ *
+ * @public
+ */
 export interface ResolvedFilterOptions {
   /** The choices to render (empty while an async loader is in flight). */
   options: readonly FilterOption[];
@@ -20,6 +24,8 @@ const EMPTY: readonly FilterOption[] = [];
  * loading affordance meanwhile), and a leftover `"auto"` — possible only on
  * the server/source tiers, where there is no full dataset to derive from —
  * resolves to no options with a development warning.
+ *
+ * @public
  */
 export function useFilterOptions<TRow>(
   def: Pick<FilterDef<TRow>, "key" | "options">

@@ -7,6 +7,7 @@ import {
   RowReorderAnnouncer,
   SidePanelLayout,
   type TableBodyRegion,
+  TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
   useMountStagger,
@@ -48,6 +49,8 @@ import { Box, Button, Flex, Progress, Text } from "./ui";
  * core's `useDataTableShell`; this renders only Base UI controls over it.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
@@ -222,6 +225,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         aria-busy={chrome.isRefreshing || undefined}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

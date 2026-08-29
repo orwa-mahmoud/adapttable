@@ -110,7 +110,11 @@ const slots: PivotPanelSlots = {
   ),
 };
 
-/** Configure a pivot: three zones, and buttons that move fields between them. */
+/**
+ * Configure a pivot: three zones, and buttons that move fields between them.
+ *
+ * @public
+ */
 export function PivotPanel(
   props: Readonly<Omit<PivotPanelChromeProps, "slots">>
 ) {

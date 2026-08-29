@@ -69,8 +69,9 @@ change.
 - **Full-width and separator rows** (`extraRows`) — host-injected slots spliced in by `beforeRowId`.
 - **Row styling and heights** (`rowStyle`, `rowHeight`) — conditional inline style and per-row height.
 - **Keyboard cell navigation** (`cellNavigation`) — one tab stop, arrow keys,
-  ARIA grid semantics and screen-reader announcements.
-- **Row grouping** (`groupBy`) with per-group aggregates sharing the `summaryRow` mapper.
+  ARIA grid semantics and screen-reader announcements. It is also the gate for
+  cell-range selection, clipboard copy/paste of a range, and the fill handle.
+- **Row grouping** (`groupBy`) — one column key or an ordered list to nest, with per-group aggregates sharing the `summaryRow` mapper.
 - **Pivot tables** — rows, columns and measures with subtotals, from the optional
   `@adapttable/core/pivot` entry.
 - **Tree data** (`getChildren` / `getParentId`) — hierarchical rows with expand/collapse, on desktop and on cards.

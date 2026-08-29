@@ -7,6 +7,12 @@
 import { ReactNode } from 'react';
 
 // @public
+export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
+
+// @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
@@ -28,6 +34,26 @@ export interface FormulaColumnSpec {
     header?: string;
     key: string;
 }
+
+// @public
+export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+
+// @public
+export type FormulaValue = {
+    readonly kind: "number";
+    readonly value: number;
+} | {
+    readonly kind: "text";
+    readonly value: string;
+} | {
+    readonly kind: "boolean";
+    readonly value: boolean;
+} | {
+    readonly kind: "blank";
+} | {
+    readonly kind: "error";
+    readonly code: FormulaErrorCode;
+};
 
 // @public
 export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is QueryFilterGroup;
@@ -86,13 +112,14 @@ export function serializePivot(config: PivotConfig): string;
 export function serializePivotState(state: PivotUrlState): string;
 
 // @public
+export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
 export type SortDirection = "asc" | "desc";
 
 // @public
 export interface SortLevel {
-    // (undocumented)
     dir: SortDirection;
-    // (undocumented)
     key: string;
 }
 

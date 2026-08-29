@@ -195,7 +195,7 @@ export function MantineDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: DataTableProps<Person>["sidePanel"];
+  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   /** The column layout the page starts from. */
@@ -208,7 +208,7 @@ export function MantineDemo({
    * the current page; the grouping demo overrides it to write the grouped
    * sheet as a spreadsheet.
    */
-  exportCsv?: DataTableProps<Person>["exportCsv"];
+  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
 }>) {
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);

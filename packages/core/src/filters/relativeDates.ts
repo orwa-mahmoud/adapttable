@@ -7,7 +7,11 @@
 const DAY_MS = 86_400_000;
 const END_OF_DAY_MS = DAY_MS - 1;
 
-/** Named windows that need no extra number. */
+/**
+ * Named windows that need no extra number.
+ *
+ * @public
+ */
 export const RELATIVE_NAMED = [
   "today",
   "yesterday",
@@ -17,15 +21,23 @@ export const RELATIVE_NAMED = [
   "previousMonth",
 ] as const;
 
-/** A stored relative-date token (`last:7`, `today`, …). */
+/**
+ * A stored relative-date token (`last:7`, `today`, …).
+ *
+ * @public
+ */
 export type RelativeDateToken =
-  | (typeof RELATIVE_NAMED)[number]
-  | `last:${number}`
-  | `next:${number}`;
+  (typeof RELATIVE_NAMED)[number] | `last:${number}` | `next:${number}`;
 
-/** Inclusive local-time window a token resolves to. */
+/**
+ * Inclusive local-time window a token resolves to.
+ *
+ * @public
+ */
 export interface RelativeDateRange {
+  /** Start of the range, inclusive, in epoch milliseconds. */
   startMs: number;
+  /** End of the range, exclusive, in epoch milliseconds. */
   endMs: number;
 }
 
@@ -54,6 +66,8 @@ function startOfIsoWeek(now: Date): Date {
 /**
  * Parse a stored token. Unknown strings (including ISO dates) return
  * `undefined` so a historical absolute bound is never treated as relative.
+ *
+ * @public
  */
 export function parseRelativeToken(
   raw: string | undefined
@@ -67,7 +81,11 @@ export function parseRelativeToken(
   return `${counted[1] as "last" | "next"}:${n}`;
 }
 
-/** True when `raw` is a relative token, not an absolute date. */
+/**
+ * True when `raw` is a relative token, not an absolute date.
+ *
+ * @public
+ */
 export function isRelativeDateToken(raw: string | undefined): boolean {
   return parseRelativeToken(raw) !== undefined;
 }
@@ -106,6 +124,8 @@ function namedRange(
  * Resolve a token against `now` (defaults to the current instant). The
  * frontend predicate and the server query path must both call this so a
  * shared link and a live table agree.
+ *
+ * @public
  */
 export function resolveRelativeRange(
   raw: string | undefined,
@@ -129,7 +149,11 @@ export function resolveRelativeRange(
   return namedRange(token as (typeof RELATIVE_NAMED)[number], instant);
 }
 
-/** Build a counted token (`last:7`). `n` below 1 becomes 1. */
+/**
+ * Build a counted token (`last:7`). `n` below 1 becomes 1.
+ *
+ * @public
+ */
 export function countedRelativeToken(
   kind: "last" | "next",
   n: number
@@ -147,29 +171,53 @@ const NAMED_LABEL_KEYS = {
   previousMonth: "relPreviousMonth",
 } as const;
 
-/** Named window or a counted last/next kind (the N lives beside the select). */
+/**
+ * Named window or a counted last/next kind (the N lives beside the select).
+ *
+ * @public
+ */
 export type RelativePreset = (typeof RELATIVE_NAMED)[number] | "last" | "next";
 
-/** Presets offered by the relative-date widget, in display order. */
+/**
+ * Presets offered by the relative-date widget, in display order.
+ *
+ * @public
+ */
 export const RELATIVE_PRESETS: readonly RelativePreset[] = [
   ...RELATIVE_NAMED,
   "last",
   "next",
 ];
 
-/** `TableLabels` key for each relative preset. */
+/**
+ * `TableLabels` key for each relative preset.
+ *
+ * @public
+ */
 export const RELATIVE_PRESET_LABEL_KEYS = {
+  /** Today, midnight to midnight. */
   today: "relToday",
+  /** The day before today. */
   yesterday: "relYesterday",
+  /** The day after today. */
   tomorrow: "relTomorrow",
+  /** The current week. */
   thisWeek: "relThisWeek",
+  /** The current calendar month. */
   thisMonth: "relThisMonth",
+  /** The month before this one. */
   previousMonth: "relPreviousMonth",
+  /** The last N days, weeks or months up to now. */
   last: "relLastN",
+  /** The next N days, weeks or months from now. */
   next: "relNextN",
 } as const;
 
-/** Split a stored token into the widget's preset + N (N defaults to 7). */
+/**
+ * Split a stored token into the widget's preset + N (N defaults to 7).
+ *
+ * @public
+ */
 export function splitRelativeToken(raw: string): {
   preset: RelativePreset;
   n: number;
@@ -187,7 +235,11 @@ export function splitRelativeToken(raw: string): {
   return { preset: "today", n: 7 };
 }
 
-/** Join a widget preset + N back into the stored token. */
+/**
+ * Join a widget preset + N back into the stored token.
+ *
+ * @public
+ */
 export function joinRelativeToken(
   preset: RelativePreset,
   n: number
@@ -198,7 +250,11 @@ export function joinRelativeToken(
   return preset;
 }
 
-/** Chip / select wording for a stored token. */
+/**
+ * Chip / select wording for a stored token.
+ *
+ * @public
+ */
 export function relativeTokenLabel(
   raw: string,
   labels: {

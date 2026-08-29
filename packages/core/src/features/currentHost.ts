@@ -6,7 +6,7 @@
  * leaves the last table on top for every later click, and lets an inner
  * table steal the rest of the outer tree. Readers take the host from
  * {@link FeatureHostContext} (hooks) or as an argument (plain functions).
- * {@link currentFeatureHost} is only valid inside {@link runWithFeatureHost},
+ * `currentFeatureHost` is only valid inside `runWithFeatureHost`,
  * which is how a mapper created outside the table (e.g. `aggregate()`)
  * still resolves names for the table that is invoking it.
  */
@@ -31,36 +31,61 @@ import {
 } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 
-/** Extra column-menu actions a plugin appends after the built-ins. */
+/**
+ * Extra column-menu actions a plugin appends after the built-ins.
+ *
+ * @public
+ */
 export type ColumnMenuActionFactory<TRow = unknown> = (
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
 ) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined;
 
-/** Extra context-menu entries a plugin appends after the built-ins. */
+/**
+ * Extra context-menu entries a plugin appends after the built-ins.
+ *
+ * @public
+ */
 export type ContextMenuItemsFactory<TRow = unknown> = (
   target: ContextMenuTarget<TRow>
 ) => readonly ContextMenuItem[];
 
-/** A patch {@link TableFeatureHost.extendFilterType} queued for the registry. */
+/**
+ * A patch {@link TableFeatureHost.extendFilterType} queued for the registry.
+ *
+ * @public
+ */
 export interface FilterTypeExtend {
+  /** The filter type being extended. */
   readonly type: string;
+  /** Fields to merge onto that type's spec. */
   readonly patch: Partial<FilterTypeSpec>;
 }
 
 /**
  * Registrations collected during {@link TableFeature.setup}. The public host
  * only has `register*` methods; the table reads these bags.
+ *
+ * @public
  */
 export interface FeatureHostState<TRow = unknown> {
+  /** Filter types features registered. */
   readonly filterTypes: readonly FilterTypeSpec[];
+  /** Patches queued against existing filter types. */
   readonly filterExtends: readonly FilterTypeExtend[];
+  /** Custom cell editors, by editor name. */
   readonly editors: ReadonlyMap<string, CustomCellEditorRender>;
+  /** Aggregators, by aggregate name. */
   readonly aggregators: ReadonlyMap<string, Aggregator>;
+  /** Export writers features added. */
   readonly writers: readonly ExportWriter[];
+  /** Factories that add entries to the column menu. */
   readonly columnMenuActions: readonly ColumnMenuActionFactory<TRow>[];
+  /** Side-panel tabs features added. */
   readonly panels: readonly SidePanelEntry[];
+  /** Commands features added to the palette. */
   readonly commands: readonly Command[];
+  /** Factories that add entries to the right-click menus. */
   readonly contextMenuItems: readonly ContextMenuItemsFactory<TRow>[];
 }
 
@@ -80,7 +105,7 @@ export function appendByKey<T>(
 const scoped: FeatureHostState[] = [];
 
 /**
- * Run `fn` with `host` as {@link currentFeatureHost}. The stack is empty
+ * Run `fn` with `host` as `currentFeatureHost`. The stack is empty
  * again when `fn` returns, so a sibling or a later click cannot see it.
  */
 export function runWithFeatureHost<T>(
@@ -97,16 +122,19 @@ export function runWithFeatureHost<T>(
 }
 
 /**
- * The host bound by {@link runWithFeatureHost}. Empty outside that call, so a
+ * The host bound by `runWithFeatureHost`. Empty outside that call, so a
  * sibling table or a later click resolves its own host and never this one.
  */
 export function currentFeatureHost<TRow = unknown>():
-  | FeatureHostState<TRow>
-  | undefined {
+  FeatureHostState<TRow> | undefined {
   return scoped.at(-1) as FeatureHostState<TRow> | undefined;
 }
 
-/** Bind a callback so every invocation sees `host` via {@link currentFeatureHost}. */
+/**
+ * Bind a callback so every invocation sees `host` via `currentFeatureHost`.
+ *
+ * @public
+ */
 export function bindFeatureHostFn<Args extends unknown[], R>(
   host: FeatureHostState | undefined,
   fn: ((...args: Args) => R) | undefined

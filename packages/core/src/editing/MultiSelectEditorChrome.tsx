@@ -20,7 +20,11 @@ import {
   editorValidationProps,
 } from "./EditableCellGate";
 
-/** One option's checkbox, rendered by the adapter with its kit's control. */
+/**
+ * One option's checkbox, rendered by the adapter with its kit's control.
+ *
+ * @public
+ */
 export interface MultiSelectEditorCheckboxProps {
   /** The option's visible text. */
   readonly label: ReactNode;
@@ -44,12 +48,21 @@ export interface MultiSelectEditorCheckboxProps {
   readonly onKeyDown: (event: KeyboardEvent) => void;
 }
 
-/** Adapter-supplied controls for {@link MultiSelectEditorChrome}. */
+/**
+ * Adapter-supplied controls for {@link MultiSelectEditorChrome}.
+ *
+ * @public
+ */
 export interface MultiSelectEditorSlots {
+  /** Renders a checkbox. */
   readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
 }
 
-/** Props for {@link MultiSelectEditorChrome}. */
+/**
+ * Props for {@link MultiSelectEditorChrome}.
+ *
+ * @public
+ */
 export interface MultiSelectEditorChromeProps {
   /** The active cell's editor controller. */
   readonly ctrl: EditableCellEditorCtrl;
@@ -57,6 +70,7 @@ export interface MultiSelectEditorChromeProps {
   readonly label: string;
   /** The adapter's key handling, already wired to `ctrl.onEditorKeyDown`. */
   readonly onKeyDown: (event: KeyboardEvent) => void;
+  /** The kit's components for each part. */
   readonly slots: MultiSelectEditorSlots;
 }
 
@@ -65,6 +79,8 @@ export interface MultiSelectEditorChromeProps {
  *
  * @param props - See {@link MultiSelectEditorChromeProps}.
  * @returns The editor, named and focusable as one control.
+ *
+ * @public
  */
 export function MultiSelectEditorChrome({
   ctrl,

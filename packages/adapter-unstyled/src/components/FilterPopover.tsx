@@ -10,15 +10,27 @@ import {
   VIEWPORT_GUTTER,
 } from "./overlayPlacement";
 
-/** Props for {@link FilterPopover}. */
+/**
+ * Props for {@link FilterPopover}.
+ *
+ * @public
+ */
 export interface FilterPopoverProps {
+  /** Whether the overlay is showing. */
   open: boolean;
+  /** Closes the overlay. Filters apply live, so this only dismisses it. */
   onClose: () => void;
+  /** The filter fields to render inside. */
   filters: ReactNode;
+  /** How many filters are currently set, for the header count. */
   activeFilterCount: number;
+  /** Clears every active filter. */
   onClearFilters?: () => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
+  /** Writing direction, so the overlay opens on the correct side. */
   dir?: Direction;
+  /** Per-part classes. */
   classNames: DataTableClassNames;
   /** The Filters trigger button — the popover anchors beneath it. */
   children: ReactNode;
@@ -30,6 +42,8 @@ export interface FilterPopoverProps {
  * interactive; clicking outside the popover/anchor or pressing Escape closes
  * it. Portalled to `document.body` so sticky headers cannot paint over it.
  * Pair with `filtersMode="drawer"` for the slide-in panel (`FilterPanel`).
+ *
+ * @public
  */
 export function FilterPopover({
   open,

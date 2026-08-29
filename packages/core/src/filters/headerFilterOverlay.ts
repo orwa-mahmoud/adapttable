@@ -13,9 +13,21 @@ import { type FilterTypeRegistry, filterWidgetKind } from "./filterRegistry";
 import { filterOpKey, isValuelessFilterOp } from "./operators";
 import { readRangeWidget } from "./rangeWidget";
 
-const SESSION_ATTR = "data-adapttable-header-filter";
+/**
+ * Attribute tying a header filter's trigger to its overlay, so one editing
+ * session is identifiable across both.
+ *
+ * @public
+ */
+export const SESSION_ATTR = "data-adapttable-header-filter";
 
+/**
+ * Props that keep one header filter's overlay session together.
+ *
+ * @public
+ */
 export interface HeaderFilterSessionProps {
+  /** Ties the trigger and its overlay to one editing session. */
   readonly [SESSION_ATTR]: string;
 }
 
@@ -24,6 +36,8 @@ export interface HeaderFilterSessionProps {
  * {@link bindHeaderFilterDismiss} will close the overlay when `closeOnSelect`
  * is on. Operator-only writes, typed terms, and multi-select toggles are
  * incomplete: another control is still waiting.
+ *
+ * @public
  */
 export function headerFilterFieldIsComplete<TRow>(
   def: FilterDef<TRow>,
@@ -56,6 +70,8 @@ export function headerFilterFieldIsComplete<TRow>(
 /**
  * Wrap a filter source so a complete write can dismiss the overlay.
  * Off unless `closeOnSelect` is true — the default is stay open.
+ *
+ * @public
  */
 export function bindHeaderFilterDismiss<TRow>(
   source: FilterFormSource<TRow>,
@@ -88,6 +104,8 @@ export function bindHeaderFilterDismiss<TRow>(
 /**
  * Dismiss on a true outside press or Escape. Nested kit dropdowns (and a
  * focused native `<select>` whose OS list is open) are not outside.
+ *
+ * @public
  */
 export function usePointerDismiss(
   open: boolean,
@@ -133,7 +151,11 @@ export function usePointerDismiss(
   }, [open, dismiss, insideSelector]);
 }
 
-/** Open state + a source that honours {@link bindHeaderFilterDismiss}. */
+/**
+ * Open state + a source that honours {@link bindHeaderFilterDismiss}.
+ *
+ * @public
+ */
 export function useHeaderFilterOverlay<TRow>(
   props: {
     source: FilterFormSource<TRow>;

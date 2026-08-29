@@ -28,11 +28,15 @@ is the closer fit):
   dialog engine. Multi-field forms still go through `rowActions` + your
   own UI, with the built-in `confirm` seam for destructive actions.
 - **Drag-to-group aggregation** (`options.grouping`) — AdaptTable ships
-  single-level [row grouping](./row-grouping.md) (`groupBy` + optional
-  `groupAggregates`); there is no drag-a-column-to-group UI, so wire your
-  own control to `groupBy` if you need that gesture.
-- **Tree data** (`parentChildData`) — not supported.
-- **PDF export button** — AdaptTable ships a headless CSV helper only.
+  [row grouping](./row-grouping.md) at any depth (`groupBy` takes one key or an
+  ordered list, plus optional `groupAggregates`); there is no
+  drag-a-column-to-group UI, so wire your own control to `groupBy` if you need
+  that gesture.
+- **Tree data** (`parentChildData`) — [`getParentId`](./tree-data.md) is the
+  same idea: a flat list with a parent column, rendered as a hierarchy.
+- **PDF export button** — the export button takes a writer, so
+  `pdfWriter` from `@adapttable/core/pdf` makes it a PDF button. See
+  [PDF export](./export-pdf.md).
 
 What's left — sorted, filtered, searched, paginated, selectable CRUD list
 tables with remote data — is the majority use case, and it maps cleanly.
@@ -83,7 +87,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | `options.columnResizable`                            | `resizableColumns`                                    | —                                                                    |
 | `options.fixedColumns: { left, right }`              | column pinning via `columnLayout` / Columns menu      | Logical sides — RTL-correct.                                         |
 | `options.padding: "dense"`                           | `density="compact"`                                   | —                                                                    |
-| `options.exportButton`                               | `exportCsv` / `rowsToCsv` + `downloadCsv`             | Built-in CSV button or headless helper; PDF is out of scope.         |
+| `options.exportButton`                               | `exportCsv` / `rowsToCsv` + `downloadCsv`             | Built-in button; the writer picks CSV, Excel or PDF.                 |
 | `options.maxBodyHeight`                              | `maxHeight`                                           | Enables the scroll box + sticky pinning.                             |
 | `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))      | Flat label object; presets for 17 locales incl. RTL.                 |
 | `isLoading`                                          | `loading`                                             | —                                                                    |

@@ -1,5 +1,8 @@
 export { DataTable } from "./DataTable";
 export type { DataTableProps } from "./types";
+export type { DataTablePropsBase } from "./types";
+export type { DataTableClassNames } from "./types";
+export type { DataTableSlots } from "./types";
 export {
   type ActiveFilterChip,
   type BulkAction,
@@ -22,16 +25,19 @@ export {
   type FilterTypeRegistry,
   type FilterTypeSpec,
   type FilterValue,
+  type MobileCardRenderer,
   type PaginatedResponse,
   type PaginationMode,
   resolveFilterRegistry,
   type RowAction,
+  type RowActionsRenderer,
   type SavedView,
   type SortByOption,
   type SortDirection,
   type TableLabels,
   type TableQuery,
   type TableSource,
+  type ToolbarSlots,
   useDataTable,
   type UseDataTableResult,
   useFrontendData,

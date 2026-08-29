@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -12,6 +12,7 @@ interface Shift {
   startsAt: string;
   reviewedAt: string;
   tags: string[];
+  team: string;
 }
 
 const ROWS: Shift[] = [
@@ -22,6 +23,7 @@ const ROWS: Shift[] = [
     startsAt: "09:30",
     reviewedAt: "2026-08-13T14:05",
     tags: ["urgent"],
+    team: "core",
   },
 ];
 
@@ -44,6 +46,19 @@ const COLS: ColumnDef<Shift>[] = [
       options: ["urgent", "billable", "remote"],
     },
   },
+  // Appended, so every open(index) above keeps the cell it means.
+  {
+    key: "team",
+    header: "Team",
+    editable: true,
+    editor: {
+      type: "select",
+      options: [
+        { value: "core", label: "Core" },
+        { value: "web", label: "Web" },
+      ],
+    },
+  },
 ];
 
 const activates = () =>
@@ -62,6 +77,13 @@ const editor = () =>
  * the stored value seeds the editor in the shape that control holds, and what it
  * commits is a value the host can store back without parsing.
  */
+/**
+ * A commit's save-state bookkeeping settles in a microtask after the host's
+ * handler has already run. Flushing it inside `act` keeps that update inside
+ * the test, which is what React asks for.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("editor set (chakra)", () => {
   const table = () => {
     const onCellEdit = vi.fn();
@@ -82,7 +104,7 @@ describe("editor set (chakra)", () => {
     fireEvent.doubleClick(activates()[index]!);
   };
 
-  it("commits a boolean in one gesture", () => {
+  it("commits a boolean in one gesture", async () => {
     const { onCellEdit } = table();
     open(0);
     // Chakra's Checkbox keeps the real input hidden inside its root, so the
@@ -92,6 +114,7 @@ describe("editor set (chakra)", () => {
     expect(box).not.toBeChecked();
     fireEvent.click(box);
     // A checkbox has one gesture: no Enter, no blur.
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "approved",
@@ -99,13 +122,14 @@ describe("editor set (chakra)", () => {
     );
   });
 
-  it("seeds a date editor with the day it holds, and commits one back", () => {
+  it("seeds a date editor with the day it holds, and commits one back", async () => {
     const { onCellEdit } = table();
     open(1);
     expect(editor()).toHaveAttribute("type", "date");
     expect(editor()).toHaveValue("2026-08-13");
     fireEvent.change(editor(), { target: { value: "2026-09-01" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "day",
@@ -113,13 +137,14 @@ describe("editor set (chakra)", () => {
     );
   });
 
-  it("uses the platform's time control", () => {
+  it("uses the platform's time control", async () => {
     const { onCellEdit } = table();
     open(2);
     expect(editor()).toHaveAttribute("type", "time");
     expect(editor()).toHaveValue("09:30");
     fireEvent.change(editor(), { target: { value: "07:15" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "startsAt",
@@ -127,13 +152,14 @@ describe("editor set (chakra)", () => {
     );
   });
 
-  it("uses the platform's datetime control", () => {
+  it("uses the platform's datetime control", async () => {
     const { onCellEdit } = table();
     open(3);
     expect(editor()).toHaveAttribute("type", "datetime-local");
     expect(editor()).toHaveValue("2026-08-13T14:05");
     fireEvent.change(editor(), { target: { value: "2026-08-14T08:00" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "reviewedAt",
@@ -141,7 +167,25 @@ describe("editor set (chakra)", () => {
     );
   });
 
-  it("commits a multi-select as the array it chose", () => {
+  it("renders the single-select editor as the kit's own Select", () => {
+    table();
+    open(5);
+
+    // Committing through this kit's Select cannot be driven in jsdom — it needs
+    // the browser pointer and focus machinery the kit's own overlay relies on,
+    // which is why the filter-overlay suite skips the same gestures here. What
+    // jsdom can prove is that the editor IS the kit's Select and offers the
+    // options the column declared.
+    const trigger = screen.getByRole("combobox", { name: "Edit cell" });
+    fireEvent.click(trigger);
+
+    // Named rather than counted: this kit renders other selects' options into
+    // the same document, so a total would not be about this editor.
+    expect(screen.getByRole("option", { name: "Core" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Web" })).toBeInTheDocument();
+  });
+
+  it("commits a multi-select as the array it chose", async () => {
     const { onCellEdit } = table();
     open(4);
     const select = editor() as HTMLSelectElement;
@@ -152,19 +196,21 @@ describe("editor set (chakra)", () => {
     select.options[1]!.selected = true;
     fireEvent.change(select);
     fireEvent.blur(select);
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "tags", [
       "urgent",
       "billable",
     ]);
   });
 
-  it("commits an empty multi-select as an empty array, not an empty string", () => {
+  it("commits an empty multi-select as an empty array, not an empty string", async () => {
     const { onCellEdit } = table();
     open(4);
     const select = editor() as HTMLSelectElement;
     select.options[0]!.selected = false;
     fireEvent.change(select);
     fireEvent.blur(select);
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "tags", []);
   });
 });

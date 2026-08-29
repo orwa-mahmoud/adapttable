@@ -356,6 +356,7 @@ function groupColumns<TRow>(
 
 /** Opt-in grouping chrome passed into {@link buildColumns} when armed. */
 export interface BuildColumnsGrouping {
+  /** Whether the group is collapsed. */
   collapsed: GroupCollapseState;
   /** Number of leaf data columns (for group-header colSpan). */
   dataColumnCount: number;
@@ -383,18 +384,27 @@ export interface BuildColumnsOptions<TRow> {
   tree?: BuildColumnsTree<TRow>;
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Per-row actions to render. */
   rowActions?: readonly RowAction<TRow>[];
+  /** How the actions column lays its controls out. */
   rowActionsLayout?: RowActionsLayout;
+  /** Host override for the actions cell. */
   renderRowActions?: RowActionsRenderer<TRow>;
+  /** Column key currently sorted by, if any. */
   sortBy: string | undefined;
+  /** Direction for `sortBy`. */
   sortDir: SortDirection | undefined;
+  /** Confirmation gate a destructive action must pass. */
   confirm: ConfirmHandler;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
   /** Opt-in editing bundle — omit and cells stay display-only. */
   editing?: EditableCellEditing<TRow>;
   /** Current page rows (Tab advance); required when editing is set. */
   rows?: readonly TRow[];
+  /** Row identity function. */
   getRowId?: (row: TRow) => string;
   /** Per-column edge pinning (logical start/end), mapped to antd's native
    *  physical `fixed` via {@link antdFixed}. */
@@ -440,10 +450,13 @@ export interface BuildColumnsOptions<TRow> {
    * so `fixed` columns stay on antd's own header.
    */
   headerFilters?: boolean;
+  /** Filter definitions for the header row. */
   filterDefs?: readonly FilterDef<TRow>[];
+  /** Reads and writes the active filter values. */
   filterSource?: FilterFormSource<TRow>;
   /** Type registry so a custom `filterTypes` entry can render in the header. */
   filterRegistry?: FilterTypeRegistry;
+  /** Dismiss a header filter's overlay after one choice. */
   closeHeaderFilterOnSelect?: boolean;
   /**
    * Mark cells a patch just changed — `data-flash` on the cell. Omit and

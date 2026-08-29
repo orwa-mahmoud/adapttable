@@ -26,7 +26,13 @@ import type { TableLabels } from "../types";
 import type { ContextMenuItem } from "./contextMenuModel";
 import type { ContextMenuPoint } from "./useContextMenu";
 
-/** Props an adapter's menu surface receives. */
+export type { ContextMenuItem, ContextMenuPoint };
+
+/**
+ * Props an adapter's menu surface receives.
+ *
+ * @public
+ */
 export interface ContextMenuSurfaceProps {
   /** Where the menu was opened, in viewport coordinates. */
   readonly at: ContextMenuPoint;
@@ -48,11 +54,17 @@ export interface ContextMenuSurfaceProps {
   readonly container?: HTMLElement;
   /** The entries, already rendered through the Item and Separator slots. */
   readonly children: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
 }
 
-/** Props an adapter's menu entry receives. */
+/**
+ * Props an adapter's menu entry receives.
+ *
+ * @public
+ */
 export interface ContextMenuItemProps {
+  /** The entry being rendered. */
   readonly item: ContextMenuItem;
   /**
    * Bind this rather than `item.onSelect`: it closes the menu first, which
@@ -61,7 +73,11 @@ export interface ContextMenuItemProps {
   readonly onSelect: () => void;
 }
 
-/** Adapter-owned rendering for {@link ContextMenuChrome}. */
+/**
+ * Adapter-owned rendering for {@link ContextMenuChrome}.
+ *
+ * @public
+ */
 export interface ContextMenuSlots {
   /** The kit's menu, positioned at the point it was opened from. */
   readonly Surface: (props: ContextMenuSurfaceProps) => ReactNode;
@@ -71,7 +87,11 @@ export interface ContextMenuSlots {
   readonly Separator: () => ReactNode;
 }
 
-/** What the context menu needs to render. */
+/**
+ * What the context menu needs to render.
+ *
+ * @public
+ */
 export interface ContextMenuChromeProps {
   /** The entries. Nothing renders when this is empty. */
   items: readonly ContextMenuItem[];
@@ -100,6 +120,8 @@ export interface ContextMenuChromeProps {
  *
  * @param props - The entries, where they were opened, and the kit's slots.
  * @returns The menu.
+ *
+ * @public
  */
 export function ContextMenuChrome(props: Readonly<ContextMenuChromeProps>) {
   const { at, items, onClose, slots } = props;

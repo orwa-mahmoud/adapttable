@@ -1,5 +1,5 @@
 import { defaultLabels } from "@adapttable/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -169,7 +169,7 @@ describe("FilterPopover", () => {
     });
     // A native <select>/date/number popup keeps focus on the control inside the
     // popover while dispatching a document-level click outside the popover DOM.
-    screen.getByTestId("op").focus();
+    act(() => screen.getByTestId("op").focus());
     fireEvent.click(document.body);
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -237,10 +237,10 @@ describe("FilterPopover", () => {
 
     it("caps the card width so it can never exceed the viewport", () => {
       renderPopover();
-      const card = document.querySelector(
+      const card = document.querySelector<HTMLElement>(
         '[data-adapttable-part="filters-popover"]'
       )!;
-      expect(card).toHaveStyle({ maxWidth: "calc(100vw - 16px)" });
+      expect(card.style.maxWidth).toBe("calc(100vw - 16px)");
     });
   });
 });

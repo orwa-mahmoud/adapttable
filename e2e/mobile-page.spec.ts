@@ -92,3 +92,56 @@ for (const kit of KITS) {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 }
+
+/**
+ * The card list is a real <ul>, so a windowed one has to state its size per
+ * item. jsdom can show the attributes exist; only a real phone-sized browser
+ * shows them holding while a live virtualizer moves the window.
+ */
+test("states the real dataset size on a windowed card list", async ({
+  page,
+}) => {
+  await page.goto(`/${KIT}/scale/`);
+  const cards = page.locator('[data-adapttable-part="card"]');
+  await expect(cards.first()).toBeVisible();
+  // A window, not the dataset: the phone holds a handful of the 50,000 rows.
+  expect(await cards.count()).toBeLessThan(120);
+  await expect(cards.first()).toHaveAttribute("aria-setsize", "50000");
+  await expect(cards.first()).toHaveAttribute("aria-posinset", "1");
+
+  // The window advances; the positions count the dataset, not the DOM.
+  await page.mouse.wheel(0, 6000);
+  await expect
+    .poll(
+      async () => Number(await cards.first().getAttribute("aria-posinset")),
+      { timeout: 5000 }
+    )
+    .toBeGreaterThan(1);
+  await expect(cards.first()).toHaveAttribute("aria-setsize", "50000");
+});
+
+/**
+ * Five kits build the list from `div role="list"` and three from a native
+ * `<ul>`. Both reach a screen reader as the same thing, which is the point:
+ * the assertion is on the roles, not on the elements a kit chose.
+ */
+test("every kit exposes the same list to assistive tech", async ({ page }) => {
+  const shapes = new Map<string, unknown>();
+  for (const kit of KITS) {
+    await page.goto(`/${kit}/mobile-cards/`);
+    await page.locator('[data-adapttable-part="card"]').first().waitFor();
+    shapes.set(kit, {
+      lists: await page.getByRole("list").count(),
+      listitems: await page.getByRole("listitem").count(),
+      cards: await page.locator('[data-adapttable-part="card"]').count(),
+    });
+  }
+
+  const [reference, ...rest] = [...shapes.keys()];
+  for (const kit of rest) {
+    expect(
+      shapes.get(kit),
+      `${kit} exposes a different card list from ${reference}`
+    ).toEqual(shapes.get(reference!));
+  }
+});

@@ -909,7 +909,7 @@ the way you configured it, and these guarantees do not apply.
   `baseParams` (static params merged into every call, e.g. a parent scope
   id), and `sanitizeParams`. Its query argument is typed structurally as
   `InfiniteQueryLike`, so TanStack Query stays a type-only peer. See
-  [`examples/mui-backend.tsx`](../examples/mui-backend.tsx) for a complete
+  [`examples/mui-query-source.tsx`](../examples/mui-query-source.tsx) for a complete
   runnable version.
 - On the server tier, `source.refetch()` re-emits the current query;
   out-of-range pages and stale responses are handled for you via the abort
@@ -3629,7 +3629,7 @@ because getting it wrong is invisible on screen.
 
 ---
 
-# React table row grouping — group rows with aggregates & expand/collapse
+# React table row grouping — nested groups, aggregates & expand/collapse
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`groupBy="role"` + `groupAggregates`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -3640,9 +3640,10 @@ totals — on a mobile card, where there are no columns to align to, the same
 numbers appear captioned by their column instead. A custom renderer can place
 them the same way with `groupRowLayout` and `groupAggregateEntries`.
 
-Group rows by one column with `groupBy` and optional per-group subtotals via
-`groupAggregates` — the **same mapper signature as `summaryRow`**. Omit
-`groupBy` and the table never inserts group header rows (package DNA: opt-in).
+Group rows with `groupBy` — one column key, or an ordered list to nest — and
+add optional per-group subtotals via `groupAggregates`, the **same mapper
+signature as `summaryRow`**. Omit `groupBy` and the table never inserts group
+header rows (package DNA: opt-in).
 
 ## Paging groups, and paging inside one
 
@@ -3963,8 +3964,10 @@ export function People() {
 
 - **Opt-in.** Pass `groupBy` (a column key) or set `source.groupBy` via
   `useFrontendData` / URL state — without it, grouping stays fully dormant.
-- **Single level.** One grouping column at a time (no nested groups, no
-  drag-to-group panel).
+- **One key or a list.** `groupBy="team"` groups one level;
+  `groupBy={["team", "status"]}` nests each key inside the one before it, to
+  any depth. There is no drag-to-group panel — the keys come from your code or
+  the URL.
 - **Frontend tier only.** Grouping needs the full filtered row set in memory
   (`allFilteredRows`). Server-paginated sources log a dev-mode warning and
   ignore grouping — see [Data tiers](./data-tiers.md).
@@ -4042,8 +4045,8 @@ export contains exactly what you see, and the rows-per-page control hides
 
 ## Headless grouping
 
-The grouping model is exported so custom tables can render the same
-single-level flat structure the adapters do:
+The grouping model is exported so custom tables can render the same flat
+structure the adapters do, at one level or nested:
 
 | Export                                         | Purpose                                                                                        |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -4061,8 +4064,8 @@ single-level flat structure the adapters do:
   on the column key — never the JSX `accessor`.
 - Works on desktop rows and mobile cards, LTR and RTL, with and without
   `virtualize` (virtual windows count collapsed groups as one row).
-- Out of scope (by design): multi-level nesting, pivot mode, drag-to-group,
-  and Excel-style aggregation pickers.
+- Out of scope (by design): a drag-to-group panel and Excel-style aggregation
+  pickers. Pivoting is a separate model — see [Pivot](./pivot.md).
 - Ant Design maps group headers onto its high-level `Table` via custom row
   rendering; every other kit renders native group header rows/cards.
 
@@ -5408,12 +5411,15 @@ real measured sizes (like the `140` above) when your cells differ.
 - Ant Design maps `virtualize` to antd's **native** virtual table mode on
   desktop; on mobile the cards window through the shared engine, just like
   every other adapter, and the page-level sentinel keeps loading more.
+  `virtualizeColumns` has no effect there: antd owns its scroller, so there is
+  no measured box for the horizontal window, and every column stays in the DOM.
 
 ## Options
 
 | Prop                  | Type      | Default | Description                                                       |
 | --------------------- | --------- | ------- | ----------------------------------------------------------------- |
 | `virtualize`          | `boolean` | `false` | Window the rendered rows/cards on long infinite lists.            |
+| `virtualizeColumns`   | `boolean` | `false` | Window the rendered columns on very wide tables.                  |
 | `maxHeight`           | `number`  | —       | Fixed-height scroll box (px); switches to element-mode windowing. |
 | `estimateRowSize`     | `number`  | `56`    | Desktop row-height estimate in px.                                |
 | `estimateCardSize`    | `number`  | —       | Mobile card-height estimate in px.                                |
@@ -5478,6 +5484,15 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
 - The headless hook is exported as `useTableVirtualization` for custom markup;
   when disabled it returns every row with no spacers, so one render path
   serves both cases.
+- A windowed table still tells assistive technology how big the data really
+  is: the table carries `aria-rowcount` with each row's absolute
+  `aria-rowindex`, and the mobile card list carries `aria-setsize` with each
+  card's `aria-posinset`. `virtualizeColumns` does the same for the horizontal
+  axis — `aria-colcount` on the table and an absolute `aria-colindex` on every
+  body and header cell — so a reader is never left counting the cells it can
+  reach. Without
+  that a screen reader would count only the few rows in the DOM. See
+  [Accessibility](./accessibility.md).
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
@@ -5934,7 +5949,7 @@ load `buildPrintDocument` into a hidden iframe and call `window.print()`.
 stylesheet — repeating `thead`, `break-inside: avoid` on rows and groups,
 column widths from the table, `padding-inline-start` so a tree or a
 group indents under RTL. `PrintLayoutOptions` / `PdfWriterOptions` /
-`PrintPageSize` configure title, direction, paper and whether a
+`PrintPageSize` / `PrintPageBreak` configure title, direction, paper and whether a
 top-level group starts a new page (`pageBreak: "group"`). Paper defaults
 to A4 landscape; direction inherits `document.documentElement.dir` when
 omitted, so print matches what the reader is looking at.
@@ -7401,6 +7416,17 @@ Every table you render already:
 - uses a real `<table>` with header and body cells
 - names every control it draws (Filters, checkboxes, close, Done — not icon-only)
 - marks sortable headers with `aria-sort`
+- states the real dataset size when only part of it is in the DOM — a virtualized or paged
+  table carries `aria-rowcount` with each row's absolute `aria-rowindex`, a table whose columns
+  are windowed carries `aria-colcount` with an absolute `aria-colindex` on every body and header
+  cell, and the mobile
+  card list carries `aria-setsize` with each card's `aria-posinset`, so a screen reader says "row
+  40,001 of 50,000" instead of counting the handful of rows it can reach
+- says what changed when the rows change — sorting, filtering, paging and page size
+  announce politely through one live region, naming the new order or the new count in the
+  same words the footer shows ("Sorted by Name, ascending", "Page 2 of 4. Showing 26–50 of
+  87"), because a control that rewrites the table silently gives a screen-reader user no
+  way to tell it worked
 - honours `prefers-reduced-motion` when rows animate in
 
 Every adapter is audited with `axe` in CI, on desktop and mobile card layouts.
@@ -7748,8 +7774,8 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `extraRows`                 | `readonly ExtraRow[]`                                           | —               | Host-injected separator and full-width slots, spliced in by `beforeRowId`. Omit and nothing is inserted. See [full-width and separator rows](./full-width-rows.md).                                                                                                                                                                                                              |
 | `summaryRow`                | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Map the current page's rows to per-column footer summary cells.                                                                                                                                                                                                                                                                                                                  |
 | `tableFooter`               | `ReactNode`                                                     | —               | Free slot under the table, above the pager. Not the column-aligned summary row.                                                                                                                                                                                                                                                                                                  |
-| `groupBy`                   | `string \| null`                                                | —               | Single-level row grouping by column key; frontend tier only (server sources devWarn and ignore). Omit and grouping stays dormant.                                                                                                                                                                                                                                                |
-| `onGroupByChange`           | `(groupBy: string \| null) => void`                             | —               | Controlled `groupBy` channel; falls back to `source.setGroupBy`. URL-synced when the source uses URL state.                                                                                                                                                                                                                                                                      |
+| `groupBy`                   | `string \| readonly string[] \| null`                           | —               | Row grouping by column key — one key, or an ordered list to nest. Frontend tier only (server sources devWarn and ignore). Omit and grouping stays dormant.                                                                                                                                                                                                                       |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —               | Notified after a grouping change, with the keys as a list. The chrome always applies the change itself; take full control via `source.setGroupBy`.                                                                                                                                                                                                                               |
 | `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Per-group aggregate cells — **same signature as `summaryRow`**. Called with each group's leaf rows.                                                                                                                                                                                                                                                                              |
 | `collapsedGroupIds`         | `readonly string[]`                                             | —               | Controlled collapsed group keys (ephemeral — not URL-synced).                                                                                                                                                                                                                                                                                                                    |
 | `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —               | Controlled collapse channel; uncontrolled mode uses internal state.                                                                                                                                                                                                                                                                                                              |
@@ -8176,7 +8202,9 @@ are still checking — behind `EditValidationState` (`UseEditValidationOptions` 
 sees before the host does. `editorValidationProps(ctrl)` from
 `@adapttable/core/adapter` is the `aria-invalid` / `aria-describedby` /
 `aria-busy` a kit's editor spreads, and `editorBusyProps(ctrl)` is just the busy
-flag for a kit whose own input owns the other two.
+flag for a kit whose own input owns the other two. `stopEditKeys(event)` keeps
+Enter, Escape and Tab inside the open editor: all three mean something to the
+grid as well, and the editor is where the user is typing.
 See [cell editing](./cell-editing.md).
 
 **The grouped row model.** `buildGroupedFlatModel` turns rows into the flat
@@ -8212,6 +8240,18 @@ region underneath it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps`
 types the announcer itself. See
 [customization](./customization.md#export).
 
+**Status announcements.** Sorting, filtering and paging rewrite the body with
+nothing a screen reader can perceive, so the table says what changed through one
+polite region. `useDataTableShell` returns the message as `statusAnnouncement`
+and adapters render it with `TableStatusAnnouncer` (`TableStatusAnnouncerProps`)
+beside their table, so the region is in the DOM before it has anything to say.
+Custom markup composes the message itself with `useTableStatusAnnouncement`
+(`TableStatusAnnouncementOptions` in — the row set, the page window and the
+sorted column). The sort sentence comes from the `sortedBy` and `sortingCleared`
+labels; the counts reuse `showing`, `pageOf` and `noResults`, so what a user
+hears matches what the footer shows. See
+[accessibility](./accessibility.md).
+
 **File formats.** An `ExportWriter` turns an `ExportWriteContext` — an
 `ExportTable` of values resolved once by `buildExportTable`, plus the filename —
 into an `ExportPayload`, which `downloadExportFile` hands to the browser.
@@ -8238,8 +8278,9 @@ the export button and `buildTablePdf` for a host assembling rows by hand.
 Print is a different verb: `openPrintLayout` (an `ExportTable`) and
 `printTable` (rows and columns) load `buildPrintDocument` into a hidden
 iframe. `buildPrintTableHtml` is the `<table>` alone; `printStyles` is the
-stylesheet. `PrintLayoutOptions` / `PdfWriterOptions` / `PrintPageSize`
-configure title, direction and paper. Both option types take `font` — a
+stylesheet. `PrintLayoutOptions` / `PdfWriterOptions` / `PrintPageSize` /
+`PrintPageBreak` configure title, direction, paper and how groups meet a
+page boundary. Both option types take `font` — a
 TrueType file as bytes — which the PDF writer subsets and embeds so the
 download draws Arabic, CJK or any script the built-in face cannot; Arabic
 is shaped into its contextual forms and reordered right to left. See
@@ -8302,7 +8343,10 @@ highlight, and never against `prefers-reduced-motion`. See
 
 **Filter internals.** `FILTER_TYPES` lists the built-in types, `filterLabel`
 resolves a filter's caption, `filterStateKeys` names the URL keys one filter
-owns, `FilterRuntime` is what `buildFilterRuntime` returns, and
+owns, `hasActiveHeaderFilter` says whether any of them holds a value worth
+marking the column with — a cleared text field leaves `""` and a cleared
+multi-select leaves `[]`, and neither is a filter — `FilterRuntime` is what
+`buildFilterRuntime` returns, and
 `ResolvedFilterOptions` is what `useFilterOptions` resolves.
 `isDeclarativeFilters` tells the array form from JSX. A form reads its values
 through `FilterFormSource` with `listFilterValues` and `scalarFilterText`.
@@ -8581,7 +8625,11 @@ from your kit and pass `fields`, `config` and `onChange`. It is
 `PivotPanelChrome` with that kit's slots already filled.
 
 **`SavedViewsPanel`** is each adapter's pre-wired management panel — import it
-from your kit and pass the views plus the five handlers.
+from your kit and pass the views plus the five handlers. shadcn's names its own
+`SavedViewsPanelProps`: the views, the five handlers, `labels`, `footer`,
+`className`, and a `classNames` map merged per key over the shadcn preset. It
+is the panel's whole contract, with no slot type to fill in — the kit has
+already filled them.
 
 **Saved-view storage and versioning.** `useSavedViews` takes a
 `SavedViewsStore` (`list` / `save` / `remove`, all async) that replaces
@@ -8782,7 +8830,8 @@ elsewhere. Adapters build theirs over `CommandPaletteChrome` /
 `CommandPaletteChromeProps` / `CommandPaletteSlots` /
 `CommandPaletteSurfaceProps` / `CommandPaletteInputProps` /
 `CommandPaletteItemProps` and arm it with `useCommandPalette` (returning a
-`TableCommandPalette`), from `@adapttable/core/adapter`. See
+`TableCommandPalette`; `UseCommandPaletteOptions` is the hook's input), from
+`@adapttable/core/adapter`. See
 [customization](./customization.md#command-palette).
 
 **Context menus.** `contextMenu` arms right-click menus for headers, rows and
@@ -8793,9 +8842,11 @@ append your own behind a divider. `ContextMenuItem` is one entry (`key`,
 the built-in entries call. Every route in works: right-click, Shift+F10, the
 menu key, and a long press. Adapters build theirs over `ContextMenuChrome` /
 `ContextMenuChromeProps` / `ContextMenuSlots` / `ContextMenuSurfaceProps` /
-`ContextMenuItemProps` and arm it with `useTableContextMenu` (returning a
+`ContextMenuItemProps` and arm it with `useTableContextMenu`
+(`TableContextMenuOptions` is the hook's input; it returns a
 `TableContextMenu`: `regionProps` to bind once, plus `items`, `at` and
-`close`), all from `@adapttable/core/adapter`. The surface slot receives an
+`close`). `ContextMenuPoint` is the click coordinates the chrome hands the
+surface. All from `@adapttable/core/adapter`. The surface slot receives an
 `anchorRef` — a zero-size element at the click point — because every kit's
 menu positions against an element rather than coordinates. See
 [customization](./customization.md#context-menus).
@@ -8841,7 +8892,8 @@ armed and disable rather than disappear; `undoRedoToolbar(wanted, history,
 labels)` from `@adapttable/core/adapter` is the one rule both wiring paths
 resolve that with. Labels are `undoEdit` and `redoEdit`. `printButton` adds a
 Print button, which renders only when `onPrint` is also wired;
-`printToolbar(wanted, onPrint, labels)` resolves that pair the same way, and
+`printToolbar(wanted, onPrint, labels)` resolves that pair the same way
+(`PrintToolbar` is the resolved `{ onPrint, label }`), and
 the caption is `labels.print`. See
 [customization](./customization.md#toolbar-and-status-bar).
 
@@ -8961,6 +9013,21 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `rowStyleArmed` / `estimateFromRowHeight`                                                                                                                                                                                                                                                                                | Whether either hook was passed / virtualizer `estimateSize` from `rowHeight`.                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `RowPinState` / `RowPinSide`                                                                                                                                                                                                                                                                                             | `{ top, bottom }` id lists / `"top" \| "bottom"`. See [row pinning](./row-pinning.md).                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `RowPinningState` / `RowPinLabels`                                                                                                                                                                                                                                                                                       | Headless pin state and the three action strings.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ExportCsvProp`                                                                                                                                                                                                                                                                                                          | The `exportCsv` prop as declared: `true`, an `ExportCsvOptions`, or absent. See [export](./customization.md#export).                                                                                                                                                                                                                                                                                                                                                                                 |
+| `WidthColumn`                                                                                                                                                                                                                                                                                                            | A column reduced to what width resolution reads — its `key` and declared `width`.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `GroupedHeaderAlign`                                                                                                                                                                                                                                                                                                     | Alignment of a spanning group header: `"start"`, `"center"` or `"end"`. See [column groups](./column-groups.md).                                                                                                                                                                                                                                                                                                                                                                                     |
+| `BuildGroupedFlatModelOptions`                                                                                                                                                                                                                                                                                           | What `buildGroupedFlatModel` flattens — `rows`, `groupBy`, `columns`, `getRowId` and the collapse/aggregate options. See [row grouping](./row-grouping.md).                                                                                                                                                                                                                                                                                                                                          |
+| `HorizontalOverflow`                                                                                                                                                                                                                                                                                                     | `useHorizontalOverflow`'s result — a callback `ref` and `overflowing`, true only while the content is wider than its wrapper.                                                                                                                                                                                                                                                                                                                                                                        |
+| `FeatureNoticeAppearance`                                                                                                                                                                                                                                                                                                | How an inert feature already looks to the person at the table: `"off"`, `"disabled"` or `"one-page"`.                                                                                                                                                                                                                                                                                                                                                                                                |
+| `SESSION_ATTR`                                                                                                                                                                                                                                                                                                           | `data-adapttable-header-filter` — the attribute tying a header filter's trigger to its overlay, so one editing session is identifiable across both. See [filtering](./filtering.md).                                                                                                                                                                                                                                                                                                                 |
+| `TableCommandOptions`                                                                                                                                                                                                                                                                                                    | What `tableCommands` needs for the table-wide entries: labels, plus `onPrint` / `onExport` / `onClearFilters` and `hasFilters`.                                                                                                                                                                                                                                                                                                                                                                      |
+| `UseShortcutsOptions`                                                                                                                                                                                                                                                                                                    | What `useShortcuts` needs: `enabled`, the `shortcuts` list, `onCommand`, and where to listen.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ValidationCheckResult`                                                                                                                                                                                                                                                                                                  | The outcome of `EditValidationState.check` — `allowed`, and `error` when it is not. See [cell editing](./cell-editing.md).                                                                                                                                                                                                                                                                                                                                                                           |
+| `editableCellController`                                                                                                                                                                                                                                                                                                 | Derives one cell's editing controller. Returns `mode: "display"` whenever the host passed no `onCellEdit`, so a table that never opted in renders exactly as before.                                                                                                                                                                                                                                                                                                                                 |
+| `FeatureHostState`                                                                                                                                                                                                                                                                                                       | The registrations a feature's `setup` collected — filter types, queued patches, menu factories, side-panel entries — as the table reads them. See [feature composition](./features.md).                                                                                                                                                                                                                                                                                                              |
+| `FilterTypeExtend`                                                                                                                                                                                                                                                                                                       | One queued `extendFilterType` patch: the `type` being extended and the `patch` merged onto its spec.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ColumnMenuActionFactory`                                                                                                                                                                                                                                                                                                | A plugin's extra column-menu actions, appended after the built-ins.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ContextMenuItemsFactory`                                                                                                                                                                                                                                                                                                | A plugin's extra context-menu entries, appended after the built-ins.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Development warnings
 
@@ -9073,7 +9140,12 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,
 `DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
 (virtualize an opaque keyed list, e.g. grouped entries),
-`useMountStagger` (the `animate` stagger), and the inline icon set
+`useMountStagger` (the `animate` stagger),
+`useOverlayTransition` / `OverlayTransition` (turns an `open` boolean into
+`{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
+has something to animate on the way out, and reduced motion skips both edges),
+`OVERLAY_MOTION` (the durations and curves the unstyled, shadcn, Base UI and
+Radix drawers share), and the inline icon set
 (`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
 `ExpandChevron`, `sortArrow`). Row reorder chrome (on each adapter):
 `RowReorderHandle`, `RowReorderHandleProps`, `RowReorderButtons`,
@@ -9122,8 +9194,12 @@ the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
   `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
   testing.
 - **Adapter packages** — each exports its `DataTable` with `DataTableProps`,
-  `DataTableSlots` and `SavedViewsMenuProps` (plus the shared core
-  re-exports); Radix and Base UI export their accent unions
+  `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
+  shared core re-exports). `DataTableProps` is `DataTablePropsBase &
+DataModeProps`: the base carries every prop except the data mode, which is
+  the half to name when you wrap or extend a table's props without committing
+  to a tier. `@adapttable/unstyled` also exports `IconProps`, the props its
+  exported icons take, so a caller supplying one has a name for the argument; Radix and Base UI export their accent unions
   (`RadixAccentColor`, `BaseUiAccentColor`); Mantine also exports its
   chrome as reusable components (`ActiveFilterChips`, `AutoFilterForm`,
   `EmptyState`, `ErrorState`, `FilterDrawer`, `PaginationFooter`,
@@ -9188,10 +9264,20 @@ you use.
 ## Is there a free alternative to MUI X DataGrid or ag-Grid?
 
 Yes — AdaptTable is **MIT-licensed and fully free**, including server-side
-data, infinite scroll, filtering, and selection. MUI X DataGrid and ag-Grid are
+data, infinite scroll, filtering and selection. MUI X DataGrid and ag-Grid are
 **open-core**: their advanced server-side data and infinite-loading
-capabilities sit behind paid Pro/Premium or Enterprise tiers. The MUI adapter
-gives a DataGrid-style experience at no cost.
+capabilities sit behind paid Pro/Premium or Enterprise tiers.
+
+Six more sit in those same paid tiers and are MIT here:
+[pivoting](./pivot.md), [tree data](./tree-data.md),
+[cell-range selection, range clipboard copy/paste and the fill
+handle](./cell-navigation.md), and
+[Excel (.xlsx) export](./customization.md#export). What the paid tiers still
+have is integration — one spreadsheet surface with its tool panels assembled —
+where AdaptTable gives you the parts. [Comparison](./comparison.md) has the
+table, with each vendor's tier named.
+
+The MUI adapter gives a DataGrid-style experience at no cost.
 
 ## Is AdaptTable free?
 
@@ -9305,20 +9391,28 @@ zero UI-kit dependencies.
 Measured on the published builds, with React and your UI kit external because
 your app already ships those:
 
-| What you import                           | min+gzip  |
-| ----------------------------------------- | --------- |
-| `useFrontendData` + `useDataTable` (core) | ~10 kB    |
-| every core export                         | ~34 kB    |
-| `DataTable` from an adapter               | ~51–57 kB |
+| What you import                           | min+gzip    |
+| ----------------------------------------- | ----------- |
+| `useFrontendData` + `useDataTable` (core) | ~18 kB      |
+| every core export                         | ~87 kB      |
+| `DataTable` from an adapter               | ~127–141 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
-land within a few kB of each other, so switching kits does not change what you
+land within ~13 kB of each other, so switching kits does not change what you
 pay.
 
+The third row is the one to understand. `DataTable` is a single component whose
+props can turn on every feature it has, and a bundler follows imports rather
+than prop values — so it carries them all whether or not you switch one on. To
+pay for what you use, name it: compose with `features` from the kit's subpath,
+or build on the headless hooks in row one. [Feature
+composition](./features.md#no-bundle-savings-yet) has the detail; v3 is where
+the props stop holding the imports open.
+
 These are not estimates. `pnpm budget` bundles each of those imports for real
-and fails the build if one crosses its ceiling, so the numbers on this page
-cannot quietly go stale.
+and fails the build if one crosses its ceiling, and it checks this table against
+what it just measured — so a figure here cannot drift from the build.
 
 ## How do I get started quickly?
 
@@ -9338,13 +9432,21 @@ near-100% test coverage across every adapter.
 
 ## When might another library fit better?
 
-- You need a heavyweight enterprise grid with pivoting, range selection, and
-  Excel-style fill-handle editing _today_ → ag-Grid or MUI X DataGrid (paid).
-  (AdaptTable does ship opt-in single-cell editing — see
-  [Inline cell editing](./cell-editing.md).)
-- You're not on React → TanStack Table (multi-framework).
-- You need spreadsheet-grade enterprise features like pivoting, Excel fill
-  handles, or range selection _today_.
+- You want a mature, deeply integrated spreadsheet-analytics product and are
+  happy to licence it → **AG Grid Enterprise** or **MUI X Premium**. Their pivot
+  UI, tool panels and range tooling arrive as one assembled surface you switch
+  on. AdaptTable ships the same capabilities under MIT —
+  [pivoting](./pivot.md), [cell-range selection, range clipboard and the fill
+  handle](./cell-navigation.md), [tree data](./tree-data.md),
+  [inline editing](./cell-editing.md) and
+  [Excel (.xlsx) export](./customization.md#export) — but as parts you compose,
+  with their prerequisites stated, rather than one spreadsheet product.
+- You're not on React → **TanStack Table** (multi-framework). AdaptTable is
+  React-only.
+- You want the table to draw its own look rather than your design system's.
+  Every AdaptTable adapter renders your UI kit's real components, which is the
+  whole point of it — and the wrong trade if you would rather not own the
+  theming at all.
 
 ---
 
@@ -9369,8 +9471,14 @@ libraries.
 | i18n + **RTL / Arabic** first-class            |  partial  |          ✗           |         ✗         |    partial     |           **✓**           |
 | Dark mode                                      |     ✓     |         n/a          |         ✓         |       ✓        |      **✓ seamless**       |
 | MIT / free                                     | open-core |          ✓           |         ✓         |   open-core    |           **✓**           |
+| Pivoting                                       | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    | **✓ engine + panel, MIT** |
+| Cell-range selection                           | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    |  **✓ MIT (cell nav on)**  |
+| Fill handle (drag to fill)                     | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    | **✓ MIT (cell nav+edit)** |
+| Clipboard copy / paste of a range              | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    | **✓ MIT (paste writes)**  |
+| Excel (.xlsx) export                           | ✓ (paid)  |          ✗           |         ✗         |    ✓ (paid)    |         **✓ MIT**         |
+| Tree data (self-referencing rows)              | ✓ (paid)  |  build it yourself   |         ✗         |    ✓ (paid)    |         **✓ MIT**         |
 
-<sub>Comparison as of July 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
+<sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
 ## Head-to-head
 
@@ -9389,13 +9497,15 @@ the escape hatch.
 
 ### AdaptTable vs AG Grid
 
-AG Grid is the enterprise heavyweight — pivoting, range selection, Excel-style
-editing. Much of that power lives in the paid Enterprise tier, and it renders
-its own look rather than your design system's. AdaptTable is MIT and free
-end to end (including server data and infinite scroll) and renders as your UI
-kit's real components. Reach for AG Grid when you need a spreadsheet-grade
-enterprise grid today; reach for AdaptTable for application data tables that
-match your app and stay free.
+AG Grid is the enterprise heavyweight, and its spreadsheet stack is the more
+integrated one. It puts pivoting, range selection, the fill handle, tree data,
+clipboard operations and Excel export in the paid Enterprise tier, and it
+renders its own look rather than your design system's. AdaptTable ships those
+same capabilities under MIT — assembled from parts rather than one spreadsheet
+surface — and is free end to end, server data and infinite scroll included,
+rendering as your UI kit's real components. Reach for AG Grid when you want that
+integrated spreadsheet product and are happy to licence it; reach for AdaptTable
+for application data tables that match your app and stay free.
 
 → [Migrate from ag-Grid](./migrate-from-ag-grid.md) (CRUD tables only — the
 guide starts with when to stay).
@@ -9471,8 +9581,11 @@ matches unstyled feature-for-feature.
 
 ## When another library may fit better
 
-- You need a heavyweight enterprise grid with pivoting, range selection, and
-  Excel-style editing today → **AG Grid** / **MUI X DataGrid (paid)**.
+- You want a mature, deeply integrated spreadsheet-analytics product and are
+  happy to licence it → **AG Grid Enterprise** / **MUI X Premium**. AdaptTable
+  has pivoting, range selection, the fill handle, clipboard and Excel export
+  under MIT, but they are assembled from parts rather than one spreadsheet
+  surface.
 - You're on a framework other than React → **TanStack Table** (multi-
   framework). AdaptTable is React-only.
 - You need a spreadsheet-like editing surface today, not a responsive data
@@ -9797,11 +9910,7 @@ function PeopleTable({ people }: { people: Person[] }) {
       rowKey={(r) => r.id}
       enableColumnMenu // show/hide, reorder, pin — no Pro licence
       resizableColumns
-      bulkActions={
-        [
-          /* … turns on multi-row selection */
-        ]
-      }
+      bulkActions={[/* … turns on multi-row selection */]}
       columns={[
         { key: "name", sortable: true },
         { key: "role" },
@@ -10086,9 +10195,9 @@ All verifiable as of mid-2026:
 - **Version lock**: peer dependencies require `@mui/material ^5.11` — npm
   refuses clean installs on MUI v6/v7, and React 19 is outside the peer range.
   Your table shouldn't decide your framework versions.
-- **Weight**: ~102 kB gzipped with 18 runtime dependencies (it bundles
-  drag-and-drop, print, and CSV machinery whether you use them or not).
-  AdaptTable core + the MUI adapter is ~51 kB min+gzip, tree-shaken.
+- **Weight**: 18 runtime dependencies, and drag-and-drop, print and CSV
+  machinery ship whether you use them or not — there is no opting out of a
+  feature you never turned on.
 - **No bundled types**: TypeScript definitions live in community
   `@types/mui-datatables` and can drift. AdaptTable is TypeScript-first.
 
@@ -10295,11 +10404,15 @@ is the closer fit):
   dialog engine. Multi-field forms still go through `rowActions` + your
   own UI, with the built-in `confirm` seam for destructive actions.
 - **Drag-to-group aggregation** (`options.grouping`) — AdaptTable ships
-  single-level [row grouping](./row-grouping.md) (`groupBy` + optional
-  `groupAggregates`); there is no drag-a-column-to-group UI, so wire your
-  own control to `groupBy` if you need that gesture.
-- **Tree data** (`parentChildData`) — not supported.
-- **PDF export button** — AdaptTable ships a headless CSV helper only.
+  [row grouping](./row-grouping.md) at any depth (`groupBy` takes one key or an
+  ordered list, plus optional `groupAggregates`); there is no
+  drag-a-column-to-group UI, so wire your own control to `groupBy` if you need
+  that gesture.
+- **Tree data** (`parentChildData`) — [`getParentId`](./tree-data.md) is the
+  same idea: a flat list with a parent column, rendered as a hierarchy.
+- **PDF export button** — the export button takes a writer, so
+  `pdfWriter` from `@adapttable/core/pdf` makes it a PDF button. See
+  [PDF export](./export-pdf.md).
 
 What's left — sorted, filtered, searched, paginated, selectable CRUD list
 tables with remote data — is the majority use case, and it maps cleanly.
@@ -10350,7 +10463,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | `options.columnResizable`                            | `resizableColumns`                                    | —                                                                    |
 | `options.fixedColumns: { left, right }`              | column pinning via `columnLayout` / Columns menu      | Logical sides — RTL-correct.                                         |
 | `options.padding: "dense"`                           | `density="compact"`                                   | —                                                                    |
-| `options.exportButton`                               | `exportCsv` / `rowsToCsv` + `downloadCsv`             | Built-in CSV button or headless helper; PDF is out of scope.         |
+| `options.exportButton`                               | `exportCsv` / `rowsToCsv` + `downloadCsv`             | Built-in button; the writer picks CSV, Excel or PDF.                 |
 | `options.maxBodyHeight`                              | `maxHeight`                                           | Enables the scroll box + sticky pinning.                             |
 | `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))      | Flat label object; presets for 17 locales incl. RTL.                 |
 | `isLoading`                                          | `loading`                                             | —                                                                    |
@@ -10490,42 +10603,50 @@ function PeopleTable({ people }: { people: Person[] }) {
 
 ---
 
-# Migrate from AG Grid to AdaptTable — CRUD tables, 300 kB lighter, MIT
+# Migrate from AG Grid to AdaptTable — CRUD tables in your UI kit, MIT
 
 ▶ **See it before you install:** [the live demo](https://orwa-mahmoud.github.io/adapttable/demo/) — flip between Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and Tailwind on the same data.
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.
-If your app uses pivoting, tree data, cell/range selection, or Excel
-export, keep AG Grid (those are its Enterprise tier, from
-$999/developer, and they're genuinely good). AdaptTable doesn't do analytics
-grids, and pretending otherwise would waste your week.
+
+The honest line is not a feature list. Pivoting, tree data, cell-range
+selection, the fill handle, clipboard range operations and Excel export all
+ship in AdaptTable, under MIT, where AG Grid puts them in its paid Enterprise
+tier — $999/developer when we checked in August 2026. What AG Grid has that
+AdaptTable does not is **integration**: one spreadsheet surface, tool panels
+already assembled, and a decade of behaviour at the edges of it. In AdaptTable
+those are parts you compose — a pivot engine and its panel, a range model, a
+side-panel frame you fill.
+
+So stay on AG Grid when the grid IS the product: an analytics surface where
+users pivot, drill and drag fields around all day, or a workflow that leans on
+Excel-style editing at scale. That week is not worth spending, and the licence
+buys something real.
 
 This page is for the other — much larger — group: teams running **ordinary
-CRUD tables** on AG Grid Community, paying for spreadsheet power they don't
-use in three currencies: **bundle size** (the full Community setup is ~346 kB
-min+gzip of grid code vs ~51 kB for AdaptTable core + an adapter), **churn**
-(a new AG Grid major about every 6 months — v32.2 rewrote the selection API,
-v33 made module registration and the Theming API mandatory, v36 overhauled
-the DOM and CSS class names), and **look** (AG Grid renders its own theme;
-AdaptTable renders _your_ UI kit's real components).
+CRUD tables** on AG Grid Community, paying for spreadsheet power they don't use
+in two currencies: **churn** (a new AG Grid major about every 6 months — v32.2
+rewrote the selection API, v33 made module registration and the Theming API
+mandatory, v36 overhauled the DOM and CSS class names), and **look** (AG Grid
+renders its own theme; AdaptTable renders _your_ UI kit's real components).
 
 ## When to stay on AG Grid
 
-- Pivoting / aggregation dashboards (single-level [row grouping](./row-grouping.md)
-  with per-group aggregates IS built in — deep multi-level grouping is not)
-- Tree data, cell/range selection + fill handle, clipboard-heavy workflows
-- Excel export (not just CSV), tool panels / side bar
+- The grid is the product — an analytics surface users pivot and drill all day
 - Excel-style cell editing at scale
+- Assembled tool panels: AdaptTable's `sidePanel` is a frame with tabs that you
+  fill (the pivot, saved-views and filter-tree panels ship; arranging them is
+  yours)
+- Drag-a-column-to-group: AdaptTable groups from `groupBy` — your code or the
+  URL, no drag gesture
 
-All Enterprise features — if you rely on them and they're worth $999/dev to
-you, that's the right tool. Migrate the CRUD tables, keep the analytics grid.
+If you rely on those and the Enterprise licence is worth it to you, that is the
+right tool. Migrate the CRUD tables, keep the analytics grid — they can run side
+by side.
 
 ## What you gain (for CRUD tables)
 
-- **~300 kB lighter** grid code (min+gzip, everything-registered Community
-  vs AdaptTable core + one adapter; AG Grid can shrink with module
-  cherry-picking, but that's work you maintain).
 - **Native look per kit** — MUI tables look like MUI, Mantine like Mantine.
   No Quartz theme to restyle, no CSS class renames on major upgrades.
 - **Declarative instead of imperative** — no `gridRef.current.api.*` calls;
@@ -10656,16 +10777,19 @@ table is your design system's, not a themed grid.
 
 ## Gotchas
 
-- **Don't migrate the analytics grids.** Pivoting, multi-level grouping,
-  tree data, range selection, clipboard, Excel export have no AdaptTable
-  equivalent — that's deliberate scope, not a roadmap gap. (Single-level
-  row grouping with aggregates DID ship — see
-  [Row grouping](./row-grouping.md).)
-- **Cell editing is opt-in, not spreadsheet-grade.** Map AG Grid `editable`
-  columns to `ColumnDef.editable` + table `onCellEdit` (see
-  [Inline cell editing](./cell-editing.md)). Full Excel-style fill-handle /
-  clipboard editing stays out of scope — use `rowActions` + your own form
-  when you need a multi-field edit dialog.
+- **The analytics features are parts, not a mode.** [Pivoting](./pivot.md) is
+  an engine plus its own panel; [nested grouping](./row-grouping.md) is a list
+  of keys in `groupBy`; [tree data](./tree-data.md) is `getChildren` or
+  `getParentId`; range selection, the fill handle and clipboard operations all
+  need `cellNavigation` armed (see
+  [Cell navigation](./cell-navigation.md)). Each works — none is the single
+  spreadsheet surface AG Grid hands you, so budget assembly time rather than a
+  prop rename.
+- **Cell editing is opt-in.** Map AG Grid `editable` columns to
+  `ColumnDef.editable` + table `onCellEdit` (see
+  [Inline cell editing](./cell-editing.md)). For a multi-field edit dialog,
+  `rowActions` + your own form is still the answer — that part AdaptTable
+  deliberately leaves to you.
 - **The imperative API disappears.** Anywhere you called
   `api.getSelectedRows()`, `api.setFilterModel()`, or `api.sizeColumnsToFit()`,
   you now read props/state (`onSelectionChange`, URL-synced filters, column
@@ -10673,9 +10797,11 @@ table is your design system's, not a themed grid.
   stops breaking on majors.
 - **Sorting is opt-in.** AG Grid columns sort by default; AdaptTable columns
   need `sortable: true`.
-- **CSV export is built-in.** Pass `exportCsv` for a toolbar button, or wire
-  `rowsToCsv` / `downloadCsv` to a custom `toolbar` control. (AG Grid's context
-  menu is Enterprise anyway.)
+- **Export is a writer, not three features.** `exportCsv` gives you the toolbar
+  button; the format is whatever writer you hand it — `csvWriter`,
+  `xlsxWriter` from `@adapttable/core/xlsx` for a real spreadsheet, or
+  `pdfWriter` from `@adapttable/core/pdf`. Excel export is AG Grid Enterprise;
+  here it is one import. (Its context menu is Enterprise anyway.)
 - **Row virtualization is opt-in** (`virtualize`) rather than always-on —
   enable it for genuinely large lists; a benchmark lives in the
   [virtualization docs](./virtualization.md).
@@ -10840,14 +10966,15 @@ Given `MAJOR.MINOR.PATCH`:
 - **MAJOR** — breaking changes to the public API. We avoid these; when one is
   unavoidable, it ships in a major with a migration note in the CHANGELOG.
 
-The library packages (`@adapttable/core`, the adapters, and `@adapttable/i18n`)
-each follow [changesets](https://github.com/changesets/changesets) **independently**:
-a package only bumps when a changeset names it. Adapters and `@adapttable/i18n`
-depend on a concrete `@adapttable/core` version at publish time (exact pin), so
-you do not need matching version numbers across kits — install the adapter you
-use and let npm pull the core it was published against. `@adapttable/cli` is a
-scaffolding tool and stays on its own cadence; it is not part of the library
-surface.
+The published packages (`@adapttable/core`, the adapters, `@adapttable/i18n`,
+`@adapttable/server`, and `@adapttable/cli`) each follow
+[changesets](https://github.com/changesets/changesets) **independently**: a
+package only bumps when a changeset names it. Adapters, `@adapttable/i18n`
+and `@adapttable/server` depend on a concrete `@adapttable/core` version at
+publish time (exact pin), so you do not need matching version numbers across
+kits — install the adapter you use and let npm pull the core it was published
+against. `@adapttable/cli` versions on its own cadence; its programmatic API
+is still part of the public surface below.
 
 ## Stability
 
@@ -10877,28 +11004,120 @@ supported major — so a claimed-but-broken version is caught before you hit it:
 
 ## Public API surface
 
-What "the public API" means — the things we commit to keeping stable:
+**What is exported and documented is supported.** Removal or narrowing of
+that surface happens in a major, with a migration note. A symbol tagged
+`@internal` is not the contract even when it appears in the published
+`.d.ts`. The complete name list lives on the [API reference](./api.md);
+this page names every **supported entrypoint** so a derived allowlist
+cannot omit one.
 
-- **`@adapttable/core`** — the `TableSource` contract; the `useFrontendData` /
-  `useQuerySource` / `useServerData` source builders; `useDataTable` and its
-  prop-getter return (`getTableProps`, `getRowProps`, `getHeaderCellProps`,
-  `getSortButtonProps`, `getSearchInputProps`, …); the core types
-  (`ColumnDef`, `RowAction`, `BulkAction`, `TableLabels`, `FilterValue`,
-  `SortDirection`, `Direction`, …); `BaseDataTableProps`; URL-state hooks
-  (`useTableUrlState`, `useColumnLayoutUrlState`, `useSavedViews`) and the
-  injectable `UrlStateAdapter`; column-layout, selection, sorting, pagination,
-  and virtualization hooks; the filter primitives (`countFilters`, chips,
-  range widget); and the i18n-agnostic labels contract.
-- **Adapters** — each `<DataTable>`'s props (extending `BaseDataTableProps`),
-  its `slots` / `classNames` / `toolbar` / `confirm` extension points, and the
-  re-exported source builders.
-- **`@adapttable/i18n`** — the locale presets and direction helpers.
+### `@adapttable/core`
 
-Anything exported but not listed above is **internal machinery** exposed
-incidentally (helpers like `mergeProps`, barrel re-exports of plumbing). It may
-change between minors. If you reach for something outside the surface above,
-prefer the documented escape hatches (`slots`, `classNames`, prop-getters, or
-the headless `useDataTable`) instead.
+The app-facing engine: `TableSource`; the `useFrontendData` /
+`useQuerySource` / `useServerData` source builders; `useDataTable` and its
+prop-getters; `ColumnDef` and the rest of the core types; `BaseDataTableProps`;
+URL-state hooks and `UrlStateAdapter`; column-layout, selection, sorting,
+pagination and virtualization hooks; filter primitives; the labels contract.
+The [API reference](./api.md) lists every export on this entry.
+
+### `@adapttable/core/features`
+
+Canonical home of the feature factories (`rowReorder`, `savedViews`,
+`grouping`, `editing`, `virtualize`, `columnMenu`, `cellNavigation`,
+`applyTableFeatures`, …). Kit subpaths re-export this entry; values stay
+off the core main barrel.
+
+### `@adapttable/core/adapter`
+
+The supported **adapter-author** boundary. Eighth and ninth adapters are
+built from this entry — `useDataTableShell`, chrome components, slot
+contracts, pager and pin math, announcers — with the same SemVer promise as
+the main entry. App code rarely imports it; reaching for it is choosing
+that contract, not an undocumented escape. There is no private channel
+behind it.
+
+### Focused core subpaths
+
+Each is a published, supported entry — not an implementation detail:
+
+| Entry                        | What it is                                                                 |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/core/formula`   | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
+| `@adapttable/core/pdf`       | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
+| `@adapttable/core/pivot`     | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
+| `@adapttable/core/query`     | The query model without React — codecs a backend can load                  |
+| `@adapttable/core/sparkline` | Sparkline column helper                                                    |
+| `@adapttable/core/stream`    | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
+| `@adapttable/core/xlsx`      | Spreadsheet export writer                                                  |
+
+### Adapter main entries
+
+Published kits: `@adapttable/mantine`, `@adapttable/mui`,
+`@adapttable/chakra`, `@adapttable/antd`, `@adapttable/radix`,
+`@adapttable/base-ui`, `@adapttable/unstyled`, `@adapttable/shadcn`.
+
+Each main entry exports `<DataTable>` with `DataTableProps` /
+`DataTablePropsBase` / `DataTableSlots` / `SavedViewsMenuProps`, plus the
+documented kit extras (Mantine chrome components, unstyled/shadcn building
+blocks, Radix and Base UI accent unions, unstyled `IconProps`, shadcn's
+`shadcnClassNames`). Styled kits do **not** expose every internal node —
+their `classNames` are the documented wrapper hooks; per-node classes and
+`data-adapttable-part` are the unstyled/shadcn contract.
+
+### Kit feature subpaths
+
+The same nine paths on every published adapter, re-exporting
+`@adapttable/core/features` (and the pivot panel on `/pivot`):
+
+`/features`, `/row-reorder`, `/saved-views`, `/grouping`, `/editing`,
+`/virtualize`, `/column-menu`, `/cell-navigation`, `/pivot`.
+
+Import from the kit you mount (`@adapttable/mantine/row-reorder`, …) so the
+factory and the table share one package.
+
+### `@adapttable/i18n`
+
+Locale presets (`en`, `ar`, …, `zhTW`), `getLabels` / `hasLocale` /
+`locales` / `LocaleKey`, and direction helpers (`getDirection`,
+`isRtlLocale`, `primarySubtag`, `RTL_LANGUAGES`).
+
+### `@adapttable/server`
+
+`parseTableQuery` against a `QuerySchema`, returning `ServerTableQuery` and
+`QueryRejection[]`. `QueryInput` is a `Request`, `URL`, query string or
+`URLSearchParams`.
+
+### `@adapttable/cli`
+
+The `adapttable init` binary, and the programmatic surface:
+`detectKit`, `runInit`, `choosePackageManager`, `installCommand`,
+`scaffoldFiles`, plus `KITS` / `Kit` / `KitInfo` / `SHADCN`,
+`packagesFor` / `mergeDependencies`, `starterComponent` / `ScaffoldFile` /
+`STARTER_PATH`, `PackageManager`, `InitError`, `InitOptions` /
+`InitResult` / `InitIO`. `./package.json` and the binary path are not typed
+entrypoints.
+
+## Customization ladder
+
+Four rungs, each more surface than the last. A styled adapter does not
+pretend to be the last two:
+
+1. **Kit theming and adapter defaults** — the table looks like the rest of
+   the app because it is built from that kit. Theme through the kit
+   provider; no AdaptTable class map required.
+2. **Structural slots, `classNames`, and render callbacks** — replace a
+   region (`slots.empty`, `toolbar`, `confirm`) or restyle the hooks the
+   kit documents. Styled adapters expose wrapper hooks (`root`, `toolbar`,
+   `table`, `card`, `footer`), not every cell and icon.
+3. **Unstyled / shadcn per-node classes** — `@adapttable/unstyled` (and
+   `@adapttable/shadcn` on top of it) expose a `classNames` key and a
+   stable `data-adapttable-part` on every rendered node. That part map is
+   the contract; see [customization](./customization.md).
+4. **Headless markup** — `useDataTable` and the prop-getters, or a custom
+   adapter over `@adapttable/core/adapter`. You own every pixel.
+
+Reach for the lowest rung that does the job. Jumping to `/adapter` or
+headless getters to restyle a button is using the wrong contract.
 
 ## Deprecation policy
 

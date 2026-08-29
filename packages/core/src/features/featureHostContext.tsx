@@ -10,7 +10,11 @@ export const FeatureHostContext = createContext<FeatureHostState | undefined>(
   undefined
 );
 
-/** Provide the host this table owns to every hook under it. */
+/**
+ * Provide the host this table owns to every hook under it.
+ *
+ * @public
+ */
 export function FeatureHostProvider({
   host,
   children,
@@ -25,9 +29,12 @@ export function FeatureHostProvider({
   );
 }
 
-/** The host of the nearest table, or nothing outside one. */
+/**
+ * The host of the nearest table, or nothing outside one.
+ *
+ * @public
+ */
 export function useFeatureHost<TRow = unknown>():
-  | FeatureHostState<TRow>
-  | undefined {
+  FeatureHostState<TRow> | undefined {
   return useContext(FeatureHostContext) as FeatureHostState<TRow> | undefined;
 }

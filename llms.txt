@@ -70,8 +70,8 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 - [React table row and column spanning — getCellSpan](https://orwa-mahmoud.github.io/adapttable/row-spanning/): colSpan and rowSpan per cell, covered cells omitted, CSV writes the origin once
 - [React table full-width and separator rows — extraRows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/): host-injected slots spliced by beforeRowId, separator or one spanning cell, mobile cards keep the same slots
 - [React table row styling and heights — rowStyle, rowHeight](https://orwa-mahmoud.github.io/adapttable/row-styling/): conditional inline style and per-row height, variable-height virtualizer, desktop and mobile cards
-- [React table keyboard navigation — arrow keys & ARIA grid](https://orwa-mahmoud.github.io/adapttable/cell-navigation/): one tab stop, absolute aria-rowindex under virtualization, screen-reader announcements
-- [React table row grouping — single-level groupBy & aggregates](https://orwa-mahmoud.github.io/adapttable/row-grouping/): per-group subtotals sharing the summaryRow mapper, expand/collapse, frontend tier only
+- [React table keyboard navigation — arrow keys, range selection & fill handle](https://orwa-mahmoud.github.io/adapttable/cell-navigation/): one tab stop, absolute aria-rowindex under virtualization, screen-reader announcements, cell-range selection, clipboard copy/paste of a range, drag-to-fill
+- [React table row grouping — nested groupBy & aggregates](https://orwa-mahmoud.github.io/adapttable/row-grouping/): one key or an ordered list, per-group subtotals sharing the summaryRow mapper, expand/collapse, frontend tier only
 - [React pivot table — rows, columns and measures](https://orwa-mahmoud.github.io/adapttable/pivot/): optional `@adapttable/core/pivot` entry, multiple dimensions on both axes, subtotals and collapsible groups
 - [React table formulas — spreadsheet columns](https://orwa-mahmoud.github.io/adapttable/formulas/): optional `@adapttable/core/formula` entry, a parsed grammar that never reaches eval, tagged values so an error is not a string
 - [React table tree data — hierarchical rows with expand/collapse](https://orwa-mahmoud.github.io/adapttable/tree-data/): getChildren or getParentId, per-level indent, mobile cards keep the hierarchy
@@ -100,7 +100,7 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 - [TanStack Table alternative — headless + ready UI kits](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/): keep headless control, drop the row models, toolbar, pagination and URL wiring (incl. react-table v7)
 - [mui-datatables alternative — maintained, MUI v6+, React 19](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-datatables/): unmaintained since Jan 2023, MUI v5 lock — column/options mapping, onTableChange → one query callback
 - [material-table alternative — modern MUI, still MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-material-table/): MUI v4-era dormant library — columns, remote data query fn, actions mapping, what doesn't map
-- [ag-Grid alternative for CRUD — lighter, native UI kits, MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-ag-grid/): CRUD tables only — ~300 kB lighter, native kit look, free master-detail/filters; honest "stay on ag-Grid" list
+- [ag-Grid alternative for CRUD — native UI kits, MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-ag-grid/): CRUD tables only — pivoting, tree data, range selection and Excel export under MIT, native kit look, free master-detail/filters; honest "stay on ag-Grid" list
 
 ## Demo
 

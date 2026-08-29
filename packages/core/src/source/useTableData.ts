@@ -34,7 +34,13 @@ import {
   type UseServerDataOptions,
 } from "./useServerData";
 
-/** Options for {@link useTableData}. */
+export type { UseServerDataOptions };
+
+/**
+ * Options for {@link useTableData}.
+ *
+ * @public
+ */
 export interface UseTableDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   "urlAdapter" | "urlSync" | "defaults" | "urlKey"
@@ -82,7 +88,7 @@ export interface UseTableDataOptions<TRow> extends Pick<
   locale?: string;
   /**
    * Server tier: what this endpoint can answer. `supports.facets`
-   * unlocks `query.facets` (checklist keys, or {@link facetKeys}).
+   * unlocks `query.facets` (checklist keys, or `facetKeys`).
    */
   supports?: QuerySupport;
   /**
@@ -96,7 +102,11 @@ export interface UseTableDataOptions<TRow> extends Pick<
   featureHost?: FeatureHostState;
 }
 
-/** Result of {@link useTableData}. */
+/**
+ * Result of {@link useTableData}.
+ *
+ * @public
+ */
 export interface UseTableDataResult<TRow> {
   /** The resolved source, whichever tier provided it. */
   source: TableSource<TRow>;
@@ -114,6 +124,8 @@ type DataTier = "source" | "server" | "frontend";
  * inference trigger respectively.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export type DataModeProps<TRow> =
   | {
@@ -214,7 +226,11 @@ function useQueryNotification<TRow>(
   }, [queryKey]);
 }
 
-/** True when the `filters` prop is the declarative array form. */
+/**
+ * True when the `filters` prop is the declarative array form.
+ *
+ * @public
+ */
 export function isDeclarativeFilters<TRow>(
   filters: readonly FilterDef<TRow>[] | ReactNode
 ): filters is readonly FilterDef<TRow>[] {
@@ -235,6 +251,8 @@ export function isDeclarativeFilters<TRow>(
  * regardless of tier.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function useTableData<TRow>(
   options: UseTableDataOptions<TRow>

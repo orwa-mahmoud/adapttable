@@ -1,6 +1,10 @@
 import { useCallback, useRef, useState } from "react";
 
-/** Result of {@link useHorizontalOverflow}. */
+/**
+ * Result of {@link useHorizontalOverflow}.
+ *
+ * @public
+ */
 export interface HorizontalOverflow<E extends HTMLElement> {
   /** Callback ref for the wrapper element to measure. */
   ref: (node: E | null) => void;
@@ -15,6 +19,8 @@ export interface HorizontalOverflow<E extends HTMLElement> {
  * container — an unconditional `overflow-x: auto` would make the wrapper a
  * scroll container and trap page-scroll sticky headers even when nothing
  * overflows. Under SSR (no `ResizeObserver`) it stays `false`.
+ *
+ * @public
  */
 export function useHorizontalOverflow<
   E extends HTMLElement,

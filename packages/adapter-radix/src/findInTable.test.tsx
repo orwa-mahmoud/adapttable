@@ -1,5 +1,5 @@
 import { Theme } from "@radix-ui/themes";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -49,7 +49,7 @@ describe("find in table (radix)", () => {
 
   it("opens on Ctrl/Cmd+F and marks what it finds", () => {
     table({ findInTable: true });
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     fireEvent.keyDown(cell(0, 0), { key: "f", ctrlKey: true });
     expect(bar()).not.toBeNull();
     fireEvent.change(input(), { target: { value: "ace" } });
@@ -61,7 +61,7 @@ describe("find in table (radix)", () => {
 
   it("walks the hits and wraps", () => {
     table({ findInTable: true });
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     fireEvent.keyDown(cell(0, 0), { key: "f", ctrlKey: true });
     fireEvent.change(input(), { target: { value: "e" } });
     const total = document.querySelectorAll("[data-cell-match]").length;
@@ -74,7 +74,7 @@ describe("find in table (radix)", () => {
 
   it("closes on Escape, leaving no cell marked", () => {
     table({ findInTable: true });
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     fireEvent.keyDown(cell(0, 0), { key: "f", ctrlKey: true });
     fireEvent.change(input(), { target: { value: "ace" } });
     fireEvent.keyDown(input(), { key: "Escape" });
@@ -84,7 +84,7 @@ describe("find in table (radix)", () => {
 
   it("leaves Ctrl/Cmd+F to the browser without the prop", () => {
     table();
-    cell(0, 0).focus();
+    act(() => cell(0, 0).focus());
     fireEvent.keyDown(cell(0, 0), { key: "f", ctrlKey: true });
     expect(bar()).toBeNull();
   });

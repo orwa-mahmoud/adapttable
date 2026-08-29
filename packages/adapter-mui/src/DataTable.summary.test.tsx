@@ -76,9 +76,12 @@ function renderHarness(props: Parameters<typeof Harness>[0] = {}, url = "") {
   );
 }
 
-/** The header's sort label (its accessible name may gain a chain badge). */
+/**
+ * The header's sort label. Its accessible name is "Sort by: <column>", and it
+ * may gain a chain badge after that, so the column is matched anywhere in it.
+ */
 function sortButton(label: string) {
-  return screen.getByRole("button", { name: new RegExp(`^${label}`, "i") });
+  return screen.getByRole("button", { name: new RegExp(label, "i") });
 }
 
 const sumAmount = (rows: readonly Row[]) =>

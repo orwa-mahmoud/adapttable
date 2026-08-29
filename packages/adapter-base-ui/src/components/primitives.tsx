@@ -132,8 +132,11 @@ export function Checkbox({
 
 /** One `<option>`-equivalent entry for {@link NativeSelect}. */
 export interface SelectOption {
+  /** Value stored when this option is chosen. */
   value: string;
+  /** Caption shown for the entry. */
   label: ReactNode;
+  /** Whether the control is offered but not available. */
   disabled?: boolean;
 }
 
@@ -200,9 +203,16 @@ export function NativeSelect({
     <Select.Root
       value={selected}
       items={items}
-      onValueChange={(next) =>
-        onValueChange(next === EMPTY_VALUE || next == null ? "" : String(next))
-      }
+      onValueChange={(next, details) => {
+        // This select is controlled by its caller, so the only value change
+        // worth forwarding is one the user made. The kit also reconciles the
+        // value itself when the item registry changes shape, reported as
+        // `reason: "none"` — with an options list that depends on the current
+        // value (the rows-per-page sizes do), that reconciliation lands after
+        // a real selection and reverts it to the value the select mounted with.
+        if (details.reason === "none") return;
+        onValueChange(next === EMPTY_VALUE || next == null ? "" : String(next));
+      }}
     >
       <Select.Trigger
         aria-label={ariaLabel}

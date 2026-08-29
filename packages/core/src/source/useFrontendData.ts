@@ -66,7 +66,11 @@ function warnUnresolvableSort<TRow>(
   }
 }
 
-/** Options for {@link useFrontendData}. */
+/**
+ * Options for {@link useFrontendData}.
+ *
+ * @public
+ */
 export interface UseFrontendDataOptions<TRow> extends Pick<
   UseTableUrlStateOptions,
   | "urlAdapter"
@@ -123,12 +127,20 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   forceMobile?: boolean;
 }
 
-/** Default searchable-text projector: flatten a row's own values. */
+/**
+ * Default searchable-text projector: flatten a row's own values.
+ *
+ * @public
+ */
 export function defaultSearchText<TRow>(row: TRow): string {
   return incrementalSearchText(row);
 }
 
-/** Default row id: `String(row.id)` when the row has a string/number id. */
+/**
+ * Default row id: `String(row.id)` when the row has a string/number id.
+ *
+ * @public
+ */
 export function defaultFrontendRowId<TRow>(row: TRow): string {
   if (row && typeof row === "object" && "id" in row) {
     const id = row.id;
@@ -150,6 +162,8 @@ export function defaultFrontendRowId<TRow>(row: TRow): string {
  * @typeParam TRow - The row item type.
  * @param options - See {@link UseFrontendDataOptions}.
  * @returns A {@link TableSource} over the in-memory data.
+ *
+ * @public
  */
 export function useFrontendData<TRow>(
   options: UseFrontendDataOptions<TRow>

@@ -3,13 +3,23 @@ import { useCallback, useState } from "react";
 
 import { isRtlElement } from "../layout/writingDirection";
 
-/** MIME type carrying the dragged column key during a reorder drag. */
+/**
+ * MIME type carrying the dragged column key during a reorder drag.
+ *
+ * @public
+ */
 export const COLUMN_DND_MIME = "application/x-adapttable-column";
 
-/** Props that make a whole menu ROW draggable (so the browser's drag image is
- * the full row — you see the column move). Pair with {@link columnDropProps}. */
+/**
+ * Props that make a whole menu ROW draggable (so the browser's drag image is
+ * the full row — you see the column move). Pair with `columnDropProps`.
+ *
+ * @public
+ */
 export interface ColumnRowDragProps {
+  /** Always true — the whole row is the drag source. */
   draggable: true;
+  /** Starts the drag and puts the column key on the dataTransfer. */
   onDragStart: (event: DragEvent<HTMLElement>) => void;
 }
 
@@ -18,6 +28,8 @@ export interface ColumnRowDragProps {
  * matching the native drag-image so the reorder feels physical.
  *
  * @param key - Column key being reordered.
+ *
+ * @public
  */
 export function columnRowDragProps(key: string): ColumnRowDragProps {
   return {
@@ -44,12 +56,21 @@ export function columnRowDragProps(key: string): ColumnRowDragProps {
   };
 }
 
-/** Props for a small, focusable reorder grip — keyboard a11y for the row drag. */
+/**
+ * Props for a small, focusable reorder grip — keyboard a11y for the row drag.
+ *
+ * @public
+ */
 export interface ColumnReorderKeyProps {
+  /** `button`, so the grip is announced as an action. */
   role: "button";
+  /** Always 0 — the grip is reachable by Tab. */
   tabIndex: 0;
+  /** The grip's accessible name, naming the column it moves. */
   "aria-label": string;
+  /** Marks the element as a reorder grip, for styling and tests. */
   "data-adapttable-grip": "";
+  /** Moves the column on the arrow keys. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
@@ -72,6 +93,8 @@ function isRtl(grip: HTMLElement | null): boolean {
  * @param index - The column's current index in the full order.
  * @param move - Layout mutator that moves a column to a new index.
  * @param label - Accessible label for the grip.
+ *
+ * @public
  */
 export function columnReorderKeyProps(
   key: string,
@@ -101,9 +124,15 @@ export function columnReorderKeyProps(
   };
 }
 
-/** Props for a row that accepts a dropped column, moving it to this index. */
+/**
+ * Props for a row that accepts a dropped column, moving it to this index.
+ *
+ * @public
+ */
 export interface ColumnDropProps {
+  /** Marks the row as a valid drop target while a column is over it. */
   onDragOver: (event: DragEvent<HTMLElement>) => void;
+  /** Completes the reorder. */
   onDrop: (event: DragEvent<HTMLElement>) => void;
 }
 
@@ -113,6 +142,8 @@ export interface ColumnDropProps {
  *
  * @param index - Target index the dragged column moves to.
  * @param move - Layout mutator that moves a column to a new index.
+ *
+ * @public
  */
 export function columnDropProps(
   index: number,
@@ -133,7 +164,11 @@ export function columnDropProps(
   };
 }
 
-/** Indicator attributes for a column-menu row during a reorder drag. */
+/**
+ * Indicator attributes for a column-menu row during a reorder drag.
+ *
+ * @public
+ */
 export interface ColumnDragRowAttrs {
   /** Present on the row being dragged (kits dim it). */
   "data-dragging"?: "";
@@ -141,20 +176,24 @@ export interface ColumnDragRowAttrs {
   "data-drop"?: "before" | "after";
 }
 
-/** Live drag state + composed prop builders from {@link useColumnDragState}. */
+/**
+ * Live drag state + composed prop builders from `useColumnDragState`.
+ *
+ * @public
+ */
 export interface ColumnDragState {
   /** Key currently being dragged, or `null` outside a drag. */
   draggingKey: string | null;
   /** Hovered drop index, or `null`. */
   overIndex: number | null;
-  /** Drag props for a row — {@link columnRowDragProps} + state tracking. */
+  /** Drag props for a row — `columnRowDragProps` + state tracking. */
   rowDragProps: (
     key: string,
     index: number
   ) => ColumnRowDragProps & {
     onDragEnd: () => void;
   };
-  /** Drop props for a row — {@link columnDropProps} + hover tracking. */
+  /** Drop props for a row — `columnDropProps` + hover tracking. */
   dropProps: (
     index: number,
     move: (key: string, toIndex: number) => void
@@ -170,6 +209,8 @@ export interface ColumnDragState {
  * the dragged row carries `data-dragging` (dim it) and the hovered target
  * carries `data-drop="before" | "after"` (draw an insertion line on that
  * edge). State clears on drop, drag end, and drag cancel alike.
+ *
+ * @public
  */
 export function useColumnDragState(): ColumnDragState {
   const [drag, setDrag] = useState<{ key: string; from: number } | null>(null);

@@ -11,7 +11,11 @@ import {
 } from "../index";
 import { renderChakra } from "../test-utils";
 import { FilterTreeBuilder } from "./FilterTreeBuilder";
-import { FilterHeaderControl, FilterHeaderRow } from "./kitControls";
+import {
+  FilterHeaderControl,
+  FilterHeaderRow,
+  FilterHeaderTrigger,
+} from "./kitControls";
 
 interface Row {
   name: string;
@@ -22,8 +26,10 @@ interface Row {
   hired: string;
 }
 
+const NAME_DEF: FilterDef<Row> = { key: "name", type: "text", label: "Name" };
+
 const DEFS: FilterDef<Row>[] = [
-  { key: "name", type: "text", label: "Name" },
+  NAME_DEF,
   {
     key: "team",
     type: "select",
@@ -74,6 +80,23 @@ function HeaderHarness({ extra: initial = {} }: { extra?: ExtraFilters }) {
         />
       </thead>
     </table>
+  );
+}
+
+function TriggerHarness({ extra: initial = {} }: { extra?: ExtraFilters }) {
+  const [extra, setExtra] = useState<ExtraFilters>(initial);
+  return (
+    <FilterHeaderTrigger
+      def={NAME_DEF}
+      source={{
+        extra,
+        setExtra: (key: string, value: FilterValue) =>
+          setExtra((prev) => ({ ...prev, [key]: value })),
+        setExtras: (patch: ExtraFilters) =>
+          setExtra((prev) => ({ ...prev, ...patch })),
+      }}
+      labels={defaultLabels}
+    />
   );
 }
 
@@ -184,4 +207,45 @@ describe("kit filter tree (chakra)", () => {
     fireEvent.change(screen.getByLabelText("N"), { target: { value: "14" } });
     expect(screen.getByLabelText("N")).toHaveValue(14);
   });
+});
+
+/**
+ * The funnel on a column header claims "this column is filtered". A funnel that
+ * lights up for a value the user cleared is worse than no funnel at all, so the
+ * emptiness rules are asserted one shape at a time rather than trusted.
+ */
+describe("kit header filter trigger (chakra)", () => {
+  const trigger = () =>
+    document.querySelector('[data-adapttable-part="filter-header-trigger"]')!;
+
+  it("stays quiet with no filter at all", () => {
+    renderChakra(<TriggerHarness />);
+
+    expect(trigger()).not.toHaveAttribute("data-active");
+  });
+
+  it.each([
+    ["an empty string", ""],
+    ["a null", null],
+    ["an empty array", [] as string[]],
+  ])("treats %s as no filter", (_name, value) => {
+    renderChakra(<TriggerHarness extra={{ name: value as FilterValue }} />);
+
+    expect(trigger()).not.toHaveAttribute("data-active");
+  });
+
+  it.each([
+    ["a typed value", "Ada"],
+    ["a non-empty array", ["a"] as string[]],
+  ])("marks itself active for %s", (_name, value) => {
+    renderChakra(<TriggerHarness extra={{ name: value as FilterValue }} />);
+
+    expect(trigger()).toHaveAttribute("data-active");
+  });
+
+  // Opening the popover, and picking inside the multi-select widget, both need
+  // the browser pointer and focus machinery Chakra's Ark overlays rely on — the
+  // same gestures its filter-overlay suite has to skip. What jsdom can prove
+  // here is the emptiness rules above, which are the part that decides whether
+  // the funnel lies.
 });

@@ -689,8 +689,7 @@ describe("useDesktopTableAssembly coverage paths", () => {
       expect(pinned.wiring.bodyPinStyle("name")?.position).toBe("sticky");
       expect(pinned.wiring.rowDomProps["data-clickable"]).toBe("");
       const enter = pinned.wiring.rowDomProps.onMouseEnter as
-        | (() => void)
-        | undefined;
+        (() => void) | undefined;
       enter?.();
       expect(prefetch).toHaveBeenCalled();
     }

@@ -8,6 +8,15 @@ import { builtAdapters } from "../apps/showcase/matrix.mjs";
  * them, and widens to the whole grid as the rest arrive.
  */
 const KIT = builtAdapters()[0]!.key;
+/**
+ * Kits whose column axis can be windowed. antd renders rows inside its own
+ * fixed-height scroller and never hands core a box to measure, so
+ * `virtualizeColumns` is inert there — its opposite contract (every column in
+ * the DOM, no count, no per-cell index) is pinned in its own suite instead.
+ */
+const WINDOWING_KITS = builtAdapters()
+  .map((adapter) => adapter.key)
+  .filter((kit) => kit !== "antd");
 
 /**
  * The scale demo windows tens of thousands of rows through the real Mantine
@@ -36,6 +45,96 @@ test.describe("scale — virtualization", () => {
       .toBeLessThan(120);
     expect(await rows.count()).toBeGreaterThan(0);
   });
+
+  /**
+   * A windowed table has a few dozen rows in the DOM and tens of thousands in
+   * the dataset. jsdom can prove the attributes exist; only a real browser
+   * proves they survive a live virtualizer as the window moves.
+   */
+  test("states the real dataset size while the DOM holds a window", async ({
+    page,
+  }) => {
+    await page.goto(`/${KIT}/scale/`);
+    const table = page.locator("table").first();
+    await expect(table).toBeVisible();
+    // Cell navigation is off on this page, so nothing claims the grid contract.
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    // The default scale dataset is 50,000 rows.
+    await expect(table).toHaveAttribute("aria-rowcount", "50000");
+
+    const rows = page.locator('[data-adapttable-part="row"]');
+    await expect(rows.first()).toHaveAttribute("aria-rowindex", "1");
+    expect(await rows.count()).toBeLessThan(120);
+
+    // The window advances; the indices count the dataset, not the DOM.
+    await page.mouse.wheel(0, 6000);
+    await expect
+      .poll(
+        async () => Number(await rows.first().getAttribute("aria-rowindex")),
+        { timeout: 5000 }
+      )
+      .toBeGreaterThan(1);
+    // And the total never moves with the window.
+    await expect(table).toHaveAttribute("aria-rowcount", "50000");
+  });
+
+  /**
+   * The horizontal axis fails the same way as the vertical one and needs the
+   * same answer. jsdom can show the attributes exist; only a real browser
+   * measures a scroll box, which is what arms the column window at all.
+   */
+  for (const kit of WINDOWING_KITS) {
+    test(`${kit}: states the real column count while the DOM holds a window`, async ({
+      page,
+    }) => {
+      await page.goto(`/${kit}/scale/?cols=60&virtualizeColumns=1`);
+      const table = page.locator("table").first();
+      await expect(table).toBeVisible();
+      // Cell navigation is off here too, so nothing claims the grid contract.
+      await expect(page.getByRole("grid")).toHaveCount(0);
+      await expect(table).toHaveAttribute("aria-colcount", "60");
+
+      const cells = page.locator(
+        '[data-adapttable-part="row"]:first-of-type [data-adapttable-part="cell"]'
+      );
+      await expect(cells.first()).toBeVisible();
+      // A window, not the axis: 60 columns never all render at once.
+      expect(await cells.count()).toBeLessThan(60);
+
+      /** The furthest column in the DOM, read off the cells themselves. */
+      const furthestColumn = async () =>
+        Math.max(
+          ...(await cells.evaluateAll((nodes) =>
+            nodes.map((node) => Number(node.getAttribute("aria-colindex") ?? 0))
+          ))
+        );
+      const before = await furthestColumn();
+      expect(before).toBeGreaterThan(0);
+
+      // Scroll the axis and the indices follow the dataset, not the DOM.
+      await page
+        .locator('[data-adapttable-part="scroll-box"]')
+        .first()
+        .evaluate((box) => {
+          box.scrollLeft = 4000;
+        });
+      await expect
+        .poll(furthestColumn, { timeout: 5000 })
+        .toBeGreaterThan(before);
+      // And the total never moves with the window.
+      await expect(table).toHaveAttribute("aria-colcount", "60");
+
+      // The header row names the same columns as the body row beneath it.
+      const headerIndices = await page
+        .locator('[data-adapttable-part="header-cell"]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute("aria-colindex"))
+        );
+      expect(headerIndices.length).toBeGreaterThan(0);
+      expect(headerIndices.every((index) => index !== null)).toBe(true);
+      expect(Math.max(...headerIndices.map(Number))).toBeGreaterThan(before);
+    });
+  }
 
   // Radix is listed explicitly: its Table.Root ScrollArea used to trap the
   // sticky header inside the table, so this only failing on the first kit

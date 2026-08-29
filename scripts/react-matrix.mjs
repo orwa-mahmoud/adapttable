@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // The oldest supported 18.x with createRoot semantics, each 19 minor's
 // floor, and the current 19.2 line the workspace itself develops on.
-const ALL_VERSIONS = ["18.3.1", "19.0.0", "19.2.7"];
+const ALL_VERSIONS = ["18.3.1", "19.0.0", "19.2.8"];
 // Executables come from fixed locations, never a bare name off a (possibly
 // writable) PATH: npm ships beside the running node, and pnpm — needed for
 // `pnpm pack`, which rewrites `workspace:` ranges to real versions (npm's

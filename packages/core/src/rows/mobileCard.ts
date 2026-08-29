@@ -22,7 +22,11 @@ import type { ReactNode } from "react";
 
 import type { ColumnDef } from "../types";
 
-/** One field on a mobile card. */
+/**
+ * One field on a mobile card.
+ *
+ * @public
+ */
 export interface MobileCardField<TRow> {
   /** The column it came from. */
   column: ColumnDef<TRow>;
@@ -40,7 +44,11 @@ export interface MobileCardField<TRow> {
   value: ReactNode;
 }
 
-/** What {@link MobileCardRenderer} is given. */
+/**
+ * What {@link MobileCardRenderer} is given.
+ *
+ * @public
+ */
 export interface MobileCardModel<TRow> {
   /** The card's place in the rendered window. */
   index: number;
@@ -57,6 +65,8 @@ export interface MobileCardModel<TRow> {
  *
  * @typeParam TRow - The row type.
  * @returns The card's content, rendered inside the shell the table owns.
+ *
+ * @public
  */
 export type MobileCardRenderer<TRow> = (
   row: TRow,

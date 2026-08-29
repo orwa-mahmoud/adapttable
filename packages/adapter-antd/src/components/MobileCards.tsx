@@ -375,6 +375,7 @@ export function MobileCards<TRow>({
   measureElement,
   rowReorder,
   windowStart = 0,
+  cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
   extraRows,
@@ -446,6 +447,8 @@ export function MobileCards<TRow>({
   measureElement?: (node: Element | null) => void;
   rowReorder?: RowReorderState<TRow>;
   windowStart?: number;
+  /** Rows in the whole dataset, for the cards' `aria-setsize`. */
+  cardSetSize?: number;
   pinnedTopRows?: readonly TRow[];
   pinnedBottomRows?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
@@ -485,6 +488,13 @@ export function MobileCards<TRow>({
         key={key}
         ref={measureElement}
         data-index={index}
+        // A windowed list has only a slice of its items in the DOM, so each
+        // one states where it sits and how many there are; a complete list
+        // needs neither, because assistive tech can simply count.
+        aria-posinset={
+          cardSetSize > rows.length ? windowStart + index + 1 : undefined
+        }
+        aria-setsize={cardSetSize > rows.length ? cardSetSize : undefined}
         data-adapttable-part="card"
         style={{
           ...treeCardStyle(treeEntry?.level ?? 0),

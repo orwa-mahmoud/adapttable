@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Japanese (`ja`) label preset. */
+/**
+ * Japanese (`ja`) label preset.
+ *
+ * @public
+ */
 export const ja: Required<TableLabels> = {
   table: "データテーブル",
   search: "検索",
@@ -112,6 +116,9 @@ export const ja: Required<TableLabels> = {
   resetColumn: "列をリセット",
   sortAscending: "昇順で並べ替え",
   sortDescending: "降順で並べ替え",
+  sortedBy: ({ column, ascending }) =>
+    `${column} で並べ替え、${ascending ? "昇順" : "降順"}`,
+  sortingCleared: "並べ替えを解除しました",
   filterColumn: "列をフィルター",
   columnActions: "列の操作",
   exportCsv: "CSVをエクスポート",

@@ -1,6 +1,6 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
@@ -56,9 +56,20 @@ describe("accessibility (axe) — MUI", () => {
       rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
       filterLabels: { status: (v) => `Status: ${v}` },
     });
-    container
-      .querySelector<HTMLInputElement>('input[aria-label="Select all"]')
-      ?.click();
+    fireEvent.click(
+      container.querySelector<HTMLInputElement>(
+        'input[aria-label="Select all"]'
+      )!
+    );
+    expect(await axe(container, axeOpts)).toHaveNoViolations();
+  });
+
+  it("mobile card layout has no violations", async () => {
+    // The cards are a different tree from the table — a list of items rather
+    // than rows and cells — so auditing the desktop layout says nothing about
+    // them.
+    const { container } = renderTable({ forceMobile: true });
+
     expect(await axe(container, axeOpts)).toHaveNoViolations();
   });
 });

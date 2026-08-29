@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -30,6 +30,12 @@ const COLS: ColumnDef<Row>[] = [
  * window is a particular size — jsdom has no layout, so the window is the
  * whole set here and the browser proves the scrolling.
  */
+/**
+ * A commit's save-state bookkeeping settles a microtask after the host's handler
+ * runs. Flushing it inside `act` keeps that update inside the test.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("virtualization compatibility (unstyled)", () => {
   const table = (extra?: Record<string, unknown>) =>
     render(
@@ -101,7 +107,7 @@ describe("virtualization compatibility (unstyled)", () => {
     expect(header?.style.position).toBe("sticky");
   });
 
-  it("edits a cell in a windowed row", () => {
+  it("edits a cell in a windowed row", async () => {
     const onCellEdit = vi.fn();
     table({ onCellEdit });
     const cell = document.querySelectorAll(
@@ -113,6 +119,7 @@ describe("virtualization compatibility (unstyled)", () => {
     )!;
     fireEvent.change(input, { target: { value: "Renamed" } });
     fireEvent.keyDown(input, { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "name",
@@ -125,7 +132,7 @@ describe("virtualization compatibility (unstyled)", () => {
     const first = document.querySelector<HTMLElement>(
       '[data-grid-cell="0:0"]'
     )!;
-    first.focus();
+    act(() => first.focus());
     fireEvent.keyDown(first, { key: "ArrowDown" });
     expect(document.activeElement?.getAttribute("data-grid-cell")).toBe("1:0");
   });

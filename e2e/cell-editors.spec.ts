@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import { configureFeatureLab } from "./feature-lab";
 
@@ -82,5 +82,54 @@ for (const kit of KITS) {
     await expect(
       cell.locator('[data-adapttable-part="edit-cell-editor"]').first()
     ).toBeVisible();
+  });
+}
+
+/**
+ * The single-select editor's COMMIT path, in every kit.
+ *
+ * The editor was only ever asserted to open. Chakra's and antd's Selects cannot
+ * be driven under jsdom at all, so for those two nothing anywhere asserted that
+ * choosing a value stores it — this is the test that does.
+ */
+const TARGET = "Blocked";
+
+/** Pick a value in whichever control the kit renders for a single select. */
+async function pickOption(page: Page, editor: Locator, value: string) {
+  const tag = await editor.evaluate((el) => el.tagName.toLowerCase());
+  if (tag === "select") {
+    await editor.selectOption({ label: value });
+    return;
+  }
+  await editor.click();
+  // antd v6 leaves its visible option items unroled and puts `role="option"` on
+  // an offscreen zero-size mirror for assistive tech, so match either shape and
+  // take the one a user could actually click.
+  await page
+    .locator('[role="option"], .ant-select-item-option')
+    .filter({ hasText: new RegExp(`^\\s*${value}\\s*$`) })
+    .locator("visible=true")
+    .first()
+    .click();
+}
+
+for (const kit of KITS) {
+  test(`${kit}: commits a single-select cell editor`, async ({ page }) => {
+    const cell = await openEditor(page, kit, "Status");
+    const editor = cell
+      .locator('[data-adapttable-part="edit-cell-editor"]')
+      .first();
+
+    // The row starts on a different value, so the assertion below cannot pass
+    // by accident.
+    await expect(cell).not.toHaveText(TARGET);
+
+    await pickOption(page, editor, TARGET);
+    await page.keyboard.press("Enter");
+
+    // Closed, and the cell renders what was chosen: that render is the stored
+    // value, not the draft.
+    await expect(editor).toHaveCount(0);
+    await expect(cell).toHaveText(TARGET);
   });
 }

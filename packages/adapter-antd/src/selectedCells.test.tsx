@@ -1,4 +1,4 @@
-import { fireEvent } from "@testing-library/react";
+import { act, fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -37,7 +37,7 @@ describe("selected cells are visible (antd)", () => {
     );
     const cells = container.querySelectorAll<HTMLElement>("[data-grid-cell]");
     expect(cells.length).toBeGreaterThan(0);
-    cells[0]!.focus();
+    act(() => cells[0]!.focus());
     fireEvent.keyDown(cells[0]!, { key: "ArrowRight", shiftKey: true });
     expect(container.querySelectorAll("[data-cell-selected]")).toHaveLength(2);
     expect(container.querySelector('[data-grid-cell="0:1"]')).toHaveAttribute(

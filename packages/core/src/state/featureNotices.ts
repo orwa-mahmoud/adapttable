@@ -14,7 +14,11 @@ import {
 import type { TableSource } from "../source/TableSource";
 import type { TableLabels } from "../types";
 
-/** Which opted-in feature is inert. */
+/**
+ * Which opted-in feature is inert.
+ *
+ * @public
+ */
 export type FeatureNoticeKind =
   | "virtualize-paged"
   | "pin-nested"
@@ -23,34 +27,60 @@ export type FeatureNoticeKind =
   | "export-all-page"
   | "edit-without-writer";
 
-/** How the table already looks to the person sitting at it. */
+/**
+ * How the table already looks to the person sitting at it.
+ *
+ * @public
+ */
 export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 
-/** One inert feature, ready for a status slot or a root attribute. */
+/**
+ * One inert feature, ready for a status slot or a root attribute.
+ *
+ * @public
+ */
 export interface FeatureNotice {
+  /** Which feature could not run. */
   readonly kind: FeatureNoticeKind;
+  /** How the table already looks because of it. */
   readonly appearance: FeatureNoticeAppearance;
+  /** The explanation, already localized. */
   readonly message: string;
 }
 
 /** Inputs {@link collectFeatureNotices} needs. Host props + source facts. */
 export interface CollectFeatureNoticesInput<TRow = unknown> {
+  /** Whether the host asked for row virtualization. */
   virtualize?: boolean;
+  /** How the source pages, which decides whether virtualization can run. */
   paginationMode?: TableSource<TRow>["paginationMode"];
+  /** Columns grouping is armed on. */
   groupByKeys: readonly string[];
+  /** Every filtered row, when the source can hand them over. */
   allFilteredRows?: readonly TRow[];
+  /** Server-built groups, when grouping happens upstream. */
   serverGroups?: unknown;
+  /** Whether the host asked for row pinning. */
   rowPinningRequested: boolean;
+  /** Whether the host asked for row reordering. */
   rowReorderRequested: boolean;
   /** Grouping is armed or a tree is on — pin and reorder stay off. */
   nestedArmed: boolean;
+  /** Whether any column declared an editor. */
   hasEditableColumn: boolean;
+  /** The cell-edit writer, absent when the host never wired one. */
   onCellEdit?: unknown;
+  /** Whether the host asked for row editing. */
   rowEditing?: boolean;
+  /** The row-edit writer, absent when the host never wired one. */
   onRowEdit?: unknown;
+  /** Whether the host asked for batch editing. */
   batchEditing?: boolean;
+  /** The batch writer, absent when the host never wired one. */
   onBatchEdit?: unknown;
+  /** CSV export, and its options when it is more than a flag. */
   exportCsv?: boolean | ExportCsvOptions<TRow>;
+  /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
 }
 

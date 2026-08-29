@@ -27,17 +27,20 @@ import { FilterType } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
+import { MobileCardRenderer } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { ReactNode } from 'react';
 import { resolveFilterRegistry } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowActionsRenderer } from '@adapttable/core';
 import { SavedView } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { useDataTable } from '@adapttable/core';
 import { UseDataTableResult } from '@adapttable/core';
@@ -70,11 +73,44 @@ export { ConfirmRequest }
 
 export { createFilterRegistry }
 
-// @public (undocumented)
+// @public
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): ReactNode;
 
 // @public
+export interface DataTableClassNames {
+    card?: string;
+    footer?: string;
+    root?: string;
+    table?: string;
+    toolbar?: string;
+}
+
+// @public
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
+
+// @public
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+    accentColor?: string;
+    animate?: boolean;
+    classNames?: DataTableClassNames;
+    data?: readonly TRow[];
+    loading?: boolean;
+    savedViews?: UseSavedViewsOptions;
+    size?: "sm" | "md" | "lg";
+    slots?: DataTableSlots;
+    source?: TableSource<TRow>;
+    total?: number;
+    urlAdapter?: UrlStateAdapter;
+    urlKey?: string;
+    urlSync?: boolean;
+}
+
+// @public
+export interface DataTableSlots {
+    empty?: ReactNode;
+    noResults?: ReactNode;
+    skeleton?: ReactNode;
+}
 
 export { defaultConfirm }
 
@@ -100,6 +136,8 @@ export { FilterTypeSpec }
 
 export { FilterValue }
 
+export { MobileCardRenderer }
+
 export { PaginatedResponse }
 
 export { PaginationMode }
@@ -107,6 +145,8 @@ export { PaginationMode }
 export { resolveFilterRegistry }
 
 export { RowAction }
+
+export { RowActionsRenderer }
 
 export { SavedView }
 
@@ -119,6 +159,8 @@ export { TableLabels }
 export { TableQuery }
 
 export { TableSource }
+
+export { ToolbarSlots }
 
 export { useDataTable }
 

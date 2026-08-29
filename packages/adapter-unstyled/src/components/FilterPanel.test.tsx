@@ -1,6 +1,6 @@
 import { defaultLabels } from "@adapttable/core";
-import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FilterPanel } from "./FilterPanel";
 
@@ -71,7 +71,7 @@ describe("FilterPanel", () => {
     const panel = document.querySelector<HTMLElement>(
       '[data-adapttable-part="filters-panel"]'
     )!;
-    panel.focus();
+    act(() => panel.focus());
     fireEvent.keyDown(panel, { key: "Tab", shiftKey: true });
     const last = document.querySelector(
       '[data-adapttable-part="filters-done"]'
@@ -93,12 +93,124 @@ describe("FilterPanel", () => {
     const stray = document.createElement("button");
     stray.textContent = "outside";
     document.body.appendChild(stray);
-    stray.focus();
+    act(() => stray.focus());
     fireEvent.keyDown(document, { key: "Tab" });
     const first = document.querySelector(
       '[data-adapttable-part="filters-close"]'
     );
     expect(document.activeElement).toBe(first);
     stray.remove();
+  });
+});
+
+/**
+ * The drawer's motion. A side sheet that appears and disappears reads as a
+ * glitch rather than a panel, so both edges animate — and the exit is the one
+ * that needs proving, because it means the node outlives `open`.
+ */
+describe("FilterPanel motion", () => {
+  /** Stub `matchMedia` so the reduced-motion preference can be set per test. */
+  function stubMotion(prefersReduced: boolean) {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: prefersReduced,
+        media: "",
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }))
+    );
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const panel = () =>
+    document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filters-panel"]'
+    );
+
+  function renderPanel(props: { open: boolean; dir?: "ltr" | "rtl" }) {
+    return render(
+      <FilterPanel
+        open={props.open}
+        onClose={vi.fn()}
+        filters={<div>filters</div>}
+        activeFilterCount={0}
+        labels={defaultLabels}
+        dir={props.dir}
+        classNames={{}}
+      />
+    );
+  }
+
+  it("slides out before it leaves, then removes itself", async () => {
+    stubMotion(false);
+    const { rerender } = renderPanel({ open: true });
+    await waitFor(() => expect(panel()).toHaveAttribute("data-state", "open"));
+    expect(panel()!.style.transform).toBe("translateX(0)");
+
+    rerender(
+      <FilterPanel
+        open={false}
+        onClose={vi.fn()}
+        filters={<div>filters</div>}
+        activeFilterCount={0}
+        labels={defaultLabels}
+        classNames={{}}
+      />
+    );
+
+    // Still painted, already off-screen-bound, and no longer a dialog.
+    const leaving = panel()!;
+    expect(leaving).toHaveAttribute("data-state", "closed");
+    expect(leaving.style.transform).toBe("translateX(100%)");
+    expect(leaving).toHaveAttribute("inert");
+
+    await waitFor(() => expect(panel()).toBeNull());
+  });
+
+  it("arrives from and leaves toward the inline-end edge in RTL", async () => {
+    stubMotion(false);
+    const { rerender } = renderPanel({ open: true, dir: "rtl" });
+    // In RTL the panel is pinned to the left, so the edge it travels from is
+    // the left one — mirrored, not the same slide with Arabic labels.
+    expect(panel()!.style.transform).toBe("translateX(-100%)");
+    await waitFor(() => expect(panel()!.style.transform).toBe("translateX(0)"));
+
+    rerender(
+      <FilterPanel
+        open={false}
+        onClose={vi.fn()}
+        filters={<div>filters</div>}
+        activeFilterCount={0}
+        labels={defaultLabels}
+        dir="rtl"
+        classNames={{}}
+      />
+    );
+    expect(panel()!.style.transform).toBe("translateX(-100%)");
+  });
+
+  it("under reduced motion nothing travels and nothing lingers", () => {
+    stubMotion(true);
+    const { rerender } = renderPanel({ open: true });
+    // No frame delay: the panel is where it belongs on the first paint.
+    expect(panel()!.style.transform).toBe("translateX(0)");
+
+    rerender(
+      <FilterPanel
+        open={false}
+        onClose={vi.fn()}
+        filters={<div>filters</div>}
+        activeFilterCount={0}
+        labels={defaultLabels}
+        classNames={{}}
+      />
+    );
+    // Gone on the same tick — no node left waiting for an animation that was
+    // never going to run.
+    expect(panel()).toBeNull();
   });
 });

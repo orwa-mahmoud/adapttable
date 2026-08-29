@@ -123,7 +123,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** Base UI AND/OR builder — compact kit row, no stacked field labels. */
+/**
+ * Base UI AND/OR builder — compact kit row, no stacked field labels.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

@@ -1,5 +1,5 @@
 import type { SelectionState } from "@adapttable/core";
-import { fireEvent, screen, within } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -15,6 +15,13 @@ import { PaginationFooter } from "./PaginationFooter";
 import { TableSkeleton } from "./TableSkeleton";
 
 const labels = defaultLabels;
+
+/**
+ * A bulk action runs asynchronously, so the runner settles a microtask after the
+ * host's onClick resolves. Flushing it inside `act` keeps that update inside
+ * the test.
+ */
+const settleRun = () => act(() => Promise.resolve());
 
 describe("EmptyState", () => {
   it("renders title, description and a custom icon", () => {
@@ -285,7 +292,7 @@ describe("BulkActionBar", () => {
     expect(screen.queryByText(/selected/)).toBeNull();
   });
 
-  it("runs a no-confirm action immediately in the page scope", () => {
+  it("runs a no-confirm action immediately in the page scope", async () => {
     const onClick = vi.fn().mockResolvedValue(undefined);
     renderMantine(
       <BulkActionBar
@@ -298,6 +305,7 @@ describe("BulkActionBar", () => {
     );
     expect(screen.getByText("2 selected")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Archive"));
+    await settleRun();
     expect(onClick).toHaveBeenCalledWith(["a", "b"], {
       allMatching: false,
       total: 2,
@@ -330,7 +338,7 @@ describe("BulkActionBar", () => {
 
   // Contract: only a *non-empty* reason disables. An empty string must be
   // treated as "no reason" — the action stays enabled and keeps its label.
-  it("keeps the action enabled when disabledReason returns an empty string", () => {
+  it("keeps the action enabled when disabledReason returns an empty string", async () => {
     const onClick = vi.fn().mockResolvedValue(undefined);
     renderMantine(
       <BulkActionBar
@@ -346,6 +354,7 @@ describe("BulkActionBar", () => {
     const btn = screen.getByText("Archive").closest("button");
     expect(btn).not.toBeDisabled();
     fireEvent.click(screen.getByText("Archive"));
+    await settleRun();
     expect(onClick).toHaveBeenCalledWith(["a", "b"], {
       allMatching: false,
       total: 2,
@@ -422,7 +431,7 @@ describe("BulkActionBar", () => {
     expect(selection.clear).toHaveBeenCalledTimes(1);
   });
 
-  it("runs bulk actions with the all-matching context when the scope is widened", () => {
+  it("runs bulk actions with the all-matching context when the scope is widened", async () => {
     const onClick = vi.fn().mockResolvedValue(undefined);
     renderMantine(
       <BulkActionBar
@@ -434,6 +443,7 @@ describe("BulkActionBar", () => {
       />
     );
     fireEvent.click(screen.getByText("Archive"));
+    await settleRun();
     expect(onClick).toHaveBeenCalledWith(["a", "b"], {
       allMatching: true,
       total: 9,

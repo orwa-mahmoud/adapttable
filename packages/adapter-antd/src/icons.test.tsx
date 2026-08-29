@@ -6,9 +6,34 @@ import {
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
 import { render } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 
-import { FiltersIcon, iconForRowAction } from "./icons";
+import {
+  ChevronRightIcon,
+  DeleteRowIcon,
+  DuplicateRowIcon,
+  FiltersIcon,
+  iconForRowAction,
+  MoreVerticalIcon,
+  PinBottomIcon,
+  PinTopIcon,
+  SearchIcon,
+  UnpinRowIcon,
+} from "./icons";
+
+/** Every glyph this adapter exports, so none is added without a check. */
+const GLYPHS: readonly [string, (p: { size?: number }) => ReactNode][] = [
+  ["FiltersIcon", FiltersIcon],
+  ["SearchIcon", SearchIcon],
+  ["ChevronRightIcon", ChevronRightIcon],
+  ["DuplicateRowIcon", DuplicateRowIcon],
+  ["DeleteRowIcon", DeleteRowIcon],
+  ["PinTopIcon", PinTopIcon],
+  ["PinBottomIcon", PinBottomIcon],
+  ["UnpinRowIcon", UnpinRowIcon],
+  ["MoreVerticalIcon", MoreVerticalIcon],
+];
 
 const BUILT_IN = [
   DUPLICATE_ROW_ACTION_KEY,
@@ -19,9 +44,34 @@ const BUILT_IN = [
 ];
 
 describe("icons", () => {
-  it("renders the Filters glyph", () => {
-    const { container } = render(<FiltersIcon />);
-    expect(container.querySelector("svg")).not.toBeNull();
+  it("honors an explicit size on every glyph", () => {
+    for (const [name, Icon] of GLYPHS) {
+      const { container } = render(<Icon size={40} />);
+      const svg = container.querySelector("svg");
+
+      expect(svg, name).toHaveAttribute("width", "40");
+      expect(svg, name).toHaveAttribute("height", "40");
+    }
+  });
+
+  it("falls back to the 16px default on every glyph", () => {
+    for (const [name, Icon] of GLYPHS) {
+      const { container } = render(<Icon />);
+      const svg = container.querySelector("svg");
+
+      expect(svg, name).toHaveAttribute("width", "16");
+      expect(svg, name).toHaveAttribute("height", "16");
+    }
+  });
+
+  it("keeps every glyph out of the accessibility tree", () => {
+    for (const [name, Icon] of GLYPHS) {
+      const { container } = render(<Icon />);
+      const svg = container.querySelector("svg");
+
+      expect(svg, name).toHaveAttribute("aria-hidden", "true");
+      expect(svg, name).toHaveAttribute("focusable", "false");
+    }
   });
 
   it("keeps a host icon and maps built-in keys to this kit's glyphs", () => {

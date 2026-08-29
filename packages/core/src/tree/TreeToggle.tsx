@@ -7,7 +7,11 @@ import type { ReactElement, ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { TreeEntry } from "./treeRows";
 
-/** Props for an adapter {@link TreeToggle} — no slots on the public API. */
+/**
+ * Props for an adapter `TreeToggle` — no slots on the public API.
+ *
+ * @public
+ */
 export interface TreeToggleProps<TRow> {
   /** The row's place in the tree. */
   entry: TreeEntry<TRow>;
@@ -21,28 +25,49 @@ export interface TreeToggleProps<TRow> {
   spacerClassName?: string;
 }
 
-/** Kit chevron the tree layout calls. */
+/**
+ * Kit chevron the tree layout calls.
+ *
+ * @public
+ */
 export interface TreeToggleButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Whether the section is open. */
   readonly expanded: boolean;
+  /** Whether the node's children are still loading. */
   readonly loading: boolean;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called when pressed. */
   readonly onClick: () => void;
 }
 
-/** Adapter-supplied controls for {@link TreeToggleChrome}. */
+/**
+ * Adapter-supplied controls for {@link TreeToggleChrome}.
+ *
+ * @public
+ */
 export interface TreeToggleSlots {
+  /** Renders a button. */
   readonly Button: (props: TreeToggleButtonProps) => ReactNode;
 }
 
-/** Props for {@link TreeToggleChrome}. */
+/**
+ * Props for {@link TreeToggleChrome}.
+ *
+ * @public
+ */
 export interface TreeToggleChromeProps<TRow> extends TreeToggleProps<TRow> {
+  /** The kit's components for each part. */
   readonly slots: TreeToggleSlots;
 }
 
 /**
  * Renders the chevron for a row with children, or an equal-width spacer for a
  * leaf so the column stays aligned.
+ *
+ * @public
  */
 export function TreeToggleChrome<TRow>({
   entry,

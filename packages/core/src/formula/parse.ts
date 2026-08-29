@@ -37,21 +37,19 @@
  * is the normal state of one being written.
  */
 
-/** A binary operator the grammar accepts. */
+/**
+ * A binary operator the grammar accepts.
+ *
+ * @public
+ */
 export type BinaryOp =
-  | "+"
-  | "-"
-  | "*"
-  | "/"
-  | "&"
-  | "="
-  | "<>"
-  | "<"
-  | "<="
-  | ">"
-  | ">=";
+  "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
 
-/** One node of a parsed formula. */
+/**
+ * One node of a parsed formula.
+ *
+ * @public
+ */
 export type FormulaNode =
   | { readonly kind: "number"; readonly value: number }
   | { readonly kind: "string"; readonly value: string }
@@ -69,7 +67,11 @@ export type FormulaNode =
       readonly args: readonly FormulaNode[];
     };
 
-/** What {@link parseFormula} answers with. */
+/**
+ * What {@link parseFormula} answers with.
+ *
+ * @public
+ */
 export interface ParseResult {
   /** Whether the text parsed. */
   readonly ok: boolean;
@@ -285,6 +287,8 @@ function expression(cursor: Cursor): FormulaNode {
  *
  * @param text - The formula as the user typed it.
  * @returns The tree, or the reason it could not be parsed. Never throws.
+ *
+ * @public
  */
 export function parseFormula(text: string): ParseResult {
   const body = text.trim().replace(/^=/, "");
@@ -309,6 +313,8 @@ export function parseFormula(text: string): ParseResult {
  *
  * @param node - A parsed formula.
  * @returns The referenced keys, each once, in the order first seen.
+ *
+ * @public
  */
 export function formulaRefs(node: FormulaNode): string[] {
   const seen: string[] = [];

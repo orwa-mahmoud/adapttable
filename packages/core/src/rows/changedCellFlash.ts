@@ -16,10 +16,16 @@ import { useCallback, useDebugValue, useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import type { RowPatchEvent } from "./patch";
 
+export type { RowPatchEvent };
+
 /** How long a mark lasts, in milliseconds. */
 const DEFAULT_DURATION_MS = 1200;
 
-/** What {@link useChangedCellFlash} needs. */
+/**
+ * What {@link useChangedCellFlash} needs.
+ *
+ * @public
+ */
 export interface UseChangedCellFlashOptions {
   /**
    * Turn it on. Off by default — a table that never patches rows should not
@@ -30,7 +36,11 @@ export interface UseChangedCellFlashOptions {
   durationMs?: number;
 }
 
-/** Marks a host can read while rendering. */
+/**
+ * Marks a host can read while rendering.
+ *
+ * @public
+ */
 export interface ChangedCellFlashState {
   /** Whether this cell changed recently enough to still be marked. */
   isFlashing: (rowId: string, columnKey: string) => boolean;
@@ -77,6 +87,8 @@ function touchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null {
  *
  * @param options - See {@link UseChangedCellFlashOptions}.
  * @returns The marks; every reader is inert while disabled.
+ *
+ * @public
  */
 export function useChangedCellFlash(
   options: UseChangedCellFlashOptions = {}

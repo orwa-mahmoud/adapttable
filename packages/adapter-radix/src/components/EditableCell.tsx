@@ -15,6 +15,7 @@ import {
 import {
   commitBooleanDraft,
   editorValidationProps,
+  stopEditKeys,
 } from "@adapttable/core/adapter";
 import { TextField } from "@radix-ui/themes";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
@@ -45,12 +46,6 @@ function MultiSelectOption({
 const multiSelectSlots: MultiSelectEditorSlots = {
   Checkbox: MultiSelectOption,
 };
-
-function stopEditKeys(event: KeyboardEvent): void {
-  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
-    event.stopPropagation();
-  }
-}
 
 /** Radix Themes text / number / select editor for the active cell. */
 export function RadixCellEditor({

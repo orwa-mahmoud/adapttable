@@ -57,15 +57,27 @@ import {
 } from "./gridFocus";
 import { pasteRangeEdits } from "./pasteRange";
 
-/** The attribute a focusable cell carries, so focus can find it in the DOM. */
+/**
+ * The attribute a focusable cell carries, so focus can find it in the DOM.
+ *
+ * @public
+ */
 export const GRID_CELL_ATTR = "data-grid-cell";
 
-/** `data-grid-cell` value for one address — `"row:col"`, both absolute. */
+/**
+ * `data-grid-cell` value for one address — `"row:col"`, both absolute.
+ *
+ * @public
+ */
 export function gridCellAttr(cell: GridCell): string {
   return `${cell.row}:${cell.col}`;
 }
 
-/** Options for {@link useGridFocus}. */
+/**
+ * Options for `useGridFocus`.
+ *
+ * @public
+ */
 export interface UseGridFocusOptions<TRow> {
   /** Off unless the host asked for it; when false the hook does nothing. */
   enabled: boolean;
@@ -84,8 +96,19 @@ export interface UseGridFocusOptions<TRow> {
    * bounds below.
    */
   rowCount: number;
-  /** Columns in the order they are rendered. */
+  /**
+   * Every visible column, whether or not the horizontal axis is windowed — this
+   * is the ARIA number (`aria-colcount`) and the address space cell indices are
+   * counted in, so a windowed table still reports absolute positions.
+   */
   columns: readonly ColumnDef<TRow>[];
+  /**
+   * Whether the rendered columns are a window over `columns` rather than
+   * all of them. Windowing the horizontal axis has the same consequence as
+   * windowing rows: the cells in the DOM are a slice, so their position has to
+   * be stated rather than counted.
+   */
+  columnsWindowed?: boolean;
   /** The rendered rows, for reading a cell's text when focus lands. */
   rows: readonly TRow[];
   /**
@@ -158,7 +181,11 @@ export interface UseGridFocusOptions<TRow> {
   currentMatch?: GridCell | null;
 }
 
-/** What {@link useGridFocus} returns. */
+/**
+ * What `useGridFocus` returns.
+ *
+ * @public
+ */
 export interface GridFocusState {
   /**
    * Whether cell navigation is on. Consumers render the live region only when
@@ -256,6 +283,8 @@ export interface GridFocusState {
  * Keyboard focus over the cell grid.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function useGridFocus<TRow>(
   options: UseGridFocusOptions<TRow>
@@ -265,6 +294,7 @@ export function useGridFocus<TRow>(
     headerCheckbox = false,
     rowCount,
     columns,
+    columnsWindowed = false,
     rows,
     firstRowIndex = 0,
     pageSize,
@@ -652,8 +682,25 @@ export function useGridFocus<TRow>(
     return () => window.removeEventListener("mouseup", end);
   }, [enabled, commitFill]);
 
+  /**
+   * Whether the rendered rows are a slice of a bigger set — virtualization, or
+   * a server page. Assistive tech counts the rows it can reach, so a windowed
+   * table has to state the real size even when cell navigation is off.
+   */
+  const windowed = rowCount > rows.length;
+
   const getGridProps = useCallback(() => {
-    if (!enabled) return {};
+    // `aria-rowcount` is valid on the implicit `role="table"`, so a windowed
+    // table can state its size without claiming the grid keyboard semantics
+    // that only cell navigation provides. Only the ROWS are a window — every
+    // column is in the DOM — so `aria-colcount` stays out of it: it would
+    // promise a matching `aria-colindex` per cell that nothing here sets.
+    if (!enabled) {
+      return {
+        ...(windowed ? { "aria-rowcount": rowCount } : {}),
+        ...(columnsWindowed ? { "aria-colcount": columns.length } : {}),
+      };
+    }
     return {
       role: "grid",
       "aria-rowcount": rowCount,
@@ -663,11 +710,16 @@ export function useGridFocus<TRow>(
         container.current = node;
       },
     };
-  }, [enabled, rowCount, columns.length, onKeyDown]);
+  }, [enabled, windowed, columnsWindowed, rowCount, columns.length, onKeyDown]);
 
   const getCellProps = useCallback(
     (cell: GridCell) => {
-      if (!enabled) return {};
+      // A windowed column axis states each cell's absolute position, or a
+      // reader counting the cells in the DOM calls column 17 "column 3 of 40".
+      // The count without the per-cell index would be worse than neither.
+      if (!enabled) {
+        return columnsWindowed ? { "aria-colindex": cell.col + 1 } : {};
+      }
       const isActive = sameGridCell(cell, active);
       // Exactly one cell is tabbable. Before the grid has ever been entered
       // that is its first cell, so Tab reaches the table at all.
@@ -679,6 +731,12 @@ export function useGridFocus<TRow>(
       const matched = matchKeys?.has(key) === true;
       return {
         [GRID_CELL_ATTR]: gridCellAttr(cell),
+        // The table is a grid while this is on, and a grid's cells are
+        // `gridcell`. A bare `<td>` maps to that on its own, but the table-level
+        // cell props state `role="cell"` for the plain-table case — correct
+        // there, wrong here, and last write wins wherever an adapter spreads
+        // both. Saying it outright keeps every adapter on the same role.
+        role: "gridcell",
         tabIndex: isActive || firstEver ? 0 : -1,
         "aria-colindex": cell.col + 1,
         // Only meaningful once a real rectangle exists: marking every focused
@@ -723,6 +781,7 @@ export function useGridFocus<TRow>(
     },
     [
       enabled,
+      columnsWindowed,
       active,
       firstRowIndex,
       range,
@@ -797,8 +856,14 @@ export function useGridFocus<TRow>(
   /** Props for a column header that selects its column when clicked. */
   const getColumnHeaderProps = useCallback(
     (col: number, options?: { sortable?: boolean }) => {
-      if (!enabled) return {};
+      // A header cell is a cell: wherever the table states `aria-colcount`, the
+      // header row has to say which column it names, or a reader counts the
+      // rendered headers and lands one window off.
+      const position =
+        enabled || columnsWindowed ? { "aria-colindex": col + 1 } : {};
+      if (!enabled) return position;
       return {
+        ...position,
         onClick: (event: { ctrlKey?: boolean; metaKey?: boolean }) => {
           const modified = event.ctrlKey === true || event.metaKey === true;
           // A sortable header's plain click already sorts, and the two cannot
@@ -809,7 +874,7 @@ export function useGridFocus<TRow>(
         },
       };
     },
-    [enabled, selectColumn]
+    [enabled, columnsWindowed, selectColumn]
   );
 
   // The handle sits on the selection's bottom inline-end corner — the last row
@@ -838,8 +903,9 @@ export function useGridFocus<TRow>(
   );
 
   const getRowProps = useCallback(
-    (rowIndex: number) => (enabled ? { "aria-rowindex": rowIndex + 1 } : {}),
-    [enabled]
+    (rowIndex: number) =>
+      enabled || windowed ? { "aria-rowindex": rowIndex + 1 } : {},
+    [enabled, windowed]
   );
 
   const getCellPropsAt = useCallback(

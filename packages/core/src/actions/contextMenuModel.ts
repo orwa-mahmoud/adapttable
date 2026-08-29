@@ -18,13 +18,21 @@
  */
 import type { ColumnDef, TableLabels } from "../types";
 
-/** Where the menu was opened. */
+/**
+ * Where the menu was opened.
+ *
+ * @public
+ */
 export type ContextMenuTarget<TRow> =
   | { kind: "header"; columnKey: string }
   | { kind: "row"; row: TRow; rowId: string }
   | { kind: "cell"; row: TRow; rowId: string; columnKey: string };
 
-/** One entry in a context menu. */
+/**
+ * One entry in a context menu.
+ *
+ * @public
+ */
 export interface ContextMenuItem {
   /** Stable identity, and the React key. */
   key: string;
@@ -40,7 +48,11 @@ export interface ContextMenuItem {
   onSelect: () => void;
 }
 
-/** The handlers a built-in entry needs, each optional. */
+/**
+ * The handlers a built-in entry needs, each optional.
+ *
+ * @public
+ */
 export interface ContextMenuActions<TRow> {
   /** Copy the selection, or this cell when nothing is selected. */
   onCopy?: (target: ContextMenuTarget<TRow>) => void;
@@ -58,9 +70,13 @@ export interface ContextMenuActions<TRow> {
 
 /** What {@link contextMenuItems} needs to decide the entries. */
 export interface ContextMenuModelOptions<TRow> {
+  /** What the menu was opened on. */
   target: ContextMenuTarget<TRow>;
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
+  /** Actions to offer. */
   actions: ContextMenuActions<TRow>;
   /** Which column is sorted, so the current direction can be marked. */
   sortBy?: string;

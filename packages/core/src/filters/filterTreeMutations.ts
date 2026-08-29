@@ -5,9 +5,18 @@
 import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
 import { isFilterGroup } from "../source/queryContract";
 
+/**
+ * One node in a filter tree: a single condition, or a group of them.
+ *
+ * @public
+ */
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
 
-/** An empty AND group — the tree a first "Add condition" starts from. */
+/**
+ * An empty AND group — the tree a first "Add condition" starts from.
+ *
+ * @public
+ */
 export function emptyFilterTree(): QueryFilterGroup {
   return { combinator: "and", conditions: [] };
 }
@@ -49,7 +58,11 @@ function replaceChild(
   return replaceChild(tree, [], head!, updated);
 }
 
-/** Set the combinator on the group at `path`. */
+/**
+ * Set the combinator on the group at `path`.
+ *
+ * @public
+ */
 export function setFilterTreeCombinator(
   tree: QueryFilterGroup,
   path: readonly number[],
@@ -82,7 +95,11 @@ export function appendFilterTreeChild(
   return replaceChild(root, parentPath, index, next);
 }
 
-/** Append a condition to the group at `path`. */
+/**
+ * Append a condition to the group at `path`.
+ *
+ * @public
+ */
 export function addFilterTreeCondition(
   tree: QueryFilterGroup | undefined,
   path: readonly number[],
@@ -91,7 +108,11 @@ export function addFilterTreeCondition(
   return appendFilterTreeChild(tree, path, condition);
 }
 
-/** Append a nested AND group to the group at `path`. */
+/**
+ * Append a nested AND group to the group at `path`.
+ *
+ * @public
+ */
 export function addFilterTreeGroup(
   tree: QueryFilterGroup | undefined,
   path: readonly number[]
@@ -99,7 +120,11 @@ export function addFilterTreeGroup(
   return appendFilterTreeChild(tree, path, emptyFilterTree());
 }
 
-/** Replace the node at `path` (path must name a child, not the root). */
+/**
+ * Replace the node at `path` (path must name a child, not the root).
+ *
+ * @public
+ */
 export function replaceFilterTreeNode(
   tree: QueryFilterGroup,
   path: readonly number[],
@@ -116,6 +141,8 @@ export function replaceFilterTreeNode(
 /**
  * Remove the node at `path`. Removing the last root child returns
  * `undefined` so the URL drops `ft`.
+ *
+ * @public
  */
 export function removeFilterTreeNode(
   tree: QueryFilterGroup,
@@ -129,7 +156,11 @@ export function removeFilterTreeNode(
   return next;
 }
 
-/** Walk every leaf, with the path to that leaf. */
+/**
+ * Walk every leaf, with the path to that leaf.
+ *
+ * @public
+ */
 export function walkFilterTreeConditions(
   tree: QueryFilterGroup | undefined,
   path: readonly number[] = []

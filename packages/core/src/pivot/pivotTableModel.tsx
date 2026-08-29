@@ -35,12 +35,16 @@ import type { ReactNode } from "react";
 
 import { resolveLabels } from "../labels";
 import type { ColumnDef, TableLabels } from "../types";
+
+export type { TableLabels };
 import { measureLabel, type PivotField } from "./pivotConfigModel";
 import type { PivotColumnLeaf, PivotResult, PivotRow } from "./pivotModel";
 
 /**
  * The key of the row-header column — the one down the side, holding each
  * line's label. Stable, so a host can style or address it.
+ *
+ * @public
  */
 export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
 
@@ -49,7 +53,11 @@ function leafColumnKey(index: number): string {
   return `pivot-${String(index)}`;
 }
 
-/** Options for {@link pivotTableModel}. */
+/**
+ * Options for {@link pivotTableModel}.
+ *
+ * @public
+ */
 export interface PivotTableModelOptions {
   /**
    * The fields the pivot was configured from, for the measure captions — the
@@ -60,7 +68,7 @@ export interface PivotTableModelOptions {
   /**
    * Localized labels. Only the pivot captions are read: the grand-total
    * column's group header, the grand-total footer's caption, and the
-   * row-header column's own header when {@link rowHeader} is absent.
+   * row-header column's own header when `rowHeader` is absent.
    */
   labels?: TableLabels;
   /**
@@ -85,7 +93,11 @@ export interface PivotTableModelOptions {
   indent?: number;
 }
 
-/** A pivot as table props. Spread the parts a `DataTable` takes. */
+/**
+ * A pivot as table props. Spread the parts a `DataTable` takes.
+ *
+ * @public
+ */
 export interface PivotTableModel {
   /** The row-header column, then one column per entry of `columnLeaves`. */
   columns: ColumnDef<PivotRow>[];
@@ -157,6 +169,8 @@ function rowHeaderCell(
  *
  * <DataTable {...model} />;
  * ```
+ *
+ * @public
  */
 export function pivotTableModel(
   result: PivotResult,

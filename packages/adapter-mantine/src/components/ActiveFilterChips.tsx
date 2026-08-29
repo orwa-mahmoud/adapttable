@@ -1,7 +1,11 @@
 import type { ActiveFilterChip } from "@adapttable/core";
 import { Anchor, Group, Pill } from "@mantine/core";
 
-/** Props for {@link ActiveFilterChips}. */
+/**
+ * Props for {@link ActiveFilterChips}.
+ *
+ * @public
+ */
 export interface ActiveFilterChipsProps {
   /** The chips to render. */
   chips: readonly ActiveFilterChip[];
@@ -13,7 +17,11 @@ export interface ActiveFilterChipsProps {
   clearAllLabel: string;
 }
 
-/** A wrapping strip of removable filter chips. Renders nothing when empty. */
+/**
+ * A wrapping strip of removable filter chips. Renders nothing when empty.
+ *
+ * @public
+ */
 export function ActiveFilterChips({
   chips,
   onClearAll,

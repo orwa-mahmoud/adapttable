@@ -27,7 +27,11 @@ import {
 import { resolveContextTarget } from "./contextMenuRegion";
 import { type ContextMenuPoint, useContextMenu } from "./useContextMenu";
 
-/** How a host arms the context menu. */
+/**
+ * How a host arms the context menu.
+ *
+ * @public
+ */
 export interface ContextMenuOptions<TRow> {
   /**
    * Extra entries, appended behind a divider so a custom action is never
@@ -36,24 +40,37 @@ export interface ContextMenuOptions<TRow> {
   items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 }
 
-/** What {@link useTableContextMenu} needs. */
+/**
+ * What {@link useTableContextMenu} needs.
+ *
+ * @public
+ */
 export interface TableContextMenuOptions<TRow> {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   contextMenu?: boolean | ContextMenuOptions<TRow>;
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
   /** The row behind an id, since the DOM only carries the id. */
   rowFor: (rowId: string) => TRow | undefined;
   /** The handlers the built-in entries call. */
   actions: ContextMenuActions<TRow>;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
+  /** Whether a column is pinned. */
   isPinned?: (columnKey: string) => boolean;
   /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
   featureHost?: FeatureHostState;
 }
 
-/** What an adapter binds and renders. */
+/**
+ * What an adapter binds and renders.
+ *
+ * @public
+ */
 export interface TableContextMenu {
   /** Spread onto the element containing the headers, rows and cells. */
   regionProps: Record<string, unknown>;
@@ -71,6 +88,8 @@ export interface TableContextMenu {
  * @param options - The prop, the columns, and the handlers behind the
  *   built-in entries.
  * @returns The props to bind and the state to render.
+ *
+ * @public
  */
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>

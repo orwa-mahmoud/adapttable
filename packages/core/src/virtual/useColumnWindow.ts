@@ -25,7 +25,11 @@ import type { ColumnDef } from "../types";
 /** How wide a column is assumed to be when nothing has measured it. */
 const DEFAULT_COLUMN_WIDTH = 160;
 
-/** What {@link useColumnWindow} needs. */
+/**
+ * What {@link useColumnWindow} needs.
+ *
+ * @public
+ */
 export interface UseColumnWindowOptions<TRow> {
   /** The columns as rendered, in order. */
   columns: readonly ColumnDef<TRow>[];
@@ -41,7 +45,11 @@ export interface UseColumnWindowOptions<TRow> {
   overscan?: number;
 }
 
-/** The windowed columns and the space the rest occupies. */
+/**
+ * The windowed columns and the space the rest occupies.
+ *
+ * @public
+ */
 export interface ColumnWindow<TRow> {
   /** Whether the returned columns are a window rather than everything. */
   enabled: boolean;
@@ -59,6 +67,8 @@ export interface ColumnWindow<TRow> {
  * @typeParam TRow - The row type.
  * @param options - See {@link UseColumnWindowOptions}.
  * @returns The window; every column and no spacers when disabled.
+ *
+ * @public
  */
 export function useColumnWindow<TRow>(
   options: UseColumnWindowOptions<TRow>

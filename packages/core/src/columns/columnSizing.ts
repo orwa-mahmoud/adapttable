@@ -14,7 +14,11 @@ import type { CSSProperties } from "react";
 import type { ColumnDef } from "../types";
 import { columnGroupStubStyle, isColumnGroupStubKey } from "./headerGroups";
 
-/** What the sizing needs to know about the table as a whole. */
+/**
+ * What the sizing needs to know about the table as a whole.
+ *
+ * @public
+ */
 export interface ColumnSizingOptions<TRow> {
   /** The columns as rendered. */
   columns: readonly ColumnDef<TRow>[];
@@ -35,6 +39,8 @@ export interface ColumnSizingOptions<TRow> {
  * @typeParam TRow - The row type.
  * @param options - See {@link ColumnSizingOptions}.
  * @returns Total flex weight, and each flexible column's percentage.
+ *
+ * @public
  */
 export function columnFlexShares<TRow>(
   options: ColumnSizingOptions<TRow>
@@ -66,6 +72,8 @@ export function columnFlexShares<TRow>(
  * @param shares - Percentages from {@link columnFlexShares}.
  * @param userWidth - The width from the layout state, when the user set one.
  * @returns The style, or `undefined` when the column says nothing about size.
+ *
+ * @public
  */
 export function columnSizeStyle<TRow>(
   column: ColumnDef<TRow>,
@@ -103,6 +111,8 @@ export function columnSizeStyle<TRow>(
  *
  * @param fitColumns - Whether the table fits its container.
  * @returns The style, or `undefined` when it overflows as usual.
+ *
+ * @public
  */
 export function fittedTableStyle(
   fitColumns?: boolean

@@ -46,8 +46,11 @@ export function Flex({
     direction?: "row" | "column";
     gap?: string | number;
     wrap?: "wrap" | "nowrap";
-    justify?: CSSProperties["justifyContent"] | "between" | "end" | "start";
-    align?: CSSProperties["alignItems"] | "center" | "start";
+    // csstype admits any string here, so the shorthand aliases below
+    // (`between`, `end`, `start`, `center`) are already assignable; justifyMap
+    // and alignMap translate them to their flexbox values.
+    justify?: NonNullable<CSSProperties["justifyContent"]>;
+    align?: NonNullable<CSSProperties["alignItems"]>;
     py?: string | number;
     mt?: string | number;
     className?: string;
@@ -134,16 +137,27 @@ export function Box({
 
 /** Props for {@link Text}. */
 export interface TextProps {
+  /** Element or component to render as. */
   as?: "span" | "div" | "label" | "p";
+  /** The kit's size token for the table. */
   size?: Size;
+  /** Font weight token. */
   weight?: "bold" | "regular";
+  /** Text colour token. */
   color?: string;
+  /** Text alignment. */
   align?: "center" | "start" | "end";
+  /** Inline-start margin token. */
   ml?: string | number;
+  /** Class for the element. */
   className?: string;
+  /** Inline style for the element. */
   style?: CSSProperties;
+  /** Content rendered inside. */
   children?: ReactNode;
+  /** Element id. */
   id?: string;
+  /** ARIA role for the element. */
   role?: string;
   "aria-hidden"?: boolean | "true" | "false";
   "data-sort-index"?: number;
@@ -457,6 +471,14 @@ export const Table = {
     className,
     children,
     tableStyle,
+    // The grid semantics belong to the <table>, not to the scroll wrapper this
+    // component owns: a role-less div carrying `aria-rowcount` states the
+    // dataset size to nothing, and the same div carrying `aria-label` names
+    // nothing. Both are pulled out of the rest spread and applied below.
+    role,
+    "aria-rowcount": ariaRowCount,
+    "aria-colcount": ariaColCount,
+    "aria-label": ariaLabel,
     ...rest
   }: Readonly<
     {
@@ -474,7 +496,14 @@ export const Table = {
         data-size={size}
         {...rest}
       >
-        <table data-adapttable-part="table" style={tableStyle}>
+        <table
+          data-adapttable-part="table"
+          style={tableStyle}
+          role={role}
+          aria-rowcount={ariaRowCount}
+          aria-colcount={ariaColCount}
+          aria-label={ariaLabel}
+        >
           {children}
         </table>
       </div>

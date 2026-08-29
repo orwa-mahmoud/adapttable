@@ -55,6 +55,24 @@ import {
   type VirtualTableRow,
 } from "./virtual/useTableVirtualization";
 
+export type {
+  GetCellSpan,
+  GroupByInput,
+  GroupCollapseState,
+  MobileCardRenderer,
+  RowAction,
+  RowActionsLayout,
+  RowActionsRenderer,
+  RowExpansionState,
+  TreeExpansionState,
+};
+
+/**
+ * Everything a kit's desktop table and mobile cards both receive. The render
+ * model resolves it once, so the two layouts cannot disagree.
+ *
+ * @public
+ */
 export interface SharedTableRenderProps<TRow> {
   /** The resolved table model from `useDataTable`. */
   table: UseDataTableResult<TRow>;
@@ -118,6 +136,12 @@ export interface SharedTableRenderProps<TRow> {
    * dataset-relative `from` / `to`.
    */
   windowStart?: number;
+  /**
+   * Rows in the whole dataset, for the card list's `aria-setsize`. A card list
+   * is a real `<ul>`, so a windowed one states its size per item rather than
+   * through the table's `aria-rowcount`.
+   */
+  cardSetSize?: number;
   /** Whether the injected reorder column is start-pinned. */
   reorderPinned?: boolean;
   /**
@@ -153,7 +177,7 @@ export interface SharedTableRenderProps<TRow> {
   editing?: EditableCellEditing<TRow>;
   /**
    * Tree bundle — present iff the host declared a hierarchy. Adapters render
-   * `tree.entries` in place of plain rows and put a {@link TreeToggle} plus
+   * `tree.entries` in place of plain rows and put a `TreeToggle` plus
    * `treeIndentStyle` in the `tree.columnKey` cell.
    */
   tree?: {
@@ -212,12 +236,12 @@ export interface SharedTableRenderProps<TRow> {
   fitColumns?: boolean;
   /**
    * Compact per-column filter row under the header. Desktop only.
-   * Driven by {@link filterDefs} and the source extra bag.
+   * Driven by `filterDefs` and the source extra bag.
    */
   headerFilters?: boolean;
   /**
    * Close a header-filter overlay after a finished single-control write.
-   * Default off — see {@link BaseDataTableProps.closeHeaderFilterOnSelect}.
+   * Default off — see `BaseDataTableProps.closeHeaderFilterOnSelect`.
    */
   closeHeaderFilterOnSelect?: boolean;
   /** Declarative filter defs the header row matches to columns. */
@@ -245,10 +269,17 @@ export interface SharedTableRenderProps<TRow> {
   resizeLabel?: string;
 }
 
-/** The shared prelude every table/card renderer derives before rendering. */
+/**
+ * The shared prelude every table/card renderer derives before rendering.
+ *
+ * @public
+ */
 export interface TableRenderModel<TRow> {
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Selection state for the rendered rows. */
   selection: SelectionState | null;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
   /** Whether a trailing actions column/section renders. */
   showActions: boolean;
@@ -321,6 +352,8 @@ function extraCoveredSlotMap<TRow>(
  * (and trip the duplication gate).
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function tableRenderModel<TRow>(
   props: Pick<
@@ -474,11 +507,12 @@ export function tableRenderModel<TRow>(
  * @param summaryRow - The caller's summary builder, or `undefined` when off.
  * @param rows - The rows the summary describes.
  * @returns The aggregate cells, or `undefined` when no builder is set.
+ *
+ * @public
  */
 export function useSummaryCells<TRow>(
   summaryRow:
-    | ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>)
-    | undefined,
+    ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined,
   rows: readonly TRow[]
 ): Partial<Record<string, ReactNode>> | undefined {
   const fromView = incrementalViewOf(rows)?.aggregates;

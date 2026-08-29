@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Korean (`ko`) label preset. */
+/**
+ * Korean (`ko`) label preset.
+ *
+ * @public
+ */
 export const ko: Required<TableLabels> = {
   table: "데이터 테이블",
   search: "검색",
@@ -112,6 +116,9 @@ export const ko: Required<TableLabels> = {
   resetColumn: "열 재설정",
   sortAscending: "오름차순 정렬",
   sortDescending: "내림차순 정렬",
+  sortedBy: ({ column, ascending }) =>
+    `${column} 기준 ${ascending ? "오름차순" : "내림차순"} 정렬`,
+  sortingCleared: "정렬 해제됨",
   filterColumn: "열 필터",
   columnActions: "열 작업",
   exportCsv: "CSV 내보내기",

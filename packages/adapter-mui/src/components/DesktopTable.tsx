@@ -94,6 +94,7 @@ export function muiColor(color: string | undefined): "default" | "error" {
 }
 
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
+  /** The kit's size token for the table. */
   size: "small" | "medium";
   /** Class applied to every mobile card (merged before `rowClassName`). */
   cardClassName?: string;
@@ -448,10 +449,7 @@ function LeafHeader<TRow>({
 }>): ReactElement {
   const { column } = leaf;
   const ariaSort = leaf.headerProps["aria-sort"] as
-    | "ascending"
-    | "descending"
-    | "none"
-    | undefined;
+    "ascending" | "descending" | "none" | undefined;
   const active = ariaSort === "ascending" || ariaSort === "descending";
   return (
     <TableCell
@@ -472,6 +470,10 @@ function LeafHeader<TRow>({
         <TableSortLabel
           active={active}
           direction={ariaSort === "descending" ? "desc" : "asc"}
+          // Six other kits name this control "Sort by: <column>". Named only by
+          // its own text, it reads as "Person, button" — which does not say what
+          // pressing it does.
+          aria-label={leaf.sortButtonProps["aria-label"]}
           onClick={leaf.sortButtonProps.onClick}
           title={column.headerTooltip}
         >

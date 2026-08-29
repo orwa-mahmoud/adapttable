@@ -40,6 +40,8 @@ import {
 } from "../aggregate/aggregate";
 import { compareValues } from "../sort/compare";
 import type { ColumnDef, SortableValue } from "../types";
+
+export type { AggregateName, Aggregator, ColumnDef, SortableValue };
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,
@@ -53,23 +55,35 @@ import {
 // still where it is exported from.
 export { PIVOT_GRAND_TOTAL_KEY };
 
-/** The label a dimension value gets when the row has none. */
+/**
+ * The label a dimension value gets when the row has none.
+ *
+ * @public
+ */
 export const PIVOT_BLANK = "—";
 
-/** One computed value per cell. */
+/**
+ * One computed value per cell.
+ *
+ * @public
+ */
 export interface PivotMeasure {
   /** The column key whose values are aggregated. */
   key: string;
   /**
    * A built-in name, a name registered on the table that called
-   * {@link pivot}, or your own function.
+   * `pivot`, or your own function.
    */
   agg: AggregateName | (string & {}) | Aggregator;
   /** Header caption. Defaults to the column key. */
   label?: string;
 }
 
-/** What to pivot, and how. */
+/**
+ * What to pivot, and how.
+ *
+ * @public
+ */
 export interface PivotConfig {
   /** Dimensions down the side, outermost first. Empty pivots to one line. */
   rows: readonly string[];
@@ -83,7 +97,11 @@ export interface PivotConfig {
   grandTotals?: boolean;
 }
 
-/** A node in the column header tree. */
+/**
+ * A node in the column header tree.
+ *
+ * @public
+ */
 export interface PivotColumnNode {
   /** The dimension value this node stands for. */
   label: string;
@@ -95,7 +113,11 @@ export interface PivotColumnNode {
   children: readonly PivotColumnNode[];
 }
 
-/** One rendered column: a column path plus the measure shown in it. */
+/**
+ * One rendered column: a column path plus the measure shown in it.
+ *
+ * @public
+ */
 export interface PivotColumnLeaf {
   /** Stable key for React and for column-level state. */
   key: string;
@@ -107,10 +129,18 @@ export interface PivotColumnLeaf {
   total: boolean;
 }
 
-/** What a line in the body is. */
+/**
+ * What a line in the body is.
+ *
+ * @public
+ */
 export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
 
-/** One rendered line. */
+/**
+ * One rendered line.
+ *
+ * @public
+ */
 export interface PivotRow {
   /** Stable id — also the collapse key for a `subtotal` line. */
   key: string;
@@ -128,7 +158,11 @@ export interface PivotRow {
   count: number;
 }
 
-/** The whole pivot, ready to render. */
+/**
+ * The whole pivot, ready to render.
+ *
+ * @public
+ */
 export interface PivotResult {
   /** The column header tree; empty when there are no column dimensions. */
   columnTree: readonly PivotColumnNode[];
@@ -140,7 +174,11 @@ export interface PivotResult {
   rowDepth: number;
 }
 
-/** Options for {@link pivot}. */
+/**
+ * Options for `pivot`.
+ *
+ * @public
+ */
 export interface PivotOptions<TRow> {
   /**
    * Columns, so dimension and measure values resolve through `sortValue`
@@ -333,6 +371,8 @@ function hiddenByCollapse(
  * @param config - Which dimensions go where, and what each cell computes.
  * @param options - Columns for value resolution, formatting, collapse state.
  * @returns The column tree, the rendered columns and every body line.
+ *
+ * @public
  */
 export function pivot<TRow>(
   rows: readonly TRow[],
@@ -555,3 +595,12 @@ function summableNumbers(values: readonly SortableValue[]): number[] {
 
 const sum = (numbers: readonly number[]): number =>
   numbers.reduce((total, n) => total + n, 0);
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+} from "../types";

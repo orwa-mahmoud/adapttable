@@ -7,6 +7,7 @@ import {
   RowReorderAnnouncer,
   SidePanelLayout,
   type TableBodyRegion,
+  TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
   useMountStagger,
@@ -62,6 +63,8 @@ function tableSize(
  * core's `useDataTableShell`; this renders only Chakra controls over it.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
@@ -219,6 +222,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         p={3}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

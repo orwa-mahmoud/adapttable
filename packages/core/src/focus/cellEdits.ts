@@ -8,7 +8,11 @@
  * batch knowing it exists, and there is never a second half-maintained
  * editing route to keep in step.
  */
-/** One cell written — exactly what an inline commit writes. */
+/**
+ * One cell written — exactly what an inline commit writes.
+ *
+ * @public
+ */
 export interface CellEdit<TRow> {
   /** The row being written. */
   row: TRow;
@@ -32,6 +36,8 @@ export interface CellEdit<TRow> {
  * @param onCellEdit - The ordinary inline-edit channel.
  * @returns The handler, or `undefined` when the table takes no edits at all —
  *   which leaves the gesture's key or drag to the browser.
+ *
+ * @public
  */
 export function batchEditHandler<TRow>(
   batch: ((edits: CellEdit<TRow>[]) => void) | undefined,

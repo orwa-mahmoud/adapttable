@@ -3,6 +3,8 @@ import type { HeaderSelectionState } from "../selection/useSelection";
 /**
  * Tri-state for a group checkbox over its leaf row ids — same enum as the
  * table header selection state. Leaf ids only; never synthetic group keys.
+ *
+ * @public
  */
 export function groupSelectionState(
   leafIds: readonly string[],

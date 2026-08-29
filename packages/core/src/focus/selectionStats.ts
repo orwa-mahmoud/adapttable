@@ -16,7 +16,11 @@ import { buildExportTable } from "../export/exportWriter";
 import type { ColumnDef } from "../types";
 import { type CellRange, cellRangeIndices, cellRangeSize } from "./cellRange";
 
-/** The numbers behind a selection. */
+/**
+ * The numbers behind a selection.
+ *
+ * @public
+ */
 export interface SelectionStats {
   /** Every selected cell, numeric or not. */
   cells: number;
@@ -32,7 +36,11 @@ export interface SelectionStats {
   max: number | null;
 }
 
-/** What the statistics need: the rectangle, and the data under it. */
+/**
+ * What the statistics need: the rectangle, and the data under it.
+ *
+ * @public
+ */
 export interface SelectionStatsOptions<TRow> {
   /**
    * Off unless the host asked for it. Passed rather than checked at the call
@@ -74,6 +82,8 @@ function numeric(value: unknown): number | null {
  * @typeParam TRow - The row type.
  * @param options - See {@link SelectionStatsOptions}.
  * @returns The statistics, or `null` when nothing is selected.
+ *
+ * @public
  */
 export function selectionStats<TRow>(
   options: SelectionStatsOptions<TRow>

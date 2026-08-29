@@ -31,7 +31,11 @@ import {
 } from "./useCellEditing";
 import type { CellValidator, EditValidationState } from "./validation";
 
-/** Opt-in editing bundle from {@link TableChrome.editing}. */
+/**
+ * Opt-in editing bundle from {@link TableChrome.editing}.
+ *
+ * @public
+ */
 export interface EditableCellEditing<TRow> {
   /**
    * The per-cell change channel. Return a promise and the cell shows it is
@@ -42,6 +46,7 @@ export interface EditableCellEditing<TRow> {
    * the row.
    */
   onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+  /** Current editing state. */
   state: CellEditingState;
   /**
    * Validation, when the host declared any. A commit runs the validators first
@@ -81,11 +86,20 @@ export interface EditableCellEditing<TRow> {
   featureHost?: FeatureHostState;
 }
 
-/** Display / edit mode for one cell. */
+/**
+ * Display / edit mode for one cell.
+ *
+ * @public
+ */
 export type EditableCellMode = "display" | "activatable" | "editing";
 
-/** Controller returned by {@link editableCellController}. */
+/**
+ * Controller returned by `editableCellController`.
+ *
+ * @public
+ */
 export interface EditableCellController<TRow = unknown> {
+  /** Which editing mode is active. */
   mode: EditableCellMode;
   /** The validator's message for this cell, if it rejected the last commit. */
   error?: string;
@@ -107,8 +121,11 @@ export interface EditableCellController<TRow = unknown> {
   editor: CellEditor | null;
   /** Normalized select options (empty for text/number). */
   selectOptions: ReturnType<typeof normalizeEditorOptions>;
+  /** The value being edited, as text. */
   draft: string;
+  /** Opens the editor. */
   begin: () => void;
+  /** Replaces the draft. */
   setDraft: (value: string) => void;
   /** Commit the draft now, without waiting for Enter or a blur. */
   commit: () => void;
@@ -144,6 +161,8 @@ export interface EditableCellController<TRow = unknown> {
  * Derive the per-cell editing controller. When `editing` is omitted (host
  * did not pass `onCellEdit`), always returns `mode: "display"` — zero UI
  * change for tables that never opted in.
+ *
+ * @public
  */
 export function editableCellController<TRow>(options: {
   editing: EditableCellEditing<TRow> | undefined;
@@ -432,6 +451,8 @@ export function stopCellEditKeyboard(
  * Attach as a `ref` (or kit `inputRef`) so the editor receives focus when the
  * cell enters edit mode — replaces the `autoFocus` attribute (axe/a11y).
  * Accepts DOM nodes and kit refs that expose `.focus()` (e.g. antd InputRef).
+ *
+ * @public
  */
 export function focusEditorOnMount(node: { focus: () => void } | null): void {
   node?.focus();
@@ -448,6 +469,8 @@ export function focusEditorOnMount(node: { focus: () => void } | null): void {
  * @param editing - The editing bundle from the chrome.
  * @param rowId - The row's stable id.
  * @returns Whether to mark the row.
+ *
+ * @public
  */
 export function rowIsDirty<TRow>(
   editing: EditableCellEditing<TRow> | undefined,
@@ -460,6 +483,8 @@ export function rowIsDirty<TRow>(
  * Memo digest for one desktop/card row: `null` when editing is off (host
  * never passed `onCellEdit`); empty string when this row is idle; otherwise
  * `columnKey:draft` so only the active edit row re-renders on keystrokes.
+ *
+ * @public
  */
 export function rowEditingSignature<TRow>(
   editing: EditableCellEditing<TRow> | undefined,

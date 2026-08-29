@@ -34,7 +34,7 @@ load `buildPrintDocument` into a hidden iframe and call `window.print()`.
 stylesheet — repeating `thead`, `break-inside: avoid` on rows and groups,
 column widths from the table, `padding-inline-start` so a tree or a
 group indents under RTL. `PrintLayoutOptions` / `PdfWriterOptions` /
-`PrintPageSize` configure title, direction, paper and whether a
+`PrintPageSize` / `PrintPageBreak` configure title, direction, paper and whether a
 top-level group starts a new page (`pageBreak: "group"`). Paper defaults
 to A4 landscape; direction inherits `document.documentElement.dir` when
 omitted, so print matches what the reader is looking at.

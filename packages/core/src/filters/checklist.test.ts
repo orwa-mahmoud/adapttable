@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -124,16 +124,16 @@ describe("useChecklistFilter", () => {
     );
     expect(result.current.available).toBe(true);
     expect(result.current.virtualize).toBe(false);
-    result.current.setQuery("core");
+    act(() => result.current.setQuery("core"));
     rerender({});
     expect(result.current.visible.map((item) => item.value)).toEqual(["Core"]);
-    result.current.selectAllVisible();
+    act(() => result.current.selectAllVisible());
     expect(setExtra).toHaveBeenCalledWith("team", ["Core"]);
-    result.current.clear();
+    act(() => result.current.clear());
     expect(setExtra).toHaveBeenCalledWith("team", undefined);
-    result.current.toggle("Web", true);
+    act(() => result.current.toggle("Web", true));
     expect(setExtra).toHaveBeenCalledWith("team", ["Web"]);
-    result.current.toggle("Web", false);
+    act(() => result.current.toggle("Web", false));
     expect(setExtra).toHaveBeenCalledWith("team", undefined);
   });
 

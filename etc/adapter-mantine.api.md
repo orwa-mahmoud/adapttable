@@ -62,6 +62,7 @@ import { getHistoryAdapter } from '@adapttable/core';
 import { GroupMoreButtonProps } from '@adapttable/core/adapter';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { JSX } from 'react';
+import { MobileCardRenderer } from '@adapttable/core';
 import { MountStaggerOptions } from '@adapttable/core/adapter';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
@@ -70,6 +71,7 @@ import { PivotPanelChromeProps } from '@adapttable/core/adapter';
 import { ReactNode } from 'react';
 import { resolveFilterRegistry } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowActionsRenderer } from '@adapttable/core';
 import { RowEditActionsProps } from '@adapttable/core/adapter';
 import { RowReorderButtonsProps } from '@adapttable/core/adapter';
 import { RowReorderHandleProps } from '@adapttable/core/adapter';
@@ -85,6 +87,7 @@ import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/core';
 import { TreeCellProps } from '@adapttable/core/adapter';
 import { TreeToggleProps } from '@adapttable/core/adapter';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -132,7 +135,7 @@ export interface AutoFilterFormProps<TRow> {
 
 export { BaseDataTableProps }
 
-// @public (undocumented)
+// @public
 export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>): JSX.Element;
 
 export { BatchEditBarProps }
@@ -162,7 +165,7 @@ export { ColumnGroupDef }
 
 export { ColumnGroupShow }
 
-// @public (undocumented)
+// @public
 export function ColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>): JSX.Element;
 
 export { ColumnGroupToggleProps }
@@ -192,20 +195,31 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.E
 
 // @public
 export interface DataTableClassNames {
-    // (undocumented)
     card?: string;
-    // (undocumented)
     footer?: string;
-    // (undocumented)
     root?: string;
-    // (undocumented)
     table?: string;
-    // (undocumented)
     toolbar?: string;
 }
 
 // @public
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
+
+// @public
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+    animate?: boolean;
+    classNames?: DataTableClassNames;
+    data?: readonly TRow[];
+    error?: Error | null;
+    loading?: boolean;
+    savedViews?: UseSavedViewsOptions;
+    slots?: DataTableSlots;
+    source?: TableSource<TRow>;
+    total?: number;
+    urlAdapter?: UrlStateAdapter;
+    urlKey?: string;
+    urlSync?: boolean;
+}
 
 // @public
 export interface DataTableSlots {
@@ -283,27 +297,21 @@ export function FilterDrawer(input: Readonly<FilterDrawerProps>): JSX.Element;
 
 // @public
 export interface FilterDrawerProps {
-    // (undocumented)
     activeFilterCount: number;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     filters: ReactNode;
-    // (undocumented)
     labels: Required<TableLabels>;
     onClearFilters: () => void;
-    // (undocumented)
     onClose: () => void;
-    // (undocumented)
     opened: boolean;
 }
 
-// @public (undocumented)
+// @public
 export function FilterHeaderControl<TRow>(props: Readonly<FilterHeaderControlProps<TRow>>): JSX.Element;
 
 export { FilterHeaderControlProps }
 
-// @public (undocumented)
+// @public
 export function FilterHeaderRow<TRow>(props: Readonly<FilterHeaderRowProps<TRow>>): JSX.Element;
 
 export { FilterHeaderRowProps }
@@ -323,19 +331,21 @@ export { FilterTypeSpec }
 
 export { FilterValue }
 
-// @public (undocumented)
+// @public
 export function FindBar(props: Readonly<FindBarProps>): JSX.Element;
 
 export { FindBarProps }
 
 export { getHistoryAdapter }
 
-// @public (undocumented)
+// @public
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;
 
 export { GroupMoreButtonProps }
 
 export { InfiniteQueryLike }
+
+export { MobileCardRenderer }
 
 export { MountStaggerOptions }
 
@@ -348,26 +358,16 @@ export function PaginationFooter(input: Readonly<PaginationFooterProps>): JSX.El
 
 // @public
 export interface PaginationFooterProps {
-    // (undocumented)
     defaultLimit?: number;
-    // (undocumented)
     fromIndex: number;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     limit: number;
-    // (undocumented)
     onLimitChange: (limit: number) => void;
-    // (undocumented)
     onPageChange: (page: number) => void;
-    // (undocumented)
     page: number;
     showRowsPerPage?: boolean;
-    // (undocumented)
     toIndex: number;
-    // (undocumented)
     total: number;
-    // (undocumented)
     totalPages: number;
 }
 
@@ -380,17 +380,19 @@ export { resolveFilterRegistry }
 
 export { RowAction }
 
-// @public (undocumented)
+export { RowActionsRenderer }
+
+// @public
 export function RowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): JSX.Element;
 
 export { RowEditActionsProps }
 
-// @public (undocumented)
+// @public
 export function RowReorderButtons<TRow>(props: Readonly<RowReorderButtonsProps<TRow>>): JSX.Element;
 
 export { RowReorderButtonsProps }
 
-// @public (undocumented)
+// @public
 export function RowReorderHandle<TRow>(props: Readonly<RowReorderHandleProps<TRow>>): JSX.Element;
 
 export { RowReorderHandleProps }
@@ -439,12 +441,14 @@ export interface TableSkeletonProps {
 
 export { TableSource }
 
-// @public (undocumented)
+export { ToolbarSlots }
+
+// @public
 export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): JSX.Element;
 
 export { TreeCellProps }
 
-// @public (undocumented)
+// @public
 export function TreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>): JSX.Element;
 
 export { TreeToggleProps }

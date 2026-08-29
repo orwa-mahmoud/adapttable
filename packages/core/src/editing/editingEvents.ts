@@ -11,12 +11,18 @@ import { useMemo } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { devWarn } from "../utils/devWarn";
 
-/** Which commit unit produced an event. */
+/**
+ * Which commit unit produced an event.
+ *
+ * @public
+ */
 export type EditUnit = "cell" | "row" | "batch";
 
 /**
  * One lifecycle event. `columnKey` is the edited field for a cell, and empty
  * for a row or batch whose payload is the whole patch (or list of patches).
+ *
+ * @public
  */
 export interface EditEvent<TRow> {
   /** The row as it was when the gesture started. */
@@ -35,10 +41,18 @@ export interface EditEvent<TRow> {
   error?: string;
 }
 
-/** A host callback that observes one kind of event. */
+/**
+ * A host callback that observes one kind of event.
+ *
+ * @public
+ */
 export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
 
-/** The five observers a host may wire. All optional, all inert when omitted. */
+/**
+ * The five observers a host may wire. All optional, all inert when omitted.
+ *
+ * @public
+ */
 export interface EditLifecycle<TRow> {
   /** An editor opened. */
   onEditStart?: EditEventHandler<TRow>;

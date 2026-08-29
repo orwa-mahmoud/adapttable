@@ -9,10 +9,143 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
 // @public
+export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
+
+// @public
 export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
 
 // @public
 export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
+
+// @public
+export type CellEditor = "text" | "number" |
+/** A checkbox. Commits `true` / `false`, never a string. */
+"boolean" |
+/** A date. Commits `YYYY-MM-DD`, the value a date input holds. */
+"date" |
+/** A date and a time. Commits `YYYY-MM-DDTHH:mm`. */
+"datetime" |
+/** A time of day. Commits `HH:mm`. */
+"time" | {
+    type: "select";
+    options: readonly CellEditorOption[] | readonly string[];
+} | {
+    type: "multi-select";
+    options: readonly CellEditorOption[] | readonly string[];
+} | {
+    type: "custom";
+    render: CustomCellEditorRender;
+};
+
+// @public
+export interface CellEditorOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export interface CellProps<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
+// @public
+export interface ColumnDef<TRow> {
+    accessor?: (row: TRow) => ReactNode;
+    align?: "start" | "center" | "end";
+    Cell?: ComponentType<CellProps<TRow>>;
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
+    editor?: CellEditor;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
+    filter?: ColumnFilter<TRow>;
+    flex?: number;
+    formatValue?: (row: TRow) => string;
+    group?: string | readonly string[];
+    groupShow?: ColumnGroupShow;
+    header?: ReactNode;
+    headerActions?: ReactNode;
+    headerTooltip?: string;
+    hideOnDesktop?: boolean;
+    hideOnMobile?: boolean;
+    i18n?: Readonly<Record<string, string>>;
+    key: string;
+    lockPin?: boolean;
+    lockPosition?: boolean;
+    lockVisibility?: boolean;
+    lockWidth?: boolean;
+    maxWidth?: number;
+    meta?: Record<string, unknown>;
+    minWidth?: number;
+    mobileLabel?: string;
+    parseValue?: (draft: string, row: TRow) => unknown;
+    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
+    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
+    responsivePriority?: number;
+    rowSpan?: number | ((row: TRow) => number);
+    sortable?: boolean;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    width?: number | string;
+}
+
+// @public
+export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
+    label?: string;
+});
+
+// @public
+export interface ColumnFooterContext<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
+// @public
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export interface ColumnHeaderContext<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController;
+}
+
+// @public
+export interface ColumnHeaderController {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
+
+// @public
+export interface CustomCellEditorCtrl {
+    cancel: () => void;
+    commit: () => void;
+    draft: string;
+    error?: string;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+    label: string;
+    onBlur: () => void;
+    onKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    setDraft: (value: string) => void;
+    validating: boolean;
+}
+
+// @public
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
 
 // @public
 export function deserializePivot(raw: string | null): PivotConfig;
@@ -22,6 +155,29 @@ export function deserializePivotState(raw: string | null): PivotUrlState;
 
 // @public
 export const EMPTY_PIVOT_CONFIG: PivotConfig;
+
+// @public
+export interface FilterDef<TRow = unknown> {
+    column?: string;
+    getValue?: (row: TRow) => unknown;
+    key: string;
+    label?: string;
+    options?: FilterOptionsSource;
+    placeholder?: string;
+    type: string;
+}
+
+// @public
+export interface FilterOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
+
+// @public
+export type FilterType = (typeof FILTER_TYPES)[number];
 
 // @public
 export function isPivotReady(config: PivotConfig): boolean;
@@ -36,10 +192,10 @@ export function moveField(config: PivotConfig, zone: PivotZone, index: number, d
 export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
 
 // @public
-export const PIVOT_BLANK = "\u2014";
+export const PIVOT_BLANK = "—";
 
 // @public
-export const PIVOT_GRAND_TOTAL_KEY = "\u0002grand";
+export const PIVOT_GRAND_TOTAL_KEY = "grand";
 
 // @public
 export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
@@ -182,16 +338,251 @@ export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOption
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
 // @public
+export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
+export interface TableLabels {
+    actions?: string;
+    addRow?: string;
+    allMatchingSelected?: (total: number) => string;
+    applyView?: string;
+    autoSizeColumn?: string;
+    autoSizeColumns?: string;
+    boolAny?: string;
+    boolFalse?: string;
+    boolTrue?: string;
+    cancel?: string;
+    cancelAll?: string;
+    checklistClear?: string;
+    checklistNoValues?: string;
+    checklistSearch?: string;
+    clearAll?: string;
+    closePanel?: string;
+    collapseColumnGroup?: string;
+    collapseGroup?: string;
+    collapseRow?: string;
+    columnActions?: string;
+    columns?: string;
+    commandEmpty?: string;
+    commandPalette?: string;
+    commandSearch?: string;
+    contextMenu?: string;
+    copyCells?: string;
+    cutCells?: string;
+    defaultViewBadge?: string;
+    deleteRow?: string;
+    deleteRowConfirm?: string;
+    deleteView?: string;
+    density?: string;
+    densityComfortable?: string;
+    densityCompact?: string;
+    duplicateRow?: string;
+    editCell?: string;
+    editConflict?: string;
+    editNothingToUndo?: string;
+    editRedone?: (cells: number) => string;
+    editRow?: string;
+    editUndone?: (cells: number) => string;
+    enterFullscreen?: string;
+    errorMessage?: string;
+    errorTitle?: string;
+    exitFullscreen?: string;
+    expandColumnGroup?: string;
+    expandGroup?: string;
+    expandRow?: string;
+    exportCsv?: string;
+    exportDone?: string;
+    exportFailed?: string;
+    exportFile?: (format: string) => string;
+    exportThisPage?: string;
+    filterAddCondition?: string;
+    filterAddGroup?: string;
+    filterColumn?: string;
+    filterCombinatorAnd?: string;
+    filterCombinatorOr?: string;
+    filterField?: string;
+    filterRemoveCondition?: string;
+    filterRemoveGroup?: string;
+    filters?: string;
+    filtersDone?: string;
+    filterTree?: string;
+    findClose?: string;
+    findInTable?: string;
+    findMatchCount?: (current: number, total: number) => string;
+    findNext?: string;
+    findPlaceholder?: string;
+    findPrevious?: string;
+    from?: string;
+    goToPage?: (page: number) => string;
+    gridCellPosition?: (row: number, total: number) => string;
+    gridFillHandle?: string;
+    gridRangeCopied?: (cells: number) => string;
+    gridRangeCopyFailed?: string;
+    gridRangeFilled?: (cells: number) => string;
+    gridRangePasted?: (cells: number) => string;
+    gridRangePasteFailed?: string;
+    gridRangeSelection?: (range: {
+        fromRow: number;
+        toRow: number;
+        fromColumn: number;
+        toColumn: number;
+        cells: number;
+    }) => string;
+    groupCount?: (count: number) => string;
+    groupTotal?: (label: string) => string;
+    headerFilters?: string;
+    hideAllColumns?: string;
+    hideColumn?: string;
+    keepMine?: string;
+    loading?: string;
+    loadMore?: string;
+    moreGroups?: (remaining: number) => string;
+    moreRowsInGroup?: (remaining: number) => string;
+    moveEnd?: string;
+    moveRowDown?: string;
+    moveRowUp?: string;
+    moveStart?: string;
+    moveViewDown?: string;
+    moveViewUp?: string;
+    nextPage?: string;
+    noData?: string;
+    noResults?: string;
+    noticeEditWithoutWriter?: string;
+    noticeExportAllPage?: string;
+    noticeGroupingUnavailable?: string;
+    noticePinNested?: string;
+    noticeReorderNested?: string;
+    noticeVirtualizePaged?: string;
+    opAfter?: string;
+    opAtLeast?: string;
+    opAtMost?: string;
+    opBefore?: string;
+    opBetween?: string;
+    opContains?: string;
+    opEmpty?: string;
+    opEndsWith?: string;
+    opEqual?: string;
+    operator?: string;
+    opGreater?: string;
+    opIn?: string;
+    opLess?: string;
+    opNotContains?: string;
+    opNotEmpty?: string;
+    opNotEqual?: string;
+    opNotIn?: string;
+    opOn?: string;
+    opOnOrAfter?: string;
+    opOnOrBefore?: string;
+    opRelative?: string;
+    opStartsWith?: string;
+    pageOf?: (range: {
+        page: number;
+        total: number;
+    }) => string;
+    pageSelected?: (count: number) => string;
+    pendingRows?: (count: number) => string;
+    pinEnd?: string;
+    pinStart?: string;
+    pinToBottom?: string;
+    pinToTop?: string;
+    pivotAdd?: string;
+    pivotAggregation?: string;
+    pivotColumns?: string;
+    pivotGrandTotal?: string;
+    pivotMeasures?: string;
+    pivotMoveDown?: string;
+    pivotMoveUp?: string;
+    pivotRemove?: string;
+    pivotRows?: string;
+    pivotTotal?: string;
+    previousPage?: string;
+    print?: string;
+    readOnlyViewBadge?: string;
+    redoEdit?: string;
+    relLastN?: string;
+    relNextN?: string;
+    relPreviousMonth?: string;
+    relThisMonth?: string;
+    relThisWeek?: string;
+    relToday?: string;
+    relTomorrow?: string;
+    relYesterday?: string;
+    removeFilter?: (label: string) => string;
+    renameView?: string;
+    reorderRow?: string;
+    resetColumn?: string;
+    resetColumns?: string;
+    resizeColumn?: string;
+    retry?: string;
+    rowActionsMenu?: string;
+    rowLifted?: (position: number) => string;
+    rowMoved?: (from: number, to: number) => string;
+    rowReorderCancelled?: string;
+    rowSeparator?: string;
+    rowsPerPage?: string;
+    saveAll?: string;
+    savedViews?: string;
+    saveRow?: string;
+    saveView?: string;
+    search?: string;
+    searchColumns?: string;
+    searchPlaceholder?: string;
+    selectAll?: string;
+    selectAllMatching?: (total: number) => string;
+    selectColumn?: string;
+    selectedCount?: (count: number) => string;
+    selectionAverage?: string;
+    selectionCount?: string;
+    selectionMax?: string;
+    selectionMin?: string;
+    selectionSum?: string;
+    selectRow?: string;
+    setDefaultView?: string;
+    showAllColumns?: string;
+    showColumn?: string;
+    showing?: (range: {
+        from: number;
+        to: number;
+        total: number;
+    }) => string;
+    sidePanel?: string;
+    sortAscending?: string;
+    sortBy?: string;
+    sortDescending?: string;
+    sortedBy?: (info: {
+        column: string;
+        ascending: boolean;
+    }) => string;
+    sortingCleared?: string;
+    table?: string;
+    takeTheirs?: string;
+    theirsValue?: (value: string) => string;
+    to?: string;
+    undoEdit?: string;
+    unpin?: string;
+    unpinAllColumns?: string;
+    unpinRow?: string;
+    value?: string;
+    viewName?: string;
+}
+
+// @public
+export interface UrlStateAdapter {
+    getSearch(): string;
+    setSearch(search: string, options?: {
+        push?: boolean;
+    }): void;
+    subscribe(onChange: () => void): () => void;
+}
+
+// @public
 export function usePivotUrlState(options?: UsePivotUrlStateOptions): UsePivotUrlStateResult;
 
 // @public
 export interface UsePivotUrlStateOptions {
     defaultConfig?: PivotConfig;
-    // (undocumented)
     urlAdapter?: UrlStateAdapter;
-    // (undocumented)
     urlKey?: string;
-    // (undocumented)
     urlSync?: boolean;
 }
 

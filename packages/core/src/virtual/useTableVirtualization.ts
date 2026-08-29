@@ -8,7 +8,11 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { VIRTUAL_OVERSCAN } from "../constants";
 import { type RowPairMeasurer, useRowPairMeasurer } from "./measureRowPair";
 
-/** One row/card entry materialized from a virtual window. */
+/**
+ * One row/card entry materialized from a virtual window.
+ *
+ * @public
+ */
 export interface VirtualTableRow<TRow> {
   /** Row data for this visual slot. */
   row: TRow;
@@ -51,14 +55,22 @@ function pendingListSize(
   return count * asSizeEstimator(estimateSize)(0);
 }
 
-/** Dataset index for ARIA / focus — the window index when pinning is off. */
+/**
+ * Dataset index for ARIA / focus — the window index when pinning is off.
+ *
+ * @public
+ */
 export function rowSourceIndex(
   entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">
 ): number {
   return entry.sourceIndex ?? entry.index;
 }
 
-/** Result consumed by adapters that opt into virtualized rendering. */
+/**
+ * Result consumed by adapters that opt into virtualized rendering.
+ *
+ * @public
+ */
 export interface TableVirtualization<TRow> {
   /** Whether the returned rows represent a virtual window. */
   enabled: boolean;
@@ -81,7 +93,11 @@ export interface TableVirtualization<TRow> {
   measureRowPair?: RowPairMeasurer;
 }
 
-/** Options for {@link useTableVirtualization}. */
+/**
+ * Options for `useTableVirtualization`.
+ *
+ * @public
+ */
 export interface UseTableVirtualizationOptions<TRow> {
   /** Source rows from the table source. */
   rows: readonly TRow[];
@@ -111,7 +127,11 @@ export interface UseTableVirtualizationOptions<TRow> {
   expandable?: boolean;
 }
 
-/** Resolve either virtual entries or the full source rows into render entries. */
+/**
+ * Resolve either virtual entries or the full source rows into render entries.
+ *
+ * @public
+ */
 export function resolveVirtualRows<TRow>(
   rows: readonly TRow[],
   rowKey: (row: TRow) => string,
@@ -148,6 +168,8 @@ export function virtualColumnSpan(
  * Headless window virtualization for adapter tables. When disabled, it returns
  * every row and no spacer/measurement data, so adapters can use the same render
  * path for virtual and non-virtual tables.
+ *
+ * @public
  */
 export function useTableVirtualization<TRow>({
   rows,
@@ -288,19 +310,29 @@ export function useTableVirtualization<TRow>({
   };
 }
 
-/** Result of {@link useKeyedVirtualization} — index window over a keyed list. */
+/**
+ * Result of {@link useKeyedVirtualization} — index window over a keyed list.
+ *
+ * @public
+ */
 export interface KeyedVirtualization {
+  /** Whether virtualization is on. */
   enabled: boolean;
   /** Source indices in the virtual window (or every index when disabled). */
   indices: readonly number[];
+  /** Height standing in for the rows above the window. */
   paddingTop: number;
+  /** Height standing in for the rows below it. */
   paddingBottom: number;
+  /** Hands a row element to the virtualizer. */
   measureElement?: (node: Element | null) => void;
 }
 
 /**
  * Virtualize an opaque keyed list (e.g. grouped flat entries). Same window /
- * element modes as {@link useTableVirtualization}.
+ * element modes as `useTableVirtualization`.
+ *
+ * @public
  */
 export function useKeyedVirtualization(options: {
   keys: readonly string[];
@@ -398,7 +430,11 @@ export function useKeyedVirtualization(options: {
   };
 }
 
-/** Slice a flat grouped model to the virtual window indices. */
+/**
+ * Slice a flat grouped model to the virtual window indices.
+ *
+ * @public
+ */
 export function windowGroupedEntries<TEntry>(
   entries: readonly TEntry[],
   indices: readonly number[]

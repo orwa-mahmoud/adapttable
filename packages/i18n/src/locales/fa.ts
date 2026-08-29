@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Persian / Farsi (`fa`) label preset. Pairs with `dir="rtl"`. */
+/**
+ * Persian / Farsi (`fa`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const fa: Required<TableLabels> = {
   table: "جدول داده",
   search: "جستجو",
@@ -113,6 +117,9 @@ export const fa: Required<TableLabels> = {
   resetColumn: "بازنشانی ستون",
   sortAscending: "مرتب‌سازی صعودی",
   sortDescending: "مرتب‌سازی نزولی",
+  sortedBy: ({ column, ascending }) =>
+    `مرتب‌شده بر اساس ${column}، ${ascending ? "صعودی" : "نزولی"}`,
+  sortingCleared: "مرتب‌سازی حذف شد",
   filterColumn: "فیلتر ستون",
   columnActions: "اقدامات ستون",
   exportCsv: "خروجی CSV",

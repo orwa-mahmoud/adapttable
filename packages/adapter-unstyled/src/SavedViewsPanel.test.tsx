@@ -6,7 +6,7 @@
  * gets wrong: reordering that needs a mouse, and a rename you cannot escape.
  */
 import type { SavedView } from "@adapttable/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -109,7 +109,7 @@ describe("SavedViewsPanel", () => {
     const handlers = renderPanel();
 
     const down = screen.getAllByRole("button", { name: "Move view down" })[0]!;
-    down.focus();
+    act(() => down.focus());
     expect(down).toHaveFocus();
     fireEvent.click(down);
 
@@ -285,7 +285,7 @@ describe("SavedViewsPanel", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Rename view" })[0]!);
     const input = screen.getByRole("textbox", { name: "View name" });
-    input.focus();
+    act(() => input.focus());
     fireEvent.change(input, { target: { value: "Ren" } });
 
     expect(screen.getByRole("textbox", { name: "View name" })).toBe(input);

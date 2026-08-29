@@ -82,7 +82,11 @@ const slots: ChecklistSlots = {
   Checkbox: ChecklistBox,
 };
 
-/** Native checklist — wrapping options, not one value per row. */
+/**
+ * Native checklist — wrapping options, not one value per row.
+ *
+ * @public
+ */
 export function ChecklistFilter<TRow>(
   props: Readonly<ChecklistFilterProps<TRow>>
 ) {

@@ -32,7 +32,11 @@ import {
   writeSortLevels,
 } from "./serialize";
 
-/** Options for {@link useTableUrlState}. */
+/**
+ * Options for `useTableUrlState`.
+ *
+ * @public
+ */
 export interface UseTableUrlStateOptions {
   /**
    * URL-state backend. Defaults to the browser History API. Supply a
@@ -60,7 +64,11 @@ export interface UseTableUrlStateOptions {
   urlKey?: string;
 }
 
-/** State + setters returned by {@link useTableUrlState}. */
+/**
+ * State + setters returned by `useTableUrlState`.
+ *
+ * @public
+ */
 export interface UseTableUrlStateResult extends TableStateMutators {
   /** Current 1-based page. */
   page: number;
@@ -77,7 +85,7 @@ export interface UseTableUrlStateResult extends TableStateMutators {
   sortBy: string | undefined;
   /** Active sort direction, if any. */
   sortDir: SortDirection | undefined;
-  /** Active single-level row-grouping column key, if any. */
+  /** Active row-grouping keys, comma-separated, if any. */
   groupBy: string | undefined;
   /** The extra-filter bag. */
   extra: ExtraFilters;
@@ -99,7 +107,7 @@ const NO_KEYS: readonly string[] = [];
  * Headless URL-synced table state. Keeps page / limit / search / sort and
  * an arbitrary `extra` filter bag in the query string (or a local store
  * when disabled), so reloads, shared links, and back/forward all restore
- * the exact slice. Decoupled from any router via {@link UrlStateAdapter}.
+ * the exact slice. Decoupled from any router via `UrlStateAdapter`.
  *
  * `defaults` apply only while the URL is silent about a key. When the user
  * explicitly clears a defaulted value (clearing the search, removing a
@@ -110,6 +118,8 @@ const NO_KEYS: readonly string[] = [];
  *
  * @param options - See {@link UseTableUrlStateOptions}.
  * @returns The current state and its setters.
+ *
+ * @public
  */
 export function useTableUrlState(
   options: UseTableUrlStateOptions = {}

@@ -11,26 +11,43 @@
  */
 import type { RowPatchStreamStatus } from "./status";
 
-/** The slice of WebSocket / EventSource this needs. Anything else can stand in. */
+/**
+ * The slice of WebSocket / EventSource this needs. Anything else can stand in.
+ *
+ * @public
+ */
 export interface StreamSocket {
+  /** Subscribes to a socket event. */
   addEventListener(
     type: string,
     listener: (event: StreamSocketEvent) => void
   ): void;
+  /** Unsubscribes from a socket event. */
   removeEventListener(
     type: string,
     listener: (event: StreamSocketEvent) => void
   ): void;
+  /** Closes the socket. */
   close(): void;
+  /** The socket's current state. */
   readonly readyState: number;
 }
 
-/** An `open` / `message` / `error` / `close` payload. */
+/**
+ * An `open` / `message` / `error` / `close` payload.
+ *
+ * @public
+ */
 export interface StreamSocketEvent {
+  /** The frame's payload. */
   data?: unknown;
 }
 
-/** How long to wait, and how many times, before giving up. */
+/**
+ * How long to wait, and how many times, before giving up.
+ *
+ * @public
+ */
 export interface RowPatchStreamReconnect {
   /** Delay before the next open. Defaults to 1000 ms. */
   delayMs?: number;
@@ -38,7 +55,11 @@ export interface RowPatchStreamReconnect {
   maxAttempts?: number;
 }
 
-/** What {@link openRowPatchStream} needs. */
+/**
+ * What {@link openRowPatchStream} needs.
+ *
+ * @public
+ */
 export interface OpenRowPatchStreamOptions {
   /** WebSocket url. Takes precedence over `eventSource`. */
   websocket?: string;
@@ -63,7 +84,11 @@ export interface OpenRowPatchStreamOptions {
   createEventSource?: (url: string) => StreamSocket | undefined;
 }
 
-/** A live connection, and the one thing a host does to it. */
+/**
+ * A live connection, and the one thing a host does to it.
+ *
+ * @public
+ */
 export interface RowPatchStreamHandle {
   /** The current status. */
   readonly status: RowPatchStreamStatus;
@@ -111,6 +136,8 @@ function makeEventSource(
  *
  * @param options - See {@link OpenRowPatchStreamOptions}.
  * @returns The handle; call `close()` when the host is done.
+ *
+ * @public
  */
 export function openRowPatchStream(
   options: OpenRowPatchStreamOptions

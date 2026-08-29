@@ -19,7 +19,11 @@ import type { CellEdit } from "../focus/cellEdits";
 import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
 
-/** One undoable gesture: what it wrote, and what was there before. */
+/**
+ * One undoable gesture: what it wrote, and what was there before.
+ *
+ * @public
+ */
 export interface EditHistoryEntry<TRow> {
   /** The edits the gesture made, in the order it made them. */
   redo: readonly CellEdit<TRow>[];
@@ -27,7 +31,11 @@ export interface EditHistoryEntry<TRow> {
   undo: readonly CellEdit<TRow>[];
 }
 
-/** What {@link useEditHistory} needs. */
+/**
+ * What `useEditHistory` needs.
+ *
+ * @public
+ */
 export interface UseEditHistoryOptions<TRow> {
   /** Off unless the host asked for it; when false nothing is recorded. */
   enabled: boolean;
@@ -39,7 +47,11 @@ export interface UseEditHistoryOptions<TRow> {
   onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
 }
 
-/** What {@link useEditHistory} returns. */
+/**
+ * What `useEditHistory` returns.
+ *
+ * @public
+ */
 export interface EditHistoryState<TRow> {
   /**
    * Whether the host armed a history at all.
@@ -88,6 +100,8 @@ export interface EditHistoryState<TRow> {
  * @param row - The row being read.
  * @param column - The column being read.
  * @returns The current value, in whatever type the row holds it.
+ *
+ * @public
  */
 export function readCellValue<TRow>(
   row: TRow,
@@ -107,6 +121,8 @@ const DEFAULT_DEPTH = 50;
  * @typeParam TRow - The row type.
  * @param options - See {@link UseEditHistoryOptions}.
  * @returns The history controls; inert when `enabled` is false.
+ *
+ * @public
  */
 export function useEditHistory<TRow>(
   options: UseEditHistoryOptions<TRow>
@@ -198,7 +214,11 @@ export function useEditHistory<TRow>(
   );
 }
 
-/** The props a table needs for its history — the `editHistory` prop, resolved. */
+/**
+ * The props a table needs for its history — the `editHistory` prop, resolved.
+ *
+ * @public
+ */
 export interface TableEditHistoryProps<TRow> {
   /** The `editHistory` prop as the host wrote it. */
   editHistory?: boolean | { depth?: number };
@@ -222,12 +242,13 @@ export interface TableEditHistoryProps<TRow> {
  * @typeParam TRow - The row type.
  * @param props - See {@link TableEditHistoryProps}.
  * @returns The history state and the commit channel to give the chrome.
+ *
+ * @public
  */
 export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
   history: EditHistoryState<TRow>;
   onCellEdit:
-    | ((row: TRow, key: string, nextValue: unknown) => unknown)
-    | undefined;
+    ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
 } {
   const { editHistory, columns, onCellEdit } = props;
   const history = useEditHistory<TRow>({
@@ -261,6 +282,8 @@ export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
  * @param apply - The resolved handler, or `undefined` when nothing receives it.
  * @param record - The history recorder.
  * @returns The wrapped handler, or `undefined` when there was none to wrap.
+ *
+ * @public
  */
 export function asGesture<TRow>(
   apply: ((edits: CellEdit<TRow>[]) => void) | undefined,

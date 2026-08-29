@@ -80,7 +80,8 @@ export const TITLES = {
   "migrate-from-mui-datatables.md":
     "Migrate from mui-datatables — maintained, v6+",
   "migrate-from-material-table.md": "Migrate from material-table — maintained",
-  "migrate-from-ag-grid.md": "Migrate from AG Grid — 300 kB lighter, MIT",
+  "migrate-from-ag-grid.md":
+    "Migrate from AG Grid — CRUD tables, your UI kit, MIT",
   "versioning.md": "AdaptTable versioning & stability policy",
 };
 
@@ -127,7 +128,7 @@ export const DESCRIPTIONS = {
   "cell-navigation.md":
     "Arrow-key cell navigation for a React table: one tab stop, correct ARIA grid semantics, absolute row indices under virtualization, and spoken announcements.",
   "row-grouping.md":
-    "Single-level React table row grouping — opt-in groupBy, per-group aggregates sharing the summaryRow mapper, expand/collapse, frontend tier only.",
+    "Nested React table row grouping — groupBy takes one key or an ordered list, per-group aggregates sharing the summaryRow mapper, expand/collapse, frontend tier only.",
   "column-management.md":
     "Let users show, hide, reorder, pin and resize columns — one prop per capability, persisted to the URL or localStorage.",
   "saved-views.md":
@@ -167,7 +168,7 @@ export const DESCRIPTIONS = {
   "migrate-from-material-table.md":
     "material-table has been dormant since 2020. @adapttable/mui maps its columns, remote data, actions and filters onto a live MUI table.",
   "migrate-from-ag-grid.md":
-    "When to stay on AG Grid, and when not to. For CRUD tables AdaptTable is ~300 kB lighter and ships URL state and filter UI under MIT.",
+    "When to stay on AG Grid, and when not to. Pivoting, tree data, range selection and Excel export are MIT here; AG Grid keeps the integrated spreadsheet surface.",
   "versioning.md":
     "Semantic versioning in practice: the committed-stable public API surface, how deprecations are handled, per-package releases.",
   "filter-tree.md":

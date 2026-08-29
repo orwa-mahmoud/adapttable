@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Hindi (`hi`) label preset. */
+/**
+ * Hindi (`hi`) label preset.
+ *
+ * @public
+ */
 export const hi: Required<TableLabels> = {
   table: "डेटा तालिका",
   search: "खोजें",
@@ -113,6 +117,9 @@ export const hi: Required<TableLabels> = {
   resetColumn: "स्तंभ रीसेट करें",
   sortAscending: "आरोही क्रम",
   sortDescending: "अवरोही क्रम",
+  sortedBy: ({ column, ascending }) =>
+    `${column} के अनुसार क्रमित, ${ascending ? "आरोही" : "अवरोही"}`,
+  sortingCleared: "क्रम हटाया गया",
   filterColumn: "स्तंभ फ़िल्टर करें",
   columnActions: "स्तंभ क्रियाएँ",
   exportCsv: "CSV निर्यात करें",

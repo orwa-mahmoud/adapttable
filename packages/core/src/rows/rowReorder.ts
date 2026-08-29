@@ -16,18 +16,31 @@ import { useCallback, useMemo, useState } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { isRtlElement } from "../layout/writingDirection";
 
-/** MIME type carrying the dragged row id during a reorder drag. */
+/**
+ * MIME type carrying the dragged row id during a reorder drag.
+ *
+ * @public
+ */
 export const ROW_DND_MIME = "application/x-adapttable-row";
 
 export { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
 
-/** Width (px) of the injected reorder column — shared so pin leads agree. */
+/**
+ * Width (px) of the injected reorder column — shared so pin leads agree.
+ *
+ * @public
+ */
 export const REORDER_COLUMN_WIDTH = 40;
+
+/** How far a lifted row is dimmed while it is being dragged. */
+export const ROW_REORDER_LIFTED_OPACITY = 0.45;
 
 /**
  * Dim the lifted row and draw an insertion line on the drop target.
  * Kits apply this so a host without CSS still sees the gesture; unstyled
  * hosts can also target `data-dragging` / `data-drop` from classNames.
+ *
+ * @public
  */
 export function rowReorderDropStyle(
   attrs: { "data-dragging"?: ""; "data-drop"?: "before" | "after" } | undefined
@@ -36,12 +49,17 @@ export function rowReorderDropStyle(
   const edge = attrs["data-drop"];
   const offset = edge === "before" ? "2px" : "-2px";
   return {
-    opacity: attrs["data-dragging"] === "" ? 0.45 : undefined,
+    opacity:
+      attrs["data-dragging"] === "" ? ROW_REORDER_LIFTED_OPACITY : undefined,
     boxShadow: edge ? `inset 0 ${offset} 0 0 currentColor` : undefined,
   };
 }
 
-/** Move `from` to `to` in a copy of `rows`. Out-of-range is a no-op copy. */
+/**
+ * Move `from` to `to` in a copy of `rows`. Out-of-range is a no-op copy.
+ *
+ * @public
+ */
 export function applyRowReorder<T>(
   rows: readonly T[],
   from: number,
@@ -63,29 +81,51 @@ export function applyRowReorder<T>(
   return next;
 }
 
-/** Dataset-relative index: the rendered slot plus the page/window offset. */
+/**
+ * Dataset-relative index: the rendered slot plus the page/window offset.
+ *
+ * @public
+ */
 export function datasetIndex(localIndex: number, windowStart: number): number {
   return windowStart + localIndex;
 }
 
-/** What a host receives when the reader drops a row. */
+/**
+ * What a host receives when the reader drops a row.
+ *
+ * @public
+ */
 export type RowReorderHandler<TRow> = (
   from: number,
   to: number,
   row: TRow
 ) => void;
 
-/** Labels the reorder handle and the live region need. */
+/**
+ * Labels the reorder handle and the live region need.
+ *
+ * @public
+ */
 export interface RowReorderLabels {
+  /** Accessible name for the drag grip. */
   reorderRow: string;
+  /** Move the row up one place. */
   moveRowUp: string;
+  /** Move the row down one place. */
   moveRowDown: string;
+  /** Announced when a row is picked up. */
   rowLifted: (position: number) => string;
+  /** Announced when a row lands. */
   rowMoved: (from: number, to: number) => string;
+  /** Announced when a reorder is abandoned. */
   rowReorderCancelled: string;
 }
 
-/** Headless reorder state returned by {@link useRowReorder}. */
+/**
+ * Headless reorder state returned by `useRowReorder`.
+ *
+ * @public
+ */
 export interface RowReorderState<TRow> {
   /** The lifted row, or `null` when idle. */
   lifted: { rowId: string; from: number } | null;
@@ -149,6 +189,8 @@ export interface RowReorderState<TRow> {
  * instead of `drop`. Hover (`overIndex`) still does not repaint untouched
  * rows; the extra cost is one visible-row pass per drag lifecycle, which is
  * the point of this digest.
+ *
+ * @public
  */
 export function rowReorderSignature<TRow>(
   reorder: RowReorderState<TRow> | undefined,
@@ -171,6 +213,8 @@ function isRtl(grip: HTMLElement | null): boolean {
 /**
  * Headless row reorder. Inert until the host passes {@link RowReorderHandler};
  * omit it and this hook still runs (Rules of Hooks) but every builder no-ops.
+ *
+ * @public
  */
 export function useRowReorder<TRow>(options: {
   enabled: boolean;

@@ -570,7 +570,9 @@ describe("async filter options through useTableData", () => {
     );
     const formSide = result.current.runtime.defs[0]!.options;
     expect(typeof formSide).toBe("function");
-    await (formSide as () => Promise<unknown>)();
+    await act(async () => {
+      await (formSide as () => Promise<unknown>)();
+    });
     await waitFor(() =>
       expect(result.current.runtime.filterLabels.companyId!("c1")).toBe(
         "Company: Acme Corp"

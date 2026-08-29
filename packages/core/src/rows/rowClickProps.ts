@@ -1,8 +1,14 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 
-/** Handlers + affordance for an activatable (clickable) row. */
+/**
+ * Handlers + affordance for an activatable (clickable) row.
+ *
+ * @public
+ */
 export interface RowClickProps {
+  /** Called when pressed. */
   onClick: (event: MouseEvent<HTMLElement>) => void;
+  /** Handles the keys this control owns. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   /**
    * Roving tab stop: the first row is the list's single Tab entry point;
@@ -12,6 +18,7 @@ export interface RowClickProps {
   tabIndex: 0 | -1;
   /** Marks the element as an arrow-key navigation stop among its siblings. */
   "data-adapttable-row": "";
+  /** Inline style for the element. */
   style: { cursor: "pointer" };
 }
 
@@ -66,6 +73,8 @@ function moveRowFocus(current: HTMLElement, delta: -1 | 1): void {
  * @param index - The row's index in the rendered list. When given, only
  *   row 0 is a Tab stop (roving tabindex); omit it and every row stays
  *   tabbable.
+ *
+ * @public
  */
 export function rowClickProps<TRow>(
   row: TRow,

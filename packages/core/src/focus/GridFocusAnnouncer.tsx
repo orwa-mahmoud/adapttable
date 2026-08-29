@@ -14,7 +14,11 @@ import type { ReactElement } from "react";
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { GridFocusState } from "./useGridFocus";
 
-/** Props for {@link GridFocusAnnouncer}. */
+/**
+ * Props for {@link GridFocusAnnouncer}.
+ *
+ * @public
+ */
 export interface GridFocusAnnouncerProps {
   /** The grid focus state, straight from `table.gridFocus`. */
   focus: GridFocusState;
@@ -25,6 +29,8 @@ export interface GridFocusAnnouncerProps {
  * navigation is off — so an adapter spreads it unconditionally and the opt-in
  * promise still holds. When on, the region is present from the first render and
  * empty until focus moves, which is the order screen readers need.
+ *
+ * @public
  */
 export function GridFocusAnnouncer({
   focus,

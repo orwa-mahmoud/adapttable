@@ -19,12 +19,19 @@ export const COLUMN_RESIZE_STEP = 16;
  * Props for a column-resize handle element. Modeled as a `button` (a focusable
  * `separator`/splitter would require `aria-valuenow/min/max`); ArrowLeft/Right
  * resize it for keyboard users.
+ *
+ * @public
  */
 export interface ColumnResizeHandleProps {
+  /** ARIA role for the element. */
   role: "button";
+  /** Tab order for the element. */
   tabIndex: 0;
+  /** The handle's accessible name, naming the column it resizes. */
   "aria-label": string;
+  /** Starts the drag. */
   onPointerDown: (event: PointerEvent<HTMLElement>) => void;
+  /** Handles the keys this control owns. */
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   /** Double-click sizes the column to its content, as every grid does. */
   onDoubleClick: (event: MouseEvent<HTMLElement>) => void;
@@ -49,12 +56,14 @@ function isRtl(handle: HTMLElement): boolean {
 
 /**
  * Build the props for a column-resize handle. Pointer drag resizes live; arrow
- * keys nudge by {@link COLUMN_RESIZE_STEP} for keyboard a11y. Width is measured
+ * keys nudge by `COLUMN_RESIZE_STEP` for keyboard a11y. Width is measured
  * from the live cell, so columns need no preset width to be resizable.
  *
  * @param key - Column key being resized.
  * @param setWidth - Layout mutator that persists the new width.
  * @param label - Accessible label for the handle.
+ *
+ * @public
  */
 export function columnResizeHandleProps(
   key: string,

@@ -30,6 +30,7 @@ import { useEffect, useRef, useState } from "react";
 type MenuLabels = ColumnMenuLabels & { actions: string; reorderRow: string };
 
 export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
+  /** Writing direction, so the menu opens on the correct side. */
   dir?: Direction;
   /** Resolved labels, including the injected actions column's name. */
   labels: MenuLabels;
@@ -48,7 +49,9 @@ export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   /** Open the filter UI from the submenu. */
   onFilterColumn?: (key: string) => void;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
 }
 
@@ -370,8 +373,18 @@ export function ColumnMenu<TRow>({
   // and width belong to us; `styles.content` below zeroes antd's own padding
   // so this is the single source of it.
   const content = (
-    <div
+    // antd's own popover wrapper is a tooltip, which is the wrong thing for a
+    // panel of controls, so the panel names itself inside it. A fieldset is the
+    // element form of the group role — the same choice the unstyled adapter
+    // makes for this panel — so the semantics come from the markup rather than
+    // from an attribute.
+    <fieldset
+      aria-label={labels.columns}
       style={{
+        border: 0,
+        margin: 0,
+        // Without it a fieldset sizes to min-content and ignores minWidth.
+        minInlineSize: 0,
         padding: 8,
         minWidth: 260,
         maxHeight: "min(70vh, 480px)",
@@ -458,7 +471,7 @@ export function ColumnMenu<TRow>({
       <Button size="small" type="text" onClick={() => layout.reset()}>
         {labels.resetColumns}
       </Button>
-    </div>
+    </fieldset>
   );
   return (
     <Popover

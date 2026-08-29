@@ -64,6 +64,7 @@ import { getHistoryAdapter } from '@adapttable/core';
 import { GroupMoreButtonProps } from '@adapttable/core/adapter';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { JSX } from 'react';
+import { MobileCardRenderer } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
@@ -72,6 +73,7 @@ import { ReactNode } from 'react';
 import { ReactPortal } from 'react';
 import { resolveFilterRegistry } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowActionsRenderer } from '@adapttable/core';
 import { RowEditActionsProps } from '@adapttable/core/adapter';
 import { RowReorderButtonsProps } from '@adapttable/core/adapter';
 import { RowReorderHandleProps } from '@adapttable/core/adapter';
@@ -86,6 +88,7 @@ import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/core';
 import { TreeCellProps } from '@adapttable/core/adapter';
 import { TreeToggleProps } from '@adapttable/core/adapter';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -125,7 +128,7 @@ export interface AutoFilterFormProps<TRow> {
 
 export { BaseDataTableProps }
 
-// @public (undocumented)
+// @public
 export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>): JSX.Element;
 
 export { BatchEditBarProps }
@@ -155,7 +158,7 @@ export { ColumnGroupDef }
 
 export { ColumnGroupShow }
 
-// @public (undocumented)
+// @public
 export function ColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>): JSX.Element;
 
 export { ColumnGroupToggleProps }
@@ -188,73 +191,48 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>): JSX.E
 
 // @public
 export interface DataTableClassNames {
-    // (undocumented)
     actionButton?: string;
-    // (undocumented)
     actionsCell?: string;
     actionsHeader?: string;
     addRow?: string;
-    // (undocumented)
     bulkBar?: string;
-    // (undocumented)
     bulkButton?: string;
     bulkError?: string;
-    // (undocumented)
     card?: string;
     cardActions?: string;
     cardDetail?: string;
-    // (undocumented)
     cardLabel?: string;
-    // (undocumented)
     cardRow?: string;
-    // (undocumented)
     cards?: string;
-    // (undocumented)
     cardValue?: string;
-    // (undocumented)
     cell?: string;
-    // (undocumented)
     cellMatch?: string;
     cellMatchCurrent?: string;
     cellSelected?: string;
     cellSpan?: string;
     checkbox?: string;
-    // (undocumented)
     chip?: string;
-    // (undocumented)
     chipRemove?: string;
-    // (undocumented)
     chips?: string;
     columnGroupToggle?: string;
-    // (undocumented)
     columnMenu?: string;
     columnMenuAction?: string;
     columnMenuAutoSize?: string;
     columnMenuBulk?: string;
     columnMenuBulkButton?: string;
-    // (undocumented)
     columnMenuButton?: string;
-    // (undocumented)
     columnMenuGrip?: string;
-    // (undocumented)
     columnMenuHeader?: string;
-    // (undocumented)
     columnMenuItem?: string;
-    // (undocumented)
     columnMenuLabel?: string;
     columnMenuMore?: string;
-    // (undocumented)
     columnMenuPanel?: string;
-    // (undocumented)
     columnMenuPin?: string;
-    // (undocumented)
     columnMenuReset?: string;
     columnMenuSearch?: string;
     columnMenuSeparator?: string;
     columnMenuSubmenu?: string;
-    // (undocumented)
     columnMenuTitle?: string;
-    // (undocumented)
     columnMenuVisibility?: string;
     columnSelect?: string;
     commandEmpty?: string;
@@ -272,10 +250,8 @@ export interface DataTableClassNames {
     editCellError?: string;
     editCellRollback?: string;
     editCellSaveError?: string;
-    // (undocumented)
     empty?: string;
     emptyClear?: string;
-    // (undocumented)
     error?: string;
     expandButton?: string;
     expandCell?: string;
@@ -299,34 +275,21 @@ export interface DataTableClassNames {
     filterLabel?: string;
     filterOperator?: string;
     filterOptionsLoading?: string;
-    // (undocumented)
     filtersAnchor?: string;
-    // (undocumented)
     filtersBackdrop?: string;
-    // (undocumented)
     filtersBody?: string;
-    // (undocumented)
     filtersButton?: string;
-    // (undocumented)
     filtersClear?: string;
-    // (undocumented)
     filtersClose?: string;
-    // (undocumented)
     filtersCount?: string;
-    // (undocumented)
     filtersDone?: string;
     filterSelect?: string;
-    // (undocumented)
     filtersFooter?: string;
     filtersForm?: string;
-    // (undocumented)
     filtersHeader?: string;
     filtersIcon?: string;
-    // (undocumented)
     filtersPanel?: string;
-    // (undocumented)
     filtersPopover?: string;
-    // (undocumented)
     filtersTitle?: string;
     filterTree?: string;
     filterTreeActions?: string;
@@ -351,13 +314,10 @@ export interface DataTableClassNames {
     groupSelect?: string;
     groupToggle?: string;
     headerActions?: string;
-    // (undocumented)
     headerCell?: string;
     headerGroupCell?: string;
     headerGroupRow?: string;
-    // (undocumented)
     headerRow?: string;
-    // (undocumented)
     loading?: string;
     loadingCard?: string;
     loadingCards?: string;
@@ -367,9 +327,7 @@ export interface DataTableClassNames {
     loadingLine?: string;
     loadingRow?: string;
     loadingTable?: string;
-    // (undocumented)
     loadMore?: string;
-    // (undocumented)
     loadMoreButton?: string;
     pageEllipsis?: string;
     pageNext?: string;
@@ -381,13 +339,9 @@ export interface DataTableClassNames {
     refreshIndicator?: string;
     reorderCell?: string;
     reorderHeader?: string;
-    // (undocumented)
     resizeHandle?: string;
-    // (undocumented)
     retryButton?: string;
-    // (undocumented)
     root?: string;
-    // (undocumented)
     row?: string;
     rowActionsMenu?: string;
     rowActionsTrigger?: string;
@@ -397,14 +351,12 @@ export interface DataTableClassNames {
     rowReorderUp?: string;
     rowsPerPage?: string;
     scrollBox?: string;
-    // (undocumented)
     search?: string;
     searchField?: string;
     searchIcon?: string;
     selectAllBanner?: string;
     selectAllButton?: string;
     selectAllText?: string;
-    // (undocumented)
     selectionCell?: string;
     selectionHeader?: string;
     separatorCell?: string;
@@ -412,10 +364,8 @@ export interface DataTableClassNames {
     sidePanel?: string;
     sidePanelClose?: string;
     sidePanelTab?: string;
-    // (undocumented)
     sortButton?: string;
     sortIndex?: string;
-    // (undocumented)
     sortSelect?: string;
     statusBar?: string;
     statusItem?: string;
@@ -423,14 +373,10 @@ export interface DataTableClassNames {
     summaryCard?: string;
     summaryCell?: string;
     summaryRow?: string;
-    // (undocumented)
     table?: string;
     tableFooter?: string;
-    // (undocumented)
     tbody?: string;
-    // (undocumented)
     thead?: string;
-    // (undocumented)
     toolbar?: string;
     treeCell?: string;
     treeSpacer?: string;
@@ -451,6 +397,22 @@ export interface DataTableClassNames {
 
 // @public
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
+
+// @public
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+    animate?: boolean;
+    classNames?: DataTableClassNames;
+    data?: readonly TRow[];
+    error?: Error | null;
+    loading?: boolean;
+    savedViews?: UseSavedViewsOptions;
+    slots?: DataTableSlots;
+    source?: TableSource<TRow>;
+    total?: number;
+    urlAdapter?: UrlStateAdapter;
+    urlKey?: string;
+    urlSync?: boolean;
+}
 
 // @public
 export interface DataTableSlots {
@@ -499,12 +461,12 @@ export { FILTER_TYPES }
 
 export { FilterDef }
 
-// @public (undocumented)
+// @public
 export function FilterHeaderControl<TRow>(props: Readonly<FilterHeaderControlProps<TRow>>): JSX.Element;
 
 export { FilterHeaderControlProps }
 
-// @public (undocumented)
+// @public
 export function FilterHeaderRow<TRow>(props: Readonly<FilterHeaderRowProps<TRow>>): JSX.Element;
 
 export { FilterHeaderRowProps }
@@ -518,21 +480,13 @@ export function FilterPanel(input: Readonly<FilterPanelProps>): ReactPortal | nu
 
 // @public
 export interface FilterPanelProps {
-    // (undocumented)
     activeFilterCount: number;
-    // (undocumented)
     classNames: DataTableClassNames;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     filters: ReactNode;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     onClearFilters?: () => void;
-    // (undocumented)
     onClose: () => void;
-    // (undocumented)
     open: boolean;
 }
 
@@ -541,22 +495,14 @@ export function FilterPopover(input: Readonly<FilterPopoverProps>): JSX.Element;
 
 // @public
 export interface FilterPopoverProps {
-    // (undocumented)
     activeFilterCount: number;
     children: ReactNode;
-    // (undocumented)
     classNames: DataTableClassNames;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     filters: ReactNode;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     onClearFilters?: () => void;
-    // (undocumented)
     onClose: () => void;
-    // (undocumented)
     open: boolean;
 }
 
@@ -578,19 +524,27 @@ export { FilterTypeSpec }
 
 export { FilterValue }
 
-// @public (undocumented)
+// @public
 export function FindBar(props: Readonly<FindBarProps>): JSX.Element;
 
 export { FindBarProps }
 
 export { getHistoryAdapter }
 
-// @public (undocumented)
+// @public
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;
 
 export { GroupMoreButtonProps }
 
+// @public
+export interface IconProps {
+    className?: string;
+    size?: number;
+}
+
 export { InfiniteQueryLike }
+
+export { MobileCardRenderer }
 
 export { PageSelector }
 
@@ -605,17 +559,19 @@ export { resolveFilterRegistry }
 
 export { RowAction }
 
-// @public (undocumented)
+export { RowActionsRenderer }
+
+// @public
 export function RowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): JSX.Element;
 
 export { RowEditActionsProps }
 
-// @public (undocumented)
+// @public
 export function RowReorderButtons<TRow>(props: Readonly<RowReorderButtonsProps<TRow>>): JSX.Element;
 
 export { RowReorderButtonsProps }
 
-// @public (undocumented)
+// @public
 export function RowReorderHandle<TRow>(props: Readonly<RowReorderHandleProps<TRow>>): JSX.Element;
 
 export { RowReorderHandleProps }
@@ -628,11 +584,9 @@ export type SavedViewsLabels = Pick<Required<TableLabels>, "savedViews" | "saveV
 // @public
 export function SavedViewsMenu(input: Readonly<SavedViewsMenuProps>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export interface SavedViewsMenuProps {
-    // (undocumented)
     classNames: DataTableClassNames;
-    // (undocumented)
     labels: SavedViewsLabels;
     options: UseSavedViewsOptions;
 }
@@ -660,12 +614,14 @@ export { TableQuery }
 
 export { TableSource }
 
-// @public (undocumented)
+export { ToolbarSlots }
+
+// @public
 export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): JSX.Element;
 
 export { TreeCellProps }
 
-// @public (undocumented)
+// @public
 export function TreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>): JSX.Element;
 
 export { TreeToggleProps }

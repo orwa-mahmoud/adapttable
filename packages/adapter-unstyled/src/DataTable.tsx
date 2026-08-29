@@ -7,6 +7,7 @@ import {
   resolveStickyToolbar,
   RowReorderAnnouncer,
   SidePanelLayout,
+  TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
   useMountStagger,
@@ -129,6 +130,8 @@ function DataTableBody<TRow>({
  * ships no styles of its own. Built on the `@adapttable/core` prop-getters.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
@@ -336,6 +339,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         className={cx("adapttable", classNames.root)}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

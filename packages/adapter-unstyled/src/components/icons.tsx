@@ -7,8 +7,15 @@ import {
 } from "@adapttable/core";
 import type { ReactNode } from "react";
 
-interface IconProps {
+/**
+ * Props every icon in this adapter takes.
+ *
+ * @public
+ */
+export interface IconProps {
+  /** Pixel size for both axes. */
   size?: number;
+  /** Class for the svg element. */
   className?: string;
 }
 
@@ -36,7 +43,11 @@ function Svg({
   );
 }
 
-/** Magnifying-glass search glyph (inline SVG, `currentColor`). */
+/**
+ * Magnifying-glass search glyph (inline SVG, `currentColor`).
+ *
+ * @public
+ */
 export const SearchIcon = (p: Readonly<IconProps>) => (
   <Svg {...p}>
     <circle cx="11" cy="11" r="7" />
@@ -44,7 +55,11 @@ export const SearchIcon = (p: Readonly<IconProps>) => (
   </Svg>
 );
 
-/** Funnel glyph for the Filters button (inline SVG, `currentColor`). */
+/**
+ * Funnel glyph for the Filters button (inline SVG, `currentColor`).
+ *
+ * @public
+ */
 export const FiltersIcon = (p: Readonly<IconProps>) => (
   <Svg {...p}>
     <path d="M3 4h18l-7 8v6l-4 2v-8L3 4Z" />

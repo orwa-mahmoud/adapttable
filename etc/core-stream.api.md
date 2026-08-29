@@ -16,6 +16,13 @@ export interface ChangedCellFlashState {
 }
 
 // @public
+export interface InsertPatch<TRow> {
+    at?: number;
+    row: TRow;
+    type: "insert";
+}
+
+// @public
 export function isStreamLive(status: RowPatchStreamStatus): boolean;
 
 // @public
@@ -41,6 +48,34 @@ export interface OpenRowPatchStreamOptions {
 export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
 
 // @public
+export interface RemovePatch {
+    id: string;
+    type: "remove";
+}
+
+// @public
+export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
+
+// @public
+export type RowPatchEvent<TRow> = {
+    type: "insert";
+    id: string;
+    row: TRow;
+    index: number;
+} | {
+    type: "remove";
+    id: string;
+    row: TRow;
+    index: number;
+} | {
+    type: "update";
+    id: string;
+    prev: TRow;
+    next: TRow;
+    index: number;
+};
+
+// @public
 export interface RowPatchStreamHandle {
     close: () => void;
     readonly status: RowPatchStreamStatus;
@@ -60,24 +95,44 @@ export interface RowPatchStreamState {
 }
 
 // @public
-export type RowPatchStreamStatus = /** No url wired, or `enabled: false`. Nothing is open and nothing will be. */"idle" /** A socket is being opened for the first time. */ | "connecting" /** Open and receiving. */ | "open" /** Dropped, and a retry is scheduled. */ | "reconnecting" /** Given up — the retry budget is spent, or the environment has no socket. */ | "error" /** The host closed it. Final: nothing reopens on its own. */ | "closed";
+export type RowPatchStreamStatus =
+/** No url wired, or `enabled: false`. Nothing is open and nothing will be. */
+"idle" |
+/** A socket is being opened for the first time. */
+"connecting" |
+/** Open and receiving. */
+"open" |
+/** Dropped, and a retry is scheduled. */
+"reconnecting" |
+/** Given up — the retry budget is spent, or the environment has no socket. */
+"error" |
+/** The host closed it. Final: nothing reopens on its own. */
+"closed";
 
 // @public
 export interface StreamSocket {
-    // (undocumented)
     addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
-    // (undocumented)
     close(): void;
-    // (undocumented)
     readonly readyState: number;
-    // (undocumented)
     removeEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
 }
 
 // @public
 export interface StreamSocketEvent {
-    // (undocumented)
     data?: unknown;
+}
+
+// @public
+export interface UpdatePatch<TRow> {
+    changes: Partial<TRow>;
+    id: string;
+    type: "update";
+}
+
+// @public
+export interface UpsertPatch<TRow> {
+    row: TRow;
+    type: "upsert";
 }
 
 // @public

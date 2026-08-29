@@ -107,8 +107,8 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `extraRows`                 | `readonly ExtraRow[]`                                           | —               | Host-injected separator and full-width slots, spliced in by `beforeRowId`. Omit and nothing is inserted. See [full-width and separator rows](./full-width-rows.md).                                                                                                                                                                                                              |
 | `summaryRow`                | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Map the current page's rows to per-column footer summary cells.                                                                                                                                                                                                                                                                                                                  |
 | `tableFooter`               | `ReactNode`                                                     | —               | Free slot under the table, above the pager. Not the column-aligned summary row.                                                                                                                                                                                                                                                                                                  |
-| `groupBy`                   | `string \| null`                                                | —               | Single-level row grouping by column key; frontend tier only (server sources devWarn and ignore). Omit and grouping stays dormant.                                                                                                                                                                                                                                                |
-| `onGroupByChange`           | `(groupBy: string \| null) => void`                             | —               | Controlled `groupBy` channel; falls back to `source.setGroupBy`. URL-synced when the source uses URL state.                                                                                                                                                                                                                                                                      |
+| `groupBy`                   | `string \| readonly string[] \| null`                           | —               | Row grouping by column key — one key, or an ordered list to nest. Frontend tier only (server sources devWarn and ignore). Omit and grouping stays dormant.                                                                                                                                                                                                                       |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —               | Notified after a grouping change, with the keys as a list. The chrome always applies the change itself; take full control via `source.setGroupBy`.                                                                                                                                                                                                                               |
 | `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —               | Per-group aggregate cells — **same signature as `summaryRow`**. Called with each group's leaf rows.                                                                                                                                                                                                                                                                              |
 | `collapsedGroupIds`         | `readonly string[]`                                             | —               | Controlled collapsed group keys (ephemeral — not URL-synced).                                                                                                                                                                                                                                                                                                                    |
 | `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —               | Controlled collapse channel; uncontrolled mode uses internal state.                                                                                                                                                                                                                                                                                                              |
@@ -535,7 +535,9 @@ are still checking — behind `EditValidationState` (`UseEditValidationOptions` 
 sees before the host does. `editorValidationProps(ctrl)` from
 `@adapttable/core/adapter` is the `aria-invalid` / `aria-describedby` /
 `aria-busy` a kit's editor spreads, and `editorBusyProps(ctrl)` is just the busy
-flag for a kit whose own input owns the other two.
+flag for a kit whose own input owns the other two. `stopEditKeys(event)` keeps
+Enter, Escape and Tab inside the open editor: all three mean something to the
+grid as well, and the editor is where the user is typing.
 See [cell editing](./cell-editing.md).
 
 **The grouped row model.** `buildGroupedFlatModel` turns rows into the flat
@@ -571,6 +573,18 @@ region underneath it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps`
 types the announcer itself. See
 [customization](./customization.md#export).
 
+**Status announcements.** Sorting, filtering and paging rewrite the body with
+nothing a screen reader can perceive, so the table says what changed through one
+polite region. `useDataTableShell` returns the message as `statusAnnouncement`
+and adapters render it with `TableStatusAnnouncer` (`TableStatusAnnouncerProps`)
+beside their table, so the region is in the DOM before it has anything to say.
+Custom markup composes the message itself with `useTableStatusAnnouncement`
+(`TableStatusAnnouncementOptions` in — the row set, the page window and the
+sorted column). The sort sentence comes from the `sortedBy` and `sortingCleared`
+labels; the counts reuse `showing`, `pageOf` and `noResults`, so what a user
+hears matches what the footer shows. See
+[accessibility](./accessibility.md).
+
 **File formats.** An `ExportWriter` turns an `ExportWriteContext` — an
 `ExportTable` of values resolved once by `buildExportTable`, plus the filename —
 into an `ExportPayload`, which `downloadExportFile` hands to the browser.
@@ -597,8 +611,9 @@ the export button and `buildTablePdf` for a host assembling rows by hand.
 Print is a different verb: `openPrintLayout` (an `ExportTable`) and
 `printTable` (rows and columns) load `buildPrintDocument` into a hidden
 iframe. `buildPrintTableHtml` is the `<table>` alone; `printStyles` is the
-stylesheet. `PrintLayoutOptions` / `PdfWriterOptions` / `PrintPageSize`
-configure title, direction and paper. Both option types take `font` — a
+stylesheet. `PrintLayoutOptions` / `PdfWriterOptions` / `PrintPageSize` /
+`PrintPageBreak` configure title, direction, paper and how groups meet a
+page boundary. Both option types take `font` — a
 TrueType file as bytes — which the PDF writer subsets and embeds so the
 download draws Arabic, CJK or any script the built-in face cannot; Arabic
 is shaped into its contextual forms and reordered right to left. See
@@ -661,7 +676,10 @@ highlight, and never against `prefers-reduced-motion`. See
 
 **Filter internals.** `FILTER_TYPES` lists the built-in types, `filterLabel`
 resolves a filter's caption, `filterStateKeys` names the URL keys one filter
-owns, `FilterRuntime` is what `buildFilterRuntime` returns, and
+owns, `hasActiveHeaderFilter` says whether any of them holds a value worth
+marking the column with — a cleared text field leaves `""` and a cleared
+multi-select leaves `[]`, and neither is a filter — `FilterRuntime` is what
+`buildFilterRuntime` returns, and
 `ResolvedFilterOptions` is what `useFilterOptions` resolves.
 `isDeclarativeFilters` tells the array form from JSX. A form reads its values
 through `FilterFormSource` with `listFilterValues` and `scalarFilterText`.
@@ -940,7 +958,11 @@ from your kit and pass `fields`, `config` and `onChange`. It is
 `PivotPanelChrome` with that kit's slots already filled.
 
 **`SavedViewsPanel`** is each adapter's pre-wired management panel — import it
-from your kit and pass the views plus the five handlers.
+from your kit and pass the views plus the five handlers. shadcn's names its own
+`SavedViewsPanelProps`: the views, the five handlers, `labels`, `footer`,
+`className`, and a `classNames` map merged per key over the shadcn preset. It
+is the panel's whole contract, with no slot type to fill in — the kit has
+already filled them.
 
 **Saved-view storage and versioning.** `useSavedViews` takes a
 `SavedViewsStore` (`list` / `save` / `remove`, all async) that replaces
@@ -1141,7 +1163,8 @@ elsewhere. Adapters build theirs over `CommandPaletteChrome` /
 `CommandPaletteChromeProps` / `CommandPaletteSlots` /
 `CommandPaletteSurfaceProps` / `CommandPaletteInputProps` /
 `CommandPaletteItemProps` and arm it with `useCommandPalette` (returning a
-`TableCommandPalette`), from `@adapttable/core/adapter`. See
+`TableCommandPalette`; `UseCommandPaletteOptions` is the hook's input), from
+`@adapttable/core/adapter`. See
 [customization](./customization.md#command-palette).
 
 **Context menus.** `contextMenu` arms right-click menus for headers, rows and
@@ -1152,9 +1175,11 @@ append your own behind a divider. `ContextMenuItem` is one entry (`key`,
 the built-in entries call. Every route in works: right-click, Shift+F10, the
 menu key, and a long press. Adapters build theirs over `ContextMenuChrome` /
 `ContextMenuChromeProps` / `ContextMenuSlots` / `ContextMenuSurfaceProps` /
-`ContextMenuItemProps` and arm it with `useTableContextMenu` (returning a
+`ContextMenuItemProps` and arm it with `useTableContextMenu`
+(`TableContextMenuOptions` is the hook's input; it returns a
 `TableContextMenu`: `regionProps` to bind once, plus `items`, `at` and
-`close`), all from `@adapttable/core/adapter`. The surface slot receives an
+`close`). `ContextMenuPoint` is the click coordinates the chrome hands the
+surface. All from `@adapttable/core/adapter`. The surface slot receives an
 `anchorRef` — a zero-size element at the click point — because every kit's
 menu positions against an element rather than coordinates. See
 [customization](./customization.md#context-menus).
@@ -1200,7 +1225,8 @@ armed and disable rather than disappear; `undoRedoToolbar(wanted, history,
 labels)` from `@adapttable/core/adapter` is the one rule both wiring paths
 resolve that with. Labels are `undoEdit` and `redoEdit`. `printButton` adds a
 Print button, which renders only when `onPrint` is also wired;
-`printToolbar(wanted, onPrint, labels)` resolves that pair the same way, and
+`printToolbar(wanted, onPrint, labels)` resolves that pair the same way
+(`PrintToolbar` is the resolved `{ onPrint, label }`), and
 the caption is `labels.print`. See
 [customization](./customization.md#toolbar-and-status-bar).
 
@@ -1320,6 +1346,21 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `rowStyleArmed` / `estimateFromRowHeight`                                                                                                                                                                                                                                                                                | Whether either hook was passed / virtualizer `estimateSize` from `rowHeight`.                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `RowPinState` / `RowPinSide`                                                                                                                                                                                                                                                                                             | `{ top, bottom }` id lists / `"top" \| "bottom"`. See [row pinning](./row-pinning.md).                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `RowPinningState` / `RowPinLabels`                                                                                                                                                                                                                                                                                       | Headless pin state and the three action strings.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ExportCsvProp`                                                                                                                                                                                                                                                                                                          | The `exportCsv` prop as declared: `true`, an `ExportCsvOptions`, or absent. See [export](./customization.md#export).                                                                                                                                                                                                                                                                                                                                                                                 |
+| `WidthColumn`                                                                                                                                                                                                                                                                                                            | A column reduced to what width resolution reads — its `key` and declared `width`.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `GroupedHeaderAlign`                                                                                                                                                                                                                                                                                                     | Alignment of a spanning group header: `"start"`, `"center"` or `"end"`. See [column groups](./column-groups.md).                                                                                                                                                                                                                                                                                                                                                                                     |
+| `BuildGroupedFlatModelOptions`                                                                                                                                                                                                                                                                                           | What `buildGroupedFlatModel` flattens — `rows`, `groupBy`, `columns`, `getRowId` and the collapse/aggregate options. See [row grouping](./row-grouping.md).                                                                                                                                                                                                                                                                                                                                          |
+| `HorizontalOverflow`                                                                                                                                                                                                                                                                                                     | `useHorizontalOverflow`'s result — a callback `ref` and `overflowing`, true only while the content is wider than its wrapper.                                                                                                                                                                                                                                                                                                                                                                        |
+| `FeatureNoticeAppearance`                                                                                                                                                                                                                                                                                                | How an inert feature already looks to the person at the table: `"off"`, `"disabled"` or `"one-page"`.                                                                                                                                                                                                                                                                                                                                                                                                |
+| `SESSION_ATTR`                                                                                                                                                                                                                                                                                                           | `data-adapttable-header-filter` — the attribute tying a header filter's trigger to its overlay, so one editing session is identifiable across both. See [filtering](./filtering.md).                                                                                                                                                                                                                                                                                                                 |
+| `TableCommandOptions`                                                                                                                                                                                                                                                                                                    | What `tableCommands` needs for the table-wide entries: labels, plus `onPrint` / `onExport` / `onClearFilters` and `hasFilters`.                                                                                                                                                                                                                                                                                                                                                                      |
+| `UseShortcutsOptions`                                                                                                                                                                                                                                                                                                    | What `useShortcuts` needs: `enabled`, the `shortcuts` list, `onCommand`, and where to listen.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ValidationCheckResult`                                                                                                                                                                                                                                                                                                  | The outcome of `EditValidationState.check` — `allowed`, and `error` when it is not. See [cell editing](./cell-editing.md).                                                                                                                                                                                                                                                                                                                                                                           |
+| `editableCellController`                                                                                                                                                                                                                                                                                                 | Derives one cell's editing controller. Returns `mode: "display"` whenever the host passed no `onCellEdit`, so a table that never opted in renders exactly as before.                                                                                                                                                                                                                                                                                                                                 |
+| `FeatureHostState`                                                                                                                                                                                                                                                                                                       | The registrations a feature's `setup` collected — filter types, queued patches, menu factories, side-panel entries — as the table reads them. See [feature composition](./features.md).                                                                                                                                                                                                                                                                                                              |
+| `FilterTypeExtend`                                                                                                                                                                                                                                                                                                       | One queued `extendFilterType` patch: the `type` being extended and the `patch` merged onto its spec.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ColumnMenuActionFactory`                                                                                                                                                                                                                                                                                                | A plugin's extra column-menu actions, appended after the built-ins.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ContextMenuItemsFactory`                                                                                                                                                                                                                                                                                                | A plugin's extra context-menu entries, appended after the built-ins.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Development warnings
 
@@ -1432,7 +1473,12 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `shallowEqualByKeys`, `resolveVirtualRows`, `SHARED_DESKTOP_ROW_KEYS`,
 `DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
 (virtualize an opaque keyed list, e.g. grouped entries),
-`useMountStagger` (the `animate` stagger), and the inline icon set
+`useMountStagger` (the `animate` stagger),
+`useOverlayTransition` / `OverlayTransition` (turns an `open` boolean into
+`{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
+has something to animate on the way out, and reduced motion skips both edges),
+`OVERLAY_MOTION` (the durations and curves the unstyled, shadcn, Base UI and
+Radix drawers share), and the inline icon set
 (`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
 `ExpandChevron`, `sortArrow`). Row reorder chrome (on each adapter):
 `RowReorderHandle`, `RowReorderHandleProps`, `RowReorderButtons`,
@@ -1481,8 +1527,12 @@ the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
   `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
   testing.
 - **Adapter packages** — each exports its `DataTable` with `DataTableProps`,
-  `DataTableSlots` and `SavedViewsMenuProps` (plus the shared core
-  re-exports); Radix and Base UI export their accent unions
+  `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
+  shared core re-exports). `DataTableProps` is `DataTablePropsBase &
+DataModeProps`: the base carries every prop except the data mode, which is
+  the half to name when you wrap or extend a table's props without committing
+  to a tier. `@adapttable/unstyled` also exports `IconProps`, the props its
+  exported icons take, so a caller supplying one has a name for the argument; Radix and Base UI export their accent unions
   (`RadixAccentColor`, `BaseUiAccentColor`); Mantine also exports its
   chrome as reusable components (`ActiveFilterChips`, `AutoFilterForm`,
   `EmptyState`, `ErrorState`, `FilterDrawer`, `PaginationFooter`,

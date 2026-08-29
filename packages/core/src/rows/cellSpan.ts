@@ -13,15 +13,27 @@
 import type { PinOffset } from "../columns/useColumnLayout";
 import type { ColumnDef } from "../types";
 
-/** What {@link GetCellSpan} may return. Omitted sides default to 1. */
+/**
+ * What {@link GetCellSpan} may return. Omitted sides default to 1.
+ *
+ * @public
+ */
 export interface CellSpanRequest {
+  /** Columns this cell covers. */
   colSpan?: number;
+  /** Rows this cell covers. */
   rowSpan?: number;
 }
 
-/** Arguments {@link GetCellSpan} receives for one origin. */
+/**
+ * Arguments {@link GetCellSpan} receives for one origin.
+ *
+ * @public
+ */
 export interface GetCellSpanArgs<TRow> {
+  /** The row being measured. */
   row: TRow;
+  /** The column being measured. */
   column: ColumnDef<TRow>;
   /** Dataset-relative row index (page offset included). */
   rowIndex: number;
@@ -37,7 +49,11 @@ export interface GetCellSpanArgs<TRow> {
   sectionRowIndex: number;
 }
 
-/** Host callback that decides a cell's span. */
+/**
+ * Host callback that decides a cell's span.
+ *
+ * @public
+ */
 export type GetCellSpan<TRow> = (
   args: GetCellSpanArgs<TRow>
 ) => CellSpanRequest | undefined;
@@ -47,10 +63,16 @@ export type GetCellSpan<TRow> = (
  * look: centered content, one fill across the span. `"plain"` is geometry
  * only — same chrome as a 1×1 cell — so a host can draw a calendar bar
  * themselves.
+ *
+ * @public
  */
 export type CellSpanAppearance = "merged" | "plain";
 
-/** `"2x1"` when this cell owns more than one slot; otherwise nothing. */
+/**
+ * `"2x1"` when this cell owns more than one slot; otherwise nothing.
+ *
+ * @public
+ */
 export function cellSpanMark(
   colSpan: number,
   rowSpan: number
@@ -59,16 +81,27 @@ export function cellSpanMark(
   return `${colSpan}x${rowSpan}`;
 }
 
-/** One body cell a kit renders — covered cells never appear. */
+/**
+ * One body cell a kit renders — covered cells never appear.
+ *
+ * @public
+ */
 export interface BodyCell<TRow> {
+  /** The column being measured. */
   column: ColumnDef<TRow>;
   /** Index in the full visible column list — what focus addresses. */
   columnIndex: number;
+  /** Columns this cell covers. */
   colSpan: number;
+  /** Rows this cell covers. */
   rowSpan: number;
 }
 
-/** True when any origin cell is taller than one row. */
+/**
+ * True when any origin cell is taller than one row.
+ *
+ * @public
+ */
 export function bodyCellsHaveRowSpan(
   cellsByRow: ReadonlyMap<string, readonly { rowSpan: number }[]>
 ): boolean {
@@ -80,7 +113,11 @@ export function bodyCellsHaveRowSpan(
   return false;
 }
 
-/** True when the host asked for any span. */
+/**
+ * True when the host asked for any span.
+ *
+ * @public
+ */
 export function spanningArmed<TRow>(
   columns: readonly ColumnDef<TRow>[],
   getCellSpan: GetCellSpan<TRow> | undefined
@@ -144,7 +181,7 @@ export function clipColSpanAtPin<TRow>(
   if (!pinOffset || colSpan <= 1) return colSpan;
   const startSide = pinOffset(columns[start]?.key ?? "")?.side;
   let span = 1;
-  for (let offset = 1; offset < colSpan && start + offset < columns.length; ) {
+  for (let offset = 1; offset < colSpan && start + offset < columns.length;) {
     const next = columns[start + offset];
     if (!next || pinOffset(next.key)?.side !== startSide) break;
     span += 1;
@@ -356,6 +393,8 @@ function emitRowCells<TRow>(
  * bottom). A consecutive merge walks that whole list so pinning a teammate
  * does not split one Team run. HTML `rowSpan` still needs those rows in
  * one tbody.
+ *
+ * @public
  */
 export function buildBodyCells<TRow>(options: {
   rows: readonly TRow[];
@@ -407,7 +446,11 @@ function markCoveredRectangle(
   }
 }
 
-/** Addresses (`row:col`, dataset-relative) covered by a span, not origins. */
+/**
+ * Addresses (`row:col`, dataset-relative) covered by a span, not origins.
+ *
+ * @public
+ */
 export function coveredAddressSet<TRow>(options: {
   rows: readonly TRow[];
   columns: readonly ColumnDef<TRow>[];
@@ -451,7 +494,11 @@ export function coveredAddressSet<TRow>(options: {
   return covered;
 }
 
-/** Memo digest so a virtualized row repaints when its spans change. */
+/**
+ * Memo digest so a virtualized row repaints when its spans change.
+ *
+ * @public
+ */
 export function rowSpanSignature<TRow>(
   cells: readonly BodyCell<TRow>[] | undefined
 ): string {
@@ -461,7 +508,11 @@ export function rowSpanSignature<TRow>(
     .join(",");
 }
 
-/** Look up a row's cells; empty when the row is unknown. */
+/**
+ * Look up a row's cells; empty when the row is unknown.
+ *
+ * @public
+ */
 export function cellsForRow<TRow>(
   cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined,
   rowKey: string

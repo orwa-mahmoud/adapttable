@@ -155,6 +155,39 @@ describe("<DataTable> (Radix)", () => {
     expect(onAction).toHaveBeenCalled();
   });
 
+  it("marks the destructive entry and blocks the one it cannot run, in the menu", async () => {
+    const onLocked = vi.fn();
+    renderHarness({
+      override: {
+        rowActions: [
+          { key: "del", label: "Delete", color: "red", onClick: vi.fn() },
+          {
+            key: "locked",
+            label: "Locked",
+            isDisabled: () => true,
+            disabledReason: () => "No access",
+            onClick: onLocked,
+          },
+        ],
+        rowActionsLayout: "menu",
+      },
+    });
+    const trigger = document.querySelector(
+      '[data-adapttable-part="row-actions-trigger"]'
+    );
+    fireEvent.pointerDown(trigger!, { button: 0 });
+    fireEvent.pointerUp(trigger!, { button: 0 });
+
+    const destructive = await screen.findByRole("menuitem", { name: "Delete" });
+    expect(destructive).toHaveAttribute("data-accent-color", "red");
+
+    const locked = screen.getByRole("menuitem", { name: "Locked" });
+    expect(locked).toHaveAttribute("data-disabled");
+    expect(locked).toHaveAttribute("title", "No access");
+    fireEvent.click(locked);
+    expect(onLocked).not.toHaveBeenCalled();
+  });
+
   it("lets renderRowActions replace the actions cell", () => {
     const onEdit = vi.fn();
     renderHarness({

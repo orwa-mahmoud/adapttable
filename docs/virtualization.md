@@ -67,12 +67,15 @@ real measured sizes (like the `140` above) when your cells differ.
 - Ant Design maps `virtualize` to antd's **native** virtual table mode on
   desktop; on mobile the cards window through the shared engine, just like
   every other adapter, and the page-level sentinel keeps loading more.
+  `virtualizeColumns` has no effect there: antd owns its scroller, so there is
+  no measured box for the horizontal window, and every column stays in the DOM.
 
 ## Options
 
 | Prop                  | Type      | Default | Description                                                       |
 | --------------------- | --------- | ------- | ----------------------------------------------------------------- |
 | `virtualize`          | `boolean` | `false` | Window the rendered rows/cards on long infinite lists.            |
+| `virtualizeColumns`   | `boolean` | `false` | Window the rendered columns on very wide tables.                  |
 | `maxHeight`           | `number`  | —       | Fixed-height scroll box (px); switches to element-mode windowing. |
 | `estimateRowSize`     | `number`  | `56`    | Desktop row-height estimate in px.                                |
 | `estimateCardSize`    | `number`  | —       | Mobile card-height estimate in px.                                |
@@ -137,5 +140,14 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
 - The headless hook is exported as `useTableVirtualization` for custom markup;
   when disabled it returns every row with no spacers, so one render path
   serves both cases.
+- A windowed table still tells assistive technology how big the data really
+  is: the table carries `aria-rowcount` with each row's absolute
+  `aria-rowindex`, and the mobile card list carries `aria-setsize` with each
+  card's `aria-posinset`. `virtualizeColumns` does the same for the horizontal
+  axis — `aria-colcount` on the table and an absolute `aria-colindex` on every
+  body and header cell — so a reader is never left counting the cells it can
+  reach. Without
+  that a screen reader would count only the few rows in the DOM. See
+  [Accessibility](./accessibility.md).
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).

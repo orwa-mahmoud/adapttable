@@ -36,17 +36,29 @@ import {
 import type { TableLabels } from "../types";
 import { type Command, filterCommands } from "./commandRegistry";
 
-/** Props an adapter's palette surface receives. */
+export type { Command };
+
+/**
+ * Props an adapter's palette surface receives.
+ *
+ * @public
+ */
 export interface CommandPaletteSurfaceProps {
   /** Accessible name for the dialog. */
   readonly label: string;
   /** Close it — bind to the kit's own dismiss channel. */
   readonly onClose: () => void;
+  /** Content rendered inside. */
   readonly children: ReactNode;
+  /** Class for the element. */
   readonly className?: string;
 }
 
-/** Props an adapter's search input receives. */
+/**
+ * Props an adapter's search input receives.
+ *
+ * @public
+ */
 export interface CommandPaletteInputProps {
   /** Spread onto the input: value, handlers, and the combobox wiring. */
   readonly inputProps: {
@@ -64,9 +76,15 @@ export interface CommandPaletteInputProps {
   };
 }
 
-/** Props an adapter's command row receives. */
+/**
+ * Props an adapter's command row receives.
+ *
+ * @public
+ */
 export interface CommandPaletteItemProps {
+  /** The command being rendered. */
   readonly command: Command;
+  /** Whether this entry is the highlighted one. */
   readonly active: boolean;
   /** Spread onto the row: the option role, its id, and selection. */
   readonly itemProps: {
@@ -80,7 +98,11 @@ export interface CommandPaletteItemProps {
   };
 }
 
-/** Adapter-owned rendering for {@link CommandPaletteChrome}. */
+/**
+ * Adapter-owned rendering for {@link CommandPaletteChrome}.
+ *
+ * @public
+ */
 export interface CommandPaletteSlots {
   /** The modal surface. */
   readonly Surface: (props: CommandPaletteSurfaceProps) => ReactNode;
@@ -92,7 +114,11 @@ export interface CommandPaletteSlots {
   readonly Empty: (props: { readonly message: string }) => ReactNode;
 }
 
-/** What the palette needs to render. */
+/**
+ * What the palette needs to render.
+ *
+ * @public
+ */
 export interface CommandPaletteChromeProps {
   /** Every command available right now. */
   commands: readonly Command[];
@@ -136,6 +162,8 @@ function focusablesIn(root: HTMLElement | null): HTMLElement[] {
  *
  * @param props - The commands, whether it is open, and the kit's slots.
  * @returns The palette.
+ *
+ * @public
  */
 export function CommandPaletteChrome(
   props: Readonly<CommandPaletteChromeProps>

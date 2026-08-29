@@ -67,6 +67,8 @@ function cellNeededWidth(cell: HTMLElement): number {
  * @param key - The column key to measure.
  * @returns The width in pixels, clamped to the resize bounds, or `null` when
  *   the column has no cells on screen to measure.
+ *
+ * @public
  */
 export function measureColumnWidth(
   root: Element | null,
@@ -92,6 +94,8 @@ export function measureColumnWidth(
  * @param keys - The columns to size, in any order.
  * @param setWidth - The layout mutator that persists each width.
  * @returns How many columns were sized — zero when nothing was measurable.
+ *
+ * @public
  */
 export function autoSizeColumns(
   root: Element | null,

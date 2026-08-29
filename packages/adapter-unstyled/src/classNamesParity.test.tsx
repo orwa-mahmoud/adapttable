@@ -164,6 +164,7 @@ const A11Y_PARTS = new Set([
   "export-announcer",
   "grid-announcer",
   "row-reorder-announcer",
+  "table-status-announcer",
 ]);
 
 /**

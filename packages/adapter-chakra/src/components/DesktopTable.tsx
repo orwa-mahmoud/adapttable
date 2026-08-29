@@ -115,7 +115,9 @@ const PIN_BG = "var(--chakra-colors-bg)";
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
   className?: string;
+  /** The kit's size token for the table. */
   size: "sm" | "md" | "lg";
+  /** The kit's accent, so chrome matches the table. */
   accentColor?: string;
   /** Text direction — flips the expand chevron for RTL. */
   dir?: Direction;
@@ -405,10 +407,7 @@ function LeafHeader<TRow>({
 }>): ReactElement {
   const { column } = leaf;
   const ariaSort = leaf.headerProps["aria-sort"] as
-    | "ascending"
-    | "descending"
-    | "none"
-    | undefined;
+    "ascending" | "descending" | "none" | undefined;
   const leafStyle = {
     ...leaf.style,
     ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
@@ -418,6 +417,9 @@ function LeafHeader<TRow>({
       key={column.key}
       data-adapttable-part="header-cell"
       {...leaf.columnHeaderProps}
+      // Chakra's own header cell does not set it, and this component takes
+      // named props from `leaf` rather than spreading `headerProps`.
+      scope="col"
       textAlign={logicalAlign(column.align)}
       width={column.width}
       aria-sort={ariaSort}

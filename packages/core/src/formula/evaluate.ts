@@ -17,7 +17,13 @@
 import type { SortableValue } from "../types";
 import type { FormulaNode } from "./parse";
 
-/** The error values a formula can produce, spelled as a spreadsheet spells them. */
+export type { SortableValue };
+
+/**
+ * The error values a formula can produce, spelled as a spreadsheet spells them.
+ *
+ * @public
+ */
 export const FORMULA_ERRORS = {
   /** A column the formula names does not exist. */
   name: "#NAME?",
@@ -31,11 +37,19 @@ export const FORMULA_ERRORS = {
   syntax: "#ERROR!",
 } as const;
 
-/** One of the error codes above. */
+/**
+ * One of the error codes above.
+ *
+ * @public
+ */
 export type FormulaErrorCode =
   (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
 
-/** What a formula evaluates to. */
+/**
+ * What a formula evaluates to.
+ *
+ * @public
+ */
 export type FormulaValue =
   | { readonly kind: "number"; readonly value: number }
   | { readonly kind: "text"; readonly value: string }
@@ -43,25 +57,45 @@ export type FormulaValue =
   | { readonly kind: "blank" }
   | { readonly kind: "error"; readonly code: FormulaErrorCode };
 
-/** An empty cell. */
+/**
+ * An empty cell.
+ *
+ * @public
+ */
 export const FORMULA_BLANK: FormulaValue = { kind: "blank" };
 
-/** A number value. */
+/**
+ * A number value.
+ *
+ * @public
+ */
 export function formulaNumber(value: number): FormulaValue {
   return { kind: "number", value };
 }
 
-/** A text value. */
+/**
+ * A text value.
+ *
+ * @public
+ */
 export function formulaText(value: string): FormulaValue {
   return { kind: "text", value };
 }
 
-/** A boolean value. */
+/**
+ * A boolean value.
+ *
+ * @public
+ */
 export function formulaBoolean(value: boolean): FormulaValue {
   return { kind: "boolean", value };
 }
 
-/** An error value. */
+/**
+ * An error value.
+ *
+ * @public
+ */
 export function formulaError(code: FormulaErrorCode): FormulaValue {
   return { kind: "error", code };
 }
@@ -71,6 +105,8 @@ export function formulaError(code: FormulaErrorCode): FormulaValue {
  *
  * @param value - Any formula result.
  * @returns Whether it failed.
+ *
+ * @public
  */
 export function isFormulaError(value: FormulaValue): boolean {
   return value.kind === "error";
@@ -86,6 +122,8 @@ export function isFormulaError(value: FormulaValue): boolean {
  *
  * @param raw - The field as it sits on the row.
  * @returns The value a formula sees.
+ *
+ * @public
  */
 export function toFormulaValue(raw: unknown): FormulaValue {
   if (raw === null || raw === undefined || raw === "") return FORMULA_BLANK;
@@ -104,6 +142,8 @@ export function toFormulaValue(raw: unknown): FormulaValue {
  *
  * @param value - The evaluated value.
  * @returns Its display text; an error shows as its code.
+ *
+ * @public
  */
 export function formulaDisplay(value: FormulaValue): string {
   switch (value.kind) {
@@ -120,7 +160,11 @@ export function formulaDisplay(value: FormulaValue): string {
   }
 }
 
-/** How the evaluator reads a column off the row it was given. */
+/**
+ * How the evaluator reads a column off the row it was given.
+ *
+ * @public
+ */
 export type FormulaScope = (key: string) => FormulaValue | undefined;
 
 /**
@@ -343,6 +387,8 @@ function applyBinary(
  * @param scope - Reads a column's value; `undefined` for a column that is not
  *   there, which becomes `#NAME?`.
  * @returns The value for the cell.
+ *
+ * @public
  */
 export function evaluateFormula(
   node: FormulaNode,
@@ -371,7 +417,11 @@ export function evaluateFormula(
   }
 }
 
-/** The function names the engine knows — for a formula bar's autocomplete. */
+/**
+ * The function names the engine knows — for a formula bar's autocomplete.
+ *
+ * @public
+ */
 export const FORMULA_FUNCTIONS: readonly string[] = Object.keys(FUNCTIONS);
 
 /**
@@ -391,6 +441,8 @@ export const FORMULA_FUNCTIONS: readonly string[] = Object.keys(FUNCTIONS);
  *
  * @param value - The evaluated value.
  * @returns The key the table's comparator orders by.
+ *
+ * @public
  */
 export function formulaSortValue(value: FormulaValue): SortableValue {
   switch (value.kind) {

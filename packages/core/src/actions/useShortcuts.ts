@@ -18,7 +18,11 @@
  */
 import { useEffect } from "react";
 
-/** One shortcut: the chord, and what it runs. */
+/**
+ * One shortcut: the chord, and what it runs.
+ *
+ * @public
+ */
 export interface Shortcut {
   /**
    * The chord, as `"mod+k"`. `mod` is Cmd on a Mac and Ctrl elsewhere,
@@ -30,7 +34,11 @@ export interface Shortcut {
   command: string;
 }
 
-/** The shortcuts a table has unless the host says otherwise. */
+/**
+ * The shortcuts a table has unless the host says otherwise.
+ *
+ * @public
+ */
 export const DEFAULT_SHORTCUTS: readonly Shortcut[] = [
   { chord: "mod+k", command: "command-palette" },
 ];
@@ -91,7 +99,11 @@ function inTextEntry(target: EventTarget | null): boolean {
   );
 }
 
-/** What {@link useShortcuts} needs. */
+/**
+ * What {@link useShortcuts} needs.
+ *
+ * @public
+ */
 export interface UseShortcutsOptions {
   /** Off unless the host armed it; nothing is bound when false. */
   enabled: boolean;
@@ -111,6 +123,8 @@ export interface UseShortcutsOptions {
  * Bind a table's shortcuts.
  *
  * @param options - The shortcuts and what to do when one fires.
+ *
+ * @public
  */
 export function useShortcuts(options: UseShortcutsOptions): void {
   const { enabled, onCommand } = options;

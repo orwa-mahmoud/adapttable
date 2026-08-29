@@ -13,21 +13,29 @@ import type { ReactNode } from "react";
  * Per-part class-name hooks. Every node also carries a stable
  * `data-adapttable-part` attribute and `data-*` state attributes so you
  * can style with Tailwind, shadcn, or your own CSS.
+ *
+ * @public
  */
 export interface DataTableClassNames {
+  /** Class for the outermost wrapper. */
   root?: string;
+  /** Class for the toolbar above the table. */
   toolbar?: string;
+  /** The search input itself. */
   search?: string;
   /** The search field wrapper (holds the search input + leading icon). */
   searchField?: string;
   /** The leading magnifying-glass icon inside the search field. */
   searchIcon?: string;
+  /** The toolbar's sort-by select. */
   sortSelect?: string;
   /** Rows-per-page `<select>` (toolbar in infinite mode, footer when paged). */
   rowsPerPage?: string;
+  /** The Filters trigger. */
   filtersButton?: string;
   /** The leading funnel icon inside the Filters button. */
   filtersIcon?: string;
+  /** The active-filter count badge on it. */
   filtersCount?: string;
   /**
    * A cell inside the selected range (`cellNavigation` + a range). There is no
@@ -35,10 +43,6 @@ export interface DataTableClassNames {
    * the element too, for CSS that prefers attribute selectors.
    */
   cellSelected?: string;
-  /**
-   * A cell the find bar matched (`findInTable`). `data-cell-match` is on the
-   * element too, for CSS that prefers attribute selectors.
-   */
   /** The footer row that closes a group (`groupFooters`). */
   groupFooterRow?: string;
   /** The spanning cell inside a group footer. */
@@ -47,6 +51,10 @@ export interface DataTableClassNames {
   groupMoreRow?: string;
   /** The spanning cell inside that row. */
   groupMoreCell?: string;
+  /**
+   * A cell the find bar matched (`findInTable`). `data-cell-match` is on the
+   * element too, for CSS that prefers attribute selectors.
+   */
   cellMatch?: string;
   /** The one match the find walk is on — `data-cell-match-current`. */
   cellMatchCurrent?: string;
@@ -112,16 +120,27 @@ export interface DataTableClassNames {
    * style — the shadcn preset spins it.
    */
   exportSpinner?: string;
+  /** The element the filters overlay is positioned against. */
   filtersAnchor?: string;
+  /** The scrim behind the filters overlay. */
   filtersBackdrop?: string;
+  /** The filters overlay in popover mode. */
   filtersPopover?: string;
+  /** The filters panel body. */
   filtersPanel?: string;
+  /** Its header strip. */
   filtersHeader?: string;
+  /** The title in that header. */
   filtersTitle?: string;
+  /** Its close control. */
   filtersClose?: string;
+  /** The scrolling area holding the fields. */
   filtersBody?: string;
+  /** The footer strip under them. */
   filtersFooter?: string;
+  /** The clear-all action. */
   filtersClear?: string;
+  /** The action that closes the panel; filters apply live. */
   filtersDone?: string;
   /** Wrapper around the auto form and the AND/OR builder. */
   filtersForm?: string;
@@ -163,21 +182,35 @@ export interface DataTableClassNames {
   filterChecklistList?: string;
   /** Per-value count in a checklist. */
   filterChecklistCount?: string;
+  /** The row of active-filter chips. */
   chips?: string;
+  /** One chip in that row. */
   chip?: string;
+  /** A chip's remove button. */
   chipRemove?: string;
+  /** The column menu as a whole. */
   columnMenu?: string;
+  /** The trigger on a column header. */
   columnMenuButton?: string;
+  /** The menu's panel. */
   columnMenuPanel?: string;
+  /** Its header strip. */
   columnMenuHeader?: string;
+  /** The title in that header. */
   columnMenuTitle?: string;
+  /** One column's row in the menu. */
   columnMenuItem?: string;
+  /** The drag grip that reorders a column. */
   columnMenuGrip?: string;
+  /** A row's column name. */
   columnMenuLabel?: string;
+  /** A row's show/hide control. */
   columnMenuVisibility?: string;
+  /** A row's pin control. */
   columnMenuPin?: string;
   /** The separator above the trailing row-actions entry in the menu. */
   columnMenuSeparator?: string;
+  /** The reset-columns action. */
   columnMenuReset?: string;
   /** The column menu's "size columns to content" action. */
   columnMenuAutoSize?: string;
@@ -217,8 +250,11 @@ export interface DataTableClassNames {
   viewsSave?: string;
   /** The separator between the views list and the save row. */
   viewsDivider?: string;
+  /** The drag handle on a column edge. */
   resizeHandle?: string;
+  /** The bar of actions for the selected rows. */
   bulkBar?: string;
+  /** One action in that bar. */
   bulkButton?: string;
   /** The failure line shown in the bulk bar after a rejected bulk action. */
   bulkError?: string;
@@ -228,9 +264,13 @@ export interface DataTableClassNames {
   selectAllText?: string;
   /** The banner's action button (select all matching / clear all). */
   selectAllButton?: string;
+  /** Class for the table element. */
   table?: string;
+  /** The table head. */
   thead?: string;
+  /** A header row. */
   headerRow?: string;
+  /** A header cell. */
   headerCell?: string;
   /** The header checkbox that selects a column (`columnSelectionCheckbox`). */
   columnSelect?: string;
@@ -250,11 +290,15 @@ export interface DataTableClassNames {
   headerGroupCell?: string;
   /** Collapse/expand control inside a collapsible group header. */
   columnGroupToggle?: string;
+  /** The sort control inside a header cell. */
   sortButton?: string;
   /** The 1-based multi-sort position badge inside a sorted header. */
   sortIndex?: string;
+  /** The table body. */
   tbody?: string;
+  /** A body row. */
   row?: string;
+  /** A body cell. */
   cell?: string;
   /**
    * A spanned cell (`getCellSpan` / `column.colSpan`). `data-cell-span` is on
@@ -276,7 +320,9 @@ export interface DataTableClassNames {
   cardDetail?: string;
   /** The trailing row-actions header cell. */
   actionsHeader?: string;
+  /** The per-row actions cell. */
   actionsCell?: string;
+  /** One control inside it. */
   actionButton?: string;
   /** The 3-dot control that opens the row-actions menu. */
   rowActionsTrigger?: string;
@@ -296,10 +342,13 @@ export interface DataTableClassNames {
   rowReorderDown?: string;
   /** The leading select-all header cell. */
   selectionHeader?: string;
+  /** The row-selection cell. */
   selectionCell?: string;
   /** A selection checkbox input (header select-all, row, mobile card). */
   checkbox?: string;
+  /** The load-more region under the rows. */
   loadMore?: string;
+  /** Its button. */
   loadMoreButton?: string;
   /* ── Row grouping (groupBy) ──────────────────────────────────────── */
   /** A group-header `<tr>` in the grouped desktop body. */
@@ -323,12 +372,17 @@ export interface DataTableClassNames {
   editCellActivate?: string;
   /** The active inline cell editor (input or select). */
   editCellEditor?: string;
+  /** The mobile card list. */
   cards?: string;
+  /** Class for a mobile card. */
   card?: string;
   /** The trailing actions strip inside a mobile card. */
   cardActions?: string;
+  /** One field row inside a card. */
   cardRow?: string;
+  /** A field's label in a card. */
   cardLabel?: string;
+  /** A field's value in a card. */
   cardValue?: string;
   /** The sideways/bounded scroll wrapper around the desktop table. */
   scrollBox?: string;
@@ -362,9 +416,11 @@ export interface DataTableClassNames {
   pageNumber?: string;
   /** The "…" gap standing in for elided page numbers. */
   pageEllipsis?: string;
+  /** The empty state. */
   empty?: string;
   /** The clear-filters button inside the "no results" empty state. */
   emptyClear?: string;
+  /** The loading state. */
   loading?: string;
   /* ── Loading skeleton ────────────────────────────────────────────── */
   /** The skeleton `<table>`. */
@@ -385,12 +441,16 @@ export interface DataTableClassNames {
   loadingCard?: string;
   /** The non-blocking background-refresh progress indicator. */
   refreshIndicator?: string;
+  /** The error state. */
   error?: string;
+  /** The retry control in the error state. */
   retryButton?: string;
 }
 
 /**
  * Overridable sub-components: the loading skeleton and the empty state.
+ *
+ * @public
  */
 export interface DataTableSlots {
   /** Replace the empty-state. */
@@ -417,8 +477,12 @@ export interface DataTableSlots {
   error?: Slot<TableErrorState>;
 }
 
-/** Props for the unstyled `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the unstyled `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {
@@ -475,6 +539,8 @@ interface DataTablePropsBase<TRow> extends Omit<
  * with core's data-mode union, so `mode="server"` requires
  * `onQueryChange` at compile time and `mode="frontend"` turns it into a
  * pure notification.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;

@@ -7,7 +7,11 @@ import type {
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
-/** Overridable sub-components. */
+/**
+ * Overridable sub-components.
+ *
+ * @public
+ */
 export interface DataTableSlots {
   /** Replace the loading skeleton. */
   skeleton?: ReactNode;
@@ -17,17 +21,30 @@ export interface DataTableSlots {
   noResults?: ReactNode;
 }
 
-/** Per-part class hooks — restyle without replacing components. */
+/**
+ * Per-part class hooks — restyle without replacing components.
+ *
+ * @public
+ */
 export interface DataTableClassNames {
+  /** Class for the outermost wrapper. */
   root?: string;
+  /** Class for the toolbar above the table. */
   toolbar?: string;
+  /** Class for the table element. */
   table?: string;
+  /** Class for a mobile card. */
   card?: string;
+  /** Class for the pagination footer. */
   footer?: string;
 }
 
-/** Props for the React Bootstrap `<DataTable>`. */
-interface DataTablePropsBase<TRow> extends Omit<
+/**
+ * Props for the React Bootstrap `<DataTable>`.
+ *
+ * @public
+ */
+export interface DataTablePropsBase<TRow> extends Omit<
   BaseDataTableProps<TRow>,
   "source"
 > {
@@ -83,6 +100,8 @@ interface DataTablePropsBase<TRow> extends Omit<
  *
  * The base surface is intersected with core's data-mode union so the
  * appropriate data-mode requirements are enforced at compile time.
+ *
+ * @public
  */
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> &
   DataModeProps<TRow>;

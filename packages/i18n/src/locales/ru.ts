@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Russian (`ru`) label preset. */
+/**
+ * Russian (`ru`) label preset.
+ *
+ * @public
+ */
 export const ru: Required<TableLabels> = {
   table: "Таблица данных",
   search: "Поиск",
@@ -115,6 +119,9 @@ export const ru: Required<TableLabels> = {
   resetColumn: "Сбросить столбец",
   sortAscending: "Сортировать по возрастанию",
   sortDescending: "Сортировать по убыванию",
+  sortedBy: ({ column, ascending }) =>
+    `Отсортировано по ${column}: ${ascending ? "по возрастанию" : "по убыванию"}`,
+  sortingCleared: "Сортировка сброшена",
   filterColumn: "Фильтровать столбец",
   columnActions: "Действия со столбцом",
   exportCsv: "Экспорт CSV",

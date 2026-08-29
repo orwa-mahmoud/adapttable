@@ -48,10 +48,20 @@ you use.
 ## Is there a free alternative to MUI X DataGrid or ag-Grid?
 
 Yes — AdaptTable is **MIT-licensed and fully free**, including server-side
-data, infinite scroll, filtering, and selection. MUI X DataGrid and ag-Grid are
+data, infinite scroll, filtering and selection. MUI X DataGrid and ag-Grid are
 **open-core**: their advanced server-side data and infinite-loading
-capabilities sit behind paid Pro/Premium or Enterprise tiers. The MUI adapter
-gives a DataGrid-style experience at no cost.
+capabilities sit behind paid Pro/Premium or Enterprise tiers.
+
+Six more sit in those same paid tiers and are MIT here:
+[pivoting](./pivot.md), [tree data](./tree-data.md),
+[cell-range selection, range clipboard copy/paste and the fill
+handle](./cell-navigation.md), and
+[Excel (.xlsx) export](./customization.md#export). What the paid tiers still
+have is integration — one spreadsheet surface with its tool panels assembled —
+where AdaptTable gives you the parts. [Comparison](./comparison.md) has the
+table, with each vendor's tier named.
+
+The MUI adapter gives a DataGrid-style experience at no cost.
 
 ## Is AdaptTable free?
 
@@ -165,20 +175,28 @@ zero UI-kit dependencies.
 Measured on the published builds, with React and your UI kit external because
 your app already ships those:
 
-| What you import                           | min+gzip  |
-| ----------------------------------------- | --------- |
-| `useFrontendData` + `useDataTable` (core) | ~10 kB    |
-| every core export                         | ~34 kB    |
-| `DataTable` from an adapter               | ~51–57 kB |
+| What you import                           | min+gzip    |
+| ----------------------------------------- | ----------- |
+| `useFrontendData` + `useDataTable` (core) | ~18 kB      |
+| every core export                         | ~87 kB      |
+| `DataTable` from an adapter               | ~127–141 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
-land within a few kB of each other, so switching kits does not change what you
+land within ~13 kB of each other, so switching kits does not change what you
 pay.
 
+The third row is the one to understand. `DataTable` is a single component whose
+props can turn on every feature it has, and a bundler follows imports rather
+than prop values — so it carries them all whether or not you switch one on. To
+pay for what you use, name it: compose with `features` from the kit's subpath,
+or build on the headless hooks in row one. [Feature
+composition](./features.md#no-bundle-savings-yet) has the detail; v3 is where
+the props stop holding the imports open.
+
 These are not estimates. `pnpm budget` bundles each of those imports for real
-and fails the build if one crosses its ceiling, so the numbers on this page
-cannot quietly go stale.
+and fails the build if one crosses its ceiling, and it checks this table against
+what it just measured — so a figure here cannot drift from the build.
 
 ## How do I get started quickly?
 
@@ -198,10 +216,18 @@ near-100% test coverage across every adapter.
 
 ## When might another library fit better?
 
-- You need a heavyweight enterprise grid with pivoting, range selection, and
-  Excel-style fill-handle editing _today_ → ag-Grid or MUI X DataGrid (paid).
-  (AdaptTable does ship opt-in single-cell editing — see
-  [Inline cell editing](./cell-editing.md).)
-- You're not on React → TanStack Table (multi-framework).
-- You need spreadsheet-grade enterprise features like pivoting, Excel fill
-  handles, or range selection _today_.
+- You want a mature, deeply integrated spreadsheet-analytics product and are
+  happy to licence it → **AG Grid Enterprise** or **MUI X Premium**. Their pivot
+  UI, tool panels and range tooling arrive as one assembled surface you switch
+  on. AdaptTable ships the same capabilities under MIT —
+  [pivoting](./pivot.md), [cell-range selection, range clipboard and the fill
+  handle](./cell-navigation.md), [tree data](./tree-data.md),
+  [inline editing](./cell-editing.md) and
+  [Excel (.xlsx) export](./customization.md#export) — but as parts you compose,
+  with their prerequisites stated, rather than one spreadsheet product.
+- You're not on React → **TanStack Table** (multi-framework). AdaptTable is
+  React-only.
+- You want the table to draw its own look rather than your design system's.
+  Every AdaptTable adapter renders your UI kit's real components, which is the
+  whole point of it — and the wrong trade if you would rather not own the
+  theming at all.

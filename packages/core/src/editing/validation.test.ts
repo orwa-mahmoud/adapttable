@@ -203,9 +203,8 @@ describe("useEditValidation", () => {
     const validateRow = vi.fn((row: Task) =>
       row.title === "SHIP" ? undefined : "wrong path"
     );
-    const applyEdit = vi.fn(
-      (row: Task, key: string, value: unknown): Task =>
-        key === "title" ? { ...row, title: String(value).toUpperCase() } : row
+    const applyEdit = vi.fn((row: Task, key: string, value: unknown): Task =>
+      key === "title" ? { ...row, title: String(value).toUpperCase() } : row
     );
     const { result } = renderHook(() =>
       useEditValidation<Task>({ validateRow, applyEdit })

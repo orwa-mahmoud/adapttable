@@ -112,8 +112,11 @@ export function Checkbox({
 
 /** One `<option>`-equivalent entry for {@link NativeSelect}. */
 export interface SelectOption {
+  /** Value stored when this option is chosen. */
   value: string;
+  /** Caption shown for the entry. */
   label: ReactNode;
+  /** Whether the control is offered but not available. */
   disabled?: boolean;
 }
 

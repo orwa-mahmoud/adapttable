@@ -94,16 +94,19 @@ export {
   type FilterTypeRegistry,
   type FilterTypeSpec,
   type FilterValue,
+  type MobileCardRenderer,
   type PaginatedResponse,
   type PaginationMode,
   resolveFilterRegistry,
   type RowAction,
+  type RowActionsRenderer,
   type SavedView,
   type SortByOption,
   type SortDirection,
   type TableLabels,
   type TableQuery,
   type TableSource,
+  type ToolbarSlots,
   useDataTable,
   type UseDataTableResult,
   useFrontendData,
@@ -136,6 +139,11 @@ export {
   type UseTableUrlStateResult,
 } from "@adapttable/core";
 export { deriveSortByOptions } from "@adapttable/core/adapter";
+
+/* The adapter's own names: the props base every DataTableProps is built
+   from, before the data mode is chosen, and the props its icons take. */
+export type { IconProps } from "./components/icons";
+export type { DataTablePropsBase } from "./types";
 
 /* Completed public surface (v2): every type a consumer's own code
    needs — CSV options, column layout, cell editors, tier props —

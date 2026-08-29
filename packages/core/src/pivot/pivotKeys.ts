@@ -27,7 +27,11 @@ export const MEASURE_SEP = "\u0001";
 /** In front of a key that stands for a total rather than a real path. */
 export const TOTAL_PREFIX = "\u0002";
 
-/** The key of the grand-total line, distinct from every real row path. */
+/**
+ * The key of the grand-total line, distinct from every real row path.
+ *
+ * @public
+ */
 export const PIVOT_GRAND_TOTAL_KEY = `${TOTAL_PREFIX}grand`;
 
 /** A stable key for a dimension path. */

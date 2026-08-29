@@ -46,7 +46,8 @@ control via prop-getters.
 - **Row styling and heights** — `rowStyle`, `rowHeight`.
   Grouping and trees refuse it. Omit the handler and no handle renders.
 - **Keyboard cell navigation** (`cellNavigation`) — one tab stop, arrow keys,
-  ARIA grid semantics and screen-reader announcements.
+  ARIA grid semantics and screen-reader announcements. It is also the gate for
+  cell-range selection, clipboard copy/paste of a range, and the fill handle.
 - **Row grouping** — `groupBy` with per-group aggregates sharing the `summaryRow` mapper.
 - **Pivot tables** — rows, columns and measures with subtotals and collapsible
   groups, from the optional `@adapttable/core/pivot` entry.

@@ -52,6 +52,8 @@ import type { UseSavedViewsOptions } from "./url/useSavedViews";
  * every kit. These name the two places outside it, so a control can be
  * put before everything or after everything without an adapter having to
  * know what the control is.
+ *
+ * @public
  */
 export interface ToolbarSlots {
   /** Ahead of the search input. */
@@ -67,6 +69,8 @@ export interface ToolbarSlots {
  * button in `toolbarSlots`, an item in your own app bar, a route. The
  * table never invents a trigger for it, and `open` is the panel's key or
  * `null` for closed.
+ *
+ * @public
  */
 export interface SidePanelOptions {
   /** The panels, in tab order. */
@@ -88,6 +92,8 @@ export interface SidePanelOptions {
  * classNames, animation, …) so the common contract lives in one place.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export interface BaseDataTableProps<TRow> {
   /** Data + state contract from `useFrontendData` / `useQuerySource`. */
@@ -125,7 +131,7 @@ export interface BaseDataTableProps<TRow> {
   /**
    * How the trailing actions column renders. Omit or `"buttons"` for the
    * horizontal strip. `"menu"` collapses visible actions into a 3-dot menu
-   * using each kit's own Menu. {@link BaseDataTableProps.renderRowActions}
+   * using each kit's own Menu. `BaseDataTableProps.renderRowActions`
    * wins over this.
    */
   rowActionsLayout?: RowActionsLayout;
@@ -223,7 +229,7 @@ export interface BaseDataTableProps<TRow> {
    *
    * Return a promise and the cell shows it is saving until that promise
    * settles, and shows why if it rejects — with an undo when
-   * {@link BaseDataTableProps.onEditRollback} says how to put the row back.
+   * `BaseDataTableProps.onEditRollback` says how to put the row back.
    */
   onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
   /**
@@ -378,7 +384,7 @@ export interface BaseDataTableProps<TRow> {
   /**
    * Edit a whole row at once instead of a cell at a time: every field opens
    * together, holds its draft, and reaches the host as ONE patch when the reader
-   * saves. Requires {@link BaseDataTableProps.onRowEdit}.
+   * saves. Requires `BaseDataTableProps.onRowEdit`.
    *
    * The right unit for a row whose fields constrain each other — a start and an
    * end date cannot be edited one at a time without passing through a state that
@@ -397,7 +403,7 @@ export interface BaseDataTableProps<TRow> {
    * Change many rows and save them together: every editable cell is a field,
    * nothing is sent until the reader saves, and one Cancel puts it all back.
    * The shape of a review pass — walk a list correcting values, write once.
-   * Requires {@link BaseDataTableProps.onBatchEdit}.
+   * Requires `BaseDataTableProps.onBatchEdit`.
    */
   batchEditing?: boolean;
   /**
@@ -432,7 +438,7 @@ export interface BaseDataTableProps<TRow> {
   onEditError?: EditEventHandler<TRow>;
   /**
    * A row changed underneath an open editor. Return `"keep"` or `"take"` to
-   * resolve it; return nothing and {@link BaseDataTableProps.editConflictPolicy}
+   * resolve it; return nothing and `BaseDataTableProps.editConflictPolicy`
    * decides. The default policy is `"ask"`.
    */
   onEditConflict?: EditConflictHandler<TRow>;
@@ -483,7 +489,7 @@ export interface BaseDataTableProps<TRow> {
   pinnedRowIds?: RowPinState;
   /**
    * Pin-list change channel. Uncontrolled: an observer. Controlled: apply
-   * the next lists to accept. Setting this (or {@link BaseDataTableProps.pinnedRowIds})
+   * the next lists to accept. Setting this (or `BaseDataTableProps.pinnedRowIds`)
    * is what arms the feature — omit both and nothing renders.
    */
   onPinnedRowIdsChange?: (next: RowPinState) => void;
@@ -517,7 +523,7 @@ export interface BaseDataTableProps<TRow> {
    */
   confirmDeleteRow?: boolean;
   /**
-   * How an edit is applied to a row for {@link BaseDataTableProps.validateRow}
+   * How an edit is applied to a row for `BaseDataTableProps.validateRow`
    * to judge. Defaults to a shallow spread keyed by the column key, which is
    * right when a column key IS the field; pass this when a column reads a
    * nested path.
@@ -531,7 +537,7 @@ export interface BaseDataTableProps<TRow> {
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
   /**
    * Free slot under the table (above the pager). Not the column-aligned
-   * summary row — that is {@link BaseDataTableProps.summaryRow}.
+   * summary row — that is `BaseDataTableProps.summaryRow`.
    */
   tableFooter?: ReactNode;
   /**
@@ -580,6 +586,7 @@ export interface BaseDataTableProps<TRow> {
   expandedIds?: readonly string[];
   /** Fired after the table opens or closes a node. */
   onExpandedIdsChange?: (ids: string[]) => void;
+  /** Column key rows are grouped on. */
   groupBy?: string | readonly string[] | null;
   /**
    * Notification fired AFTER the grouping change is applied — the table
@@ -641,14 +648,16 @@ export interface BaseDataTableProps<TRow> {
    * this decides which of the SURVIVING rows' groups are worth showing.
    */
   groupFilter?: (group: GroupNode<TRow>) => boolean;
+  /** Aggregates shown on each group header. */
   groupAggregates?: (
     rows: readonly TRow[]
   ) => Partial<Record<string, ReactNode>>;
   /**
    * Controlled collapsed group keys (ephemeral — not URL-synced).
-   * Uncontrolled: internal {@link useGroupCollapse}.
+   * Uncontrolled: internal `useGroupCollapse`.
    */
   collapsedGroupIds?: readonly string[];
+  /** Called with the collapsed groups after a toggle. */
   onCollapsedGroupIdsChange?: (ids: string[]) => void;
   /** Disable the built-in search box. */
   /**
@@ -839,7 +848,7 @@ export interface BaseDataTableProps<TRow> {
   cellNavigation?: boolean;
   /**
    * Offer a checkbox in every column header that selects that column.
-   * Defaults to false, and needs {@link cellNavigation} to do anything.
+   * Defaults to false, and needs `cellNavigation` to do anything.
    *
    * Ctrl/Cmd+click on a header already selects a column, and that gesture is
    * unchanged. It is also unreachable on a touch device — there is no Ctrl key
@@ -898,7 +907,7 @@ export interface BaseDataTableProps<TRow> {
    * What gets printed is the host's: `printTable` opens a browser dialog and
    * `downloadExportFile` cannot, so the table asks and the host decides.
    * Wire this and it becomes a command in the palette and an entry anywhere
-   * else commands are listed. Add {@link printButton} for a toolbar control
+   * else commands are listed. Add `printButton` for a toolbar control
    * as well — opt-in chrome either way, never a permanent button.
    *
    * ```tsx
@@ -988,7 +997,7 @@ export interface BaseDataTableProps<TRow> {
   /**
    * Show a Print button in the toolbar. Defaults to false.
    *
-   * The palette command is the always-on path once {@link onPrint} is wired
+   * The palette command is the always-on path once `onPrint` is wired
    * — this is the visible one, for an app whose users will not reach for
    * Cmd/Ctrl+K. It renders only when both are set: a button that opens
    * nothing would be worse than no button, so the option alone draws

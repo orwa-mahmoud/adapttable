@@ -98,158 +98,590 @@ import {
 } from "./rows/rowStyle";
 import { rowSourceIndex as rowSourceIndexImpl } from "./virtual/useTableVirtualization";
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Path separator inside a column-group id — labels may contain `/`.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_ID_SEP = COLUMN_GROUP_ID_SEP_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Synthetic leaf shown when a collapsed group uses `collapsedRender`.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_RENDER_PREFIX = COLUMN_GROUP_RENDER_PREFIX_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Synthetic leaf shown when a collapsed group has no summary column.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_STUB_PREFIX = COLUMN_GROUP_STUB_PREFIX_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Pixel lock for a collapsed arrow stub — chevron only, no leftover strip.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_STUB_WIDTH = COLUMN_GROUP_STUB_WIDTH_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Visible group caption; `null` when the collapsed stub hides the name.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const columnGroupHeaderCaption = columnGroupHeaderCaptionImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Stable id for a group path.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const columnGroupId = columnGroupIdImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * `column.group` as a root-to-leaf path. A string is one level.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const columnGroupPath = columnGroupPathImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Size lock for a collapsed arrow-stub column. `width` alone is a hint in
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const columnGroupStubStyle = columnGroupStubStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Alignment for a group header. Omit / unknown → `"center"`, so existing
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const groupedHeaderAlign = groupedHeaderAlignImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Style on one HTML group header cell: inset hairline while children sit
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const groupedHeaderCellStyle = groupedHeaderCellStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Inset hairline under a group title that still has child headers below.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const groupedHeaderChildRule = groupedHeaderChildRuleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Cluster for the collapse chevron + group title. A one-child group is only
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const groupedHeaderLabelStyle = groupedHeaderLabelStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * One cell of a group header row.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type HeaderGroupCell = HeaderGroupCellType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * The top group-header row. `null` when no visible column declares a group.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const headerGroupRow = headerGroupRowImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Every group-header row, top level first. Returns `null` when no visible
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const headerGroupRows = headerGroupRowsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * One cell in {@link htmlGroupedHeaderPlan}. Group cells span children
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCellType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Header rows for HTML-table kits. `null` when no column declares a group.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const htmlGroupedHeaderPlan = htmlGroupedHeaderPlanImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * True when this key is a collapsed-group `collapsedRender` column.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const isColumnGroupRenderKey = isColumnGroupRenderKeyImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * True when this key is a collapsed-group arrow stub.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const isColumnGroupStubKey = isColumnGroupStubKeyImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * True when this key is a stub or `collapsedRender` summary leaf.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const isColumnGroupSummaryKey = isColumnGroupSummaryKeyImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Add or drop a group id in the collapsed set.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const toggleCollapsedColumnGroup = toggleCollapsedColumnGroupImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Lift an extra row above a continuing Team span so the note is not hidden
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const EXTRA_OVER_SPAN_ROW_STYLE = EXTRA_OVER_SPAN_ROW_STYLE_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Cell paint for an extra: RTL-safe align, and room for a line of text.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const EXTRA_OVER_SPAN_STYLE = EXTRA_OVER_SPAN_STYLE_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Part names every kit stamps on an extra row.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const EXTRA_ROW_PARTS = EXTRA_ROW_PARTS_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * How many extras sit immediately in front of any of these data-row ids.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const extraCountBeforeRowIds = extraCountBeforeRowIdsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Table-slot indexes (leading chrome + data columns) a continuing row span
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const extraCoveredTableSlots = extraCoveredTableSlotsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * A separator or full-width entry in a `kind`-tagged body list.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type ExtraEntry = ExtraEntryType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * The fill the host already passed for this extra's person. Height is not
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const extraHostFillStyle = extraHostFillStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Extras whose `beforeRowId` sits in this section. Untargeted extras
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const extraRowsForSection = extraRowsForSectionImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Uncovered colSpans for an extra row that has to leave holes for a row span.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const extraUncoveredColSpans = extraUncoveredColSpansImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Grow a data-row `rowSpan` so it still reaches the last covered person
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const inflateBodyCellRowSpans = inflateBodyCellRowSpansImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Splice extras into a `kind`-tagged list. `dataKey` names the data row
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const insertExtraRows = insertExtraRowsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Splice extras whose `beforeRowId` is in this row list. Use on a pin
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const insertExtrasBeforeRows = insertExtrasBeforeRowsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Narrow a body slot to a host-injected extra.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const isExtraEntry = isExtraEntryImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Card list order: top pins, then the scroll window, then bottom pins.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const orderedCardEntries = orderedCardEntriesImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Bottom pin marker on that row.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const PINNED_BOTTOM_PART = PINNED_BOTTOM_PART_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * `data-adapttable-part` on a pinned row in the shared tbody.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const PINNED_TOP_PART = PINNED_TOP_PART_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Extra sticky inset a cell in a pinned row needs, and the z-index when
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const pinnedRowCellStyle = pinnedRowCellStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Part name for a pinned row, or `undefined` when the row is not pinned.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const pinnedRowPart = pinnedRowPartImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Sticky style when the row is pinned and the kit asked for sticky pins.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const pinnedRowSticky = pinnedRowStickyImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Sticky style for a pinned-row section (tbody or the row itself).
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const pinnedRowStickyStyle = pinnedRowStickyStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Measure an element's offset height; used for the sticky header offset.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const useOffsetHeight = useOffsetHeightImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Sort, pin, hide, autosize, filter, reset — disabled when locked.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const columnMenuActions = columnMenuActionsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Keep rows whose name or key contains the query (case-insensitive).
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const filterColumnMenuRows = filterColumnMenuRowsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Hide every unlocked visible column.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const hideAllColumns = hideAllColumnsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Restore one column's visibility, pin and width. Locks still apply.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const resetColumnLayout = resetColumnLayoutImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Show every unlocked hidden column.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const showAllColumns = showAllColumnsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Unpin every unlocked pinned column.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const unpinAllColumns = unpinAllColumnsImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * One body cell a kit renders — covered cells never appear.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type BodyCell<TRow> = BodyCellType<TRow>;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * True when any origin cell is taller than one row.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const bodyCellsHaveRowSpan = bodyCellsHaveRowSpanImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Look up a row's cells; empty when the row is unknown.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const cellsForRow = cellsForRowImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * `"2x1"` when this cell owns more than one slot; otherwise nothing.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const cellSpanMark = cellSpanMarkImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Memo digest so a virtualized row repaints when its spans change.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const rowSpanSignature = rowSpanSignatureImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Width (px) of the injected reorder column — shared so pin leads agree.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const REORDER_COLUMN_WIDTH = REORDER_COLUMN_WIDTH_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * MIME type carrying the dragged row id during a reorder drag.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const ROW_DND_MIME = ROW_DND_MIME_IMPL;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Dim the lifted row and draw an insertion line on the drop target.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const rowReorderDropStyle = rowReorderDropStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Per-row digest so a memoized row repaints when IT is lifted or is the drop
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const rowReorderSignature = rowReorderSignatureImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Row-reorder state: what is being dragged and where it may land.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type RowReorderState<TRow> = RowReorderStateType<TRow>;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Resolve `rowHeight` for one row.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const resolveRowHeight = resolveRowHeightImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Merge `rowStyle` with an explicit height. Height wins when both name it —
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const resolveRowStyle = resolveRowStyleImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Stable compare key for a memoized row's resolved style.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const rowStyleSignature = rowStyleSignatureImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Kit activate control the gate calls while the cell is idle.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type EditableCellActivateProps = EditableCellActivatePropsType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Kit button the gate calls for a conflict choice.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type EditableCellButtonProps = EditableCellButtonPropsType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Adapter-supplied controls for `EditableCellGate`.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type EditableCellSlots = EditableCellSlotsType;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Per-part classes for the filter header row.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type FilterHeaderClassNames = FilterHeaderClassNamesType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Props for the filter row under the column headers.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type FilterHeaderRowProps<TRow> = FilterHeaderRowPropsType<TRow>;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Hide leaves under collapsed groups according to each parent's options.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const applyCollapsedColumnGroups = applyCollapsedColumnGroupsImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Flatten a mixed column tree into leaves. Tree parents become `group`
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const flattenColumnTree = flattenColumnTreeImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * What `useFullscreen` returns.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export type FullscreenState = FullscreenStateType;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Promote a table to fullscreen, and say where overlays should go.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const useFullscreen = useFullscreenImpl;
 
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Memo digest so a virtualized row repaints when it is pinned or unpinned.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const rowPinSignature = rowPinSignatureImpl;
-/** @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3. */
+/**
+ * Dataset index for ARIA and focus — the window index when pinning is off.
+ *
+ * @deprecated Import from "@adapttable/core/adapter". Removed from the main entry at v3.
+ *
+ * @public
+ */
 export const rowSourceIndex = rowSourceIndexImpl;

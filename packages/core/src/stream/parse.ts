@@ -13,6 +13,8 @@
  */
 import type { RowPatch } from "../rows/patch";
 
+export type { RowPatch };
+
 /** One entry of a frame, before it is known to be a patch. */
 type Unknown = Record<string, unknown>;
 
@@ -67,6 +69,8 @@ function toPatch<TRow>(entry: unknown): RowPatch<TRow> | undefined {
  * @typeParam TRow - The row type.
  * @param frame - The raw text from the socket.
  * @returns Every well-formed patch in the frame; empty when there are none.
+ *
+ * @public
  */
 export function parseRowPatchFrame<TRow>(
   frame: string
@@ -87,3 +91,10 @@ export function parseRowPatchFrame<TRow>(
   }
   return patches;
 }
+
+export type {
+  InsertPatch,
+  RemovePatch,
+  UpdatePatch,
+  UpsertPatch,
+} from "../rows/patch";

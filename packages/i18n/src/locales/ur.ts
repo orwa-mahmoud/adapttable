@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Urdu (`ur`) label preset. Pairs with `dir="rtl"`. */
+/**
+ * Urdu (`ur`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const ur: Required<TableLabels> = {
   table: "ڈیٹا ٹیبل",
   search: "تلاش",
@@ -114,6 +118,9 @@ export const ur: Required<TableLabels> = {
   resetColumn: "کالم ری سیٹ کریں",
   sortAscending: "صعودی ترتیب",
   sortDescending: "نزولی ترتیب",
+  sortedBy: ({ column, ascending }) =>
+    `${column} کے مطابق ترتیب: ${ascending ? "صعودی" : "نزولی"}`,
+  sortingCleared: "ترتیب ہٹا دی گئی",
   filterColumn: "کالم فلٹر کریں",
   columnActions: "کالم اعمال",
   exportCsv: "CSV برآمد کریں",

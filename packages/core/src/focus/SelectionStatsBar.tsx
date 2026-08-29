@@ -4,7 +4,13 @@ import type { ReactNode } from "react";
 import type { TableLabels } from "../types";
 import type { SelectionStats } from "./selectionStats";
 
-/** Props for {@link SelectionStatsChrome}. */
+export type { SelectionStats };
+
+/**
+ * Props for {@link SelectionStatsChrome}.
+ *
+ * @public
+ */
 export interface SelectionStatsChromeProps {
   /** The statistics, straight from `shell.selectionStats`. */
   stats: SelectionStats | null;
@@ -18,20 +24,37 @@ export interface SelectionStatsChromeProps {
   slots: SelectionStatsSlots;
 }
 
-/** One formatted statistic in display order. */
+/**
+ * One formatted statistic in display order.
+ *
+ * @public
+ */
 export interface SelectionStatPart {
+  /** Which statistic this part reports. */
   readonly key: "count" | "sum" | "average" | "min" | "max";
+  /** The text to render. */
   readonly text: string;
 }
 
-/** Props passed to an adapter's selection-status component. */
+/**
+ * Props passed to an adapter's selection-status component.
+ *
+ * @public
+ */
 export interface SelectionStatsSlotProps {
+  /** The statistics to render, already formatted. */
   readonly parts: readonly SelectionStatPart[];
+  /** Class for the element. */
   readonly className?: string;
 }
 
-/** Adapter-owned rendering for {@link SelectionStatsChrome}. */
+/**
+ * Adapter-owned rendering for {@link SelectionStatsChrome}.
+ *
+ * @public
+ */
 export interface SelectionStatsSlots {
+  /** Renders the selection statistics. */
   readonly Stats: (props: SelectionStatsSlotProps) => ReactNode;
 }
 
@@ -53,6 +76,8 @@ function figure(
  * The strip is a status region: a screen reader reads the new figures after
  * the range announcement rather than interrupting it, which is the order the
  * two belong in.
+ *
+ * @public
  */
 export function SelectionStatsChrome({
   stats,

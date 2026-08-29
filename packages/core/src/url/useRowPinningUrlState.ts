@@ -13,7 +13,11 @@ import { EMPTY_ROW_PIN_STATE, type RowPinState } from "../rows/rowPinning";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import { readRowPins, writeRowPins } from "./serialize";
 
-/** What {@link useRowPinningUrlState} needs. */
+/**
+ * What {@link useRowPinningUrlState} needs.
+ *
+ * @public
+ */
 export interface UseRowPinningUrlStateOptions {
   /** URL backend; defaults to the History API. */
   urlAdapter?: UrlStateAdapter;
@@ -23,7 +27,11 @@ export interface UseRowPinningUrlStateOptions {
   urlKey?: string;
 }
 
-/** The controlled pair `<DataTable>` takes. */
+/**
+ * The controlled pair `<DataTable>` takes.
+ *
+ * @public
+ */
 export interface UseRowPinningUrlStateResult {
   /** The pin lists. */
   pinnedRowIds: RowPinState;
@@ -36,6 +44,8 @@ export interface UseRowPinningUrlStateResult {
  *
  * @param options - See {@link UseRowPinningUrlStateOptions}.
  * @returns The controlled pair to spread onto the table.
+ *
+ * @public
  */
 export function useRowPinningUrlState(
   options: UseRowPinningUrlStateOptions = {}

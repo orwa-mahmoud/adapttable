@@ -7,6 +7,8 @@ import type { ExtraFilters, FilterValue, SortDirection } from "./types";
  * `useTableUrlState`: the same setters exist whether the state lives in
  * the URL, in memory, or behind a server query. Every mutation that
  * changes which rows are visible also resets to page 1.
+ *
+ * @public
  */
 export interface TableStateMutators {
   /** Set the 1-based page. Page `1` is the default (dropped from the URL). */
@@ -38,7 +40,7 @@ export interface TableStateMutators {
   /** Clear search + sort + groupBy + page + every extra filter in one commit. */
   clearAll: () => void;
   /**
-   * Set or clear the single-level row-grouping column key; resets to page 1.
+   * Set or clear the row-grouping keys, comma-separated; resets to page 1.
    * Frontend tier only — server sources may carry the URL param but chrome
    * ignores grouping without `allFilteredRows`.
    */

@@ -25,8 +25,13 @@ import {
   PARAM_SORT_DIR,
 } from "./serialize";
 
-/** One captured view: a name plus the table's own URL params. */
+/**
+ * One captured view: a name plus the table's own URL params.
+ *
+ * @public
+ */
 export interface SavedView {
+  /** The view's name. */
   name: string;
   /** The table-scoped query string (only this table's params). */
   search: string;
@@ -55,7 +60,11 @@ export interface SavedView {
   readOnly?: boolean;
 }
 
-/** Who a saved view is for. */
+/**
+ * Who a saved view is for.
+ *
+ * @public
+ */
 export type SavedViewVisibility = "private" | "team";
 
 /**
@@ -65,16 +74,20 @@ export type SavedViewVisibility = "private" | "team";
  * saving one — so it carries the version it was written at and the table
  * upgrades what it reads. Views stored before versioning existed have no
  * number and are treated as version 1, which is what they are.
+ *
+ * @public
  */
 export const SAVED_VIEW_VERSION = 2;
 
 /**
  * Bring one stored view up to date, or return `null` to drop it.
  *
- * Called for every view whose `version` is behind {@link SAVED_VIEW_VERSION},
+ * Called for every view whose `version` is behind `SAVED_VIEW_VERSION`,
  * oldest first, after the built-in migration has run. Dropping is a real
  * answer: a view whose columns no longer exist restores a table nobody asked
  * for, and silently applying it is worse than losing it.
+ *
+ * @public
  */
 export type SavedViewMigration = (
   view: SavedView,
@@ -88,6 +101,8 @@ export type SavedViewMigration = (
  * would have to be faked by every implementation. `localStorage` remains the
  * zero-config default, so a table that never passes a store keeps working
  * offline with no server at all.
+ *
+ * @public
  */
 export interface SavedViewsStore {
   /** Every view this reader can see, in the order to show them. */
@@ -120,7 +135,11 @@ export interface SavedViewsStore {
   reorder?: (names: readonly string[]) => Promise<void>;
 }
 
-/** Options for {@link useSavedViews}. */
+/**
+ * Options for `useSavedViews`.
+ *
+ * @public
+ */
 export interface UseSavedViewsOptions {
   /** Storage key for the view list, e.g. `"people-table-views"`. */
   storageKey: string;
@@ -154,7 +173,11 @@ export interface UseSavedViewsOptions {
   urlSync?: boolean;
 }
 
-/** Result of {@link useSavedViews}. */
+/**
+ * Result of `useSavedViews`.
+ *
+ * @public
+ */
 export interface UseSavedViewsResult {
   /** The saved views, in save order. */
   views: readonly SavedView[];
@@ -350,6 +373,8 @@ function readStored(
  * sort, page, filters, column layout — ONLY this table's params) under a
  * name, persist the list, and re-apply on demand without touching other
  * tables sharing the URL. Wire it to any menu in the `toolbar` slot.
+ *
+ * @public
  */
 export function useSavedViews({
   storageKey,

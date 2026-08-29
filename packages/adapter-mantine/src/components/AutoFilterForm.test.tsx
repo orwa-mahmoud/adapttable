@@ -253,7 +253,9 @@ describe("<AutoFilterForm>", () => {
     expect(screen.queryByRole("option", { name: "Urgent" })).toBeNull();
     // Loaded: the searchable field replaces the spinner.
     const field = await screen.findByRole("combobox", { name: "Tags" });
-    expect(container.querySelector(".mantine-Loader-root")).toBeNull();
+    await waitFor(() =>
+      expect(container.querySelector(".mantine-Loader-root")).toBeNull()
+    );
     fireEvent.click(field);
     expect(screen.getByRole("option", { name: "Urgent" })).toBeInTheDocument();
   });

@@ -4,6 +4,8 @@
  *
  * @param parts - Class names or falsy values.
  * @returns The space-joined class string.
+ *
+ * @public
  */
 export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");

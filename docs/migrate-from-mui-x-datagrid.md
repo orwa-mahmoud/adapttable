@@ -124,11 +124,7 @@ function PeopleTable({ people }: { people: Person[] }) {
       rowKey={(r) => r.id}
       enableColumnMenu // show/hide, reorder, pin — no Pro licence
       resizableColumns
-      bulkActions={
-        [
-          /* … turns on multi-row selection */
-        ]
-      }
+      bulkActions={[/* … turns on multi-row selection */]}
       columns={[
         { key: "name", sortable: true },
         { key: "role" },

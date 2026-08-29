@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useTableStatusAnnouncement } from "./a11y/useTableStatusAnnouncement";
 import { autoSizeColumns as autoSizeAllColumns } from "./columns/autoSizeColumns";
 import {
   ACTIONS_COLUMN_KEY,
@@ -48,14 +49,18 @@ import {
 } from "./useTableChrome";
 import { useColumnWindow } from "./virtual/useColumnWindow";
 
+export type { FacetMap, QuerySupport, UrlStateAdapter };
+
 /**
  * The kit-agnostic prop surface every batteries-included `<DataTable>` shares:
  * the base display props plus the three data tiers (`source` / `data` +
  * `onQueryChange`) and the URL-sync controls. Adapters extend this with
  * kit-specific extras (slots, classNames, colour, table size) and pass the
- * whole thing straight through to {@link useDataTableShell}.
+ * whole thing straight through to `useDataTableShell`.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export type DataTableShellProps<TRow> = Omit<
   BaseDataTableProps<TRow>,
@@ -106,8 +111,9 @@ export type DataTableShellProps<TRow> = Omit<
  *   filters (called only when there are declarative defs).
  * @returns The resolved source, chrome, filter node, refs, and the
  *   `tableProps` / `toolbarProps` bundles (sans kit-specific extras).
+ *
+ * @public
  */
-
 export function useDataTableShell<TRow>(
   incoming: DataTableShellProps<TRow>,
   renderAutoForm: (
@@ -230,6 +236,22 @@ export function useDataTableShell<TRow>(
       coveredCells.has(`${cell.row}:${cell.col}`),
     [coveredCells]
   );
+  // One scroll box, two windows: the rows track its vertical scrolling and the
+  // columns its horizontal, so the adapters attach a single ref.
+  const scrollBoxElement = useRef<HTMLElement | null>(null);
+  // The horizontal window reads the same scroll box the vertical one does.
+  const columnWindow = useColumnWindow<TRow>({
+    columns: chrome.columnLayout.visibleColumns,
+    enabled: props.virtualizeColumns === true,
+    widths: chrome.columnLayout.state.widths,
+    pinnedKeys: new Set(
+      Object.keys(chrome.columnLayout.state.pinned).filter(
+        (key) => chrome.columnLayout.state.pinned[key] !== undefined
+      )
+    ),
+    getScrollElement: () => scrollBoxElement.current,
+  });
+
   const gridFocus = useGridFocus<TRow>({
     enabled: props.cellNavigation === true,
     headerCheckbox: props.columnSelectionCheckbox === true,
@@ -238,6 +260,7 @@ export function useDataTableShell<TRow>(
       windowStart + chrome.source.rows.length
     ),
     columns: chrome.columnLayout.visibleColumns,
+    columnsWindowed: columnWindow.enabled,
     rows: chrome.source.rows,
     firstRowIndex: windowStart,
     dir: props.dir,
@@ -339,9 +362,6 @@ export function useDataTableShell<TRow>(
     pinnedTopRows,
     pinnedBottomRows,
   } = useChromeBodyData(chrome, chromeProps);
-  // One scroll box, two windows: the rows track its vertical scrolling and the
-  // columns its horizontal, so the adapters attach a single ref.
-  const scrollBoxElement = useRef<HTMLElement | null>(null);
   const virtualScrollRef = useCallback(
     (node: HTMLElement | null) => {
       scrollBoxElement.current = node;
@@ -365,19 +385,6 @@ export function useDataTableShell<TRow>(
     chrome.columnLayout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
   const reorderPinned =
     chrome.columnLayout.state.pinned[REORDER_COLUMN_KEY] === "start";
-
-  // The horizontal window reads the same scroll box the vertical one does.
-  const columnWindow = useColumnWindow<TRow>({
-    columns: chrome.columnLayout.visibleColumns,
-    enabled: props.virtualizeColumns === true,
-    widths: chrome.columnLayout.state.widths,
-    pinnedKeys: new Set(
-      Object.keys(chrome.columnLayout.state.pinned).filter(
-        (key) => chrome.columnLayout.state.pinned[key] !== undefined
-      )
-    ),
-    getScrollElement: () => scrollBoxElement.current,
-  });
 
   const grouping =
     chrome.grouping && groupingEntries
@@ -409,6 +416,13 @@ export function useDataTableShell<TRow>(
     cellSpanAppearance: props.cellSpanAppearance,
     extraRows: props.extraRows,
     windowStart,
+    // Rows in the whole dataset, for the card list's `aria-setsize`. A card
+    // list is a real <ul>, so a windowed one states its size the way a list
+    // does — per item — rather than through the table's `aria-rowcount`.
+    cardSetSize: Math.max(
+      chrome.source.total,
+      windowStart + chrome.source.rows.length
+    ),
     confirm,
     getRowId,
     rowEntries: virtualization.enabled ? virtualization.rows : undefined,
@@ -481,9 +495,32 @@ export function useDataTableShell<TRow>(
     dir: props.dir,
   };
 
+  // What the table says out loud when sorting, filtering or paging rewrites the
+  // body. Derived from the SETTLED source rather than from the controls, which
+  // is what keeps a filter being typed from announcing once per keystroke.
+  const sortedColumn = chrome.columnLayout.visibleColumns.find(
+    (column) => column.key === chrome.source.sortBy
+  );
+  const statusAnnouncement = useTableStatusAnnouncement({
+    labels,
+    total: chrome.source.total,
+    shown: chrome.source.rows.length,
+    page: chrome.source.page,
+    limit: chrome.source.limit,
+    paged: chrome.source.paginationMode === "paged",
+    sortBy: chrome.source.sortBy,
+    sortDir: chrome.source.sortDir,
+    sortColumnName:
+      typeof sortedColumn?.header === "string"
+        ? sortedColumn.header
+        : sortedColumn?.key,
+  });
+
   return {
     /** Cell-navigation state; inert unless `cellNavigation` is set. */
     gridFocus,
+    /** What to announce when the rows change; pass to `TableStatusAnnouncer`. */
+    statusAnnouncement,
     /** What the selection adds up to; `null` unless `selectionStats` is set. */
     selectionStats: stats,
     /** Undo/redo controls; inert unless `editHistory` is set. */
@@ -556,3 +593,8 @@ function useShellRowPins<TRow>(
     },
   };
 }
+
+export type { FilterRuntime } from "./filters/filterDefs";
+export type { GroupAggregatesFn } from "./grouping/groupRows";
+export type { Direction } from "./types";
+export type { TableChrome } from "./useTableChrome";

@@ -3,7 +3,11 @@ import type { ReactNode } from "react";
 
 import { InboxIcon } from "../icons";
 
-/** Props for {@link EmptyState}. */
+/**
+ * Props for {@link EmptyState}.
+ *
+ * @public
+ */
 export interface EmptyStateProps {
   /** Headline text. */
   title: string;
@@ -15,7 +19,11 @@ export interface EmptyStateProps {
   action?: ReactNode;
 }
 
-/** Centred "nothing to show" placeholder. */
+/**
+ * Centred "nothing to show" placeholder.
+ *
+ * @public
+ */
 export function EmptyState({
   title,
   description,

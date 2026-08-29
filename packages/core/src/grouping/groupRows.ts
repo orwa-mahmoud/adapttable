@@ -5,8 +5,10 @@ import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
 
 /**
- * One visual row in a single-level grouped body: a group header, or a leaf
+ * One visual row in a grouped body: a group header at some depth, or a leaf
  * data row belonging to a group. Adapters switch on `kind`.
+ *
+ * @public
  */
 export type GroupedFlatEntry<TRow> =
   | {
@@ -111,6 +113,8 @@ export type GroupedFlatEntry<TRow> =
  * groups "by their total" is `sum(b.leafRows) - sum(a.leafRows)`, computed from
  * the same rows the aggregate mapper reads. Comparing rendered aggregate cells
  * instead would mean comparing ReactNodes, which is not an ordering.
+ *
+ * @public
  */
 export interface GroupNode<TRow> {
   /** The raw bucket value. */
@@ -125,7 +129,11 @@ export interface GroupNode<TRow> {
   leafRows: readonly TRow[];
 }
 
-/** How to order groups within their parent. */
+/**
+ * How to order groups within their parent.
+ *
+ * @public
+ */
 export type GroupSort<TRow> =
   | "label"
   | "label-desc"
@@ -133,11 +141,21 @@ export type GroupSort<TRow> =
   | "count-desc"
   | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
 
-/** Same mapper signature as `summaryRow` — one API for page footer + groups. */
+/**
+ * Same mapper signature as `summaryRow` — one API for page footer + groups.
+ *
+ * @public
+ */
 export type GroupAggregatesFn<TRow> = (
   rows: readonly TRow[]
 ) => Partial<Record<string, ReactNode>>;
 
+/**
+ * What `buildGroupedFlatModel` needs to flatten grouped rows into the single
+ * list a table renders.
+ *
+ * @public
+ */
 export interface BuildGroupedFlatModelOptions<TRow> {
   /** Leaf rows to partition (frontend: prefer `allFilteredRows`). */
   rows: readonly TRow[];
@@ -146,9 +164,11 @@ export interface BuildGroupedFlatModelOptions<TRow> {
    * `["team", "status"]` puts each status inside its team.
    */
   groupBy: string | readonly string[];
+  /** Visible columns, in order. */
   columns: readonly ColumnDef<TRow>[];
+  /** Row identity function. */
   getRowId: (row: TRow) => string;
-  /** Collapsed group keys (from {@link useGroupCollapse}). */
+  /** Collapsed group keys (from `useGroupCollapse`). */
   collapsedGroupIds: ReadonlySet<string>;
   /** Optional per-group cells — same shape as `summaryRow`. */
   aggregates?: GroupAggregatesFn<TRow>;
@@ -179,7 +199,11 @@ export interface BuildGroupedFlatModelOptions<TRow> {
   paging?: GroupPaging;
 }
 
-/** How much of a paged group model the reader has asked to see. */
+/**
+ * How much of a paged group model the reader has asked to see.
+ *
+ * @public
+ */
 export interface GroupPaging {
   /** Extra top-level groups revealed beyond the first page. */
   groups?: number;
@@ -209,6 +233,8 @@ export function resolveGroupValue<TRow>(
  * empty-string values deliberately share the one blank bucket (they all
  * render the same blank label; splitting them would show several
  * identical "(blank)" groups).
+ *
+ * @public
  */
 export function groupValueKey(value: unknown): string {
   if (value == null || value === "") return "";
@@ -225,6 +251,11 @@ export function groupValueKey(value: unknown): string {
   }
 }
 
+/**
+ * Render a group's value as its header caption.
+ *
+ * @public
+ */
 export function formatGroupLabel(
   value: unknown,
   blankLabel = "(blank)"
@@ -488,8 +519,10 @@ export function flattenGroupPartitions<TRow>(
  * one step.
  *
  * @typeParam TRow - The row type.
- * @param options - See {@link BuildGroupedFlatModelOptions}.
+ * @param options - See `BuildGroupedFlatModelOptions`.
  * @returns The entries, in render order.
+ *
+ * @public
  */
 export function buildGroupedFlatModel<TRow>(
   options: BuildGroupedFlatModelOptions<TRow>

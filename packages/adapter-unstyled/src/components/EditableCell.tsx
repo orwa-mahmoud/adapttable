@@ -14,6 +14,7 @@ import {
   commitBooleanDraft,
   editorValidationProps,
   multiDraftFromSelect,
+  stopEditKeys,
 } from "@adapttable/core/adapter";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
@@ -31,13 +32,7 @@ export function NativeCellEditor({
 }>): ReactElement {
   const onKeyDown = (event: KeyboardEvent) => {
     ctrl.onEditorKeyDown(event);
-    if (
-      event.key === "Enter" ||
-      event.key === "Escape" ||
-      event.key === "Tab"
-    ) {
-      event.stopPropagation();
-    }
+    stopEditKeys(event);
   };
 
   if (isBooleanEditor(ctrl.editor)) {

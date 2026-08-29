@@ -2,19 +2,33 @@ import type { Direction, TableLabels } from "@adapttable/core";
 import { Button, Drawer, Group, Stack } from "@mantine/core";
 import type { ReactNode } from "react";
 
-/** Props for {@link FilterDrawer}. */
+/**
+ * Props for {@link FilterDrawer}.
+ *
+ * @public
+ */
 export interface FilterDrawerProps {
+  /** Whether the drawer is showing. */
   opened: boolean;
+  /** Closes the overlay. Filters apply live, so this only dismisses it. */
   onClose: () => void;
+  /** The filter fields to render inside. */
   filters: ReactNode;
+  /** How many filters are currently set, for the header count. */
   activeFilterCount: number;
   /** Clear-filters handler (always supplied by the table chrome). */
   onClearFilters: () => void;
+  /** Resolved labels, every key filled. */
   labels: Required<TableLabels>;
+  /** Writing direction, so the overlay opens on the correct side. */
   dir?: Direction;
 }
 
-/** Side drawer holding the caller's filter widgets + a pinned apply/clear bar. */
+/**
+ * Side drawer holding the caller's filter widgets + a pinned apply/clear bar.
+ *
+ * @public
+ */
 export function FilterDrawer({
   opened,
   onClose,

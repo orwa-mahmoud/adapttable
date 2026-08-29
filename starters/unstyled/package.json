@@ -10,14 +10,14 @@
   "dependencies": {
     "@adapttable/core": "^2.0.0",
     "@adapttable/unstyled": "^2.0.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.0",
     "typescript": "^6.0.3",
-    "vite": "^8.1.3"
+    "vite": "^8.2.2"
   }
 }

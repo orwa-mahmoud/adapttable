@@ -15,6 +15,8 @@ function sortsLast(value: SortableValue): boolean {
  * locale-aware string comparison.
  *
  * @returns Negative if `a < b`, positive if `a > b`, `0` if equal.
+ *
+ * @public
  */
 export function compareValues(a: SortableValue, b: SortableValue): number {
   // All unorderable values are EQUAL to each other (null vs undefined vs
@@ -114,6 +116,8 @@ export function sortedInsertIndex<T>(
  * @param getValue - Extracts the comparison key for a row.
  * @param direction - Sort direction.
  * @returns A new, sorted array.
+ *
+ * @public
  */
 export function sortRows<TRow>(
   rows: readonly TRow[],
@@ -126,9 +130,15 @@ export function sortRows<TRow>(
     .map((entry) => entry.row);
 }
 
-/** One level of a multi-column sort. */
+/**
+ * One level of a multi-column sort.
+ *
+ * @public
+ */
 export interface SortLevel {
+  /** Stable key for the entry. */
   key: string;
+  /** Sort direction for this level. */
   dir: SortDirection;
 }
 
@@ -136,6 +146,8 @@ export interface SortLevel {
  * Sort rows by a CHAIN of levels: ties at level N fall through to level
  * N+1. Null-ish values sort last per level regardless of direction, same
  * as {@link sortRows}.
+ *
+ * @public
  */
 export function sortRowsMulti<TRow>(
   rows: readonly TRow[],

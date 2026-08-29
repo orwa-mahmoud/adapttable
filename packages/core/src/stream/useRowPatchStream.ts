@@ -28,7 +28,11 @@ import {
 import { parseRowPatchFrame } from "./parse";
 import type { RowPatchStreamStatus } from "./status";
 
-/** What {@link useRowPatchStream} needs. */
+/**
+ * What {@link useRowPatchStream} needs.
+ *
+ * @public
+ */
 export interface UseRowPatchStreamOptions<TRow> {
   /** WebSocket url. Takes precedence over `eventSource`. */
   websocket?: string;
@@ -69,7 +73,11 @@ export interface UseRowPatchStreamOptions<TRow> {
   createEventSource?: (url: string) => StreamSocket | undefined;
 }
 
-/** What the hook reports back. */
+/**
+ * What the hook reports back.
+ *
+ * @public
+ */
 export interface RowPatchStreamState {
   /** What the connection is doing. */
   status: RowPatchStreamStatus;
@@ -85,6 +93,8 @@ export interface RowPatchStreamState {
  * @typeParam TRow - The row type.
  * @param options - See {@link UseRowPatchStreamOptions}.
  * @returns The connection state; inert while `enabled` is false.
+ *
+ * @public
  */
 export function useRowPatchStream<TRow>(
   options: UseRowPatchStreamOptions<TRow>

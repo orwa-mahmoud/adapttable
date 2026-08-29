@@ -4,6 +4,8 @@
  * `"hiredAt"` → `"Hired At"`, `"department.name"` → `"Name"`,
  * `"first_name"` → `"First Name"`. An empty/undefined `key` returns `""` so a
  * transiently-malformed column key can never crash a render.
+ *
+ * @public
  */
 export function humanizeKey(key: string): string {
   if (!key) return "";

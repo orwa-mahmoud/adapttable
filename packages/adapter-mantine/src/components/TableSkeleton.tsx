@@ -1,6 +1,10 @@
 import { Skeleton, Table, VisuallyHidden } from "@mantine/core";
 
-/** Props for {@link TableSkeleton}. */
+/**
+ * Props for {@link TableSkeleton}.
+ *
+ * @public
+ */
 export interface TableSkeletonProps {
   /** Number of placeholder columns. */
   columns: number;
@@ -10,7 +14,11 @@ export interface TableSkeletonProps {
   loadingLabel?: string;
 }
 
-/** Loading placeholder that mirrors the table shape to avoid layout shift. */
+/**
+ * Loading placeholder that mirrors the table shape to avoid layout shift.
+ *
+ * @public
+ */
 export function TableSkeleton({
   columns,
   rows = 5,

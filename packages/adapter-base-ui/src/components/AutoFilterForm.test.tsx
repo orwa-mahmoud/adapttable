@@ -420,4 +420,92 @@ describe("<AutoFilterForm> (Base UI)", () => {
     );
     expect(screen.getByPlaceholderText("Find…")).toBeVisible();
   });
+  /**
+   * The Relative operator swaps the date input for a preset select, and only
+   * the two counted presets ("Last N days" / "Next N days") get an N beside
+   * them. Whether that N appears, and what token it writes, is the whole
+   * feature — none of it is visible from the other operators' tests.
+   */
+  it("dateRange relative: a named preset shows no count beside it", () => {
+    renderForm([{ key: "hiredAt", type: "dateRange" }], {
+      hiredAtOp: "relative",
+      hiredAtFrom: "today",
+    });
+
+    expect(triggerText("Relative")).toBe("Today");
+    expect(screen.queryByLabelText("Value")).toBeNull();
+  });
+
+  it("dateRange relative: a counted preset reads its N out of the token", () => {
+    renderForm([{ key: "hiredAt", type: "dateRange" }], {
+      hiredAtOp: "relative",
+      hiredAtFrom: "last:30",
+    });
+
+    expect(triggerText("Relative")).toBe("Last N days");
+    expect(screen.getByLabelText("Value")).toHaveValue(30);
+  });
+
+  it("dateRange relative: typing a new N rewrites the counted token", () => {
+    const { setExtras } = renderForm([{ key: "hiredAt", type: "dateRange" }], {
+      hiredAtOp: "relative",
+      hiredAtFrom: "last:30",
+    });
+    fireEvent.change(screen.getByLabelText("Value"), {
+      target: { value: "14" },
+    });
+
+    expect(setExtras).toHaveBeenCalledWith({
+      hiredAtFrom: "last:14",
+      hiredAtTo: undefined,
+      hiredAtOp: "relative",
+    });
+  });
+
+  it("dateRange relative: switching to a counted preset seeds the default N", () => {
+    const { setExtras } = renderForm([{ key: "hiredAt", type: "dateRange" }], {
+      hiredAtOp: "relative",
+      hiredAtFrom: "today",
+    });
+    pickOption("Relative", "Last N days");
+
+    expect(setExtras).toHaveBeenCalledWith({
+      hiredAtFrom: "last:7",
+      hiredAtTo: undefined,
+      hiredAtOp: "relative",
+    });
+  });
+
+  it("dateRange relative: switching to a named preset drops the count", () => {
+    const { setExtras } = renderForm([{ key: "hiredAt", type: "dateRange" }], {
+      hiredAtOp: "relative",
+      hiredAtFrom: "last:30",
+    });
+    pickOption("Relative", "This month");
+
+    expect(setExtras).toHaveBeenCalledWith({
+      hiredAtFrom: "thisMonth",
+      hiredAtTo: undefined,
+      hiredAtOp: "relative",
+    });
+  });
+
+  it("dateRange relative: offers every preset in display order", () => {
+    renderForm([{ key: "hiredAt", type: "dateRange" }], {
+      hiredAtOp: "relative",
+      hiredAtFrom: "today",
+    });
+    openSelect("Relative");
+
+    expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual([
+      "Today",
+      "Yesterday",
+      "Tomorrow",
+      "This week",
+      "This month",
+      "Previous month",
+      "Last N days",
+      "Next N days",
+    ]);
+  });
 });

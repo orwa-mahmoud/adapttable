@@ -5,9 +5,15 @@ import { currentFeatureHost } from "../features/currentHost";
 import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
-/** One choice in a select cell editor. */
+/**
+ * One choice in a select cell editor.
+ *
+ * @public
+ */
 export interface CellEditorOption {
+  /** Value committed when this option is chosen. */
   value: string;
+  /** Caption shown for the option. */
   label: string;
 }
 
@@ -15,6 +21,8 @@ export interface CellEditorOption {
  * Editor descriptor for an editable column — mirrors the declarative
  * `filter` shorthand: a bare type, or a select with options (objects or
  * plain value strings).
+ *
+ * @public
  */
 export type CellEditor =
   | "text"
@@ -28,7 +36,9 @@ export type CellEditor =
   /** A time of day. Commits `HH:mm`. */
   | "time"
   | {
+      /** One of a fixed set. Commits the chosen value. */
       type: "select";
+      /** The choices, as values or value/label pairs. */
       options: readonly CellEditorOption[] | readonly string[];
     }
   | {
@@ -54,12 +64,18 @@ export type CellEditor =
  * cancels, Tab moves on, validators gate the commit. What arrives here is the
  * draft and the two calls that change it — so an autocomplete, a rich-text
  * field or a colour picker becomes an editor without reimplementing any of that.
+ *
+ * @public
  */
 export type CustomCellEditorRender = (
   ctrl: CustomCellEditorCtrl
 ) => ReactElement;
 
-/** What a custom editor is handed. */
+/**
+ * What a custom editor is handed.
+ *
+ * @public
+ */
 export interface CustomCellEditorCtrl {
   /** The draft, as the table holds it. */
   draft: string;
@@ -97,45 +113,70 @@ export interface CustomCellEditorCtrl {
 }
 
 /**
- * Minimal column surface the editing helpers need. {@link ColumnDef}
+ * Minimal column surface the editing helpers need. `ColumnDef`
  * satisfies this; using a narrow shape avoids `ColumnDef<T>` variance
  * issues when Tab-navigation crosses generic boundaries.
  *
  * `editable` uses a bivariant callback (same pattern as React's event
  * handlers) so `ColumnDef<Person>` is assignable to `EditableColumnLike`.
+ *
+ * @public
  */
 export interface EditableColumnLike<TRow = unknown> {
+  /** The column's key. */
   key: string;
+  /** Whether the column is editable, per row when it is a function. */
   editable?: boolean | { bivarianceHack(row: TRow): boolean }["bivarianceHack"];
+  /** Which editor the cell opens. Defaults to a text field. */
   editor?: CellEditor;
+  /** Turns the stored value into the draft text the editor starts with. */
   editValue?: { bivarianceHack(row: TRow): string }["bivarianceHack"];
+  /** Turns the draft text back into the stored value's type. */
   parseValue?: {
     bivarianceHack(draft: string, row: TRow): unknown;
   }["bivarianceHack"];
+  /** Rejects a value with a message; may be async. */
   validate?: {
     bivarianceHack(
       value: unknown,
       row: TRow
     ): string | undefined | Promise<string | undefined>;
   }["bivarianceHack"];
+  /** Value this column sorts by, when it differs from what is displayed. */
   sortValue?: { bivarianceHack(row: TRow): SortableValue }["bivarianceHack"];
 }
 
-/** The active cell being edited. */
+/**
+ * The active cell being edited.
+ *
+ * @public
+ */
 export interface CellEditTarget {
+  /** Identity of the row being edited. */
   rowId: string;
+  /** Key of the column being edited. */
   columnKey: string;
 }
 
-/** Result of a successful commit (host applies via `onCellEdit`). */
+/**
+ * Result of a successful commit (host applies via `onCellEdit`).
+ *
+ * @public
+ */
 export interface CellEditCommit {
+  /** Identity of the row that was edited. */
   rowId: string;
+  /** Key of the column that was edited. */
   columnKey: string;
   /** Raw draft string from the editor. */
   draft: string;
 }
 
-/** Whether this editor is the host's own component. */
+/**
+ * Whether this editor is the host's own component.
+ *
+ * @public
+ */
 export function isCustomEditor(
   editor: CellEditor | null
 ): editor is { type: "custom"; render: CustomCellEditorRender } {
@@ -144,12 +185,20 @@ export function isCustomEditor(
   );
 }
 
-/** Whether this editor is a checkbox. */
+/**
+ * Whether this editor is a checkbox.
+ *
+ * @public
+ */
 export function isBooleanEditor(editor: CellEditor | null): boolean {
   return editor === "boolean";
 }
 
-/** Whether this editor chooses several of a fixed set. */
+/**
+ * Whether this editor chooses several of a fixed set.
+ *
+ * @public
+ */
 export function isMultiSelectEditor(
   editor: CellEditor | null
 ): editor is { type: "multi-select"; options: readonly CellEditorOption[] } {
@@ -160,7 +209,11 @@ export function isMultiSelectEditor(
   );
 }
 
-/** Whether this editor chooses one of a fixed set. */
+/**
+ * Whether this editor chooses one of a fixed set.
+ *
+ * @public
+ */
 export function isSelectEditor(
   editor: CellEditor | null
 ): editor is { type: "select"; options: readonly CellEditorOption[] } {
@@ -182,6 +235,8 @@ export function isSelectEditor(
  *
  * @param editor - The column's editor descriptor.
  * @returns The `type` attribute for the editor's input.
+ *
+ * @public
  */
 export function editorInputType(
   editor: CellEditor | null
@@ -193,17 +248,29 @@ export function editorInputType(
   return "text";
 }
 
-/** The draft string a checkbox holds. */
+/**
+ * The draft string a checkbox holds.
+ *
+ * @public
+ */
 export function booleanDraft(checked: boolean): string {
   return checked ? "true" : "false";
 }
 
-/** Whether a boolean editor's draft is on. */
+/**
+ * Whether a boolean editor's draft is on.
+ *
+ * @public
+ */
 export function isDraftChecked(draft: string): boolean {
   return draft === "true";
 }
 
-/** Normalize select options to `{ value, label }` pairs. */
+/**
+ * Normalize select options to `{ value, label }` pairs.
+ *
+ * @public
+ */
 export function normalizeEditorOptions(
   options: readonly CellEditorOption[] | readonly string[]
 ): CellEditorOption[] {
@@ -212,7 +279,11 @@ export function normalizeEditorOptions(
   );
 }
 
-/** Whether any column opts into editing (ignores per-row predicates). */
+/**
+ * Whether any column opts into editing (ignores per-row predicates).
+ *
+ * @public
+ */
 export function hasEditableColumns(
   columns: readonly EditableColumnLike[]
 ): boolean {
@@ -221,7 +292,11 @@ export function hasEditableColumns(
   );
 }
 
-/** Whether a column is editable for a given row. */
+/**
+ * Whether a column is editable for a given row.
+ *
+ * @public
+ */
 export function isCellEditable<TRow>(
   column: EditableColumnLike<TRow>,
   row: TRow
@@ -259,6 +334,8 @@ function resolveEditorValue(
  * A string that is not a built-in name is a plugin type registered with
  * {@link TableFeatureHost.registerEditor}; it resolves to
  * `{ type: "custom", render }` so adapters stay on one path.
+ *
+ * @public
  */
 export function resolveCellEditor(
   column: EditableColumnLike,
@@ -336,6 +413,8 @@ function localDateTimeParts(value: Date): string {
  * Parse a draft string into the value passed to `onCellEdit`.
  * Number editors yield `number | null` (empty / invalid → `null`);
  * select and text stay strings.
+ *
+ * @public
  */
 export function parseCellEditValue(editor: CellEditor, draft: string): unknown {
   if (editor === "number") return parseNumberDraft(draft);
@@ -367,7 +446,11 @@ function parseMultiDraft(draft: string): string[] {
   return draft === "" ? [] : draft.split(MULTI_SEPARATOR);
 }
 
-/** The separator {@link formatMultiDraft} joins a multi-select's values with. */
+/**
+ * The separator {@link formatMultiDraft} joins a multi-select's values with.
+ *
+ * @public
+ */
 export const MULTI_SEPARATOR = "\u001f";
 
 /**
@@ -375,6 +458,8 @@ export const MULTI_SEPARATOR = "\u001f";
  *
  * @param values - The chosen values.
  * @returns The draft the editing state holds.
+ *
+ * @public
  */
 export function formatMultiDraft(values: readonly string[]): string {
   return values.join(MULTI_SEPARATOR);
@@ -385,6 +470,8 @@ export function formatMultiDraft(values: readonly string[]): string {
  *
  * @param draft - The draft the editing state holds.
  * @returns The chosen values, in the order they were joined.
+ *
+ * @public
  */
 export function readMultiDraft(draft: string): string[] {
   return parseMultiDraft(draft);

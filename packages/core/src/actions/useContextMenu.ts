@@ -20,15 +20,23 @@ import { useCallback, useRef, useState } from "react";
 
 import type { ContextMenuTarget } from "./contextMenuModel";
 
-/** Where on screen the menu should appear. */
+/**
+ * Where on screen the menu should appear.
+ *
+ * @public
+ */
 export interface ContextMenuPoint {
+  /** Viewport x, in pixels. */
   x: number;
+  /** Viewport y, in pixels. */
   y: number;
 }
 
 /** The open menu, or `null` when there is none. */
 export interface ContextMenuState<TRow> {
+  /** What the menu was opened on. */
   target: ContextMenuTarget<TRow>;
+  /** Where the menu opened. */
   at: ContextMenuPoint;
 }
 

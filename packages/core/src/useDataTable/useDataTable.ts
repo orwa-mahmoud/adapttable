@@ -34,7 +34,11 @@ import { useSearchInput } from "./useSearchInput";
 
 const EMPTY_LABELS: Readonly<Record<string, ChipLabelResolver>> = {};
 
-/** Options for {@link useDataTable}. */
+/**
+ * Options for {@link useDataTable}.
+ *
+ * @public
+ */
 export interface UseDataTableOptions<TRow> {
   /** The data + state contract, from `useFrontendData` / `useQuerySource`. */
   source: TableSource<TRow>;
@@ -70,7 +74,7 @@ export interface UseDataTableOptions<TRow> {
   bulkActions?: BulkAction[];
   /** Selection id extractor; defaults to `rowKey` when bulk actions exist. */
   selectionGetId?: (row: TRow) => string;
-  /** Controlled selection value (see {@link BaseDataTableProps.selectedIds}). */
+  /** Controlled selection value (see `BaseDataTableProps.selectedIds`). */
   selectedIds?: readonly string[];
   /** Change handler for the controlled selection. */
   onSelectedIdsChange?: (selectedIds: string[]) => void;
@@ -80,7 +84,11 @@ export interface UseDataTableOptions<TRow> {
   multiSort?: boolean;
 }
 
-/** Everything a headless consumer needs to render a table. */
+/**
+ * Everything a headless consumer needs to render a table.
+ *
+ * @public
+ */
 export interface UseDataTableResult<TRow> {
   /** The materialised rows for the current slice. */
   rows: readonly TRow[];
@@ -122,21 +130,28 @@ export interface UseDataTableResult<TRow> {
   source: TableSource<TRow>;
 
   /* ── Prop-getters (merge caller overrides) ───────────────────────── */
+  /** Props for the `<table>` element, its role and accessible name included. */
   getTableProps: (props?: Props) => TableElementProps;
+  /** Props for the header row. */
   getHeaderRowProps: (props?: Props) => Props;
+  /** Props for one header cell, `scope` and sort state included. */
   getHeaderCellProps: (
     column: ColumnDef<TRow>,
     props?: Props
   ) => CellElementProps;
+  /** Props for a column's sort control, its accessible name included. */
   getSortButtonProps: (
     column: ColumnDef<TRow>,
     props?: Props
   ) => SortButtonElementProps;
+  /** Props for a body row. Spread-clean: never carries a React `key`. */
   getRowProps: (row: TRow, index: number, props?: Props) => RowElementProps;
+  /** Props for a body cell. */
   getCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
+  /** Props for the search box. */
   getSearchInputProps: (props?: Props) => SearchInputElementProps;
   /**
-   * The row's stable React key. Kept OUT of {@link getRowProps} so its
+   * The row's stable React key. Kept OUT of `getRowProps` so its
    * result spreads clean — React forbids spreading a `key`.
    */
   getRowKey: (row: TRow) => string;
@@ -156,51 +171,89 @@ export interface UseDataTableResult<TRow> {
    compatible) while typing the known keys — so adapters read them without
    casts. */
 
-/** Props from {@link UseDataTableResult.getTableProps}. */
+/**
+ * Props from `UseDataTableResult.getTableProps`.
+ *
+ * @public
+ */
 export interface TableElementProps extends Props {
+  /** `grid` with cell navigation, `table` otherwise. */
   role: string;
+  /** Writing direction, present only when the table sets it. */
   dir?: Direction;
+  /** The table's accessible name. */
   "aria-label": string;
 }
 
 /**
- * Props from {@link UseDataTableResult.getRowProps}. Spread-clean by
- * contract: never contains `key` — read {@link UseDataTableResult.getRowKey}
+ * Props from `UseDataTableResult.getRowProps`. Spread-clean by
+ * contract: never contains `key` — read `UseDataTableResult.getRowKey`
  * for the React key.
+ *
+ * @public
  */
 export interface RowElementProps extends Props {
+  /** `row`. */
   role: string;
   /** The structural part name every kit's body row carries. */
   "data-adapttable-part": "row";
   /** The row's id, so an event can be traced back to the row it happened in. */
   "data-row-id": string;
+  /** The row's position in the rendered window. */
   "data-index": number;
+  /** Selection state, present only while selection is on. */
   "aria-selected"?: boolean;
 }
 
-/** Props from {@link UseDataTableResult.getSortButtonProps}. */
+/**
+ * Props from `UseDataTableResult.getSortButtonProps`.
+ *
+ * @public
+ */
 export interface SortButtonElementProps extends Props {
+  /** Always `button`, so the control never submits a form. */
   type: "button";
+  /** Whether the control is offered but not available. */
   disabled: boolean;
+  /** Called when pressed. */
   onClick: (event?: { shiftKey?: boolean }) => void;
+  /** 1-based place in a multi-column sort, present only while sorted. */
   "data-sort-index"?: number;
+  /** The sort control's accessible name. */
   "aria-label": string;
 }
 
-/** Props from {@link UseDataTableResult.getCellProps} / `getHeaderCellProps`. */
+/**
+ * Props from `UseDataTableResult.getCellProps` / `getHeaderCellProps`.
+ *
+ * @public
+ */
 export interface CellElementProps extends Props {
+  /** `gridcell` or `columnheader` inside a grid, `cell` otherwise. */
   role: string;
+  /** Inline style for the element. */
   style?: CSSProperties;
+  /** 1-based place in a multi-column sort, present only while sorted. */
   "data-sort-index"?: number;
 }
 
-/** Props from {@link UseDataTableResult.getSearchInputProps}. */
+/**
+ * Props from `UseDataTableResult.getSearchInputProps`.
+ *
+ * @public
+ */
 export interface SearchInputElementProps extends Props {
+  /** `search`. */
   type: string;
+  /** `searchbox`. */
   role: string;
+  /** Current value. */
   value: string;
+  /** Placeholder text. */
   placeholder: string;
+  /** The search box's accessible name. */
   "aria-label": string;
+  /** Called with the new value. */
   onChange: (event: { currentTarget: { value: string } }) => void;
 }
 
@@ -250,7 +303,9 @@ type TRowAny = Record<string, unknown>;
  *
  * @typeParam TRow - The row type.
  * @param options - See {@link UseDataTableOptions}.
- * @returns Derived state and prop-getters — see {@link UseDataTableResult}.
+ * @returns Derived state and prop-getters — see `UseDataTableResult`.
+ *
+ * @public
  */
 export function useDataTable<TRow>(
   options: UseDataTableOptions<TRow>
@@ -386,6 +441,10 @@ export function useDataTable<TRow>(
       mergeProps(
         {
           role: "columnheader",
+          // The HTML half of the same statement the role makes. Four kits set
+          // it on their own `<th>` and four did not, so a cell's header
+          // association depended on which kit you picked.
+          scope: "col",
           "aria-sort": ariaSort(
             column,
             chainLevel(source.sortLevels, column.key)?.key ?? source.sortBy,

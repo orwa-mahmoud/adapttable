@@ -13,10 +13,13 @@ import {
   isColumnGroupStubKey,
 } from "./headerGroups";
 
+export type { ColumnDef, GroupedHeaderAlign };
 /**
  * A parent header with its own children. Collapse options live here, not
  * on the table: each group decides whether a collapsed state is an arrow
  * stub, a kept child, or a cell the host draws.
+ *
+ * @public
  */
 export interface ColumnGroupDef<TRow> {
   /** Caption on the spanning header cell, and the group's id. */
@@ -48,22 +51,42 @@ export interface ColumnGroupDef<TRow> {
   readonly align?: GroupedHeaderAlign;
 }
 
-/** A leaf {@link ColumnDef} or a {@link ColumnGroupDef} parent. */
+/**
+ * A leaf `ColumnDef` or a {@link ColumnGroupDef} parent.
+ *
+ * @public
+ */
 export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
 
-/** Collapse policy recorded for one parent while flattening a tree. */
+/**
+ * Collapse policy recorded for one parent while flattening a tree.
+ *
+ * @public
+ */
 export interface ColumnGroupRecord<TRow> {
+  /** Stable id built from the group's path. */
   readonly id: string;
+  /** Caption on the group header. */
   readonly label: string;
+  /** Column shown as the summary while the group is collapsed. */
   readonly collapsedKey?: string;
+  /** Renders a synthetic summary cell while collapsed. */
   readonly collapsedRender?: (row: TRow) => ReactNode;
+  /** Keeps the group's columns together when columns are reordered. */
   readonly marryChildren: boolean;
+  /** Tooltip on the group header. */
   readonly headerTooltip?: string;
+  /** How the group header's caption aligns. */
   readonly align?: GroupedHeaderAlign;
+  /** Keys of the columns under this group. */
   readonly childKeys: readonly string[];
 }
 
-/** True when this column input is a parent with children. */
+/**
+ * True when this column input is a parent with children.
+ *
+ * @public
+ */
 export function isColumnGroup<TRow>(
   column: ColumnInput<TRow>
 ): column is ColumnGroupDef<TRow> {
@@ -72,7 +95,9 @@ export function isColumnGroup<TRow>(
 
 /**
  * Flatten a mixed column tree into leaves. Tree parents become `group`
- * paths on those leaves; collapse options are in {@link FlattenedColumns.groups}.
+ * paths on those leaves; collapse options are in `FlattenedColumns.groups`.
+ *
+ * @public
  */
 export function flattenColumnTree<TRow>(
   columns: readonly ColumnInput<TRow>[]
@@ -94,9 +119,15 @@ export function flattenColumnTree<TRow>(
   return { leaves, groups: frozen };
 }
 
-/** Leaves plus the parent records {@link flattenColumnTree} collected. */
+/**
+ * Leaves plus the parent records {@link flattenColumnTree} collected.
+ *
+ * @public
+ */
 export interface FlattenedColumns<TRow> {
+  /** The columns themselves, in render order. */
   readonly leaves: ColumnDef<TRow>[];
+  /** The header rows above them. */
   readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 }
 
@@ -105,6 +136,8 @@ export interface FlattenedColumns<TRow> {
  *
  * Default (no `collapsedKey`, no `collapsedRender`, no `groupShow: "closed"`
  * child): a thin stub column. `collapsedRender` wins over `collapsedKey`.
+ *
+ * @public
  */
 export function applyCollapsedColumnGroups<TRow>(
   columns: readonly ColumnDef<TRow>[],
@@ -142,6 +175,8 @@ export function applyCollapsedColumnGroups<TRow>(
 /**
  * True when `nextOrder` still keeps every married group's children in one
  * contiguous block. Used to reject a reorder that would split a tree group.
+ *
+ * @public
  */
 export function marriedOrderHolds<TRow>(
   nextOrder: readonly string[],

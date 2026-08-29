@@ -10,11 +10,14 @@
  *   1. ESM import + the `@adapttable/core/adapter` subpath   (node, npm install)
  *   2. CommonJS require of the same three entrypoints         (node)
  *   3. Types under moduleResolution node16 / nodenext / bundler (tsc ×3)
- *   4. The same install resolves under pnpm as well as npm
- *   5. Adapter CSS ships and is non-empty (base-ui styles.css)
- *   6. `@adapttable/server` parses a query in a backend with NO React
- *   7. A Vite production build of a real table                (vite build)
- *   8. A Next.js App Router build whose prerender renders rows (next build)
+ *   4. The beginner, v2-props, senior, customization and headless layers
+ *   5. Every type a subpath hands back is nameable from that subpath
+ *   6. Every compatibility alias is still a value at runtime
+ *   7. The same install resolves under pnpm as well as npm
+ *   8. Adapter CSS ships and is non-empty (base-ui styles.css)
+ *   9. `@adapttable/server` parses a query in a backend with NO React
+ *  10. A Vite production build of a real table                (vite build)
+ *  11. A Next.js App Router build whose prerender renders rows (next build)
  *
  * Monorepo tests can never see these failures: they resolve source, not
  * `exports` maps, tarball file lists, or bundler resolution rules.
@@ -36,6 +39,18 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import {
+  aliasesIn,
+  aliasRuntimeProbe,
+  aliasTypeProbe,
+  BEGINNER,
+  CUSTOMIZATION,
+  HEADLESS,
+  SENIOR,
+  V2_PROPS,
+} from "./layer-fixtures.mjs";
+import { missingNames, NAMEABLE, NAMEABLE_PROBE } from "./packed-names.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Absolute executable paths — never a bare name off a writable PATH. npm
@@ -90,6 +105,41 @@ function run(cmd, args, cwd, label) {
   }
 }
 
+/**
+ * Every promised name arrives in the declaration a consumer installs.
+ *
+ * Read out of `node_modules`, not out of the workspace build: the tarball is
+ * what `exports` maps and file lists are actually resolved against, and a name
+ * can survive the build and still not ship.
+ */
+function checkPackedNames(resDir) {
+  process.stdout.write("packed declarations name their own types … ");
+  for (const [pkg, entry, names] of NAMEABLE) {
+    const route =
+      entry === "index" ? `@adapttable/${pkg}` : `@adapttable/${pkg}/${entry}`;
+    const dtsPath = join(
+      resDir,
+      "node_modules",
+      "@adapttable",
+      pkg,
+      "dist",
+      `${entry}.d.ts`
+    );
+    if (!existsSync(dtsPath)) {
+      console.error(`\n✗ the packed ${pkg} ships no dist/${entry}.d.ts`);
+      process.exit(1);
+    }
+    const missing = missingNames(readFileSync(dtsPath, "utf8"), names);
+    if (missing.length > 0) {
+      console.error(
+        `\n✗ ${route} hands back ${missing.join(", ")} but its packed declaration exports no such name — a consumer cannot write the type`
+      );
+      process.exit(1);
+    }
+  }
+  console.log("ok");
+}
+
 function main() {
   const packDir = mkdtempSync(join(tmpdir(), "consumer-packs-"));
   const scratches = [];
@@ -126,6 +176,11 @@ function main() {
   const SERVER = {
     "@adapttable/server": `file:${tarballs["@adapttable/server"]}`,
   };
+  // Only react and react-dom are peers, so the styled kit installs like any
+  // other package — and its own props type has to arrive from its own entry.
+  const SHADCN = {
+    "@adapttable/shadcn": `file:${tarballs["@adapttable/shadcn"]}`,
+  };
 
   // On a Version Packages PR the bumped versions exist only as tarballs —
   // the registry doesn't have them yet. Every scratch app therefore pins
@@ -141,7 +196,8 @@ function main() {
       .map(([name, file]) => `  "${name}": "file:${file}"`)
       .join("\n")}\n`;
 
-  // ── 1–5. Resolution scratch: ESM, CJS, tsc ×3, pnpm, CSS ─────────────
+  // ── 1–8. Resolution scratch: ESM, CJS, tsc ×3, layers, names, aliases,
+  //         pnpm, CSS ────────────────────────────────────────────────────
   const resDir = scratch("resolution");
   writeFileSync(
     join(resDir, "package.json"),
@@ -151,7 +207,14 @@ function main() {
         version: "0.0.0",
         private: true,
         type: "module",
-        dependencies: { ...CORE, ...UNSTYLED, ...BASE_UI, ...SERVER, ...REACT },
+        dependencies: {
+          ...CORE,
+          ...UNSTYLED,
+          ...BASE_UI,
+          ...SERVER,
+          ...SHADCN,
+          ...REACT,
+        },
         overrides: OVERRIDES,
         devDependencies: {
           typescript: "^6.0.0",
@@ -219,6 +282,25 @@ export const surface = { useQuerySource, useDataTableShell, DataTable };
 export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
 `
   );
+  writeFileSync(join(resDir, "nameable.ts"), NAMEABLE_PROBE);
+  // The three product layers, compiled against the tarballs beside the probes.
+  const aliases = aliasesIn(
+    readFileSync(
+      join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
+      "utf8"
+    )
+  );
+  for (const [name, source] of [
+    ["beginner.tsx", BEGINNER],
+    ["v2props.tsx", V2_PROPS],
+    ["senior.tsx", SENIOR],
+    ["customization.tsx", CUSTOMIZATION],
+    ["headless.tsx", HEADLESS],
+    ["aliases.ts", aliasTypeProbe(aliases)],
+  ]) {
+    writeFileSync(join(resDir, name), source);
+  }
+  writeFileSync(join(resDir, "aliases.mjs"), aliasRuntimeProbe(aliases.values));
   for (const resolution of ["node16", "nodenext", "bundler"]) {
     writeFileSync(
       join(resDir, `tsconfig.${resolution}.json`),
@@ -234,7 +316,16 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
             skipLibCheck: true,
             noEmit: true,
           },
-          include: ["probe.ts"],
+          include: [
+            "probe.ts",
+            "nameable.ts",
+            "aliases.ts",
+            "beginner.tsx",
+            "v2props.tsx",
+            "senior.tsx",
+            "customization.tsx",
+            "headless.tsx",
+          ],
         },
         null,
         2
@@ -264,6 +355,12 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
     );
     console.log("ok");
   }
+
+  checkPackedNames(resDir);
+
+  process.stdout.write("compatibility aliases are still values … ");
+  run(process.execPath, ["aliases.mjs"], resDir, "compatibility aliases");
+  console.log("ok");
 
   process.stdout.write("adapter CSS ships (base-ui styles.css) … ");
   const cssPath = join(
@@ -302,7 +399,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   run(process.execPath, ["esm.mjs"], pnpmDir, "ESM import under pnpm");
   console.log("ok");
 
-  // ── 6. A backend with no React at all ─────────────────────────────────
+  // ── 9. A backend with no React at all ─────────────────────────────────
   //
   // Every scratch app above has React, because every one of them renders a
   // table. `@adapttable/server` renders nothing: it reads a query string inside
@@ -441,7 +538,7 @@ if (wrong.length > 0)
   run(process.execPath, ["parse.cjs"], nodeDir, "react-free CJS parse");
   console.log("ok");
 
-  // ── 7. Vite production build ──────────────────────────────────────────
+  // ── 10. Vite production build ─────────────────────────────────────────
   const viteDir = scratch("vite");
   mkdirSync(join(viteDir, "src"), { recursive: true });
   writeFileSync(
@@ -500,7 +597,7 @@ createRoot(document.getElementById("root")!).render(
   }
   console.log("ok");
 
-  // ── 8. Next.js App Router build + prerender ───────────────────────────
+  // ── 11. Next.js App Router build + prerender ──────────────────────────
   const nextDir = scratch("next");
   mkdirSync(join(nextDir, "app"), { recursive: true });
   writeFileSync(

@@ -15,17 +15,27 @@ import {
 } from "./editableCellController";
 import { BatchEditCell, RowEditCell } from "./RowEditGate";
 
-/** Props for a kit-native editor while a cell is active. */
+/**
+ * Props for a kit-native editor while a cell is active.
+ *
+ * @public
+ */
 export interface EditableCellEditorCtrl {
+  /** The value being edited, as text. */
   draft: string;
+  /** Replaces the draft on every keystroke. */
   setDraft: (value: string) => void;
+  /** Handles Enter, Escape and Tab for the editor. */
   onEditorKeyDown: (event: {
     key: string;
     preventDefault: () => void;
     shiftKey?: boolean;
   }) => void;
+  /** Commits the draft when focus leaves the editor. */
   commitOnBlur: () => void;
+  /** The editor shape this column declared. */
   editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
+  /** Choices for a select editor, empty for other shapes. */
   selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
   /**
    * A validator's message for this cell, when the last commit was rejected.
@@ -76,14 +86,23 @@ function isFirstEditableColumn(
  *
  * When `editing` is omitted this is a pure pass-through of `display` —
  * zero DOM / behavior change for tables that never opted into cell edit.
+ *
+ * @public
  */
 export interface EditableCellGateProps<TRow> {
+  /** Cell-editing state; the gate is a pass-through when absent. */
   readonly editing: EditableCellEditing<TRow> | undefined;
+  /** The row being rendered. */
   readonly row: TRow;
+  /** The column being rendered. */
   readonly column: ColumnDef<TRow>;
+  /** Identity of the row being edited. */
   readonly rowId: string;
+  /** The rendered rows. */
   readonly rows: readonly TRow[];
+  /** Visible columns, in order. */
   readonly columns: readonly ColumnDef<TRow>[];
+  /** Row identity function. */
   readonly rowKey: (row: TRow) => string;
   /** Accessible name for the activate control. */
   readonly editLabel: string;
@@ -109,6 +128,7 @@ export interface EditableCellGateProps<TRow> {
    * the kit.
    */
   readonly kitRendersError?: boolean;
+  /** What the cell shows when it is not being edited. */
   readonly display: ReactNode;
   /**
    * Kit-native editor. Only called while this cell is the active edit.
@@ -119,19 +139,32 @@ export interface EditableCellGateProps<TRow> {
   readonly slots: EditableCellSlots;
 }
 
-/** Kit activate control the gate calls while the cell is idle. */
+/**
+ * Kit activate control the gate calls while the cell is idle.
+ *
+ * @public
+ */
 export interface EditableCellActivateProps {
+  /** Tooltip for the control. */
   readonly title: string;
+  /** Class for the element. */
   readonly className?: string;
+  /** Save state for this cell, when one is being reported. */
   readonly saveStatus: string | undefined;
+  /** Whether the cell holds an unsaved edit. */
   readonly dirty: boolean;
+  /** Ref to the control, so the gate can put focus back. */
   readonly activateRef: (node: HTMLButtonElement | null) => void;
+  /** What the cell shows while idle. */
   readonly display: ReactNode;
+  /** Opens the editor on a double click. */
   readonly onDoubleClick: (event: {
     preventDefault: () => void;
     stopPropagation: () => void;
   }) => void;
+  /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
+  /** Handles the keys this control owns. */
   readonly onKeyDown: (event: {
     key: string;
     preventDefault: () => void;
@@ -139,19 +172,55 @@ export interface EditableCellActivateProps {
   }) => void;
 }
 
-/** Kit button the gate calls for conflict choices and undo. */
+/**
+ * Kit button the gate calls for conflict choices and undo.
+ *
+ * @public
+ */
 export interface EditableCellButtonProps {
+  /** Accessible name for the control. */
   readonly label: string;
+  /** Part name, so styling can target this element. */
   readonly part: string;
+  /** Class for the element. */
   readonly className?: string;
+  /** Called on press, before focus moves. */
   readonly onMouseDown?: (event: { preventDefault: () => void }) => void;
+  /** Called when pressed. */
   readonly onClick: (event: { stopPropagation: () => void }) => void;
 }
 
-/** Adapter-supplied controls for {@link EditableCellGate}. */
+/**
+ * Adapter-supplied controls for `EditableCellGate`.
+ *
+ * @public
+ */
 export interface EditableCellSlots {
+  /** Renders the idle cell that opens the editor. */
   readonly Activate: (props: EditableCellActivateProps) => ReactNode;
+  /** Renders a conflict-resolution button. */
   readonly Button: (props: EditableCellButtonProps) => ReactNode;
+}
+
+/**
+ * Keep an editor's own keys out of the table's key handler.
+ *
+ * Enter, Escape and Tab all mean something to BOTH an open editor and the grid
+ * around it: the editor commits, cancels or moves to the next field, and the
+ * table would also move focus or leave edit mode on the same press. The editor
+ * is the one the user is typing in, so it wins — and the table never sees it.
+ *
+ * Structural event on purpose, so this stays usable from any framework's
+ * handler and from a plain listener.
+ *
+ * @public
+ */
+export function stopEditKeys(
+  event: Readonly<{ key: string; stopPropagation: () => void }>
+): void {
+  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
+    event.stopPropagation();
+  }
 }
 
 /**
@@ -163,6 +232,8 @@ export interface EditableCellSlots {
  *
  * @param ctrl - The editor controller the gate handed the kit.
  * @returns Attributes to spread; empty while the value is fine.
+ *
+ * @public
  */
 export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
   "aria-invalid"?: true;
@@ -187,6 +258,8 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
  * @param ctrl - The editor controller the gate handed the kit.
  * @returns Attributes to spread; empty unless a check is running or a
  *   conflict is being asked.
+ *
+ * @public
  */
 export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
   "aria-busy"?: true;
@@ -264,6 +337,8 @@ function ConflictNotice(
  *
  * @param ctrl - The editor controller the gate handed the kit.
  * @param checked - The box's new state.
+ *
+ * @public
  */
 export function commitBooleanDraft(
   ctrl: EditableCellEditorCtrl,
@@ -278,6 +353,8 @@ export function commitBooleanDraft(
  *
  * @param select - The select element.
  * @returns The draft string the editing state holds.
+ *
+ * @public
  */
 export function multiDraftFromSelect(select: HTMLSelectElement): string {
   return formatMultiDraft(
@@ -285,7 +362,11 @@ export function multiDraftFromSelect(select: HTMLSelectElement): string {
   );
 }
 
-/** Opt out of the React Compiler: early returns swap trees of different memo sizes. */
+/**
+ * Opt out of the React Compiler: early returns swap trees of different memo sizes.
+ *
+ * @public
+ */
 export function EditableCellGate<TRow>(
   props: EditableCellGateProps<TRow>
 ): ReactElement {

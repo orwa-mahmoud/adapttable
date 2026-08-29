@@ -5,7 +5,7 @@
  * Both props take the same mapper: rows in, a record of cells out. Writing
  * that mapper by hand is fine for one total and tedious for five, and every
  * hand-rolled version re-solves the same edge cases — non-numeric values,
- * blanks, an empty group. {@link aggregate} builds the mapper from a
+ * blanks, an empty group. `aggregate` builds the mapper from a
  * declaration instead:
  *
  * ```ts
@@ -25,7 +25,11 @@ import { currentFeatureHost } from "../features/currentHost";
 import type { ColumnDef, SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
-/** The aggregate functions available by name. */
+/**
+ * The aggregate functions available by name.
+ *
+ * @public
+ */
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 /**
@@ -37,15 +41,25 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
  *
  * The return type is `ReactNode` so the built mapper is directly assignable
  * to `summaryRow` and `groupAggregates`, which is the whole point of it.
+ *
+ * @public
  */
 export type Aggregator<TValue = SortableValue> = (
   values: readonly TValue[]
 ) => ReactNode;
 
-/** What to compute per column: a built-in name, or your own function. */
+/**
+ * What to compute per column: a built-in name, or your own function.
+ *
+ * @public
+ */
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
-/** Options for {@link aggregate}. */
+/**
+ * Options for `aggregate`.
+ *
+ * @public
+ */
 export interface AggregateOptions<TRow> {
   /**
    * Columns, so values resolve through `sortValue` exactly as sorting and
@@ -59,7 +73,7 @@ export interface AggregateOptions<TRow> {
   format?: (value: ReactNode, key: string) => ReactNode;
   /**
    * The host of the table this mapper will run in. Omit it when the
-   * table binds the call with {@link runWithFeatureHost}.
+   * table binds the call with `runWithFeatureHost`.
    */
   host?: FeatureHostState;
 }
@@ -117,7 +131,11 @@ const BUILT_INS: Record<AggregateName, Aggregator> = {
   },
 };
 
-/** Every built-in aggregate name, for a UI that offers a choice. */
+/**
+ * Every built-in aggregate name, for a UI that offers a choice.
+ *
+ * @public
+ */
 export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
 
 /**
@@ -149,6 +167,8 @@ export function resolveAggregateValue<TRow>(
  *   groupAggregates={aggregate({ budget: "sum" }, { columns })}
  * />
  * ```
+ *
+ * @public
  */
 export function aggregate<TRow>(
   spec: AggregateSpec,

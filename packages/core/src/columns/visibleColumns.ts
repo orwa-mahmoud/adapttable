@@ -1,6 +1,10 @@
 import type { ColumnDef } from "../types";
 
-/** Which layout a table is rendering in. */
+/**
+ * Which layout a table is rendering in.
+ *
+ * @public
+ */
 export type TableLayout = "desktop" | "mobile";
 
 /**
@@ -18,6 +22,8 @@ export type TableLayout = "desktop" | "mobile";
  * @param columns - All declared columns.
  * @param layout - The current layout.
  * @returns The columns to render, in declared order.
+ *
+ * @public
  */
 export function visibleColumns<TRow>(
   columns: readonly ColumnDef<TRow>[],

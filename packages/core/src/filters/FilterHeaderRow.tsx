@@ -8,7 +8,7 @@ import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { ColumnDef, TableLabels } from "../types";
 import { ColumnSpacer } from "../virtual/ColumnSpacer";
 import { defaultFilterRegistry } from "./filterBuiltins";
-import { type FilterDef, filterLabel } from "./filterDefs";
+import { type FilterDef, filterLabel, filterStateKeys } from "./filterDefs";
 import {
   type FilterFormSource,
   listFilterValues,
@@ -22,20 +22,39 @@ import {
 } from "./filterRegistry";
 import { useFilterOptions } from "./useFilterOptions";
 
-/** Class hooks the unstyled adapter maps onto `DataTableClassNames`. */
+export type { FilterFormSource, FilterTypeRegistry };
+
+/**
+ * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
+ *
+ * @public
+ */
 export interface FilterHeaderClassNames {
+  /** Class for the filter row. */
   filterHeaderRow?: string;
+  /** Class for one filter cell. */
   filterHeaderCell?: string;
+  /** Class for the control inside a filter cell. */
   filterHeaderInput?: string;
+  /** Class for a filter cell's popover. */
   filterHeaderMenu?: string;
+  /** Class shared with the ordinary header cells. */
   headerCell?: string;
+  /** Class for the expansion column's header cell. */
   expandHeader?: string;
+  /** Class for the reorder column's header cell. */
   reorderHeader?: string;
+  /** Class for the selection column's header cell. */
   selectionHeader?: string;
+  /** Class for the actions column's header cell. */
   actionsHeader?: string;
 }
 
-/** Overlay a sticky `top` on a cell or pad style. */
+/**
+ * Overlay a sticky `top` on a cell or pad style.
+ *
+ * @public
+ */
 export function headerFilterStickTop(
   sticky: boolean,
   base: CSSProperties | undefined,
@@ -46,33 +65,61 @@ export function headerFilterStickTop(
   return { ...stickyExtras, ...base, top };
 }
 
-/** Props for an adapter {@link FilterHeaderRow} — no slots on the public API. */
+/**
+ * Props for an adapter `FilterHeaderRow` — no slots on the public API.
+ *
+ * @public
+ */
 export interface FilterHeaderRowProps<TRow> {
   /** When false the row does not render, even if defs exist. */
   readonly enabled?: boolean;
+  /** Visible columns, so each filter lands under its own header. */
   readonly columns: readonly ColumnDef<TRow>[];
+  /** Filter definitions to render. */
   readonly defs: readonly FilterDef<TRow>[];
+  /** Reads and writes the active filter values. */
   readonly source: FilterFormSource<TRow>;
+  /** Custom filter types, beyond the built-ins. */
   readonly registry?: FilterTypeRegistry;
+  /** Resolved labels, every key filled. */
   readonly labels: Required<TableLabels>;
+  /** Whether an expansion column is injected. */
   readonly expandable?: boolean;
+  /** Whether a reorder column is injected. */
   readonly showReorder?: boolean;
+  /** Whether a selection column is injected. */
   readonly selection?: boolean;
+  /** Whether an actions column is injected. */
   readonly showActions?: boolean;
+  /** Widths standing in for columns outside the window. */
   readonly columnSpacers?: { start: number; end: number };
+  /** Width and sticky offsets for a column's filter cell. */
   readonly cellStyle?: (column: ColumnDef<TRow>) => CSSProperties | undefined;
+  /** Edge a column is pinned to, absent when it floats. */
   readonly pinSide?: (key: string) => "start" | "end" | undefined;
+  /** Style for the spacer cells at either end. */
   readonly padStyle?: CSSProperties;
+  /** Present only when the row sticks, for styling hooks. */
   readonly stickyAttr?: true;
+  /** Per-part classes for the row. */
   readonly classNames?: FilterHeaderClassNames;
 }
 
-/** Props for an adapter {@link FilterHeaderControl} — no slots on the public API. */
+/**
+ * Props for an adapter `FilterHeaderControl` — no slots on the public API.
+ *
+ * @public
+ */
 export interface FilterHeaderControlProps<TRow> {
+  /** The filter this control edits. */
   readonly def: FilterDef<TRow>;
+  /** Reads and writes the active filter values. */
   readonly source: FilterFormSource<TRow>;
+  /** Resolved labels, every key filled. */
   readonly labels: Required<TableLabels>;
+  /** Class for the control. */
   readonly className?: string;
+  /** Custom filter types, beyond the built-ins. */
   readonly registry?: FilterTypeRegistry;
   /**
    * Dismiss the overlay after a finished single-control write. Default off.
@@ -81,72 +128,166 @@ export interface FilterHeaderControlProps<TRow> {
   readonly closeOnSelect?: boolean;
 }
 
-/** One option in a header Select or multi menu. */
+/**
+ * Whether a header filter holds a value worth marking its column with.
+ *
+ * The emptiness rules are the whole point, and they are not obvious: a cleared
+ * text field leaves `""`, a cleared multi-select leaves `[]`, and a control
+ * nobody touched leaves `undefined`. None of those is a filter. A funnel that
+ * lights up for one is worse than no funnel at all, because a reader who trusts
+ * it goes looking for a filter that is not there.
+ *
+ * Every adapter drew this conclusion for itself with a byte-identical copy of
+ * these six lines; it belongs here, where it can be wrong in one place only.
+ *
+ * @public
+ */
+export function hasActiveHeaderFilter<TRow>(
+  props: Readonly<
+    Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">
+  >
+): boolean {
+  return filterStateKeys(
+    props.def,
+    props.registry ?? defaultFilterRegistry
+  ).some((key) => {
+    const value = props.source.extra[key];
+    if (value == null || value === "") return false;
+    return !(Array.isArray(value) && value.length === 0);
+  });
+}
+
+/**
+ * One option in a header Select or multi menu.
+ *
+ * @public
+ */
 export interface FilterHeaderOption {
+  /** Value stored when this option is chosen. */
   readonly value: string;
+  /** Caption shown for the option. */
   readonly label: string;
 }
 
-/** Kit search field a text header cell calls. */
+/**
+ * Kit search field a text header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderSearchProps {
+  /** Accessible name for the box. */
   readonly label: string;
+  /** Placeholder text. */
   readonly placeholder: string;
+  /** Current text. */
   readonly value: string;
+  /** Class for the box. */
   readonly className?: string;
+  /** Called with the new text on every keystroke. */
   readonly onChange: (value: string) => void;
 }
 
-/** Kit Select a select/boolean header cell calls. */
+/**
+ * Kit Select a select/boolean header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderSelectProps {
+  /** Accessible name for the select. */
   readonly label: string;
+  /** Currently chosen value. */
   readonly value: string;
+  /** Choices to offer. */
   readonly options: readonly FilterHeaderOption[];
+  /** Class for the select. */
   readonly className?: string;
+  /** Called with the chosen value. */
   readonly onChange: (value: string) => void;
 }
 
-/** Kit number/date field a range header cell calls. */
+/**
+ * Kit number/date field a range header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderRangeProps {
+  /** Accessible name for the field. */
   readonly label: string;
+  /** Which input type the bound is edited with. */
   readonly type: "text" | "number" | "date";
+  /** Current bound, as text. */
   readonly value: string;
+  /** Called with the new bound. */
   readonly onChange: (value: string) => void;
 }
 
-/** Kit compact multi menu a checklist/multiSelect header cell calls. */
+/**
+ * Kit compact multi menu a checklist/multiSelect header cell calls.
+ *
+ * @public
+ */
 export interface FilterHeaderMultiProps {
+  /** Accessible name for the trigger. */
   readonly label: string;
+  /** What the trigger shows for the current selection. */
   readonly summary: string;
+  /** Choices to offer. */
   readonly options: readonly FilterHeaderOption[];
+  /** Values currently checked. */
   readonly selected: readonly string[];
+  /** Class for the trigger. */
   readonly className?: string;
+  /** Class for the popover. */
   readonly menuClassName?: string;
+  /** Called with a value and its new checked state. */
   readonly onToggle: (value: string, checked: boolean) => void;
 }
 
-/** Adapter-supplied controls for {@link FilterHeaderChrome}. */
+/**
+ * Adapter-supplied controls for {@link FilterHeaderChrome}.
+ *
+ * @public
+ */
 export interface FilterHeaderSlots {
+  /** Renders a free-text filter. */
   readonly Search: (props: FilterHeaderSearchProps) => ReactNode;
+  /** Renders a single-choice filter. */
   readonly Select: (props: FilterHeaderSelectProps) => ReactNode;
+  /** Renders one bound of a range filter. */
   readonly Range: (props: FilterHeaderRangeProps) => ReactNode;
+  /** Renders a multi-choice filter behind a popover. */
   readonly Multi: (props: FilterHeaderMultiProps) => ReactNode;
 }
 
-/** Props for {@link FilterHeaderChrome}. */
+/**
+ * Props for {@link FilterHeaderChrome}.
+ *
+ * @public
+ */
 export interface FilterHeaderChromeProps<
   TRow,
 > extends FilterHeaderRowProps<TRow> {
+  /** The kit's controls for each filter shape. */
   readonly slots: FilterHeaderSlots;
 }
 
-/** Props for {@link FilterHeaderControlChrome}. */
+/**
+ * Props for {@link FilterHeaderControlChrome}.
+ *
+ * @public
+ */
 export interface FilterHeaderControlChromeProps<
   TRow,
 > extends FilterHeaderControlProps<TRow> {
+  /** The kit's controls for each filter shape. */
   readonly slots: FilterHeaderSlots;
 }
 
-/** The definition that drives a column's header filter, if any. */
+/**
+ * The definition that drives a column's header filter, if any.
+ *
+ * @public
+ */
 export function filterDefForColumn<TRow>(
   defs: readonly FilterDef<TRow>[],
   key: string
@@ -436,7 +577,11 @@ function FilterHeaderCell<TRow>({
   }
 }
 
-/** Compact control for one filter definition — used in the header row and antd titles. */
+/**
+ * Compact control for one filter definition — used in the header row and antd titles.
+ *
+ * @public
+ */
 export function FilterHeaderControlChrome<TRow>({
   def,
   source,
@@ -460,6 +605,8 @@ export function FilterHeaderControlChrome<TRow>({
 /**
  * Second header row of per-column quick filters. Pads and spacers match
  * the leaf header so sticky, pin offsets, and column windowing stay aligned.
+ *
+ * @public
  */
 export function FilterHeaderChrome<TRow>({
   enabled = true,

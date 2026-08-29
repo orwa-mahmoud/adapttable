@@ -7,7 +7,13 @@
  * virtualization, that a cell the virtualizer has not mounted is still
  * reachable, and that omitting the prop leaves the markup untouched.
  */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../types";
@@ -67,6 +73,8 @@ function Grid(props: {
   editable?: boolean;
   /** Offer the per-column header checkbox. */
   headerCheckbox?: boolean;
+  /** The rendered columns are a window over the full set. */
+  columnsWindowed?: boolean;
 }) {
   const rows = props.rows ?? makeRows(3);
   const columns = props.editable === true ? EDITABLE : COLUMNS;
@@ -75,6 +83,7 @@ function Grid(props: {
     headerCheckbox: props.headerCheckbox,
     rowCount: props.rowCount ?? rows.length,
     columns,
+    columnsWindowed: props.columnsWindowed,
     rows,
     firstRowIndex: props.firstRowIndex,
     pageSize: props.pageSize,
@@ -495,6 +504,123 @@ describe("useGridFocus", () => {
     expect(screen.queryByRole("grid")).toBeNull();
     expect(cellAt(0, 0)).toBeNull();
   });
+
+  /**
+   * A windowed table only has a slice of its rows in the DOM, so assistive
+   * tech counts what it can reach and calls a 40,000-row dataset three rows
+   * long. The size is a fact about the table, not about cell navigation.
+   */
+  describe("a window's size, with cell navigation off", () => {
+    const table = () => document.querySelector("table");
+    const rows = () => [...document.querySelectorAll("tbody tr")];
+
+    it("states the real row count", () => {
+      render(<Grid enabled={false} rowCount={40_000} rows={makeRows(3)} />);
+      expect(table()).toHaveAttribute("aria-rowcount", "40000");
+      // Only the rows are a window here. The column axis states itself, and
+      // only when it is windowed too — see the block below.
+      expect(table()).not.toHaveAttribute("aria-colcount");
+      // Still not a grid: nothing here provides grid keyboard semantics.
+      expect(screen.queryByRole("grid")).toBeNull();
+    });
+
+    it("numbers each mounted row from its absolute position", () => {
+      render(
+        <Grid
+          enabled={false}
+          rowCount={40_000}
+          rows={makeRows(3, 120)}
+          firstRowIndex={120}
+        />
+      );
+      expect(rows().map((r) => r.getAttribute("aria-rowindex"))).toEqual([
+        "121",
+        "122",
+        "123",
+      ]);
+    });
+
+    it("says nothing when every row is already in the DOM", () => {
+      render(<Grid enabled={false} />);
+      expect(table()).not.toHaveAttribute("aria-rowcount");
+      expect(rows()[0]).not.toHaveAttribute("aria-rowindex");
+    });
+
+    it("leaves the counts alone when cell navigation is on", () => {
+      render(<Grid rowCount={40_000} rows={makeRows(3)} />);
+      expect(screen.getByRole("grid")).toHaveAttribute(
+        "aria-rowcount",
+        "40000"
+      );
+      expect(rows()[0]).toHaveAttribute("aria-rowindex", "1");
+    });
+
+    /**
+     * The horizontal axis fails the same way and needs the same answer. The
+     * count and the per-cell index ship together: a count whose cells cannot
+     * say where they are is worse than saying nothing, because a reader then
+     * trusts a position it counted off the DOM.
+     */
+    it("states the real column count when the column axis is windowed", () => {
+      render(<Grid enabled={false} columnsWindowed />);
+
+      expect(table()).toHaveAttribute("aria-colcount", String(COLUMNS.length));
+      // The rows are all present, so their axis stays quiet.
+      expect(table()).not.toHaveAttribute("aria-rowcount");
+      expect(screen.queryByRole("grid")).toBeNull();
+    });
+
+    it("numbers each mounted cell from its absolute column", () => {
+      render(<Grid enabled={false} columnsWindowed />);
+      const cells = [...document.querySelectorAll("tbody tr:first-child td")];
+
+      expect(cells.map((c) => c.getAttribute("aria-colindex"))).toEqual(
+        COLUMNS.map((_, index) => String(index + 1))
+      );
+    });
+
+    it("says nothing when every column is already in the DOM", () => {
+      render(<Grid enabled={false} />);
+
+      expect(table()).not.toHaveAttribute("aria-colcount");
+      expect(
+        document.querySelector("tbody tr:first-child td")
+      ).not.toHaveAttribute("aria-colindex");
+    });
+
+    it("numbers the header cells from the same absolute positions", () => {
+      render(<Grid enabled={false} columnsWindowed />);
+      const headers = [...document.querySelectorAll("thead th")];
+
+      // A header names its column, so it has to agree with the body cell under
+      // it — two different positions for one column is worse than none.
+      expect(headers.map((h) => h.getAttribute("aria-colindex"))).toEqual(
+        COLUMNS.map((_, index) => String(index + 1))
+      );
+    });
+
+    it("leaves the header row unnumbered when no axis is windowed", () => {
+      render(<Grid enabled={false} />);
+
+      expect(document.querySelector("thead th")).not.toHaveAttribute(
+        "aria-colindex"
+      );
+    });
+
+    it("states both axes when both are windowed", () => {
+      render(
+        <Grid
+          enabled={false}
+          rowCount={40_000}
+          rows={makeRows(3)}
+          columnsWindowed
+        />
+      );
+
+      expect(table()).toHaveAttribute("aria-rowcount", "40000");
+      expect(table()).toHaveAttribute("aria-colcount", String(COLUMNS.length));
+    });
+  });
 });
 
 /**
@@ -556,7 +682,7 @@ describe("useGridFocus — drag, columns and the range announcement", () => {
 
   it("announces the rectangle's edges and size, not just the cell", () => {
     render(<Grid rows={makeRows(4)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowRight", shiftKey: true });
     fireEvent.keyDown(cellAt(0, 1)!, { key: "ArrowDown", shiftKey: true });
     expect(document.querySelector("output")?.textContent).toBe(
@@ -566,7 +692,7 @@ describe("useGridFocus — drag, columns and the range announcement", () => {
 
   it("says nothing extra for a single cell — the cell announced itself", () => {
     render(<Grid rows={makeRows(4)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowRight" });
     expect(document.querySelector("output")?.textContent).toContain("row 1 of");
   });
@@ -655,7 +781,7 @@ describe("useGridFocus — the header checkbox into the same selection", () => {
 
   it("reads as unchecked for a rectangle that does not span every row", () => {
     render(<Grid rows={makeRows(4)} headerCheckbox />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
 
     // One column, two rows. Saying that column is selected would tell the
     // reader a copy covers rows it does not.
@@ -688,7 +814,7 @@ describe("useGridFocus — copy and cut the selection", () => {
   it("copies the rectangle as TSV on Ctrl+C", async () => {
     const writeText = clipboard();
     render(<Grid rows={makeRows(3)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowRight", shiftKey: true });
     fireEvent.keyDown(cellAt(0, 1)!, { key: "c", ctrlKey: true });
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
@@ -699,7 +825,7 @@ describe("useGridFocus — copy and cut the selection", () => {
   it("says how much was copied", async () => {
     clipboard();
     render(<Grid rows={makeRows(3)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowDown", shiftKey: true });
     fireEvent.keyDown(cellAt(1, 0)!, { key: "c", metaKey: true });
     await waitFor(() =>
@@ -715,7 +841,7 @@ describe("useGridFocus — copy and cut the selection", () => {
       clipboard: { writeText: vi.fn().mockRejectedValue(new Error("no")) },
     });
     render(<Grid rows={makeRows(3)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowRight", shiftKey: true });
     fireEvent.keyDown(cellAt(0, 1)!, { key: "c", ctrlKey: true });
     await waitFor(() =>
@@ -728,7 +854,7 @@ describe("useGridFocus — copy and cut the selection", () => {
     clipboard();
     const onCut = vi.fn();
     render(<Grid rows={makeRows(3)} onCut={onCut} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowRight", shiftKey: true });
     fireEvent.keyDown(cellAt(0, 1)!, { key: "x", ctrlKey: true });
     await waitFor(() => expect(onCut).toHaveBeenCalledOnce());
@@ -741,7 +867,7 @@ describe("useGridFocus — copy and cut the selection", () => {
   it("leaves the browser's own copy alone when nothing is selected", () => {
     const writeText = clipboard();
     render(<Grid rows={makeRows(3)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "c", ctrlKey: true });
     expect(writeText).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
@@ -759,7 +885,7 @@ describe("useGridFocus — paste from a spreadsheet", () => {
     clipboard("A\tB\nC\tD");
     const onPaste = vi.fn();
     render(<Grid rows={makeRows(3)} editable onPaste={onPaste} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "v", ctrlKey: true });
     await waitFor(() => expect(onPaste).toHaveBeenCalledOnce());
     const edits = onPaste.mock.calls[0]?.[0] as CellEdit<Row>[];
@@ -773,7 +899,7 @@ describe("useGridFocus — paste from a spreadsheet", () => {
   it("says how much was pasted", async () => {
     clipboard("A\tB");
     render(<Grid rows={makeRows(3)} editable onPaste={vi.fn()} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "v", metaKey: true });
     await waitFor(() =>
       expect(document.querySelector("output")?.textContent).toBe(
@@ -788,7 +914,7 @@ describe("useGridFocus — paste from a spreadsheet", () => {
       clipboard: { readText: vi.fn().mockRejectedValue(new Error("denied")) },
     });
     render(<Grid rows={makeRows(3)} editable onPaste={vi.fn()} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "v", ctrlKey: true });
     await waitFor(() =>
       expect(document.querySelector("output")?.textContent).toBe("Paste failed")
@@ -800,7 +926,7 @@ describe("useGridFocus — paste from a spreadsheet", () => {
     clipboard("A\tB");
     const onPaste = vi.fn();
     render(<Grid rows={makeRows(3)} onPaste={onPaste} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "v", ctrlKey: true });
     await waitFor(() => expect(onPaste).toHaveBeenCalledOnce());
     expect(onPaste.mock.calls[0]?.[0]).toEqual([]);
@@ -811,7 +937,7 @@ describe("useGridFocus — paste from a spreadsheet", () => {
     const readText = vi.fn().mockResolvedValue("A");
     vi.stubGlobal("navigator", { clipboard: { readText } });
     render(<Grid rows={makeRows(3)} editable />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "v", ctrlKey: true });
     expect(readText).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
@@ -827,7 +953,7 @@ describe("useGridFocus — the fill handle", () => {
   it("carries the selection's values to where the drag ended", () => {
     const onFill = vi.fn();
     render(<Grid rows={makeRows(4)} editable onFill={onFill} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.mouseDown(cellAt(0, 0)!);
     fireEvent.mouseUp(cellAt(0, 0)!);
     fireEvent.mouseDown(handle());
@@ -853,7 +979,7 @@ describe("useGridFocus — the fill handle", () => {
 
   it("leaves the filled rectangle selected, ready for the next one", () => {
     render(<Grid rows={makeRows(4)} editable onFill={vi.fn()} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.mouseDown(cellAt(0, 0)!);
     fireEvent.mouseUp(cellAt(0, 0)!);
     fireEvent.mouseDown(handle());
@@ -865,7 +991,7 @@ describe("useGridFocus — the fill handle", () => {
   it("writes nothing when the drag never left the selection", () => {
     const onFill = vi.fn();
     render(<Grid rows={makeRows(4)} editable onFill={onFill} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.mouseDown(cellAt(0, 0)!);
     fireEvent.mouseUp(cellAt(0, 0)!);
     fireEvent.mouseDown(handle());
@@ -877,7 +1003,7 @@ describe("useGridFocus — the fill handle", () => {
   it("does not start a selection drag from the handle itself", () => {
     // The cell's own press collapses the selection; the handle's must not.
     render(<Grid rows={makeRows(4)} editable onFill={vi.fn()} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowDown", shiftKey: true });
     expect(selectionSize()).toBe("2");
     fireEvent.mouseDown(handle());
@@ -887,7 +1013,7 @@ describe("useGridFocus — the fill handle", () => {
   it("fills the selection down on Ctrl+D", () => {
     const onFill = vi.fn();
     render(<Grid rows={makeRows(4)} editable onFill={onFill} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowDown", shiftKey: true });
     fireEvent.keyDown(cellAt(1, 0)!, { key: "d", ctrlKey: true });
     expect(onFill.mock.calls[0]?.[0]).toHaveLength(1);
@@ -897,7 +1023,7 @@ describe("useGridFocus — the fill handle", () => {
   it("leaves Ctrl+D to the browser on a one-row selection", () => {
     const onFill = vi.fn();
     render(<Grid rows={makeRows(4)} editable onFill={onFill} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "ArrowRight", shiftKey: true });
     fireEvent.keyDown(cellAt(0, 1)!, { key: "d", ctrlKey: true });
     expect(onFill).not.toHaveBeenCalled();
@@ -908,7 +1034,7 @@ describe("useGridFocus — undo and redo keys", () => {
   it("undoes on Ctrl/Cmd+Z and says how much came back", () => {
     const onUndo = vi.fn().mockReturnValue(3);
     render(<Grid rows={makeRows(3)} onUndo={onUndo} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "z", metaKey: true });
     expect(onUndo).toHaveBeenCalledOnce();
     expect(document.querySelector("output")?.textContent).toBe(
@@ -919,7 +1045,7 @@ describe("useGridFocus — undo and redo keys", () => {
   it("redoes on both spellings — Ctrl+Shift+Z and Ctrl+Y", () => {
     const onRedo = vi.fn().mockReturnValue(1);
     render(<Grid rows={makeRows(3)} onRedo={onRedo} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, {
       key: "z",
       ctrlKey: true,
@@ -932,7 +1058,7 @@ describe("useGridFocus — undo and redo keys", () => {
 
   it("says so rather than swallowing an empty history", () => {
     render(<Grid rows={makeRows(3)} onUndo={() => 0} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "z", ctrlKey: true });
     expect(document.querySelector("output")?.textContent).toBe(
       "Nothing to undo"
@@ -941,7 +1067,7 @@ describe("useGridFocus — undo and redo keys", () => {
 
   it("leaves the key to the browser when no history is wired", () => {
     render(<Grid rows={makeRows(3)} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "z", ctrlKey: true });
     expect(document.querySelector("output")?.textContent).toBe("");
   });
@@ -949,7 +1075,7 @@ describe("useGridFocus — undo and redo keys", () => {
   it("opens find on Ctrl/Cmd+F when the table has a find bar", () => {
     const onFind = vi.fn();
     render(<Grid rows={makeRows(3)} onFind={onFind} />);
-    cellAt(0, 0)!.focus();
+    act(() => cellAt(0, 0)!.focus());
     fireEvent.keyDown(cellAt(0, 0)!, { key: "f", ctrlKey: true });
     expect(onFind).toHaveBeenCalledOnce();
   });

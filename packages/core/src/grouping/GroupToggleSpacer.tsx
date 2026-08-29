@@ -9,7 +9,11 @@
  */
 import type { ReactElement } from "react";
 
-/** Renders an inert element the size of a group's toggle button. */
+/**
+ * Renders an inert element the size of a group's toggle button.
+ *
+ * @public
+ */
 export function GroupToggleSpacer(): ReactElement {
   return (
     <span

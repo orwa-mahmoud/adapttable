@@ -8,7 +8,11 @@
  */
 import type { ReactElement } from "react";
 
-/** Props for {@link ColumnSpacer}. */
+/**
+ * Props for {@link ColumnSpacer}.
+ *
+ * @public
+ */
 export interface ColumnSpacerProps {
   /** Pixel width of the columns this cell stands in for. */
   width: number;
@@ -18,7 +22,11 @@ export interface ColumnSpacerProps {
   as?: "td" | "th";
 }
 
-/** Renders the spacer, or nothing when there is nothing to hold open. */
+/**
+ * Renders the spacer, or nothing when there is nothing to hold open.
+ *
+ * @public
+ */
 export function ColumnSpacer({
   width,
   side,

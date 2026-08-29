@@ -44,7 +44,7 @@ type FilterBag<TRow> = Pick<
   "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets"
 >;
 
-/** Props for {@link AutoFilterForm}. */
+/** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
   /** The resolved declarative definitions, in render order. */
   defs: readonly FilterDef<TRow>[];

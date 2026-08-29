@@ -11,13 +11,21 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-/** The label strings the saved-views menu renders. */
+/**
+ * The label strings the saved-views menu renders.
+ *
+ * @public
+ */
 export type SavedViewsLabels = Pick<
   Required<TableLabels>,
   "savedViews" | "saveView" | "viewName" | "deleteView"
 >;
 
-/** Props for the saved-views menu. */
+/**
+ * Props for the saved-views menu.
+ *
+ * @public
+ */
 export interface SavedViewsMenuProps {
   /** Storage + URL backend wiring, forwarded to core's `useSavedViews`. */
   options: UseSavedViewsOptions;
@@ -30,6 +38,8 @@ export interface SavedViewsMenuProps {
  * saved views — click applies one and closes, the trailing × deletes it —
  * above a save row that captures the table's CURRENT URL state (search,
  * sort, page, filters, column layout) under a typed name.
+ *
+ * @public
  */
 export function SavedViewsMenu({
   options,

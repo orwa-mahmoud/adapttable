@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { CHECKLIST_ITEM_HEIGHT, CHECKLIST_LIST_HEIGHT } from "./checklist";
@@ -102,8 +102,8 @@ describe("useChecklistWindow", () => {
 
   it("survives a ref that never attaches", () => {
     const { result } = renderHook(() => useChecklistWindow(200, true));
-    result.current.ref(null);
-    result.current.onScroll();
+    act(() => result.current.ref(null));
+    act(() => result.current.onScroll());
     expect(result.current.end).toBeLessThan(200);
   });
 
@@ -111,7 +111,7 @@ describe("useChecklistWindow", () => {
     const { result } = renderHook(() => useChecklistWindow(200, true));
     const node = document.createElement("div");
     Object.defineProperty(node, "clientWidth", { value: widthFor(2) });
-    result.current.ref(node);
+    act(() => result.current.ref(node));
     expect(result.current.end).toBeGreaterThan(0);
   });
 });

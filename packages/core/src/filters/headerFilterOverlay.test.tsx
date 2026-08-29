@@ -224,7 +224,7 @@ describe("usePointerDismiss", () => {
     }
     render(<Probe />);
     await flushArm();
-    screen.getByRole("combobox", { name: "inside" }).focus();
+    act(() => screen.getByRole("combobox", { name: "inside" }).focus());
     fireEvent.mouseDown(document.body);
     expect(dismiss).not.toHaveBeenCalled();
   });

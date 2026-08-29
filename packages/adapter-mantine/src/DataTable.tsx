@@ -11,6 +11,7 @@ import {
   resolveStickyToolbar,
   RowReorderAnnouncer,
   SidePanelLayout,
+  TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
   useStickyToolbarLayout,
@@ -71,6 +72,8 @@ function SavedViewsSlot({
  * mode, and optional entrance animation.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
@@ -253,6 +256,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         className={classNames?.root}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

@@ -9,7 +9,13 @@ import { createElement, type ReactElement, type ReactNode } from "react";
 
 import type { ColumnDef } from "../types";
 
-/** The three marks this entry draws. */
+export type { ColumnDef };
+
+/**
+ * The three marks this entry draws.
+ *
+ * @public
+ */
 export type SparklineKind = "bar" | "line" | "area";
 
 /** One bar in the bar mark. */
@@ -20,7 +26,11 @@ interface SparklineBar {
   height: number;
 }
 
-/** Props for {@link Sparkline}. */
+/**
+ * Props for {@link Sparkline}.
+ *
+ * @public
+ */
 export interface SparklineProps {
   /** The series, oldest first. Non-finite values are dropped. */
   values: readonly number[];
@@ -36,15 +46,25 @@ export interface SparklineProps {
   label?: string;
 }
 
-/** How {@link sparklineColumn} is declared. */
+/**
+ * How {@link sparklineColumn} is declared.
+ *
+ * @public
+ */
 export interface SparklineColumnSpec<TRow> {
+  /** Stable key for the entry. */
   key: string;
+  /** Caption for the column. */
   header?: ReactNode;
   /** The series on this row. */
   values: (row: TRow) => readonly number[];
+  /** Which sparkline to draw. */
   kind?: SparklineKind;
+  /** Width in pixels. */
   width?: number;
+  /** Height in pixels. */
   height?: number;
+  /** Stroke or bar fill. Defaults to `currentColor` so the kit theme wins. */
   color?: string;
   /** Override the default numeric summary. */
   label?: (values: readonly number[], row: TRow) => string;
@@ -57,12 +77,20 @@ const DEFAULT_HEIGHT = 28;
 const PAD = 2;
 const BAR_GAP = 1;
 
-/** Drop NaN / Infinity so a bad point cannot collapse the scale. */
+/**
+ * Drop NaN / Infinity so a bad point cannot collapse the scale.
+ *
+ * @public
+ */
 export function finiteSparklineValues(values: readonly number[]): number[] {
   return values.filter((value) => Number.isFinite(value));
 }
 
-/** Default accessible summary — numbers only, so it is locale-neutral. */
+/**
+ * Default accessible summary — numbers only, so it is locale-neutral.
+ *
+ * @public
+ */
 export function sparklineSummary(values: readonly number[]): string {
   const series = finiteSparklineValues(values);
   if (series.length === 0) return "no values";
@@ -80,7 +108,11 @@ export function sparklineSummary(values: readonly number[]): string {
   return `${series.length} values, min ${min}, max ${max}, last ${last}`;
 }
 
-/** CSV / xlsx fallback — the numbers, not the SVG. */
+/**
+ * CSV / xlsx fallback — the numbers, not the SVG.
+ *
+ * @public
+ */
 export function sparklineExportValue(values: readonly number[]): string {
   return finiteSparklineValues(values).join(", ");
 }
@@ -181,6 +213,8 @@ function sparklineAreaPath(
 /**
  * A mini chart sized to a cell. Fixed width/height — no observers — so a
  * virtualized row can mount and unmount it without measuring.
+ *
+ * @public
  */
 export function Sparkline({
   values,
@@ -255,6 +289,8 @@ export function Sparkline({
  * A column whose cell is a sparkline.
  *
  * Sort and export read the numbers, never the SVG.
+ *
+ * @public
  */
 export function sparklineColumn<TRow>(
   spec: SparklineColumnSpec<TRow>
@@ -284,3 +320,13 @@ export function sparklineColumn<TRow>(
     exportValue: (row) => sparklineExportValue(spec.values(row)),
   };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";

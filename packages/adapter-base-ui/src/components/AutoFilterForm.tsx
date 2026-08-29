@@ -36,7 +36,7 @@ import {
 
 /**
  * A labelled GROUP wrapper for multi-control fields (the multiSelect chip
- * group). Unlike {@link FormField} the label carries an `id` so the group
+ * group). Unlike `FormField` the label carries an `id` so the group
  * references it via `aria-labelledby` instead of naming a single control.
  */
 function GroupField({
@@ -54,7 +54,7 @@ function GroupField({
   );
 }
 
-/** Props for {@link AutoFilterForm}. */
+/** Props for `AutoFilterForm`. */
 export interface AutoFilterFormProps<TRow> {
   /** Writing direction (kept for parity; Base UI controls flip from ambient dir). */
   dir?: Direction;
@@ -119,7 +119,7 @@ function RelativeTokenField({
  * Operator-first range widget (`numberRange` / `dateRange`): a comparison
  * select, then ONE bound input — or a From/To pair for "Between". The widget
  * logic (operator seeding, bound derivation, writes) lives in core's
- * {@link useRangeFilterWidget}; this renders the Base UI controls over it.
+ * `useRangeFilterWidget`; this renders the Base UI controls over it.
  */
 function RangeField<TRow>({
   def,
@@ -399,7 +399,7 @@ function AutoFilterField<TRow>({
 
 /**
  * The auto-built filter form: one kit-native Base UI control per
- * declarative {@link FilterDef}, reading and writing the source's extra-filter
+ * declarative `FilterDef`, reading and writing the source's extra-filter
  * bag — `""` / `[]` clears a key. Rendered inside the filter popover or dialog
  * when the `filters` prop is the declarative array form.
  *

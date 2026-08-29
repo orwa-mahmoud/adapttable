@@ -8,16 +8,26 @@ import type { FilterDef } from "./filterDefs";
 import { listFilterValues } from "./filterForm";
 import type { FilterTypeRegistry } from "./filterRegistry";
 
-/** Distinct values + counts for one filter key. */
+/**
+ * Distinct values + counts for one filter key.
+ *
+ * @public
+ */
 export type FacetCounts = readonly ChecklistValue[];
 
-/** Facet counts keyed by filter key. */
+/**
+ * Facet counts keyed by filter key.
+ *
+ * @public
+ */
 export type FacetMap = Readonly<Record<string, FacetCounts>>;
 
 /**
  * Rows that still match after every filter except `key`. The count on
  * each remaining value is "how many rows you would keep if you picked
  * it", not "how many remain after you already picked it".
+ *
+ * @public
  */
 export function rowsExcludingFilter<TRow>(
   rows: readonly TRow[],
@@ -32,6 +42,8 @@ export function rowsExcludingFilter<TRow>(
 /**
  * Facet counts for every `checklist` definition. Other types are
  * ignored — they do not show per-value counts.
+ *
+ * @public
  */
 export function computeFilterFacets<TRow>(
   defs: readonly FilterDef<TRow>[],

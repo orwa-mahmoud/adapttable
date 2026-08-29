@@ -135,7 +135,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** Ant Design AND/OR builder — compact kit Select / Input / Button, no stacked labels. */
+/**
+ * Ant Design AND/OR builder — compact kit Select / Input / Button, no stacked labels.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

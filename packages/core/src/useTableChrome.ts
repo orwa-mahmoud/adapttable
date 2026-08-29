@@ -116,6 +116,13 @@ import {
 } from "./virtual/useTableVirtualization";
 import { useMeasuredWindowScrollMargin } from "./virtual/windowScrollMargin";
 
+export type {
+  BulkAction,
+  ConfirmHandler,
+  EditHistoryState,
+  SelectionState,
+  ToolbarSlots,
+};
 /**
  * The shared prop surface every adapter's toolbar sub-component needs.
  * Adapters render kit-specific markup from this; extracting it keeps the
@@ -123,6 +130,8 @@ import { useMeasuredWindowScrollMargin } from "./virtual/windowScrollMargin";
  * each adapter.
  *
  * @typeParam TRow - The row type.
+ *
+ * @public
  */
 export interface ToolbarChromeProps<TRow> {
   /** The headless table state + prop-getters. */
@@ -143,7 +152,7 @@ export interface ToolbarChromeProps<TRow> {
    * the pair on presence and never has to check two things.
    */
   onUndo?: () => void;
-  /** Do the last undone edit again. Present with {@link onUndo}. */
+  /** Do the last undone edit again. Present with `onUndo`. */
   onRedo?: () => void;
   /**
    * Whether there is anything to undo. The button is disabled, not
@@ -184,7 +193,7 @@ export interface ToolbarChromeProps<TRow> {
   onToggleFilters: () => void;
   /**
    * Bind to the trigger's `onPointerDown` (see
-   * {@link useFilterTriggerToggle}) so a click on the open trigger CLOSES
+   * `useFilterTriggerToggle`) so a click on the open trigger CLOSES
    * the popover instead of racing the kit's outside-close and reopening.
    */
   onFiltersTriggerPointerDown?: () => void;
@@ -192,7 +201,7 @@ export interface ToolbarChromeProps<TRow> {
   showRowsPerPage: boolean;
   /**
    * Built saved-views menu node, when the `savedViews` prop opts in. Renders
-   * ahead of {@link columnMenu} so every adapter's toolbar reads
+   * ahead of `columnMenu` so every adapter's toolbar reads
    * Filters · Saved views · Columns · Export CSV.
    */
   savedViewsMenu?: ReactNode;
@@ -200,7 +209,7 @@ export interface ToolbarChromeProps<TRow> {
   columnMenu?: ReactNode;
   /**
    * When set, render the Export CSV toolbar button and call this on click.
-   * Built by {@link makeExportCsvHandler} from the `exportCsv` prop.
+   * Built by `makeExportCsvHandler` from the `exportCsv` prop.
    */
   onExportCsv?: () => void;
   /**
@@ -245,6 +254,8 @@ export interface ToolbarChromeProps<TRow> {
  * The shared prop surface every adapter's bulk-action bar needs. Extracted
  * so the identical shape isn't re-declared (and flagged as duplication) in
  * each adapter's chrome.
+ *
+ * @public
  */
 export interface BulkBarChromeProps {
   /** Current selection state. */
@@ -266,10 +277,16 @@ export interface BulkBarChromeProps {
  * Which body region a `DataTable` should render. Named `TableBodyRegion`
  * (not `TableBody`) so it never collides with MUI's `TableBody` component
  * in consumer imports.
+ *
+ * @public
  */
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
-/** The shared, UI-agnostic orchestration result for an adapter table. */
+/**
+ * The shared, UI-agnostic orchestration result for an adapter table.
+ *
+ * @public
+ */
 export interface TableChrome<TRow> {
   /**
    * The source as the VIEW sees it. Identical to the caller's source —
@@ -449,7 +466,7 @@ export interface TableChrome<TRow> {
  * footer to show. Adapters then render their kit-specific markup from this.
  *
  * @typeParam TRow - The row type.
- * @param props - The adapter's {@link BaseDataTableProps}.
+ * @param props - The adapter's `BaseDataTableProps`.
  * @returns The {@link TableChrome} orchestration result.
  */
 /**
@@ -468,14 +485,25 @@ export interface TableChrome<TRow> {
  * adapter renders on presence. The fullscreen half folds in whether the
  * browser will allow it at all: a toggle that cannot work is worse than no
  * toggle, and an embedded webview is a real place where it cannot.
+ *
+ * @public
  */
 export interface ViewControlsToolbar {
+  /** Current row density. */
   density?: "comfortable" | "compact";
+  /** Switches density, absent when the chooser is off. */
   onDensityChange?: (next: "comfortable" | "compact") => void;
+  /** Enters or leaves fullscreen, absent when it is unavailable. */
   onToggleFullscreen?: () => void;
+  /** Whether the table is currently fullscreen. */
   isFullscreen?: boolean;
 }
 
+/**
+ * The density and fullscreen half of a toolbar's props.
+ *
+ * @public
+ */
 export function viewControlsToolbar(
   props: {
     densityChooser?: boolean;
@@ -501,6 +529,11 @@ export function viewControlsToolbar(
   };
 }
 
+/**
+ * The undo/redo half of a toolbar's props.
+ *
+ * @public
+ */
 export function undoRedoToolbar<TRow>(
   wanted: boolean | undefined,
   history: EditHistoryState<TRow>,
@@ -517,9 +550,15 @@ export function undoRedoToolbar<TRow>(
   };
 }
 
-/** The print button's half of a toolbar's props. */
+/**
+ * The print button's half of a toolbar's props.
+ *
+ * @public
+ */
 export interface PrintToolbar {
+  /** Runs the print layout, absent when printing is off. */
   onPrint?: () => void;
+  /** Caption for the print control. */
   printLabel?: string;
 }
 
@@ -533,6 +572,8 @@ export interface PrintToolbar {
  * Not generic, unlike {@link undoRedoToolbar}: neither prop mentions the row
  * type, and a `Partial<ToolbarChromeProps<TRow>>` return with no `TRow` in the
  * arguments infers `unknown` and widens the whole spread at every call site.
+ *
+ * @public
  */
 export function printToolbar(
   wanted: boolean | undefined,
@@ -543,6 +584,11 @@ export function printToolbar(
   return { onPrint, printLabel: labels.print };
 }
 
+/**
+ * Assemble every piece of chrome a kit's toolbar and footer need.
+ *
+ * @public
+ */
 export function useTableChrome<TRow>(
   props: BaseDataTableProps<TRow>
 ): TableChrome<TRow> {
@@ -1353,7 +1399,11 @@ export function useTableChrome<TRow>(
   };
 }
 
-/** Result of {@link useChromeBodyData}. */
+/**
+ * Result of {@link useChromeBodyData}.
+ *
+ * @public
+ */
 export interface ChromeBodyData<TRow> {
   /** Row/card window virtualization state (disabled unless eligible). */
   virtualization: TableVirtualization<TRow>;
@@ -1392,8 +1442,10 @@ export interface ChromeBodyData<TRow> {
  *
  * @typeParam TRow - The row type.
  * @param chrome - The {@link useTableChrome} result.
- * @param props - The adapter's {@link BaseDataTableProps}.
+ * @param props - The adapter's `BaseDataTableProps`.
  * @returns Virtualization state + the load-more sentinel.
+ *
+ * @public
  */
 export function useChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
@@ -1629,7 +1681,9 @@ function resolveBodyVirtualization<TRow>(
  * @typeParam TRow - The row type.
  * @param ref - The adapter's root element.
  * @param chrome - The {@link useTableChrome} result.
- * @param props - The adapter's {@link BaseDataTableProps}.
+ * @param props - The adapter's `BaseDataTableProps`.
+ *
+ * @public
  */
 export function useChromeScrollReset<TRow>(
   ref: RefObject<HTMLElement | null>,
@@ -1657,9 +1711,15 @@ export function useChromeScrollReset<TRow>(
   });
 }
 
-/** Pointer/click handlers returned by {@link useFilterTriggerToggle}. */
+/**
+ * Pointer/click handlers returned by `useFilterTriggerToggle`.
+ *
+ * @public
+ */
 export interface FilterTriggerToggle {
+  /** Records that the press began on the trigger. */
   onPointerDown: () => void;
+  /** Opens or closes the overlay, ignoring a click that closed it already. */
   onClick: () => void;
 }
 
@@ -1699,6 +1759,11 @@ function useChromeRowPinning<TRow>(options: {
   return enabled ? state : undefined;
 }
 
+/**
+ * Pointer and click handlers that open the filters overlay without double-firing.
+ *
+ * @public
+ */
 export function useFilterTriggerToggle(
   open: boolean,
   setOpen: (next: boolean | ((current: boolean) => boolean)) => void

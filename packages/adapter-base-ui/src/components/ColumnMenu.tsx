@@ -54,7 +54,9 @@ export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   /** Open the filter UI from the submenu. */
   onFilterColumn?: (key: string) => void;
+  /** Column key currently sorted by, if any. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: "asc" | "desc";
   /** Text direction — the menu portals to `<body>`, so it loses the table's
    *  direction unless we hand it over explicitly (RTL flips grip ↔ pin). */
@@ -318,6 +320,7 @@ export function ColumnMenu<TRow>({
           }}
         >
           <Popover.Popup
+            aria-label={labels.columns}
             className="adapttable-popup"
             dir={dir}
             style={{

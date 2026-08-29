@@ -685,7 +685,7 @@ describe("useTableChrome — row mutations and lazy tree", () => {
     ]);
   });
 
-  it("loads children when a collapsed lazy node is opened", () => {
+  it("loads children when a collapsed lazy node is opened", async () => {
     const onLoadChildren = vi.fn().mockResolvedValue(undefined);
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() => {
@@ -705,8 +705,10 @@ describe("useTableChrome — row mutations and lazy tree", () => {
       });
     });
     expect(result.current.tree?.entries[0]?.expanded).toBe(false);
-    act(() => {
+    await act(async () => {
       result.current.tree?.expansion.toggle("a");
+      // The lazy loader is a promise; settle it inside the same act.
+      await Promise.resolve();
     });
     expect(onLoadChildren).toHaveBeenCalledWith(ROWS[0]);
   });

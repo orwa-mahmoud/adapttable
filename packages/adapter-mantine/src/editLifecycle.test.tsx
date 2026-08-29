@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -25,8 +25,15 @@ const part = (name: string) =>
  * The handlers observe; they cannot change whether a commit lands. These check
  * that the same three events fire through this kit that core already proved.
  */
+/**
+ * A commit's save-state bookkeeping settles in a microtask after the host's
+ * handler has already run. Flushing it inside `act` keeps that update inside
+ * the test, which is what React asks for.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("edit lifecycle (mantine)", () => {
-  it("fires start, commit and cancel from the cell the reader typed in", () => {
+  it("fires start, commit and cancel from the cell the reader typed in", async () => {
     const onEditStart = vi.fn();
     const onEditCommit = vi.fn();
     const onEditCancel = vi.fn();
@@ -50,6 +57,7 @@ describe("edit lifecycle (mantine)", () => {
     const editor = part("edit-cell-editor")!;
     fireEvent.change(editor, { target: { value: "Ship it" } });
     fireEvent.keyDown(editor, { key: "Enter" });
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledOnce();
     expect(onEditCommit).toHaveBeenCalledOnce();
 

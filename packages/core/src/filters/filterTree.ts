@@ -1,7 +1,7 @@
 /**
  * AND/OR filter tree — the engine behind advanced filters (#278).
  * The URL and Saved Views store a versioned encoding; the frontend
- * predicate and the server query both read the same {@link QueryFilterGroup}.
+ * predicate and the server query both read the same `QueryFilterGroup`.
  * The builder UI is #279; this file is the evaluator.
  */
 import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
@@ -33,6 +33,8 @@ function asScalar(value: unknown): string | undefined {
 /**
  * Project one tree condition onto the extra-filter bag the existing
  * per-def predicate already understands.
+ *
+ * @public
  */
 export function conditionToExtra<TRow>(
   def: FilterDef<TRow>,
@@ -64,6 +66,8 @@ function matchCondition<TRow>(
 /**
  * Evaluate a tree against one row. An empty / missing tree matches
  * every row. Unknown condition keys match (stale links do not hide data).
+ *
+ * @public
  */
 export function evaluateFilterTree<TRow>(
   tree: QueryFilterGroup | undefined,

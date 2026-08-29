@@ -123,8 +123,10 @@ function overlayPanels<P extends object>(props: P, host: FeatureHostState): P {
 /**
  * Apply `features`, run `setup(host)`, overlay side-panel panels onto props.
  *
- * Safe to call from an adapter and again from {@link useDataTableShell}:
+ * Safe to call from an adapter and again from `useDataTableShell`:
  * the second call reuses the host and does not re-register.
+ *
+ * @public
  */
 export function useTableFeatures<P extends object>(incoming: P): P {
   const reused = hostOf.get(incoming);
@@ -162,12 +164,20 @@ export function useTableFeatures<P extends object>(incoming: P): P {
   return props;
 }
 
-/** The host {@link useTableFeatures} created for these resolved props. */
+/**
+ * The host {@link useTableFeatures} created for these resolved props.
+ *
+ * @public
+ */
 export function featureHostOf(props: object): FeatureHostState | undefined {
   return hostOf.get(props);
 }
 
-/** Attach a host to a derived props object (chrome spreads a new one). */
+/**
+ * Attach a host to a derived props object (chrome spreads a new one).
+ *
+ * @public
+ */
 export function rememberFeatureHost(
   props: object,
   host: FeatureHostState | undefined

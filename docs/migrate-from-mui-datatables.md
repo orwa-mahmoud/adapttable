@@ -23,9 +23,9 @@ All verifiable as of mid-2026:
 - **Version lock**: peer dependencies require `@mui/material ^5.11` — npm
   refuses clean installs on MUI v6/v7, and React 19 is outside the peer range.
   Your table shouldn't decide your framework versions.
-- **Weight**: ~102 kB gzipped with 18 runtime dependencies (it bundles
-  drag-and-drop, print, and CSV machinery whether you use them or not).
-  AdaptTable core + the MUI adapter is ~51 kB min+gzip, tree-shaken.
+- **Weight**: 18 runtime dependencies, and drag-and-drop, print and CSV
+  machinery ship whether you use them or not — there is no opting out of a
+  feature you never turned on.
 - **No bundled types**: TypeScript definitions live in community
   `@types/mui-datatables` and can drift. AdaptTable is TypeScript-first.
 

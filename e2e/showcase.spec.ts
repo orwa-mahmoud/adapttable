@@ -93,6 +93,13 @@ test("shadcn and Tailwind drawer labels are not flush on the control", async ({
     await openDemo(page, adapter);
     await setFiltersMode(page, "Drawer");
     await filtersTrigger(page).click();
+    // The drawer slides in, so its fields are not in the DOM on the tick the
+    // click resolves. Measuring straight away read zero fields under parallel
+    // worker load and passed the spacing loop vacuously — wait for the first
+    // one, then measure them all.
+    await expect(
+      page.locator("[data-adapttable-part='filter-field']").first()
+    ).toBeVisible();
     const gaps = await page.evaluate(() =>
       [
         ...document.querySelectorAll("[data-adapttable-part='filter-field']"),

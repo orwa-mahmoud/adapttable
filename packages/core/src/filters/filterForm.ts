@@ -20,25 +20,39 @@ import {
 import { type RangeOp, readRangeWidget, writeRangeFilter } from "./rangeWidget";
 import { isRelativeDateToken } from "./relativeDates";
 
-/** Operand shape for a selected range operator. */
+/**
+ * Operand shape for a selected range operator.
+ *
+ * @public
+ */
 export type RangeOpArity = "none" | "one" | "two" | "list";
 
 /**
  * The slice of the table source the auto-built filter form reads and writes:
  * the extra-filter bag and its single/bulk setters. Every batteries-included
  * adapter renders its own kit controls over this same contract.
+ *
+ * @public
  */
 export type FilterFormSource<TRow> = Pick<
   TableSource<TRow>,
   "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets"
 >;
 
-/** A scalar filter value as input text ("" when unset; numbers stringify). */
+/**
+ * A scalar filter value as input text ("" when unset; numbers stringify).
+ *
+ * @public
+ */
 export function scalarFilterText(value: FilterValue): string {
   return value == null ? "" : String(value);
 }
 
-/** A multi-select value as a list — tolerating a scalar from the URL. */
+/**
+ * A multi-select value as a list — tolerating a scalar from the URL.
+ *
+ * @public
+ */
 export function listFilterValues(value: FilterValue): string[] {
   if (Array.isArray(value)) return [...value];
   return value == null || value === "" ? [] : [String(value)];
@@ -63,12 +77,20 @@ function rangeInputType(
   return "number";
 }
 
-/** Per-operator label keys for one widget flavour (numbers or dates). */
+/**
+ * Per-operator label keys for one widget flavour (numbers or dates).
+ *
+ * @public
+ */
 export type RangeOpLabelKeys =
   | typeof NUMBER_OP_LABEL_KEYS
   | (typeof DATE_OP_LABEL_KEYS & { readonly eq: "opOn" });
 
-/** Computed state + writers driving an operator-first range field. */
+/**
+ * Computed state + writers driving an operator-first range field.
+ *
+ * @public
+ */
 export interface RangeFieldWidget {
   /** The field's display label. */
   label: string;
@@ -102,6 +124,8 @@ export interface RangeFieldWidget {
  * @param def - The range filter definition.
  * @param source - The filter-bag slice (extra + setters).
  * @returns The {@link RangeFieldWidget} state and writers.
+ *
+ * @public
  */
 export function useRangeFilterWidget<TRow>(
   def: FilterDef<TRow>,
@@ -168,7 +192,11 @@ export function useRangeFilterWidget<TRow>(
   };
 }
 
-/** Computed state + writers driving an operator-first text field. */
+/**
+ * Computed state + writers driving an operator-first text field.
+ *
+ * @public
+ */
 export interface TextFieldWidget {
   /** The field's display label. */
   label: string;
@@ -196,6 +224,8 @@ export interface TextFieldWidget {
  * @param def - The text filter definition.
  * @param source - The filter-bag slice (extra + setters).
  * @returns The {@link TextFieldWidget} state and writers.
+ *
+ * @public
  */
 export function useTextFilterWidget<TRow>(
   def: FilterDef<TRow>,
@@ -230,7 +260,11 @@ export function useTextFilterWidget<TRow>(
   };
 }
 
-/** Resolve a `TableLabels` key to the string the widget should show. */
+/**
+ * Resolve a `TableLabels` key to the string the widget should show.
+ *
+ * @public
+ */
 export function filterOpLabel(
   labels: Required<TableLabels>,
   key: keyof TableLabels
@@ -241,17 +275,29 @@ export function filterOpLabel(
 
 export type { DateOp, NumberOp, TextOp } from "./operators";
 
-/** One choice in a tri-state boolean filter (`""` = any). */
+/**
+ * One choice in a tri-state boolean filter (`""` = any).
+ *
+ * @public
+ */
 export type BooleanChoice = "" | "true" | "false";
 
-/** Read a boolean filter slot as a tri-state choice. */
+/**
+ * Read a boolean filter slot as a tri-state choice.
+ *
+ * @public
+ */
 export function parseBooleanChoice(value: FilterValue): BooleanChoice {
   if (value === "true" || value === 1) return "true";
   if (value === "false" || value === 0) return "false";
   return "";
 }
 
-/** Computed state + writer driving a tri-state boolean field. */
+/**
+ * Computed state + writer driving a tri-state boolean field.
+ *
+ * @public
+ */
 export interface BooleanFieldWidget {
   /** The field's display label. */
   label: string;
@@ -264,6 +310,8 @@ export interface BooleanFieldWidget {
 /**
  * Kit-agnostic logic for a `boolean` filter: any / true / false, never a
  * checkbox. The token is stored as `f_<key>=true|false`; omitting it is any.
+ *
+ * @public
  */
 export function useBooleanFilterWidget<TRow>(
   def: FilterDef<TRow>,

@@ -17,13 +17,24 @@
 import type { ReactElement, ReactNode } from "react";
 
 import type { TableLabels } from "../types";
+import type { Density } from "../url/useDensityUrlState";
 
-/** Row density, as the table's own prop spells it. */
-type Density = "comfortable" | "compact";
+/**
+ * Row density, as the table's own prop spells it.
+ *
+ * Re-exported from the hook that owns it rather than spelled again here. A
+ * second declaration of the same union reads as harmless and is not: both land
+ * in core's rollup, the declaration bundler renames one `Density_2`, and every
+ * public signature that reaches the copy then names a type no consumer can
+ * import.
+ */
+export type { Density };
 
 /**
  * The props a nested table must be mounted with, handed to the host's `table`
  * callback to spread onto the kit's own component.
+ *
+ * @public
  */
 export interface NestedTableDefaults {
   /**
@@ -45,7 +56,11 @@ export interface NestedTableDefaults {
   tableLabel: string;
 }
 
-/** A row's nested table. */
+/**
+ * A row's nested table.
+ *
+ * @public
+ */
 export interface NestedTable {
   /**
    * Accessible name for the nested table and its region — the only thing a
@@ -62,10 +77,18 @@ export interface NestedTable {
   table: (defaults: NestedTableDefaults) => ReactNode;
 }
 
-/** A host's declaration: the nested table for a row, or nothing. */
+/**
+ * A host's declaration: the nested table for a row, or nothing.
+ *
+ * @public
+ */
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 
-/** What the parent contributes to its nested tables. */
+/**
+ * What the parent contributes to its nested tables.
+ *
+ * @public
+ */
 export interface NestedTableParent {
   /** The parent's density. */
   density?: Density;
@@ -82,6 +105,8 @@ const DEFAULT_LABEL = "Row details";
  * @param label - The nested table's accessible name.
  * @param parent - What the parent table contributes.
  * @returns Props to spread onto the kit's own table.
+ *
+ * @public
  */
 export function nestedTableDefaults(
   label: string,
@@ -103,6 +128,8 @@ export function nestedTableDefaults(
  * @typeParam TRow - The parent row type.
  * @param options - The declaration, the host's own panel, and the parent chrome.
  * @returns A `renderRowDetail`, or `undefined` when neither is declared.
+ *
+ * @public
  */
 export function nestedTableDetail<TRow>(options: {
   nestedTable: NestedTableFor<TRow> | undefined;

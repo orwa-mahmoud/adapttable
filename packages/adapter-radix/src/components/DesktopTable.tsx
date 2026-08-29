@@ -38,7 +38,9 @@ import {
   type ReactElement,
   type ReactNode,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
 } from "react";
 
 import type { RadixAccentColor } from "../types";
@@ -168,7 +170,9 @@ const STICKY_FIX_CSS =
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
   className?: string;
+  /** The kit's size token for the table. */
   size: RadixSize;
+  /** The kit's accent, so chrome matches the table. */
   accentColor?: RadixAccentColor;
   /** Text direction — flips the expand chevron for RTL. */
   dir?: Direction;
@@ -458,10 +462,7 @@ function LeafHeader<TRow>({
 }>): ReactElement {
   const { column } = leaf;
   const ariaSort = leaf.headerProps["aria-sort"] as
-    | "ascending"
-    | "descending"
-    | "none"
-    | undefined;
+    "ascending" | "descending" | "none" | undefined;
   const style = stickify({
     ...leaf.style,
     ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
@@ -618,9 +619,49 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       background: PIN_BG,
     };
   };
+  const tableRootRef = useRef<HTMLDivElement | null>(null);
   const nameTableElement = useCallback((node: HTMLDivElement | null) => {
+    tableRootRef.current = node;
     node?.querySelector("table")?.setAttribute("data-adapttable-part", "table");
   }, []);
+  // Radix's `Table.Root` spreads every prop it does not recognise onto its own
+  // scroll wrapper, so the grid semantics would land on a div with no role:
+  // `aria-rowcount` would state the dataset size to nothing and `aria-label`
+  // would name nothing. There is no prop route to the inner element, so mirror
+  // them onto the `<table>` the wrapper owns and keep them in step as the
+  // window moves.
+  // Everything the effect below owns is withheld from the wrapper, so exactly
+  // one element claims the grid. `onKeyDown` stays on the wrapper — key events
+  // bubble out of the table. The focus container ref is withheld too: Radix
+  // takes a single ref, and this component already needs it to reach the inner
+  // element, so the effect hands core the same node instead.
+  const {
+    role: gridRole,
+    "aria-rowcount": gridRowCount,
+    "aria-colcount": gridColCount,
+    ref: focusContainerRef,
+    ...wrapperGridProps
+  } = gridProps as Record<string, unknown> & {
+    role?: string;
+    "aria-rowcount"?: number;
+    "aria-colcount"?: number;
+    ref?: (node: HTMLElement | null) => void;
+  };
+  const gridLabel = tableProps["aria-label"];
+  useEffect(() => {
+    const root = tableRootRef.current;
+    focusContainerRef?.(root);
+    const element = root?.querySelector("table");
+    if (!element) return;
+    const apply = (name: string, value: string | number | undefined): void => {
+      if (value === undefined) element.removeAttribute(name);
+      else element.setAttribute(name, String(value));
+    };
+    apply("role", gridRole);
+    apply("aria-rowcount", gridRowCount);
+    apply("aria-colcount", gridColCount);
+    apply("aria-label", gridLabel);
+  }, [focusContainerRef, gridRole, gridRowCount, gridColCount, gridLabel]);
   const leafProps = {
     stickify,
     flexShares,
@@ -782,8 +823,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
         className={[className, fitColumns === true ? FIT_CLASS : ""]
           .filter(Boolean)
           .join(" ")}
-        aria-label={tableProps["aria-label"]}
-        {...gridProps}
+        {...wrapperGridProps}
       >
         <Table.Header data-adapttable-part="thead" ref={header.theadRef}>
           {headerPlan ? (

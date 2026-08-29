@@ -1,5 +1,6 @@
 import { defaultLabels } from "@adapttable/core";
 import {
+  act,
   fireEvent,
   render as renderChips,
   screen,
@@ -28,7 +29,7 @@ describe("Chips", () => {
     const remove = screen.getByRole("button", { name: REMOVE_NAME });
     expect(remove.tabIndex).toBe(0);
 
-    remove.focus();
+    act(() => remove.focus());
     expect(remove).toHaveFocus();
 
     fireEvent.keyDown(remove, { key: "Enter", code: "Enter" });

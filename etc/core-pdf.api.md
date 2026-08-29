@@ -23,6 +23,158 @@ export function buildTablePdf<TRow>(options: {
 } & PdfWriterOptions): Uint8Array<ArrayBuffer>;
 
 // @public
+export type CellEditor = "text" | "number" |
+/** A checkbox. Commits `true` / `false`, never a string. */
+"boolean" |
+/** A date. Commits `YYYY-MM-DD`, the value a date input holds. */
+"date" |
+/** A date and a time. Commits `YYYY-MM-DDTHH:mm`. */
+"datetime" |
+/** A time of day. Commits `HH:mm`. */
+"time" | {
+    type: "select";
+    options: readonly CellEditorOption[] | readonly string[];
+} | {
+    type: "multi-select";
+    options: readonly CellEditorOption[] | readonly string[];
+} | {
+    type: "custom";
+    render: CustomCellEditorRender;
+};
+
+// @public
+export interface CellEditorOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export interface CellProps<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
+// @public
+export interface ColumnDef<TRow> {
+    accessor?: (row: TRow) => ReactNode;
+    align?: "start" | "center" | "end";
+    Cell?: ComponentType<CellProps<TRow>>;
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
+    editor?: CellEditor;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
+    filter?: ColumnFilter<TRow>;
+    flex?: number;
+    formatValue?: (row: TRow) => string;
+    group?: string | readonly string[];
+    groupShow?: ColumnGroupShow;
+    header?: ReactNode;
+    headerActions?: ReactNode;
+    headerTooltip?: string;
+    hideOnDesktop?: boolean;
+    hideOnMobile?: boolean;
+    i18n?: Readonly<Record<string, string>>;
+    key: string;
+    lockPin?: boolean;
+    lockPosition?: boolean;
+    lockVisibility?: boolean;
+    lockWidth?: boolean;
+    maxWidth?: number;
+    meta?: Record<string, unknown>;
+    minWidth?: number;
+    mobileLabel?: string;
+    parseValue?: (draft: string, row: TRow) => unknown;
+    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
+    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
+    responsivePriority?: number;
+    rowSpan?: number | ((row: TRow) => number);
+    sortable?: boolean;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    width?: number | string;
+}
+
+// @public
+export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
+    label?: string;
+});
+
+// @public
+export interface ColumnFooterContext<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
+// @public
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export interface ColumnHeaderContext<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController;
+}
+
+// @public
+export interface ColumnHeaderController {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
+
+// @public
+export interface CustomCellEditorCtrl {
+    cancel: () => void;
+    commit: () => void;
+    draft: string;
+    error?: string;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+    label: string;
+    onBlur: () => void;
+    onKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    setDraft: (value: string) => void;
+    validating: boolean;
+}
+
+// @public
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
+
+// @public
+export interface ExportPayload {
+    mimeType: string;
+    parts: readonly BlobPart[];
+    text: string;
+}
+
+// @public
+export interface ExportRowMeta {
+    level: number;
+    role: ExportRowRole;
+}
+
+// @public
+export type ExportRowRole = "data" | "group" | "aggregate";
+
+// @public
+export interface ExportTable {
+    headers: readonly string[];
+    keys: readonly string[];
+    rowMeta?: readonly ExportRowMeta[];
+    rows: readonly (readonly unknown[])[];
+    widths?: readonly (number | undefined)[];
+}
+
+// @public
 export type ExportViewEntry<TRow> = {
     role: "data";
     row: TRow;
@@ -30,10 +182,46 @@ export type ExportViewEntry<TRow> = {
 } | {
     role: "group" | "aggregate";
     label: string;
-    level: number; /** Column that receives the label when that cell would otherwise be empty. */
+    level: number;
     labelKey?: string;
     values?: Readonly<Partial<Record<string, unknown>>>;
 };
+
+// @public
+export interface ExportWriteContext {
+    escapeFormulas?: boolean;
+    filename: string;
+    table: ExportTable;
+}
+
+// @public
+export interface ExportWriter {
+    build: (context: ExportWriteContext) => ExportPayload;
+    extension: string;
+}
+
+// @public
+export interface FilterDef<TRow = unknown> {
+    column?: string;
+    getValue?: (row: TRow) => unknown;
+    key: string;
+    label?: string;
+    options?: FilterOptionsSource;
+    placeholder?: string;
+    type: string;
+}
+
+// @public
+export interface FilterOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
+
+// @public
+export type FilterType = (typeof FILTER_TYPES)[number];
 
 // @public
 export function openPrintLayout(table: ExportTable, options?: PrintLayoutOptions): void;
@@ -62,6 +250,9 @@ export interface PrintLayoutOptions {
 }
 
 // @public
+export type PrintPageBreak = "auto" | "group";
+
+// @public
 export type PrintPageSize = "a4" | "a4-landscape" | "letter" | "letter-landscape";
 
 // @public
@@ -74,6 +265,9 @@ export function printTable<TRow>(options: {
     view?: readonly ExportViewEntry<TRow>[];
     summary?: Readonly<Partial<Record<string, unknown>>>;
 } & PrintLayoutOptions): void;
+
+// @public
+export type SortableValue = string | number | boolean | null | undefined;
 
 // (No @packageDocumentation comment for this package)
 

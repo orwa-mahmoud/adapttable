@@ -22,7 +22,7 @@ function mount(over: Partial<UseRowPatchStreamOptions<Row>> = {}) {
   let rows: readonly Row[] = ROWS;
   const view = renderHook(() =>
     useRowPatchStream<Row>({
-      websocket: "ws://test/rows",
+      websocket: "wss://test/rows",
       getRowId: (row) => row.id,
       onPatch: (update) => {
         rows = update(rows);

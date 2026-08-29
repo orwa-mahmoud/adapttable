@@ -25,7 +25,9 @@ export const ADAPTTABLE_GROUP = "__adapttableGroup" as const;
  */
 export interface AdaptTableGroupRow {
   [ADAPTTABLE_GROUP]: true;
+  /** Stable key for the entry. */
   key: string;
+  /** Caption shown for the entry. */
   label: string;
   /** Depth from zero, so a nested header indents like every other kit's. */
   level: number;
@@ -35,8 +37,11 @@ export interface AdaptTableGroupRow {
   more?: { scope: "groups" | "rows"; groupKey?: string; remaining: number };
   /** How many leaves it has — the server's number when it grouped. */
   count: number;
+  /** Ids of the rows under this group. */
   leafIds: readonly string[];
+  /** Footer aggregates for the group, by column key. */
   aggregateCells?: Partial<Record<string, ReactNode>>;
+  /** Whether the group is collapsed. */
   collapsed: boolean;
 }
 
@@ -46,8 +51,11 @@ export const ADAPTTABLE_EXTRA = "__adapttableExtra" as const;
 /** Synthetic dataSource record for a separator or full-width extra row. */
 export interface AdaptTableExtraRow {
   [ADAPTTABLE_EXTRA]: true;
+  /** Stable key for the entry. */
   key: string;
+  /** Whether the extra row is a separator or spans the full width. */
   extraKind: "separator" | "fullWidth";
+  /** Renders the row's content. */
   render?: () => ReactNode;
 }
 
@@ -64,9 +72,7 @@ export function isAdaptTableExtraRow(
 
 /** dataSource entry when grouping is armed: group header, extra slot, or leaf. */
 export type GroupedDataRecord<TRow> =
-  | AdaptTableGroupRow
-  | AdaptTableExtraRow
-  | TRow;
+  AdaptTableGroupRow | AdaptTableExtraRow | TRow;
 
 /** Type guard for synthetic group header records. */
 export function isAdaptTableGroupRow(

@@ -52,6 +52,13 @@ const part = (name: string) =>
  * activation, focus, the keyboard flow, validation, the commit — and the
  * component owns only what the reader looks at. These check each half of that.
  */
+/**
+ * A commit's save-state bookkeeping settles in a microtask after the host's
+ * handler has already run. Flushing it inside `act` keeps that update inside
+ * the test, which is what React asks for.
+ */
+const settleCommit = () => act(() => Promise.resolve());
+
 describe("custom cell editor (base-ui)", () => {
   const table = (extra?: Partial<ColumnDef<Task>>) => {
     const onCellEdit = vi.fn();
@@ -102,10 +109,11 @@ describe("custom cell editor (base-ui)", () => {
     expect(screen.getByRole("button", { name: "amber" })).toHaveFocus();
   });
 
-  it("commits when the component says the choice was made", () => {
+  it("commits when the component says the choice was made", async () => {
     const { onCellEdit } = table();
     open();
     fireEvent.click(screen.getByRole("button", { name: "teal" }));
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
       ROWS[0],
       "colour",
@@ -116,17 +124,18 @@ describe("custom cell editor (base-ui)", () => {
     expect(part("edit-cell-activate")).toHaveFocus();
   });
 
-  it("still cancels on Escape, through the component's own handler", () => {
+  it("still cancels on Escape, through the component's own handler", async () => {
     const { onCellEdit } = table();
     open();
     fireEvent.keyDown(screen.getByRole("button", { name: "amber" }), {
       key: "Escape",
     });
+    await settleCommit();
     expect(onCellEdit).not.toHaveBeenCalled();
     expect(screen.queryByTestId("swatches")).toBeNull();
   });
 
-  it("passes the column's parsed value to the host", () => {
+  it("passes the column's parsed value to the host", async () => {
     // The draft is a string; `parseValue` is still the column's own way to turn
     // it into whatever gets stored.
     const { onCellEdit } = table({
@@ -134,6 +143,7 @@ describe("custom cell editor (base-ui)", () => {
     });
     open();
     fireEvent.click(screen.getByRole("button", { name: "violet" }));
+    await settleCommit();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], "colour", {
       name: "violet",
     });
@@ -149,6 +159,7 @@ describe("custom cell editor (base-ui)", () => {
       fireEvent.click(screen.getByRole("button", { name: "violet" }));
       await Promise.resolve();
     });
+    await settleCommit();
     expect(onCellEdit).not.toHaveBeenCalled();
     // The component is still open, and told about the rejection.
     const message = part("edit-cell-error")!;

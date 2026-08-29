@@ -123,7 +123,11 @@ const slots: FilterTreeSlots = {
   Disclosure: TreeDisclosure,
 };
 
-/** Radix AND/OR builder — compact kit row, no stacked field labels. */
+/**
+ * Radix AND/OR builder — compact kit row, no stacked field labels.
+ *
+ * @public
+ */
 export function FilterTreeBuilder<TRow>(
   props: Readonly<FilterTreeBuilderProps<TRow>>
 ) {

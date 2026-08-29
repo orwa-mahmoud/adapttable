@@ -1,6 +1,10 @@
 import type { TableLabels } from "@adapttable/core";
 
-/** Hebrew (`he`) label preset. Pairs with `dir="rtl"`. */
+/**
+ * Hebrew (`he`) label preset. Pairs with `dir="rtl"`.
+ *
+ * @public
+ */
 export const he: Required<TableLabels> = {
   table: "טבלת נתונים",
   search: "חיפוש",
@@ -114,6 +118,9 @@ export const he: Required<TableLabels> = {
   resetColumn: "אפס עמודה",
   sortAscending: "מיין בסדר עולה",
   sortDescending: "מיין בסדר יורד",
+  sortedBy: ({ column, ascending }) =>
+    `ממוין לפי ${column}, ${ascending ? "בסדר עולה" : "בסדר יורד"}`,
+  sortingCleared: "המיון בוטל",
   filterColumn: "סנן עמודה",
   columnActions: "פעולות עמודה",
   exportCsv: "ייצוא CSV",

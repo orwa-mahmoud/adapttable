@@ -31,14 +31,39 @@ import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import { devWarn } from "../utils/devWarn";
 
-/** Props a feature may write. Keys match `<DataTable>` enabling props. */
+export type {
+  Aggregator,
+  ColumnMenuAction,
+  ColumnMenuActionContext,
+  ColumnMenuRow,
+  Command,
+  ContextMenuItem,
+  ContextMenuTarget,
+  CustomCellEditorRender,
+  ExportWriter,
+  FilterTypeSpec,
+  SidePanelEntry,
+};
+
+/**
+ * Props a feature may write. Keys match `<DataTable>` enabling props.
+ *
+ * @public
+ */
 export interface FeaturePatch<TRow = unknown> {
+  /** Any other prop a feature wants to set on the table. */
   readonly [key: string]: unknown;
+  /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;
 }
 
-/** The table props a feature may read while applying. */
+/**
+ * The table props a feature may read while applying.
+ *
+ * @public
+ */
 export type FeatureApplyInput<TRow = unknown> = object & {
+  /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;
 };
 
@@ -48,6 +73,8 @@ export type FeatureApplyInput<TRow = unknown> = object & {
  * `apply` maps onto the existing prop surface so both enabling paths are
  * the same runtime. `setup` is live-host registration; built-ins and
  * plugins share it, on this same object, in the same array.
+ *
+ * @public
  */
 export interface TableFeature<TRow = unknown> {
   /** Stable id (`"row-reorder"`, `"grouping"`, a host plugin's name). */
@@ -73,6 +100,8 @@ export interface TableFeature<TRow = unknown> {
  * Every extension seam — filter types, editors, aggregators, exporters,
  * menu items, panels, commands — lands here so a built-in is not a
  * special case.
+ *
+ * @public
  */
 export interface TableFeatureHost<TRow = unknown> {
   /** Forget a registration when the table unmounts or features change. */
@@ -83,16 +112,16 @@ export interface TableFeatureHost<TRow = unknown> {
   extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
   /**
    * Named custom editor. `column.editor` as that string resolves to
-   * `{ type: "custom", render }` through the same {@link resolveCellEditor}
+   * `{ type: "custom", render }` through the same `resolveCellEditor`
    * path built-ins use.
    */
   registerEditor(type: string, render: CustomCellEditorRender): void;
   /**
-   * Named aggregator. {@link aggregate} looks this up after the built-in
+   * Named aggregator. `aggregate` looks this up after the built-in
    * names, so a plugin `"distinct"` is not a second API beside `Aggregator`.
    */
   registerAggregator(name: string, aggregator: Aggregator): void;
-  /** Same {@link ExportWriter} as `exportCsv.writer`. */
+  /** Same `ExportWriter` as `exportCsv.writer`. */
   registerWriter(writer: ExportWriter): void;
   /**
    * Extra Columns-menu actions, appended after the built-ins. The factory
@@ -104,14 +133,15 @@ export interface TableFeatureHost<TRow = unknown> {
       ctx: ColumnMenuActionContext<TRow>
     ) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined
   ): void;
-  /** Same {@link SidePanelEntry} as `sidePanel.panels`. */
+  /** Same `SidePanelEntry` as `sidePanel.panels`. */
   registerPanel(panel: SidePanelEntry): void;
-  /** Same {@link Command} as `commandPalette.commands`. */
+  /** Same `Command` as `commandPalette.commands`. */
   registerCommand(command: Command): void;
   /** Same extra-items factory as `contextMenu.items`. */
   registerContextMenuItems(
     items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]
   ): void;
+  /** Phantom marker that pins the row type; never read at runtime. */
   readonly __row?: TRow;
 }
 
@@ -187,6 +217,8 @@ function featuresOf(props: object): readonly TableFeature[] | undefined {
  * Later features win; defined host props win over both. `features` is
  * stripped from the result. Calling twice on the same object is a no-op
  * so adapters and `useDataTableShell` can both apply.
+ *
+ * @public
  */
 export function applyTableFeatures<P extends object>(props: P): P {
   if (applied.has(props)) {

@@ -13,6 +13,12 @@ import { useRef } from "react";
 
 import { isBrowser } from "../utils/env";
 
+/**
+ * How the table reads and writes the query string. Implement it to hand URL
+ * state to a router; the default one talks to the browser directly.
+ *
+ * @public
+ */
 export interface UrlStateAdapter {
   /** Current query string WITHOUT the leading `"?"` (e.g. `"page=2&q=foo"`). */
   getSearch(): string;
@@ -34,7 +40,9 @@ export interface UrlStateAdapter {
  * (the query string is global state), so this is safe to memoise as a
  * module singleton via {@link getHistoryAdapter}.
  *
- * @returns A {@link UrlStateAdapter} backed by `window.history` + `popstate`.
+ * @returns A `UrlStateAdapter` backed by `window.history` + `popstate`.
+ *
+ * @public
  */
 export function createHistoryAdapter(): UrlStateAdapter {
   const listeners = new Set<() => void>();
@@ -79,7 +87,9 @@ export function createHistoryAdapter(): UrlStateAdapter {
  * (the table still gets fully working local state).
  *
  * @param initialSearch - Optional starting query string (without `"?"`).
- * @returns A self-contained {@link UrlStateAdapter}.
+ * @returns A self-contained `UrlStateAdapter`.
+ *
+ * @public
  */
 export function createMemoryAdapter(initialSearch = ""): UrlStateAdapter {
   let current = initialSearch.replace(/^\?/, "");
@@ -107,6 +117,8 @@ let historySingleton: UrlStateAdapter | undefined;
  * fresh memory adapter when there is no `window` (SSR).
  *
  * @returns The shared history adapter, or a memory adapter under SSR.
+ *
+ * @public
  */
 export function getHistoryAdapter(): UrlStateAdapter {
   if (!isBrowser()) {
@@ -127,13 +139,15 @@ export function resetHistoryAdapter(): void {
 }
 
 /**
- * Resolve which {@link UrlStateAdapter} a URL-synced hook should use: an
+ * Resolve which `UrlStateAdapter` a URL-synced hook should use: an
  * explicit `adapter` wins; otherwise the shared history adapter in the
  * browser, or a stable per-hook memory adapter when disabled or under SSR.
  *
  * @param adapter - Optional explicit adapter (router integration).
  * @param enabled - When false, always use the local memory adapter.
  * @returns The adapter to read/write the query string through.
+ *
+ * @public
  */
 export function useResolvedAdapter(
   adapter: UrlStateAdapter | undefined,

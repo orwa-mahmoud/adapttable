@@ -78,6 +78,7 @@ import {
   type RowReorderState,
   SidePanelLayout,
   tableRenderModel,
+  TableStatusAnnouncer,
   undoRedoToolbar,
   useCommandPalette,
   useExportHandler,
@@ -89,6 +90,7 @@ import {
   useStickyToolbarLayout,
   useTableContextMenu,
   useTableFeatures,
+  useTableStatusAnnouncement,
   viewControlsToolbar,
 } from "@adapttable/core/adapter";
 import {
@@ -370,6 +372,12 @@ function antdOnRow<TRow>(options: {
     // antd builds its own <tr>, so the absolute aria-rowindex arrives
     // here rather than through a spread on the element.
     ...(rowIndex === undefined ? {} : gridFocus?.getRowPropsAt(rowIndex)),
+    // The other seven adapters state it through core's row props, which antd
+    // does not spread because it assembles its own <tr>. A <tr> is implicitly a
+    // row, so this restates rather than changes anything — but a row that is
+    // silent about its role in one kit and not the others is a difference
+    // waiting to be mistaken for a bug.
+    role: "row",
     // antd builds its own <tr>, so the part name and the row id arrive here
     // rather than through a spread on the element. The part goes BEFORE the
     // pin attrs on purpose: antd owns one tbody, so a pinned row marks its
@@ -709,8 +717,7 @@ function sentinelEnabled(
  */
 function buildSummary<TRow>(
   summaryRow:
-    | ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>)
-    | undefined,
+    ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined,
   columns: readonly ColumnDef<TRow>[],
   leadingCells: number,
   hasActions: boolean
@@ -1066,6 +1073,8 @@ interface DataTableBodyRegionProps<TRow> {
   hasRowActions: boolean;
   rowReorder: RowReorderState<TRow> | undefined;
   windowStart: number;
+  /** Rows in the whole dataset, for the cards' `aria-setsize`. */
+  cardSetSize: number;
   rowPinning: RowPinningState<TRow> | undefined;
   pinnedTopRows: readonly TRow[];
   pinnedBottomRows: readonly TRow[];
@@ -1147,7 +1156,6 @@ function DesktopTableBody<TRow>({
   // and `role="grid"` with the ARIA dimensions — reach them through the
   // `components` seam. Memoized: a new component identity here would remount
   // the whole table on every render.
-  const gridEnabled = gridFocus?.enabled ?? false;
   const getGridProps = gridFocus?.getGridProps;
   // Depends on the GETTER, not the whole state: the announcement changes on
   // every focus move, and rebuilding `components` would remount antd's table and
@@ -1160,9 +1168,10 @@ function DesktopTableBody<TRow>({
   const virtualBody = virtualize && !grouping;
   const components = useMemo(
     () => ({
-      table: tableComponent(
-        gridEnabled && getGridProps ? getGridProps() : undefined
-      ),
+      // Core decides what belongs here: the grid role and handlers only with
+      // cell navigation, but a windowed table's `aria-rowcount` regardless —
+      // so this asks unconditionally rather than gating on the feature.
+      table: tableComponent(getGridProps ? getGridProps() : undefined),
       header: {
         // A bounded height splits the grid into a header table and a body
         // table, and antd resolves the header one through `header.table`. It
@@ -1176,7 +1185,7 @@ function DesktopTableBody<TRow>({
       },
       body: { wrapper: virtualBody ? VirtualTbodyWrapper : TbodyWrapper },
     }),
-    [gridEnabled, getGridProps, pinArmed, theadRef, virtualBody]
+    [getGridProps, pinArmed, theadRef, virtualBody]
   );
 
   return (
@@ -1334,6 +1343,7 @@ function DataTableBodyRegion<TRow>(
     hasRowActions,
     rowReorder,
     windowStart,
+    cardSetSize,
     rowPinning,
     pinnedTopRows,
     pinnedBottomRows,
@@ -1392,6 +1402,7 @@ function DataTableBodyRegion<TRow>(
         {...cardWindow}
         rowReorder={rowReorder}
         windowStart={windowStart}
+        cardSetSize={cardSetSize}
         pinnedTopRows={pinnedTopRows}
         pinnedBottomRows={pinnedBottomRows}
         extraRows={extraRows}
@@ -1511,9 +1522,50 @@ function useAntdGridState<TRow>(
     columns: c.columnLayout.visibleColumns,
     firstRowIndex: windowStart,
   });
-  return { windowStart, find, gridFocus, stats };
+  // The same dataset size the grid reports through `aria-rowcount`; the card
+  // list needs it per item, as `aria-setsize`.
+  const cardSetSize = Math.max(
+    c.source.total,
+    windowStart + c.source.rows.length
+  );
+  // Same derivation as the shell's: antd builds its own chrome, so it calls the
+  // status hook directly rather than reading `shell.statusAnnouncement`.
+  const sortedColumn = c.columnLayout.visibleColumns.find(
+    (column) => column.key === c.source.sortBy
+  );
+  const statusAnnouncement = useTableStatusAnnouncement({
+    labels: c.table.labels,
+    total: c.source.total,
+    shown: c.source.rows.length,
+    page: c.source.page,
+    limit: c.source.limit,
+    paged: c.source.paginationMode === "paged",
+    sortBy: c.source.sortBy,
+    sortDir: c.source.sortDir,
+    sortColumnName:
+      typeof sortedColumn?.header === "string"
+        ? sortedColumn.header
+        : sortedColumn?.key,
+  });
+  return {
+    windowStart,
+    cardSetSize,
+    find,
+    gridFocus,
+    stats,
+    statusAnnouncement,
+  };
 }
 
+/**
+ * The Ant Design table. Pass rows and columns — or a `query` (server), or a
+ * prebuilt `source` — to get a fully styled, sortable, filterable, paginated
+ * table with selection, bulk actions, RTL and dark mode.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);
@@ -1609,11 +1661,14 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   };
   rememberFeatureHost(chromeProps, featureHost);
   const c = useTableChrome<TRow>(chromeProps);
-  const { windowStart, find, gridFocus, stats } = useAntdGridState(
-    props,
-    c,
-    history
-  );
+  const {
+    windowStart,
+    cardSetSize,
+    find,
+    gridFocus,
+    stats,
+    statusAnnouncement,
+  } = useAntdGridState(props, c, history);
   const { table, confirm, getRowId } = c;
   const { labels, source, selection } = table;
   // The injected actions column is first-class in column management: it lives
@@ -1981,6 +2036,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
       hasRowActions={hasRowActions}
       rowReorder={c.rowReorder}
       windowStart={windowStart}
+      cardSetSize={cardSetSize}
       rowPinning={c.rowPinning}
       pinnedTopRows={pinnedTopRows}
       pinnedBottomRows={pinnedBottomRows}
@@ -2001,6 +2057,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         aria-busy={c.isRefreshing || undefined}
       >
         <GridFocusAnnouncer focus={gridFocus} />
+        <TableStatusAnnouncer announcement={statusAnnouncement} />
         <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
         <FindBar find={find} labels={c.table.labels} />
         <Space orientation="vertical" size="small" style={{ width: "100%" }}>

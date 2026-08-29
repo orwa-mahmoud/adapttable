@@ -3,6 +3,7 @@ import {
   GridFocusAnnouncer,
   RowReorderAnnouncer,
   type TableBodyRegion,
+  TableStatusAnnouncer,
   useDataTableShell,
   useMountStagger,
   useTableFeatures,
@@ -19,6 +20,14 @@ function renderNoAutoForm() {
   return null;
 }
 
+/**
+ * The Bootstrap table. Pass rows and columns — or a `query` (server), or a
+ * prebuilt `source` — to get a styled, sortable, filterable, paginated table.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
 export function DataTable<TRow>(
   incoming: Readonly<DataTableProps<TRow>>
 ): ReactNode {
@@ -102,6 +111,7 @@ export function DataTable<TRow>(
         aria-busy={chrome.isRefreshing || undefined}
       >
         <GridFocusAnnouncer focus={shell.gridFocus} />
+        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
         {shell.tableProps.rowReorder ? (
           <RowReorderAnnouncer
             announcement={shell.tableProps.rowReorder.announcement}

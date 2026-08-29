@@ -19,10 +19,18 @@ import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 
-/** What a cell's last save is doing. */
+/**
+ * What a cell's last save is doing.
+ *
+ * @public
+ */
 export type CellSaveStatus = "saving" | "failed";
 
-/** One cell's failed save, with what it takes to retry or undo it. */
+/**
+ * One cell's failed save, with what it takes to retry or undo it.
+ *
+ * @public
+ */
 export interface FailedCellSave<TRow> {
   /** The row as it was before the edit — what a rollback restores. */
   previous: TRow;
@@ -32,7 +40,11 @@ export interface FailedCellSave<TRow> {
   message: string;
 }
 
-/** What {@link useCellSaveState} needs. */
+/**
+ * What {@link useCellSaveState} needs.
+ *
+ * @public
+ */
 export interface UseCellSaveStateOptions<TRow> {
   /**
    * Put the previous row back after a rejected save. Without it the table marks
@@ -46,7 +58,11 @@ export interface UseCellSaveStateOptions<TRow> {
   onEditError?: EditEventHandler<TRow>;
 }
 
-/** Per-cell save state for the whole table. */
+/**
+ * Per-cell save state for the whole table.
+ *
+ * @public
+ */
 export interface CellSaveState<TRow> {
   /** What this cell's last save is doing, if anything. */
   statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
@@ -116,6 +132,8 @@ function isThenable(value: unknown): value is Promise<unknown> {
  * @typeParam TRow - The row type.
  * @param options - See {@link UseCellSaveStateOptions}.
  * @returns The state; inert until a commit returns a promise that rejects.
+ *
+ * @public
  */
 export function useCellSaveState<TRow>(
   options: UseCellSaveStateOptions<TRow> = {}

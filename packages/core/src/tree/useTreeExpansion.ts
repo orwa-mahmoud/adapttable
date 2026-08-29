@@ -13,7 +13,11 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/** Tree expansion state and the actions that change it. */
+/**
+ * Tree expansion state and the actions that change it.
+ *
+ * @public
+ */
 export interface TreeExpansionState {
   /** Ids of the currently expanded nodes. */
   expandedIds: ReadonlySet<string>;
@@ -34,6 +38,8 @@ export interface TreeExpansionState {
  *
  * @param controlled - The host's pair, when it holds the state.
  * @returns The state; uncontrolled unless `expandedIds` is given.
+ *
+ * @public
  */
 export function useTreeExpansion(controlled?: {
   expandedIds?: readonly string[];

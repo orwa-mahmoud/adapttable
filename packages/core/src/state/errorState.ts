@@ -15,7 +15,11 @@ import type { ReactNode } from "react";
 
 import type { TableSource } from "../source/TableSource";
 
-/** What the error chrome is describing, and what it can do about it. */
+/**
+ * What the error chrome is describing, and what it can do about it.
+ *
+ * @public
+ */
 export interface TableErrorState {
   /** The failure to surface. */
   error: Error;
@@ -34,6 +38,8 @@ export interface TableErrorState {
  * what the built-in was showing.
  *
  * @typeParam TState - What the built-in had to work with.
+ *
+ * @public
  */
 export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
@@ -43,6 +49,8 @@ export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
  * @param slot - The host's replacement, if any.
  * @param state - What the built-in chrome was showing.
  * @returns The host's node, or `undefined` when they left the built-in alone.
+ *
+ * @public
  */
 export function fillSlot<TState>(
   slot: Slot<TState> | undefined,
@@ -60,6 +68,8 @@ export function fillSlot<TState>(
  *
  * @param source - The table's source.
  * @returns The state, or `undefined` when there is no failure to report.
+ *
+ * @public
  */
 export function tableErrorState<TRow>(
   source: TableSource<TRow>

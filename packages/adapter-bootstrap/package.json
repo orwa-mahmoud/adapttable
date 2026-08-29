@@ -13,6 +13,9 @@
   "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
   "type": "module",
   "sideEffects": false,
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "private": true,
   "files": [
     "LICENSE",
@@ -147,13 +150,13 @@
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
-    "axe-core": "^4.12.1",
+    "axe-core": "^4.13.0",
     "bootstrap": "^5.3.0",
-    "react": "^19.2.7",
+    "react": "^19.2.8",
     "react-bootstrap": "^2.10.10",
-    "react-dom": "^19.2.7",
+    "react-dom": "^19.2.8",
     "vitest-axe": "^0.1.0"
   },
   "publishConfig": {

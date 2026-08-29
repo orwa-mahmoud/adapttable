@@ -12,7 +12,11 @@ import type { ReactElement } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 
-/** Props for {@link ExportAnnouncer}. */
+/**
+ * Props for {@link ExportAnnouncer}.
+ *
+ * @public
+ */
 export interface ExportAnnouncerProps {
   /** `exportAnnouncement` from `useExportHandler`. Empty until an export ends. */
   announcement: string;
@@ -23,6 +27,8 @@ export interface ExportAnnouncerProps {
  * because a region that appears together with its message is missed.
  *
  * @param props - See {@link ExportAnnouncerProps}.
+ *
+ * @public
  */
 export function ExportAnnouncer({
   announcement,

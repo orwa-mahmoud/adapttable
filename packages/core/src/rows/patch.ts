@@ -29,46 +29,80 @@
  * this does not make it start: you hold the rows, you apply the patch.
  */
 
-/** Insert a row. Without `at`, it goes on the end. */
+/**
+ * Insert a row. Without `at`, it goes on the end.
+ *
+ * @public
+ */
 export interface InsertPatch<TRow> {
+  /** Discriminant for the patch union. */
   type: "insert";
+  /** The row to write. */
   row: TRow;
   /** Zero-based position. Clamped into range; negative counts from the end. */
   at?: number;
 }
 
-/** Merge changes into the row with this id. Absent id: nothing happens. */
+/**
+ * Merge changes into the row with this id. Absent id: nothing happens.
+ *
+ * @public
+ */
 export interface UpdatePatch<TRow> {
+  /** Discriminant for the patch union. */
   type: "update";
+  /** Identity of the row to change. */
   id: string;
+  /** Fields to merge into that row. */
   changes: Partial<TRow>;
 }
 
-/** Replace the row with this id, or append it when it is not there yet. */
+/**
+ * Replace the row with this id, or append it when it is not there yet.
+ *
+ * @public
+ */
 export interface UpsertPatch<TRow> {
+  /** Discriminant for the patch union. */
   type: "upsert";
+  /** The row to write. */
   row: TRow;
 }
 
-/** Drop the row with this id. Absent id: nothing happens. */
+/**
+ * Drop the row with this id. Absent id: nothing happens.
+ *
+ * @public
+ */
 export interface RemovePatch {
+  /** Discriminant for the patch union. */
   type: "remove";
+  /** Identity of the row to change. */
   id: string;
 }
 
-/** One change to a row set. */
+/**
+ * One change to a row set.
+ *
+ * @public
+ */
 export type RowPatch<TRow> =
-  | InsertPatch<TRow>
-  | UpdatePatch<TRow>
-  | UpsertPatch<TRow>
-  | RemovePatch;
+  InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
 
-/** Insert a row, optionally at a position. */
+/**
+ * Insert a row, optionally at a position.
+ *
+ * @public
+ */
 export function insertRow<TRow>(row: TRow, at?: number): InsertPatch<TRow> {
   return { type: "insert", row, at };
 }
 
-/** Merge changes into one row. */
+/**
+ * Merge changes into one row.
+ *
+ * @public
+ */
 export function updateRow<TRow>(
   id: string,
   changes: Partial<TRow>
@@ -76,12 +110,20 @@ export function updateRow<TRow>(
   return { type: "update", id, changes };
 }
 
-/** Replace a row, or add it if it is new. */
+/**
+ * Replace a row, or add it if it is new.
+ *
+ * @public
+ */
 export function upsertRow<TRow>(row: TRow): UpsertPatch<TRow> {
   return { type: "upsert", row };
 }
 
-/** Remove a row by id. */
+/**
+ * Remove a row by id.
+ *
+ * @public
+ */
 export function removeRow(id: string): RemovePatch {
   return { type: "remove", id };
 }
@@ -110,11 +152,13 @@ function indexOfId<TRow>(
 }
 
 /**
- * One mutation {@link applyRowPatchesWithLog} actually performed.
+ * One mutation `applyRowPatchesWithLog` actually performed.
  *
  * Incremental re-evaluation walks this list instead of scanning the row set
  * to find what changed. Indices are taken at the moment the event ran, so a
  * later event sees the array the earlier one left behind.
+ *
+ * @public
  */
 export type RowPatchEvent<TRow> =
   | { type: "insert"; id: string; row: TRow; index: number }
@@ -124,6 +168,8 @@ export type RowPatchEvent<TRow> =
 /**
  * The result of applying patches, plus the events an incremental view needs
  * so it does not have to diff two 20k-row arrays to find one update.
+ *
+ * @public
  */
 export interface RowPatchLog<TRow> {
   /** The row set after the patches — same contract as {@link applyRowPatches}. */
@@ -147,6 +193,8 @@ const PATCH_LOGS = new WeakMap<WeakKey, RowPatchLog<unknown>>();
  * @param rows - An array returned by {@link applyRowPatches}.
  * @returns The log, or `undefined` when this array was not produced by a
  *   changing patch (or was copied).
+ *
+ * @public
  */
 export function rowPatchLog<TRow>(
   rows: readonly TRow[]
@@ -215,6 +263,8 @@ function applyOne<TRow>(
  * @param rows - The current rows.
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
+ *
+ * @public
  */
 export function applyRowPatches<TRow>(
   rows: readonly TRow[],
@@ -235,6 +285,8 @@ export function applyRowPatches<TRow>(
  * @param rows - The current rows.
  * @param patches - The changes to apply, in order.
  * @param getRowId - How a row's id is derived; the table's own `rowKey`.
+ *
+ * @public
  */
 export function applyRowPatchesWithLog<TRow>(
   rows: readonly TRow[],

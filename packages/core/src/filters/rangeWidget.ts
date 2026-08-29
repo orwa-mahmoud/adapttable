@@ -17,13 +17,23 @@ import { isRelativeDateToken } from "./relativeDates";
  * Historical four-operator set. New code should use {@link NUMBER_OPS} /
  * {@link DATE_OPS}; this list stays exported so existing imports keep
  * type-checking while the widgets read the flavour-specific lists.
+ *
+ * @public
  */
 export const RANGE_OPS = ["eq", "gte", "lte", "between"] as const;
 
-/** One range-widget comparison operator (number or date). */
+/**
+ * One range-widget comparison operator (number or date).
+ *
+ * @public
+ */
 export type RangeOp = NumberOp | DateOp;
 
-/** The widget's view of a range: an operator plus its bound(s). */
+/**
+ * The widget's view of a range: an operator plus its bound(s).
+ *
+ * @public
+ */
 export interface RangeWidgetState {
   /** Selected comparison, or `undefined` while nothing is chosen. */
   op: RangeOp | undefined;
@@ -92,6 +102,8 @@ function inferRangeFromPair(
  * inclusive pair still infers `eq` / `gte` / `lte` / `between` so links
  * written before operators were persisted keep opening on the right
  * comparison.
+ *
+ * @public
  */
 export function readRangeWidget(
   extra: ExtraFilters,
@@ -113,6 +125,8 @@ export function readRangeWidget(
 /**
  * Convert a widget interaction back to the persisted pair. Empty values
  * clear their keys, so half-filled widgets never leak stale bounds.
+ *
+ * @public
  */
 export function writeRangeWidget(
   op: RangeOp | undefined,
@@ -145,6 +159,8 @@ export function writeRangeWidget(
 /**
  * Persist an operator-first range (or list) filter: the inclusive pair,
  * the list key for `in` / `notIn`, and the readable `f_<key>Op` token.
+ *
+ * @public
  */
 export function writeRangeFilter(
   op: RangeOp | undefined,
@@ -184,7 +200,11 @@ export function writeRangeFilter(
   };
 }
 
-/** Label keys for each operator, per widget flavour (numbers vs dates). */
+/**
+ * Label keys for each operator, per widget flavour (numbers vs dates).
+ *
+ * @public
+ */
 export const RANGE_OP_LABEL_KEYS = {
   number: NUMBER_OP_LABEL_KEYS,
   /** `eq` stays as the historical spelling of `on` for existing widgets. */

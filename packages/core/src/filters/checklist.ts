@@ -12,23 +12,46 @@ import { getPath } from "../utils/path";
 import type { FilterDef, FilterOption } from "./filterDefs";
 import { listFilterValues } from "./filterForm";
 
-/** Window the list once it is long enough that a full render would hitch. */
+/**
+ * Window the list once it is long enough that a full render would hitch.
+ *
+ * @public
+ */
 export const CHECKLIST_VIRTUALIZE_AT = 40;
 
-/** Fixed row height the virtual window measures against, in px. */
+/**
+ * Fixed row height the virtual window measures against, in px.
+ *
+ * @public
+ */
 export const CHECKLIST_ITEM_HEIGHT = 28;
 
-/** Visible viewport of a virtualized list, in px. */
+/**
+ * Visible viewport of a virtualized list, in px.
+ *
+ * @public
+ */
 export const CHECKLIST_LIST_HEIGHT = 240;
 
-/** One distinct value in a checklist, with its count in the current set. */
+/**
+ * One distinct value in a checklist, with its count in the current set.
+ *
+ * @public
+ */
 export interface ChecklistValue {
+  /** The value itself. */
   value: string;
+  /** Caption shown for the entry. */
   label: string;
+  /** How many rows carry this value. */
   count: number;
 }
 
-/** Kit-agnostic state behind {@link useChecklistFilter}. */
+/**
+ * Kit-agnostic state behind {@link useChecklistFilter}.
+ *
+ * @public
+ */
 export interface ChecklistFilterState {
   /** False when the source has no full filtered set — do not render. */
   available: boolean;
@@ -38,13 +61,17 @@ export interface ChecklistFilterState {
   visible: readonly ChecklistValue[];
   /** Current search box text. */
   query: string;
+  /** Replaces the checklist's search text. */
   setQuery: (next: string) => void;
   /** Currently checked values. */
   selected: readonly string[];
   /** True when `visible` is long enough to window. */
   virtualize: boolean;
+  /** Checks every option the search left visible. */
   selectAllVisible: () => void;
+  /** Unchecks every option. */
   clear: () => void;
+  /** Checks or unchecks one option. */
   toggle: (value: string, on: boolean) => void;
 }
 
@@ -74,6 +101,8 @@ function rowValue<TRow>(def: FilterDef<TRow>, row: TRow): string {
 /**
  * Distinct values + counts from a row set. Static `options` only supply
  * labels — the values themselves always come from the rows.
+ *
+ * @public
  */
 export function collectChecklistValues<TRow>(
   def: FilterDef<TRow>,
@@ -106,6 +135,8 @@ function selectedList(value: FilterValue): string[] {
  * Derive the checklist from `source.facets` or `source.allFilteredRows`.
  * Returns `available: false` when both are missing so a server page
  * never pretends it can count a set it does not hold.
+ *
+ * @public
  */
 export function useChecklistFilter<TRow>(
   def: FilterDef<TRow>,

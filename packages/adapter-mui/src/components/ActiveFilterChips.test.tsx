@@ -1,5 +1,5 @@
 import { defaultLabels } from "@adapttable/core";
-import { fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderMui as renderChips } from "../test-utils";
@@ -24,7 +24,7 @@ describe("Chips", () => {
     const remove = screen.getByRole("button", { name: REMOVE_NAME });
     expect(remove.tabIndex).toBe(0);
 
-    remove.focus();
+    act(() => remove.focus());
     expect(remove).toHaveFocus();
 
     fireEvent.keyDown(remove, { key: "Enter", code: "Enter" });

@@ -14,7 +14,11 @@
  */
 import type { Direction } from "../types";
 
-/** A cell address in the grid: both indices absolute, both zero-based. */
+/**
+ * A cell address in the grid: both indices absolute, both zero-based.
+ *
+ * @public
+ */
 export interface GridCell {
   /** Row index within the whole dataset, not within the rendered window. */
   row: number;
@@ -22,7 +26,11 @@ export interface GridCell {
   col: number;
 }
 
-/** The grid's shape, as the mover needs to see it. */
+/**
+ * The grid's shape, as the mover needs to see it.
+ *
+ * @public
+ */
 export interface GridBounds {
   /** Total rows the user can reach — the dataset, not the rendered slice. */
   rowCount: number;
@@ -39,6 +47,8 @@ export interface GridBounds {
  * What a key press means. Named rather than passed as raw keys so the mapping
  * is testable on its own and an adapter can bind a kit's own control to the
  * same intent.
+ *
+ * @public
  */
 export type GridFocusMove =
   | "up"
@@ -121,6 +131,8 @@ function stepGridFocus(
  * @param bounds - The grid's shape.
  * @param covered - True for a cell that must not receive focus.
  * @returns The new address, which may equal `from` at an edge.
+ *
+ * @public
  */
 export function moveGridFocus(
   from: GridCell,
@@ -141,11 +153,17 @@ export function moveGridFocus(
   }
 }
 
-/** The key press, as much of it as the mapping needs. */
+/**
+ * The key press, as much of it as the mapping needs.
+ *
+ * @public
+ */
 export interface GridKeyPress {
+  /** Stable key for the entry. */
   key: string;
   /** Ctrl or Cmd — either one means "to the end of the grid". */
   ctrlKey?: boolean;
+  /** Whether the Meta key was held. */
   metaKey?: boolean;
 }
 
@@ -160,6 +178,8 @@ export interface GridKeyPress {
  * @param press - The key event, narrowed to what matters.
  * @param dir - The table's text direction.
  * @returns The intended move, or `null` to let the event through untouched.
+ *
+ * @public
  */
 export function gridFocusMoveForKey(
   press: GridKeyPress,
@@ -191,7 +211,11 @@ export function gridFocusMoveForKey(
   }
 }
 
-/** Are two addresses the same cell? */
+/**
+ * Are two addresses the same cell?
+ *
+ * @public
+ */
 export function sameGridCell(a: GridCell | null, b: GridCell | null): boolean {
   if (!a || !b) return a === b;
   return a.row === b.row && a.col === b.col;

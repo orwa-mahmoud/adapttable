@@ -14,40 +14,76 @@ import type { CellEditor } from "./editing/cellEditing";
 import type { FacetMap } from "./filters/facets";
 import type { ColumnFilter } from "./filters/filterDefs";
 
-/** Sort direction for a column. */
+/**
+ * Sort direction for a column.
+ *
+ * @public
+ */
 export type SortDirection = "asc" | "desc";
 
-/** Text direction. Adapters apply it; logical CSS does the rest. */
+/**
+ * Text direction. Adapters apply it; logical CSS does the rest.
+ *
+ * @public
+ */
 export type Direction = "ltr" | "rtl";
 
 /**
  * Colour scheme preference. `"auto"` follows the host /
  * `prefers-color-scheme`; adapters resolve it to their theming.
+ *
+ * @public
  */
 export type ColorScheme = "light" | "dark" | "auto";
 
-/** How the table paginates. `"auto"` resolves by viewport (mobile → infinite). */
+/**
+ * How the table paginates. `"auto"` resolves by viewport (mobile → infinite).
+ *
+ * @public
+ */
 export type PaginationMode = "infinite" | "paged" | "auto";
 
-/** The resolved (non-auto) pagination mode a source actually runs in. */
+/**
+ * The resolved (non-auto) pagination mode a source actually runs in.
+ *
+ * @public
+ */
 export type ResolvedPaginationMode = "infinite" | "paged";
 
-/** Comparable primitive returned by a sort-value extractor. */
+/**
+ * Comparable primitive returned by a sort-value extractor.
+ *
+ * @public
+ */
 export type SortableValue = string | number | boolean | null | undefined;
 
 /**
  * When a leaf under a collapsible column group is visible.
  * `"open"` — expanded group only; `"closed"` — collapsed only; `"always"` — both.
+ *
+ * @public
  */
 export type ColumnGroupShow = "open" | "closed" | "always";
 
-/** A single extra-filter value as it round-trips through URL state. */
+/**
+ * A single extra-filter value as it round-trips through URL state.
+ *
+ * @public
+ */
 export type FilterValue = string | string[] | number | undefined;
 
-/** The bag of extra (caller-defined) filter values keyed by filter name. */
+/**
+ * The bag of extra (caller-defined) filter values keyed by filter name.
+ *
+ * @public
+ */
 export type ExtraFilters = Record<string, FilterValue>;
 
-/** Props every {@link ColumnDef.Cell} component receives. */
+/**
+ * Props every `ColumnDef.Cell` component receives.
+ *
+ * @public
+ */
 export interface CellProps<TRow> {
   /** The row being rendered. */
   readonly row: TRow;
@@ -58,9 +94,11 @@ export interface CellProps<TRow> {
 /**
  * Definition of a single column. `TRow` is the row item type.
  *
- * Provide either a {@link ColumnDef.Cell} component (stable identity →
+ * Provide either a `ColumnDef.Cell` component (stable identity →
  * memoisable sub-trees, preferred for statically-known columns) or the
- * lighter {@link ColumnDef.accessor} function.
+ * lighter `ColumnDef.accessor` function.
+ *
+ * @public
  */
 export interface ColumnDef<TRow> {
   /**
@@ -104,7 +142,7 @@ export interface ColumnDef<TRow> {
    * path (`["Finance", "Q1"]`) stacks rows. Reordering columns apart
    * splits the group (adjacency-based, never lies about layout).
    *
-   * Prefer a {@link ColumnGroupDef} with `children` when the group has
+   * Prefer a `ColumnGroupDef` with `children` when the group has
    * collapse options (`collapsedKey`, `collapsedRender`) — `group` is
    * the shortcut for a spanning label only.
    */
@@ -139,7 +177,7 @@ export interface ColumnDef<TRow> {
    */
   editable?: boolean | ((row: TRow) => boolean);
   /**
-   * Editor widget when {@link ColumnDef.editable} is set. Defaults to
+   * Editor widget when `ColumnDef.editable` is set. Defaults to
    * `"text"`. A registered plugin name (`host.registerEditor`) is a string
    * that is not a built-in. Select options may be `{ value, label }` or
    * plain strings.
@@ -155,7 +193,7 @@ export interface ColumnDef<TRow> {
    * Turn the edited text back into the value to commit.
    *
    * A column can show one thing, seed the editor with another, and commit a
-   * third: `accessor` renders `"$1,240.00"`, {@link ColumnDef.editValue} seeds
+   * third: `accessor` renders `"$1,240.00"`, `ColumnDef.editValue` seeds
    * the editor with `"1240"`, and this parses what the user typed back into a
    * number. Without it, a `number` editor commits `number | null` and every
    * other editor commits the raw string.
@@ -166,7 +204,7 @@ export interface ColumnDef<TRow> {
   parseValue?: (draft: string, row: TRow) => unknown;
   /**
    * Gate a commit on this column's own rule. Receives the value
-   * {@link ColumnDef.parseValue} produced, plus the row being edited; return a
+   * `ColumnDef.parseValue` produced, plus the row being edited; return a
    * message to reject it, nothing to allow it.
    *
    * May be async — "is this SKU real" is a request — and the editor stays open
@@ -183,7 +221,7 @@ export interface ColumnDef<TRow> {
    * its identity is stable across renders.
    */
   Cell?: ComponentType<CellProps<TRow>>;
-  /** Lightweight alternative to {@link ColumnDef.Cell}; returns cell content. */
+  /** Lightweight alternative to `ColumnDef.Cell`; returns cell content. */
   accessor?: (row: TRow) => ReactNode;
   /**
    * Primitive extractor used by the client-side sort comparator
@@ -206,14 +244,14 @@ export interface ColumnDef<TRow> {
   /**
    * The cell as plain text, for every context that cannot render JSX.
    *
-   * {@link ColumnDef.accessor} returns a `ReactNode`, so a screen-reader
+   * `ColumnDef.accessor` returns a `ReactNode`, so a screen-reader
    * announcement, an `aria-label`, a tooltip or the clipboard have nothing to
    * read: a badge or an avatar is a React element, not a word. Return the text
    * those places should use.
    *
    * Resolution order when this is absent — text is always available, this only
-   * makes it accurate: {@link ColumnDef.formatValue}, then
-   * {@link ColumnDef.exportValue}, then `accessor` when it happens to yield a
+   * makes it accurate: `ColumnDef.formatValue`, then
+   * `ColumnDef.exportValue`, then `accessor` when it happens to yield a
    * primitive, then the key's data path. So only columns whose rendered cell is
    * not already its own text need one.
    */
@@ -271,29 +309,51 @@ export interface ColumnDef<TRow> {
   meta?: Record<string, unknown>;
 }
 
-/** Sort/resize state a custom header caption can read. */
+/**
+ * Sort/resize state a custom header caption can read.
+ *
+ * @public
+ */
 export interface ColumnHeaderController {
   /** Default caption (`header`, else the humanized key). */
   label: ReactNode;
+  /** This column's sort direction, absent when it is not sorted. */
   sortDir?: "asc" | "desc";
+  /** 1-based position in a multi-column sort, absent when unsorted. */
   sortIndex?: number;
   /** Cycle this column's sort. No-op when the column is not sortable. */
   toggleSort: (event?: { shiftKey?: boolean }) => void;
 }
 
-/** Arguments for {@link ColumnDef.renderHeader}. */
+/**
+ * Arguments for `ColumnDef.renderHeader`.
+ *
+ * @public
+ */
 export interface ColumnHeaderContext<TRow> {
+  /** The column being rendered. */
   column: ColumnDef<TRow>;
+  /** Caption and sort state for this header. */
   controller: ColumnHeaderController;
 }
 
-/** Arguments for {@link ColumnDef.renderFooter}. */
+/**
+ * Arguments for `ColumnDef.renderFooter`.
+ *
+ * @public
+ */
 export interface ColumnFooterContext<TRow> {
+  /** The column being rendered. */
   column: ColumnDef<TRow>;
+  /** The aggregate this column resolved to, already formatted. */
   value: ReactNode;
 }
 
-/** Confirmation wiring shared by row and bulk actions. */
+/**
+ * Confirmation wiring shared by row and bulk actions.
+ *
+ * @public
+ */
 export interface ActionConfirm<TArg> {
   /** Dialog title (pre-translated). */
   title: string;
@@ -305,7 +365,11 @@ export interface ActionConfirm<TArg> {
   danger?: boolean;
 }
 
-/** A per-row action — trailing buttons on desktop, card buttons on mobile. */
+/**
+ * A per-row action — trailing buttons on desktop, card buttons on mobile.
+ *
+ * @public
+ */
 export interface RowAction<TRow> {
   /** Identifier — not shown to the user. */
   key: string;
@@ -334,7 +398,11 @@ export interface RowAction<TRow> {
   confirm?: ActionConfirm<TRow>;
 }
 
-/** A bulk action invoked from the selection toolbar with the selected ids. */
+/**
+ * A bulk action invoked from the selection toolbar with the selected ids.
+ *
+ * @public
+ */
 export interface BulkAction {
   /** Identifier — not shown to the user. */
   key: string;
@@ -364,7 +432,11 @@ export interface BulkAction {
   confirm?: ActionConfirm<number>;
 }
 
-/** Scope context handed to a bulk action. */
+/**
+ * Scope context handed to a bulk action.
+ *
+ * @public
+ */
 export interface BulkActionContext {
   /** True when the user chose "select all matching" across every page. */
   allMatching: boolean;
@@ -372,20 +444,35 @@ export interface BulkActionContext {
   total: number;
 }
 
-/** Option entry for a sort-by select control. */
+/**
+ * Option entry for a sort-by select control.
+ *
+ * @public
+ */
 export interface SortByOption {
+  /** Column key this option sorts by. */
   value: string;
+  /** Caption shown in the select. */
   label: string;
 }
 
-/** Baseline query params a backend list endpoint receives. */
+/**
+ * Baseline query params a backend list endpoint receives.
+ *
+ * @public
+ */
 export interface TableQueryParams {
+  /** 1-based page number. */
   page?: number;
+  /** Rows per page. */
   limit?: number;
+  /** The free-text search term, as typed. */
   search?: string;
+  /** Column key to sort by. */
   sortBy?: string;
+  /** Direction for `sortBy`. */
   sortDir?: SortDirection;
-  /** Single-level row grouping column key (URL-synced; frontend chrome only). */
+  /** Row grouping keys, comma-separated (URL-synced; frontend chrome only). */
   groupBy?: string;
   /**
    * The active filter values, namespaced so a user filter named like a
@@ -400,12 +487,19 @@ export interface TableQueryParams {
   cursor?: string;
 }
 
-/** Standard paginated response envelope. */
+/**
+ * Standard paginated response envelope.
+ *
+ * @public
+ */
 export interface PaginatedResponse<TRow> {
   /** The page of rows. */
   rows?: TRow[];
+  /** Rows in the whole matching set, not just this page. */
   total: number;
+  /** 1-based page number this payload answers for. */
   page: number;
+  /** Rows per page this payload was built with. */
   limit: number;
   /** Whether a page exists after this one. */
   hasNextPage?: boolean;
@@ -419,13 +513,18 @@ export interface PaginatedResponse<TRow> {
 /**
  * Strings the table renders. Pass pre-translated values (or wire them to
  * your i18n stack). Every key is optional; sensible English defaults fill
- * the gaps — see {@link defaultLabels}.
+ * the gaps — see `defaultLabels`.
+ *
+ * @public
  */
 export interface TableLabels {
   /** Accessible label for an unlabeled table. */
   table?: string;
+  /** Accessible name for the search box. */
   search?: string;
+  /** Placeholder text inside the search box. */
   searchPlaceholder?: string;
+  /** Empty state when the table has no rows at all. */
   noData?: string;
   /** Empty state when an active search/filter matched nothing. */
   noResults?: string;
@@ -533,9 +632,13 @@ export interface TableLabels {
   selectAllMatching?: (total: number) => string;
   /** Banner: the whole matching set is selected. */
   allMatchingSelected?: (total: number) => string;
+  /** Shown while rows are being fetched. */
   loading?: string;
+  /** Action that appends the next page to the rows on screen. */
   loadMore?: string;
+  /** Name of the filters trigger, panel and column menu section. */
   filters?: string;
+  /** Action that removes every active filter at once. */
   clearAll?: string;
   /** Accessible name for a single filter chip's remove button. */
   removeFilter?: (label: string) => string;
@@ -569,19 +672,28 @@ export interface TableLabels {
   checklistNoValues?: string;
   /** Accessible name of the compact header filter row. */
   headerFilters?: string;
+  /** Prefix for a sort control's accessible name, before the column. */
   sortBy?: string;
+  /** Accessible name for the page-size select. */
   rowsPerPage?: string;
+  /** Header of the per-row actions column. */
   actions?: string;
+  /** Accessible name for the header checkbox that selects the page. */
   selectAll?: string;
+  /** Accessible name for a row's selection checkbox. */
   selectRow?: string;
   /**
    * Accessible name for the header checkbox that selects a column
    * (`columnSelectionCheckbox`). The column's own name is appended.
    */
   selectColumn?: string;
+  /** Action that abandons an edit or closes a prompt. */
   cancel?: string;
+  /** Action that re-runs a failed load. */
   retry?: string;
+  /** Heading of the error state. */
   errorTitle?: string;
+  /** Body of the error state, under the heading. */
   errorMessage?: string;
   /** Accessible label for the previous-page control. */
   previousPage?: string;
@@ -599,10 +711,13 @@ export interface TableLabels {
   columns?: string;
   /** Pin-column menu actions. */
   pinStart?: string;
+  /** Column-menu action that pins the column to the trailing edge. */
   pinEnd?: string;
+  /** Column-menu action that returns a pinned column to the scroll area. */
   unpin?: string;
   /** Reorder-column menu actions. */
   moveStart?: string;
+  /** Column-menu action that moves the column to the last position. */
   moveEnd?: string;
   /** Reset the column layout to defaults. */
   resetColumns?: string;
@@ -630,6 +745,15 @@ export interface TableLabels {
   sortAscending?: string;
   /** Sort this column descending from the column-menu submenu. */
   sortDescending?: string;
+  /**
+   * Announced politely once a sort settles, so a screen-reader user learns the
+   * order changed — the rows are re-read from the top with no visible cue and
+   * no change in row count. Names the column and the direction in one phrase,
+   * because a live region reads its whole message at once.
+   */
+  sortedBy?: (info: { column: string; ascending: boolean }) => string;
+  /** Announced politely when the last sort is removed. */
+  sortingCleared?: string;
   /** Open the table filters from a column-menu submenu. */
   filterColumn?: string;
   /** Accessible name of the per-column submenu trigger. */
@@ -641,7 +765,7 @@ export interface TableLabels {
    * produces (`"xlsx"`, or whatever a custom one names itself), return the
    * button's caption. Defaults to `"Export XLSX"` and its translations.
    *
-   * CSV keeps {@link TableLabels.exportCsv}, so its existing translations stand
+   * CSV keeps `TableLabels.exportCsv`, so its existing translations stand
    * and a host that overrode that string keeps their own wording.
    */
   exportFile?: (format: string) => string;
@@ -738,7 +862,7 @@ export interface TableLabels {
   rowActionsMenu?: string;
   /**
    * The message on an editor whose row changed under it. Keep mine / Take
-   * theirs sit beside it, and {@link TableLabels.theirsValue} names the
+   * theirs sit beside it, and `TableLabels.theirsValue` names the
    * incoming value so the reader can see what they would take.
    */
   editConflict?: string;
