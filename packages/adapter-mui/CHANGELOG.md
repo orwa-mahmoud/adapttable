@@ -1,5 +1,65 @@
 # @adapttable/mui
 
+## 2.6.0
+
+### Minor Changes
+
+- f8ba086: `<kit>/features` now re-exports every type `@adapttable/core/features` publishes,
+  not just the feature factories. Writing a `TableFeature` of your own means naming
+  `Aggregator`, `Command`, `CustomCellEditorRender`, `ExportWriter`,
+  `FilterTypeSpec` or `SidePanelEntry` to register anything on the host, and those
+  were only reachable from `@adapttable/core` — so composing a feature meant
+  importing from two packages instead of the one you mount.
+- f8ba086: Each kit now exports `MobileCardRenderer`, `RowActionsRenderer` and
+  `ToolbarSlots`. `renderCard`, `renderRowActions` and `toolbarSlots` are props
+  on the kit's own `DataTable`, so writing one of those callbacks as a named
+  function — rather than inline, where TypeScript infers it — meant importing its
+  type from `@adapttable/core`, which is the dependency importing from your kit
+  is meant to spare you.
+- f8ba086: Export `DataTablePropsBase`, the half of each `DataTableProps` that carries every
+  prop except the data mode. Extending or wrapping a table's props meant restating
+  them, because the base was declared but never exported — the same shape core has
+  always exported as `BaseDataTableProps`.
+  
+  `@adapttable/unstyled` also exports `IconProps`, which its icons already took.
+
+### Patch Changes
+
+- f8ba086: Name the sort control in the MUI adapter "Sort by: <column>", matching the six other kits that label
+  theirs. It was named by its own text and read as "Person, button", which does not say what pressing it
+  does.
+- f8ba086: Give the column menu an accessible name in every adapter. The trigger announced that it had expanded
+  something, and what it had expanded could not be identified: four kits opened a `dialog` with no
+  name, and two put the column list inside a wrapper their kit had already marked `presentation` or
+  `tooltip`. The panel is now named in all eight — as the kit's own `dialog` where the kit provides
+  one, and as a named `group` where it does not.
+- f8ba086: Name the command palette dialog in the MUI adapter. `aria-label` on MUI's `Dialog` lands on its
+  Modal root, which MUI marks `role="presentation"`, so the name was discarded and the palette opened
+  as a dialog with no accessible name — the browser computed no named dialog at all. The name now sits
+  on the paper, where `role="dialog"` is.
+- f8ba086: Share the rule that keeps an editor's own keys out of the table's key handler, as `stopEditKeys` on
+  `@adapttable/core/adapter`. Enter, Escape and Tab mean something to both an open editor and the grid
+  around it, and custom adapters need the same rule. Behaviour is unchanged in the seven adapters that
+  now share it.
+- f8ba086: Move the rule that decides whether a column header's funnel is lit into core, as
+  `hasActiveHeaderFilter`, so custom markup can light its own headers the way the adapters do.
+  Behaviour is unchanged in the seven adapters that now share it.
+- f8ba086: State the real dataset size on a windowed mobile card list. The cards are a real `<ul>`, so a
+  virtualized or paged list now carries `aria-setsize` on each card with its absolute
+  `aria-posinset` — the list-shaped counterpart to the table's `aria-rowcount`. A list that holds
+  every card says nothing extra, because assistive technology can simply count.
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+  - @adapttable/core@2.9.0
+
 ## 2.5.0
 
 ### Minor Changes

@@ -1,5 +1,101 @@
 # @adapttable/core
 
+## 2.9.0
+
+### Minor Changes
+
+- f8ba086: Say what changed when the rows change. Sorting, filtering, paging and changing the page size rewrote
+  the table body with nothing a screen reader could perceive, so activating "Sort ascending" produced no
+  feedback at all. The table now announces politely: the new order when a sort settles ("Sorted by Name,
+  ascending", "Sorting cleared"), and otherwise the new count in the same words the footer shows
+  ("Page 2 of 4. Showing 26–50 of 87"). A filter being typed announces once when the results arrive
+  rather than once per keystroke, and a filter that matches nothing is announced by the empty state.
+  
+  Adapters render the announcement through the new `TableStatusAnnouncer`, and
+  `useTableStatusAnnouncement` computes the message for custom markup. Two new label keys, `sortedBy`
+  and `sortingCleared`, are translated in all 17 locales.
+- f8ba086: Share the rule that keeps an editor's own keys out of the table's key handler, as `stopEditKeys` on
+  `@adapttable/core/adapter`. Enter, Escape and Tab mean something to both an open editor and the grid
+  around it, and custom adapters need the same rule. Behaviour is unchanged in the seven adapters that
+  now share it.
+- f8ba086: Move the rule that decides whether a column header's funnel is lit into core, as
+  `hasActiveHeaderFilter`, so custom markup can light its own headers the way the adapters do.
+  Behaviour is unchanged in the seven adapters that now share it.
+- f8ba086: Every focused subpath now exports the types its own signatures hand back.
+  `@adapttable/core/pivot` returned a `ColumnDef` whose `header`, `footer`,
+  `filter` and `editor` types could not be named from `/pivot`; `/xlsx` and
+  `/pdf` returned an `ExportWriter` the same way. Reaching for
+  `@adapttable/core` to name part of what a subpath already gave you is the
+  detour this removes — 413 routes across the nine entries, of which 380 are
+  types core already supported and 33 were previously unreachable from anywhere.
+  
+  `useOverlayTransition`, `OverlayTransition`, `OVERLAY_MOTION`,
+  `stopEditKeys` and `hasActiveHeaderFilter` are supported on
+  `@adapttable/core/adapter`, which the versioning policy already described as
+  having no private channel behind it. `editableCellController` is exported from
+  the main entry beside the type of the same name.
+- f8ba086: State the real dataset size on a windowed mobile card list. The cards are a real `<ul>`, so a
+  virtualized or paged list now carries `aria-setsize` on each card with its absolute
+  `aria-posinset` — the list-shaped counterpart to the table's `aria-rowcount`. A list that holds
+  every card says nothing extra, because assistive technology can simply count.
+- f8ba086: State the real width of a windowed column axis, with cell navigation off. A table using
+  `virtualizeColumns` renders a slice of its columns, so a screen reader that counts the cells in the
+  DOM reports column 17 of 40 as "3 of 9". The table now carries `aria-colcount`, and every body and
+  header cell an absolute `aria-colindex`, the same way a windowed row axis already carries
+  `aria-rowcount` with an absolute `aria-rowindex`. `role="grid"` and the grid keyboard contract remain
+  tied to `cellNavigation`.
+  
+  Column selection from a header now names the right column when the axis is windowed. A header was
+  given its position within the rendered slice, while selection, the header checkbox and `toggleColumn`
+  all address columns in the full visible list — so with `virtualizeColumns` and `cellNavigation`
+  together, acting on a header reached the column that many places from the left of the dataset rather
+  than the one clicked.
+  
+  `useGridFocus` takes `columnsWindowed` for the same purpose in custom markup.
+
+### Patch Changes
+
+- f8ba086: Let the table repeat an announcement. The status region kept its last message
+  through a silent settle, so filtering to nothing and back — 87 rows, 0 rows, 87
+  rows — left the identical string in the DOM and `aria-live` had no change to
+  fire on: the reader heard the count once and never again. Silence now clears the
+  region.
+  
+  It also announces when only the rendered count moves and the source reports no
+  limit, which is the case that decides the bounds there.
+- f8ba086: The filter drawer now slides in and out in every kit.
+  
+  `@adapttable/unstyled` — and so `@adapttable/shadcn` — mounted and unmounted the
+  panel on the same tick it opened, so it appeared and vanished with no motion.
+  It now travels in from the inline-end edge with the backdrop fading alongside,
+  and leaves the same way. While it leaves it is inert and out of the
+  accessibility tree, and focus returns to the trigger immediately rather than
+  when the animation ends.
+  
+  `@adapttable/base-ui` had no transition on its drawer at all, which also meant
+  the swipe-to-dismiss gesture it already enabled moved nothing on screen. The
+  panel now follows the swipe and the backdrop fades with its progress.
+  
+  `@adapttable/radix` ran its panel and Radix's own scrim on different durations
+  and curves, so they finished at different moments, and the panel lost its
+  opacity a moment before it started sliding. Both now run on one pair of tokens,
+  and reduced motion falls through to Radix's unanimated dialog.
+  
+  Mantine, MUI, Chakra and Ant Design keep their own kit's drawer motion.
+- f8ba086: Describe the table the same way in every adapter, at all four levels a screen reader walks — the
+  table, a row, a cell, a header cell:
+  
+  - Cells inside a `role="grid"` table now map to `gridcell`. Three kits set `role="cell"` explicitly,
+    which overrode that and told assistive technology the grid was an ordinary table.
+  - All eight kits now set `scope="col"` on header cells. Four did, so which cells a screen reader
+    associated with their column header depended on the kit.
+  - Ant Design's rows now state `role="row"` explicitly, as the other seven already did. A `<tr>` is a
+    row either way; this is parity, not a fix.
+- f8ba086: State the real dataset size on a windowed table even when cell navigation is off. A virtualized or
+  paged table now carries `aria-rowcount` with each row's absolute `aria-rowindex`, so a screen reader
+  reads the true position instead of counting the rows currently in the DOM. `role="grid"` and the
+  grid keyboard contract remain tied to `cellNavigation`.
+
 ## 2.8.0
 
 ### Minor Changes

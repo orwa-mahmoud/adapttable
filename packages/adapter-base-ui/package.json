@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/base-ui",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Base UI adapter for AdaptTable — a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",
