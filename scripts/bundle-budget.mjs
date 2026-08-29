@@ -358,12 +358,18 @@ const FIXTURES = [
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
   { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
   { name: "radix · table", pkg: "adapter-radix", budgetKB: 135 },
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 142 },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
-  // 2026-08-29: measured 141.1 / 138.2 against 141 / 138 — 0.1–0.2 KB over,
-  // same 1 KB raise as the earlier nights so a tag-only restore cannot flake.
+  //
+  // The filter drawer's enter/leave transition is the most recent weight on
+  // that path: the shared overlay-transition hook and the drawer's own
+  // keyframes ship on the default path, because a drawer that appears
+  // instantly reads as a rendering glitch rather than a panel. Measured
+  // 2026-08-29 at the commit that landed it: base-ui 141.1 KB and shadcn
+  // 138.2 KB, against ceilings of 141 and 138. unstyled and radix carried it
+  // inside the slack they already had.
+  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 142 },
   { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 139 },
   { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 135 },
 ].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
