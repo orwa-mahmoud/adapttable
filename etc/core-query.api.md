@@ -36,6 +36,9 @@ export interface FormulaColumnSpec {
 }
 
 // @public
+export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+
+// @public
 export type FormulaValue = {
     readonly kind: "number";
     readonly value: number;
@@ -107,6 +110,9 @@ export function serializePivot(config: PivotConfig): string;
 
 // @public
 export function serializePivotState(state: PivotUrlState): string;
+
+// @public
+export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
 export type SortDirection = "asc" | "desc";

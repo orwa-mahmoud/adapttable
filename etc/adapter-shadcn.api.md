@@ -26,11 +26,14 @@ import { EditUnit } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { FILTER_TYPES } from '@adapttable/core';
 import { JSX } from 'react';
+import { MobileCardRenderer } from '@adapttable/core';
 import { PivotPanel } from '@adapttable/unstyled';
 import { ReactNode } from 'react';
+import { RowActionsRenderer } from '@adapttable/core';
 import { SavedView } from '@adapttable/unstyled';
 import { TableLabels } from '@adapttable/unstyled';
 import { TableQuery } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/core';
 import { UseServerDataOptions } from '@adapttable/core';
 import { UseTableDataOptions } from '@adapttable/core';
 
@@ -84,7 +87,11 @@ export { ExportCsvOptions }
 
 export { FILTER_TYPES }
 
+export { MobileCardRenderer }
+
 export { PivotPanel }
+
+export { RowActionsRenderer }
 
 // @public
 export function SavedViewsPanel(props: SavedViewsPanelProps): JSX.Element;
@@ -310,6 +317,8 @@ export const shadcnClassNames: {
 };
 
 export { TableQuery }
+
+export { ToolbarSlots }
 
 export { UseServerDataOptions }
 

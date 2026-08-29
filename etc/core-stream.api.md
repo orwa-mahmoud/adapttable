@@ -16,6 +16,13 @@ export interface ChangedCellFlashState {
 }
 
 // @public
+export interface InsertPatch<TRow> {
+    at?: number;
+    row: TRow;
+    type: "insert";
+}
+
+// @public
 export function isStreamLive(status: RowPatchStreamStatus): boolean;
 
 // @public
@@ -39,6 +46,12 @@ export interface OpenRowPatchStreamOptions {
 
 // @public
 export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
+
+// @public
+export interface RemovePatch {
+    id: string;
+    type: "remove";
+}
 
 // @public
 export type RowPatch<TRow> = InsertPatch<TRow> | UpdatePatch<TRow> | UpsertPatch<TRow> | RemovePatch;
@@ -107,6 +120,19 @@ export interface StreamSocket {
 // @public
 export interface StreamSocketEvent {
     data?: unknown;
+}
+
+// @public
+export interface UpdatePatch<TRow> {
+    changes: Partial<TRow>;
+    id: string;
+    type: "update";
+}
+
+// @public
+export interface UpsertPatch<TRow> {
+    row: TRow;
+    type: "upsert";
 }
 
 // @public

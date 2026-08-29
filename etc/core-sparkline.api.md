@@ -9,6 +9,38 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 
 // @public
+export type CellEditor = "text" | "number" |
+/** A checkbox. Commits `true` / `false`, never a string. */
+"boolean" |
+/** A date. Commits `YYYY-MM-DD`, the value a date input holds. */
+"date" |
+/** A date and a time. Commits `YYYY-MM-DDTHH:mm`. */
+"datetime" |
+/** A time of day. Commits `HH:mm`. */
+"time" | {
+    type: "select";
+    options: readonly CellEditorOption[] | readonly string[];
+} | {
+    type: "multi-select";
+    options: readonly CellEditorOption[] | readonly string[];
+} | {
+    type: "custom";
+    render: CustomCellEditorRender;
+};
+
+// @public
+export interface CellEditorOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export interface CellProps<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
+// @public
 export interface ColumnDef<TRow> {
     accessor?: (row: TRow) => ReactNode;
     align?: "start" | "center" | "end";
@@ -50,7 +82,87 @@ export interface ColumnDef<TRow> {
 }
 
 // @public
+export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
+    label?: string;
+});
+
+// @public
+export interface ColumnFooterContext<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
+// @public
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export interface ColumnHeaderContext<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController;
+}
+
+// @public
+export interface ColumnHeaderController {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
+
+// @public
+export interface CustomCellEditorCtrl {
+    cancel: () => void;
+    commit: () => void;
+    draft: string;
+    error?: string;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+    label: string;
+    onBlur: () => void;
+    onKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    setDraft: (value: string) => void;
+    validating: boolean;
+}
+
+// @public
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
+
+// @public
+export interface FilterDef<TRow = unknown> {
+    column?: string;
+    getValue?: (row: TRow) => unknown;
+    key: string;
+    label?: string;
+    options?: FilterOptionsSource;
+    placeholder?: string;
+    type: string;
+}
+
+// @public
+export interface FilterOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
+
+// @public
+export type FilterType = (typeof FILTER_TYPES)[number];
+
+// @public
 export function finiteSparklineValues(values: readonly number[]): number[];
+
+// @public
+export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
 export function Sparkline(input: Readonly<SparklineProps>): ReactElement;

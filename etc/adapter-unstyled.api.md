@@ -64,6 +64,7 @@ import { getHistoryAdapter } from '@adapttable/core';
 import { GroupMoreButtonProps } from '@adapttable/core/adapter';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { JSX } from 'react';
+import { MobileCardRenderer } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
@@ -72,6 +73,7 @@ import { ReactNode } from 'react';
 import { ReactPortal } from 'react';
 import { resolveFilterRegistry } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowActionsRenderer } from '@adapttable/core';
 import { RowEditActionsProps } from '@adapttable/core/adapter';
 import { RowReorderButtonsProps } from '@adapttable/core/adapter';
 import { RowReorderHandleProps } from '@adapttable/core/adapter';
@@ -86,6 +88,7 @@ import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/core';
 import { TreeCellProps } from '@adapttable/core/adapter';
 import { TreeToggleProps } from '@adapttable/core/adapter';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -541,6 +544,8 @@ export interface IconProps {
 
 export { InfiniteQueryLike }
 
+export { MobileCardRenderer }
+
 export { PageSelector }
 
 export { PaginatedResponse }
@@ -553,6 +558,8 @@ export function PivotPanel(props: Readonly<Omit<PivotPanelChromeProps, "slots">>
 export { resolveFilterRegistry }
 
 export { RowAction }
+
+export { RowActionsRenderer }
 
 // @public
 export function RowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): JSX.Element;
@@ -606,6 +613,8 @@ export { TableLabels }
 export { TableQuery }
 
 export { TableSource }
+
+export { ToolbarSlots }
 
 // @public
 export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): JSX.Element;
