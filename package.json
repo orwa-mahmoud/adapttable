@@ -2,7 +2,7 @@
   "name": "adapttable-monorepo",
   "version": "0.0.0",
   "private": true,
-  "description": "AdaptTable — a headless, UI-agnostic React data table with batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix, and shadcn/ui, plus an unstyled path for Tailwind & your own CSS.",
+  "description": "AdaptTable \u2014 a headless, UI-agnostic React data table with batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix, and shadcn/ui, plus an unstyled path for Tailwind & your own CSS.",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -32,11 +32,11 @@
     "changeset": "changeset",
     "version-packages": "changeset version && prettier --write \".changeset/*.json\" \"packages/*/CHANGELOG.md\" \"packages/*/package.json\"",
     "release": "turbo run build && changeset publish",
-    "verify:release": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run typecheck && pnpm run test:coverage --concurrency=1 && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget && pnpm run consumer:harness && pnpm run peer:floors",
+    "verify:release": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run typecheck && pnpm run test:coverage --concurrency=1 && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget && pnpm run consumer:harness && pnpm run peer:floors",
     "publint": "pnpm --filter \"./packages/*\" exec publint --strict",
     "smoke:dist": "node scripts/smoke-dist.mjs",
     "budget": "node scripts/bundle-budget.mjs",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
     "prepare": "husky",
     "check:kits-docs": "pnpm --filter @adapttable/cli exec vitest run src/kits-docs.test.ts",
     "check:readmes": "node scripts/check-readme-features.mjs",
@@ -46,7 +46,8 @@
     "api:reports": "node scripts/api-reports.mjs --local",
     "api:check": "node scripts/api-reports.mjs",
     "release:gated": "pnpm run build && pnpm run publint && changeset publish",
-    "check:parts": "node scripts/check-parts-parity.mjs"
+    "check:parts": "node scripts/check-parts-parity.mjs",
+    "check:api-contract": "node scripts/check-api-contract.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
