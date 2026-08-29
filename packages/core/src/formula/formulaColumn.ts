@@ -14,23 +14,13 @@
  * the cycle is found in the dependency graph before anything is evaluated,
  * and every column in it renders `#CYCLE!` — a report rather than a hang.
  */
-import type { CellEditor } from "../editing/cellEditing";
-import type { ColumnFilter } from "../filters/filterDefs";
-import type {
-  CellProps,
-  ColumnDef,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  SortableValue,
-} from "../types";
+import type { ColumnDef } from "../types";
 import {
   evaluateFormula,
   FORMULA_BLANK,
   FORMULA_ERRORS,
   formulaDisplay,
   formulaError,
-  type FormulaErrorCode,
   formulaSortValue,
   type FormulaValue,
   isFormulaError,
@@ -38,18 +28,7 @@ import {
 } from "./evaluate";
 import { formulaRefs, parseFormula, type ParseResult } from "./parse";
 
-export type {
-  CellEditor,
-  CellProps,
-  ColumnDef,
-  ColumnFilter,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  FormulaErrorCode,
-  FormulaValue,
-  SortableValue,
-};
+export type { ColumnDef, FormulaValue };
 
 /**
  * One user-typed formula column.
@@ -254,3 +233,14 @@ export function buildFormulaColumns<TRow extends object>(
 
   return { columns, errors, cycles };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+export type { FormulaErrorCode } from "./evaluate";

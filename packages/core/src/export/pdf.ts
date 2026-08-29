@@ -23,23 +23,11 @@
  * honoured here because a PDF that ignores them is a screenshot of the
  * wrong table.
  */
-import type { CellEditor } from "../editing/cellEditing";
-import type { ColumnFilter } from "../filters/filterDefs";
-import type {
-  CellProps,
-  ColumnDef,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  SortableValue,
-} from "../types";
+import type { ColumnDef } from "../types";
 import {
   buildExportTable,
-  type ExportPayload,
-  type ExportRowMeta,
   type ExportTable,
   type ExportViewEntry,
-  type ExportWriteContext,
   type ExportWriter,
 } from "./exportWriter";
 import {
@@ -58,21 +46,7 @@ import {
 } from "./printLayout";
 import { parseSfnt } from "./sfnt";
 
-export type {
-  CellEditor,
-  CellProps,
-  ColumnDef,
-  ColumnFilter,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  ExportPayload,
-  ExportRowMeta,
-  ExportWriteContext,
-  ExportWriter,
-  PrintPageBreak,
-  SortableValue,
-};
+export type { ColumnDef, ExportWriter, PrintPageBreak };
 
 /**
  * Options the writer and {@link buildTablePdf} share.
@@ -689,3 +663,18 @@ export function pdfWriter(options?: PdfWriterOptions): ExportWriter {
     }),
   };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+export type {
+  ExportPayload,
+  ExportRowMeta,
+  ExportWriteContext,
+} from "./exportWriter";

@@ -7,27 +7,9 @@
  */
 import { createElement, type ReactElement, type ReactNode } from "react";
 
-import type { CellEditor } from "../editing/cellEditing";
-import type { ColumnFilter } from "../filters/filterDefs";
-import type {
-  CellProps,
-  ColumnDef,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  SortableValue,
-} from "../types";
+import type { ColumnDef } from "../types";
 
-export type {
-  CellEditor,
-  CellProps,
-  ColumnDef,
-  ColumnFilter,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  SortableValue,
-};
+export type { ColumnDef };
 
 /**
  * The three marks this entry draws.
@@ -338,3 +320,13 @@ export function sparklineColumn<TRow>(
     exportValue: (row) => sparklineExportValue(spec.values(row)),
   };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";

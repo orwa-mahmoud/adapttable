@@ -15,39 +15,16 @@
  * Numbers stay numbers so a spreadsheet can sum them, which is the entire point
  * of exporting to a spreadsheet rather than a CSV.
  */
-import type { CellEditor } from "../editing/cellEditing";
-import type { ColumnFilter } from "../filters/filterDefs";
-import type {
-  CellProps,
-  ColumnDef,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  SortableValue,
-} from "../types";
+import type { ColumnDef } from "../types";
 import {
   buildExportTable,
-  type ExportPayload,
   type ExportTable,
   type ExportViewEntry,
-  type ExportWriteContext,
   type ExportWriter,
 } from "./exportWriter";
 import { buildZip, utf8, type ZipEntry } from "./zip";
 
-export type {
-  CellEditor,
-  CellProps,
-  ColumnDef,
-  ColumnFilter,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  ExportPayload,
-  ExportWriteContext,
-  ExportWriter,
-  SortableValue,
-};
+export type { ColumnDef, ExportWriter };
 
 /** Escape the five characters XML cannot carry literally. */
 function xml(text: string): string {
@@ -375,3 +352,14 @@ export function xlsxWriter(options?: { sheetName?: string }): ExportWriter {
     }),
   };
 }
+
+export type { CellEditor } from "../editing/cellEditing";
+export type { ColumnFilter } from "../filters/filterDefs";
+export type {
+  CellProps,
+  ColumnFooterContext,
+  ColumnGroupShow,
+  ColumnHeaderContext,
+  SortableValue,
+} from "../types";
+export type { ExportPayload, ExportWriteContext } from "./exportWriter";

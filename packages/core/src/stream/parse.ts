@@ -11,15 +11,9 @@
  * each is dropped rather than applied, because a malformed frame must not
  * be able to empty a table.
  */
-import type {
-  InsertPatch,
-  RemovePatch,
-  RowPatch,
-  UpdatePatch,
-  UpsertPatch,
-} from "../rows/patch";
+import type { RowPatch } from "../rows/patch";
 
-export type { InsertPatch, RemovePatch, RowPatch, UpdatePatch, UpsertPatch };
+export type { RowPatch };
 
 /** One entry of a frame, before it is known to be a patch. */
 type Unknown = Record<string, unknown>;
@@ -97,3 +91,10 @@ export function parseRowPatchFrame<TRow>(
   }
   return patches;
 }
+
+export type {
+  InsertPatch,
+  RemovePatch,
+  UpdatePatch,
+  UpsertPatch,
+} from "../rows/patch";

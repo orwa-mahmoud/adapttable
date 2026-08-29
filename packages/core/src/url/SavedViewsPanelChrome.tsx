@@ -30,11 +30,10 @@
 import { type CSSProperties, type ReactNode, useState } from "react";
 
 import { resolveLabels } from "../labels";
-import type { BaseDataTableProps } from "../props";
 import type { TableLabels } from "../types";
 import type { SavedView } from "./useSavedViews";
 
-export type { BaseDataTableProps, SavedView };
+export type { SavedView };
 
 /**
  * The row's own shape: the name, growing to fill the line, and the control
@@ -470,3 +469,5 @@ export function SavedViewsPanelChrome({
     </Surface>
   );
 }
+
+export type { BaseDataTableProps } from "../props";
