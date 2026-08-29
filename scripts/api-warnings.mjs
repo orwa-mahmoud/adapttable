@@ -36,6 +36,30 @@ export const ALIAS_REPORT = "core.api.md";
 /** The suffix shapes the declaration bundler assigns to a duplicate. */
 const GENERATED = /^(?<base>[A-Za-z_$][\w$]*?)(?<suffix>[$_]\d+)$/;
 
+/** Any identifier, matched whole so the suffix test below stays anchored. */
+const IDENTIFIER = /[A-Za-z_$][\w$]*/g;
+
+/**
+ * A report with the bundler's generated names folded to one spelling.
+ *
+ * The suffix is assigned by collision order, and this repository's build does
+ * not settle on one: the same source emits `pinnedRowPart$1` on some runs and
+ * `pinnedRowPart_2` on others, because the declaration bundler sometimes
+ * inlines a shared declaration and sometimes hoists it to a chunk. Comparing
+ * reports byte for byte therefore fails roughly half the time on a change that
+ * altered nothing.
+ *
+ * Folding the suffix compares the contract instead of the bundler's private
+ * naming. Nothing is lost: the name on the LEFT of each of those lines is
+ * untouched, and `check-api-contract.mjs` compares the exported names exactly,
+ * so a real symbol whose name ended in `_2` could not hide here.
+ */
+export function withoutGeneratedNames(report) {
+  return report.replace(IDENTIFIER, (name) =>
+    name.replace(GENERATED, "$<base><generated>")
+  );
+}
+
 /**
  * Every name `mainEntryAliases.ts` re-exports.
  *

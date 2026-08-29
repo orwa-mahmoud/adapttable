@@ -6,6 +6,7 @@ import {
   aliasNames,
   classifyForgottenExport,
   summarize,
+  withoutGeneratedNames,
 } from "./api-warnings.mjs";
 
 const ALIASES = aliasNames(
@@ -180,5 +181,43 @@ describe("summarize", () => {
 
   it("says so plainly when there is genuinely nothing", () => {
     assert.equal(summarize({}), "api-reports: no warnings of any class.");
+  });
+});
+
+describe("withoutGeneratedNames", () => {
+  // The build does not settle on one spelling: the same source emits
+  // `pinnedRowPart$1` on some runs and `pinnedRowPart_2` on others, because the
+  // declaration bundler sometimes inlines a shared declaration and sometimes
+  // hoists it. Byte-comparing reports therefore failed about half the time on a
+  // change that altered nothing.
+  it("folds both suffix spellings to the same text", () => {
+    const dollar = "export const pinnedRowPart: typeof pinnedRowPart$1;";
+    const underscore = "export const pinnedRowPart: typeof pinnedRowPart_2;";
+    assert.equal(
+      withoutGeneratedNames(dollar),
+      withoutGeneratedNames(underscore)
+    );
+  });
+
+  it("leaves the public name on the left untouched", () => {
+    assert.match(
+      withoutGeneratedNames(
+        "export type EditableCellSlots = EditableCellSlots_2;"
+      ),
+      /^export type EditableCellSlots = /
+    );
+  });
+
+  it("does not touch a name that merely ends in a digit", () => {
+    const line = "export const useDataTable2: number;";
+    assert.equal(withoutGeneratedNames(line), line);
+  });
+
+  // The surface itself is still compared exactly, by check-api-contract.mjs.
+  it("still distinguishes two different public names", () => {
+    assert.notEqual(
+      withoutGeneratedNames("export const a: typeof a$1;"),
+      withoutGeneratedNames("export const b: typeof b$1;")
+    );
   });
 });

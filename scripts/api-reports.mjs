@@ -27,6 +27,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -40,6 +41,7 @@ import {
   classifyForgottenExport,
   entryExports,
   summarize,
+  withoutGeneratedNames,
 } from "./api-warnings.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -101,6 +103,11 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   // Read once per entry: the `published` class is proved against the very
   // declaration being extracted, not against a list kept beside it.
   const entryExported = entryExports(entry);
+  // Captured BEFORE extraction: in local mode the extractor writes straight
+  // into `etc/`, so reading afterwards would compare the file with itself.
+  const committed = existsSync(join(ETC, report))
+    ? readFileSync(join(ETC, report), "utf8")
+    : "";
   const config = ExtractorConfig.prepare({
     configObject: {
       projectFolder: join(REPO_ROOT, "packages", dir),
@@ -211,17 +218,21 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     console.error(`✗ ${report}: extraction errored`);
     return false;
   }
-  if (!LOCAL) {
-    const fresh = readFileSync(join(OUT, report), "utf8");
-    const committed = existsSync(join(ETC, report))
-      ? readFileSync(join(ETC, report), "utf8")
-      : "";
-    if (fresh !== committed) {
-      console.error(
-        `✗ ${report} is out of date — run \`pnpm api:reports\` and commit the diff.`
-      );
-      return false;
-    }
+  const fresh = readFileSync(join(OUT, report), "utf8");
+  const same =
+    fresh === committed ||
+    withoutGeneratedNames(fresh) === withoutGeneratedNames(committed);
+  if (!LOCAL && !same) {
+    console.error(
+      `✗ ${report} is out of date — run \`pnpm api:reports\` and commit the diff.`
+    );
+    return false;
+  }
+  // Locally, keep the committed bytes when the only difference is the
+  // bundler's generated naming: rewriting them would put a diff in front of a
+  // reviewer that says nothing about the surface.
+  if (LOCAL && same && fresh !== committed) {
+    writeFileSync(join(ETC, report), committed);
   }
   console.log(`✓ ${report}`);
   return true;
