@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Parse and validate an AdaptTable query on the server — one typed contract from the URL to your backend, for Next.js route handlers, Remix loaders and Server Actions.",
   "keywords": [
     "react",

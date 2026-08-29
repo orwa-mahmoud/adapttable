@@ -1,5 +1,82 @@
 # @adapttable/radix
 
+## 2.6.0
+
+### Minor Changes
+
+- f8ba086: `<kit>/features` now re-exports every type `@adapttable/core/features` publishes,
+  not just the feature factories. Writing a `TableFeature` of your own means naming
+  `Aggregator`, `Command`, `CustomCellEditorRender`, `ExportWriter`,
+  `FilterTypeSpec` or `SidePanelEntry` to register anything on the host, and those
+  were only reachable from `@adapttable/core` — so composing a feature meant
+  importing from two packages instead of the one you mount.
+- f8ba086: Each kit now exports `MobileCardRenderer`, `RowActionsRenderer` and
+  `ToolbarSlots`. `renderCard`, `renderRowActions` and `toolbarSlots` are props
+  on the kit's own `DataTable`, so writing one of those callbacks as a named
+  function — rather than inline, where TypeScript infers it — meant importing its
+  type from `@adapttable/core`, which is the dependency importing from your kit
+  is meant to spare you.
+- f8ba086: Export `DataTablePropsBase`, the half of each `DataTableProps` that carries every
+  prop except the data mode. Extending or wrapping a table's props meant restating
+  them, because the base was declared but never exported — the same shape core has
+  always exported as `BaseDataTableProps`.
+  
+  `@adapttable/unstyled` also exports `IconProps`, which its icons already took.
+
+### Patch Changes
+
+- f8ba086: The filter drawer now slides in and out in every kit.
+  
+  `@adapttable/unstyled` — and so `@adapttable/shadcn` — mounted and unmounted the
+  panel on the same tick it opened, so it appeared and vanished with no motion.
+  It now travels in from the inline-end edge with the backdrop fading alongside,
+  and leaves the same way. While it leaves it is inert and out of the
+  accessibility tree, and focus returns to the trigger immediately rather than
+  when the animation ends.
+  
+  `@adapttable/base-ui` had no transition on its drawer at all, which also meant
+  the swipe-to-dismiss gesture it already enabled moved nothing on screen. The
+  panel now follows the swipe and the backdrop fades with its progress.
+  
+  `@adapttable/radix` ran its panel and Radix's own scrim on different durations
+  and curves, so they finished at different moments, and the panel lost its
+  opacity a moment before it started sliding. Both now run on one pair of tokens,
+  and reduced motion falls through to Radix's unanimated dialog.
+  
+  Mantine, MUI, Chakra and Ant Design keep their own kit's drawer motion.
+- f8ba086: Put the table's grid semantics on the `<table>` element in the Radix Themes and Base UI adapters.
+  Both kits' `Table.Root` spreads unrecognised props onto its own scroll wrapper, so `role="grid"`,
+  `aria-rowcount`, `aria-colcount` and `aria-label` applied to a `<div>` with no role. A windowed
+  table in these two adapters now states its real dataset size to assistive technology, and the table
+  carries its accessible name — matching the other seven adapters.
+- f8ba086: Give the column menu an accessible name in every adapter. The trigger announced that it had expanded
+  something, and what it had expanded could not be identified: four kits opened a `dialog` with no
+  name, and two put the column list inside a wrapper their kit had already marked `presentation` or
+  `tooltip`. The panel is now named in all eight — as the kit's own `dialog` where the kit provides
+  one, and as a named `group` where it does not.
+- f8ba086: Share the rule that keeps an editor's own keys out of the table's key handler, as `stopEditKeys` on
+  `@adapttable/core/adapter`. Enter, Escape and Tab mean something to both an open editor and the grid
+  around it, and custom adapters need the same rule. Behaviour is unchanged in the seven adapters that
+  now share it.
+- f8ba086: Move the rule that decides whether a column header's funnel is lit into core, as
+  `hasActiveHeaderFilter`, so custom markup can light its own headers the way the adapters do.
+  Behaviour is unchanged in the seven adapters that now share it.
+- f8ba086: State the real dataset size on a windowed mobile card list. The cards are a real `<ul>`, so a
+  virtualized or paged list now carries `aria-setsize` on each card with its absolute
+  `aria-posinset` — the list-shaped counterpart to the table's `aria-rowcount`. A list that holds
+  every card says nothing extra, because assistive technology can simply count.
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+  - @adapttable/core@2.9.0
+
 ## 2.5.0
 
 ### Minor Changes

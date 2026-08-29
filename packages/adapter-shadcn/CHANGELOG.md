@@ -1,5 +1,56 @@
 # @adapttable/shadcn
 
+## 2.6.0
+
+### Minor Changes
+
+- f8ba086: `<kit>/features` now re-exports every type `@adapttable/core/features` publishes,
+  not just the feature factories. Writing a `TableFeature` of your own means naming
+  `Aggregator`, `Command`, `CustomCellEditorRender`, `ExportWriter`,
+  `FilterTypeSpec` or `SidePanelEntry` to register anything on the host, and those
+  were only reachable from `@adapttable/core` — so composing a feature meant
+  importing from two packages instead of the one you mount.
+- f8ba086: Each kit now exports `MobileCardRenderer`, `RowActionsRenderer` and
+  `ToolbarSlots`. `renderCard`, `renderRowActions` and `toolbarSlots` are props
+  on the kit's own `DataTable`, so writing one of those callbacks as a named
+  function — rather than inline, where TypeScript infers it — meant importing its
+  type from `@adapttable/core`, which is the dependency importing from your kit
+  is meant to spare you.
+- f8ba086: Export `SavedViewsPanelProps`, the shape `<SavedViewsPanel>` accepts: the views,
+  the five handlers, `labels`, `footer`, `className`, and a `classNames` map merged
+  per key over the shadcn preset. Typing a wrapper around the panel meant restating
+  those fields or reaching into core's chrome props for them.
+
+### Patch Changes
+
+- f8ba086: The filter drawer now slides in and out in every kit.
+  
+  `@adapttable/unstyled` — and so `@adapttable/shadcn` — mounted and unmounted the
+  panel on the same tick it opened, so it appeared and vanished with no motion.
+  It now travels in from the inline-end edge with the backdrop fading alongside,
+  and leaves the same way. While it leaves it is inert and out of the
+  accessibility tree, and focus returns to the trigger immediately rather than
+  when the animation ends.
+  
+  `@adapttable/base-ui` had no transition on its drawer at all, which also meant
+  the swipe-to-dismiss gesture it already enabled moved nothing on screen. The
+  panel now follows the swipe and the backdrop fades with its progress.
+  
+  `@adapttable/radix` ran its panel and Radix's own scrim on different durations
+  and curves, so they finished at different moments, and the panel lost its
+  opacity a moment before it started sliding. Both now run on one pair of tokens,
+  and reduced motion falls through to Radix's unanimated dialog.
+  
+  Mantine, MUI, Chakra and Ant Design keep their own kit's drawer motion.
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+  - @adapttable/unstyled@2.6.0
+
 ## 2.5.0
 
 ### Minor Changes

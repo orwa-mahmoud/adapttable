@@ -1,5 +1,23 @@
 # @adapttable/server
 
+## 0.1.1
+
+### Patch Changes
+
+- f8ba086: The README states the query parser's measured size, 1.6 KB gzipped, and the
+  bundle budget now checks that figure against the build.
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+- Updated dependencies [f8ba086]
+  - @adapttable/core@2.9.0
+
 ## 0.1.0
 
 ### Minor Changes
