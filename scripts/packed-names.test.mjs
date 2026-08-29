@@ -98,11 +98,16 @@ describe("the built declarations honour NAMEABLE", () => {
     "and the reader is strict enough to fail",
     { skip: !existsSync(sparkline) },
     () => {
-      // `ColumnHeaderContext` is a member type of `ColumnDef` that no entry
-      // point exports. If this ever passes, the check has stopped checking.
+      // `pivot` is the engine behind a different subpath, and `/sparkline` has
+      // no business exporting it. A control that names a member type would not
+      // hold any more: closing the member-type closure made every one of those
+      // reachable from the entry that hands it back.
       assert.deepEqual(
-        missingNames(readFileSync(sparkline, "utf8"), ["ColumnHeaderContext"]),
-        ["ColumnHeaderContext"]
+        missingNames(readFileSync(sparkline, "utf8"), [
+          "pivot",
+          "useDataTable",
+        ]),
+        ["pivot", "useDataTable"]
       );
     }
   );

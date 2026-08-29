@@ -1,13 +1,25 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   ALIAS_REPORT,
   aliasNames,
   classifyForgottenExport,
   summarize,
+  VALUE_BACKED,
   withoutGeneratedNames,
 } from "./api-warnings.mjs";
+
+const CORE_SRC = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "packages",
+  "core",
+  "src"
+);
 
 const ALIASES = aliasNames(
   [
@@ -185,39 +197,118 @@ describe("summarize", () => {
 });
 
 describe("withoutGeneratedNames", () => {
+  const fold = (text, report = ALIAS_REPORT) =>
+    withoutGeneratedNames(text, ALIASES, report);
+
   // The build does not settle on one spelling: the same source emits
   // `pinnedRowPart$1` on some runs and `pinnedRowPart_2` on others, because the
   // declaration bundler sometimes inlines a shared declaration and sometimes
   // hoists it. Byte-comparing reports therefore failed about half the time on a
   // change that altered nothing.
-  it("folds both suffix spellings to the same text", () => {
-    const dollar = "export const pinnedRowPart: typeof pinnedRowPart$1;";
-    const underscore = "export const pinnedRowPart: typeof pinnedRowPart_2;";
+  it("folds both suffix spellings of a real alias", () => {
     assert.equal(
-      withoutGeneratedNames(dollar),
-      withoutGeneratedNames(underscore)
+      fold("export const pinnedRowPart: typeof pinnedRowPart$1;"),
+      fold("export const pinnedRowPart: typeof pinnedRowPart_2;")
+    );
+  });
+
+  it("folds a member that references the alias too", () => {
+    assert.equal(
+      fold("    readonly slots: EditableCellSlots$1;"),
+      fold("    readonly slots: EditableCellSlots_2;")
     );
   });
 
   it("leaves the public name on the left untouched", () => {
     assert.match(
-      withoutGeneratedNames(
-        "export type EditableCellSlots = EditableCellSlots_2;"
-      ),
+      fold("export type EditableCellSlots = EditableCellSlots_2;"),
       /^export type EditableCellSlots = /
+    );
+  });
+
+  // Folding every identifier that merely ends in `_N` would let a renamed
+  // member through a check whose whole job is to catch it.
+  it("does NOT fold a renamed member that is not an alias", () => {
+    assert.notEqual(fold("    field_2: string;"), fold("    field_3: string;"));
+  });
+
+  it("does NOT fold a changed string literal", () => {
+    assert.notEqual(
+      fold('export const K = "value_2";'),
+      fold('export const K = "value_3";')
     );
   });
 
   it("does not touch a name that merely ends in a digit", () => {
     const line = "export const useDataTable2: number;";
-    assert.equal(withoutGeneratedNames(line), line);
+    assert.equal(fold(line), line);
   });
 
-  // The surface itself is still compared exactly, by check-api-contract.mjs.
-  it("still distinguishes two different public names", () => {
+  // Two conditions, both proven: the right report AND a real alias under the
+  // suffix. An alias name reported from elsewhere is a finding, not an artifact.
+  it("folds nothing outside the report the aliases roll into", () => {
     assert.notEqual(
-      withoutGeneratedNames("export const a: typeof a$1;"),
-      withoutGeneratedNames("export const b: typeof b$1;")
+      fold("typeof pinnedRowPart$1;", "core-pivot.api.md"),
+      fold("typeof pinnedRowPart_2;", "core-pivot.api.md")
     );
+  });
+
+  it("still distinguishes two different alias names", () => {
+    assert.notEqual(
+      fold("export const pinnedRowPart: typeof pinnedRowPart$1;"),
+      fold("export const EditableCellSlots: typeof EditableCellSlots$1;")
+    );
+  });
+});
+
+describe("the value-backed class", () => {
+  it("defers only the exact report-and-symbol pairs listed", () => {
+    for (const [report, symbol] of VALUE_BACKED) {
+      assert.equal(
+        classify({ symbol, report, isMainEntry: report === "core.api.md" })
+          .kind,
+        "value-backed",
+        `${report} ${symbol}`
+      );
+    }
+  });
+
+  it("does NOT defer the same symbol on a report it is not listed for", () => {
+    assert.equal(
+      classify({ symbol: "FILTER_TYPES", report: "core-stream.api.md" }).kind,
+      "subpath"
+    );
+  });
+
+  it("does NOT defer a different symbol on a listed report", () => {
+    assert.equal(
+      classify({ symbol: "SomethingElse", report: "core-query.api.md" }).kind,
+      "subpath"
+    );
+  });
+
+  // The class claims each of these is a runtime value that a public type is
+  // derived from. If that stops being true, the reason for the deferral is
+  // gone and this fails rather than quietly carrying on.
+  it("every listed symbol really is a value a public type is built from", () => {
+    const sources = [
+      "filters/filterDefs.ts",
+      "formula/evaluate.ts",
+      "editing/cellEditing.ts",
+      "editing/editableCellController.ts",
+    ].map((f) => readFileSync(join(CORE_SRC, f), "utf8"));
+    const all = sources.join("\n");
+    for (const symbol of new Set(VALUE_BACKED.map(([, s]) => s))) {
+      const declaresValue = new RegExp(
+        `^export (?:declare )?(?:const|function) ${symbol}\\b`,
+        "m"
+      ).test(all);
+      assert.ok(declaresValue, `${symbol} is declared as a value`);
+      assert.ok(
+        all.includes(`typeof ${symbol}`) ||
+          all.includes(`ReturnType<typeof ${symbol}>`),
+        `${symbol} has a public type derived from it`
+      );
+    }
   });
 });

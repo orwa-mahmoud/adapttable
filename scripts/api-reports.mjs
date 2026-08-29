@@ -80,13 +80,14 @@ const counts = {
   published: 0,
   subpath: 0,
   frontDoor: 0,
+  valueBacked: 0,
   unresolvedLink: 0,
   missingReleaseTag: 0,
   other: 0,
 };
 
-/** Front doors that are not clean, named so the failure is actionable. */
-const frontDoorFindings = [];
+/** Every entry point that hands back a type it does not export, named. */
+const findings = [];
 
 /** api-extractor's opening lines, said once for the run rather than per entry. */
 const SAID_ONCE = new Set([
@@ -206,12 +207,21 @@ function extractOne({ dir, report, entry, isMainEntry }) {
         message.text += ` — deferred: ${report} exports ${base}, and ${suffix} is the bundler's private copy`;
         return;
       }
+      if (kind === "value-backed") {
+        // Counted and named, never silent: the whole point is that the list
+        // cannot grow without someone deciding it should.
+        counts.valueBacked += 1;
+        message.logLevel = "none";
+        message.text += ` — deferred: ${base} is a runtime value a public type is derived from, and ${report} is sold on being small`;
+        return;
+      }
       if (kind === "front-door") {
         counts.frontDoor += 1;
-        frontDoorFindings.push(`${report}: ${named?.[1] ?? "?"}`);
+        findings.push(`${report}: ${named?.[1] ?? "?"} (main entry)`);
         return;
       }
       counts.subpath += 1;
+      findings.push(`${report}: ${named?.[1] ?? "?"}`);
     },
   });
   if (!result.succeeded) {
@@ -221,7 +231,8 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   const fresh = readFileSync(join(OUT, report), "utf8");
   const same =
     fresh === committed ||
-    withoutGeneratedNames(fresh) === withoutGeneratedNames(committed);
+    withoutGeneratedNames(fresh, ALIASES, report) ===
+      withoutGeneratedNames(committed, ALIASES, report);
   if (!LOCAL && !same) {
     console.error(
       `✗ ${report} is out of date — run \`pnpm api:reports\` and commit the diff.`
@@ -257,15 +268,24 @@ if (LOCAL) {
   );
 }
 console.log(summarize(counts));
-// The front door is the promise: a type an exported signature hands back must
-// be nameable from the same import. Subpath entries publish the machinery —
-// `/adapter` alone would drag two thirds of core into the public surface — so
-// they stay informational. A main entry is what an application imports, and
-// one that hands back a type nobody can write is a hole in the contract.
-if (counts.frontDoor > 0) {
+// The promise, at every documented entry point rather than only the front
+// doors: a type an exported signature hands back must be nameable from the
+// same import. `docs/versioning.md` lists the focused subpaths as supported
+// entry points, so a consumer of `@adapttable/core/pivot` is owed the parts of
+// what `/pivot` returns, exactly as a consumer of the main entry is.
+//
+// Closing that took the count from 149 to 0 over seven rounds, and it cost far
+// less than it looked: of the 413 routes it opened, 380 are types the package
+// already supported on `@adapttable/core` and could not be named from the entry
+// that returns them.
+const holes = counts.frontDoor + counts.subpath;
+if (holes > 0) {
+  const shown = findings.slice(0, 40).join("\n  ");
+  const rest = findings.length - 40;
+  const more = rest > 0 ? `\n  … and ${rest} more` : "";
   console.error(
-    `\n✗ ${counts.frontDoor} public signature(s) hand back a type their own entry point does not export:\n  ` +
-      `${frontDoorFindings.join("\n  ")}\n  ` +
+    `\n✗ ${holes} public signature(s) hand back a type their own entry point does not export:\n  ` +
+      `${shown}${more}\n  ` +
       `Export the type from that entry, or give the signature one the entry already names.`
   );
   ok = false;

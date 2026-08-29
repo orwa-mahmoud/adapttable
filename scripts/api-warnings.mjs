@@ -33,6 +33,36 @@ import { exportedNames } from "./packed-names.mjs";
 /** The report the main-entry aliases are rolled into. */
 export const ALIAS_REPORT = "core.api.md";
 
+/**
+ * The exact places a public type is derived from a runtime value.
+ *
+ * `FilterType` is `(typeof FILTER_TYPES)[number]`, and `FormulaErrorCode` is
+ * the same shape over `FORMULA_ERRORS`. Naming the type from a subpath means
+ * re-exporting the const, and a value re-export ships bytes: measured
+ * 2026-08-29, adding these to the entry barrels cost 0.1–0.2 KB gzipped on
+ * every one of the eight adapters, took `unstyled` from 0.2 KB of headroom to
+ * 0.0, and moved `core/pivot` from 1.5 KB to 1.6 — a published figure. The
+ * entries whose whole promise is that they are small do not pay that for a
+ * name a consumer can already reach from `@adapttable/core`.
+ *
+ * Frozen, and exact: report and symbol both. Anything not on this list is a
+ * finding, including a different symbol on one of these same reports.
+ */
+export const VALUE_BACKED = [
+  ["core-adapter.api.md", "FILTER_TYPES"],
+  ["core-features.api.md", "FILTER_TYPES"],
+  ["core-formula.api.md", "FILTER_TYPES"],
+  ["core-pdf.api.md", "FILTER_TYPES"],
+  ["core-pivot.api.md", "FILTER_TYPES"],
+  ["core-query.api.md", "FORMULA_ERRORS"],
+  ["core-sparkline.api.md", "FILTER_TYPES"],
+  ["core-xlsx.api.md", "FILTER_TYPES"],
+];
+
+const VALUE_BACKED_KEYS = new Set(
+  VALUE_BACKED.map(([r, s]) => `${r}\u0000${s}`)
+);
+
 /** The suffix shapes the declaration bundler assigns to a duplicate. */
 const GENERATED = /^(?<base>[A-Za-z_$][\w$]*?)(?<suffix>[$_]\d+)$/;
 
@@ -40,7 +70,7 @@ const GENERATED = /^(?<base>[A-Za-z_$][\w$]*?)(?<suffix>[$_]\d+)$/;
 const IDENTIFIER = /[A-Za-z_$][\w$]*/g;
 
 /**
- * A report with the bundler's generated names folded to one spelling.
+ * A report with the deprecated aliases' generated names folded to one spelling.
  *
  * The suffix is assigned by collision order, and this repository's build does
  * not settle on one: the same source emits `pinnedRowPart$1` on some runs and
@@ -49,15 +79,25 @@ const IDENTIFIER = /[A-Za-z_$][\w$]*/g;
  * reports byte for byte therefore fails roughly half the time on a change that
  * altered nothing.
  *
- * Folding the suffix compares the contract instead of the bundler's private
- * naming. Nothing is lost: the name on the LEFT of each of those lines is
- * untouched, and `check-api-contract.mjs` compares the exported names exactly,
- * so a real symbol whose name ended in `_2` could not hide here.
+ * Only the proven case is folded, and it has to prove itself twice: the report
+ * must be the one the aliases roll into, and the name under the suffix must be
+ * a real alias from `mainEntryAliases.ts`. Folding every identifier that merely
+ * ENDS in `_2` would compare a renamed member or a changed string literal as
+ * equal — `field_2` becoming `field_3`, or `"value_2"` becoming `"value_3"`,
+ * would both slip through a check whose whole job is to catch them.
+ *
+ * @param report - The report text.
+ * @param aliases - The alias names, from {@link aliasNames}.
+ * @param reportName - Which report this is; only {@link ALIAS_REPORT} folds.
  */
-export function withoutGeneratedNames(report) {
-  return report.replace(IDENTIFIER, (name) =>
-    name.replace(GENERATED, "$<base><generated>")
-  );
+export function withoutGeneratedNames(report, aliases, reportName) {
+  if (reportName !== ALIAS_REPORT) return report;
+  return report.replace(IDENTIFIER, (name) => {
+    const found = GENERATED.exec(name);
+    return found && aliases.has(found.groups.base)
+      ? `${found.groups.base}<generated>`
+      : name;
+  });
 }
 
 /**
@@ -114,6 +154,9 @@ export function classifyForgottenExport({
   if (suffix && entryExported.has(base)) {
     return { kind: "published", base, suffix };
   }
+  if (VALUE_BACKED_KEYS.has(`${report}\u0000${symbol}`)) {
+    return { kind: "value-backed", base, suffix };
+  }
   return { kind: isMainEntry ? "front-door" : "subpath", base, suffix };
 }
 
@@ -128,6 +171,8 @@ export function summarize(counts) {
   const said = [];
   if (counts.alias) said.push(`${counts.alias} deprecated-alias artifact(s)`);
   if (counts.published) said.push(`${counts.published} published-name copy(s)`);
+  if (counts.valueBacked)
+    said.push(`${counts.valueBacked} value-backed type(s)`);
   if (counts.subpath) said.push(`${counts.subpath} on a subpath entry`);
   if (counts.frontDoor) said.push(`${counts.frontDoor} at a front door`);
   if (counts.unresolvedLink)
