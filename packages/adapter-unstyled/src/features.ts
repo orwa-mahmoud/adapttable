@@ -62,6 +62,7 @@ export {
   multiSort,
   nestedTable,
   type NestedTableFor,
+  print,
   resizableColumns,
   rowAppearance,
   rowDetail,

@@ -18,7 +18,7 @@ import { LiveRegion } from "./LiveRegion";
 /**
  * Props for {@link TableStatusAnnouncer}.
  *
- * @internal
+ * @public
  */
 export interface TableStatusAnnouncerProps {
   /** What to announce, from `useDataTableShell().statusAnnouncement`. */
@@ -30,7 +30,7 @@ export interface TableStatusAnnouncerProps {
  *
  * @param props - See {@link TableStatusAnnouncerProps}.
  *
- * @internal
+ * @public
  */
 export function TableStatusAnnouncer({
   announcement,

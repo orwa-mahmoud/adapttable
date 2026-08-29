@@ -3415,7 +3415,7 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly total: number;
 }
 
-// @internal
+// @public
 export interface TableStatusAnnouncementOptions {
     labels: Required<TableLabels>;
     limit: number;
@@ -3428,10 +3428,10 @@ export interface TableStatusAnnouncementOptions {
     total: number;
 }
 
-// @internal
+// @public
 export function TableStatusAnnouncer(input: Readonly<TableStatusAnnouncerProps>): ReactElement;
 
-// @internal
+// @public
 export interface TableStatusAnnouncerProps {
     announcement: string;
 }
@@ -3864,7 +3864,7 @@ export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>
 // @public
 export function useTableFeatures<P extends object>(incoming: P): P;
 
-// @internal
+// @public
 export function useTableStatusAnnouncement(options: TableStatusAnnouncementOptions): string;
 
 // @public

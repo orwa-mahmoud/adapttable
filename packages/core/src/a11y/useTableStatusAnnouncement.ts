@@ -25,7 +25,7 @@ export type { SortDirection };
 /**
  * Options for {@link useTableStatusAnnouncement}.
  *
- * @internal
+ * @public
  */
 export interface TableStatusAnnouncementOptions {
   /** Resolved labels — the announcements are built from them. */
@@ -141,7 +141,7 @@ export function resolveTableStatus(
  * @param options - See {@link TableStatusAnnouncementOptions}.
  * @returns The current announcement — `""` until something changes.
  *
- * @internal
+ * @public
  */
 export function useTableStatusAnnouncement(
   options: TableStatusAnnouncementOptions
