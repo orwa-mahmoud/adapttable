@@ -10,11 +10,12 @@
  *   1. ESM import + the `@adapttable/core/adapter` subpath   (node, npm install)
  *   2. CommonJS require of the same three entrypoints         (node)
  *   3. Types under moduleResolution node16 / nodenext / bundler (tsc ×3)
- *   4. The same install resolves under pnpm as well as npm
- *   5. Adapter CSS ships and is non-empty (base-ui styles.css)
- *   6. `@adapttable/server` parses a query in a backend with NO React
- *   7. A Vite production build of a real table                (vite build)
- *   8. A Next.js App Router build whose prerender renders rows (next build)
+ *   4. Every type a subpath hands back is nameable from that subpath
+ *   5. The same install resolves under pnpm as well as npm
+ *   6. Adapter CSS ships and is non-empty (base-ui styles.css)
+ *   7. `@adapttable/server` parses a query in a backend with NO React
+ *   8. A Vite production build of a real table                (vite build)
+ *   9. A Next.js App Router build whose prerender renders rows (next build)
  *
  * Monorepo tests can never see these failures: they resolve source, not
  * `exports` maps, tarball file lists, or bundler resolution rules.
@@ -36,6 +37,8 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { missingNames, NAMEABLE, NAMEABLE_PROBE } from "./packed-names.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Absolute executable paths — never a bare name off a writable PATH. npm
@@ -141,7 +144,7 @@ function main() {
       .map(([name, file]) => `  "${name}": "file:${file}"`)
       .join("\n")}\n`;
 
-  // ── 1–5. Resolution scratch: ESM, CJS, tsc ×3, pnpm, CSS ─────────────
+  // ── 1–6. Resolution scratch: ESM, CJS, tsc ×3, names, pnpm, CSS ──────
   const resDir = scratch("resolution");
   writeFileSync(
     join(resDir, "package.json"),
@@ -219,6 +222,7 @@ export const surface = { useQuerySource, useDataTableShell, DataTable };
 export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
 `
   );
+  writeFileSync(join(resDir, "nameable.ts"), NAMEABLE_PROBE);
   for (const resolution of ["node16", "nodenext", "bundler"]) {
     writeFileSync(
       join(resDir, `tsconfig.${resolution}.json`),
@@ -234,7 +238,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
             skipLibCheck: true,
             noEmit: true,
           },
-          include: ["probe.ts"],
+          include: ["probe.ts", "nameable.ts"],
         },
         null,
         2
@@ -264,6 +268,30 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
     );
     console.log("ok");
   }
+
+  process.stdout.write("packed declarations name their own types … ");
+  for (const [entry, names] of NAMEABLE) {
+    const dtsPath = join(
+      resDir,
+      "node_modules",
+      "@adapttable",
+      "core",
+      "dist",
+      `${entry}.d.ts`
+    );
+    if (!existsSync(dtsPath)) {
+      console.error(`\n✗ the packed core ships no dist/${entry}.d.ts`);
+      process.exit(1);
+    }
+    const missing = missingNames(readFileSync(dtsPath, "utf8"), names);
+    if (missing.length > 0) {
+      console.error(
+        `\n✗ @adapttable/core/${entry} hands back ${missing.join(", ")} but its packed declaration exports no such name — a consumer cannot write the type`
+      );
+      process.exit(1);
+    }
+  }
+  console.log("ok");
 
   process.stdout.write("adapter CSS ships (base-ui styles.css) … ");
   const cssPath = join(
@@ -302,7 +330,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   run(process.execPath, ["esm.mjs"], pnpmDir, "ESM import under pnpm");
   console.log("ok");
 
-  // ── 6. A backend with no React at all ─────────────────────────────────
+  // ── 7. A backend with no React at all ─────────────────────────────────
   //
   // Every scratch app above has React, because every one of them renders a
   // table. `@adapttable/server` renders nothing: it reads a query string inside
@@ -441,7 +469,7 @@ if (wrong.length > 0)
   run(process.execPath, ["parse.cjs"], nodeDir, "react-free CJS parse");
   console.log("ok");
 
-  // ── 7. Vite production build ──────────────────────────────────────────
+  // ── 8. Vite production build ──────────────────────────────────────────
   const viteDir = scratch("vite");
   mkdirSync(join(viteDir, "src"), { recursive: true });
   writeFileSync(
@@ -500,7 +528,7 @@ createRoot(document.getElementById("root")!).render(
   }
   console.log("ok");
 
-  // ── 8. Next.js App Router build + prerender ───────────────────────────
+  // ── 9. Next.js App Router build + prerender ───────────────────────────
   const nextDir = scratch("next");
   mkdirSync(join(nextDir, "app"), { recursive: true });
   writeFileSync(
