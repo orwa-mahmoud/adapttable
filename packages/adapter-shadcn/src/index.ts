@@ -39,7 +39,10 @@ export {
   type EditUnit,
   type ExportCsvOptions,
   FILTER_TYPES,
+  type MobileCardRenderer,
+  type RowActionsRenderer,
   type TableQuery,
+  type ToolbarSlots,
   type UseServerDataOptions,
   type UseTableDataOptions,
 } from "@adapttable/core";
