@@ -40,7 +40,11 @@ export interface ContextMenuOptions<TRow> {
   items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 }
 
-/** What {@link useTableContextMenu} needs. */
+/**
+ * What {@link useTableContextMenu} needs.
+ *
+ * @public
+ */
 export interface TableContextMenuOptions<TRow> {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   contextMenu?: boolean | ContextMenuOptions<TRow>;

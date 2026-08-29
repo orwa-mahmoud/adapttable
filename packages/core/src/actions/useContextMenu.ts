@@ -20,7 +20,11 @@ import { useCallback, useRef, useState } from "react";
 
 import type { ContextMenuTarget } from "./contextMenuModel";
 
-/** Where on screen the menu should appear. */
+/**
+ * Where on screen the menu should appear.
+ *
+ * @public
+ */
 export interface ContextMenuPoint {
   /** Viewport x, in pixels. */
   x: number;

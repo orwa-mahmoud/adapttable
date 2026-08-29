@@ -550,7 +550,11 @@ export function undoRedoToolbar<TRow>(
   };
 }
 
-/** The print button's half of a toolbar's props. */
+/**
+ * The print button's half of a toolbar's props.
+ *
+ * @public
+ */
 export interface PrintToolbar {
   /** Runs the print layout, absent when printing is off. */
   onPrint?: () => void;

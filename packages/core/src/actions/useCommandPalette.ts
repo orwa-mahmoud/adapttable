@@ -42,7 +42,11 @@ export interface CommandPaletteOptions {
   shortcuts?: readonly Shortcut[];
 }
 
-/** What {@link useCommandPalette} needs. */
+/**
+ * What {@link useCommandPalette} needs.
+ *
+ * @public
+ */
 export interface UseCommandPaletteOptions extends TableCommandOptions {
   /** The prop as the host wrote it: `true`, an options object, or absent. */
   commandPalette?: boolean | CommandPaletteOptions;
