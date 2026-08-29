@@ -17,10 +17,18 @@
 import type { ReactElement, ReactNode } from "react";
 
 import type { TableLabels } from "../types";
+import type { Density } from "../url/useDensityUrlState";
 
+/**
+ * Row density, as the table's own prop spells it.
+ *
+ * Re-exported from the hook that owns it rather than spelled again here. A
+ * second declaration of the same union reads as harmless and is not: both land
+ * in core's rollup, the declaration bundler renames one `Density_2`, and every
+ * public signature that reaches the copy then names a type no consumer can
+ * import.
+ */
 export type { Density };
-/** Row density, as the table's own prop spells it. */
-type Density = "comfortable" | "compact";
 
 /**
  * The props a nested table must be mounted with, handed to the host's `table`

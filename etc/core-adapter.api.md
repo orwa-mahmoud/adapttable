@@ -2068,7 +2068,7 @@ export function multiDraftFromSelect(select: HTMLSelectElement): string;
 
 // @public
 export interface NestedTableDefaults {
-    density: Density_2 | undefined;
+    density: Density | undefined;
     labels: TableLabels | undefined;
     searchable: boolean;
     tableLabel: string;
@@ -2090,7 +2090,7 @@ export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 
 // @public
 export interface NestedTableParent {
-    density?: Density_2;
+    density?: Density;
     labels?: TableLabels;
 }
 

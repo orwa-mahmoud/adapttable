@@ -35,6 +35,12 @@ import { fileURLToPath } from "node:url";
 import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
 import { entrypoints } from "./api-entrypoints.mjs";
+import {
+  aliasNames,
+  classifyForgottenExport,
+  entryExports,
+  summarize,
+} from "./api-warnings.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ETC = join(REPO_ROOT, "etc");
@@ -53,35 +59,48 @@ if (!LOCAL && existsSync(ETC)) {
   }
 }
 
-/**
- * Names the deprecated main-entry aliases re-export. The alias and its source
- * module both land in core's rollup, so the d.ts bundler renames the second
- * copy (`pinnedRowPart$1`) and API Extractor then reports a symbol that exists
- * only because of the duplication. Keyed on the BASE name, never the generated
- * one: `$1` is assigned by collision order, so a literal list would silently
- * stop matching the day another duplicate appears. The set empties itself when
- * the aliases are deleted.
- */
-const ALIAS_NAMES = new Set(
-  [
-    ...readFileSync(
-      join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
-      "utf8"
-    ).matchAll(/^export\s+(?:type|const)\s+([A-Za-z_$][\w$]*)/gm),
-  ].map((m) => m[1])
+/** Every deprecated main-entry alias, read from the module that declares them. */
+const ALIASES = aliasNames(
+  readFileSync(
+    join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
+    "utf8"
+  )
 );
 
-/** Warnings deferred behind ALIAS_NAMES, counted for one closing summary. */
-let deferredAliasWarnings = 0;
-let deferredSubpathWarnings = 0;
-let frontDoorWarnings = 0;
-let compilerNoticeShown = false;
+/**
+ * One tally per warning class, so the closing line can name every one.
+ *
+ * A run that silences a class without counting it reports zero warnings while
+ * holding some, which is the failure mode this replaced.
+ */
+const counts = {
+  alias: 0,
+  published: 0,
+  subpath: 0,
+  frontDoor: 0,
+  unresolvedLink: 0,
+  missingReleaseTag: 0,
+  other: 0,
+};
+
+/** Front doors that are not clean, named so the failure is actionable. */
+const frontDoorFindings = [];
+
+/** api-extractor's opening lines, said once for the run rather than per entry. */
+const SAID_ONCE = new Set([
+  "console-preamble",
+  "console-compiler-version-notice",
+]);
+const shown = new Set();
 
 function extractOne({ dir, report, entry, isMainEntry }) {
   if (!existsSync(entry)) {
     console.error(`✗ ${report}: missing ${entry} — run \`pnpm build\` first.`);
     return false;
   }
+  // Read once per entry: the `published` class is proved against the very
+  // declaration being extracted, not against a list kept beside it.
+  const entryExported = entryExports(entry);
   const config = ExtractorConfig.prepare({
     configObject: {
       projectFolder: join(REPO_ROOT, "packages", dir),
@@ -127,11 +146,15 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     localBuild: true,
     showVerboseMessages: false,
     messageCallback: (message) => {
-      // Said once per report otherwise, and it is about api-extractor's own
-      // bundled TypeScript rather than anything in this repository.
-      if (message.messageId === "console-compiler-version-notice") {
-        if (compilerNoticeShown) message.logLevel = "none";
-        compilerNoticeShown = true;
+      // Both of api-extractor's opening lines are emitted once per
+      // extraction, and this runs one extraction per entry point — 103 copies
+      // of two sentences about api-extractor's own bundled TypeScript. Each is
+      // said once for the run: kept, so the version mismatch is still visible,
+      // but not repeated. `console-preamble` is the line naming the bundled
+      // version; the notice beside it is the one comparing it to this project.
+      if (SAID_ONCE.has(message.messageId)) {
+        if (shown.has(message.messageId)) message.logLevel = "none";
+        shown.add(message.messageId);
         return;
       }
       // This repository exports its internal machinery without an underscore
@@ -141,33 +164,47 @@ function extractOne({ dir, report, entry, isMainEntry }) {
         message.logLevel = "none";
         return;
       }
-      // A symbol the d.ts bundler invented for a deprecated alias's duplicate.
-      if (message.messageId === "ae-forgotten-export") {
-        const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
-        const symbol = named?.[1] ?? "";
-        const generated = /[$_]\d+$/.test(symbol);
-        const base = symbol.replace(/[$_]\d+$/, "");
-        // A name the d.ts bundler invented while flattening a duplicate. No
-        // edit to this repository can produce or remove it.
-        if (generated || ALIAS_NAMES.has(base)) {
-          deferredAliasWarnings += 1;
-          message.logLevel = "none";
-          return;
-        }
-        // The front door is the promise: a type an exported signature hands
-        // back must be nameable from the same import. Subpath entries publish
-        // the machinery — `/adapter` alone would drag two thirds of core into
-        // the public surface — so they stay informational.
-        // Ready to become an error the moment the front doors are clean. One
-        // is not: shadcn's saved-views panel types its props from core's chrome
-        // props, and exporting that type pulls its whole slot family with it —
-        // each promotion naming the next. Parked for the owner.
-        if (isMainEntry) {
-          frontDoorWarnings += 1;
-          return;
-        }
-        deferredSubpathWarnings += 1;
+      if (message.messageId === "ae-unresolved-link") {
+        counts.unresolvedLink += 1;
+        return;
       }
+      if (message.messageId === "ae-missing-release-tag") {
+        counts.missingReleaseTag += 1;
+        return;
+      }
+      if (message.messageId !== "ae-forgotten-export") {
+        // Only api-extractor's own analysis messages are warnings about this
+        // repository; its console chatter is not.
+        if (message.messageId.startsWith("ae-")) counts.other += 1;
+        return;
+      }
+      const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
+      const { kind, base, suffix } = classifyForgottenExport({
+        symbol: named?.[1] ?? "",
+        report,
+        isMainEntry,
+        aliases: ALIASES,
+        exports: entryExported,
+      });
+      if (kind === "alias") {
+        // Named in full so a deferral can be audited from the log alone.
+        counts.alias += 1;
+        message.logLevel = "none";
+        message.text += ` — deferred: ${base} is a deprecated main-entry alias and ${suffix} is the bundler's copy of it`;
+        return;
+      }
+      if (kind === "published") {
+        counts.published += 1;
+        message.logLevel = "none";
+        message.text += ` — deferred: ${report} exports ${base}, and ${suffix} is the bundler's private copy`;
+        return;
+      }
+      if (kind === "front-door") {
+        counts.frontDoor += 1;
+        frontDoorFindings.push(`${report}: ${named?.[1] ?? "?"}`);
+        return;
+      }
+      counts.subpath += 1;
     },
   });
   if (!result.succeeded) {
@@ -196,16 +233,23 @@ for (const target of entrypoints()) {
   ok = extractOne(target) && ok;
 }
 if (!LOCAL) rmSync(OUT, { recursive: true, force: true });
-if (!ok) process.exit(1);
 console.log(
   LOCAL
     ? "\napi-reports: regenerated — commit any changes under etc/."
     : "\napi-reports: every committed report matches the built types."
 );
-if (deferredAliasWarnings > 0 || deferredSubpathWarnings > 0) {
-  console.log(
-    `api-reports: ${deferredAliasWarnings} bundler-invented and ` +
-      `${deferredSubpathWarnings} subpath forgotten-export warning(s) deferred. ` +
-      `${frontDoorWarnings} at a front door.`
+console.log(summarize(counts));
+// The front door is the promise: a type an exported signature hands back must
+// be nameable from the same import. Subpath entries publish the machinery —
+// `/adapter` alone would drag two thirds of core into the public surface — so
+// they stay informational. A main entry is what an application imports, and
+// one that hands back a type nobody can write is a hole in the contract.
+if (counts.frontDoor > 0) {
+  console.error(
+    `\n✗ ${counts.frontDoor} public signature(s) hand back a type their own entry point does not export:\n  ` +
+      `${frontDoorFindings.join("\n  ")}\n  ` +
+      `Export the type from that entry, or give the signature one the entry already names.`
   );
+  ok = false;
 }
+if (!ok) process.exit(1);

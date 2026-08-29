@@ -2508,7 +2508,7 @@ export interface NestedTable {
 
 // @public
 export interface NestedTableDefaults {
-    density: Density_2 | undefined;
+    density: Density | undefined;
     labels: TableLabels | undefined;
     searchable: boolean;
     tableLabel: string;
