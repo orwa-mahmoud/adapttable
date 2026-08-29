@@ -26,6 +26,10 @@ const REPORT = [
   "// @internal",
   "export declare function mergeProps(): void;",
   "",
+  "// @public",
+  "function print_2<TRow>(onPrint: () => void): TableFeature<TRow>;",
+  "export { print_2 as print }",
+  "",
   "export { ColumnDef, pinnedRowPart }",
   "",
 ].join("\n");
@@ -40,7 +44,7 @@ const ENTRY = {
 
 /** A manifest that agrees with REPORT, which each test then breaks one way. */
 const agreeing = () => ({
-  surfaces: { core: ["ColumnDef", "pinnedRowPart"] },
+  surfaces: { core: ["ColumnDef", "pinnedRowPart", "print"] },
   entrypoints: { "core.api.md": { surface: "core" } },
 });
 
@@ -60,7 +64,23 @@ describe("readReport", () => {
     const report = readReport(REPORT);
     assert.equal(report.tagged.pinnedRowPart, "public");
     assert.ok(!("pinnedRowPart_2" in report.tagged));
-    assert.deepEqual(publicNames(report), ["ColumnDef", "pinnedRowPart"]);
+    assert.deepEqual(publicNames(report), [
+      "ColumnDef",
+      "pinnedRowPart",
+      "print",
+    ]);
+  });
+
+  // The other half of the same rule, and the one that hid a real gap: a symbol
+  // whose public name differs from its local one is written as an unexported
+  // declaration plus `export { print_2 as print }`. Reading only the inline
+  // exports drops `print` from the contract entirely; reading the local name
+  // files the contract under a name no import can use.
+  it("files a renamed export under its public name, not its local one", () => {
+    const report = readReport(REPORT);
+    assert.equal(report.tagged.print, "public");
+    assert.ok(!("print_2" in report.tagged));
+    assert.ok(report.exported.has("print"));
   });
 
   it("keeps an @internal declaration out of the public surface", () => {
@@ -83,7 +103,7 @@ describe("both directions", () => {
 
   it("fails an @public symbol the contract does not list", () => {
     const manifest = agreeing();
-    manifest.surfaces.core = ["ColumnDef"];
+    manifest.surfaces.core = ["ColumnDef", "print"];
     assert.match(
       run(manifest)[0],
       /marks 1 symbol\(s\) @public.*pinnedRowPart/
@@ -94,7 +114,12 @@ describe("both directions", () => {
   // withdrawn and the only guard asked the other question.
   it("fails a contracted symbol that is no longer @public", () => {
     const manifest = agreeing();
-    manifest.surfaces.core = ["ColumnDef", "pinnedRowPart", "useDataTable"];
+    manifest.surfaces.core = [
+      "ColumnDef",
+      "pinnedRowPart",
+      "print",
+      "useDataTable",
+    ];
     assert.match(run(manifest)[0], /no longer classifies.*useDataTable/);
   });
 
@@ -125,7 +150,12 @@ describe("both directions", () => {
 describe("the manifest's own shape", () => {
   it("fails a duplicate name inside a surface", () => {
     const manifest = agreeing();
-    manifest.surfaces.core = ["ColumnDef", "pinnedRowPart", "ColumnDef"];
+    manifest.surfaces.core = [
+      "ColumnDef",
+      "pinnedRowPart",
+      "print",
+      "ColumnDef",
+    ];
     assert.ok(run(manifest).some((e) => /lists ColumnDef twice/.test(e)));
   });
 

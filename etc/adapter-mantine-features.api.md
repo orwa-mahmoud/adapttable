@@ -4,54 +4,88 @@
 
 ```ts
 
+import { Aggregator } from '@adapttable/core/features';
 import { applyTableFeatures } from '@adapttable/core/features';
 import { batchEditing } from '@adapttable/core/features';
+import { BatchRowEdit } from '@adapttable/core/features';
+import { BulkAction } from '@adapttable/core/features';
 import { bulkActions } from '@adapttable/core/features';
 import { cellNavigation } from '@adapttable/core/features';
 import { cellSpan } from '@adapttable/core/features';
+import { CellSpanAppearance } from '@adapttable/core/features';
 import { collapsibleColumnGroups } from '@adapttable/core/features';
 import { columnMenu } from '@adapttable/core/features';
+import { ColumnMenuAction } from '@adapttable/core/features';
+import { ColumnMenuActionContext } from '@adapttable/core/features';
+import { ColumnMenuRow } from '@adapttable/core/features';
 import { columnSelectionCheckbox } from '@adapttable/core/features';
+import { Command } from '@adapttable/core/features';
 import { commandPalette } from '@adapttable/core/features';
+import { CommandPaletteOptions } from '@adapttable/core/features';
 import { contextMenu } from '@adapttable/core/features';
+import { ContextMenuItem } from '@adapttable/core/features';
+import { ContextMenuOptions } from '@adapttable/core/features';
+import { ContextMenuTarget } from '@adapttable/core/features';
+import { CustomCellEditorRender } from '@adapttable/core/features';
 import { densityChooser } from '@adapttable/core/features';
 import { dirtyIndicators } from '@adapttable/core/features';
 import { editHistory } from '@adapttable/core/features';
 import { editing } from '@adapttable/core/features';
 import { exportCsv } from '@adapttable/core/features';
+import { ExportCsvOptions } from '@adapttable/core/features';
+import { ExportWriter } from '@adapttable/core/features';
+import { ExtraRow } from '@adapttable/core/features';
 import { extraRows } from '@adapttable/core/features';
 import { feature } from '@adapttable/core/features';
 import { FeatureApplyInput } from '@adapttable/core/features';
 import { FeaturePatch } from '@adapttable/core/features';
+import { FilterDef } from '@adapttable/core/features';
 import { filters } from '@adapttable/core/features';
 import { filterTypes } from '@adapttable/core/features';
+import { FilterTypeSpec } from '@adapttable/core/features';
 import { findInTable } from '@adapttable/core/features';
 import { fitColumns } from '@adapttable/core/features';
 import { fullscreen } from '@adapttable/core/features';
+import { GetCellSpan } from '@adapttable/core/features';
 import { grouping } from '@adapttable/core/features';
+import { GroupSort } from '@adapttable/core/features';
 import { headerFilters } from '@adapttable/core/features';
 import { multiSort } from '@adapttable/core/features';
 import { nestedTable } from '@adapttable/core/features';
-import { print as print_2 } from '@adapttable/core/features';
+import { NestedTableFor } from '@adapttable/core/features';
 import { resizableColumns } from '@adapttable/core/features';
 import { rowAppearance } from '@adapttable/core/features';
 import { rowDetail } from '@adapttable/core/features';
 import { rowEditing } from '@adapttable/core/features';
+import { RowHeight } from '@adapttable/core/features';
 import { rowPinning } from '@adapttable/core/features';
+import { RowPinState } from '@adapttable/core/features';
 import { rowReorder } from '@adapttable/core/features';
+import { RowReorderHandler } from '@adapttable/core/features';
+import { RowStyle } from '@adapttable/core/features';
 import { savedViews } from '@adapttable/core/features';
 import { selectionStats } from '@adapttable/core/features';
 import { sidePanel } from '@adapttable/core/features';
+import { SidePanelEntry } from '@adapttable/core/features';
+import { SidePanelOptions } from '@adapttable/core/features';
 import { statusBar } from '@adapttable/core/features';
 import { TableFeature } from '@adapttable/core/features';
 import { TableFeatureHost } from '@adapttable/core/features';
 import { tree } from '@adapttable/core/features';
 import { undoRedoButtons } from '@adapttable/core/features';
+import { UseSavedViewsOptions } from '@adapttable/core/features';
+import { useTableFeatures } from '@adapttable/core/features';
 import { virtualize } from '@adapttable/core/features';
+
+export { Aggregator }
 
 export { applyTableFeatures }
 
 export { batchEditing }
+
+export { BatchRowEdit }
+
+export { BulkAction }
 
 export { bulkActions }
 
@@ -59,15 +93,35 @@ export { cellNavigation }
 
 export { cellSpan }
 
+export { CellSpanAppearance }
+
 export { collapsibleColumnGroups }
 
 export { columnMenu }
 
+export { ColumnMenuAction }
+
+export { ColumnMenuActionContext }
+
+export { ColumnMenuRow }
+
 export { columnSelectionCheckbox }
+
+export { Command }
 
 export { commandPalette }
 
+export { CommandPaletteOptions }
+
 export { contextMenu }
+
+export { ContextMenuItem }
+
+export { ContextMenuOptions }
+
+export { ContextMenuTarget }
+
+export { CustomCellEditorRender }
 
 export { densityChooser }
 
@@ -79,6 +133,12 @@ export { editing }
 
 export { exportCsv }
 
+export { ExportCsvOptions }
+
+export { ExportWriter }
+
+export { ExtraRow }
+
 export { extraRows }
 
 export { feature }
@@ -87,9 +147,13 @@ export { FeatureApplyInput }
 
 export { FeaturePatch }
 
+export { FilterDef }
+
 export { filters }
 
 export { filterTypes }
+
+export { FilterTypeSpec }
 
 export { findInTable }
 
@@ -97,7 +161,11 @@ export { fitColumns }
 
 export { fullscreen }
 
+export { GetCellSpan }
+
 export { grouping }
+
+export { GroupSort }
 
 export { headerFilters }
 
@@ -105,7 +173,7 @@ export { multiSort }
 
 export { nestedTable }
 
-export { print_2 as print }
+export { NestedTableFor }
 
 export { resizableColumns }
 
@@ -115,15 +183,27 @@ export { rowDetail }
 
 export { rowEditing }
 
+export { RowHeight }
+
 export { rowPinning }
 
+export { RowPinState }
+
 export { rowReorder }
+
+export { RowReorderHandler }
+
+export { RowStyle }
 
 export { savedViews }
 
 export { selectionStats }
 
 export { sidePanel }
+
+export { SidePanelEntry }
+
+export { SidePanelOptions }
 
 export { statusBar }
 
@@ -134,6 +214,10 @@ export { TableFeatureHost }
 export { tree }
 
 export { undoRedoButtons }
+
+export { UseSavedViewsOptions }
+
+export { useTableFeatures }
 
 export { virtualize }
 

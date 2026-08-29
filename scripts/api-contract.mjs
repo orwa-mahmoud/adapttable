@@ -32,8 +32,12 @@
 
 /** A tagged declaration in a report, and the release tag above it. */
 const TAG = /^\/\/ @(public|beta|alpha|internal)\b/;
+// A declaration, exported inline or not. API Extractor writes a symbol whose
+// public name differs from its local one as an unexported declaration plus a
+// renamed export: `function print_2<TRow>(…)` then `export { print_2 as print }`.
 const DECL =
-  /^export (?:declare )?(?:abstract )?(?:function|const|let|var|class|interface|type|enum) ([A-Za-z_$][\w$]*)/;
+  /^(?:export )?(?:declare )?(?:abstract )?(?:function|const|let|var|class|interface|type|enum) ([A-Za-z_$][\w$]*)/;
+const INLINE_EXPORT = /^export /;
 const STAR = /^export \* from "([^"]+)"/;
 
 /**
@@ -46,17 +50,29 @@ const STAR = /^export \* from "([^"]+)"/;
  * private local name that no import can use.
  */
 export function readReport(text) {
-  const tagged = {};
+  const declared = {};
+  const inline = new Set();
   const stars = [];
   let tag = null;
   for (const line of text.split("\n")) {
-    tag = readLine(line, tag, tagged, stars);
+    tag = readLine(line, tag, declared, inline, stars);
   }
-  return { tagged, stars, exported: blockExports(text) };
+  const exported = blockExports(text);
+  // File every declaration under the name a consumer writes. A renamed export
+  // carries the tag of the local declaration behind it, so `print` is public
+  // and `print_2` — the local name, which no import can use — never appears.
+  const tagged = {};
+  for (const [local, publicName] of exported) {
+    if (local in declared) tagged[publicName] = declared[local];
+  }
+  for (const name of inline) {
+    if (name in declared) tagged[name] = declared[name];
+  }
+  return { tagged, stars, exported: new Set(exported.values()) };
 }
 
 /** One line of a report: a tag to remember, a star, a declaration, or noise. */
-function readLine(line, tag, tagged, stars) {
+function readLine(line, tag, declared, inline, stars) {
   const t = TAG.exec(line.trim());
   if (t) return t[1];
   const s = STAR.exec(line);
@@ -65,19 +81,27 @@ function readLine(line, tag, tagged, stars) {
     return null;
   }
   const d = DECL.exec(line);
-  if (d) tagged[d[1]] = tag ?? "untagged";
+  if (d) {
+    declared[d[1]] = tag ?? "untagged";
+    if (INLINE_EXPORT.test(line)) inline.add(d[1]);
+  }
   return null;
 }
 
-/** Every name a trailing `export { … }` block publishes, renames included. */
+/** `local name -> public name` for every `export { … }` specifier. */
 function blockExports(text) {
-  const exported = new Set();
+  const exported = new Map();
   for (const block of text.matchAll(/export \{([^}]*)\}/g)) {
     for (const part of block[1].split(",")) {
       const spec = part.trim();
       if (!spec) continue;
-      const renamed = /\bas ([A-Za-z_$][\w$]*)$/.exec(spec);
-      exported.add(renamed ? renamed[1] : spec.replace(/^type /, ""));
+      const renamed =
+        /^(?:type )?([A-Za-z_$][\w$]*) as ([A-Za-z_$][\w$]*)$/.exec(spec);
+      if (renamed) exported.set(renamed[1], renamed[2]);
+      else {
+        const name = spec.replace(/^type /, "");
+        exported.set(name, name);
+      }
     }
   }
   return exported;
