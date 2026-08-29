@@ -9,7 +9,10 @@ const common: UserConfig = {
   // declaration beside the root's vitest.shared.ts.
   tsconfig: "./tsconfig.build.json",
   format: ["esm", "cjs"],
-  dts: true,
+  // The multi-entry surface shares types across several declaration graphs.
+  // Preparing the complete program before chunking keeps their placement and
+  // generated names deterministic across otherwise identical builds.
+  dts: { eager: true },
   sourcemap: true,
   clean: true,
   treeshake: true,

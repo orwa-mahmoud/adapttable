@@ -10,7 +10,6 @@ import {
   classifyForgottenExport,
   summarize,
   VALUE_BACKED,
-  withoutGeneratedNames,
 } from "./api-warnings.mjs";
 
 const CORE_SRC = join(
@@ -193,71 +192,6 @@ describe("summarize", () => {
 
   it("says so plainly when there is genuinely nothing", () => {
     assert.equal(summarize({}), "api-reports: no warnings of any class.");
-  });
-});
-
-describe("withoutGeneratedNames", () => {
-  const fold = (text, report = ALIAS_REPORT) =>
-    withoutGeneratedNames(text, ALIASES, report);
-
-  // The build does not settle on one spelling: the same source emits
-  // `pinnedRowPart$1` on some runs and `pinnedRowPart_2` on others, because the
-  // declaration bundler sometimes inlines a shared declaration and sometimes
-  // hoists it. Byte-comparing reports therefore failed about half the time on a
-  // change that altered nothing.
-  it("folds both suffix spellings of a real alias", () => {
-    assert.equal(
-      fold("export const pinnedRowPart: typeof pinnedRowPart$1;"),
-      fold("export const pinnedRowPart: typeof pinnedRowPart_2;")
-    );
-  });
-
-  it("folds a member that references the alias too", () => {
-    assert.equal(
-      fold("    readonly slots: EditableCellSlots$1;"),
-      fold("    readonly slots: EditableCellSlots_2;")
-    );
-  });
-
-  it("leaves the public name on the left untouched", () => {
-    assert.match(
-      fold("export type EditableCellSlots = EditableCellSlots_2;"),
-      /^export type EditableCellSlots = /
-    );
-  });
-
-  // Folding every identifier that merely ends in `_N` would let a renamed
-  // member through a check whose whole job is to catch it.
-  it("does NOT fold a renamed member that is not an alias", () => {
-    assert.notEqual(fold("    field_2: string;"), fold("    field_3: string;"));
-  });
-
-  it("does NOT fold a changed string literal", () => {
-    assert.notEqual(
-      fold('export const K = "value_2";'),
-      fold('export const K = "value_3";')
-    );
-  });
-
-  it("does not touch a name that merely ends in a digit", () => {
-    const line = "export const useDataTable2: number;";
-    assert.equal(fold(line), line);
-  });
-
-  // Two conditions, both proven: the right report AND a real alias under the
-  // suffix. An alias name reported from elsewhere is a finding, not an artifact.
-  it("folds nothing outside the report the aliases roll into", () => {
-    assert.notEqual(
-      fold("typeof pinnedRowPart$1;", "core-pivot.api.md"),
-      fold("typeof pinnedRowPart_2;", "core-pivot.api.md")
-    );
-  });
-
-  it("still distinguishes two different alias names", () => {
-    assert.notEqual(
-      fold("export const pinnedRowPart: typeof pinnedRowPart$1;"),
-      fold("export const EditableCellSlots: typeof EditableCellSlots$1;")
-    );
   });
 });
 

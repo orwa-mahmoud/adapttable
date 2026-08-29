@@ -66,40 +66,6 @@ const VALUE_BACKED_KEYS = new Set(
 /** The suffix shapes the declaration bundler assigns to a duplicate. */
 const GENERATED = /^(?<base>[A-Za-z_$][\w$]*?)(?<suffix>[$_]\d+)$/;
 
-/** Any identifier, matched whole so the suffix test below stays anchored. */
-const IDENTIFIER = /[A-Za-z_$][\w$]*/g;
-
-/**
- * A report with the deprecated aliases' generated names folded to one spelling.
- *
- * The suffix is assigned by collision order, and this repository's build does
- * not settle on one: the same source emits `pinnedRowPart$1` on some runs and
- * `pinnedRowPart_2` on others, because the declaration bundler sometimes
- * inlines a shared declaration and sometimes hoists it to a chunk. Comparing
- * reports byte for byte therefore fails roughly half the time on a change that
- * altered nothing.
- *
- * Only the proven case is folded, and it has to prove itself twice: the report
- * must be the one the aliases roll into, and the name under the suffix must be
- * a real alias from `mainEntryAliases.ts`. Folding every identifier that merely
- * ENDS in `_2` would compare a renamed member or a changed string literal as
- * equal — `field_2` becoming `field_3`, or `"value_2"` becoming `"value_3"`,
- * would both slip through a check whose whole job is to catch them.
- *
- * @param report - The report text.
- * @param aliases - The alias names, from {@link aliasNames}.
- * @param reportName - Which report this is; only {@link ALIAS_REPORT} folds.
- */
-export function withoutGeneratedNames(report, aliases, reportName) {
-  if (reportName !== ALIAS_REPORT) return report;
-  return report.replace(IDENTIFIER, (name) => {
-    const found = GENERATED.exec(name);
-    return found && aliases.has(found.groups.base)
-      ? `${found.groups.base}<generated>`
-      : name;
-  });
-}
-
 /**
  * Every name `mainEntryAliases.ts` re-exports.
  *

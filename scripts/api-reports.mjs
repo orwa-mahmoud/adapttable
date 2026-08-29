@@ -27,7 +27,6 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
-  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -41,7 +40,6 @@ import {
   classifyForgottenExport,
   entryExports,
   summarize,
-  withoutGeneratedNames,
 } from "./api-warnings.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -229,21 +227,12 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     return false;
   }
   const fresh = readFileSync(join(OUT, report), "utf8");
-  const same =
-    fresh === committed ||
-    withoutGeneratedNames(fresh, ALIASES, report) ===
-      withoutGeneratedNames(committed, ALIASES, report);
+  const same = fresh === committed;
   if (!LOCAL && !same) {
     console.error(
       `✗ ${report} is out of date — run \`pnpm api:reports\` and commit the diff.`
     );
     return false;
-  }
-  // Locally, keep the committed bytes when the only difference is the
-  // bundler's generated naming: rewriting them would put a diff in front of a
-  // reviewer that says nothing about the surface.
-  if (LOCAL && same && fresh !== committed) {
-    writeFileSync(join(ETC, report), committed);
   }
   console.log(`✓ ${report}`);
   return true;

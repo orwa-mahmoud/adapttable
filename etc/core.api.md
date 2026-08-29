@@ -1210,10 +1210,10 @@ export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 export function edgePinStyle(side: PinSide, active: boolean, zIndex?: number): PinnedCellStyle | undefined;
 
 // @public @deprecated
-export type EditableCellActivateProps = EditableCellActivateProps$1;
+export type EditableCellActivateProps = EditableCellActivateProps_2;
 
 // @public @deprecated
-export type EditableCellButtonProps = EditableCellButtonProps$1;
+export type EditableCellButtonProps = EditableCellButtonProps_2;
 
 // @public
 export interface EditableCellController<TRow = unknown> {
@@ -1322,7 +1322,7 @@ export interface EditableCellGateProps<TRow> {
     readonly rowKey: (row: TRow) => string;
     readonly rows: readonly TRow[];
     readonly saveErrorClassName?: string;
-    readonly slots: EditableCellSlots$1;
+    readonly slots: EditableCellSlots_2;
     readonly undoLabel?: string;
 }
 
@@ -1330,7 +1330,7 @@ export interface EditableCellGateProps<TRow> {
 export type EditableCellMode = "display" | "activatable" | "editing";
 
 // @public @deprecated
-export type EditableCellSlots = EditableCellSlots$1;
+export type EditableCellSlots = EditableCellSlots_2;
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
@@ -1789,10 +1789,10 @@ export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], s
 export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
 
 // @public @deprecated
-export type FilterHeaderClassNames = FilterHeaderClassNames$1;
+export type FilterHeaderClassNames = FilterHeaderClassNames_2;
 
 // @public @deprecated
-export type FilterHeaderRowProps<TRow> = FilterHeaderRowProps$1<TRow>;
+export type FilterHeaderRowProps<TRow> = FilterHeaderRowProps_2<TRow>;
 
 // @public
 export function filterLabel(def: Pick<FilterDef, "key" | "label">): string;
@@ -1960,7 +1960,7 @@ export function formatGroupLabel(value: unknown, blankLabel?: string): string;
 export function formatMultiDraft(values: readonly string[]): string;
 
 // @public @deprecated
-export type FullscreenState = FullscreenState$1;
+export type FullscreenState = FullscreenState_2;
 
 // @public
 export type GetCellSpan<TRow> = (args: GetCellSpanArgs<TRow>) => CellSpanRequest | undefined;
@@ -2547,7 +2547,7 @@ export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "betwe
 export type NumberOp = (typeof NUMBER_OPS)[number];
 
 // @public @deprecated
-export const orderedCardEntries: typeof orderedCardEntries$1;
+export const orderedCardEntries: typeof orderedCardEntries_2;
 
 // @public
 export const PAGE_SIZE_OPTIONS: readonly [10, 25, 50, 100];
@@ -2677,16 +2677,16 @@ export interface PinnedCellStyle {
 export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
 
 // @public @deprecated
-export const pinnedRowCellStyle: typeof pinnedRowCellStyle$1;
+export const pinnedRowCellStyle: typeof pinnedRowCellStyle_2;
 
 // @public @deprecated
-export const pinnedRowPart: typeof pinnedRowPart$1;
+export const pinnedRowPart: typeof pinnedRowPart_2;
 
 // @public @deprecated
-export const pinnedRowSticky: typeof pinnedRowSticky$1;
+export const pinnedRowSticky: typeof pinnedRowSticky_2;
 
 // @public @deprecated
-export const pinnedRowStickyStyle: typeof pinnedRowStickyStyle$1;
+export const pinnedRowStickyStyle: typeof pinnedRowStickyStyle_2;
 
 // @public
 export type PinnedSide = PinSide | undefined;
@@ -3170,7 +3170,7 @@ export type RowReorderState<TRow> = RowReorderState_2<TRow>;
 export function rowsExcludingFilter<TRow>(rows: readonly TRow[], extra: ExtraFilters, key: string, filterFn: (row: TRow, extra: ExtraFilters) => boolean): readonly TRow[];
 
 // @public @deprecated
-export const rowSourceIndex: typeof rowSourceIndex$1;
+export const rowSourceIndex: typeof rowSourceIndex_2;
 
 // @public @deprecated
 export const rowSpanSignature: typeof rowSpanSignature_2;
@@ -4254,7 +4254,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptio
 }
 
 // @public @deprecated
-export const useFullscreen: typeof useFullscreen$1;
+export const useFullscreen: typeof useFullscreen_2;
 
 // @public
 export function useGridFocus<TRow>(options: UseGridFocusOptions<TRow>): GridFocusState;
@@ -4364,7 +4364,7 @@ export interface UseLazyChildrenOptions<TRow> {
 export function useMediaQuery(query: string, defaultValue?: boolean): boolean;
 
 // @public @deprecated
-export const useOffsetHeight: typeof useOffsetHeight$1;
+export const useOffsetHeight: typeof useOffsetHeight_2;
 
 // @public
 export function usePointerDismiss(open: boolean, dismiss: () => void, insideSelector: string): void;
