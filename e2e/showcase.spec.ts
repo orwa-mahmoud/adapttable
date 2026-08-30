@@ -373,7 +373,11 @@ for (const adapter of ADAPTERS) {
 
       // Escape while interacting inside the overlay dismisses it (some kits
       // scope their Escape listener to the open panel, so focus it first).
+      // Assert the focus landed: if it has not, Escape goes to the body and a
+      // kit that scopes its listener never sees it — which reads as "the
+      // popover would not close" rather than "the key went somewhere else".
       await control.focus();
+      await expect(control).toBeFocused();
       await page.keyboard.press("Escape");
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
       // Escape must also RESTORE focus to the trigger (CLAUDE.md overlay
@@ -382,8 +386,15 @@ for (const adapter of ADAPTERS) {
 
       // Re-open, then a click in the far corner (outside the anchored card)
       // dismisses it.
+      //
+      // Wait for the CARD, not just the trigger's attribute. A kit that mounts
+      // its overlay a tick after opening arms its outside-click listener with
+      // it, so a click that lands in between is heard by nobody and the
+      // popover never closes — which reads as a dismiss failure rather than
+      // what it is.
       await trigger.click();
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
+      await expect(form).toBeVisible();
       await page.mouse.click(4, 4);
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
