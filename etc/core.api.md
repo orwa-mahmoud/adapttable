@@ -1713,6 +1713,16 @@ export interface FeaturePatch<TRow = unknown> {
 }
 
 // @public
+export interface FeatureProviderContribution {
+    readonly Provider: ComponentType<FeatureProviderProps>;
+}
+
+// @public
+export interface FeatureProviderProps {
+    readonly children: ReactNode;
+}
+
+// @public
 export interface FetchAllExport<TRow> {
     fetchPage: (query: ExportQuery) => Promise<readonly TRow[]>;
     maxRows?: number;
@@ -3505,6 +3515,7 @@ export interface TableErrorState {
 export interface TableFeature<TRow = unknown> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
+    readonly provider?: FeatureProviderContribution;
     setup?(host: TableFeatureHost<TRow>): void | (() => void);
 }
 

@@ -1877,6 +1877,38 @@ export interface FeaturePatch<TRow = unknown> {
 }
 
 // @public
+export interface FeatureProviderContribution {
+    readonly Provider: ComponentType<FeatureProviderProps>;
+}
+
+// @public
+export interface FeatureProviderProps {
+    readonly children: ReactNode;
+}
+
+// @public
+export function FeatureProviders<TRow>(input: {
+    readonly features: readonly TableFeature<TRow>[] | undefined;
+    readonly children: ReactNode;
+}): ReactNode;
+
+// @public
+export interface FeatureStateKey<T> {
+    readonly __state?: T;
+    readonly id: string;
+}
+
+// @public
+export function featureStateKey<T>(id: string): FeatureStateKey<T>;
+
+// @public
+export function FeatureStateScope<T>(input: {
+    readonly stateKey: FeatureStateKey<T>;
+    readonly value: T;
+    readonly children: ReactNode;
+}): ReactNode;
+
+// @public
 export interface FetchAllExport<TRow> {
     fetchPage: (query: ExportQuery) => Promise<readonly TRow[]>;
     maxRows?: number;
@@ -3895,6 +3927,7 @@ export function tableErrorState<TRow>(source: TableSource<TRow>): TableErrorStat
 export interface TableFeature<TRow = unknown> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
+    readonly provider?: FeatureProviderContribution;
     setup?(host: TableFeatureHost<TRow>): void | (() => void);
 }
 
@@ -4611,6 +4644,9 @@ export function useExportHandler(handler: (() => void | Promise<void>) | undefin
 
 // @public
 export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
+
+// @public
+export function useFeatureState<T>(stateKey: FeatureStateKey<T>): T | undefined;
 
 // @public
 export function useFullscreen(element: HTMLElement | null): FullscreenState;

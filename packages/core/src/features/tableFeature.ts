@@ -30,6 +30,7 @@ import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import { devWarn } from "../utils/devWarn";
+import type { FeatureProviderContribution } from "./providers";
 
 export type {
   Aggregator,
@@ -92,6 +93,15 @@ export interface TableFeature<TRow = unknown> {
    * Return a function to run when the table unmounts or `features` change.
    */
   setup?(host: TableFeatureHost<TRow>): void | (() => void);
+  /**
+   * The React component this feature needs in the tree.
+   *
+   * `apply` and `setup` run inside a render that has already happened, so
+   * neither can add a hook. A feature whose behaviour IS a hook contributes a
+   * provider instead: mounting it is the legal way to add hooks, and not
+   * importing it is what keeps them out of the graph.
+   */
+  readonly provider?: FeatureProviderContribution;
 }
 
 /**

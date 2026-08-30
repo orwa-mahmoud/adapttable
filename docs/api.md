@@ -156,6 +156,14 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
 scopes a mapper (summary, group aggregates) to the table that invoked it.
 
+A feature whose behaviour is a hook carries a `provider` instead —
+`FeatureProviderContribution`, whose component receives
+`FeatureProviderProps` and wraps the table. `FeatureProviders` nests them in
+feature-id order. It publishes through `FeatureStateScope` under a
+`FeatureStateKey` from `featureStateKey`, and anything below reads it with
+`useFeatureState`. All from `@adapttable/core/adapter`; see
+[feature composition](./features.md).
+
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
 `rowEditing` · `batchEditing` · `editHistory` · `dirtyIndicators` ·

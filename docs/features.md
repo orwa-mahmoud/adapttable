@@ -140,6 +140,75 @@ no matching prop is enough to arm that chrome.
 The per-seam registration APIs this supersedes (`FilterTypeRegistry.register`
 / `extend`, the `filterTypes` prop) are deprecated and removed at v3.
 
+## Features that own hooks — `provider`
+
+`apply` sets props and `setup(host)` registers values, but neither can add a
+React hook. Hooks must be called in the same order on every render, so a table
+that calls `useRowReorder` only when the feature is composed is not a table with
+an optional feature — it is a crash. That is why the enabling props never saved
+a byte: whatever the props said, the import was already in the graph.
+
+A component is the answer, because mounting and unmounting one is the legal way
+to add and remove hooks. A feature may carry a `provider` whose component wraps
+the table, calls whatever hooks it needs, and publishes the result under a typed
+key:
+
+```tsx
+import {
+  FeatureStateScope,
+  featureStateKey,
+  type TableFeature,
+} from "@adapttable/core/adapter";
+
+export const AUDIT = featureStateKey<{ count: number }>("audit-log");
+
+export const auditLog = (): TableFeature => ({
+  id: "audit-log",
+  provider: {
+    Provider: ({ children }) => {
+      const [count, setCount] = useState(0);
+      useEffect(() => subscribe(() => setCount((n) => n + 1)), []);
+      return (
+        <FeatureStateScope stateKey={AUDIT} value={{ count }}>
+          {children}
+        </FeatureStateScope>
+      );
+    },
+  },
+});
+```
+
+Anything under the table reads it with `useFeatureState`, which returns
+`undefined` when the feature is not composed — the ordinary answer for a table
+that does not have it, not an error:
+
+```tsx
+const audit = useFeatureState(AUDIT);
+if (!audit) return null;
+return <span>{audit.count} changes</span>;
+```
+
+Both halves are typed: `featureStateKey<T>` fixes what the provider must publish
+and what a reader gets back, so this is a contract rather than a bag of strings.
+
+### What the table guarantees
+
+- **Order comes from the ids, not from your array.** Providers nest in
+  feature-id order, so `[grouping("team"), auditLog()]` and
+  `[auditLog(), grouping("team")]` build the identical tree. Moving a line never
+  remounts a provider or discards what it was holding.
+- **One provider per id.** A duplicate id warns in development and the last one
+  wins, exactly as `apply` already resolves duplicates.
+- **A provider mounts when its feature arrives and unmounts when it leaves**, and
+  its cleanup runs once.
+- **State belongs to its own table.** It travels by context, so two tables on a
+  page — and a table nested in another table's row detail — never read each
+  other's. A nested table shadows the outer value for its own subtree while
+  everything the outer table published stays readable.
+
+This is the same `TableFeature` in the same `features` array. There is no second
+registry to learn and nothing global to collide over.
+
 ## Every factory
 
 `rowReorder` · `rowPinning` · `cellSpan` · `extraRows` · `rowAppearance` ·

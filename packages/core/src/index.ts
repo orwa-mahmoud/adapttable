@@ -76,6 +76,10 @@ export {
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
 export { localizedColumnPath, resolveColumns } from "./columns/resolveColumns";
+export type {
+  FeatureProviderContribution,
+  FeatureProviderProps,
+} from "./features/providers";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export {
   CHECKLIST_ITEM_HEIGHT,

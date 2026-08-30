@@ -224,6 +224,17 @@ export {
   FeatureHostProvider,
   useFeatureHost,
 } from "./features/featureHostContext";
+export type {
+  FeatureProviderContribution,
+  FeatureProviderProps,
+  FeatureStateKey,
+} from "./features/providers";
+export {
+  FeatureProviders,
+  featureStateKey,
+  FeatureStateScope,
+  useFeatureState,
+} from "./features/providers";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";

@@ -77,6 +77,10 @@ export {
 } from "./features/factories";
 export { useTableFeatures } from "./features/featureHost";
 export type {
+  FeatureProviderContribution,
+  FeatureProviderProps,
+} from "./features/providers";
+export type {
   FeatureApplyInput,
   FeaturePatch,
   TableFeature,
