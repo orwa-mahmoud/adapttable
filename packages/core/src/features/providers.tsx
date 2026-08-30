@@ -31,8 +31,10 @@ import {
   type ComponentType,
   createContext,
   type ReactNode,
+  type RefObject,
   useContext,
   useMemo,
+  useRef,
 } from "react";
 
 import { devWarn } from "../utils/devWarn";
@@ -72,7 +74,17 @@ export function featureStateKey<T>(id: string): FeatureStateKey<T> {
  *
  * @public
  */
-export interface FeatureProviderProps {
+export interface FeatureProviderProps<TRow = unknown> {
+  /**
+   * The composed feature this provider belongs to, so one stable component can
+   * serve every call of a factory.
+   *
+   * A factory that closed over its options in a component defined inline would
+   * mint a new component type on every render, and React would remount it —
+   * losing a lifted row mid-drag. The options travel on the feature object
+   * instead; the component stays the same one.
+   */
+  readonly feature: TableFeature<TRow>;
   /** The table subtree. A provider MUST render this. */
   readonly children: ReactNode;
 }
@@ -151,10 +163,16 @@ export function useFeatureState<T>(
  * happened to write the array in — the same features always nest the same way,
  * so no provider is remounted because a line moved.
  */
+interface MountedProvider {
+  readonly id: string;
+  readonly Provider: ComponentType<FeatureProviderProps>;
+  readonly feature: TableFeature;
+}
+
 function providersOf<TRow>(
   features: readonly TableFeature<TRow>[]
-): readonly { id: string; Provider: ComponentType<FeatureProviderProps> }[] {
-  const byId = new Map<string, ComponentType<FeatureProviderProps>>();
+): readonly MountedProvider[] {
+  const byId = new Map<string, MountedProvider>();
   for (const feature of features) {
     const contribution = (feature as WithProvider<TRow>).provider;
     if (!contribution) continue;
@@ -165,11 +183,75 @@ function providersOf<TRow>(
           `them a different id.`
       );
     }
-    byId.set(feature.id, contribution.Provider);
+    byId.set(feature.id, {
+      id: feature.id,
+      Provider: contribution.Provider,
+      feature: feature as TableFeature,
+    });
   }
-  return [...byId]
-    .map(([id, Provider]) => ({ id, Provider }))
-    .sort((left, right) => (left.id < right.id ? -1 : 1));
+  return [...byId.values()].sort((left, right) =>
+    left.id < right.id ? -1 : 1
+  );
+}
+
+/**
+ * What a provider can read about the table it wraps.
+ *
+ * A provider mounts ABOVE the chrome, so it cannot be handed values the chrome
+ * computes — that is a cycle. It reads them instead, at the moment it needs
+ * them, which for a drag handler or an announcement is always an event rather
+ * than a render.
+ *
+ * @public
+ */
+export interface TableRuntime<TRow = unknown> {
+  /** The row at a rendered index, or `undefined` once it has scrolled away. */
+  rowAt(localIndex: number): TRow | undefined;
+  /** The table's resolved labels, for announcements. */
+  labels(): Readonly<Record<string, unknown>> | undefined;
+}
+
+interface RuntimeCell {
+  rows: readonly unknown[];
+  labels: Readonly<Record<string, unknown>> | undefined;
+}
+
+const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
+  undefined
+);
+
+/**
+ * Publish what providers above this chrome need to read.
+ *
+ * The write happens during render and the reads happen in handlers, which is
+ * the same shape `useEventCallback` and the selection model already use: never
+ * read during render, so there is nothing to tear.
+ *
+ * @public
+ */
+export function usePublishTableRuntime(
+  rows: readonly unknown[],
+  labels: Readonly<Record<string, unknown>> | undefined
+): void {
+  const cell = useContext(TableRuntimeContext);
+  if (cell) cell.current = { rows, labels };
+}
+
+/**
+ * Read the live table from inside a provider.
+ *
+ * @public
+ */
+export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow> {
+  const cell = useContext(TableRuntimeContext);
+  return useMemo(
+    () => ({
+      rowAt: (localIndex: number) =>
+        cell?.current.rows[localIndex] as TRow | undefined,
+      labels: () => cell?.current.labels,
+    }),
+    [cell]
+  );
 }
 
 /**
@@ -190,8 +272,18 @@ export function FeatureProviders({
 }): ReactNode {
   const features = getAppliedFeatures(props);
   const providers = useMemo(() => providersOf(features ?? []), [features]);
-  return providers.reduceRight<ReactNode>(
-    (inner, { id, Provider }) => <Provider key={id}>{inner}</Provider>,
+  const cell = useRef<RuntimeCell>({ rows: [], labels: undefined });
+  const tree = providers.reduceRight<ReactNode>(
+    (inner, { id, Provider, feature }) => (
+      <Provider key={id} feature={feature}>
+        {inner}
+      </Provider>
+    ),
     children
+  );
+  return (
+    <TableRuntimeContext.Provider value={cell}>
+      {tree}
+    </TableRuntimeContext.Provider>
   );
 }

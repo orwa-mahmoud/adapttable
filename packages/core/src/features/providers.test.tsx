@@ -168,6 +168,53 @@ describe("FeatureProviders", () => {
     expect(log.filter((entry) => entry === "unmount:b-second")).toHaveLength(1);
   });
 
+  // A factory is normally called inline in the host's render, so it returns a
+  // NEW feature object every time. That must not reach the tree as a new
+  // component type — React would remount it and a drag in flight would die.
+  it("does not remount when a factory is called again with the same options", () => {
+    const log: string[] = [];
+    function Host() {
+      const [, force] = useState(0);
+      return (
+        <>
+          <button type="button" onClick={() => force((n) => n + 1)}>
+            rerender
+          </button>
+          <FeatureProviders
+            props={resolved([publishing("counter", COUNTER, 1, log)])}
+          >
+            <Readout />
+          </FeatureProviders>
+        </>
+      );
+    }
+    render(<Host />);
+    expect(log).toEqual(["mount:counter"]);
+
+    act(() => screen.getByRole("button", { name: "rerender" }).click());
+    act(() => screen.getByRole("button", { name: "rerender" }).click());
+    expect(log).toEqual(["mount:counter"]);
+  });
+
+  it("hands each provider the feature it belongs to", () => {
+    const seen: string[] = [];
+    const feature: TableFeature = {
+      id: "reads-itself",
+      provider: {
+        Provider: ({ feature: own, children }: FeatureProviderProps) => {
+          seen.push(own.id);
+          return <>{children}</>;
+        },
+      },
+    };
+    render(
+      <FeatureProviders props={resolved([feature])}>
+        <Readout />
+      </FeatureProviders>
+    );
+    expect(seen).toContain("reads-itself");
+  });
+
   it("disposes each provider exactly once on unmount", () => {
     const log: string[] = [];
     mount([
