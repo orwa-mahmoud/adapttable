@@ -27,6 +27,7 @@
 import { spawnSync } from "node:child_process";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
+import { createRequire } from "node:module";
 import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -67,9 +68,17 @@ const TYPES = new Map(
  */
 function build() {
   if (process.env.SHOWCASE_SKIP_BUILD === "1") return;
+  // Resolved from the installed package and run with this interpreter, so
+  // neither the binary nor the runtime is taken from PATH.
+  const require = createRequire(import.meta.url);
+  const turbo = join(
+    dirname(require.resolve("turbo/package.json")),
+    "bin",
+    "turbo"
+  );
   const result = spawnSync(
-    "pnpm",
-    ["turbo", "run", "build", "--filter=@adapttable/showcase"],
+    process.execPath,
+    [turbo, "run", "build", "--filter=@adapttable/showcase"],
     {
       cwd: ROOT,
       stdio: "inherit",
