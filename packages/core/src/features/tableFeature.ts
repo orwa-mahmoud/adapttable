@@ -175,15 +175,17 @@ function warnDeprecatedFeatureProps(props: object): void {
   // Bundlers inline NODE_ENV and drop this list from production.
   if (process.env.NODE_ENV === "production") return;
   const used = (
-    "onRowReorder,pinnedRowIds,onPinnedRowIdsChange,getCellSpan,extraRows," +
-    "rowStyle,rowHeight,rowClassName,renderRowDetail,nestedTable,onCellEdit," +
+    "onRowReorder,pinnedRowIds,onPinnedRowIdsChange,getCellSpan," +
+    "cellSpanAppearance,extraRows,rowStyle,rowHeight,rowClassName," +
+    "renderRowDetail,defaultExpandedRowIds,nestedTable,onCellEdit," +
     "rowEditing,onRowEdit,batchEditing,onBatchEdit,editHistory,dirtyIndicators," +
-    "getChildren,getParentId,groupBy,virtualize,virtualizeColumns," +
-    "enableColumnMenu,resizableColumns,collapsibleColumnGroups,exportCsv," +
-    "cellNavigation,findInTable,fullscreen,commandPalette,contextMenu," +
-    "sidePanel,bulkActions,filters,filterTypes,headerFilters,savedViews," +
-    "selectionStats,densityChooser,onPrint,statusBar,undoRedoButtons," +
-    "multiSort,fitColumns,columnSelectionCheckbox"
+    "getChildren,getParentId,treeColumn,onLoadChildren,groupBy,virtualize," +
+    "virtualizeColumns,enableColumnMenu,resizableColumns," +
+    "collapsibleColumnGroups,exportCsv,cellNavigation,findInTable,fullscreen," +
+    "commandPalette,contextMenu,sidePanel,bulkActions,filters,filterTypes," +
+    "headerFilters,savedViews,selectionStats,densityChooser,onPrint," +
+    "printButton,statusBar,undoRedoButtons,multiSort,fitColumns," +
+    "columnSelectionCheckbox"
   )
     .split(",")
     .filter((key) => (props as Record<string, unknown>)[key] !== undefined);

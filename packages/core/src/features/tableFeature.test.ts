@@ -101,6 +101,22 @@ describe("applyTableFeatures", () => {
     expect(warn).not.toHaveBeenCalled();
   });
 
+  // A feature's companion options go away with the feature, so a migration
+  // that removes only the headline prop is still broken at v3. Each of these
+  // warns on its own rather than only alongside its sibling.
+  it.each([
+    ["cellSpanAppearance", { cellSpanAppearance: "muted" }],
+    ["defaultExpandedRowIds", { defaultExpandedRowIds: ["a"] }],
+    ["treeColumn", { treeColumn: "name" }],
+    ["onLoadChildren", { onLoadChildren: () => undefined }],
+    ["printButton", { printButton: true }],
+  ])("warns for the companion prop %s on its own", (name, props) => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    applyTableFeatures({ ...props });
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]?.[0]).toContain(name);
+  });
+
   it("composes an ad-hoc feature() patch", () => {
     const resolved = applyTableFeatures({
       features: [feature("audit", { statusBar: true })],
