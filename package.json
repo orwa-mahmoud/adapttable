@@ -36,7 +36,7 @@
     "publint": "pnpm --filter \"./packages/*\" exec publint --strict",
     "smoke:dist": "node scripts/smoke-dist.mjs",
     "budget": "node scripts/bundle-budget.mjs",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:features && pnpm run check:boundary && pnpm run check:api-contract && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
     "prepare": "husky",
     "check:kits-docs": "pnpm --filter @adapttable/cli exec vitest run src/kits-docs.test.ts",
     "check:readmes": "node scripts/check-readme-features.mjs",
@@ -47,6 +47,8 @@
     "api:check": "node scripts/api-reports.mjs",
     "release:gated": "pnpm run build && pnpm run publint && changeset publish",
     "check:parts": "node scripts/check-parts-parity.mjs",
+    "check:features": "node scripts/check-feature-classification.mjs",
+    "check:boundary": "node scripts/check-framework-boundary.mjs",
     "check:api-contract": "node scripts/check-api-contract.mjs"
   },
   "devDependencies": {

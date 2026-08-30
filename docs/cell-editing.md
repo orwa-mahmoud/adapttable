@@ -70,8 +70,13 @@ export function People() {
 - **One-way data flow.** The commit payload is
   `onCellEdit(row, key, nextValue)` — adapters render kit-native inputs;
   core owns the state machine so every kit behaves the same.
-- Out of scope (by design): row-level edit mode, validation UI, and
-  optimistic-update helpers — persistence stays with the host.
+- **Beyond one cell.** Row-level edit mode (`rowEditing` + `onRowEdit`) opens
+  every field together and commits one patch; `validate` / `validateRow` reject
+  a commit and mark the cells that failed; `onEditRollback` restores a row after
+  a rejected save, and `dirtyIndicators` marks what nobody has confirmed yet.
+- **The table never writes to a row.** Persistence stays with the host: every
+  commit reaches your handler, and the stored data changes only when you change
+  it.
 
 ## Options
 

@@ -162,6 +162,14 @@ jobs:
         if: needs.detect.outputs.runUnit == 'true'
         run: pnpm check:parts
 
+      - name: Check the feature inventory matches the code
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:features
+
+      - name: Check the engine imports no framework
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:boundary
+
       - name: Lint root tooling
         if: needs.detect.outputs.runLintRoot == 'true'
         run: pnpm lint:root

@@ -134,9 +134,11 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
 ## Notes
 
 - Virtualization is optional — leave it off for small lists or paged tables.
-- Combining `virtualize` with `renderRowDetail` is not recommended: desktop
-  detail panels render as unmeasured sibling rows, so scroll heights can drift
-  (a dev-mode warning says so). Prefer paged data with row details.
+- `virtualize` and `renderRowDetail` work together. A `<tr>` cannot contain the
+  panel that belongs to it, so an open detail renders as a sibling row — and the
+  pair is measured as a pair, with the combined height handed to the virtualizer.
+  A panel that grows later (an image loading, a nested table expanding) corrects
+  its item's size when it does, so scroll positions hold.
 - The headless hook is exported as `useTableVirtualization` for custom markup;
   when disabled it returns every row with no spacers, so one render path
   serves both cases.
