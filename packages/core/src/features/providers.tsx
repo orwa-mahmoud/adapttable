@@ -36,7 +36,7 @@ import {
 } from "react";
 
 import { devWarn } from "../utils/devWarn";
-import type { TableFeature } from "./tableFeature";
+import { getAppliedFeatures, type TableFeature } from "./tableFeature";
 
 /**
  * A typed handle for one piece of feature-published state.
@@ -173,17 +173,22 @@ function providersOf<TRow>(
 }
 
 /**
- * Nest every contributed provider around the table.
+ * Nest every provider the composed features contribute around the table.
+ *
+ * `props` is what `useTableFeatures` returned, which is where the applied
+ * feature list lives — an adapter has it already and does not need a second
+ * accessor for it.
  *
  * @public
  */
-export function FeatureProviders<TRow>({
-  features,
+export function FeatureProviders({
+  props,
   children,
 }: {
-  readonly features: readonly TableFeature<TRow>[] | undefined;
+  readonly props: object;
   readonly children: ReactNode;
 }): ReactNode {
+  const features = getAppliedFeatures(props);
   const providers = useMemo(() => providersOf(features ?? []), [features]);
   return providers.reduceRight<ReactNode>(
     (inner, { id, Provider }) => <Provider key={id}>{inner}</Provider>,

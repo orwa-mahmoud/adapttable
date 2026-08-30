@@ -1,6 +1,7 @@
 import { showSimpleFilterFields } from "@adapttable/core";
 import {
   FeatureHostProvider,
+  FeatureProviders,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -52,7 +53,7 @@ import { Box, Button, Flex, Progress, Text } from "./ui";
  *
  * @public
  */
-export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   ensureBaseUiStyles();
   const { slots, accentColor, animate = false } = props;
@@ -397,5 +398,26 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         />
       </Box>
     </FeatureHostProvider>
+  );
+}
+
+/**
+ * Resolve `features` and mount whatever providers they contribute, then render
+ * the table inside them.
+ *
+ * A feature that owns hooks owns a component, so its provider has to sit ABOVE
+ * the body that reads what it publishes — that is the whole reason this is two
+ * components rather than one.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = useTableFeatures(incoming);
+  return (
+    <FeatureProviders props={props}>
+      <DataTableContent<TRow> {...props} />
+    </FeatureProviders>
   );
 }

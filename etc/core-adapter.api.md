@@ -1887,8 +1887,8 @@ export interface FeatureProviderProps {
 }
 
 // @public
-export function FeatureProviders<TRow>(input: {
-    readonly features: readonly TableFeature<TRow>[] | undefined;
+export function FeatureProviders(input: {
+    readonly props: object;
     readonly children: ReactNode;
 }): ReactNode;
 

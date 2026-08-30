@@ -10,7 +10,11 @@ import {
   FeatureStateScope,
   useFeatureState,
 } from "./providers";
-import type { TableFeature } from "./tableFeature";
+import { applyTableFeatures, type TableFeature } from "./tableFeature";
+
+/** What `useTableFeatures` hands an adapter: props with the list remembered. */
+const resolved = (features: readonly TableFeature[]) =>
+  applyTableFeatures({ features });
 
 const COUNTER = featureStateKey<number>("counter");
 const LABEL = featureStateKey<string>("label");
@@ -56,7 +60,7 @@ function Readout() {
 
 function mount(features: readonly TableFeature[], children: ReactNode = null) {
   return render(
-    <FeatureProviders features={features}>
+    <FeatureProviders props={resolved(features)}>
       {children ?? <Readout />}
     </FeatureProviders>
   );
@@ -121,7 +125,7 @@ describe("FeatureProviders", () => {
           <button type="button" onClick={() => setFlipped(true)}>
             flip
           </button>
-          <FeatureProviders features={flipped ? [b, a] : [a, b]}>
+          <FeatureProviders props={resolved(flipped ? [b, a] : [a, b])}>
             <Readout />
           </FeatureProviders>
         </>
@@ -147,7 +151,7 @@ describe("FeatureProviders", () => {
           <button type="button" onClick={() => setWithB((on) => !on)}>
             toggle
           </button>
-          <FeatureProviders features={withB ? [a, b] : [a]}>
+          <FeatureProviders props={resolved(withB ? [a, b] : [a])}>
             <Readout />
           </FeatureProviders>
         </>
@@ -193,12 +197,16 @@ describe("FeatureProviders", () => {
     render(
       <>
         <div data-testid="left">
-          <FeatureProviders features={[publishing("counter", COUNTER, 1)]}>
+          <FeatureProviders
+            props={resolved([publishing("counter", COUNTER, 1)])}
+          >
             <Readout />
           </FeatureProviders>
         </div>
         <div data-testid="right">
-          <FeatureProviders features={[publishing("counter", COUNTER, 2)]}>
+          <FeatureProviders
+            props={resolved([publishing("counter", COUNTER, 2)])}
+          >
             <Readout />
           </FeatureProviders>
         </div>
@@ -216,9 +224,11 @@ describe("FeatureProviders", () => {
 
   it("lets a nested table shadow the outer table's value", () => {
     render(
-      <FeatureProviders features={[publishing("counter", COUNTER, 1)]}>
+      <FeatureProviders props={resolved([publishing("counter", COUNTER, 1)])}>
         <div data-testid="outer">
-          <FeatureProviders features={[publishing("counter", COUNTER, 2)]}>
+          <FeatureProviders
+            props={resolved([publishing("counter", COUNTER, 2)])}
+          >
             <div data-testid="inner">
               <Readout />
             </div>
@@ -233,8 +243,8 @@ describe("FeatureProviders", () => {
 
   it("keeps an outer feature readable from inside a nested table", () => {
     render(
-      <FeatureProviders features={[publishing("label", LABEL, "outer")]}>
-        <FeatureProviders features={[publishing("counter", COUNTER, 5)]}>
+      <FeatureProviders props={resolved([publishing("label", LABEL, "outer")])}>
+        <FeatureProviders props={resolved([publishing("counter", COUNTER, 5)])}>
           <Readout />
         </FeatureProviders>
       </FeatureProviders>
@@ -245,7 +255,7 @@ describe("FeatureProviders", () => {
 
   it("treats an absent feature list as no providers", () => {
     render(
-      <FeatureProviders features={undefined}>
+      <FeatureProviders props={{}}>
         <Readout />
       </FeatureProviders>
     );

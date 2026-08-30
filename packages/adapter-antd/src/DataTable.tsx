@@ -58,6 +58,7 @@ import {
   EXTRA_ROW_PARTS,
   featureHostOf,
   FeatureHostProvider,
+  FeatureProviders,
   fillSlot,
   flattenColumnTree,
   GridFocusAnnouncer,
@@ -1566,7 +1567,7 @@ function useAntdGridState<TRow>(
  *
  * @public
  */
-export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);
   const {
@@ -2224,5 +2225,26 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         />
       </div>
     </FeatureHostProvider>
+  );
+}
+
+/**
+ * Resolve `features` and mount whatever providers they contribute, then render
+ * the table inside them.
+ *
+ * A feature that owns hooks owns a component, so its provider has to sit ABOVE
+ * the body that reads what it publishes — that is the whole reason this is two
+ * components rather than one.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
+  const props = useTableFeatures(incoming);
+  return (
+    <FeatureProviders props={props}>
+      <DataTableContent<TRow> {...props} />
+    </FeatureProviders>
   );
 }
