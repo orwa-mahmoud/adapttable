@@ -53,8 +53,12 @@ const ATTRIBUTES = {
   header: ["scope", "aria-sort"],
 } as const;
 
-/** Pages chosen for their table state: one plain, one a keyboard grid. */
-const PAGES = ["all-options", "accessibility"] as const;
+/**
+ * Pages chosen for their table state: one plain, one a keyboard grid. Both are
+ * per-kit routes — the Feature Lab is one page with a kit switcher, so it has
+ * no `/<kit>/all-options/` to compare eight of.
+ */
+const PAGES = ["columns", "accessibility"] as const;
 
 for (const page of PAGES) {
   test(`${page}: every kit describes the table the same way`, async ({

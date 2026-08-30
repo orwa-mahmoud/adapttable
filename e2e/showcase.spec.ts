@@ -22,6 +22,37 @@ const ADAPTERS = [
 ] as const;
 
 const demo = (page: Page) => page.locator("#demo");
+
+/**
+ * What is actually painted at the top-left of an overlay item.
+ *
+ * The bug this guards is an overlay the sticky header or a pinned cell paints
+ * over, so the question is which element wins the pixel — not whether the item
+ * exists. `"missing"` is kept distinct from `"header"` so a selector that stops
+ * matching fails loudly instead of passing as "not covered".
+ *
+ * The target is a CSS selector, or the exact text of a button when the kit
+ * gives the control no stable part name.
+ */
+const stackingAt = (page: Page, target: string) =>
+  page.evaluate((selector) => {
+    const item =
+      selector.startsWith("[") || selector.startsWith(".")
+        ? document.querySelector(selector)
+        : [...document.querySelectorAll("button")].find(
+            (el) => el.textContent?.trim() === selector
+          );
+    if (!item) return "missing";
+    const box = item.getBoundingClientRect();
+    const hit = document.elementFromPoint(
+      box.left + Math.min(24, box.width / 2),
+      box.top + 8
+    );
+    return hit?.closest("th, [data-adapttable-part='header-cell']")
+      ? "header"
+      : "overlay";
+  }, target);
+
 const filtersTrigger = (page: Page) =>
   demo(page).getByRole("button", { name: "Filters", exact: true }).first();
 
@@ -421,25 +452,15 @@ for (const adapter of ADAPTERS) {
         .getByRole("button", { name: /(hide|show) column/i })
         .first();
       await expect(toggle).toBeVisible();
-      const stacked = await page.evaluate(() => {
-        const item = document.querySelector(
-          '[data-adapttable-part="column-menu-item"]'
-        );
-        if (!item) return { found: false };
-        const ir = item.getBoundingClientRect();
-        const hit = document.elementFromPoint(
-          ir.left + Math.min(24, ir.width / 2),
-          ir.top + 8
-        );
-        return {
-          found: true,
-          headerOnTop: Boolean(
-            hit?.closest("th, [data-adapttable-part='header-cell']")
-          ),
-        };
-      });
-      expect(stacked.found).toBe(true);
-      expect(stacked.headerOnTop).toBe(false);
+      // Visible is not yet settled: a kit that animates its menu into place is
+      // still moving when the assertion could first run, and a sample taken
+      // mid-flight reads whatever is under that pixel on the way. Poll until
+      // the overlay has landed, the same way the drawer check above does.
+      await expect
+        .poll(() =>
+          stackingAt(page, '[data-adapttable-part="column-menu-item"]')
+        )
+        .toBe("overlay");
     });
 
     test("saved views menu opens below the trigger", async ({ page }) => {
@@ -450,25 +471,7 @@ for (const adapter of ADAPTERS) {
       await trigger.click();
       const save = page.getByRole("button", { name: "Save view", exact: true });
       await expect(save).toBeVisible();
-      const stacked = await page.evaluate(() => {
-        const save = [...document.querySelectorAll("button")].find(
-          (el) => el.textContent?.trim() === "Save view"
-        );
-        if (!save) return { found: false };
-        const sr = save.getBoundingClientRect();
-        const hit = document.elementFromPoint(
-          sr.left + Math.min(24, sr.width / 2),
-          sr.top + 8
-        );
-        return {
-          found: true,
-          headerOnTop: Boolean(
-            hit?.closest("th, [data-adapttable-part='header-cell']")
-          ),
-        };
-      });
-      expect(stacked.found).toBe(true);
-      expect(stacked.headerOnTop).toBe(false);
+      await expect.poll(() => stackingAt(page, "Save view")).toBe("overlay");
     });
 
     test("mirrors to RTL in Arabic", async ({ page }) => {

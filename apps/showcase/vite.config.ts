@@ -154,15 +154,19 @@ const pkg = (rel: string, entry = "index") =>
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
+/**
+ * The end-to-end suite runs against a production build, and GA4 and Clarity
+ * inject on build only — so without this every e2e run would file itself as
+ * real traffic and real session recordings. `scripts/serve-showcase.mjs` sets
+ * the flag for the build it drives.
+ */
+const analytics = process.env.ADAPTTABLE_NO_ANALYTICS
+  ? []
+  : [googleAnalytics(), microsoftClarity()];
+
 export default defineConfig({
   base: "./",
-  plugins: [
-    react(),
-    tailwindcss(),
-    googleAnalytics(),
-    microsoftClarity(),
-    patchStream(),
-  ],
+  plugins: [react(), tailwindcss(), ...analytics, patchStream()],
   // Multi-page app: each demo page is its own static HTML entry, linked
   // with plain anchors — no client router, no GitHub Pages 404 tricks.
   build: {

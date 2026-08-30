@@ -349,12 +349,25 @@ test("the menu surface follows the theme tokens", async ({ page }) => {
       const panel = document.querySelector("#nav-menu-adapters");
       if (!panel) return null;
       const style = getComputedStyle(panel);
-      const root = getComputedStyle(document.documentElement);
+      // A custom property keeps whatever text was authored, and the CSS
+      // minifier rewrites `oklch(1 0 0)` to `oklch(100% 0 0)` — the same colour,
+      // spelled differently from the computed value it is compared against. So
+      // the token is resolved through the browser too, and both sides arrive as
+      // one canonical colour.
+      const resolve = (token: string) => {
+        const probe = document.createElement("div");
+        probe.style.display = "none";
+        probe.style.backgroundColor = `var(${token})`;
+        document.body.append(probe);
+        const value = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return value;
+      };
       return {
         background: style.backgroundColor,
-        surface: root.getPropertyValue("--page-surface").trim(),
+        surface: resolve("--page-surface"),
         border: style.borderTopColor,
-        borderToken: root.getPropertyValue("--page-border").trim(),
+        borderToken: resolve("--page-border"),
       };
     });
 

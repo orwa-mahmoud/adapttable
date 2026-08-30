@@ -436,9 +436,31 @@ jobs:
           floors="${{ needs.floors.result }}"
           case "$floors" in success|skipped) ;; *) echo "Floors: $floors"; exit 1 ;; esac
 
+  showcase-build:
+    name: Build the showcase for E2E
+    needs: detect
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      # Every shard runs against this one build, so nine runners do not each
+      # compile the same site. Analytics stays out of it: GA4 and Clarity inject
+      # on build, and a suite that loads them files each run as real traffic.
+      - name: Build
+        run: pnpm turbo run build --filter=@adapttable/showcase
+        env:
+          ADAPTTABLE_NO_ANALYTICS: "1"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: showcase-dist
+          path: apps/showcase/dist/
+          retention-days: 1
+
   playwright-shard:
     name: Playwright shards
-    needs: detect
+    needs: [detect, showcase-build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -450,8 +472,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - uses: ./.github/actions/playwright-chromium
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: showcase-dist
+          path: apps/showcase/dist/
       - name: Run E2E smoke suite
         run: pnpm exec playwright test --shard=${{ matrix.shard }}/9
+        env:
+          SHOWCASE_SKIP_BUILD: "1"
       - name: Upload report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

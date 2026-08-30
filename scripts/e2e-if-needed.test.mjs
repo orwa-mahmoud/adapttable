@@ -35,6 +35,7 @@ describe("path matchers", () => {
   it("treats the lockfile and playwright config as related", () => {
     assert.equal(isE2eRelated("pnpm-lock.yaml"), true);
     assert.equal(isE2eRelated("playwright.config.ts"), true);
+    assert.equal(isE2eRelated("scripts/serve-showcase.mjs"), true);
     assert.equal(isE2eRelated("apps/showcase/src/Demo.tsx"), true);
   });
 
