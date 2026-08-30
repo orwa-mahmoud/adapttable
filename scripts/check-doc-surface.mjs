@@ -22,7 +22,7 @@
  * `--report` prints the full per-package diff instead of failing fast —
  * useful when auditing rather than gating.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -57,10 +57,14 @@ function entriesOf(pkg) {
   return Object.keys(manifest.exports ?? { ".": {} })
     .filter((key) => key === "." || !key.slice(2).includes("."))
     .sort()
-    .map((key) => ({
-      label: key === "." ? pkg : `${pkg}/${key.slice(2)}`,
-      entry: join(pkg, "src", key === "." ? "index.ts" : `${key.slice(2)}.ts`),
-    }));
+    .map((key) => {
+      const stem = join(pkg, "src", key === "." ? "index" : key.slice(2));
+      // A feature entry that renders is `.tsx`; the rest are `.ts`.
+      const entry = existsSync(join(REPO_ROOT, "packages", `${stem}.ts`))
+        ? `${stem}.ts`
+        : `${stem}.tsx`;
+      return { label: key === "." ? pkg : `${pkg}/${key.slice(2)}`, entry };
+    });
 }
 
 const SURFACES = readdirSync(join(REPO_ROOT, "packages"), {

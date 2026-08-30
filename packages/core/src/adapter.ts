@@ -228,12 +228,15 @@ export type {
   FeatureProviderContribution,
   FeatureProviderProps,
   FeatureStateKey,
+  TableRuntime,
 } from "./features/providers";
 export {
   FeatureProviders,
   featureStateKey,
   FeatureStateScope,
   useFeatureState,
+  usePublishTableRuntime,
+  useTableRuntime,
 } from "./features/providers";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";

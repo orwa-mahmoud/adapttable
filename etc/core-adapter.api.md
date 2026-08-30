@@ -148,7 +148,6 @@ export interface BaseDataTableProps<TRow> {
     onPrint?: () => void;
     onRowClick?: (row: TRow) => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
-    onRowReorder?: (from: number, to: number, row: TRow) => void;
     onRowsChange?: (rows: readonly TRow[]) => void;
     onSelectionChange?: (selectedIds: string[]) => void;
     onValidationFail?: EditEventHandler<TRow>;
@@ -1882,8 +1881,9 @@ export interface FeatureProviderContribution {
 }
 
 // @public
-export interface FeatureProviderProps {
+export interface FeatureProviderProps<TRow = unknown> {
     readonly children: ReactNode;
+    readonly feature: TableFeature<TRow>;
 }
 
 // @public
@@ -4217,6 +4217,12 @@ export interface TableRenderModel<TRow> {
 export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "rowActions" | "getRowId" | "rowEntries" | "renderRowDetail" | "expansion" | "columnWindow" | "editing" | "rowReorder" | "pinnedTopRows" | "pinnedBottomRows" | "getCellSpan" | "pinOffset" | "tree" | "grouping" | "extraRows">): TableRenderModel<TRow>;
 
 // @public
+export interface TableRuntime<TRow = unknown> {
+    labels(): Readonly<Record<string, unknown>> | undefined;
+    rowAt(localIndex: number): TRow | undefined;
+}
+
+// @public
 export interface TableSource<TRow> extends TableStateMutators {
     readonly allFilteredRows?: readonly TRow[];
     readonly allSearchedRows?: readonly TRow[];
@@ -4672,6 +4678,9 @@ export function useOffsetHeight(): [(node: HTMLElement | null) => void, number];
 export function useOverlayTransition(open: boolean, exitMs?: number): OverlayTransition;
 
 // @public
+export function usePublishTableRuntime(rows: readonly unknown[], labels: Readonly<Record<string, unknown>> | undefined): void;
+
+// @public
 export function useResolvedAdapter(adapter: UrlStateAdapter | undefined, enabled: boolean): UrlStateAdapter;
 
 // @public
@@ -4722,6 +4731,9 @@ export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>
 
 // @public
 export function useTableFeatures<P extends object>(incoming: P): P;
+
+// @public
+export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow>;
 
 // @public
 export function useTableStatusAnnouncement(options: TableStatusAnnouncementOptions): string;

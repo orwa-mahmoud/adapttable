@@ -30,7 +30,7 @@ function isTypedSubpath(key) {
 }
 
 /**
- * `{ dir, isMainEntry, report, entry, published }` for every typed entry
+ * `{ dir, subpath, isMainEntry, report, entry, published }` for every typed entry
  * point, package by package, subpath sorted.
  *
  * `published` is false for a workspace-private package (`@adapttable/bootstrap`
@@ -50,9 +50,17 @@ export function entrypoints() {
       const name = key === "." ? "index" : key.slice(2);
       list.push({
         dir,
+        // The exports-map key this came from. Carried rather than recovered
+        // from the report name, which flattens a nested subpath's separator.
+        subpath: key,
         isMainEntry: key === ".",
         published: manifest.private !== true,
-        report: key === "." ? `${dir}.api.md` : `${dir}-${name}.api.md`,
+        // A nested subpath (`./features/row-reorder`) still names ONE report,
+        // so the separator is flattened — `etc/` is a flat directory.
+        report:
+          key === "."
+            ? `${dir}.api.md`
+            : `${dir}-${name.replaceAll("/", "-")}.api.md`,
         entry: join(PACKAGES_DIR, dir, "dist", `${name}.d.ts`),
       });
     }

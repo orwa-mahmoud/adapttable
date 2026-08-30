@@ -62,7 +62,6 @@ export default defineConfig([
       "src/pivot.ts",
       "src/formula.ts",
       "src/features.ts",
-      "src/features/row-reorder.tsx",
       "src/stream.ts",
     ],
   },

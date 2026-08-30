@@ -194,7 +194,6 @@ export interface BaseDataTableProps<TRow> {
     onPrint?: () => void;
     onRowClick?: (row: TRow) => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
-    onRowReorder?: (from: number, to: number, row: TRow) => void;
     onRowsChange?: (rows: readonly TRow[]) => void;
     onSelectionChange?: (selectedIds: string[]) => void;
     onValidationFail?: EditEventHandler<TRow>;
@@ -1718,8 +1717,9 @@ export interface FeatureProviderContribution {
 }
 
 // @public
-export interface FeatureProviderProps {
+export interface FeatureProviderProps<TRow = unknown> {
     readonly children: ReactNode;
+    readonly feature: TableFeature<TRow>;
 }
 
 // @public
@@ -4458,7 +4458,7 @@ export interface UseRowPinningUrlStateResult {
 export function useRowReorder<TRow>(options: {
     enabled: boolean;
     onRowReorder?: RowReorderHandler<TRow>;
-    labels: RowReorderLabels;
+    labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled">;
     rowAt: (localIndex: number) => TRow | undefined;
 }): RowReorderState_2<TRow>;
 

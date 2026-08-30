@@ -98,16 +98,6 @@
         "default": "./dist/features.cjs"
       }
     },
-    "./features/row-reorder": {
-      "import": {
-        "types": "./dist/features/row-reorder.d.ts",
-        "default": "./dist/features/row-reorder.js"
-      },
-      "require": {
-        "types": "./dist/features/row-reorder.d.cts",
-        "default": "./dist/features/row-reorder.cjs"
-      }
-    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",

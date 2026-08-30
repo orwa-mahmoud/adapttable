@@ -372,7 +372,20 @@ const FIXTURES = [
   { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 142 },
   { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 139 },
   { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 135 },
-].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
+].map((f) => ({
+  code: `export { DataTable } from "PKG";`,
+  // Row reordering is the first feature to own its provider, and this is what
+  // says so. `ROW_DND_MIME` is the drag payload type, written and read inside
+  // the reorder state machine and nowhere else, so its absence means that
+  // machine is not in the base graph — not that it happened to compress well.
+  // Every adapter root lost ~0.7 KB gzipped the day it moved out.
+  //
+  // The marker is the constant rather than `useRowReorder`, because the hook's
+  // NAME still appears in core's public export list whether or not its body
+  // survives; a marker that matches a name proves nothing about the code.
+  absent: ["ROW_DND_MIME"],
+  ...f,
+}));
 
 /**
  * Bundle one fixture: its gzipped size, plus any names that were supposed to

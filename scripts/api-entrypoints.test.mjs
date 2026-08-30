@@ -27,10 +27,8 @@ describe("entrypoints", () => {
       const advertised = Object.keys(packageJson(dir).exports ?? { ".": {} })
         .filter((key) => key === "." || !key.slice(2).includes("."))
         .sort();
-      const covered = ENTRIES.filter((e) => e.dir === dir).map((e) =>
-        e.isMainEntry
-          ? "."
-          : `./${e.report.slice(dir.length + 1, -".api.md".length)}`
+      const covered = ENTRIES.filter((e) => e.dir === dir).map(
+        (e) => e.subpath
       );
       assert.deepEqual(covered, advertised, `${dir} entry points`);
     }

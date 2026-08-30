@@ -160,8 +160,10 @@ A feature whose behaviour is a hook carries a `provider` instead —
 `FeatureProviderProps` and wraps the table. `FeatureProviders` nests them in
 feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
-`useFeatureState`. All from `@adapttable/core/adapter`; see
-[feature composition](./features.md).
+`useFeatureState`. A provider sits above the chrome, so it reads the live rows
+and labels through `useTableRuntime` (`TableRuntime`) rather than being handed
+them; chrome offers them with `usePublishTableRuntime`. All from
+`@adapttable/core/adapter`; see [feature composition](./features.md).
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
@@ -664,7 +666,7 @@ the host can pass `isCellFlashing` — a pulse, not a locate-the-row
 highlight, and never against `prefers-reduced-motion`. See
 [realtime](./realtime.md).
 
-**Row reordering.** `rowReorder(handler)` from `@adapttable/<kit>/row-reorder` arms it and `RowReorderHandler` is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
+**Row reordering.** `rowReorder(handler)` from `@adapttable/<kit>/row-reorder` arms it and `RowReorderHandler` is the write; `ROW_REORDER` is the `FeatureStateKey` its provider publishes under, so custom chrome reads the live state with `useFeatureState(ROW_REORDER)`; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
 `RowReorderHandleChrome` / `RowReorderHandleChromeProps` /
 `RowReorderHandleSlots` / `RowReorderHandleSlotProps` and

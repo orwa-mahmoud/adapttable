@@ -497,8 +497,9 @@ export interface FeatureProviderContribution {
 }
 
 // @public
-export interface FeatureProviderProps {
+export interface FeatureProviderProps<TRow = unknown> {
     readonly children: ReactNode;
+    readonly feature: TableFeature<TRow>;
 }
 
 // @public

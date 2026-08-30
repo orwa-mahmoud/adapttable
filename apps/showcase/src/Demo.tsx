@@ -20,7 +20,7 @@ import {
   useHighlight,
   useQuerySource,
 } from "@adapttable/core";
-import { rowReorder } from "@adapttable/core/features/row-reorder";
+import { rowReorder } from "@adapttable/core/features";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
