@@ -9,10 +9,16 @@
  * nobody checks is a boundary that closes the first time someone reaches for
  * `useMemo` in an operator.
  *
+ * What is forbidden is a COUPLING, not a vendor. `@tanstack/virtual-core` is
+ * framework-neutral and is ordinary engine code; `@tanstack/react-virtual` is
+ * React-coupled and belongs to the binding side. Banning the namespace instead
+ * of the coupling would push the engine to reimplement neutral libraries for
+ * no gain.
+ *
  * So the engine is a written list. `frameworkBoundary.engineModules` in
  * `feature-classification.json` names every module on the React-free side, and
  * this fails the build when one of them imports React, a React runtime, or a
- * framework-coupled package.
+ * React-coupled package.
  *
  * Two directions matter, and both are checked:
  *
@@ -38,9 +44,9 @@ const MANIFEST = join(ROOT, "scripts", "feature-classification.json");
 const { frameworkBoundary } = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const { engineModules, forbiddenImports } = frameworkBoundary;
 
-/** `react/*` and `@tanstack/*` are prefixes; the rest are exact specifiers. */
+/** A trailing `*` is a prefix (`react/*`, `@tanstack/react-*`); the rest are exact. */
 const matchers = forbiddenImports.map((pattern) =>
-  pattern.endsWith("/*")
+  pattern.endsWith("*")
     ? (spec) => spec.startsWith(pattern.slice(0, -1))
     : (spec) => spec === pattern
 );

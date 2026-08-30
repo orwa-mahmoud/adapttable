@@ -7,7 +7,7 @@
     "base": "Always present in the root DataTable; not an opt-in factory.",
     "headless": "Structure and state only. Core owns it; the kit renders it through slots it already has.",
     "adapter": "Needs a kit-rendered control or surface of its own.",
-    "engine": "Large calculation or interaction-opened panel. Permitted lazy-import candidate."
+    "engine": "Large calculation or interaction-opened panel."
   },
   "baseBehavior": [
     "responsive desktop/mobile rendering",
@@ -16,9 +16,7 @@
     "single-column sorting",
     "search",
     "pagination and infinite data",
-    "row selection",
-    "row actions",
-    "column visibility and order"
+    "column resolution \u2014 the `columns` array rendered in order, honouring `hidden`"
   ],
   "features": {
     "rowReorder": {
@@ -29,7 +27,8 @@
       "implementation": ["core/src/rows/rowReorder.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Drag state and the reordered row model live in core; kits draw the grip through the existing row slots, so no kit component is dedicated to it."
+      "note": "Drag state and the reordered row model live in core; kits draw the grip through the existing row slots, so no kit component is dedicated to it.",
+      "requiresConfig": true
     },
     "rowPinning": {
       "id": "row-pinning",
@@ -39,7 +38,8 @@
       "implementation": ["core/src/rows/rowPinning.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Pins reorder the row model and set a part name; no dedicated kit component."
+      "note": "Pins reorder the row model and set a part name; no dedicated kit component.",
+      "requiresConfig": true
     },
     "cellSpan": {
       "id": "cell-span",
@@ -49,7 +49,8 @@
       "implementation": ["core/src/rows/cellSpan.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Emits rowSpan/colSpan on cells the kit already renders."
+      "note": "Emits rowSpan/colSpan on cells the kit already renders.",
+      "requiresConfig": true
     },
     "extraRows": {
       "id": "extra-rows",
@@ -59,7 +60,8 @@
       "implementation": ["core/src/rows/extraRows.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Injects entries into the row model; rendered by the kit's existing row path."
+      "note": "Injects entries into the row model; rendered by the kit's existing row path.",
+      "requiresConfig": true
     },
     "rowAppearance": {
       "id": "row-appearance",
@@ -69,7 +71,8 @@
       "implementation": ["core/src/rows/rowStyle.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Per-row class/style/height computed in core and spread by the kit's row."
+      "note": "Per-row class/style/height computed in core and spread by the kit's row.",
+      "requiresConfig": true
     },
     "rowDetail": {
       "id": "row-detail",
@@ -79,7 +82,8 @@
       "implementation": ["core/src/rows/useRowExpansion.ts"],
       "adapterComponents": ["ExpandToggle"],
       "standardPreset": false,
-      "note": "Needs the kit's own disclosure control and a sibling detail row."
+      "note": "Needs the kit's own disclosure control and a sibling detail row.",
+      "requiresConfig": true
     },
     "nestedTable": {
       "id": "nested-table",
@@ -89,7 +93,8 @@
       "implementation": ["core/src/tree/nestedTable.tsx"],
       "adapterComponents": ["ExpandToggle"],
       "standardPreset": false,
-      "note": "A table inside a detail row; reuses the expansion chrome."
+      "note": "A table inside a detail row; reuses the expansion chrome.",
+      "requiresConfig": true
     },
     "editing": {
       "id": "editing",
@@ -102,7 +107,8 @@
       ],
       "adapterComponents": ["EditableCell"],
       "standardPreset": false,
-      "note": "Kit-native inputs are the whole point; core owns the state machine."
+      "note": "Kit-native inputs are the whole point; core owns the state machine.",
+      "requiresConfig": true
     },
     "rowEditing": {
       "id": "row-editing",
@@ -112,7 +118,8 @@
       "implementation": ["core/src/editing/rowEditing.ts"],
       "adapterComponents": ["EditableCell"],
       "standardPreset": false,
-      "note": "Row-level commit mode layered on the same editor chrome."
+      "note": "Row-level commit mode layered on the same editor chrome.",
+      "requiresConfig": true
     },
     "batchEditing": {
       "id": "batch-editing",
@@ -122,7 +129,8 @@
       "implementation": ["core/src/editing/batchEditing.ts"],
       "adapterComponents": ["EditableCell", "StatusBar"],
       "standardPreset": false,
-      "note": "Deferred commits plus a save/discard surface."
+      "note": "Deferred commits plus a save/discard surface.",
+      "requiresConfig": true
     },
     "editHistory": {
       "id": "edit-history",
@@ -132,7 +140,8 @@
       "implementation": ["core/src/editing/editHistory.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Undo/redo stack over edits; the buttons are a separate factory."
+      "note": "Undo/redo stack over edits; the buttons are a separate factory.",
+      "requiresConfig": false
     },
     "dirtyIndicators": {
       "id": "dirty-indicators",
@@ -142,7 +151,8 @@
       "implementation": ["core/src/editing/dirtyCells.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Marks changed cells with a part name the kit already styles."
+      "note": "Marks changed cells with a part name the kit already styles.",
+      "requiresConfig": false
     },
     "grouping": {
       "id": "grouping",
@@ -155,7 +165,8 @@
       ],
       "adapterComponents": ["GroupHeader"],
       "standardPreset": true,
-      "note": "Group header rows are kit chrome; the grouping model is core."
+      "note": "Group header rows are kit chrome; the grouping model is core.",
+      "requiresConfig": true
     },
     "tree": {
       "id": "tree",
@@ -173,7 +184,8 @@
       ],
       "adapterComponents": ["ExpandToggle"],
       "standardPreset": false,
-      "note": "Hierarchical row model plus the kit's disclosure control."
+      "note": "Hierarchical row model plus the kit's disclosure control.",
+      "requiresConfig": true
     },
     "virtualize": {
       "id": "virtualize",
@@ -186,7 +198,8 @@
       ],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Windowing engine. Owned virtualizer replaces @tanstack/react-virtual in v3; changes render semantics so it stays explicit."
+      "note": "Windowing engine. Owned virtualizer replaces @tanstack/react-virtual in v3; changes render semantics so it stays explicit.",
+      "requiresConfig": false
     },
     "columnMenu": {
       "id": "column-menu",
@@ -196,7 +209,8 @@
       "implementation": ["core/src/columns/columnMenuModel.ts"],
       "adapterComponents": ["ColumnMenu"],
       "standardPreset": true,
-      "note": "Per-column menu drawn with the kit's own Menu."
+      "note": "Per-column menu drawn with the kit's own Menu.",
+      "requiresConfig": false
     },
     "resizableColumns": {
       "id": "resizable-columns",
@@ -206,7 +220,8 @@
       "implementation": ["core/src/columns/columnSizing.ts"],
       "adapterComponents": [],
       "standardPreset": true,
-      "note": "Pointer-driven widths applied to header cells the kit already renders."
+      "note": "Pointer-driven widths applied to header cells the kit already renders.",
+      "requiresConfig": false
     },
     "collapsibleColumnGroups": {
       "id": "collapsible-column-groups",
@@ -219,7 +234,8 @@
       ],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Header-group tree collapse in the header plan."
+      "note": "Header-group tree collapse in the header plan.",
+      "requiresConfig": false
     },
     "exportCsv": {
       "id": "export-csv",
@@ -232,7 +248,8 @@
       ],
       "adapterComponents": ["Toolbar"],
       "standardPreset": true,
-      "note": "CSV writer plus the toolbar action that triggers it."
+      "note": "CSV writer plus the toolbar action that triggers it.",
+      "requiresConfig": false
     },
     "cellNavigation": {
       "id": "cell-navigation",
@@ -242,7 +259,8 @@
       "implementation": ["core/src/focus/useGridFocus.ts"],
       "adapterComponents": ["FillHandle"],
       "standardPreset": false,
-      "note": "Range selection, clipboard and the fill handle."
+      "note": "Range selection, clipboard and the fill handle.",
+      "requiresConfig": false
     },
     "findInTable": {
       "id": "find-in-table",
@@ -252,7 +270,8 @@
       "implementation": ["core/src/find/useFindInTable.ts"],
       "adapterComponents": ["Toolbar"],
       "standardPreset": true,
-      "note": "Find bar rendered through the kit toolbar slots."
+      "note": "Find bar rendered through the kit toolbar slots.",
+      "requiresConfig": false
     },
     "fullscreen": {
       "id": "fullscreen",
@@ -262,7 +281,8 @@
       "implementation": ["core/src/layout/useFullscreen.ts"],
       "adapterComponents": ["Toolbar"],
       "standardPreset": true,
-      "note": "Toolbar toggle plus the fullscreen container."
+      "note": "Toolbar toggle plus the fullscreen container.",
+      "requiresConfig": false
     },
     "commandPalette": {
       "id": "command-palette",
@@ -275,7 +295,8 @@
       ],
       "adapterComponents": ["CommandPalette"],
       "standardPreset": false,
-      "note": "Large interaction-opened overlay \u2014 a permitted lazy-import candidate."
+      "note": "Large interaction-opened overlay.",
+      "requiresConfig": false
     },
     "contextMenu": {
       "id": "context-menu",
@@ -288,7 +309,8 @@
       ],
       "adapterComponents": ["ContextMenu"],
       "standardPreset": false,
-      "note": "Right-click menu drawn with the kit's Menu."
+      "note": "Right-click menu drawn with the kit's Menu.",
+      "requiresConfig": false
     },
     "sidePanel": {
       "id": "side-panel",
@@ -298,7 +320,8 @@
       "implementation": ["core/src/layout/SidePanelChrome.tsx"],
       "adapterComponents": ["SidePanel"],
       "standardPreset": false,
-      "note": "Docked panel host \u2014 large, interaction-opened, lazy-import candidate."
+      "note": "Docked panel host \u2014 large, interaction-opened, lazy-import candidate.",
+      "requiresConfig": true
     },
     "bulkActions": {
       "id": "bulk-actions",
@@ -308,7 +331,8 @@
       "implementation": ["core/src/selection/useSelection.ts"],
       "adapterComponents": ["BulkActionBar"],
       "standardPreset": true,
-      "note": "Selection bar drawn with the kit's own buttons."
+      "note": "Selection bar drawn with the kit's own buttons.",
+      "requiresConfig": true
     },
     "filters": {
       "id": "filters",
@@ -328,7 +352,8 @@
         "ChecklistFilter"
       ],
       "standardPreset": true,
-      "note": "The filter engine plus five kit surfaces \u2014 the largest single optional contribution."
+      "note": "The filter engine plus five kit surfaces \u2014 the largest single optional contribution.",
+      "requiresConfig": true
     },
     "filterTypes": {
       "id": "filter-types",
@@ -338,7 +363,8 @@
       "implementation": ["core/src/filters/filterRegistry.ts"],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Registry extension; supersedes FilterTypeRegistry.register/extend, removed in v3."
+      "note": "Registry extension; supersedes FilterTypeRegistry.register/extend, removed in v3.",
+      "requiresConfig": true
     },
     "headerFilters": {
       "id": "header-filters",
@@ -348,7 +374,8 @@
       "implementation": ["core/src/filters/FilterHeaderRow.tsx"],
       "adapterComponents": ["AutoFilterForm"],
       "standardPreset": true,
-      "note": "Per-column filter row under the header."
+      "note": "Per-column filter row under the header.",
+      "requiresConfig": false
     },
     "savedViews": {
       "id": "saved-views",
@@ -358,7 +385,8 @@
       "implementation": ["core/src/url/useSavedViews.ts"],
       "adapterComponents": ["SavedViewsMenu", "SavedViewsPanel"],
       "standardPreset": true,
-      "note": "URL-state capture plus a menu and a management panel."
+      "note": "URL-state capture plus a menu and a management panel.",
+      "requiresConfig": true
     },
     "selectionStats": {
       "id": "selection-stats",
@@ -371,7 +399,8 @@
       ],
       "adapterComponents": ["SelectionStatsBar"],
       "standardPreset": true,
-      "note": "Aggregates over the selection, rendered as a kit bar."
+      "note": "Aggregates over the selection, rendered as a kit bar.",
+      "requiresConfig": false
     },
     "densityChooser": {
       "id": "density-chooser",
@@ -381,7 +410,8 @@
       "implementation": ["core/src/url/useDensityUrlState.ts"],
       "adapterComponents": ["Toolbar"],
       "standardPreset": true,
-      "note": "Toolbar control bound to density URL state."
+      "note": "Toolbar control bound to density URL state.",
+      "requiresConfig": false
     },
     "print": {
       "id": "print",
@@ -391,7 +421,8 @@
       "implementation": ["core/src/export/printLayout.ts"],
       "adapterComponents": ["Toolbar"],
       "standardPreset": false,
-      "note": "Print stylesheet and the toolbar button."
+      "note": "Print stylesheet and the toolbar button.",
+      "requiresConfig": true
     },
     "statusBar": {
       "id": "status-bar",
@@ -401,7 +432,8 @@
       "implementation": ["core/src/focus/StatusBarChrome.tsx"],
       "adapterComponents": ["StatusBar"],
       "standardPreset": true,
-      "note": "Footer bar drawn by the kit."
+      "note": "Footer bar drawn by the kit.",
+      "requiresConfig": false
     },
     "undoRedoButtons": {
       "id": "undo-redo-buttons",
@@ -411,7 +443,8 @@
       "implementation": ["core/src/editing/editHistory.ts"],
       "adapterComponents": ["Toolbar"],
       "standardPreset": false,
-      "note": "Toolbar buttons over the edit-history stack."
+      "note": "Toolbar buttons over the edit-history stack.",
+      "requiresConfig": false
     },
     "multiSort": {
       "id": "multi-sort",
@@ -421,7 +454,8 @@
       "implementation": ["core/src/useDataTable/useDataTable.ts"],
       "adapterComponents": [],
       "standardPreset": true,
-      "note": "Extends built-in sorting to an ordered key list; no new chrome."
+      "note": "Extends built-in sorting to an ordered key list; no new chrome.",
+      "requiresConfig": false
     },
     "fitColumns": {
       "id": "fit-columns",
@@ -431,7 +465,8 @@
       "implementation": ["core/src/columns/autoSizeColumns.ts"],
       "adapterComponents": [],
       "standardPreset": true,
-      "note": "Measures content and writes widths; no new chrome."
+      "note": "Measures content and writes widths; no new chrome.",
+      "requiresConfig": false
     },
     "columnSelectionCheckbox": {
       "id": "column-selection-checkbox",
@@ -441,18 +476,19 @@
       "implementation": ["core/src/selection/useSelection.ts"],
       "adapterComponents": ["ColumnSelectCheckbox"],
       "standardPreset": false,
-      "note": "Checkbox column rendered with the kit's own Checkbox."
+      "note": "Checkbox column rendered with the kit's own Checkbox.",
+      "requiresConfig": false
     }
   },
   "frameworkBoundary": {
-    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no react, no react-dom, no react-compiler-runtime and no @tanstack/* package. React lives in the binding layer (hooks, Chrome, focus) outside this list. Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a framework import.",
+    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React and no React-coupled package. A vendor namespace is not a framework boundary \u2014 a framework-neutral dependency such as `@tanstack/virtual-core` is ordinary engine code, while `@tanstack/react-virtual` is React-coupled and belongs to the binding side. React lives in the binding layer (hooks, Chrome, focus). Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a React-coupled import.",
     "forbiddenImports": [
       "react",
       "react-dom",
       "react/*",
       "react-dom/*",
       "react-compiler-runtime",
-      "@tanstack/*"
+      "@tanstack/react-*"
     ],
     "engineModules": [
       "core/src/actions/commandRegistry.ts",
@@ -722,5 +758,59 @@
         "test": "packages/adapter-mui/src/DataTable.coverage.test.tsx \u2014 \"lets an explicit size prop win over density (back-compat)\""
       }
     ]
+  },
+  "standardFeatures": {
+    "note": "`standardFeatures()` with no arguments returns only factories that are callable with no required configuration. A factory that needs options is inert without them, so naming it in a preset would bundle an implementation the table cannot use. Those join through `standardFeatures({ ... })` when the caller supplies what they need.",
+    "zeroArgument": [
+      "columnMenu",
+      "densityChooser",
+      "exportCsv",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "headerFilters",
+      "multiSort",
+      "resizableColumns",
+      "selectionStats",
+      "statusBar"
+    ],
+    "onlyWithOptions": ["bulkActions", "filters", "grouping", "savedViews"]
+  },
+  "loading": {
+    "rule": "Feature subpaths are imported statically. A lazy variant is a separate, explicitly measured export, admitted only with evidence that initial-open SSR, hydration, focus order and first use are unchanged. No feature is named a lazy candidate in advance."
+  },
+  "provisionalBaseReview": {
+    "note": "Four capabilities were carried as provisional base members and measured before the contract was fixed. The test is both halves: essential to the three-prop table AND cheap. Each is cheap; none is reachable from `columns` + `data` + `rowKey` alone, so none stays in base. Sizes are that module's own graph bundled with React and the kits external, minified and gzipped \u2014 an upper bound, because a shared dependency is counted against every module that reaches it.",
+    "method": "rolldown over packages/core/src, React and @tanstack external, minify + gzip",
+    "reviewed": {
+      "row selection": {
+        "module": "core/src/selection/useSelection.ts",
+        "sizeKB": 0.79,
+        "essentialToThreeProp": false,
+        "verdict": "feature",
+        "where": "The selection model is what `columnSelectionCheckbox`, `bulkActions` and `selectionStats` need; a three-prop table renders no checkbox and no bulk bar. Item 4 moves the hook behind those features."
+      },
+      "row actions": {
+        "module": "core/src/rows/rowActions.ts",
+        "sizeKB": 0.1,
+        "essentialToThreeProp": false,
+        "verdict": "feature",
+        "where": "The trailing action column renders only when the host passes `rowActions`, and the buttons are the kit's own. Item 4 gives it a factory and its adapter contribution."
+      },
+      "column visibility": {
+        "module": "core/src/columns/useColumnLayout.ts",
+        "sizeKB": 1.9,
+        "essentialToThreeProp": false,
+        "verdict": "feature",
+        "where": "Resolving which columns render is base and stays; CHANGING that set is the Columns menu. `columnMenu` already owns the control, its URL state and its storage."
+      },
+      "column order": {
+        "module": "core/src/columns/columnReorder.ts",
+        "sizeKB": 0.91,
+        "essentialToThreeProp": false,
+        "verdict": "feature",
+        "where": "Initial order is the `columns` array, which is base. Reordering is reached only through the Columns menu \u2014 `columnReorderKeyProps` is imported by adapter ColumnMenu components and nothing else \u2014 so it ships with `columnMenu`."
+      }
+    }
   }
 }

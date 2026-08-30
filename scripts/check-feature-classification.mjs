@@ -23,7 +23,12 @@
  * 3. **Every replaced prop is real.** Each `replacesProps` entry must appear
  *    in the deprecation list `warnDeprecatedFeatureProps` warns on, which is
  *    what proves the v2 path and the v3 replacement are the same feature.
- * 4. **The removal inventory matches the surface.** Every warned prop and
+ * 4. **`standardFeatures()` is honest.** Its zero-argument list may name only
+ *    factories that are callable bare — a factory that needs options is inert
+ *    without them, so naming it in a preset would bundle an implementation the
+ *    table cannot use. Each `requiresConfig` is checked against the real
+ *    signature rather than trusted.
+ * 5. **The removal inventory matches the surface.** Every warned prop and
  *    every main-entry alias is accounted for in both directions, so the major
  *    cannot quietly drop something nobody wrote down — or keep advertising a
  *    removal that already happened.
@@ -133,7 +138,109 @@ for (const [name, feature] of Object.entries(listed)) {
   }
 }
 
-/* 4. The v3 removal inventory still matches the code it describes. -------- */
+/* 4. `standardFeatures()` names only factories that work with no options. -- */
+
+const factories = readFileSync(
+  join(PACKAGES, "core", "src", "features", "factories.ts"),
+  "utf8"
+);
+
+/** Split a parameter list on its top-level commas. */
+function parameters(text) {
+  const parts = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of text) {
+    if ("<({[".includes(ch)) depth++;
+    else if (">)}]".includes(ch)) depth--;
+    if (ch === "," && depth === 0) {
+      parts.push(current);
+      current = "";
+    } else current += ch;
+  }
+  if (current.trim()) parts.push(current);
+  return parts.map((part) => part.trim());
+}
+
+/** `name?: T` or `name = default`. An arrow type is not a default. */
+function isOptional(parameter) {
+  if (/^\w+\s*\?\s*:/.test(parameter)) return true;
+  let depth = 0;
+  for (let i = 0; i < parameter.length; i++) {
+    const ch = parameter[i];
+    if ("<({[".includes(ch)) depth++;
+    else if (">)}]".includes(ch)) depth--;
+    else if (ch === "=" && depth === 0) {
+      if (parameter[i + 1] === ">" || parameter[i + 1] === "=") continue;
+      if ("=!<>".includes(parameter[i - 1])) continue;
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Can this factory be called with no arguments at all? */
+const callableBare = new Map();
+for (const block of factories.split("\nexport function ").slice(1)) {
+  const name = /^(\w+)/.exec(block)?.[1];
+  const signature = /^\w+(?:<[^>]*>)?\(([\s\S]*?)\):\s*TableFeature/.exec(
+    block
+  );
+  if (!name || !signature) continue;
+  callableBare.set(name, parameters(signature[1]).every(isOptional));
+}
+
+for (const [name, feature] of Object.entries(listed)) {
+  const bare = callableBare.get(name);
+  if (bare === undefined) {
+    problems.push(
+      `${name}: no factory signature found in features/factories.ts`
+    );
+    continue;
+  }
+  if (feature.requiresConfig === bare) {
+    problems.push(
+      `${name}: requiresConfig is ${feature.requiresConfig}, but the factory ` +
+        `${bare ? "takes no required argument" : "requires an argument"}`
+    );
+  }
+}
+
+const { zeroArgument, onlyWithOptions } = manifest.standardFeatures;
+const preset = Object.keys(listed).filter(
+  (name) => listed[name].standardPreset
+);
+for (const name of zeroArgument) {
+  if (listed[name]?.requiresConfig) {
+    problems.push(
+      `standardFeatures(): ${name} is listed as zero-argument but needs options`
+    );
+  }
+}
+for (const name of onlyWithOptions) {
+  if (listed[name] && !listed[name].requiresConfig) {
+    problems.push(
+      `standardFeatures(): ${name} is listed as needing options but takes none`
+    );
+  }
+}
+const named = new Set([...zeroArgument, ...onlyWithOptions]);
+for (const name of preset) {
+  if (!named.has(name)) {
+    problems.push(
+      `standardFeatures(): ${name} is a preset member but appears in neither list`
+    );
+  }
+}
+for (const name of named) {
+  if (!preset.includes(name)) {
+    problems.push(
+      `standardFeatures(): ${name} is listed but is not a preset member`
+    );
+  }
+}
+
+/* 5. The v3 removal inventory still matches the code it describes. -------- */
 
 const removals = Object.fromEntries(
   manifest.v3Removals.groups.map((group) => [group.id, group])
@@ -191,12 +298,10 @@ for (const group of manifest.v3Removals.groups) {
 /* ------------------------------------------------------------------------- */
 
 if (problems.length === 0) {
-  const standard = Object.values(listed).filter(
-    (feature) => feature.standardPreset
-  ).length;
   console.log(
     `✓ feature classification — ${Object.keys(listed).length} features, ` +
-      `${standard} in standardFeatures(), every module and prop reconciled`
+      `standardFeatures() ${zeroArgument.length} bare + ${onlyWithOptions.length} ` +
+      `with options, every module, prop and signature reconciled`
   );
   process.exit(0);
 }

@@ -29,9 +29,20 @@ and everything below is present without asking:
 - loading, error and empty states
 - accessibility: roles, `aria-rowcount`/`aria-colcount`, live announcements
 - single-column sorting, search, pagination and infinite data
-- row selection, row actions, column visibility and order
+- column resolution: the `columns` array rendered in order, honouring `hidden`
 
 Nothing else rides that import. Every other capability is a feature.
+
+Membership is decided on two questions, both of which must be yes: is it
+reachable from those three props, and is it cheap? Row selection, row actions,
+column visibility and column order were each measured against that test and each
+failed the first half — a three-prop table renders no checkbox, no action
+column, and no way to change the column set. All four are cheap (0.10–1.90 KB),
+and cheap alone is not a reason to charge every table for them, so each belongs
+to the feature that already reaches it: selection to `columnSelectionCheckbox`,
+`bulkActions` and `selectionStats`, the action column to its own factory, and
+both column capabilities to `columnMenu`. The numbers and the method are in
+`provisionalBaseReview` in the classification artifact.
 
 ## Features
 
@@ -60,14 +71,20 @@ needs is reachable from the root import.
 
 ### `standardFeatures()`
 
-One import for the common richer table, so the ordinary case is not 15 import
-lines. It is a starting point, not a tier — every member is separately
-importable, and a table that wants fourteen of them composes fourteen.
+One import for the common richer table, so the ordinary case is not eleven
+import lines. It is a starting point, not a tier — every member is separately
+importable, and a table that wants ten of them composes ten.
 
-Members: `grouping`, `columnMenu`, `resizableColumns`, `exportCsv`,
-`findInTable`, `fullscreen`, `bulkActions`, `filters`, `headerFilters`,
-`savedViews`, `selectionStats`, `densityChooser`, `statusBar`, `multiSort`,
-`fitColumns`.
+Called bare it returns the eleven factories that need no configuration:
+`columnMenu`, `densityChooser`, `exportCsv`, `findInTable`, `fitColumns`,
+`fullscreen`, `headerFilters`, `multiSort`, `resizableColumns`,
+`selectionStats`, `statusBar`.
+
+`grouping`, `bulkActions`, `filters` and `savedViews` each need options to do
+anything, so they join only when the caller supplies them —
+`standardFeatures({ groupBy: "team", filters: defs })`. A feature that cannot act
+without configuration is inert, and bundling an inert implementation because a
+preset happened to name it is the cost this rule removes.
 
 Excluded on purpose: `virtualize`, `tree` and the editing family change render
 or data semantics rather than adding chrome, and `commandPalette`, `sidePanel`,
@@ -82,17 +99,17 @@ the five editing features are all `@adapttable/<kit>/editing`, and `filters` and
 `filterTypes` are both `@adapttable/<kit>/filters`. `@adapttable/<kit>/features`
 re-exports every factory for hosts that would rather have one import.
 
-### Static imports, and the one exception
+### Static imports
 
 Feature imports are static. A bundler follows imports rather than prop values,
 so a static graph is what makes the cost of a table equal to the features it
 named.
 
-Dynamic `import()` is reserved for large panels that open on interaction and
-whose absence changes nothing about SSR, hydration, keyboard reachability or
-first use — `commandPalette`, `sidePanel`, and the pivot panel. A lazy boundary
-anywhere else trades a measurable byte count for an unmeasurable first-use
-stall, which is the wrong trade.
+A lazy variant is a separate export, admitted one at a time on evidence: initial
+open, SSR, hydration, focus order and first use measured unchanged. No feature is
+nominated for that in advance — a lazy boundary chosen on the shape of a feature
+rather than on a measurement trades a countable byte total for an uncountable
+first-use stall.
 
 ## The framework boundary
 
@@ -100,11 +117,17 @@ The engine is framework-agnostic by construction. Model, state, operators and
 serialization compile without React; React lives in a binding layer above them —
 hooks, Chrome, focus.
 
+What is forbidden is a coupling, not a vendor. `@tanstack/virtual-core` is
+framework-neutral and is ordinary engine code; `@tanstack/react-virtual` is
+React-coupled and lives in the optional virtualization binding, where the base
+graph proves it absent and the tables that virtualize keep a mature
+implementation. Rewriting a working library to clear a namespace buys nothing.
+
 `frameworkBoundary.engineModules` in the classification artifact names all 98
 engine modules, and `scripts/check-framework-boundary.mjs` fails the build when
-one of them imports `react`, `react-dom`, `react-compiler-runtime` or any
-`@tanstack/*` package. New engine code joins that list; a module that becomes
-binding leaves it, with the reason in the commit.
+one of them imports `react`, `react-dom`, `react-compiler-runtime` or a
+`@tanstack/react-*` package. New engine code joins that list; a module that
+becomes binding leaves it, with the reason in the commit.
 
 This is what makes a Vue or Angular binding possible without a rewrite. Those
 bindings are not in this major, and the line is drawn and enforced now so they
