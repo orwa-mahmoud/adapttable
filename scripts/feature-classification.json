@@ -824,5 +824,33 @@
         "where": "Initial order is the `columns` array, which is base. Reordering is reached only through the Columns menu \u2014 `columnReorderKeyProps` is imported by adapter ColumnMenu components and nothing else \u2014 so it ships with `columnMenu`."
       }
     }
+  },
+  "seamMeasurement": {
+    "note": "What the provider seam costs and what the first feature through it removed, so the trade is a number rather than a claim. Packed figures come from scripts/bundle-budget.mjs; module figures are that module's own graph bundled with React and the kits external, minified and gzipped.",
+    "providerLayerKB": 0.74,
+    "rowReorderModuleKB": 1.51,
+    "packedAdapterRootDeltaKB": -0.7,
+    "packedBefore": {
+      "mantine": 133.7,
+      "mui": 134.3,
+      "chakra": 133.2,
+      "antd": 127.1,
+      "radix": 134.1,
+      "base-ui": 141.1,
+      "shadcn": 138.2,
+      "unstyled": 134.8
+    },
+    "packedAfter": {
+      "mantine": 133.0,
+      "mui": 133.5,
+      "chakra": 132.5,
+      "antd": 126.4,
+      "radix": 133.4,
+      "base-ui": 140.3,
+      "shadcn": 137.5,
+      "unstyled": 134.1
+    },
+    "absenceMarker": "ROW_DND_MIME \u2014 written and read only inside the reorder state machine, so its absence from every adapter root is the proof the machine left the base graph.",
+    "reading": "The layer costs 0.74 KB and the state machine it displaced was 1.51 KB, which is the -0.7 KB each adapter root actually moved. The layer is paid once; every further feature that moves behind it is subtraction."
   }
 }
