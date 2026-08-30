@@ -467,17 +467,6 @@ export interface BaseDataTableProps<TRow> {
   /** Remove a row. A Delete row action appears as soon as this is set. */
   onDeleteRow?: (row: TRow) => unknown;
   /**
-   * Reorder a row — a drag handle appears in a reserved leading column as
-   * soon as this is set. `from` / `to` are dataset-relative (page offset
-   * included), and `row` is the one that moved. The table never mutates the
-   * array; apply the move with `applyRowReorder` or your own write.
-   *
-   * Keyboard: Space lifts, arrows move, Space drops, Escape cancels.
-   * Grouping or a tree refuses this with a `devWarn` — nested order is not
-   * a flat splice. Mobile cards get up/down buttons rather than a grip.
-   */
-  onRowReorder?: (from: number, to: number, row: TRow) => void;
-  /**
    * Controlled row pins. `{ top, bottom }` lists of row ids that render
    * outside the virtual window — sticky above and below the scroll box —
    * so they are not drawn twice. Omit for the internal (uncontrolled)

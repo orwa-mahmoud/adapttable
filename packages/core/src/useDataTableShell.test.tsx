@@ -1,7 +1,10 @@
 import { act, fireEvent, render, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { rowReorder } from "./features/factories";
+import { FeatureProviders } from "./features/providers";
+import { rowReorder } from "./features/row-reorder";
+import { applyTableFeatures } from "./features/tableFeature";
 import type { FilterDef } from "./filters/filterDefs";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef, RowAction } from "./types";
@@ -55,20 +58,30 @@ describe("useDataTableShell", () => {
   });
 
   it("arms row reorder from the features path", () => {
-    const onRowReorder = vi.fn();
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        {
-          data: ROWS,
-          columns,
-          rowKey,
-          urlSync: false,
-          features: [rowReorder(onRowReorder)],
-        },
-        noForm
-      )
+    // The feature's provider owns the hook, so it has to be mounted above the
+    // component that calls the shell — which is what every adapter's
+    // `DataTable` does around its `DataTableContent`.
+    const props = applyTableFeatures({ features: [rowReorder(vi.fn())] });
+    const { result } = renderHook(
+      () =>
+        useDataTableShell(
+          { data: ROWS, columns, rowKey, urlSync: false, ...props },
+          noForm
+        ),
+      {
+        wrapper: ({ children }: { children: ReactNode }) => (
+          <FeatureProviders props={props}>{children}</FeatureProviders>
+        ),
+      }
     );
     expect(result.current.hasRowReorder).toBe(true);
+  });
+
+  it("does not arm row reorder without the feature", () => {
+    const { result } = renderHook(() =>
+      useDataTableShell({ data: ROWS, columns, rowKey, urlSync: false }, noForm)
+    );
+    expect(result.current.hasRowReorder).toBe(false);
   });
 
   it("renders the auto-form for declarative filters", () => {

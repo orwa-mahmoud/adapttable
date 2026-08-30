@@ -21,13 +21,16 @@
   "features": {
     "rowReorder": {
       "id": "row-reorder",
-      "replacesProps": ["onRowReorder"],
+      "replacesProps": [],
       "classification": "headless",
       "subpath": "row-reorder",
-      "implementation": ["core/src/rows/rowReorder.ts"],
+      "implementation": [
+        "core/src/features/row-reorder.tsx",
+        "core/src/rows/rowReorder.ts"
+      ],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Drag state and the reordered row model live in core; kits draw the grip through the existing row slots, so no kit component is dedicated to it.",
+      "note": "The first feature to own its provider: the drag state machine lives on `@adapttable/core/features/row-reorder` and nothing in the base graph reaches it. Its enabling prop is gone \u2014 the feature import is the only way to arm reordering.",
       "requiresConfig": true
     },
     "rowPinning": {
@@ -595,15 +598,24 @@
     "note": "Everything the v3 major removes, with the import or call that replaces it. Item 8 executes this list; the migration guide is generated from it.",
     "groups": [
       {
+        "id": "row-reorder-prop",
+        "removes": "the `onRowReorder` prop",
+        "v2Path": "<DataTable onRowReorder={handler} />",
+        "v3Path": "import { rowReorder } from \"@adapttable/mui/row-reorder\";\n<DataTable features={[rowReorder(handler)]} />",
+        "packages": ["@adapttable/core", "every @adapttable/<kit>"],
+        "warnedBy": "removed \u2014 the feature import is the only way in",
+        "test": "packages/core/src/features/row-reorder.test.tsx",
+        "note": "Removed ahead of the rest because row reordering is the feature that proves the provider seam: while the prop worked, the chrome had to import the hook to serve it, and nothing could leave the graph."
+      },
+      {
         "id": "enabling-props",
-        "removes": "50 enabling props on DataTable",
+        "removes": "49 enabling props on DataTable",
         "v2Path": "<DataTable onRowReorder={fn} groupBy=\"team\" virtualize />",
         "v3Path": "<DataTable features={[rowReorder(fn), grouping(\"team\"), virtualize()]} />",
         "packages": ["@adapttable/core", "every @adapttable/<kit>"],
         "warnedBy": "warnDeprecatedFeatureProps in packages/core/src/features/tableFeature.ts",
         "test": "packages/core/src/features/tableFeature.test.ts",
         "props": {
-          "onRowReorder": "rowReorder",
           "pinnedRowIds": "rowPinning",
           "onPinnedRowIdsChange": "rowPinning",
           "getCellSpan": "cellSpan",

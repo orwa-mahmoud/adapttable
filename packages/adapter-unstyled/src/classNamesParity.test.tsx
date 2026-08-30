@@ -20,6 +20,7 @@ import {
   type DataTableClassNames,
   defaultLabels,
 } from "./index";
+import { rowReorder } from "./row-reorder";
 
 vi.mock("@adapttable/core/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
@@ -519,8 +520,11 @@ async function renderAllStates(classNames?: DataTableClassNames) {
 
   // Row reorder: desktop grip + header, mobile up/down. Isolated so grouping
   // does not refuse the column and fire a devWarn in the kitchen-sink mounts.
-  mount({ override: { onRowReorder: vi.fn() } }).unmount();
-  mount({ isMobile: true, override: { onRowReorder: vi.fn() } }).unmount();
+  mount({ override: { features: [rowReorder(vi.fn())] } }).unmount();
+  mount({
+    isMobile: true,
+    override: { features: [rowReorder(vi.fn())] },
+  }).unmount();
 
   mount({
     override: {

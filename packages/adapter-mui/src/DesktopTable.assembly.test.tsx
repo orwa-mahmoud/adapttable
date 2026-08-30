@@ -14,6 +14,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ExpandChevron, muiColor } from "./components/DesktopTable";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { rowReorder } from "./row-reorder";
 
 interface Person {
   id: string;
@@ -75,7 +76,7 @@ function mount(
 
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  onRowReorder: vi.fn(),
+  features: [rowReorder(vi.fn())],
   bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {

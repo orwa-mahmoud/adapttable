@@ -29,6 +29,8 @@ import { useCellEditing } from "./editing/useCellEditing";
 import { useEditValidation } from "./editing/validation";
 import type { ExportStatus } from "./export/useExportHandler";
 import { featureHostOf } from "./features/featureHost";
+import { useFeatureState } from "./features/providers";
+import { ROW_REORDER } from "./features/rowReorderKey";
 import {
   type ActiveFilterChip,
   mergeFilterChips,
@@ -69,7 +71,7 @@ import {
   type RowPinState,
   useRowPinning,
 } from "./rows/rowPinning";
-import { type RowReorderState, useRowReorder } from "./rows/rowReorder";
+import type { RowReorderState } from "./rows/rowReorder";
 import { estimateFromRowHeight } from "./rows/rowStyle";
 import {
   type RowExpansionState,
@@ -386,7 +388,7 @@ export interface TableChrome<TRow> {
    */
   hasRowReorder: boolean;
   /**
-   * Headless row-reorder state. Present iff the host passed `onRowReorder`,
+   * Headless row-reorder state. Present iff the row-reorder feature is composed,
    * grouping/tree are off, and the column is visible. Adapters read THIS.
    */
   rowReorder?: RowReorderState<TRow>;
@@ -1224,32 +1226,23 @@ export function useTableChrome<TRow>(
 
   // Reorder a flat list, never a nested one: grouping and trees have their
   // own order, and a splice through them would silently lie.
-  const requestedReorder = props.onRowReorder !== undefined;
+  // The feature owns the hook; this reads what its provider published. A table
+  // that never imported `@adapttable/<kit>/row-reorder` gets `undefined` here
+  // and never carries the drag state machine at all.
+  const publishedReorder = useFeatureState(ROW_REORDER) as
+    RowReorderState<TRow> | undefined;
+  const requestedReorder = publishedReorder !== undefined;
   const reorderBlocked = grouping !== undefined || treeShaped;
   useEffect(() => {
     if (!requestedReorder || !reorderBlocked) return;
     devWarn(
-      "onRowReorder is ignored while grouping or a tree is armed — reorder a flat list, not a nested one."
+      "The row-reorder feature is ignored while grouping or a tree is armed — reorder a flat list, not a nested one."
     );
   }, [requestedReorder, reorderBlocked]);
   const hasRowReorder = requestedReorder && !reorderBlocked;
   const reorderHidden = columnLayout.isHidden(REORDER_COLUMN_KEY);
   const rowReorderEnabled = hasRowReorder && !reorderHidden;
-  const hostRowReorder = props.onRowReorder;
-  const rowReorderState = useRowReorder<TRow>({
-    enabled: rowReorderEnabled,
-    onRowReorder: hostRowReorder,
-    labels: {
-      reorderRow: table.labels.reorderRow,
-      moveRowUp: table.labels.moveRowUp,
-      moveRowDown: table.labels.moveRowDown,
-      rowLifted: table.labels.rowLifted,
-      rowMoved: table.labels.rowMoved,
-      rowReorderCancelled: table.labels.rowReorderCancelled,
-    },
-    rowAt: (index) => editingRows[index],
-  });
-  const rowReorder = rowReorderEnabled ? rowReorderState : undefined;
+  const rowReorder = rowReorderEnabled ? publishedReorder : undefined;
 
   const rowPinning = useChromeRowPinning<TRow>({
     requested:
@@ -1315,7 +1308,7 @@ export function useTableChrome<TRow>(
         rowPinningRequested:
           props.pinnedRowIds !== undefined ||
           props.onPinnedRowIdsChange !== undefined,
-        rowReorderRequested: props.onRowReorder !== undefined,
+        rowReorderRequested: requestedReorder,
         nestedArmed: grouping !== undefined || treeShaped,
         hasEditableColumn,
         onCellEdit,
@@ -1334,7 +1327,7 @@ export function useTableChrome<TRow>(
       serverGroups,
       props.pinnedRowIds,
       props.onPinnedRowIdsChange,
-      props.onRowReorder,
+      requestedReorder,
       grouping,
       treeShaped,
       hasEditableColumn,

@@ -20,6 +20,7 @@ import {
   useHighlight,
   useQuerySource,
 } from "@adapttable/core";
+import { rowReorder } from "@adapttable/core/features/row-reorder";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -589,7 +590,9 @@ function frontendColumnProps(
     });
   }
   if (flags.rowReorder) {
-    Object.assign(next, { onRowReorder: flags.onRowReorder });
+    // Row reordering has no enabling prop: composing the feature is what brings
+    // its state machine and its controls into the table.
+    Object.assign(next, { features: [rowReorder(flags.onRowReorder)] });
   }
   if (flags.rowPinning) {
     Object.assign(next, { onPinnedRowIdsChange: () => undefined });

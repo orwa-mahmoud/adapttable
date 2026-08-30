@@ -463,7 +463,7 @@ do the list work.
 
 ## Reordering rows
 
-Changing which row sits where is the same one-way write: pass `onRowReorder`
+Changing which row sits where is the same one-way write: compose `rowReorder`
 and a grip appears. See [row reordering](./row-reordering.md).
 Pass `onPinnedRowIdsChange` and pin actions appear. See [row pinning](./row-pinning.md).
 

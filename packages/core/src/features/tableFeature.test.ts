@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { resetDevWarnings } from "../utils/devWarn";
-import { feature, rowReorder, virtualize } from "./factories";
+import { feature, grouping, virtualize } from "./factories";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 
 beforeEach(() => {
@@ -14,7 +14,7 @@ afterEach(() => {
 
 describe("applyTableFeatures", () => {
   it("returns the same object when no features key is present", () => {
-    const props = { onRowReorder: undefined, columns: [] };
+    const props = { groupBy: undefined, columns: [] };
     expect(applyTableFeatures(props)).toBe(props);
   });
 
@@ -35,39 +35,31 @@ describe("applyTableFeatures", () => {
   });
 
   it("applies a factory onto the prop surface", () => {
-    const onRowReorder = vi.fn();
-    const resolved = applyTableFeatures({
-      features: [rowReorder(onRowReorder)],
-    });
-    expect(resolved).toEqual({ onRowReorder });
+    const resolved = applyTableFeatures({ features: [grouping("team")] });
+    expect(resolved).toEqual({ groupBy: "team" });
   });
 
   it("lets a later feature win", () => {
-    const first = vi.fn();
-    const second = vi.fn();
     const resolved = applyTableFeatures({
-      features: [rowReorder(first), rowReorder(second)],
+      features: [grouping("first"), grouping("second")],
     });
-    expect(resolved).toEqual({ onRowReorder: second });
+    expect(resolved).toEqual({ groupBy: "second" });
   });
 
   it("lets an explicit prop win over a feature", () => {
-    const fromFeature = vi.fn();
-    const fromProp = vi.fn();
     const resolved = applyTableFeatures({
-      features: [rowReorder(fromFeature)],
-      onRowReorder: fromProp,
+      features: [grouping("from-feature")],
+      groupBy: "from-prop",
     });
-    expect(resolved).toEqual({ onRowReorder: fromProp });
+    expect(resolved).toEqual({ groupBy: "from-prop" });
   });
 
   it("does not let an undefined explicit prop overwrite a feature", () => {
-    const onRowReorder = vi.fn();
     const resolved = applyTableFeatures({
-      features: [rowReorder(onRowReorder)],
-      onRowReorder: undefined,
+      features: [grouping("team")],
+      groupBy: undefined,
     });
-    expect(resolved).toEqual({ onRowReorder });
+    expect(resolved).toEqual({ groupBy: "team" });
   });
 
   it("skips a feature that has no apply", () => {
@@ -80,18 +72,17 @@ describe("applyTableFeatures", () => {
 
   it("is a no-op the second time on the same object", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const onRowReorder = vi.fn();
-    const first = applyTableFeatures({ onRowReorder });
+    const first = applyTableFeatures({ groupBy: "team" });
     applyTableFeatures(first);
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
   it("warns once when a deprecated enabling prop is set", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    applyTableFeatures({ onRowReorder: vi.fn() });
-    applyTableFeatures({ onRowReorder: vi.fn() });
+    applyTableFeatures({ groupBy: "team" });
+    applyTableFeatures({ groupBy: "other" });
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain("onRowReorder");
+    expect(warn.mock.calls[0]?.[0]).toContain("groupBy");
     expect(warn.mock.calls[0]?.[0]).toContain("deprecated");
   });
 

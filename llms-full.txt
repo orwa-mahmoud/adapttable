@@ -247,7 +247,7 @@ The source for each lives in
   (show/hide, reorder, pin), resizing.
 - [Inline cell editing](./cell-editing.md) — opt-in `onCellEdit`, kit-native
   editors, keyboard flow.
-- [Row reordering](./row-reordering.md) — opt-in `onRowReorder`, Space-lift
+- [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots
@@ -426,8 +426,8 @@ desktop-visible columns so every card keeps enough identity to be useful.
 
 ▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — every opt-in, on every kit.
 
-Opt-in features used to be a prop: pass `onRowReorder` and a grip appears. That
-still works. The new path moves the enable-switch onto the import:
+Every opt-in is an import and one entry in `features`. The import is the
+switch, which is what lets a table pay only for what it named:
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
@@ -443,19 +443,19 @@ import { rowReorder } from "@adapttable/mantine/row-reorder";
 />;
 ```
 
-Same runtime as `onRowReorder={…}`. A built-in factory and a host plugin are
-the same `TableFeature` type in the same array — that is the public plugin
-surface, not a parallel API.
+A built-in factory and a host plugin are the same `TableFeature` type in the
+same array — that is the public plugin surface, not a parallel API.
 
-## No bundle savings yet
+## What the import buys
 
-While the enabling props still work, `DataTable` keeps its internal imports. A
-bundler follows imports, not prop values, so a plain table still ships every
-feature it _might_ render. The drop lands at v3, when the props go away and
-the adapter can stop importing what the host did not.
+A bundler follows imports, not prop values. While a feature can still be armed
+by an enabling prop, `DataTable` has to import its implementation to serve that
+prop, so a plain table ships everything it _might_ render.
 
-Until then: compose with `features` so the call site already names what it
-uses, and keep the props if that is what you have.
+Row reordering is the first feature past that: it has no enabling prop, its
+state machine lives on its own entry, and a table that does not compose
+`rowReorder` never downloads it. The rest follow, and the enabling props go
+with them.
 
 ## Kit subpaths
 
@@ -485,14 +485,13 @@ engine, so a host that composes a pivot table still does it in one import.
 
 ```tsx
 // Deprecated, still works:
-<DataTable onRowReorder={handler} groupBy="team" virtualize />;
+<DataTable groupBy="team" virtualize />;
 
 // Preferred:
 import { grouping } from "@adapttable/mantine/grouping";
-import { rowReorder } from "@adapttable/mantine/row-reorder";
 import { virtualize } from "@adapttable/mantine/virtualize";
 
-<DataTable features={[rowReorder(handler), grouping("team"), virtualize()]} />;
+<DataTable features={[grouping("team"), virtualize()]} />;
 ```
 
 An explicit prop wins if both are set. Development mode warns once when a
@@ -2788,7 +2787,7 @@ do the list work.
 
 ## Reordering rows
 
-Changing which row sits where is the same one-way write: pass `onRowReorder`
+Changing which row sits where is the same one-way write: compose `rowReorder`
 and a grip appears. See [row reordering](./row-reordering.md).
 Pass `onPinnedRowIdsChange` and pin actions appear. See [row pinning](./row-pinning.md).
 
@@ -2958,20 +2957,19 @@ history of rows that no longer exist can only put back values nobody wants.
 
 # React table row reordering — drag handle, keyboard grab, dataset indices
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — pass `onRowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [drag-reorder rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-Pass `onRowReorder` and a drag handle appears in a reserved leading column.
-Or import `rowReorder` from `@adapttable/<kit>/row-reorder` and pass
-`features={[rowReorder(handler)]}` — same runtime, see
-[feature composition](./features.md). The enabling prop is deprecated and
-stays until v3.
-Omit it and nothing renders, nothing ships in the hot path — the same opt-in
-rule as `onCellEdit`. The table never mutates your array; you apply the move.
+Import `rowReorder` from `@adapttable/<kit>/row-reorder` and a drag handle
+appears in a reserved leading column. The import is the switch: a table that
+does not compose it never downloads the drag state machine, its keyboard
+handling or its announcements — see [feature composition](./features.md).
+The table never mutates your array; you apply the move.
 
 ```tsx
 import { applyRowReorder, DataTable } from "@adapttable/mantine";
+import { rowReorder } from "@adapttable/mantine/row-reorder";
 import { useState } from "react";
 
 function Tasks({ seed }: { seed: Task[] }) {
@@ -2981,9 +2979,11 @@ function Tasks({ seed }: { seed: Task[] }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      onRowReorder={(from, to) => {
-        setRows((current) => applyRowReorder(current, from, to));
-      }}
+      features={[
+        rowReorder((from, to) => {
+          setRows((current) => applyRowReorder(current, from, to));
+        }),
+      ]}
     />
   );
 }
@@ -3008,7 +3008,7 @@ review. The grip is a real button:
 - **Escape** cancels
 
 `RowReorderAnnouncer` is the live region. It mounts only when reorder is
-armed, so a table without `onRowReorder` does not add a second status
+armed, so a table that does not compose `rowReorder` adds no second status
 region (export already owns one).
 
 ## Mobile
@@ -3018,8 +3018,8 @@ ends disable rather than wrapping.
 
 ## What it will not do
 
-**Grouping or a tree.** Nested order is not a flat splice. Passing
-`onRowReorder` while either is armed logs a `devWarn` and the handle does not
+**Grouping or a tree.** Nested order is not a flat splice. Composing
+`rowReorder` while either is armed logs a `devWarn` and the handle does not
 render — never a silent ignore.
 
 **URL / Saved Views.** Row order is the host's array. There is nothing to
@@ -7842,7 +7842,6 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `onEditConflict`            | `EditConflictHandler<TRow>`                                     | —               | A row changed under an open editor. Return `"keep"` or `"take"`; omit and `editConflictPolicy` decides.                                                                                                                                                                                                                                                                          |
 | `editConflictPolicy`        | `"keep" \| "take" \| "ask"`                                     | `"ask"`         | What to do when the host does not choose. `"ask"` surfaces Keep mine / Take theirs.                                                                                                                                                                                                                                                                                              |
 | `rowVersion`                | `(row: TRow) => string \| number`                               | —               | Host version of a row. Any change under an open editor is a conflict, not only the edited column.                                                                                                                                                                                                                                                                                |
-| `onRowReorder`              | `RowReorderHandler<TRow>`                                       | —               | Drag handle in a reserved column. `from` / `to` are dataset-relative; the table never mutates rows. Keyboard: Space lifts, arrows move, Space drops, Escape cancels. Grouping or a tree refuses with a `devWarn`. See [row reordering](./row-reordering.md).                                                                                                                     |
 | `pinnedRowIds`              | `RowPinState`                                                   | —               | Controlled `{ top, bottom }` row-id lists. Pinned rows leave the virtual window and stick above or below the scroll box. See [row pinning](./row-pinning.md).                                                                                                                                                                                                                    |
 | `onPinnedRowIdsChange`      | `(next: RowPinState) => void`                                   | —               | Pin-list channel. Setting this (or `pinnedRowIds`) arms the feature. Uncontrolled lists also write `rowPin` to the URL. Grouping or a tree refuses with a `devWarn`.                                                                                                                                                                                                             |
 | `getCellSpan`               | `GetCellSpan<TRow>`                                             | —               | Per-cell `{ colSpan, rowSpan }`. Covered cells are omitted from the row's cell list. Receives `sectionRows` / `sectionRowIndex` in visual body order (pinned top, scroll, pinned bottom) so a consecutive merge stays one cell across a pin. Clips at pin boundaries and the column window. Mobile cards ignore geometry. See [row and column spanning](./row-spanning.md).      |
@@ -8408,7 +8407,7 @@ the host can pass `isCellFlashing` — a pulse, not a locate-the-row
 highlight, and never against `prefers-reduced-motion`. See
 [realtime](./realtime.md).
 
-**Row reordering.** `onRowReorder` (`RowReorderHandler`) is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
+**Row reordering.** `rowReorder(handler)` from `@adapttable/<kit>/row-reorder` arms it and `RowReorderHandler` is the write; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `RowReorderState`; `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
 `RowReorderHandleChrome` / `RowReorderHandleChromeProps` /
 `RowReorderHandleSlots` / `RowReorderHandleSlotProps` and

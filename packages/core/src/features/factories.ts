@@ -70,17 +70,6 @@ export function feature<TRow>(
 }
 
 /**
- * Let rows be dragged into a new order.
- *
- * @public
- */
-export function rowReorder<TRow>(
-  onRowReorder: RowReorderHandler<TRow>
-): TableFeature<TRow> {
-  return define("row-reorder", { onRowReorder });
-}
-
-/**
  * Let rows be pinned to the top or bottom.
  *
  * @public

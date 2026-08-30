@@ -32,7 +32,6 @@ import {
   rowDetail,
   rowEditing,
   rowPinning,
-  rowReorder,
   savedViews,
   selectionStats,
   sidePanel,
@@ -49,11 +48,6 @@ function patch<T>(factory: { apply?: (input: object) => T }): T {
 }
 
 describe("feature factories", () => {
-  it("rowReorder writes onRowReorder", () => {
-    const onRowReorder = vi.fn();
-    expect(patch(rowReorder(onRowReorder))).toEqual({ onRowReorder });
-  });
-
   it("rowPinning writes both pin channels", () => {
     const onPinnedRowIdsChange = vi.fn();
     expect(

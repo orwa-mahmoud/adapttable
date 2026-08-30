@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/core",
   "version": "2.9.0",
-  "description": "Headless, UI-agnostic React data table engine — state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
+  "description": "Headless, UI-agnostic React data table engine \u2014 state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
   "keywords": [
     "react",
     "data-table",
@@ -96,6 +96,16 @@
       "require": {
         "types": "./dist/features.d.cts",
         "default": "./dist/features.cjs"
+      }
+    },
+    "./features/row-reorder": {
+      "import": {
+        "types": "./dist/features/row-reorder.d.ts",
+        "default": "./dist/features/row-reorder.js"
+      },
+      "require": {
+        "types": "./dist/features/row-reorder.d.cts",
+        "default": "./dist/features/row-reorder.cjs"
       }
     },
     "./pivot": {

@@ -240,7 +240,7 @@ The source for each lives in
   (show/hide, reorder, pin), resizing.
 - [Inline cell editing](./cell-editing.md) — opt-in `onCellEdit`, kit-native
   editors, keyboard flow.
-- [Row reordering](./row-reordering.md) — opt-in `onRowReorder`, Space-lift
+- [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots

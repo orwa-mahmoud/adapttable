@@ -185,7 +185,7 @@ function warnDeprecatedFeatureProps(props: object): void {
   // Bundlers inline NODE_ENV and drop this list from production.
   if (process.env.NODE_ENV === "production") return;
   const used = (
-    "onRowReorder,pinnedRowIds,onPinnedRowIdsChange,getCellSpan," +
+    "pinnedRowIds,onPinnedRowIdsChange,getCellSpan," +
     "cellSpanAppearance,extraRows,rowStyle,rowHeight,rowClassName," +
     "renderRowDetail,defaultExpandedRowIds,nestedTable,onCellEdit," +
     "rowEditing,onRowEdit,batchEditing,onBatchEdit,editHistory,dirtyIndicators," +
@@ -203,7 +203,7 @@ function warnDeprecatedFeatureProps(props: object): void {
   devWarn(
     `Enabling props (${used.join(", ")}) are deprecated. Import factories ` +
       `from an @adapttable/<kit>/<feature> subpath and pass ` +
-      `features={[rowReorder(fn), …]}. The props still work until v3 — ` +
+      `features={[grouping("team"), …]}. The props still work until v3 — ` +
       `see https://orwa-mahmoud.github.io/adapttable/features/`
   );
 }

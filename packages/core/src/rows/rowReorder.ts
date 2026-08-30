@@ -219,7 +219,15 @@ function isRtl(grip: HTMLElement | null): boolean {
 export function useRowReorder<TRow>(options: {
   enabled: boolean;
   onRowReorder?: RowReorderHandler<TRow>;
-  labels: RowReorderLabels;
+  /**
+   * The three labels this state machine speaks. The other three on
+   * {@link RowReorderLabels} name the grip and its mobile buttons, which the
+   * adapter draws from the table's own labels.
+   */
+  labels: Pick<
+    RowReorderLabels,
+    "rowLifted" | "rowMoved" | "rowReorderCancelled"
+  >;
   /** Look up a row in the current source by its rendered index. */
   rowAt: (localIndex: number) => TRow | undefined;
 }): RowReorderState<TRow> {

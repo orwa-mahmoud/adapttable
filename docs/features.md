@@ -2,8 +2,8 @@
 
 ▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — every opt-in, on every kit.
 
-Opt-in features used to be a prop: pass `onRowReorder` and a grip appears. That
-still works. The new path moves the enable-switch onto the import:
+Every opt-in is an import and one entry in `features`. The import is the
+switch, which is what lets a table pay only for what it named:
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
@@ -19,19 +19,19 @@ import { rowReorder } from "@adapttable/mantine/row-reorder";
 />;
 ```
 
-Same runtime as `onRowReorder={…}`. A built-in factory and a host plugin are
-the same `TableFeature` type in the same array — that is the public plugin
-surface, not a parallel API.
+A built-in factory and a host plugin are the same `TableFeature` type in the
+same array — that is the public plugin surface, not a parallel API.
 
-## No bundle savings yet
+## What the import buys
 
-While the enabling props still work, `DataTable` keeps its internal imports. A
-bundler follows imports, not prop values, so a plain table still ships every
-feature it _might_ render. The drop lands at v3, when the props go away and
-the adapter can stop importing what the host did not.
+A bundler follows imports, not prop values. While a feature can still be armed
+by an enabling prop, `DataTable` has to import its implementation to serve that
+prop, so a plain table ships everything it _might_ render.
 
-Until then: compose with `features` so the call site already names what it
-uses, and keep the props if that is what you have.
+Row reordering is the first feature past that: it has no enabling prop, its
+state machine lives on its own entry, and a table that does not compose
+`rowReorder` never downloads it. The rest follow, and the enabling props go
+with them.
 
 ## Kit subpaths
 
@@ -61,14 +61,13 @@ engine, so a host that composes a pivot table still does it in one import.
 
 ```tsx
 // Deprecated, still works:
-<DataTable onRowReorder={handler} groupBy="team" virtualize />;
+<DataTable groupBy="team" virtualize />;
 
 // Preferred:
 import { grouping } from "@adapttable/mantine/grouping";
-import { rowReorder } from "@adapttable/mantine/row-reorder";
 import { virtualize } from "@adapttable/mantine/virtualize";
 
-<DataTable features={[rowReorder(handler), grouping("team"), virtualize()]} />;
+<DataTable features={[grouping("team"), virtualize()]} />;
 ```
 
 An explicit prop wins if both are set. Development mode warns once when a

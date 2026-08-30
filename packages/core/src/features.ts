@@ -66,7 +66,6 @@ export {
   rowDetail,
   rowEditing,
   rowPinning,
-  rowReorder,
   savedViews,
   selectionStats,
   sidePanel,
@@ -80,6 +79,7 @@ export type {
   FeatureProviderContribution,
   FeatureProviderProps,
 } from "./features/providers";
+export { rowReorder } from "./features/row-reorder";
 export type {
   FeatureApplyInput,
   FeaturePatch,

@@ -1,19 +1,18 @@
 # React table row reordering — drag handle, keyboard grab, dataset indices
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — pass `onRowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [drag-reorder rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-Pass `onRowReorder` and a drag handle appears in a reserved leading column.
-Or import `rowReorder` from `@adapttable/<kit>/row-reorder` and pass
-`features={[rowReorder(handler)]}` — same runtime, see
-[feature composition](./features.md). The enabling prop is deprecated and
-stays until v3.
-Omit it and nothing renders, nothing ships in the hot path — the same opt-in
-rule as `onCellEdit`. The table never mutates your array; you apply the move.
+Import `rowReorder` from `@adapttable/<kit>/row-reorder` and a drag handle
+appears in a reserved leading column. The import is the switch: a table that
+does not compose it never downloads the drag state machine, its keyboard
+handling or its announcements — see [feature composition](./features.md).
+The table never mutates your array; you apply the move.
 
 ```tsx
 import { applyRowReorder, DataTable } from "@adapttable/mantine";
+import { rowReorder } from "@adapttable/mantine/row-reorder";
 import { useState } from "react";
 
 function Tasks({ seed }: { seed: Task[] }) {
@@ -23,9 +22,11 @@ function Tasks({ seed }: { seed: Task[] }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      onRowReorder={(from, to) => {
-        setRows((current) => applyRowReorder(current, from, to));
-      }}
+      features={[
+        rowReorder((from, to) => {
+          setRows((current) => applyRowReorder(current, from, to));
+        }),
+      ]}
     />
   );
 }
@@ -50,7 +51,7 @@ review. The grip is a real button:
 - **Escape** cancels
 
 `RowReorderAnnouncer` is the live region. It mounts only when reorder is
-armed, so a table without `onRowReorder` does not add a second status
+armed, so a table that does not compose `rowReorder` adds no second status
 region (export already owns one).
 
 ## Mobile
@@ -60,8 +61,8 @@ ends disable rather than wrapping.
 
 ## What it will not do
 
-**Grouping or a tree.** Nested order is not a flat splice. Passing
-`onRowReorder` while either is armed logs a `devWarn` and the handle does not
+**Grouping or a tree.** Nested order is not a flat splice. Composing
+`rowReorder` while either is armed logs a `devWarn` and the handle does not
 render — never a silent ignore.
 
 **URL / Saved Views.** Row order is the host's array. There is nothing to

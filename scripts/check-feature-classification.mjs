@@ -58,10 +58,16 @@ const featuresEntry = readFileSync(
   join(PACKAGES, "core", "src", "features.ts"),
   "utf8"
 );
-/** Value re-exports from `./features/factories` — the built-in factories. */
+/**
+ * The built-in factories the entry re-exports.
+ *
+ * Most still come from the shared `factories` module; a feature that owns
+ * hooks has moved to its own entry so a table that never imports it never
+ * carries it, and those are re-exported by name.
+ */
 const exported = new Set();
 for (const block of featuresEntry.matchAll(
-  /export\s+\{([^}]*)\}\s+from\s+"\.\/features\/factories";/g
+  /export\s+\{([^}]*)\}\s+from\s+"\.\/features\/[\w-]+";/g
 )) {
   for (const raw of block[1].split(",")) {
     // Prettier normalizes `X as Y` to single spaces, so a literal split is exact.
@@ -71,8 +77,11 @@ for (const block of featuresEntry.matchAll(
     }
   }
 }
-// `feature()` is the ad-hoc patch escape hatch, not a classified feature.
-exported.delete("feature");
+// Not features: the ad-hoc patch escape hatch, and the two composition
+// helpers every adapter runs.
+for (const name of ["feature", "applyTableFeatures", "useTableFeatures"]) {
+  exported.delete(name);
+}
 
 for (const name of exported) {
   if (!(name in listed)) {
@@ -140,10 +149,13 @@ for (const [name, feature] of Object.entries(listed)) {
 
 /* 4. `standardFeatures()` names only factories that work with no options. -- */
 
-const factories = readFileSync(
-  join(PACKAGES, "core", "src", "features", "factories.ts"),
-  "utf8"
-);
+/** Every module that defines a factory, shared or feature-owned. */
+const factoryModules = readdirSync(join(PACKAGES, "core", "src", "features"))
+  .filter((name) => /\.tsx?$/.test(name) && !name.includes(".test."))
+  .map((name) =>
+    readFileSync(join(PACKAGES, "core", "src", "features", name), "utf8")
+  );
+const factories = factoryModules.join("\n");
 
 /** Split a parameter list on its top-level commas. */
 function parameters(text) {
