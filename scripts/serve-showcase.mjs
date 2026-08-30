@@ -63,8 +63,11 @@ const TYPES = new Map(
  *
  * Turbo owns the caching, so an unchanged tree is a cache hit rather than a
  * rebuild — "build once" without this script keeping its own staleness notes.
- * Analytics is switched off for the build: GA4 and Clarity inject on build
- * only, and a suite that loads them files every run as real traffic.
+ *
+ * The build keeps its analytics tags. They carry a host guard that injects
+ * nothing off the real site, and `e2e/analytics.spec.ts` is what proves a
+ * localhost run makes no tracker request — a guard nothing exercises is a
+ * guard that quietly stops working.
  */
 function build() {
   if (process.env.SHOWCASE_SKIP_BUILD === "1") return;
@@ -82,7 +85,6 @@ function build() {
     {
       cwd: ROOT,
       stdio: "inherit",
-      env: { ...process.env, ADAPTTABLE_NO_ANALYTICS: "1" },
     }
   );
   if (result.status !== 0) {

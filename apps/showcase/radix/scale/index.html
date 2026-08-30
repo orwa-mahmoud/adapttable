@@ -22,12 +22,31 @@
     <script type="application/ld+json">
       {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Render 100,000 rows and 40 columns in a Radix data table — row and column virtualization, sticky headers, pinned columns, and sorting that stays interactive.","url":"https://orwa-mahmoud.github.io/adapttable/demo/radix/scale/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
-    ></script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

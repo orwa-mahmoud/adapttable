@@ -446,12 +446,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       # Every shard runs against this one build, so nine runners do not each
-      # compile the same site. Analytics stays out of it: GA4 and Clarity inject
-      # on build, and a suite that loads them files each run as real traffic.
+      # compile the same site.
       - name: Build
         run: pnpm turbo run build --filter=@adapttable/showcase
-        env:
-          ADAPTTABLE_NO_ANALYTICS: "1"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: showcase-dist

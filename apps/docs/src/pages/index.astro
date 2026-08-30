@@ -124,6 +124,7 @@ const JSON_LD = JSON.stringify({
   codeRepository: REPO,
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 });
+import { appendScript, guarded } from "../../../../scripts/analytics-guard.mjs";
 ---
 
 <!doctype html>
@@ -148,12 +149,17 @@ const JSON_LD = JSON.stringify({
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={`${SITE}/og.png`} />
     <script type="application/ld+json" set:html={JSON_LD} />
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a local run files no session. -->
     <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
-    ></script>
+      is:inline
+      set:html={guarded(
+        appendScript("https://static.cloudflareinsights.com/beacon.min.js", {
+          defer: true,
+          "data-cf-beacon": '{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}',
+        })
+      )}
+    />
     <!--
       Google Analytics (GA4) and Microsoft Clarity, production builds only.
       This landing page is a standalone Astro page, so Starlight's `head`
@@ -174,13 +180,12 @@ const JSON_LD = JSON.stringify({
               browser full error detail instead of the opaque "Script error."
               every cross-origin failure collapses into. */}
           <script
-            async
-            crossorigin="anonymous"
-            src="https://www.googletagmanager.com/gtag/js?id=G-FT8LY7Z15Y"
-          />
-          <script
             is:inline
-            set:html={`window.dataLayer = window.dataLayer || [];
+            set:html={guarded(`${appendScript(
+              "https://www.googletagmanager.com/gtag/js?id=G-FT8LY7Z15Y",
+              { async: true, crossorigin: "anonymous" }
+            )}
+window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-FT8LY7Z15Y');
@@ -212,15 +217,15 @@ gtag('config', 'G-FT8LY7Z15Y');
   window.addEventListener('unhandledrejection', function (event) {
     report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);
   });
-})();`}
+})();`)}
           />
           <script
             is:inline
-            set:html={`window.clarity = window.clarity || function () {
+            set:html={guarded(`window.clarity = window.clarity || function () {
   (window.clarity.q = window.clarity.q || []).push(arguments);
-};`}
+};
+${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           />
-          <script async src="https://www.clarity.ms/tag/xxq9dbsjnj" />
         </>
       )
     }
