@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
@@ -29,6 +30,7 @@ describe("toolbar order (MUI)", () => {
         urlSync={false}
         filters={[{ key: "name", type: "text" }]}
         enableColumnMenu
+        features={[columnMenu<Row>()]}
         exportCsv
         savedViews={{ storageKey: "order-test" }}
       />

@@ -1,6 +1,7 @@
 import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
@@ -115,7 +116,7 @@ describe("row reorder (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         enableColumnMenu
-        {...enable(vi.fn())}
+        features={[rowReorder(vi.fn()), columnMenu<Task>()]}
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));

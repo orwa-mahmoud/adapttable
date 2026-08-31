@@ -566,6 +566,9 @@ export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
+export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<never>>;
+
+// @public
 export interface ColumnDef<TRow> {
     accessor?: (row: TRow) => ReactNode;
     align?: "start" | "center" | "end";
@@ -809,6 +812,23 @@ export interface ColumnMenuRow<TRow> {
     key: string;
     name: string;
     pinned: PinnedSide;
+}
+
+// @public
+export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
+    dir?: Direction;
+    hasRowActions?: boolean;
+    hasRowReorder?: boolean;
+    labels: ColumnMenuLabels & {
+        actions: string;
+        reorderRow: string;
+    };
+    onAutoSize: () => void;
+    onAutoSizeColumn?: (key: string) => void;
+    onFilterColumn?: (key: string) => void;
+    onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+    sortBy?: string;
+    sortDir?: "asc" | "desc";
 }
 
 // @public

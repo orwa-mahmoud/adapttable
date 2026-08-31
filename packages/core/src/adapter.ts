@@ -80,6 +80,7 @@ export {
   type ColumnMenuChromeProps,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
   filterColumnMenuRows,
   hideAllColumns,
   nextPinSide,
@@ -246,6 +247,7 @@ export {
 } from "./features/providers";
 export {
   BATCH_EDIT_BAR,
+  COLUMN_MENU,
   COMMAND_PALETTE,
   CONTEXT_MENU,
   FIND_BAR,

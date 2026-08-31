@@ -2,16 +2,15 @@ import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
   columnReorderKeyProps,
-  type Direction,
   REORDER_COLUMN_KEY,
   useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import {
   columnMenuActions,
-  type ColumnMenuChromeProps,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
@@ -37,37 +36,8 @@ import { useState } from "react";
 
 import { useEscapeClose } from "./useEscapeClose";
 
-/**
- * Props for the column menu — the shared core contract, plus the injected
- * actions column: when the table has row actions, the menu lists it too
- * (named by `labels.actions`) with an eye toggle and a one-click end-pin.
- */
-export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
-  /** Resolved labels — the shared menu set plus the actions-column name. */
-  labels: ColumnMenuLabels & { actions: string; reorderRow: string };
-  /** Whether the table has row actions (lists the injected actions column). */
-  hasRowActions?: boolean;
-  /**
-   * Whether the table renders a row-reorder column. When true the menu
-   * lists it as a leading reserved row: hideable and start-pinnable.
-   */
-  hasRowReorder?: boolean;
-  /** Size every rendered column to its content. */
-  onAutoSize: () => void;
-  /** Size one column to its content. */
-  onAutoSizeColumn?: (key: string) => void;
-  /** Sort one column from the submenu. */
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  /** Open the filter UI from the submenu. */
-  onFilterColumn?: (key: string) => void;
-  /** Column key currently sorted by, if any. */
-  sortBy?: string;
-  /** Direction for `sortBy`. */
-  sortDir?: "asc" | "desc";
-  /** Text direction — the menu portals to `<body>`, so it loses the table's
-   *  direction unless we hand it over explicitly (RTL flipped grip ↔ pin). */
-  dir?: Direction;
-}
+/** The shared Columns-menu contract, declared once in core. */
+export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
 /** The eye toggle + struck-through name shared by data and actions rows. */
 function RowVisibility({

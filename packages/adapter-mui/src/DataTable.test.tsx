@@ -5,6 +5,7 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -770,7 +771,11 @@ describe("actions column management (MUI)", () => {
 
   it("pins the actions column with ONE click — sticky with NO data pins", async () => {
     renderHarness({
-      override: { enableColumnMenu: true, rowActions: [edit] },
+      override: {
+        enableColumnMenu: true,
+        features: [columnMenu<Row>()],
+        rowActions: [edit],
+      },
     });
     // In normal flow before the pin: nothing anywhere is pinned.
     expect(getComputedStyle(actionsHeader()!).position).not.toBe("sticky");
@@ -793,7 +798,11 @@ describe("actions column management (MUI)", () => {
 
   it("hides and re-shows the actions column from the Columns menu", async () => {
     renderHarness({
-      override: { enableColumnMenu: true, rowActions: [edit] },
+      override: {
+        enableColumnMenu: true,
+        features: [columnMenu<Row>()],
+        rowActions: [edit],
+      },
     });
     expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(2);
     await openMenu();
@@ -816,6 +825,7 @@ describe("actions column management (MUI)", () => {
     const first = renderHarness({
       override: {
         enableColumnMenu: true,
+        features: [columnMenu<Row>()],
         rowActions: [edit],
         onColumnLayoutChange: (next) => (persisted = next),
       },

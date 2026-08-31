@@ -4,6 +4,7 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { LoadingState } from "./components/TableSkeleton";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
@@ -266,7 +267,7 @@ describe("MUI coverage gaps", () => {
   });
 
   it("opens and closes the column menu popover", async () => {
-    mount({ enableColumnMenu: true });
+    mount({ enableColumnMenu: true, features: [columnMenu<Row>()] });
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     await screen.findByText("Reset columns");
     fireEvent.click(document.querySelector(".MuiBackdrop-root")!);

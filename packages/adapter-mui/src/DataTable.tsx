@@ -1,6 +1,8 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   BATCH_EDIT_BAR,
+  COLUMN_MENU,
+  type ColumnMenuSlotProps,
   COMMAND_PALETTE,
   CONTEXT_MENU,
   FeatureHostProvider,
@@ -35,7 +37,6 @@ import type { ReactNode } from "react";
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { BulkBar } from "./components/BulkActionBar";
-import { ColumnMenu } from "./components/ColumnMenu";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { FilterDrawer } from "./components/FilterDrawer";
@@ -184,19 +185,26 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     enabled: animate,
   });
   const columnMenu = props.enableColumnMenu && !c.isMobile && (
-    <ColumnMenu
-      allColumns={c.allColumns}
-      onAutoSize={shell.autoSizeColumns}
-      onAutoSizeColumn={shell.autoSizeColumn}
-      onSortColumn={(key, dir) => viewSource.setSort(key, dir)}
-      onFilterColumn={() => setFiltersOpen(true)}
-      sortBy={viewSource.sortBy}
-      sortDir={viewSource.sortDir}
-      layout={c.columnLayout}
-      labels={labels}
-      hasRowActions={hasRowActions}
-      hasRowReorder={hasRowReorder}
-      dir={props.dir}
+    <FeatureSlot
+      slot={COLUMN_MENU}
+      props={
+        {
+          allColumns: c.allColumns,
+          onAutoSize: shell.autoSizeColumns,
+          onAutoSizeColumn: shell.autoSizeColumn,
+          onSortColumn: (key, dir) => viewSource.setSort(key, dir),
+          onFilterColumn: () => setFiltersOpen(true),
+          sortBy: viewSource.sortBy,
+          sortDir: viewSource.sortDir,
+          layout: c.columnLayout,
+          labels,
+          hasRowActions,
+          hasRowReorder,
+          dir: props.dir,
+          // The slot key erases the row; ColumnDef is invariant, so the
+          // table's TRow cannot be proven to be `never`.
+        } as ColumnMenuSlotProps<never>
+      }
     />
   );
   // Saved views capture the table's own URL params, so the menu defaults to

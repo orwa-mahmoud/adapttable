@@ -2,7 +2,9 @@ import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { ColumnMenu } from "./components/ColumnMenu";
+import { DataTable } from "./DataTable";
 
 interface Row {
   id: string;
@@ -291,5 +293,36 @@ describe("mui ColumnMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     const reset = await screen.findByText("Reset columns");
     expect(reset.closest('[dir="rtl"]')).not.toBeNull();
+  });
+});
+
+describe("column menu feature (mui)", () => {
+  it("draws no Columns button when the feature was never imported", () => {
+    render(
+      <DataTable
+        data={[{ id: "1" }]}
+        columns={cols}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        enableColumnMenu
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: "Columns" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("draws the Columns button when the feature is composed", () => {
+    render(
+      <DataTable
+        data={[{ id: "1" }]}
+        columns={cols}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        enableColumnMenu
+        features={[columnMenu<Row>()]}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Columns" })).toBeInTheDocument();
   });
 });

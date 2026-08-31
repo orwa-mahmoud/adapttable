@@ -173,8 +173,9 @@ and it draws once), `FIND_BAR` (`findInTable` from
 `@adapttable/<kit>/find-in-table`), `BATCH_EDIT_BAR` (`batchEditing` from
 `@adapttable/<kit>/batch-editing`), `COMMAND_PALETTE` (`commandPalette` from
 `@adapttable/<kit>/command-palette`), `CONTEXT_MENU` (`contextMenu` from
-`@adapttable/<kit>/context-menu`) and `SIDE_PANEL` (`sidePanel` from
-`@adapttable/<kit>/side-panel`). And
+`@adapttable/<kit>/context-menu`), `SIDE_PANEL` (`sidePanel` from
+`@adapttable/<kit>/side-panel`) and `COLUMN_MENU` (`columnMenu` from
+`@adapttable/<kit>/column-menu`). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 
@@ -1473,7 +1474,7 @@ column's pin, `pinActionLabel` labels the action, and
 `PinnedCellStyle` compute direction-aware sticky styles. Pager math:
 `paginationSlots` / `paginationItems` build the windowed pager model
 (`PaginationSlot`, `PaginationItem`, `PaginationInfo`). Column chrome:
-`ColumnMenuChromeProps`, `ColumnMenuRow`, `ColumnMenuLabels`,
+`ColumnMenuChromeProps`, `ColumnMenuSlotProps`, `ColumnMenuRow`, `ColumnMenuLabels`,
 `ColumnDragState`, `ColumnDragRowAttrs`, `ColumnDropProps`,
 `ColumnRowDragProps`, `ColumnReorderKeyProps`,
 `ColumnResizeHandleProps` and `COLUMN_DND_MIME` power the column menu's

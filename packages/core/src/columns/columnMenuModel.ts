@@ -1,5 +1,6 @@
 import type { FeatureHostState } from "../features/currentHost";
 import type { ColumnDef } from "../types";
+import type { Direction } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
 
@@ -425,4 +426,46 @@ export interface ColumnMenuChromeProps<TRow> {
   layout: UseColumnLayoutResult<TRow>;
   /** Resolved labels. */
   labels: ColumnMenuLabels;
+}
+
+/**
+ * Everything a kit's Columns menu is given.
+ *
+ * Every adapter declared this same shape beside its own menu — eight copies of
+ * one contract, so a field the table started passing reached whichever kits
+ * someone remembered to edit. It belongs here, next to the model that produces
+ * the values.
+ *
+ * @public
+ */
+export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
+  /** Resolved labels, including the trailing actions-column entry's name. */
+  labels: ColumnMenuLabels & {
+    actions: string;
+    reorderRow: string;
+  };
+  /** Whether the table has row actions — lists the injected actions column. */
+  hasRowActions?: boolean;
+  /**
+   * Whether the table renders a row-reorder column. When true the menu
+   * lists it as a leading reserved row: hideable and start-pinnable.
+   */
+  hasRowReorder?: boolean;
+  /** Size every rendered column to its content. */
+  onAutoSize: () => void;
+  /** Size one column to its content. */
+  onAutoSizeColumn?: (key: string) => void;
+  /** Sort one column from the submenu. */
+  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+  /** Open the filter UI from the submenu. */
+  onFilterColumn?: (key: string) => void;
+  /** Column key currently sorted by, if any. */
+  sortBy?: string;
+  /** Direction for `sortBy`. */
+  sortDir?: "asc" | "desc";
+  /**
+   * Text direction. A kit that portals its menu to `<body>` loses the table's
+   * direction unless it is handed over, and RTL flips grip against pin.
+   */
+  dir?: Direction;
 }

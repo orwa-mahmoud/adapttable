@@ -5,6 +5,7 @@ import type {
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable, type DataTableProps } from "@adapttable/mui";
+import { columnMenu as columnMenu_ } from "@adapttable/mui/column-menu";
 import { commandPalette as commandPalette_ } from "@adapttable/mui/command-palette";
 import { contextMenu as contextMenu_ } from "@adapttable/mui/context-menu";
 import { findInTable as findInTable_ } from "@adapttable/mui/find-in-table";
@@ -308,6 +309,7 @@ export function MuiDemo({
               findInTable_<Person>(),
               commandPalette_<Person>(commandPalette ?? true),
               contextMenu_<Person>(contextMenu ?? true),
+              ...((columnMenu ?? !focused) ? [columnMenu_<Person>()] : []),
               ...(sidePanel ? [sidePanel_<Person>(sidePanel)] : []),
             ]}
             nestedTable={nested ? nestedOrders : undefined}

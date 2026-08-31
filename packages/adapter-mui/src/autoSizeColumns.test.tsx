@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
 import type { ColumnDef, ColumnLayoutState } from "./index";
 
@@ -49,6 +50,7 @@ describe("column auto-sizing (mui)", () => {
         urlSync={false}
         resizableColumns
         enableColumnMenu
+        features={[columnMenu<Row>()]}
         onColumnLayoutChange={onColumnLayoutChange}
       />
     );

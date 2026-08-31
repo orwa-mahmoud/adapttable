@@ -20,7 +20,7 @@ export default defineConfig({
     "src/grouping.ts",
     "src/editing.ts",
     "src/virtualize.ts",
-    "src/column-menu.ts",
+    "src/column-menu.tsx",
     "src/cell-navigation.ts",
     "src/pivot.ts",
   ],

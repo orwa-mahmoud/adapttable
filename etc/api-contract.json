@@ -1212,6 +1212,7 @@
       "COLUMN_GROUP_RENDER_PREFIX",
       "COLUMN_GROUP_STUB_PREFIX",
       "COLUMN_GROUP_STUB_WIDTH",
+      "COLUMN_MENU",
       "ColumnDef",
       "ColumnDragRowAttrs",
       "ColumnDragState",
@@ -1242,6 +1243,7 @@
       "ColumnMenuChromeProps",
       "ColumnMenuLabels",
       "ColumnMenuRow",
+      "ColumnMenuSlotProps",
       "ColumnReorderKeyProps",
       "ColumnResizeHandleProps",
       "ColumnRowDragProps",
@@ -2193,6 +2195,9 @@
     ],
     "adapter-mui-side-panel": [
       "sidePanel"
+    ],
+    "adapter-mui-column-menu": [
+      "columnMenu"
     ]
   },
   "entrypoints": {
@@ -2353,7 +2358,7 @@
       "reexport": "kit/cell-navigation"
     },
     "adapter-mui-column-menu.api.md": {
-      "reexport": "kit/column-menu"
+      "surface": "adapter-mui-column-menu"
     },
     "adapter-mui-editing.api.md": {
       "reexport": "kit/editing"

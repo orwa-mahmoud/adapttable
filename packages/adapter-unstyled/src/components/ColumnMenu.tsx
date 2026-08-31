@@ -2,7 +2,6 @@ import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
   columnReorderKeyProps,
-  type Direction,
   REORDER_COLUMN_KEY,
   useColumnDragState,
   type UseColumnLayoutResult,
@@ -10,9 +9,9 @@ import {
 import {
   type ColumnDragState,
   columnMenuActions,
-  type ColumnMenuChromeProps,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
@@ -329,39 +328,10 @@ function ReorderMenuRowItem<TRow>({
   );
 }
 
-export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
+/** The shared Columns-menu contract, plus this kit's class map. */
+export interface ColumnMenuProps<TRow> extends ColumnMenuSlotProps<TRow> {
+  /** Class map for the menu's parts. */
   classNames: DataTableClassNames;
-  /** Resolved labels — the shared contract plus the actions row's name. */
-  labels: ColumnMenuRowLabels;
-  /**
-   * Whether the table renders row actions. When true the menu lists the
-   * injected actions column as a separated trailing row, so it hides and
-   * end-pins like any data column.
-   */
-  hasRowActions?: boolean;
-  /**
-   * Whether the table renders a row-reorder column. When true the menu
-   * lists it as a leading reserved row: hideable and start-pinnable.
-   */
-  hasRowReorder?: boolean;
-  /** Size every rendered column to its content. */
-  onAutoSize: () => void;
-  /** Size one column to its content. */
-  onAutoSizeColumn?: (key: string) => void;
-  /** Sort one column from the submenu. */
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  /** Open the filter UI from the submenu. */
-  onFilterColumn?: (key: string) => void;
-  /** Column key currently sorted by, if any. */
-  sortBy?: string;
-  /** Direction for `sortBy`. */
-  sortDir?: "asc" | "desc";
-  /**
-   * Text direction. The panel portals to `document.body`, so it cannot
-   * inherit `dir` from the table — without this, Arabic keeps LTR row
-   * chrome (grip, eye, pin).
-   */
-  dir?: Direction;
 }
 
 /**

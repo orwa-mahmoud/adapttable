@@ -2,16 +2,15 @@ import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
   columnReorderKeyProps,
-  type Direction,
   REORDER_COLUMN_KEY,
   useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import {
   columnMenuActions,
-  type ColumnMenuChromeProps,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
@@ -35,37 +34,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-/** Props for the column menu — the shared core contract + actions wiring. */
-export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
-  /** Resolved labels, including the trailing actions-column entry's name. */
-  labels: ColumnMenuChromeProps<TRow>["labels"] & {
-    actions: string;
-    reorderRow: string;
-  };
-  /** Whether the table has row actions — lists the injected actions column. */
-  hasRowActions?: boolean;
-  /**
-   * Whether the table renders a row-reorder column. When true the menu
-   * lists it as a leading reserved row: hideable and start-pinnable.
-   */
-  hasRowReorder?: boolean;
-  /** Size every rendered column to its content. */
-  onAutoSize: () => void;
-  /** Size one column to its content. */
-  onAutoSizeColumn?: (key: string) => void;
-  /** Sort one column from the submenu. */
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  /** Open the filter UI from the submenu. */
-  onFilterColumn?: (key: string) => void;
-  /** Column key currently sorted by, if any. */
-  sortBy?: string;
-  /** Direction for `sortBy`. */
-  sortDir?: "asc" | "desc";
-  /** Text direction — the Popover portals to `<body>`, so it loses the
-   *  table's direction unless we hand it over explicitly (RTL flips
-   *  grip ↔ pin). */
-  dir?: Direction;
-}
+/** The shared Columns-menu contract, declared once in core. */
+export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
 /** Labels the visibility toggle and the row name share. */
 interface RowLabels {

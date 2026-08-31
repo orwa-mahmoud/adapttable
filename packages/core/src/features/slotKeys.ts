@@ -8,6 +8,7 @@
  */
 import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
+import type { ColumnMenuSlotProps } from "../columns/columnMenuModel";
 import type { BatchEditBarProps } from "../editing/RowEditGate";
 import type { FindBarProps } from "../find/FindBar";
 import type { StatusBarChromeProps } from "../focus/StatusBarChrome";
@@ -76,5 +77,19 @@ export const CONTEXT_MENU = featureSlotKey<
  */
 export const SIDE_PANEL = featureSlotKey<Omit<SidePanelChromeProps, "slots">>(
   "side-panel",
+  { single: true }
+);
+
+/**
+ * The Columns menu in the toolbar.
+ *
+ * The row type is erased to `never` because a slot key is one module-level
+ * constant serving every table. Callers pass that table's columns and layout;
+ * the renderer only reads them.
+ *
+ * @public
+ */
+export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
+  "column-menu",
   { single: true }
 );
