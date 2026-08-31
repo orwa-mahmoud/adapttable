@@ -898,6 +898,9 @@ export interface ColumnWindow<TRow> {
 export type Command = ContextMenuItem;
 
 // @public
+export const COMMAND_PALETTE: FeatureSlotKey<Omit<CommandPaletteChromeProps, "slots">>;
+
+// @public
 export function CommandPaletteChrome(props: Readonly<CommandPaletteChromeProps>): JSX.Element | null;
 
 // @public
@@ -981,6 +984,9 @@ export interface ConfirmRequest {
     onConfirm: () => void;
     title: string;
 }
+
+// @public
+export const CONTEXT_MENU: FeatureSlotKey<Omit<ContextMenuChromeProps, "slots">>;
 
 // @public
 export interface ContextMenuActions<TRow> {
@@ -3677,6 +3683,9 @@ export interface Shortcut {
 
 // @public
 export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
+
+// @public
+export const SIDE_PANEL: FeatureSlotKey<Omit<SidePanelChromeProps, "slots">>;
 
 // @public
 export function SidePanelChrome(props: Readonly<SidePanelChromeProps>): JSX.Element | null;

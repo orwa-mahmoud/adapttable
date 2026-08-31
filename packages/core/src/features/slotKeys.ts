@@ -6,9 +6,12 @@
  * the row-reorder state key away from the reorder hook. This module holds ids
  * and types only; nothing here has a runtime cost worth measuring.
  */
+import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";
+import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
 import type { BatchEditBarProps } from "../editing/RowEditGate";
 import type { FindBarProps } from "../find/FindBar";
 import type { StatusBarChromeProps } from "../focus/StatusBarChrome";
+import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
 import { featureSlotKey } from "./providers";
 
 /**
@@ -45,5 +48,33 @@ export const FIND_BAR = featureSlotKey<FindBarProps>("find-bar", {
  */
 export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<never>>(
   "batch-edit-bar",
+  { single: true }
+);
+
+/**
+ * The command palette overlay.
+ *
+ * @public
+ */
+export const COMMAND_PALETTE = featureSlotKey<
+  Omit<CommandPaletteChromeProps, "slots">
+>("command-palette", { single: true });
+
+/**
+ * The right-click menu.
+ *
+ * @public
+ */
+export const CONTEXT_MENU = featureSlotKey<
+  Omit<ContextMenuChromeProps, "slots">
+>("context-menu", { single: true });
+
+/**
+ * The docked side panel.
+ *
+ * @public
+ */
+export const SIDE_PANEL = featureSlotKey<Omit<SidePanelChromeProps, "slots">>(
+  "side-panel",
   { single: true }
 );

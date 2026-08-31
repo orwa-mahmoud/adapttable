@@ -5,7 +5,10 @@ import type {
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable, type DataTableProps } from "@adapttable/mui";
+import { commandPalette as commandPalette_ } from "@adapttable/mui/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/mui/context-menu";
 import { findInTable as findInTable_ } from "@adapttable/mui/find-in-table";
+import { sidePanel as sidePanel_ } from "@adapttable/mui/side-panel";
 import {
   selectionStats as selectionStats_,
   statusBar as statusBar_,
@@ -303,6 +306,9 @@ export function MuiDemo({
               statusBar_<Person>(),
               selectionStats_<Person>(),
               findInTable_<Person>(),
+              commandPalette_<Person>(commandPalette ?? true),
+              contextMenu_<Person>(contextMenu ?? true),
+              ...(sidePanel ? [sidePanel_<Person>(sidePanel)] : []),
             ]}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}

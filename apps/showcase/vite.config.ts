@@ -196,6 +196,13 @@ export default defineConfig({
         "tsx"
       ),
       "@adapttable/mui/status-bar": pkg("adapter-mui", "status-bar", "tsx"),
+      "@adapttable/mui/command-palette": pkg(
+        "adapter-mui",
+        "command-palette",
+        "tsx"
+      ),
+      "@adapttable/mui/context-menu": pkg("adapter-mui", "context-menu", "tsx"),
+      "@adapttable/mui/side-panel": pkg("adapter-mui", "side-panel", "tsx"),
       "@adapttable/core/features": pkg("core", "features"),
       "@adapttable/core/adapter": pkg("core", "adapter"),
       "@adapttable/core/xlsx": pkg("core", "xlsx"),

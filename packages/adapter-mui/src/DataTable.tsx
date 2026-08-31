@@ -1,6 +1,8 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   BATCH_EDIT_BAR,
+  COMMAND_PALETTE,
+  CONTEXT_MENU,
   FeatureHostProvider,
   FeatureProviders,
   FeatureSlot,
@@ -9,6 +11,7 @@ import {
   GridFocusAnnouncer,
   resolveStickyToolbar,
   RowReorderAnnouncer,
+  SIDE_PANEL,
   SidePanelLayout,
   STATUS_BAR,
   TableStatusAnnouncer,
@@ -33,8 +36,6 @@ import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { BulkBar } from "./components/BulkActionBar";
 import { ColumnMenu } from "./components/ColumnMenu";
-import { CommandPalette } from "./components/CommandPalette";
-import { ContextMenu } from "./components/ContextMenu";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { FilterDrawer } from "./components/FilterDrawer";
@@ -42,7 +43,6 @@ import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { SidePanel } from "./components/SidePanel";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
 import type { DataTableProps } from "./types";
@@ -316,18 +316,24 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
               labels={labels}
             />
           )}
-          <CommandPalette
-            commands={palette.commands}
-            open={palette.open}
-            onClose={palette.close}
-            labels={labels}
+          <FeatureSlot
+            slot={COMMAND_PALETTE}
+            props={{
+              commands: palette.commands,
+              open: palette.open,
+              onClose: palette.close,
+              labels,
+            }}
           />
-          <ContextMenu
-            items={contextMenu.items}
-            at={contextMenu.at}
-            onClose={contextMenu.close}
-            container={shell.fullscreen.container}
-            labels={labels}
+          <FeatureSlot
+            slot={CONTEXT_MENU}
+            props={{
+              items: contextMenu.items,
+              at: contextMenu.at,
+              onClose: contextMenu.close,
+              container: shell.fullscreen.container,
+              labels,
+            }}
           />
           <SidePanelLayout
             side={props.sidePanel?.side}
@@ -346,15 +352,18 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             }
             panel={
               props.sidePanel?.open != null && (
-                <SidePanel
-                  panels={props.sidePanel.panels}
-                  openPanel={props.sidePanel.open}
-                  onOpenPanel={props.sidePanel.onOpenChange}
-                  onClose={() => {
-                    props.sidePanel?.onOpenChange(null);
+                <FeatureSlot
+                  slot={SIDE_PANEL}
+                  props={{
+                    panels: props.sidePanel.panels,
+                    openPanel: props.sidePanel.open,
+                    onOpenPanel: props.sidePanel.onOpenChange,
+                    onClose: () => {
+                      props.sidePanel?.onOpenChange(null);
+                    },
+                    side: props.sidePanel.side,
+                    labels,
                   }}
-                  side={props.sidePanel.side}
-                  labels={labels}
                 />
               )
             }

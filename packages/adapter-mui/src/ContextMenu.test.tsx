@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { contextMenu } from "./context-menu";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -30,9 +31,22 @@ describe("context menu (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           contextMenu
+          features={[contextMenu<Row>()]}
           {...extra}
         />
       </>
+    );
+
+  /** No features composed: the import is the switch, so nothing is drawn. */
+  const bare = (extra?: Record<string, unknown>) =>
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        {...extra}
+      />
     );
 
   const menu = () =>
@@ -75,8 +89,8 @@ describe("context menu (mui)", () => {
     expect(menu()).not.toBeNull();
   });
 
-  it("renders nothing at all when the prop is absent", () => {
-    table({ contextMenu: undefined });
+  it("renders nothing at all when the feature is not composed", () => {
+    bare({ contextMenu: true });
     fireEvent.contextMenu(
       document.querySelector('[data-adapttable-part="header-cell"]')!,
       { clientX: 5, clientY: 5 }

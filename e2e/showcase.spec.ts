@@ -395,7 +395,11 @@ for (const adapter of ADAPTERS) {
       await trigger.click();
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
       await expect(form).toBeVisible();
-      await page.mouse.click(4, 4);
+      // Click inert page text, not a corner coordinate. (4, 4) is the sticky
+      // `<header class="nav">`, so the gesture was landing on other interactive
+      // chrome — which some kits' overlays treat differently from ordinary
+      // outside-click, and which decided the result by timing under load.
+      await page.getByRole("heading", { level: 1 }).first().click();
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 

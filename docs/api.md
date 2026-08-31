@@ -170,8 +170,11 @@ and the positions themselves are named constants: `STATUS_BAR` (the footer
 strip, filled by `statusBar` or `selectionStats` from
 `@adapttable/<kit>/status-bar` — a single slot, so the pair share one element
 and it draws once), `FIND_BAR` (`findInTable` from
-`@adapttable/<kit>/find-in-table`) and `BATCH_EDIT_BAR` (`batchEditing` from
-`@adapttable/<kit>/batch-editing`). And
+`@adapttable/<kit>/find-in-table`), `BATCH_EDIT_BAR` (`batchEditing` from
+`@adapttable/<kit>/batch-editing`), `COMMAND_PALETTE` (`commandPalette` from
+`@adapttable/<kit>/command-palette`), `CONTEXT_MENU` (`contextMenu` from
+`@adapttable/<kit>/context-menu`) and `SIDE_PANEL` (`sidePanel` from
+`@adapttable/<kit>/side-panel`). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 

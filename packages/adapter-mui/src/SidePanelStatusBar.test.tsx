@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { sidePanel } from "./side-panel";
 import { statusBar } from "./status-bar";
 
 interface Row {
@@ -34,9 +35,29 @@ describe("side panel and status bar (mui)", () => {
           columns={COLS}
           rowKey={(r) => r.id}
           urlSync={false}
+          features={[
+            statusBar<Row>(),
+            sidePanel<Row>({
+              panels: [],
+              open: null,
+              onOpenChange: () => undefined,
+            }),
+          ]}
           {...extra}
         />
       </>
+    );
+
+  /** No features composed: the import is the switch, so nothing is drawn. */
+  const bare = (extra?: Record<string, unknown>) =>
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        {...extra}
+      />
     );
 
   const panel = {
@@ -48,8 +69,8 @@ describe("side panel and status bar (mui)", () => {
     onOpenChange,
   };
 
-  it("renders neither without the props", () => {
-    table();
+  it("renders neither without the features", () => {
+    bare({ statusBar: true });
 
     expect(
       document.querySelector('[data-adapttable-part="status-bar"]')

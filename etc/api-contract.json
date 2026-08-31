@@ -1256,6 +1256,7 @@
       "ColumnSpacerProps",
       "ColumnWindow",
       "Command",
+      "COMMAND_PALETTE",
       "CommandPaletteChrome",
       "CommandPaletteChromeProps",
       "CommandPaletteInputProps",
@@ -1266,6 +1267,7 @@
       "commitBooleanDraft",
       "ConfirmHandler",
       "ConfirmRequest",
+      "CONTEXT_MENU",
       "ContextMenuActions",
       "ContextMenuChrome",
       "ContextMenuChromeProps",
@@ -1640,6 +1642,7 @@
       "SharedTableRenderProps",
       "Shortcut",
       "showAllColumns",
+      "SIDE_PANEL",
       "SidePanelChrome",
       "SidePanelChromeProps",
       "SidePanelCloseProps",
@@ -2181,6 +2184,15 @@
     ],
     "adapter-mui-batch-editing": [
       "batchEditing"
+    ],
+    "adapter-mui-command-palette": [
+      "commandPalette"
+    ],
+    "adapter-mui-context-menu": [
+      "contextMenu"
+    ],
+    "adapter-mui-side-panel": [
+      "sidePanel"
     ]
   },
   "entrypoints": {
@@ -2501,6 +2513,15 @@
     },
     "adapter-mui-batch-editing.api.md": {
       "surface": "adapter-mui-batch-editing"
+    },
+    "adapter-mui-command-palette.api.md": {
+      "surface": "adapter-mui-command-palette"
+    },
+    "adapter-mui-context-menu.api.md": {
+      "surface": "adapter-mui-context-menu"
+    },
+    "adapter-mui-side-panel.api.md": {
+      "surface": "adapter-mui-side-panel"
     }
   }
 }

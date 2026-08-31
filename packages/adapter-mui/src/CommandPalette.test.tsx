@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { commandPalette } from "./command-palette";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -31,10 +32,23 @@ describe("command palette (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           commandPalette
+          features={[commandPalette<Row>()]}
           onPrint={onPrint}
           {...extra}
         />
       </>
+    );
+
+  /** No features composed: the import is the switch, so nothing is drawn. */
+  const bare = (extra?: Record<string, unknown>) =>
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        {...extra}
+      />
     );
 
   const palette = () =>
@@ -94,8 +108,8 @@ describe("command palette (mui)", () => {
     expect(palette()).toBeNull();
   });
 
-  it("binds nothing when the prop is absent", () => {
-    table({ commandPalette: undefined });
+  it("binds nothing when the feature is not composed", () => {
+    bare({ commandPalette: true });
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
 
     expect(palette()).toBeNull();
