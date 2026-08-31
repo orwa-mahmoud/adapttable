@@ -246,10 +246,13 @@ export {
   useTableRuntime,
 } from "./features/providers";
 export {
+  ACTIVE_FILTER_CHIPS,
   BATCH_EDIT_BAR,
+  BULK_BAR,
   COLUMN_MENU,
   COMMAND_PALETTE,
   CONTEXT_MENU,
+  FILTERS_FORM,
   FIND_BAR,
   SIDE_PANEL,
   STATUS_BAR,
@@ -269,7 +272,10 @@ export {
 } from "./filters/ChecklistChrome";
 export type { FacetMap } from "./filters/facets";
 export type { FilterDef, FilterRuntime } from "./filters/filterDefs";
-export type { FilterFormSource } from "./filters/filterForm";
+export type {
+  FilterFormSource,
+  FiltersFormSlotProps,
+} from "./filters/filterForm";
 export {
   FilterHeaderChrome,
   type FilterHeaderChromeProps,
@@ -639,6 +645,7 @@ export type {
 } from "./filters/filterRegistry";
 export type {
   ActiveFilterChip,
+  ActiveFilterChipsSlotProps,
   ChipLabelResolver,
 } from "./filters/useActiveFilterChips";
 export type { CellEdit } from "./focus/cellEdits";

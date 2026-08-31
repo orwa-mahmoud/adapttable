@@ -5,9 +5,14 @@ import type {
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable, type DataTableProps } from "@adapttable/mui";
+import { bulkActions as bulkActions_ } from "@adapttable/mui/bulk-actions";
 import { columnMenu as columnMenu_ } from "@adapttable/mui/column-menu";
 import { commandPalette as commandPalette_ } from "@adapttable/mui/command-palette";
 import { contextMenu as contextMenu_ } from "@adapttable/mui/context-menu";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/mui/filters";
 import { findInTable as findInTable_ } from "@adapttable/mui/find-in-table";
 import { sidePanel as sidePanel_ } from "@adapttable/mui/side-panel";
 import {
@@ -311,6 +316,15 @@ export function MuiDemo({
               contextMenu_<Person>(contextMenu ?? true),
               ...((columnMenu ?? !focused) ? [columnMenu_<Person>()] : []),
               ...(sidePanel ? [sidePanel_<Person>(sidePanel)] : []),
+              ...((bulkActions ?? !focused)
+                ? [bulkActions_<Person>(makeBulkActions(locale))]
+                : []),
+              ...((filterControls ?? !focused)
+                ? [
+                    filters_<Person>(filters),
+                    filterTypes_<Person>(demoFilterTypes()),
+                  ]
+                : []),
             ]}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}

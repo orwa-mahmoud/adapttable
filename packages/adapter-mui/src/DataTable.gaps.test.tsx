@@ -10,6 +10,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -115,7 +116,10 @@ describe("MUI gaps", () => {
 
   it("deleting a chip clears its filter", () => {
     mount(
-      { filterLabels: { status: (v) => `Status: ${v}` } },
+      {
+        filterLabels: { status: (v) => `Status: ${v}` },
+        features: [filtersFeature<Row>([])],
+      },
       "paged",
       "f_status=Active"
     );
@@ -127,7 +131,11 @@ describe("MUI gaps", () => {
   it("clear-all link clears filters", () => {
     const onClearFilters = vi.fn();
     mount(
-      { filterLabels: { status: (v) => `Status: ${v}` }, onClearFilters },
+      {
+        filterLabels: { status: (v) => `Status: ${v}` },
+        onClearFilters,
+        features: [filtersFeature<Row>([])],
+      },
       "paged",
       "f_status=Active"
     );

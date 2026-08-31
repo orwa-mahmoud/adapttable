@@ -31,10 +31,20 @@ export interface ActionConfirm<TArg> {
 }
 
 // @public
+export const ACTIVE_FILTER_CHIPS: FeatureSlotKey<ActiveFilterChipsSlotProps>;
+
+// @public
 export interface ActiveFilterChip {
     key: string;
     label: string;
     onRemove: () => void;
+}
+
+// @public
+export interface ActiveFilterChipsSlotProps {
+    readonly chips: readonly ActiveFilterChip[];
+    readonly labels: Required<TableLabels>;
+    readonly onClearAll: () => void;
 }
 
 // @public
@@ -284,6 +294,9 @@ export interface BodyCell<TRow> {
 export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
     rowSpan: number;
 }[]>): boolean;
+
+// @public
+export const BULK_BAR: FeatureSlotKey<BulkBarChromeProps>;
 
 // @public
 export interface BulkAction {
@@ -2147,6 +2160,19 @@ export interface FilterRuntime<TRow> {
     filterLabels: Record<string, ChipLabelResolver>;
     numberExtraKeys: string[];
     registry: FilterTypeRegistry;
+}
+
+// @public
+export const FILTERS_FORM: FeatureSlotKey<FiltersFormSlotProps<never>>;
+
+// @public
+export interface FiltersFormSlotProps<TRow> {
+    readonly defaultExpanded?: boolean;
+    readonly defs: readonly FilterDef<TRow>[];
+    readonly labels: Required<TableLabels>;
+    readonly registry: FilterTypeRegistry;
+    readonly showSimpleFields: boolean;
+    readonly source: TableSource<TRow>;
 }
 
 // @public

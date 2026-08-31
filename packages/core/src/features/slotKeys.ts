@@ -10,9 +10,12 @@ import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome"
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
 import type { ColumnMenuSlotProps } from "../columns/columnMenuModel";
 import type { BatchEditBarProps } from "../editing/RowEditGate";
+import type { FiltersFormSlotProps } from "../filters/filterForm";
+import type { ActiveFilterChipsSlotProps } from "../filters/useActiveFilterChips";
 import type { FindBarProps } from "../find/FindBar";
 import type { StatusBarChromeProps } from "../focus/StatusBarChrome";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
+import type { BulkBarChromeProps } from "../useTableChrome";
 import { featureSlotKey } from "./providers";
 
 /**
@@ -91,5 +94,38 @@ export const SIDE_PANEL = featureSlotKey<Omit<SidePanelChromeProps, "slots">>(
  */
 export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
   "column-menu",
+  { single: true }
+);
+
+/**
+ * The selection bar with bulk actions.
+ *
+ * @public
+ */
+export const BULK_BAR = featureSlotKey<BulkBarChromeProps>("bulk-bar", {
+  single: true,
+});
+
+/**
+ * Removable chips for the active filters.
+ *
+ * @public
+ */
+export const ACTIVE_FILTER_CHIPS = featureSlotKey<ActiveFilterChipsSlotProps>(
+  "active-filter-chips",
+  { single: true }
+);
+
+/**
+ * The filters panel body (tree builder + optional simple fields).
+ *
+ * The row type is erased to `never` because a slot key is one module-level
+ * constant serving every table. Callers pass that table's defs and source;
+ * the renderer only reads them.
+ *
+ * @public
+ */
+export const FILTERS_FORM = featureSlotKey<FiltersFormSlotProps<never>>(
+  "filters-form",
   { single: true }
 );

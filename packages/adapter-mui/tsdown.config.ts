@@ -21,6 +21,8 @@ export default defineConfig({
     "src/editing.ts",
     "src/virtualize.ts",
     "src/column-menu.tsx",
+    "src/bulk-actions.tsx",
+    "src/filters.tsx",
     "src/cell-navigation.ts",
     "src/pivot.ts",
   ],

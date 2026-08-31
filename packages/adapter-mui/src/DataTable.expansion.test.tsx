@@ -24,6 +24,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DesktopTable } from "./components/DesktopTable";
 import { useStableToggle } from "./components/DesktopTable";
 import { MobileCards } from "./components/MobileCards";
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -247,9 +248,11 @@ describe("memoized desktop rows (MUI)", () => {
       { key: "name", header: "Name", accessor: nameAccessor },
       { key: "city", header: "City", accessor: cityAccessor },
     ];
+    const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
     renderTable({
       columns: tracked,
-      bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+      bulkActions: actions,
+      features: [bulkActionsFeature<Row>(actions)],
     });
     expect(nameAccessor).toHaveBeenCalled();
     nameAccessor.mockClear();

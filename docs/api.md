@@ -174,8 +174,11 @@ and it draws once), `FIND_BAR` (`findInTable` from
 `@adapttable/<kit>/batch-editing`), `COMMAND_PALETTE` (`commandPalette` from
 `@adapttable/<kit>/command-palette`), `CONTEXT_MENU` (`contextMenu` from
 `@adapttable/<kit>/context-menu`), `SIDE_PANEL` (`sidePanel` from
-`@adapttable/<kit>/side-panel`) and `COLUMN_MENU` (`columnMenu` from
-`@adapttable/<kit>/column-menu`). And
+`@adapttable/<kit>/side-panel`), `COLUMN_MENU` (`columnMenu` from
+`@adapttable/<kit>/column-menu`), `BULK_BAR` (`bulkActions` from
+`@adapttable/<kit>/bulk-actions`), and `ACTIVE_FILTER_CHIPS` plus
+`FILTERS_FORM` (`filters` from `@adapttable/<kit>/filters` — one feature
+fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 

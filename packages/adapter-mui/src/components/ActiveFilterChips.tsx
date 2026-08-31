@@ -1,5 +1,5 @@
 /** Removable chips for the active filters. */
-import { type ActiveFilterChip, type TableLabels } from "@adapttable/core";
+import type { ActiveFilterChipsSlotProps } from "@adapttable/core/adapter";
 import {
   alpha,
   Button,
@@ -33,11 +33,7 @@ export function Chips({
   chips,
   onClearAll,
   labels,
-}: Readonly<{
-  chips: readonly ActiveFilterChip[];
-  onClearAll: () => void;
-  labels: Required<TableLabels>;
-}>) {
+}: Readonly<ActiveFilterChipsSlotProps>) {
   if (chips.length === 0) return null;
   return (
     <Stack

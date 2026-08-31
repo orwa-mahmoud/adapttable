@@ -175,6 +175,26 @@
         "default": "./dist/column-menu.cjs"
       }
     },
+    "./bulk-actions": {
+      "import": {
+        "types": "./dist/bulk-actions.d.ts",
+        "default": "./dist/bulk-actions.js"
+      },
+      "require": {
+        "types": "./dist/bulk-actions.d.cts",
+        "default": "./dist/bulk-actions.cjs"
+      }
+    },
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
     "./cell-navigation": {
       "import": {
         "types": "./dist/cell-navigation.d.ts",

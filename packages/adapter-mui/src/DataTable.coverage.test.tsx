@@ -4,6 +4,7 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
 import { LoadingState } from "./components/TableSkeleton";
 import { DataTable } from "./DataTable";
@@ -243,7 +244,11 @@ describe("MUI coverage gaps", () => {
   });
 
   it("toggles a desktop row's selection checkbox", () => {
-    mount({ bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }] });
+    const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
+    mount({
+      bulkActions: actions,
+      features: [bulkActionsFeature<Row>(actions)],
+    });
     const rowChecks = screen.getAllByLabelText("Select row");
     fireEvent.click(rowChecks[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();

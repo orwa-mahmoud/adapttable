@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { TableSource } from "../source/TableSource";
 import type { FilterValue, TableLabels } from "../types";
 import { type FilterDef, filterLabel, RANGE_SUFFIXES } from "./filterDefs";
+import type { FilterTypeRegistry } from "./filterRegistry";
 import {
   DATE_OP_LABEL_KEYS,
   DATE_OPS,
@@ -38,6 +39,29 @@ export type FilterFormSource<TRow> = Pick<
   TableSource<TRow>,
   "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets"
 >;
+
+/**
+ * What the filters panel (tree builder + optional simple fields) needs.
+ *
+ * The table asks through a feature slot so the kit form stays behind
+ * `@adapttable/<kit>/filters` instead of the adapter root.
+ *
+ * @public
+ */
+export interface FiltersFormSlotProps<TRow> {
+  /** Resolved declarative definitions, in render order. */
+  readonly defs: readonly FilterDef<TRow>[];
+  /** Source the tree and the simple fields read and write. */
+  readonly source: TableSource<TRow>;
+  /** Type registry; kits pass it through to both surfaces. */
+  readonly registry: FilterTypeRegistry;
+  /** Fully resolved labels for every control. */
+  readonly labels: Required<TableLabels>;
+  /** Open Advanced on first paint. */
+  readonly defaultExpanded?: boolean;
+  /** When true, also draw the simple AutoFilterForm fields. */
+  readonly showSimpleFields: boolean;
+}
 
 /**
  * A scalar filter value as input text ("" when unset; numbers stringify).

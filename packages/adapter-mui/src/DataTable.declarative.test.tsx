@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { DataTable } from "./DataTable";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef, FilterDef, FilterOption, TableQuery } from "./index";
 import {
   defaultFilterRegistry,
@@ -97,15 +98,24 @@ function mountTable(
   url = ""
 ) {
   const adapter = createMemoryAdapter(url);
+  const { features: extraFeatures, ...rest } = override;
+  const filtersProp = "filters" in override ? override.filters : FILTERS;
+  // The kit renderer rides on the feature; defs still come from the prop /
+  // column shorthands. An empty list only fills the slot.
+  const filterDefs = Array.isArray(filtersProp) ? filtersProp : [];
   render(
     <ThemeProvider theme={theme}>
       <DataTable<Person>
         data={PEOPLE}
         columns={columns}
         rowKey={(r) => r.id}
-        filters={FILTERS}
+        filters={filtersProp}
+        features={[
+          filtersFeature<Person>(filterDefs),
+          ...(extraFeatures ?? []),
+        ]}
         urlAdapter={adapter}
-        {...override}
+        {...rest}
       />
     </ThemeProvider>
   );

@@ -1,6 +1,8 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
+  ACTIVE_FILTER_CHIPS,
   BATCH_EDIT_BAR,
+  BULK_BAR,
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE,
@@ -9,6 +11,8 @@ import {
   FeatureProviders,
   FeatureSlot,
   fillSlot,
+  FILTERS_FORM,
+  type FiltersFormSlotProps,
   FIND_BAR,
   GridFocusAnnouncer,
   resolveStickyToolbar,
@@ -34,13 +38,9 @@ import {
 } from "@mui/material";
 import type { ReactNode } from "react";
 
-import { Chips } from "./components/ActiveFilterChips";
-import { AutoFilterForm } from "./components/AutoFilterForm";
-import { BulkBar } from "./components/BulkActionBar";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { FilterDrawer } from "./components/FilterDrawer";
-import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
@@ -92,25 +92,18 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     headerFiltersOn,
     props.filterFields
   );
-  const shell = useDataTableShell<TRow>(props, (defs, source, registry) => (
-    <Stack spacing={3} data-adapttable-part="filters-form">
-      <FilterTreeBuilder
-        defs={defs}
-        source={source}
-        labels={props.labels}
-        registry={registry}
-        defaultExpanded={!simpleFiltersOn}
-      />
-      {simpleFiltersOn ? (
-        <AutoFilterForm
-          defs={defs}
-          source={source}
-          labels={resolveLabels(props.labels)}
-          registry={registry}
-        />
-      ) : null}
-    </Stack>
-  ));
+  const shell = useDataTableShell<TRow>(props, (defs, source, registry) => {
+    // The slot key erases the row; TableSource is invariant in TRow.
+    const formProps = {
+      defs,
+      source,
+      registry,
+      labels: resolveLabels(props.labels),
+      defaultExpanded: !simpleFiltersOn,
+      showSimpleFields: simpleFiltersOn,
+    } as unknown as FiltersFormSlotProps<never>;
+    return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
+  });
   const {
     chrome: c,
     table,
@@ -303,10 +296,13 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             />
           </Box>
           {c.isRefreshing && <LinearProgress aria-label={labels.loading} />}
-          <Chips
-            chips={c.mergedChips}
-            onClearAll={c.clearFilters}
-            labels={labels}
+          <FeatureSlot
+            slot={ACTIVE_FILTER_CHIPS}
+            props={{
+              chips: c.mergedChips,
+              onClearAll: c.clearFilters,
+              labels,
+            }}
           />
           {c.editing?.batch && (
             <FeatureSlot
@@ -315,15 +311,18 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             />
           )}
 
-          {table.selection && props.bulkActions && (
-            <BulkBar
-              selection={table.selection}
-              total={viewSource.total}
-              bulkActions={props.bulkActions}
-              confirm={confirm}
-              labels={labels}
+          {table.selection && props.bulkActions ? (
+            <FeatureSlot
+              slot={BULK_BAR}
+              props={{
+                selection: table.selection,
+                total: viewSource.total,
+                bulkActions: props.bulkActions,
+                confirm,
+                labels,
+              }}
             />
-          )}
+          ) : null}
           <FeatureSlot
             slot={COMMAND_PALETTE}
             props={{

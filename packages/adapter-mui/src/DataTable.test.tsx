@@ -5,8 +5,10 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -23,6 +25,16 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 const theme = createTheme();
+
+function composeBulk(
+  actions: NonNullable<Parameters<typeof DataTable<Row>>[0]["bulkActions"]>,
+  extra: Parameters<typeof DataTable<Row>>[0]["features"] = []
+) {
+  return {
+    bulkActions: actions,
+    features: [bulkActionsFeature<Row>(actions), ...(extra ?? [])],
+  };
+}
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
@@ -93,7 +105,7 @@ describe("<DataTable> (MUI)", () => {
         maxHeight: 300,
         density: "compact",
         resizableColumns: true,
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...composeBulk([{ key: "x", label: "X", onClick: vi.fn() }]),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
         columns: [
           {
@@ -372,20 +384,21 @@ describe("<DataTable> (MUI)", () => {
   it("runs a bulk action after confirm", async () => {
     const onClick = vi.fn();
     const confirm = vi.fn((r: { onConfirm: () => void }) => r.onConfirm());
+    const actions = [
+      {
+        key: "del",
+        label: "Delete",
+        onClick,
+        confirm: {
+          title: "t",
+          message: (n: number) => `Delete ${n}`,
+          confirmLabel: "Yes",
+        },
+      },
+    ];
     renderHarness({
       override: {
-        bulkActions: [
-          {
-            key: "del",
-            label: "Delete",
-            onClick,
-            confirm: {
-              title: "t",
-              message: (n) => `Delete ${n}`,
-              confirmLabel: "Yes",
-            },
-          },
-        ],
+        ...composeBulk(actions),
         confirm,
       },
     });
@@ -408,9 +421,10 @@ describe("<DataTable> (MUI)", () => {
       { id: "d", name: "Dina", city: "Muscat" },
     ];
     const bulkActions = [{ key: "x", label: "X", onClick: vi.fn() }];
+    const bulk = () => composeBulk(bulkActions);
 
     it("stays hidden when the page already holds every match", () => {
-      renderHarness({ override: { bulkActions } });
+      renderHarness({ override: { ...bulk() } });
       fireEvent.click(screen.getByLabelText("Select all"));
       expect(screen.getByText("2 selected")).toBeInTheDocument();
       expect(screen.queryByText(/on this page selected/)).toBeNull();
@@ -418,7 +432,7 @@ describe("<DataTable> (MUI)", () => {
     });
 
     it("flips from the offer to the active state and back to none via clear", () => {
-      renderHarness({ rows: MANY, override: { bulkActions } }, "limit=2");
+      renderHarness({ rows: MANY, override: { ...bulk() } }, "limit=2");
       fireEvent.click(screen.getByLabelText("Select all"));
       // Offer: full page selected, more rows match elsewhere.
       expect(
@@ -440,22 +454,23 @@ describe("<DataTable> (MUI)", () => {
       const confirm = vi.fn((r: { message: string; onConfirm: () => void }) =>
         r.onConfirm()
       );
+      const actions = [
+        {
+          key: "del",
+          label: "Delete",
+          onClick,
+          confirm: {
+            title: "t",
+            message: (n: number) => `Delete ${n}`,
+            confirmLabel: "Yes",
+          },
+        },
+      ];
       renderHarness(
         {
           rows: MANY,
           override: {
-            bulkActions: [
-              {
-                key: "del",
-                label: "Delete",
-                onClick,
-                confirm: {
-                  title: "t",
-                  message: (n) => `Delete ${n}`,
-                  confirmLabel: "Yes",
-                },
-              },
-            ],
+            ...composeBulk(actions),
             confirm,
           },
         },
@@ -479,7 +494,7 @@ describe("<DataTable> (MUI)", () => {
     });
 
     it("narrows back to the page scope on a single row toggle", () => {
-      renderHarness({ rows: MANY, override: { bulkActions } }, "limit=2");
+      renderHarness({ rows: MANY, override: { ...bulk() } }, "limit=2");
       fireEvent.click(screen.getByLabelText("Select all"));
       fireEvent.click(
         screen.getByRole("button", { name: "Select all 4 matching" })
@@ -498,6 +513,7 @@ describe("<DataTable> (MUI)", () => {
         override: {
           filters: <div>filter body</div>,
           filterLabels: { status: (v) => `Status: ${v}` },
+          features: [filtersFeature<Row>([])],
         },
       },
       "f_status=Active"
@@ -627,6 +643,7 @@ describe("<DataTable> (MUI)", () => {
         override: {
           filterLabels: { status: (v) => `Status: ${v}` },
           extraChips: [{ key: "x", label: "Custom", onRemove: vi.fn() }],
+          features: [filtersFeature<Row>([])],
         },
       },
       "f_status=Active"
@@ -640,7 +657,7 @@ describe("<DataTable> (MUI)", () => {
     renderHarness({
       isMobile: true,
       override: {
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...composeBulk([{ key: "x", label: "X", onClick: vi.fn() }]),
         rowActions: [{ key: "e", label: "Edit", onClick }],
       },
     });
@@ -655,14 +672,14 @@ describe("<DataTable> (MUI)", () => {
   it("bulk action with a disabledReason is disabled", () => {
     renderHarness({
       override: {
-        bulkActions: [
+        ...composeBulk([
           {
             key: "d",
             label: "Delete",
             onClick: vi.fn(),
             disabledReason: () => "no",
           },
-        ],
+        ]),
       },
     });
     fireEvent.click(screen.getByLabelText("Select all"));

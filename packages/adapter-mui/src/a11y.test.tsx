@@ -4,6 +4,7 @@ import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -51,8 +52,10 @@ function renderTable(
 
 describe("accessibility (axe) — MUI", () => {
   it("a full-featured table has no violations", async () => {
+    const actions = [{ key: "x", label: "Delete", onClick: () => undefined }];
     const { container } = renderTable({
-      bulkActions: [{ key: "x", label: "Delete", onClick: () => undefined }],
+      bulkActions: actions,
+      features: [bulkActionsFeature<Row>(actions)],
       rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
       filterLabels: { status: (v) => `Status: ${v}` },
     });

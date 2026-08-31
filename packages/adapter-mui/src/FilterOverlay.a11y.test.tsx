@@ -26,6 +26,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
 import { DataTable } from "./DataTable";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef, DataTableProps } from "./index";
 
 interface Person {
@@ -52,9 +53,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 
 // A select + a numberRange exercises the full auto-built filter form, so axe
 // scans real, labelled form controls — not an empty card.
-const FILTERS: DataTableProps<Person>["filters"] = [
-  { key: "age", type: "numberRange" },
-];
+const FILTERS = [{ key: "age", type: "numberRange" as const }];
 
 // `color-contrast` is jsdom-blind (the existing a11y.test.tsx disables it for
 // the same reason). `region` flags page-level landmarks — the host app's job,
@@ -80,6 +79,7 @@ function renderTable(
         rowKey={(r) => r.id}
         urlAdapter={createMemoryAdapter("")}
         filters={FILTERS}
+        features={[filtersFeature<Person>(FILTERS)]}
         {...override}
       />
     </ThemeProvider>

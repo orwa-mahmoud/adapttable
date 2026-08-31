@@ -3,6 +3,7 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -95,7 +96,13 @@ describe("summary row (desktop)", () => {
     const { container } = renderHarness({
       override: {
         summaryRow: (rows) => ({ amount: sumAmount(rows) }),
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...(() => {
+          const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
+          return {
+            bulkActions: actions,
+            features: [bulkActionsFeature<Row>(actions)],
+          };
+        })(),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
         renderRowDetail: (r) => <div>detail {r.id}</div>,
       },
@@ -153,7 +160,13 @@ describe("header groups (desktop)", () => {
     const { container } = renderHarness({
       columns: GROUPED,
       override: {
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...(() => {
+          const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
+          return {
+            bulkActions: actions,
+            features: [bulkActionsFeature<Row>(actions)],
+          };
+        })(),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
         renderRowDetail: (r) => <div>detail {r.id}</div>,
       },

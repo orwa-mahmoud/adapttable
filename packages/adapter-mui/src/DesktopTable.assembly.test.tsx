@@ -12,6 +12,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ExpandChevron, muiColor } from "./components/DesktopTable";
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
@@ -74,10 +75,11 @@ function mount(
   );
 }
 
+const BULK = [{ key: "x", label: "Export", onClick: vi.fn() }];
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  features: [rowReorder(vi.fn())],
-  bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
+  features: [rowReorder(vi.fn()), bulkActionsFeature<Person>(BULK)],
+  bulkActions: BULK,
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {
     hidden: [] as string[],

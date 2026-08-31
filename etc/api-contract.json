@@ -1150,7 +1150,9 @@
     ],
     "core-adapter": [
       "ActionConfirm",
+      "ACTIVE_FILTER_CHIPS",
       "ActiveFilterChip",
+      "ActiveFilterChipsSlotProps",
       "AggregateFn",
       "AggregateName",
       "Aggregator",
@@ -1174,6 +1176,7 @@
       "BulkAction",
       "BulkActionContext",
       "bulkActionErrorMessage",
+      "BULK_BAR",
       "BulkBarChromeProps",
       "BulkBarState",
       "CellEdit",
@@ -1390,6 +1393,8 @@
       "filterColumnMenuRows",
       "FilterDef",
       "FilterFormSource",
+      "FILTERS_FORM",
+      "FiltersFormSlotProps",
       "FilterHeaderChrome",
       "FilterHeaderChromeProps",
       "FilterHeaderClassNames",
@@ -2198,6 +2203,13 @@
     ],
     "adapter-mui-column-menu": [
       "columnMenu"
+    ],
+    "adapter-mui-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-mui-filters": [
+      "filterTypes",
+      "filters"
     ]
   },
   "entrypoints": {
@@ -2359,6 +2371,12 @@
     },
     "adapter-mui-column-menu.api.md": {
       "surface": "adapter-mui-column-menu"
+    },
+    "adapter-mui-bulk-actions.api.md": {
+      "surface": "adapter-mui-bulk-actions"
+    },
+    "adapter-mui-filters.api.md": {
+      "surface": "adapter-mui-filters"
     },
     "adapter-mui-editing.api.md": {
       "reexport": "kit/editing"
