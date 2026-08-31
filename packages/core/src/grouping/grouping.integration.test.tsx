@@ -1,11 +1,48 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { ChromeExtrasGate } from "../features/chromeExtrasGate";
+import { editing } from "../features/editing";
+import { grouping } from "../features/grouping";
+import { FeatureProviders } from "../features/providers";
+import {
+  applyTableFeatures,
+  type TableFeature,
+} from "../features/tableFeature";
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
-import { useTableChrome } from "../useTableChrome";
+import { useTableChrome, type TableChrome } from "../useTableChrome";
 import { resetDevWarnings } from "../utils/devWarn";
+
+function renderLiveChrome<TRow>(
+  features: readonly TableFeature<TRow>[],
+  build: () => Parameters<typeof useTableChrome<TRow>>[0]
+) {
+  const applied = applyTableFeatures({ features });
+  const box: { current: TableChrome<TRow> } = {
+    current: undefined as unknown as TableChrome<TRow>,
+  };
+  function Probe() {
+    const props = build();
+    const chromeProps = { ...applied, ...props };
+    const base = useTableChrome<TRow>(chromeProps);
+    return (
+      <ChromeExtrasGate chrome={base} props={chromeProps}>
+        {(overlaid) => {
+          box.current = overlaid;
+          return null;
+        }}
+      </ChromeExtrasGate>
+    );
+  }
+  render(
+    <FeatureProviders props={applied}>
+      <Probe />
+    </FeatureProviders>
+  );
+  return { result: box };
+}
 
 afterEach(() => {
   resetDevWarnings();
@@ -66,23 +103,25 @@ const PAGED_ROWS: Row[] = [
 
 describe("editing row universe under grouping", () => {
   function chromeWith(groupBy: string | undefined) {
-    const { result: sourceResult } = renderHook(() =>
-      useFrontendData<Row>({
+    const features: TableFeature<Row>[] = [
+      editing(() => undefined),
+      ...(groupBy ? [grouping<Row>(groupBy)] : []),
+    ];
+    return renderLiveChrome(features, () => {
+      const source = useFrontendData<Row>({
         data: PAGED_ROWS,
         columns: [{ key: "team" }, { key: "name" }],
         urlAdapter: createMemoryAdapter(""),
         defaults: { limit: 2 },
-      })
-    );
-    return renderHook(() =>
-      useTableChrome<Row>({
-        source: sourceResult.current,
+      });
+      return {
+        source,
         columns: [{ key: "team" }, { key: "name" }],
         rowKey: (r) => r.id,
         groupBy,
         onCellEdit: () => undefined,
-      })
-    );
+      };
+    });
   }
 
   it("exposes the grouped leaf set as editingRows, the page slice otherwise", () => {
@@ -146,23 +185,21 @@ describe("useTableChrome grouping bundle", () => {
   });
 
   it("arms grouping from prop groupBy on frontend source", () => {
-    const { result: sourceResult } = renderHook(() =>
-      useFrontendData<Row>({
+    const { result } = renderLiveChrome([grouping<Row>("team")], () => {
+      const source = useFrontendData<Row>({
         data: ROWS,
         columns: [{ key: "team" }, { key: "name" }],
         urlAdapter: createMemoryAdapter(""),
         defaults: { limit: 10 },
-      })
-    );
-    const { result } = renderHook(() =>
-      useTableChrome<Row>({
-        source: sourceResult.current,
+      });
+      return {
+        source,
         columns: [{ key: "team" }, { key: "name" }],
         rowKey: (r) => r.id,
         groupBy: "team",
         groupAggregates: (rows) => ({ name: rows.length }),
-      })
-    );
+      };
+    });
     // The bundle carries the keys as a list now, one entry for a flat group.
     expect(result.current.grouping?.groupBy).toEqual(["team"]);
     expect(result.current.grouping?.entries[0]).toMatchObject({
@@ -190,14 +227,12 @@ describe("useTableChrome grouping bundle", () => {
       ...sourceResult.current,
       allFilteredRows: undefined,
     };
-    const { result } = renderHook(() =>
-      useTableChrome<Row>({
-        source: serverish,
-        columns: [{ key: "team" }],
-        rowKey: (r) => r.id,
-        groupBy: "team",
-      })
-    );
+    const { result } = renderLiveChrome([grouping<Row>("team")], () => ({
+      source: serverish,
+      columns: [{ key: "team" }],
+      rowKey: (r) => r.id,
+      groupBy: "team",
+    }));
     expect(result.current.grouping).toBeUndefined();
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("groupBy is only supported on the frontend")

@@ -36,15 +36,17 @@ import {
 import { Card, Checkbox, Descriptions, Space } from "antd";
 import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import {
-  ADAPTTABLE_GROUP,
-  type AdaptTableGroupRow,
-  GroupHeaderCard,
-} from "./grouping";
-import { RowEditActions, RowReorderButtons, TreeToggle } from "./kitControls";
+import { ADAPTTABLE_GROUP, type AdaptTableGroupRow } from "./grouping";
 import { RowActionButtons } from "./RowActionButtons";
+import {
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
+} from "./featureSlots";
+import { cellDisplay } from "./DisplayCell";
 
 /**
  * The mobile counterpart of the desktop footer summary: one trailing card
@@ -223,7 +225,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     column,
     label: resolveMobileLabel(column),
     value: (
-      <EditableDataCell
+      <OptionalEditableCell
         editing={editing}
         row={row}
         column={column}
@@ -234,6 +236,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
+        display={cellDisplay(column, row, rowIndex)}
       />
     ),
   }));
@@ -251,7 +254,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         (treeEntry ?? onToggleSelect) ? (
           <Space size="small">
             {treeEntry && (
-              <TreeToggle
+              <OptionalTreeToggle
                 entry={treeEntry}
                 labels={labels}
                 onToggle={onToggleTree ?? (() => undefined)}
@@ -271,14 +274,16 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         (onToggleExpand ?? actions ?? editing?.rowEditing) ? (
           <Space size="small">
             {onToggleExpand && (
-              <ExpandToggle
-                expanded={expanded}
-                labels={labels}
-                onClick={() => onToggleExpand(id)}
+              <OptionalExpandToggle
+                id={id}
+                expanded={Boolean(expanded)}
+                onToggle={onToggleExpand}
+                expandLabel={labels.expandRow}
+                collapseLabel={labels.collapseRow}
               />
             )}
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
@@ -318,7 +323,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         </Descriptions>
       )}
       {rowReorder && (
-        <RowReorderButtons
+        <OptionalRowReorderButtons
           reorder={rowReorder}
           labels={labels}
           localIndex={rowIndex}
@@ -614,7 +619,7 @@ export function MobileCards<TRow>({
             ) {
               return (
                 <li key={entry.key} ref={measureElement}>
-                  <GroupHeaderCard
+                  <OptionalGroupHeaderCard
                     group={toGroupRow(entry)}
                     labels={labels}
                     onToggle={() => grouping.collapsed.toggle(entry.key)}

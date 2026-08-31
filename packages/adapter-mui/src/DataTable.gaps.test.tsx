@@ -9,9 +9,10 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -48,6 +49,7 @@ function mockBodyData(
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: rows,
@@ -188,7 +190,14 @@ describe("MUI gaps", () => {
       40,
       40
     );
-    mount({ virtualize: true, estimateRowSize: 40 }, "infinite");
+    mount(
+      {
+        virtualize: true,
+        estimateRowSize: 40,
+        features: [virtualize<Row>({ estimateRowSize: 40 })],
+      },
+      "infinite"
+    );
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });
@@ -199,7 +208,12 @@ describe("MUI gaps", () => {
       132,
       0
     );
-    mount({ forceMobile: true, virtualize: true, estimateCardSize: 132 });
+    mount({
+      forceMobile: true,
+      virtualize: true,
+      estimateCardSize: 132,
+      features: [virtualize<Row>({ estimateCardSize: 132 })],
+    });
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });

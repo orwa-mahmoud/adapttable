@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
 import { type ColumnDef, DataTable } from "./index";
+import { savedViews } from "./saved-views";
 import { renderMui } from "./test-utils";
 
 const labels = {
@@ -132,6 +133,7 @@ describe("DataTable savedViews prop (MUI)", () => {
         rowKey={(r) => r.id}
         urlAdapter={adapter}
         savedViews={{ storageKey: "views", storage }}
+        features={[savedViews<Row>({ storageKey: "views", storage })]}
       />
     );
     fireEvent.click(trigger());

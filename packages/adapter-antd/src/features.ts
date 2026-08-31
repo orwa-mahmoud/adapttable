@@ -68,6 +68,7 @@ export {
   rowDetail,
   rowEditing,
   type RowHeight,
+  rowActions,
   rowPinning,
   type RowPinState,
   rowReorder,

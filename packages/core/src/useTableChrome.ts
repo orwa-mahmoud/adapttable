@@ -1,84 +1,35 @@
-import type { ReactNode, RefCallback, RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { type ConfirmHandler, defaultConfirm } from "./actions/confirm";
-import {
-  ACTIONS_COLUMN_KEY,
-  REORDER_COLUMN_KEY,
-} from "./columns/columnMenuModel";
+import { REORDER_COLUMN_KEY } from "./columns/columnMenuModel";
 import {
   type ColumnGroupRecord,
   flattenColumnTree,
 } from "./columns/columnTree";
 import { resolveColumns } from "./columns/resolveColumns";
 import { responsiveColumns } from "./columns/responsiveColumns";
-import {
-  useColumnLayout,
-  type UseColumnLayoutResult,
-} from "./columns/useColumnLayout";
-import { DEFAULT_CARD_SIZE_PX, DEFAULT_ROW_SIZE_PX } from "./constants";
-import { useBatchEditing } from "./editing/batchEditing";
-import { useDirtyCells } from "./editing/dirtyCells";
+import { declaredColumnLayout } from "./columns/declaredColumnLayout";
+import type { UseColumnLayoutResult } from "./columns/columnLayoutModel";
 import type { EditableCellEditing } from "./editing/editableCellController";
-import { useEditConflict } from "./editing/editConflict";
 import type { EditHistoryState } from "./editing/editHistory";
-import { useEditLifecycle } from "./editing/editingEvents";
-import { useRowEditing } from "./editing/rowEditing";
-import { useCellSaveState } from "./editing/saveState";
-import { useCellEditing } from "./editing/useCellEditing";
-import { useEditValidation } from "./editing/validation";
 import type { ExportStatus } from "./export/useExportHandler";
-import { featureHostOf } from "./features/featureHost";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
-import {
-  type ActiveFilterChip,
-  mergeFilterChips,
-  resolveActiveFilterCount,
-} from "./filters/useActiveFilterChips";
-import { useFilterTreeChips } from "./filters/useFilterTreeChips";
-import {
-  formatGroupBy,
-  type GroupByInput,
-  parseGroupBy,
-} from "./grouping/groupKeys";
-import {
-  buildGroupedFlatModel,
-  type GroupAggregatesFn,
-  type GroupedFlatEntry,
-} from "./grouping/groupRows";
-import {
-  type GroupCollapseState,
-  useGroupCollapse,
-} from "./grouping/useGroupCollapse";
-import { useGroupPaging } from "./grouping/useGroupPaging";
+import type { ActiveFilterChip } from "./filters/useActiveFilterChips";
+import type { GroupByInput } from "./grouping/groupKeys";
+import type { GroupAggregatesFn, GroupedFlatEntry } from "./grouping/groupRows";
+import type { GroupCollapseState } from "./grouping/useGroupCollapse";
 import { useEventCallback } from "./hooks/useEventCallback";
-import { useInfiniteScroll } from "./hooks/useInfiniteScroll";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useScrollToTableTop } from "./hooks/useScrollToTableTop";
 import { useElementWidth } from "./layout/useElementWidth";
 import type { BaseDataTableProps, ToolbarSlots } from "./props";
-import { insertExtraRows } from "./rows/extraRows";
-import {
-  configureIncrementalView,
-  incrementalViewOf,
-} from "./rows/incremental";
-import { type RowMutationsState, useRowMutations } from "./rows/rowMutations";
-import {
-  partitionPinnedRows,
-  type RowPinLabels,
-  type RowPinningState,
-  type RowPinState,
-  useRowPinning,
-} from "./rows/rowPinning";
+import type { RowMutationsState } from "./rows/rowMutations";
+import type { RowPinningState } from "./rows/rowPinning";
 import type { RowReorderState } from "./rows/rowReorder";
-import { estimateFromRowHeight } from "./rows/rowStyle";
-import {
-  type RowExpansionState,
-  useRowExpansion,
-} from "./rows/useRowExpansion";
+import type { RowExpansionState } from "./rows/useRowExpansion";
 import type { SelectionState } from "./selection/useSelection";
-import { serverGroupEntries } from "./source/queryGroups";
 import type { TableSource } from "./source/TableSource";
 import { type TableErrorState, tableErrorState } from "./state/errorState";
 import {
@@ -87,17 +38,8 @@ import {
 } from "./state/featureNotices";
 
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
-import { nestedTableDetail } from "./tree/nestedTable";
-import {
-  buildTreeEntries,
-  treeColumnKey,
-  type TreeEntry,
-} from "./tree/treeRows";
-import { useLazyChildren } from "./tree/useLazyChildren";
-import {
-  type TreeExpansionState,
-  useTreeExpansion,
-} from "./tree/useTreeExpansion";
+import type { TreeEntry } from "./tree/treeRows";
+import type { TreeExpansionState } from "./tree/useTreeExpansion";
 import type {
   BulkAction,
   ColumnDef,
@@ -110,13 +52,6 @@ import {
   type UseDataTableResult,
 } from "./useDataTable/useDataTable";
 import { devWarn } from "./utils/devWarn";
-import {
-  type TableVirtualization,
-  useKeyedVirtualization,
-  useTableVirtualization,
-  windowGroupedEntries,
-} from "./virtual/useTableVirtualization";
-import { useMeasuredWindowScrollMargin } from "./virtual/windowScrollMargin";
 
 export type {
   BulkAction,
@@ -365,12 +300,14 @@ export interface TableChrome<TRow> {
    */
   editing?: EditableCellEditing<TRow>;
   /**
-   * Adding, duplicating and deleting rows. Always present: `canAdd` says
-   * whether the toolbar's Add control renders, and the duplicate and delete
-   * actions are already folded into {@link TableChrome.rowActions}, so an
-   * adapter that renders row actions gets both for free.
+   * Adding, duplicating and deleting rows. Empty until `rowActions()` is
+   * composed. `canAdd` says whether the toolbar's Add control renders.
    */
   rowMutations: RowMutationsState<TRow>;
+  /** Size every visible column to its content. Present with column layout. */
+  autoSizeColumns?: () => void;
+  /** Size one column to its content. Present with column layout. */
+  autoSizeColumn?: (key: string) => void;
   /**
    * The row actions to render — the host's, plus duplicate and delete when
    * those are wired, and `undefined` when the reader hid the actions column.
@@ -393,10 +330,20 @@ export interface TableChrome<TRow> {
    */
   rowReorder?: RowReorderState<TRow>;
   /**
-   * Headless row-pin state. Present iff the host passed `pinnedRowIds` or
-   * `onPinnedRowIdsChange`, and grouping/tree are off.
+   * Headless row-pin state. Present iff the pinning feature is composed
+   * and grouping/tree are off.
    */
   rowPinning?: RowPinningState<TRow>;
+  /**
+   * Whether grouping is armed — full-set overlay is on. Pinning and
+   * reorder read this rather than re-parsing `groupBy`.
+   */
+  groupingArmed: boolean;
+  /**
+   * Whether the host declared a tree. Pinning and reorder refuse a
+   * nested list.
+   */
+  treeShaped: boolean;
   /**
    * Tree bundle — present iff the host declared a hierarchy (`getChildren` or
    * `getParentId`). A tree and a grouping are different models and can both be
@@ -591,6 +538,14 @@ export function printToolbar(
  *
  * @public
  */
+const NO_ROW_MUTATIONS: RowMutationsState<never> = {
+  canAdd: false,
+  addRow: () => {
+    // The row-actions feature owns add. The lean table has no handler.
+  },
+  actions: [],
+};
+
 export function useTableChrome<TRow>(
   props: BaseDataTableProps<TRow>
 ): TableChrome<TRow> {
@@ -614,17 +569,6 @@ export function useTableChrome<TRow>(
     extraChips,
     activeFilterCount: activeFilterCountProp,
     confirm: confirmProp,
-    columnLayout: columnLayoutProp,
-    onColumnLayoutChange,
-    defaultColumnLayout,
-    groupAggregates,
-    groupFooters,
-    groupSort,
-    groupFilter,
-    groupPageSize,
-    groupRowPageSize,
-    onGroupLoadMore,
-    extraRows,
   } = props;
 
   const autoMobile = useIsMobile(mobileBreakpoint);
@@ -647,50 +591,12 @@ export function useTableChrome<TRow>(
   const rootRef = useRef<HTMLDivElement>(null);
   const rootWidth = useElementWidth(rootRef);
 
-  const columnLayout = useColumnLayout<TRow>({
-    columns: resolvedColumns,
-    layout: columnLayoutProp,
-    onLayoutChange: onColumnLayoutChange,
-    defaultColumnLayout,
-    collapsibleColumnGroups: props.collapsibleColumnGroups === true,
-    columnGroups: flattened.groups,
-  });
-
-  // Effective groupBy: prop wins when provided (including `null` to force
-  // off); otherwise the URL/source value. Empty string is treated as unset.
-  //
-  // With grouping armed the table is a FULL-SET view: grouped mode renders
-  // every filtered row, so the source the chrome reasons about presents
-  // that same set — footer numbers, select-all scope and page-scope CSV
-  // export all describe exactly what is on screen instead of the page
-  // slice. Mutators pass through untouched; the overlay disappears (and
-  // real pagination resumes) the moment grouping is cleared.
-  const requestedGroupBy =
-    props.groupBy === undefined ? source.groupBy : props.groupBy;
-  const groupByKeys = useMemo(
-    () => parseGroupBy(requestedGroupBy),
-    [requestedGroupBy]
+  const columnLayout = useMemo(
+    () => declaredColumnLayout(resolvedColumns),
+    [resolvedColumns]
   );
-  // A server tier that answered `query.groupBy` sends its own groups; a
-  // frontend tier hands over the whole filtered set to group locally. Either
-  // way the adapters see the same entries.
-  const serverGroups = source.groups;
-  const groupingArmed = Boolean(
-    groupByKeys.length > 0 && (source.allFilteredRows ?? serverGroups)
-  );
-  const viewSource = useMemo<TableSource<TRow>>(() => {
-    if (!groupingArmed || !source.allFilteredRows) return source;
-    const all = source.allFilteredRows;
-    return {
-      ...source,
-      rows: all,
-      page: 1,
-      limit: Math.max(all.length, 1),
-      total: all.length,
-      hasNextPage: false,
-      isFetchingNextPage: false,
-    };
-  }, [groupingArmed, source]);
+  const groupingArmed = false;
+  const viewSource = source;
 
   // Progressive hiding sits between the user's own hidden set and what is
   // rendered: it is a fact about the viewport, not a choice the user made,
@@ -751,25 +657,8 @@ export function useTableChrome<TRow>(
     }
   }, [controlledSelection, selectedIds, notifySelectionChange]);
 
-  const treeChips = useFilterTreeChips({
-    tree: source.filterTree,
-    defs: props.filterDefs ?? [],
-    labels: table.labels,
-    setFilterTree: source.setFilterTree,
-  });
-  const mergedChips = useMemo<readonly ActiveFilterChip[]>(
-    () =>
-      mergeFilterChips(
-        mergeFilterChips(table.filterChips, extraChips),
-        treeChips
-      ),
-    [table.filterChips, extraChips, treeChips]
-  );
-
-  const activeFilterCount = resolveActiveFilterCount(
-    activeFilterCountProp,
-    mergedChips.length
-  );
+  const mergedChips = extraChips ?? [];
+  const activeFilterCount = activeFilterCountProp ?? mergedChips.length;
 
   const isPaged = source.paginationMode === "paged";
 
@@ -782,8 +671,11 @@ export function useTableChrome<TRow>(
 
   // Zero rows under an active search/filter is "nothing MATCHED", not
   // "nothing exists" — the empty state should say so and offer a clear.
+  const hasSourceFilters = Object.keys(source.extra ?? {}).length > 0;
   const emptyVariant =
-    activeFilterCount > 0 || source.search !== "" ? "noResults" : "noData";
+    activeFilterCount > 0 || hasSourceFilters || source.search !== ""
+      ? "noResults"
+      : "noData";
 
   // `isFetchingNextPage` is load-more, not a refresh of what's on screen.
   const isRefreshing = Boolean(
@@ -800,429 +692,26 @@ export function useTableChrome<TRow>(
     onClearFilters?.();
   }, [onClearFilters, source]);
 
-  // Hooks run unconditionally; the state is simply unused (and unexposed)
-  // when the caller renders no row details.
-  const expansionState = useRowExpansion(props.defaultExpandedRowIds);
-  // A declared nested table IS the detail panel; a row without one falls back
-  // to whatever the host builds itself.
-  const { nestedTable, density, labels: hostLabels } = props;
-  const hostRenderRowDetail = props.renderRowDetail;
-  const renderRowDetail = useMemo(
-    () =>
-      nestedTableDetail({
-        nestedTable,
-        renderRowDetail: hostRenderRowDetail,
-        parent: { density, labels: hostLabels },
-      }),
-    [nestedTable, hostRenderRowDetail, density, hostLabels]
-  );
-  const detail = useMemo(
-    () =>
-      renderRowDetail
-        ? { render: renderRowDetail, expansion: expansionState }
-        : undefined,
-    [renderRowDetail, expansionState]
-  );
-
-  // Same opt-in pattern as `detail`: the hook always runs (Rules of Hooks),
-  // but `editing` is only exposed when the host passes `onCellEdit`.
-  const lifecycle = useEditLifecycle<TRow>({
-    onEditStart: props.onEditStart,
-    onEditCancel: props.onEditCancel,
-    onEditCommit: props.onEditCommit,
-    onValidationFail: props.onValidationFail,
-    onEditError: props.onEditError,
-  });
-  const cellEditingState = useCellEditing<TRow>({
-    onEditStart: lifecycle.onEditStart,
-    onEditCancel: lifecycle.onEditCancel,
-  });
-  const conflict = useEditConflict<TRow>();
+  // Grouping, tree, expansion and editing hooks live on their feature
+  // entries. Base chrome leaves those fields empty; ChromeExtrasGate overlays
+  // them when the matching feature is composed.
+  const detail = undefined;
+  const editing = undefined;
   const onCellEdit = props.onCellEdit;
-  // Validation gates the commit and nothing else; it runs whether or not any
-  // validator exists, and stays inert until one rejects something.
-  const validation = useEditValidation<TRow>({
-    validateRow: props.validateRow,
-    applyEdit: props.applyEdit,
-  });
-  // A host whose `onCellEdit` returns a promise gets a saving cell for free;
-  // one that saves synchronously never pays a render for it.
-  const saving = useCellSaveState<TRow>({
-    onRollback: props.onEditRollback,
-    formatError: props.formatEditError,
-    onEditError: lifecycle.onEditError,
-  });
-  // A mark is a claim about what the server has agreed to, so it is the host's
-  // to ask for: `dirtyIndicators` on, and `confirmEdits` to say when a value has
-  // settled (a refetch agreed, a websocket echoed it back).
-  const dirty = useDirtyCells({ enabled: props.dirtyIndicators === true });
-  // Row mode changes the commit unit from a cell to a row, so it takes both the
-  // flag and a channel: an Edit control with nowhere to send the patch would be
-  // a mode the reader can enter and never leave usefully.
-  const rowModeArmed =
-    props.rowEditing === true && props.onRowEdit !== undefined;
-  const rowEditing = useRowEditing<TRow>({
-    enabled: rowModeArmed,
-    columns: resolvedColumns,
-    onRowEdit: props.onRowEdit,
-    onEditStart: lifecycle.onEditStart,
-    onEditCancel: lifecycle.onEditCancel,
-    onEditCommit: lifecycle.onEditCommit,
-    featureHost: featureHostOf(props),
-  });
-  // Either channel arms the bundle: a host that wants row-level commits only
-  // never passes `onCellEdit`, and its cells stay display-only until a reader
-  // opens the row.
-  // Batch mode is the third commit unit: many rows held, one write at the end.
-  const batchArmed =
-    props.batchEditing === true && props.onBatchEdit !== undefined;
-  const batch = useBatchEditing<TRow>({
-    enabled: batchArmed,
-    columns: resolvedColumns,
-    onBatchEdit: props.onBatchEdit,
-    onEditStart: lifecycle.onEditStart,
-    onEditCancel: lifecycle.onEditCancel,
-    onEditCommit: lifecycle.onEditCommit,
-    featureHost: featureHostOf(props),
-  });
-  const editingArmed = onCellEdit !== undefined || rowModeArmed || batchArmed;
-  const editing = useMemo(
-    () =>
-      editingArmed
-        ? {
-            onCellEdit,
-            state: cellEditingState,
-            validation,
-            saving,
-            dirty,
-            // Only when the host armed row mode: carried unconditionally, every
-            // table with cell editing would grow an "Edit row" control.
-            rowEditing: rowModeArmed ? rowEditing : undefined,
-            batch: batchArmed ? batch : undefined,
-            lifecycle,
-            conflict,
-            conflictLabels: {
-              message: table.labels.editConflict,
-              keepMine: table.labels.keepMine,
-              takeTheirs: table.labels.takeTheirs,
-              theirsValue: table.labels.theirsValue,
-            },
-            featureHost: featureHostOf(props),
-          }
-        : undefined,
-    [
-      editingArmed,
-      onCellEdit,
-      cellEditingState,
-      validation,
-      saving,
-      dirty,
-      rowModeArmed,
-      rowEditing,
-      batchArmed,
-      batch,
-      lifecycle,
-      conflict,
-      table.labels.editConflict,
-      table.labels.keepMine,
-      table.labels.takeTheirs,
-      table.labels.theirsValue,
-      props,
-    ]
-  );
-  // Half-configured editing is a silent trap: `editable: true` on a column
-  // does NOTHING without the table-level change channel. Say so in dev.
   const hasEditableColumn = resolvedColumns.some((column) => column.editable);
-  useEffect(() => {
-    if (!hasEditableColumn || onCellEdit) return;
-    devWarn(
-      "columns declare `editable` but no `onCellEdit` handler is set — cell editing stays inert. Pass `onCellEdit` on the table to enable it."
-    );
-  }, [hasEditableColumn, onCellEdit]);
-
-  // If the active row leaves the rendered set, drop the draft without
-  // committing — the host never receives a stale edit. The check runs
-  // against `editingRows` (defined after grouping below): the grouped body
-  // renders the FULL filtered leaf set, so validating against the page
-  // slice would silently kill edits on every off-page row (each group's
-  // rows beyond page 1 froze as display-only).
-
-  const groupCollapse = useGroupCollapse({
-    collapsedGroupIds: props.collapsedGroupIds,
-    onCollapsedGroupIdsChange: props.onCollapsedGroupIdsChange,
-  });
-
-  useEffect(() => {
-    if (groupByKeys.length === 0) return;
-    if (source.allFilteredRows || serverGroups) return;
-    devWarn(
-      "groupBy is only supported on the frontend data tier (in-memory rows with allFilteredRows). Server-paginated sources cannot regroup a full result set; grouping is ignored."
-    );
-  }, [groupByKeys, source.allFilteredRows, serverGroups]);
-
-  // Depend on the two stable members, never the whole props/source objects
-  // (both fresh every render) — keying on them rebuilt the grouping bundle,
-  // and the O(filtered rows) grouped flat model behind it, on every
-  // keystroke.
-  const { onGroupByChange } = props;
-  const { setGroupBy: sourceSetGroupBy } = source;
-  // `onGroupByChange` is a pure NOTIFICATION: the chrome always applies
-  // the grouping change itself, then tells the host. (It used to REPLACE
-  // the mutator, so a logging handler silently broke grouping — take full
-  // control via `source.setGroupBy` instead.)
-  const setGroupBy = useCallback(
-    (key: GroupByInput) => {
-      sourceSetGroupBy(formatGroupBy(key));
-      onGroupByChange?.(parseGroupBy(key));
-    },
-    [onGroupByChange, sourceSetGroupBy]
-  );
 
   const getRowId = selectionGetId ?? rowKey;
-  const groupPaging = useGroupPaging();
-  // Adding, duplicating and deleting: the table asks, the host does. Nothing
-  // renders until the handler that performs it is wired.
-  const rowMutations = useRowMutations<TRow>({
-    labels: table.labels,
-    onAddRow: props.onAddRow,
-    onDuplicateRow: props.onDuplicateRow,
-    onDeleteRow: props.onDeleteRow,
-    confirmDeleteRow: props.confirmDeleteRow,
-  });
-  // The one row-action list every renderer reads. Duplicate and delete come
-  // after the host's own, so a delete stays last where a destructive action
-  // belongs — and the whole column hides and end-pins as one, because the
-  // layout state cannot tell a synthesized action from a declared one.
-  const mutationActions = rowMutations.actions;
-  const hasRowActions =
-    (props.rowActions?.length ?? 0) + mutationActions.length > 0;
-  const actionsHidden = columnLayout.isHidden(ACTIONS_COLUMN_KEY);
-  const hostRowActions = props.rowActions;
-  const rowActions = useMemo<RowAction<TRow>[] | undefined>(() => {
-    if (actionsHidden || !hasRowActions) return undefined;
-    if (mutationActions.length === 0) return hostRowActions;
-    return [...(hostRowActions ?? []), ...mutationActions];
-  }, [actionsHidden, hasRowActions, hostRowActions, mutationActions]);
+  const rowMutations = NO_ROW_MUTATIONS as RowMutationsState<TRow>;
+  const hasRowActions = false;
+  const rowActions = undefined;
 
-  // A declared hierarchy is a fact about the rows, so it is armed by the shape
-  // the host gave rather than by a mode flag.
-  const treeExpansion = useTreeExpansion({
-    expandedIds: props.expandedIds,
-    onExpandedIdsChange: props.onExpandedIdsChange,
-  });
   const treeShaped =
     props.getChildren !== undefined || props.getParentId !== undefined;
-  // A branch the browser has not fetched yet: the host says there is more, the
-  // rows are not there, so opening it is a request rather than a reveal.
-  const lazyChildren = useLazyChildren<TRow>({
-    onLoadChildren: props.onLoadChildren,
-    hasLoadedChildren: (row) => hasLoadedChildren(row, source.rows, props),
-    getRowId,
-  });
-  // The walked hierarchy, before any lazy-loading chrome is layered on it: the
-  // entries are what a toggle looks a row up in, since a nested child never
-  // appears in `source.rows` at all.
-  const treeEntries = useMemo(
-    () =>
-      treeShaped
-        ? buildTreeEntries<TRow>({
-            rows: source.rows,
-            getRowId,
-            expandedIds: treeExpansion.expandedIds,
-            loadingIds: lazyChildren.loadingIds,
-            getChildren: props.getChildren,
-            getParentId: props.getParentId,
-            hasChildren: props.hasChildren,
-          })
-        : undefined,
-    [
-      treeShaped,
-      source.rows,
-      getRowId,
-      treeExpansion.expandedIds,
-      lazyChildren.loadingIds,
-      props.getChildren,
-      props.getParentId,
-      props.hasChildren,
-    ]
-  );
-  /**
-   * The same hierarchy with every node open.
-   *
-   * An export scoped to "all" means all the data, and a folded folder is a
-   * display state — the rows inside it matched the filters just the same. The
-   * rendered entries stop at every collapsed node, so exporting from them
-   * silently drops whole subtrees. This is what the export reads instead.
-   */
-  const treeExportEntries = useMemo(
-    () =>
-      treeEntries
-        ? buildTreeEntries<TRow>({
-            rows: source.rows,
-            getRowId,
-            // Every node id: a rendered entry carries its whole subtree in
-            // `descendantIds` whether or not it is open, and roots are always
-            // rendered — so the walked entries name every node in the tree.
-            expandedIds: new Set(
-              treeEntries.flatMap((entry) => [
-                entry.key,
-                ...entry.descendantIds,
-              ])
-            ),
-            getChildren: props.getChildren,
-            getParentId: props.getParentId,
-            hasChildren: props.hasChildren,
-          })
-        : undefined,
-    [
-      treeEntries,
-      source.rows,
-      getRowId,
-      props.getChildren,
-      props.getParentId,
-      props.hasChildren,
-    ]
-  );
-  const tree = useMemo(() => {
-    if (!treeEntries) return undefined;
-    return {
-      entries: treeEntries,
-      /** Every node, folded ones included — what an "all" export writes. */
-      allEntries: treeExportEntries,
-      // Opening a node fetches its children on the way: the row opens at once
-      // and fills when they land, so the chevron never feels stuck behind a
-      // request.
-      expansion: {
-        ...treeExpansion,
-        toggle: (id: string) => {
-          const entry = treeEntries.find((candidate) => candidate.key === id);
-          if (entry && !entry.expanded) lazyChildren.loadIfNeeded(entry.row);
-          treeExpansion.toggle(id);
-        },
-      },
-      loadingIds: lazyChildren.loadingIds,
-      /** Nodes whose last fetch failed — closed, and clickable again. */
-      failedIds: lazyChildren.failedIds,
-      columnKey: treeColumnKey(columnLayout.visibleColumns, props.treeColumn),
-    };
-  }, [
-    treeEntries,
-    treeExportEntries,
-    treeExpansion,
-    lazyChildren,
-    props.treeColumn,
-    columnLayout.visibleColumns,
-  ]);
-  const grouping = useMemo(() => {
-    if (groupByKeys.length === 0) return undefined;
-    if (!source.allFilteredRows && !serverGroups) return undefined;
-    const incremental = incrementalViewOf(source.allFilteredRows ?? []);
-    const view = incremental
-      ? configureIncrementalView(incremental, {
-          groupBy: groupByKeys,
-          columns: columnLayout.visibleColumns,
-          getRowId,
-          groupAggregates,
-          groupSort,
-          groupFilter,
-          groupFooters: groupFooters === true,
-          collapsedGroupIds: groupCollapse.collapsedGroupIds,
-          groupPageSize,
-          rowPageSize: groupRowPageSize,
-          paging: groupPaging.paging,
-        })
-      : undefined;
-    const entries = serverGroups
-      ? serverGroupEntries({
-          groups: serverGroups,
-          groupBy: groupByKeys,
-          collapsedGroupIds: groupCollapse.collapsedGroupIds,
-          getRowId,
-          footers: groupFooters === true,
-        })
-      : (view?.groups ??
-        buildGroupedFlatModel({
-          rows: source.allFilteredRows ?? [],
-          groupBy: groupByKeys,
-          columns: columnLayout.visibleColumns,
-          getRowId,
-          collapsedGroupIds: groupCollapse.collapsedGroupIds,
-          aggregates: groupAggregates,
-          footers: groupFooters === true,
-          sort: groupSort,
-          filter: groupFilter,
-          groupPageSize,
-          rowPageSize: groupRowPageSize,
-          paging: groupPaging.paging,
-        }));
-    // The whole-tree actions need the keys, and the entries are where they
-    // are: a collapsed group hides its children, so its own key is still
-    // listed while theirs are not — which is exactly what closing everything
-    // one level at a time produces.
-    const openGroups = entries.flatMap((entry) =>
-      entry.kind === "group" ? [{ key: entry.key, level: entry.level }] : []
-    );
-    const withExtras = insertExtraRows(entries, extraRows, (entry) =>
-      entry.kind === "row" ? entry.key : undefined
-    );
-    return {
-      groupBy: groupByKeys,
-      collapsed: groupCollapse,
-      aggregates: groupAggregates,
-      entries: withExtras,
-      setGroupBy,
-      /**
-       * Reveal the next page of groups, or of one group's rows. The table
-       * shows what it already holds; `onGroupLoadMore` is where a server tier
-       * fetches the rest.
-       */
-      showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => {
-        const size =
-          entry.scope === "groups"
-            ? (groupPageSize ?? 0)
-            : (groupRowPageSize ?? 0);
-        groupPaging.showMore(size, entry.groupKey);
-        if (entry.scope === "rows" && entry.groupKey) {
-          onGroupLoadMore?.(entry.groupKey);
-        }
-      },
-      expandAll: groupCollapse.expandAll,
-      collapseAll: () => {
-        groupCollapse.collapseToDepth(0, openGroups);
-      },
-      collapseToDepth: (depth: number) => {
-        groupCollapse.collapseToDepth(depth, openGroups);
-      },
-    };
-  }, [
-    groupByKeys,
-    serverGroups,
-    source.allFilteredRows,
-    columnLayout.visibleColumns,
-    getRowId,
-    groupCollapse,
-    groupAggregates,
-    groupFooters,
-    groupSort,
-    groupFilter,
-    groupPageSize,
-    groupRowPageSize,
-    onGroupLoadMore,
-    extraRows,
-    groupPaging,
-    setGroupBy,
-  ]);
+  const tree = undefined;
+  const grouping = undefined;
+  const editingRows = viewSource.rows;
 
-  // See TableChrome.editingRows — the row universe the editing layer
-  // validates against must match what the body renders.
-  const editingRows = useMemo<readonly TRow[]>(() => {
-    if (!grouping) return viewSource.rows;
-    const leaves: TRow[] = [];
-    for (const entry of grouping.entries) {
-      if (entry.kind === "row") leaves.push(entry.row);
-    }
-    return leaves;
-  }, [grouping, viewSource.rows]);
+  // See TableChrome.editingRows — extras overlay the grouped leaf set.
 
   // Reorder a flat list, never a nested one: grouping and trees have their
   // own order, and a splice through them would silently lie.
@@ -1232,7 +721,7 @@ export function useTableChrome<TRow>(
   const publishedReorder = useFeatureState(ROW_REORDER) as
     RowReorderState<TRow> | undefined;
   const requestedReorder = publishedReorder !== undefined;
-  const reorderBlocked = grouping !== undefined || treeShaped;
+  const reorderBlocked = groupingArmed || treeShaped;
   useEffect(() => {
     if (!requestedReorder || !reorderBlocked) return;
     devWarn(
@@ -1244,53 +733,7 @@ export function useTableChrome<TRow>(
   const rowReorderEnabled = hasRowReorder && !reorderHidden;
   const rowReorder = rowReorderEnabled ? publishedReorder : undefined;
 
-  const rowPinning = useChromeRowPinning<TRow>({
-    requested:
-      props.pinnedRowIds !== undefined ||
-      props.onPinnedRowIdsChange !== undefined,
-    blocked: grouping !== undefined || treeShaped,
-    pinnedRowIds: props.pinnedRowIds,
-    onPinnedRowIdsChange: props.onPinnedRowIdsChange,
-    getRowId: (row) => rowKey(row),
-    labels: {
-      pinToTop: table.labels.pinToTop,
-      pinToBottom: table.labels.pinToBottom,
-      unpinRow: table.labels.unpinRow,
-    },
-  });
-
-  useEffect(() => {
-    if (!editing) return;
-    editing.state.discardIfRowMissing(editingRows, (row) =>
-      rowKey(row as TRow)
-    );
-    conflict.reconcile({
-      active: editing.state.active,
-      openedRow: editing.state.openedRow() as TRow | undefined,
-      draft: editing.state.draft,
-      rows: editingRows,
-      columns: resolvedColumns,
-      rowKey,
-      rowVersion: props.rowVersion,
-      policy: props.editConflictPolicy ?? "ask",
-      onEditConflict: props.onEditConflict,
-      keep: (row) => {
-        editing.state.keepLive(row);
-      },
-      take: (row, value) => {
-        editing.state.takeLive(row, value);
-      },
-    });
-  }, [
-    editing,
-    editingRows,
-    rowKey,
-    conflict,
-    resolvedColumns,
-    props.rowVersion,
-    props.editConflictPolicy,
-    props.onEditConflict,
-  ]);
+  const rowPinning = undefined;
 
   const showFooter =
     isPaged &&
@@ -1302,14 +745,14 @@ export function useTableChrome<TRow>(
       collectFeatureNotices({
         virtualize: props.virtualize,
         paginationMode: source.paginationMode,
-        groupByKeys,
+        groupByKeys: [],
         allFilteredRows: source.allFilteredRows,
-        serverGroups,
+        serverGroups: source.groups,
         rowPinningRequested:
           props.pinnedRowIds !== undefined ||
           props.onPinnedRowIdsChange !== undefined,
         rowReorderRequested: requestedReorder,
-        nestedArmed: grouping !== undefined || treeShaped,
+        nestedArmed: groupingArmed || treeShaped,
         hasEditableColumn,
         onCellEdit,
         rowEditing: props.rowEditing,
@@ -1322,13 +765,12 @@ export function useTableChrome<TRow>(
     [
       props.virtualize,
       source.paginationMode,
-      groupByKeys,
       source.allFilteredRows,
-      serverGroups,
+      source.groups,
       props.pinnedRowIds,
       props.onPinnedRowIdsChange,
       requestedReorder,
-      grouping,
+      groupingArmed,
       treeShaped,
       hasEditableColumn,
       onCellEdit,
@@ -1349,14 +791,6 @@ export function useTableChrome<TRow>(
     else delete el.dataset.adapttableNotices;
   });
 
-  const hasAnyActions = hasRowActions || rowPinning !== undefined;
-  const visibleRowActions = useMemo(() => {
-    if (actionsHidden || !hasAnyActions) return undefined;
-    const pins = rowPinning?.actions ?? [];
-    if (pins.length === 0) return rowActions;
-    return [...(rowActions ?? []), ...pins];
-  }, [actionsHidden, hasAnyActions, rowActions, rowPinning]);
-
   return {
     source: viewSource,
     table,
@@ -1375,11 +809,13 @@ export function useTableChrome<TRow>(
     clearFilters,
     detail,
     rowMutations,
-    rowActions: visibleRowActions,
-    hasRowActions: hasAnyActions,
+    rowActions,
+    hasRowActions,
     hasRowReorder,
     rowReorder,
     rowPinning,
+    groupingArmed,
+    treeShaped,
     editing,
     grouping,
     tree,
@@ -1392,278 +828,7 @@ export function useTableChrome<TRow>(
   };
 }
 
-/**
- * Result of {@link useChromeBodyData}.
- *
- * @public
- */
-export interface ChromeBodyData<TRow> {
-  /** Row/card window virtualization state (disabled unless eligible). */
-  virtualization: TableVirtualization<TRow>;
-  /**
-   * When grouping is armed, the (possibly virtual-windowed) flat entries
-   * adapters should render. `undefined` when grouping is dormant.
-   */
-  groupingEntries?: readonly GroupedFlatEntry<TRow>[];
-  /**
-   * When a tree is armed, the (possibly virtual-windowed) entries adapters
-   * should render. `undefined` when the table is flat.
-   */
-  treeEntries?: readonly TreeEntry<TRow>[];
-  /** Sentinel ref that auto-loads the next page in infinite mode. */
-  loadMoreRef: RefObject<HTMLDivElement | null>;
-  /** Whether the load-more affordance applies (infinite mode, no error). */
-  canLoadMore: boolean;
-  /**
-   * Attach to the `maxHeight` scroll box (when one renders) so the virtual
-   * window tracks the box's scrolling instead of the page's. Harmless to
-   * attach when virtualization is off.
-   */
-  virtualScrollRef: RefCallback<HTMLElement>;
-  /** Top-pinned rows, removed from the virtual window. */
-  pinnedTopRows: readonly TRow[];
-  /** Bottom-pinned rows, removed from the virtual window. */
-  pinnedBottomRows: readonly TRow[];
-}
-
-/**
- * The shared data-flow wiring between {@link useTableChrome} and an
- * adapter's body: window virtualization (eligible only for real rows in
- * infinite mode) and the infinite-scroll sentinel. Extracted because four
- * adapters repeated this block verbatim; antd opts out (it scrolls inside
- * its own `<Table>` container).
- *
- * @typeParam TRow - The row type.
- * @param chrome - The {@link useTableChrome} result.
- * @param props - The adapter's `BaseDataTableProps`.
- * @returns Virtualization state + the load-more sentinel.
- *
- * @public
- */
-export function useChromeBodyData<TRow>(
-  chrome: TableChrome<TRow>,
-  props: BaseDataTableProps<TRow>
-): ChromeBodyData<TRow> {
-  const { rowKey, virtualize = false } = props;
-  // The chrome's view facade, so grouped full-set state (no next page, all
-  // rows present) drives the sentinel and virtualization too.
-  const { source } = chrome;
-  if (virtualize && source.paginationMode === "paged") {
-    devWarn(
-      'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it.'
-    );
-  }
-  const fetchNext = useCallback(() => {
-    if (source.hasNextPage && !source.isFetchingNextPage) {
-      source.fetchNextPage();
-    }
-  }, [source]);
-  const scrollBoxRef = useRef<HTMLElement | null>(null);
-  const inScrollBox = props.maxHeight != null;
-  // Window mode needs the list's document Y as TanStack `scrollMargin`.
-  // Without it, page chrome above the table is treated as already-scrolled
-  // rows and the body opens with a blank gap. An explicit prop wins.
-  const measureWindowOffset =
-    virtualize && !inScrollBox && props.virtualScrollMargin == null;
-  const { scrollMargin: measuredScrollMargin, observe: observeWindowList } =
-    useMeasuredWindowScrollMargin(measureWindowOffset, chrome.rootRef);
-  const virtualScrollRef = useCallback(
-    (node: HTMLElement | null) => {
-      scrollBoxRef.current = node;
-      observeWindowList(node);
-    },
-    [observeWindowList]
-  );
-  const bodyEligible = isBodyEligible(chrome);
-  const groupingArmed = Boolean(chrome.grouping);
-  const groupKeys = entryKeys(chrome.grouping?.entries);
-  // A tree is a keyed flat list once it has been walked, exactly like a
-  // grouped model — so it windows through the same hook rather than a second
-  // one. Without this a 50,000-row hierarchy renders 50,000 rows: the row
-  // virtualizer counts source rows, and a tree's visible list is its own.
-  const treeArmed = Boolean(chrome.tree);
-  const treeKeys = entryKeys(chrome.tree?.entries);
-  const pinState = chrome.rowPinning?.state;
-  const partitioned = useMemo(() => {
-    if (!pinState) {
-      return { top: [] as TRow[], scroll: source.rows, bottom: [] as TRow[] };
-    }
-    return partitionPinnedRows(source.rows, pinState, rowKey);
-  }, [pinState, rowKey, source.rows]);
-  const estimateSize = estimateBodyItemSize(chrome, props, partitioned.scroll);
-  const scrollOpts = {
-    overscan: props.virtualOverscan,
-    scrollMargin: props.virtualScrollMargin ?? measuredScrollMargin,
-    getScrollElement: inScrollBox ? () => scrollBoxRef.current : undefined,
-    onEndReached: fetchNext,
-    estimateSize,
-  } as const;
-
-  // Both hooks run unconditionally (Rules of Hooks); exactly one is enabled.
-  const groupVirtualization = useKeyedVirtualization({
-    keys: groupKeys,
-    enabled: virtualize && groupingArmed && bodyEligible,
-    ...scrollOpts,
-  });
-  const treeVirtualization = useKeyedVirtualization({
-    keys: treeKeys,
-    enabled: virtualize && treeArmed && !groupingArmed && bodyEligible,
-    ...scrollOpts,
-  });
-
-  const virtualization = useTableVirtualization({
-    rows: partitioned.scroll,
-    rowKey,
-    enabled: virtualize && !groupingArmed && !treeArmed && bodyEligible,
-    // Detail panels are separate elements from their rows on desktop, so the
-    // window measures the two together. A mobile card nests the detail inside
-    // the card, so the card element is the whole item — keep measureElement.
-    expandable: measureRowDetailAsPair(chrome.isMobile, props.renderRowDetail),
-    ...scrollOpts,
-  });
-
-  const groupingEntries = chrome.grouping
-    ? windowGroupedEntries(chrome.grouping.entries, groupVirtualization.indices)
-    : undefined;
-  const treeEntries = chrome.tree
-    ? windowGroupedEntries(chrome.tree.entries, treeVirtualization.indices)
-    : undefined;
-
-  const resolvedVirtualization = resolveBodyVirtualization(
-    groupingArmed ? groupVirtualization : treeVirtualization,
-    virtualization
-  );
-
-  const boxVirtual = resolvedVirtualization.enabled && inScrollBox;
-  const canLoadMore = !chrome.isPaged && !source.error && !boxVirtual;
-  const loadMoreRef = useInfiniteScroll<HTMLDivElement>({
-    hasNextPage: Boolean(source.hasNextPage),
-    isFetchingNextPage: Boolean(source.isFetchingNextPage),
-    fetchNextPage: fetchNext,
-    itemCount: bodySentinelCount(chrome, groupingArmed),
-    enabled: canLoadMore,
-  });
-  const sourceIndexById = useMemo(() => {
-    const map = new Map<string, number>();
-    source.rows.forEach((row, index) => map.set(rowKey(row), index));
-    return map;
-  }, [rowKey, source.rows]);
-
-  const pinnedVirtualization = useMemo(() => {
-    if (!pinState) return resolvedVirtualization;
-    return {
-      ...resolvedVirtualization,
-      rows: resolvedVirtualization.rows.map((entry) => ({
-        ...entry,
-        sourceIndex: sourceIndexById.get(entry.key) ?? entry.index,
-      })),
-    };
-  }, [pinState, resolvedVirtualization, sourceIndexById]);
-
-  return {
-    virtualization: pinnedVirtualization,
-    groupingEntries,
-    treeEntries,
-    loadMoreRef,
-    canLoadMore,
-    virtualScrollRef,
-    pinnedTopRows: partitioned.top,
-    pinnedBottomRows: partitioned.bottom,
-  };
-}
-
-/**
- * Whether a row's children are already in the data.
- *
- * Both declarations answer it: nested data has them under the row, a flat table
- * has them among the rows keyed by their parent. A node with none is one the
- * host said has children (`hasChildren`) and the browser has not fetched.
- */
-function hasLoadedChildren<TRow>(
-  row: TRow,
-  rows: readonly TRow[],
-  props: BaseDataTableProps<TRow>
-): boolean {
-  const nested = props.getChildren?.(row);
-  if (nested !== undefined) return nested.length > 0;
-  const { getParentId, rowKey } = props;
-  if (!getParentId) return false;
-  const id = rowKey(row);
-  return rows.some((candidate) => getParentId(candidate) === id);
-}
-
-/** The keys of a walked model's entries — one shape for groups and trees. */
-function entryKeys(entries?: readonly { key: string }[]): string[] {
-  return entries?.map((entry) => entry.key) ?? [];
-}
-
-/** Whether the body is a real row/card list the window can apply to. */
-function isBodyEligible<TRow>(chrome: TableChrome<TRow>): boolean {
-  return (
-    !chrome.isPaged &&
-    !chrome.source.error &&
-    (chrome.body === "desktop" || chrome.body === "mobile")
-  );
-}
-
-/**
- * Desktop detail is a sibling of the row, so the window measures the pair.
- * A mobile card nests the detail inside the card — one element, not a pair.
- */
-function measureRowDetailAsPair(
-  isMobile: boolean,
-  renderRowDetail: unknown
-): boolean {
-  return !isMobile && renderRowDetail !== undefined;
-}
-
-/** A card's height on a phone, a row's on a desktop — or `rowHeight`. */
-function estimateBodyItemSize<TRow>(
-  chrome: TableChrome<TRow>,
-  props: BaseDataTableProps<TRow>,
-  scrollRows: readonly TRow[]
-): (index: number) => number {
-  const fallback = chrome.isMobile
-    ? (props.estimateCardSize ?? DEFAULT_CARD_SIZE_PX)
-    : (props.estimateRowSize ?? DEFAULT_ROW_SIZE_PX);
-  return estimateFromRowHeight(props.rowHeight, fallback, (index) => {
-    if (chrome.grouping) {
-      const entry = chrome.grouping.entries[index];
-      if (entry?.kind === "row") return { row: entry.row, index: entry.index };
-      return undefined;
-    }
-    if (chrome.tree) {
-      const entry = chrome.tree.entries[index];
-      if (entry) return { row: entry.row, index };
-      return undefined;
-    }
-    const row = scrollRows[index];
-    return row === undefined ? undefined : { row, index };
-  });
-}
-
-/** How many items the infinite-scroll sentinel counts as already rendered. */
-function bodySentinelCount<TRow>(
-  chrome: TableChrome<TRow>,
-  groupingArmed: boolean
-): number {
-  if (groupingArmed) return chrome.grouping?.entries.length ?? 0;
-  return chrome.source.rows.length;
-}
-
-function resolveBodyVirtualization<TRow>(
-  keyed: ReturnType<typeof useKeyedVirtualization>,
-  virtualization: TableVirtualization<TRow>
-): TableVirtualization<TRow> {
-  if (!keyed.enabled) return virtualization;
-  return {
-    enabled: true,
-    rows: [],
-    paddingTop: keyed.paddingTop,
-    paddingBottom: keyed.paddingBottom,
-    measureElement: keyed.measureElement,
-  };
-}
+export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 
 /**
  * The shared scroll-restoration wiring every adapter `<DataTable>` needs:
@@ -1726,32 +891,6 @@ export interface FilterTriggerToggle {
  * otherwise the click toggles normally (kits that exclude the trigger from
  * outside-close keep working unchanged).
  */
-function useChromeRowPinning<TRow>(options: {
-  requested: boolean;
-  blocked: boolean;
-  pinnedRowIds?: RowPinState;
-  onPinnedRowIdsChange?: (next: RowPinState) => void;
-  getRowId: (row: TRow) => string;
-  labels: RowPinLabels;
-}): RowPinningState<TRow> | undefined {
-  const { requested, blocked, labels } = options;
-  useEffect(() => {
-    if (!requested || !blocked) return;
-    devWarn(
-      "row pinning is ignored while grouping or a tree is armed — pin a flat list, not a nested one."
-    );
-  }, [blocked, requested]);
-  const enabled = requested && !blocked;
-  const state = useRowPinning<TRow>({
-    enabled,
-    pinnedRowIds: options.pinnedRowIds,
-    onPinnedRowIdsChange: options.onPinnedRowIdsChange,
-    getRowId: options.getRowId,
-    labels,
-  });
-  return enabled ? state : undefined;
-}
-
 /**
  * Pointer and click handlers that open the filters overlay without double-firing.
  *

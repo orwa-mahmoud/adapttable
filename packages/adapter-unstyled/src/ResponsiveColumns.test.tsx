@@ -11,7 +11,7 @@ import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {

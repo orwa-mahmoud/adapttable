@@ -6,12 +6,12 @@
  * between a scrolled pinned column and the sticky header: otherwise a
  * pinned row slides under the header, or a pinned column paints over it.
  */
-import { useCallback, useEffect, useState } from "react";
-
 import { PIN_Z } from "../columns/useColumnLayout";
-import type { VirtualTableRow } from "../virtual/useTableVirtualization";
-import { resolveVirtualRows } from "../virtual/useTableVirtualization";
+import type { VirtualTableRow } from "../virtual/virtualTableModel";
+import { resolveVirtualRows } from "../virtual/virtualTableModel";
 import type { RowPinSide } from "./rowPinning";
+
+export { useOffsetHeight } from "../layout/useOffsetHeight";
 
 /**
  * `data-adapttable-part` on a pinned row in the shared tbody.
@@ -100,32 +100,6 @@ export function pinnedRowCellStyle(
     ...edge,
     zIndex: columnPinned ? PIN_Z.rowPinnedColumn : PIN_Z.rowPinned,
   };
-}
-
-/**
- * Measure an element's offset height; used for the sticky header offset.
- *
- * @public
- */
-export function useOffsetHeight(): [
-  (node: HTMLElement | null) => void,
-  number,
-] {
-  const [node, setNode] = useState<HTMLElement | null>(null);
-  const [height, setHeight] = useState(0);
-  const ref = useCallback((next: HTMLElement | null) => {
-    setNode(next);
-    if (next) setHeight(next.getBoundingClientRect().height);
-  }, []);
-  useEffect(() => {
-    if (!node || typeof ResizeObserver === "undefined") return undefined;
-    const observer = new ResizeObserver(() => {
-      setHeight(node.getBoundingClientRect().height);
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [node]);
-  return [ref, height];
 }
 
 /**

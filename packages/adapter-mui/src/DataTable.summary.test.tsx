@@ -4,8 +4,10 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
-import { DataTable } from "./DataTable";
+import { collapsibleColumnGroups } from "./column-groups";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { rowDetail } from "./row-detail";
 
 interface Row {
   id: string;
@@ -100,7 +102,10 @@ describe("summary row (desktop)", () => {
           const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
           return {
             bulkActions: actions,
-            features: [bulkActionsFeature<Row>(actions)],
+            features: [
+              bulkActionsFeature<Row>(actions),
+              rowDetail((r: Row) => <div>detail {r.id}</div>),
+            ],
           };
         })(),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
@@ -164,7 +169,10 @@ describe("header groups (desktop)", () => {
           const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
           return {
             bulkActions: actions,
-            features: [bulkActionsFeature<Row>(actions)],
+            features: [
+              bulkActionsFeature<Row>(actions),
+              rowDetail((r: Row) => <div>detail {r.id}</div>),
+            ],
           };
         })(),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
@@ -191,7 +199,10 @@ describe("header groups (desktop)", () => {
   it("collapses a group to an arrow stub when armed", () => {
     const { container } = renderHarness({
       columns: GROUPED,
-      override: { collapsibleColumnGroups: true },
+      override: {
+        collapsibleColumnGroups: true,
+        features: [collapsibleColumnGroups<Row>()],
+      },
     });
     const toggle = container.querySelector(
       '[data-adapttable-part="column-group-toggle"]'

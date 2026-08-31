@@ -6,14 +6,62 @@
  * Load-more button appends rows the window doesn't even show.
  */
 import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
-import { renderHook } from "@testing-library/react";
-import { act } from "react";
+import { render, renderHook } from "@testing-library/react";
+import { act, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ChromeExtrasGate } from "./features/chromeExtrasGate";
+import { grouping } from "./features/grouping";
+import { FeatureProviders } from "./features/providers";
+import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
-import { useChromeBodyData, useTableChrome } from "./useTableChrome";
+import { useTableChrome, type TableChrome } from "./useTableChrome";
+import type { ChromeBodyData } from "./virtual/chromeBodyShared";
+import { useChromeBodyData } from "./virtual/useVirtualChromeBodyData";
+
+function renderLiveBody<TRow>(
+  features: readonly TableFeature<TRow>[],
+  build: () => Parameters<typeof useTableChrome<TRow>>[0]
+) {
+  const applied = applyTableFeatures({ features });
+  const box: {
+    current: { chrome: TableChrome<TRow>; body: ChromeBodyData<TRow> };
+  } = {
+    current: undefined as unknown as {
+      chrome: TableChrome<TRow>;
+      body: ChromeBodyData<TRow>;
+    },
+  };
+  function BodyInner({
+    chrome,
+    props,
+  }: {
+    chrome: TableChrome<TRow>;
+    props: Parameters<typeof useTableChrome<TRow>>[0];
+  }): ReactNode {
+    const body = useChromeBodyData(chrome, props);
+    box.current = { chrome, body };
+    return null;
+  }
+  function Probe() {
+    const props = { ...applied, ...build() };
+    const base = useTableChrome<TRow>(props);
+    return (
+      <ChromeExtrasGate chrome={base} props={props}>
+        {(chrome) => <BodyInner chrome={chrome} props={props} />}
+      </ChromeExtrasGate>
+    );
+  }
+  render(
+    <FeatureProviders props={applied}>
+      <Probe />
+    </FeatureProviders>
+  );
+  return { result: box };
+}
 
 vi.mock("@tanstack/react-virtual", () => ({
   useWindowVirtualizer: vi.fn(),
@@ -159,22 +207,20 @@ describe("useChromeBodyData with row grouping", () => {
     } as unknown as ReturnType<typeof useWindowVirtualizer>);
 
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => {
+    const { result } = renderLiveBody([grouping<Row>("team")], () => {
       const source = useFrontendData<Row>({
         data: groupedRows,
         columns: groupCols,
         urlAdapter: adapter,
         paginationMode: "infinite",
       });
-      const props = {
+      return {
         source,
         columns: groupCols,
         rowKey: (r: Row) => r.id,
         virtualize: true as const,
         groupBy: "team",
       };
-      const chrome = useTableChrome<Row>(props);
-      return { chrome, body: useChromeBodyData(chrome, props) };
     });
 
     expect(result.current.chrome.grouping).toBeDefined();
@@ -212,26 +258,31 @@ describe("useChromeBodyData with tree data", () => {
     } as unknown as ReturnType<typeof useWindowVirtualizer>);
 
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        columns: cols,
-        urlAdapter: adapter,
-        paginationMode: "infinite",
-      });
-      const props = {
-        source,
-        columns: cols,
-        rowKey: (r: Row) => r.id,
-        virtualize: true as const,
-        // Every row a child of the one before it: one deep chain, all open.
-        getParentId: (row: Row) =>
-          row.id === "0" ? undefined : String(Number(row.id) - 1),
-        expandedIds: ROWS.map((row) => row.id),
-      };
-      const chrome = useTableChrome<Row>(props);
-      return { chrome, body: useChromeBodyData(chrome, props) };
-    });
+    const { result } = renderLiveBody(
+      [
+        tree({
+          getParentId: (row: Row) =>
+            row.id === "0" ? undefined : String(Number(row.id) - 1),
+        }),
+      ],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "infinite",
+        });
+        return {
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+          virtualize: true as const,
+          getParentId: (row: Row) =>
+            row.id === "0" ? undefined : String(Number(row.id) - 1),
+          expandedIds: ROWS.map((row) => row.id),
+        };
+      }
+    );
 
     // One entry per row the source handed over — the whole walked tree.
     expect(result.current.chrome.tree?.entries).toHaveLength(
@@ -322,14 +373,14 @@ describe("useChromeBodyData rowHeight estimate", () => {
       { key: "team", accessor: () => "A" },
     ];
     const adapter = createMemoryAdapter("");
-    renderHook(() => {
+    renderLiveBody([grouping<Row>("team")], () => {
       const source = useFrontendData<Row>({
         data: groupedRows,
         columns: groupCols,
         urlAdapter: adapter,
         paginationMode: "infinite",
       });
-      const props = {
+      return {
         source,
         columns: groupCols,
         rowKey: (r: Row) => r.id,
@@ -337,8 +388,6 @@ describe("useChromeBodyData rowHeight estimate", () => {
         groupBy: "team",
         rowHeight: (row: Row) => (row.id === "1" ? 90 : 40),
       };
-      const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
     });
     const estimate = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
       .estimateSize;

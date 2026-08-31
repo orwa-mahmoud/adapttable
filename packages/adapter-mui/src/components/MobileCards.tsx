@@ -41,10 +41,15 @@ import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { memo, useMemo } from "react";
 
 import { type SharedProps } from "./DesktopTable";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { GroupHeaderCard } from "./GroupHeader";
-import { RowEditActions, RowReorderButtons, TreeToggle } from "./kitControls";
+import {
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
+} from "./featureSlots";
+import { cellDisplay } from "./DisplayCell";
 import { RowActionButtons } from "./RowActionButtons";
 
 /** Per-card inputs for the memoized {@link MobileCardBase}. */
@@ -200,7 +205,7 @@ function MobileCardBase<TRow>({
     column,
     label: resolveMobileLabel(column),
     value: (
-      <EditableDataCell
+      <OptionalEditableCell
         editing={editing}
         row={row}
         column={column}
@@ -211,6 +216,7 @@ function MobileCardBase<TRow>({
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
+        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -238,7 +244,7 @@ function MobileCardBase<TRow>({
         sx={compact ? { p: 1.25, "&:last-child": { pb: 1.25 } } : undefined}
       >
         {treeEntry && (
-          <TreeToggle
+          <OptionalTreeToggle
             entry={treeEntry}
             labels={labels}
             onToggle={onToggleTree ?? (() => undefined)}
@@ -252,7 +258,7 @@ function MobileCardBase<TRow>({
           />
         )}
         {onToggleExpand && (
-          <ExpandToggle
+          <OptionalExpandToggle
             id={id}
             expanded={expanded}
             onToggle={onToggleExpand}
@@ -287,7 +293,7 @@ function MobileCardBase<TRow>({
               </Box>
             ))}
         {rowReorder && (
-          <RowReorderButtons
+          <OptionalRowReorderButtons
             reorder={rowReorder}
             labels={labels}
             localIndex={index}
@@ -297,7 +303,7 @@ function MobileCardBase<TRow>({
           />
         )}
         {editing?.rowEditing && (
-          <RowEditActions
+          <OptionalRowEditActions
             rowEditing={editing.rowEditing}
             row={row}
             rowId={id}
@@ -479,7 +485,7 @@ export function MobileCards<TRow>({
               entry.kind === "groupMore"
             ) {
               return (
-                <GroupHeaderCard
+                <OptionalGroupHeaderCard
                   key={entry.key}
                   entry={entry}
                   columns={columns}

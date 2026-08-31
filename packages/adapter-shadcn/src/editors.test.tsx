@@ -1,7 +1,7 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Shift {

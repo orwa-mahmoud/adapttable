@@ -9,7 +9,7 @@ import { render, within } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {

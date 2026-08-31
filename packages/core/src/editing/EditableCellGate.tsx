@@ -301,8 +301,14 @@ function ConflictNotice(
       data-conflict=""
       className={errorClassName}
     >
-      {ctrl.conflictLabels.message}
-      <span data-adapttable-part="edit-cell-incoming">
+      <span data-adapttable-part="edit-cell-conflict-message">
+        {ctrl.conflictLabels.message}
+      </span>
+      {"\n"}
+      <span
+        data-adapttable-part="edit-cell-incoming"
+        style={{ display: "block" }}
+      >
         {ctrl.conflictLabels.theirsValue(ctrl.conflict.incomingValue)}
       </span>
       <Button

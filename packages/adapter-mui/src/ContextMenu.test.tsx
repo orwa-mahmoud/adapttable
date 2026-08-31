@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { contextMenu } from "./context-menu";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {

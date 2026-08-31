@@ -60,8 +60,8 @@ engine, so a host that composes a pivot table still does it in one import.
 ## Both paths, until v3
 
 ```tsx
-// Deprecated, still works:
-<DataTable groupBy="team" virtualize />;
+// Deprecated, still works for most factories:
+<DataTable groupBy="team" />;
 
 // Preferred:
 import { grouping } from "@adapttable/mantine/grouping";
@@ -69,6 +69,10 @@ import { virtualize } from "@adapttable/mantine/virtualize";
 
 <DataTable features={[grouping<Row>("team"), virtualize<Row>()]} />;
 ```
+
+`virtualize` is the exception: the enabling prop no longer windows rows. The
+factory fills `CHROME_BODY` with the TanStack-backed body; a table that never
+imports it never carries `@tanstack/react-virtual`.
 
 An explicit prop wins if both are set. Development mode warns once when a
 deprecated enabling prop is used. The props are removed in v3.

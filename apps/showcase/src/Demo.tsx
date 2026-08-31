@@ -20,7 +20,7 @@ import {
   useHighlight,
   useQuerySource,
 } from "@adapttable/core";
-import { rowReorder } from "@adapttable/core/features";
+import { rowReorder, virtualize } from "@adapttable/core/features";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -545,7 +545,6 @@ function frontendColumnProps(
   };
   if (flags.large) {
     Object.assign(next, {
-      virtualize: true,
       estimateRowSize: LARGE_ROW_ESTIMATE,
     });
   }
@@ -589,10 +588,16 @@ function frontendColumnProps(
       onDeleteRow: flags.onDeleteRow,
     });
   }
-  if (flags.rowReorder) {
-    // Row reordering has no enabling prop: composing the feature is what brings
-    // its state machine and its controls into the table.
-    Object.assign(next, { features: [rowReorder(flags.onRowReorder)] });
+  {
+    const composed = [
+      ...(flags.rowReorder ? [rowReorder(flags.onRowReorder)] : []),
+      ...(flags.large
+        ? [virtualize({ estimateRowSize: LARGE_ROW_ESTIMATE })]
+        : []),
+    ];
+    if (composed.length > 0) {
+      Object.assign(next, { features: composed });
+    }
   }
   if (flags.rowPinning) {
     Object.assign(next, { onPinnedRowIdsChange: () => undefined });

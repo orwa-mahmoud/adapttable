@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { cellNavigation } from "./cell-navigation";
+import { batchEditing, dirtyIndicators, editing, rowEditing } from "./editing";
+import { editHistory } from "./edit-history";
+import { exportCsv } from "./export-csv";
 import {
-  batchEditing,
   bulkActions,
-  cellNavigation,
   cellSpan,
   collapsibleColumnGroups,
   columnMenu,
@@ -11,35 +13,29 @@ import {
   commandPalette,
   contextMenu,
   densityChooser,
-  dirtyIndicators,
-  editHistory,
-  editing,
-  exportCsv,
   extraRows,
   feature,
-  filters,
   filterTypes,
-  findInTable,
   fitColumns,
-  fullscreen,
-  grouping,
   headerFilters,
   multiSort,
-  nestedTable,
   print,
   resizableColumns,
   rowAppearance,
-  rowDetail,
-  rowEditing,
-  rowPinning,
   savedViews,
-  selectionStats,
   sidePanel,
   statusBar,
-  tree,
   undoRedoButtons,
-  virtualize,
 } from "./factories";
+import { filters } from "./filters";
+import { findInTable } from "./find-in-table";
+import { fullscreen } from "./fullscreen";
+import { grouping } from "./grouping";
+import { rowPinning } from "./row-pinning";
+import { selectionStats } from "./selection-stats";
+import { nestedTable, rowDetail } from "./row-detail";
+import { tree } from "./tree";
+import { virtualize } from "./virtualize";
 
 function patch<T>(factory: { apply?: (input: object) => T }): T {
   const result = factory.apply?.({});
@@ -65,15 +61,19 @@ describe("feature factories", () => {
 
   it("cellSpan writes the getter and appearance", () => {
     const getCellSpan = vi.fn();
-    expect(patch(cellSpan(getCellSpan, "plain"))).toEqual({
-      getCellSpan,
-      cellSpanAppearance: "plain",
-    });
+    expect(patch(cellSpan(getCellSpan, "plain"))).toEqual(
+      expect.objectContaining({
+        getCellSpan,
+        cellSpanAppearance: "plain",
+      })
+    );
   });
 
   it("extraRows writes the list", () => {
     const rows = [{ key: "sep", kind: "separator" as const, beforeRowId: "a" }];
-    expect(patch(extraRows(rows))).toEqual({ extraRows: rows });
+    expect(patch(extraRows(rows))).toEqual(
+      expect.objectContaining({ extraRows: rows })
+    );
   });
 
   it("rowAppearance writes style hooks", () => {
@@ -161,7 +161,9 @@ describe("feature factories", () => {
 
   it("boolean chrome factories arm their prop", () => {
     expect(patch(columnMenu())).toEqual({ enableColumnMenu: true });
-    expect(patch(resizableColumns())).toEqual({ resizableColumns: true });
+    expect(patch(resizableColumns())).toEqual(
+      expect.objectContaining({ resizableColumns: true })
+    );
     expect(patch(collapsibleColumnGroups())).toEqual({
       collapsibleColumnGroups: true,
     });

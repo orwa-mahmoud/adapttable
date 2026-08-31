@@ -35,9 +35,7 @@ export type { CustomCellEditorRender } from "./editing/cellEditing";
 export type { ExportWriter } from "./export/exportWriter";
 export type { ExportCsvOptions } from "./export/tableCsv";
 export {
-  batchEditing,
   bulkActions,
-  cellNavigation,
   cellSpan,
   collapsibleColumnGroups,
   columnMenu,
@@ -45,35 +43,38 @@ export {
   commandPalette,
   contextMenu,
   densityChooser,
-  dirtyIndicators,
-  editHistory,
-  editing,
-  exportCsv,
   extraRows,
   feature,
-  filters,
   filterTypes,
-  findInTable,
   fitColumns,
-  fullscreen,
-  grouping,
   headerFilters,
   multiSort,
-  nestedTable,
   print,
   resizableColumns,
   rowAppearance,
-  rowDetail,
-  rowEditing,
-  rowPinning,
   savedViews,
-  selectionStats,
   sidePanel,
   statusBar,
-  tree,
   undoRedoButtons,
-  virtualize,
 } from "./features/factories";
+export { virtualize } from "./features/virtualize";
+export { filters } from "./features/filters";
+export { rowPinning } from "./features/row-pinning";
+export { selectionStats } from "./features/selection-stats";
+export { findInTable } from "./features/find-in-table";
+export { editHistory } from "./features/edit-history";
+export { fullscreen } from "./features/fullscreen";
+export { cellNavigation } from "./features/cell-navigation";
+export { exportCsv } from "./features/export-csv";
+export { grouping } from "./features/grouping";
+export {
+  batchEditing,
+  dirtyIndicators,
+  editing,
+  rowEditing,
+} from "./features/editing";
+export { tree } from "./features/tree";
+export { nestedTable, rowDetail } from "./features/row-detail";
 export { useTableFeatures } from "./features/featureHost";
 export type {
   FeatureProviderContribution,
@@ -82,6 +83,7 @@ export type {
   FeatureSlotKey,
 } from "./features/providers";
 export { rowReorder } from "./features/row-reorder";
+export { rowActions } from "./features/row-actions";
 export type {
   FeatureApplyInput,
   FeaturePatch,

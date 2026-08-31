@@ -11,7 +11,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import { savedViews } from "./saved-views";
 
 /** Map-backed `LayoutStorage`, so views never leak between tests. */

@@ -354,7 +354,26 @@ const FIXTURES = [
   // the host has to remember to switch on. 0.1-0.4 KB gzip; the five kits
   // already on their line move 1 KB, the other three had the slack.
   { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 134 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 135 },
+  {
+    name: "mui · table",
+    pkg: "adapter-mui",
+    budgetKB: 135,
+    // Unique strings from the optional modules this kit already moved
+    // behind feature imports. Hook names that still appear in JSDoc on
+    // the lean path (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
   { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
   { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
   { name: "radix · table", pkg: "adapter-radix", budgetKB: 135 },
@@ -383,7 +402,7 @@ const FIXTURES = [
   // The marker is the constant rather than `useRowReorder`, because the hook's
   // NAME still appears in core's public export list whether or not its body
   // survives; a marker that matches a name proves nothing about the code.
-  absent: ["ROW_DND_MIME"],
+  absent: ["ROW_DND_MIME", "useVirtualizer"],
   ...f,
 }));
 

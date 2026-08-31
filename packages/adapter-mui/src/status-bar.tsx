@@ -1,4 +1,5 @@
 import {
+  extendFeature,
   slotRender,
   STATUS_BAR,
   type TableFeature,
@@ -14,7 +15,8 @@ import { StatusBar } from "./components/StatusBar";
  * The MUI strip, offered by whichever of the two features is composed.
  *
  * One element serves both, so the slot is single and draws it once even when a
- * table composes the pair.
+ * table composes the pair. Concatenate onto the core live renders — replacing
+ * `renders` would drop {@link SELECTION_STATS_LIVE}.
  */
 const draws = [
   slotRender(STATUS_BAR, (props) => <StatusBar {...props} />),
@@ -26,7 +28,7 @@ const draws = [
  * @public
  */
 export function statusBar<TRow>(): TableFeature<TRow> {
-  return { ...coreStatusBar<TRow>(), renders: draws };
+  return extendFeature(coreStatusBar<TRow>(), draws);
 }
 
 /**
@@ -35,5 +37,5 @@ export function statusBar<TRow>(): TableFeature<TRow> {
  * @public
  */
 export function selectionStats<TRow>(): TableFeature<TRow> {
-  return { ...coreSelectionStats<TRow>(), renders: draws };
+  return extendFeature(coreSelectionStats<TRow>(), draws);
 }

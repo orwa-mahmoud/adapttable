@@ -7,7 +7,8 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -45,8 +46,11 @@ function Harness(props: {
       columns={columns}
       rowKey={(r) => r.id}
       forceMobile={props.isMobile}
-      groupBy="team"
-      groupAggregates={(rows) => ({ name: rows.length })}
+      features={[
+        grouping<Row>("team", {
+          groupAggregates: (rows) => ({ name: rows.length }),
+        }),
+      ]}
       {...props.override}
     />
   );

@@ -122,12 +122,15 @@ export function EditableDataCell<TRow>(props: {
   readonly editLabel: string;
   /** `labels.undoEdit` — the control a failed save offers. */
   readonly undoLabel?: string;
+  readonly display?: ReactNode;
 }): ReactElement {
-  const display: ReactNode = props.column.Cell ? (
-    <props.column.Cell row={props.row} rowIndex={props.rowIndex} />
-  ) : (
-    props.column.accessor?.(props.row)
-  );
+  const display: ReactNode =
+    props.display ??
+    (props.column.Cell ? (
+      <props.column.Cell row={props.row} rowIndex={props.rowIndex} />
+    ) : (
+      props.column.accessor?.(props.row)
+    ));
 
   return (
     <EditableCellGate

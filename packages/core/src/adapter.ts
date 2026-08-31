@@ -239,23 +239,83 @@ export {
   featureSlotKey,
   featureStateKey,
   FeatureStateScope,
+  extendFeature,
   slotRender,
   useFeatureSlotFilled,
   useFeatureState,
   usePublishTableRuntime,
   useTableRuntime,
 } from "./features/providers";
+export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
+export { ChromeExtrasGate } from "./features/chromeExtrasGate";
+export { HistoryLiveGate, ShellLiveGate } from "./features/shellLiveGate";
+export type {
+  CellNavLiveSlotProps,
+  ChromeBodySlotProps,
+  ChromeExtraSlotProps,
+  ContextMenuLiveSlotProps,
+  EditableCellSlotProps,
+  EditHistoryLiveSlotProps,
+  ExpandToggleSlotProps,
+  ExportLiveSlotProps,
+  FillHandleCellSlotProps,
+  FilterOverlaySlotProps,
+  FindLiveSlotProps,
+  FullscreenLiveSlotProps,
+  GroupHeaderCardSlotProps,
+  GroupHeaderRowSlotProps,
+  SavedViewsSlotProps,
+  SelectionStatsLiveSlotProps,
+  ToolbarExtrasSlotProps,
+} from "./features/slotKeys";
 export {
   ACTIVE_FILTER_CHIPS,
   BATCH_EDIT_BAR,
   BULK_BAR,
+  CELL_NAV_LIVE,
+  CHROME_BODY,
+  COLUMN_GROUP_TOGGLE,
+  COLUMN_LAYOUT_LIVE,
   COLUMN_MENU,
+  COLUMN_SELECT,
   COMMAND_PALETTE,
+  COMMAND_PALETTE_LIVE,
   CONTEXT_MENU,
+  CONTEXT_MENU_LIVE,
+  EDITABLE_CELL,
+  EDIT_HISTORY_LIVE,
+  EDITING_LIVE,
+  EXPAND_TOGGLE,
+  EXPANSION_LIVE,
+  EXPORT_LIVE,
+  FILL_HANDLE,
+  FILTER_CHIPS_LIVE,
+  FILTER_DRAWER,
+  FILTER_HEADER,
+  FILTER_POPOVER,
   FILTERS_FORM,
   FIND_BAR,
+  FIND_LIVE,
+  FULLSCREEN_LIVE,
+  GRID_FOCUS_ANNOUNCER,
+  GROUP_HEADER_CARD,
+  GROUP_HEADER_ROW,
+  GROUPING_LIVE,
+  PINNING_LIVE,
+  ROW_EDIT_ACTIONS,
+  ROW_ACTIONS_LIVE,
+  ROW_REORDER_ANNOUNCER,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
+  SAVED_VIEWS,
+  SELECTION_LIVE,
+  SELECTION_STATS_LIVE,
   SIDE_PANEL,
   STATUS_BAR,
+  TOOLBAR_EXTRAS,
+  TREE_CELL,
+  TREE_LIVE,
+  TREE_TOGGLE,
 } from "./features/slotKeys";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
@@ -566,8 +626,11 @@ export type {
   UseDataTableResult,
 } from "./useDataTable/useDataTable";
 export { type SearchInputState } from "./useDataTable/useSearchInput";
-export type { DataTableShellProps } from "./useDataTableShell";
-export { useDataTableShell } from "./useDataTableShell";
+export type {
+  DataTableShellProps,
+  DataTableShellResult,
+} from "./useDataTableShell";
+export { finishDataTableShell, useDataTableShell } from "./useDataTableShell";
 export type { PrintToolbar, TableChrome } from "./useTableChrome";
 export {
   type BulkBarChromeProps,
@@ -596,12 +659,22 @@ export {
   type UseColumnWindowOptions,
 } from "./virtual/useColumnWindow";
 export {
+  useKeyedVirtualization,
+  useTableVirtualization,
+  type UseTableVirtualizationOptions,
+} from "./virtual/useTableVirtualization";
+export type { ChromeBodyData } from "./virtual/chromeBodyShared";
+export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
+export {
   type KeyedVirtualization,
   resolveVirtualRows,
   rowSourceIndex,
-  useKeyedVirtualization,
+  type TableVirtualization,
+  type VirtualItemMeta,
   type VirtualTableRow,
-} from "./virtual/useTableVirtualization";
+  virtualColumnSpan,
+  windowGroupedEntries,
+} from "./virtual/virtualTableModel";
 
 /**
  * The member types the signatures above hand back.

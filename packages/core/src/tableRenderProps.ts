@@ -25,17 +25,17 @@ import type { GroupByInput } from "./grouping/groupKeys";
 import type { GroupedFlatEntry } from "./grouping/groupRows";
 import type { GroupCollapseState } from "./grouping/useGroupCollapse";
 import {
-  type BodyCell,
-  buildBodyCells,
-  type CellSpanAppearance,
-  type GetCellSpan,
+  type AssemblyFns,
+  bodyRowEntries,
+  resolveAssembly,
+} from "./layout/leanAssembly";
+import type {
+  BodyCell,
+  CellSpanAppearance,
+  GetCellSpan,
 } from "./rows/cellSpan";
-import {
-  extraCoveredTableSlots,
-  type ExtraRow,
-  inflateBodyCellRowSpans,
-} from "./rows/extraRows";
-import { incrementalViewOf } from "./rows/incremental";
+import type { ExtraRow } from "./rows/extraRows";
+import { incrementalViewOf } from "./rows/incrementalView";
 import type { MobileCardRenderer } from "./rows/mobileCard";
 import type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
 import type { RowPinningState } from "./rows/rowPinning";
@@ -43,7 +43,7 @@ import type { RowReorderState } from "./rows/rowReorder";
 import type { RowHeight, RowStyle } from "./rows/rowStyle";
 import type { RowExpansionState } from "./rows/useRowExpansion";
 import type { SelectionState } from "./selection/useSelection";
-import { bodyRowEntries, type TreeEntry } from "./tree/treeRows";
+import type { TreeEntry } from "./tree/treeRows";
 import type { TreeExpansionState } from "./tree/useTreeExpansion";
 import type { ColumnDef, RowAction, TableLabels } from "./types";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
@@ -53,7 +53,7 @@ import {
   resolveVirtualRows,
   virtualColumnSpan,
   type VirtualTableRow,
-} from "./virtual/useTableVirtualization";
+} from "./virtual/virtualTableModel";
 
 export type {
   GetCellSpan,
@@ -74,6 +74,8 @@ export type {
  * @public
  */
 export interface SharedTableRenderProps<TRow> {
+  /** Injected assembly heavies — present when optional features compose them. */
+  assembly?: Partial<AssemblyFns<TRow>>;
   /** The resolved table model from `useDataTable`. */
   table: UseDataTableResult<TRow>;
   /** The rows to render for the current page/window. */
@@ -327,7 +329,8 @@ function extraCoveredSlotMap<TRow>(
   extraRows: readonly ExtraRow[] | undefined,
   visualIds: readonly string[],
   cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>,
-  leadingCells: number
+  leadingCells: number,
+  extraCoveredTableSlots: AssemblyFns<TRow>["extraCoveredTableSlots"]
 ): Map<string, ReadonlySet<number>> {
   const extraCoveredSlots = new Map<string, ReadonlySet<number>>();
   for (const extra of extraRows ?? []) {
@@ -375,8 +378,10 @@ export function tableRenderModel<TRow>(
     | "tree"
     | "grouping"
     | "extraRows"
+    | "assembly"
   >
 ): TableRenderModel<TRow> {
+  const assembly = resolveAssembly(props.assembly);
   const { selection, labels } = props.table;
   // Windowed columns replace the full set for every renderer at once, so no
   // adapter has to know whether the horizontal axis is windowed.
@@ -432,7 +437,7 @@ export function tableRenderModel<TRow>(
   ];
   const visualIds = visualRows.map((row) => props.getRowId(row));
   merge(
-    buildBodyCells({
+    assembly.buildBodyCells({
       ...cellOptions,
       rows: visualRows,
     })
@@ -446,14 +451,14 @@ export function tableRenderModel<TRow>(
   );
   if (groupedRows.length > 0) {
     merge(
-      buildBodyCells({
+      assembly.buildBodyCells({
         ...cellOptions,
         rows: groupedRows.map((entry) => entry.row),
         firstRowIndex: groupedRows[0]?.index ?? 0,
       })
     );
   }
-  const spannedCells = inflateBodyCellRowSpans(
+  const spannedCells = assembly.inflateBodyCellRowSpans(
     cellsByRow,
     visualIds,
     props.extraRows
@@ -466,7 +471,8 @@ export function tableRenderModel<TRow>(
     props.extraRows,
     visualIds,
     cellsByRow,
-    leadingCells
+    leadingCells,
+    assembly.extraCoveredTableSlots
   );
   return {
     columns,
@@ -515,7 +521,9 @@ export function useSummaryCells<TRow>(
     ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined,
   rows: readonly TRow[]
 ): Partial<Record<string, ReactNode>> | undefined {
-  const fromView = incrementalViewOf(rows)?.aggregates;
+  const fromView = incrementalViewOf<{
+    aggregates?: Partial<Record<string, ReactNode>>;
+  }>(rows)?.aggregates;
   const builderRef = useRef(summaryRow);
   builderRef.current = summaryRow;
   const enabled = summaryRow !== undefined && fromView === undefined;

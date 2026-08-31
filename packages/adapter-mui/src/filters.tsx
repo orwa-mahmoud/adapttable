@@ -1,5 +1,8 @@
 import {
   ACTIVE_FILTER_CHIPS,
+  extendFeature,
+  FILTER_DRAWER,
+  FILTER_POPOVER,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   slotRender,
@@ -15,6 +18,8 @@ import { Stack } from "@mui/material";
 
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
+import { FilterDrawer } from "./components/FilterDrawer";
+import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 
 /**
@@ -57,13 +62,14 @@ function FiltersForm({
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
 ): TableFeature<TRow> {
-  return {
-    ...coreFilters(defs),
-    renders: [
-      slotRender(FILTERS_FORM, (props) => <FiltersForm {...props} />),
-      slotRender(ACTIVE_FILTER_CHIPS, (props) => <Chips {...props} />),
-    ],
-  };
+  return extendFeature(coreFilters(defs), [
+    slotRender(FILTERS_FORM, (props) => <FiltersForm {...props} />),
+    slotRender(ACTIVE_FILTER_CHIPS, (props) => <Chips {...props} />),
+    slotRender(FILTER_DRAWER, (props) => <FilterDrawer {...props} />),
+    slotRender(FILTER_POPOVER, (props) => (
+      <FilterPopover {...props} anchorEl={props.anchorEl ?? null} />
+    )),
+  ]);
 }
 
 /**

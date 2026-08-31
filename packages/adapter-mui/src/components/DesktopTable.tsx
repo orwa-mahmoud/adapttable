@@ -40,18 +40,19 @@ import {
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { useCallback, useMemo, useRef } from "react";
 
-import { ColumnSelectCheckbox } from "./ColumnSelectCheckbox";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { FillHandle } from "./FillHandle";
-import { GroupHeaderRow } from "./GroupHeader";
 import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./kitControls";
+  OptionalColumnGroupToggle,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./featureSlots";
+import { cellDisplay } from "./DisplayCell";
 import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
@@ -152,36 +153,6 @@ export function useStableToggle(
   return useCallback((id: string) => ref.current?.toggle(id), []);
 }
 
-/** Inline chevron pointing at the reading end; rotates down when open. */
-export function ExpandChevron({
-  expanded,
-  dir,
-}: Readonly<{ expanded: boolean; dir?: "ltr" | "rtl" }>) {
-  let transform: string | undefined;
-  if (expanded) transform = "rotate(90deg)";
-  else if (dir === "rtl") transform = "rotate(180deg)";
-  return (
-    <Box
-      component="span"
-      aria-hidden
-      sx={{ display: "inline-flex", transition: "transform 150ms", transform }}
-    >
-      <svg
-        width="1em"
-        height="1em"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M9 6l6 6-6 6" />
-      </svg>
-    </Box>
-  );
-}
-
 function muiAlign(
   align: "start" | "center" | "end" | undefined
 ): "start" | "center" | "end" {
@@ -271,7 +242,7 @@ function DesktopRowBase<TRow>(
             sx={PAPER_SX}
             style={{ ...edge(hasStartPin), ...edgeRowPin }}
           >
-            <ExpandToggle
+            <OptionalExpandToggle
               id={id}
               expanded={Boolean(expanded)}
               onToggle={onToggleExpand}
@@ -291,7 +262,7 @@ function DesktopRowBase<TRow>(
               ...edgeRowPin,
             }}
           >
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -349,7 +320,7 @@ function DesktopRowBase<TRow>(
               )}
               {...focusProps}
             >
-              <TreeCell
+              <OptionalTreeCell
                 entry={treeEntry}
                 columnKey={column.key}
                 treeColumnKey={treeKey}
@@ -359,7 +330,7 @@ function DesktopRowBase<TRow>(
                 }}
                 onToggle={onToggleTree}
               >
-                <EditableDataCell
+                <OptionalEditableCell
                   editing={editing}
                   row={row}
                   column={column}
@@ -370,9 +341,10 @@ function DesktopRowBase<TRow>(
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
+                  display={cellDisplay(column, row, focusIndex)}
                 />
-              </TreeCell>
-              <FillHandle
+              </OptionalTreeCell>
+              <OptionalFillHandle
                 focus={gridFocus}
                 windowIndex={focusIndex}
                 col={columnIndex}
@@ -395,7 +367,7 @@ function DesktopRowBase<TRow>(
             }}
           >
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
@@ -488,7 +460,7 @@ function LeafHeader<TRow>({
         <span title={column.headerTooltip}>{leaf.caption}</span>
       )}
       {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-        <ColumnSelectCheckbox
+        <OptionalColumnSelect
           label={leaf.columnSelectAriaLabel}
           checked={leaf.columnCheckboxChecked}
           onToggle={leaf.onToggleColumn}
@@ -500,7 +472,7 @@ function LeafHeader<TRow>({
         </span>
       ) : null}
       {leaf.headerDef ? (
-        <FilterHeaderTrigger
+        <OptionalFilterHeader
           def={leaf.headerDef}
           source={source}
           labels={labels}
@@ -627,7 +599,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (
-            <ColumnGroupToggle
+            <OptionalColumnGroupToggle
               cell={cell.cell}
               labels={labels}
               onToggle={props.onToggleColumnGroup}
@@ -798,7 +770,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
             }
             if (slot.kind === "group") {
               return (
-                <GroupHeaderRow
+                <OptionalGroupHeaderRow
                   key={slot.key}
                   entry={slot.entry}
                   columns={columns}

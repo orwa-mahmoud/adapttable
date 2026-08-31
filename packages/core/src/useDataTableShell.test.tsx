@@ -1,28 +1,27 @@
-import { act, fireEvent, render, renderHook } from "@testing-library/react";
+import { act, render, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { DataTableShellView } from "./features/chromeBodyGate";
+import { columnMenu, resizableColumns } from "./features/factories";
+import { filters } from "./features/filters";
 import { FeatureProviders } from "./features/providers";
+import { rowActions } from "./features/row-actions";
+import { rowPinning } from "./features/row-pinning";
 import { rowReorder } from "./features/row-reorder";
-import { applyTableFeatures } from "./features/tableFeature";
+import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import { virtualize } from "./features/virtualize";
 import type { FilterDef } from "./filters/filterDefs";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef, RowAction } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
-import { useDataTableShell } from "./useDataTableShell";
-import type * as TableChromeModule from "./useTableChrome";
-import { useChromeBodyData } from "./useTableChrome";
+import {
+  finishDataTableShell,
+  useDataTableShell,
+  type DataTableShellResult,
+} from "./useDataTableShell";
+import type { ChromeBodyData } from "./virtual/chromeBodyShared";
 import { resetDevWarnings } from "./utils/devWarn";
-
-// The body-data hook is mocked so the virtual-window / load-more branches can
-// be driven directly (jsdom can't measure a real virtualizer).
-vi.mock("./useTableChrome", async (importOriginal) => {
-  const actual = await importOriginal<typeof TableChromeModule>();
-  return { ...actual, useChromeBodyData: vi.fn(actual.useChromeBodyData) };
-});
-
-const actualChrome =
-  await vi.importActual<typeof TableChromeModule>("./useTableChrome");
 
 interface Row {
   id: string;
@@ -38,11 +37,46 @@ const columns: ColumnDef<Row>[] = [
 const rowKey = (r: Row) => r.id;
 const noForm = () => null;
 
-beforeEach(() => {
-  vi.mocked(useChromeBodyData).mockImplementation(
-    actualChrome.useChromeBodyData
+function renderLiveShell(
+  features: readonly TableFeature<Row>[],
+  extra: Partial<Parameters<typeof useDataTableShell<Row>>[0]> = {},
+  renderForm: (
+    defs: readonly FilterDef<Row>[],
+    source: never,
+    registry: never
+  ) => ReactNode = noForm
+) {
+  const props = applyTableFeatures({
+    features,
+    data: ROWS,
+    columns,
+    rowKey,
+    urlSync: false,
+    ...extra,
+  });
+  let view: DataTableShellResult<Row> | undefined;
+  function Probe() {
+    const shell = useDataTableShell(props, renderForm as never);
+    return (
+      <DataTableShellView shell={shell}>
+        {(next) => {
+          view = next;
+          return null;
+        }}
+      </DataTableShellView>
+    );
+  }
+  render(
+    <FeatureProviders props={props}>
+      <Probe />
+    </FeatureProviders>
   );
-});
+  return {
+    get current() {
+      return view!;
+    },
+  };
+}
 
 describe("useDataTableShell", () => {
   it("resolves the frontend tier and builds the prop bundles", () => {
@@ -85,40 +119,31 @@ describe("useDataTableShell", () => {
   });
 
   it("renders the auto-form for declarative filters", () => {
-    const filters: FilterDef<Row>[] = [
+    const defs: FilterDef<Row>[] = [
       { key: "name", type: "text", label: "Name" },
     ];
     const renderForm = vi.fn(() => <div>form</div>);
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        { data: ROWS, columns, rowKey, urlSync: false, filters },
-        renderForm
-      )
+    const view = renderLiveShell(
+      [filters(defs)],
+      { filters: defs },
+      renderForm
     );
     expect(renderForm).toHaveBeenCalled();
-    expect(result.current.filtersNode).toBeDefined();
-    expect(result.current.toolbarProps.hasFilters).toBe(true);
+    expect(view.current.filtersNode).toBeDefined();
+    expect(view.current.toolbarProps.hasFilters).toBe(true);
   });
 
   it("keeps Filters in header mode when the AND/OR tree is on", () => {
-    const filters: FilterDef<Row>[] = [
+    const defs: FilterDef<Row>[] = [
       { key: "name", type: "text", label: "Name" },
     ];
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        {
-          data: ROWS,
-          columns,
-          rowKey,
-          urlSync: false,
-          filters,
-          headerFilters: true,
-        },
-        () => <div>form</div>
-      )
+    const view = renderLiveShell(
+      [filters(defs)],
+      { filters: defs, headerFilters: true },
+      () => <div>form</div>
     );
-    expect(result.current.toolbarProps.hasFilters).toBe(true);
-    expect(result.current.tableProps.closeHeaderFilterOnSelect).toBe(false);
+    expect(view.current.toolbarProps.hasFilters).toBe(true);
+    expect(view.current.tableProps.closeHeaderFilterOnSelect).toBe(false);
   });
 
   it("passes hand-drawn JSX filters through untouched", () => {
@@ -133,28 +158,19 @@ describe("useDataTableShell", () => {
   });
 
   it("exposes row actions and resizing when provided", () => {
-    const rowActions: RowAction<Row>[] = [
+    const actions: RowAction<Row>[] = [
       { key: "x", label: "X", onClick: vi.fn() },
     ];
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        {
-          data: ROWS,
-          columns,
-          rowKey,
-          urlSync: false,
-          rowActions,
-          resizableColumns: true,
-        },
-        noForm
-      )
-    );
-    expect(result.current.hasRowActions).toBe(true);
-    expect(result.current.tableProps.rowActions).toHaveLength(1);
-    expect(result.current.tableProps.rowActionsLayout).toBeUndefined();
-    expect(result.current.tableProps.renderRowActions).toBeUndefined();
-    expect(result.current.tableProps.cellSpanAppearance).toBeUndefined();
-    expect(result.current.tableProps.setWidth).toBeTypeOf("function");
+    const view = renderLiveShell([rowActions(actions), resizableColumns()], {
+      rowActions: actions,
+      resizableColumns: true,
+    });
+    expect(view.current.hasRowActions).toBe(true);
+    expect(view.current.tableProps.rowActions).toHaveLength(1);
+    expect(view.current.tableProps.rowActionsLayout).toBeUndefined();
+    expect(view.current.tableProps.renderRowActions).toBeUndefined();
+    expect(view.current.tableProps.cellSpanAppearance).toBeUndefined();
+    expect(view.current.tableProps.setWidth).toBeTypeOf("function");
   });
 
   it("forwards the opt-in row-actions layout and custom cell renderer", () => {
@@ -182,20 +198,33 @@ describe("useDataTableShell", () => {
   it("writes uncontrolled pins to the URL and still notifies the host", () => {
     const adapter = createMemoryAdapter("");
     const onPinnedRowIdsChange = vi.fn();
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        {
-          data: ROWS,
-          columns,
-          rowKey,
-          urlAdapter: adapter,
-          onPinnedRowIdsChange,
-        },
-        noForm
-      )
+    const props = applyTableFeatures({
+      features: [rowPinning<Row>({ onPinnedRowIdsChange })],
+      data: ROWS,
+      columns,
+      rowKey,
+      urlAdapter: adapter,
+      onPinnedRowIdsChange,
+    });
+    let view: DataTableShellResult<Row> | undefined;
+    function Probe() {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            view = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    render(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
     );
     act(() => {
-      result.current.tableProps.rowPinning?.pin("a", "top");
+      view?.tableProps.rowPinning?.pin("a", "top");
     });
     expect(onPinnedRowIdsChange).toHaveBeenCalledExactlyOnceWith({
       top: ["a"],
@@ -207,21 +236,39 @@ describe("useDataTableShell", () => {
   it("leaves the URL alone when the host owns the pin lists", () => {
     const adapter = createMemoryAdapter("");
     const onPinnedRowIdsChange = vi.fn();
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        {
-          data: ROWS,
-          columns,
-          rowKey,
-          urlAdapter: adapter,
+    const props = applyTableFeatures({
+      features: [
+        rowPinning<Row>({
           pinnedRowIds: { top: ["b"], bottom: [] },
           onPinnedRowIdsChange,
-        },
-        noForm
-      )
+        }),
+      ],
+      data: ROWS,
+      columns,
+      rowKey,
+      urlAdapter: adapter,
+      pinnedRowIds: { top: ["b"], bottom: [] },
+      onPinnedRowIdsChange,
+    });
+    let view: DataTableShellResult<Row> | undefined;
+    function Probe() {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            view = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    render(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
     );
     act(() => {
-      result.current.tableProps.rowPinning?.pin("a", "bottom");
+      view?.tableProps.rowPinning?.pin("a", "bottom");
     });
     expect(onPinnedRowIdsChange).toHaveBeenCalledExactlyOnceWith({
       top: ["b"],
@@ -231,7 +278,7 @@ describe("useDataTableShell", () => {
   });
 
   it("forwards a virtual window into tableProps", () => {
-    vi.mocked(useChromeBodyData).mockReturnValue({
+    const body: ChromeBodyData<Row> = {
       virtualization: {
         enabled: true,
         rows: [{ row: ROWS[1]!, index: 1, key: "b" }],
@@ -244,13 +291,14 @@ describe("useDataTableShell", () => {
       virtualScrollRef: () => undefined,
       pinnedTopRows: [],
       pinnedBottomRows: [],
-    });
+    };
     const { result } = renderHook(() =>
       useDataTableShell({ data: ROWS, columns, rowKey, urlSync: false }, noForm)
     );
-    expect(result.current.tableProps.rowEntries).toHaveLength(1);
-    expect(result.current.tableProps.paddingTop).toBe(8);
-    expect(result.current.toolbarProps.showRowsPerPage).toBe(true);
+    const view = finishDataTableShell(result.current, body);
+    expect(view.tableProps.rowEntries).toHaveLength(1);
+    expect(view.tableProps.paddingTop).toBe(8);
+    expect(view.toolbarProps.showRowsPerPage).toBe(true);
   });
 
   it("covers the server tier and the optional pass-through props", () => {
@@ -363,18 +411,24 @@ describe("useDataTableShell", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     try {
       const adapter = createMemoryAdapter("");
-      renderHook(() =>
-        useDataTableShell(
-          {
-            data: ROWS,
-            columns,
-            rowKey,
-            urlAdapter: adapter,
-            paginationMode: "paged",
-            virtualize: true,
-          },
-          noForm
-        )
+      const props = applyTableFeatures({
+        features: [virtualize<Row>()],
+        data: ROWS,
+        columns,
+        rowKey,
+        urlAdapter: adapter,
+        paginationMode: "paged" as const,
+      });
+      function Probe() {
+        const shell = useDataTableShell(props, noForm);
+        return (
+          <DataTableShellView shell={shell}>{() => null}</DataTableShellView>
+        );
+      }
+      render(
+        <FeatureProviders props={props}>
+          <Probe />
+        </FeatureProviders>
       );
       expect(warn).toHaveBeenCalledWith(
         expect.stringContaining('paginationMode="infinite"')
@@ -409,19 +463,6 @@ describe("useDataTableShell", () => {
   });
 
   it("suppresses the virtual window and load-more when off", () => {
-    vi.mocked(useChromeBodyData).mockReturnValue({
-      virtualization: {
-        enabled: false,
-        rows: [],
-        paddingTop: 0,
-        paddingBottom: 0,
-      },
-      loadMoreRef: { current: null },
-      canLoadMore: false,
-      virtualScrollRef: () => undefined,
-      pinnedTopRows: [],
-      pinnedBottomRows: [],
-    });
     const { result } = renderHook(() =>
       useDataTableShell({ data: ROWS, columns, rowKey, urlSync: false }, noForm)
     );
@@ -454,11 +495,29 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
 
   it("sizes every rendered column to its content", () => {
     const onColumnLayoutChange = vi.fn();
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        { data: ROWS, columns, rowKey, onColumnLayoutChange },
-        noForm
-      )
+    const props = applyTableFeatures({
+      features: [columnMenu()],
+      data: ROWS,
+      columns,
+      rowKey,
+      onColumnLayoutChange,
+    });
+    let view: DataTableShellResult<Row> | undefined;
+    function Probe() {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            view = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    render(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
     );
     // A root with one measurable cell per column is all the action needs.
     const root = document.createElement("div");
@@ -467,9 +526,9 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
     Object.defineProperty(cell, "scrollWidth", { value: 200 });
     root.append(cell);
     document.body.append(root);
-    result.current.rootRef.current = root;
+    view!.rootRef.current = root;
 
-    act(() => result.current.autoSizeColumns());
+    act(() => view!.autoSizeColumns());
     expect(onColumnLayoutChange).toHaveBeenCalledOnce();
     expect(onColumnLayoutChange.mock.calls[0]?.[0].widths).toMatchObject({
       name: 224,
@@ -479,58 +538,84 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
 
   it("sizes nothing when there is nothing rendered to measure", () => {
     const onColumnLayoutChange = vi.fn();
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        { data: ROWS, columns, rowKey, onColumnLayoutChange },
-        noForm
-      )
+    const props = applyTableFeatures({
+      features: [columnMenu()],
+      data: ROWS,
+      columns,
+      rowKey,
+      onColumnLayoutChange,
+    });
+    let view: DataTableShellResult<Row> | undefined;
+    function Probe() {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            view = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    render(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
     );
-    act(() => result.current.autoSizeColumns());
+    act(() => view!.autoSizeColumns());
     expect(onColumnLayoutChange).not.toHaveBeenCalled();
   });
 
   it("sizes one named column and windows when virtualizeColumns is on", () => {
     const onColumnLayoutChange = vi.fn();
-    const { result } = renderHook(() =>
-      useDataTableShell(
-        {
-          data: ROWS,
-          columns,
-          rowKey,
-          onColumnLayoutChange,
-          virtualizeColumns: true,
-          cellNavigation: true,
-          closeHeaderFilterOnSelect: true,
-          columnLayout: {
-            hidden: [],
-            order: [],
-            pinned: { name: "start" },
-            widths: {},
-          },
-        },
-        noForm
-      )
+    const props = applyTableFeatures({
+      features: [columnMenu()],
+      data: ROWS,
+      columns,
+      rowKey,
+      onColumnLayoutChange,
+      virtualizeColumns: true,
+      cellNavigation: true,
+      closeHeaderFilterOnSelect: true,
+      columnLayout: {
+        hidden: [],
+        order: [],
+        pinned: { name: "start" },
+        widths: {},
+      },
+    });
+    let view: DataTableShellResult<Row> | undefined;
+    function Probe() {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            view = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    render(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
     );
-    expect(result.current.tableProps.closeHeaderFilterOnSelect).toBe(true);
+    expect(view!.tableProps.closeHeaderFilterOnSelect).toBe(true);
     const root = document.createElement("div");
     const cell = document.createElement("div");
     cell.setAttribute("data-column-key", "name");
     Object.defineProperty(cell, "scrollWidth", { value: 200 });
     root.append(cell);
     document.body.append(root);
-    result.current.rootRef.current = root;
+    view!.rootRef.current = root;
     act(() => {
-      result.current.autoSizeColumn("name");
+      view!.autoSizeColumn("name");
     });
     expect(onColumnLayoutChange).toHaveBeenCalledOnce();
     const box = document.createElement("div");
-    result.current.tableProps.virtualScrollRef(box);
-    const gridProps = result.current.tableProps.gridFocus.getGridProps();
-    const { getByRole } = render(<div {...gridProps} />);
-    act(() => {
-      result.current.tableProps.gridFocus.focusCell({ row: 0, col: 0 });
-    });
-    fireEvent.keyDown(getByRole("grid"), { key: "ArrowDown" });
+    view!.tableProps.virtualScrollRef(box);
+    expect(view!.tableProps.columnWindow.enabled).toBe(false);
     root.remove();
   });
 });

@@ -363,15 +363,19 @@ export {
   type UseDensityUrlStateResult,
 } from "./url/useDensityUrlState";
 export {
-  type ChromeBodyData,
   type FeatureNotice,
   type FeatureNoticeKind,
   type TableChrome,
-  useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
   useTableChrome,
 } from "./useTableChrome";
+export type { ChromeBodyData } from "./virtual/chromeBodyShared";
+export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
+export {
+  useChromeBodyData,
+  useVirtualChromeBodyData,
+} from "./virtual/useVirtualChromeBodyData";
 export { humanizeKey } from "./utils/humanizeKey";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { getPath } from "./utils/path";
@@ -571,11 +575,15 @@ export { useSearchInput } from "./useDataTable/useSearchInput";
 
 /* ── Virtualization ───────────────────────────────────────────────── */
 export {
-  type TableVirtualization,
   useTableVirtualization,
   type UseTableVirtualizationOptions,
-  windowGroupedEntries,
 } from "./virtual/useTableVirtualization";
+export {
+  type TableVirtualization,
+  type VirtualItemMeta,
+  type VirtualTableRow,
+  windowGroupedEntries,
+} from "./virtual/virtualTableModel";
 
 /* ── Utils ─────────────────────────────────────────────────────────── */
 export { mergeProps, type Props } from "./utils/mergeProps";
@@ -944,4 +952,3 @@ export type { FeatureNoticeAppearance } from "./state/featureNotices";
 export type { SearchInputState } from "./useDataTable/useSearchInput";
 export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";
-export type { VirtualTableRow } from "./virtual/useTableVirtualization";

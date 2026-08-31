@@ -69,6 +69,10 @@ import {
   type RowPatchEvent,
   type RowPatchLog,
 } from "./patch";
+import {
+  attachIncrementalView as attachView,
+  incrementalViewOf as viewOf,
+} from "./incrementalView";
 
 export { rowPatchLog } from "./patch";
 
@@ -183,7 +187,6 @@ type FilterDelta<TRow> =
   | { kind: "replace"; id: string; prev: TRow; next: TRow };
 
 const STATES = new WeakMap<IncrementalView<unknown>, ViewState<unknown>>();
-const VIEWS = new WeakMap<readonly unknown[], IncrementalView<unknown>>();
 
 /**
  * The snapshot {@link createIncrementalView} attached to a derived row
@@ -196,7 +199,7 @@ const VIEWS = new WeakMap<readonly unknown[], IncrementalView<unknown>>();
 export function incrementalViewOf<TRow>(
   rows: readonly TRow[]
 ): IncrementalView<TRow> | undefined {
-  return VIEWS.get(rows) as IncrementalView<TRow> | undefined;
+  return viewOf<IncrementalView<TRow>>(rows);
 }
 
 /**
@@ -210,7 +213,7 @@ export function attachIncrementalView<TRow>(
   rows: readonly TRow[],
   view: IncrementalView<TRow>
 ): void {
-  VIEWS.set(rows, view);
+  attachView(rows, view);
 }
 
 /**
@@ -455,9 +458,9 @@ function publish<TRow>(
     aggregates,
   };
   STATES.set(view, state as ViewState<unknown>);
-  VIEWS.set(rows, view);
-  VIEWS.set(filtered, view);
-  VIEWS.set(sorted, view);
+  attachView(rows, view);
+  attachView(filtered, view);
+  attachView(sorted, view);
   return view;
 }
 

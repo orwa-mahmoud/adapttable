@@ -7,7 +7,7 @@ import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -43,6 +43,7 @@ function mockVirtualWindow(top: number, bottom: number, indices = [0, 1]) {
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: indices

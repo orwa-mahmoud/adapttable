@@ -16,7 +16,6 @@ import {
   resolveColumnHeader,
 } from "../columns/columnHeader";
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
-import { columnResizeHandleProps } from "../columns/columnResize";
 import { fittedTableStyle } from "../columns/columnSizing";
 import { pinnedColumnWidth, tableMinWidth } from "../columns/columnWidths";
 import type { HtmlGroupedHeaderCell } from "../columns/headerGroups";
@@ -27,45 +26,14 @@ import {
   type PinLeads,
   pinnedCellStyle,
   type PinOffset,
-} from "../columns/useColumnLayout";
+} from "../columns/columnLayoutModel";
 import type { EditableCellEditing } from "../editing/editableCellController";
-import {
-  rowEditingSignature,
-  rowIsDirty,
-} from "../editing/editableCellController";
 import type { FilterDef } from "../filters/filterDefs";
-import { filterDefForColumn } from "../filters/FilterHeaderRow";
-import { columnSelectLabel } from "../focus/ColumnSelectCheckbox";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
-import { rowFlashSignature } from "../rows/cellFlashPaint";
 import type { BodyCell } from "../rows/cellSpan";
-import {
-  bodyCellsHaveRowSpan,
-  cellsForRow,
-  rowSpanSignature,
-} from "../rows/cellSpan";
-import {
-  extraHostFillStyle,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-  isExtraEntry,
-} from "../rows/extraRows";
-import {
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
-  useOffsetHeight,
-} from "../rows/pinnedRowChrome";
 import { rowClickProps } from "../rows/rowClickProps";
 import type { RowPinSide } from "../rows/rowPinning";
-import { rowPinSignature } from "../rows/rowPinning";
-import {
-  REORDER_COLUMN_WIDTH,
-  rowReorderDropStyle,
-  rowReorderSignature,
-} from "../rows/rowReorder";
-import { resolveRowStyle, rowStyleSignature } from "../rows/rowStyle";
 import {
   type SharedTableRenderProps,
   type TableRenderModel,
@@ -73,7 +41,30 @@ import {
   useSummaryCells,
 } from "../tableRenderProps";
 import type { TreeEntry } from "../tree/treeRows";
-import { bodyRowEntries } from "../tree/treeRows";
+import {
+  type AssemblyFns,
+  REORDER_COLUMN_WIDTH,
+  bodyCellsHaveRowSpan,
+  bodyRowEntries,
+  cellsForRow,
+  columnSelectLabel,
+  filterDefForColumn,
+  isExtraEntry,
+  pinnedRowCellStyle,
+  pinnedRowPart,
+  pinnedRowSticky,
+  resolveAssembly,
+  resolveRowStyle,
+  rowEditingSignature,
+  rowFlashSignature,
+  rowIsDirty,
+  rowPinSignature,
+  rowReorderDropStyle,
+  rowReorderSignature,
+  rowSpanSignature,
+  rowStyleSignature,
+} from "./leanAssembly";
+import { useOffsetHeight } from "./useOffsetHeight";
 import type { ColumnDef, TableLabels } from "../types";
 import type {
   CellElementProps,
@@ -934,6 +925,8 @@ interface DesktopBodySlotsContext<TRow> {
   pinnedBottomRows: readonly TRow[];
   extraRows: SharedTableRenderProps<TRow>["extraRows"];
   extraFill: (key: string) => CSSProperties | undefined;
+  insertExtraRows: AssemblyFns<TRow>["insertExtraRows"];
+  insertExtrasBeforeRows: AssemblyFns<TRow>["insertExtrasBeforeRows"];
   paddingTop: number;
   paddingBottom: number;
   grouping: SharedTableRenderProps<TRow>["grouping"];
@@ -1099,7 +1092,7 @@ function appendPinnedDesktopSlots<TRow>(
   pinnedRows: readonly TRow[],
   side: RowPinSide
 ): void {
-  const { extraRows, extraFill, wiring } = ctx;
+  const { extraRows, extraFill, insertExtrasBeforeRows, wiring } = ctx;
   const { getRowId, columnSpan, rows } = wiring;
   for (const slot of insertExtrasBeforeRows(pinnedRows, extraRows, getRowId)) {
     if (isExtraEntry(slot)) {
@@ -1163,7 +1156,7 @@ function appendScrollDesktopSlots<TRow>(
   bodySlots: DesktopBodySlot<TRow>[],
   ctx: DesktopBodySlotsContext<TRow>
 ): void {
-  const { extraRows, extraFill, entries, wiring } = ctx;
+  const { extraRows, extraFill, insertExtraRows, entries, wiring } = ctx;
   const { getRowId, columnSpan, tree } = wiring;
   for (const slot of insertExtraRows(
     bodyRowEntries(entries, tree),
@@ -1288,7 +1281,9 @@ export function useDesktopTableAssembly<TRow>(
     rowActionsLayout,
     cellSpanAppearance,
     renderRowActions,
+    assembly,
   } = props;
+  const assemblyFns = resolveAssembly(assembly);
 
   const model = tableRenderModel({
     table,
@@ -1308,6 +1303,7 @@ export function useDesktopTableAssembly<TRow>(
     tree,
     grouping,
     extraRows,
+    assembly,
   });
   const {
     columns,
@@ -1323,7 +1319,7 @@ export function useDesktopTableAssembly<TRow>(
 
   const pinRowSticky = !bodyCellsHaveRowSpan(cellsByRow);
   const extraFill = (key: string) =>
-    extraHostFillStyle(key, extraRows, rows, getRowId, rowStyle);
+    assemblyFns.extraHostFillStyle(key, extraRows, rows, getRowId, rowStyle);
   const [theadRef, headerHeight] = useOffsetHeight();
   const [headerRowRef] = useOffsetHeight();
   const stickActions = showActions && actionsPinned;
@@ -1501,6 +1497,8 @@ export function useDesktopTableAssembly<TRow>(
     pinnedBottomRows,
     extraRows,
     extraFill,
+    insertExtraRows: assemblyFns.insertExtraRows,
+    insertExtrasBeforeRows: assemblyFns.insertExtrasBeforeRows,
     paddingTop,
     paddingBottom,
     grouping,
@@ -1571,7 +1569,7 @@ export function useDesktopTableAssembly<TRow>(
       headerDef,
       pinSide: pinOffset?.(column.key)?.side,
       resizeHandleProps: setWidth
-        ? columnResizeHandleProps(
+        ? assemblyFns.columnResizeHandleProps(
             column.key,
             setWidth,
             `${resizeLabel}: ${columnName}`

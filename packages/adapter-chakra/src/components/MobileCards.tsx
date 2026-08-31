@@ -34,12 +34,17 @@ import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
 import { subtleText } from "../styles";
 import { type SharedProps } from "./DesktopTable";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { GroupHeaderCard } from "./GroupHeader";
-import { RowEditActions, RowReorderButtons, TreeToggle } from "./kitControls";
 import { Checkbox } from "./primitives";
 import { RowActionButtons } from "./RowActionButtons";
+import {
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
+} from "./featureSlots";
+import { cellDisplay } from "./DisplayCell";
 
 /** Join the static class hook with a conditional per-row class. */
 function joinClasses(
@@ -206,23 +211,18 @@ function MobileCardBase<TRow>({
     column,
     label: resolveMobileLabel(column),
     value: (
-      <EditableDataCell
+      <OptionalEditableCell
         editing={editing}
         row={row}
         column={column}
         rowId={id}
+        rowIndex={index}
         rows={rows}
         columns={columns}
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={
-          column.Cell ? (
-            <column.Cell row={row} rowIndex={index} />
-          ) : (
-            column.accessor?.(row)
-          )
-        }
+        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -248,7 +248,7 @@ function MobileCardBase<TRow>({
     >
       <Card.Body p={compact ? 3 : undefined}>
         {treeEntry && (
-          <TreeToggle
+          <OptionalTreeToggle
             entry={treeEntry}
             labels={labels}
             onToggle={onToggleTree ?? (() => undefined)}
@@ -264,11 +264,13 @@ function MobileCardBase<TRow>({
         )}
         {onToggleExpand && (
           <Box mb={2}>
-            <ExpandToggle
-              open={expanded}
+            <OptionalExpandToggle
+              id={id}
+              expanded={Boolean(expanded)}
+              onToggle={onToggleExpand}
               dir={dir}
-              labels={labels}
-              onToggle={() => onToggleExpand(id)}
+              expandLabel={labels.expandRow}
+              collapseLabel={labels.collapseRow}
             />
           </Box>
         )}
@@ -292,7 +294,7 @@ function MobileCardBase<TRow>({
               </Box>
             ))}
         {rowReorder && (
-          <RowReorderButtons
+          <OptionalRowReorderButtons
             reorder={rowReorder}
             labels={labels}
             localIndex={index}
@@ -307,7 +309,7 @@ function MobileCardBase<TRow>({
           </Box>
         )}
         {editing?.rowEditing && (
-          <RowEditActions
+          <OptionalRowEditActions
             rowEditing={editing.rowEditing}
             row={row}
             rowId={id}
@@ -475,14 +477,13 @@ export function MobileCards<TRow>({
               entry.kind === "groupMore"
             ) {
               return (
-                <GroupHeaderCard
+                <OptionalGroupHeaderCard
                   key={entry.key}
                   entry={entry}
-                  columns={columns}
+                  columns={columns as never}
                   selection={selection}
                   labels={labels}
-                  dir={dir}
-                  accentColor={accentColor}
+                  compact={compact}
                   onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
                   onShowMore={grouping.showMore}
                 />

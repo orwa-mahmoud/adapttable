@@ -11,11 +11,8 @@ import {
 } from "../index";
 import { renderMui } from "../test-utils";
 import { FilterTreeBuilder } from "./FilterTreeBuilder";
-import {
-  FilterHeaderControl,
-  FilterHeaderRow,
-  FilterHeaderTrigger,
-} from "./kitControls";
+import { FilterHeaderTrigger } from "./FilterHeaderTrigger";
+import { FilterHeaderControl, FilterHeaderRow } from "./kitControls";
 
 interface Row {
   name: string;

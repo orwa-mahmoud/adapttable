@@ -4,12 +4,13 @@ import {
   ExportAnnouncer,
   SearchIcon,
   type ToolbarChromeProps,
+  FeatureSlot,
+  FILTER_POPOVER,
 } from "@adapttable/core/adapter";
 import { Badge, Button, HStack, Input, InputGroup } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 
 import { FiltersIcon } from "../icons";
-import { FilterPopover } from "./FilterPopover";
 import { NativeSelect } from "./primitives";
 
 export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
@@ -147,23 +148,23 @@ export function Toolbar<TRow>({
           </NativeSelect>
         )}
         {toolbar}
-        {hasFilters &&
-          (filtersMode === "popover" ? (
-            <FilterPopover
-              open={filtersOpen}
-              onClose={onCloseFilters}
-              filters={filters}
-              activeFilterCount={activeFilterCount}
-              onClearFilters={onClearFilters}
-              labels={labels}
-              accentColor={accentColor}
-              dir={dir}
-            >
-              {filtersButton}
-            </FilterPopover>
-          ) : (
-            filtersButton
-          ))}
+        {hasFilters && filtersMode === "popover" ? (
+          <FeatureSlot
+            slot={FILTER_POPOVER}
+            props={{
+              open: filtersOpen,
+              onClose: onCloseFilters,
+              filters,
+              activeFilterCount,
+              onClearFilters,
+              labels,
+              dir,
+              children: filtersButton,
+            }}
+          />
+        ) : (
+          hasFilters && filtersButton
+        )}
         {savedViewsMenu}
         {columnMenu}
         {onUndo && onRedo && (

@@ -43,6 +43,7 @@ vi.mock("@adapttable/core/adapter", async () => {
       }
 
       return {
+        skipChromeBody: true,
         chrome: {
           body: mockShellState.body ?? "desktop",
           emptyVariant: mockShellState.emptyVariant ?? "noData",

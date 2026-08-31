@@ -17,7 +17,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { FilterPopover } from "./components/FilterPopover";
 import { LoadingState } from "./components/TableSkeleton";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -54,9 +54,10 @@ const actualCore = await vi.importActual<typeof AdapterModule>(
 type Shell = ReturnType<typeof actualCore.useDataTableShell>;
 
 function mockShell(patch: (real: Shell) => Shell) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) =>
-    patch(actualCore.useDataTableShell(props, render))
-  );
+  vi.mocked(useDataTableShell).mockImplementation((props, render) => ({
+    ...patch(actualCore.useDataTableShell(props, render)),
+    skipChromeBody: true,
+  }));
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;

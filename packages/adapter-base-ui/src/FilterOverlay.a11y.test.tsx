@@ -28,7 +28,7 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef, DataTableProps } from "./index";
 
 interface Person {

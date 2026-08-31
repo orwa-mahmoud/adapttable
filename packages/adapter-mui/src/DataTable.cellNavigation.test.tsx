@@ -9,7 +9,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -36,6 +37,7 @@ const table = (extra?: { cellNavigation?: boolean }) => (
       rowKey={(r) => r.id}
       urlSync={false}
       forceMobile={false}
+      features={extra?.cellNavigation ? [cellNavigation<Row>()] : undefined}
       {...extra}
     />
   </>

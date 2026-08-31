@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 
@@ -36,9 +36,8 @@ describe.each(["prop", "feature"] as const)(
           columns={COLS}
           rowKey={(r) => r.id}
           urlSync={false}
-          {...(path === "feature"
-            ? { features: [grouping(["team", "status"])] }
-            : { groupBy: ["team", "status"] })}
+          groupBy={path === "prop" ? ["team", "status"] : undefined}
+          features={[grouping(["team", "status"])]}
         />
       );
     /** Group headers in document order, as plain text. */

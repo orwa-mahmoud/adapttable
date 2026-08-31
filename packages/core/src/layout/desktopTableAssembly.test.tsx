@@ -3,6 +3,8 @@ import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { defaultConfirm } from "../actions/confirm";
+import { columnResizeHandleProps } from "../columns/columnResize";
+import { insertExtraRows, insertExtrasBeforeRows } from "../rows/extraRows";
 import { REORDER_COLUMN_WIDTH } from "../rows/rowReorder";
 import { useFrontendData } from "../source/useFrontendData";
 import { tableRenderModel } from "../tableRenderProps";
@@ -265,6 +267,7 @@ describe("useDesktopTableAssembly", () => {
         getRowId: chrome.getRowId,
         confirm: defaultConfirm,
         setWidth: () => undefined,
+        assembly: { columnResizeHandleProps },
         headerFilters: true,
         filterDefs: [{ key: "name", type: "text" }],
       });
@@ -287,6 +290,10 @@ describe("useDesktopTableAssembly", () => {
         confirm: defaultConfirm,
         paddingTop: 40,
         paddingBottom: 20,
+        assembly: {
+          insertExtraRows,
+          insertExtrasBeforeRows,
+        },
         extraRows: [
           {
             key: "note",
@@ -536,6 +543,10 @@ describe("useDesktopTableAssembly coverage paths", () => {
             key === "name" ? { side: "start", inset: 0 } : undefined,
           pinnedTopRows: [ROWS[0]!],
           pinnedBottomRows: [ROWS[1]!],
+          assembly: {
+            insertExtraRows,
+            insertExtrasBeforeRows,
+          },
           extraRows: [
             {
               key: "rule",

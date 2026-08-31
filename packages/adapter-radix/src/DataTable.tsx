@@ -1,40 +1,41 @@
-import { showSimpleFilterFields } from "@adapttable/core";
+import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   FeatureHostProvider,
   FeatureProviders,
   fillSlot,
-  GridFocusAnnouncer,
   resolveStickyToolbar,
-  RowReorderAnnouncer,
-  SidePanelLayout,
   type TableBodyRegion,
+  DataTableShellView,
   TableStatusAnnouncer,
-  useCommandPalette,
   useDataTableShell,
   useMountStagger,
   useStickyToolbarLayout,
-  useTableContextMenu,
   useTableFeatures,
+  ACTIVE_FILTER_CHIPS,
+  BATCH_EDIT_BAR,
+  BULK_BAR,
+  COLUMN_MENU,
+  type ColumnMenuSlotProps,
+  COMMAND_PALETTE_LIVE,
+  FeatureSlot,
+  FILTER_DRAWER,
+  FILTERS_FORM,
+  type FiltersFormSlotProps,
+  FIND_BAR,
+  GRID_FOCUS_ANNOUNCER,
+  ROW_REORDER_ANNOUNCER,
+  SAVED_VIEWS,
+  SIDE_PANEL,
+  STATUS_BAR,
 } from "@adapttable/core/adapter";
+import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import { Box, Button, Flex, Progress, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 
-import { Chips } from "./components/ActiveFilterChips";
-import { AutoFilterForm } from "./components/AutoFilterForm";
-import { BulkBar } from "./components/BulkActionBar";
-import { ColumnMenu } from "./components/ColumnMenu";
-import { CommandPalette } from "./components/CommandPalette";
-import { ContextMenu } from "./components/ContextMenu";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
-import { FilterDrawer } from "./components/FilterDrawer";
-import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
-import { BatchEditBar, FindBar } from "./components/kitControls";
 import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
-import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { SidePanel } from "./components/SidePanel";
-import { StatusBar } from "./components/StatusBar";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
 import { subtleText } from "./styles";
@@ -68,30 +69,17 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     headerFiltersOn,
     props.filterFields
   );
-  const shell = useDataTableShell<TRow>(props, (defs, source, registry) => (
-    <div
-      data-adapttable-part="filters-form"
-      style={{ display: "flex", flexDirection: "column", gap: 16 }}
-    >
-      <FilterTreeBuilder
-        defs={defs}
-        source={source}
-        labels={props.labels}
-        registry={registry}
-        defaultExpanded={!simpleFiltersOn}
-      />
-      {simpleFiltersOn ? (
-        <AutoFilterForm
-          defs={defs}
-          source={source}
-          accentColor={accentColor}
-          dir={props.dir}
-          labels={props.labels}
-          registry={registry}
-        />
-      ) : null}
-    </div>
-  ));
+  const shell = useDataTableShell<TRow>(props, (defs, source, registry) => {
+    const formProps = {
+      defs,
+      source,
+      registry,
+      labels: resolveLabels(props.labels),
+      defaultExpanded: !simpleFiltersOn,
+      showSimpleFields: simpleFiltersOn,
+    } as unknown as FiltersFormSlotProps<never>;
+    return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
+  });
   const {
     source,
     chrome,
@@ -102,11 +90,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     setFiltersOpen,
     filtersTrigger,
     rootRef,
-    loadMoreRef,
-    canLoadMore,
-    hasRowActions,
-    hasRowReorder,
-    toolbarProps,
   } = shell;
   const stickyBar = useStickyToolbarLayout(
     resolveStickyToolbar(
@@ -118,274 +101,343 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   );
   // One binding covers headers, rows and cells: the target is resolved from
   // wherever the event started, so there is no third handler to forget.
-  const contextMenu = useTableContextMenu<TRow>({
-    contextMenu: props.contextMenu,
-    columns: chrome.allColumns,
-    labels,
-    rowFor: (rowId) =>
-      shell.source.rows.find((row) => props.rowKey(row) === rowId),
-    actions: {
-      onCopy: () => {
-        shell.gridFocus.copyCells();
-      },
-      onSort: (key, dir) => {
-        shell.source.setSort(key, dir);
-      },
-      onHide: (key) => {
-        chrome.columnLayout.toggleVisible(key);
-      },
-      onFilter: () => {
-        shell.setFiltersOpen(true);
-      },
-    },
-    sortBy: shell.source.sortBy,
-    sortDir: shell.source.sortDir,
-    featureHost: shell.featureHost,
-  });
 
   // The palette lists the table's own actions; its shortcut is bound here
   // so an adapter cannot ship one without the other.
-  const palette = useCommandPalette({
-    commandPalette: props.commandPalette,
-    labels: labels,
-    onPrint: props.onPrint,
-    onExport: shell.toolbarProps.onExportCsv,
-    onClearFilters: chrome.clearFilters,
-    hasFilters: chrome.activeFilterCount > 0,
-    featureHost: shell.featureHost,
-  });
-  const tableProps = { ...shell.tableProps, size, accentColor };
   useMountStagger(rootRef, [source.rows.length, chrome.isMobile], {
     enabled: animate,
   });
 
-  const bodyByRegion: Record<TableBodyRegion, ReactNode> = {
-    skeleton: slots?.skeleton ?? (
-      <LoadingState
-        rows={props.skeletonRows ?? source.limit}
-        columns={table.columns.length}
-        loadingLabel={labels.loading}
-      />
-    ),
-    empty:
-      (chrome.emptyVariant === "noResults" ? slots?.noResults : undefined) ??
-      slots?.empty ??
-      (chrome.emptyVariant === "noResults" ? (
-        <Flex role="status" direction="column" align="center" py="6" gap="3">
-          <Text {...subtleText}>{labels.noResults}</Text>
-          <Button
-            size="2"
-            variant="outline"
-            color={accentColor}
-            onClick={chrome.clearFilters}
-          >
-            {labels.clearAll}
-          </Button>
-        </Flex>
-      ) : (
-        <Text
-          role="status"
-          {...subtleText}
-          align="center"
-          style={{ display: "block", padding: "var(--space-6) 0" }}
-        >
-          {labels.noData}
-        </Text>
-      )),
-    mobile: <MobileCards {...tableProps} className={props.classNames?.card} />,
-    desktop: (
-      <DesktopTable
-        {...tableProps}
-        stickyTop={stickyBar.headerOffset}
-        prefetch={props.prefetch}
-        className={props.classNames?.table}
-      />
-    ),
-  };
-
   return (
-    <FeatureHostProvider host={shell.featureHost}>
-      <Box
-        ref={rootRef}
-        {...contextMenu.regionProps}
-        dir={props.dir}
-        className={props.classNames?.root}
-        aria-busy={chrome.isRefreshing || undefined}
-        p="3"
-      >
-        <GridFocusAnnouncer focus={shell.gridFocus} />
-        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
-        {shell.tableProps.rowReorder ? (
-          <RowReorderAnnouncer
-            announcement={shell.tableProps.rowReorder.announcement}
-          />
-        ) : null}
-        <FindBar find={shell.find} labels={labels} />
-        <Flex direction="column" gap="3">
-          <Box ref={stickyBar.toolbarRef} style={stickyBar.toolbarStyle}>
-            <Toolbar
-              {...toolbarProps}
-              className={props.classNames?.toolbar}
-              filtersMode={filtersMode}
-              filtersOpen={filtersOpen}
-              onToggleFilters={filtersTrigger.onClick}
-              onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-              onCloseFilters={() => setFiltersOpen(false)}
-              savedViewsMenu={
-                props.savedViews ? (
-                  <SavedViewsMenu
-                    options={{
-                      // The table's RESOLVED backend — shared so views follow urlSync.
-                      urlAdapter: shell.urlAdapter,
-                      urlKey: props.urlKey,
-                      ...props.savedViews,
-                    }}
-                    labels={labels}
-                    accentColor={accentColor}
-                  />
-                ) : undefined
-              }
-              columnMenu={
-                props.enableColumnMenu && !chrome.isMobile ? (
-                  <ColumnMenu
-                    allColumns={chrome.allColumns}
-                    onAutoSize={shell.autoSizeColumns}
-                    onAutoSizeColumn={shell.autoSizeColumn}
-                    onSortColumn={(key, dir) => source.setSort(key, dir)}
-                    onFilterColumn={() => setFiltersOpen(true)}
-                    sortBy={source.sortBy}
-                    sortDir={source.sortDir}
-                    layout={chrome.columnLayout}
-                    labels={table.labels}
-                    hasRowActions={hasRowActions}
-                    hasRowReorder={hasRowReorder}
-                    dir={props.dir}
-                  />
-                ) : undefined
-              }
-              accentColor={accentColor}
+    <DataTableShellView shell={shell}>
+      {(view) => {
+        const chrome = view.chrome;
+        const {
+          canLoadMore,
+          loadMoreRef,
+          hasRowActions,
+          hasRowReorder,
+          toolbarProps,
+          table,
+          source,
+        } = view;
+        const tableProps = { ...view.tableProps, size, accentColor };
+        const bodyByRegion: Record<TableBodyRegion, ReactNode> = {
+          skeleton: slots?.skeleton ?? (
+            <LoadingState
+              rows={props.skeletonRows ?? source.limit}
+              columns={table.columns.length}
+              loadingLabel={labels.loading}
             />
-          </Box>
-          {chrome.isRefreshing && (
-            <Progress size="1" duration="1.5s" aria-label={labels.loading} />
-          )}
-          <Chips
-            chips={chrome.mergedChips}
-            onClearAll={chrome.clearFilters}
-            labels={labels}
-          />
-          {chrome.editing?.batch && (
-            <BatchEditBar batch={chrome.editing.batch} labels={labels} />
-          )}
-
-          {table.selection && props.bulkActions && (
-            <BulkBar
-              selection={table.selection}
-              total={source.total}
-              bulkActions={props.bulkActions}
-              confirm={chrome.confirm}
-              labels={labels}
-              accentColor={accentColor}
-            />
-          )}
-          <CommandPalette
-            commands={palette.commands}
-            open={palette.open}
-            onClose={palette.close}
-            labels={labels}
-          />
-          <ContextMenu
-            items={contextMenu.items}
-            at={contextMenu.at}
-            onClose={contextMenu.close}
-            container={shell.fullscreen.container}
-            labels={labels}
-          />
-          <SidePanelLayout
-            side={props.sidePanel?.side}
-            body={
-              <>
-                {chrome.errorState
-                  ? (fillSlot(slots?.error, chrome.errorState) ?? (
-                      <ErrorState
-                        error={chrome.errorState.error}
-                        labels={labels}
-                        onRetry={chrome.errorState.retry}
-                      />
-                    ))
-                  : bodyByRegion[chrome.body]}
-              </>
-            }
-            panel={
-              props.sidePanel?.open != null && (
-                <SidePanel
-                  panels={props.sidePanel.panels}
-                  openPanel={props.sidePanel.open}
-                  onOpenPanel={props.sidePanel.onOpenChange}
-                  onClose={() => {
-                    props.sidePanel?.onOpenChange(null);
-                  }}
-                  side={props.sidePanel.side}
-                  labels={labels}
-                />
-              )
-            }
-          />
-          {canLoadMore && source.hasNextPage && (
-            <Flex ref={loadMoreRef} justify="center" py="2">
-              <Button
-                size="2"
-                variant="outline"
-                loading={source.isFetchingNextPage}
-                onClick={() => source.fetchNextPage()}
+          ),
+          empty:
+            (chrome.emptyVariant === "noResults"
+              ? slots?.noResults
+              : undefined) ??
+            slots?.empty ??
+            (chrome.emptyVariant === "noResults" ? (
+              <Flex
+                role="status"
+                direction="column"
+                align="center"
+                py="6"
+                gap="3"
               >
-                {labels.loadMore}
-              </Button>
-            </Flex>
-          )}
-          {props.tableFooter ? (
-            <div data-adapttable-part="table-footer">{props.tableFooter}</div>
-          ) : null}
-          {chrome.showFooter && (
-            <Footer
-              className={props.classNames?.footer}
-              pagination={table.pagination}
-              total={source.total}
-              limit={source.limit}
-              defaultLimit={source.defaultLimit}
-              setPage={source.setPage}
-              setLimit={source.setLimit}
-              labels={labels}
-              showRowsPerPage={!chrome.grouping}
+                <Text {...subtleText}>{labels.noResults}</Text>
+                <Button
+                  size="2"
+                  variant="outline"
+                  color={accentColor}
+                  onClick={chrome.clearFilters}
+                >
+                  {labels.clearAll}
+                </Button>
+              </Flex>
+            ) : (
+              <Text
+                role="status"
+                {...subtleText}
+                align="center"
+                style={{ display: "block", padding: "var(--space-6) 0" }}
+              >
+                {labels.noData}
+              </Text>
+            )),
+          mobile: (
+            <MobileCards {...tableProps} className={props.classNames?.card} />
+          ),
+          desktop: (
+            <DesktopTable
+              {...tableProps}
+              stickyTop={stickyBar.headerOffset}
+              prefetch={props.prefetch}
+              className={props.classNames?.table}
             />
-          )}
-        </Flex>
-        {filtersNode && filtersMode === "drawer" && (
-          <FilterDrawer
-            open={filtersOpen}
-            onClose={() => setFiltersOpen(false)}
-            filters={filtersNode}
-            activeFilterCount={chrome.activeFilterCount}
-            onClearFilters={chrome.clearFilters}
-            labels={labels}
-            accentColor={accentColor}
-            dir={props.dir}
-          />
-        )}
-        <StatusBar
-          enabled={props.statusBar === true}
-          notices={chrome.featureNotices}
-          shown={shell.source.rows.length}
-          page={shell.source.page}
-          limit={shell.source.limit}
-          total={shell.source.total}
-          selected={table.selection?.selectedCount ?? 0}
-          stats={shell.selectionStats}
-          labels={labels}
-          locale={props.locale}
-        />
-      </Box>
-    </FeatureHostProvider>
+          ),
+        };
+        return (
+          <FeatureHostProvider host={shell.featureHost}>
+            <ContextMenuLiveGate
+              props={{
+                contextMenu: props.contextMenu,
+                columns: chrome.allColumns as never,
+                labels,
+                rowFor: (rowId) =>
+                  shell.source.rows.find(
+                    (row) => props.rowKey(row) === rowId
+                  ) as never,
+                actions: {
+                  onCopy: () => {
+                    view.gridFocus.copyCells();
+                  },
+                  onSort: (key, dir) => {
+                    shell.source.setSort(key, dir);
+                  },
+                  onHide: (key) => {
+                    chrome.columnLayout.toggleVisible(key);
+                  },
+                  onFilter: () => {
+                    shell.setFiltersOpen(true);
+                  },
+                },
+                sortBy: shell.source.sortBy,
+                sortDir: shell.source.sortDir,
+                featureHost: shell.featureHost,
+                container: view.fullscreen.container,
+              }}
+            >
+              {(regionProps) => (
+                <Box
+                  ref={rootRef}
+                  {...regionProps}
+                  dir={props.dir}
+                  className={props.classNames?.root}
+                  aria-busy={chrome.isRefreshing || undefined}
+                  p="3"
+                >
+                  <FeatureSlot
+                    slot={GRID_FOCUS_ANNOUNCER}
+                    props={{ focus: view.gridFocus }}
+                  />
+                  <TableStatusAnnouncer
+                    announcement={shell.statusAnnouncement}
+                  />
+                  {view.tableProps.rowReorder ? (
+                    <FeatureSlot
+                      slot={ROW_REORDER_ANNOUNCER}
+                      props={{
+                        announcement: view.tableProps.rowReorder.announcement,
+                      }}
+                    />
+                  ) : null}
+                  <FeatureSlot
+                    slot={FIND_BAR}
+                    props={{ find: view.find, labels }}
+                  />
+                  <Flex direction="column" gap="3">
+                    <Box
+                      ref={stickyBar.toolbarRef}
+                      style={stickyBar.toolbarStyle}
+                    >
+                      <Toolbar
+                        {...toolbarProps}
+                        className={props.classNames?.toolbar}
+                        filtersMode={filtersMode}
+                        filtersOpen={filtersOpen}
+                        onToggleFilters={filtersTrigger.onClick}
+                        onFiltersTriggerPointerDown={
+                          filtersTrigger.onPointerDown
+                        }
+                        onCloseFilters={() => setFiltersOpen(false)}
+                        savedViewsMenu={
+                          props.savedViews ? (
+                            <FeatureSlot
+                              slot={SAVED_VIEWS}
+                              props={{
+                                options: {
+                                  urlAdapter: shell.urlAdapter,
+                                  urlKey: props.urlKey,
+                                  ...props.savedViews,
+                                },
+                                labels,
+                              }}
+                            />
+                          ) : undefined
+                        }
+                        columnMenu={
+                          props.enableColumnMenu && !chrome.isMobile ? (
+                            <FeatureSlot
+                              slot={COLUMN_MENU}
+                              props={
+                                {
+                                  allColumns: chrome.allColumns,
+                                  onAutoSize: view.autoSizeColumns,
+                                  onAutoSizeColumn: view.autoSizeColumn,
+                                  onSortColumn: (key, dir) =>
+                                    shell.source.setSort(key, dir),
+                                  onFilterColumn: () => setFiltersOpen(true),
+                                  sortBy: shell.source.sortBy,
+                                  sortDir: shell.source.sortDir,
+                                  layout: chrome.columnLayout,
+                                  labels,
+                                  hasRowActions,
+                                  hasRowReorder,
+                                  dir: props.dir,
+                                } as ColumnMenuSlotProps<never>
+                              }
+                            />
+                          ) : undefined
+                        }
+                        accentColor={accentColor}
+                      />
+                    </Box>
+                    {chrome.isRefreshing && (
+                      <Progress
+                        size="1"
+                        duration="1.5s"
+                        aria-label={labels.loading}
+                      />
+                    )}
+                    <FeatureSlot
+                      slot={ACTIVE_FILTER_CHIPS}
+                      props={{
+                        chips: chrome.mergedChips,
+                        onClearAll: chrome.clearFilters,
+                        labels,
+                      }}
+                    />
+                    {chrome.editing?.batch && (
+                      <FeatureSlot
+                        slot={BATCH_EDIT_BAR}
+                        props={{ batch: chrome.editing!.batch, labels }}
+                      />
+                    )}
+
+                    {table.selection && props.bulkActions && (
+                      <FeatureSlot
+                        slot={BULK_BAR}
+                        props={{
+                          selection: table.selection,
+                          total: shell.source.total,
+                          bulkActions: props.bulkActions,
+                          confirm: chrome.confirm,
+                          labels,
+                        }}
+                      />
+                    )}
+                    <FeatureSlot
+                      slot={COMMAND_PALETTE_LIVE}
+                      props={{
+                        commandPalette: props.commandPalette,
+                        labels,
+                        onPrint: props.onPrint,
+                        onExport: shell.toolbarProps.onExportCsv,
+                        onClearFilters: chrome.clearFilters,
+                        hasFilters: chrome.activeFilterCount > 0,
+                        featureHost: shell.featureHost,
+                      }}
+                    />
+
+                    <OptionalSidePanel
+                      side={props.sidePanel?.side}
+                      body={
+                        <>
+                          {chrome.errorState
+                            ? (fillSlot(slots?.error, chrome.errorState) ?? (
+                                <ErrorState
+                                  error={chrome.errorState.error}
+                                  labels={labels}
+                                  onRetry={chrome.errorState.retry}
+                                />
+                              ))
+                            : bodyByRegion[chrome.body]}
+                        </>
+                      }
+                      panel={
+                        props.sidePanel?.open != null && (
+                          <FeatureSlot
+                            slot={SIDE_PANEL}
+                            props={{
+                              panels: props.sidePanel!.panels,
+                              openPanel: props.sidePanel!.open,
+                              onOpenPanel: props.sidePanel!.onOpenChange,
+                              onClose: () => {
+                                props.sidePanel?.onOpenChange(null);
+                              },
+                              side: props.sidePanel?.side,
+                              labels,
+                            }}
+                          />
+                        )
+                      }
+                    />
+                    {canLoadMore && source.hasNextPage && (
+                      <Flex ref={loadMoreRef} justify="center" py="2">
+                        <Button
+                          size="2"
+                          variant="outline"
+                          loading={source.isFetchingNextPage}
+                          onClick={() => source.fetchNextPage()}
+                        >
+                          {labels.loadMore}
+                        </Button>
+                      </Flex>
+                    )}
+                    {props.tableFooter ? (
+                      <div data-adapttable-part="table-footer">
+                        {props.tableFooter}
+                      </div>
+                    ) : null}
+                    {chrome.showFooter && (
+                      <Footer
+                        className={props.classNames?.footer}
+                        pagination={table.pagination}
+                        total={source.total}
+                        limit={source.limit}
+                        defaultLimit={source.defaultLimit}
+                        setPage={source.setPage}
+                        setLimit={source.setLimit}
+                        labels={labels}
+                        showRowsPerPage={!chrome.grouping}
+                      />
+                    )}
+                  </Flex>
+                  {filtersNode && filtersMode === "drawer" && (
+                    <FeatureSlot
+                      slot={FILTER_DRAWER}
+                      props={{
+                        open: filtersOpen,
+                        onClose: () => setFiltersOpen(false),
+                        filters: filtersNode,
+                        activeFilterCount: chrome.activeFilterCount,
+                        onClearFilters: chrome.clearFilters,
+                        labels,
+                        dir: props.dir,
+                      }}
+                    />
+                  )}
+                  <FeatureSlot
+                    slot={STATUS_BAR}
+                    props={{
+                      enabled: props.statusBar === true,
+                      notices: chrome.featureNotices,
+                      shown: shell.source.rows.length,
+                      page: shell.source.page,
+                      limit: shell.source.limit,
+                      total: shell.source.total,
+                      selected: table.selection?.selectedCount ?? 0,
+                      stats: view.selectionStats,
+                      labels,
+                      locale: props.locale,
+                    }}
+                  />
+                </Box>
+              )}
+            </ContextMenuLiveGate>
+          </FeatureHostProvider>
+        );
+      }}
+    </DataTableShellView>
   );
 }
 

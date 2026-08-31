@@ -96,7 +96,7 @@ import {
   resolveRowStyle as resolveRowStyleImpl,
   rowStyleSignature as rowStyleSignatureImpl,
 } from "./rows/rowStyle";
-import { rowSourceIndex as rowSourceIndexImpl } from "./virtual/useTableVirtualization";
+import { rowSourceIndex as rowSourceIndexImpl } from "./virtual/virtualTableModel";
 
 /**
  * Path separator inside a column-group id — labels may contain `/`.

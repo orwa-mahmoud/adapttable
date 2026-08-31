@@ -55,24 +55,25 @@ import type {
   ReactNode,
 } from "react";
 
-import { ColumnSelectCheckbox } from "./components/ColumnSelectCheckbox";
-import { EditableDataCell } from "./components/EditableCell";
-import { FillHandle } from "./components/FillHandle";
+import { RowActionButtons } from "./components/RowActionButtons";
+import {
+  OptionalColumnGroupToggle,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./components/featureSlots";
+import { cellDisplay } from "./components/DisplayCell";
 import {
   type AdaptTableGroupRow,
   type GroupedDataRecord,
-  GroupHeaderCell,
   isAdaptTableExtraRow,
   isAdaptTableGroupRow,
 } from "./components/grouping";
-import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./components/kitControls";
-import { RowActionButtons } from "./components/RowActionButtons";
 
 /**
  * Map a logical pin side to antd's native physical `fixed` value. antd mirrors
@@ -256,7 +257,11 @@ function groupTitle(
   return (
     <span style={groupedHeaderLabelStyle()}>
       {onToggle ? (
-        <ColumnGroupToggle cell={cell} labels={labels} onToggle={onToggle} />
+        <OptionalColumnGroupToggle
+          cell={cell}
+          labels={labels}
+          onToggle={onToggle}
+        />
       ) : null}
       {columnGroupHeaderCaption(cell)}
     </span>
@@ -542,7 +547,7 @@ function renderGroupDataCell<TRow>(
   if (groupSpansAll(record)) {
     if (columnIndex === 0) {
       content = (
-        <GroupHeaderCell
+        <OptionalGroupHeaderRow
           group={record}
           labels={options.labels}
           onToggle={() => options.grouping?.collapsed.toggle(record.key)}
@@ -552,7 +557,7 @@ function renderGroupDataCell<TRow>(
     }
   } else if (columnIndex === 0) {
     content = (
-      <GroupHeaderCell
+      <OptionalGroupHeaderRow
         group={record}
         labels={options.labels}
         onToggle={() => options.grouping?.collapsed.toggle(record.key)}
@@ -584,14 +589,14 @@ function renderLeafDataCell<TRow>(
 ): ReactNode {
   return (
     <>
-      <TreeCell
+      <OptionalTreeCell
         entry={options.tree?.entryFor(record)}
         columnKey={column.key}
         treeColumnKey={options.tree?.columnKey}
         labels={options.labels}
         onToggle={options.tree?.toggle}
       >
-        <EditableDataCell
+        <OptionalEditableCell
           editing={options.editing}
           row={record}
           column={column}
@@ -602,9 +607,10 @@ function renderLeafDataCell<TRow>(
           rowKey={options.getRowId}
           editLabel={options.labels.editCell}
           undoLabel={options.labels.undoEdit}
+          display={cellDisplay(column, record, index)}
         />
-      </TreeCell>
-      <FillHandle
+      </OptionalTreeCell>
+      <OptionalFillHandle
         focus={options.gridFocus}
         windowIndex={index}
         col={columnIndex}
@@ -722,7 +728,7 @@ export function buildColumns<TRow>({
               })
             )}
             {gridFocus?.columnCheckbox === true ? (
-              <ColumnSelectCheckbox
+              <OptionalColumnSelect
                 label={columnSelectLabel(labels.selectColumn, column)}
                 checked={gridFocus.isColumnSelected(columnIndex)}
                 onToggle={() => gridFocus.toggleColumn(columnIndex)}
@@ -745,7 +751,7 @@ export function buildColumns<TRow>({
               />
             )}
             {headerDef && filterSource ? (
-              <FilterHeaderTrigger
+              <OptionalFilterHeader
                 def={headerDef}
                 source={filterSource}
                 labels={labels}
@@ -910,7 +916,7 @@ export function buildColumns<TRow>({
         const id = getRowId(row);
         return (
           <span data-adapttable-part="reorder-cell">
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -957,7 +963,7 @@ export function buildColumns<TRow>({
         return (
           <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
             {rowMode && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={rowMode}
                 row={row}
                 rowId={getRowId(row)}

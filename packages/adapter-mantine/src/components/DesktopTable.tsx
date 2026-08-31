@@ -33,19 +33,20 @@ import { Fragment, useMemo } from "react";
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
 import { HAIRLINE, SURFACE } from "../surface";
-import { ColumnSelectCheckbox } from "./ColumnSelectCheckbox";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { FillHandle } from "./FillHandle";
-import { GroupHeaderRow } from "./GroupHeader";
-import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./kitControls";
 import { RowActionButtons } from "./RowActionButtons";
+import {
+  OptionalColumnGroupToggle,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./featureSlots";
+import { cellDisplay } from "./DisplayCell";
 
 function ExtraSlotRow({
   kind,
@@ -162,14 +163,14 @@ function LeafHeader<TRow>({
   ) : null;
   const columnSelect =
     leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-      <ColumnSelectCheckbox
+      <OptionalColumnSelect
         label={leaf.columnSelectAriaLabel}
         checked={leaf.columnCheckboxChecked}
         onToggle={leaf.onToggleColumn}
       />
     ) : null;
   const filterTrigger = leaf.headerDef ? (
-    <FilterHeaderTrigger
+    <OptionalFilterHeader
       def={leaf.headerDef}
       source={source}
       labels={labels}
@@ -350,11 +351,12 @@ function DesktopRowBase<TRow>(
             ta="center"
             style={{ ...expansionCellStyle, ...edgeRowPin }}
           >
-            <ExpandToggle
-              expanded={expanded}
+            <OptionalExpandToggle
+              id={id}
+              expanded={Boolean(expanded)}
+              onToggle={onToggleExpand}
               expandLabel={labels.expandRow}
               collapseLabel={labels.collapseRow}
-              onToggle={() => onToggleExpand(id)}
             />
           </Table.Td>
         )}
@@ -364,7 +366,7 @@ function DesktopRowBase<TRow>(
             ta="center"
             style={{ ...paintedReorder, ...edgeRowPin }}
           >
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -417,7 +419,7 @@ function DesktopRowBase<TRow>(
                 }
               )}
             >
-              <TreeCell
+              <OptionalTreeCell
                 entry={treeEntry}
                 columnKey={column.key}
                 treeColumnKey={treeKey}
@@ -427,26 +429,21 @@ function DesktopRowBase<TRow>(
                 }}
                 onToggle={onToggleTree}
               >
-                <EditableDataCell
+                <OptionalEditableCell
                   editing={editing}
                   row={row}
                   column={column}
                   rowId={id}
+                  rowIndex={focusIndex}
                   rows={rows}
                   columns={columns}
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={
-                    column.Cell ? (
-                      <column.Cell row={row} rowIndex={focusIndex} />
-                    ) : (
-                      column.accessor?.(row)
-                    )
-                  }
+                  display={cellDisplay(column, row, focusIndex)}
                 />
-              </TreeCell>
-              <FillHandle
+              </OptionalTreeCell>
+              <OptionalFillHandle
                 focus={gridFocus}
                 windowIndex={focusIndex}
                 col={columnIndex}
@@ -458,7 +455,7 @@ function DesktopRowBase<TRow>(
         {showActions && (
           <Table.Td ta="end" style={{ ...paintedActions, ...edgeRowPin }}>
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
@@ -600,7 +597,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (
-            <ColumnGroupToggle
+            <OptionalColumnGroupToggle
               cell={cell.cell}
               labels={labels}
               onToggle={props.onToggleColumnGroup}
@@ -763,7 +760,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
             }
             if (slot.kind === "group") {
               return (
-                <GroupHeaderRow
+                <OptionalGroupHeaderRow
                   key={slot.key}
                   entry={slot.entry}
                   columns={columns}

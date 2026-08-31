@@ -47,7 +47,7 @@
     "api:check": "node scripts/api-reports.mjs",
     "release:gated": "pnpm run build && pnpm run publint && changeset publish",
     "check:parts": "node scripts/check-parts-parity.mjs",
-    "check:features": "node scripts/check-feature-classification.mjs",
+    "check:features": "node scripts/check-feature-classification.mjs && node scripts/check-feature-parity.mjs",
     "check:boundary": "node scripts/check-framework-boundary.mjs",
     "check:api-contract": "node scripts/check-api-contract.mjs"
   },

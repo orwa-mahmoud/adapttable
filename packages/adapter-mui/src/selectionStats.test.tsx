@@ -1,7 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { selectionStats } from "./status-bar";
 
@@ -34,6 +35,7 @@ describe("selection statistics (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
+        features={[cellNavigation<Row>(), selectionStats<Row>()]}
         {...extra}
       />
     );
@@ -51,7 +53,7 @@ describe("selection statistics (mui)", () => {
     table({
       selectionStats: true,
       locale: "en-US",
-      features: [selectionStats()],
+      features: [cellNavigation<Row>(), selectionStats<Row>()],
     });
     selectBudgetColumn();
     expect(strip()?.textContent).toContain("Sum 40");
@@ -59,7 +61,11 @@ describe("selection statistics (mui)", () => {
   });
 
   it("renders nothing without the feature", () => {
-    table({ selectionStats: true, locale: "en-US" });
+    table({
+      selectionStats: true,
+      locale: "en-US",
+      features: [cellNavigation<Row>()],
+    });
     selectBudgetColumn();
     expect(strip()).toBeNull();
   });

@@ -1,4 +1,5 @@
 import {
+  extendFeature,
   SIDE_PANEL,
   slotRender,
   type TableFeature,
@@ -16,8 +17,7 @@ import { SidePanel } from "./components/SidePanel";
  * @public
  */
 export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
-  return {
-    ...core<TRow>(options),
-    renders: [slotRender(SIDE_PANEL, (props) => <SidePanel {...props} />)],
-  };
+  return extendFeature(core<TRow>(options), [
+    slotRender(SIDE_PANEL, (props) => <SidePanel {...props} />),
+  ]);
 }

@@ -14,7 +14,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterHeaderRow } from "./components/kitControls";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import {
   type ColumnDef,
   type DataTableClassNames,
@@ -40,6 +40,7 @@ function mockVirtualWindow(top: number, bottom: number, indices = [0, 1]) {
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: indices
@@ -513,8 +514,12 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   tree.unmount();
 
   // Row grouping (desktop + mobile cards).
-  mount({ url: "groupBy=team" }).unmount();
-  const groupedMobile = mount({ url: "groupBy=team", isMobile: true });
+  mount({ url: "groupBy=team", override: { groupBy: "team" } }).unmount();
+  const groupedMobile = mount({
+    url: "groupBy=team",
+    isMobile: true,
+    override: { groupBy: "team" },
+  });
   absorb();
   groupedMobile.unmount();
 

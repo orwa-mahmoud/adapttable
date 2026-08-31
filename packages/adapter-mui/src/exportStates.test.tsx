@@ -2,7 +2,8 @@ import { xlsxWriter } from "@adapttable/core/xlsx";
 import { act, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { exportCsv } from "./export";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
 
@@ -30,6 +31,7 @@ function renderExport(request: () => Promise<void>) {
       columns={columns}
       rowKey={(r) => r.id}
       urlSync={false}
+      features={[exportCsv<Row>({ request })]}
       exportCsv={{ request }}
     />
   );
@@ -91,6 +93,7 @@ describe("export states (MUI)", () => {
         columns={columns}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[exportCsv<Row>({ writer: xlsxWriter() })]}
         exportCsv={{ writer: xlsxWriter() }}
       />
     );

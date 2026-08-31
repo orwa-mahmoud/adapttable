@@ -1,13 +1,14 @@
 /** Search field, sort select, filters trigger, menus and rows-per-page. */
 import { pageSizeOptions } from "@adapttable/core";
 import {
-  ExportAnnouncer,
+  FeatureSlot,
+  FILTER_POPOVER,
+  TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import {
   Badge,
   Button,
-  CircularProgress,
   InputAdornment,
   MenuItem,
   Stack,
@@ -16,7 +17,6 @@ import {
 import { type ReactNode, useRef } from "react";
 
 import { FiltersIcon } from "../icons";
-import { FilterPopover } from "./FilterPopover";
 
 /** Magnifying-glass glyph for the search field (currentColor, no icon-lib). */
 function SearchIcon() {
@@ -180,64 +180,44 @@ export function Toolbar<TRow>({
         {toolbar}
         {filtersButton}
         {hasFilters && filtersMode === "popover" && (
-          <FilterPopover
-            open={filtersOpen}
-            onClose={onCloseFilters}
-            anchorEl={filtersAnchorRef.current}
-            filters={filters}
-            activeFilterCount={activeFilterCount}
-            onClearFilters={onClearFilters}
-            labels={labels}
-            dir={dir}
+          <FeatureSlot
+            slot={FILTER_POPOVER}
+            props={{
+              open: filtersOpen,
+              onClose: onCloseFilters,
+              anchorEl: filtersAnchorRef.current,
+              filters,
+              activeFilterCount,
+              onClearFilters,
+              labels,
+              dir,
+            }}
           />
         )}
         {savedViewsMenu}
         {columnMenu}
-        {onUndo && onRedo && (
-          <>
-            <Button
-              variant="outlined"
-              size="small"
-              data-adapttable-part="undo-button"
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              data-adapttable-part="redo-button"
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </Button>
-          </>
-        )}
-        {onExportCsv && (
-          <>
-            {/* MUI's own progress indicator in the button's icon slot rather
-                than the Button `loading` prop, which only exists from 6.4 and
-                the supported floor is 6.1 — the affordance is the kit's either
-                way, and it works on every version this adapter claims. */}
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={onExportCsv}
-              disabled={exportBusy}
-              aria-busy={exportBusy}
-              startIcon={
-                exportBusy ? (
-                  <CircularProgress size={14} color="inherit" />
-                ) : undefined
-              }
-            >
-              {exportLabel}
-            </Button>
-            <ExportAnnouncer announcement={exportAnnouncement} />
-          </>
-        )}
+        <FeatureSlot
+          slot={TOOLBAR_EXTRAS}
+          props={{
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo,
+            undoLabel,
+            redoLabel,
+            onPrint,
+            printLabel,
+            density,
+            onDensityChange,
+            onToggleFullscreen,
+            isFullscreen,
+            onExportCsv,
+            exportBusy,
+            exportAnnouncement,
+            exportLabel,
+            labels,
+          }}
+        />
         {onAddRow && (
           <Button
             variant="contained"
@@ -246,48 +226,6 @@ export function Toolbar<TRow>({
             onClick={onAddRow}
           >
             {addRowLabel}
-          </Button>
-        )}
-        {onPrint && (
-          <Button
-            variant="outlined"
-            size="small"
-            data-adapttable-part="print-button"
-            onClick={onPrint}
-          >
-            {printLabel}
-          </Button>
-        )}
-        {onDensityChange && (
-          <Button
-            variant="outlined"
-            size="small"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            onClick={() => {
-              onDensityChange(
-                density === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {density === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </Button>
-        )}
-        {onToggleFullscreen && (
-          <Button
-            variant="outlined"
-            size="small"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
           </Button>
         )}
         {toolbarSlots?.end}

@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/mui",
   "version": "2.6.0",
-  "description": "Material UI adapter for AdaptTable \u2014 a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
+  "description": "Material UI adapter for AdaptTable — a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
   "keywords": [
     "react",
     "mui",
@@ -65,24 +65,154 @@
         "default": "./dist/row-reorder.cjs"
       }
     },
-    "./saved-views": {
+    "./row-pinning": {
       "import": {
-        "types": "./dist/saved-views.d.ts",
-        "default": "./dist/saved-views.js"
+        "types": "./dist/row-pinning.d.ts",
+        "default": "./dist/row-pinning.js"
       },
       "require": {
-        "types": "./dist/saved-views.d.cts",
-        "default": "./dist/saved-views.cjs"
+        "types": "./dist/row-pinning.d.cts",
+        "default": "./dist/row-pinning.cjs"
       }
     },
-    "./status-bar": {
+    "./cell-span": {
       "import": {
-        "types": "./dist/status-bar.d.ts",
-        "default": "./dist/status-bar.js"
+        "types": "./dist/cell-span.d.ts",
+        "default": "./dist/cell-span.js"
       },
       "require": {
-        "types": "./dist/status-bar.d.cts",
-        "default": "./dist/status-bar.cjs"
+        "types": "./dist/cell-span.d.cts",
+        "default": "./dist/cell-span.cjs"
+      }
+    },
+    "./extra-rows": {
+      "import": {
+        "types": "./dist/extra-rows.d.ts",
+        "default": "./dist/extra-rows.js"
+      },
+      "require": {
+        "types": "./dist/extra-rows.d.cts",
+        "default": "./dist/extra-rows.cjs"
+      }
+    },
+    "./row-appearance": {
+      "import": {
+        "types": "./dist/row-appearance.d.ts",
+        "default": "./dist/row-appearance.js"
+      },
+      "require": {
+        "types": "./dist/row-appearance.d.cts",
+        "default": "./dist/row-appearance.cjs"
+      }
+    },
+    "./row-detail": {
+      "import": {
+        "types": "./dist/row-detail.d.ts",
+        "default": "./dist/row-detail.js"
+      },
+      "require": {
+        "types": "./dist/row-detail.d.cts",
+        "default": "./dist/row-detail.cjs"
+      }
+    },
+    "./nested-table": {
+      "import": {
+        "types": "./dist/nested-table.d.ts",
+        "default": "./dist/nested-table.js"
+      },
+      "require": {
+        "types": "./dist/nested-table.d.cts",
+        "default": "./dist/nested-table.cjs"
+      }
+    },
+    "./editing": {
+      "import": {
+        "types": "./dist/editing.d.ts",
+        "default": "./dist/editing.js"
+      },
+      "require": {
+        "types": "./dist/editing.d.cts",
+        "default": "./dist/editing.cjs"
+      }
+    },
+    "./grouping": {
+      "import": {
+        "types": "./dist/grouping.d.ts",
+        "default": "./dist/grouping.js"
+      },
+      "require": {
+        "types": "./dist/grouping.d.cts",
+        "default": "./dist/grouping.cjs"
+      }
+    },
+    "./tree": {
+      "import": {
+        "types": "./dist/tree.d.ts",
+        "default": "./dist/tree.js"
+      },
+      "require": {
+        "types": "./dist/tree.d.cts",
+        "default": "./dist/tree.cjs"
+      }
+    },
+    "./virtualize": {
+      "import": {
+        "types": "./dist/virtualize.d.ts",
+        "default": "./dist/virtualize.js"
+      },
+      "require": {
+        "types": "./dist/virtualize.d.cts",
+        "default": "./dist/virtualize.cjs"
+      }
+    },
+    "./column-menu": {
+      "import": {
+        "types": "./dist/column-menu.d.ts",
+        "default": "./dist/column-menu.js"
+      },
+      "require": {
+        "types": "./dist/column-menu.d.cts",
+        "default": "./dist/column-menu.cjs"
+      }
+    },
+    "./resizable-columns": {
+      "import": {
+        "types": "./dist/resizable-columns.d.ts",
+        "default": "./dist/resizable-columns.js"
+      },
+      "require": {
+        "types": "./dist/resizable-columns.d.cts",
+        "default": "./dist/resizable-columns.cjs"
+      }
+    },
+    "./column-groups": {
+      "import": {
+        "types": "./dist/column-groups.d.ts",
+        "default": "./dist/column-groups.js"
+      },
+      "require": {
+        "types": "./dist/column-groups.d.cts",
+        "default": "./dist/column-groups.cjs"
+      }
+    },
+    "./export": {
+      "import": {
+        "types": "./dist/export.d.ts",
+        "default": "./dist/export.js"
+      },
+      "require": {
+        "types": "./dist/export.d.cts",
+        "default": "./dist/export.cjs"
+      }
+    },
+    "./cell-navigation": {
+      "import": {
+        "types": "./dist/cell-navigation.d.ts",
+        "default": "./dist/cell-navigation.js"
+      },
+      "require": {
+        "types": "./dist/cell-navigation.d.cts",
+        "default": "./dist/cell-navigation.cjs"
       }
     },
     "./find-in-table": {
@@ -95,14 +225,14 @@
         "default": "./dist/find-in-table.cjs"
       }
     },
-    "./batch-editing": {
+    "./fullscreen": {
       "import": {
-        "types": "./dist/batch-editing.d.ts",
-        "default": "./dist/batch-editing.js"
+        "types": "./dist/fullscreen.d.ts",
+        "default": "./dist/fullscreen.js"
       },
       "require": {
-        "types": "./dist/batch-editing.d.cts",
-        "default": "./dist/batch-editing.cjs"
+        "types": "./dist/fullscreen.d.cts",
+        "default": "./dist/fullscreen.cjs"
       }
     },
     "./command-palette": {
@@ -135,46 +265,6 @@
         "default": "./dist/side-panel.cjs"
       }
     },
-    "./grouping": {
-      "import": {
-        "types": "./dist/grouping.d.ts",
-        "default": "./dist/grouping.js"
-      },
-      "require": {
-        "types": "./dist/grouping.d.cts",
-        "default": "./dist/grouping.cjs"
-      }
-    },
-    "./editing": {
-      "import": {
-        "types": "./dist/editing.d.ts",
-        "default": "./dist/editing.js"
-      },
-      "require": {
-        "types": "./dist/editing.d.cts",
-        "default": "./dist/editing.cjs"
-      }
-    },
-    "./virtualize": {
-      "import": {
-        "types": "./dist/virtualize.d.ts",
-        "default": "./dist/virtualize.js"
-      },
-      "require": {
-        "types": "./dist/virtualize.d.cts",
-        "default": "./dist/virtualize.cjs"
-      }
-    },
-    "./column-menu": {
-      "import": {
-        "types": "./dist/column-menu.d.ts",
-        "default": "./dist/column-menu.js"
-      },
-      "require": {
-        "types": "./dist/column-menu.d.cts",
-        "default": "./dist/column-menu.cjs"
-      }
-    },
     "./bulk-actions": {
       "import": {
         "types": "./dist/bulk-actions.d.ts",
@@ -195,14 +285,114 @@
         "default": "./dist/filters.cjs"
       }
     },
-    "./cell-navigation": {
+    "./header-filters": {
       "import": {
-        "types": "./dist/cell-navigation.d.ts",
-        "default": "./dist/cell-navigation.js"
+        "types": "./dist/header-filters.d.ts",
+        "default": "./dist/header-filters.js"
       },
       "require": {
-        "types": "./dist/cell-navigation.d.cts",
-        "default": "./dist/cell-navigation.cjs"
+        "types": "./dist/header-filters.d.cts",
+        "default": "./dist/header-filters.cjs"
+      }
+    },
+    "./saved-views": {
+      "import": {
+        "types": "./dist/saved-views.d.ts",
+        "default": "./dist/saved-views.js"
+      },
+      "require": {
+        "types": "./dist/saved-views.d.cts",
+        "default": "./dist/saved-views.cjs"
+      }
+    },
+    "./selection-stats": {
+      "import": {
+        "types": "./dist/selection-stats.d.ts",
+        "default": "./dist/selection-stats.js"
+      },
+      "require": {
+        "types": "./dist/selection-stats.d.cts",
+        "default": "./dist/selection-stats.cjs"
+      }
+    },
+    "./density": {
+      "import": {
+        "types": "./dist/density.d.ts",
+        "default": "./dist/density.js"
+      },
+      "require": {
+        "types": "./dist/density.d.cts",
+        "default": "./dist/density.cjs"
+      }
+    },
+    "./print": {
+      "import": {
+        "types": "./dist/print.d.ts",
+        "default": "./dist/print.js"
+      },
+      "require": {
+        "types": "./dist/print.d.cts",
+        "default": "./dist/print.cjs"
+      }
+    },
+    "./status-bar": {
+      "import": {
+        "types": "./dist/status-bar.d.ts",
+        "default": "./dist/status-bar.js"
+      },
+      "require": {
+        "types": "./dist/status-bar.d.cts",
+        "default": "./dist/status-bar.cjs"
+      }
+    },
+    "./multi-sort": {
+      "import": {
+        "types": "./dist/multi-sort.d.ts",
+        "default": "./dist/multi-sort.js"
+      },
+      "require": {
+        "types": "./dist/multi-sort.d.cts",
+        "default": "./dist/multi-sort.cjs"
+      }
+    },
+    "./fit-columns": {
+      "import": {
+        "types": "./dist/fit-columns.d.ts",
+        "default": "./dist/fit-columns.js"
+      },
+      "require": {
+        "types": "./dist/fit-columns.d.cts",
+        "default": "./dist/fit-columns.cjs"
+      }
+    },
+    "./row-actions": {
+      "import": {
+        "types": "./dist/row-actions.d.ts",
+        "default": "./dist/row-actions.js"
+      },
+      "require": {
+        "types": "./dist/row-actions.d.cts",
+        "default": "./dist/row-actions.cjs"
+      }
+    },
+    "./column-selection": {
+      "import": {
+        "types": "./dist/column-selection.d.ts",
+        "default": "./dist/column-selection.js"
+      },
+      "require": {
+        "types": "./dist/column-selection.d.cts",
+        "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./batch-editing": {
+      "import": {
+        "types": "./dist/batch-editing.d.ts",
+        "default": "./dist/batch-editing.js"
+      },
+      "require": {
+        "types": "./dist/batch-editing.d.cts",
+        "default": "./dist/batch-editing.cjs"
       }
     },
     "./pivot": {

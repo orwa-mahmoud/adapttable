@@ -1,6 +1,21 @@
 import { act, render, renderHook } from "@testing-library/react";
+import { type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { columnResizeHandleProps } from "./columns/columnResize";
+import { ChromeExtrasGate } from "./features/chromeExtrasGate";
+import { FeatureProviders } from "./features/providers";
+import { rowDetail } from "./features/row-detail";
+import { rowPinning } from "./features/row-pinning";
+import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import { buildBodyCells } from "./rows/cellSpan";
+import {
+  extraCoveredTableSlots,
+  extraHostFillStyle,
+  inflateBodyCellRowSpans,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+} from "./rows/extraRows";
 import { createIncrementalView } from "./rows/incremental";
 import { useFrontendData } from "./source/useFrontendData";
 import { tableRenderModel, useSummaryCells } from "./tableRenderProps";
@@ -8,11 +23,12 @@ import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
 import {
-  useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
   useTableChrome,
+  type TableChrome,
 } from "./useTableChrome";
+import { useChromeBodyData } from "./virtual/useVirtualChromeBodyData";
 
 interface Row {
   id: string;
@@ -27,28 +43,101 @@ const cols: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name },
 ];
 
+const FULL_ASSEMBLY = {
+  buildBodyCells,
+  inflateBodyCellRowSpans,
+  extraCoveredTableSlots,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+  extraHostFillStyle,
+  columnResizeHandleProps,
+};
+
+function renderLiveChrome<TRow>(
+  features: readonly TableFeature<TRow>[],
+  build: () => Parameters<typeof useTableChrome<TRow>>[0]
+) {
+  const applied = applyTableFeatures({ features });
+  const box: { current: TableChrome<TRow> } = {
+    current: undefined as unknown as TableChrome<TRow>,
+  };
+  function Probe() {
+    const props = { ...applied, ...build() };
+    const base = useTableChrome<TRow>(props);
+    return (
+      <ChromeExtrasGate chrome={base} props={props}>
+        {(overlaid) => {
+          box.current = overlaid;
+          return null;
+        }}
+      </ChromeExtrasGate>
+    );
+  }
+  const view = render(
+    <FeatureProviders props={applied}>
+      <Probe />
+    </FeatureProviders>
+  );
+  return { result: box, unmount: view.unmount };
+}
+
+function renderLiveBody<TRow>(
+  features: readonly TableFeature<TRow>[],
+  build: () => Parameters<typeof useTableChrome<TRow>>[0]
+) {
+  const applied = applyTableFeatures({ features });
+  const box: { current: ReturnType<typeof useChromeBodyData<TRow>> } = {
+    current: undefined as unknown as ReturnType<typeof useChromeBodyData<TRow>>,
+  };
+  function BodyProbe({
+    chrome,
+    props,
+  }: {
+    chrome: TableChrome<TRow>;
+    props: Parameters<typeof useTableChrome<TRow>>[0];
+  }): ReactNode {
+    box.current = useChromeBodyData(chrome, props);
+    return null;
+  }
+  function Probe() {
+    const props = { ...applied, ...build() };
+    const base = useTableChrome<TRow>(props);
+    return (
+      <ChromeExtrasGate chrome={base} props={props}>
+        {(overlaid) => <BodyProbe chrome={overlaid} props={props} />}
+      </ChromeExtrasGate>
+    );
+  }
+  const view = render(
+    <FeatureProviders props={applied}>
+      <Probe />
+    </FeatureProviders>
+  );
+  return { result: box, unmount: view.unmount };
+}
+
 describe("tableRenderModel", () => {
   it("columnSpan counts the expansion column when row details are active", () => {
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => {
+    const live = renderLiveChrome([rowDetail((r: Row) => r.name)], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
         urlAdapter: adapter,
         paginationMode: "paged",
       });
-      return useTableChrome<Row>({
+      return {
         source,
         columns: cols,
         rowKey: (r: Row) => r.id,
-        renderRowDetail: (r) => r.name,
-      });
+        renderRowDetail: (r: Row) => r.name,
+      };
     });
-    const detail = result.current.detail!;
+    const detail = live.result.current.detail!;
     const model = tableRenderModel<Row>({
-      table: result.current.table,
+      table: live.result.current.table,
       rows: ROWS,
-      getRowId: result.current.getRowId,
+      getRowId: live.result.current.getRowId,
       renderRowDetail: detail.render,
       expansion: detail.expansion,
     });
@@ -146,10 +235,11 @@ describe("tableRenderModel", () => {
       selection: null,
       labels: { cancel: "Cancel" },
     } as unknown as UseDataTableResult<Member>;
-    const model = tableRenderModel({
+    const model = tableRenderModel<Member>({
       table: memberTable,
       rows: people,
       getRowId: (r) => r.id,
+      assembly: FULL_ASSEMBLY,
       pinnedTopRows: [people[0]!],
       getCellSpan: ({ column, sectionRows, sectionRowIndex }) => {
         if (column.key !== "team") return undefined;
@@ -217,10 +307,11 @@ describe("tableRenderModel", () => {
       }
       return span > 1 ? { rowSpan: span } : undefined;
     };
-    const model = tableRenderModel({
+    const model = tableRenderModel<Member>({
       table: memberTable,
       rows: people,
       getRowId: (r) => r.id,
+      assembly: FULL_ASSEMBLY,
       pinnedBottomRows: [people[3]!, people[4]!],
       getCellSpan: consecutiveTeam,
     });
@@ -254,10 +345,11 @@ describe("tableRenderModel", () => {
       selection: null,
       labels: { cancel: "Cancel" },
     } as unknown as UseDataTableResult<Member>;
-    const model = tableRenderModel({
+    const model = tableRenderModel<Member>({
       table: memberTable,
       rows: people,
       getRowId: (r) => r.id,
+      assembly: FULL_ASSEMBLY,
       extraRows: [
         { key: "s", kind: "separator", beforeRowId: "5" },
         { key: "n", kind: "fullWidth", beforeRowId: "5" },
@@ -616,28 +708,36 @@ describe("controlled selection through the chrome", () => {
 describe("useChromeBodyData", () => {
   it("pulls pinned rows out of the virtual window", () => {
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => {
-      const source = useFrontendData<Row>({
-        data: ROWS,
-        columns: cols,
-        urlAdapter: adapter,
-        paginationMode: "paged",
-      });
-      const props = {
-        source,
-        columns: cols,
-        rowKey: (r: Row) => r.id,
-        pinnedRowIds: { top: ["a"], bottom: [] },
-        onPinnedRowIdsChange: () => undefined,
-      };
-      const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
-    });
-    expect(result.current.pinnedTopRows.map((row) => row.id)).toEqual(["a"]);
+    const live = renderLiveBody(
+      [
+        rowPinning<Row>({
+          pinnedRowIds: { top: ["a"], bottom: [] },
+          onPinnedRowIdsChange: () => undefined,
+        }),
+      ],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+          pinnedRowIds: { top: ["a"], bottom: [] },
+          onPinnedRowIdsChange: () => undefined,
+        };
+      }
+    );
+    expect(live.result.current.pinnedTopRows.map((row) => row.id)).toEqual([
+      "a",
+    ]);
     expect(
-      result.current.virtualization.rows.map((entry) => entry.key)
+      live.result.current.virtualization.rows.map((entry) => entry.key)
     ).toEqual(["b"]);
-    expect(result.current.virtualization.rows[0]?.sourceIndex).toBe(1);
+    expect(live.result.current.virtualization.rows[0]?.sourceIndex).toBe(1);
   });
 
   it("element mode: a maxHeight box scrolls the virtual window (ref wiring)", () => {
@@ -970,7 +1070,7 @@ describe("useFilterTriggerToggle", () => {
 describe("chrome row expansion", () => {
   it("exposes expansion state only when renderRowDetail is set", () => {
     const adapter = createMemoryAdapter("");
-    const { result } = renderHook(() => {
+    const without = renderLiveChrome([], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: cols,
@@ -978,26 +1078,32 @@ describe("chrome row expansion", () => {
         paginationMode: "paged",
       });
       return {
-        withDetail: useTableChrome<Row>({
-          source,
-          columns: cols,
-          rowKey: (r: Row) => r.id,
-          renderRowDetail: (r) => r.name,
-        }),
-        without: useTableChrome<Row>({
-          source,
-          columns: cols,
-          rowKey: (r: Row) => r.id,
-        }),
+        source,
+        columns: cols,
+        rowKey: (r: Row) => r.id,
       };
     });
-    expect(result.current.without.detail).toBeUndefined();
+    const withDetail = renderLiveChrome([rowDetail((r: Row) => r.name)], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns: cols,
+        rowKey: (r: Row) => r.id,
+        renderRowDetail: (r: Row) => r.name,
+      };
+    });
+    expect(without.result.current.detail).toBeUndefined();
     // ONE guard narrows both halves of the bundle.
-    const detail = result.current.withDetail.detail!;
+    const detail = withDetail.result.current.detail!;
     expect(detail.render({ id: "a", name: "Alice" })).toBe("Alice");
     expect(detail.expansion.isExpanded("a")).toBe(false);
     act(() => detail.expansion.toggle("a"));
-    expect(result.current.withDetail.detail!.expansion.isExpanded("a")).toBe(
+    expect(withDetail.result.current.detail!.expansion.isExpanded("a")).toBe(
       true
     );
   });

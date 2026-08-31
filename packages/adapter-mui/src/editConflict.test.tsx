@@ -1,7 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { editing } from "./editing";
 import type { ColumnDef } from "./index";
 
 interface Task {
@@ -24,13 +25,15 @@ function table(
     forceMobile?: boolean;
   } = {}
 ) {
+  const onCellEdit = extra.onCellEdit ?? vi.fn();
   return (
     <DataTable
       data={rows}
       columns={COLS}
       rowKey={(r) => r.id}
       urlSync={false}
-      onCellEdit={extra.onCellEdit ?? vi.fn()}
+      onCellEdit={onCellEdit}
+      features={[editing(onCellEdit)]}
       editConflictPolicy={extra.editConflictPolicy}
       forceMobile={extra.forceMobile}
     />

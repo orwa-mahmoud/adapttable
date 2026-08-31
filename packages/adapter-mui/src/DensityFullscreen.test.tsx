@@ -1,7 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { densityChooser } from "./density";
+import { fullscreen } from "./fullscreen";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -44,6 +46,10 @@ describe("density and fullscreen (mui)", () => {
           columns={COLS}
           rowKey={(r) => r.id}
           urlSync={false}
+          features={[
+            ...(extra?.densityChooser ? [densityChooser<Row>()] : []),
+            ...(extra?.fullscreen ? [fullscreen<Row>()] : []),
+          ]}
           {...extra}
         />
       </>

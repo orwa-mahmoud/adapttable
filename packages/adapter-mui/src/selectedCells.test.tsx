@@ -1,7 +1,8 @@
 import { act, fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
 
@@ -33,6 +34,7 @@ describe("selected cells are visible (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[cellNavigation<Row>()]}
         cellNavigation
       />
     );

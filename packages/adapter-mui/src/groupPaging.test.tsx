@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -31,6 +32,12 @@ describe("group paging (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[
+          grouping<Row>("team", {
+            groupPageSize: extra?.groupPageSize as number | undefined,
+            groupRowPageSize: extra?.groupRowPageSize as number | undefined,
+          }),
+        ]}
         groupBy="team"
         {...extra}
       />

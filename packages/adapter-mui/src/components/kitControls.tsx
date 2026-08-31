@@ -2,7 +2,6 @@
  * MUI kit controls — TextField / Button / IconButton / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel, useHeaderFilterOverlay } from "@adapttable/core";
 import {
   BatchEditBarChrome,
   type BatchEditBarProps,
@@ -30,7 +29,6 @@ import {
   GroupMoreButtonChrome,
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
-  hasActiveHeaderFilter,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -54,14 +52,9 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Paper,
-  Popper,
   TextField,
 } from "@mui/material";
-import { useId, useRef, useState } from "react";
-
-import { FiltersIcon } from "../icons";
-import { AutoFilterForm } from "./AutoFilterForm";
+import { useId, useState } from "react";
 
 export type {
   BatchEditBarProps,
@@ -266,55 +259,6 @@ export function FilterHeaderControl<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
   return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
-}
-
-/** Funnel on the column header — the same field the Filters panel draws. */
-export function FilterHeaderTrigger<TRow>(
-  props: Readonly<FilterHeaderControlProps<TRow>>
-) {
-  const active = hasActiveHeaderFilter(props);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
-    props,
-    {
-      nestedSelector: "[role='listbox'],.MuiMenu-root,.MuiPopover-root",
-    }
-  );
-  return (
-    <>
-      <IconButton
-        {...sessionProps}
-        ref={triggerRef}
-        size="small"
-        aria-label={filterLabel(props.def)}
-        data-adapttable-part="filter-header-trigger"
-        data-active={active ? "" : undefined}
-        onClick={() => setOpen(!open)}
-      >
-        <FiltersIcon size={14} />
-      </IconButton>
-      <Popper
-        open={open}
-        anchorEl={triggerRef.current}
-        placement="bottom-start"
-        style={{ zIndex: 1300 }}
-      >
-        <Paper
-          {...sessionProps}
-          elevation={8}
-          data-adapttable-part="filter-header-cell"
-          sx={{ minWidth: "20rem", p: 1 }}
-        >
-          <AutoFilterForm
-            defs={[props.def]}
-            source={source}
-            labels={props.labels}
-            registry={props.registry}
-          />
-        </Paper>
-      </Popper>
-    </>
-  );
 }
 
 function FindSearch({

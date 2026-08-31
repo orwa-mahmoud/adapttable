@@ -11,10 +11,18 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { ExpandChevron, muiColor } from "./components/DesktopTable";
+import { ExpandChevron } from "./components/ExpandToggle";
+import { muiColor } from "./components/DesktopTable";
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { cellNavigation } from "./cell-navigation";
+import { columnSelectionCheckbox } from "./column-selection";
+import { grouping } from "./grouping";
+import { headerFilters } from "./header-filters";
+import { rowEditing } from "./editing";
+import { rowDetail } from "./row-detail";
+import { rowPinning } from "./row-pinning";
 import { rowReorder } from "./row-reorder";
 
 interface Person {
@@ -78,7 +86,11 @@ function mount(
 const BULK = [{ key: "x", label: "Export", onClick: vi.fn() }];
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  features: [rowReorder(vi.fn()), bulkActionsFeature<Person>(BULK)],
+  features: [
+    rowReorder(vi.fn()),
+    bulkActionsFeature<Person>(BULK),
+    rowDetail((row) => <div>detail-{row.id}</div>),
+  ],
   bulkActions: BULK,
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {
@@ -180,6 +192,14 @@ describe("DesktopTable layered chrome", () => {
       headerFilters: true,
       filters: [{ key: "name", type: "text", label: "Name" }],
       cellNavigation: true,
+      features: [
+        ...fullChrome.features,
+        headerFilters<Person>(),
+        cellNavigation<Person>(),
+        columnSelectionCheckbox<Person>(),
+        rowEditing(onRowEdit),
+        rowPinning<Person>({ pinnedRowIds: { top: ["a"], bottom: [] } }),
+      ],
       columnSelectionCheckbox: true,
       resizableColumns: true,
       rowEditing: true,
@@ -244,6 +264,7 @@ describe("DesktopTable layered chrome", () => {
     const { container } = mount({
       ...fullChrome,
       groupBy: "city",
+      features: [...fullChrome.features, grouping<Person>("city")],
     });
     expect(
       container.querySelector('[data-adapttable-part="group-label"]')

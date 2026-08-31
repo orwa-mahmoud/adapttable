@@ -4,7 +4,8 @@ import { sparklineColumn } from "@adapttable/core/sparkline";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { virtualize } from "./virtualize";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -980,7 +981,10 @@ describe("<DataTable> (unstyled)", () => {
         rows: many,
         isMobile: true,
         mode: "infinite",
-        override: { virtualize: true, maxHeight: 400 },
+        override: {
+          features: [virtualize()],
+          maxHeight: 400,
+        },
       },
       "limit=40"
     );

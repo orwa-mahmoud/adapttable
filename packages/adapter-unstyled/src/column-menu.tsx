@@ -1,0 +1,22 @@
+import {
+  COLUMN_MENU,
+  type ColumnMenuSlotProps,
+  extendFeature,
+  slotRender,
+  type TableFeature,
+} from "@adapttable/core/adapter";
+import { columnMenu as core } from "@adapttable/core/features";
+import { useClassNames } from "./components/classNamesContext";
+
+import { ColumnMenu } from "./components/ColumnMenu";
+
+function ColumnMenuSlot(props: ColumnMenuSlotProps<never>) {
+  const classNames = useClassNames();
+  return <ColumnMenu {...props} classNames={classNames} />;
+}
+
+export function columnMenu<TRow>(): TableFeature<TRow> {
+  return extendFeature(core<TRow>(), [
+    slotRender(COLUMN_MENU, (props) => <ColumnMenuSlot {...props} />),
+  ]);
+}

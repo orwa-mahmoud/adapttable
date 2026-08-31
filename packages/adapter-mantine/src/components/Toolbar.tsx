@@ -2,12 +2,13 @@ import { pageSizeOptions } from "@adapttable/core";
 import {
   ExportAnnouncer,
   type ToolbarChromeProps,
+  FeatureSlot,
+  FILTER_POPOVER,
 } from "@adapttable/core/adapter";
 import { Badge, Button, Group, Select, Text, TextInput } from "@mantine/core";
 import type { ReactNode } from "react";
 
 import { FiltersIcon, SearchIcon } from "../icons";
-import { FilterPopover } from "./FilterPopover";
 
 /**
  * Props for {@link Toolbar}: the shared chrome surface from core plus the
@@ -130,22 +131,23 @@ export function Toolbar<TRow>({
           />
         )}
         {toolbar}
-        {hasFilters &&
-          (filtersMode === "popover" ? (
-            <FilterPopover
-              open={filtersOpen}
-              onClose={onCloseFilters}
-              filters={filters}
-              activeFilterCount={activeFilterCount}
-              onClearFilters={onClearFilters}
-              labels={labels}
-              dir={dir}
-            >
-              {filtersButton}
-            </FilterPopover>
-          ) : (
-            filtersButton
-          ))}
+        {hasFilters && filtersMode === "popover" ? (
+          <FeatureSlot
+            slot={FILTER_POPOVER}
+            props={{
+              open: filtersOpen,
+              onClose: onCloseFilters,
+              filters,
+              activeFilterCount,
+              onClearFilters,
+              labels,
+              dir,
+              children: filtersButton,
+            }}
+          />
+        ) : (
+          hasFilters && filtersButton
+        )}
         {savedViewsMenu}
         {columnMenu}
         {onUndo && onRedo && (

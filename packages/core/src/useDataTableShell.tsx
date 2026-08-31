@@ -1,53 +1,48 @@
-import type { ReactNode } from "react";
+import type { ReactNode, RefCallback, RefObject } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useTableStatusAnnouncement } from "./a11y/useTableStatusAnnouncement";
-import { autoSizeColumns as autoSizeAllColumns } from "./columns/autoSizeColumns";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "./columns/columnMenuModel";
 import { flattenColumnTree } from "./columns/columnTree";
-import { asGesture, useTableEditHistory } from "./editing/editHistory";
-import { makeExportCsvHandler, resolveExportCsv } from "./export/tableCsv";
-import { useExportHandler } from "./export/useExportHandler";
 import { bindFeatureHostFn } from "./features/currentHost";
 import {
   featureHostOf,
   rememberFeatureHost,
   useTableFeatures,
 } from "./features/featureHost";
+import {
+  DISABLED_EXPORT,
+  DISABLED_FIND,
+  DISABLED_FULLSCREEN,
+  disabledColumnWindow,
+  disabledGridFocus,
+  disabledHistory,
+} from "./features/shellLiveStubs";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
 import type { FilterDef } from "./filters/filterDefs";
 import type { FilterTypeRegistry } from "./filters/filterRegistry";
-import { useFindFocus, useFindInTable } from "./find/useFindInTable";
-import { cellFillHandler, cellPasteHandler } from "./focus/pasteRange";
-import { selectionStats } from "./focus/selectionStats";
-import { useGridFocus } from "./focus/useGridFocus";
-import { useFullscreen } from "./layout/useFullscreen";
+import type { AssemblyFns } from "./layout/leanAssembly";
 import type { BaseDataTableProps } from "./props";
-import { coveredAddressSet } from "./rows/cellSpan";
-import type { RowPinState } from "./rows/rowPinning";
 import type { QuerySupport } from "./source/queryContract";
 import type { TableSource } from "./source/TableSource";
-import {
-  type DataModeProps,
-  isDeclarativeFilters,
-  useTableData,
-} from "./source/useTableData";
+import { isDeclarativeFilters } from "./source/isDeclarativeFilters";
+import type { DataModeProps } from "./source/useTableDataImpl";
+import { useTableDataLean } from "./source/useTableDataLean";
 import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
-import { useRowPinningUrlState } from "./url/useRowPinningUrlState";
 import {
   printToolbar,
   undoRedoToolbar,
-  useChromeBodyData,
   useChromeScrollReset,
   useFilterTriggerToggle,
   useTableChrome,
   viewControlsToolbar,
 } from "./useTableChrome";
-import { useColumnWindow } from "./virtual/useColumnWindow";
+import type { ChromeBodyData } from "./virtual/chromeBodyShared";
+import type { VirtualTableRow } from "./virtual/virtualTableModel";
 
 export type { FacetMap, QuerySupport, UrlStateAdapter };
 
@@ -138,7 +133,7 @@ export function useDataTableShell<TRow>(
   );
   // Resolve the data tier (source > onQueryChange server > frontend) and the
   // declarative-filter runtime (defs, chip labels, URL keys, predicate).
-  const { source, runtime } = useTableData<TRow>({
+  const { source, runtime } = useTableDataLean<TRow>({
     locale: props.locale,
     source: props.source,
     data: props.data,
@@ -163,10 +158,10 @@ export function useDataTableShell<TRow>(
     facetKeys: props.facetKeys,
     facets: props.facets,
   });
-  const { history, onCellEdit: recordingCellEdit } = useTableEditHistory<TRow>({
-    ...props,
-    columns: dataColumns,
-  });
+  // History, find, grid, export and fullscreen mount in-tree through
+  // {@link ShellLiveGate}. The hook only holds inert stand-ins so this
+  // module never imports those implementations.
+  const history = disabledHistory<TRow>();
 
   // Declarative `filters` array → the auto-built form; JSX passes through.
   const autoForm =
@@ -177,27 +172,22 @@ export function useDataTableShell<TRow>(
     isDeclarativeFilters(props.filters) || props.filters === undefined
       ? autoForm
       : props.filters;
-  const pinProps = useShellRowPins(props, urlAdapter);
   const chromeProps = {
     ...props,
-    onCellEdit: recordingCellEdit,
+    urlAdapter,
+    onCellEdit: props.onCellEdit,
     source,
     filters: filtersNode,
     filterDefs: runtime.defs,
     filterLabels: { ...runtime.filterLabels, ...props.filterLabels },
     summaryRow: bindFeatureHostFn(featureHost, props.summaryRow),
     groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
-    ...pinProps,
   };
   rememberFeatureHost(chromeProps, featureHost);
   const chrome = useTableChrome<TRow>(chromeProps);
   const { table, confirm, getRowId } = chrome;
   const { labels } = table;
   const [filtersOpen, setFiltersOpen] = useState(false);
-  // Cell navigation is wired HERE rather than in `useDataTable`, so a headless
-  // consumer of the main entry never pays for a grid it did not ask for — the
-  // bundle budget catches that regression, which is how this landed here.
-  //
   // The row count is the DATASET total and `windowStart` is where the rendered
   // slice begins, so Ctrl+End reaches the real last row and the ARIA counts stay
   // truthful under virtualization. Derived here so no adapter has to know: an
@@ -206,89 +196,11 @@ export function useDataTableShell<TRow>(
     chrome.source.paginationMode === "paged"
       ? Math.max(0, (chrome.source.page - 1) * chrome.source.limit)
       : 0;
-  // Find state first: the grid marks the cells it matched, and the effect
-  // below walks focus to whichever match the user is on.
-  const find = useFindInTable<TRow>({
-    enabled: props.findInTable === true,
-    rows: chrome.source.rows,
-    columns: chrome.columnLayout.visibleColumns,
-    firstRowIndex: windowStart,
-  });
-  const coveredCells = useMemo(
-    () =>
-      coveredAddressSet({
-        rows: chrome.source.rows,
-        columns: chrome.columnLayout.visibleColumns,
-        getCellSpan: props.getCellSpan,
-        firstRowIndex: windowStart,
-        pinOffset: chrome.columnLayout.pinOffset,
-      }),
-    [
-      chrome.source.rows,
-      chrome.columnLayout.visibleColumns,
-      chrome.columnLayout.pinOffset,
-      props.getCellSpan,
-      windowStart,
-    ]
-  );
-  const isCoveredCell = useCallback(
-    (cell: { row: number; col: number }) =>
-      coveredCells.has(`${cell.row}:${cell.col}`),
-    [coveredCells]
-  );
-  // One scroll box, two windows: the rows track its vertical scrolling and the
-  // columns its horizontal, so the adapters attach a single ref.
+  const find = DISABLED_FIND;
   const scrollBoxElement = useRef<HTMLElement | null>(null);
-  // The horizontal window reads the same scroll box the vertical one does.
-  const columnWindow = useColumnWindow<TRow>({
-    columns: chrome.columnLayout.visibleColumns,
-    enabled: props.virtualizeColumns === true,
-    widths: chrome.columnLayout.state.widths,
-    pinnedKeys: new Set(
-      Object.keys(chrome.columnLayout.state.pinned).filter(
-        (key) => chrome.columnLayout.state.pinned[key] !== undefined
-      )
-    ),
-    getScrollElement: () => scrollBoxElement.current,
-  });
-
-  const gridFocus = useGridFocus<TRow>({
-    enabled: props.cellNavigation === true,
-    headerCheckbox: props.columnSelectionCheckbox === true,
-    rowCount: Math.max(
-      chrome.source.total,
-      windowStart + chrome.source.rows.length
-    ),
-    columns: chrome.columnLayout.visibleColumns,
-    columnsWindowed: columnWindow.enabled,
-    rows: chrome.source.rows,
-    firstRowIndex: windowStart,
-    dir: props.dir,
-    labels,
-    onCut: props.onCellCut,
-    // With no `onCellPaste`, the ordinary edit channel takes each cell: a table
-    // that can be edited can be pasted into with nothing extra wired. A batch
-    // is ONE undo entry, so it records itself rather than per cell.
-    onPaste: asGesture(cellPasteHandler(props), history.record),
-    onFill: asGesture(cellFillHandler(props), history.record),
-    onUndo: history.undo,
-    onRedo: history.redo,
-    onFind: find.openBar,
-    matchKeys: find.matchKeys,
-    currentMatch: find.current,
-    isCoveredCell,
-  });
-  useFindFocus(find.current, gridFocus.focusCell, gridFocus.selectRange);
-  // Computed here rather than in eight adapters: the rectangle, the rows and
-  // the window offset all live on this side, and an adapter that derived any
-  // of them itself would be the one place the figures could go wrong.
-  const stats = selectionStats({
-    enabled: props.selectionStats === true,
-    range: gridFocus.range,
-    rows: chrome.source.rows,
-    columns: chrome.columnLayout.visibleColumns,
-    firstRowIndex: windowStart,
-  });
+  const columnWindow = disabledColumnWindow(chrome.columnLayout.visibleColumns);
+  const gridFocus = disabledGridFocus();
+  const stats = null;
   const filtersTrigger = useFilterTriggerToggle(filtersOpen, setFiltersOpen);
   // Layout-visible columns WITHOUT device filtering: the same button must
   // produce the same file on phone and desktop. The selection, the full column
@@ -296,36 +208,10 @@ export function useDataTableShell<TRow>(
   // `columns: "all"` and `scope: "range"` work without the host wiring anything
   // up — the columns here are the same list cell navigation addresses, which is
   // what makes a range's column indices mean the same thing on both sides.
-  const exportHandler = useExportHandler(
-    makeExportCsvHandler(
-      props.exportCsv,
-      chrome.source,
-      chrome.columnLayout.visibleColumns,
-      {
-        selectedIds: table.selection?.selectedIds,
-        getRowId,
-        allColumns: chrome.allColumns,
-        range: gridFocus.range,
-        firstRowIndex: windowStart,
-        getCellSpan: props.getCellSpan,
-        grouping: chrome.grouping,
-        tree: chrome.tree,
-        groupTotal: labels.groupTotal,
-        summaryRow: chromeProps.summaryRow,
-      },
-      featureHost
-    ),
-    labels,
-    // The button names the format it produces, so a spreadsheet writer relabels
-    // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv, featureHost)?.writer?.extension,
-    chrome.featureNotices.some((notice) => notice.kind === "export-all-page")
-  );
+  const exportHandler = DISABLED_EXPORT;
   // The chrome owns it: progressive column hiding measures this element.
   const rootRef = chrome.rootRef;
-  // Fullscreen also decides where every overlay portals: promoted, the rest
-  // of the document is hidden, so a menu on `document.body` is invisible.
-  const fullscreen = useFullscreen(rootRef.current);
+  const fullscreen = DISABLED_FULLSCREEN;
   useChromeScrollReset(rootRef, chrome, chromeProps);
   // Name the root the way the scroll box is named: the column menu sizes
   // columns by measuring cells, and it has to know which table is its own.
@@ -338,43 +224,28 @@ export function useDataTableShell<TRow>(
    * Measures the DOM, because a cell's width is what the browser laid out
    * rather than anything the data knows.
    */
-  const autoSizeColumns = useCallback(
-    () =>
-      autoSizeAllColumns(
-        rootRef.current,
-        chrome.columnLayout.visibleColumns.map((column) => column.key),
-        chrome.columnLayout.setWidth
-      ),
-    [chrome.columnLayout, rootRef]
-  );
-  const autoSizeColumn = useCallback(
-    (key: string) =>
-      autoSizeAllColumns(rootRef.current, [key], chrome.columnLayout.setWidth),
-    [chrome.columnLayout, rootRef]
-  );
-  const {
-    virtualization,
-    groupingEntries,
-    treeEntries,
-    loadMoreRef,
-    canLoadMore,
-    virtualScrollRef: bodyScrollRef,
-    pinnedTopRows,
-    pinnedBottomRows,
-  } = useChromeBodyData(chrome, chromeProps);
-  const virtualScrollRef = useCallback(
-    (node: HTMLElement | null) => {
-      scrollBoxElement.current = node;
-      // Desktop kits attach this to an unnamed overflow box. The mobile card
-      // list already names itself `cards` — overwriting that would hide the
-      // list from window-offset measurement and from every cards query.
-      if (node && !node.dataset.adapttablePart) {
-        node.dataset.adapttablePart = "scroll-box";
-      }
-      bodyScrollRef(node);
-    },
-    [bodyScrollRef]
-  );
+  const autoSizeColumns =
+    chrome.autoSizeColumns ??
+    (() => {
+      // Column sizing lives on the layout feature.
+    });
+  const autoSizeColumn =
+    chrome.autoSizeColumn ??
+    ((_key: string) => {
+      // Column sizing lives on the layout feature.
+    });
+  // Name the scroll box here so tests and a mock that skips the body gate
+  // still have a ref that both windows can find. The gate composes the
+  // body's own scroll callback on top of this.
+  const nameScrollBox = useCallback<RefCallback<HTMLElement>>((node) => {
+    scrollBoxElement.current = node;
+    // Desktop kits attach this to an unnamed overflow box. The mobile card
+    // list already names itself `cards` — overwriting that would hide the
+    // list from window-offset measurement and from every cards query.
+    if (node && !node.dataset.adapttablePart) {
+      node.dataset.adapttablePart = "scroll-box";
+    }
+  }, []);
 
   // The injected actions column is first-class in column management: the layout
   // state treats its reserved key like any column key, so the Columns menu can
@@ -386,19 +257,8 @@ export function useDataTableShell<TRow>(
   const reorderPinned =
     chrome.columnLayout.state.pinned[REORDER_COLUMN_KEY] === "start";
 
-  const grouping =
-    chrome.grouping && groupingEntries
-      ? { ...chrome.grouping, entries: groupingEntries }
-      : chrome.grouping;
-  // Same shape for the hierarchy: what the body renders is the window, not the
-  // whole walked tree.
-  const tree =
-    chrome.tree && treeEntries
-      ? { ...chrome.tree, entries: treeEntries }
-      : chrome.tree;
-
-  // The kit-agnostic slice of a table renderer's props — the adapter spreads
-  // this and adds its kit's row `size` and accent colour.
+  // Body-dependent fields start inert. {@link finishDataTableShell} overlays
+  // the window, pins, and load-more sentinel once a body path has run in-tree.
   const tableProps = {
     table,
     gridFocus,
@@ -409,8 +269,8 @@ export function useDataTableShell<TRow>(
     actionsPinned,
     rowReorder,
     reorderPinned,
-    pinnedTopRows,
-    pinnedBottomRows,
+    pinnedTopRows: [] as readonly TRow[],
+    pinnedBottomRows: [] as readonly TRow[],
     rowPinning: chrome.rowPinning,
     getCellSpan: props.getCellSpan,
     cellSpanAppearance: props.cellSpanAppearance,
@@ -425,14 +285,16 @@ export function useDataTableShell<TRow>(
     ),
     confirm,
     getRowId,
-    rowEntries: virtualization.enabled ? virtualization.rows : undefined,
-    paddingTop: virtualization.paddingTop,
-    paddingBottom: virtualization.paddingBottom,
-    measureElement: virtualization.measureElement,
-    measureRowPair: virtualization.measureRowPair,
+    rowEntries: undefined as readonly VirtualTableRow<TRow>[] | undefined,
+    paddingTop: 0,
+    paddingBottom: 0,
+    measureElement: undefined as
+      ChromeBodyData<TRow>["virtualization"]["measureElement"] | undefined,
+    measureRowPair: undefined as
+      ChromeBodyData<TRow>["virtualization"]["measureRowPair"] | undefined,
     columnWindow,
     fitColumns: props.fitColumns,
-    tree,
+    tree: chrome.tree,
     stickyHeader: props.stickyHeader,
     stickyTop: props.stickyTop,
     headerFilters:
@@ -442,7 +304,7 @@ export function useDataTableShell<TRow>(
     filterRegistry: runtime.registry,
     pinOffset: chrome.columnLayout.pinOffset,
     maxHeight: props.maxHeight,
-    virtualScrollRef,
+    virtualScrollRef: nameScrollBox,
     setWidth: props.resizableColumns ? chrome.columnLayout.setWidth : undefined,
     columnWidths: chrome.columnLayout.state.widths,
     resizeLabel: table.labels.resizeColumn,
@@ -461,8 +323,9 @@ export function useDataTableShell<TRow>(
     summaryRow: chromeProps.summaryRow,
     expansion: chrome.detail?.expansion,
     editing: chrome.editing,
-    grouping,
+    grouping: chrome.grouping,
     dir: props.dir,
+    assembly: (props as { assembly?: Partial<AssemblyFns<TRow>> }).assembly,
   };
 
   // The kit-agnostic slice of the toolbar's props — the adapter spreads this
@@ -486,7 +349,8 @@ export function useDataTableShell<TRow>(
     filters: filtersNode,
     onClearFilters: chrome.clearFilters,
     // Hidden in the grouped full-set view, where page size has no effect.
-    showRowsPerPage: canLoadMore && !chrome.grouping,
+    // The body gate overlays the real sentinel; the shell starts inert.
+    showRowsPerPage: false,
     onAddRow: chrome.rowMutations.canAdd
       ? chrome.rowMutations.addRow
       : undefined,
@@ -534,6 +398,18 @@ export function useDataTableShell<TRow>(
     /** The table's resolved URL backend — pass to saved-views UIs. */
     urlAdapter,
     chrome,
+    /**
+     * Props the chrome was built with. The body gate reads these.
+     */
+    chromeProps,
+    /**
+     * When true, {@link DataTableShellView} leaves `tableProps` alone —
+     * tests that inject a virtual window set this so the gate cannot
+     * overwrite `rowEntries`.
+     */
+    skipChromeBody: false,
+    /** The overflow box both windows attach to. */
+    scrollBoxElement,
     table,
     labels,
     filtersNode,
@@ -546,8 +422,8 @@ export function useDataTableShell<TRow>(
     /** Size every rendered column to its content. */
     autoSizeColumns,
     autoSizeColumn,
-    loadMoreRef,
-    canLoadMore,
+    loadMoreRef: { current: null } as RefObject<HTMLDivElement | null>,
+    canLoadMore: false,
     hasRowActions,
     hasRowReorder,
     tableProps,
@@ -558,41 +434,61 @@ export function useDataTableShell<TRow>(
 }
 
 /**
- * Uncontrolled pins write the URL; a host that passes `pinnedRowIds` owns
- * the lists and the URL hook stays a no-op.
+ * Overlay the in-tree chrome-body result onto a shell the hook already built.
+ *
+ * The hook never calls TanStack (or the plain body hook). Adapters finish
+ * through {@link DataTableShellView}, which mounts the right child and
+ * calls this.
+ *
+ * @public
  */
-function useShellRowPins<TRow>(
-  props: Pick<
-    DataTableShellProps<TRow>,
-    "pinnedRowIds" | "onPinnedRowIdsChange" | "urlSync" | "urlKey"
-  >,
-  urlAdapter: UrlStateAdapter
-): {
-  pinnedRowIds: RowPinState | undefined;
-  onPinnedRowIdsChange: ((next: RowPinState) => void) | undefined;
-} {
-  const requested =
-    props.pinnedRowIds !== undefined ||
-    props.onPinnedRowIdsChange !== undefined;
-  const pinUrl = useRowPinningUrlState({
-    urlAdapter,
-    urlSync:
-      props.urlSync !== false && requested && props.pinnedRowIds === undefined,
-    urlKey: props.urlKey,
-  });
-  if (!requested) {
-    return { pinnedRowIds: undefined, onPinnedRowIdsChange: undefined };
-  }
+export function finishDataTableShell<TRow>(
+  shell: DataTableShellResult<TRow>,
+  body: ChromeBodyData<TRow>
+): DataTableShellResult<TRow> {
+  const virtualScrollRef: RefCallback<HTMLElement> = (node) => {
+    shell.tableProps.virtualScrollRef(node);
+    body.virtualScrollRef(node);
+  };
+  const grouping =
+    shell.chrome.grouping && body.groupingEntries
+      ? { ...shell.chrome.grouping, entries: body.groupingEntries }
+      : shell.chrome.grouping;
+  const tree =
+    shell.chrome.tree && body.treeEntries
+      ? { ...shell.chrome.tree, entries: body.treeEntries }
+      : shell.chrome.tree;
   return {
-    pinnedRowIds: props.pinnedRowIds ?? pinUrl.pinnedRowIds,
-    onPinnedRowIdsChange: (next: RowPinState) => {
-      if (props.pinnedRowIds === undefined) {
-        pinUrl.onPinnedRowIdsChange(next);
-      }
-      props.onPinnedRowIdsChange?.(next);
+    ...shell,
+    loadMoreRef: body.loadMoreRef,
+    canLoadMore: body.canLoadMore,
+    tableProps: {
+      ...shell.tableProps,
+      pinnedTopRows: body.pinnedTopRows,
+      pinnedBottomRows: body.pinnedBottomRows,
+      rowEntries: body.virtualization.enabled
+        ? body.virtualization.rows
+        : undefined,
+      paddingTop: body.virtualization.paddingTop,
+      paddingBottom: body.virtualization.paddingBottom,
+      measureElement: body.virtualization.measureElement,
+      measureRowPair: body.virtualization.measureRowPair,
+      columnWindow: body.columnWindow ?? shell.tableProps.columnWindow,
+      grouping,
+      tree,
+      virtualScrollRef,
+    },
+    toolbarProps: {
+      ...shell.toolbarProps,
+      showRowsPerPage: body.canLoadMore && !shell.chrome.grouping,
     },
   };
 }
+
+/** What {@link useDataTableShell} returns, before or after the body gate. */
+export type DataTableShellResult<TRow> = ReturnType<
+  typeof useDataTableShell<TRow>
+>;
 
 export type { FilterRuntime } from "./filters/filterDefs";
 export type { GroupAggregatesFn } from "./grouping/groupRows";

@@ -35,11 +35,16 @@ import { memo, useMemo } from "react";
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 import { type SharedProps } from "./DesktopTable";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandButton } from "./ExpandToggle";
-import { GroupHeaderCard } from "./GroupHeader";
-import { RowEditActions, RowReorderButtons, TreeToggle } from "./kitControls";
+import { cellDisplay } from "./DisplayCell";
 import { RowActionButtons } from "./RowActionButtons";
+import {
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
+} from "./featureSlots";
 
 /** Per-card inputs for the memoized {@link MobileCardBase}. */
 interface MobileCardProps<TRow> {
@@ -194,28 +199,18 @@ function MobileCardBase<TRow>({
     column,
     label: resolveMobileLabel(column),
     value: (
-      <EditableDataCell
-        activateClassName={classNames.editCellActivate}
-        errorClassName={classNames.editCellError}
-        saveErrorClassName={classNames.editCellSaveError}
-        rollbackClassName={classNames.editCellRollback}
-        editorClassName={classNames.editCellEditor}
+      <OptionalEditableCell
         editing={editing}
         row={row}
         column={column}
         rowId={id}
+        rowIndex={index}
         rows={rows}
         columns={columns}
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={
-          column.Cell ? (
-            <column.Cell row={row} rowIndex={index} />
-          ) : (
-            column.accessor?.(row)
-          )
-        }
+        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -239,7 +234,7 @@ function MobileCardBase<TRow>({
       className={cx(classNames.card, className)}
     >
       {treeEntry && (
-        <TreeToggle
+        <OptionalTreeToggle
           toggleClassName={classNames.treeToggle}
           spacerClassName={classNames.treeSpacer}
           entry={treeEntry}
@@ -258,11 +253,12 @@ function MobileCardBase<TRow>({
         />
       )}
       {onToggleExpand && (
-        <ExpandButton
-          expanded={expanded}
-          labels={labels}
-          classNames={classNames}
-          onToggle={() => onToggleExpand(id)}
+        <OptionalExpandToggle
+          id={id}
+          expanded={Boolean(expanded)}
+          onToggle={onToggleExpand}
+          expandLabel={labels.expandRow}
+          collapseLabel={labels.collapseRow}
         />
       )}
       {renderCard
@@ -291,7 +287,7 @@ function MobileCardBase<TRow>({
             </div>
           ))}
       {rowReorder && (
-        <RowReorderButtons
+        <OptionalRowReorderButtons
           reorder={rowReorder}
           labels={labels}
           localIndex={index}
@@ -304,7 +300,7 @@ function MobileCardBase<TRow>({
         />
       )}
       {editing?.rowEditing && (
-        <RowEditActions
+        <OptionalRowEditActions
           rowEditing={editing.rowEditing}
           row={row}
           rowId={id}
@@ -498,12 +494,12 @@ export function MobileCards<TRow>({
             ) {
               return (
                 <li key={entry.key} style={{ display: "block" }}>
-                  <GroupHeaderCard
+                  <OptionalGroupHeaderCard
                     entry={entry}
-                    columns={columns}
+                    columns={columns as never}
                     selection={selection}
                     labels={labels}
-                    classNames={classNames}
+                    compact={false}
                     onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
                     onShowMore={grouping.showMore}
                   />

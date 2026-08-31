@@ -1,4 +1,5 @@
 import {
+  extendFeature,
   FIND_BAR,
   slotRender,
   type TableFeature,
@@ -13,8 +14,7 @@ import { FindBar } from "./components/kitControls";
  * @public
  */
 export function findInTable<TRow>(): TableFeature<TRow> {
-  return {
-    ...core<TRow>(),
-    renders: [slotRender(FIND_BAR, (props) => <FindBar {...props} />)],
-  };
+  return extendFeature(core<TRow>(), [
+    slotRender(FIND_BAR, (props) => <FindBar {...props} />),
+  ]);
 }

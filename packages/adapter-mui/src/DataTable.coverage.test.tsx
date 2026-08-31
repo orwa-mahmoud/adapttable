@@ -7,8 +7,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
 import { LoadingState } from "./components/TableSkeleton";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -52,6 +54,7 @@ function mockBodyData(
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: rows,
@@ -105,7 +108,10 @@ function mount(
 
 describe("MUI coverage gaps", () => {
   it("renders the filter popover with NO modal backdrop/scrim", () => {
-    mount({ filters: <div>filter body</div> });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // The popover is a non-modal Popper, so the background stays interactive:
@@ -116,7 +122,10 @@ describe("MUI coverage gaps", () => {
   });
 
   it("closes the filter popover on outside click (ClickAwayListener)", async () => {
-    mount({ filters: <div>filter body</div> });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // ClickAwayListener arms its outside-click guard on the next tick.
@@ -131,7 +140,10 @@ describe("MUI coverage gaps", () => {
   });
 
   it("closes the filter popover on Escape (and only Escape)", async () => {
-    mount({ filters: <div>filter body</div> });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     const body = screen.getByText("filter body");
     // The document-level listener must ignore every other key — typing in a
@@ -149,6 +161,7 @@ describe("MUI coverage gaps", () => {
     mount(
       {
         filters: <div>filter body</div>,
+        features: [filtersFeature<Row>([])],
         filterLabels: { status: (v) => `Status: ${v}` },
         onClearFilters,
       },
@@ -167,6 +180,7 @@ describe("MUI coverage gaps", () => {
       {
         filters: <div>filter body</div>,
         filtersMode: "drawer",
+        features: [filtersFeature<Row>([])],
         filterLabels: { status: (v) => `Status: ${v}` },
         onClearFilters,
       },
@@ -183,7 +197,11 @@ describe("MUI coverage gaps", () => {
   });
 
   it("closes the filter drawer from its Done button", async () => {
-    mount({ filters: <div>filter body</div>, filtersMode: "drawer" });
+    mount({
+      filters: <div>filter body</div>,
+      filtersMode: "drawer",
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // The drawer's Done button hands control back to DataTable, which flips
@@ -387,6 +405,7 @@ describe("MUI coverage gaps", () => {
     mount({
       filters: <div>filter body</div>,
       filtersMode: "drawer",
+      features: [filtersFeature<Row>([])],
       dir: "rtl",
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
@@ -400,7 +419,11 @@ describe("MUI coverage gaps", () => {
   });
 
   it("anchors the RTL filter popover (bottom-start) with no backdrop", () => {
-    mount({ filters: <div>filter body</div>, dir: "rtl" });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+      dir: "rtl",
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // dir="rtl" flips the Popper placement to bottom-start; it stays non-modal.
@@ -417,7 +440,14 @@ describe("MUI coverage gaps", () => {
     // paddingBottom > 0 → the trailing `paddingBottom > 0 &&` spacer renders
     // (MobileCards true branch). paddingTop is 0 so only the bottom spacer.
     mockBodyData([{ row: ROWS[1]!, index: 1, key: "b" }], 0, 80);
-    mount({ forceMobile: true, virtualize: true }, "infinite");
+    mount(
+      {
+        forceMobile: true,
+        virtualize: true,
+        features: [virtualize<Row>()],
+      },
+      "infinite"
+    );
     const list = screen.getByRole("list");
     expect(within(list).getByText("Bob")).toBeInTheDocument();
     // The list's direct spacer children: a bottom spacer (height 80) but no top

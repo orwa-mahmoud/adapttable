@@ -38,7 +38,11 @@
       "replacesProps": ["pinnedRowIds", "onPinnedRowIdsChange"],
       "classification": "headless",
       "subpath": "row-pinning",
-      "implementation": ["core/src/rows/rowPinning.ts"],
+      "implementation": [
+        "core/src/rows/rowPinning.ts",
+        "core/src/url/useRowPinningUrlState.ts",
+        "core/src/features/row-pinning.tsx"
+      ],
       "adapterComponents": [],
       "standardPreset": false,
       "note": "Pins reorder the row model and set a part name; no dedicated kit component.",
@@ -196,12 +200,15 @@
       "classification": "engine",
       "subpath": "virtualize",
       "implementation": [
+        "core/src/features/virtualize.tsx",
+        "core/src/virtual/chromeBodyShared.ts",
+        "core/src/virtual/useVirtualChromeBodyData.ts",
         "core/src/virtual/useTableVirtualization.ts",
         "core/src/virtual/measureRowPair.ts"
       ],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "Windowing engine. Owned virtualizer replaces @tanstack/react-virtual in v3; changes render semantics so it stays explicit.",
+      "note": "Windowing engine. Composing virtualize() fills CHROME_BODY with the TanStack-backed path; a table that never imports it never carries @tanstack/react-virtual.",
       "requiresConfig": false
     },
     "columnMenu": {
@@ -259,7 +266,10 @@
       "replacesProps": ["cellNavigation"],
       "classification": "adapter",
       "subpath": "cell-navigation",
-      "implementation": ["core/src/focus/useGridFocus.ts"],
+      "implementation": [
+        "core/src/focus/useGridFocus.ts",
+        "core/src/features/cell-navigation.tsx"
+      ],
       "adapterComponents": ["FillHandle"],
       "standardPreset": false,
       "note": "Range selection, clipboard and the fill handle.",
@@ -345,7 +355,8 @@
       "implementation": [
         "core/src/filters/filterDefs.ts",
         "core/src/filters/filterTree.ts",
-        "core/src/filters/filterChrome.ts"
+        "core/src/filters/filterChrome.ts",
+        "core/src/features/filters.tsx"
       ],
       "adapterComponents": [
         "AutoFilterForm",
@@ -398,7 +409,8 @@
       "subpath": "selection-stats",
       "implementation": [
         "core/src/focus/selectionStats.ts",
-        "core/src/focus/SelectionStatsBar.tsx"
+        "core/src/focus/SelectionStatsBar.tsx",
+        "core/src/features/selection-stats.tsx"
       ],
       "adapterComponents": ["SelectionStatsBar"],
       "standardPreset": true,
@@ -469,6 +481,26 @@
       "adapterComponents": [],
       "standardPreset": true,
       "note": "Measures content and writes widths; no new chrome.",
+      "requiresConfig": false
+    },
+    "rowActions": {
+      "id": "row-actions",
+      "replacesProps": [
+        "onAddRow",
+        "onDuplicateRow",
+        "onDeleteRow",
+        "confirmDeleteRow",
+        "rowActions"
+      ],
+      "classification": "headless",
+      "subpath": "row-actions",
+      "implementation": [
+        "core/src/features/row-actions.tsx",
+        "core/src/rows/rowMutations.ts"
+      ],
+      "adapterComponents": [],
+      "standardPreset": false,
+      "note": "Add / duplicate / delete and the host row-actions column. A three-prop table has no trailing actions.",
       "requiresConfig": false
     },
     "columnSelectionCheckbox": {
@@ -609,7 +641,7 @@
       },
       {
         "id": "enabling-props",
-        "removes": "49 enabling props on DataTable",
+        "removes": "54 enabling props on DataTable",
         "v2Path": "<DataTable onRowReorder={fn} groupBy=\"team\" virtualize />",
         "v3Path": "<DataTable features={[rowReorder(fn), grouping(\"team\"), virtualize()]} />",
         "packages": ["@adapttable/core", "every @adapttable/<kit>"],
@@ -664,7 +696,12 @@
           "undoRedoButtons": "undoRedoButtons",
           "multiSort": "multiSort",
           "fitColumns": "fitColumns",
-          "columnSelectionCheckbox": "columnSelectionCheckbox"
+          "columnSelectionCheckbox": "columnSelectionCheckbox",
+          "onAddRow": "rowActions",
+          "onDuplicateRow": "rowActions",
+          "onDeleteRow": "rowActions",
+          "confirmDeleteRow": "rowActions",
+          "rowActions": "rowActions"
         },
         "unmappedProps": []
       },

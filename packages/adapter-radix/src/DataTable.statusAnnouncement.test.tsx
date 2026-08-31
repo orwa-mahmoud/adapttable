@@ -9,7 +9,7 @@ import { createMemoryAdapter } from "@adapttable/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { renderRadix } from "./test-utils";
 

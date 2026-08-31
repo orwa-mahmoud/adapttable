@@ -2,7 +2,7 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 

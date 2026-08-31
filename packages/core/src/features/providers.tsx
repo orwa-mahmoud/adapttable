@@ -327,6 +327,24 @@ export function slotRender<TProps>(
   return { slot, render };
 }
 
+/**
+ * Keep a core feature's live renders and append kit chrome.
+ *
+ * A kit that replaces `renders` drops the hook-owning slot the factory
+ * already filled. Concatenate instead.
+ *
+ * @public
+ */
+export function extendFeature<TRow>(
+  base: TableFeature<TRow>,
+  renders: readonly FeatureRender<never>[]
+): TableFeature<TRow> {
+  return {
+    ...base,
+    renders: [...(base.renders ?? []), ...renders],
+  };
+}
+
 type RenderMap = ReadonlyMap<
   string,
   readonly { id: string; render: (props: never) => ReactNode }[]
@@ -389,7 +407,7 @@ export function FeatureSlot<TProps>({
  *
  * @public
  */
-export function useFeatureSlotFilled(slot: FeatureSlotKey<never>): boolean {
+export function useFeatureSlotFilled(slot: { readonly id: string }): boolean {
   return useContext(FeatureRenderContext).has(slot.id);
 }
 

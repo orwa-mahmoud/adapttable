@@ -24,6 +24,12 @@ import { isRelativeDateToken } from "./relativeDates";
 /**
  * Operand shape for a selected range operator.
  *
+ * Kit `RelativeTokenField` / `RangeField` / `TextFilterField` look alike
+ * because they speak the same model (this file). They are not byte-equal
+ * pixels — MUI, Antd and native resolve those names to different controls —
+ * so they stay kit-native. A shared raw-HTML control would break Chrome +
+ * slots.
+ *
  * @public
  */
 export type RangeOpArity = "none" | "one" | "two" | "list";

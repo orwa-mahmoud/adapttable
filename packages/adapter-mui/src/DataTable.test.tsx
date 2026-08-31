@@ -7,8 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import { filters as filtersFeature } from "./filters";
+import { headerFilters } from "./header-filters";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -84,7 +85,11 @@ afterEach(() => vi.useRealTimers());
 describe("<DataTable> (MUI)", () => {
   it("drawer mode opens the slide-in filter drawer", async () => {
     renderHarness({
-      override: { filters: <div>drawer body</div>, filtersMode: "drawer" },
+      override: {
+        filters: <div>drawer body</div>,
+        filtersMode: "drawer",
+        features: [filtersFeature<Row>([])],
+      },
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(await screen.findByText("drawer body")).toBeInTheDocument();
@@ -92,7 +97,11 @@ describe("<DataTable> (MUI)", () => {
 
   it("flips the filter popover to the start side under RTL", async () => {
     renderHarness({
-      override: { dir: "rtl", filters: <div>rtl body</div> },
+      override: {
+        dir: "rtl",
+        filters: <div>rtl body</div>,
+        features: [filtersFeature<Row>([])],
+      },
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(await screen.findByText("rtl body")).toBeInTheDocument();
@@ -948,6 +957,7 @@ describe("header filter trigger", () => {
     renderHarness({
       override: {
         headerFilters: true,
+        features: [headerFilters()],
         filters: [{ key: "name", type: "text", label: "Name" }],
       },
     });
@@ -962,6 +972,7 @@ describe("header filter trigger", () => {
       isMobile: true,
       override: {
         headerFilters: true,
+        features: [headerFilters()],
         filters: [{ key: "name", type: "text", label: "Name" }],
       },
     });

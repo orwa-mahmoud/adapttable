@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./testDataTable";
 import { findInTable } from "./find-in-table";
 import type { ColumnDef } from "./index";
 
@@ -34,7 +35,7 @@ describe("find in table (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
-        features={[findInTable<Row>()]}
+        features={[findInTable<Row>(), cellNavigation<Row>()]}
         {...extra}
       />
     );

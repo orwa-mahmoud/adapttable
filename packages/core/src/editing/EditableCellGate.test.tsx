@@ -232,12 +232,18 @@ describe("EditableCellGate", () => {
         )}
       />
     );
-    expect(
-      document.querySelector('[data-adapttable-part="edit-cell-conflict"]')
-    ).toHaveTextContent("This row changed");
-    expect(
-      document.querySelector('[data-adapttable-part="edit-cell-incoming"]')
-    ).toHaveTextContent("Theirs: Ada Updated");
+    const notice = document.querySelector(
+      '[data-adapttable-part="edit-cell-conflict"]'
+    );
+    const incoming = document.querySelector(
+      '[data-adapttable-part="edit-cell-incoming"]'
+    );
+    expect(notice).toHaveTextContent("This row changed");
+    expect(incoming).toHaveTextContent("Theirs: Ada Updated");
+    expect(notice?.textContent ?? "").not.toMatch(
+      /changedTheirs|editingTheirs/
+    );
+    expect(incoming).toHaveStyle({ display: "block" });
     const keepMine = document.querySelector(
       '[data-adapttable-part="edit-cell-keep-mine"]'
     )!;

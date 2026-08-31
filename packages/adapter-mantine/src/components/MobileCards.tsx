@@ -41,11 +41,16 @@ import {
 } from "react";
 
 import type { Density } from "../density";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { GroupHeaderCard } from "./GroupHeader";
-import { RowEditActions, RowReorderButtons, TreeToggle } from "./kitControls";
 import { RowActionButtons } from "./RowActionButtons";
+import {
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
+} from "./featureSlots";
+import { cellDisplay } from "./DisplayCell";
 
 /**
  * Props for {@link MobileCards}: the card-relevant slice of core's shared
@@ -245,23 +250,18 @@ function MobileCardBase<TRow>({
     column,
     label: resolveMobileLabel(column),
     value: (
-      <EditableDataCell
+      <OptionalEditableCell
         editing={editing}
         row={row}
         column={column}
         rowId={id}
+        rowIndex={index}
         rows={rows}
         columns={columns}
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={
-          column.Cell ? (
-            <column.Cell row={row} rowIndex={index} />
-          ) : (
-            column.accessor?.(row)
-          )
-        }
+        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -289,7 +289,7 @@ function MobileCardBase<TRow>({
     >
       <Stack gap={cardGap}>
         {treeEntry && (
-          <TreeToggle
+          <OptionalTreeToggle
             entry={treeEntry}
             labels={labels}
             onToggle={onToggleTree ?? (() => undefined)}
@@ -304,11 +304,12 @@ function MobileCardBase<TRow>({
         )}
         {onToggleExpand && (
           <Group justify="flex-end">
-            <ExpandToggle
-              expanded={expanded}
+            <OptionalExpandToggle
+              id={id}
+              expanded={Boolean(expanded)}
+              onToggle={onToggleExpand}
               expandLabel={labels.expandRow}
               collapseLabel={labels.collapseRow}
-              onToggle={() => onToggleExpand(id)}
             />
           </Group>
         )}
@@ -334,7 +335,7 @@ function MobileCardBase<TRow>({
               </div>
             ))}
         {rowReorder && (
-          <RowReorderButtons
+          <OptionalRowReorderButtons
             reorder={rowReorder}
             labels={labels}
             localIndex={index}
@@ -347,7 +348,7 @@ function MobileCardBase<TRow>({
           <div data-adapttable-part="card-detail">{renderDetail(row)}</div>
         )}
         {editing?.rowEditing && (
-          <RowEditActions
+          <OptionalRowEditActions
             rowEditing={editing.rowEditing}
             row={row}
             rowId={id}
@@ -519,13 +520,13 @@ export function MobileCards<TRow>({
               entry.kind === "groupMore"
             ) {
               return (
-                <GroupHeaderCard
+                <OptionalGroupHeaderCard
                   key={entry.key}
                   entry={entry}
-                  columns={columns}
+                  columns={columns as never}
                   selection={selection}
                   labels={labels}
-                  padding={cardPadding}
+                  compact={compact}
                   onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
                   onShowMore={grouping.showMore}
                 />

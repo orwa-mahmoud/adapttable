@@ -9,7 +9,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AutoFilterForm } from "./components/AutoFilterForm";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import { filters as filtersFeature } from "./filters";
 import type { ColumnDef, FilterDef, FilterOption, TableQuery } from "./index";
 import {

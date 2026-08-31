@@ -25,8 +25,9 @@ import { DesktopTable } from "./components/DesktopTable";
 import { useStableToggle } from "./components/DesktopTable";
 import { MobileCards } from "./components/MobileCards";
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { rowDetail } from "./row-detail";
 
 interface Row {
   id: string;
@@ -61,6 +62,14 @@ function Harness(props: {
       source={source}
       columns={columns}
       rowKey={(r) => r.id}
+      features={
+        props.override?.renderRowDetail
+          ? [
+              rowDetail(props.override.renderRowDetail),
+              ...(props.override.features ?? []),
+            ]
+          : props.override?.features
+      }
       {...props.override}
     />
   );

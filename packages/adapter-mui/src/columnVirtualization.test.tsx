@@ -1,8 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -34,6 +35,11 @@ describe("column virtualization (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         maxHeight={300}
+        features={
+          extra?.virtualizeColumns === true
+            ? [virtualize<Row>({ virtualizeColumns: true })]
+            : undefined
+        }
         {...extra}
       />
     );

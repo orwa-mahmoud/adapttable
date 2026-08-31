@@ -1,7 +1,8 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
+import { dirtyIndicators, editing } from "./editing";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -45,6 +46,7 @@ describe("dirty indicators (mui)", () => {
         urlSync={false}
         dirtyIndicators
         onCellEdit={onCellEdit}
+        features={[dirtyIndicators<Row>()]}
         {...extra}
       />
     );
@@ -123,6 +125,7 @@ describe("dirty indicators (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         onCellEdit={() => new Promise<void>(() => undefined)}
+        features={[editing<Row>(() => new Promise<void>(() => undefined))]}
       />
     );
     edit("Augusta");

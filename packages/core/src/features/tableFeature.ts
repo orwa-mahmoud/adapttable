@@ -203,7 +203,7 @@ function warnDeprecatedFeatureProps(props: object): void {
     "commandPalette,contextMenu,sidePanel,bulkActions,filters,filterTypes," +
     "headerFilters,savedViews,selectionStats,densityChooser,onPrint," +
     "printButton,statusBar,undoRedoButtons,multiSort,fitColumns," +
-    "columnSelectionCheckbox"
+    "columnSelectionCheckbox,onAddRow,onDuplicateRow,onDeleteRow,confirmDeleteRow,rowActions"
   )
     .split(",")
     .filter((key) => (props as Record<string, unknown>)[key] !== undefined);
@@ -262,7 +262,22 @@ export function applyTableFeatures<P extends object>(props: P): P {
   let fromFeatures: Record<string, unknown> = {};
   for (const next of list) {
     const patch = next.apply?.(fromFeatures);
-    if (patch) fromFeatures = { ...fromFeatures, ...definedEntries(patch) };
+    if (!patch) continue;
+    const entries = definedEntries(patch);
+    const prevAssembly = fromFeatures.assembly;
+    const nextAssembly = entries.assembly;
+    fromFeatures = { ...fromFeatures, ...entries };
+    if (
+      prevAssembly &&
+      nextAssembly &&
+      typeof prevAssembly === "object" &&
+      typeof nextAssembly === "object"
+    ) {
+      fromFeatures.assembly = {
+        ...(prevAssembly as object),
+        ...(nextAssembly as object),
+      };
+    }
   }
 
   const resolved = {

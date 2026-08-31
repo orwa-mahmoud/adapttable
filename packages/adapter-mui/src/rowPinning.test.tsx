@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { rowPinning } from "./row-pinning";
 
 interface Task {
   id: string;
@@ -45,6 +46,12 @@ describe("row pinning (mui)", () => {
         urlSync={false}
         pinnedRowIds={{ top: [], bottom: [] }}
         onPinnedRowIdsChange={onPinnedRowIdsChange}
+        features={[
+          rowPinning<Task>({
+            pinnedRowIds: { top: [], bottom: [] },
+            onPinnedRowIdsChange,
+          }),
+        ]}
       />
     );
     fireEvent.click(screen.getAllByRole("button", { name: "Pin to top" })[0]!);
@@ -63,6 +70,12 @@ describe("row pinning (mui)", () => {
         urlSync={false}
         pinnedRowIds={{ top: ["1"], bottom: ["3"] }}
         onPinnedRowIdsChange={vi.fn()}
+        features={[
+          rowPinning<Task>({
+            pinnedRowIds: { top: ["1"], bottom: ["3"] },
+            onPinnedRowIdsChange: vi.fn(),
+          }),
+        ]}
       />
     );
     expect(part("pinned-top")?.textContent).toContain("Ship");
@@ -82,6 +95,7 @@ describe("row pinning (mui)", () => {
         urlSync={false}
         forceMobile
         onPinnedRowIdsChange={onPinnedRowIdsChange}
+        features={[rowPinning<Task>({ onPinnedRowIdsChange })]}
       />
     );
     expect(part("pinned-top")).toBeNull();

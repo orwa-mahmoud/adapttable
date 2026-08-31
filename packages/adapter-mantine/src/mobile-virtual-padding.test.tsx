@@ -10,7 +10,7 @@ import { MantineProvider } from "@mantine/core";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -39,6 +39,7 @@ beforeEach(() => {
     const real = actualCore.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: real.tableProps.rows.map((row, index) => ({
