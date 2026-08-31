@@ -1157,6 +1157,7 @@
       "applyCollapsedColumnGroups",
       "applyTableFeatures",
       "BaseDataTableProps",
+      "BATCH_EDIT_BAR",
       "BatchEditBarChrome",
       "BatchEditBarChromeProps",
       "BatchEditBarProps",
@@ -1420,6 +1421,7 @@
       "FilterValue",
       "FilterWidgetKind",
       "FilterWidgetRenderProps",
+      "FIND_BAR",
       "FindBarChrome",
       "FindBarChromeProps",
       "FindBarProps",
@@ -2173,6 +2175,12 @@
     "adapter-mui-status-bar": [
       "selectionStats",
       "statusBar"
+    ],
+    "adapter-mui-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-mui-batch-editing": [
+      "batchEditing"
     ]
   },
   "entrypoints": {
@@ -2487,6 +2495,12 @@
     },
     "adapter-mui-status-bar.api.md": {
       "surface": "adapter-mui-status-bar"
+    },
+    "adapter-mui-find-in-table.api.md": {
+      "surface": "adapter-mui-find-in-table"
+    },
+    "adapter-mui-batch-editing.api.md": {
+      "surface": "adapter-mui-batch-editing"
     }
   }
 }

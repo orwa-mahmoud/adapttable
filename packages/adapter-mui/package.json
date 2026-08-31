@@ -85,6 +85,26 @@
         "default": "./dist/status-bar.cjs"
       }
     },
+    "./find-in-table": {
+      "import": {
+        "types": "./dist/find-in-table.d.ts",
+        "default": "./dist/find-in-table.js"
+      },
+      "require": {
+        "types": "./dist/find-in-table.d.cts",
+        "default": "./dist/find-in-table.cjs"
+      }
+    },
+    "./batch-editing": {
+      "import": {
+        "types": "./dist/batch-editing.d.ts",
+        "default": "./dist/batch-editing.js"
+      },
+      "require": {
+        "types": "./dist/batch-editing.d.cts",
+        "default": "./dist/batch-editing.cjs"
+      }
+    },
     "./grouping": {
       "import": {
         "types": "./dist/grouping.d.ts",

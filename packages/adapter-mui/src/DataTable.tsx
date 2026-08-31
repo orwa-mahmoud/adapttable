@@ -1,9 +1,11 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
+  BATCH_EDIT_BAR,
   FeatureHostProvider,
   FeatureProviders,
   FeatureSlot,
   fillSlot,
+  FIND_BAR,
   GridFocusAnnouncer,
   resolveStickyToolbar,
   RowReorderAnnouncer,
@@ -37,7 +39,6 @@ import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
-import { BatchEditBar, FindBar } from "./components/kitControls";
 import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
@@ -264,7 +265,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             announcement={shell.tableProps.rowReorder.announcement}
           />
         ) : null}
-        <FindBar find={shell.find} labels={labels} />
+        <FeatureSlot slot={FIND_BAR} props={{ find: shell.find, labels }} />
         <Stack spacing={1.5}>
           <Box
             data-adapttable-part="toolbar"
@@ -300,7 +301,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             labels={labels}
           />
           {c.editing?.batch && (
-            <BatchEditBar batch={c.editing.batch} labels={labels} />
+            <FeatureSlot
+              slot={BATCH_EDIT_BAR}
+              props={{ batch: c.editing.batch, labels }}
+            />
           )}
 
           {table.selection && props.bulkActions && (

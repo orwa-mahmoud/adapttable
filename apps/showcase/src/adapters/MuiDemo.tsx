@@ -5,6 +5,11 @@ import type {
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable, type DataTableProps } from "@adapttable/mui";
+import { findInTable as findInTable_ } from "@adapttable/mui/find-in-table";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/mui/status-bar";
 import { Avatar, Box, Chip, LinearProgress, Typography } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
@@ -291,7 +296,14 @@ export function MuiDemo({
                   })
             }
             rowKey={(r) => r.id}
-            features={nested ? nestedOuterFeatures<Person>() : undefined}
+            features={[
+              ...(nested ? nestedOuterFeatures<Person>() : []),
+              // Migrated features bring their own MUI components; the props
+              // beside them still decide when each one shows.
+              statusBar_<Person>(),
+              selectionStats_<Person>(),
+              findInTable_<Person>(),
+            ]}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

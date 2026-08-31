@@ -67,11 +67,16 @@ engine, so a host that composes a pivot table still does it in one import.
 import { grouping } from "@adapttable/mantine/grouping";
 import { virtualize } from "@adapttable/mantine/virtualize";
 
-<DataTable features={[grouping("team"), virtualize()]} />;
+<DataTable features={[grouping<Row>("team"), virtualize<Row>()]} />;
 ```
 
 An explicit prop wins if both are set. Development mode warns once when a
 deprecated enabling prop is used. The props are removed in v3.
+
+A factory that takes a row-typed callback works out the row type on its own —
+`rowReorder(handler)`, `editing(save)`. One that does not, like `grouping` or
+`virtualize`, needs it: write `grouping<Row>("team")`. Without it the feature
+resolves `TableFeature<unknown>` and the compiler says so, naming the feature.
 
 A host plugin is the same object: `feature("audit-log", { statusBar: true })`,
 or a `TableFeature` with `setup(host)` for live registration.

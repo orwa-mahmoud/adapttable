@@ -90,7 +90,7 @@ export interface BaseDataTableProps<TRow> {
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraChips?: readonly ActiveFilterChip[];
     extraRows?: readonly ExtraRow[];
-    features?: readonly TableFeature<TRow>[];
+    features?: readonly TableFeature<NoInfer<TRow>>[];
     filterDefs?: readonly FilterDef<TRow>[];
     filterFields?: boolean;
     filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
@@ -197,6 +197,9 @@ export interface BaseDataTableProps<TRow> {
     virtualOverscan?: number;
     virtualScrollMargin?: number;
 }
+
+// @public
+export const BATCH_EDIT_BAR: FeatureSlotKey<BatchEditBarProps<never>>;
 
 // @public
 export function BatchEditBarChrome<TRow>(input: Readonly<BatchEditBarChromeProps<TRow>>): ReactElement | null;
@@ -2266,6 +2269,9 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
     readonly labels: Required<TableLabels>;
     readonly source: FilterFormSource<TRow>;
 }
+
+// @public
+export const FIND_BAR: FeatureSlotKey<FindBarProps>;
 
 // @public
 export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement | null;

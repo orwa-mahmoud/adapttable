@@ -12,6 +12,8 @@ export default defineConfig({
     "src/row-reorder.ts",
     "src/saved-views.ts",
     "src/status-bar.tsx",
+    "src/find-in-table.tsx",
+    "src/batch-editing.tsx",
     "src/grouping.ts",
     "src/editing.ts",
     "src/virtualize.ts",

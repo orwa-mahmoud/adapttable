@@ -244,7 +244,7 @@ export {
   usePublishTableRuntime,
   useTableRuntime,
 } from "./features/providers";
-export { STATUS_BAR } from "./features/slotKeys";
+export { BATCH_EDIT_BAR, FIND_BAR, STATUS_BAR } from "./features/slotKeys";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";

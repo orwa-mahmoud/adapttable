@@ -136,7 +136,7 @@ export interface BaseDataTableProps<TRow> {
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraChips?: readonly ActiveFilterChip[];
     extraRows?: readonly ExtraRow[];
-    features?: readonly TableFeature<TRow>[];
+    features?: readonly TableFeature<NoInfer<TRow>>[];
     filterDefs?: readonly FilterDef<TRow>[];
     filterFields?: boolean;
     filterLabels?: Readonly<Record<string, ChipLabelResolver>>;

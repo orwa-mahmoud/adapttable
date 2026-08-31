@@ -114,7 +114,10 @@ export interface BaseDataTableProps<TRow> {
    * Built-in factories and host plugins are the same {@link TableFeature}
    * type in this one array.
    */
-  features?: readonly TableFeature<TRow>[];
+  // `NoInfer` so a factory that cannot work out the row type — `grouping("team")`,
+  // `virtualize()` — does not offer `unknown` as a candidate and pin the whole
+  // table to it, rejecting its own `columns` and `rowKey`.
+  features?: readonly TableFeature<NoInfer<TRow>>[];
   /**
    * Saved views: capture the table's current URL state under a name and
    * re-apply it on demand. Setting this renders a Saved-views menu in the

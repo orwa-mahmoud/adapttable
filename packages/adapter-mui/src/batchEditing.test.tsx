@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { batchEditing } from "./batch-editing";
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
@@ -50,6 +51,7 @@ describe("batch editing (mui)", () => {
         urlSync={false}
         batchEditing
         onBatchEdit={onBatchEdit}
+        features={[batchEditing<Task>(onBatchEdit)]}
         {...extra}
       />
     );
