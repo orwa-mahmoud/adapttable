@@ -78,6 +78,8 @@ export { useTableFeatures } from "./features/featureHost";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
+  FeatureRender,
+  FeatureSlotKey,
 } from "./features/providers";
 export { rowReorder } from "./features/row-reorder";
 export type {

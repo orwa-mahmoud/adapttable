@@ -79,6 +79,8 @@ export { localizedColumnPath, resolveColumns } from "./columns/resolveColumns";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
+  FeatureRender,
+  FeatureSlotKey,
 } from "./features/providers";
 export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
 export {

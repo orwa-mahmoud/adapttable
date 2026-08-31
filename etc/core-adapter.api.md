@@ -1893,6 +1893,27 @@ export function FeatureProviders(input: {
 }): ReactNode;
 
 // @public
+export interface FeatureRender<TProps> {
+    readonly render: (props: TProps) => ReactNode;
+    readonly slot: FeatureSlotKey<TProps>;
+}
+
+// @public
+export function FeatureSlot<TProps>(input: {
+    readonly slot: FeatureSlotKey<TProps>;
+    readonly props: TProps;
+}): ReactNode;
+
+// @public
+export interface FeatureSlotKey<TProps> {
+    readonly __props?: (value: TProps) => void;
+    readonly id: string;
+}
+
+// @public
+export function featureSlotKey<TProps>(id: string): FeatureSlotKey<TProps>;
+
+// @public
 export interface FeatureStateKey<T> {
     readonly __state?: T;
     readonly id: string;
@@ -3730,6 +3751,9 @@ export interface SidePanelTabProps {
 export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
 // @public
+export function slotRender<TProps>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => ReactNode): FeatureRender<TProps>;
+
+// @public
 export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
@@ -3928,6 +3952,7 @@ export interface TableFeature<TRow = unknown> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
+    readonly renders?: readonly FeatureRender<never>[];
     setup?(host: TableFeatureHost<TRow>): void | (() => void);
 }
 
@@ -4650,6 +4675,9 @@ export function useExportHandler(handler: (() => void | Promise<void>) | undefin
 
 // @public
 export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
+
+// @public
+export function useFeatureSlotFilled(slot: FeatureSlotKey<never>): boolean;
 
 // @public
 export function useFeatureState<T>(stateKey: FeatureStateKey<T>): T | undefined;

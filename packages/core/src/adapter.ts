@@ -227,13 +227,19 @@ export {
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
+  FeatureRender,
+  FeatureSlotKey,
   FeatureStateKey,
   TableRuntime,
 } from "./features/providers";
 export {
   FeatureProviders,
+  FeatureSlot,
+  featureSlotKey,
   featureStateKey,
   FeatureStateScope,
+  slotRender,
+  useFeatureSlotFilled,
   useFeatureState,
   usePublishTableRuntime,
   useTableRuntime,

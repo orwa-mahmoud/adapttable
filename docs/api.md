@@ -162,7 +162,12 @@ feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
 `useFeatureState`. A provider sits above the chrome, so it reads the live rows
 and labels through `useTableRuntime` (`TableRuntime`) rather than being handed
-them; chrome offers them with `usePublishTableRuntime`. All from
+them; chrome offers them with `usePublishTableRuntime`. A feature also fills
+named positions: `renders` is a list of `FeatureRender` entries, each pairing a
+`FeatureSlotKey` from `featureSlotKey` with what to draw — built with
+`slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`,
+and
+`useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·

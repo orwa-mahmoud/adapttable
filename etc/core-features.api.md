@@ -503,6 +503,18 @@ export interface FeatureProviderProps<TRow = unknown> {
 }
 
 // @public
+export interface FeatureRender<TProps> {
+    readonly render: (props: TProps) => ReactNode;
+    readonly slot: FeatureSlotKey<TProps>;
+}
+
+// @public
+export interface FeatureSlotKey<TProps> {
+    readonly __props?: (value: TProps) => void;
+    readonly id: string;
+}
+
+// @public
 export interface FetchAllExport<TRow> {
     fetchPage: (query: ExportQuery) => Promise<readonly TRow[]>;
     maxRows?: number;
@@ -813,6 +825,7 @@ export interface TableFeature<TRow = unknown> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
+    readonly renders?: readonly FeatureRender<never>[];
     setup?(host: TableFeatureHost<TRow>): void | (() => void);
 }
 

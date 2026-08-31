@@ -190,6 +190,50 @@ return <span>{audit.count} changes</span>;
 Both halves are typed: `featureStateKey<T>` fixes what the provider must publish
 and what a reader gets back, so this is a contract rather than a bag of strings.
 
+### Features that draw — `renders`
+
+State is half of a feature; the other half is what the reader sees. A feature
+fills named positions in the table, and the kit's own components are what it
+fills them with:
+
+```tsx
+import {
+  FeatureSlot,
+  featureSlotKey,
+  slotRender,
+} from "@adapttable/core/adapter";
+
+export const STATUS_BAR = featureSlotKey<{ total: number }>("status-bar");
+
+export const statusBar = (): TableFeature => ({
+  id: "status-bar",
+  renders: [
+    slotRender(STATUS_BAR, ({ total }) => <MyStatusBar total={total} />),
+  ],
+});
+```
+
+The table computes the props and asks; it never learns what was drawn:
+
+```tsx
+<FeatureSlot slot={STATUS_BAR} props={{ total }} />
+```
+
+`slotRender` is what keeps `total` typed at the call site; one feature can fill
+several positions that take different props.
+
+An unfilled slot renders nothing, so chrome around a position the reader does
+not have simply is not there. `useFeatureSlotFilled` answers when a wrapper
+must not be drawn around nothing.
+
+Several features may fill one position — a toolbar takes more than one control
+— so a slot keeps every answer and orders them by feature id, the same way
+providers nest. Fillers belong to the table that composed them, so two tables
+on a page never draw each other's controls.
+
+This is why a kit's pixels stay out of the base graph: the adapter's table asks
+for a position, and only the feature that was imported can answer.
+
 ### What the table guarantees
 
 - **Order comes from the ids, not from your array.** Providers nest in

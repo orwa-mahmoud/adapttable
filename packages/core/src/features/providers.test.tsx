@@ -5,9 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type FeatureProviderProps,
   FeatureProviders,
+  FeatureSlot,
+  featureSlotKey,
   type FeatureStateKey,
   featureStateKey,
   FeatureStateScope,
+  slotRender,
+  useFeatureSlotFilled,
   useFeatureState,
 } from "./providers";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
@@ -307,5 +311,84 @@ describe("FeatureProviders", () => {
       </FeatureProviders>
     );
     expect(screen.getByTestId("counter")).toHaveTextContent("undefined");
+  });
+});
+
+const TOOLBAR = featureSlotKey<{ readonly label: string }>("toolbar");
+const FOOTER = featureSlotKey<{ readonly total: number }>("footer");
+
+/** A feature that draws into a slot rather than publishing state. */
+function drawing(id: string, text: string): TableFeature {
+  return {
+    id,
+    renders: [
+      slotRender(TOOLBAR, ({ label }) => (
+        <span data-testid={`t-${id}`}>
+          {text}:{label}
+        </span>
+      )),
+    ],
+  };
+}
+
+describe("FeatureSlot", () => {
+  const Chrome = () => (
+    <>
+      <FeatureSlot slot={TOOLBAR} props={{ label: "here" }} />
+      <span data-testid="filled">{String(useFeatureSlotFilled(TOOLBAR))}</span>
+      <FeatureSlot slot={FOOTER} props={{ total: 7 }} />
+    </>
+  );
+
+  const show = (features: readonly TableFeature[]) =>
+    render(
+      <FeatureProviders props={resolved(features)}>
+        <Chrome />
+      </FeatureProviders>
+    );
+
+  it("draws nothing when no feature fills the slot", () => {
+    show([{ id: "plain" }]);
+    expect(screen.queryByTestId("t-plain")).toBeNull();
+    expect(screen.getByTestId("filled")).toHaveTextContent("false");
+  });
+
+  it("hands the slot's props to the feature that fills it", () => {
+    show([drawing("a", "A")]);
+    expect(screen.getByTestId("t-a")).toHaveTextContent("A:here");
+    expect(screen.getByTestId("filled")).toHaveTextContent("true");
+  });
+
+  // A toolbar takes several controls, so a slot keeps every answer rather than
+  // the last one — ordered by feature id, like the providers.
+  it("draws every filler, in feature-id order", () => {
+    show([drawing("b-second", "B"), drawing("a-first", "A")]);
+    const texts = [...document.querySelectorAll("[data-testid^='t-']")].map(
+      (node) => node.textContent
+    );
+    expect(texts).toEqual(["A:here", "B:here"]);
+  });
+
+  it("keeps a slot's fillers to the table that composed them", () => {
+    render(
+      <>
+        <div data-testid="left">
+          <FeatureProviders props={resolved([drawing("a", "LEFT")])}>
+            <Chrome />
+          </FeatureProviders>
+        </div>
+        <div data-testid="right">
+          <FeatureProviders props={resolved([])}>
+            <Chrome />
+          </FeatureProviders>
+        </div>
+      </>
+    );
+    expect(
+      screen.getByTestId("left").querySelector("[data-testid='t-a']")
+    ).toHaveTextContent("LEFT:here");
+    expect(
+      screen.getByTestId("right").querySelector("[data-testid='t-a']")
+    ).toBeNull();
   });
 });

@@ -30,7 +30,7 @@ import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import { devWarn } from "../utils/devWarn";
-import type { FeatureProviderContribution } from "./providers";
+import type { FeatureProviderContribution, FeatureRender } from "./providers";
 
 export type {
   Aggregator,
@@ -102,6 +102,14 @@ export interface TableFeature<TRow = unknown> {
    * importing it is what keeps them out of the graph.
    */
   readonly provider?: FeatureProviderContribution;
+  /**
+   * Named positions this feature draws into, built with `slotRender`.
+   *
+   * The table computes each slot's props and asks; what appears there is the
+   * feature's own kit components, which is what keeps a kit's pixels out of a
+   * table that never imported the feature.
+   */
+  readonly renders?: readonly FeatureRender<never>[];
 }
 
 /**
