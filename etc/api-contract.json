@@ -1656,6 +1656,7 @@
       "SortByOption",
       "SortDirection",
       "SortLevel",
+      "STATUS_BAR",
       "StatusBarChrome",
       "StatusBarChromeProps",
       "StatusBarItem",
@@ -2168,6 +2169,10 @@
       "QuerySchema",
       "ServerFilterValue",
       "ServerTableQuery"
+    ],
+    "adapter-mui-status-bar": [
+      "selectionStats",
+      "statusBar"
     ]
   },
   "entrypoints": {
@@ -2479,6 +2484,9 @@
     },
     "server.api.md": {
       "surface": "server"
+    },
+    "adapter-mui-status-bar.api.md": {
+      "surface": "adapter-mui-status-bar"
     }
   }
 }

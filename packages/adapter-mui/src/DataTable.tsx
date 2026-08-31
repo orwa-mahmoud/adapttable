@@ -2,11 +2,13 @@ import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   FeatureHostProvider,
   FeatureProviders,
+  FeatureSlot,
   fillSlot,
   GridFocusAnnouncer,
   resolveStickyToolbar,
   RowReorderAnnouncer,
   SidePanelLayout,
+  STATUS_BAR,
   TableStatusAnnouncer,
   useCommandPalette,
   useDataTableShell,
@@ -40,7 +42,6 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
 import { SidePanel } from "./components/SidePanel";
-import { StatusBar } from "./components/StatusBar";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
 import type { DataTableProps } from "./types";
@@ -396,17 +397,20 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             dir={props.dir}
           />
         )}
-        <StatusBar
-          enabled={props.statusBar === true}
-          notices={c.featureNotices}
-          shown={shell.source.rows.length}
-          page={shell.source.page}
-          limit={shell.source.limit}
-          total={shell.source.total}
-          selected={table.selection?.selectedCount ?? 0}
-          stats={shell.selectionStats}
-          labels={labels}
-          locale={props.locale}
+        <FeatureSlot
+          slot={STATUS_BAR}
+          props={{
+            enabled: props.statusBar === true,
+            notices: c.featureNotices,
+            shown: shell.source.rows.length,
+            page: shell.source.page,
+            limit: shell.source.limit,
+            total: shell.source.total,
+            selected: table.selection?.selectedCount ?? 0,
+            stats: shell.selectionStats,
+            labels,
+            locale: props.locale,
+          }}
         />
       </Paper>
     </FeatureHostProvider>

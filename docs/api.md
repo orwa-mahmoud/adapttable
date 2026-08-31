@@ -166,7 +166,9 @@ them; chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
 `slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`,
-and
+and `STATUS_BAR` is the first such position: the footer strip, filled by
+`statusBar` or `selectionStats` from `@adapttable/<kit>/status-bar`. It is a
+single slot, so the pair share one element and it draws once. And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 

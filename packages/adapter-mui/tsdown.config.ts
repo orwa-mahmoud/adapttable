@@ -11,6 +11,7 @@ export default defineConfig({
     "src/features.ts",
     "src/row-reorder.ts",
     "src/saved-views.ts",
+    "src/status-bar.tsx",
     "src/grouping.ts",
     "src/editing.ts",
     "src/virtualize.ts",

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { selectionStats } from "./status-bar";
 
 interface Row {
   id: string;
@@ -47,14 +48,18 @@ describe("selection statistics (mui)", () => {
   };
 
   it("adds up the selected cells", () => {
-    table({ selectionStats: true, locale: "en-US" });
+    table({
+      selectionStats: true,
+      locale: "en-US",
+      features: [selectionStats()],
+    });
     selectBudgetColumn();
     expect(strip()?.textContent).toContain("Sum 40");
     expect(strip()?.textContent).toContain("Avg 20");
   });
 
-  it("renders nothing without the prop", () => {
-    table();
+  it("renders nothing without the feature", () => {
+    table({ selectionStats: true, locale: "en-US" });
     selectBudgetColumn();
     expect(strip()).toBeNull();
   });

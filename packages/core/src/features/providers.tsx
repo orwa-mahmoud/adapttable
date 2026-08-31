@@ -268,6 +268,15 @@ export interface FeatureSlotKey<TProps> {
   /** Stable id, conventionally the surface's name (`"status-bar"`). */
   readonly id: string;
   /**
+   * Whether this position is ONE element rather than a list.
+   *
+   * Some surfaces are shared: the status bar hosts both the strip the
+   * `statusBar` feature asks for and the figures `selectionStats` produces, and
+   * the rule that they must not print twice belongs to that one element. Both
+   * features offer the same renderer, and a single slot draws it once.
+   */
+  readonly single?: boolean;
+  /**
    * Phantom marker that pins the props type; never read at runtime.
    *
    * It is a function of `TProps` rather than a `TProps` so the key erases
@@ -283,8 +292,11 @@ export interface FeatureSlotKey<TProps> {
  *
  * @public
  */
-export function featureSlotKey<TProps>(id: string): FeatureSlotKey<TProps> {
-  return { id };
+export function featureSlotKey<TProps>(
+  id: string,
+  options: { readonly single?: boolean } = {}
+): FeatureSlotKey<TProps> {
+  return options.single === true ? { id, single: true } : { id };
 }
 
 /**
@@ -365,7 +377,8 @@ export function FeatureSlot<TProps>({
 }): ReactNode {
   const filled = useContext(FeatureRenderContext).get(slot.id);
   if (!filled) return null;
-  return filled.map(({ id, render }) => (
+  const drawn = slot.single === true ? filled.slice(0, 1) : filled;
+  return drawn.map(({ id, render }) => (
     <Fragment key={id}>{(render as (p: TProps) => ReactNode)(props)}</Fragment>
   ));
 }

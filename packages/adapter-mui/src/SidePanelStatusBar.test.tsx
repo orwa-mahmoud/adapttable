@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { statusBar } from "./status-bar";
 
 interface Row {
   id: string;
@@ -59,7 +60,9 @@ describe("side panel and status bar (mui)", () => {
   });
 
   it("shows the row count once the status bar is asked for", () => {
-    table({ statusBar: true });
+    // The strip is the feature's own component, so the import is what brings
+    // it; the prop enables it.
+    table({ statusBar: true, features: [statusBar()] });
     const bar = document.querySelector('[data-adapttable-part="status-bar"]');
 
     expect(bar?.textContent).toContain("2");

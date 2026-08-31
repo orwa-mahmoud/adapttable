@@ -392,3 +392,38 @@ describe("FeatureSlot", () => {
     ).toBeNull();
   });
 });
+
+const SHARED = featureSlotKey<{ readonly label: string }>("shared", {
+  single: true,
+});
+
+describe("a single slot", () => {
+  /** Two features that share one element offer the same renderer. */
+  const sharing = (id: string): TableFeature => ({
+    id,
+    renders: [
+      slotRender(SHARED, ({ label }) => (
+        <span data-testid="shared">once:{label}</span>
+      )),
+    ],
+  });
+
+  it("draws one element however many features asked for it", () => {
+    render(
+      <FeatureProviders props={resolved([sharing("a"), sharing("b")])}>
+        <FeatureSlot slot={SHARED} props={{ label: "x" }} />
+      </FeatureProviders>
+    );
+    expect(screen.getAllByTestId("shared")).toHaveLength(1);
+    expect(screen.getByTestId("shared")).toHaveTextContent("once:x");
+  });
+
+  it("still draws nothing when nobody asked", () => {
+    render(
+      <FeatureProviders props={resolved([{ id: "plain" }])}>
+        <FeatureSlot slot={SHARED} props={{ label: "x" }} />
+      </FeatureProviders>
+    );
+    expect(screen.queryByTestId("shared")).toBeNull();
+  });
+});

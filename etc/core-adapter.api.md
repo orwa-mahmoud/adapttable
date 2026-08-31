@@ -1908,10 +1908,13 @@ export function FeatureSlot<TProps>(input: {
 export interface FeatureSlotKey<TProps> {
     readonly __props?: (value: TProps) => void;
     readonly id: string;
+    readonly single?: boolean;
 }
 
 // @public
-export function featureSlotKey<TProps>(id: string): FeatureSlotKey<TProps>;
+export function featureSlotKey<TProps>(id: string, options?: {
+    readonly single?: boolean;
+}): FeatureSlotKey<TProps>;
 
 // @public
 export interface FeatureStateKey<T> {
@@ -3784,6 +3787,9 @@ export interface SortLevel {
     dir: SortDirection;
     key: string;
 }
+
+// @public
+export const STATUS_BAR: FeatureSlotKey<Omit<StatusBarChromeProps, "slots">>;
 
 // @public
 export function StatusBarChrome(props: Readonly<StatusBarChromeProps>): JSX.Element;

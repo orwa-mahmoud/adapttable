@@ -1732,6 +1732,7 @@ export interface FeatureRender<TProps> {
 export interface FeatureSlotKey<TProps> {
     readonly __props?: (value: TProps) => void;
     readonly id: string;
+    readonly single?: boolean;
 }
 
 // @public
