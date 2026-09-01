@@ -6,10 +6,15 @@
  * honestly work are OFF, in the DOM, with the reason attached — and a source
  * that declares it can do more gets those same controls back.
  */
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef, TableSource } from "./index";
+import type {
+  ColumnDef,
+  ExportCsvOptions,
+  TableLabels,
+  TableSource,
+} from "./index";
 import { DataTable } from "./testDataTable";
 
 interface Row {
@@ -71,16 +76,21 @@ const pagedSource = (
 const part = (name: string) =>
   document.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
 
-const renderTable = (capabilities?: TableSource<Row>["capabilities"]) =>
+const renderTable = (
+  capabilities?: TableSource<Row>["capabilities"],
+  exportCsv: ExportCsvOptions<Row> = { scope: "all" },
+  labels?: Partial<TableLabels>
+) =>
   render(
     <DataTable
       source={pagedSource(capabilities)}
       columns={COLS}
       rowKey={(r) => r.id}
-      exportCsv={{ scope: "all" }}
+      exportCsv={exportCsv}
       groupBy="team"
       statusBar
       bulkActions={[{ key: "x", label: "X", onClick: vi.fn() }]}
+      labels={labels}
     />
   );
 
@@ -98,6 +108,13 @@ describe("a source that holds one page", () => {
     // And the caption still names the format, because the format is not
     // what went wrong.
     expect(button).toHaveTextContent("Export CSV");
+  });
+
+  it("puts the localized reason on the disabled control", () => {
+    const reason = "All rows need a retrieval route.";
+    renderTable(undefined, { scope: "all" }, { noticeExportAllPage: reason });
+    expect(part("export-csv-button")).toHaveAttribute("title", reason);
+    expect(screen.getByText(reason)).toBeInTheDocument();
   });
 
   it("states both reasons in the status bar", () => {
@@ -139,17 +156,36 @@ describe("a source that declares what it cannot do", () => {
 });
 
 describe("a source that declares what it can do", () => {
-  it("hands the export back on the same one-page shape", () => {
-    renderTable({
-      fullDataset: false,
-      grouping: false,
-      selectAcrossPages: true,
-      exportScope: "all",
-      totalCount: "exact",
-    });
+  const claimsAll: TableSource<Row>["capabilities"] = {
+    fullDataset: false,
+    grouping: false,
+    selectAcrossPages: true,
+    exportScope: "all",
+    totalCount: "exact",
+  };
+
+  it("stays disabled when the declaration supplies no rows", () => {
+    renderTable(claimsAll);
+    const button = part("export-csv-button");
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("title", EXPORT_REASON);
+  });
+
+  it("enables and uses a host request route", () => {
+    const request = vi.fn();
+    renderTable(claimsAll, { scope: "all", request });
     const button = part("export-csv-button");
     expect(button).toBeEnabled();
-    expect(button).not.toHaveAttribute("title");
-    expect(screen.queryByText(EXPORT_REASON)).toBeNull();
+    fireEvent.click(button!);
+    expect(request).toHaveBeenCalledOnce();
+  });
+
+  it("enables and uses a host fetch-all route", async () => {
+    const fetchPage = vi.fn(() => Promise.resolve([]));
+    renderTable(claimsAll, { scope: "all", fetchAll: { fetchPage } });
+    const button = part("export-csv-button");
+    expect(button).toBeEnabled();
+    fireEvent.click(button!);
+    await waitFor(() => expect(fetchPage).toHaveBeenCalledOnce());
   });
 });

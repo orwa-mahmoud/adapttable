@@ -163,7 +163,7 @@ export function collectFeatureNotices<TRow>(
   ) {
     notices.push({
       kind: "export-all-page",
-      appearance: "one-page",
+      appearance: "disabled",
       message: labels.noticeExportAllPage ?? capabilityReason("exportScope"),
     });
   }

@@ -588,9 +588,10 @@ raw output for a non-spreadsheet pipeline.
 
 - `scope: "page"` (default) — the current page / loaded slice.
 - `scope: "all"` — the full filtered+sorted set when the source can reach it
-  (frontend can). A source whose `capabilities.exportScope` is `"page"`
-  disables the button and says why, unless `request` or `fetchAll` fetches the
-  rest — see
+  (frontend can). A source-owned route requires both actual
+  `allFilteredRows` and a capability contract that permits `"all"`; the
+  declaration alone does not retrieve rows. Otherwise `request` or `fetchAll`
+  must fetch the rest — see
   [source capabilities](./data-tiers.md#what-a-source-can-do--capabilities).
 
   **"All" means every row that matched the filters, not every row on screen.**
@@ -611,9 +612,9 @@ raw output for a non-spreadsheet pipeline.
     stopped the export short. `fetchAllExportRows` is the same walk, exported
     for hand-built downloads.
 
-  With neither, the Export button is **not rendered** and a development warning
-  says why. Writing the current page as if it were everything is the one answer
-  that is always wrong.
+  With no executable route, the Export button stays rendered but disabled,
+  with the localized reason on the control and in the status bar. Writing the
+  current page as if it were everything is the one answer that is always wrong.
 
 - `scope: "selected"` — the ticked rows, in table order. Selection is a set of
   ids, so a row checked on page 1 is still in the file while page 3 is on

@@ -28,8 +28,8 @@ describe("StatusBar and SelectionStatsBar (unstyled)", () => {
         notices={[
           {
             kind: "export-all-page",
-            appearance: "one-page",
-            message: "Export is this page",
+            appearance: "disabled",
+            message: "Export all is unavailable",
           },
         ]}
       />
@@ -37,8 +37,8 @@ describe("StatusBar and SelectionStatsBar (unstyled)", () => {
     const bar = document.querySelector('[data-adapttable-part="status-bar"]');
     expect(bar).toHaveClass("sb");
     expect(
-      document.querySelector('[data-appearance="one-page"]')
-    ).toHaveTextContent("Export is this page");
+      document.querySelector('[data-appearance="disabled"]')
+    ).toHaveTextContent("Export all is unavailable");
     expect(bar?.textContent).toMatch(/selected/i);
     expect(
       document.querySelector('[data-adapttable-part="selection-stats"]')

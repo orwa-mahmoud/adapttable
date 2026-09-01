@@ -1,3 +1,7 @@
+import {
+  type TableSourceCapabilities,
+  useFrontendData,
+} from "@adapttable/core";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -17,6 +21,33 @@ const ROWS: Row[] = [{ id: "r1", name: "Ada" }];
 const COLS: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name },
 ];
+const CLAIMS_ALL: TableSourceCapabilities = {
+  fullDataset: false,
+  grouping: false,
+  selectAcrossPages: true,
+  exportScope: "all",
+  totalCount: "exact",
+};
+const EXPORT_REASON = "All rows need a retrieval route.";
+
+function ClaimedAllWithoutRows() {
+  const frontend = useFrontendData({ data: ROWS, columns: COLS });
+  const source = {
+    ...frontend,
+    allFilteredRows: undefined,
+    capabilities: CLAIMS_ALL,
+  };
+  return (
+    <BareDataTable
+      source={source}
+      columns={COLS}
+      rowKey={(row) => row.id}
+      urlSync={false}
+      labels={{ noticeExportAllPage: EXPORT_REASON }}
+      features={[exportCsv<Row>({ scope: "all" })]}
+    />
+  );
+}
 
 /**
  * The optional toolbar controls are absent until their feature is imported.
@@ -89,5 +120,12 @@ describe("toolbar extras (unstyled)", () => {
     expect(part("undo-button")).not.toBeNull();
     expect(part("redo-button")).not.toBeNull();
     expect(screen.queryByRole("button", { name: /export/i })).not.toBeNull();
+  });
+
+  it("disables export with the localized reason when no route exists", () => {
+    render(<ClaimedAllWithoutRows />);
+    const button = screen.getByRole("button", { name: /export/i });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("title", EXPORT_REASON);
   });
 });

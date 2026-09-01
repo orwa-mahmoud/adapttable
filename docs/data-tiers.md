@@ -251,19 +251,19 @@ const source: TableSource<Person> = {
     fullDataset: false, // one page at a time
     grouping: "server", // the API returns group rows
     selectAcrossPages: true, // it can act on the whole match set
-    exportScope: "all", // and stream the whole export
+    exportScope: "all", // it permits a wired full-export route
     totalCount: "exact", // `total` counts matches, not what has loaded
   },
 };
 ```
 
-| Capability          | Values                          | What turns on                                                       | Off means                                                     |
-| ------------------- | ------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `fullDataset`       | `boolean`                       | Every row is reachable, not just the page on screen                 | The other four are decided independently                      |
-| `grouping`          | `"client" \| "server" \| false` | `groupBy` groups in the browser, or renders the server's group rows | `groupBy` is ignored, and the status bar says why             |
-| `selectAcrossPages` | `boolean`                       | The "select all N matching" banner after a full page is selected    | Selection stays the rows on screen                            |
-| `exportScope`       | `"all" \| "page"`               | `exportCsv` `scope: "all"` writes the whole filtered set            | The Export button is disabled, with the reason on the control |
-| `totalCount`        | `"exact" \| "loaded"`           | `total` is the match count                                          | `total` is what has arrived so far                            |
+| Capability          | Values                          | What it permits                                                                                      | Off means                                                     |
+| ------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `fullDataset`       | `boolean`                       | Every row is reachable, not just the page on screen                                                  | The other four are decided independently                      |
+| `grouping`          | `"client" \| "server" \| false` | `groupBy` groups in the browser, or renders the server's group rows                                  | `groupBy` is ignored, and the status bar says why             |
+| `selectAcrossPages` | `boolean`                       | The "select all N matching" banner after a full page is selected                                     | Selection stays the rows on screen                            |
+| `exportScope`       | `"all" \| "page"`               | A source-owned `allFilteredRows` route may serve `scope: "all"`; it does not retrieve rows by itself | The Export button is disabled, with the reason on the control |
+| `totalCount`        | `"exact" \| "loaded"`           | `total` is the match count                                                                           | `total` is what has arrived so far                            |
 
 **Omit `capabilities` and nothing changes.** The table reads the same answers
 off the source's shape, exactly as it always has: `allFilteredRows` present
@@ -271,11 +271,16 @@ means the full dataset, `groups` present means the server grouped, a non-zero
 `total` means the count is real — which is why every source `useFrontendData`
 and `useQuerySource` build already answers correctly without declaring
 anything. Declare it when the shape is misleading in either direction: a paged
-source whose backend WILL export everything on request, or an in-memory slice
-that must not pretend to be the whole set.
+source whose backend permits full exports (with the actual request wired on
+the export feature), or an in-memory slice that must not pretend to be the
+whole set.
 
-A host that wires `exportCsv.request` or `exportCsv.fetchAll` fetches the rest
-itself, so the export stays on whatever the source can or cannot reach.
+Capabilities describe support; they are not transport. `exportScope: "all"`
+without rows or a retrieval handler leaves Export all disabled. A source-owned
+route needs `allFilteredRows` to be present and the declaration to permit
+`"all"`. A host that wires `exportCsv.request` or `exportCsv.fetchAll` supplies
+an independent executable route, so it can fetch the rest whatever the source
+can or cannot reach.
 
 ## Cache keys for TanStack Query and SWR
 

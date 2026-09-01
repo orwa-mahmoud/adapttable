@@ -102,7 +102,7 @@ describe("collectFeatureNotices", () => {
     ).toEqual([]);
   });
 
-  it("marks export-all without a full set as one-page", () => {
+  it("marks export-all without a retrieval route as disabled", () => {
     const notices = collectFeatureNotices({
       ...BASE,
       exportCsv: { scope: "all" },
@@ -110,7 +110,7 @@ describe("collectFeatureNotices", () => {
     expect(notices).toEqual([
       {
         kind: "export-all-page",
-        appearance: "one-page",
+        appearance: "disabled",
         message: defaultLabels.noticeExportAllPage,
       },
     ]);

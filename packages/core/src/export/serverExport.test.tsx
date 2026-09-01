@@ -16,6 +16,7 @@ import {
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import type { TableSourceCapabilities } from "../source/capabilities";
 import type { TableSource } from "../source/TableSource";
 import type { ColumnDef } from "../types";
 import { resetDevWarnings } from "../utils/devWarn";
@@ -36,6 +37,20 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
 const COLUMNS: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (row) => row.name },
 ];
+const CLAIMS_ALL: TableSourceCapabilities = {
+  fullDataset: false,
+  grouping: false,
+  selectAcrossPages: true,
+  exportScope: "all",
+  totalCount: "exact",
+};
+const PAGE_ONLY: TableSourceCapabilities = {
+  fullDataset: false,
+  grouping: false,
+  selectAcrossPages: false,
+  exportScope: "page",
+  totalCount: "loaded",
+};
 
 function source(): TableSource<Row> {
   return {
@@ -81,7 +96,7 @@ describe('scope "all" over a server source', () => {
     const request = vi.fn();
     const handler = makeExportCsvHandler(
       { scope: "all", request },
-      serverSource(),
+      serverSource({ capabilities: CLAIMS_ALL }),
       COLUMNS
     );
     handler?.();
@@ -110,22 +125,52 @@ describe('scope "all" over a server source', () => {
     expect(info.query.limit).toBe(25);
   });
 
-  it("keeps a this-page button when it cannot answer all", () => {
-    // Neither `request` nor `fetchAll`, and no rows to read: hiding the
-    // button left only a console warning. The person at the table gets
-    // a button that writes this page — the caption says so.
+  it("never turns an unavailable all-rows request into a page export", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const onAfterExport = vi.fn();
     const handler = makeExportCsvHandler(
-      { scope: "all" },
-      serverSource(),
+      { scope: "all", onAfterExport },
+      serverSource({ capabilities: CLAIMS_ALL }),
       COLUMNS
     );
     expect(handler).toBeDefined();
+    handler?.();
+    expect(onAfterExport).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("No export was started")
+    );
+    warn.mockRestore();
+    resetDevWarnings();
   });
 
-  it("keeps the button for a frontend source, which can answer", () => {
-    expect(
-      makeExportCsvHandler({ scope: "all" }, source(), COLUMNS)
-    ).toBeDefined();
+  it("exports the complete source-owned set, not only the visible page", () => {
+    const complete = [...ROWS, { id: "2", name: "Grace" }];
+    const onAfterExport = vi.fn();
+    makeExportCsvHandler(
+      { scope: "all", onAfterExport },
+      { ...source(), rows: ROWS, allFilteredRows: complete, total: 2 },
+      COLUMNS
+    )?.();
+    expect(onAfterExport.mock.calls[0]?.[0].rows).toEqual(complete);
+    expect(onAfterExport.mock.calls[0]?.[0].csv).toContain("Grace");
+  });
+
+  it("honors a page-only declaration even when rows are present", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const onAfterExport = vi.fn();
+    makeExportCsvHandler(
+      { scope: "all", onAfterExport },
+      { ...source(), capabilities: PAGE_ONLY },
+      COLUMNS
+    )?.();
+    expect(onAfterExport).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("No export was started")
+    );
+    warn.mockRestore();
+    resetDevWarnings();
   });
 });
 
@@ -211,13 +256,31 @@ describe("exportCsv.fetchAll", () => {
         fetchAll: { fetchPage: pager(3), pageSize: 10 },
         onAfterExport,
       },
-      serverSource(),
+      serverSource({ capabilities: CLAIMS_ALL }),
       COLUMNS
     );
     expect(handler).toBeDefined();
     await handler?.();
     expect(onAfterExport).toHaveBeenCalledOnce();
     expect(onAfterExport.mock.calls[0]?.[0].rows).toHaveLength(3);
+  });
+
+  it("uses the host route when a page-only declaration constrains present rows", async () => {
+    const fetched = [{ id: "2", name: "Fetched" }];
+    const fetchPage = vi.fn(() => Promise.resolve(fetched));
+    const onAfterExport = vi.fn();
+    const handler = makeExportCsvHandler(
+      {
+        scope: "all",
+        fetchAll: { fetchPage, pageSize: 10 },
+        onAfterExport,
+      },
+      { ...source(), capabilities: PAGE_ONLY },
+      COLUMNS
+    );
+    await handler?.();
+    expect(fetchPage).toHaveBeenCalledOnce();
+    expect(onAfterExport.mock.calls[0]?.[0].rows).toEqual(fetched);
   });
 });
 

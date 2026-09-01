@@ -58,8 +58,9 @@ export interface ExportCsvOptions<TRow = unknown> {
    *
    * `"page"` (default) — current page / loaded slice.
    * `"all"` — full filtered+sorted set when the source exposes
-   * {@link TableSource.allFilteredRows}; otherwise falls back to the
-   * page with a dev-only warning.
+   * {@link TableSource.allFilteredRows}. A server source instead needs
+   * {@link ExportCsvOptions.request} or {@link ExportCsvOptions.fetchAll};
+   * without one of those executable routes the export stays disabled.
    * `"selected"` — the checked rows, in table order. Selection is a set of
    * ids, so this searches the widest set the source can offer: a row selected
    * on page 1 is still exported while page 3 is on screen.
@@ -311,26 +312,34 @@ export function resolveExportCsv<TRow = unknown>(
   return { ...value, writer };
 }
 
+/** Whether the source itself can execute an all-rows export. */
+function sourceProvidesAllExportRows(source: CapabilitySource): boolean {
+  return (
+    source.allFilteredRows !== undefined &&
+    sourceCapabilities(source).exportScope === "all"
+  );
+}
+
 /**
- * Whether `scope: "all"` will write the current page instead of the
- * full filtered set.
+ * Whether `scope: "all"` lacks a route to the full filtered set.
  *
- * A frontend source that exposes `allFilteredRows`, or a host that
- * passed `request` / `fetchAll`, can answer honestly. Everything else
- * is this page — the button should say so.
+ * A frontend source that both exposes `allFilteredRows` and declares that
+ * export-all is supported can answer through the source. A host-provided
+ * `request` / `fetchAll` route can answer independently. A capability
+ * declaration describes support; it never creates access to rows.
  */
 export function exportAllFallsBackToPage<TRow = unknown>(
   exportCsv: ExportCsvProp<TRow>,
   source: CapabilitySource
 ): boolean {
   const options = resolveExportCsv(exportCsv);
-  // The source's own answer, not a guess at its shape: a host that fetches
-  // the rest itself (`request` / `fetchAll`) is covered whatever it declares.
+  // A source declaration may constrain its own row route. Host-owned routes
+  // are executable independently and remain valid whatever the source says.
   return Boolean(
     options?.scope === "all" &&
-    sourceCapabilities(source).exportScope === "page" &&
     options.request === undefined &&
-    options.fetchAll === undefined
+    options.fetchAll === undefined &&
+    !sourceProvidesAllExportRows(source)
   );
 }
 
@@ -683,9 +692,13 @@ export function makeExportCsvHandler<TRow>(
   }
 
   // "All" over a server source: the browser holds one page, so it has to be
-  // answered by fetching, not by pretending. `fetchAll` is the opt-in.
+  // answered by fetching, not by pretending. A page-only declaration also
+  // constrains rows that happen to be present; `fetchAll` remains an
+  // independent host-owned route in either case.
   const serverAll =
-    options.scope === "all" && !source.allFilteredRows && options.fetchAll;
+    options.scope === "all" &&
+    !sourceProvidesAllExportRows(source) &&
+    options.fetchAll;
   if (serverAll) {
     return async () => {
       const rows = await fetchAllExportRows(source, serverAll);
@@ -704,28 +717,16 @@ export function makeExportCsvHandler<TRow>(
     };
   }
 
-  // Neither a backend handler nor an opt-in fetch, and no rows to read:
-  // write this page and name the button that way.
-  if (options.scope === "all" && !source.allFilteredRows) {
-    devWarn(
-      'exportCsv scope "all" needs the full filtered set. This source ' +
-        "exposes only the current page, so the Export button writes this " +
-        "page and names itself that way. Pass `request` or `fetchAll` to " +
-        "export everything from a server tier."
-    );
-    return () =>
-      downloadTableCsv({
-        source,
-        columns,
-        filename: options.filename,
-        scope: "page",
-        columnScope: options.columns,
-        escapeFormulas: options.escapeFormulas,
-        context,
-        writer,
-        onBeforeExport: options.onBeforeExport,
-        onAfterExport: options.onAfterExport,
-      });
+  // Keep a handler so adapters can render the disabled control, but never
+  // turn an unavailable all-rows request into a current-page download.
+  if (exportAllFallsBackToPage(options, source)) {
+    return () => {
+      devWarn(
+        'exportCsv scope "all" needs an executable full-export route. ' +
+          "Provide source.allFilteredRows, exportCsv.request, or " +
+          "exportCsv.fetchAll. No export was started."
+      );
+    };
   }
 
   return () =>

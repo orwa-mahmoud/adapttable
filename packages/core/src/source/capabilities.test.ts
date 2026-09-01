@@ -172,34 +172,53 @@ describe("the features that used to guess", () => {
     ).toBe("source");
   });
 
-  it("falls export back to the page only when nothing can reach further", () => {
+  it("requires an executable route for an all-rows export", () => {
     expect(exportAllFallsBackToPage({ scope: "all" }, paged)).toBe(true);
     expect(exportAllFallsBackToPage({ scope: "all" }, full)).toBe(false);
-    // The host fetches the rest itself, so the source's limit is not the end
-    // of the story.
     expect(
       exportAllFallsBackToPage(
         { scope: "all", fetchAll: { fetchPage: () => Promise.resolve(ROWS) } },
         paged
       )
     ).toBe(false);
-    // A declaration is enough: a source that will serve everything on request
-    // is not falling back, whatever its current shape looks like.
+    expect(
+      exportAllFallsBackToPage(
+        { scope: "all", request: () => undefined },
+        paged
+      )
+    ).toBe(false);
+  });
+
+  it("never treats a capability declaration as row transport", () => {
+    const claimsAll: TableSourceCapabilities = {
+      fullDataset: false,
+      grouping: false,
+      selectAcrossPages: true,
+      exportScope: "all",
+      totalCount: "exact",
+    };
     expect(
       exportAllFallsBackToPage(
         { scope: "all" },
-        {
-          ...paged,
-          capabilities: {
-            fullDataset: false,
-            grouping: false,
-            selectAcrossPages: true,
-            exportScope: "all",
-            totalCount: "exact",
-          },
-        }
+        { ...paged, capabilities: claimsAll }
       )
-    ).toBe(false);
+    ).toBe(true);
+  });
+
+  it("lets an explicit page-only declaration constrain source-owned rows", () => {
+    const pageOnly: TableSourceCapabilities = {
+      fullDataset: false,
+      grouping: false,
+      selectAcrossPages: false,
+      exportScope: "page",
+      totalCount: "loaded",
+    };
+    expect(
+      exportAllFallsBackToPage(
+        { scope: "all" },
+        { ...full, capabilities: pageOnly }
+      )
+    ).toBe(true);
   });
 
   it("leaves a page-scoped export alone", () => {
