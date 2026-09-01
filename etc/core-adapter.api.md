@@ -4909,10 +4909,12 @@ export interface ToolbarChromeProps<TRow> {
 
 // @public
 export interface ToolbarExtrasSlotProps {
+    accentColor?: string;
     // (undocumented)
     canRedo?: boolean;
     // (undocumented)
     canUndo?: boolean;
+    classNames?: Readonly<Record<string, string | undefined>>;
     // (undocumented)
     density?: "comfortable" | "compact";
     // (undocumented)
@@ -5154,22 +5156,22 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
+        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions | undefined;
         headerFilters?: boolean | undefined;
-        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions | undefined;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
         commandPalette?: (boolean | CommandPaletteOptions) | undefined;
         density?: "comfortable" | "compact" | undefined;
         findInTable?: boolean | undefined;
-        labels?: TableLabels | undefined;
-        locale?: string | undefined;
         dir?: Direction | undefined;
+        labels?: TableLabels | undefined;
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance | undefined;
+        locale?: string | undefined;
         rowActions?: RowAction<TRow>[] | undefined;
         confirm?: ConfirmHandler | undefined;
         isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
@@ -5311,22 +5313,22 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
+        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions | undefined;
         headerFilters?: boolean | undefined;
-        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions | undefined;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
         commandPalette?: (boolean | CommandPaletteOptions) | undefined;
         density?: "comfortable" | "compact" | undefined;
         findInTable?: boolean | undefined;
-        labels?: TableLabels | undefined;
-        locale?: string | undefined;
         dir?: Direction | undefined;
+        labels?: TableLabels | undefined;
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance | undefined;
+        locale?: string | undefined;
         rowActions?: RowAction<TRow>[] | undefined;
         confirm?: ConfirmHandler | undefined;
         isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;

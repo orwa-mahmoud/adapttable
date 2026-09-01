@@ -1,7 +1,24 @@
+import {
+  extendFeature,
+  slotRender,
+  type TableFeature,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/core/adapter";
+import { densityChooser as core } from "@adapttable/core/features";
 import type { MantineSpacing } from "@mantine/core";
 
-// The density feature, on the same entry every other kit publishes it from.
-export { densityChooser } from "@adapttable/core/features";
+import { DensityButton } from "./components/toolbarExtras";
+
+/**
+ * Switch row density, with Mantine's own toolbar control.
+ *
+ * @public
+ */
+export function densityChooser<TRow>(): TableFeature<TRow> {
+  return extendFeature(core<TRow>(), [
+    slotRender(TOOLBAR_EXTRAS, (props) => <DensityButton {...props} />),
+  ]);
+}
 
 /** Row density — independent of column pinning. */
 export type Density = "comfortable" | "compact";

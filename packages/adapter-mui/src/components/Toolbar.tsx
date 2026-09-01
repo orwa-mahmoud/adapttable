@@ -93,6 +93,8 @@ export function Toolbar<TRow>({
   exportBusy,
   exportAnnouncement = "",
   exportLabel,
+  exportDisabled,
+  exportDisabledReason,
 }: Readonly<MuiToolbarProps<TRow>>) {
   const { labels, source } = table;
   const sortOptions =
@@ -215,6 +217,8 @@ export function Toolbar<TRow>({
             exportBusy,
             exportAnnouncement,
             exportLabel,
+            exportDisabled,
+            exportDisabledReason,
             labels,
           }}
         />

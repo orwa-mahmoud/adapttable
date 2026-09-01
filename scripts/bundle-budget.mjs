@@ -353,7 +353,26 @@ const FIXTURES = [
   // broken for a screen-reader user, and there is no version of that fix which
   // the host has to remember to switch on. 0.1-0.4 KB gzip; the five kits
   // already on their line move 1 KB, the other three had the slack.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 134 },
+  {
+    name: "mantine · table",
+    pkg: "adapter-mantine",
+    budgetKB: 134,
+    // Unique strings from the optional modules this kit moved behind feature
+    // imports. Hook names that still appear in JSDoc on the lean path
+    // (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
   {
     name: "mui · table",
     pkg: "adapter-mui",
@@ -374,9 +393,64 @@ const FIXTURES = [
       "SavedViewsMenu",
     ],
   },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
-  { name: "radix · table", pkg: "adapter-radix", budgetKB: 135 },
+  {
+    name: "chakra · table",
+    pkg: "adapter-chakra",
+    budgetKB: 134,
+    // Unique strings from the optional modules this kit moved behind feature
+    // imports. Hook names that still appear in JSDoc on the lean path
+    // (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
+  {
+    name: "antd · table",
+    pkg: "adapter-antd",
+    budgetKB: 128,
+    // antd builds its chrome by hand instead of through `useDataTableShell`,
+    // so five engines the other kits reach through live slots — cell
+    // navigation, find, row-pinning URL state, the edit history and the
+    // export handler — are still called from its root component and are in
+    // this graph. Item 18 owns that; the markers below are the ones its
+    // toolbar split does deliver.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "useFilterTreeChips",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
+  {
+    name: "radix · table",
+    pkg: "adapter-radix",
+    budgetKB: 135,
+    // Unique strings from the optional modules this kit moved behind feature
+    // imports. Hook names that still appear in JSDoc on the lean path
+    // (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
   // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
   // ceilings move; ~3 KB slack so the next small patch does not flake CI.
@@ -388,9 +462,66 @@ const FIXTURES = [
   // 2026-08-29 at the commit that landed it: base-ui 141.1 KB and shadcn
   // 138.2 KB, against ceilings of 141 and 138. unstyled and radix carried it
   // inside the slack they already had.
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 142 },
-  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 139 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 135 },
+  {
+    name: "base-ui · table",
+    pkg: "adapter-base-ui",
+    budgetKB: 142,
+    // Unique strings from the optional modules this kit moved behind feature
+    // imports. Hook names that still appear in JSDoc on the lean path
+    // (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
+  {
+    name: "shadcn · table",
+    pkg: "adapter-shadcn",
+    budgetKB: 139,
+    // Unique strings from the optional modules this kit moved behind feature
+    // imports. Hook names that still appear in JSDoc on the lean path
+    // (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
+  {
+    name: "unstyled · table",
+    pkg: "adapter-unstyled",
+    budgetKB: 135,
+    // Unique strings from the optional modules this kit moved behind feature
+    // imports. Hook names that still appear in JSDoc on the lean path
+    // (`useFindInTable`, `useSavedViews`) are not markers.
+    absent: [
+      "ROW_DND_MIME",
+      "useVirtualizer",
+      "GRID_CELL_ATTR",
+      "buildExportTable",
+      "useFilterTreeChips",
+      "matchKeySet",
+      "useRowPinningUrlState",
+      "useTableEditHistory",
+      "FilterTreeBuilder",
+      "SavedViewsMenu",
+    ],
+  },
 ].map((f) => ({
   code: `export { DataTable } from "PKG";`,
   // Row reordering is the first feature to own its provider, and this is what

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Generated from `feature-classification.json`: every published kit exposes
- * the same feature subpaths, and no root table imports a sibling kit or the
- * features aggregate barrel.
+ * the same feature subpaths, no root table imports a sibling kit or the
+ * features aggregate barrel, and every kit passes core's header-cell props
+ * through whole.
  *
  *   node scripts/check-feature-parity.mjs
  */
@@ -32,6 +33,21 @@ const subpaths = [
   ),
 ].sort();
 
+/**
+ * Core states a header cell's props once and every kit has to put the whole
+ * object on its own element. A kit that reads named fields off it instead
+ * drops whatever core adds next, silently: `role` and `scope` reached four
+ * kits out of eight that way, and nothing failed, because the table still
+ * looked right. Two shapes satisfy this — spreading `leaf.headerProps`, or
+ * handing core's `getHeaderCellProps` to a kit that builds its own header
+ * (antd's `onHeaderCell` is the whole of its `<th>`).
+ */
+const HEADER_SPREAD = /\.\.\.leaf\.headerProps(?!\s*\[)/;
+const HEADER_NAMED = /leaf\.headerProps\s*\[/;
+const HEADER_HANDOFF = /getHeaderCellProps/;
+/** shadcn renders through `@adapttable/unstyled`, so it has no header of its own. */
+const NO_HEADER_OF_ITS_OWN = new Set(["adapter-shadcn"]);
+
 const problems = [];
 
 for (const adapter of PUBLISHED) {
@@ -50,9 +66,20 @@ for (const adapter of PUBLISHED) {
     .filter((name) => typeof name === "string" && /\.(tsx?|jsx?)$/.test(name))
     .map((name) => join(src, name));
 
+  let passesHeaderProps = NO_HEADER_OF_ITS_OWN.has(adapter);
+
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     const rel = file.slice(PACKAGES.length + 1);
+    if (rel.endsWith(".test.tsx") || rel.endsWith(".test.ts")) continue;
+    if (HEADER_SPREAD.test(text) || HEADER_HANDOFF.test(text)) {
+      passesHeaderProps = true;
+    }
+    if (HEADER_NAMED.test(text) && !HEADER_SPREAD.test(text)) {
+      problems.push(
+        `${rel}: reads named fields off leaf.headerProps without spreading it`
+      );
+    }
     if (/from\s+["']@adapttable\/(?!core)[^"']+["']/.test(text)) {
       const other = text.match(/from\s+["'](@adapttable\/(?!core)[^"']+)["']/);
       if (
@@ -71,6 +98,12 @@ for (const adapter of PUBLISHED) {
       problems.push(`${rel}: root table imports the features aggregate barrel`);
     }
   }
+
+  if (!passesHeaderProps) {
+    problems.push(
+      `${pkg.name}: never passes core's header-cell props to its header element`
+    );
+  }
 }
 
 if (problems.length > 0) {
@@ -80,5 +113,6 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `feature parity: ${PUBLISHED.length} kits share ${subpaths.length} subpaths`
+  `feature parity: ${PUBLISHED.length} kits share ${subpaths.length} subpaths ` +
+    `and pass core's header props through whole`
 );

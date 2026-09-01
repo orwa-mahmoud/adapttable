@@ -11,7 +11,6 @@ import {
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   DataTableShellView,
-  ExportAnnouncer,
   FeatureHostProvider,
   FeatureProviders,
   FeatureSlot,
@@ -28,6 +27,7 @@ import {
   SIDE_PANEL,
   STATUS_BAR,
   TableStatusAnnouncer,
+  TOOLBAR_EXTRAS,
   useDataTableShell,
   useMountStagger,
   useStickyToolbarLayout,
@@ -472,60 +472,33 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         }
                       />
                     )}
-                    {onUndo && onRedo && (
-                      <>
-                        <button
-                          type="button"
-                          data-adapttable-part="undo-button"
-                          className={classNames.undoButton}
-                          disabled={canUndo !== true}
-                          onClick={onUndo}
-                        >
-                          {undoLabel}
-                        </button>
-                        <button
-                          type="button"
-                          data-adapttable-part="redo-button"
-                          className={classNames.redoButton}
-                          disabled={canRedo !== true}
-                          onClick={onRedo}
-                        >
-                          {redoLabel}
-                        </button>
-                      </>
-                    )}
-                    {onExportCsv && (
-                      <>
-                        <button
-                          type="button"
-                          data-adapttable-part="export-csv-button"
-                          className={classNames.exportCsvButton}
-                          style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-                          onClick={onExportCsv}
-                          disabled={
-                            exportBusy === true || exportDisabled === true
-                          }
-                          aria-busy={exportBusy}
-                          title={
-                            exportDisabled ? exportDisabledReason : undefined
-                          }
-                        >
-                          {/* No kit to borrow a loading button from, so the affordance is an
-                  element the host can style — `aria-hidden` because the
-                  announcement below is what a screen reader should hear, not a
-                  decoration. */}
-                          {exportBusy && (
-                            <span
-                              aria-hidden="true"
-                              data-adapttable-part="export-spinner"
-                              className={classNames.exportSpinner}
-                            />
-                          )}
-                          {exportLabel}
-                        </button>
-                        <ExportAnnouncer announcement={exportAnnouncement} />
-                      </>
-                    )}
+                    <FeatureSlot
+                      slot={TOOLBAR_EXTRAS}
+                      props={{
+                        onUndo,
+                        onRedo,
+                        canUndo,
+                        canRedo,
+                        undoLabel,
+                        redoLabel,
+                        onPrint,
+                        printLabel,
+                        density: toolbarDensity,
+                        onDensityChange,
+                        onToggleFullscreen,
+                        isFullscreen,
+                        onExportCsv,
+                        exportBusy,
+                        exportAnnouncement,
+                        exportLabel,
+                        exportDisabled,
+                        exportDisabledReason,
+                        // A plain object, because the kit's class map is an
+                        // interface and the slot takes any kit's map.
+                        classNames: { ...classNames },
+                        labels,
+                      }}
+                    />
                     {onAddRow && (
                       <button
                         type="button"
@@ -535,50 +508,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         onClick={onAddRow}
                       >
                         {addRowLabel}
-                      </button>
-                    )}
-                    {onPrint && (
-                      <button
-                        type="button"
-                        data-adapttable-part="print-button"
-                        className={classNames.printButton}
-                        onClick={onPrint}
-                      >
-                        {printLabel}
-                      </button>
-                    )}
-                    {onDensityChange && (
-                      <button
-                        type="button"
-                        aria-label={labels.density}
-                        data-adapttable-part="density-toggle"
-                        className={classNames.densityToggle}
-                        onClick={() => {
-                          onDensityChange(
-                            toolbarDensity === "compact"
-                              ? "comfortable"
-                              : "compact"
-                          );
-                        }}
-                      >
-                        {toolbarDensity === "compact"
-                          ? labels.densityCompact
-                          : labels.densityComfortable}
-                      </button>
-                    )}
-                    {onToggleFullscreen && (
-                      <button
-                        type="button"
-                        aria-label={
-                          isFullscreen === true
-                            ? labels.exitFullscreen
-                            : labels.enterFullscreen
-                        }
-                        data-adapttable-part="fullscreen-toggle"
-                        className={classNames.fullscreenToggle}
-                        onClick={onToggleFullscreen}
-                      >
-                        {isFullscreen === true ? "\u2715" : "\u26f6"}
                       </button>
                     )}
                     {toolbarSlots?.end}

@@ -4,8 +4,10 @@
 
 ```ts
 
-import { print as print_2 } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
+// @public
+function print_2<TRow>(onPrint: () => void, printButton?: boolean): TableFeature<TRow>;
 export { print_2 as print }
 
 // (No @packageDocumentation comment for this package)

@@ -54,6 +54,19 @@ const ATTRIBUTES = {
 } as const;
 
 /**
+ * What `getHeaderCellProps` states about every header cell, in every kit.
+ *
+ * These are not kit choices: core computes them and each adapter has to put
+ * them on its own header element. Two kits spread the whole object and six
+ * read named fields off it, so `role` and `scope` reached half the kits until
+ * every kit was made to pass the object through whole.
+ */
+const HEADER_CONTRACT = {
+  role: "columnheader",
+  scope: "col",
+} as const;
+
+/**
  * Pages chosen for their table state: one plain, one a keyboard grid. Both are
  * per-kit routes — the Feature Lab is one page with a kit switcher, so it has
  * no `/<kit>/all-options/` to compare eight of.
@@ -107,6 +120,35 @@ for (const page of PAGES) {
         shapes.get(kit),
         `${kit} describes the table differently from ${reference}`
       ).toEqual(shapes.get(reference!));
+    }
+  });
+
+  test(`${page}: every kit renders the header props core states`, async ({
+    page: browser,
+  }) => {
+    // Comparing kits to each other cannot see this: eight kits all missing a
+    // prop core computes agree perfectly. So this one asserts CONFORMANCE —
+    // each kit against the contract, not against its siblings — which is the
+    // guarantee that lets core state something new about a header cell and
+    // have it arrive everywhere.
+    for (const kit of KITS) {
+      await browser.goto(`/${kit}/${page}/`);
+      await browser.locator("table").first().waitFor({ state: "visible" });
+      const header = browser
+        .locator('[data-adapttable-part="header-cell"]')
+        .first();
+      for (const [name, value] of Object.entries(HEADER_CONTRACT)) {
+        await expect(
+          header,
+          `${kit} drops ${name} from the header props core states`
+        ).toHaveAttribute(name, value);
+      }
+      // Not a fixed value — what matters is that the key core computes is on
+      // the element at all, whatever this page's first column happens to be.
+      await expect(
+        header,
+        `${kit} drops data-column-key from the header props core states`
+      ).toHaveAttribute("data-column-key", /.+/);
     }
   });
 

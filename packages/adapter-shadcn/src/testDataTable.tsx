@@ -1,13 +1,9 @@
 import { flattenColumnTree, type TableFeature } from "@adapttable/core/adapter";
 import {
   cellSpan,
-  densityChooser,
-  exportCsv,
   extraRows,
   fitColumns,
-  fullscreen,
   multiSort,
-  print,
   resizableColumns,
   rowActions,
   rowAppearance,
@@ -22,6 +18,7 @@ import { columnSelectionCheckbox } from "./column-selection";
 import { commandPalette } from "./command-palette";
 import { contextMenu } from "./context-menu";
 import { DataTable as IsolatedDataTable } from "./DataTable";
+import { densityChooser } from "./density";
 import {
   batchEditing,
   dirtyIndicators,
@@ -30,10 +27,13 @@ import {
   rowEditing,
   undoRedoButtons,
 } from "./editing";
+import { exportCsv } from "./export";
 import { filters, filterTypes } from "./filters";
 import { findInTable } from "./find-in-table";
+import { fullscreen } from "./fullscreen";
 import { grouping } from "./grouping";
 import { headerFilters } from "./header-filters";
+import { print } from "./print";
 import { nestedTable, rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { rowReorder } from "./row-reorder";

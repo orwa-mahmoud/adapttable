@@ -1,17 +1,17 @@
 /** Search field, sort select, filters trigger, menus and rows-per-page. */
 import { pageSizeOptions } from "@adapttable/core";
 import {
-  ExportAnnouncer,
   FeatureSlot,
   FILTER_POPOVER,
   SearchIcon,
+  TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import { type ReactNode } from "react";
 
 import { FiltersIcon } from "../icons";
 import type { BaseUiAccentColor } from "../types";
-import { Badge, Box, Button, Flex, Spinner, TextField } from "../ui";
+import { Badge, Box, Button, Flex, TextField } from "../ui";
 import { NativeSelect, type SelectOption } from "./primitives";
 
 export function pageSizeSelectOptions(
@@ -174,48 +174,31 @@ export function Toolbar<TRow>({
         )}
         {savedViewsMenu}
         {columnMenu}
-        {onUndo && onRedo && (
-          <>
-            <Button
-              size="2"
-              variant="soft"
-              color="gray"
-              data-adapttable-part="undo-button"
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </Button>
-            <Button
-              size="2"
-              variant="soft"
-              color="gray"
-              data-adapttable-part="redo-button"
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </Button>
-          </>
-        )}
-        {onExportCsv && (
-          <Button
-            size="2"
-            variant="outline"
-            color={accentColor}
-            onClick={onExportCsv}
-            disabled={exportBusy === true || exportDisabled}
-            aria-busy={exportBusy}
-            title={exportDisabled ? exportDisabledReason : undefined}
-          >
-            {/* This adapter's own Spinner — the same one the filter form uses
-                while options load, so "working" looks the same everywhere in
-                the kit. */}
-            {exportBusy && <Spinner size="1" label={labels.loading} />}
-            {exportLabel}
-          </Button>
-        )}
-        {onExportCsv && <ExportAnnouncer announcement={exportAnnouncement} />}
+        <FeatureSlot
+          slot={TOOLBAR_EXTRAS}
+          props={{
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo,
+            undoLabel,
+            redoLabel,
+            onPrint,
+            printLabel,
+            density,
+            onDensityChange,
+            onToggleFullscreen,
+            isFullscreen,
+            onExportCsv,
+            exportBusy,
+            exportAnnouncement,
+            exportLabel,
+            exportDisabled,
+            exportDisabledReason,
+            accentColor,
+            labels,
+          }}
+        />
         {onAddRow && (
           <Button
             size="2"
@@ -224,51 +207,6 @@ export function Toolbar<TRow>({
             onClick={onAddRow}
           >
             {addRowLabel}
-          </Button>
-        )}
-        {onPrint && (
-          <Button
-            size="2"
-            variant="soft"
-            color="gray"
-            data-adapttable-part="print-button"
-            onClick={onPrint}
-          >
-            {printLabel}
-          </Button>
-        )}
-        {onDensityChange && (
-          <Button
-            size="2"
-            variant="soft"
-            color="gray"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            onClick={() => {
-              onDensityChange(
-                density === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {density === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </Button>
-        )}
-        {onToggleFullscreen && (
-          <Button
-            size="2"
-            variant="soft"
-            color="gray"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
           </Button>
         )}
         {toolbarSlots?.end}

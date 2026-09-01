@@ -2012,6 +2012,7 @@ function AntdTableBody<TRow>({
 
   const columns = buildColumns<TRow>({
     gridFocus: gridFocus,
+    getHeaderCellProps: table.getHeaderCellProps,
     columns: table.columns,
     rowActions,
     rowActionsLayout: props.rowActionsLayout,

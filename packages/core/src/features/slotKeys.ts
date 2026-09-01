@@ -670,6 +670,14 @@ export interface ToolbarExtrasSlotProps {
   exportDisabled?: boolean;
   /** Why the Export button is disabled, localized; empty while it is not. */
   exportDisabledReason?: string;
+  /**
+   * The table's class map, for a kit whose controls are styled through one
+   * (`unstyled` and everything built on it). A kit with its own components
+   * ignores it — the documented `classNames` keys are the same either way.
+   */
+  classNames?: Readonly<Record<string, string | undefined>>;
+  /** Kit accent token some controls paint with. */
+  accentColor?: string;
   /** Resolved labels for density and fullscreen controls. */
   labels: Required<TableLabels>;
 }

@@ -425,10 +425,11 @@ function LeafHeader<TRow>({
     <TableCell
       key={column.key}
       data-adapttable-part="header-cell"
+      // Every header prop core states, in full. Cherry-picking named fields
+      // meant a prop core added reached only the kits that happened to name
+      // it; the kit's own props below still win where they overlap.
+      {...leaf.headerProps}
       {...leaf.columnHeaderProps}
-      aria-sort={ariaSort}
-      data-column-key={column.key}
-      data-sort-index={leaf.sortIndex}
       rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
       sx={headSx}
       style={{

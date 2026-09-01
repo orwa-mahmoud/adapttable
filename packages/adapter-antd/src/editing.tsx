@@ -6,6 +6,7 @@ import {
   ROW_EDIT_ACTIONS,
   slotRender,
   type TableFeature,
+  TOOLBAR_EXTRAS,
 } from "@adapttable/core/adapter";
 import {
   batchEditing as coreBatch,
@@ -19,6 +20,7 @@ import {
 
 import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";
+import { UndoRedoButtons } from "./components/toolbarExtras";
 
 function EditableSlot(props: Readonly<EditableCellSlotProps<never>>) {
   return <EditableDataCell {...props} />;
@@ -54,7 +56,9 @@ export function editHistory<TRow>(
 }
 
 export function undoRedoButtons<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreButtons<TRow>(), []);
+  return extendFeature(coreButtons<TRow>(), [
+    slotRender(TOOLBAR_EXTRAS, (props) => <UndoRedoButtons {...props} />),
+  ]);
 }
 
 export function batchEditing<TRow>(

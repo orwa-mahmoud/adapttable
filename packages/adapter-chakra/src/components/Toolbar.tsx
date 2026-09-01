@@ -1,10 +1,10 @@
 /** Search field, sort select, filters trigger, menus and rows-per-page. */
 import { pageSizeOptions } from "@adapttable/core";
 import {
-  ExportAnnouncer,
   FeatureSlot,
   FILTER_POPOVER,
   SearchIcon,
+  TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import { Badge, Button, HStack, Input, InputGroup } from "@chakra-ui/react";
@@ -169,48 +169,31 @@ export function Toolbar<TRow>({
         )}
         {savedViewsMenu}
         {columnMenu}
-        {onUndo && onRedo && (
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              data-adapttable-part="undo-button"
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              data-adapttable-part="redo-button"
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </Button>
-          </>
-        )}
-        {onExportCsv && (
-          <>
-            {/* Chakra's own loading Button: its Spinner replaces the label and
-                the control blocks itself, which is the kit's own vocabulary for
-                work in progress. */}
-            <Button
-              size="sm"
-              variant="outline"
-              colorPalette={accentColor}
-              onClick={onExportCsv}
-              loading={exportBusy}
-              aria-busy={exportBusy}
-              disabled={exportDisabled}
-              title={exportDisabled ? exportDisabledReason : undefined}
-            >
-              {exportLabel}
-            </Button>
-            <ExportAnnouncer announcement={exportAnnouncement} />
-          </>
-        )}
+        <FeatureSlot
+          slot={TOOLBAR_EXTRAS}
+          props={{
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo,
+            undoLabel,
+            redoLabel,
+            onPrint,
+            printLabel,
+            density,
+            onDensityChange,
+            onToggleFullscreen,
+            isFullscreen,
+            onExportCsv,
+            exportBusy,
+            exportAnnouncement,
+            exportLabel,
+            exportDisabled,
+            exportDisabledReason,
+            accentColor,
+            labels,
+          }}
+        />
         {onAddRow && (
           <Button
             size="sm"
@@ -219,48 +202,6 @@ export function Toolbar<TRow>({
             onClick={onAddRow}
           >
             {addRowLabel}
-          </Button>
-        )}
-        {onPrint && (
-          <Button
-            size="sm"
-            variant="outline"
-            data-adapttable-part="print-button"
-            onClick={onPrint}
-          >
-            {printLabel}
-          </Button>
-        )}
-        {onDensityChange && (
-          <Button
-            size="sm"
-            variant="outline"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            onClick={() => {
-              onDensityChange(
-                density === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {density === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </Button>
-        )}
-        {onToggleFullscreen && (
-          <Button
-            size="sm"
-            variant="outline"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
           </Button>
         )}
         {toolbarSlots?.end}

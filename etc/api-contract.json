@@ -281,6 +281,30 @@
     "adapter-unstyled-pivot": [
       "PivotPanel"
     ],
+    "antd/density": [
+      "densityChooser"
+    ],
+    "antd/export": [
+      "exportCsv"
+    ],
+    "antd/fullscreen": [
+      "fullscreen"
+    ],
+    "antd/print": [
+      "print"
+    ],
+    "base-ui/density": [
+      "densityChooser"
+    ],
+    "base-ui/export": [
+      "exportCsv"
+    ],
+    "base-ui/fullscreen": [
+      "fullscreen"
+    ],
+    "base-ui/print": [
+      "print"
+    ],
     "bootstrap/cell-navigation": [
       "cellNavigation"
     ],
@@ -298,6 +322,18 @@
     ],
     "bootstrap/saved-views": [
       "savedViews"
+    ],
+    "chakra/density": [
+      "densityChooser"
+    ],
+    "chakra/export": [
+      "exportCsv"
+    ],
+    "chakra/fullscreen": [
+      "fullscreen"
+    ],
+    "chakra/print": [
+      "print"
     ],
     "cli": [
       "choosePackageManager",
@@ -2335,9 +2371,6 @@
     "kit/context-menu": [
       "contextMenu"
     ],
-    "kit/density": [
-      "densityChooser"
-    ],
     "kit/editing": [
       "batchEditing",
       "dirtyIndicators",
@@ -2345,10 +2378,6 @@
       "editing",
       "rowEditing",
       "undoRedoButtons"
-    ],
-    "kit/export": [
-      "ExportCsvOptions",
-      "exportCsv"
     ],
     "kit/extra-rows": [
       "extraRows"
@@ -2439,9 +2468,6 @@
     "kit/fit-columns": [
       "fitColumns"
     ],
-    "kit/fullscreen": [
-      "fullscreen"
-    ],
     "kit/grouping": [
       "grouping"
     ],
@@ -2453,9 +2479,6 @@
     ],
     "kit/nested-table": [
       "nestedTable"
-    ],
-    "kit/print": [
-      "print"
     ],
     "kit/resizable-columns": [
       "resizableColumns"
@@ -2498,7 +2521,17 @@
     "mantine/density": [
       "DENSITY_SPACING",
       "Density",
-      "DensitySpacing"
+      "DensitySpacing",
+      "densityChooser"
+    ],
+    "mantine/export": [
+      "exportCsv"
+    ],
+    "mantine/fullscreen": [
+      "fullscreen"
+    ],
+    "mantine/print": [
+      "print"
     ],
     "mui/density": [
       "densityChooser"
@@ -2512,6 +2545,18 @@
     "mui/print": [
       "print"
     ],
+    "radix/density": [
+      "densityChooser"
+    ],
+    "radix/export": [
+      "exportCsv"
+    ],
+    "radix/fullscreen": [
+      "fullscreen"
+    ],
+    "radix/print": [
+      "print"
+    ],
     "server": [
       "parseTableQuery",
       "QueryInput",
@@ -2519,6 +2564,18 @@
       "QuerySchema",
       "ServerFilterValue",
       "ServerTableQuery"
+    ],
+    "unstyled/density": [
+      "densityChooser"
+    ],
+    "unstyled/export": [
+      "exportCsv"
+    ],
+    "unstyled/fullscreen": [
+      "fullscreen"
+    ],
+    "unstyled/print": [
+      "print"
     ]
   },
   "entrypoints": {
@@ -2550,13 +2607,13 @@
       "surface": "kit/context-menu"
     },
     "adapter-antd-density.api.md": {
-      "reexport": "kit/density"
+      "surface": "antd/density"
     },
     "adapter-antd-editing.api.md": {
       "surface": "kit/editing"
     },
     "adapter-antd-export.api.md": {
-      "reexport": "kit/export"
+      "surface": "antd/export"
     },
     "adapter-antd-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
@@ -2574,7 +2631,7 @@
       "reexport": "kit/fit-columns"
     },
     "adapter-antd-fullscreen.api.md": {
-      "reexport": "kit/fullscreen"
+      "surface": "antd/fullscreen"
     },
     "adapter-antd-grouping.api.md": {
       "surface": "kit/grouping"
@@ -2592,7 +2649,7 @@
       "surface": "adapter-antd-pivot"
     },
     "adapter-antd-print.api.md": {
-      "reexport": "kit/print"
+      "surface": "antd/print"
     },
     "adapter-antd-resizable-columns.api.md": {
       "reexport": "kit/resizable-columns"
@@ -2661,13 +2718,13 @@
       "surface": "kit/context-menu"
     },
     "adapter-base-ui-density.api.md": {
-      "reexport": "kit/density"
+      "surface": "base-ui/density"
     },
     "adapter-base-ui-editing.api.md": {
       "surface": "kit/editing"
     },
     "adapter-base-ui-export.api.md": {
-      "reexport": "kit/export"
+      "surface": "base-ui/export"
     },
     "adapter-base-ui-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
@@ -2685,7 +2742,7 @@
       "reexport": "kit/fit-columns"
     },
     "adapter-base-ui-fullscreen.api.md": {
-      "reexport": "kit/fullscreen"
+      "surface": "base-ui/fullscreen"
     },
     "adapter-base-ui-grouping.api.md": {
       "surface": "kit/grouping"
@@ -2703,7 +2760,7 @@
       "surface": "adapter-base-ui-pivot"
     },
     "adapter-base-ui-print.api.md": {
-      "reexport": "kit/print"
+      "surface": "base-ui/print"
     },
     "adapter-base-ui-resizable-columns.api.md": {
       "reexport": "kit/resizable-columns"
@@ -2802,13 +2859,13 @@
       "surface": "kit/context-menu"
     },
     "adapter-chakra-density.api.md": {
-      "reexport": "kit/density"
+      "surface": "chakra/density"
     },
     "adapter-chakra-editing.api.md": {
       "surface": "kit/editing"
     },
     "adapter-chakra-export.api.md": {
-      "reexport": "kit/export"
+      "surface": "chakra/export"
     },
     "adapter-chakra-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
@@ -2826,7 +2883,7 @@
       "reexport": "kit/fit-columns"
     },
     "adapter-chakra-fullscreen.api.md": {
-      "reexport": "kit/fullscreen"
+      "surface": "chakra/fullscreen"
     },
     "adapter-chakra-grouping.api.md": {
       "surface": "kit/grouping"
@@ -2844,7 +2901,7 @@
       "surface": "adapter-chakra-pivot"
     },
     "adapter-chakra-print.api.md": {
-      "reexport": "kit/print"
+      "surface": "chakra/print"
     },
     "adapter-chakra-resizable-columns.api.md": {
       "reexport": "kit/resizable-columns"
@@ -2919,7 +2976,7 @@
       "surface": "kit/editing"
     },
     "adapter-mantine-export.api.md": {
-      "reexport": "kit/export"
+      "surface": "mantine/export"
     },
     "adapter-mantine-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
@@ -2937,7 +2994,7 @@
       "reexport": "kit/fit-columns"
     },
     "adapter-mantine-fullscreen.api.md": {
-      "reexport": "kit/fullscreen"
+      "surface": "mantine/fullscreen"
     },
     "adapter-mantine-grouping.api.md": {
       "surface": "kit/grouping"
@@ -2955,7 +3012,7 @@
       "surface": "adapter-mantine-pivot"
     },
     "adapter-mantine-print.api.md": {
-      "reexport": "kit/print"
+      "surface": "mantine/print"
     },
     "adapter-mantine-resizable-columns.api.md": {
       "reexport": "kit/resizable-columns"
@@ -3135,13 +3192,13 @@
       "surface": "kit/context-menu"
     },
     "adapter-radix-density.api.md": {
-      "reexport": "kit/density"
+      "surface": "radix/density"
     },
     "adapter-radix-editing.api.md": {
       "surface": "kit/editing"
     },
     "adapter-radix-export.api.md": {
-      "reexport": "kit/export"
+      "surface": "radix/export"
     },
     "adapter-radix-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
@@ -3159,7 +3216,7 @@
       "reexport": "kit/fit-columns"
     },
     "adapter-radix-fullscreen.api.md": {
-      "reexport": "kit/fullscreen"
+      "surface": "radix/fullscreen"
     },
     "adapter-radix-grouping.api.md": {
       "surface": "kit/grouping"
@@ -3177,7 +3234,7 @@
       "surface": "adapter-radix-pivot"
     },
     "adapter-radix-print.api.md": {
-      "reexport": "kit/print"
+      "surface": "radix/print"
     },
     "adapter-radix-resizable-columns.api.md": {
       "reexport": "kit/resizable-columns"
@@ -3357,13 +3414,13 @@
       "surface": "kit/context-menu"
     },
     "adapter-unstyled-density.api.md": {
-      "reexport": "kit/density"
+      "surface": "unstyled/density"
     },
     "adapter-unstyled-editing.api.md": {
       "surface": "kit/editing"
     },
     "adapter-unstyled-export.api.md": {
-      "reexport": "kit/export"
+      "surface": "unstyled/export"
     },
     "adapter-unstyled-extra-rows.api.md": {
       "reexport": "kit/extra-rows"
@@ -3381,7 +3438,7 @@
       "reexport": "kit/fit-columns"
     },
     "adapter-unstyled-fullscreen.api.md": {
-      "reexport": "kit/fullscreen"
+      "surface": "unstyled/fullscreen"
     },
     "adapter-unstyled-grouping.api.md": {
       "surface": "kit/grouping"
@@ -3399,7 +3456,7 @@
       "surface": "adapter-unstyled-pivot"
     },
     "adapter-unstyled-print.api.md": {
-      "reexport": "kit/print"
+      "surface": "unstyled/print"
     },
     "adapter-unstyled-resizable-columns.api.md": {
       "reexport": "kit/resizable-columns"

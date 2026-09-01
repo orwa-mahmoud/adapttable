@@ -4,10 +4,11 @@
 
 ```ts
 
-import { exportCsv } from '@adapttable/core/features';
 import { ExportCsvOptions } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { exportCsv }
+// @public
+export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 
 export { ExportCsvOptions }
 

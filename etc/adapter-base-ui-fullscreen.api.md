@@ -4,9 +4,10 @@
 
 ```ts
 
-import { fullscreen } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { fullscreen }
+// @public
+export function fullscreen<TRow>(): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

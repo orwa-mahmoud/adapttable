@@ -4,9 +4,10 @@
 
 ```ts
 
-import { densityChooser } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { densityChooser }
+// @public
+export function densityChooser<TRow>(): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

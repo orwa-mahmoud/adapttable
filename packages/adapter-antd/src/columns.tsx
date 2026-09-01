@@ -1,5 +1,6 @@
 import {
   ACTIONS_COLUMN_KEY,
+  type CellElementProps,
   type CellSpanAppearance,
   type ColumnDef,
   columnHeaderController,
@@ -413,6 +414,12 @@ export interface BuildColumnsOptions<TRow> {
   /** Per-column edge pinning (logical start/end), mapped to antd's native
    *  physical `fixed` via {@link antdFixed}. */
   pinned?: Readonly<Record<string, PinSide>>;
+  /**
+   * Core's header-cell props for a column. antd builds its `<th>` from what
+   * `onHeaderCell` returns and nothing else, so this is the only way an
+   * attribute core states about a header reaches this kit.
+   */
+  getHeaderCellProps?: (column: ColumnDef<TRow>) => CellElementProps;
   /** Layout width mutator; enables a resize handle when provided. */
   setWidth?: (key: string, width: number) => void;
   /** Per-column pixel widths from the layout state. */
@@ -645,6 +652,7 @@ function renderDataCell<TRow>(
 
 export function buildColumns<TRow>({
   gridFocus,
+  getHeaderCellProps,
   columns,
   rowActions,
   rowActionsLayout,
@@ -845,7 +853,12 @@ export function buildColumns<TRow>({
             pinned?.[column.key] != null,
             onToggleSortLevel
           );
+          // Everything core states about a header cell, in full, before this
+          // adapter's own props: the kit's values still win where they
+          // overlap, but nothing core adds is silently dropped.
+          const core = getHeaderCellProps?.(column);
           return {
+            ...core,
             "data-adapttable-part": "header-cell",
             "data-column-key": column.key,
             ...gridFocus?.getColumnHeaderProps(columnIndex, {
@@ -855,6 +868,7 @@ export function buildColumns<TRow>({
             // The sizing merges INTO whatever style the header already has,
             // rather than being overwritten by it.
             style: {
+              ...core?.style,
               ...head.style,
               ...columnSizeStyle(
                 column,

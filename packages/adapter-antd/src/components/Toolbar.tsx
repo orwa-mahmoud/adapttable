@@ -1,9 +1,9 @@
 /** Search field, sort select, filters trigger, menus and rows-per-page. */
 import { pageSizeOptions } from "@adapttable/core";
 import {
-  ExportAnnouncer,
   FeatureSlot,
   FILTER_POPOVER,
+  TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import { Badge, Button, Flex, Input, Select, Spin } from "antd";
@@ -141,41 +141,30 @@ export function Toolbar<TRow>({
         )}
         {savedViewsMenu}
         {columnMenu}
-        {onUndo && onRedo && (
-          <>
-            <Button
-              data-adapttable-part="undo-button"
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </Button>
-            <Button
-              data-adapttable-part="redo-button"
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </Button>
-          </>
-        )}
-        {onExportCsv && (
-          <>
-            {/* antd's own loading Button: the spinner replaces its icon slot
-                and the button disables itself, which is the kit's language for
-                "working" rather than a bare greyed-out control. */}
-            <Button
-              onClick={onExportCsv}
-              loading={exportBusy}
-              aria-busy={exportBusy}
-              disabled={exportDisabled}
-              title={exportDisabled ? exportDisabledReason : undefined}
-            >
-              {exportLabel}
-            </Button>
-            <ExportAnnouncer announcement={exportAnnouncement} />
-          </>
-        )}
+        <FeatureSlot
+          slot={TOOLBAR_EXTRAS}
+          props={{
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo,
+            undoLabel,
+            redoLabel,
+            onPrint,
+            printLabel,
+            density,
+            onDensityChange,
+            onToggleFullscreen,
+            isFullscreen,
+            onExportCsv,
+            exportBusy,
+            exportAnnouncement,
+            exportLabel,
+            exportDisabled,
+            exportDisabledReason,
+            labels,
+          }}
+        />
         {onAddRow && (
           <Button
             type="primary"
@@ -183,45 +172,6 @@ export function Toolbar<TRow>({
             onClick={onAddRow}
           >
             {addRowLabel}
-          </Button>
-        )}
-        {onPrint && (
-          <Button
-            size="small"
-            data-adapttable-part="print-button"
-            onClick={onPrint}
-          >
-            {printLabel}
-          </Button>
-        )}
-        {onDensityChange && (
-          <Button
-            size="small"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            onClick={() => {
-              onDensityChange(
-                density === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {density === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </Button>
-        )}
-        {onToggleFullscreen && (
-          <Button
-            size="small"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
           </Button>
         )}
         {toolbarSlots?.end}

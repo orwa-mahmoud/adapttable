@@ -412,14 +412,13 @@ function LeafHeader<TRow>({
     <Table.ColumnHeader
       key={column.key}
       data-adapttable-part="header-cell"
+      // Every header prop core states, in full. Cherry-picking named fields
+      // meant a prop core added reached only the kits that happened to name
+      // it; the kit's own props below still win where they overlap.
+      {...leaf.headerProps}
       {...leaf.columnHeaderProps}
-      // Chakra's own header cell does not set it, and this component takes
-      // named props from `leaf` rather than spreading `headerProps`.
-      scope="col"
       textAlign={logicalAlign(column.align)}
       width={column.width}
-      aria-sort={ariaSort}
-      data-column-key={column.key}
       rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
       {...stickyTh}
       style={leafStyle}

@@ -4,8 +4,8 @@
 
 ```ts
 
-import { densityChooser } from '@adapttable/core/features';
 import { MantineSpacing } from '@mantine/core';
+import { TableFeature } from '@adapttable/core/adapter';
 
 // @public
 export type Density = "comfortable" | "compact";
@@ -13,7 +13,8 @@ export type Density = "comfortable" | "compact";
 // @public
 export const DENSITY_SPACING: Record<Density, DensitySpacing>;
 
-export { densityChooser }
+// @public
+export function densityChooser<TRow>(): TableFeature<TRow>;
 
 // @public
 export interface DensitySpacing {
