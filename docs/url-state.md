@@ -12,6 +12,31 @@ Reloading, sharing the link, or pressing back lands on the exact same slice.
 Two conventions keep URLs clean: default values are omitted, and changing
 search, sort, or a filter resets the page to 1.
 
+## Format stability and recovery
+
+Every table namespace AdaptTable has written carries an `atv=1` marker
+(`people.atv=1` when `urlKey="people"`). A link without the marker is also
+version 1, so links created before the marker existed keep their exact meaning.
+The marker remains when the other values are cleared, so an explicitly empty
+state is versioned too. It changes only when a future release needs a real
+migration; adding an optional parameter does not reinterpret existing ones.
+
+URL state is untrusted input and recovers by policy:
+
+- Unknown parameters are ignored by the table and preserved on writes.
+- Malformed values fall back or are dropped independently, so one bad field
+  cannot erase valid state.
+- When a parameter is duplicated, the first value wins.
+- An unsupported or malformed `atv` ignores AdaptTable's recognized parameters
+  for that table only. Other table namespaces and application parameters remain
+  intact.
+- One table may carry at most 8,192 encoded characters of recognized state.
+  Oversized incoming state is ignored for that table; a write that would cross
+  the limit keeps the previous valid state instead.
+
+Every recovery path produces the normal default table rather than throwing or
+rendering a blank result.
+
 ## Multiple tables on one URL: `urlKey`
 
 Two tables on one page would clobber each other's params. Give each a
@@ -50,7 +75,7 @@ export function Dashboard({
     </>
   );
 }
-// → ?people.q=avery&people.page=2&orders.f_totalMin=100
+// → ?people.q=avery&people.page=2&people.atv=1&orders.f_totalMin=100&orders.atv=1
 ```
 
 The same `urlKey` option exists on `useFrontendData`, `useQuerySource`,
@@ -188,13 +213,14 @@ changes, and any `urlAdapter` is ignored.
 <DataTable data={data} columns={columns} rowKey={(r) => r.id} urlSync={false} />
 ```
 
-Headless equivalent: `useTableUrlState({ enabled: false })` — handy inside
+Headless equivalent: `useTableUrlState({ urlSync: false })` — handy inside
 modals or drawers where the address bar shouldn't change.
 
 ## Param reference
 
 | Param                       | Example                     | Meaning                                                                                                                                                        |
 | --------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `atv`                       | `atv=1`                     | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                       |
 | `q`                         | `q=avery`                   | Committed search term.                                                                                                                                         |
 | `page`                      | `page=3`                    | 1-based page; omitted at 1.                                                                                                                                    |
 | `limit`                     | `limit=50`                  | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |

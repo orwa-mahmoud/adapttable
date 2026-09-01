@@ -22,6 +22,7 @@ import {
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import { PARAM_DENSITY } from "./serialize";
+import { parseTableUrlState, updateTableUrlState } from "./urlStateCodec";
 
 /**
  * The two layouts a table has.
@@ -101,7 +102,7 @@ export function useDensityUrlState(
   const density = useMemo(() => {
     if (pending) return pending;
     return (
-      readDensity(new URLSearchParams(search), ns) ??
+      readDensity(parseTableUrlState(search, ns), ns) ??
       defaultDensity ??
       "comfortable"
     );
@@ -109,15 +110,17 @@ export function useDensityUrlState(
 
   const persist = useCallback(
     (next: Density) => {
-      const params = new URLSearchParams(resolved.getSearch());
-      // The default writes no parameter: a URL should carry what someone
-      // chose, not restate what the table would have done anyway.
-      if (next === (defaultDensity ?? "comfortable")) {
-        params.delete(`${ns}${PARAM_DENSITY}`);
-      } else {
-        params.set(`${ns}${PARAM_DENSITY}`, next);
-      }
-      resolved.setSearch(params.toString());
+      resolved.setSearch(
+        updateTableUrlState(resolved.getSearch(), ns, (params) => {
+          // The default writes no parameter: a URL should carry what someone
+          // chose, not restate what the table would have done anyway.
+          if (next === (defaultDensity ?? "comfortable")) {
+            params.delete(`${ns}${PARAM_DENSITY}`);
+          } else {
+            params.set(`${ns}${PARAM_DENSITY}`, next);
+          }
+        })
+      );
     },
     [resolved, ns, defaultDensity]
   );

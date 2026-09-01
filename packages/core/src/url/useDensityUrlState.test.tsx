@@ -89,6 +89,7 @@ describe("useDensityUrlState", () => {
     flushUrl();
 
     expect(urlAdapter.search).toContain("density=compact");
+    expect(urlAdapter.search).toContain("atv=1");
     expect(result.current.density).toBe("compact");
   });
 

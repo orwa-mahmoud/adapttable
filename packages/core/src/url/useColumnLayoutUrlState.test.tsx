@@ -76,7 +76,7 @@ describe("useColumnLayoutUrlState", () => {
       });
     });
     flushUrl();
-    expect(adapter.getSearch()).toBe("colPin=person%3Astart");
+    expect(adapter.getSearch()).toBe("colPin=person%3Astart&atv=1");
     expect(result.current.layout.pinned).toEqual({ person: "start" });
   });
 
@@ -141,11 +141,11 @@ describe("useColumnLayoutUrlState", () => {
       });
     });
     flushUrl();
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
     expect(result.current.layout.hidden).toEqual(["email"]);
   });
 
-  it("an emptied layout with no default leaves a clean URL", () => {
+  it("an emptied layout with no default leaves only the format marker", () => {
     const { result, adapter } = renderWith("colHide=email");
     act(() => {
       result.current.onLayoutChange({
@@ -156,7 +156,7 @@ describe("useColumnLayoutUrlState", () => {
       });
     });
     flushUrl();
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
     expect(result.current.layout.hidden).toEqual([]);
   });
 });
@@ -175,7 +175,7 @@ describe("debounced URL persistence", () => {
     // …but the URL write is still pending.
     expect(adapter.getSearch()).toBe("");
     flushUrl();
-    expect(adapter.getSearch()).toBe("colHide=email");
+    expect(adapter.getSearch()).toBe("colHide=email&atv=1");
   });
 
   it("coalesces a burst of changes into one trailing write", () => {
@@ -214,6 +214,6 @@ describe("debounced URL persistence", () => {
     );
     act(() => result.current.onLayoutChange(NEXT));
     unmount();
-    expect(adapter.getSearch()).toBe("colHide=email");
+    expect(adapter.getSearch()).toBe("colHide=email&atv=1");
   });
 });

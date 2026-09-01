@@ -56,6 +56,7 @@ describe("useFormulaUrlState", () => {
     });
     flushUrl();
     expect(adapter.getSearch()).toContain("formula=total");
+    expect(adapter.getSearch()).toContain("atv=1");
     expect(result.current.formulas).toEqual(TOTAL);
   });
 

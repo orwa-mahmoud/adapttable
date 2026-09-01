@@ -22,6 +22,7 @@ import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
 
 export type { UrlStateAdapter };
 import { PARAM_FORMULA } from "../url/serialize";
+import { parseTableUrlState, updateTableUrlState } from "../url/urlStateCodec";
 import type { FormulaColumnSpec } from "./formulaColumn";
 import {
   deserializeFormulaColumns,
@@ -99,27 +100,29 @@ export function useFormulaUrlState(
 
   const formulas = useMemo<readonly FormulaColumnSpec[]>(() => {
     if (pending) return pending;
-    const raw = new URLSearchParams(search).get(param);
+    const raw = parseTableUrlState(search, ns).get(param);
     // Absent means nothing has been said, so the default applies. Present and
     // empty means someone removed the last column, which is not the same thing.
     if (raw === null) return defaultFormulas ?? NO_FORMULAS;
     return deserializeFormulaColumns(raw);
-  }, [pending, search, param, defaultFormulas]);
+  }, [pending, search, ns, param, defaultFormulas]);
 
   const persist = useCallback(
     (next: readonly FormulaColumnSpec[]) => {
-      const params = new URLSearchParams(resolved.getSearch());
-      const value = serializeFormulaColumns(next);
-      if (value !== "") params.set(param, value);
-      else if (defaultFormulas && defaultFormulas.length > 0) {
-        // An emptied list writes the empty marker when there is a default to
-        // displace: deleting the parameter reads back as "nothing has been
-        // said", and the removed columns would return on the next read.
-        params.set(param, "");
-      } else params.delete(param);
-      resolved.setSearch(params.toString());
+      resolved.setSearch(
+        updateTableUrlState(resolved.getSearch(), ns, (params) => {
+          const value = serializeFormulaColumns(next);
+          if (value !== "") params.set(param, value);
+          else if (defaultFormulas && defaultFormulas.length > 0) {
+            // An emptied list writes the empty marker when there is a default
+            // to displace: deleting the parameter reads back as "nothing has
+            // been said", and removed columns would return on the next read.
+            params.set(param, "");
+          } else params.delete(param);
+        })
+      );
     },
-    [resolved, param, defaultFormulas]
+    [resolved, ns, param, defaultFormulas]
   );
 
   const onFormulasChange = useCallback(

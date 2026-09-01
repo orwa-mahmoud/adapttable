@@ -25,7 +25,7 @@ describe("useRowPinningUrlState", () => {
     act(() => {
       result.current.onPinnedRowIdsChange({ top: ["grace"], bottom: [] });
     });
-    expect(adapter.getSearch()).toBe("rowPin=grace%3Atop");
+    expect(adapter.getSearch()).toBe("rowPin=grace%3Atop&atv=1");
   });
 
   it("namespaces the parameter", () => {

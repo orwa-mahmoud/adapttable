@@ -45,6 +45,41 @@ describe("useTableUrlState", () => {
     expect(result.current.sortDir).toBe("desc");
   });
 
+  it("uses the first duplicate value consistently", () => {
+    const { result } = renderWith(
+      "page=2&page=9&q=first&q=second&f_team=Core&f_team=Other"
+    );
+    expect(result.current.page).toBe(2);
+    expect(result.current.search).toBe("first");
+    expect(result.current.extra.team).toBe("Core");
+  });
+
+  it("recovers one unsupported namespace without touching another table", () => {
+    const adapter = createMemoryAdapter(
+      "left.atv=99&left.q=bad&right.atv=1&right.q=good&app=keep"
+    );
+    const { result } = renderHook(() => ({
+      left: useTableUrlState({ urlAdapter: adapter, urlKey: "left" }),
+      right: useTableUrlState({ urlAdapter: adapter, urlKey: "right" }),
+    }));
+
+    expect(result.current.left.search).toBe("");
+    expect(result.current.right.search).toBe("good");
+
+    act(() => result.current.left.setSearch("fixed"));
+    const params = new URLSearchParams(adapter.getSearch());
+    expect(params.get("left.atv")).toBe("1");
+    expect(params.get("left.q")).toBe("fixed");
+    expect(params.get("right.q")).toBe("good");
+    expect(params.get("app")).toBe("keep");
+  });
+
+  it("treats a malformed marker as unsupported state", () => {
+    const { result } = renderWith("atv=banana&page=8&q=bad");
+    expect(result.current.page).toBe(1);
+    expect(result.current.search).toBe("");
+  });
+
   it("applies defaults when the URL is empty", () => {
     const { result } = renderWith("", {
       defaults: { limit: 10, sortBy: "createdAt", sortDir: "asc" },
@@ -83,27 +118,27 @@ describe("useTableUrlState", () => {
   it("setPage writes >1 and drops the param at 1", () => {
     const { result, adapter } = renderWith();
     act(() => result.current.setPage(3));
-    expect(adapter.getSearch()).toBe("page=3");
+    expect(adapter.getSearch()).toBe("page=3&atv=1");
     act(() => result.current.setPage(1));
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
   });
 
   it("setLimit resets page and drops the param at the default", () => {
     const { result, adapter } = renderWith("page=4");
     expect(result.current.defaultLimit).toBe(25);
     act(() => result.current.setLimit(50));
-    expect(adapter.getSearch()).toBe("limit=50");
+    expect(adapter.getSearch()).toBe("limit=50&atv=1");
     expect(result.current.defaultLimit).toBe(25);
     act(() => result.current.setLimit(25));
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
   });
 
   it("setSearch writes q, trims, resets page, and clears when blank", () => {
     const { result, adapter } = renderWith("page=2");
     act(() => result.current.setSearch("  hi  "));
-    expect(adapter.getSearch()).toBe("q=hi");
+    expect(adapter.getSearch()).toBe("q=hi&atv=1");
     act(() => result.current.setSearch(""));
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
   });
 
   it("setSort writes both keys and clears them with undefined", () => {
@@ -112,7 +147,7 @@ describe("useTableUrlState", () => {
     expect(adapter.getSearch()).toContain("sortBy=name");
     expect(adapter.getSearch()).toContain("sortDir=desc");
     act(() => result.current.setSort(undefined));
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
   });
 
   it("setSort defaults the direction to asc", () => {
@@ -130,13 +165,13 @@ describe("useTableUrlState", () => {
     act(() => result.current.setExtras({ tags: ["a", "b"] }));
     expect(adapter.getSearch()).toContain("f_tags=a%2Cb");
     act(() => result.current.clearAll());
-    expect(adapter.getSearch()).toBe("keep=me");
+    expect(adapter.getSearch()).toBe("keep=me&atv=1");
   });
 
   it("setExtra(undefined) removes a filter", () => {
     const { result, adapter } = renderWith("f_status=Active");
     act(() => result.current.setExtra("status", undefined));
-    expect(adapter.getSearch()).toBe("");
+    expect(adapter.getSearch()).toBe("atv=1");
   });
 
   it("urlSync: false keeps state local and never touches the URL", () => {
@@ -153,7 +188,7 @@ describe("useTableUrlState", () => {
     const { result } = renderHook(() => useTableUrlState());
     expect(result.current.page).toBe(7);
     act(() => result.current.setPage(2));
-    expect(window.location.search).toBe("?page=2");
+    expect(window.location.search).toBe("?page=2&atv=1");
   });
 
   it("uses the memory adapter when enabled but not in a browser (SSR)", () => {
@@ -289,7 +324,7 @@ describe("useTableUrlState", () => {
         { urlKey: "left", arrayExtraKeys: ["team"] }
       );
       act(() => result.current.clearAll());
-      expect(adapter.getSearch()).toBe("right.q=bar");
+      expect(adapter.getSearch()).toBe("right.q=bar&left.atv=1");
     });
   });
 
@@ -342,7 +377,7 @@ describe("useTableUrlState", () => {
         arrayExtraKeys: ["team"],
       });
       act(() => result.current.clearAll());
-      expect(adapter.getSearch()).toBe("");
+      expect(adapter.getSearch()).toBe("atv=1");
     });
 
     it("setPage(1) wins over a defaults.page greater than 1", () => {

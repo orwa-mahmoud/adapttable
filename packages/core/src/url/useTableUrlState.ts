@@ -31,6 +31,7 @@ import {
   writeFilterTreeParam,
   writeSortLevels,
 } from "./serialize";
+import { parseTableUrlState, updateTableUrlState } from "./urlStateCodec";
 
 /**
  * Options for `useTableUrlState`.
@@ -147,7 +148,7 @@ export function useTableUrlState(
     () => resolved.getSearch(),
     () => (backend ? backend.getSearch() : "")
   );
-  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const params = useMemo(() => parseTableUrlState(search, ns), [search, ns]);
 
   // Two tables on one adapter without distinct urlKeys silently clobber each
   // other's params — catch it in development.
@@ -229,11 +230,9 @@ export function useTableUrlState(
 
   const commit = useCallback(
     (mutate: (next: URLSearchParams) => void) => {
-      const next = new URLSearchParams(resolved.getSearch());
-      mutate(next);
-      resolved.setSearch(next.toString());
+      resolved.setSearch(updateTableUrlState(resolved.getSearch(), ns, mutate));
     },
-    [resolved]
+    [resolved, ns]
   );
 
   /**

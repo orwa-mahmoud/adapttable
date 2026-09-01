@@ -338,7 +338,7 @@ export function readCollapsedGroups(
   return raw
     .split(",")
     .filter((key) => key.length > 0)
-    .map((key) => decodeURIComponent(key));
+    .map(safeDecode);
 }
 
 /**

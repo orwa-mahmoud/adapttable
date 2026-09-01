@@ -24,6 +24,7 @@ describe("useGroupCollapseUrlState", () => {
     // The key is percent-encoded before it joins the comma-separated value,
     // so a group whose label contains a comma cannot split the list.
     expect(adapter.getSearch()).toContain("groupClosed=");
+    expect(adapter.getSearch()).toContain("atv=1");
     expect(result.current.collapsedGroupIds).toEqual(["group:team:s:Core"]);
   });
 
@@ -44,6 +45,13 @@ describe("useGroupCollapseUrlState", () => {
       useGroupCollapseUrlState({ urlAdapter: adapter })
     );
     expect(result.current.collapsedGroupIds).toEqual(["a", "b"]);
+  });
+
+  it("does not throw on a truncated percent escape", () => {
+    const adapter = createMemoryAdapter("groupClosed=%E0%A4%A");
+    expect(() =>
+      renderHook(() => useGroupCollapseUrlState({ urlAdapter: adapter }))
+    ).not.toThrow();
   });
 
   it("namespaces per table", () => {

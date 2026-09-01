@@ -28,6 +28,7 @@ import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
 
 export type { UrlStateAdapter };
 import { PARAM_PIVOT } from "../url/serialize";
+import { parseTableUrlState, updateTableUrlState } from "../url/urlStateCodec";
 import { EMPTY_PIVOT_CONFIG } from "./pivotConfigModel";
 import type { PivotConfig } from "./pivotModel";
 import {
@@ -112,7 +113,7 @@ export function usePivotUrlState(
 
   const state = useMemo<PivotUrlState>(() => {
     if (pending) return pending;
-    const raw = new URLSearchParams(search).get(param);
+    const raw = parseTableUrlState(search, ns).get(param);
     if (raw === null) {
       return {
         config: defaultConfig ?? EMPTY_PIVOT_CONFIG,
@@ -120,21 +121,23 @@ export function usePivotUrlState(
       };
     }
     return deserializePivotState(raw);
-  }, [pending, search, param, defaultConfig]);
+  }, [pending, search, ns, param, defaultConfig]);
 
   const collapsed = useMemo(() => new Set(state.collapsed), [state.collapsed]);
 
   const persist = useCallback(
     (next: PivotUrlState) => {
-      const params = new URLSearchParams(resolved.getSearch());
-      const value = serializePivotState(next);
-      // An empty pivot writes no parameter: a URL should carry what someone
-      // built, not restate the nothing the table starts with.
-      if (value === "") params.delete(param);
-      else params.set(param, value);
-      resolved.setSearch(params.toString());
+      resolved.setSearch(
+        updateTableUrlState(resolved.getSearch(), ns, (params) => {
+          const value = serializePivotState(next);
+          // An empty pivot writes no parameter: a URL should carry what someone
+          // built, not restate the nothing the table starts with.
+          if (value === "") params.delete(param);
+          else params.set(param, value);
+        })
+      );
     },
-    [resolved, param]
+    [resolved, ns, param]
   );
 
   // What the setters below read. Two of them share one parameter, and a render

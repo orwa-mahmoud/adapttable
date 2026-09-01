@@ -992,7 +992,7 @@ describe("useSavedViews", () => {
     adapter.setSearch("q=b");
     act(() => result.current.save("v"));
     expect(result.current.views).toHaveLength(1);
-    expect(result.current.views[0]!.search).toBe("q=b");
+    expect(result.current.views[0]!.search).toBe("q=b&atv=1");
     act(() => result.current.apply("missing"));
     expect(adapter.getSearch()).toBe("q=b");
     act(() => result.current.remove("v"));
@@ -1048,7 +1048,9 @@ describe("useSavedViews", () => {
     act(() => result.current.save("v"));
     expect(
       JSON.parse(globalThis.localStorage.getItem("views-default")!)
-    ).toEqual([{ name: "v", search: "q=z", version: SAVED_VIEW_VERSION }]);
+    ).toEqual([
+      { name: "v", search: "q=z&atv=1", version: SAVED_VIEW_VERSION },
+    ]);
     globalThis.localStorage.removeItem("views-default");
   });
 

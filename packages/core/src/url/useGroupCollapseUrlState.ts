@@ -13,7 +13,12 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
-import { readCollapsedGroups, writeCollapsedGroups } from "./serialize";
+import {
+  PARAM_GROUP_CLOSED,
+  readCollapsedGroups,
+  writeCollapsedGroups,
+} from "./serialize";
+import { parseTableUrlState, updateTableUrlState } from "./urlStateCodec";
 
 /**
  * What {@link useGroupCollapseUrlState} needs.
@@ -69,21 +74,23 @@ export function useGroupCollapseUrlState(
 
   const collapsedGroupIds = useMemo(() => {
     if (pending) return pending;
-    const fromUrl = readCollapsedGroups(new URLSearchParams(search), ns);
+    const fromUrl = readCollapsedGroups(parseTableUrlState(search, ns), ns);
     return fromUrl ?? [...(defaultCollapsedGroupIds ?? [])];
   }, [pending, search, ns, defaultCollapsedGroupIds]);
 
   const onCollapsedGroupIdsChange = useCallback(
     (ids: string[]) => {
       setPending(ids);
-      const params = new URLSearchParams(resolved.getSearch());
-      writeCollapsedGroups(params, ids, ns);
-      // An emptied set writes no parameter, which reads back as "nothing has
-      // been said" — so the default would re-apply. Stamp it empty instead.
-      if (ids.length === 0 && (defaultCollapsedGroupIds?.length ?? 0) > 0) {
-        params.set(`${ns}groupClosed`, "");
-      }
-      resolved.setSearch(params.toString());
+      resolved.setSearch(
+        updateTableUrlState(resolved.getSearch(), ns, (params) => {
+          writeCollapsedGroups(params, ids, ns);
+          // An emptied set writes no parameter, which reads back as "nothing
+          // has been said" — so the default would re-apply. Stamp it empty.
+          if (ids.length === 0 && (defaultCollapsedGroupIds?.length ?? 0) > 0) {
+            params.set(ns + PARAM_GROUP_CLOSED, "");
+          }
+        })
+      );
       setPending(null);
     },
     [resolved, ns, defaultCollapsedGroupIds]

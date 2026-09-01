@@ -3,27 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LayoutStorage } from "../columns/useColumnLayoutStorageState";
 import { safeLocalStorage } from "../utils/env";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
-import {
-  FILTER_PREFIX,
-  PARAM_COL_GROUPS,
-  PARAM_COL_HIDDEN,
-  PARAM_COL_ORDER,
-  PARAM_COL_PINNED,
-  PARAM_COL_WIDTHS,
-  PARAM_DENSITY,
-  PARAM_FILTER_TREE,
-  PARAM_FORMULA,
-  PARAM_GROUP_BY,
-  PARAM_GROUP_CLOSED,
-  PARAM_LIMIT,
-  PARAM_PAGE,
-  PARAM_PIVOT,
-  PARAM_ROW_PIN,
-  PARAM_SEARCH,
-  PARAM_SORT,
-  PARAM_SORT_BY,
-  PARAM_SORT_DIR,
-} from "./serialize";
+import { applyTableUrlState, captureTableUrlState } from "./urlStateCodec";
 
 /**
  * One captured view: a name plus the table's own URL params.
@@ -218,34 +198,6 @@ export interface UseSavedViewsResult {
   reload: () => void;
 }
 
-const BARE_PARAMS = [
-  PARAM_PAGE,
-  PARAM_LIMIT,
-  PARAM_SEARCH,
-  PARAM_SORT_BY,
-  PARAM_SORT_DIR,
-  // The multi-sort chain — it supersedes sortBy/sortDir, so a view that
-  // missed it could neither capture nor displace an active chain.
-  PARAM_SORT,
-  PARAM_GROUP_BY,
-  PARAM_COL_HIDDEN,
-  PARAM_COL_PINNED,
-  PARAM_COL_ORDER,
-  PARAM_COL_WIDTHS,
-  PARAM_COL_GROUPS,
-  PARAM_ROW_PIN,
-  // The advanced filter tree, collapsed groups, density, the pivot and the
-  // typed formula columns. A view that captured everything EXCEPT these looked
-  // like it worked and then quietly dropped the most laboriously built parts of
-  // the state — and a formula is the one part nobody can rebuild from memory,
-  // because the table never offered it: someone wrote it.
-  PARAM_FILTER_TREE,
-  PARAM_GROUP_CLOSED,
-  PARAM_DENSITY,
-  PARAM_PIVOT,
-  PARAM_FORMULA,
-];
-
 /**
  * Bring a view up to today's schema.
  *
@@ -326,24 +278,6 @@ function omitDefault(view: SavedView): SavedView {
   const next = { ...view };
   delete next.isDefault;
   return next;
-}
-
-/** Whether a param key belongs to the table at namespace `ns`. */
-function ownsParam(key: string, ns: string): boolean {
-  return (
-    BARE_PARAMS.some((p) => key === ns + p) ||
-    key.startsWith(ns + FILTER_PREFIX)
-  );
-}
-
-/** The table-scoped subset of a full query string. */
-function captureTableParams(search: string, ns: string): string {
-  const all = new URLSearchParams(search);
-  const own = new URLSearchParams();
-  all.forEach((value, key) => {
-    if (ownsParam(key, ns)) own.set(key, value);
-  });
-  return own.toString();
 }
 
 function readStored(
@@ -475,7 +409,7 @@ export function useSavedViews({
     (name: string) => {
       const view: SavedView = {
         name,
-        search: captureTableParams(resolved.getSearch(), ns),
+        search: captureTableUrlState(resolved.getSearch(), ns),
         version: SAVED_VIEW_VERSION,
         ...(visibility === "private" ? {} : { visibility }),
       };
@@ -564,20 +498,9 @@ export function useSavedViews({
     (name: string) => {
       const view = views.find((v) => v.name === name);
       if (!view) return;
-      const next = new URLSearchParams(resolved.getSearch());
-      // Drop this table's current params, then lay the view's over.
-      const stale: string[] = [];
-      next.forEach((_, key) => {
-        if (ownsParam(key, ns)) stale.push(key);
-      });
-      for (const key of stale) next.delete(key);
-      // Write owned params ONLY — a stored view is external input (old
-      // versions, hand-edited storage) and must never touch params that
-      // belong to other tables or the surrounding app.
-      new URLSearchParams(view.search).forEach((value, key) => {
-        if (ownsParam(key, ns)) next.set(key, value);
-      });
-      resolved.setSearch(next.toString());
+      resolved.setSearch(
+        applyTableUrlState(resolved.getSearch(), view.search, ns)
+      );
     },
     [views, resolved, ns]
   );

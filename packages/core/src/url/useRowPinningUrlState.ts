@@ -12,6 +12,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { EMPTY_ROW_PIN_STATE, type RowPinState } from "../rows/rowPinning";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import { readRowPins, writeRowPins } from "./serialize";
+import { parseTableUrlState, updateTableUrlState } from "./urlStateCodec";
 
 /**
  * What {@link useRowPinningUrlState} needs.
@@ -62,15 +63,19 @@ export function useRowPinningUrlState(
 
   const pinnedRowIds = useMemo(() => {
     if (pending) return pending;
-    return readRowPins(new URLSearchParams(search), ns) ?? EMPTY_ROW_PIN_STATE;
+    return (
+      readRowPins(parseTableUrlState(search, ns), ns) ?? EMPTY_ROW_PIN_STATE
+    );
   }, [ns, pending, search]);
 
   const onPinnedRowIdsChange = useCallback(
     (next: RowPinState) => {
       setPending(next);
-      const params = new URLSearchParams(resolved.getSearch());
-      writeRowPins(params, next, ns);
-      resolved.setSearch(params.toString());
+      resolved.setSearch(
+        updateTableUrlState(resolved.getSearch(), ns, (params) => {
+          writeRowPins(params, next, ns);
+        })
+      );
       setPending(null);
     },
     [ns, resolved]

@@ -18,6 +18,7 @@ import {
   readColumnLayout,
   writeColumnLayout,
 } from "./serialize";
+import { parseTableUrlState, updateTableUrlState } from "./urlStateCodec";
 
 /**
  * Options for {@link useColumnLayoutUrlState}.
@@ -93,7 +94,7 @@ export function useColumnLayoutUrlState(
     () => resolved.getSearch(),
     () => (backend ? backend.getSearch() : "")
   );
-  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const params = useMemo(() => parseTableUrlState(search, ns), [search, ns]);
 
   const fallback = useMemo<ColumnLayoutState>(
     () => ({ ...EMPTY_COLUMN_LAYOUT, ...baseLayout }),
@@ -110,16 +111,20 @@ export function useColumnLayoutUrlState(
 
   const persist = useCallback(
     (next: ColumnLayoutState) => {
-      const p = new URLSearchParams(resolved.getSearch());
-      const isDefault = stableKey(next) === stableKey(fallback);
-      const isEmpty = stableKey(next) === stableKey(EMPTY_COLUMN_LAYOUT);
-      // Back to the exact default → drop the params; the default re-applies
-      // and shared URLs stay clean.
-      writeColumnLayout(p, isDefault ? EMPTY_COLUMN_LAYOUT : next, ns);
-      // An all-empty layout writes no params, which reads back as "use the
-      // default" — stamp a marker so an explicitly emptied layout sticks.
-      if (isEmpty && !isDefault) p.set(ns + PARAM_COL_HIDDEN, "");
-      resolved.setSearch(p.toString());
+      resolved.setSearch(
+        updateTableUrlState(resolved.getSearch(), ns, (params) => {
+          const isDefault = stableKey(next) === stableKey(fallback);
+          const isEmpty = stableKey(next) === stableKey(EMPTY_COLUMN_LAYOUT);
+          // Back to the exact default → drop the params; the default re-applies
+          // and shared URLs stay clean.
+          writeColumnLayout(params, isDefault ? EMPTY_COLUMN_LAYOUT : next, ns);
+          // An all-empty layout writes no params, which reads back as "use the
+          // default" — stamp a marker so an explicitly emptied layout sticks.
+          if (isEmpty && !isDefault) {
+            params.set(ns + PARAM_COL_HIDDEN, "");
+          }
+        })
+      );
     },
     [resolved, ns, fallback]
   );

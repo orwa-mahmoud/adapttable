@@ -5292,10 +5292,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
+        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions;
         headerFilters?: boolean;
-        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
@@ -5449,10 +5449,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
+        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions;
         headerFilters?: boolean;
-        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;

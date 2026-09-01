@@ -53,6 +53,7 @@ describe("usePivotUrlState", () => {
     flushUrl();
 
     expect(urlAdapter.getSearch()).toContain("pivot=rows%3Ateam");
+    expect(urlAdapter.getSearch()).toContain("atv=1");
     expect(result.current.config.rows).toEqual(["team"]);
   });
 
