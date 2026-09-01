@@ -1,4 +1,5 @@
 import { type ColumnDef, DataTable } from "@adapttable/antd";
+import { rowActions } from "@adapttable/antd/row-actions";
 import { ConfigProvider, theme } from "antd";
 
 interface Product {
@@ -40,26 +41,28 @@ export function AntdBasicExample() {
         data={PRODUCTS}
         columns={columns}
         rowKey={(r) => r.id}
-        bordered
-        rowActions={[
-          {
-            key: "edit",
-            label: "Edit",
-            onClick: (row) => alert(`Edit ${row.name}`),
-          },
-          {
-            key: "delete",
-            label: "Delete",
-            color: "danger",
-            confirm: {
-              title: "Delete product?",
-              message: (row) => `Permanently delete "${row.name}"?`,
-              confirmLabel: "Delete",
-              danger: true,
+        features={[
+          rowActions<Product>([
+            {
+              key: "edit",
+              label: "Edit",
+              onClick: (row) => alert(`Edit ${row.name}`),
             },
-            onClick: (row) => alert(`Deleted ${row.name}`),
-          },
+            {
+              key: "delete",
+              label: "Delete",
+              color: "danger",
+              confirm: {
+                title: "Delete product?",
+                message: (row) => `Permanently delete "${row.name}"?`,
+                confirmLabel: "Delete",
+                danger: true,
+              },
+              onClick: (row) => alert(`Deleted ${row.name}`),
+            },
+          ]),
         ]}
+        bordered
       />
     </ConfigProvider>
   );

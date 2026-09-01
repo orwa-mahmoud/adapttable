@@ -189,8 +189,6 @@ export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>,
     error?: Error | null;
     loading?: boolean;
     savedViews?: UseSavedViewsOptions;
-    // @deprecated
-    size?: "small" | "medium";
     slots?: DataTableSlots;
     source?: TableSource<TRow>;
     total?: number;

@@ -58,7 +58,7 @@ control via prop-getters.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
 - **Live row patches** (`@adapttable/core/stream`) — `useRowPatchStream` binds a WebSocket or SSE to the rows you already own.
 - **Saved views** — name a filter/sort/column arrangement and switch between them.
-- **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/core/features` or a kit subpath. Host plugins use the same `TableFeature` / `setup(host)` surface. Enabling props still work until v3; no bundle saving yet.
+- **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/core/features` or a kit subpath. The import is the switch, and the only way to arm a feature. Host plugins use the same `TableFeature` / `setup(host)` surface.
 - **CSV export** (`exportCsv`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
 - **Virtualization** (`virtualize`) — row/card windowing for very large lists.

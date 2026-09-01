@@ -100,9 +100,9 @@ export interface SharedTableRenderProps<TRow> {
   getRowId: (row: TRow) => string;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
   prefetch?: (row: TRow) => void;
-  /** Row activation handler — see `BaseDataTableProps.onRowClick`. */
+  /** Row activation handler — see `ComposedTableProps.onRowClick`. */
   onRowClick?: (row: TRow) => void;
-  /** Conditional per-row class — see `BaseDataTableProps.rowClassName`. */
+  /** Conditional per-row class — see `ComposedTableProps.rowClassName`. */
   rowClassName?: (row: TRow, index: number) => string | undefined;
   /**
    * Mark cells a patch just changed — `data-flash` on the cell. Omit and
@@ -117,15 +117,15 @@ export interface SharedTableRenderProps<TRow> {
   columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
   /** Toggle one column group. No-op unless collapse is armed. */
   onToggleColumnGroup?: (id: string) => void;
-  /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
+  /** Conditional per-row style — see `ComposedTableProps.rowStyle`. */
   rowStyle?: RowStyle<TRow>;
-  /** Per-row height — see `BaseDataTableProps.rowHeight`. */
+  /** Per-row height — see `ComposedTableProps.rowHeight`. */
   rowHeight?: RowHeight<TRow>;
-  /** Detail-panel renderer — see `BaseDataTableProps.renderRowDetail`. */
+  /** Detail-panel renderer — see `ComposedTableProps.renderRowDetail`. */
   renderRowDetail?: (row: TRow) => ReactNode;
-  /** Custom mobile-card body — see `BaseDataTableProps.renderCard`. */
+  /** Custom mobile-card body — see `ComposedTableProps.renderCard`. */
   renderCard?: MobileCardRenderer<TRow>;
-  /** Footer summary builder — see `BaseDataTableProps.summaryRow`. */
+  /** Footer summary builder — see `ComposedTableProps.summaryRow`. */
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
   /**
    * Row-reorder bundle — present iff the host passed `onRowReorder` and
@@ -243,7 +243,7 @@ export interface SharedTableRenderProps<TRow> {
   headerFilters?: boolean;
   /**
    * Close a header-filter overlay after a finished single-control write.
-   * Default off — see `BaseDataTableProps.closeHeaderFilterOnSelect`.
+   * Default off — see `ComposedTableProps.closeHeaderFilterOnSelect`.
    */
   closeHeaderFilterOnSelect?: boolean;
   /** Declarative filter defs the header row matches to columns. */

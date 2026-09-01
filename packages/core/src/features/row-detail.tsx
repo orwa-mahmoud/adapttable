@@ -65,11 +65,12 @@ export function rowDetail<TRow>(
  * @public
  */
 export function nestedTable<TRow>(
-  nested: NestedTableFor<TRow>
+  nested: NestedTableFor<TRow>,
+  defaultExpandedRowIds?: readonly string[]
 ): TableFeature<TRow> {
   return {
     id: "nested-table",
-    apply: () => ({ nestedTable: nested }),
+    apply: () => ({ nestedTable: nested, defaultExpandedRowIds }),
     renders: [expansionRender],
   };
 }

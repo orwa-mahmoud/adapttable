@@ -1,6 +1,7 @@
 import "@radix-ui/themes/styles.css";
 
 import { type ColumnDef, DataTable, useFrontendData } from "@adapttable/radix";
+import { rowActions } from "@adapttable/radix/row-actions";
 import { Theme } from "@radix-ui/themes";
 
 interface Person {
@@ -42,14 +43,16 @@ export function RadixBasicExample() {
         source={source}
         columns={columns}
         rowKey={(r) => r.id}
-        searchPlaceholder="Search people…"
-        rowActions={[
-          {
-            key: "edit",
-            label: "Edit",
-            onClick: (row) => alert(`Edit ${row.name}`),
-          },
+        features={[
+          rowActions<Person>([
+            {
+              key: "edit",
+              label: "Edit",
+              onClick: (row) => alert(`Edit ${row.name}`),
+            },
+          ]),
         ]}
+        searchPlaceholder="Search people…"
       />
     </Theme>
   );

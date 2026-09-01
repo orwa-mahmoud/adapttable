@@ -120,28 +120,26 @@ for (const [name, feature] of Object.entries(listed)) {
   }
 }
 
-/* 3. Every replaced prop is one the deprecation warning names. ------------- */
+/* 3. Every replaced prop is gone from the public prop surface. ------------- */
 
-const tableFeature = readFileSync(
-  join(PACKAGES, "core", "src", "features", "tableFeature.ts"),
-  "utf8"
+/**
+ * v3 removed the enabling props, so there is no warning list to reconcile
+ * against any more — the check is that they are ABSENT.
+ *
+ * `FeatureProps` still declares each one, because that is the channel a
+ * feature's `apply()` writes through; what must never come back is a
+ * declaration on the public `BaseDataTableProps`, which is the only shape a
+ * host can write.
+ */
+const props = readFileSync(join(PACKAGES, "core", "src", "props.ts"), "utf8");
+const publicSurface = props.slice(
+  props.indexOf("export interface BaseDataTableProps<TRow> {")
 );
-const warned = new Set(
-  (tableFeature.match(/const used = \(([^)]*)\)\s*\.split/)?.[1] ?? "")
-    .replaceAll(/["'+\s]/g, "")
-    .split(",")
-    .filter(Boolean)
-);
-if (warned.size === 0) {
-  problems.push(
-    "could not read the deprecated-prop list out of features/tableFeature.ts"
-  );
-}
 for (const [name, feature] of Object.entries(listed)) {
   for (const prop of feature.replacesProps) {
-    if (warned.size > 0 && !warned.has(prop)) {
+    if (new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
       problems.push(
-        `${name}: replacesProps names "${prop}", which warnDeprecatedFeatureProps does not warn on`
+        `${name}: replacesProps names "${prop}", which v3 removed but BaseDataTableProps declares again`
       );
     }
   }
@@ -260,40 +258,42 @@ const removals = Object.fromEntries(
 );
 
 const enabling = removals["enabling-props"];
-for (const prop of warned) {
-  if (!(prop in enabling.props)) {
+for (const prop of Object.keys(enabling.props)) {
+  // Inventoried as removed, so it must be off the public surface AND still on
+  // the internal channel — a prop features can write but no host can pass.
+  if (new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
     problems.push(
-      `v3Removals: enabling prop "${prop}" is warned on but is not in the removal inventory`
+      `v3Removals: "${prop}" is inventoried for removal but BaseDataTableProps declares it`
     );
   }
-}
-for (const prop of Object.keys(enabling.props)) {
-  if (warned.size > 0 && !warned.has(prop)) {
+  if (!new RegExp(`^  ${prop}\\??:`, "m").test(props)) {
     problems.push(
-      `v3Removals: "${prop}" is inventoried for removal but nothing warns on it`
+      `v3Removals: "${prop}" is inventoried for removal but FeatureProps does not declare it, so no feature can apply it`
     );
   }
 }
 
-const aliasSource = readFileSync(
-  join(PACKAGES, "core", "src", "mainEntryAliases.ts"),
+/**
+ * The aliases are gone, and staying gone is the assertion now.
+ *
+ * Every name the inventory lists was re-exported from the MAIN entry as well
+ * as from `@adapttable/core/adapter`; v3 removed the main-entry copy. If one
+ * comes back — a stray `export * from` somewhere in the barrel — this is what
+ * notices, because the adapter entry is the only place any of them may live.
+ */
+const mainEntry = readFileSync(
+  join(PACKAGES, "core", "src", "index.ts"),
   "utf8"
 );
-const aliasNames = [
-  ...aliasSource.matchAll(/^export (?:const|type) (\w+)/gm),
-].map((match) => match[1]);
 const inventoried = new Set(removals["main-entry-aliases"].names);
-for (const name of aliasNames) {
-  if (!inventoried.has(name)) {
-    problems.push(
-      `v3Removals: main-entry alias "${name}" is exported but not inventoried`
-    );
-  }
-}
 for (const name of inventoried) {
-  if (!aliasNames.includes(name)) {
+  if (
+    new RegExp(`^export (?:const|type|function) ${name}\\b`, "m").test(
+      mainEntry
+    )
+  ) {
     problems.push(
-      `v3Removals: "${name}" is inventoried as a main-entry alias but is not exported`
+      `v3Removals: "${name}" was removed from the main entry at v3 but is exported there again`
     );
   }
 }

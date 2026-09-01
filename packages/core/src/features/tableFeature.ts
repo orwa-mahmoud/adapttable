@@ -5,10 +5,8 @@
  * A bundler follows imports, not prop values, so an adapter `<DataTable>`
  * that statically imports every feature it *might* render ships them all.
  * The `features` array moves the enable-switch onto the consumer's import:
- * `features={[rowReorder(fn)]}` from `@adapttable/<kit>/row-reorder`.
- *
- * While the enabling props still work, DataTable keeps its internal imports
- * — there is no bundle saving yet. The drop lands at v3.
+ * `features={[rowReorder(fn)]}` from `@adapttable/<kit>/row-reorder`, and
+ * that import is the only way in — a table pays for what it names.
  *
  * The same {@link TableFeature} carries `setup(host)` so custom filter
  * types, editors, aggregators, exporters, menu items, panels and commands
@@ -29,7 +27,6 @@ import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
-import { devWarn } from "../utils/devWarn";
 import type { FeatureProviderContribution, FeatureRender } from "./providers";
 
 export type {
@@ -62,7 +59,7 @@ export interface FeaturePatch<TRow = unknown> {
    * configuration says nothing about rows produces `TRow = unknown`, and a
    * marker in a return position would make that patch incompatible with the
    * table's own row type — the reason every documented example used to need
-   * an explicit `grouping<Row>("team")`. Read contravariantly instead,
+   * an explicit `grouping("team")`. Read contravariantly instead,
    * `unknown` is the row type that fits every table, while a genuinely wrong
    * one (`TableFeature<Other>` into a `DataTable<Row>`) still fails, and the
    * error still names the feature.
@@ -246,33 +243,6 @@ function definedEntries(value: object): Record<string, unknown> {
   return out;
 }
 
-function warnDeprecatedFeatureProps(props: object): void {
-  // Bundlers inline NODE_ENV and drop this list from production.
-  if (process.env.NODE_ENV === "production") return;
-  const used = (
-    "pinnedRowIds,onPinnedRowIdsChange,getCellSpan," +
-    "cellSpanAppearance,extraRows,rowStyle,rowHeight,rowClassName," +
-    "renderRowDetail,defaultExpandedRowIds,nestedTable,onCellEdit," +
-    "rowEditing,onRowEdit,batchEditing,onBatchEdit,editHistory,dirtyIndicators," +
-    "getChildren,getParentId,treeColumn,onLoadChildren,groupBy,virtualize," +
-    "virtualizeColumns,enableColumnMenu,resizableColumns," +
-    "collapsibleColumnGroups,exportCsv,cellNavigation,findInTable,fullscreen," +
-    "commandPalette,contextMenu,sidePanel,bulkActions,filters,filterTypes," +
-    "headerFilters,savedViews,selectionStats,densityChooser,onPrint," +
-    "printButton,statusBar,undoRedoButtons,multiSort,fitColumns," +
-    "columnSelectionCheckbox,onAddRow,onDuplicateRow,onDeleteRow,confirmDeleteRow,rowActions"
-  )
-    .split(",")
-    .filter((key) => (props as Record<string, unknown>)[key] !== undefined);
-  if (used.length === 0) return;
-  devWarn(
-    `Enabling props (${used.join(", ")}) are deprecated. Import factories ` +
-      `from an @adapttable/<kit>/<feature> subpath and pass ` +
-      `features={[grouping("team"), …]}. The props still work until v3 — ` +
-      `see https://orwa-mahmoud.github.io/adapttable/features/`
-  );
-}
-
 function omitFeatures<P extends object>(props: P): P {
   const rest: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(props)) {
@@ -301,8 +271,6 @@ export function applyTableFeatures<P extends object>(props: P): P {
   if (applied.has(props)) {
     return props;
   }
-
-  warnDeprecatedFeatureProps(props);
 
   const list = featuresOf(props);
   if (list == null) {

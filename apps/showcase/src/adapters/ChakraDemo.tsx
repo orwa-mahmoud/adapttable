@@ -1,4 +1,4 @@
-import { DataTable, type DataTableProps } from "@adapttable/chakra";
+import { DataTable } from "@adapttable/chakra";
 import { bulkActions as bulkActions_ } from "@adapttable/chakra/bulk-actions";
 import { cellNavigation as cellNavigation_ } from "@adapttable/chakra/cell-navigation";
 import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/chakra/column-groups";
@@ -35,6 +35,7 @@ import {
   statusBar as statusBar_,
 } from "@adapttable/chakra/status-bar";
 import { tree as tree_ } from "@adapttable/chakra/tree";
+import type { FeatureProps } from "@adapttable/core";
 import type {
   ColumnDef,
   ColumnLayoutState,
@@ -95,7 +96,6 @@ import {
   demoFilterTypes,
   type DemoOrder,
   demoOrders,
-  demoSavedViews,
   LIVE_DEFAULT_LAYOUT,
   type LoadCellProps,
   type Locale,
@@ -266,7 +266,7 @@ export function ChakraDemo({
   editorShowcase?: boolean;
   /** Show the Columns menu. Defaults to on unless the page is focused. */
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   /** Show the Filters control. Defaults to on unless the page is focused. */
   filterControls?: boolean;
@@ -282,7 +282,7 @@ export function ChakraDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
@@ -369,6 +369,7 @@ export function ChakraDemo({
                   fullscreen,
                   headerFilters,
                   nested: nested ? nestedOrders : undefined,
+                  nestedOpenIds: nestedOpenIds(nested, source.rows),
                   onPrint,
                   printButton,
                   undoRedoButtons,
@@ -377,7 +378,10 @@ export function ChakraDemo({
                   bulkActionList: makeBulkActions(locale),
                   collapsibleColumnGroups: columns.collapsibleColumnGroups,
                   columnMenu,
-                  rowActions: !(rowMutations ?? (focused && !columnGroups)),
+                  rowActions:
+                    (rowMutations ?? (focused && !columnGroups))
+                      ? undefined
+                      : makeActions(locale),
                   commandPalette,
                   contextMenu,
                   filterControls,
@@ -389,23 +393,7 @@ export function ChakraDemo({
                 }),
                 ...(demoFeatures ?? []),
               ]}
-              nestedTable={nested ? nestedOrders : undefined}
-              defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
-              cellNavigation={cellNavigation ?? editing}
-              columnSelectionCheckbox={columnSelectionCheckbox}
-              statusBar={statusBar}
-              contextMenu={contextMenu}
-              densityChooser={densityChooser}
               onDensityChange={onDensityChange}
-              fullscreen={fullscreen}
-              commandPalette={commandPalette}
-              onPrint={onPrint}
-              printButton={printButton}
-              undoRedoButtons={undoRedoButtons}
-              sidePanel={sidePanel}
-              selectionStats={editing}
-              editHistory={editing}
-              findInTable={editing}
               {...columns}
               forceMobile={forceMobile}
               density={density}
@@ -414,26 +402,11 @@ export function ChakraDemo({
               locale={locale}
               dir={getDirection(locale)}
               searchPlaceholder={s.search}
-              rowActions={
-                rowMutations || (focused && !columnGroups)
-                  ? undefined
-                  : makeActions(locale)
-              }
               rowActionsLayout={rowMutations ? "menu" : undefined}
-              bulkActions={
-                (bulkActions ?? !focused) ? makeBulkActions(locale) : undefined
-              }
               confirm={demoConfirm}
-              enableColumnMenu={columnMenu ?? !focused}
-              exportCsv={exportCsv ?? !focused}
-              savedViews={focused ? undefined : demoSavedViews(urlKey)}
               animate={animate}
-              resizableColumns
               stickyHeader
-              headerFilters={headerFilters}
               filterFields={filterFields}
-              filters={(filterControls ?? !focused) ? filters : undefined}
-              filterTypes={demoFilterTypes()}
             />
           )}
         />

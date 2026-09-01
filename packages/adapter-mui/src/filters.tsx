@@ -16,6 +16,7 @@ import {
   type FilterTypeSpec,
 } from "@adapttable/core/features";
 import { Stack } from "@mui/material";
+import type { ReactNode } from "react";
 
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
@@ -60,10 +61,14 @@ function FiltersForm({
  *
  * @public
  */
+export function filters(form: ReactNode): StaticTableFeature;
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
+): TableFeature<TRow>;
+export function filters<TRow>(
+  defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
-  return extendFeature(coreFilters(defs), [
+  return extendFeature(coreFilters(defs as readonly FilterDef<TRow>[]), [
     slotRender(FILTERS_FORM, (props) => <FiltersForm {...props} />),
     slotRender(ACTIVE_FILTER_CHIPS, (props) => <Chips {...props} />),
     slotRender(FILTER_DRAWER, (props) => <FilterDrawer {...props} />),

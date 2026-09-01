@@ -1,5 +1,6 @@
+import type { FeatureProps } from "@adapttable/core";
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
-import type { DataTableProps } from "@adapttable/unstyled";
+import type {} from "@adapttable/unstyled";
 
 import { type Locale, type Person } from "../data";
 import {
@@ -101,7 +102,7 @@ export function UnstyledDemo({
   derivedFields?: boolean;
   editorShowcase?: boolean;
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   filterControls?: boolean;
   bulkActions?: boolean;
@@ -114,7 +115,7 @@ export function UnstyledDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;

@@ -43,7 +43,7 @@ import type {
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
 import type { FullscreenState } from "../layout/useFullscreen";
-import type { BaseDataTableProps } from "../props";
+import type { ComposedTableProps } from "../props";
 import type {
   RowReorderButtonsProps,
   RowReorderHandleProps,
@@ -184,7 +184,7 @@ export interface ChromeBodySlotProps<TRow = never> {
   /** Chrome already computed by the shell — hooks here must not recompute it. */
   chrome: TableChrome<TRow>;
   /** The same props the shell handed the chrome. */
-  props: BaseDataTableProps<TRow>;
+  props: ComposedTableProps<TRow>;
   /** Finish the table with the body data this slot produced. */
   children: (body: ChromeBodyData<TRow>) => ReactNode;
 }
@@ -392,7 +392,7 @@ export interface CellNavLiveSlotProps<TRow = never> {
     "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind"
   >;
   /** Host props the paste/fill channels read. */
-  hostProps: BaseDataTableProps<TRow>;
+  hostProps: ComposedTableProps<TRow>;
   /** Record a paste/fill as one undo gesture. */
   record: (edits: readonly unknown[]) => void;
   undo: () => number;
@@ -475,7 +475,7 @@ export interface ChromeExtraSlotProps<TRow = never> {
    * The same props the shell handed the chrome, plus the resolved URL
    * backend so extras that own URL state (pin lists) share one adapter.
    */
-  props: BaseDataTableProps<TRow> & {
+  props: ComposedTableProps<TRow> & {
     urlAdapter?: UrlStateAdapter;
     urlSync?: boolean;
     urlKey?: string;

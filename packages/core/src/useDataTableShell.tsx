@@ -27,7 +27,7 @@ import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
 import type { FilterDef } from "./filters/filterDefs";
 import type { FilterTypeRegistry } from "./filters/filterRegistry";
 import type { AssemblyFns } from "./layout/leanAssembly";
-import type { BaseDataTableProps } from "./props";
+import type { ComposedTableProps } from "./props";
 import { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 import type { QuerySupport } from "./source/queryContract";
 import type { TableSource } from "./source/TableSource";
@@ -59,7 +59,7 @@ export type { FacetMap, QuerySupport, UrlStateAdapter };
  * @public
  */
 export type DataTableShellProps<TRow> = Omit<
-  BaseDataTableProps<TRow>,
+  ComposedTableProps<TRow>,
   "source"
 > & {
   /** Full-control tier: a prebuilt source. */

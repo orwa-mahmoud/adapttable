@@ -71,6 +71,10 @@ export const sidebar = [
     label: "Migrating",
     items: [
       {
+        label: "From AdaptTable v2",
+        slug: "migrate-from-v2",
+      },
+      {
         label: "From AdaptTable v1",
         slug: "migrate-from-v1",
       },

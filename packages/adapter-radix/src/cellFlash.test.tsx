@@ -39,7 +39,7 @@ function table(
         urlSync={false}
         forceMobile={extra.forceMobile}
         isCellFlashing={extra.isCellFlashing}
-        features={extra.grouped ? [grouping<Row>(["name"])] : undefined}
+        features={extra.grouped ? [grouping(["name"])] : undefined}
       />
     </Theme>
   );

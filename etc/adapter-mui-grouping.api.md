@@ -4,22 +4,17 @@
 
 ```ts
 
+import { GroupingExtras } from '@adapttable/core/features';
 import { GroupSort } from '@adapttable/core/features';
+import { StaticGroupingExtras } from '@adapttable/core/features';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 import { TableFeature } from '@adapttable/core/adapter';
 
 // @public
-export function grouping<TRow>(groupBy: string | readonly string[], extras?: {
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    groupAggregates?: (rows: readonly TRow[]) => unknown;
-    groupFooters?: boolean;
-    groupSort?: GroupSort<TRow>;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupFilter?: (group: unknown) => boolean;
-    collapsedGroupIds?: readonly string[];
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-}): TableFeature<TRow>;
+export function grouping(groupBy: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature;
+
+// @public (undocumented)
+export function grouping<TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
 
 export { GroupSort }
 

@@ -3,6 +3,7 @@ import {
   DataTable,
   useFrontendData,
 } from "@adapttable/base-ui";
+import { rowActions } from "@adapttable/base-ui/row-actions";
 
 interface Person {
   id: string;
@@ -43,14 +44,16 @@ export function BaseUiBasicExample() {
       source={source}
       columns={columns}
       rowKey={(r) => r.id}
-      searchPlaceholder="Search people…"
-      rowActions={[
-        {
-          key: "edit",
-          label: "Edit",
-          onClick: (row) => alert(`Edit ${row.name}`),
-        },
+      features={[
+        rowActions<Person>([
+          {
+            key: "edit",
+            label: "Edit",
+            onClick: (row) => alert(`Edit ${row.name}`),
+          },
+        ]),
       ]}
+      searchPlaceholder="Search people…"
     />
   );
 }

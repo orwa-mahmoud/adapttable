@@ -6,10 +6,14 @@
 
 import { FilterDef } from '@adapttable/core/features';
 import { FilterTypeSpec } from '@adapttable/core/features';
+import { ReactNode } from 'react';
 import { StaticTableFeature } from '@adapttable/core/adapter';
 import { TableFeature } from '@adapttable/core/adapter';
 
 // @public
+export function filters(form: ReactNode): StaticTableFeature;
+
+// @public (undocumented)
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
 // @public

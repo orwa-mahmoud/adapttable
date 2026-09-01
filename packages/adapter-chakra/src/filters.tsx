@@ -16,6 +16,7 @@ import {
   filterTypes as coreFilterTypes,
   type FilterTypeSpec,
 } from "@adapttable/core/features";
+import type { ReactNode } from "react";
 
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
@@ -84,10 +85,14 @@ function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
   );
 }
 
+export function filters(form: ReactNode): StaticTableFeature;
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
+): TableFeature<TRow>;
+export function filters<TRow>(
+  defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
-  return extendFeature(coreFilters(defs), [
+  return extendFeature(coreFilters(defs as readonly FilterDef<TRow>[]), [
     slotRender(FILTERS_FORM, (props) => <FiltersForm {...props} />),
     slotRender(ACTIVE_FILTER_CHIPS, (props) => <ChipsSlot {...props} />),
     slotRender(FILTER_DRAWER, (props) => <DrawerSlot {...props} />),

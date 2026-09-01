@@ -182,7 +182,7 @@ describe("useTableChrome", () => {
     const adapter = createMemoryAdapter("limit=10");
     const { result } = renderLiveChrome(
       [
-        grouping<Row>("name"),
+        grouping("name"),
         bulkActions([{ key: "del", label: "Delete", onClick: vi.fn() }]),
       ],
       () => {
@@ -229,7 +229,7 @@ describe("useTableChrome", () => {
     }));
     const adapter = createMemoryAdapter("");
     const stableRowKey = (r: Row) => r.id;
-    const { result } = renderLiveChrome([grouping<Row>("name")], () => {
+    const { result } = renderLiveChrome([grouping("name")], () => {
       const source = useFrontendData<Row>({
         data: rows,
         urlAdapter: adapter,
@@ -365,7 +365,7 @@ describe("useTableChrome", () => {
   it("onGroupByChange observes — a logging handler never breaks grouping", () => {
     const onGroupByChange = vi.fn();
     const adapter = createMemoryAdapter("");
-    const { result } = renderLiveChrome([grouping<Row>("name")], () => {
+    const { result } = renderLiveChrome([grouping("name")], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         urlAdapter: adapter,
@@ -472,7 +472,7 @@ describe("useTableChrome", () => {
       warn.mockClear();
       resetDevWarnings();
       const grouped = renderLiveChrome(
-        [rowReorder(vi.fn()), grouping<Row>("name")],
+        [rowReorder(vi.fn()), grouping("name")],
         () => {
           const source = useFrontendData<Row>({
             data: ROWS,
@@ -538,7 +538,7 @@ describe("useTableChrome", () => {
       expect(chrome?.rowActions?.some((a) => a.key.includes("pin"))).toBe(true);
 
       const groupedProps = applyTableFeatures({
-        features: [rowPinning({ onPinnedRowIdsChange }), grouping<Row>("name")],
+        features: [rowPinning({ onPinnedRowIdsChange }), grouping("name")],
         columns,
         rowKey,
         onPinnedRowIdsChange,
@@ -683,11 +683,7 @@ describe("useTableChrome — the whole-tree grouping actions", () => {
   ];
   const setup = (props: Record<string, unknown> = {}) =>
     renderLiveChrome(
-      [
-        grouping<Person>(
-          (props.groupBy as string | string[]) ?? ["role", "name"]
-        ),
-      ],
+      [grouping((props.groupBy as string | string[]) ?? ["role", "name"])],
       () => {
         const source = useFrontendData<Person>({
           data: rows,

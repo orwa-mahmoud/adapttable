@@ -138,10 +138,10 @@ or a `TableFeature` with `setup(host)` for live registration.
 
 ## Host plugins — `setup(host)`
 
-The enabling props (`filterTypes`, `exportCsv.writer`, `commandPalette.commands`,
-`contextMenu.items`, `sidePanel.panels`) still work until v3. The public
-registration surface is the same `TableFeature` as the factories: one array,
-one host, lifecycle via `onDispose` or a function returned from `setup`.
+A plugin registers on the same `TableFeature` the factories return —
+`filterTypes`, an export writer, palette commands, context-menu items, a side
+panel — so the registration surface is one array, one host, with lifecycle via
+`onDispose` or a function returned from `setup`.
 
 ```tsx
 import type { TableFeature } from "@adapttable/mantine/features";

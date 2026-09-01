@@ -105,7 +105,7 @@ describe("editing row universe under grouping", () => {
   function chromeWith(groupBy: string | undefined) {
     const features: TableFeature<Row>[] = [
       editing(() => undefined),
-      ...(groupBy ? [grouping<Row>(groupBy)] : []),
+      ...(groupBy ? [grouping(groupBy)] : []),
     ];
     return renderLiveChrome(features, () => {
       const source = useFrontendData<Row>({
@@ -185,7 +185,7 @@ describe("useTableChrome grouping bundle", () => {
   });
 
   it("arms grouping from prop groupBy on frontend source", () => {
-    const { result } = renderLiveChrome([grouping<Row>("team")], () => {
+    const { result } = renderLiveChrome([grouping("team")], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: [{ key: "team" }, { key: "name" }],
@@ -227,7 +227,7 @@ describe("useTableChrome grouping bundle", () => {
       ...sourceResult.current,
       allFilteredRows: undefined,
     };
-    const { result } = renderLiveChrome([grouping<Row>("team")], () => ({
+    const { result } = renderLiveChrome([grouping("team")], () => ({
       source: serverish,
       columns: [{ key: "team" }],
       rowKey: (r) => r.id,

@@ -25,7 +25,7 @@ import { useEventCallback } from "./hooks/useEventCallback";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useScrollToTableTop } from "./hooks/useScrollToTableTop";
 import { useElementWidth } from "./layout/useElementWidth";
-import type { BaseDataTableProps, ToolbarSlots } from "./props";
+import type { ComposedTableProps, ToolbarSlots } from "./props";
 import type { RowMutationsState } from "./rows/rowMutations";
 import type { RowPinningState } from "./rows/rowPinning";
 import type { RowReorderState } from "./rows/rowReorder";
@@ -424,7 +424,7 @@ export interface TableChrome<TRow> {
  * footer to show. Adapters then render their kit-specific markup from this.
  *
  * @typeParam TRow - The row type.
- * @param props - The adapter's `BaseDataTableProps`.
+ * @param props - The adapter's `ComposedTableProps`.
  * @returns The {@link TableChrome} orchestration result.
  */
 /**
@@ -556,7 +556,7 @@ const NO_ROW_MUTATIONS: RowMutationsState<never> = {
 };
 
 export function useTableChrome<TRow>(
-  props: BaseDataTableProps<TRow>
+  props: ComposedTableProps<TRow>
 ): TableChrome<TRow> {
   const {
     source,
@@ -864,14 +864,14 @@ export type { ChromeBodyData } from "./virtual/chromeBodyShared";
  * @typeParam TRow - The row type.
  * @param ref - The adapter's root element.
  * @param chrome - The {@link useTableChrome} result.
- * @param props - The adapter's `BaseDataTableProps`.
+ * @param props - The adapter's `ComposedTableProps`.
  *
  * @public
  */
 export function useChromeScrollReset<TRow>(
   ref: RefObject<HTMLElement | null>,
   chrome: TableChrome<TRow>,
-  props: BaseDataTableProps<TRow>
+  props: ComposedTableProps<TRow>
 ): void {
   const { source } = props;
   // In infinite mode a page increment means "the window grew at the

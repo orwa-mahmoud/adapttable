@@ -597,7 +597,7 @@ describe("the editing row universe survives the gates", () => {
       name: `Person ${i}`,
     }));
     const props = applyTableFeatures({
-      features: [grouping<Row>("name"), editing<Row>(vi.fn())],
+      features: [grouping("name"), editing<Row>(vi.fn())],
       data: many,
       columns,
       rowKey,

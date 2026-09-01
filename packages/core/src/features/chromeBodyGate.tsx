@@ -12,7 +12,7 @@ import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
-import type { BaseDataTableProps } from "../props";
+import type { ComposedTableProps } from "../props";
 import {
   type DataTableShellResult,
   finishDataTableShell,
@@ -36,7 +36,7 @@ export function ChromeBodyGate<TRow>({
   children,
 }: {
   readonly chrome: TableChrome<TRow>;
-  readonly props: BaseDataTableProps<TRow>;
+  readonly props: ComposedTableProps<TRow>;
   readonly children: (body: ChromeBodyData<TRow>) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CHROME_BODY);
@@ -61,7 +61,7 @@ function PlainChromeBody<TRow>({
   children,
 }: {
   readonly chrome: TableChrome<TRow>;
-  readonly props: BaseDataTableProps<TRow>;
+  readonly props: ComposedTableProps<TRow>;
   readonly children: (body: ChromeBodyData<TRow>) => ReactNode;
 }): ReactNode {
   const body = usePlainChromeBodyData(chrome, props);

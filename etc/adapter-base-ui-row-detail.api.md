@@ -8,7 +8,7 @@ import { NestedTableFor } from '@adapttable/core/features';
 import { TableFeature } from '@adapttable/core/adapter';
 
 // @public (undocumented)
-export function nestedTable<TRow>(nested: NestedTableFor<TRow>): TableFeature<TRow>;
+export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;
 
 // @public (undocumented)
 export function rowDetail<TRow>(renderRowDetail: (row: TRow) => unknown, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;

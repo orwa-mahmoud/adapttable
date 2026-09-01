@@ -66,10 +66,12 @@ export {
   statusBar,
   undoRedoButtons,
 } from "./features/factories";
+export type { RowOf } from "./features/featureHost";
 export { useTableFeatures } from "./features/featureHost";
 export { filters } from "./features/filters";
 export { findInTable } from "./features/find-in-table";
 export { fullscreen } from "./features/fullscreen";
+export type { GroupingExtras, StaticGroupingExtras } from "./features/grouping";
 export { grouping } from "./features/grouping";
 export type {
   FeatureProviderContribution,
@@ -97,6 +99,7 @@ export type { FilterDef } from "./filters/filterDefs";
 export type { FilterTypeSpec } from "./filters/filterRegistry";
 export type { GroupSort } from "./grouping/groupRows";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
+export type { ComposedTableProps, FeatureProps } from "./props";
 export type { SidePanelOptions } from "./props";
 export type { CellSpanAppearance, GetCellSpan } from "./rows/cellSpan";
 export type { ExtraRow } from "./rows/extraRows";

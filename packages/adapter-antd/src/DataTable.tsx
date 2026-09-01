@@ -66,6 +66,7 @@ import {
   EXTRA_ROW_PARTS,
   featureHostOf,
   FeatureHostProvider,
+  type FeatureProps,
   FeatureProviders,
   FeatureSlot,
   fillSlot,
@@ -323,8 +324,8 @@ function antdOnRow<TRow>(options: {
   onRowClick: DataTableProps<TRow>["onRowClick"];
   editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
   prefetch: DataTableProps<TRow>["prefetch"];
-  rowStyle: DataTableProps<TRow>["rowStyle"];
-  rowHeight: DataTableProps<TRow>["rowHeight"];
+  rowStyle: ComposedProps<TRow>["rowStyle"];
+  rowHeight: ComposedProps<TRow>["rowHeight"];
 }): AntdRowHtmlAttrs {
   const {
     record,
@@ -430,7 +431,7 @@ function antdPinnedDataSource<TRow>(
 function resolveAntdDataSource<TRow>(
   grouping: unknown,
   rows: readonly GroupedDataRecord<TRow>[],
-  extraRows: DataTableProps<TRow>["extraRows"],
+  extraRows: ComposedProps<TRow>["extraRows"],
   getRowId: (row: TRow) => string
 ): readonly GroupedDataRecord<TRow>[] {
   if (grouping) return rows;
@@ -456,8 +457,8 @@ function resolveAntdDataSource<TRow>(
 
 /** Same URL/controlled pin wiring the batteries-included shell applies. */
 function useAntdPinChrome<TRow>(props: {
-  pinnedRowIds: DataTableProps<TRow>["pinnedRowIds"];
-  onPinnedRowIdsChange: DataTableProps<TRow>["onPinnedRowIdsChange"];
+  pinnedRowIds: ComposedProps<TRow>["pinnedRowIds"];
+  onPinnedRowIdsChange: ComposedProps<TRow>["onPinnedRowIdsChange"];
   urlSync: DataTableProps<TRow>["urlSync"];
   urlKey: DataTableProps<TRow>["urlKey"];
   urlAdapter: UrlStateAdapter | undefined;
@@ -905,7 +906,7 @@ function autoFilterForm<TRow>(
 
 /** Declarative `filters` become the auto form; JSX passes through. */
 function resolveFiltersNode<TRow>(
-  filters: DataTableProps<TRow>["filters"],
+  filters: ComposedProps<TRow>["filters"],
   runtime: FilterRuntime<TRow>,
   source: TableSource<TRow>,
   labels: Required<TableLabels>,
@@ -973,7 +974,7 @@ function AntdCardWindow<TRow>({
 }: Readonly<{
   rows: readonly TRow[];
   rowKey: (row: TRow) => string;
-  props: Readonly<DataTableProps<TRow>>;
+  props: Readonly<ComposedProps<TRow>>;
   /** The resolved decision: antd's own virtual Table owns the desktop path. */
   virtualize: boolean;
   isPaged: boolean;
@@ -1056,7 +1057,7 @@ function AntdGroupingWindow<TRow>({
   children,
 }: Readonly<{
   grouping: GroupingBundle<TRow> | undefined;
-  props: Readonly<DataTableProps<TRow>>;
+  props: Readonly<ComposedProps<TRow>>;
   isPaged: boolean;
   error: Error | null;
   body: string;
@@ -1105,7 +1106,7 @@ interface DataTableBodyRegionProps<TRow> {
   table: UseDataTableResult<TRow>;
   slots: DataTableProps<TRow>["slots"];
   columns: ReturnType<typeof buildColumns<TRow>>;
-  rowActions: DataTableProps<TRow>["rowActions"];
+  rowActions: ComposedProps<TRow>["rowActions"];
   rowActionsLayout: DataTableProps<TRow>["rowActionsLayout"];
   renderRowActions: DataTableProps<TRow>["renderRowActions"];
   confirm: ConfirmHandler;
@@ -1124,10 +1125,10 @@ interface DataTableBodyRegionProps<TRow> {
   onRowClick: DataTableProps<TRow>["onRowClick"];
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
-  rowClassName: DataTableProps<TRow>["rowClassName"];
+  rowClassName: ComposedProps<TRow>["rowClassName"];
   isCellFlashing: DataTableProps<TRow>["isCellFlashing"];
-  rowStyle: DataTableProps<TRow>["rowStyle"];
-  rowHeight: DataTableProps<TRow>["rowHeight"];
+  rowStyle: ComposedProps<TRow>["rowStyle"];
+  rowHeight: ComposedProps<TRow>["rowHeight"];
   cardClassName: string | undefined;
   summaryRow: DataTableProps<TRow>["summaryRow"];
   renderCard: DataTableProps<TRow>["renderCard"];
@@ -1153,7 +1154,7 @@ interface DataTableBodyRegionProps<TRow> {
   rowPinning: RowPinningState<TRow> | undefined;
   pinnedTopRows: readonly TRow[];
   pinnedBottomRows: readonly TRow[];
-  extraRows: DataTableProps<TRow>["extraRows"];
+  extraRows: ComposedProps<TRow>["extraRows"];
   pinRowSticky: boolean;
 }
 
@@ -1205,9 +1206,9 @@ function DesktopTableBody<TRow>({
   expandable: TableProps<GroupedDataRecord<TRow>>["expandable"];
   summary: TableProps<GroupedDataRecord<TRow>>["summary"];
   handleChange: TableProps<TRow>["onChange"];
-  rowClassName: DataTableProps<TRow>["rowClassName"];
-  rowStyle: DataTableProps<TRow>["rowStyle"];
-  rowHeight: DataTableProps<TRow>["rowHeight"];
+  rowClassName: ComposedProps<TRow>["rowClassName"];
+  rowStyle: ComposedProps<TRow>["rowStyle"];
+  rowHeight: ComposedProps<TRow>["rowHeight"];
   /** The editing bundle, so a row can carry its dirty mark. */
   editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
   onRowClick: DataTableProps<TRow>["onRowClick"];
@@ -1557,7 +1558,7 @@ function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
  * assembles the entire adapter — from carrying their branches too.
  */
 function useAntdGridState<TRow>(
-  props: Readonly<DataTableProps<TRow>>,
+  props: Readonly<ComposedProps<TRow>>,
   c: ReturnType<typeof useTableChrome<TRow>>,
   history: EditHistoryState<TRow>
 ) {
@@ -1780,6 +1781,15 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   );
 }
 
+/**
+ * The props this module works with once `features` have applied.
+ *
+ * The public `DataTableProps` is what a host writes; everything past
+ * `useTableFeatures` also carries what the composed features wrote, and the
+ * internals below read both.
+ */
+type ComposedProps<TRow> = DataTableProps<TRow> & FeatureProps<TRow>;
+
 /** The assembly bundle `tableRenderModel` accepts, named without a new export. */
 type RenderModelAssembly<TRow> = Parameters<
   typeof tableRenderModel<TRow>
@@ -1787,7 +1797,7 @@ type RenderModelAssembly<TRow> = Parameters<
 
 /** Everything the body needs from the half of the table above the gate. */
 interface AntdTableBodyProps<TRow> {
-  readonly props: Readonly<DataTableProps<TRow>>;
+  readonly props: Readonly<ComposedProps<TRow>>;
   readonly chromeProps: Parameters<typeof useTableChrome<TRow>>[0];
   readonly chrome: ReturnType<typeof useTableChrome<TRow>>;
   readonly history: EditHistoryState<TRow>;

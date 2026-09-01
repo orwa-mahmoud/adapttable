@@ -2,9 +2,11 @@ import type {
   BulkAction,
   CommandPaletteOptions,
   ContextMenuOptions,
+  ExportCsvOptions,
   FilterDef,
   FilterTypeSpec,
   NestedTableFor,
+  RowAction,
   SidePanelOptions,
 } from "@adapttable/core";
 import type {
@@ -28,13 +30,20 @@ export interface KitChromeFactories {
   columnSelectionCheckbox: () => StaticTableFeature;
   densityChooser: () => StaticTableFeature;
   editHistory: () => StaticTableFeature;
-  exportCsv: <TRow>() => TableFeature<TRow>;
+  exportCsv: <TRow>(
+    options?: boolean | ExportCsvOptions<TRow>
+  ) => TableFeature<TRow>;
   fullscreen: () => StaticTableFeature;
   headerFilters: () => StaticTableFeature;
-  nestedTable: <TRow>(nested: NestedTableFor<TRow>) => TableFeature<TRow>;
+  nestedTable: <TRow>(
+    nested: NestedTableFor<TRow>,
+    defaultExpandedRowIds?: readonly string[]
+  ) => TableFeature<TRow>;
   print: (onPrint: () => void, printButton?: boolean) => StaticTableFeature;
   resizableColumns: () => StaticTableFeature;
-  rowActions: <TRow>() => TableFeature<TRow>;
+  rowActions: <TRow>(
+    actions?: readonly RowAction<TRow>[]
+  ) => TableFeature<TRow>;
   savedViews: (
     options: ReturnType<typeof demoSavedViews>
   ) => StaticTableFeature;
@@ -87,12 +96,14 @@ export interface KitChromeFlags {
   columnSelectionCheckbox?: boolean;
   densityChooser?: boolean;
   editing?: boolean;
-  exportCsv?: unknown;
+  exportCsv?: boolean | ExportCsvOptions<Person>;
   focused?: boolean;
   fullscreen?: boolean;
   headerFilters?: boolean;
   /** The nested-table definition, when the page shows one. */
   nested?: NestedTableFor<Person>;
+  /** Which nested rows start open. */
+  nestedOpenIds?: readonly string[];
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
@@ -104,7 +115,8 @@ export interface KitChromeFlags {
   collapsibleColumnGroups?: boolean;
   columnMenu?: boolean;
   /** Whether this page draws the trailing row-actions column. */
-  rowActions?: boolean;
+  /** The trailing actions column, with the actions it offers. */
+  rowActions?: readonly RowAction<Person>[];
   commandPalette?: boolean | CommandPaletteOptions;
   contextMenu?: boolean | ContextMenuOptions<Person>;
   /** The Filters control. */
@@ -137,14 +149,18 @@ export function kitChromeFeatures(
     ...(flags.onPrint ? [kit.print(flags.onPrint, flags.printButton)] : []),
     ...(flags.undoRedoButtons ? [kit.undoRedoButtons()] : []),
     ...(flags.editing ? [kit.editHistory()] : []),
-    ...((flags.exportCsv ?? rich) ? [kit.exportCsv<Person>()] : []),
+    ...((flags.exportCsv ?? rich)
+      ? [kit.exportCsv<Person>(flags.exportCsv ?? true)]
+      : []),
     ...(rich ? [kit.savedViews(demoSavedViews(flags.urlKey))] : []),
     ...(flags.headerFilters ? [kit.headerFilters()] : []),
-    ...(flags.nested ? [kit.nestedTable<Person>(flags.nested)] : []),
+    ...(flags.nested
+      ? [kit.nestedTable<Person>(flags.nested, flags.nestedOpenIds)]
+      : []),
     kit.resizableColumns(),
     // Only when the page actually shows the trailing actions column: composing
     // it always would add a column, and every column index with it.
-    ...(flags.rowActions ? [kit.rowActions<Person>()] : []),
+    ...(flags.rowActions ? [kit.rowActions<Person>(flags.rowActions)] : []),
     ...alwaysOn(kit, flags),
     ...panelChrome(kit, flags, rich),
     ...kitDrawn(kit, flags.kitFeatures ?? {}),

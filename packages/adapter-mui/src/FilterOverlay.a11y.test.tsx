@@ -26,7 +26,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
 import { filters as filtersFeature } from "./filters";
-import type { ColumnDef, DataTableProps } from "./index";
+import type { ColumnDef } from "./index";
 import { DataTable } from "./testDataTable";
 
 interface Person {
@@ -69,7 +69,7 @@ const AXE_TIMEOUT_MS = 20_000;
 const theme = createTheme();
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <ThemeProvider theme={theme}>

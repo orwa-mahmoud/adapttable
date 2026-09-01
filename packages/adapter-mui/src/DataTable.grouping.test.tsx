@@ -47,8 +47,8 @@ function Harness(props: {
       rowKey={(r) => r.id}
       forceMobile={props.isMobile}
       features={[
-        grouping<Row>("team", {
-          groupAggregates: (rows) => ({ name: rows.length }),
+        grouping("team", {
+          groupAggregates: (rows: readonly Row[]) => ({ name: rows.length }),
         }),
       ]}
       {...props.override}

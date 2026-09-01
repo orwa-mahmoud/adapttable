@@ -9,7 +9,7 @@ import { type RefCallback, type RefObject, useCallback, useMemo } from "react";
 import { DEFAULT_CARD_SIZE_PX, DEFAULT_ROW_SIZE_PX } from "../constants";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
-import type { BaseDataTableProps } from "../props";
+import type { ComposedTableProps } from "../props";
 import type { RowPinState } from "../rows/rowPinning";
 import type { RowHeight } from "../rows/rowStyle";
 import type { TreeEntry } from "../tree/treeRows";
@@ -60,7 +60,7 @@ export interface ChromeBodyData<TRow> {
 export function hasLoadedChildren<TRow>(
   row: TRow,
   rows: readonly TRow[],
-  props: BaseDataTableProps<TRow>
+  props: ComposedTableProps<TRow>
 ): boolean {
   const nested = props.getChildren?.(row);
   if (nested !== undefined) return nested.length > 0;
@@ -139,7 +139,7 @@ function partitionPinnedRows<TRow>(
 /** A card's height on a phone, a row's on a desktop — or `rowHeight`. */
 export function estimateBodyItemSize<TRow>(
   chrome: TableChrome<TRow>,
-  props: BaseDataTableProps<TRow>,
+  props: ComposedTableProps<TRow>,
   scrollRows: readonly TRow[]
 ): (index: number) => number {
   const fallback = chrome.isMobile

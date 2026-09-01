@@ -1,4 +1,4 @@
-import { DataTable, type DataTableProps } from "@adapttable/base-ui";
+import { DataTable } from "@adapttable/base-ui";
 import { bulkActions as bulkActions_ } from "@adapttable/base-ui/bulk-actions";
 import { cellNavigation as cellNavigation_ } from "@adapttable/base-ui/cell-navigation";
 import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/base-ui/column-groups";
@@ -35,6 +35,7 @@ import {
   statusBar as statusBar_,
 } from "@adapttable/base-ui/status-bar";
 import { tree as tree_ } from "@adapttable/base-ui/tree";
+import type { FeatureProps } from "@adapttable/core";
 import type {
   ColumnDef,
   ColumnLayoutState,
@@ -86,7 +87,6 @@ import {
   demoFilterTypes,
   type DemoOrder,
   demoOrders,
-  demoSavedViews,
   LIVE_DEFAULT_LAYOUT,
   type LoadCellProps,
   type Locale,
@@ -290,7 +290,7 @@ export function BaseUiDemo({
   editorShowcase?: boolean;
   /** Show the Columns menu. Defaults to on unless the page is focused. */
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   /** Show the Filters control. Defaults to on unless the page is focused. */
   filterControls?: boolean;
@@ -306,7 +306,7 @@ export function BaseUiDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   /** The column layout the page starts from. */
@@ -390,6 +390,7 @@ export function BaseUiDemo({
               fullscreen,
               headerFilters,
               nested: nested ? nestedOrders : undefined,
+              nestedOpenIds: nestedOpenIds(nested, source.rows),
               onPrint,
               printButton,
               undoRedoButtons,
@@ -398,7 +399,10 @@ export function BaseUiDemo({
               bulkActionList: makeBulkActions(locale),
               collapsibleColumnGroups: columns.collapsibleColumnGroups,
               columnMenu,
-              rowActions: !(rowMutations ?? (focused && !columnGroups)),
+              rowActions:
+                (rowMutations ?? (focused && !columnGroups))
+                  ? undefined
+                  : makeActions(locale),
               commandPalette,
               contextMenu,
               filterControls,
@@ -410,23 +414,7 @@ export function BaseUiDemo({
             }),
             ...(demoFeatures ?? []),
           ]}
-          nestedTable={nested ? nestedOrders : undefined}
-          defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
-          cellNavigation={cellNavigation ?? editing}
-          columnSelectionCheckbox={columnSelectionCheckbox}
-          statusBar={statusBar}
-          contextMenu={contextMenu}
-          densityChooser={densityChooser}
           onDensityChange={onDensityChange}
-          fullscreen={fullscreen}
-          commandPalette={commandPalette}
-          onPrint={onPrint}
-          printButton={printButton}
-          undoRedoButtons={undoRedoButtons}
-          sidePanel={sidePanel}
-          selectionStats={editing}
-          editHistory={editing}
-          findInTable={editing}
           {...columns}
           forceMobile={forceMobile}
           density={density}
@@ -435,26 +423,11 @@ export function BaseUiDemo({
           locale={locale}
           dir={getDirection(locale)}
           searchPlaceholder={s.search}
-          rowActions={
-            rowMutations || (focused && !columnGroups)
-              ? undefined
-              : makeActions(locale)
-          }
           rowActionsLayout={rowMutations ? "menu" : undefined}
-          bulkActions={
-            (bulkActions ?? !focused) ? makeBulkActions(locale) : undefined
-          }
           confirm={demoConfirm}
-          enableColumnMenu={columnMenu ?? !focused}
-          exportCsv={exportCsv ?? !focused}
-          savedViews={focused ? undefined : demoSavedViews(urlKey)}
           animate={animate}
-          resizableColumns
           stickyHeader
-          headerFilters={headerFilters}
           filterFields={filterFields}
-          filters={(filterControls ?? !focused) ? filters : undefined}
-          filterTypes={demoFilterTypes()}
           accentColor="blue"
         />
       )}

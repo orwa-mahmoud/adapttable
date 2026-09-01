@@ -275,6 +275,9 @@ export interface CommandPaletteOptions {
 }
 
 // @public
+export type ComposedTableProps<TRow> = BaseDataTableProps<TRow> & FeatureProps<TRow>;
+
+// @public
 export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
 // @public
@@ -495,6 +498,66 @@ export interface FeaturePatch<TRow = unknown> {
 }
 
 // @public
+export interface FeatureProps<TRow> {
+    batchEditing?: boolean;
+    bulkActions?: BulkAction[];
+    cellNavigation?: boolean;
+    cellSpanAppearance?: CellSpanAppearance;
+    collapsibleColumnGroups?: boolean;
+    columnSelectionCheckbox?: boolean;
+    commandPalette?: boolean | CommandPaletteOptions;
+    confirmDeleteRow?: boolean;
+    contextMenu?: boolean | ContextMenuOptions<TRow>;
+    defaultExpandedRowIds?: readonly string[];
+    densityChooser?: boolean;
+    dirtyIndicators?: boolean;
+    editHistory?: boolean | {
+        depth?: number;
+    };
+    enableColumnMenu?: boolean;
+    exportCsv?: boolean | ExportCsvOptions<TRow>;
+    extraRows?: readonly ExtraRow[];
+    filters?: readonly FilterDef<TRow>[] | ReactNode;
+    filterTypes?: readonly FilterTypeSpec[];
+    findInTable?: boolean;
+    fitColumns?: boolean;
+    fullscreen?: boolean;
+    getCellSpan?: GetCellSpan<TRow>;
+    getChildren?: (row: TRow) => readonly TRow[] | undefined;
+    getParentId?: (row: TRow) => string | undefined;
+    groupBy?: string | readonly string[] | null;
+    headerFilters?: boolean;
+    multiSort?: boolean;
+    nestedTable?: NestedTableFor<TRow>;
+    onAddRow?: () => unknown;
+    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    onDeleteRow?: (row: TRow) => unknown;
+    onDuplicateRow?: (row: TRow) => unknown;
+    onLoadChildren?: (row: TRow) => void | Promise<void>;
+    onPinnedRowIdsChange?: (next: RowPinState) => void;
+    onPrint?: () => void;
+    onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    pinnedRowIds?: RowPinState;
+    printButton?: boolean;
+    renderRowDetail?: (row: TRow) => ReactNode;
+    resizableColumns?: boolean;
+    rowActions?: RowAction<TRow>[];
+    rowClassName?: (row: TRow, index: number) => string | undefined;
+    rowEditing?: boolean;
+    rowHeight?: RowHeight<TRow>;
+    rowStyle?: RowStyle<TRow>;
+    savedViews?: UseSavedViewsOptions;
+    selectionStats?: boolean;
+    sidePanel?: SidePanelOptions;
+    statusBar?: boolean;
+    treeColumn?: string;
+    undoRedoButtons?: boolean;
+    virtualize?: boolean;
+    virtualizeColumns?: boolean;
+}
+
+// @public
 export interface FeatureProviderContribution {
     readonly Provider: ComponentType<FeatureProviderProps>;
 }
@@ -553,6 +616,9 @@ export interface FilterOption {
 export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
 
 // @public
+export function filters(form: ReactNode): StaticTableFeature;
+
+// @public (undocumented)
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
 // @public
@@ -619,21 +685,19 @@ export interface GetCellSpanArgs<TRow> {
 }
 
 // @public
-export function grouping<TRow>(groupBy: string | readonly string[], extras?: {
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    groupAggregates?: (rows: readonly TRow[]) => unknown;
-    groupFooters?: boolean;
-    groupSort?: GroupSort<TRow>;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupFilter?: (group: unknown) => boolean;
-    collapsedGroupIds?: readonly string[];
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-}): TableFeature<TRow>;
+export function grouping(groupBy: string | readonly string[]): StaticTableFeature;
+
+// @public (undocumented)
+export function grouping<TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
 
 // @public
 export type GroupingCapability = "client" | "server" | false;
+
+// @public
+export interface GroupingExtras<TRow> extends StaticGroupingExtras {
+    groupAggregates?: (rows: readonly TRow[]) => unknown;
+    groupSort?: GroupSort<TRow>;
+}
 
 // @public
 export interface GroupNode<TRow> {
@@ -663,7 +727,7 @@ export interface NestedTable {
 }
 
 // @public
-export function nestedTable<TRow>(nested: NestedTableFor<TRow>): TableFeature<TRow>;
+export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;
 
 // @public
 export interface NestedTableDefaults {
@@ -754,6 +818,11 @@ export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<s
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 
 // @public
+export type RowOf<P> = P extends {
+    rowKey: (row: infer TRow) => string;
+} ? TRow : unknown;
+
+// @public
 export function rowPinning(options?: {
     pinnedRowIds?: RowPinState;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
@@ -842,6 +911,18 @@ export interface SortLevel {
 
 // @public
 export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
+
+// @public
+export interface StaticGroupingExtras {
+    collapsedGroupIds?: readonly string[];
+    groupFilter?: (group: unknown) => boolean;
+    groupFooters?: boolean;
+    groupPageSize?: number;
+    groupRowPageSize?: number;
+    onCollapsedGroupIdsChange?: (ids: string[]) => void;
+    onGroupByChange?: (groupBy: readonly string[]) => void;
+    onGroupLoadMore?: (groupKey: string) => void;
+}
 
 // @public
 export interface StaticTableFeature {
@@ -1211,7 +1292,7 @@ export interface UseSavedViewsOptions {
 }
 
 // @public
-export function useTableFeatures<P extends object>(incoming: P): P;
+export function useTableFeatures<P extends object>(incoming: P): P & FeatureProps<RowOf<P>>;
 
 // @public
 export function virtualize(options?: VirtualizeOptions): StaticTableFeature;

@@ -1,5 +1,6 @@
+import type { FeatureProps } from "@adapttable/core";
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
-import type { DataTableProps } from "@adapttable/mantine";
+import type {} from "@adapttable/mantine";
 import {
   type ComponentType,
   lazy,
@@ -90,7 +91,7 @@ export type KitDemoProps = Readonly<{
   /** Undo and Redo in the toolbar. Needs editing armed to do anything. */
   undoRedoButtons?: boolean;
   /** A settings panel docked beside the table. */
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   /** The column layout a page starts from. */
@@ -100,7 +101,7 @@ export type KitDemoProps = Readonly<{
   /** A checkbox in every column header that selects the column. */
   columnSelectionCheckbox?: boolean;
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   forceMobile?: boolean;
   pageMode?: PageMode;
   focused?: boolean;

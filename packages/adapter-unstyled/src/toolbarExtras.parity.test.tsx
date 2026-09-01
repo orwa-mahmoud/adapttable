@@ -21,10 +21,12 @@ const COLS: ColumnDef<Row>[] = [
 /**
  * The optional toolbar controls are absent until their feature is imported.
  *
- * The shipped `DataTable`, not the test harness: the harness composes features
- * from props, which is exactly what must not decide this. Each control comes
- * from its own entry through `TOOLBAR_EXTRAS`, so the props alone draw nothing
- * — which is what makes the entry, and not the prop, the thing you pay for.
+ * The shipped `DataTable`, not the test harness: the harness converts v2 props
+ * into features, which is exactly what must not decide this. Each control comes
+ * from its own entry through `TOOLBAR_EXTRAS`, so a table that imports none of
+ * them draws none of them — which is what makes the entry, and not a prop, the
+ * thing you pay for. v3 removed the props that used to arm these, so there is
+ * no second way in to test.
  */
 describe("toolbar extras (unstyled)", () => {
   beforeEach(() => {
@@ -51,20 +53,12 @@ describe("toolbar extras (unstyled)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        exportCsv
-        onPrint={vi.fn()}
-        printButton
-        densityChooser
         onDensityChange={vi.fn()}
-        fullscreen
-        onCellEdit={vi.fn()}
-        editHistory
-        undoRedoButtons
         features={features as never}
       />
     );
 
-  it("draws no optional control from the props alone", () => {
+  it("draws no optional control until one is composed", () => {
     table();
 
     expect(document.querySelector("table")).not.toBeNull();

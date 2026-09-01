@@ -7,9 +7,10 @@
  * through the tarball's `exports` map and its emitted declarations — the two
  * things a monorepo test can never see, because it resolves source.
  *
- * The compatibility aliases are the exception: they are generated from
- * `mainEntryAliases.ts` rather than listed, so the day one is added or retired
- * the fixture follows without anyone remembering to edit it.
+ * The names v3 moved off the main entry are the exception: they come from the
+ * removal inventory rather than being listed here, so the fixture proves the
+ * migration's own claim — each one still reachable from
+ * `@adapttable/core/adapter`.
  */
 
 /** `<DataTable data columns rowKey />` and nothing else. */
@@ -309,22 +310,19 @@ export function Headless() {
 `;
 
 /**
- * Split `mainEntryAliases.ts` into its type and value aliases.
+ * The names v3 moved off the main entry, as the inventory records them.
  *
- * Read from the module that declares them so the fixture cannot drift: the
- * whole point is that every alias still reachable is still reached.
+ * They used to be read out of `mainEntryAliases.ts`; v3 deleted that module,
+ * and the list is now closed — nothing joins a set of removals that already
+ * happened. What the probes check is the other half of the promise: every one
+ * of them still ships from `@adapttable/core/adapter`, which is the import a
+ * host moves to.
  */
-export function aliasesIn(source) {
-  const types = [];
-  const values = [];
-  for (const m of source.matchAll(
-    /^export (type|const) ([A-Za-z_$][\w$]*)/gm
-  )) {
-    (m[1] === "type" ? types : values).push(m[2]);
-  }
-  types.sort((a, b) => a.localeCompare(b));
-  values.sort((a, b) => a.localeCompare(b));
-  return { types, values };
+export function movedAliases(manifest) {
+  const group = manifest.v3Removals.groups.find(
+    (entry) => entry.id === "main-entry-aliases"
+  );
+  return { types: group.types, values: group.values };
 }
 
 /** Three aliases are generic, so naming them needs a row type. */
@@ -342,12 +340,13 @@ export function aliasTypeProbe({ types, values }) {
       `  ${name[0].toLowerCase()}${name.slice(1)}: ${name}${GENERIC.has(name) ? "<Row>" : ""};`
   );
   return [
-    "// Every deprecated main-entry alias, reached from the v2 import path it",
-    "// has always had. They stay until v3 so existing code keeps compiling.",
+    "// Every name v3 moved off the main entry, reached from the entry it",
+    '// moved to. A migration that says "import it from /adapter instead"',
+    "// is only true if all of them are there.",
     "import {",
     ...types.map((name) => `  type ${name},`),
     ...values.map((name) => `  ${name},`),
-    '} from "@adapttable/core";',
+    '} from "@adapttable/core/adapter";',
     "",
     "type Row = { id: string };",
     "",
@@ -367,12 +366,12 @@ export function aliasTypeProbe({ types, values }) {
 /** A value alias must still be a value — proved by running it, not by tsc. */
 export function aliasRuntimeProbe(values) {
   return [
-    'import * as core from "@adapttable/core";',
+    'import * as core from "@adapttable/core/adapter";',
     `const values = ${JSON.stringify(values)};`,
     "const missing = values.filter((name) => core[name] === undefined);",
     "if (missing.length > 0)",
     "  throw new Error(",
-    '    "compatibility aliases missing from the packed @adapttable/core: " +',
+    '    "names missing from the packed @adapttable/core/adapter: " +',
     '      missing.join(", ")',
     "  );",
     'console.log("aliases ok (" + values.length + " values)");',

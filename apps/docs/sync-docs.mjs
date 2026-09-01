@@ -70,6 +70,7 @@ export const TITLES = {
   "api.md": "AdaptTable API reference — every export",
   "faq.md": "FAQ — the free MUI X & ag-Grid alternative",
   "comparison.md": "React table comparison — AG Grid, TanStack, MUI",
+  "migrate-from-v2.md": "Upgrading from v2 — every removed prop",
   "migrate-from-v1.md": "Migrate from AdaptTable v1 to v2 — every rename",
   "migrate-from-mantine-datatable.md":
     "Migrate from mantine-datatable — more built-in",
@@ -181,6 +182,8 @@ export const DESCRIPTIONS = {
     "Parse and validate AdaptTable's URL state on the server — typed queries for filtering, sorting and paging your backend can trust.",
   "tree-data.md":
     "Render hierarchical rows in a React data table — pass getChildren for expandable tree data with keyboard access and announcements.",
+  "migrate-from-v2.md":
+    "Upgrade AdaptTable v2 to v3 — every removed enabling prop with the feature import that replaces it, in one table.",
   "migrate-from-v1.md":
     "Migrate AdaptTable v1 to v2 — every rename and behavior change in one checklist, applied the same way across all eight adapters.",
 };

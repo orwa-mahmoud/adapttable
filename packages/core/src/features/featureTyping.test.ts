@@ -5,7 +5,7 @@
  * `features={[grouping("team"), virtualize(), rowReorder(fn)]}` — and for most
  * of v2 that did not compile: a factory with nothing row-shaped to infer from
  * resolved `TRow` to `unknown`, and `TableFeature<unknown>` was not a
- * `TableFeature<Row>`, so every example needed a `grouping<Row>("team")`
+ * `TableFeature<Row>`, so every example needed a `grouping("team")`
  * annotation the docs never showed.
  *
  * The fix is variance, not looseness: the phantom row markers are read

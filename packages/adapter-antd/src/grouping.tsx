@@ -3,17 +3,31 @@ import {
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
   slotRender,
+  type StaticTableFeature,
   type TableFeature,
 } from "@adapttable/core/adapter";
-import { grouping as core, type GroupSort } from "@adapttable/core/features";
+import {
+  grouping as core,
+  type GroupingExtras,
+  type GroupSort,
+  type StaticGroupingExtras,
+} from "@adapttable/core/features";
 
 import { GroupHeaderCard, GroupHeaderCell } from "./components/grouping";
 
+export function grouping(
+  groupBy: string | readonly string[],
+  extras?: StaticGroupingExtras
+): StaticTableFeature;
 export function grouping<TRow>(
   groupBy: string | readonly string[],
-  extras?: Parameters<typeof core<TRow>>[1]
+  extras: GroupingExtras<TRow>
+): TableFeature<TRow>;
+export function grouping<TRow>(
+  groupBy: string | readonly string[],
+  extras?: GroupingExtras<TRow>
 ): TableFeature<TRow> {
-  return extendFeature(core(groupBy, extras), [
+  return extendFeature(core<TRow>(groupBy, extras ?? {}), [
     slotRender(GROUP_HEADER_ROW, (props) => (
       <GroupHeaderCell
         {...(props as unknown as Parameters<typeof GroupHeaderCell>[0])}

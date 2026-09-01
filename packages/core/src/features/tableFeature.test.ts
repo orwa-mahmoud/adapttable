@@ -73,41 +73,22 @@ describe("applyTableFeatures", () => {
   });
 
   it("is a no-op the second time on the same object", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const first = applyTableFeatures({ groupBy: "team" });
-    applyTableFeatures(first);
-    expect(warn).toHaveBeenCalledTimes(1);
+    const first = applyTableFeatures({ features: [virtualize()] });
+    const second = applyTableFeatures(first);
+    expect(second).toBe(first);
   });
 
-  it("warns once when a deprecated enabling prop is set", () => {
+  /**
+   * v3 removed the enabling props, and with them the warning that pointed at
+   * their replacements. What is left is silence: nothing about a plain props
+   * object is deprecated any more, so a table that composes features and one
+   * that composes none both go through without a word.
+   */
+  it("says nothing about a props object it is handed", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    applyTableFeatures({ groupBy: "team" });
-    applyTableFeatures({ groupBy: "other" });
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain("groupBy");
-    expect(warn.mock.calls[0]?.[0]).toContain("deprecated");
-  });
-
-  it("does not warn when only the features path is used", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    applyTableFeatures({ searchable: true });
     applyTableFeatures({ features: [virtualize()] });
     expect(warn).not.toHaveBeenCalled();
-  });
-
-  // A feature's companion options go away with the feature, so a migration
-  // that removes only the headline prop is still broken at v3. Each of these
-  // warns on its own rather than only alongside its sibling.
-  it.each([
-    ["cellSpanAppearance", { cellSpanAppearance: "muted" }],
-    ["defaultExpandedRowIds", { defaultExpandedRowIds: ["a"] }],
-    ["treeColumn", { treeColumn: "name" }],
-    ["onLoadChildren", { onLoadChildren: () => undefined }],
-    ["printButton", { printButton: true }],
-  ])("warns for the companion prop %s on its own", (name, props) => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    applyTableFeatures({ ...props });
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain(name);
   });
 
   it("composes an ad-hoc feature() patch", () => {

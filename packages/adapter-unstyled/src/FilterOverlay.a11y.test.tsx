@@ -23,7 +23,7 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import type { ColumnDef, DataTableProps } from "./index";
+import type { ColumnDef, FilterDef } from "./index";
 import { DataTable } from "./testDataTable";
 
 interface Person {
@@ -51,9 +51,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 // A select column filter ("Status") + a top-level numberRange ("Age")
 // exercises the full auto-built filter form, so axe scans real, labelled form
 // controls — not an empty card.
-const FILTERS: DataTableProps<Person>["filters"] = [
-  { key: "age", type: "numberRange" },
-];
+const FILTERS: FilterDef<Person>[] = [{ key: "age", type: "numberRange" }];
 
 // `color-contrast` is jsdom-blind (the existing a11y.test.tsx disables it for
 // the same reason). `region` flags page-level landmarks — the host app's job,
@@ -67,7 +65,7 @@ const axeOpts = {
 const AXE_TIMEOUT_MS = 20_000;
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   // The plain-DOM kit needs NO provider wrapper — mount <DataTable /> directly.
   return render(

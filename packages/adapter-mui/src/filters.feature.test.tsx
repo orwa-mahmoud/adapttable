@@ -21,8 +21,9 @@ const DEFS = [{ key: "status", label: "Status", type: "text" as const }];
 
 describe("filters feature (mui)", () => {
   it("draws no chip strip when the feature was never imported", () => {
-    // The shipped component, not the harness: the harness composes features
-    // from props, which is exactly what this test must not have happen.
+    // The shipped component, not the harness: the harness turns v2 props into
+    // features, which is exactly what this test must not have happen. v3
+    // removed those props, so there is no second way in to pass either.
     render(
       <BareDataTable
         data={ROWS}

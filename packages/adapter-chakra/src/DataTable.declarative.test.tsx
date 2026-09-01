@@ -3,7 +3,7 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef, DataTableProps } from "./index";
+import type { ColumnDef } from "./index";
 import { DataTable } from "./testDataTable";
 
 interface Person {
@@ -50,7 +50,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <ChakraProvider value={defaultSystem}>

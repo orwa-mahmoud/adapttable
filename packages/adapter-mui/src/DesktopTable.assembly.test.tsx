@@ -264,7 +264,7 @@ describe("DesktopTable layered chrome", () => {
     const { container } = mount({
       ...fullChrome,
       groupBy: "city",
-      features: [...fullChrome.features, grouping<Person>("city")],
+      features: [...fullChrome.features, grouping("city")],
     });
     expect(
       container.querySelector('[data-adapttable-part="group-label"]')

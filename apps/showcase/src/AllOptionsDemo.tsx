@@ -1,3 +1,4 @@
+import type { FeatureProps } from "@adapttable/core";
 import type { ColumnDef, SidePanelEntry } from "@adapttable/core";
 import { usePrefersReducedMotion, useSavedViews } from "@adapttable/core";
 import { buildFormulaColumns } from "@adapttable/core/formula";
@@ -7,7 +8,7 @@ import {
   usePivotUrlState,
 } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
-import { type DataTableProps, FilterDrawer } from "@adapttable/mantine";
+import { FilterDrawer } from "@adapttable/mantine";
 import { MantineProvider } from "@mantine/core";
 import {
   type ReactNode,
@@ -374,7 +375,7 @@ function LabRows({
   pivoted: boolean;
   kit: string;
   dark: boolean;
-  sidePanel: DataTableProps<Person>["sidePanel"];
+  sidePanel: FeatureProps<Person>["sidePanel"];
   children: ReactNode;
 }>) {
   if (!pivoted) return <>{children}</>;

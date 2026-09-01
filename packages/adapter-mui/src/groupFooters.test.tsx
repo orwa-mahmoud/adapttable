@@ -38,7 +38,7 @@ describe("group footers (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         features={[
-          grouping<Row>("team", {
+          grouping("team", {
             groupAggregates: total,
             groupFooters: extra?.groupFooters as boolean | undefined,
           }),

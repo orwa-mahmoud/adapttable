@@ -105,84 +105,49 @@ export interface AssemblyFns<TRow = unknown> {
 export interface BaseDataTableProps<TRow> {
     activeFilterCount?: number;
     applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
-    batchEditing?: boolean;
-    bulkActions?: BulkAction[];
-    cellNavigation?: boolean;
-    cellSpanAppearance?: CellSpanAppearance;
     closeHeaderFilterOnSelect?: boolean;
     collapsedGroupIds?: readonly string[];
-    collapsibleColumnGroups?: boolean;
     columnLayout?: ColumnLayoutState;
     columns: ColumnInput<TRow>[];
-    columnSelectionCheckbox?: boolean;
-    commandPalette?: boolean | CommandPaletteOptions;
     confirm?: ConfirmHandler;
-    confirmDeleteRow?: boolean;
-    contextMenu?: boolean | ContextMenuOptions<TRow>;
     defaultColumnLayout?: Partial<ColumnLayoutState>;
-    defaultExpandedRowIds?: readonly string[];
     defaults?: Partial<TableQueryParams> & {
         extra?: ExtraFilters;
     };
     density?: "comfortable" | "compact";
-    densityChooser?: boolean;
     dir?: Direction;
-    dirtyIndicators?: boolean;
     editConflictPolicy?: EditConflictPolicy;
-    editHistory?: boolean | {
-        depth?: number;
-    };
-    enableColumnMenu?: boolean;
     estimateCardSize?: number;
     estimateRowSize?: number;
     expandedIds?: readonly string[];
-    exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraChips?: readonly ActiveFilterChip[];
-    extraRows?: readonly ExtraRow[];
     features?: readonly TableFeature<NoInfer<TRow>>[];
     filterDefs?: readonly FilterDef<TRow>[];
     filterFields?: boolean;
     filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
-    filters?: readonly FilterDef<TRow>[] | ReactNode;
     filtersMode?: "popover" | "drawer" | "header";
-    filterTypes?: readonly FilterTypeSpec[];
-    findInTable?: boolean;
-    fitColumns?: boolean;
     forceMobile?: boolean;
     formatEditError?: (error: unknown) => string;
-    fullscreen?: boolean;
-    getCellSpan?: GetCellSpan<TRow>;
-    getChildren?: (row: TRow) => readonly TRow[] | undefined;
-    getParentId?: (row: TRow) => string | undefined;
     groupAggregates?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
-    groupBy?: string | readonly string[] | null;
     groupFilter?: (group: GroupNode<TRow>) => boolean;
     groupFooters?: boolean;
     groupPageSize?: number;
     groupRowPageSize?: number;
     groupSort?: GroupSort<TRow>;
     hasChildren?: (row: TRow) => boolean;
-    headerFilters?: boolean;
     isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     labels?: TableLabels;
     locale?: string;
     maxHeight?: number;
     mobileBreakpoint?: number;
     mobileIdentityColumns?: number;
-    multiSort?: boolean;
-    nestedTable?: NestedTableFor<TRow>;
-    onAddRow?: () => unknown;
-    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
     onCellCut?: (range: CellRange) => void;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
     onCellFill?: (edits: CellEdit<TRow>[]) => void;
     onCellPaste?: (edits: CellEdit<TRow>[]) => void;
     onClearFilters?: () => void;
     onCollapsedGroupIdsChange?: (ids: string[]) => void;
     onColumnLayoutChange?: (next: ColumnLayoutState) => void;
-    onDeleteRow?: (row: TRow) => unknown;
     onDensityChange?: (next: "comfortable" | "compact") => void;
-    onDuplicateRow?: (row: TRow) => unknown;
     onEditCancel?: EditEventHandler<TRow>;
     onEditCommit?: EditEventHandler<TRow>;
     onEditConflict?: EditConflictHandler<TRow>;
@@ -192,31 +157,17 @@ export interface BaseDataTableProps<TRow> {
     onExpandedIdsChange?: (ids: string[]) => void;
     onGroupByChange?: (groupBy: readonly string[]) => void;
     onGroupLoadMore?: (groupKey: string) => void;
-    onLoadChildren?: (row: TRow) => void | Promise<void>;
-    onPinnedRowIdsChange?: (next: RowPinState) => void;
-    onPrint?: () => void;
     onRowClick?: (row: TRow) => void;
-    onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
     onRowsChange?: (rows: readonly TRow[]) => void;
     onSelectionChange?: (selectedIds: string[]) => void;
     onValidationFail?: EditEventHandler<TRow>;
     paginationMode?: PaginationMode;
-    pinnedRowIds?: RowPinState;
     prefetch?: (row: TRow) => void;
-    printButton?: boolean;
     renderCard?: MobileCardRenderer<TRow>;
     renderRowActions?: RowActionsRenderer<TRow>;
-    renderRowDetail?: (row: TRow) => ReactNode;
-    resizableColumns?: boolean;
-    rowActions?: RowAction<TRow>[];
     rowActionsLayout?: RowActionsLayout;
-    rowClassName?: (row: TRow, index: number) => string | undefined;
-    rowEditing?: boolean;
-    rowHeight?: RowHeight<TRow>;
     rowKey: (row: TRow) => string;
-    rowStyle?: RowStyle<TRow>;
     rowVersion?: (row: TRow) => string | number;
-    savedViews?: UseSavedViewsOptions;
     scrollTopGap?: number;
     scrollToTopOnChange?: boolean;
     searchable?: boolean;
@@ -224,12 +175,9 @@ export interface BaseDataTableProps<TRow> {
     searchPlaceholder?: string;
     selectedIds?: readonly string[];
     selectionGetId?: (row: TRow) => string;
-    selectionStats?: boolean;
-    sidePanel?: SidePanelOptions;
     skeletonRows?: number;
     sortByOptions?: SortByOption[];
     source: TableSource<TRow>;
-    statusBar?: boolean;
     stickyHeader?: boolean;
     stickyToolbar?: boolean;
     stickyTop?: number;
@@ -238,11 +186,7 @@ export interface BaseDataTableProps<TRow> {
     tableLabel?: string;
     toolbar?: ReactNode;
     toolbarSlots?: ToolbarSlots;
-    treeColumn?: string;
-    undoRedoButtons?: boolean;
     validateRow?: RowValidator<TRow>;
-    virtualize?: boolean;
-    virtualizeColumns?: boolean;
     virtualOverscan?: number;
     virtualScrollMargin?: number;
 }
@@ -488,7 +432,7 @@ export interface CellNavLiveSlotProps<TRow = never> {
     children: (gridFocus: GridFocusState) => ReactNode;
     // (undocumented)
     currentMatch: UseGridFocusOptions<TRow>["currentMatch"];
-    hostProps: BaseDataTableProps<TRow>;
+    hostProps: ComposedTableProps<TRow>;
     // (undocumented)
     matchKeys: ReadonlySet<string>;
     onFind?: () => void;
@@ -642,7 +586,7 @@ export interface ChromeBodyData<TRow> {
 // @public
 export function ChromeBodyGate<TRow>(input: {
     readonly chrome: TableChrome<TRow>;
-    readonly props: BaseDataTableProps<TRow>;
+    readonly props: ComposedTableProps<TRow>;
     readonly children: (body: ChromeBodyData<TRow>) => ReactNode;
 }): ReactNode;
 
@@ -650,7 +594,7 @@ export function ChromeBodyGate<TRow>(input: {
 export interface ChromeBodySlotProps<TRow = never> {
     children: (body: ChromeBodyData<TRow>) => ReactNode;
     chrome: TableChrome<TRow>;
-    props: BaseDataTableProps<TRow>;
+    props: ComposedTableProps<TRow>;
 }
 
 // @public
@@ -664,7 +608,7 @@ export function ChromeExtrasGate<TRow>(input: {
 export interface ChromeExtraSlotProps<TRow = never> {
     children: (chrome: TableChrome<TRow>) => ReactNode;
     chrome: TableChrome<TRow>;
-    props: BaseDataTableProps<TRow> & {
+    props: ComposedTableProps<TRow> & {
         urlAdapter?: UrlStateAdapter;
         urlSync?: boolean;
         urlKey?: string;
@@ -1126,6 +1070,9 @@ export interface CommandPaletteSurfaceProps {
 export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolean): void;
 
 // @public
+export type ComposedTableProps<TRow> = BaseDataTableProps<TRow> & FeatureProps<TRow>;
+
+// @public
 export type ConfirmHandler = (request: ConfirmRequest) => void;
 
 // @public
@@ -1274,7 +1221,7 @@ export type DataModeProps<_TRow = unknown> = {
 };
 
 // @public
-export type DataTableShellProps<TRow> = Omit<BaseDataTableProps<TRow>, "source"> & {
+export type DataTableShellProps<TRow> = Omit<ComposedTableProps<TRow>, "source"> & {
     source?: TableSource<TRow>;
     data?: readonly TRow[];
     total?: number;
@@ -2170,6 +2117,66 @@ export interface FeaturePatch<TRow = unknown> {
 }
 
 // @public
+export interface FeatureProps<TRow> {
+    batchEditing?: boolean;
+    bulkActions?: BulkAction[];
+    cellNavigation?: boolean;
+    cellSpanAppearance?: CellSpanAppearance;
+    collapsibleColumnGroups?: boolean;
+    columnSelectionCheckbox?: boolean;
+    commandPalette?: boolean | CommandPaletteOptions;
+    confirmDeleteRow?: boolean;
+    contextMenu?: boolean | ContextMenuOptions<TRow>;
+    defaultExpandedRowIds?: readonly string[];
+    densityChooser?: boolean;
+    dirtyIndicators?: boolean;
+    editHistory?: boolean | {
+        depth?: number;
+    };
+    enableColumnMenu?: boolean;
+    exportCsv?: boolean | ExportCsvOptions<TRow>;
+    extraRows?: readonly ExtraRow[];
+    filters?: readonly FilterDef<TRow>[] | ReactNode;
+    filterTypes?: readonly FilterTypeSpec[];
+    findInTable?: boolean;
+    fitColumns?: boolean;
+    fullscreen?: boolean;
+    getCellSpan?: GetCellSpan<TRow>;
+    getChildren?: (row: TRow) => readonly TRow[] | undefined;
+    getParentId?: (row: TRow) => string | undefined;
+    groupBy?: string | readonly string[] | null;
+    headerFilters?: boolean;
+    multiSort?: boolean;
+    nestedTable?: NestedTableFor<TRow>;
+    onAddRow?: () => unknown;
+    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    onDeleteRow?: (row: TRow) => unknown;
+    onDuplicateRow?: (row: TRow) => unknown;
+    onLoadChildren?: (row: TRow) => void | Promise<void>;
+    onPinnedRowIdsChange?: (next: RowPinState) => void;
+    onPrint?: () => void;
+    onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    pinnedRowIds?: RowPinState;
+    printButton?: boolean;
+    renderRowDetail?: (row: TRow) => ReactNode;
+    resizableColumns?: boolean;
+    rowActions?: RowAction<TRow>[];
+    rowClassName?: (row: TRow, index: number) => string | undefined;
+    rowEditing?: boolean;
+    rowHeight?: RowHeight<TRow>;
+    rowStyle?: RowStyle<TRow>;
+    savedViews?: UseSavedViewsOptions;
+    selectionStats?: boolean;
+    sidePanel?: SidePanelOptions;
+    statusBar?: boolean;
+    treeColumn?: string;
+    undoRedoButtons?: boolean;
+    virtualize?: boolean;
+    virtualizeColumns?: boolean;
+}
+
+// @public
 export interface FeatureProviderContribution {
     readonly Provider: ComponentType<FeatureProviderProps>;
 }
@@ -2575,12 +2582,8 @@ export interface FilterTypeExtend {
 
 // @public
 export interface FilterTypeRegistry {
-    // @deprecated
-    extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry;
     get(type: string): FilterTypeSpec | undefined;
     has(type: string): boolean;
-    // @deprecated
-    register(spec: FilterTypeSpec): FilterTypeRegistry;
     types(): readonly string[];
 }
 
@@ -3713,6 +3716,11 @@ export interface RowMutationsState<TRow> {
     addRow: () => void;
     canAdd: boolean;
 }
+
+// @public
+export type RowOf<P> = P extends {
+    rowKey: (row: infer TRow) => string;
+} ? TRow : unknown;
 
 // @public
 export interface RowPairMeasurer {
@@ -5172,24 +5180,27 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         searchPlaceholder?: string | undefined;
-        savedViews?: UseSavedViewsOptions | undefined;
-        headerFilters?: boolean | undefined;
+        savedViews?: UseSavedViewsOptions;
+        headerFilters?: boolean;
         columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
-        sidePanel?: SidePanelOptions | undefined;
+        sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
-        commandPalette?: (boolean | CommandPaletteOptions) | undefined;
+        commandPalette?: boolean | CommandPaletteOptions;
         density?: "comfortable" | "compact" | undefined;
-        findInTable?: boolean | undefined;
+        findInTable?: boolean;
         dir?: Direction | undefined;
         labels?: TableLabels | undefined;
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
-        cellSpanAppearance?: CellSpanAppearance | undefined;
+        cellSpanAppearance?: CellSpanAppearance;
         locale?: string | undefined;
+        rowActions?: RowAction<TRow>[] | undefined;
+        confirm?: ConfirmHandler | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
         tableLabel?: string | undefined;
         sortByOptions?: SortByOption[] | undefined;
         renderCard?: MobileCardRenderer<TRow> | undefined;
@@ -5202,30 +5213,13 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
         onCellFill?: ((edits: CellEdit<TRow>[]) => void) | undefined;
-        selectionStats?: boolean | undefined;
-        editHistory?: boolean | {
-            depth?: number;
-        } | undefined;
-        rowClassName?: ((row: TRow, index: number) => string | undefined) | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
-        rowStyle?: RowStyle<TRow> | undefined;
-        rowHeight?: RowHeight<TRow> | undefined;
-        renderRowDetail?: ((row: TRow) => ReactNode) | undefined;
-        defaultExpandedRowIds?: readonly string[] | undefined;
-        nestedTable?: NestedTableFor<TRow> | undefined;
         validateRow?: RowValidator<TRow> | undefined;
         onEditRollback?: ((previous: TRow, columnKey: string) => void) | undefined;
         formatEditError?: ((error: unknown) => string) | undefined;
-        dirtyIndicators?: boolean | undefined;
-        rowEditing?: boolean | undefined;
-        onRowEdit?: ((row: TRow, patch: Readonly<Record<string, unknown>>) => unknown) | undefined;
-        batchEditing?: boolean | undefined;
-        onBatchEdit?: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
         onEditStart?: EditEventHandler<TRow> | undefined;
         onEditCancel?: EditEventHandler<TRow> | undefined;
         onEditCommit?: EditEventHandler<TRow> | undefined;
@@ -5234,24 +5228,11 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onEditConflict?: EditConflictHandler<TRow> | undefined;
         editConflictPolicy?: EditConflictPolicy | undefined;
         rowVersion?: ((row: TRow) => string | number) | undefined;
-        onAddRow?: (() => unknown) | undefined;
-        onDuplicateRow?: ((row: TRow) => unknown) | undefined;
-        onDeleteRow?: ((row: TRow) => unknown) | undefined;
-        pinnedRowIds?: RowPinState | undefined;
-        onPinnedRowIdsChange?: ((next: RowPinState) => void) | undefined;
-        getCellSpan?: GetCellSpan<TRow> | undefined;
-        extraRows?: readonly ExtraRow[] | undefined;
-        confirmDeleteRow?: boolean | undefined;
         applyEdit?: ((row: TRow, columnKey: string, value: unknown) => TRow) | undefined;
         tableFooter?: ReactNode;
-        getChildren?: ((row: TRow) => readonly TRow[] | undefined) | undefined;
-        getParentId?: ((row: TRow) => string | undefined) | undefined;
         hasChildren?: ((row: TRow) => boolean) | undefined;
-        treeColumn?: string | undefined;
-        onLoadChildren?: ((row: TRow) => void | Promise<void>) | undefined;
         expandedIds?: readonly string[] | undefined;
         onExpandedIdsChange?: ((ids: string[]) => void) | undefined;
-        groupBy?: (string | readonly string[] | null) | undefined;
         onGroupByChange?: ((groupBy: readonly string[]) => void) | undefined;
         groupFooters?: boolean | undefined;
         groupSort?: GroupSort<TRow> | undefined;
@@ -5262,50 +5243,77 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         collapsedGroupIds?: readonly string[] | undefined;
         onCollapsedGroupIdsChange?: ((ids: string[]) => void) | undefined;
         searchable?: boolean | undefined;
-        multiSort?: boolean | undefined;
-        enableColumnMenu?: boolean | undefined;
-        resizableColumns?: boolean | undefined;
         columnLayout?: ColumnLayoutState | undefined;
         onColumnLayoutChange?: ((next: ColumnLayoutState) => void) | undefined;
         defaultColumnLayout?: Partial<ColumnLayoutState> | undefined;
-        collapsibleColumnGroups?: boolean | undefined;
         maxHeight?: number | undefined;
-        virtualize?: boolean | undefined;
-        virtualizeColumns?: boolean | undefined;
-        fitColumns?: boolean | undefined;
         estimateRowSize?: number | undefined;
         estimateCardSize?: number | undefined;
         virtualOverscan?: number | undefined;
         virtualScrollMargin?: number | undefined;
-        filterTypes?: readonly FilterTypeSpec[] | undefined;
         filtersMode?: "popover" | "drawer" | "header" | undefined;
         extraChips?: readonly ActiveFilterChip[] | undefined;
         activeFilterCount?: number | undefined;
         onClearFilters?: (() => void) | undefined;
         closeHeaderFilterOnSelect?: boolean | undefined;
         filterFields?: boolean | undefined;
-        bulkActions?: BulkAction[] | undefined;
         selectionGetId?: ((row: TRow) => string) | undefined;
         selectedIds?: readonly string[] | undefined;
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
-        cellNavigation?: boolean | undefined;
-        columnSelectionCheckbox?: boolean | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
-        densityChooser?: boolean | undefined;
         onDensityChange?: ((next: "comfortable" | "compact") => void) | undefined;
-        fullscreen?: boolean | undefined;
-        onPrint?: (() => void) | undefined;
-        statusBar?: boolean | undefined;
-        undoRedoButtons?: boolean | undefined;
-        printButton?: boolean | undefined;
-        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
         stickyToolbar?: boolean | undefined;
         scrollToTopOnChange?: boolean | undefined;
         scrollTopGap?: number | undefined;
+        selectionStats?: boolean;
+        editHistory?: boolean | {
+            depth?: number;
+        };
+        rowClassName?: ((row: TRow, index: number) => string | undefined) | undefined;
+        rowStyle?: RowStyle<TRow> | undefined;
+        rowHeight?: RowHeight<TRow> | undefined;
+        renderRowDetail?: ((row: TRow) => ReactNode) | undefined;
+        defaultExpandedRowIds?: readonly string[];
+        nestedTable?: NestedTableFor<TRow> | undefined;
+        dirtyIndicators?: boolean;
+        rowEditing?: boolean;
+        onRowEdit?: ((row: TRow, patch: Readonly<Record<string, unknown>>) => unknown) | undefined;
+        batchEditing?: boolean;
+        onBatchEdit?: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
+        onAddRow?: () => unknown;
+        onDuplicateRow?: ((row: TRow) => unknown) | undefined;
+        onDeleteRow?: ((row: TRow) => unknown) | undefined;
+        pinnedRowIds?: RowPinState;
+        onPinnedRowIdsChange?: (next: RowPinState) => void;
+        getCellSpan?: GetCellSpan<TRow> | undefined;
+        extraRows?: readonly ExtraRow[];
+        confirmDeleteRow?: boolean;
+        getChildren?: ((row: TRow) => readonly TRow[] | undefined) | undefined;
+        getParentId?: ((row: TRow) => string | undefined) | undefined;
+        treeColumn?: string;
+        onLoadChildren?: ((row: TRow) => void | Promise<void>) | undefined;
+        groupBy?: string | readonly string[] | null;
+        multiSort?: boolean;
+        enableColumnMenu?: boolean;
+        resizableColumns?: boolean;
+        collapsibleColumnGroups?: boolean;
+        virtualize?: boolean;
+        virtualizeColumns?: boolean;
+        fitColumns?: boolean;
+        filterTypes?: readonly FilterTypeSpec[];
+        bulkActions?: BulkAction[];
+        cellNavigation?: boolean;
+        columnSelectionCheckbox?: boolean;
+        densityChooser?: boolean;
+        fullscreen?: boolean;
+        onPrint?: () => void;
+        statusBar?: boolean;
+        undoRedoButtons?: boolean;
+        printButton?: boolean;
         data?: readonly TRow[] | undefined;
         total?: number;
         loading?: boolean;
@@ -5329,24 +5337,27 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         searchPlaceholder?: string | undefined;
-        savedViews?: UseSavedViewsOptions | undefined;
-        headerFilters?: boolean | undefined;
+        savedViews?: UseSavedViewsOptions;
+        headerFilters?: boolean;
         columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
-        sidePanel?: SidePanelOptions | undefined;
+        sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
-        commandPalette?: (boolean | CommandPaletteOptions) | undefined;
+        commandPalette?: boolean | CommandPaletteOptions;
         density?: "comfortable" | "compact" | undefined;
-        findInTable?: boolean | undefined;
+        findInTable?: boolean;
         dir?: Direction | undefined;
         labels?: TableLabels | undefined;
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
-        cellSpanAppearance?: CellSpanAppearance | undefined;
+        cellSpanAppearance?: CellSpanAppearance;
         locale?: string | undefined;
+        rowActions?: RowAction<TRow>[] | undefined;
+        confirm?: ConfirmHandler | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
         tableLabel?: string | undefined;
         sortByOptions?: SortByOption[] | undefined;
         renderCard?: MobileCardRenderer<TRow> | undefined;
@@ -5359,30 +5370,13 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
         onCellFill?: ((edits: CellEdit<TRow>[]) => void) | undefined;
-        selectionStats?: boolean | undefined;
-        editHistory?: boolean | {
-            depth?: number;
-        } | undefined;
-        rowClassName?: ((row: TRow, index: number) => string | undefined) | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
-        rowStyle?: RowStyle<TRow> | undefined;
-        rowHeight?: RowHeight<TRow> | undefined;
-        renderRowDetail?: ((row: TRow) => ReactNode) | undefined;
-        defaultExpandedRowIds?: readonly string[] | undefined;
-        nestedTable?: NestedTableFor<TRow> | undefined;
         validateRow?: RowValidator<TRow> | undefined;
         onEditRollback?: ((previous: TRow, columnKey: string) => void) | undefined;
         formatEditError?: ((error: unknown) => string) | undefined;
-        dirtyIndicators?: boolean | undefined;
-        rowEditing?: boolean | undefined;
-        onRowEdit?: ((row: TRow, patch: Readonly<Record<string, unknown>>) => unknown) | undefined;
-        batchEditing?: boolean | undefined;
-        onBatchEdit?: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
         onEditStart?: EditEventHandler<TRow> | undefined;
         onEditCancel?: EditEventHandler<TRow> | undefined;
         onEditCommit?: EditEventHandler<TRow> | undefined;
@@ -5391,24 +5385,11 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onEditConflict?: EditConflictHandler<TRow> | undefined;
         editConflictPolicy?: EditConflictPolicy | undefined;
         rowVersion?: ((row: TRow) => string | number) | undefined;
-        onAddRow?: (() => unknown) | undefined;
-        onDuplicateRow?: ((row: TRow) => unknown) | undefined;
-        onDeleteRow?: ((row: TRow) => unknown) | undefined;
-        pinnedRowIds?: RowPinState | undefined;
-        onPinnedRowIdsChange?: ((next: RowPinState) => void) | undefined;
-        getCellSpan?: GetCellSpan<TRow> | undefined;
-        extraRows?: readonly ExtraRow[] | undefined;
-        confirmDeleteRow?: boolean | undefined;
         applyEdit?: ((row: TRow, columnKey: string, value: unknown) => TRow) | undefined;
         tableFooter?: ReactNode;
-        getChildren?: ((row: TRow) => readonly TRow[] | undefined) | undefined;
-        getParentId?: ((row: TRow) => string | undefined) | undefined;
         hasChildren?: ((row: TRow) => boolean) | undefined;
-        treeColumn?: string | undefined;
-        onLoadChildren?: ((row: TRow) => void | Promise<void>) | undefined;
         expandedIds?: readonly string[] | undefined;
         onExpandedIdsChange?: ((ids: string[]) => void) | undefined;
-        groupBy?: (string | readonly string[] | null) | undefined;
         onGroupByChange?: ((groupBy: readonly string[]) => void) | undefined;
         groupFooters?: boolean | undefined;
         groupSort?: GroupSort<TRow> | undefined;
@@ -5419,50 +5400,77 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         collapsedGroupIds?: readonly string[] | undefined;
         onCollapsedGroupIdsChange?: ((ids: string[]) => void) | undefined;
         searchable?: boolean | undefined;
-        multiSort?: boolean | undefined;
-        enableColumnMenu?: boolean | undefined;
-        resizableColumns?: boolean | undefined;
         columnLayout?: ColumnLayoutState | undefined;
         onColumnLayoutChange?: ((next: ColumnLayoutState) => void) | undefined;
         defaultColumnLayout?: Partial<ColumnLayoutState> | undefined;
-        collapsibleColumnGroups?: boolean | undefined;
         maxHeight?: number | undefined;
-        virtualize?: boolean | undefined;
-        virtualizeColumns?: boolean | undefined;
-        fitColumns?: boolean | undefined;
         estimateRowSize?: number | undefined;
         estimateCardSize?: number | undefined;
         virtualOverscan?: number | undefined;
         virtualScrollMargin?: number | undefined;
-        filterTypes?: readonly FilterTypeSpec[] | undefined;
         filtersMode?: "popover" | "drawer" | "header" | undefined;
         extraChips?: readonly ActiveFilterChip[] | undefined;
         activeFilterCount?: number | undefined;
         onClearFilters?: (() => void) | undefined;
         closeHeaderFilterOnSelect?: boolean | undefined;
         filterFields?: boolean | undefined;
-        bulkActions?: BulkAction[] | undefined;
         selectionGetId?: ((row: TRow) => string) | undefined;
         selectedIds?: readonly string[] | undefined;
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
-        cellNavigation?: boolean | undefined;
-        columnSelectionCheckbox?: boolean | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
-        densityChooser?: boolean | undefined;
         onDensityChange?: ((next: "comfortable" | "compact") => void) | undefined;
-        fullscreen?: boolean | undefined;
-        onPrint?: (() => void) | undefined;
-        statusBar?: boolean | undefined;
-        undoRedoButtons?: boolean | undefined;
-        printButton?: boolean | undefined;
-        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
         stickyToolbar?: boolean | undefined;
         scrollToTopOnChange?: boolean | undefined;
         scrollTopGap?: number | undefined;
+        selectionStats?: boolean;
+        editHistory?: boolean | {
+            depth?: number;
+        };
+        rowClassName?: ((row: TRow, index: number) => string | undefined) | undefined;
+        rowStyle?: RowStyle<TRow> | undefined;
+        rowHeight?: RowHeight<TRow> | undefined;
+        renderRowDetail?: ((row: TRow) => ReactNode) | undefined;
+        defaultExpandedRowIds?: readonly string[];
+        nestedTable?: NestedTableFor<TRow> | undefined;
+        dirtyIndicators?: boolean;
+        rowEditing?: boolean;
+        onRowEdit?: ((row: TRow, patch: Readonly<Record<string, unknown>>) => unknown) | undefined;
+        batchEditing?: boolean;
+        onBatchEdit?: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
+        onAddRow?: () => unknown;
+        onDuplicateRow?: ((row: TRow) => unknown) | undefined;
+        onDeleteRow?: ((row: TRow) => unknown) | undefined;
+        pinnedRowIds?: RowPinState;
+        onPinnedRowIdsChange?: (next: RowPinState) => void;
+        getCellSpan?: GetCellSpan<TRow> | undefined;
+        extraRows?: readonly ExtraRow[];
+        confirmDeleteRow?: boolean;
+        getChildren?: ((row: TRow) => readonly TRow[] | undefined) | undefined;
+        getParentId?: ((row: TRow) => string | undefined) | undefined;
+        treeColumn?: string;
+        onLoadChildren?: ((row: TRow) => void | Promise<void>) | undefined;
+        groupBy?: string | readonly string[] | null;
+        multiSort?: boolean;
+        enableColumnMenu?: boolean;
+        resizableColumns?: boolean;
+        collapsibleColumnGroups?: boolean;
+        virtualize?: boolean;
+        virtualizeColumns?: boolean;
+        fitColumns?: boolean;
+        filterTypes?: readonly FilterTypeSpec[];
+        bulkActions?: BulkAction[];
+        cellNavigation?: boolean;
+        columnSelectionCheckbox?: boolean;
+        densityChooser?: boolean;
+        fullscreen?: boolean;
+        onPrint?: () => void;
+        statusBar?: boolean;
+        undoRedoButtons?: boolean;
+        printButton?: boolean;
         data?: readonly TRow[] | undefined;
         total?: number;
         loading?: boolean;
@@ -5740,7 +5748,7 @@ export function useSummaryCells<TRow>(summaryRow: ((rows: readonly TRow[]) => Pa
 export function useTableContextMenu<TRow>(options: TableContextMenuOptions<TRow>): TableContextMenu;
 
 // @public
-export function useTableFeatures<P extends object>(incoming: P): P;
+export function useTableFeatures<P extends object>(incoming: P): P & FeatureProps<RowOf<P>>;
 
 // @public
 export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow>;

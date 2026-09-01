@@ -480,6 +480,8 @@ describe("MUI coverage gaps", () => {
 describe("MUI density → table size", () => {
   // MUI threads the table `size` down to every cell as a `MuiTableCell-size*`
   // modifier class, which is the stable signal for the rendered density.
+  // `density` is the only input: v3 removed the `size` prop that used to
+  // override it, so these three cover the whole mapping.
   it("maps density='compact' to the small MUI table", () => {
     const { container } = mount({ density: "compact" });
     const cell = container.querySelector("tbody td");
@@ -496,15 +498,6 @@ describe("MUI density → table size", () => {
 
   it("defaults to the medium MUI table when density is omitted", () => {
     const { container } = mount();
-    const cell = container.querySelector("tbody td");
-    expect(cell).toHaveClass("MuiTableCell-sizeMedium");
-    expect(cell).not.toHaveClass("MuiTableCell-sizeSmall");
-  });
-
-  it("lets an explicit size prop win over density (back-compat)", () => {
-    // Pre-density callers passed MUI's `size` directly; it must still take
-    // precedence so upgrading does not change their rendered table.
-    const { container } = mount({ size: "medium", density: "compact" });
     const cell = container.querySelector("tbody td");
     expect(cell).toHaveClass("MuiTableCell-sizeMedium");
     expect(cell).not.toHaveClass("MuiTableCell-sizeSmall");

@@ -1,4 +1,5 @@
 import { type ColumnDef, DataTable } from "@adapttable/chakra";
+import { bulkActions } from "@adapttable/chakra/bulk-actions";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 
 interface Invoice {
@@ -34,26 +35,28 @@ export function ChakraSelectionExample() {
         data={INVOICES}
         columns={columns}
         rowKey={(r) => r.id}
-        accentColor="teal"
-        bulkActions={[
-          {
-            key: "remind",
-            label: "Send reminder",
-            onClick: (ids) => alert(`Reminding ${ids.length}`),
-          },
-          {
-            key: "delete",
-            label: "Delete",
-            color: "red",
-            confirm: {
-              title: "Delete invoices?",
-              message: (count) => `Permanently delete ${count} invoice(s)?`,
-              confirmLabel: "Delete",
-              danger: true,
+        features={[
+          bulkActions([
+            {
+              key: "remind",
+              label: "Send reminder",
+              onClick: (ids) => alert(`Reminding ${ids.length}`),
             },
-            onClick: (ids) => alert(`Deleted ${ids.join(", ")}`),
-          },
+            {
+              key: "delete",
+              label: "Delete",
+              color: "red",
+              confirm: {
+                title: "Delete invoices?",
+                message: (count) => `Permanently delete ${count} invoice(s)?`,
+                confirmLabel: "Delete",
+                danger: true,
+              },
+              onClick: (ids) => alert(`Deleted ${ids.join(", ")}`),
+            },
+          ]),
         ]}
+        accentColor="teal"
       />
     </ChakraProvider>
   );

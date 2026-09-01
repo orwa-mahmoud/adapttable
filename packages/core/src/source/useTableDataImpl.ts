@@ -35,12 +35,6 @@ const EMPTY_REGISTRY: FilterTypeRegistry = {
   get: () => undefined,
   has: () => false,
   types: () => [],
-  register() {
-    return EMPTY_REGISTRY;
-  },
-  extend() {
-    return EMPTY_REGISTRY;
-  },
 };
 
 const EMPTY_RUNTIME: FilterRuntime<never> = {

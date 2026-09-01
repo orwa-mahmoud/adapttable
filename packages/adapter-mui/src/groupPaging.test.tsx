@@ -33,7 +33,7 @@ describe("group paging (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         features={[
-          grouping<Row>("team", {
+          grouping("team", {
             groupPageSize: extra?.groupPageSize as number | undefined,
             groupRowPageSize: extra?.groupRowPageSize as number | undefined,
           }),

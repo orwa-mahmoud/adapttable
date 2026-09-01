@@ -208,7 +208,7 @@ describe("useVirtualChromeBodyData with row grouping", () => {
     } as unknown as ReturnType<typeof useWindowVirtualizer>);
 
     const adapter = createMemoryAdapter("");
-    const { result } = renderLiveBody([grouping<Row>("team")], () => {
+    const { result } = renderLiveBody([grouping("team")], () => {
       const source = useFrontendData<Row>({
         data: groupedRows,
         columns: groupCols,
@@ -374,7 +374,7 @@ describe("useVirtualChromeBodyData rowHeight estimate", () => {
       { key: "team", accessor: () => "A" },
     ];
     const adapter = createMemoryAdapter("");
-    renderLiveBody([grouping<Row>("team")], () => {
+    renderLiveBody([grouping("team")], () => {
       const source = useFrontendData<Row>({
         data: groupedRows,
         columns: groupCols,

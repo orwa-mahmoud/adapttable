@@ -318,8 +318,8 @@ function ServerScaleTable({
         labels={getLabels("en")}
         urlSync={false}
         searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
-        // The window is what this page exists to show, so it is imported:
-        // the props beside it only tune what the feature already brought.
+        // The window is what this page exists to show, so it is imported —
+        // and the import carries its own configuration.
         features={[
           ...(virtual
             ? [
@@ -333,10 +333,6 @@ function ServerScaleTable({
             ? [rowAppearance<BigPerson>({ rowHeight: variableRowHeight })]
             : []),
         ]}
-        virtualize={virtual}
-        virtualizeColumns={virtualCols}
-        estimateRowSize={48}
-        rowHeight={variableHeight ? variableRowHeight : undefined}
         classNames={kitClassNames(kit)}
         stickyHeader
         stickyTop={navHeight}
@@ -567,18 +563,11 @@ function FrontendScaleTable({
               : []),
             ...(edit ? [editing_<BigPerson>(onScaleCellEdit)] : []),
           ]}
-          virtualize={virtual}
-          virtualizeColumns={virtualCols}
-          getParentId={treeShape?.getParentId}
-          expandedIds={treeShape?.expandedIds}
-          estimateRowSize={48}
-          rowHeight={variableHeight ? variableRowHeight : undefined}
           classNames={kitClassNames(kit)}
           // Page-scroll window mode with a pinned header: the page itself
           // scrolls the 50k rows while the header sticks under the app nav.
           stickyHeader
           stickyTop={navHeight}
-          onCellEdit={edit ? onScaleCellEdit : undefined}
         />
       </div>
     </KitProvider>

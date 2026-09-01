@@ -3,7 +3,7 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef, DataTableProps } from "./index";
+import type { ColumnDef } from "./index";
 import { DataTable } from "./testDataTable";
 
 interface Person {
@@ -37,14 +37,14 @@ const GROUPED: ColumnDef<Person>[] = [
 ];
 
 /** Everything that enables the leading/trailing edge columns at once. */
-const EDGES: Partial<Omit<DataTableProps<Person>, "mode">> = {
+const EDGES: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {
   bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   renderRowDetail: (row) => <div>Detail {row.id}</div>,
 };
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <ChakraProvider value={defaultSystem}>

@@ -4,12 +4,17 @@
 
 ```ts
 
-import { grouping as grouping_2 } from '@adapttable/core/features';
+import { GroupingExtras } from '@adapttable/core/features';
 import { GroupSort } from '@adapttable/core/features';
+import { StaticGroupingExtras } from '@adapttable/core/features';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 import { TableFeature } from '@adapttable/core/adapter';
 
 // @public (undocumented)
-export function grouping<TRow>(groupBy: string | readonly string[], extras?: Parameters<typeof grouping_2<TRow>>[1]): TableFeature<TRow>;
+export function grouping(groupBy: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature;
+
+// @public (undocumented)
+export function grouping<TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
 
 export { GroupSort }
 

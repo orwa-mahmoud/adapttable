@@ -36,7 +36,6 @@ import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
 import { entrypoints } from "./api-entrypoints.mjs";
 import {
-  aliasNames,
   classifyForgottenExport,
   entryExports,
   summarize,
@@ -59,14 +58,6 @@ if (!LOCAL && existsSync(ETC)) {
   }
 }
 
-/** Every deprecated main-entry alias, read from the module that declares them. */
-const ALIASES = aliasNames(
-  readFileSync(
-    join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
-    "utf8"
-  )
-);
-
 /**
  * One tally per warning class, so the closing line can name every one.
  *
@@ -74,7 +65,6 @@ const ALIASES = aliasNames(
  * holding some, which is the failure mode this replaced.
  */
 const counts = {
-  alias: 0,
   published: 0,
   subpath: 0,
   frontDoor: 0,
@@ -189,16 +179,8 @@ function extractOne({ dir, report, entry, isMainEntry }) {
         symbol: named?.[1] ?? "",
         report,
         isMainEntry,
-        aliases: ALIASES,
         exports: entryExported,
       });
-      if (kind === "alias") {
-        // Named in full so a deferral can be audited from the log alone.
-        counts.alias += 1;
-        message.logLevel = "none";
-        message.text += ` — deferred: ${base} is a deprecated main-entry alias and ${suffix} is the bundler's copy of it`;
-        return;
-      }
       if (kind === "published") {
         counts.published += 1;
         message.logLevel = "none";

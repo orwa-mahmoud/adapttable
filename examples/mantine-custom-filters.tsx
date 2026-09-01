@@ -6,6 +6,7 @@ import {
   type ExtraFilters,
   useFrontendData,
 } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 import { Checkbox, MantineProvider, Stack } from "@mantine/core";
 
 interface Invoice {
@@ -61,21 +62,23 @@ export function MantineCustomFiltersExample() {
         source={source}
         columns={columns}
         rowKey={(r) => r.id}
+        features={[
+          filters(
+            <Checkbox.Group
+              label="Status"
+              value={selected}
+              onChange={(value) => source.setExtra("status", value)}
+            >
+              <Stack gap="xs" mt="xs">
+                {STATUSES.map((s) => (
+                  <Checkbox key={s} value={s} label={s} />
+                ))}
+              </Stack>
+            </Checkbox.Group>
+          ),
+        ]}
         filterLabels={{ status: (value) => `Status: ${value}` }}
         onClearFilters={() => source.setExtra("status", undefined)}
-        filters={
-          <Checkbox.Group
-            label="Status"
-            value={selected}
-            onChange={(value) => source.setExtra("status", value)}
-          >
-            <Stack gap="xs" mt="xs">
-              {STATUSES.map((s) => (
-                <Checkbox key={s} value={s} label={s} />
-              ))}
-            </Stack>
-          </Checkbox.Group>
-        }
       />
     </MantineProvider>
   );

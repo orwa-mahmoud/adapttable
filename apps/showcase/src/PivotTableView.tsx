@@ -1,8 +1,9 @@
 import { sidePanel as antdSidePanel } from "@adapttable/antd/side-panel";
 import { sidePanel as baseUiSidePanel } from "@adapttable/base-ui/side-panel";
 import { sidePanel as chakraSidePanel } from "@adapttable/chakra/side-panel";
-import type { TableFeature } from "@adapttable/core";
+import type { FeatureProps, TableFeature } from "@adapttable/core";
 import type { SidePanelOptions } from "@adapttable/core";
+import { rowAppearance } from "@adapttable/core/features";
 import {
   pivot,
   type PivotConfig,
@@ -11,7 +12,7 @@ import {
   pivotTableModel,
 } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
-import type { DataTableProps } from "@adapttable/mantine";
+import type {} from "@adapttable/mantine";
 import { sidePanel as mantineSidePanel } from "@adapttable/mantine/side-panel";
 import { sidePanel as muiSidePanel } from "@adapttable/mui/side-panel";
 import { sidePanel as radixSidePanel } from "@adapttable/radix/side-panel";
@@ -81,7 +82,7 @@ export interface PivotTableViewProps<TRow> {
   /** Fold or unfold one subtotal group. */
   onToggleFold: (key: string) => void;
   /** A panel docked beside the table — the Feature Lab docks the pivot builder. */
-  sidePanel?: NonNullable<DataTableProps<PivotRow>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<PivotRow>["sidePanel"]>;
 }
 
 /**
@@ -189,6 +190,9 @@ export function PivotTableView<TRow>({
           // it — and a panel is drawn by the kit, which means importing the
           // kit's own feature rather than passing a prop.
           features={[
+            rowAppearance<PivotRow>({
+              rowClassName: (row) => `pivot-line pivot-line--${row.kind}`,
+            }),
             RANGE_FEATURE,
             ...(sidePanel ? [kitSidePanel<PivotRow>(kit, sidePanel)] : []),
           ]}
@@ -196,7 +200,6 @@ export function PivotTableView<TRow>({
           columns={model.columns}
           rowKey={model.rowKey}
           summaryRow={model.summaryRow}
-          rowClassName={(row) => `pivot-line pivot-line--${row.kind}`}
           labels={labels}
           classNames={kitClassNames(kit)}
           // Only the live demo writes the address bar. This table must not
@@ -210,7 +213,6 @@ export function PivotTableView<TRow>({
           defaults={{ limit: 500 }}
           paginationMode="paged"
           stickyHeader
-          sidePanel={sidePanel}
         />
       </Suspense>
     </div>

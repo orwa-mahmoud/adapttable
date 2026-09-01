@@ -322,6 +322,8 @@ export {
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export type {
   BaseDataTableProps,
+  ComposedTableProps,
+  FeatureProps,
   SidePanelOptions,
   ToolbarSlots,
 } from "./props";
@@ -380,10 +382,7 @@ export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { getPath } from "./utils/path";
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
-export {
-  useChromeBodyData,
-  useVirtualChromeBodyData,
-} from "./virtual/useVirtualChromeBodyData";
+export { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
 
 /* ── Labels ────────────────────────────────────────────────────────── */
 export { defaultLabels, resolveLabels } from "./labels";
@@ -599,6 +598,19 @@ export {
   windowGroupedEntries,
 } from "./virtual/virtualTableModel";
 
+/* ── Types a main-entry signature names ────────────────────────────── */
+
+/**
+ * Three shapes the front door's own signatures hand back.
+ *
+ * v3 moved the adapter machinery to `@adapttable/core/adapter`; these stayed
+ * because a value this entry exports returns one of them, and a return type a
+ * caller cannot name is a signature they cannot write down.
+ */
+export type { EditableCellSlots } from "./editing/EditableCellGate";
+export type { ExtraEntry } from "./rows/extraRows";
+export type { RowReorderState } from "./rows/rowReorder";
+
 /* ── Utils ─────────────────────────────────────────────────────────── */
 export { mergeProps, type Props } from "./utils/mergeProps";
 export { stableKey } from "./utils/stableKey";
@@ -606,6 +618,7 @@ export { stableKey } from "./utils/stableKey";
 /* ── Rows ──────────────────────────────────────────────────────────── */
 
 export {
+  type BodyCell,
   buildBodyCells,
   type CellSpanAppearance,
   type CellSpanRequest,
@@ -914,10 +927,6 @@ export {
   resolveExportColumns,
   resolveExportCsv,
 } from "./export/tableCsv";
-
-/* ── Adapter machinery (deprecated on the main entry; gone at v3) ──── */
-export * from "./mainEntryAliases";
-
 /* ── Types the entry's own signatures hand back ────────────────────────
  * A caller of `@adapttable/core` receives these from exported functions, so
  * they have to be nameable from the same door. Value exports keep their

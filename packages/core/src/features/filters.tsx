@@ -22,7 +22,7 @@ import {
   slotRender,
 } from "./providers";
 import { type ChromeExtraSlotProps, FILTER_CHIPS_LIVE } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function FiltersEngineProvider({
   children,
@@ -66,12 +66,20 @@ function LiveFilterChips({
 }
 
 /**
- * Add the filter panel for the given definitions.
+ * Add the filter panel.
+ *
+ * Declarative definitions describe rows, so that form is row-aware and takes
+ * its row from the defs. A hand-built form is just JSX and says nothing about
+ * rows, so that form composes into any table.
  *
  * @public
  */
+export function filters(form: ReactNode): StaticTableFeature;
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
+): TableFeature<TRow>;
+export function filters<TRow>(
+  defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
   return {
     id: "filters",

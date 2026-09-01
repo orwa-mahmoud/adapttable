@@ -82,19 +82,20 @@ describe("register / extend", () => {
     expect(next.get("text")?.widget).toBe("text");
   });
 
-  it("deprecated register/extend still delegate to the helpers", () => {
-    const live = defaultFilterRegistry as unknown as {
-      register(spec: FilterTypeSpec): typeof defaultFilterRegistry;
-      extend(
-        type: string,
-        patch: Partial<FilterTypeSpec>
-      ): typeof defaultFilterRegistry;
-    };
-    const added = live.register(SKU);
+  it("registers through the host, and the registry it read stays untouched", () => {
+    // A registry is immutable: `registerFilterType` builds the next one, so a
+    // render that already read the current registry cannot see a type appear
+    // underneath it.
+    const added = withFilterType(defaultFilterRegistry, SKU);
     expect(added.has("sku")).toBe(true);
     expect(defaultFilterRegistry.has("sku")).toBe(false);
-    const patched = live.extend("text", { defaultOp: "contains" });
-    expect(filterTypeDefaultOp({ type: "text" }, patched)).toBe("contains");
+    const patched = withExtendedFilterType(defaultFilterRegistry, "text", {
+      defaultOp: "eq",
+    });
+    expect(filterTypeDefaultOp({ type: "text" }, patched)).toBe("eq");
+    expect(
+      filterTypeDefaultOp({ type: "text" }, defaultFilterRegistry)
+    ).not.toBe("eq");
   });
 
   it("extend of an unknown type warns and returns the same registry", () => {

@@ -5,8 +5,6 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
-  ALIAS_REPORT,
-  aliasNames,
   classifyForgottenExport,
   summarize,
   VALUE_BACKED,
@@ -20,79 +18,38 @@ const CORE_SRC = join(
   "src"
 );
 
-const ALIASES = aliasNames(
-  [
-    "export const pinnedRowPart = pinnedRowPartImpl;",
-    "export type EditableCellSlots = EditableCellSlotsType;",
-    "  export const notAtColumnZero = nope;",
-  ].join("\n")
-);
-
 /** Every field the classifier reads, with the safe defaults a test overrides. */
 const classify = (over) =>
   classifyForgottenExport({
     symbol: "Whatever",
     report: "core-features.api.md",
     isMainEntry: false,
-    aliases: ALIASES,
     exports: new Set(),
     ...over,
   });
 
-describe("aliasNames", () => {
-  it("reads the const and type aliases the module re-exports", () => {
-    assert.ok(ALIASES.has("pinnedRowPart"));
-    assert.ok(ALIASES.has("EditableCellSlots"));
-  });
-
-  it("ignores an export that is not at column zero", () => {
-    assert.ok(!ALIASES.has("notAtColumnZero"));
-  });
-});
-
-describe("the alias class", () => {
-  it("defers an alias artifact in the report the aliases roll into", () => {
-    const verdict = classify({
-      symbol: "pinnedRowPart$1",
-      report: ALIAS_REPORT,
-    });
-    assert.deepEqual(verdict, {
-      kind: "alias",
-      base: "pinnedRowPart",
-      suffix: "$1",
-    });
-  });
-
-  it("takes the underscore suffix the same way", () => {
+/**
+ * v3 removed the main-entry aliases, and with them the class that deferred
+ * the bundler's copies of them. A suffixed symbol in `core.api.md` is now a
+ * finding like any other — which is the point: the deferral existed only
+ * because two copies of one binding were in the rollup.
+ */
+describe("the alias deferral is gone", () => {
+  it("treats a suffixed symbol in the main report as a finding", () => {
     assert.equal(
-      classify({ symbol: "EditableCellSlots_2", report: ALIAS_REPORT }).kind,
-      "alias"
-    );
-  });
-
-  // The evidence is the whole point: an alias name reported from a report the
-  // aliases do not roll into is a real finding wearing a familiar name.
-  it("does NOT defer a known alias reported from the wrong report", () => {
-    assert.equal(
-      classify({ symbol: "pinnedRowPart$1", report: "core-pivot.api.md" }).kind,
+      classify({ symbol: "pinnedRowPart$1", report: "core.api.md" }).kind,
       "subpath"
     );
   });
 
-  it("does NOT defer an alias name with no bundler suffix", () => {
-    assert.equal(
-      classify({ symbol: "pinnedRowPart", report: ALIAS_REPORT }).kind,
-      "subpath"
-    );
-  });
-
-  it("does NOT defer an unrelated symbol that merely ends in a suffix", () => {
+  it("still calls it a front-door finding on the main entry", () => {
     assert.equal(
       classify({
-        symbol: "UseServerDataOptions$1",
-        report: ALIAS_REPORT,
+        symbol: "pinnedRowPart$1",
+        report: "core.api.md",
+        isMainEntry: true,
       }).kind,
-      "subpath"
+      "front-door"
     );
   });
 });
@@ -169,7 +126,6 @@ describe("summarize", () => {
   it("names every class that occurred, with its count", () => {
     assert.equal(
       summarize({
-        alias: 61,
         published: 1,
         subpath: 149,
         frontDoor: 0,
@@ -177,7 +133,7 @@ describe("summarize", () => {
         missingReleaseTag: 0,
         other: 0,
       }),
-      "api-reports: 61 deprecated-alias artifact(s), 1 published-name copy(s), " +
+      "api-reports: 1 published-name copy(s), " +
         "149 on a subpath entry, 27 unresolved @link(s)."
     );
   });

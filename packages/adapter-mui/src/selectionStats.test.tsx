@@ -62,17 +62,16 @@ describe("selection statistics (mui)", () => {
   });
 
   it("renders nothing without the feature", () => {
-    // The shipped component, not the harness: the harness composes features
-    // from props, which is exactly what this test must not have happen.
+    // The shipped component, not the harness: the harness turns v2 props into
+    // features, which is exactly what this test must not have happen. v3
+    // removed those props, so there is no second way in to pass either.
     render(
       <BareDataTable
         data={ROWS}
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        cellNavigation
         locale="en-US"
-        selectionStats
         features={[cellNavigation()]}
       />
     );

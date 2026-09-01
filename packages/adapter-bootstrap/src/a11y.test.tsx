@@ -1,10 +1,13 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { rowActions } from "@adapttable/core/features";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
+import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
 import { editing } from "./editing";
+import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
 
@@ -70,7 +73,11 @@ describe("accessibility (axe)", () => {
 
   it("a table with row actions has no violations", async () => {
     const { container } = renderTable({
-      rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
+      features: [
+        rowActions<Row>([
+          { key: "e", label: "Edit", onClick: () => undefined },
+        ]),
+      ],
     });
     expect(await axe(container, axeOpts)).toHaveNoViolations();
   });
@@ -84,12 +91,12 @@ describe("real render branches", () => {
     document.querySelector('[data-adapttable-part="column-menu-button"]');
 
   it("renders the Columns menu on desktop and hides it on a phone", () => {
-    const { unmount } = renderTable({ enableColumnMenu: true });
+    const { unmount } = renderTable({ features: [columnMenu()] });
     expect(columnMenuButton()).not.toBeNull();
     unmount();
 
     // Bootstrap keeps its table on a phone — the menu is what it drops.
-    renderTable({ enableColumnMenu: true, forceMobile: true });
+    renderTable({ features: [columnMenu()], forceMobile: true });
     expect(columnMenuButton()).toBeNull();
   });
 
@@ -129,7 +136,7 @@ describe("real render branches", () => {
   });
 
   it("opens the Columns menu and works its controls", () => {
-    renderTable({ enableColumnMenu: true, searchable: true });
+    renderTable({ features: [columnMenu()], searchable: true });
     fireEvent.click(columnMenuButton()!);
 
     // The menu body only executes once it is open, and it is the largest
@@ -161,14 +168,13 @@ describe("real render branches", () => {
         rowReorder<Row>(() => undefined),
         editing<Row>(() => undefined),
       ],
-      onCellEdit: () => undefined,
       animate: true,
     });
     expect(document.querySelector("table")).not.toBeNull();
   });
 
   it("groups rows when asked", () => {
-    renderTable({ groupBy: "city" });
+    renderTable({ features: [grouping("city")] });
     expect(document.querySelector("table")).not.toBeNull();
   });
 });

@@ -52,17 +52,10 @@ function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
   return <Box data-adapttable-part="table-footer">{children}</Box>;
 }
 
-/**
- * Map row density to MUI's table `size`, independent of column pinning. An
- * explicit `size` prop still wins for backward compatibility.
- */
+/** Map row density to MUI's table `size`, independent of column pinning. */
 function tableSize(
-  bits: Readonly<{
-    size?: "small" | "medium";
-    density?: "comfortable" | "compact";
-  }>
+  bits: Readonly<{ density?: "comfortable" | "compact" }>
 ): "small" | "medium" {
-  if (bits.size) return bits.size;
   return bits.density === "compact" ? "small" : "medium";
 }
 

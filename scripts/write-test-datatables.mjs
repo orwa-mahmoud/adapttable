@@ -26,6 +26,7 @@ function contents(kit) {
     ? ""
     : `import type { DataTableProps } from "./types";\n`;
   return `import {
+  type FeatureProps,
   flattenColumnTree,
   type TableFeature,
 } from "@adapttable/core/adapter";
@@ -86,6 +87,16 @@ import { selectionStats, statusBar } from "./status-bar";
 import { tree } from "./tree";
 ${typesImport}import { virtualize } from "./virtualize";
 
+/**
+ * What this harness accepts: the shipped props plus the enabling props v3
+ * removed.
+ *
+ * Converting the second into features is the whole job — a suite written
+ * against the props keeps asserting the same behaviour while composing the
+ * real factories, which is exactly the migration a host performs.
+ */
+type HarnessProps<TRow> = DataTableProps<TRow> & FeatureProps<TRow>;
+
 function hasId<TRow>(
   features: readonly TableFeature<TRow>[],
   id: string
@@ -95,7 +106,7 @@ function hasId<TRow>(
 
 /** Filtering, and the header row that reads a filter. */
 function bridgeFilterProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (!hasId(next, "filters")) {
@@ -119,7 +130,7 @@ function bridgeFilterProps<TRow>(
 
 /** The toolbar's own controls, and the menus behind them. */
 function bridgeToolbarProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (
@@ -147,7 +158,7 @@ function bridgeToolbarProps<TRow>(
 
 /** The bars and panels that sit around the table. */
 function bridgeBarProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.statusBar && !hasId(next, "status-bar")) {
@@ -169,7 +180,7 @@ function bridgeBarProps<TRow>(
 
 /** Writing a cell, a row, or a batch of them. */
 function bridgeCellEditProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.onCellEdit && !hasId(next, "editing")) {
@@ -199,7 +210,7 @@ function bridgeCellEditProps<TRow>(
 
 /** The undo stack, and the buttons that drive it. */
 function bridgeEditHistoryProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.editHistory && !hasId(next, "edit-history")) {
@@ -212,7 +223,7 @@ function bridgeEditHistoryProps<TRow>(
 
 /** Grouping rows, and nesting them. */
 function bridgeRowTreeProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.groupBy && !hasId(next, "grouping")) {
@@ -242,7 +253,7 @@ function bridgeRowTreeProps<TRow>(
 
 /** Reordering rows, and pinning them out of the order. */
 function bridgeRowOrderProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   const onRowReorder = (
@@ -268,7 +279,7 @@ function bridgeRowOrderProps<TRow>(
 
 /** The grid surface: navigation, windowing, column selection. */
 function bridgeGridProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.cellNavigation && !hasId(next, "cell-navigation")) {
@@ -278,7 +289,7 @@ function bridgeGridProps<TRow>(
     (props.virtualize || props.virtualizeColumns) &&
     !hasId(next, "virtualize")
   ) {
-    next.push(virtualize<TRow>());
+    next.push(virtualize());
   }
   if (
     props.columnSelectionCheckbox &&
@@ -290,7 +301,7 @@ function bridgeGridProps<TRow>(
 
 /** What a row looks like — extra rows, spans, appearance. */
 function bridgeRowShapeProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.extraRows && !hasId(next, "extra-rows")) {
@@ -315,7 +326,7 @@ function bridgeRowShapeProps<TRow>(
 
 /** Resizing columns, and collapsing their groups. */
 function bridgeColumnProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.resizableColumns && !hasId(next, "resizable-columns")) {
@@ -331,7 +342,7 @@ function bridgeColumnProps<TRow>(
 
 /** Taking the view somewhere else — export, print. */
 function bridgeOutputProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.exportCsv && !hasId(next, "export-csv")) {
@@ -344,7 +355,7 @@ function bridgeOutputProps<TRow>(
 
 /** What the reader does to the whole view. */
 function bridgeViewProps<TRow>(
-  props: DataTableProps<TRow>,
+  props: HarnessProps<TRow>,
   next: TableFeature<TRow>[]
 ): void {
   if (props.densityChooser && !hasId(next, "density-chooser")) {
@@ -400,7 +411,7 @@ export function composeTestFeatures<TRow>(
   return next;
 }
 
-export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>) {
+export function DataTable<TRow>(props: Readonly<HarnessProps<TRow>>) {
   return (
     <IsolatedDataTable {...props} features={composeTestFeatures(props)} />
   );

@@ -3,9 +3,15 @@ import {
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
   slotRender,
+  type StaticTableFeature,
   type TableFeature,
 } from "@adapttable/core/adapter";
-import { grouping as core, type GroupSort } from "@adapttable/core/features";
+import {
+  grouping as core,
+  type GroupingExtras,
+  type GroupSort,
+  type StaticGroupingExtras,
+} from "@adapttable/core/features";
 
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 
@@ -14,22 +20,19 @@ import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
  *
  * @public
  */
+export function grouping(
+  groupBy: string | readonly string[],
+  extras?: StaticGroupingExtras
+): StaticTableFeature;
 export function grouping<TRow>(
   groupBy: string | readonly string[],
-  extras?: {
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    groupAggregates?: (rows: readonly TRow[]) => unknown;
-    groupFooters?: boolean;
-    groupSort?: GroupSort<TRow>;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupFilter?: (group: unknown) => boolean;
-    collapsedGroupIds?: readonly string[];
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-  }
+  extras: GroupingExtras<TRow>
+): TableFeature<TRow>;
+export function grouping<TRow>(
+  groupBy: string | readonly string[],
+  extras?: GroupingExtras<TRow>
 ): TableFeature<TRow> {
-  return extendFeature(core(groupBy, extras), [
+  return extendFeature(core<TRow>(groupBy, extras ?? {}), [
     slotRender(GROUP_HEADER_ROW, (props) => <GroupHeaderRow {...props} />),
     slotRender(GROUP_HEADER_CARD, (props) => <GroupHeaderCard {...props} />),
   ]);

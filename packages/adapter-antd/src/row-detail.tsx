@@ -41,7 +41,8 @@ export function rowDetail<TRow>(
 }
 
 export function nestedTable<TRow>(
-  nested: NestedTableFor<TRow>
+  nested: NestedTableFor<TRow>,
+  defaultExpandedRowIds?: readonly string[]
 ): TableFeature<TRow> {
-  return extendFeature(coreNested(nested), expandChrome);
+  return extendFeature(coreNested(nested, defaultExpandedRowIds), expandChrome);
 }

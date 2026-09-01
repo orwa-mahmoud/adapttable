@@ -12,11 +12,11 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 
 ### Data
 
-| Prop       | Type                            | Default | Description                                                                                                                                                                    |
-| ---------- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `source`   | `TableSource<TRow>`             | —       | Data + state contract from `useFrontendData` / `useQuerySource`; adapters make it optional when you pass `data` instead.                                                       |
-| `rowKey`   | `(row: TRow) => string`         | —       | Stable React key extractor for a row (required).                                                                                                                               |
-| `features` | `readonly TableFeature<TRow>[]` | —       | Compose opt-in features from `@adapttable/<kit>/<feature>` subpaths. Identical to the enabling props, which are deprecated until v3. See [feature composition](./features.md). |
+| Prop       | Type                            | Default | Description                                                                                                                                                                 |
+| ---------- | ------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`   | `TableSource<TRow>`             | —       | Data + state contract from `useFrontendData` / `useQuerySource`; adapters make it optional when you pass `data` instead.                                                    |
+| `rowKey`   | `(row: TRow) => string`         | —       | Stable React key extractor for a row (required).                                                                                                                            |
+| `features` | `readonly TableFeature<TRow>[]` | —       | Compose opt-in features from `@adapttable/<kit>/<feature>` subpaths. The import is the switch, and the only way to arm a feature. See [feature composition](./features.md). |
 
 ### Columns & layout
 
@@ -142,9 +142,10 @@ plus the `AbortSignal` for the request it starts.
 ## Feature composition
 
 `features={[rowReorder(fn)]}` from `@adapttable/<kit>/row-reorder` (or the
-`@adapttable/<kit>/features` barrel, or `@adapttable/core/features`). Same
-runtime as the enabling props; those props stay until v3 and there is **no
-bundle saving yet**. See [feature composition](./features.md).
+`@adapttable/<kit>/features` barrel, or `@adapttable/core/features`). The
+import is the switch, and it is the only way in — see
+[feature composition](./features.md) and, for a v2 table,
+[upgrading from v2](./migrate-from-v2.md).
 
 Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `FeatureApplyInput`. The merge is `applyTableFeatures`. Live registration is
@@ -444,8 +445,7 @@ All from `@adapttable/core`.
   `usePlainChromeBodyData` is the same shape without the virtualizer, for a
   table that never composed `virtualize`; `VirtualItemMeta` is one windowed
   entry and `virtualColumnSpan` is the span a windowed row's spacer cells
-  cover. `useChromeBodyData` is the former name of the virtual one and still
-  works.
+  cover.
 - `useDataTableShell(props, renderAutoForm): DataTableShellResult<TRow>` —
   the whole adapter shell in one call: resolved tier, chrome, and the
   `tableProps` / `toolbarProps` bundles a kit spreads. `DataTableShellView`
@@ -1377,14 +1377,18 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 
 ## Feature composition types
 
-| Export                         | What it is                                                                                                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.       |
-| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument. |
-| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.              |
-| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                 |
-| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                |
-| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                      |
+| Export                         | What it is                                                                                                                                                       |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.             |
+| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument.       |
+| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.                    |
+| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                       |
+| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                      |
+| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                            |
+| `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                          |
+| `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                              |
+| `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md). |
+| `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                  |
 
 See [feature composition](./features.md).
 

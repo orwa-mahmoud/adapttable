@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { DataTable } from "./DataTable";
 
 // State controller and spies for useDataTableShell
@@ -47,7 +48,9 @@ vi.mock("@adapttable/core/adapter", async () => {
         // The live gates read these off the shell result. A mock that omits
         // one throws inside the gate, before the component under test renders,
         // so every field a gate touches has to be present even when empty.
-        chromeProps: {},
+        // The column-layout gate flattens these, so the mock supplies the
+        // same columns the test passes in.
+        chromeProps: { columns: defaultProps.columns },
         chrome: {
           // Every field a gate touches, present even when empty — an omission
           // throws inside the gate before the component under test renders.
@@ -253,13 +256,13 @@ describe("DataTable", () => {
     expect(screen.getByText("Alice")).toBeInTheDocument();
   });
 
-  it("hides the column menu on mobile even when enableColumnMenu is set", () => {
+  it("hides the column menu on mobile even when the feature is composed", () => {
     mockShellState = { body: "mobile", isMobile: true };
 
     render(
       <DataTable
         {...defaultProps}
-        enableColumnMenu={true}
+        features={[columnMenu()]}
         prefetch={vi.fn()}
         classNames={{ root: "rt", table: "tbl" }}
       />
@@ -276,7 +279,7 @@ describe("DataTable", () => {
       filtersOpen: false,
     };
 
-    render(<DataTable {...defaultProps} enableColumnMenu={true} />);
+    render(<DataTable {...defaultProps} features={[columnMenu()]} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Sort Col" }));
     expect(mockSetSort).toHaveBeenCalledWith("name", "asc");

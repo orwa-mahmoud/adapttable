@@ -22,7 +22,7 @@ import { capabilityReason, sourceCapabilities } from "../source/capabilities";
 import { devWarn } from "../utils/devWarn";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function LiveGrouping({
   chrome,
@@ -190,24 +190,67 @@ function LiveGrouping({
 }
 
 /**
- * Group rows under collapsible headers.
+ * What grouping can be told that says nothing about the row type.
+ *
+ * Paging, collapse state and the footer flag are the same whatever the table
+ * holds, so configuring only these keeps the feature row-independent — and
+ * composable into any table with no annotation.
  *
  * @public
  */
+export interface StaticGroupingExtras {
+  /** Told when the keys change, so a host can mirror them. */
+  onGroupByChange?: (groupBy: readonly string[]) => void;
+  /** Draw a footer row under each group. */
+  groupFooters?: boolean;
+  /** Show this many groups at a time. */
+  groupPageSize?: number;
+  /** Show this many rows inside each group. */
+  groupRowPageSize?: number;
+  /** Keep only the groups this accepts. */
+  groupFilter?: (group: unknown) => boolean;
+  /** Controlled collapse state. */
+  collapsedGroupIds?: readonly string[];
+  /** Told when a group opens or closes. */
+  onCollapsedGroupIdsChange?: (ids: string[]) => void;
+  /** Fetch the rest of a group on demand. */
+  onGroupLoadMore?: (groupKey: string) => void;
+}
+
+/**
+ * Everything grouping can be told, including the row-shaped parts.
+ *
+ * Supplying either of the two below makes the feature row-aware, and the row
+ * comes from the callback you wrote — no type argument needed.
+ *
+ * @public
+ */
+export interface GroupingExtras<TRow> extends StaticGroupingExtras {
+  /** Per-group subtotals, the same mapper shape as `summaryRow`. */
+  groupAggregates?: (rows: readonly TRow[]) => unknown;
+  /** Order the groups themselves. */
+  groupSort?: GroupSort<TRow>;
+}
+
+/**
+ * Group rows under collapsible headers.
+ *
+ * By a key alone this says nothing about the row type, so it composes into any
+ * table with no annotation. Pass {@link GroupingExtras} and it becomes
+ * row-aware, taking its row from the callback you supplied.
+ *
+ * @public
+ */
+export function grouping(
+  groupBy: string | readonly string[]
+): StaticTableFeature;
 export function grouping<TRow>(
   groupBy: string | readonly string[],
-  extras?: {
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    groupAggregates?: (rows: readonly TRow[]) => unknown;
-    groupFooters?: boolean;
-    groupSort?: GroupSort<TRow>;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupFilter?: (group: unknown) => boolean;
-    collapsedGroupIds?: readonly string[];
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-  }
+  extras: GroupingExtras<TRow>
+): TableFeature<TRow>;
+export function grouping<TRow>(
+  groupBy: string | readonly string[],
+  extras?: GroupingExtras<TRow>
 ): TableFeature<TRow> {
   return {
     id: "grouping",

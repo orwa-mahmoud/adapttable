@@ -6,7 +6,7 @@
  */
 import { useCallback, useMemo, useRef } from "react";
 
-import type { BaseDataTableProps } from "../props";
+import type { ComposedTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
 import { devWarn } from "../utils/devWarn";
 import {
@@ -39,7 +39,7 @@ import { useMeasuredWindowScrollMargin } from "./windowScrollMargin";
  */
 export function useVirtualChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
-  props: BaseDataTableProps<TRow>
+  props: ComposedTableProps<TRow>
 ): ChromeBodyData<TRow> {
   const { rowKey, virtualize = false } = props;
   const { source } = chrome;
@@ -167,6 +167,3 @@ function resolveBodyVirtualization<TRow>(
     measureElement: keyed.measureElement,
   };
 }
-
-/** @deprecated Import {@link useVirtualChromeBodyData}. Kept for existing tests. */
-export const useChromeBodyData = useVirtualChromeBodyData;

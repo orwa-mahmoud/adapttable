@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 
 import { DataTable } from "@adapttable/mantine";
+import { rowActions } from "@adapttable/mantine/row-actions";
 import { MantineProvider } from "@mantine/core";
 
 interface Person {
@@ -37,14 +38,16 @@ export function MantineBasicExample() {
           { key: "role", sortable: true },
         ]}
         rowKey={(r) => r.id}
-        searchPlaceholder="Search people…"
-        rowActions={[
-          {
-            key: "edit",
-            label: "Edit",
-            onClick: (row) => alert(`Edit ${row.name}`),
-          },
+        features={[
+          rowActions<Person>([
+            {
+              key: "edit",
+              label: "Edit",
+              onClick: (row) => alert(`Edit ${row.name}`),
+            },
+          ]),
         ]}
+        searchPlaceholder="Search people…"
       />
     </MantineProvider>
   );

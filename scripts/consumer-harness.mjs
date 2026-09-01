@@ -41,12 +41,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  aliasesIn,
   aliasRuntimeProbe,
   aliasTypeProbe,
   BEGINNER,
   CUSTOMIZATION,
   HEADLESS,
+  movedAliases,
   SENIOR,
   V2_PROPS,
 } from "./layer-fixtures.mjs";
@@ -284,10 +284,12 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   );
   writeFileSync(join(resDir, "nameable.ts"), NAMEABLE_PROBE);
   // The three product layers, compiled against the tarballs beside the probes.
-  const aliases = aliasesIn(
-    readFileSync(
-      join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
-      "utf8"
+  const aliases = movedAliases(
+    JSON.parse(
+      readFileSync(
+        join(REPO_ROOT, "scripts", "feature-classification.json"),
+        "utf8"
+      )
     )
   );
   for (const [name, source] of [

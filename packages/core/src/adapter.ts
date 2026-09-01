@@ -221,6 +221,7 @@ export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
 export { ChromeExtrasGate } from "./features/chromeExtrasGate";
 export type { FeatureHostState } from "./features/currentHost";
 export { bindFeatureHostFn } from "./features/currentHost";
+export type { RowOf } from "./features/featureHost";
 export { useTableFeatures } from "./features/featureHost";
 export { featureHostOf, rememberFeatureHost } from "./features/featureHost";
 export {
@@ -499,7 +500,12 @@ export {
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
 } from "./pivot/PivotPanelChrome";
-export type { BaseDataTableProps, ToolbarSlots } from "./props";
+export type {
+  BaseDataTableProps,
+  ComposedTableProps,
+  FeatureProps,
+  ToolbarSlots,
+} from "./props";
 export { cellFlashAttr, rowFlashSignature } from "./rows/cellFlashPaint";
 export type { GetCellSpan } from "./rows/cellSpan";
 export {

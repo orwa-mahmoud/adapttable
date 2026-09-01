@@ -1,4 +1,4 @@
-import { DataTable, type DataTableProps } from "@adapttable/antd";
+import { DataTable } from "@adapttable/antd";
 import { bulkActions as bulkActions_ } from "@adapttable/antd/bulk-actions";
 import { cellNavigation as cellNavigation_ } from "@adapttable/antd/cell-navigation";
 import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/antd/column-groups";
@@ -35,6 +35,7 @@ import {
   statusBar as statusBar_,
 } from "@adapttable/antd/status-bar";
 import { tree as tree_ } from "@adapttable/antd/tree";
+import type { FeatureProps } from "@adapttable/core";
 import type {
   ColumnDef,
   ColumnLayoutState,
@@ -94,7 +95,6 @@ import {
   demoFilterTypes,
   type DemoOrder,
   demoOrders,
-  demoSavedViews,
   initials,
   LIVE_DEFAULT_LAYOUT,
   type LoadCellProps,
@@ -268,7 +268,7 @@ export function AntdDemo({
    * the current page; the columns demo overrides it to write the highlighted
    * cell range as a spreadsheet.
    */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   headerFilters?: boolean;
   filterFields?: boolean;
   columnGroups?: boolean;
@@ -295,7 +295,7 @@ export function AntdDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   forceMobile?: boolean;
   /** Dedicated pages hide unrelated filter/action/view chrome. */
   focused?: boolean;
@@ -382,6 +382,7 @@ export function AntdDemo({
                 fullscreen,
                 headerFilters,
                 nested: nested ? nestedOrders : undefined,
+                nestedOpenIds: nestedOpenIds(nested, source.rows),
                 onPrint,
                 printButton,
                 undoRedoButtons,
@@ -390,7 +391,10 @@ export function AntdDemo({
                 bulkActionList: makeBulkActions(locale),
                 collapsibleColumnGroups: columns.collapsibleColumnGroups,
                 columnMenu,
-                rowActions: !(rowMutations ?? (focused && !columnGroups)),
+                rowActions:
+                  (rowMutations ?? (focused && !columnGroups))
+                    ? undefined
+                    : makeActions(locale),
                 commandPalette,
                 contextMenu,
                 filterControls,
@@ -402,23 +406,7 @@ export function AntdDemo({
               }),
               ...(demoFeatures ?? []),
             ]}
-            nestedTable={nested ? nestedOrders : undefined}
-            defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
-            cellNavigation={cellNavigation ?? editing}
-            columnSelectionCheckbox={columnSelectionCheckbox}
-            statusBar={statusBar}
-            contextMenu={contextMenu}
-            densityChooser={densityChooser}
             onDensityChange={onDensityChange}
-            fullscreen={fullscreen}
-            commandPalette={commandPalette}
-            onPrint={onPrint}
-            printButton={printButton}
-            undoRedoButtons={undoRedoButtons}
-            sidePanel={sidePanel}
-            selectionStats={editing}
-            editHistory={editing}
-            findInTable={editing}
             {...columns}
             forceMobile={forceMobile}
             density={density}
@@ -427,25 +415,10 @@ export function AntdDemo({
             locale={locale}
             dir={getDirection(locale)}
             searchPlaceholder={s.search}
-            rowActions={
-              rowMutations || (focused && !columnGroups)
-                ? undefined
-                : makeActions(locale)
-            }
             rowActionsLayout={rowMutations ? "menu" : undefined}
-            bulkActions={
-              (bulkActions ?? !focused) ? makeBulkActions(locale) : undefined
-            }
             confirm={demoConfirm}
-            enableColumnMenu={columnMenu ?? !focused}
-            exportCsv={exportCsv ?? !focused}
-            savedViews={focused ? undefined : demoSavedViews(urlKey)}
             animate={animate}
-            resizableColumns
             stickyHeader
-            filters={(filterControls ?? !focused) ? filters : undefined}
-            filterTypes={demoFilterTypes()}
-            headerFilters={headerFilters}
             filterFields={filterFields}
           />
         )}
