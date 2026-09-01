@@ -1,6 +1,6 @@
 # React table row grouping — nested groups, aggregates & expand/collapse
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`groupBy="role"` + `groupAggregates`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`grouping("role", { groupAggregates })`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [collapse groups and read per-group subtotals in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — a real table you can click, not a recording.
 
@@ -9,10 +9,11 @@ totals — on a mobile card, where there are no columns to align to, the same
 numbers appear captioned by their column instead. A custom renderer can place
 them the same way with `groupRowLayout` and `groupAggregateEntries`.
 
-Group rows with `groupBy` — one column key, or an ordered list to nest — and
-add optional per-group subtotals via `groupAggregates`, the **same mapper
-signature as `summaryRow`**. Omit `groupBy` and the table never inserts group
-header rows (package DNA: opt-in).
+Compose `grouping` from `@adapttable/<kit>/grouping` — one column key, or an
+ordered list to nest — and add optional per-group subtotals via
+`groupAggregates` in the factory's second argument, the **same mapper
+signature as `summaryRow`**. Omit the factory and the table never inserts group
+header rows (package DNA: opt-in). See [feature composition](./features.md).
 
 ## Paging groups, and paging inside one
 
@@ -21,14 +22,15 @@ a screenful and offers the rest; `groupRowPageSize` does the same for the rows
 inside each group:
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
+import { grouping } from "@adapttable/mantine/grouping";
+
 <DataTable
   data={ORDERS}
   columns={columns}
   rowKey={rowKey}
-  groupBy="customer"
-  groupPageSize={25}
-  groupRowPageSize={10}
-/>
+  features={[grouping("customer", { groupPageSize: 25, groupRowPageSize: 10 })]}
+/>;
 ```
 
 Each limit adds one row — "Show 42 more groups", "Show 8 more in this group" —
@@ -63,7 +65,12 @@ const source = useQuerySource<Person, Params, Page>({
   aggregates: [{ key: "budget", fn: "sum" }],
 });
 
-<DataTable source={source} columns={columns} rowKey={rowKey} groupBy="team" />;
+<DataTable
+  source={source}
+  columns={columns}
+  rowKey={rowKey}
+  features={[grouping("team")]}
+/>;
 ```
 
 `query.groupBy` arrives as an **array**, outermost key first — one entry for a
@@ -140,15 +147,20 @@ Groups start expanded and collapse on their own. To hold that state yourself,
 pass the pair:
 
 ```tsx
+import { grouping } from "@adapttable/mantine/grouping";
+
 const [closed, setClosed] = useState<string[]>([]);
 
 <DataTable
   data={PEOPLE}
   columns={columns}
   rowKey={(r) => r.id}
-  groupBy={["team", "status"]}
-  collapsedGroupIds={closed}
-  onCollapsedGroupIdsChange={setClosed}
+  features={[
+    grouping(["team", "status"], {
+      collapsedGroupIds: closed,
+      onCollapsedGroupIdsChange: setClosed,
+    }),
+  ]}
 />;
 ```
 
@@ -160,9 +172,16 @@ extra bookkeeping.
 **In the URL**, with `useGroupCollapseUrlState`:
 
 ```tsx
+import { grouping } from "@adapttable/mantine/grouping";
+
 const groups = useGroupCollapseUrlState({ urlKey: "people" });
 
-<DataTable {...groups} groupBy="team" columns={columns} rowKey={rowKey} />;
+<DataTable
+  {...groups}
+  features={[grouping("team")]}
+  columns={columns}
+  rowKey={rowKey}
+/>;
 ```
 
 A link then carries which groups were folded — part of what someone means when
@@ -180,17 +199,22 @@ wants its own buttons: `expandAll()`, `collapseAll()`, and
 which of them are worth showing:
 
 ```tsx
+import { grouping } from "@adapttable/mantine/grouping";
+
 <DataTable
   data={SALES}
   columns={columns}
   rowKey={(r) => r.id}
-  groupBy="region"
-  groupAggregates={(rows) => ({ amount: sum(rows) })}
-  // Biggest region first — the same rows the aggregate is computed from.
-  groupSort={(a, b) => sum(b.leafRows) - sum(a.leafRows)}
-  // And only the regions worth a line.
-  groupFilter={(group) => sum(group.leafRows) >= 10_000}
-/>
+  features={[
+    grouping("region", {
+      groupAggregates: (rows) => ({ amount: sum(rows) }),
+      // Biggest region first — the same rows the aggregate is computed from.
+      groupSort: (a, b) => sum(b.leafRows) - sum(a.leafRows),
+      // And only the regions worth a line.
+      groupFilter: (group) => sum(group.leafRows) >= 10_000,
+    }),
+  ]}
+/>;
 ```
 
 `groupSort` also takes `"label"`, `"label-desc"`, `"count"` and `"count-desc"`.
@@ -222,15 +246,20 @@ never opens or closes anything by accident.
 header carries:
 
 ```tsx
+import { grouping } from "@adapttable/mantine/grouping";
+
 <DataTable
   data={PEOPLE}
   columns={columns}
   rowKey={(r) => r.id}
-  groupBy="team"
-  groupAggregates={(rows) => ({ budget: sum(rows) })}
-  groupFooters
+  features={[
+    grouping("team", {
+      groupAggregates: (rows) => ({ budget: sum(rows) }),
+      groupFooters: true,
+    }),
+  ]}
   summaryRow={(rows) => ({ budget: sum(rows) })}
-/>
+/>;
 ```
 
 The totals then read at the bottom of a group as well as the top — which is
@@ -254,16 +283,11 @@ in `@adapttable/unstyled`).
 
 ## Nested groups
 
-`groupBy` also takes an ordered list, and each key nests inside the one before
+`grouping` also takes an ordered list, and each key nests inside the one before
 it:
 
 ```tsx
-<DataTable
-  data={PEOPLE}
-  columns={columns}
-  rowKey={(r) => r.id}
-  groupBy={["team", "status"]}
-/>
+features={[grouping(["team", "status"])]}
 ```
 
 > Core (12)
@@ -290,6 +314,7 @@ and `onGroupByChange` reports the keys as a list.
 
 ```tsx
 import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
+import { grouping } from "@adapttable/mantine/grouping";
 
 interface Person {
   id: string;
@@ -318,12 +343,17 @@ export function People() {
         },
       ]}
       rowKey={(r) => r.id}
-      groupBy="team"
-      groupAggregates={(rows) => ({
-        budget: (
-          <b>${rows.reduce((sum, r) => sum + r.budget, 0).toLocaleString()}</b>
-        ),
-      })}
+      features={[
+        grouping("team", {
+          groupAggregates: (rows) => ({
+            budget: (
+              <b>
+                ${rows.reduce((sum, r) => sum + r.budget, 0).toLocaleString()}
+              </b>
+            ),
+          }),
+        }),
+      ]}
     />
   );
 }
@@ -331,10 +361,10 @@ export function People() {
 
 ## How it works
 
-- **Opt-in.** Pass `groupBy` (a column key) or set `source.groupBy` via
-  `useFrontendData` / URL state — without it, grouping stays fully dormant.
-- **One key or a list.** `groupBy="team"` groups one level;
-  `groupBy={["team", "status"]}` nests each key inside the one before it, to
+- **Opt-in.** Compose `grouping(key)`. The source and URL state carry the
+  resolved grouping value, but neither imports or mounts the feature.
+- **One key or a list.** `grouping("team")` groups one level;
+  `grouping(["team", "status"])` nests each key inside the one before it, to
   any depth. There is no drag-to-group panel — the keys come from your code or
   the URL.
 - **Somewhere that can group.** Either the full filtered set is in memory
@@ -347,7 +377,7 @@ export function People() {
   one function for both if the math is identical — or build both with
   `aggregate()` (below).
 - **Expand / collapse.** Groups start expanded. Collapse state is ephemeral
-  (not URL-synced). `groupBy` itself serializes to the URL like sort and
+  (not URL-synced). The grouping key itself serializes to the URL like sort and
   filters.
 - **Selection.** When row checkboxes are enabled, each group header exposes a
   tri-state checkbox over its leaf rows.
@@ -359,10 +389,14 @@ them instead and `aggregate()` returns that same mapper:
 
 ```tsx
 import { aggregate } from "@adapttable/core";
+import { grouping } from "@adapttable/mantine/grouping";
 
 <DataTable
-  groupBy="role"
-  groupAggregates={aggregate({ budget: "sum", team: "count" }, { columns })}
+  features={[
+    grouping("role", {
+      groupAggregates: aggregate({ budget: "sum", team: "count" }, { columns }),
+    }),
+  ]}
   summaryRow={aggregate({ budget: "sum" }, { columns })}
   columns={columns}
   // …
@@ -397,18 +431,21 @@ unanswerable, not zero.
 
 ## Options
 
-| Prop / field                | Type                                                            | Default | Description                                                                                 |
-| --------------------------- | --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------- |
-| `groupBy`                   | `string \| null`                                                | —       | Column key to group by; its presence arms grouping (still requires a frontend data source). |
-| `onGroupByChange`           | `(groupBy: string \| null) => void`                             | —       | Controlled change channel; falls back to `source.setGroupBy`.                               |
-| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.   |
-| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                               |
-| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                         |
-| `labels`                    | `TableLabels`                                                   | English | Override `expandGroup`, `collapseGroup`, and `groupCount` for header controls.              |
+`grouping(key, extras?)` — first argument is the column key (or ordered list);
+companion options go in the second argument:
+
+| Field / prop                | Type                                                            | Default | Description                                                                                            |
+| --------------------------- | --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | —       | Column key(s) to group by; composing `grouping` arms grouping (still requires a frontend data source). |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                          |
+| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.              |
+| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                          |
+| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                                    |
+| `labels`                    | `TableLabels`                                                   | English | Override `expandGroup`, `collapseGroup`, and `groupCount` for header controls.                         |
 
 ## Grouped tables are a full-set view
 
-With `groupBy` active the table renders **every filtered row** (grouped),
+With grouping active the table renders **every filtered row** (grouped),
 and the chrome agrees with the screen: the footer count describes the
 rendered set, header select-all covers all rendered rows, page-scope CSV
 export contains exactly what you see, and the rows-per-page control hides

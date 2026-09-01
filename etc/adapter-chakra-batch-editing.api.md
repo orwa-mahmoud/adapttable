@@ -7,7 +7,7 @@
 import { batchEditing as batchEditing_2 } from '@adapttable/core/features';
 import { TableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function batchEditing<TRow>(onBatchEdit: Parameters<typeof batchEditing_2<TRow>>[0]): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)

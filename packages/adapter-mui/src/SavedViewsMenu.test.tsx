@@ -1,7 +1,7 @@
 /**
  * Saved-views menu: capture the table's URL params under a name, re-apply
- * them on demand, delete views — plus the DataTable `savedViews` prop that
- * mounts the menu in the toolbar wired to the table's own URL backend.
+ * them on demand, delete views — mounted by the composed feature and wired to
+ * the table's own URL backend.
  */
 import { createMemoryAdapter, type LayoutStorage } from "@adapttable/core";
 import { fireEvent, screen } from "@testing-library/react";
@@ -110,7 +110,7 @@ describe("SavedViewsMenu (MUI)", () => {
   });
 });
 
-describe("DataTable savedViews prop (MUI)", () => {
+describe("DataTable savedViews feature (MUI)", () => {
   interface Row {
     id: string;
     name: string;
@@ -132,7 +132,6 @@ describe("DataTable savedViews prop (MUI)", () => {
         columns={columns}
         rowKey={(r) => r.id}
         urlAdapter={adapter}
-        savedViews={{ storageKey: "views", storage }}
         features={[savedViews({ storageKey: "views", storage })]}
       />
     );

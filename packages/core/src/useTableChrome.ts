@@ -138,7 +138,7 @@ export interface ToolbarChromeProps<TRow> {
   /** Whether to show the rows-per-page control (infinite mode). */
   showRowsPerPage: boolean;
   /**
-   * Built saved-views menu node, when the `savedViews` prop opts in. Renders
+   * Built saved-views menu node, when the feature is composed. Renders
    * ahead of `columnMenu` so every adapter's toolbar reads
    * Filters · Saved views · Columns · Export CSV.
    */
@@ -147,7 +147,7 @@ export interface ToolbarChromeProps<TRow> {
   columnMenu?: ReactNode;
   /**
    * When set, render the Export CSV toolbar button and call this on click.
-   * Built by `makeExportCsvHandler` from the `exportCsv` prop.
+   * Built by `makeExportCsvHandler` from the export feature's configuration.
    */
   onExportCsv?: () => void;
   /**
@@ -320,7 +320,7 @@ export interface TableChrome<TRow> {
   /**
    * The row actions to render — the host's, plus duplicate and delete when
    * those are wired, and `undefined` when the reader hid the actions column.
-   * Adapters read THIS rather than the `rowActions` prop.
+   * Adapters read THIS rather than internal feature configuration.
    */
   rowActions?: RowAction<TRow>[];
   /**
@@ -536,11 +536,6 @@ export function printToolbar(
   return { onPrint, printLabel: labels.print };
 }
 
-/**
- * Assemble every piece of chrome a kit's toolbar and footer need.
- *
- * @public
- */
 const NO_ROW_MUTATIONS: RowMutationsState<never> = {
   canAdd: false,
   addRow: () => {
@@ -549,6 +544,11 @@ const NO_ROW_MUTATIONS: RowMutationsState<never> = {
   actions: [],
 };
 
+/**
+ * Assemble every piece of chrome a kit's toolbar and footer need.
+ *
+ * @public
+ */
 export function useTableChrome<TRow>(
   props: ComposedTableProps<TRow>
 ): TableChrome<TRow> {

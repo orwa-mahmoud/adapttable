@@ -1,15 +1,15 @@
 /**
- * Row grouping smoke: arms the grouping branch in components/DesktopTable.tsx via
- * frontend data + an opt-in `groupBy` prop.
+ * Row grouping smoke: arms the grouping branch in components/DesktopTable.tsx
+ * through the composed grouping feature.
  */
 import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

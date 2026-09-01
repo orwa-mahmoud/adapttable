@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Radix</p>
         <h1>Inline cell editing in Radix</h1>
-        <p>Mark a column <code>editable</code>, pass <code>onCellEdit</code>, and double-click opens a Radix editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
+        <p>Mark a column <code>editable</code>, compose <code>editing(onCellEdit)</code>, and double-click opens a Radix editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
         <p>The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.</p>
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
         <p>Text and number edit in a TextField.Root, a select column edits in a Radix Select that commits on change, and a boolean edits in a Radix Checkbox.</p>

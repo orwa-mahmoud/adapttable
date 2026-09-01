@@ -20,10 +20,17 @@ export function densityChooser(): StaticTableFeature {
   ]);
 }
 
-/** Row density — independent of column pinning. */
+/** Row density — independent of column pinning.
+ *
+ * @public
+ */
 export type Density = "comfortable" | "compact";
 
-/** Mantine `<Table>` spacing props for a given density. */
+/**
+ * Mantine `<Table>` spacing props for a given density.
+ *
+ * @public
+ */
 export interface DensitySpacing {
   /** Cell padding along the block axis for this density. */
   verticalSpacing: MantineSpacing;
@@ -35,6 +42,8 @@ export interface DensitySpacing {
  * Maps each {@link Density} to the Mantine `<Table>` spacing props.
  * `comfortable` keeps the original `sm`/`md` rhythm; `compact` tightens
  * rows with a 4px vertical gap and `sm` horizontal padding.
+ *
+ * @public
  */
 export const DENSITY_SPACING: Record<Density, DensitySpacing> = {
   comfortable: { verticalSpacing: "sm", horizontalSpacing: "md" },

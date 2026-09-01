@@ -7,8 +7,8 @@ import {
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, DataTableClassNames, FilterDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -434,7 +434,7 @@ describe("<DataTable> declarative columns + filters (unstyled)", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("builds the form from column filter shorthands alone (no filters prop)", () => {
+  it("builds the form from column shorthands with empty feature config", () => {
     const adapter = createMemoryAdapter("");
     render(
       <DataTable<Row>

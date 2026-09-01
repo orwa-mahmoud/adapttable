@@ -13,7 +13,7 @@ import { TableFeature } from '@adapttable/core/adapter';
 // @public
 export function grouping(groupBy: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function grouping<TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
 
 export { GroupSort }

@@ -43,11 +43,10 @@ export const sharedConfig = defineConfig({
       exclude: [
         "src/**/*.{test,spec}.{ts,tsx}",
         "src/**/*.gaps.test.{ts,tsx}",
-        // Test scaffolding, not product code: `testDataTable.tsx` is the
-        // generated harness that turns enabling props into composed features
-        // so the prop-driven suites keep running. Nothing exports it, nothing
-        // ships it, and measuring a harness measures the tests, not the kit.
-        "src/**/testDataTable.tsx",
+        // Test scaffolding, not product code. Nothing exports these helpers,
+        // nothing ships them, and measuring a harness measures the tests
+        // rather than the kit.
+        "src/**/*.test-utils.tsx",
         "src/**/index.ts",
         "src/**/*.d.ts",
         "src/**/types.ts",

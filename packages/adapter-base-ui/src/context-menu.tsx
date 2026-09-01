@@ -34,6 +34,11 @@ function LiveContextMenu({
   );
 }
 
+/**
+ * A right-click menu on rows and cells, drawn with Base UI's own Menu.
+ *
+ * @public
+ */
 export function contextMenu<TRow>(
   options: boolean | ContextMenuOptions<TRow> = true
 ): TableFeature<TRow> {

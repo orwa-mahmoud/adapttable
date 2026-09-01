@@ -117,8 +117,9 @@ all — your call.
 ## Does it support virtualization?
 
 Yes. Long infinite lists can opt into row/card virtualization with
-`virtualize`, `estimateRowSize`, `estimateCardSize`, and `virtualOverscan`.
-Ant Design uses its native virtual table mode via the same `virtualize` prop.
+Compose `virtualize()` and tune `estimateRowSize`, `estimateCardSize`, and
+`virtualOverscan`. Ant Design uses its native virtual table mode through the
+same feature.
 
 ## How do I add URL-synced (shareable, deep-linkable) table state?
 

@@ -9,6 +9,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AutoFilterForm } from "./components/AutoFilterForm";
+import { DataTable } from "./data-table.test-utils";
 import { filters as filtersFeature } from "./filters";
 import type { ColumnDef, FilterDef, FilterOption, TableQuery } from "./index";
 import {
@@ -17,7 +18,6 @@ import {
   resolveFilterRegistry,
 } from "./index";
 import { renderMui } from "./test-utils";
-import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;
@@ -159,7 +159,7 @@ function pickSelect(
 }
 
 describe("declarative DataTable (MUI)", () => {
-  it("column filter shorthands alone (no filters prop) render the auto form", () => {
+  it("column shorthands with empty feature config render the auto form", () => {
     mountTable({
       filters: undefined,
       columns: [

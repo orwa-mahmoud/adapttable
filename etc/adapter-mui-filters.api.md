@@ -13,7 +13,7 @@ import { TableFeature } from '@adapttable/core/adapter';
 // @public
 export function filters(form: ReactNode): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
 // @public

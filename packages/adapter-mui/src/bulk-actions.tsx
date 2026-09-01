@@ -13,7 +13,7 @@ import { BulkBar } from "./components/BulkActionBar";
  * Actions that run against the selected rows, drawn with MUI's own bar.
  *
  * Concatenate onto the core live render — replacing `renders` would drop
- * {@link SELECTION_LIVE}.
+ * `SELECTION_LIVE`.
  *
  * @public
  */

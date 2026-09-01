@@ -21,7 +21,11 @@ export interface DensityFeatureState {
 export const DENSITY_STATE =
   featureStateKey<DensityFeatureState>("density-chooser");
 
-/** The density and request channel every adapter renders. */
+/**
+ * The density and request channel every adapter renders.
+ *
+ * @public
+ */
 export interface ResolvedDensity {
   /** Controlled value, feature-owned value, or the comfortable default. */
   readonly density: Density;

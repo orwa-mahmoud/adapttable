@@ -120,7 +120,7 @@ export function flattenColumnTree<TRow>(
 }
 
 /**
- * Leaves plus the parent records {@link flattenColumnTree} collected.
+ * Leaves plus the parent records {@link !flattenColumnTree} collected.
  *
  * @public
  */

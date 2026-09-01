@@ -39,7 +39,7 @@ export interface VirtualTableRow<TRow> {
   row: TRow;
   /**
    * Index in the array the virtualizer windows. When pinning is on that is
-   * the unpinned scroll list, not the page — use {@link rowSourceIndex}
+   * the unpinned scroll list, not the page — use {@link !rowSourceIndex}
    * for ARIA, focus and `rowClassName`.
    */
   index: number;
@@ -112,7 +112,11 @@ export function resolveVirtualRows<TRow>(
   );
 }
 
-/** Column span for spacer/detail/summary cells in table-based adapters. */
+/**
+ * Column span for spacer/detail/summary cells in table-based adapters.
+ *
+ * @public
+ */
 export function virtualColumnSpan(
   columnCount: number,
   hasSelection: boolean,

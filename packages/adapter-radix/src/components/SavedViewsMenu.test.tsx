@@ -1,7 +1,7 @@
 /**
  * SavedViewsMenu: saving (disabled while empty, clears after), applying a
  * view through a memory URL adapter (scoped to the table's `urlKey`),
- * deleting, and the `savedViews` DataTable prop mounting the trigger.
+ * deleting, and the composed saved-views feature mounting the trigger.
  *
  * Radix portals its popover content; internals appear once the trigger opens,
  * so they are queried by label/placeholder/text after the popover mounts.
@@ -14,9 +14,9 @@ import {
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { DataTable } from "../data-table.test-utils";
 import type { ColumnDef } from "../index";
 import { renderRadix } from "../test-utils";
-import { DataTable } from "../testDataTable";
 import { SavedViewsMenu } from "./SavedViewsMenu";
 
 /** In-memory `LayoutStorage` stub, inspectable per test. */
@@ -106,7 +106,7 @@ describe("<SavedViewsMenu> (Radix)", () => {
   });
 });
 
-describe("<DataTable> savedViews prop (Radix)", () => {
+describe("<DataTable> savedViews feature (Radix)", () => {
   interface Row {
     id: string;
     name: string;

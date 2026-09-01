@@ -62,9 +62,19 @@ function FiltersForm({
  * @public
  */
 export function filters(form: ReactNode): StaticTableFeature;
+/**
+ * Declarative filters with custom definitions.
+ *
+ * @public
+ */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
 ): TableFeature<TRow>;
+/**
+ * Declarative filters with custom definitions or a hand-built panel.
+ *
+ * @public
+ */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {

@@ -54,7 +54,7 @@ export interface PinOffset {
 }
 
 /**
- * Result of `useColumnLayout` / {@link declaredColumnLayout}.
+ * Result of `useColumnLayout` / {@link !declaredColumnLayout}.
  *
  * @public
  */

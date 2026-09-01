@@ -6,6 +6,7 @@
 
 import { BulkAction } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
+import { StaticTableFeature } from '@adapttable/core';
 import { TableFeature } from '@adapttable/core';
 import { UseSavedViewsOptions } from '@adapttable/core';
 
@@ -16,6 +17,9 @@ export interface StandardFeatureOptions<TRow> {
     grouping?: string | readonly string[];
     savedViews?: UseSavedViewsOptions;
 }
+
+// @public
+export function standardFeatures(): StaticTableFeature[];
 
 // @public
 export function standardFeatures<TRow>(options?: StandardFeatureOptions<TRow>): TableFeature<TRow>[];

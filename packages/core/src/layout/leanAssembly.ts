@@ -31,6 +31,7 @@ const LIFTED_OPACITY = 0.45;
  * @public
  */
 export interface AssemblyFns<TRow = unknown> {
+  /** Build per-row body cells, optionally merging spans. */
   buildBodyCells: (options: {
     rows: readonly TRow[];
     columns: readonly ColumnDef<TRow>[];
@@ -40,16 +41,19 @@ export interface AssemblyFns<TRow = unknown> {
     pinOffset?: (key: string) => PinOffset | undefined;
     windowKeys?: ReadonlySet<string>;
   }) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+  /** Insert full-width extra rows into a flat entry list. */
   insertExtraRows: <T extends { key: string }>(
     entries: readonly T[],
     extraRows: readonly ExtraRow[] | undefined,
     dataKey: (entry: T) => string | undefined
   ) => readonly (T | ExtraEntry)[];
+  /** Insert extra rows immediately before matching data rows. */
   insertExtrasBeforeRows: (
     rows: readonly TRow[],
     extraRows: readonly ExtraRow[] | undefined,
     getRowId: (row: TRow) => string
   ) => readonly ({ key: string; row: TRow } | ExtraEntry)[];
+  /** Background fill for a host row hosting an extra separator. */
   extraHostFillStyle: (
     extraKey: string,
     extraRows: readonly ExtraRow[] | undefined,
@@ -57,11 +61,13 @@ export interface AssemblyFns<TRow = unknown> {
     getRowId: (row: TRow) => string,
     rowStyle: RowStyle<TRow> | undefined
   ) => CSSProperties | undefined;
+  /** Inflate row spans where extra rows cover body cells. */
   inflateBodyCellRowSpans: (
     cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>,
     visualIds: readonly string[],
     extraRows: readonly ExtraRow[] | undefined
   ) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+  /** Table slots an extra row covers in a grouped layout. */
   extraCoveredTableSlots: (
     beforeRowId: string,
     options: {
@@ -74,6 +80,7 @@ export interface AssemblyFns<TRow = unknown> {
       leadingCells: number;
     }
   ) => ReadonlySet<number>;
+  /** Props for a column resize handle, when resizing is enabled. */
   columnResizeHandleProps: (
     key: string,
     setWidth: (key: string, width: number) => void,

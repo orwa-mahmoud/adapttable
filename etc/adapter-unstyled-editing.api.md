@@ -9,24 +9,24 @@ import { FeaturePatch } from '@adapttable/core/features';
 import { StaticTableFeature } from '@adapttable/core/adapter';
 import { TableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function batchEditing<TRow>(onBatchEdit: Parameters<typeof batchEditing_2<TRow>>[0]): TableFeature<TRow>;
 
-// @public (undocumented)
+// @public
 export function dirtyIndicators(): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function editHistory(options?: boolean | {
     depth?: number;
 }): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-// @public (undocumented)
+// @public
 export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-// @public (undocumented)
+// @public
 export function undoRedoButtons(): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

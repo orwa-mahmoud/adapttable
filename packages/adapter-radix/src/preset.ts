@@ -47,7 +47,7 @@ import { savedViews } from "./saved-views";
 import { statusBar } from "./status-bar";
 
 /**
- * What {@link standardFeatures} composes when you supply it.
+ * What {@link standardFeatures:()} composes when you supply it.
  *
  * Each field is the argument the matching factory already takes, so learning
  * the preset teaches the individual import and not a second vocabulary.
@@ -87,9 +87,19 @@ export interface StandardFeatureOptions<TRow> {
  * @public
  */
 export function standardFeatures(): StaticTableFeature[];
+/**
+ * Compose the standard preset with optional configuration.
+ *
+ * @public
+ */
 export function standardFeatures<TRow>(
   options?: StandardFeatureOptions<TRow>
 ): TableFeature<TRow>[];
+/**
+ * Compose the standard preset with optional configuration.
+ *
+ * @public
+ */
 export function standardFeatures<TRow>(
   options: StandardFeatureOptions<TRow> = {}
 ): TableFeature<TRow>[] {

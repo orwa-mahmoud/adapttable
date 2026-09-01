@@ -19,7 +19,11 @@ import {
 } from "./slotKeys";
 import type { FeaturePatch, StaticTableFeature } from "./tableFeature";
 
-/** Options the factory accepts — a boolean or the windowing knobs. */
+/**
+ * Options the factory accepts — a boolean or the windowing knobs.
+ *
+ * @public
+ */
 export type VirtualizeOptions =
   | boolean
   | {

@@ -77,8 +77,8 @@ through the rename table below.
   nothing.
 - **An explicit `hideOnMobile: true` always wins** — the mobile identity
   anchor no longer forces hidden columns onto cards. A column marked
-  `editable` without a table-level `onCellEdit` dev-warns instead of
-  doing nothing.
+  `editable` without a composed `editing()` feature dev-warns instead of doing
+  nothing.
 - **The selection contract is settled**: uncontrolled =` onSelectionChange`
   observes (mount fire with the empty set, auto-reset on search/filter
   change included); controlled = change-request handler, no mount fire.

@@ -7,9 +7,9 @@ import { createMemoryAdapter } from "@adapttable/core";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderBaseUi } from "./test-utils";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

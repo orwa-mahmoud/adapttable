@@ -6,10 +6,10 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
 import { renderBaseUi } from "./test-utils";
-import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

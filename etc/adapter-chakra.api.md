@@ -188,7 +188,6 @@ export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>,
     classNames?: DataTableClassNames;
     data?: readonly TRow[];
     loading?: boolean;
-    savedViews?: UseSavedViewsOptions;
     size?: "sm" | "md" | "lg";
     slots?: DataTableSlots;
     source?: TableSource<TRow>;

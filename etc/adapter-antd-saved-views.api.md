@@ -7,7 +7,7 @@
 import { StaticTableFeature } from '@adapttable/core/adapter';
 import { UseSavedViewsOptions } from '@adapttable/core/features';
 
-// @public (undocumented)
+// @public
 export function savedViews(options: UseSavedViewsOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

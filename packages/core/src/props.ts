@@ -435,11 +435,10 @@ export interface FeatureProps<TRow> {
    */
   columnSelectionCheckbox?: boolean;
   /**
-   * Compatibility-only v2 enabling prop. It does not compose toolbar UI.
+   * Feature-applied marker for the composed density chooser.
    *
-   * Import and compose `densityChooser()` from the selected kit instead.
-   *
-   * @deprecated Compose the kit's `densityChooser()` feature.
+   * The adapter control comes from the feature's toolbar slot; shared chrome
+   * reads the separately resolved `density` value.
    */
   densityChooser?: boolean;
   /**
@@ -679,7 +678,7 @@ export interface BaseDataTableProps<TRow> {
   searchDebounceMs?: number;
   /**
    * Pagination mode: `"paged"`, `"infinite"`, or `"auto"` (the default —
-   * mobile resolves to infinite, desktop to paged). `virtualize` applies
+   * mobile resolves to infinite, desktop to paged). `virtualize()` applies
    * in infinite mode; on a paged desktop table it is inert.
    */
   paginationMode?: PaginationMode;
@@ -711,9 +710,9 @@ export interface BaseDataTableProps<TRow> {
    * Paste — Ctrl/Cmd+V, with the clipboard already parsed into ordinary cell
    * edits. Requires `cellNavigation`.
    *
-   * Omit it and every edit goes through `onCellEdit`, so a table that can be
-   * edited can be pasted into with nothing extra wired. Provide it to take the
-   * batch whole — one server round trip, one undo entry.
+   * Omit it and every edit goes through the composed `editing()` handler.
+   * Provide it to take the batch whole — one server round trip, one undo
+   * entry.
    *
    * Cells landing outside the loaded rows or the rendered columns are dropped
    * rather than invented, and a column that is not `editable` is skipped.
@@ -723,9 +722,8 @@ export interface BaseDataTableProps<TRow> {
    * Fill — the handle dragged from the selection's corner, or Ctrl/Cmd+D.
    * Requires `cellNavigation`.
    *
-   * Same contract as `onCellPaste`: omit it and every edit goes through
-   * `onCellEdit`, so the handle appears as soon as the table can be edited.
-   * Provide it to take the batch whole.
+   * Same contract as `onCellPaste`: omit it and every edit goes through the
+   * composed `editing()` handler. Provide it to take the batch whole.
    */
   onCellFill?: (edits: CellEdit<TRow>[]) => void;
   /**
@@ -765,7 +763,7 @@ export interface BaseDataTableProps<TRow> {
   onEditCancel?: EditEventHandler<TRow>;
   /**
    * Observe a value reaching the host. Fires after parse and validation, at
-   * the same moment as `onCellEdit` / `onRowEdit` / `onBatchEdit`.
+   * the same moment as the composed cell, row or batch edit handler.
    */
   onEditCommit?: EditEventHandler<TRow>;
   /**
@@ -813,15 +811,6 @@ export interface BaseDataTableProps<TRow> {
    */
   tableFooter?: ReactNode;
   /**
-   * Row grouping by column key — one key, or an ordered list for nested
-   * groups: `groupBy={["team", "status"]}` puts each status inside its team,
-   * and every header carries the count and aggregates of its whole subtree.
-   *
-   * Its presence (or `source.groupBy`) arms grouping chrome — omit it and the
-   * table never inserts group header rows (package DNA: opt-in). Frontend tier
-   * only; server-paginated sources get a devWarn and grouping is ignored.
-   */
-  /**
    * Whether a row has children that have not been fetched yet — a server tree
    * knows there is more before the browser does.
    */
@@ -838,10 +827,6 @@ export interface BaseDataTableProps<TRow> {
    * Receives the keys as a list, empty when grouping was cleared.
    */
   onGroupByChange?: (groupBy: readonly string[]) => void;
-  /**
-   * Per-group aggregate cells — **same signature as {@link summaryRow}**.
-   * Called with each group's leaf rows. Omit for headers without subtotals.
-   */
   /**
    * Close every group with a footer row carrying its aggregates — the totals
    * read at the bottom of the group as well as the top, which is where a long
@@ -940,7 +925,7 @@ export interface BaseDataTableProps<TRow> {
   /* ── Filters ─────────────────────────────────────────────────────── */
   /**
    * Resolved filter definitions, used to label AND/OR tree chips. The
-   * shell sets this from the declarative `filters` array; hosts that
+   * shell sets this from the declarative `filters()` definitions; hosts that
    * call `useTableChrome` directly can pass the same defs the builder
    * receives.
    */
@@ -950,7 +935,6 @@ export interface BaseDataTableProps<TRow> {
    * `"popover"` (default) anchors a light card under the Filters button
    * (no backdrop); `"drawer"` slides in a side panel with a real backdrop;
    * `"header"` is the compact per-column row and hides the toolbar button.
-   * `headerFilters` is an alias for `"header"`.
    */
   filtersMode?: "popover" | "drawer" | "header";
   /** Per-filter-key chip label resolvers. */

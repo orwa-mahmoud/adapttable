@@ -388,7 +388,7 @@ describe("useTableChrome", () => {
     expect(adapter.getSearch()).not.toContain("groupBy");
   });
 
-  it("dev-warns when a column is editable but no onCellEdit is set", () => {
+  it("dev-warns when editable columns have no composed editing handler", () => {
     resetDevWarnings();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     try {
@@ -405,7 +405,9 @@ describe("useTableChrome", () => {
           rowKey: (r) => r.id,
         };
       });
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("onCellEdit"));
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("editing(handler)")
+      );
       first.unmount();
 
       // With the handler present the combination is complete: no warning.

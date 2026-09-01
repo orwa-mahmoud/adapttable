@@ -11,9 +11,8 @@
  * <DataTable features={[rowReorder(onRowReorder)]} … />
  * ```
  *
- * Kit subpaths re-export the same factories. There is no bundle saving yet:
- * while the enabling props still work, DataTable keeps its internal imports.
- * The drop lands at v3.
+ * Kit subpaths pair the same factories with their adapter contributions. The
+ * import is the switch: an omitted feature stays outside the root table graph.
  *
  * @packageDocumentation
  */
@@ -99,7 +98,7 @@ export type { FilterDef } from "./filters/filterDefs";
 export type { FilterTypeSpec } from "./filters/filterRegistry";
 export type { GroupSort } from "./grouping/groupRows";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
-export type { ComposedTableProps, FeatureProps } from "./props";
+export type { FeatureProps } from "./props";
 export type { SidePanelOptions } from "./props";
 export type { CellSpanAppearance, GetCellSpan } from "./rows/cellSpan";
 export type { ExtraRow } from "./rows/extraRows";

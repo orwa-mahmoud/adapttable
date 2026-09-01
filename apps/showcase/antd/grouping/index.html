@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Ant Design</p>
         <h1>Row grouping in Ant Design</h1>
-        <p>Pass <code>groupBy</code> and rows fold into Ant Design group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
+        <p>Compose <code>grouping(groupBy)</code> and rows fold into Ant Design group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
         <p><code>groupAggregates</code> adds per-group subtotals from the same mapper <code>summaryRow</code> uses, so every header totals its whole subtree and <code>groupFooters</code> closes each group with the same numbers.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>Group headers and footers are records spliced into antd's own dataSource and spanned through its onCell hook, so grouping happens inside antd's Table rather than around it; the summary row is antd's Table.Summary.</p>

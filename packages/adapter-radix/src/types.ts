@@ -4,7 +4,6 @@ import type {
   TableErrorState,
   TableSource,
   UrlStateAdapter,
-  UseSavedViewsOptions,
 } from "@adapttable/core";
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
@@ -134,12 +133,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
    * one URL without colliding.
    */
   urlKey?: string;
-  /**
-   * Mount the saved-views toolbar menu: capture, re-apply, and delete named
-   * snapshots of this table's URL state. The table's own `urlAdapter` /
-   * `urlKey` fill in unless the options override them.
-   */
-  savedViews?: UseSavedViewsOptions;
   /** Replace sub-components (skeleton, empty-state). */
   slots?: DataTableSlots;
   /** Per-part class hooks (root / toolbar / table / card / footer). */

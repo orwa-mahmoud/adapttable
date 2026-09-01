@@ -26,8 +26,16 @@ export const Beginner = () => (
 );
 `;
 
-/** The v2 props a table already in production is passing. */
-export const V2_PROPS = String.raw`import type { ColumnDef, FilterDef } from "@adapttable/unstyled";
+/** Every removed v2 enabling prop must fail against the packed declaration. */
+export function removedV2Props(manifest) {
+  const group = manifest.v3Removals.groups.find(
+    (entry) => entry.id === "enabling-props"
+  );
+  const probes = Object.keys(group.props).map(
+    (prop) => `// @ts-expect-error v3 removed the ${prop} enabling prop
+export const removed_${prop} = <DataTable {...base} ${prop}={undefined} />;`
+  );
+  return String.raw`import type { ColumnDef } from "@adapttable/unstyled";
 import { DataTable } from "@adapttable/unstyled";
 
 type Row = { id: string; name: string; city: string; spend: number };
@@ -37,22 +45,11 @@ const columns: ColumnDef<Row>[] = [
   { key: "city" },
   { key: "spend", align: "end" },
 ];
-const filters: FilterDef[] = [{ key: "city", label: "City", type: "text" }];
+const base = { data: rows, columns, rowKey: (row: Row) => row.id };
 
-export const StillAccepted = () => (
-  <DataTable
-    data={rows}
-    columns={columns}
-    rowKey={(row) => row.id}
-    groupBy="city"
-    virtualize
-    searchable
-    filters={filters}
-    onRowReorder={(next) => next}
-    onCellEdit={(edit) => edit}
-  />
-);
+${probes.join("\n\n")}
 `;
+}
 
 /** Kit factories, a custom feature, and every registration the host offers. */
 export const SENIOR = String.raw`import type {
@@ -146,12 +143,12 @@ export const Senior = () => (
     rowKey={(row) => row.id}
     features={[
       rowReorder<Row>((next) => next),
-      savedViews<Row>({ storageKey: "harness" }),
-      grouping<Row>("city"),
+      savedViews({ storageKey: "harness" }),
+      grouping("city"),
       editing<Row>((row, key, next) => ({ ...row, [key]: next })),
-      virtualize<Row>(),
-      columnMenu<Row>(),
-      cellNavigation<Row>(),
+      virtualize(),
+      columnMenu(),
+      cellNavigation(),
       everything,
     ]}
   />
@@ -174,6 +171,7 @@ import type {
   DataTableSlots,
 } from "@adapttable/unstyled";
 import { DataTable } from "@adapttable/unstyled";
+import { rowDetail } from "@adapttable/unstyled/row-detail";
 import type { SavedViewsPanelProps } from "@adapttable/shadcn";
 import {
   DataTable as ShadcnDataTable,
@@ -227,7 +225,7 @@ export const Customized = () => (
     toolbarSlots={toolbarSlots}
     renderCard={renderCard}
     renderRowActions={renderRowActions}
-    renderRowDetail={(row) => <pre>{row.name}</pre>}
+    features={[rowDetail((row: Row) => <pre>{row.name}</pre>)]}
   />
 );
 
@@ -361,6 +359,17 @@ export function aliasTypeProbe({ types, values }) {
     `export const named = ${named.length};`,
     "",
   ].join("\n");
+}
+
+/** Every moved name must fail from the packed main entry. */
+export function removedAliasProbe({ types, values }) {
+  return [...types, ...values]
+    .map(
+      (name) =>
+        `// @ts-expect-error v3 moved ${name} to @adapttable/core/adapter\n` +
+        `import { ${name} as Removed_${name} } from "@adapttable/core";`
+    )
+    .join("\n");
 }
 
 /** A value alias must still be a value — proved by running it, not by tsc. */

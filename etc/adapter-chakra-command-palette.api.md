@@ -7,7 +7,7 @@
 import { CommandPaletteOptions } from '@adapttable/core/features';
 import { StaticTableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function commandPalette(options?: boolean | CommandPaletteOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

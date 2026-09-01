@@ -4,7 +4,6 @@ import type {
   TableErrorState,
   TableSource,
   UrlStateAdapter,
-  UseSavedViewsOptions,
 } from "@adapttable/core";
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
@@ -76,13 +75,13 @@ export interface DataTableClassNames {
   treeToggle?: string;
   /** A leaf's placeholder, holding the chevron's width so names line up. */
   treeSpacer?: string;
-  /** The Add-row toolbar button (when `onAddRow` is set). */
+  /** The Add-row toolbar button contributed by `rowActions()`. */
   addRow?: string;
-  /** The density toggle (when `densityChooser` is set). */
+  /** The density toggle contributed by `density()`. */
   densityToggle?: string;
-  /** The fullscreen toggle (when `fullscreen` is set). */
+  /** The fullscreen toggle contributed by `fullscreen()`. */
   fullscreenToggle?: string;
-  /** The command palette's surface (when `commandPalette` is set). */
+  /** The surface contributed by `commandPalette()`. */
   commandPalette?: string;
   /** Its search box. */
   commandInput?: string;
@@ -90,29 +89,29 @@ export interface DataTableClassNames {
   commandItem?: string;
   /** The "nothing matched" line. */
   commandEmpty?: string;
-  /** The right-click menu (when `contextMenu` is set). */
+  /** The right-click menu contributed by `contextMenu()`. */
   contextMenu?: string;
   /** One entry in it. */
   contextMenuItem?: string;
   /** The divider between groups of entries. */
   contextMenuSeparator?: string;
-  /** The docked settings panel (when `sidePanel` is set). */
+  /** The docked settings panel contributed by `sidePanel()`. */
   sidePanel?: string;
   /** One tab in the side panel's strip. */
   sidePanelTab?: string;
   /** The side panel's close control. */
   sidePanelClose?: string;
-  /** The status bar under the table (when `statusBar` is set). */
+  /** The strip contributed by `statusBar()`. */
   statusBar?: string;
   /** One figure inside the status bar. */
   statusItem?: string;
-  /** The Undo toolbar button (when `undoRedoButtons` is set). */
+  /** The Undo toolbar button contributed by `undoRedoButtons()`. */
   undoButton?: string;
-  /** The Redo toolbar button (when `undoRedoButtons` is set). */
+  /** The Redo toolbar button contributed by `undoRedoButtons()`. */
   redoButton?: string;
-  /** The Print toolbar button (when `printButton` and `onPrint` are set). */
+  /** The Print toolbar button contributed by `print()`. */
   printButton?: string;
-  /** The Export CSV toolbar button (when `exportCsv` is set). */
+  /** The Export CSV toolbar button contributed by `exportCsv()`. */
   exportCsvButton?: string;
   /**
    * The spinner inside the Export button while a host-handled export runs.
@@ -518,11 +517,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
   urlSync?: boolean;
   /** Per-table URL namespace (e.g. `"left"` → `left.q`, `left.page`). */
   urlKey?: string;
-  /**
-   * Mounts a saved-views menu in the toolbar (beside the Columns button).
-   * The table's own `urlAdapter` / `urlKey` fill in unless overridden here.
-   */
-  savedViews?: UseSavedViewsOptions;
   /** Per-part class name overrides. */
   classNames?: DataTableClassNames;
   /** Replace sub-components (loading skeleton, empty state). */

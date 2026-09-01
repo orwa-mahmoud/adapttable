@@ -2,10 +2,10 @@ import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 import { selectionStats } from "./status-bar";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

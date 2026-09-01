@@ -30,8 +30,8 @@ import { ConfigProvider } from "antd";
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, FilterDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

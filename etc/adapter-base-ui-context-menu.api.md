@@ -7,7 +7,7 @@
 import { ContextMenuOptions } from '@adapttable/core/features';
 import { TableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)

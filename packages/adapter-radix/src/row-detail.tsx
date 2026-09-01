@@ -31,6 +31,11 @@ const expandChrome = [
   slotRender(EXPAND_TOGGLE, (props) => <ExpandSlot {...props} />),
 ];
 
+/**
+ * Render a panel under an expanded row.
+ *
+ * @public
+ */
 export function rowDetail<TRow>(
   renderRowDetail: (row: TRow) => unknown,
   defaultExpandedRowIds?: readonly string[]
@@ -41,6 +46,11 @@ export function rowDetail<TRow>(
   );
 }
 
+/**
+ * Render a whole table inside a row's detail panel.
+ *
+ * @public
+ */
 export function nestedTable<TRow>(
   nested: NestedTableFor<TRow>,
   defaultExpandedRowIds?: readonly string[]

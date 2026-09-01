@@ -47,8 +47,9 @@ import {
   CUSTOMIZATION,
   HEADLESS,
   movedAliases,
+  removedAliasProbe,
+  removedV2Props,
   SENIOR,
-  V2_PROPS,
 } from "./layer-fixtures.mjs";
 import { missingNames, NAMEABLE, NAMEABLE_PROBE } from "./packed-names.mjs";
 
@@ -284,21 +285,21 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   );
   writeFileSync(join(resDir, "nameable.ts"), NAMEABLE_PROBE);
   // The three product layers, compiled against the tarballs beside the probes.
-  const aliases = movedAliases(
-    JSON.parse(
-      readFileSync(
-        join(REPO_ROOT, "scripts", "feature-classification.json"),
-        "utf8"
-      )
+  const manifest = JSON.parse(
+    readFileSync(
+      join(REPO_ROOT, "scripts", "feature-classification.json"),
+      "utf8"
     )
   );
+  const aliases = movedAliases(manifest);
   for (const [name, source] of [
     ["beginner.tsx", BEGINNER],
-    ["v2props.tsx", V2_PROPS],
+    ["removed-v2-props.tsx", removedV2Props(manifest)],
     ["senior.tsx", SENIOR],
     ["customization.tsx", CUSTOMIZATION],
     ["headless.tsx", HEADLESS],
     ["aliases.ts", aliasTypeProbe(aliases)],
+    ["removed-aliases.ts", removedAliasProbe(aliases)],
   ]) {
     writeFileSync(join(resDir, name), source);
   }
@@ -322,8 +323,9 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
             "probe.ts",
             "nameable.ts",
             "aliases.ts",
+            "removed-aliases.ts",
             "beginner.tsx",
-            "v2props.tsx",
+            "removed-v2-props.tsx",
             "senior.tsx",
             "customization.tsx",
             "headless.tsx",
@@ -360,7 +362,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
 
   checkPackedNames(resDir);
 
-  process.stdout.write("compatibility aliases are still values … ");
+  process.stdout.write("moved aliases are values on core/adapter … ");
   run(process.execPath, ["aliases.mjs"], resDir, "compatibility aliases");
   console.log("ok");
 

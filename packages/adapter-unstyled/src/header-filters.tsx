@@ -15,6 +15,11 @@ function HeaderFilterSlot(props: Readonly<FilterHeaderControlProps<never>>) {
   return <FilterHeaderTrigger {...props} classNames={classNames} />;
 }
 
+/**
+ * Per-column header filter trigger, drawn with native controls funnel and form.
+ *
+ * @public
+ */
 export function headerFilters(): StaticTableFeature {
   return extendFeature(core(), [
     slotRender(FILTER_HEADER, (props) => <HeaderFilterSlot {...props} />),

@@ -110,7 +110,7 @@ grouping("team", {
 });
 ```
 
-## The other three removals
+## The other four removals
 
 **Main-entry adapter machinery.** 72 names that were re-exported from
 `@adapttable/core` now live only on `@adapttable/core/adapter`, which is where
@@ -123,8 +123,90 @@ import { headerGroupRows } from "@adapttable/core";
 import { headerGroupRows } from "@adapttable/core/adapter";
 ```
 
-**`FilterTypeRegistry.register` / `.extend`.** A custom filter type registers
-through a feature, on the same object every other extension uses:
+Every moved name keeps the same spelling:
+
+| Removed from `@adapttable/core` | v3 import                  |
+| ------------------------------- | -------------------------- |
+| `COLUMN_GROUP_ID_SEP`           | `@adapttable/core/adapter` |
+| `COLUMN_GROUP_RENDER_PREFIX`    | `@adapttable/core/adapter` |
+| `COLUMN_GROUP_STUB_PREFIX`      | `@adapttable/core/adapter` |
+| `COLUMN_GROUP_STUB_WIDTH`       | `@adapttable/core/adapter` |
+| `columnGroupHeaderCaption`      | `@adapttable/core/adapter` |
+| `columnGroupId`                 | `@adapttable/core/adapter` |
+| `columnGroupPath`               | `@adapttable/core/adapter` |
+| `columnGroupStubStyle`          | `@adapttable/core/adapter` |
+| `groupedHeaderAlign`            | `@adapttable/core/adapter` |
+| `groupedHeaderCellStyle`        | `@adapttable/core/adapter` |
+| `groupedHeaderChildRule`        | `@adapttable/core/adapter` |
+| `groupedHeaderLabelStyle`       | `@adapttable/core/adapter` |
+| `HeaderGroupCell`               | `@adapttable/core/adapter` |
+| `headerGroupRow`                | `@adapttable/core/adapter` |
+| `headerGroupRows`               | `@adapttable/core/adapter` |
+| `HtmlGroupedHeaderCell`         | `@adapttable/core/adapter` |
+| `htmlGroupedHeaderPlan`         | `@adapttable/core/adapter` |
+| `isColumnGroupRenderKey`        | `@adapttable/core/adapter` |
+| `isColumnGroupStubKey`          | `@adapttable/core/adapter` |
+| `isColumnGroupSummaryKey`       | `@adapttable/core/adapter` |
+| `toggleCollapsedColumnGroup`    | `@adapttable/core/adapter` |
+| `EXTRA_OVER_SPAN_ROW_STYLE`     | `@adapttable/core/adapter` |
+| `EXTRA_OVER_SPAN_STYLE`         | `@adapttable/core/adapter` |
+| `EXTRA_ROW_PARTS`               | `@adapttable/core/adapter` |
+| `extraCountBeforeRowIds`        | `@adapttable/core/adapter` |
+| `extraCoveredTableSlots`        | `@adapttable/core/adapter` |
+| `ExtraEntry`                    | `@adapttable/core/adapter` |
+| `extraHostFillStyle`            | `@adapttable/core/adapter` |
+| `extraRowsForSection`           | `@adapttable/core/adapter` |
+| `extraUncoveredColSpans`        | `@adapttable/core/adapter` |
+| `inflateBodyCellRowSpans`       | `@adapttable/core/adapter` |
+| `insertExtraRows`               | `@adapttable/core/adapter` |
+| `insertExtrasBeforeRows`        | `@adapttable/core/adapter` |
+| `isExtraEntry`                  | `@adapttable/core/adapter` |
+| `orderedCardEntries`            | `@adapttable/core/adapter` |
+| `PINNED_BOTTOM_PART`            | `@adapttable/core/adapter` |
+| `PINNED_TOP_PART`               | `@adapttable/core/adapter` |
+| `pinnedRowCellStyle`            | `@adapttable/core/adapter` |
+| `pinnedRowPart`                 | `@adapttable/core/adapter` |
+| `pinnedRowSticky`               | `@adapttable/core/adapter` |
+| `pinnedRowStickyStyle`          | `@adapttable/core/adapter` |
+| `useOffsetHeight`               | `@adapttable/core/adapter` |
+| `columnMenuActions`             | `@adapttable/core/adapter` |
+| `filterColumnMenuRows`          | `@adapttable/core/adapter` |
+| `hideAllColumns`                | `@adapttable/core/adapter` |
+| `resetColumnLayout`             | `@adapttable/core/adapter` |
+| `showAllColumns`                | `@adapttable/core/adapter` |
+| `unpinAllColumns`               | `@adapttable/core/adapter` |
+| `BodyCell`                      | `@adapttable/core/adapter` |
+| `bodyCellsHaveRowSpan`          | `@adapttable/core/adapter` |
+| `cellsForRow`                   | `@adapttable/core/adapter` |
+| `cellSpanMark`                  | `@adapttable/core/adapter` |
+| `rowSpanSignature`              | `@adapttable/core/adapter` |
+| `REORDER_COLUMN_WIDTH`          | `@adapttable/core/adapter` |
+| `ROW_DND_MIME`                  | `@adapttable/core/adapter` |
+| `rowReorderDropStyle`           | `@adapttable/core/adapter` |
+| `rowReorderSignature`           | `@adapttable/core/adapter` |
+| `RowReorderState`               | `@adapttable/core/adapter` |
+| `resolveRowHeight`              | `@adapttable/core/adapter` |
+| `resolveRowStyle`               | `@adapttable/core/adapter` |
+| `rowStyleSignature`             | `@adapttable/core/adapter` |
+| `EditableCellActivateProps`     | `@adapttable/core/adapter` |
+| `EditableCellButtonProps`       | `@adapttable/core/adapter` |
+| `EditableCellSlots`             | `@adapttable/core/adapter` |
+| `FilterHeaderClassNames`        | `@adapttable/core/adapter` |
+| `FilterHeaderRowProps`          | `@adapttable/core/adapter` |
+| `applyCollapsedColumnGroups`    | `@adapttable/core/adapter` |
+| `flattenColumnTree`             | `@adapttable/core/adapter` |
+| `FullscreenState`               | `@adapttable/core/adapter` |
+| `useFullscreen`                 | `@adapttable/core/adapter` |
+| `rowPinSignature`               | `@adapttable/core/adapter` |
+| `rowSourceIndex`                | `@adapttable/core/adapter` |
+
+**`useChromeBodyData`.** Choose the implementation the host actually renders:
+`usePlainChromeBodyData` for a normal table, or `useVirtualChromeBodyData` for
+the virtualized feature path. Both remain available from `@adapttable/core`.
+
+**`FilterTypeRegistry.register` / `FilterTypeRegistry.extend`.** A custom
+filter type registers through a feature, on the same object every other
+extension uses:
 
 ```tsx
 // v2
@@ -144,3 +226,19 @@ meant, and `density="comfortable"` is `size="medium"`.
 The compiler finds every call site: a removed prop is not in
 `DataTableProps` any more, so `tsc` names each one. There is no deprecation
 warning to grep for, because there is nothing left to deprecate.
+
+Run the v3 codemod over the source directories:
+
+```bash
+npx @adapttable/cli migrate-v3 src
+npx @adapttable/cli migrate-v3 src --check
+```
+
+The codemod performs one provably mechanical rewrite: named adapter-contract
+imports move from `@adapttable/core` to `@adapttable/core/adapter`, splitting a
+mixed import when necessary. It is idempotent; the second run reports zero
+updates. Enabling props, `FilterTypeRegistry.register` / `extend`,
+`useChromeBodyData`, and MUI `size` need behavior choices, so the command
+reports each location and exits non-zero without rewriting it. Use those
+locations with the inventory above; no feature order or option mapping is
+guessed.

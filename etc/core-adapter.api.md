@@ -63,7 +63,6 @@ export function applyTableFeatures<P extends object>(props: P): P;
 
 // @public
 export interface AssemblyFns<TRow = unknown> {
-    // (undocumented)
     buildBodyCells: (options: {
         rows: readonly TRow[];
         columns: readonly ColumnDef<TRow>[];
@@ -73,9 +72,7 @@ export interface AssemblyFns<TRow = unknown> {
         pinOffset?: (key: string) => PinOffset | undefined;
         windowKeys?: ReadonlySet<string>;
     }) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
-    // (undocumented)
     columnResizeHandleProps: (key: string, setWidth: (key: string, width: number) => void, label: string) => ColumnResizeHandleProps | undefined;
-    // (undocumented)
     extraCoveredTableSlots: (beforeRowId: string, options: {
         visualIds: readonly string[];
         cellsByRow: ReadonlyMap<string, readonly {
@@ -86,15 +83,11 @@ export interface AssemblyFns<TRow = unknown> {
         extraRows?: readonly ExtraRow[];
         leadingCells: number;
     }) => ReadonlySet<number>;
-    // (undocumented)
     extraHostFillStyle: (extraKey: string, extraRows: readonly ExtraRow[] | undefined, rows: readonly TRow[], getRowId: (row: TRow) => string, rowStyle: RowStyle<TRow> | undefined) => CSSProperties | undefined;
-    // (undocumented)
     inflateBodyCellRowSpans: (cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
-    // (undocumented)
     insertExtraRows: <T extends {
         key: string;
     }>(entries: readonly T[], extraRows: readonly ExtraRow[] | undefined, dataKey: (entry: T) => string | undefined) => readonly (T | ExtraEntry)[];
-    // (undocumented)
     insertExtrasBeforeRows: (rows: readonly TRow[], extraRows: readonly ExtraRow[] | undefined, getRowId: (row: TRow) => string) => readonly ({
         key: string;
         row: TRow;
@@ -430,18 +423,14 @@ export function cellHighlightStyle(props: Readonly<Record<string, unknown>> | un
 // @public
 export interface CellNavLiveSlotProps<TRow = never> {
     children: (gridFocus: GridFocusState) => ReactNode;
-    // (undocumented)
     currentMatch: UseGridFocusOptions<TRow>["currentMatch"];
     hostProps: ComposedTableProps<TRow>;
-    // (undocumented)
     matchKeys: ReadonlySet<string>;
     onFind?: () => void;
     options: Omit<UseGridFocusOptions<TRow>, "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind">;
     pinOffset?: (key: string) => PinOffset | undefined;
     record: (edits: readonly unknown[]) => void;
-    // (undocumented)
     redo: () => number;
-    // (undocumented)
     undo: () => number;
 }
 
@@ -1637,26 +1626,16 @@ export type EditableCellMode = "display" | "activatable" | "editing";
 
 // @public
 export interface EditableCellSlotProps<TRow = never> {
-    // (undocumented)
     column: ColumnDef<TRow>;
-    // (undocumented)
     columns: readonly ColumnDef<TRow>[];
     display?: ReactNode;
-    // (undocumented)
     editing: EditableCellEditing<TRow> | undefined;
-    // (undocumented)
     editLabel: string;
-    // (undocumented)
     row: TRow;
-    // (undocumented)
     rowId: string;
-    // (undocumented)
     rowIndex: number;
-    // (undocumented)
     rowKey: (row: TRow) => string;
-    // (undocumented)
     rows: readonly TRow[];
-    // (undocumented)
     undoLabel?: string;
 }
 
@@ -1814,17 +1793,11 @@ export function ExpandChevron(input: Readonly<{
 
 // @public
 export interface ExpandToggleSlotProps {
-    // (undocumented)
     collapseLabel: string;
-    // (undocumented)
     dir?: Direction;
-    // (undocumented)
     expanded: boolean;
-    // (undocumented)
     expandLabel: string;
-    // (undocumented)
     id: string;
-    // (undocumented)
     onToggle: (id: string) => void;
 }
 
@@ -1983,7 +1956,7 @@ export interface ExportWriter {
 // @public
 export function extendFeature(base: StaticTableFeature, renders: readonly FeatureRender<never>[]): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function extendFeature<TRow>(base: TableFeature<TRow>, renders: readonly FeatureRender<never>[]): TableFeature<TRow>;
 
 // @public
@@ -2249,11 +2222,8 @@ export const FILL_HANDLE: FeatureSlotKey<FillHandleCellSlotProps>;
 
 // @public
 export interface FillHandleCellSlotProps {
-    // (undocumented)
     col: number;
-    // (undocumented)
     focus: GridFocusState | undefined;
-    // (undocumented)
     windowIndex: number;
 }
 
@@ -2880,51 +2850,35 @@ export function groupedHeaderLabelStyle(): CSSProperties;
 
 // @public
 export interface GroupHeaderCardSlotProps<TRow = never> {
-    // (undocumented)
     columns: readonly ColumnDef<TRow>[];
-    // (undocumented)
     compact: boolean;
-    // (undocumented)
     entry: Extract<GroupedFlatEntry<TRow>, {
         kind: "group" | "groupFooter" | "groupMore";
     }>;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     onShowMore: (entry: {
         scope: "groups" | "rows";
         groupKey?: string;
     }) => void;
-    // (undocumented)
     onToggleCollapse: (groupKey: string) => void;
-    // (undocumented)
     selection: SelectionState | null;
 }
 
 // @public
 export interface GroupHeaderRowSlotProps<TRow = never> {
-    // (undocumented)
     columns: readonly ColumnDef<TRow>[];
-    // (undocumented)
     entry: Extract<GroupedFlatEntry<TRow>, {
         kind: "group" | "groupFooter" | "groupMore";
     }>;
-    // (undocumented)
     getCellProps: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    // (undocumented)
     labels: Required<TableLabels>;
-    // (undocumented)
     leadingCells: number;
-    // (undocumented)
     onShowMore: (entry: {
         scope: "groups" | "rows";
         groupKey?: string;
     }) => void;
-    // (undocumented)
     onToggleCollapse: (groupKey: string) => void;
-    // (undocumented)
     selection: SelectionState | null;
-    // (undocumented)
     showActions: boolean;
 }
 
@@ -3513,6 +3467,12 @@ export interface ResolvedContextTarget<TRow> {
 }
 
 // @public
+export interface ResolvedDensity {
+    readonly density: Density;
+    readonly onDensityChange: (next: Density) => void;
+}
+
+// @public
 export function resolveDisabledReason(reason: string | undefined): string | undefined;
 
 // @public
@@ -4075,15 +4035,10 @@ export interface SelectionStatsChromeProps {
 
 // @public
 export interface SelectionStatsLiveSlotProps<TRow = never> {
-    // (undocumented)
     children: (stats: SelectionStats | null) => ReactNode;
-    // (undocumented)
     columns: readonly ColumnDef<TRow>[];
-    // (undocumented)
     firstRowIndex: number;
-    // (undocumented)
     range: CellRange | null;
-    // (undocumented)
     rows: readonly TRow[];
 }
 
@@ -4897,7 +4852,7 @@ export interface ToolbarChromeProps<TRow> {
     canRedo?: boolean;
     canUndo?: boolean;
     columnMenu?: ReactNode;
-    density?: "comfortable" | "compact";
+    density: "comfortable" | "compact";
     dir?: "ltr" | "rtl";
     exportAnnouncement?: string;
     exportBusy?: boolean;
@@ -4909,7 +4864,7 @@ export interface ToolbarChromeProps<TRow> {
     hasFilters: boolean;
     isFullscreen?: boolean;
     onAddRow?: () => void;
-    onDensityChange?: (next: "comfortable" | "compact") => void;
+    onDensityChange: (next: "comfortable" | "compact") => void;
     onExportCsv?: () => void;
     onFiltersTriggerPointerDown?: () => void;
     onPrint?: () => void;
@@ -4933,41 +4888,25 @@ export interface ToolbarChromeProps<TRow> {
 // @public
 export interface ToolbarExtrasSlotProps {
     accentColor?: string;
-    // (undocumented)
     canRedo?: boolean;
-    // (undocumented)
     canUndo?: boolean;
     classNames?: Readonly<Record<string, string | undefined>>;
-    // (undocumented)
-    density?: "comfortable" | "compact";
-    // (undocumented)
+    density: "comfortable" | "compact";
     exportAnnouncement?: string;
-    // (undocumented)
     exportBusy?: boolean;
     exportDisabled?: boolean;
     exportDisabledReason?: string;
-    // (undocumented)
     exportLabel?: string;
-    // (undocumented)
     isFullscreen?: boolean;
     labels: Required<TableLabels>;
-    // (undocumented)
-    onDensityChange?: (next: "comfortable" | "compact") => void;
-    // (undocumented)
+    onDensityChange: (next: "comfortable" | "compact") => void;
     onExportCsv?: () => void;
-    // (undocumented)
     onPrint?: () => void;
-    // (undocumented)
     onRedo?: () => void;
-    // (undocumented)
     onToggleFullscreen?: () => void;
-    // (undocumented)
     onUndo?: () => void;
-    // (undocumented)
     printLabel?: string;
-    // (undocumented)
     redoLabel?: string;
-    // (undocumented)
     undoLabel?: string;
 }
 
@@ -5169,6 +5108,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
     urlAdapter: UrlStateAdapter;
     chrome: TableChrome<TRow>;
     chromeProps: {
+        density: Density;
+        onDensityChange: (next: Density) => void;
         urlAdapter: UrlStateAdapter;
         onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
         source: TableSource<TRow>;
@@ -5187,7 +5128,6 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
         commandPalette?: boolean | CommandPaletteOptions;
-        density?: "comfortable" | "compact" | undefined;
         findInTable?: boolean;
         dir?: Direction | undefined;
         labels?: TableLabels | undefined;
@@ -5262,7 +5202,6 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
-        onDensityChange?: ((next: "comfortable" | "compact") => void) | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
@@ -5326,6 +5265,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         mode: "server";
         onQueryChange: TableQueryHandler;
     } | {
+        density: Density;
+        onDensityChange: (next: Density) => void;
         urlAdapter: UrlStateAdapter;
         onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
         source: TableSource<TRow>;
@@ -5344,7 +5285,6 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
         commandPalette?: boolean | CommandPaletteOptions;
-        density?: "comfortable" | "compact" | undefined;
         findInTable?: boolean;
         dir?: Direction | undefined;
         labels?: TableLabels | undefined;
@@ -5419,7 +5359,6 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
-        onDensityChange?: ((next: "comfortable" | "compact") => void) | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
@@ -5487,6 +5426,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
     scrollBoxElement: RefObject<HTMLElement | null>;
     table: UseDataTableResult<TRow>;
     labels: Required<TableLabels>;
+    density: Density;
     filtersNode: ReactNode;
     filtersOpen: boolean;
     setFiltersOpen: Dispatch<SetStateAction<boolean>>;
@@ -5569,7 +5509,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
             collapseToDepth: (depth: number) => void;
             showMore: (entry: {
                 scope: "groups" | "rows";
-                groupKey? /** Cell-navigation state; inert unless `cellNavigation` is set. */ : string;
+                groupKey?: string;
             }) => void;
         } | undefined;
         dir: Direction | undefined;
@@ -5591,8 +5531,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         showRowsPerPage: boolean;
         onAddRow: (() => void) | undefined;
         addRowLabel: string;
-        density?: "comfortable" | "compact";
-        onDensityChange?: ((next: "comfortable" | "compact") => void) | undefined;
+        density: "comfortable" | "compact";
+        onDensityChange: (next: "comfortable" | "compact") => void;
         onToggleFullscreen?: (() => void) | undefined;
         isFullscreen?: boolean;
         onPrint?: (() => void) | undefined;
@@ -5702,6 +5642,12 @@ export function usePublishTableRuntime(rows: readonly unknown[], labels: Readonl
 export function useResolvedAdapter(adapter: UrlStateAdapter | undefined, enabled: boolean): UrlStateAdapter;
 
 // @public
+export function useResolvedDensity(input: {
+    readonly density?: Density;
+    readonly onDensityChange?: (next: Density) => void;
+}): ResolvedDensity;
+
+// @public
 export function useRowPairMeasurer(virtualizer: ResizableVirtualizer | undefined, enabled: boolean): RowPairMeasurer;
 
 // @public
@@ -5798,17 +5744,16 @@ export interface ValidationTarget {
 
 // @public
 export interface ViewControlsToolbar {
-    density?: "comfortable" | "compact";
+    density: "comfortable" | "compact";
     isFullscreen?: boolean;
-    onDensityChange?: (next: "comfortable" | "compact") => void;
+    onDensityChange: (next: "comfortable" | "compact") => void;
     onToggleFullscreen?: () => void;
 }
 
 // @public
 export function viewControlsToolbar(props: {
-    densityChooser?: boolean;
-    density?: "comfortable" | "compact";
-    onDensityChange?: (next: "comfortable" | "compact") => void;
+    density: "comfortable" | "compact";
+    onDensityChange: (next: "comfortable" | "compact") => void;
     fullscreen?: boolean;
 }, fullscreen: {
     supported: boolean;

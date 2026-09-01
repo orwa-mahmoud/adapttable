@@ -11,8 +11,8 @@ import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

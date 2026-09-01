@@ -7,7 +7,7 @@
 import { BulkAction } from '@adapttable/core/features';
 import { StaticTableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function bulkActions(actions: readonly BulkAction[]): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

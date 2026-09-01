@@ -653,7 +653,8 @@ export function downloadTableCsv<TRow>(options: {
 }
 
 /**
- * Resolve the `exportCsv` prop into a click handler, or `undefined` when off.
+ * Resolve composed export configuration into a click handler, or `undefined`
+ * when off.
  * Adapters bind this to the toolbar Export button.
  *
  * @typeParam TRow - The row type.

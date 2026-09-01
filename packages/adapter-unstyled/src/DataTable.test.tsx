@@ -4,8 +4,8 @@ import { sparklineColumn } from "@adapttable/core/sparkline";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 import { virtualize } from "./virtualize";
 
 interface Row {

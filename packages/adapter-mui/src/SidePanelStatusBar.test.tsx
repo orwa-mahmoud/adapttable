@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 import { sidePanel } from "./side-panel";
 import { statusBar } from "./status-bar";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -86,8 +86,8 @@ describe("side panel and status bar (mui)", () => {
   });
 
   it("shows the row count once the status bar is asked for", () => {
-    // The strip is the feature's own component, so the import is what brings
-    // it; the prop enables it.
+    // The strip is the feature's own component; the import and composition
+    // bring both its configuration and renderer.
     table({ statusBar: true, features: [statusBar()] });
     const bar = document.querySelector('[data-adapttable-part="status-bar"]');
 

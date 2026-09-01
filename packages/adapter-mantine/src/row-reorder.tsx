@@ -11,6 +11,11 @@ import { rowReorder as core } from "@adapttable/core/features";
 
 import { RowReorderButtons, RowReorderHandle } from "./components/kitControls";
 
+/**
+ * Let rows be dragged, or moved with the keyboard, into a new order.
+ *
+ * @public
+ */
 export function rowReorder<TRow>(
   onRowReorder: Parameters<typeof core<TRow>>[0]
 ): TableFeature<TRow> {

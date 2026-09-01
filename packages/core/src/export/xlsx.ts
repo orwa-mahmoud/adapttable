@@ -325,7 +325,7 @@ const XLSX_MIME =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 /**
- * The spreadsheet writer, for the `exportCsv` prop's `writer` option:
+ * The spreadsheet writer, for `exportCsv({ writer })`:
  *
  * ```tsx
  * import { xlsxWriter } from "@adapttable/core/xlsx";

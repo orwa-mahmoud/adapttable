@@ -493,7 +493,11 @@ export function finishDataTableShell<TRow>(
   };
 }
 
-/** What {@link useDataTableShell} returns, before or after the body gate. */
+/**
+ * What {@link useDataTableShell} returns, before or after the body gate.
+ *
+ * @public
+ */
 export type DataTableShellResult<TRow> = ReturnType<
   typeof useDataTableShell<TRow>
 >;

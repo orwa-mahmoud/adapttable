@@ -1,16 +1,24 @@
 # React table column management — show, hide, reorder, pin & resize
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`enableColumnMenu` + `resizableColumns`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's features are already wired in `src/App.tsx` (`columnMenu()` + `resizableColumns()`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [pin, resize and reorder columns in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/) — a real table you can drag, not a recording.
 
-Let users show/hide, reorder, pin, and resize columns — one prop per capability, with the resulting layout persistable to the URL or localStorage. Every adapter shares the same engine from `@adapttable/core`.
+Let users show/hide, reorder, pin, and resize columns — compose one factory per
+capability from `@adapttable/<kit>/<feature>`, with the resulting layout
+persistable to the URL or localStorage. The import is the switch; enabling props
+such as `enableColumnMenu` or `resizableColumns` draw nothing on their own. See
+[feature composition](./features.md). Every adapter shares the same engine from
+`@adapttable/core`.
 
 ## Example
 
 ```tsx
 import { useColumnLayoutStorageState } from "@adapttable/core";
 import { type ColumnDef, DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { columnMenu } from "@adapttable/mantine/column-menu";
+import { resizableColumns } from "@adapttable/mantine/resizable-columns";
+import { rowActions } from "@adapttable/mantine/row-actions";
 
 interface Person {
   id: string;
@@ -69,14 +77,16 @@ export function People() {
       data={people}
       columns={columns}
       rowKey={(r) => r.id}
-      enableColumnMenu // Columns menu: show/hide, reorder, pin
-      resizableColumns // drag or arrow-key resize handles
+      features={[
+        columnMenu(), // Columns menu: show/hide, reorder, pin
+        resizableColumns(), // drag or arrow-key resize handles
+        rowActions([
+          { key: "edit", label: "Edit", onClick: (r) => console.log(r) },
+        ]),
+      ]}
       maxHeight={420} // scroll box so pinned columns visibly stick
       columnLayout={layout}
       onColumnLayoutChange={onLayoutChange}
-      rowActions={[
-        { key: "edit", label: "Edit", onClick: (r) => console.log(r) },
-      ]}
     />
   );
 }
@@ -84,24 +94,25 @@ export function People() {
 
 ## How it works
 
-- `enableColumnMenu` renders the built-in Columns menu: a search box, bulk show/hide/unpin, a visibility toggle per column, drag- or arrow-key reorder on each row's grip, a pin control, a per-column submenu (sort, pin, hide, auto-size, filter, reset one), auto-size-all, and reset-all. Hiding a column never reorders the rest. `lockPosition` / `lockVisibility` / `lockWidth` / `lockPin` on a `ColumnDef` gray out the matching controls.
+- `columnMenu()` renders the built-in Columns menu: a search box, bulk show/hide/unpin, a visibility toggle per column, drag- or arrow-key reorder on each row's grip, a pin control, a per-column submenu (sort, pin, hide, auto-size, filter, reset one), auto-size-all, and reset-all. Hiding a column never reorders the rest. `lockPosition` / `lockVisibility` / `lockWidth` / `lockPin` on a `ColumnDef` gray out the matching controls.
 - Pinning is logical (inline start/end), so a "left" pin sticks to the correct edge under `dir="rtl"`. It needs a horizontal scroll context to visibly stick — set `maxHeight`, or let the table exceed its container width.
-- `resizableColumns` adds a handle to every header: drag it, or focus it and press ←/→ (16 px per step, 60 px minimum). Direction-aware, so it widens the right way in RTL.
+- `resizableColumns()` adds a handle to every header: drag it, or focus it and press ←/→ (16 px per step, 60 px minimum). Direction-aware, so it widens the right way in RTL.
 - The row-actions column is first-class under the reserved key `"actions"` (`ACTIONS_COLUMN_KEY`): the menu lists it with a visibility toggle and an end-pin toggle — `hidden: ["actions"]` hides it, `pinned: { actions: "right" }` pins it to the end on its own, no data-column pin required. It never reorders or resizes; it always trails.
 - The layout state is `{ hidden, order, pinned, widths, collapsedGroups? }` (`ColumnLayoutState`), keyed by column key. Uncontrolled by default; seed it with `defaultColumnLayout`, or own it with `columnLayout` + `onColumnLayoutChange` — the same controlled/uncontrolled split as a form input. `collapsedGroups` is omitted when every group is open.
 - Two ready-made persistence hooks feed the controlled mode: `useColumnLayoutUrlState({ urlKey })` keeps the layout in the query string (`colHide` / `colPin` / `colOrder` / `colW` / `colGroupCollapse` — shareable links), and `useColumnLayoutStorageState({ storageKey })` keeps it in localStorage (user preference).
 
 ## Options
 
-| Prop                      | Type                                | Default | Description                                                                                                     |
-| ------------------------- | ----------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
-| `enableColumnMenu`        | `boolean`                           | `false` | Render the built-in Columns menu (show/hide, pin, reorder).                                                     |
-| `resizableColumns`        | `boolean`                           | `false` | Enable drag/keyboard column-resize handles.                                                                     |
-| `defaultColumnLayout`     | `Partial<ColumnLayoutState>`        | —       | Initial layout for the uncontrolled mode.                                                                       |
-| `columnLayout`            | `ColumnLayoutState`                 | —       | Controlled layout (hidden/order/pinned/widths).                                                                 |
-| `onColumnLayoutChange`    | `(next: ColumnLayoutState) => void` | —       | Change handler for the controlled layout.                                                                       |
-| `collapsibleColumnGroups` | `boolean`                           | `false` | Group headers gain a collapse toggle; each group decides what remains. See [column groups](./column-groups.md). |
-| `maxHeight`               | `number`                            | —       | Fixed-height scroll box (px); enables sideways scroll + visible pinning.                                        |
+| Factory / prop              | Type                                | Default | Description                                                                                                                    |
+| --------------------------- | ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `columnMenu()`              | —                                   | off     | Factory from `@adapttable/<kit>/column-menu`; composes the Columns menu (show/hide, pin, reorder).                             |
+| `resizableColumns()`        | —                                   | off     | Factory from `@adapttable/<kit>/resizable-columns`; drag/keyboard column-resize handles.                                       |
+| `fitColumns()`              | —                                   | off     | Factory from `@adapttable/<kit>/fit-columns`; columns share the container width.                                               |
+| `collapsibleColumnGroups()` | —                                   | off     | Factory from `@adapttable/<kit>/column-groups`; group headers gain a collapse toggle. See [column groups](./column-groups.md). |
+| `defaultColumnLayout`       | `Partial<ColumnLayoutState>`        | —       | Initial layout for the uncontrolled mode.                                                                                      |
+| `columnLayout`              | `ColumnLayoutState`                 | —       | Controlled layout (hidden/order/pinned/widths).                                                                                |
+| `onColumnLayoutChange`      | `(next: ColumnLayoutState) => void` | —       | Change handler for the controlled layout.                                                                                      |
+| `maxHeight`                 | `number`                            | —       | Fixed-height scroll box (px); enables sideways scroll + visible pinning.                                                       |
 
 ## Notes
 
@@ -137,11 +148,18 @@ share of whatever space is left over.
 ### Filling the container
 
 By default a table takes the width its columns need and scrolls when that is
-more than the container. `fitColumns` reverses it: the columns share the
-container instead.
+more than the container. Compose `fitColumns()` to reverse it: the columns
+share the container instead.
 
 ```tsx
-<DataTable data={rows} columns={columns} rowKey={rowKey} fitColumns />
+import { fitColumns } from "@adapttable/mantine/fit-columns";
+
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={rowKey}
+  features={[fitColumns()]}
+/>;
 ```
 
 Columns with a `width` keep it, columns with a `flex` take that share, and

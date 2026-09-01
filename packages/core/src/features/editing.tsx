@@ -127,7 +127,7 @@ function LiveEditing({
   useEffect(() => {
     if (!hasEditableColumn || onCellEdit) return;
     devWarn(
-      "columns declare `editable` but no `onCellEdit` handler is set — cell editing stays inert. Pass `onCellEdit` on the table to enable it."
+      "columns declare `editable` but no edit handler is composed — cell editing stays inert. Add `editing(handler)` to the table's features."
     );
   }, [hasEditableColumn, onCellEdit]);
 

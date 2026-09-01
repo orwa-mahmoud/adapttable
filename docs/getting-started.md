@@ -144,6 +144,7 @@ Pass `data` and declare columns — that's the whole thing:
 // "@adapttable/radix", "@adapttable/base-ui", "@adapttable/shadcn",
 // "@adapttable/unstyled" — same props everywhere.
 import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 
 interface Person {
   id: string;
@@ -188,10 +189,15 @@ export function PeopleTable() {
         { key: "hiredAt", filter: "dateRange" },
       ]}
       rowKey={(r) => r.id}
+      features={[filters([])]}
     />
   );
 }
 ```
+
+Column `filter` declarations need the filters feature — `filters([])` when
+every filter lives on a column, or pass standalone defs to the factory (below).
+See [feature composition](./features.md).
 
 What you just got without writing any of it: search, sorting, pagination
 (paged on desktop, infinite scroll on mobile), URL-synced state (reload-safe,
@@ -208,11 +214,18 @@ filter also drives its own removable chip, URL parsing, and row predicate.
 <DataTable
   data={PEOPLE}
   columns={columns}
-  filters={[
-    { key: "companyId", type: "select", label: "Company", options: companies },
-    { key: "budget", type: "numberRange" },
-  ]}
   rowKey={(r) => r.id}
+  features={[
+    filters([
+      {
+        key: "companyId",
+        type: "select",
+        label: "Company",
+        options: companies,
+      },
+      { key: "budget", type: "numberRange" },
+    ]),
+  ]}
 />
 ```
 
@@ -238,7 +251,7 @@ The source for each lives in
 
 - [Columns](./columns.md) — headers, custom cells, the Columns menu
   (show/hide, reorder, pin), resizing.
-- [Inline cell editing](./cell-editing.md) — opt-in `onCellEdit`, kit-native
+- [Inline cell editing](./cell-editing.md) — compose `editing()`, kit-native
   editors, keyboard flow.
 - [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids

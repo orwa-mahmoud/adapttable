@@ -4,8 +4,8 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;
@@ -100,7 +100,7 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
     expect(screen.queryByText("Beta")).not.toBeInTheDocument();
   });
 
-  it("column filter shorthands alone (no filters prop) render the auto form", async () => {
+  it("column shorthands with empty feature config render the auto form", async () => {
     const adapter = createMemoryAdapter("");
     renderMantine(
       <DataTable<Person>

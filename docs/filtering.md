@@ -12,6 +12,7 @@ the [advanced filter tree](./filter-tree.md).
 ```tsx
 // Needs your kit's provider once at the root (e.g. <MantineProvider>).
 import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { filters } from "@adapttable/mantine/filters";
 
 interface Person {
   id: string;
@@ -93,16 +94,16 @@ export function PeopleTable() {
         { key: "salary", filter: "numberRange", sortable: true },
         { key: "hiredAt", filter: "dateRange" },
       ]}
-      // Filters that aren't columns. A `filters` entry with the same key as a
-      // column filter wins (with a dev warning).
-      filters={[
-        {
-          key: "tenure",
-          type: "numberRange",
-          label: "Tenure (years)",
-          getValue: (r) =>
-            (Date.now() - new Date(r.hiredAt).getTime()) / 31_557_600_000,
-        },
+      features={[
+        filters([
+          {
+            key: "tenure",
+            type: "numberRange",
+            label: "Tenure (years)",
+            getValue: (r) =>
+              (Date.now() - new Date(r.hiredAt).getTime()) / 31_557_600_000,
+          },
+        ]),
       ]}
       filtersMode="popover" // the default; "drawer" or "header" — one mode, never stacked
     />
@@ -110,13 +111,18 @@ export function PeopleTable() {
 }
 ```
 
+Import `filters` from `@adapttable/<kit>/filters` — the import is the switch.
+Column `filter` declarations still need that feature: pass `filters([])` when
+every filter lives on a column, or pass standalone defs as above. See
+[feature composition](./features.md).
+
 ## How it works
 
 - Two declaration sites, merged column-first: the column `filter` shorthand
   (a bare type like `"dateRange"`, or a definition without `key`/`label` —
-  both inherited from the column) and the table-level `filters: FilterDef[]`
-  for filters with no column. On a key collision the standalone definition
-  wins and a development warning points at the duplicate.
+  both inherited from the column) and standalone entries passed to
+  `filters([…])` for filters with no column. On a key collision the standalone
+  definition wins and a development warning points at the duplicate.
 - Seven built-in types (`FILTER_TYPES`): `text`, `select` (equals),
   `multiSelect` (wrapping multi-value chips),
   `checklist` (Excel-style distinct values with search, select-all and
@@ -158,19 +164,17 @@ export function PeopleTable() {
 | `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                               |
 | `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                |
 
-`<DataTable>` filter props:
-
-| Prop                        | Type                                | Default        | Description                                                                                                                               |
+| Factory / prop              | Type                                | Default        | Description                                                                                                                               |
 | --------------------------- | ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters`                   | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch).                                                        |
+| `filters([…])`              | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch). Use `filters([])` when every filter is on a column.    |
 | `filtersMode`               | `"popover" \| "drawer" \| "header"` | `"popover"`    | One container. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: compact per-column row; hides the Filters button.   |
 | `onClearFilters`            | `() => void`                        | built-in clear | Clear handler used by the drawer and the chip strip.                                                                                      |
 | `filterLabels`              | `Record<string, ChipLabelResolver>` | derived        | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label). |
 | `extraChips`                | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                                                                       |
 | `activeFilterCount`         | `number`                            | chip count     | Overrides the Filters-button badge.                                                                                                       |
-| `headerFilters`             | `boolean`                           | `false`        | Alias for `filtersMode="header"`. Desktop only. Never stacked with the popover or drawer.                                                 |
 | `closeHeaderFilterOnSelect` | `boolean`                           | `false`        | Close a header-filter overlay after a finished single-control write (select/boolean, or a valueless operator). Off by default.            |
-| `filterTypes`               | `FilterTypeSpec[]`                  | built-ins      | Extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces.                                              |
+| `filterTypes([…])`          | `FilterTypeSpec[]`                  | built-ins      | Extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces. Compose via `features`.                      |
+| `headerFilters()`           | factory                             | —              | Compose when `filtersMode="header"` (or pass `headerFilters` on a test harness). Desktop only. Never stacked with the popover or drawer.  |
 
 ## Headless filter primitives
 
@@ -233,7 +237,8 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   `emptyFilterRegistry` seeds a registry from scratch.
   `FilterTypeRegistry` / `FilterWidgetKind` / `FilterWidgetRenderProps`
   are the types.
-- **Header filter row**: `headerFilters` (or `filtersMode="header"`)
+- **Header filter row**: compose `headerFilters()` and set
+  `filtersMode="header"` (see [feature composition](./features.md))
   mounts each adapter's `FilterHeaderRow` / `FilterHeaderControl` over
   `FilterHeaderChrome` / `FilterHeaderControlChrome`. Helpers
   `filterDefForColumn` / `headerFilterStickTop` stay on core. The row
@@ -306,7 +311,7 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   its key, so half-filled widgets never leak stale bounds.
 - Async loaders run once (the promise is cached); until they resolve, chips
   label with the raw value. A failed load dev-warns and yields no options.
-- Passing JSX as `filters` switches off every derivation — your controls
+- Passing JSX to `filters(…)` switches off every derivation — your controls
   update table state themselves (live by default), and you supply
   `filterLabels` / `extraChips` / `activeFilterCount` for the chips and badge.
 - Changing any filter resets the page to 1. `multiSelect` URL values are

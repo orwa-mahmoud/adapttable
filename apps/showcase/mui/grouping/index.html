@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for MUI</p>
         <h1>Row grouping in MUI</h1>
-        <p>Pass <code>groupBy</code> and rows fold into MUI group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
+        <p>Compose <code>grouping(groupBy)</code> and rows fold into MUI group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
         <p><code>groupAggregates</code> adds per-group subtotals from the same mapper <code>summaryRow</code> uses, so every header totals its whole subtree and <code>groupFooters</code> closes each group with the same numbers.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>A group header is a TableRow with a spanning TableCell holding an IconButton chevron, a Checkbox and Typography; the footer is the same component with the controls taken away, and the summary sits in a real TableFooter.</p>

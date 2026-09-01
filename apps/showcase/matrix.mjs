@@ -460,7 +460,7 @@ export function People({ rows, columns }) {
     description:
       "Edit cells in place in a {kit} table — text, number and select editors, Enter to commit, paste from a spreadsheet, undo in one press. Your handler owns every write.",
     intro: [
-      "Mark a column `editable`, pass `onCellEdit`, and double-click opens a {kit} editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.",
+      "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a {kit} editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.",
       "The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.",
       "With `cellNavigation` on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.",
     ],
@@ -767,7 +767,7 @@ export function People({ rows }) {
     description:
       "Export a {kit} data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout.",
     intro: [
-      "One `exportCsv` prop puts an export button in the toolbar, and one `scope` decides what leaves: the current page, every filtered row, or exactly the cells selected.",
+      "One `exportCsv()` feature puts an export button in the toolbar, and one `scope` decides what leaves: the current page, every filtered row, or exactly the cells selected.",
       "Swap the writer and the same button produces a different file. `xlsxWriter` writes Excel outline levels for grouped rows and bolds the totals; `pdfWriter` lays out a paginated document, right-to-left scripts included when you hand it a font.",
       "`printTable` opens the browser's own print dialog against a layout built for paper rather than a screenshot of the page.",
     ],
@@ -866,7 +866,7 @@ export function People({ rows, columns, onArchive }) {
     description:
       "Group rows in a {kit} data table by one key or several — nested group headers with counts, per-group subtotals, group footers, and collapse state in the URL.",
     intro: [
-      "Pass `groupBy` and rows fold into {kit} group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.",
+      "Compose `grouping(groupBy)` and rows fold into {kit} group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.",
       "`groupAggregates` adds per-group subtotals from the same mapper `summaryRow` uses, so every header totals its whole subtree and `groupFooters` closes each group with the same numbers.",
       "Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.",
     ],

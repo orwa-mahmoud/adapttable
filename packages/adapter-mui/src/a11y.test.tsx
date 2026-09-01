@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

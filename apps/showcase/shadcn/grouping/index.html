@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for shadcn</p>
         <h1>Row grouping in shadcn</h1>
-        <p>Pass <code>groupBy</code> and rows fold into shadcn group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
+        <p>Compose <code>grouping(groupBy)</code> and rows fold into shadcn group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
         <p><code>groupAggregates</code> adds per-group subtotals from the same mapper <code>summaryRow</code> uses, so every header totals its whole subtree and <code>groupFooters</code> closes each group with the same numbers.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>A group row sits on bg-muted, and the footer flips the rule rather than the colour — same surface, a top border instead of a bottom one — so a group reads as opening and closing on the same note.</p>

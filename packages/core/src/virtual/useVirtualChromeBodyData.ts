@@ -32,8 +32,8 @@ import { useMeasuredWindowScrollMargin } from "./windowScrollMargin";
 
 /**
  * Window virtualization (eligible only for real rows in infinite mode) and
- * the infinite-scroll sentinel. Same behaviour as the former
- * `useChromeBodyData` when `virtualize` is on.
+ * the infinite-scroll sentinel. This is the body-data implementation composed
+ * by the `virtualize` feature.
  *
  * @public
  */

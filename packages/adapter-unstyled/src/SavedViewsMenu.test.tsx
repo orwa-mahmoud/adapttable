@@ -8,8 +8,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 const KEY = "test-views";
 

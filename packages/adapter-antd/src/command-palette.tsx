@@ -25,6 +25,12 @@ function LiveCommandPalette(props: Readonly<UseCommandPaletteOptions>) {
   );
 }
 
+/**
+ * A searchable list of everything the table can do, opened with Ctrl/Cmd+K,
+ * drawn with Ant Design's own dialog and list.
+ *
+ * @public
+ */
 export function commandPalette(
   options: boolean | CommandPaletteOptions = true
 ): StaticTableFeature {

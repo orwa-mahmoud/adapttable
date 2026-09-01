@@ -19,6 +19,14 @@ function BulkSlot(
   return <BulkBar {...props} classNames={classNames} />;
 }
 
+/**
+ * Actions that run against the selected rows, drawn with native controls bar.
+ *
+ * Concatenate onto the core live render — replacing `renders` would drop
+ * `SELECTION_LIVE`.
+ *
+ * @public
+ */
 export function bulkActions(
   actions: readonly BulkAction[]
 ): StaticTableFeature {

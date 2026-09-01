@@ -16,8 +16,8 @@ import {
 import { ConfigProvider } from "antd";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, FilterDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -1717,7 +1717,7 @@ function pickFilterSelect(
 const urlState = () => decodeURIComponent(adapter.getSearch());
 
 describe("<DataTable> declarative engine (Ant Design)", () => {
-  it("column filter shorthands alone (no filters prop) render the auto form", () => {
+  it("column shorthands with empty feature config render the auto form", () => {
     renderZero();
     const popover = openFilters();
     // personColumns declares `filter: "text"` on firstName — the form must

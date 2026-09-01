@@ -15,6 +15,14 @@ function BulkSlot(props: Parameters<typeof BulkBar>[0]) {
   return <BulkBar {...props} />;
 }
 
+/**
+ * Actions that run against the selected rows, drawn with Ant Design's own bar.
+ *
+ * Concatenate onto the core live render — replacing `renders` would drop
+ * `SELECTION_LIVE`.
+ *
+ * @public
+ */
 export function bulkActions(
   actions: readonly BulkAction[]
 ): StaticTableFeature {

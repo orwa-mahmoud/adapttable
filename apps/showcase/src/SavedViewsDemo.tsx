@@ -171,10 +171,8 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 urlKey="sv"
                 urlAdapter={session}
                 defaultColumnLayout={layoutFor("saved-views")}
-                // The views menu and the column layout both come with this
-                // import: the props alone draw neither.
+                // The feature owns both the views menu and its runtime state.
                 features={[kitSavedViewsFeature(adapter, savedViewsOptions)]}
-                savedViews={savedViewsOptions}
                 labels={getLabels("en")}
                 classNames={classNames}
               />

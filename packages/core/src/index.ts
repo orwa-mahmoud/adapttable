@@ -601,15 +601,19 @@ export {
 /* ── Types a main-entry signature names ────────────────────────────── */
 
 /**
- * Three shapes the front door's own signatures hand back.
+ * Six shapes the front door's own signatures hand back.
  *
- * v3 moved the adapter machinery to `@adapttable/core/adapter`; these stayed
- * because a value this entry exports returns one of them, and a return type a
+ * v3 moved the adapter contracts to `@adapttable/core/adapter`; the main entry
+ * gives its returned shapes distinct public names because a return type a
  * caller cannot name is a signature they cannot write down.
  */
-export type { EditableCellSlots } from "./editing/EditableCellGate";
-export type { ExtraEntry } from "./rows/extraRows";
-export type { RowReorderState } from "./rows/rowReorder";
+export type {
+  EditableCellActivateProps as EditableCellActivateControlProps,
+  EditableCellButtonProps as EditableCellConflictButtonProps,
+  EditableCellSlots as EditableCellControls,
+} from "./editing/EditableCellGate";
+export type { ExtraEntry as TableExtraEntry } from "./rows/extraRows";
+export type { RowReorderState as TableRowReorderState } from "./rows/rowReorder";
 
 /* ── Utils ─────────────────────────────────────────────────────────── */
 export { mergeProps, type Props } from "./utils/mergeProps";
@@ -618,7 +622,6 @@ export { stableKey } from "./utils/stableKey";
 /* ── Rows ──────────────────────────────────────────────────────────── */
 
 export {
-  type BodyCell,
   buildBodyCells,
   type CellSpanAppearance,
   type CellSpanRequest,
@@ -626,6 +629,7 @@ export {
   type GetCellSpan,
   type GetCellSpanArgs,
   spanningArmed,
+  type BodyCell as TableBodyCell,
 } from "./rows/cellSpan";
 export {
   type ExtraRow,

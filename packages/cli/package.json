@@ -1,13 +1,15 @@
 {
   "name": "@adapttable/cli",
   "version": "2.0.0",
-  "description": "Scaffolding CLI for AdaptTable — `npx @adapttable/cli init` detects your UI kit (Mantine, MUI, Chakra, Ant Design, Tailwind) and sets up a data table.",
+  "description": "Scaffolding and migration CLI for AdaptTable — initialize a table or safely migrate v2 source.",
   "keywords": [
     "adapttable",
     "cli",
     "scaffold",
     "data-table",
-    "init"
+    "init",
+    "migration",
+    "codemod"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

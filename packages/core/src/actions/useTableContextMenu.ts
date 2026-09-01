@@ -1,6 +1,6 @@
 /**
- * One hook that turns the `contextMenu` prop into something an adapter can
- * bind.
+ * One hook that turns composed context-menu configuration into something an
+ * adapter can bind.
  *
  * The pieces already exist separately — the routes in, the target read back
  * out of the DOM, the entries a target deserves — and each is separately

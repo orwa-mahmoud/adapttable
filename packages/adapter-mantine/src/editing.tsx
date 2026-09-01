@@ -44,6 +44,11 @@ const cellChrome = [
   slotRender(ROW_EDIT_ACTIONS, (props) => <RowEditActions {...props} />),
 ];
 
+/**
+ * Edit a single cell in place, with Mantine's own editors.
+ *
+ * @public
+ */
 export function editing<TRow>(
   onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown,
   extras?: FeaturePatch<TRow>
@@ -51,6 +56,11 @@ export function editing<TRow>(
   return extendFeature(coreEditing(onCellEdit, extras), cellChrome);
 }
 
+/**
+ * Edit a whole row at once, saved or cancelled together.
+ *
+ * @public
+ */
 export function rowEditing<TRow>(
   onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown,
   extras?: FeaturePatch<TRow>
@@ -58,22 +68,43 @@ export function rowEditing<TRow>(
   return extendFeature(coreRowEditing(onRowEdit, extras), cellChrome);
 }
 
+/**
+ * Mark cells and rows that have unsaved edits.
+ *
+ * @public
+ */
 export function dirtyIndicators(): StaticTableFeature {
   return extendFeature(coreDirty(), []);
 }
 
+/**
+ * Track edits so they can be undone and redone.
+ *
+ * @public
+ */
 export function editHistory(
   options: boolean | { depth?: number } = true
 ): StaticTableFeature {
   return extendFeature(coreHistory(options), []);
 }
 
+/**
+ * Add undo and redo controls for edits.
+ *
+ * @public
+ */
 export function undoRedoButtons(): StaticTableFeature {
   return extendFeature(coreButtons(), [
     slotRender(TOOLBAR_EXTRAS, (props) => <UndoRedoButtons {...props} />),
   ]);
 }
 
+/**
+ * Hold every edit until the reader saves, with Mantine's own save and discard
+ * buttons.
+ *
+ * @public
+ */
 export function batchEditing<TRow>(
   onBatchEdit: Parameters<typeof coreBatch<TRow>>[0]
 ): TableFeature<TRow> {

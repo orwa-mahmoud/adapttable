@@ -62,7 +62,7 @@ function ColumnMenuSlot<TRow>({
 
 /**
  * The Saved-views menu in the toolbar. A component (not inline JSX) so
- * `useSavedViews` only runs when the `savedViews` prop is set.
+ * `useSavedViews` only runs when the feature is composed.
  */
 function SavedViewsSlot({
   options,

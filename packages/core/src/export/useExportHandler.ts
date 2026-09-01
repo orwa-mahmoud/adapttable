@@ -71,7 +71,7 @@ export interface ExportHandlerState {
  * Make an export handler single-flight, and report what it is doing.
  *
  * @param handler - The handler from `makeExportCsvHandler`, or `undefined`
- *   when the `exportCsv` prop is off.
+ *   when the export feature is absent.
  * @param labels - Resolved table labels, for the caption and the announcements.
  * @param format - The writer's extension. Defaults to `"csv"`, the built-in.
  * @param pageOnly - The source holds one page and the host asked for `"all"`.

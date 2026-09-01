@@ -16,8 +16,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { FilterPopover } from "./components/FilterPopover";
 import { LoadingState } from "./components/TableSkeleton";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

@@ -7,8 +7,8 @@ import { flattenColumnTree } from "@adapttable/core/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, ColumnInput } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

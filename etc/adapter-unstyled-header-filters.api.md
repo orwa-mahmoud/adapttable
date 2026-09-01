@@ -6,7 +6,7 @@
 
 import { StaticTableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function headerFilters(): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

@@ -186,7 +186,6 @@ export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>,
     bordered?: boolean;
     className?: string;
     classNames?: DataTableClassNames;
-    savedViews?: UseSavedViewsOptions;
     size?: "small" | "middle" | "large";
     slots?: DataTableSlots;
     urlAdapter?: UrlStateAdapter;

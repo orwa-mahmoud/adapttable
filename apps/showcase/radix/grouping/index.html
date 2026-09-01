@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Radix</p>
         <h1>Row grouping in Radix</h1>
-        <p>Pass <code>groupBy</code> and rows fold into Radix group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
+        <p>Compose <code>grouping(groupBy)</code> and rows fold into Radix group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
         <p><code>groupAggregates</code> adds per-group subtotals from the same mapper <code>summaryRow</code> uses, so every header totals its whole subtree and <code>groupFooters</code> closes each group with the same numbers.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>A group header is a real Table.Row with a spanning cell, and its toggle wraps the engine's chevron — which points by writing direction rather than rotating, so it reads correctly right-to-left.</p>

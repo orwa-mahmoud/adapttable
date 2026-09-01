@@ -16,7 +16,7 @@ import { StatusBar } from "./components/StatusBar";
  *
  * One element serves both, so the slot is single and draws it once even when a
  * table composes the pair. Concatenate onto the core live renders — replacing
- * `renders` would drop {@link SELECTION_STATS_LIVE}.
+ * `renders` would drop `SELECTION_STATS_LIVE`.
  */
 const draws = [
   slotRender(STATUS_BAR, (props) => <StatusBar {...props} />),

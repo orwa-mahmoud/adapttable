@@ -51,7 +51,7 @@ export interface UseColumnLayoutOptions<TRow> {
    * according to that group's collapse options. Omit and collapse is inert.
    */
   collapsibleColumnGroups?: boolean;
-  /** Tree-group collapse options from {@link flattenColumnTree}. */
+  /** Tree-group collapse options from {@link !flattenColumnTree}. */
   columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 }
 

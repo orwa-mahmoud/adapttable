@@ -95,7 +95,7 @@ export const DESCRIPTIONS = {
   "concepts.md":
     "One headless core, a TableSource data contract, and adapters that mount real Mantine, MUI, Chakra, Ant, Radix and shadcn components.",
   "features.md":
-    "Compose AdaptTable features from kit subpath imports — features={[rowReorder(fn)]} — same runtime as the enabling props, which stay until v3.",
+    "Compose AdaptTable features from kit subpath imports — features={[rowReorder(fn)]} — so omitted features stay outside the table graph.",
   "columns.md":
     "Define React table columns once with ColumnDef — accessors, sorting, per-column filters, alignment, pinning and custom cells — same API across every UI kit.",
   "column-groups.md":
@@ -181,7 +181,7 @@ export const DESCRIPTIONS = {
   "server-queries.md":
     "Parse and validate AdaptTable's URL state on the server — typed queries for filtering, sorting and paging your backend can trust.",
   "tree-data.md":
-    "Render hierarchical rows in a React data table — pass getChildren for expandable tree data with keyboard access and announcements.",
+    "Render hierarchical rows in a React data table — compose tree({ getChildren }) for expandable data with keyboard access and announcements.",
   "migrate-from-v2.md":
     "Upgrade AdaptTable v2 to v3 — every removed enabling prop with the feature import that replaces it, in one table.",
   "migrate-from-v1.md":

@@ -2,9 +2,9 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
-import { DataTable } from "./testDataTable";
 
 interface Task {
   id: string;

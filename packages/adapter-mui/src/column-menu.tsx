@@ -12,7 +12,7 @@ import { ColumnMenu } from "./components/ColumnMenu";
  * The Columns menu, drawn with MUI's own button and popover.
  *
  * Concatenate onto the core live render — replacing `renders` would drop
- * {@link COLUMN_LAYOUT_LIVE}.
+ * `COLUMN_LAYOUT_LIVE`.
  *
  * @public
  */

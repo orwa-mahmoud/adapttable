@@ -8,6 +8,11 @@ import { cellNavigation as core } from "@adapttable/core/features";
 
 import { FillHandle } from "./components/FillHandle";
 
+/**
+ * Keyboard grid plus the fill handle, drawn with native controls control.
+ *
+ * @public
+ */
 export function cellNavigation(): StaticTableFeature {
   return extendFeature(core(), [
     slotRender(FILL_HANDLE, (props) => <FillHandle {...props} />),

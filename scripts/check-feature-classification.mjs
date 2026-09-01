@@ -135,12 +135,29 @@ const props = readFileSync(join(PACKAGES, "core", "src", "props.ts"), "utf8");
 const publicSurface = props.slice(
   props.indexOf("export interface BaseDataTableProps<TRow> {")
 );
+const adapterPublicSurfaces = adapters.flatMap((adapter) => {
+  const typesPath = join(PACKAGES, adapter, "src", "types.ts");
+  if (!existsSync(typesPath)) return [];
+  const source = readFileSync(typesPath, "utf8");
+  const start = source.indexOf("export interface DataTablePropsBase<TRow>");
+  const end = source.indexOf("export type DataTableProps<TRow>", start);
+  return start < 0 || end < 0
+    ? []
+    : [{ adapter, surface: source.slice(start, end) }];
+});
 for (const [name, feature] of Object.entries(listed)) {
   for (const prop of feature.replacesProps) {
     if (new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
       problems.push(
         `${name}: replacesProps names "${prop}", which v3 removed but BaseDataTableProps declares again`
       );
+    }
+    for (const { adapter, surface } of adapterPublicSurfaces) {
+      if (new RegExp(`^  ${prop}\\??:`, "m").test(surface)) {
+        problems.push(
+          `${name}: replacesProps names "${prop}", which v3 removed but ${adapter} DataTablePropsBase declares again`
+        );
+      }
     }
   }
 }
@@ -285,15 +302,96 @@ const mainEntry = readFileSync(
   join(PACKAGES, "core", "src", "index.ts"),
   "utf8"
 );
+const mainEntryExports = new Set();
+for (const match of mainEntry.matchAll(
+  /^export\s+(?:declare\s+)?(?:const|function|interface|type|class|enum)\s+([A-Za-z_$][\w$]*)/gm
+)) {
+  mainEntryExports.add(match[1]);
+}
+for (const declaration of mainEntry.split(/^export\s+/m).slice(1)) {
+  const block = declaration.startsWith("type ")
+    ? declaration.slice("type ".length)
+    : declaration;
+  if (!block.startsWith("{")) continue;
+  const open = block.indexOf("{");
+  const close = block.indexOf("}", open + 1);
+  if (close < 0) continue;
+  for (const raw of block.slice(open + 1, close).split(",")) {
+    const trimmed = raw.trim();
+    const specifier = trimmed.startsWith("type ")
+      ? trimmed.slice("type ".length)
+      : trimmed;
+    if (!specifier) continue;
+    const aliasAt = specifier.lastIndexOf(" as ");
+    mainEntryExports.add(
+      aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length)
+    );
+  }
+}
 const inventoried = new Set(removals["main-entry-aliases"].names);
 for (const name of inventoried) {
-  if (
-    new RegExp(`^export (?:const|type|function) ${name}\\b`, "m").test(
-      mainEntry
-    )
-  ) {
+  if (mainEntryExports.has(name)) {
     problems.push(
       `v3Removals: "${name}" was removed from the main entry at v3 but is exported there again`
+    );
+  }
+}
+
+const codemodSource = readFileSync(
+  join(PACKAGES, "cli", "src", "migrateV3.ts"),
+  "utf8"
+);
+const codemodAliasStart = codemodSource.indexOf(
+  "const MOVED_CORE_EXPORTS = new Set(["
+);
+const codemodAliasEnd = codemodSource.indexOf("]);", codemodAliasStart);
+const codemodAliases = new Set(
+  codemodSource
+    .slice(codemodAliasStart, codemodAliasEnd)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('"') && line.endsWith('",'))
+    .map((line) => JSON.parse(line.slice(0, -1)))
+);
+for (const name of inventoried) {
+  if (!codemodAliases.has(name)) {
+    problems.push(`v3Removals: migrate-v3 does not move alias "${name}"`);
+  }
+}
+for (const name of codemodAliases) {
+  if (!inventoried.has(name)) {
+    problems.push(`v3Removals: migrate-v3 moves uninventoried alias "${name}"`);
+  }
+}
+
+const migrationGuide = readFileSync(
+  join(ROOT, "docs", "migrate-from-v2.md"),
+  "utf8"
+);
+for (const name of [
+  ...Object.keys(enabling.props),
+  ...inventoried,
+  "useChromeBodyData",
+  "FilterTypeRegistry.register",
+  "FilterTypeRegistry.extend",
+  "size",
+]) {
+  if (!migrationGuide.includes(`\`${name}\``)) {
+    problems.push(
+      `v3Removals: docs/migrate-from-v2.md does not name removed API "${name}"`
+    );
+  }
+}
+
+const apiGuide = readFileSync(join(ROOT, "docs", "api.md"), "utf8");
+const dataTableReference = apiGuide.slice(
+  0,
+  apiGuide.indexOf("## Headless hooks")
+);
+for (const prop of Object.keys(enabling.props)) {
+  if (dataTableReference.includes(`| \`${prop}\``)) {
+    problems.push(
+      `v3Removals: docs/api.md still lists removed DataTable prop "${prop}"`
     );
   }
 }

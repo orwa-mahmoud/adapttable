@@ -25,9 +25,9 @@ import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { DesktopTable } from "./components/DesktopTable";
 import { useStableToggle } from "./components/DesktopTable";
 import { MobileCards } from "./components/MobileCards";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowDetail } from "./row-detail";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

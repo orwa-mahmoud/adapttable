@@ -172,18 +172,18 @@ extras (`filterTypes`, `exportCsv` with a writer, `commandPalette` with extra
 commands, `contextMenu` with extra items, `sidePanel` panels) call the same
 methods in `setup`, so a plugin is not a second API.
 
-| Host method                | Same as                                     |
-| -------------------------- | ------------------------------------------- |
-| `registerFilterType`       | `filterTypes={[spec]}`                      |
-| `extendFilterType`         | `FilterTypeRegistry.extend`                 |
-| `registerEditor`           | `column.editor: { type: "custom", render }` |
-| `registerAggregator`       | `aggregate({ key: fn })`                    |
-| `registerWriter`           | `exportCsv={{ writer }}`                    |
-| `registerColumnMenuAction` | appended after the built-in Columns actions |
-| `registerPanel`            | `sidePanel.panels` (needs an open dock)     |
-| `registerCommand`          | `commandPalette.commands`                   |
-| `registerContextMenuItems` | `contextMenu.items`                         |
-| `onDispose`                | cleanup when the table unmounts             |
+| Host method                | Same as                                       |
+| -------------------------- | --------------------------------------------- |
+| `registerFilterType`       | `filterTypes([spec])`                         |
+| `extendFilterType`         | a custom feature's `host.extendFilterType(…)` |
+| `registerEditor`           | `column.editor: { type: "custom", render }`   |
+| `registerAggregator`       | `aggregate({ key: fn })`                      |
+| `registerWriter`           | `exportCsv({ writer })`                       |
+| `registerColumnMenuAction` | appended after the built-in Columns actions   |
+| `registerPanel`            | `sidePanel({ panels, … })`                    |
+| `registerCommand`          | `commandPalette({ commands, … })`             |
+| `registerContextMenuItems` | `contextMenu({ items })`                      |
+| `onDispose`                | cleanup when the table unmounts               |
 
 A named editor is a string `column.editor` that is not a built-in (`"text"`,
 `"number"`, …). `resolveCellEditor` turns it into `{ type: "custom", render }`
@@ -191,12 +191,13 @@ so adapters keep one custom-editor path. A named aggregator is a string
 `aggregate()` looks up after the built-ins, when the mapper **runs** (inside
 the table), not when `aggregate()` is called in the parent.
 
-`registerPanel` appends to an existing `sidePanel` dock — the host still owns
-`open` / `onOpenChange`. Registering a command or a context-menu factory with
-no matching prop is enough to arm that chrome.
+`registerPanel` appends to a composed `sidePanel()` dock — the feature still
+owns `open` / `onOpenChange`. Registrations add content to their matching
+composed feature; they do not pull command-palette, context-menu or side-panel
+chrome into the base table.
 
-The per-seam registration APIs this supersedes (`FilterTypeRegistry.register`
-/ `extend`, the `filterTypes` prop) are deprecated and removed at v3.
+The superseded `FilterTypeRegistry.register` / `extend` methods and the
+`filterTypes` enabling prop are not part of the v3 API.
 
 ## Features that own hooks — `provider`
 

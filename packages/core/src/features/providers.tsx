@@ -343,10 +343,20 @@ export function extendFeature(
   base: StaticTableFeature,
   renders: readonly FeatureRender<never>[]
 ): StaticTableFeature;
+/**
+ * Keep a core feature's live renders and append kit chrome.
+ *
+ * @public
+ */
 export function extendFeature<TRow>(
   base: TableFeature<TRow>,
   renders: readonly FeatureRender<never>[]
 ): TableFeature<TRow>;
+/**
+ * Keep a core feature's live renders and append kit chrome.
+ *
+ * @public
+ */
 export function extendFeature<TRow>(
   base: StaticTableFeature | TableFeature<TRow>,
   renders: readonly FeatureRender<never>[]

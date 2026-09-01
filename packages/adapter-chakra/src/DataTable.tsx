@@ -42,8 +42,7 @@ import { subtleText } from "./styles";
 import type { DataTableProps } from "./types";
 
 /**
- * Map row density to Chakra's table `size`. An explicit `size` prop still
- * wins for backward compatibility.
+ * Map row density to Chakra's table `size`. An explicit kit `size` wins.
  */
 function tableSize(
   bits: Readonly<{

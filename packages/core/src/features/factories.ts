@@ -1,5 +1,5 @@
 /**
- * Built-in feature factories — one per opt-in, matching the enabling prop.
+ * Built-in feature factories — one per optional behavior.
  *
  * Import from `@adapttable/core/features` or `@adapttable/<kit>/<feature>`.
  * Each factory is a {@link TableFeature}: host plugins are the same type
@@ -8,11 +8,7 @@
 import type { CommandPaletteOptions } from "../actions/useCommandPalette";
 import type { ContextMenuOptions } from "../actions/useTableContextMenu";
 import { columnResizeHandleProps } from "../columns/columnResize";
-import type { BatchRowEdit } from "../editing/batchEditing";
-import type { ExportCsvOptions } from "../export/tableCsv";
-import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
-import type { GroupSort } from "../grouping/groupRows";
 import type { SidePanelOptions } from "../props";
 import {
   buildBodyCells,
@@ -27,9 +23,7 @@ import {
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "../rows/extraRows";
-import type { RowReorderHandler } from "../rows/rowReorder";
 import type { RowHeight, RowStyle } from "../rows/rowStyle";
-import type { NestedTableFor } from "../tree/nestedTable";
 import type { BulkAction } from "../types";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import { COLUMN_LAYOUT_LIVE_RENDER } from "./column-layout-live";
@@ -41,24 +35,24 @@ import type {
 } from "./tableFeature";
 
 export type {
-  BatchRowEdit,
   BulkAction,
   CellSpanAppearance,
   CommandPaletteOptions,
   ContextMenuOptions,
-  ExportCsvOptions,
   ExtraRow,
-  FilterDef,
   FilterTypeSpec,
   GetCellSpan,
-  GroupSort,
-  NestedTableFor,
   RowHeight,
-  RowReorderHandler,
   RowStyle,
   SidePanelOptions,
   UseSavedViewsOptions,
 };
+export type { BatchRowEdit } from "../editing/batchEditing";
+export type { ExportCsvOptions } from "../export/tableCsv";
+export type { FilterDef } from "../filters/filterDefs";
+export type { GroupSort } from "../grouping/groupRows";
+export type { RowReorderHandler } from "../rows/rowReorder";
+export type { NestedTableFor } from "../tree/nestedTable";
 
 function define<TRow>(
   id: string,

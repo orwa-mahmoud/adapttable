@@ -32,12 +32,23 @@ AdaptTable — detected Mantine.
   npm) and **prints** the right install command — it never installs
   anything itself; you run the command it shows.
 - **Scaffolds** `src/PeopleTable.tsx`, a sortable starter table wired to
-  the matching adapter (every AdaptTable feature is one prop away — see
+  the matching adapter (every optional behavior is one feature import away — see
   the docs). Pass `--force` to overwrite an existing file.
 - **One step it can't do for you:** wrap your app in the kit's provider
   (`MantineProvider`, MUI's `ThemeProvider`, `ChakraProvider`, antd's
   `ConfigProvider`, Radix's `Theme`) if it isn't already — that's the
   most common first-run failure.
+
+## Migrate from v2
+
+```bash
+npx @adapttable/cli migrate-v3 src
+npx @adapttable/cli migrate-v3 src --check
+```
+
+The command moves the 72 adapter-contract imports to
+`@adapttable/core/adapter`. Changes that need a behavior choice are reported
+with their source locations and left untouched. A second run is a no-op.
 
 ## Programmatic use
 
@@ -57,7 +68,10 @@ detectKit({ "@mui/material": "^6" }).kit; // "mui"
   packages it needs (run it yourself with your package manager).
 - **Scaffolds a working table** wired to your kit, not a blank file: sortable out
   of the box, with the full AdaptTable feature set (filtering, selection, editing,
-  grouping, saved views, CSV export, virtualization, …) each one prop away.
+  grouping, saved views, CSV export, virtualization, …) each one import away.
+- **Migrates v2 source safely** — `migrate-v3` moves adapter-contract imports
+  to `@adapttable/core/adapter` and reports every behavior-dependent change
+  for manual review.
 - **Programmatic API** — call it from your own scripts, not only the terminal.
 
 ## See it work

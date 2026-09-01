@@ -2,12 +2,12 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { columnMenu } from "./column-menu";
+import { DataTable } from "./data-table.test-utils";
 import { exportCsv } from "./export";
 import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
 import { savedViews } from "./saved-views";
 import { renderMui } from "./test-utils";
-import { DataTable } from "./testDataTable";
 
 /**
  * The toolbar reads Filters · Saved views · Columns · Export CSV. Every

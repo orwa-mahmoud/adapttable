@@ -1,14 +1,14 @@
 /**
- * Row grouping smoke: arms the grouping branch in components/tables.tsx via
- * frontend data + an opt-in `groupBy` prop.
+ * Row grouping smoke: arms the grouping branch in components/tables.tsx
+ * through the composed grouping feature.
  */
 import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { ensureBaseUiStyles } from "./injectStyles";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

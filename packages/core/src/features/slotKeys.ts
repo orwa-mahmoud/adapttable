@@ -190,7 +190,7 @@ export interface ChromeBodySlotProps<TRow = never> {
 }
 
 /**
- * The scroll-window body. Filled only by {@link virtualize}; the plain path
+ * The scroll-window body. Filled only by `virtualize()`; the plain path
  * never mounts the TanStack hooks.
  *
  * @public
@@ -206,7 +206,7 @@ export const CHROME_BODY = featureSlotKey<ChromeBodySlotProps<never>>(
  * antd renders through its own `<Table>`, so it cannot take {@link CHROME_BODY}
  * — but it still has a grouped flat list to window, and windowing it means the
  * TanStack hooks. Asking for them here keeps them where every other kit keeps
- * them: behind {@link virtualize}, out of the plain table's graph.
+ * them: behind `virtualize()`, out of the plain table's graph.
  *
  * @public
  */
@@ -227,7 +227,11 @@ export interface KeyedWindowSlotProps {
   children: (window: KeyedVirtualization) => ReactNode;
 }
 
-/** The keyed window a kit that builds its own body asks for. */
+/**
+ * The keyed window a kit that builds its own body asks for.
+ *
+ * @public
+ */
 export const KEYED_WINDOW = featureSlotKey<KeyedWindowSlotProps>(
   "keyed-window",
   { single: true }
@@ -235,7 +239,7 @@ export const KEYED_WINDOW = featureSlotKey<KeyedWindowSlotProps>(
 
 /**
  * The saved-views toolbar control. The feature that fills it also owns
- * {@link useSavedViews} — the menu calls the hook, the root never does.
+ * `useSavedViews` — the menu calls the hook, the root never does.
  *
  * @public
  */
@@ -249,7 +253,11 @@ export interface SavedViewsSlotProps {
   >;
 }
 
-/** The saved-views toolbar control. */
+/**
+ * The saved-views toolbar control.
+ *
+ * @public
+ */
 export const SAVED_VIEWS = featureSlotKey<SavedViewsSlotProps>("saved-views", {
   single: true,
 });
@@ -282,13 +290,21 @@ export interface FilterOverlaySlotProps {
   accentColor?: string;
 }
 
-/** The slide-in filters drawer. */
+/**
+ * The slide-in filters drawer.
+ *
+ * @public
+ */
 export const FILTER_DRAWER = featureSlotKey<FilterOverlaySlotProps>(
   "filter-drawer",
   { single: true }
 );
 
-/** The anchored filters popover. */
+/**
+ * The anchored filters popover.
+ *
+ * @public
+ */
 export const FILTER_POPOVER = featureSlotKey<FilterOverlaySlotProps>(
   "filter-popover",
   { single: true }
@@ -337,7 +353,7 @@ export const CONTEXT_MENU_LIVE = featureSlotKey<
 /**
  * Find-in-table plus the hook that arms it.
  *
- * Kits that still call {@link useFindInTable} in the root fill
+ * Kits that still call `useFindInTable` in the root fill
  * {@link FIND_BAR} with finished UI props. A kit that has moved the hook
  * fills this slot; the renderer calls the hook and hands the state down.
  *
@@ -350,7 +366,11 @@ export interface FindLiveSlotProps<
   children: (find: FindInTableState) => ReactNode;
 }
 
-/** The find hook. Filled only by {@link findInTable}. */
+/**
+ * The find hook. Filled only by `findInTable()`.
+ *
+ * @public
+ */
 export const FIND_LIVE = featureSlotKey<FindLiveSlotProps<never>>("find-live", {
   single: true,
 });
@@ -375,7 +395,11 @@ export interface EditHistoryLiveSlotProps<TRow = never> {
   }) => ReactNode;
 }
 
-/** The undo/redo hook. */
+/**
+ * The undo/redo hook.
+ *
+ * @public
+ */
 export const EDIT_HISTORY_LIVE = featureSlotKey<
   EditHistoryLiveSlotProps<never>
 >("edit-history-live", { single: true });
@@ -395,11 +419,15 @@ export interface CellNavLiveSlotProps<TRow = never> {
   hostProps: ComposedTableProps<TRow>;
   /** Record a paste/fill as one undo gesture. */
   record: (edits: readonly unknown[]) => void;
+  /** Undo the last paste/fill gesture. */
   undo: () => number;
+  /** Redo the last undone gesture. */
   redo: () => number;
   /** Open the find bar, when find is composed. */
   onFind?: () => void;
+  /** Column keys the find bar highlights. */
   matchKeys: ReadonlySet<string>;
+  /** The active find match, when find is composed. */
   currentMatch: UseGridFocusOptions<TRow>["currentMatch"];
   /** Pin boundary the span-coverage walk respects. */
   pinOffset?: (key: string) => PinOffset | undefined;
@@ -407,7 +435,11 @@ export interface CellNavLiveSlotProps<TRow = never> {
   children: (gridFocus: GridFocusState) => ReactNode;
 }
 
-/** The cell-navigation hook. */
+/**
+ * The cell-navigation hook.
+ *
+ * @public
+ */
 export const CELL_NAV_LIVE = featureSlotKey<CellNavLiveSlotProps<never>>(
   "cell-nav-live",
   { single: true }
@@ -419,7 +451,7 @@ export const CELL_NAV_LIVE = featureSlotKey<CellNavLiveSlotProps<never>>(
  * @public
  */
 export interface ExportLiveSlotProps<TRow = never> {
-  /** The `exportCsv` prop as applied. */
+  /** Configuration applied by the composed export feature. */
   exportCsv: boolean | ExportCsvOptions<TRow> | undefined;
   /** Rows the file is built from. */
   source: TableSource<TRow>;
@@ -437,7 +469,11 @@ export interface ExportLiveSlotProps<TRow = never> {
   children: (exportHandler: ExportHandlerState) => ReactNode;
 }
 
-/** The export hook. */
+/**
+ * The export hook.
+ *
+ * @public
+ */
 export const EXPORT_LIVE = featureSlotKey<ExportLiveSlotProps>("export-live", {
   single: true,
 });
@@ -454,7 +490,11 @@ export interface FullscreenLiveSlotProps {
   children: (fullscreen: FullscreenState) => ReactNode;
 }
 
-/** The fullscreen hook. */
+/**
+ * The fullscreen hook.
+ *
+ * @public
+ */
 export const FULLSCREEN_LIVE = featureSlotKey<FullscreenLiveSlotProps>(
   "fullscreen-live",
   { single: true }
@@ -484,55 +524,91 @@ export interface ChromeExtraSlotProps<TRow = never> {
   children: (chrome: TableChrome<TRow>) => ReactNode;
 }
 
-/** Grouping row-model + collapse/paging hooks. */
+/**
+ * Grouping row-model + collapse/paging hooks.
+ *
+ * @public
+ */
 export const GROUPING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "grouping-live",
   { single: true }
 );
 
-/** Tree walk + expansion/lazy-load hooks. */
+/**
+ * Tree walk + expansion/lazy-load hooks.
+ *
+ * @public
+ */
 export const TREE_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "tree-live",
   { single: true }
 );
 
-/** Row-detail / nested-table expansion hooks. */
+/**
+ * Row-detail / nested-table expansion hooks.
+ *
+ * @public
+ */
 export const EXPANSION_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "expansion-live",
   { single: true }
 );
 
-/** Cell/row/batch editing hooks. */
+/**
+ * Cell/row/batch editing hooks.
+ *
+ * @public
+ */
 export const EDITING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "editing-live",
   { single: true }
 );
 
-/** Row-pin state machine. */
+/**
+ * Row-pin state machine.
+ *
+ * @public
+ */
 export const PINNING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "pinning-live",
   { single: true }
 );
 
-/** Filter-tree chips merged onto chrome. */
+/**
+ * Filter-tree chips merged onto chrome.
+ *
+ * @public
+ */
 export const FILTER_CHIPS_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "filter-chips-live",
   { single: true }
 );
 
-/** User column-layout hook (hide / order / pin / resize). */
+/**
+ * User column-layout hook (hide / order / pin / resize).
+ *
+ * @public
+ */
 export const COLUMN_LAYOUT_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "column-layout-live",
   { single: true }
 );
 
-/** Add / duplicate / delete and host row actions. */
+/**
+ * Add / duplicate / delete and host row actions.
+ *
+ * @public
+ */
 export const ROW_ACTIONS_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "row-actions-live",
   { single: true }
 );
 
-/** Row selection state machine. */
+/**
+ * Row selection state machine.
+ *
+ * @public
+ */
 export const SELECTION_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "selection-live",
   { single: true }
@@ -544,35 +620,60 @@ export const SELECTION_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
  * @public
  */
 export interface SelectionStatsLiveSlotProps<TRow = never> {
+  /** Selected cell rectangle, if any. */
   range: CellRange | null;
+  /** Rows the stats cover. */
   rows: readonly TRow[];
+  /** Columns the stats cover. */
   columns: readonly ColumnDef<TRow>[];
+  /** Dataset index of the range's first row. */
   firstRowIndex: number;
+  /** Finish with the computed stats. */
   children: (stats: SelectionStats | null) => ReactNode;
 }
 
-/** Selection-stats compute. */
+/**
+ * Selection-stats compute.
+ *
+ * @public
+ */
 export const SELECTION_STATS_LIVE = featureSlotKey<
   SelectionStatsLiveSlotProps<never>
 >("selection-stats-live", { single: true });
 
-/** Header checkbox that selects a column. */
+/**
+ * Header checkbox that selects a column.
+ *
+ * @public
+ */
 export const COLUMN_SELECT =
   featureSlotKey<Omit<ColumnSelectCheckboxChromeProps, "slots">>(
     "column-select"
   );
 
-/** Live region for keyboard-grid focus. */
+/**
+ * Live region for keyboard-grid focus.
+ *
+ * @public
+ */
 export const GRID_FOCUS_ANNOUNCER = featureSlotKey<{
   focus: GridFocusState;
 }>("grid-focus-announcer", { single: true });
 
-/** Live region for row reorder. */
+/**
+ * Live region for row reorder.
+ *
+ * @public
+ */
 export const ROW_REORDER_ANNOUNCER = featureSlotKey<{
   announcement: string;
 }>("row-reorder-announcer", { single: true });
 
-/** Per-column header filter trigger. */
+/**
+ * Per-column header filter trigger.
+ *
+ * @public
+ */
 export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
   "filter-header",
   { single: true }
@@ -584,15 +685,25 @@ export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
  * @public
  */
 export interface EditableCellSlotProps<TRow = never> {
+  /** Active edit session for this cell, if any. */
   editing: EditableCellEditing<TRow> | undefined;
+  /** The row being edited. */
   row: TRow;
+  /** The column being edited. */
   column: ColumnDef<TRow>;
+  /** Stable row id. */
   rowId: string;
+  /** Index in the current page. */
   rowIndex: number;
+  /** All rows on the current page. */
   rows: readonly TRow[];
+  /** Visible columns in the current view. */
   columns: readonly ColumnDef<TRow>[];
+  /** Resolve a row's stable key. */
   rowKey: (row: TRow) => string;
+  /** Accessible label for the editor. */
   editLabel: string;
+  /** Accessible undo label. */
   undoLabel?: string;
   /**
    * The cell's display content, computed by the adapter's cell wrapper so the
@@ -603,7 +714,11 @@ export interface EditableCellSlotProps<TRow = never> {
   display?: ReactNode;
 }
 
-/** The kit's editable cell. One renderer — dirty marks ride the same cell. */
+/**
+ * The kit's editable cell. One renderer — dirty marks ride the same cell.
+ *
+ * @public
+ */
 export const EDITABLE_CELL = featureSlotKey<EditableCellSlotProps<never>>(
   "editable-cell",
   { single: true }
@@ -615,12 +730,19 @@ export const EDITABLE_CELL = featureSlotKey<EditableCellSlotProps<never>>(
  * @public
  */
 export interface FillHandleCellSlotProps {
+  /** Grid focus state for the selected cell. */
   focus: GridFocusState | undefined;
+  /** Row index in the virtual window. */
   windowIndex: number;
+  /** Column index in the visible set. */
   col: number;
 }
 
-/** The fill handle. */
+/**
+ * The fill handle.
+ *
+ * @public
+ */
 export const FILL_HANDLE =
   featureSlotKey<FillHandleCellSlotProps>("fill-handle");
 
@@ -630,15 +752,25 @@ export const FILL_HANDLE =
  * @public
  */
 export interface ExpandToggleSlotProps {
+  /** Row or node id this toggle controls. */
   id: string;
+  /** Whether the row is expanded. */
   expanded: boolean;
+  /** Flip expansion for an id. */
   onToggle: (id: string) => void;
+  /** Writing direction. */
   dir?: Direction;
+  /** Accessible expand label. */
   expandLabel: string;
+  /** Accessible collapse label. */
   collapseLabel: string;
 }
 
-/** The expand/collapse control. */
+/**
+ * The expand/collapse control.
+ *
+ * @public
+ */
 export const EXPAND_TOGGLE =
   featureSlotKey<ExpandToggleSlotProps>("expand-toggle");
 
@@ -650,21 +782,37 @@ export const EXPAND_TOGGLE =
  * @public
  */
 export interface ToolbarExtrasSlotProps {
+  /** Undo the last edit. */
   onUndo?: () => void;
+  /** Redo the last undone edit. */
   onRedo?: () => void;
+  /** Whether undo is available. */
   canUndo?: boolean;
+  /** Whether redo is available. */
   canRedo?: boolean;
+  /** Accessible undo label. */
   undoLabel?: string;
+  /** Accessible redo label. */
   redoLabel?: string;
+  /** Print the table. */
   onPrint?: () => void;
+  /** Accessible print label. */
   printLabel?: string;
+  /** Current row density. */
   density: "comfortable" | "compact";
+  /** Request a density change. */
   onDensityChange: (next: "comfortable" | "compact") => void;
+  /** Enter or exit fullscreen. */
   onToggleFullscreen?: () => void;
+  /** Whether the table is fullscreen. */
   isFullscreen?: boolean;
+  /** Export the current view to CSV. */
   onExportCsv?: () => void;
+  /** Whether an export is in flight. */
   exportBusy?: boolean;
+  /** Live-region text while exporting. */
   exportAnnouncement?: string;
+  /** Accessible export label. */
   exportLabel?: string;
   /** The source cannot cover the export the host asked for. */
   exportDisabled?: boolean;
@@ -682,31 +830,59 @@ export interface ToolbarExtrasSlotProps {
   labels: Required<TableLabels>;
 }
 
-/** Optional toolbar controls. */
+/**
+ * Optional toolbar controls.
+ *
+ * @public
+ */
 export const TOOLBAR_EXTRAS =
   featureSlotKey<ToolbarExtrasSlotProps>("toolbar-extras");
 
-/** Tree-column cell wrapper. Empty means render the cell contents alone. */
+/**
+ * Tree-column cell wrapper. Empty means render the cell contents alone.
+ *
+ * @public
+ */
 export const TREE_CELL = featureSlotKey<TreeCellProps<never>>("tree-cell");
 
-/** Mobile tree disclosure control. */
+/**
+ * Mobile tree disclosure control.
+ *
+ * @public
+ */
 export const TREE_TOGGLE =
   featureSlotKey<TreeToggleProps<never>>("tree-toggle");
 
-/** Save / cancel for a row being edited. */
+/**
+ * Save / cancel for a row being edited.
+ *
+ * @public
+ */
 export const ROW_EDIT_ACTIONS =
   featureSlotKey<RowEditActionsProps<never>>("row-edit-actions");
 
-/** Desktop row-reorder grip. */
+/**
+ * Desktop row-reorder grip.
+ *
+ * @public
+ */
 export const ROW_REORDER_HANDLE =
   featureSlotKey<RowReorderHandleProps<never>>("row-reorder-handle");
 
-/** Mobile row-reorder buttons. */
+/**
+ * Mobile row-reorder buttons.
+ *
+ * @public
+ */
 export const ROW_REORDER_BUTTONS = featureSlotKey<
   RowReorderButtonsProps<never>
 >("row-reorder-buttons");
 
-/** Collapse a header group. */
+/**
+ * Collapse a header group.
+ *
+ * @public
+ */
 export const COLUMN_GROUP_TOGGLE = featureSlotKey<ColumnGroupToggleProps>(
   "column-group-toggle"
 );
@@ -717,21 +893,34 @@ export const COLUMN_GROUP_TOGGLE = featureSlotKey<ColumnGroupToggleProps>(
  * @public
  */
 export interface GroupHeaderRowSlotProps<TRow = never> {
+  /** Group header, footer, or show-more row. */
   entry: Extract<
     GroupedFlatEntry<TRow>,
     { kind: "group" | "groupFooter" | "groupMore" }
   >;
+  /** Visible columns in the current view. */
   columns: readonly ColumnDef<TRow>[];
+  /** Leading utility columns before data cells. */
   leadingCells: number;
+  /** Whether the actions column is shown. */
   showActions: boolean;
+  /** Cell props for a column in this row. */
   getCellProps: (column: ColumnDef<TRow>) => Record<string, unknown>;
+  /** Current row selection, if any. */
   selection: SelectionState | null;
+  /** Resolved table labels. */
   labels: Required<TableLabels>;
+  /** Collapse or expand a group. */
   onToggleCollapse: (groupKey: string) => void;
+  /** Load the next page of groups or rows. */
   onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
 }
 
-/** Desktop group header row. */
+/**
+ * Desktop group header row.
+ *
+ * @public
+ */
 export const GROUP_HEADER_ROW =
   featureSlotKey<GroupHeaderRowSlotProps<never>>("group-header-row");
 
@@ -741,18 +930,29 @@ export const GROUP_HEADER_ROW =
  * @public
  */
 export interface GroupHeaderCardSlotProps<TRow = never> {
+  /** Group header, footer, or show-more card. */
   entry: Extract<
     GroupedFlatEntry<TRow>,
     { kind: "group" | "groupFooter" | "groupMore" }
   >;
+  /** Visible columns in the current view. */
   columns: readonly ColumnDef<TRow>[];
+  /** Current row selection, if any. */
   selection: SelectionState | null;
+  /** Resolved table labels. */
   labels: Required<TableLabels>;
+  /** Whether the mobile list is compact. */
   compact: boolean;
+  /** Collapse or expand a group. */
   onToggleCollapse: (groupKey: string) => void;
+  /** Load the next page of groups or rows. */
   onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
 }
 
-/** Mobile group header card. */
+/**
+ * Mobile group header card.
+ *
+ * @public
+ */
 export const GROUP_HEADER_CARD =
   featureSlotKey<GroupHeaderCardSlotProps<never>>("group-header-card");

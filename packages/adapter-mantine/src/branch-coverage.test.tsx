@@ -16,8 +16,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { FilterDrawer } from "./components/FilterDrawer";
+import { DataTable } from "./data-table.test-utils";
 import { defaultLabels } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

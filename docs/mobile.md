@@ -157,7 +157,7 @@ still lists it.
 - **Grouping** renders group header blocks between cards, with the same
   collapse behavior as desktop — see [row grouping](./row-grouping.md).
 - **Virtualization** windows the card list the same way it windows rows:
-  one `virtualize` prop, measured in a real browser across every adapter —
+  one `virtualize()` feature, measured in a real browser across every adapter —
   see [virtualization](./virtualization.md).
 - **RTL** flips the cards along with everything else — see
   [i18n & RTL](./i18n-rtl.md).

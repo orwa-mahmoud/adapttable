@@ -1,7 +1,7 @@
 /**
  * SavedViewsMenu: saving (disabled while empty, clears after), applying a
  * view through a memory URL adapter (scoped to the table's `urlKey`),
- * deleting, and the `savedViews` DataTable prop mounting the trigger.
+ * deleting, and the composed saved-views feature mounting the trigger.
  *
  * Chakra portals its popover and keeps closed content visibility-hidden in
  * jsdom, so internals are queried by label/placeholder, not by role.
@@ -14,9 +14,9 @@ import {
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { DataTable } from "../data-table.test-utils";
 import type { ColumnDef } from "../index";
 import { renderChakra } from "../test-utils";
-import { DataTable } from "../testDataTable";
 import { SavedViewsMenu } from "./SavedViewsMenu";
 
 /** In-memory `LayoutStorage` stub, inspectable per test. */
@@ -108,7 +108,7 @@ describe("<SavedViewsMenu> (Chakra)", () => {
   });
 });
 
-describe("<DataTable> savedViews prop (Chakra)", () => {
+describe("<DataTable> savedViews feature (Chakra)", () => {
   interface Row {
     id: string;
     name: string;

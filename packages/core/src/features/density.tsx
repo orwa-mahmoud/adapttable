@@ -34,6 +34,7 @@ function DensityProvider({
 export function densityChooser(): StaticTableFeature {
   return {
     id: "density-chooser",
+    apply: () => ({ densityChooser: true }),
     provider: { Provider: DensityProvider },
   };
 }

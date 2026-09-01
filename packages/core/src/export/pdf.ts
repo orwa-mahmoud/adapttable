@@ -627,7 +627,7 @@ export function buildTablePdf<TRow>(
 const PDF_MIME = "application/pdf";
 
 /**
- * The PDF writer, for the `exportCsv` prop's `writer` option:
+ * The PDF writer, for `exportCsv({ writer })`:
  *
  * ```tsx
  * import { pdfWriter } from "@adapttable/core/pdf";

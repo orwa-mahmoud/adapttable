@@ -44,7 +44,7 @@ export type {
 };
 
 /**
- * Props a feature may write. Keys match `<DataTable>` enabling props.
+ * Internal table configuration a composed feature may write.
  *
  * @public
  */
@@ -80,19 +80,16 @@ export type FeatureApplyInput<TRow = unknown> = object & {
 /**
  * One composed feature — a built-in factory or a host plugin.
  *
- * `apply` maps onto the existing prop surface so both enabling paths are
- * the same runtime. `setup` is live-host registration; built-ins and
- * plugins share it, on this same object, in the same array.
+ * `apply` maps factory options into internal table configuration. `setup` is
+ * live-host registration; built-ins and plugins share it, on this same
+ * object, in the same array.
  *
  * @public
  */
 export interface TableFeature<TRow = unknown> {
   /** Stable id (`"row-reorder"`, `"grouping"`, a host plugin's name). */
   readonly id: string;
-  /**
-   * Merge this feature's enabling props into the table. Later features win;
-   * an explicit prop on the table still wins over either.
-   */
+  /** Merge this feature's configuration into the table. Later features win. */
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
   /**
    * Register against the live table. Built-in features and host plugins
@@ -151,7 +148,7 @@ export type StaticFeatureHost = Omit<
 export interface StaticTableFeature {
   /** Stable id, exactly as {@link TableFeature.id}. */
   readonly id: string;
-  /** Merge enabling props, exactly as {@link TableFeature.apply}. */
+  /** Merge internal configuration, exactly as {@link TableFeature.apply}. */
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
   /** Register against the live table, minus the row-shaped seams. */
   setup?(host: StaticFeatureHost): void | (() => void);
@@ -173,9 +170,9 @@ export interface StaticTableFeature {
 export interface TableFeatureHost<TRow = unknown> {
   /** Forget a registration when the table unmounts or features change. */
   onDispose(cleanup: () => void): void;
-  /** Same contract as the `filterTypes` prop / `FilterTypeRegistry.register` (deprecated). */
+  /** Register a filter type for this table. */
   registerFilterType(spec: FilterTypeSpec): void;
-  /** Same contract as `FilterTypeRegistry.extend` (deprecated). */
+  /** Extend a registered filter type for this table. */
   extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
   /**
    * Named custom editor. `column.editor` as that string resolves to

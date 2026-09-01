@@ -63,6 +63,8 @@ function makeToolbarProps(
     exportLabel: "Export CSV",
     onExportCsv: vi.fn(),
     exportBusy: false,
+    density: "comfortable",
+    onDensityChange: vi.fn(),
     ...overrides,
   };
 }

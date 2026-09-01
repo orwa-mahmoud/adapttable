@@ -7,7 +7,7 @@
 import { SidePanelOptions } from '@adapttable/core/features';
 import { StaticTableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function sidePanel(options: SidePanelOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

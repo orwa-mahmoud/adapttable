@@ -260,7 +260,7 @@ export interface SharedTableRenderProps<TRow> {
   maxHeight?: number;
   /**
    * Attach to the `maxHeight` scroll box so an element-mode virtual window
-   * tracks the box's scrolling (from `useChromeBodyData`).
+   * tracks the box's scrolling (from `useVirtualChromeBodyData`).
    */
   virtualScrollRef?: (node: HTMLElement | null) => void;
   /** Commit a new width (px) for a resizable column. */

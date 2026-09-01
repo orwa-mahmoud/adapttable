@@ -15,6 +15,14 @@ function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<never>>) {
   return <ColumnMenu {...props} classNames={classNames} />;
 }
 
+/**
+ * The Columns menu, drawn with native controls button and popover.
+ *
+ * Concatenate onto the core live render — replacing `renders` would drop
+ * `COLUMN_LAYOUT_LIVE`.
+ *
+ * @public
+ */
 export function columnMenu(): StaticTableFeature {
   return extendFeature(core(), [
     slotRender(COLUMN_MENU, (props) => <ColumnMenuSlot {...props} />),

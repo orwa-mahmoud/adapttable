@@ -2,9 +2,9 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./data-table.test-utils";
 import { findInTable } from "./find-in-table";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

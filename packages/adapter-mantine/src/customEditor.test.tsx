@@ -2,8 +2,8 @@ import { MantineProvider } from "@mantine/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, CustomCellEditorCtrl } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Task {
   id: string;

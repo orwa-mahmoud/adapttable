@@ -9,9 +9,9 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 import { virtualize } from "./virtualize";
 
 interface Row {

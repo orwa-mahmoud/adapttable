@@ -11,9 +11,9 @@ import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { ADAPTTABLE_BASE_UI_CSS } from "./injectStyles";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

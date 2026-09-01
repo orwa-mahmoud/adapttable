@@ -244,10 +244,20 @@ export interface GroupingExtras<TRow> extends StaticGroupingExtras {
 export function grouping(
   groupBy: string | readonly string[]
 ): StaticTableFeature;
+/**
+ * Group rows with row-aware extras.
+ *
+ * @public
+ */
 export function grouping<TRow>(
   groupBy: string | readonly string[],
   extras: GroupingExtras<TRow>
 ): TableFeature<TRow>;
+/**
+ * Group rows under collapsible headers.
+ *
+ * @public
+ */
 export function grouping<TRow>(
   groupBy: string | readonly string[],
   extras?: GroupingExtras<TRow>

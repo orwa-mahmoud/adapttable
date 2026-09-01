@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { columnMenu } from "./column-menu";
 import { ColumnMenu } from "./components/ColumnMenu";
+import { DataTable } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

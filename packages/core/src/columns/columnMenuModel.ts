@@ -1,6 +1,5 @@
 import type { FeatureHostState } from "../features/currentHost";
-import type { ColumnDef } from "../types";
-import type { Direction } from "../types";
+import type { ColumnDef, Direction } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
 

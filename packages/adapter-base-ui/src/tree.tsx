@@ -9,6 +9,11 @@ import { tree as core } from "@adapttable/core/features";
 
 import { TreeCell, TreeToggle } from "./components/kitControls";
 
+/**
+ * Render rows as an expandable tree, with Base UI's own chevron.
+ *
+ * @public
+ */
 export function tree<TRow>(
   options: Parameters<typeof core<TRow>>[0]
 ): TableFeature<TRow> {

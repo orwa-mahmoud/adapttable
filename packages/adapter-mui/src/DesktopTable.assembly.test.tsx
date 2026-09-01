@@ -16,6 +16,7 @@ import { cellNavigation } from "./cell-navigation";
 import { columnSelectionCheckbox } from "./column-selection";
 import { muiColor } from "./components/DesktopTable";
 import { ExpandChevron } from "./components/ExpandToggle";
+import { DataTable } from "./data-table.test-utils";
 import { rowEditing } from "./editing";
 import { grouping } from "./grouping";
 import { headerFilters } from "./header-filters";
@@ -23,7 +24,6 @@ import type { ColumnDef } from "./index";
 import { rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { rowReorder } from "./row-reorder";
-import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

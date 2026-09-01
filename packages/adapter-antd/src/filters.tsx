@@ -83,10 +83,25 @@ function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
   );
 }
 
+/**
+ * Declarative filters with Ant Design's chip strip and filter panel.
+ *
+ * @public
+ */
 export function filters(form: ReactNode): StaticTableFeature;
+/**
+ * Declarative filters with custom definitions.
+ *
+ * @public
+ */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[]
 ): TableFeature<TRow>;
+/**
+ * Declarative filters with custom definitions or a hand-built panel.
+ *
+ * @public
+ */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
@@ -98,6 +113,11 @@ export function filters<TRow>(
   ]);
 }
 
+/**
+ * Register custom filter types the panel can render.
+ *
+ * @public
+ */
 export function filterTypes(
   specs: readonly FilterTypeSpec[]
 ): StaticTableFeature {

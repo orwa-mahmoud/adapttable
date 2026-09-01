@@ -9,20 +9,34 @@ import {
 import {
   grouping as core,
   type GroupingExtras,
-  type GroupSort,
   type StaticGroupingExtras,
 } from "@adapttable/core/features";
 
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 
+/**
+ * Group rows under collapsible headers, drawn with Base UI's own row and card.
+ *
+ * @public
+ */
 export function grouping(
   groupBy: string | readonly string[],
   extras?: StaticGroupingExtras
 ): StaticTableFeature;
+/**
+ * Group rows with row-aware extras.
+ *
+ * @public
+ */
 export function grouping<TRow>(
   groupBy: string | readonly string[],
   extras: GroupingExtras<TRow>
 ): TableFeature<TRow>;
+/**
+ * Group rows under collapsible headers.
+ *
+ * @public
+ */
 export function grouping<TRow>(
   groupBy: string | readonly string[],
   extras?: GroupingExtras<TRow>
@@ -33,4 +47,4 @@ export function grouping<TRow>(
   ]);
 }
 
-export type { GroupSort };
+export type { GroupSort } from "@adapttable/core/features";

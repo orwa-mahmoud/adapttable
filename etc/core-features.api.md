@@ -275,9 +275,6 @@ export interface CommandPaletteOptions {
 }
 
 // @public
-export type ComposedTableProps<TRow> = BaseDataTableProps<TRow> & FeatureProps<TRow>;
-
-// @public
 export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
 // @public
@@ -618,7 +615,7 @@ export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Prom
 // @public
 export function filters(form: ReactNode): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
 // @public
@@ -687,7 +684,7 @@ export interface GetCellSpanArgs<TRow> {
 // @public
 export function grouping(groupBy: string | readonly string[]): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function grouping<TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
 
 // @public

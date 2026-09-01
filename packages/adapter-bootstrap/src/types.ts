@@ -2,7 +2,6 @@ import type {
   BaseDataTableProps,
   TableSource,
   UrlStateAdapter,
-  UseSavedViewsOptions,
 } from "@adapttable/core";
 import type { DataModeProps } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
@@ -75,9 +74,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
 
   /** Namespace for this table's URL parameters. */
   urlKey?: string;
-
-  /** Saved-view configuration. */
-  savedViews?: UseSavedViewsOptions;
 
   /** Replace sub-components. */
   slots?: DataTableSlots;

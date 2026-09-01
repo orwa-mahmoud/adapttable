@@ -12,17 +12,18 @@ No PDF library.
 ```tsx
 import { pdfWriter, printTable } from "@adapttable/core/pdf";
 import { DataTable } from "@adapttable/mantine";
+import { exportCsv } from "@adapttable/mantine/export";
 
 <DataTable
   data={people}
   columns={columns}
   rowKey={(row) => row.id}
-  exportCsv={{ writer: pdfWriter(), scope: "all" }}
+  features={[exportCsv({ writer: pdfWriter(), scope: "all" })]}
 />;
 ```
 
 `pdfWriter` is the production default for the export button: the same
-`exportCsv` seam as [CSV and XLSX](./customization.md#export), the same
+`exportCsv()` seam as [CSV and XLSX](./customization.md#export), the same
 scopes (`page`, `all`, `selected`, `range`) and the same column subset.
 The button relabels itself **Export PDF** from `labels.exportFile("pdf")`.
 `buildTablePdf` is the same file, for a host assembling rows by hand.
@@ -40,10 +41,10 @@ to A4 landscape; direction inherits `document.documentElement.dir` when
 omitted, so print matches what the reader is looking at.
 
 What to print stays the host's call — the table never picks the rows for a
-dialog it cannot open. Wire `onPrint` and Print becomes a palette command; add
-`printButton` and the toolbar draws a Print button beside the view controls,
+dialog it cannot open. Compose `print(onPrint)` and Print becomes a palette command; pass
+`true` as the second argument and the toolbar draws a Print button beside the view controls,
 captioned from `labels.print`. Both are opt-in, and the button needs the
-handler as well as the option, so neither can appear on its own.
+handler as well as the second argument, so neither can appear on its own.
 
 The PDF is written by hand (one page tree, no dependency). By default it
 draws in Helvetica and embeds nothing, so the file stays a few kilobytes
@@ -60,17 +61,20 @@ makes the option usable on a CJK font at all.
 
 ```tsx
 import { pdfWriter } from "@adapttable/core/pdf";
+import { exportCsv } from "@adapttable/mantine/export";
 
 const font = await fetch("/fonts/NotoSansArabic-Regular.ttf").then((res) =>
   res.arrayBuffer()
 );
 
 <DataTable
-  exportCsv={{
-    scope: "all",
-    writer: pdfWriter({ font, direction: "rtl", title: "تقرير المبيعات" }),
-    filename: "report.pdf",
-  }}
+  features={[
+    exportCsv({
+      scope: "all",
+      writer: pdfWriter({ font, direction: "rtl", title: "تقرير المبيعات" }),
+      filename: "report.pdf",
+    }),
+  ]}
   …
 />;
 ```

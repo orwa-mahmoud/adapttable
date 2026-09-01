@@ -2,9 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { contextMenu } from "./context-menu";
+import { DataTable } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
-import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

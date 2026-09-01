@@ -218,14 +218,6 @@ export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, op
 }): FilterFormSource<TRow>;
 
 // @public
-export interface BodyCell<TRow> {
-    colSpan: number;
-    column: ColumnDef<TRow>;
-    columnIndex: number;
-    rowSpan: number;
-}
-
-// @public
 export function bodyRowEntries<TRow>(rows: readonly {
     row: TRow;
     index: number;
@@ -266,7 +258,7 @@ export function buildBodyCells<TRow>(options: {
     firstRowIndex?: number;
     pinOffset?: (key: string) => PinOffset | undefined;
     windowKeys?: ReadonlySet<string>;
-}): ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+}): ReadonlyMap<string, readonly TableBodyCell<TRow>[]>;
 
 // @public
 export function buildExportTable<TRow>(rows: readonly TRow[], columns: readonly ColumnDef<TRow>[], span?: {
@@ -1141,6 +1133,41 @@ export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 export function edgePinStyle(side: PinSide, active: boolean, zIndex?: number): PinnedCellStyle | undefined;
 
 // @public
+export interface EditableCellActivateControlProps {
+    readonly activateRef: (node: HTMLButtonElement | null) => void;
+    readonly className?: string;
+    readonly dirty: boolean;
+    readonly display: ReactNode;
+    readonly onClick: (event: {
+        stopPropagation: () => void;
+    }) => void;
+    readonly onDoubleClick: (event: {
+        preventDefault: () => void;
+        stopPropagation: () => void;
+    }) => void;
+    readonly onKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        stopPropagation: () => void;
+    }) => void;
+    readonly saveStatus: string | undefined;
+    readonly title: string;
+}
+
+// @public
+export interface EditableCellConflictButtonProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onClick: (event: {
+        stopPropagation: () => void;
+    }) => void;
+    readonly onMouseDown?: (event: {
+        preventDefault: () => void;
+    }) => void;
+    readonly part: string;
+}
+
+// @public
 export interface EditableCellController<TRow = unknown> {
     begin: () => void;
     cancel: () => void;
@@ -1185,6 +1212,12 @@ export function editableCellController<TRow>(options: {
     columns: readonly ColumnDef<TRow>[];
     rowKey: (row: TRow) => string;
 }): EditableCellController;
+
+// @public
+export interface EditableCellControls {
+    readonly Activate: (props: EditableCellActivateControlProps) => ReactNode;
+    readonly Button: (props: EditableCellConflictButtonProps) => ReactNode;
+}
 
 // @public
 export interface EditableCellEditing<TRow> {
@@ -1247,18 +1280,12 @@ export interface EditableCellGateProps<TRow> {
     readonly rowKey: (row: TRow) => string;
     readonly rows: readonly TRow[];
     readonly saveErrorClassName?: string;
-    readonly slots: EditableCellSlots;
+    readonly slots: EditableCellControls;
     readonly undoLabel?: string;
 }
 
 // @public
 export type EditableCellMode = "display" | "activatable" | "editing";
-
-// @public
-export interface EditableCellSlots {
-    readonly Activate: (props: EditableCellActivateProps) => ReactNode;
-    readonly Button: (props: EditableCellButtonProps) => ReactNode;
-}
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
@@ -1539,16 +1566,6 @@ export interface ExportWriter {
 
 // @public
 export function extendCellRange(range: CellRange | null, head: GridCell, fallbackAnchor: GridCell): CellRange;
-
-// @public
-export type ExtraEntry = {
-    kind: "separator";
-    key: string;
-} | {
-    kind: "fullWidth";
-    key: string;
-    render?: () => ReactNode;
-};
 
 // @public
 export type ExtraFilters = Record<string, FilterValue>;
@@ -2072,7 +2089,7 @@ export type GroupedFlatEntry<TRow> = {
     row: TRow;
     index: number;
     groupKey: string;
-} | ExtraEntry;
+} | TableExtraEntry;
 
 // @public
 export type GroupedHeaderAlign = "start" | "center" | "end";
@@ -3044,32 +3061,6 @@ export interface RowReorderLabels {
 }
 
 // @public
-export interface RowReorderState<TRow> {
-    announcement: string;
-    dragProps: (rowId: string, localIndex: number) => {
-        draggable: true;
-        onDragStart: (event: DragEvent_2<HTMLElement>) => void;
-        onDragEnd: () => void;
-    };
-    dropProps: (localIndex: number, row: TRow, windowStart: number) => {
-        onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-        onDrop: (event: DragEvent_2<HTMLElement>) => void;
-    };
-    handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
-    isLifted: (rowId: string) => boolean;
-    lifted: {
-        rowId: string;
-        from: number;
-    } | null;
-    moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
-    overIndex: number | null;
-    rowAttrs: (rowId: string, localIndex: number) => {
-        "data-dragging"?: "";
-        "data-drop"?: "before" | "after";
-    };
-}
-
-// @public
 export function rowsExcludingFilter<TRow>(rows: readonly TRow[], extra: ExtraFilters, key: string, filterFn: (row: TRow, extra: ExtraFilters) => boolean): readonly TRow[];
 
 // @public
@@ -3312,6 +3303,14 @@ export function stepMatch(index: number, total: number, step: number): number;
 export function summaryExportValues(cells: Readonly<Partial<Record<string, unknown>>> | undefined): Partial<Record<string, unknown>> | undefined;
 
 // @public
+export interface TableBodyCell<TRow> {
+    colSpan: number;
+    column: ColumnDef<TRow>;
+    columnIndex: number;
+    rowSpan: number;
+}
+
+// @public
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 
 // @public
@@ -3361,7 +3360,7 @@ export interface TableChrome<TRow> {
     rowActions?: RowAction<TRow>[];
     rowMutations: RowMutationsState<TRow>;
     rowPinning?: RowPinningState<TRow>;
-    rowReorder?: RowReorderState<TRow>;
+    rowReorder?: TableRowReorderState<TRow>;
     showFooter: boolean;
     source: TableSource<TRow>;
     table: UseDataTableResult<TRow>;
@@ -3411,6 +3410,16 @@ export interface TableErrorState {
     retry?: () => void;
     retrying: boolean;
 }
+
+// @public
+export type TableExtraEntry = {
+    kind: "separator";
+    key: string;
+} | {
+    kind: "fullWidth";
+    key: string;
+    render?: () => ReactNode;
+};
 
 // @public
 export interface TableFeature<TRow = unknown> {
@@ -3702,6 +3711,32 @@ export interface TableQueryParams {
     search?: string;
     sortBy?: string;
     sortDir?: SortDirection;
+}
+
+// @public
+export interface TableRowReorderState<TRow> {
+    announcement: string;
+    dragProps: (rowId: string, localIndex: number) => {
+        draggable: true;
+        onDragStart: (event: DragEvent_2<HTMLElement>) => void;
+        onDragEnd: () => void;
+    };
+    dropProps: (localIndex: number, row: TRow, windowStart: number) => {
+        onDragOver: (event: DragEvent_2<HTMLElement>) => void;
+        onDrop: (event: DragEvent_2<HTMLElement>) => void;
+    };
+    handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
+    isLifted: (rowId: string) => boolean;
+    lifted: {
+        rowId: string;
+        from: number;
+    } | null;
+    moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
+    overIndex: number | null;
+    rowAttrs: (rowId: string, localIndex: number) => {
+        "data-dragging"?: "";
+        "data-drop"?: "before" | "after";
+    };
 }
 
 // @public
@@ -4362,7 +4397,7 @@ export function useRowReorder<TRow>(options: {
     onRowReorder?: RowReorderHandler<TRow>;
     labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled">;
     rowAt: (localIndex: number) => TRow | undefined;
-}): RowReorderState<TRow>;
+}): TableRowReorderState<TRow>;
 
 // @public
 export function useSavedViews(input: UseSavedViewsOptions): UseSavedViewsResult;
@@ -4453,7 +4488,7 @@ export interface UseShortcutsOptions {
     target?: () => EventTarget | null;
 }
 
-// @public (undocumented)
+// @public
 export function useTableChrome<TRow>(props: ComposedTableProps<TRow>): TableChrome<TRow>;
 
 // @public

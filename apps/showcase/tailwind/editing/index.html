@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Tailwind</p>
         <h1>Inline cell editing in Tailwind</h1>
-        <p>Mark a column <code>editable</code>, pass <code>onCellEdit</code>, and double-click opens a Tailwind editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
+        <p>Mark a column <code>editable</code>, compose <code>editing(onCellEdit)</code>, and double-click opens a Tailwind editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
         <p>The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.</p>
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
         <p>The editor is a native input or select carrying the map's field classes with an indigo focus ring; the validation and rollback parts carry no classes in this map, so a rejected commit reads as browser-default text.</p>

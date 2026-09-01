@@ -6,10 +6,10 @@
 
 import { StaticTableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function selectionStats(): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function statusBar(): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

@@ -690,7 +690,7 @@ function ColumnMenuSlot<TRow>({
 }
 
 /**
- * The saved-views menu, mounted when the `savedViews` prop opts in. The
+ * The saved-views menu, mounted when the feature is composed. The
  * table's own `urlAdapter` / `urlKey` are the defaults so a captured view
  * holds THIS table's params; explicit options win.
  */

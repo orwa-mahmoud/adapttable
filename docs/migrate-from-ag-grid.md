@@ -30,10 +30,10 @@ renders its own theme; AdaptTable renders _your_ UI kit's real components).
 
 - The grid is the product — an analytics surface users pivot and drill all day
 - Excel-style cell editing at scale
-- Assembled tool panels: AdaptTable's `sidePanel` is a frame with tabs that you
-  fill (the pivot, saved-views and filter-tree panels ship; arranging them is
-  yours)
-- Drag-a-column-to-group: AdaptTable groups from `groupBy` — your code or the
+- Assembled tool panels: AdaptTable's `sidePanel({ panels, open, onOpenChange })`
+  is a frame with tabs that you fill (the pivot, saved-views and filter-tree
+  panels ship; arranging them is yours)
+- Drag-a-column-to-group: AdaptTable groups from `grouping("team")` — your code or the
   URL, no drag gesture
 
 If you rely on those and the Enterprise licence is worth it to you, that is the
@@ -48,7 +48,7 @@ by side.
   selection, filters, sort, and page are props and URL state.
 - **URL-synced shareable state** built in — AG Grid exposes grid state through
   its API and leaves persistence to you.
-- **Free master/detail** — `renderRowDetail` does what AG Grid gates behind
+- **Free master/detail** — `rowDetail(fn)` does what AG Grid gates behind
   Enterprise master/detail (for detail panels, not nested grids).
 - **A real filter UI for free** — AG Grid's set filter, multi filter, and
   filter tool panel are Enterprise; AdaptTable's select/multi-select/range
@@ -70,38 +70,38 @@ renders through the kit provider your app already has.
 
 Grid-level (`<AgGridReact>` → `<DataTable>`):
 
-| AG Grid                                            | AdaptTable                                            | Notes                                                             |
-| -------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- |
-| `rowData`                                          | `data`                                                | —                                                                 |
-| `columnDefs`                                       | `columns`                                             | `ColDef` mapping below.                                           |
-| `defaultColDef`                                    | (not needed)                                          | Column defaults are explicit per column.                          |
-| `pagination` + `paginationPageSize`                | automatic                                             | Paged on desktop, infinite on mobile; page-size control built in. |
-| `rowSelection={{ mode: "multiRow" }}`              | `bulkActions`, or `selectedIds` / `onSelectionChange` | Checkboxes render when selection is on.                           |
-| `api.getSelectedRows()`                            | `onSelectionChange` state                             | Selection is React state, not an API call.                        |
-| `rowModelType: "infinite"`                         | `onQueryChange` (+ infinite mode)                     | One consolidated query; superseded fetches abort via `signal`.    |
-| `api.exportDataAsCsv()`                            | `exportCsv` / `rowsToCsv` + `downloadCsv`             | Built-in toolbar button or headless helpers.                      |
-| `theme={themeQuartz}`                              | your kit's provider/theme                             | The table inherits the design system, incl. dark mode.            |
-| `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                             | No module registry.                                               |
-| `onGridReady` / `gridRef.current.api`              | (nothing)                                             | Declarative props replace the imperative API.                     |
-| column tool panel (Enterprise side bar)            | `enableColumnMenu`                                    | Show/hide, reorder, pin — free.                                   |
-| `getDetailPanelContent`-style master/detail (Ent.) | `renderRowDetail`                                     | `(row) => ReactNode`, free.                                       |
+| AG Grid                                            | AdaptTable                                                 | Notes                                                             |
+| -------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| `rowData`                                          | `data`                                                     | —                                                                 |
+| `columnDefs`                                       | `columns`                                                  | `ColDef` mapping below.                                           |
+| `defaultColDef`                                    | (not needed)                                               | Column defaults are explicit per column.                          |
+| `pagination` + `paginationPageSize`                | automatic                                                  | Paged on desktop, infinite on mobile; page-size control built in. |
+| `rowSelection={{ mode: "multiRow" }}`              | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to turn on checkboxes.                    |
+| `api.getSelectedRows()`                            | `onSelectionChange` state                                  | Selection is React state, not an API call.                        |
+| `rowModelType: "infinite"`                         | `onQueryChange` (+ infinite mode)                          | One consolidated query; superseded fetches abort via `signal`.    |
+| `api.exportDataAsCsv()`                            | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a toolbar button or headless helpers.   |
+| `theme={themeQuartz}`                              | your kit's provider/theme                                  | The table inherits the design system, incl. dark mode.            |
+| `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                  | No module registry.                                               |
+| `onGridReady` / `gridRef.current.api`              | (nothing)                                                  | Declarative props replace the imperative API.                     |
+| column tool panel (Enterprise side bar)            | `columnMenu()`                                             | Show/hide, reorder, pin — free.                                   |
+| `getDetailPanelContent`-style master/detail (Ent.) | `rowDetail(fn)`                                            | `(row) => ReactNode`, free.                                       |
 
 `ColDef` → `ColumnDef`:
 
-| AG Grid                             | AdaptTable                                                      | Notes                                         |
-| ----------------------------------- | --------------------------------------------------------------- | --------------------------------------------- |
-| `field`                             | `key`                                                           | Dot paths supported.                          |
-| `headerName`                        | `header`                                                        | Auto-derived from `key` when omitted.         |
-| `valueGetter` / `valueFormatter`    | `accessor: (row) => …`                                          | One function, receives the row.               |
-| `cellRenderer`                      | `Cell`                                                          | Component receiving `{ row, rowIndex }`.      |
-| `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                    |
-| `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.               |
-| `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration. |
-| `flex` / `width` / `minWidth`       | `width`                                                         | —                                             |
-| `pinned: "left" \| "right"`         | pinning via Columns menu / `columnLayout`                       | Logical sides — RTL-correct.                  |
-| `hide`                              | `enableColumnMenu` + `columnLayout`                             | User-facing visibility lives in the menu.     |
-| `resizable` (default true)          | `resizableColumns` (table-level)                                | —                                             |
-| `editable`                          | `editable` + `editor` + table `onCellEdit`                      | Opt-in; no editor until `onCellEdit` is set.  |
+| AG Grid                             | AdaptTable                                                      | Notes                                            |
+| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
+| `field`                             | `key`                                                           | Dot paths supported.                             |
+| `headerName`                        | `header`                                                        | Auto-derived from `key` when omitted.            |
+| `valueGetter` / `valueFormatter`    | `accessor: (row) => …`                                          | One function, receives the row.                  |
+| `cellRenderer`                      | `Cell`                                                          | Component receiving `{ row, rowIndex }`.         |
+| `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                       |
+| `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.                  |
+| `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration.    |
+| `flex` / `width` / `minWidth`       | `width`                                                         | —                                                |
+| `pinned: "left" \| "right"`         | pinning via `columnMenu()` + `columnLayout`                     | Logical sides — RTL-correct.                     |
+| `hide`                              | `columnMenu()` + `columnLayout`                                 | User-facing visibility lives in the menu.        |
+| `resizable` (default true)          | `resizableColumns()` (table-level)                              | —                                                |
+| `editable`                          | `editable` + `editor` + `editing(save)`                         | Opt-in; no editor until `editing()` is composed. |
 
 ## Before / after
 
@@ -142,14 +142,15 @@ function PeopleGrid({ rows }: { rows: Person[] }) {
 
 ```tsx
 import { DataTable } from "@adapttable/mui";
+import { bulkActions } from "@adapttable/mui/bulk-actions";
+import { columnMenu } from "@adapttable/mui/column-menu";
 
 function PeopleTable({ people }: { people: Person[] }) {
   return (
     <DataTable
       data={people}
       rowKey={(r) => r.id}
-      bulkActions={bulkActions}
-      enableColumnMenu
+      features={[bulkActions([]), columnMenu()]}
       columns={[
         { key: "name", sortable: true },
         { key: "role" },
@@ -173,17 +174,17 @@ table is your design system's, not a themed grid.
 ## Gotchas
 
 - **The analytics features are parts, not a mode.** [Pivoting](./pivot.md) is
-  an engine plus its own panel; [nested grouping](./row-grouping.md) is a list
-  of keys in `groupBy`; [tree data](./tree-data.md) is `getChildren` or
-  `getParentId`; range selection, the fill handle and clipboard operations all
-  need `cellNavigation` armed (see
+  an engine plus its own panel; [nested grouping](./row-grouping.md) is
+  `grouping("team")` with optional aggregate options; [tree data](./tree-data.md) is
+  `tree({ getChildren })` or `tree({ getParentId })`; range selection, the fill
+  handle and clipboard operations all need `cellNavigation()` composed (see
   [Cell navigation](./cell-navigation.md)). Each works — none is the single
   spreadsheet surface AG Grid hands you, so budget assembly time rather than a
   prop rename.
 - **Cell editing is opt-in.** Map AG Grid `editable` columns to
-  `ColumnDef.editable` + table `onCellEdit` (see
+  `ColumnDef.editable` + `editing(save)` (see
   [Inline cell editing](./cell-editing.md)). For a multi-field edit dialog,
-  `rowActions` + your own form is still the answer — that part AdaptTable
+  `rowActions([…])` + your own form is still the answer — that part AdaptTable
   deliberately leaves to you.
 - **The imperative API disappears.** Anywhere you called
   `api.getSelectedRows()`, `api.setFilterModel()`, or `api.sizeColumnsToFit()`,
@@ -192,14 +193,16 @@ table is your design system's, not a themed grid.
   stops breaking on majors.
 - **Sorting is opt-in.** AG Grid columns sort by default; AdaptTable columns
   need `sortable: true`.
-- **Export is a writer, not three features.** `exportCsv` gives you the toolbar
-  button; the format is whatever writer you hand it — `csvWriter`,
+- **Export is a writer, not three features.** Compose `exportCsv()` for the
+  toolbar button; the format is whatever writer you hand it — `csvWriter`,
   `xlsxWriter` from `@adapttable/core/xlsx` for a real spreadsheet, or
   `pdfWriter` from `@adapttable/core/pdf`. Excel export is AG Grid Enterprise;
   here it is one import. (Its context menu is Enterprise anyway.)
-- **Row virtualization is opt-in** (`virtualize`) rather than always-on —
+- **Row virtualization is opt-in** (`virtualize()`) rather than always-on —
   enable it for genuinely large lists; a benchmark lives in the
   [virtualization docs](./virtualization.md).
+- **Features compose in `features`.** Import each factory from its kit subpath;
+  enabling props no longer arm chrome. See [feature composition](./features.md).
 
 ## Where next
 

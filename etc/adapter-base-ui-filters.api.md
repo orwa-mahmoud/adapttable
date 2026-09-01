@@ -10,13 +10,13 @@ import { ReactNode } from 'react';
 import { StaticTableFeature } from '@adapttable/core/adapter';
 import { TableFeature } from '@adapttable/core/adapter';
 
-// @public (undocumented)
+// @public
 export function filters(form: ReactNode): StaticTableFeature;
 
-// @public (undocumented)
+// @public
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
-// @public (undocumented)
+// @public
 export function filterTypes(specs: readonly FilterTypeSpec[]): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)

@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Tailwind</p>
         <h1>Row grouping in Tailwind</h1>
-        <p>Pass <code>groupBy</code> and rows fold into Tailwind group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
+        <p>Compose <code>grouping(groupBy)</code> and rows fold into Tailwind group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
         <p><code>groupAggregates</code> adds per-group subtotals from the same mapper <code>summaryRow</code> uses, so every header totals its whole subtree and <code>groupFooters</code> closes each group with the same numbers.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>The group row, toggle, label, count and aggregate all carry the map's classes with a dark variant; group footers and the show-more row are not in the map, so those two read as browser defaults.</p>
