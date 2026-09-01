@@ -174,8 +174,13 @@ Adapter authors bind those slots without copying feature lifecycle through
 `createAdapterGroupingFeature`, `createAdapterRowDetailFeatures`,
 `createAdapterRowReorderFeature`, `createAdapterContextMenuFeature` and
 `createAdapterCommandPaletteFeature`. Each accepts kit-owned
-`AdapterFeatureComponent`s and returns ordinary feature factories; the
-corresponding `Adapter*Components`, `Adapter*Feature` and normalized
+`AdapterFeatureComponent`s and returns ordinary feature factories. Their
+contracts are `AdapterEditingComponents`, `AdapterEditingFeatures`,
+`AdapterFiltersComponents`, `AdapterFiltersFeature`,
+`AdapterGroupingComponents`, `AdapterGroupingFeature`,
+`AdapterRowDetailComponents`, `AdapterRowDetailFeatures`,
+`AdapterRowReorderComponents`, `AdapterRowReorderFeature`,
+`AdapterContextMenuFeature` and `AdapterCommandPaletteFeature`; normalized
 `AdapterContextMenuProps` / `AdapterCommandPaletteProps` types keep the seam
 typed. `createAdapterStandardFeatures` takes
 `AdapterStandardFeatureFactories` and returns a `StandardFeaturesFactory`
