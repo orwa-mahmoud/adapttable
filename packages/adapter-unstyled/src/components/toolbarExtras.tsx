@@ -114,7 +114,6 @@ export function DensityButton(
 ): ReactNode {
   const { density, onDensityChange, labels } = props;
   const classNames = classesOf(props);
-  if (!onDensityChange) return null;
   return (
     <button
       type="button"

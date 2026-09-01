@@ -99,7 +99,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     enableColumnMenu = false,
     savedViews,
   } = props;
-  const density = props.density ?? "comfortable";
 
   // The whole shared orchestration — data tier, filter runtime, chrome,
   // scroll reset, body windowing — lives in core. Mantine adds only what its
@@ -124,6 +123,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const {
     chrome,
     labels,
+    density,
     filtersNode: filters,
     filtersOpen: drawerOpened,
     setFiltersOpen: setDrawerOpened,

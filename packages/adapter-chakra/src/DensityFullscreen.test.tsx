@@ -67,6 +67,15 @@ describe("density and fullscreen (chakra)", () => {
     expect(onDensityChange).toHaveBeenCalledWith("compact");
   });
 
+  it("applies an uncontrolled choice to the rendered table", () => {
+    const { container } = table({ densityChooser: true });
+    const rendered = container.querySelector("table")!;
+
+    expect(rendered).toHaveAttribute("data-size", "md");
+    fireEvent.click(part("density-toggle")!);
+    expect(rendered).toHaveAttribute("data-size", "sm");
+  });
+
   it("goes back the other way from compact", () => {
     table({ densityChooser: true, density: "compact", onDensityChange });
     fireEvent.click(part("density-toggle")!);

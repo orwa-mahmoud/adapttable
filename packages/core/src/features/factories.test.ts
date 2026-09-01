@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { cellNavigation } from "./cell-navigation";
+import { densityChooser } from "./density";
 import { editHistory } from "./edit-history";
 import { batchEditing, dirtyIndicators, editing, rowEditing } from "./editing";
 import { exportCsv } from "./export-csv";
@@ -12,7 +13,6 @@ import {
   columnSelectionCheckbox,
   commandPalette,
   contextMenu,
-  densityChooser,
   extraRows,
   feature,
   filterTypes,
@@ -172,7 +172,6 @@ describe("feature factories", () => {
     expect(patch(fullscreen())).toEqual({ fullscreen: true });
     expect(patch(headerFilters())).toEqual({ headerFilters: true });
     expect(patch(selectionStats())).toEqual({ selectionStats: true });
-    expect(patch(densityChooser())).toEqual({ densityChooser: true });
     expect(patch(statusBar())).toEqual({ statusBar: true });
     expect(patch(undoRedoButtons())).toEqual({ undoRedoButtons: true });
     expect(patch(multiSort())).toEqual({ multiSort: true });
@@ -180,6 +179,12 @@ describe("feature factories", () => {
     expect(patch(columnSelectionCheckbox())).toEqual({
       columnSelectionCheckbox: true,
     });
+  });
+
+  it("gives density its provider without a write-only enabling patch", () => {
+    const feature = densityChooser();
+    expect(feature.apply).toBeUndefined();
+    expect(feature.provider).toBeDefined();
   });
 
   it("exportCsv writes true or options", () => {

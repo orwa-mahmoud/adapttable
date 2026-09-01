@@ -3,8 +3,10 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTableShellView } from "./features/chromeBodyGate";
+import { densityChooser } from "./features/density";
 import { editing } from "./features/editing";
 import { columnMenu, resizableColumns, savedViews } from "./features/factories";
+import { useTableFeatures } from "./features/featureHost";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
 import { FeatureProviders } from "./features/providers";
@@ -18,6 +20,7 @@ import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef, RowAction } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
 import {
+  type DataTableShellProps,
   type DataTableShellResult,
   finishDataTableShell,
   useDataTableShell,
@@ -103,6 +106,48 @@ function renderShellWith(
   };
 }
 
+interface DensityHarnessProps {
+  density?: "comfortable" | "compact";
+  onDensityChange?: (next: "comfortable" | "compact") => void;
+}
+
+function renderDensityShell(initial: DensityHarnessProps = {}) {
+  const features = [densityChooser()];
+  let shell: DataTableShellResult<Row> | undefined;
+
+  function Probe({ props }: { props: DataTableShellProps<Row> }) {
+    shell = useDataTableShell(props, noForm);
+    return null;
+  }
+
+  function Harness(control: DensityHarnessProps) {
+    const props = useTableFeatures({
+      features,
+      data: ROWS,
+      columns,
+      rowKey,
+      urlSync: false,
+      ...control,
+    });
+    return (
+      <FeatureProviders props={props}>
+        <Probe props={props} />
+      </FeatureProviders>
+    );
+  }
+
+  const rendered = render(<Harness {...initial} />);
+  return {
+    get current() {
+      return shell!;
+    },
+    rerender(next: DensityHarnessProps) {
+      rendered.rerender(<Harness {...next} />);
+    },
+    unmount: rendered.unmount,
+  };
+}
+
 describe("useDataTableShell", () => {
   it("resolves the frontend tier and builds the prop bundles", () => {
     const { result } = renderHook(() =>
@@ -141,6 +186,64 @@ describe("useDataTableShell", () => {
       useDataTableShell({ data: ROWS, columns, rowKey, urlSync: false }, noForm)
     );
     expect(result.current.hasRowReorder).toBe(false);
+  });
+
+  it("lets the density feature own and report an uncontrolled choice", () => {
+    const onDensityChange = vi.fn();
+    const view = renderDensityShell({ onDensityChange });
+    expect(view.current.density).toBe("comfortable");
+    expect(view.current.toolbarProps.density).toBe("comfortable");
+
+    act(() => {
+      view.current.toolbarProps.onDensityChange?.("compact");
+    });
+
+    expect(onDensityChange).toHaveBeenCalledExactlyOnceWith("compact");
+    expect(view.current.density).toBe("compact");
+    expect(view.current.toolbarProps.density).toBe("compact");
+  });
+
+  it("keeps the density request callback stable as uncontrolled state changes", () => {
+    const view = renderDensityShell();
+    const request = view.current.toolbarProps.onDensityChange;
+
+    act(() => {
+      request("compact");
+    });
+    expect(view.current.toolbarProps.onDensityChange).toBe(request);
+
+    view.rerender({});
+    expect(view.current.toolbarProps.onDensityChange).toBe(request);
+  });
+
+  it("waits for a controlled density prop to change", () => {
+    const onDensityChange = vi.fn();
+    const view = renderDensityShell({
+      density: "comfortable",
+      onDensityChange,
+    });
+
+    act(() => {
+      view.current.toolbarProps.onDensityChange?.("compact");
+    });
+    expect(onDensityChange).toHaveBeenCalledExactlyOnceWith("compact");
+    expect(view.current.density).toBe("comfortable");
+
+    view.rerender({ density: "compact", onDensityChange });
+    expect(view.current.density).toBe("compact");
+    expect(view.current.toolbarProps.density).toBe("compact");
+  });
+
+  it("returns an uncontrolled density to comfortable on remount", () => {
+    const first = renderDensityShell();
+    act(() => {
+      first.current.toolbarProps.onDensityChange?.("compact");
+    });
+    expect(first.current.density).toBe("compact");
+    first.unmount();
+
+    const second = renderDensityShell();
+    expect(second.current.density).toBe("comfortable");
   });
 
   it("renders the auto-form for declarative filters", () => {

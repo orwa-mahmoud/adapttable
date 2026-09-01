@@ -59,11 +59,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   ensureBaseUiStyles();
   const { slots, accentColor, animate = false } = props;
   const { filtersMode = "popover" } = props;
-  // Map row density to a table `size` (independent of column pinning):
-  // compact → "1", comfortable (default) → "2". An explicit `size` prop, if
-  // given, still wins.
-  const size =
-    props.size ?? ((props.density ?? "comfortable") === "compact" ? "1" : "2");
 
   const headerFiltersOn =
     props.headerFilters === true || props.filtersMode === "header";
@@ -92,6 +87,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filtersTrigger,
     rootRef,
   } = shell;
+  // Map resolved row density to a table `size` (independent of column
+  // pinning). An explicit kit size still wins.
+  const size = props.size ?? (shell.density === "compact" ? "1" : "2");
   const stickyBar = useStickyToolbarLayout(
     resolveStickyToolbar(
       props.stickyHeader,

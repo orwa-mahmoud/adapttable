@@ -71,14 +71,13 @@ needs is reachable from the root import.
 
 ### `standardFeatures()`
 
-One import for the common richer table, so the ordinary case is not eleven
+One import for the common richer table, so the ordinary case is not ten
 import lines. It is a starting point, not a tier — every member is separately
 importable, and a table that wants ten of them composes ten.
 
-Called bare it returns the eleven factories that need no configuration:
+Called bare it returns the ten factories that need no configuration:
 `columnMenu`, `densityChooser`, `exportCsv`, `findInTable`, `fitColumns`,
-`fullscreen`, `headerFilters`, `multiSort`, `resizableColumns`,
-`selectionStats`, `statusBar`.
+`fullscreen`, `headerFilters`, `multiSort`, `resizableColumns`, `statusBar`.
 
 `grouping`, `bulkActions`, `filters` and `savedViews` each need options to do
 anything, so they join only when the caller supplies them —

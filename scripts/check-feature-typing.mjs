@@ -12,9 +12,12 @@
  * Variance fixed it, and variance is exactly the kind of thing that regresses
  * silently: a phantom marker moved from a contravariant position back to a
  * covariant one breaks every documented example at once, and no runtime test
- * notices. So the compiler is the test. Two fixtures, opposite expectations:
+ * notices. So the compiler is the test. The fixtures have opposite
+ * expectations:
  *
  * - `typing-fixtures/documented.ts` must compile clean. It is the docs.
+ * - Both `preset-*.tsx` fixtures must compile a real adapter `DataTable`
+ *   without a type argument or cast.
  * - `typing-fixtures/wrong-row.ts` must NOT compile, and the diagnostic has to
  *   name the offending feature, so a caller mixing row types is told which
  *   entry is wrong rather than that the array is.
@@ -45,6 +48,8 @@ const OPTIONS = {
   paths: {
     "@adapttable/core": ["packages/core/src/index.ts"],
     "@adapttable/core/*": ["packages/core/src/*.ts"],
+    "@adapttable/mui": ["packages/adapter-mui/src/index.ts"],
+    "@adapttable/mui/*": ["packages/adapter-mui/src/*.ts"],
   },
 };
 
@@ -57,6 +62,35 @@ function diagnose(file) {
     .map((d) => ts.flattenDiagnosticMessageText(d.messageText, " "));
 }
 
+/** Type-check generated consumer source against one adapter's source entry. */
+function diagnoseGenerated(file, source, packageName, packageDir) {
+  const virtualFile = join(FIXTURES, file);
+  const options = {
+    ...OPTIONS,
+    paths: {
+      ...OPTIONS.paths,
+      [`@adapttable/${packageName}/preset`]: [
+        `packages/adapter-${packageDir}/src/preset.ts`,
+      ],
+    },
+  };
+  const host = ts.createCompilerHost(options);
+  const getSourceFile = host.getSourceFile.bind(host);
+  const fileExists = host.fileExists.bind(host);
+  const readFile = host.readFile.bind(host);
+  host.fileExists = (name) => name === virtualFile || fileExists(name);
+  host.readFile = (name) => (name === virtualFile ? source : readFile(name));
+  host.getSourceFile = (name, languageVersion, onError, shouldCreate) =>
+    name === virtualFile
+      ? ts.createSourceFile(name, source, languageVersion, true)
+      : getSourceFile(name, languageVersion, onError, shouldCreate);
+  const program = ts.createProgram([virtualFile], options, host);
+  return ts
+    .getPreEmitDiagnostics(program)
+    .filter((d) => d.file?.fileName === virtualFile)
+    .map((d) => ts.flattenDiagnosticMessageText(d.messageText, " "));
+}
+
 const problems = [];
 
 const documented = diagnose("documented.ts");
@@ -65,6 +99,55 @@ if (documented.length > 0) {
     "documented.ts must compile with no type arguments, and does not:\n    " +
       documented.join("\n    ")
   );
+}
+
+for (const fixture of ["preset-bare.tsx", "preset-configured.tsx"]) {
+  const diagnostics = diagnose(fixture);
+  if (diagnostics.length > 0) {
+    problems.push(
+      `${fixture} must compile with no type argument or cast, and does not:\n    ` +
+        diagnostics.join("\n    ")
+    );
+  }
+}
+
+const presetContract = (packageName) => `
+import type { StaticTableFeature, TableFeature } from "@adapttable/core";
+import {
+  standardFeatures,
+  type StandardFeatureOptions,
+} from "@adapttable/${packageName}/preset";
+
+type PresetContract = <TRow>(
+  options?: StandardFeatureOptions<TRow>
+) => TableFeature<TRow>[];
+
+export const preset: PresetContract = standardFeatures;
+export const bare: StaticTableFeature[] = standardFeatures();
+`;
+
+for (const [packageName, packageDir] of [
+  ["antd", "antd"],
+  ["base-ui", "base-ui"],
+  ["chakra", "chakra"],
+  ["mantine", "mantine"],
+  ["mui", "mui"],
+  ["radix", "radix"],
+  ["shadcn", "shadcn"],
+  ["unstyled", "unstyled"],
+]) {
+  const diagnostics = diagnoseGenerated(
+    `preset-${packageName}-parity.ts`,
+    presetContract(packageName),
+    packageName,
+    packageDir
+  );
+  if (diagnostics.length > 0) {
+    problems.push(
+      `${packageName} preset does not match the shared generic contract:\n    ` +
+        diagnostics.join("\n    ")
+    );
+  }
 }
 
 const wrong = diagnose("wrong-row.ts");
@@ -88,6 +171,6 @@ if (problems.length > 0) {
 }
 
 console.log(
-  "feature typing: the documented array compiles bare, and the wrong row " +
-    "still names the feature"
+  "feature typing: documented and preset arrays compile bare, and the wrong " +
+    "row still names the feature"
 );

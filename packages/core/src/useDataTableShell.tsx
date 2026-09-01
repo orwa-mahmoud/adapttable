@@ -8,6 +8,7 @@ import {
 } from "./columns/columnMenuModel";
 import { flattenColumnTree } from "./columns/columnTree";
 import { bindFeatureHostFn } from "./features/currentHost";
+import { useResolvedDensity } from "./features/densityStateKey";
 import {
   featureHostOf,
   rememberFeatureHost,
@@ -120,6 +121,8 @@ export function useDataTableShell<TRow>(
 ) {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);
+  const { density, onDensityChange: requestDensityChange } =
+    useResolvedDensity(props);
   // ONE resolved URL backend for everything in this table: the tier hooks
   // AND chrome that reads URL state (saved views) share this instance, so
   // with `urlSync={false}` they share the same in-memory backend instead of
@@ -175,6 +178,8 @@ export function useDataTableShell<TRow>(
       : props.filters;
   const chromeProps = {
     ...props,
+    density,
+    onDensityChange: requestDensityChange,
     urlAdapter,
     onCellEdit: props.onCellEdit,
     source,
@@ -340,7 +345,7 @@ export function useDataTableShell<TRow>(
     toolbarSlots: props.toolbarSlots,
     ...undoRedoToolbar(props.undoRedoButtons, history, labels),
     ...printToolbar(props.printButton, props.onPrint, labels),
-    ...viewControlsToolbar(props, fullscreen),
+    ...viewControlsToolbar(chromeProps, fullscreen),
     hasFilters: toolbarShowsFilters(
       resolveFilterMode(props.filtersMode, props.headerFilters),
       Boolean(filtersNode),
@@ -413,6 +418,8 @@ export function useDataTableShell<TRow>(
     scrollBoxElement,
     table,
     labels,
+    /** The density every adapter renders, controlled or feature-owned. */
+    density,
     filtersNode,
     filtersOpen,
     setFiltersOpen,

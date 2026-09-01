@@ -75,9 +75,9 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 ```
 
 With no arguments it composes the features that work with nothing else
-supplied: the Columns menu, CSV export, find-in-table, fit-columns, the
-fullscreen toggle, header filters, multi-sort, resizable columns and the status
-bar.
+supplied: the Columns menu, the density chooser, CSV export, find-in-table,
+fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
+columns and the status bar.
 
 A feature that needs input joins only when you give it that input, because an
 inert implementation is exactly the weight this architecture exists to remove:
@@ -91,11 +91,10 @@ standardFeatures({
 });
 ```
 
-Two factories are callable with no arguments and are still NOT members: the
-density chooser draws nothing unless the host also passes `onDensityChange`,
-and selection statistics need a cell range — which needs `cellNavigation` —
-while arming a row-selection column on their own. Import either directly when
-you want it.
+One factory is callable with no arguments and is still NOT a member: the
+selection statistics feature needs a cell range — which needs `cellNavigation`
+— while arming a row-selection column on its own. Import it directly when you
+want it.
 
 The result is an ordinary array. Append to it, filter it, or replace an entry:
 
@@ -108,10 +107,10 @@ it, and a duplicate id warns in development.
 
 **The preset entry statically imports everything it can compose**, so its own
 bundle contains the configurable members whether or not you pass their options.
-That is the trade: one import instead of nine.
+That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 55.5 kB gzipped and the same table with
-`standardFeatures()` composed is 101.9 kB.
+Measured on MUI, the table alone is 55.6 kB gzipped and the same table with
+`standardFeatures()` composed is 102.2 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 

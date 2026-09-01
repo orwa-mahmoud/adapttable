@@ -72,6 +72,15 @@ describe("density and fullscreen (mui)", () => {
     expect(onDensityChange).toHaveBeenCalledWith("compact");
   });
 
+  it("applies an uncontrolled choice to the rendered cells", () => {
+    table({ densityChooser: true });
+    const header = document.querySelector("th")!;
+
+    expect(header).toHaveClass("MuiTableCell-sizeMedium");
+    fireEvent.click(part("density-toggle")!);
+    expect(header).toHaveClass("MuiTableCell-sizeSmall");
+  });
+
   it("goes back the other way from compact", () => {
     table({ densityChooser: true, density: "compact", onDensityChange });
     fireEvent.click(part("density-toggle")!);

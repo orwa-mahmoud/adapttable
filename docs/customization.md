@@ -389,23 +389,57 @@ cell, for a column's `Cell` renderer to read.
 ## Density and fullscreen
 
 ```tsx
-const { density, onDensityChange } = useDensityUrlState();
+import { DataTable } from "@adapttable/mantine";
+import { standardFeatures } from "@adapttable/mantine/preset";
 
 <DataTable
-  density={density}
-  densityChooser
-  onDensityChange={onDensityChange}
-  fullscreen
+  data={data}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={standardFeatures()}
   …
 />;
 ```
 
-`densityChooser` puts the control in the toolbar; `density` is still what
-the table renders, so the host stays in charge. Pairing it with
-`useDensityUrlState` keeps the choice in the URL beside sort and filters, so
-a reload and a shared link both reproduce it.
+`standardFeatures()` includes `densityChooser()` — the toggle works with no
+`density` or `onDensityChange` from the host. The feature owns uncontrolled
+state and starts at `"comfortable"`. To control density yourself, pass `density`
+as the source of truth and `onDensityChange` to observe requests:
 
-`fullscreen` adds a toggle. Fullscreen hides everything outside the table,
+```tsx
+import { densityChooser } from "@adapttable/mantine/density";
+import { fullscreen } from "@adapttable/mantine/fullscreen";
+import type { Density } from "@adapttable/core";
+
+const [density, setDensity] = useState<Density>("comfortable");
+
+<DataTable
+  density={density}
+  onDensityChange={setDensity}
+  features={[densityChooser(), fullscreen()]}
+  …
+/>;
+```
+
+Pairing controlled density with `useDensityUrlState` keeps the choice in the
+URL beside sort and filters, so a reload and a shared link both reproduce it:
+
+```tsx
+import { densityChooser } from "@adapttable/mantine/density";
+import { fullscreen } from "@adapttable/mantine/fullscreen";
+import { useDensityUrlState } from "@adapttable/core";
+
+const { density, onDensityChange } = useDensityUrlState();
+
+<DataTable
+  density={density}
+  onDensityChange={onDensityChange}
+  features={[densityChooser(), fullscreen()]}
+  …
+/>;
+```
+
+`fullscreen()` adds a toggle. Fullscreen hides everything outside the table,
 which is what makes it useful and also what breaks overlays: a menu
 portalled to `document.body` sits inside the part being hidden, still
 mounted and still focused. The table's own overlays are re-pointed at the
@@ -548,10 +582,11 @@ it with `SidePanelLayout` / `SidePanelLayoutProps`, all from
 ```
 
 `"comfortable"` (default) is the roomy layout; `"compact"` tightens row
-height and padding. Each adapter maps it to its kit's table size — MUI
-`"comfortable"` → `medium` / `"compact"` → `small`, antd → `middle` /
-`small`, Radix `"2"` / `"1"` — and MUI, Chakra, antd, and Radix offer an
-explicit `size` prop that
+height and padding. With `densityChooser()` composed and no controlled
+`density` prop, the feature owns the choice and defaults to `"comfortable"`.
+Each adapter maps density to its kit's table size — MUI `"comfortable"` →
+`medium` / `"compact"` → `small`, antd → `middle` / `small`, Radix `"2"` /
+`"1"` — and MUI, Chakra, antd, and Radix offer an explicit `size` prop that
 overrides the mapping (e.g. antd `size="large"`).
 
 ## Export

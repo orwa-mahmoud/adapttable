@@ -110,7 +110,7 @@ export default defineConfig(
     // Root build tooling (lcov path fixer, shared vitest config) lives
     // outside any package's TS project, so the type-aware rules can't
     // resolve it. Lint it with the syntactic rules only.
-    files: ["scripts/**/*.{js,mjs,cjs,ts}", "vitest.shared.ts"],
+    files: ["scripts/**/*.{js,mjs,cjs,ts,tsx}", "vitest.shared.ts"],
     languageOptions: {
       parserOptions: { projectService: false, project: false },
     },

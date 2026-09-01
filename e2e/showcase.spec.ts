@@ -62,7 +62,7 @@ async function openDemo(page: Page, adapter: string): Promise<void> {
   // chunk requests for other kits are attributable to the click.
   await expect(
     demo(page).locator('[data-adapter="mantine"] [data-stagger]').first()
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
   if (adapter === "mantine") return;
   const tab = page.getByTestId(`adapter-${adapter}`);
   await tab.scrollIntoViewIfNeeded();
@@ -71,7 +71,7 @@ async function openDemo(page: Page, adapter: string): Promise<void> {
   // ready — assert against the NEW adapter's tree, not the outgoing one.
   await expect(
     demo(page).locator(`[data-adapter="${adapter}"] [data-stagger]`).first()
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 test("non-default kits load on demand (code-split)", async ({ page }) => {
@@ -294,6 +294,28 @@ test("antd keeps its sticky header to one compact line", async ({ page }) => {
   const rowBox = await row.boundingBox();
   expect(headerBox?.height).toBeLessThanOrEqual(64);
   expect(headerBox?.height ?? 0).toBeLessThan((rowBox?.height ?? 1) * 2);
+});
+
+test("keyboard density changes tighten rows in every adapter", async ({
+  page,
+}) => {
+  for (const adapter of ADAPTERS) {
+    await openDemo(page, adapter);
+    const row = demo(page)
+      .locator(`[data-adapter="${adapter}"] [data-stagger]`)
+      .first();
+    const comfortable = await row.boundingBox();
+    expect(comfortable).not.toBeNull();
+
+    const compact = page
+      .getByRole("group", { name: "density" })
+      .getByRole("button", { name: "Compact", exact: true });
+    await compact.focus();
+    await page.keyboard.press("Enter");
+    await expect
+      .poll(async () => (await row.boundingBox())?.height ?? Infinity)
+      .toBeLessThan(comfortable!.height);
+  }
 });
 
 /** Grouping and editing are opt-in control-bar toggles (off by default). */

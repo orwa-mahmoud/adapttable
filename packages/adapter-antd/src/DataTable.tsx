@@ -106,6 +106,7 @@ import {
   useMountStagger,
   useOffsetHeight,
   useResolvedAdapter,
+  useResolvedDensity,
   useStickyToolbarLayout,
   useTableFeatures,
   useTableStatusAnnouncement,
@@ -1650,6 +1651,7 @@ function useAntdGridState<TRow>(
 function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);
+  const { density, onDensityChange } = useResolvedDensity(props);
   const {
     slots,
     className,
@@ -1658,7 +1660,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     bordered = false,
     virtualize = false,
   } = props;
-  const size = resolveSize(props.size, props.density);
+  const size = resolveSize(props.size, density);
   const filtersMode = resolveFilterMode(props.filtersMode, props.headerFilters);
   // Resolve the data tier (source > onQueryChange server > frontend data)
   // and the declarative-filter runtime; everything below — pagination, row
@@ -1730,6 +1732,8 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   });
   const chromeProps = {
     ...props,
+    density,
+    onDensityChange,
     onCellEdit: recordingCellEdit,
     source: resolvedSource,
     filters: filtersNode,
@@ -1758,6 +1762,8 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
               grouping={grouping}
               props={props}
               chromeProps={chromeProps}
+              density={density}
+              onDensityChange={onDensityChange}
               chrome={chrome}
               history={history}
               featureHost={featureHost}
@@ -1799,6 +1805,8 @@ type RenderModelAssembly<TRow> = Parameters<
 interface AntdTableBodyProps<TRow> {
   readonly props: Readonly<ComposedProps<TRow>>;
   readonly chromeProps: Parameters<typeof useTableChrome<TRow>>[0];
+  readonly density: "comfortable" | "compact";
+  readonly onDensityChange: (next: "comfortable" | "compact") => void;
   readonly chrome: ReturnType<typeof useTableChrome<TRow>>;
   readonly history: EditHistoryState<TRow>;
   readonly featureHost: ReturnType<typeof featureHostOf>;
@@ -1834,6 +1842,8 @@ interface AntdTableBodyProps<TRow> {
 function AntdTableBody<TRow>({
   props,
   chromeProps,
+  density,
+  onDensityChange,
   chrome: c,
   history,
   featureHost,
@@ -1928,7 +1938,10 @@ function AntdTableBody<TRow>({
   // Fullscreen also decides where every overlay portals: promoted, the rest
   // of the document is hidden, so a menu on `document.body` is invisible.
   const fullscreen = useFullscreen(rootRef.current);
-  const viewControls = viewControlsToolbar(props, fullscreen);
+  const viewControls = viewControlsToolbar(
+    { density, onDensityChange, fullscreen: chromeProps.fullscreen },
+    fullscreen
+  );
   useChromeScrollReset(rootRef, c, chromeProps);
   // Same action the shell exposes, wired to this adapter's own root: sizing a
   // column means measuring cells, and the cells are in there.
@@ -2172,7 +2185,7 @@ function AntdTableBody<TRow>({
           editing={c.editing}
           cardWindow={cardWindow}
           tableLabel={resolvedTableLabel}
-          density={props.density}
+          density={density}
           prefetch={props.prefetch}
           onRowClick={props.onRowClick}
           rowClassName={props.rowClassName}

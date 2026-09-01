@@ -499,9 +499,9 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 ```
 
 With no arguments it composes the features that work with nothing else
-supplied: the Columns menu, CSV export, find-in-table, fit-columns, the
-fullscreen toggle, header filters, multi-sort, resizable columns and the status
-bar.
+supplied: the Columns menu, the density chooser, CSV export, find-in-table,
+fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
+columns and the status bar.
 
 A feature that needs input joins only when you give it that input, because an
 inert implementation is exactly the weight this architecture exists to remove:
@@ -515,11 +515,10 @@ standardFeatures({
 });
 ```
 
-Two factories are callable with no arguments and are still NOT members: the
-density chooser draws nothing unless the host also passes `onDensityChange`,
-and selection statistics need a cell range — which needs `cellNavigation` —
-while arming a row-selection column on their own. Import either directly when
-you want it.
+One factory is callable with no arguments and is still NOT a member: the
+selection statistics feature needs a cell range — which needs `cellNavigation`
+— while arming a row-selection column on its own. Import it directly when you
+want it.
 
 The result is an ordinary array. Append to it, filter it, or replace an entry:
 
@@ -532,10 +531,10 @@ it, and a duplicate id warns in development.
 
 **The preset entry statically imports everything it can compose**, so its own
 bundle contains the configurable members whether or not you pass their options.
-That is the trade: one import instead of nine.
+That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 55.5 kB gzipped and the same table with
-`standardFeatures()` composed is 101.9 kB.
+Measured on MUI, the table alone is 55.6 kB gzipped and the same table with
+`standardFeatures()` composed is 102.2 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -6938,23 +6937,57 @@ cell, for a column's `Cell` renderer to read.
 ## Density and fullscreen
 
 ```tsx
-const { density, onDensityChange } = useDensityUrlState();
+import { DataTable } from "@adapttable/mantine";
+import { standardFeatures } from "@adapttable/mantine/preset";
 
 <DataTable
-  density={density}
-  densityChooser
-  onDensityChange={onDensityChange}
-  fullscreen
+  data={data}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={standardFeatures()}
   …
 />;
 ```
 
-`densityChooser` puts the control in the toolbar; `density` is still what
-the table renders, so the host stays in charge. Pairing it with
-`useDensityUrlState` keeps the choice in the URL beside sort and filters, so
-a reload and a shared link both reproduce it.
+`standardFeatures()` includes `densityChooser()` — the toggle works with no
+`density` or `onDensityChange` from the host. The feature owns uncontrolled
+state and starts at `"comfortable"`. To control density yourself, pass `density`
+as the source of truth and `onDensityChange` to observe requests:
 
-`fullscreen` adds a toggle. Fullscreen hides everything outside the table,
+```tsx
+import { densityChooser } from "@adapttable/mantine/density";
+import { fullscreen } from "@adapttable/mantine/fullscreen";
+import type { Density } from "@adapttable/core";
+
+const [density, setDensity] = useState<Density>("comfortable");
+
+<DataTable
+  density={density}
+  onDensityChange={setDensity}
+  features={[densityChooser(), fullscreen()]}
+  …
+/>;
+```
+
+Pairing controlled density with `useDensityUrlState` keeps the choice in the
+URL beside sort and filters, so a reload and a shared link both reproduce it:
+
+```tsx
+import { densityChooser } from "@adapttable/mantine/density";
+import { fullscreen } from "@adapttable/mantine/fullscreen";
+import { useDensityUrlState } from "@adapttable/core";
+
+const { density, onDensityChange } = useDensityUrlState();
+
+<DataTable
+  density={density}
+  onDensityChange={onDensityChange}
+  features={[densityChooser(), fullscreen()]}
+  …
+/>;
+```
+
+`fullscreen()` adds a toggle. Fullscreen hides everything outside the table,
 which is what makes it useful and also what breaks overlays: a menu
 portalled to `document.body` sits inside the part being hidden, still
 mounted and still focused. The table's own overlays are re-pointed at the
@@ -7097,10 +7130,11 @@ it with `SidePanelLayout` / `SidePanelLayoutProps`, all from
 ```
 
 `"comfortable"` (default) is the roomy layout; `"compact"` tightens row
-height and padding. Each adapter maps it to its kit's table size — MUI
-`"comfortable"` → `medium` / `"compact"` → `small`, antd → `middle` /
-`small`, Radix `"2"` / `"1"` — and MUI, Chakra, antd, and Radix offer an
-explicit `size` prop that
+height and padding. With `densityChooser()` composed and no controlled
+`density` prop, the feature owns the choice and defaults to `"comfortable"`.
+Each adapter maps density to its kit's table size — MUI `"comfortable"` →
+`medium` / `"compact"` → `small`, antd → `middle` / `small`, Radix `"2"` /
+`"1"` — and MUI, Chakra, antd, and Radix offer an explicit `size` prop that
 overrides the mapping (e.g. antd `size="large"`).
 
 ## Export
@@ -7969,7 +8003,7 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `labels`                    | `TableLabels`                                                   | English         | Pre-translated label overrides; missing keys fall back to English defaults.                                                                                                                                                                                                                                                                                                                                                                                              |
 | `dir`                       | `"ltr" \| "rtl"`                                                | `"ltr"`         | Text direction.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `locale`                    | `string`                                                        | —               | Active locale tag (e.g. `"ar"`, `"ar-EG"`) driving per-column `i18n` data-path resolution.                                                                                                                                                                                                                                                                                                                                                                               |
-| `density`                   | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `density`                   | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size. With `densityChooser()` composed, omit this to let the feature own uncontrolled state; pass it to control density and pair with `onDensityChange` to observe requests.                                                                                                                                                                                                                                        |
 | `renderCard`                | `(row, card) => ReactNode`                                      | —               | Replace a mobile card's body; the shell keeps selection, actions and expansion. See [mobile](./mobile.md).                                                                                                                                                                                                                                                                                                                                                               |
 | `mobileBreakpoint`          | `number`                                                        | `768`           | Width (px) at or below which the card layout takes over. See [mobile](./mobile.md).                                                                                                                                                                                                                                                                                                                                                                                      |
 | `forceMobile`               | `boolean`                                                       | viewport        | Force the mobile layout instead of resolving from the viewport.                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -8055,6 +8089,8 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
 scopes a mapper (summary, group aggregates) to the table that invoked it.
+`RowOf<P>` derives the row type from a wrapper's `rowKey` prop so adapter
+feature hosts retain the consumer's row contract.
 
 A feature whose behaviour is a hook carries a `provider` instead —
 `FeatureProviderContribution`, whose component receives
@@ -9104,13 +9140,19 @@ with `tableErrorState(source)` and resolve the slot with `fillSlot(slot,
 state)`, both from `@adapttable/core/adapter`. See
 [customization](./customization.md).
 
-**Density chooser and fullscreen toggle.** `densityChooser` puts a density
-control in the toolbar and reports the choice through `onDensityChange`;
-`fullscreen` puts a fullscreen toggle beside it, and that button hides
-itself where the browser will not allow fullscreen at all. Adapters build
-both from `viewControlsToolbar(props, fullscreen)` / `ViewControlsToolbar`
-in `@adapttable/core/adapter`, which resolves them to present-or-absent so a
-kit renders on presence.
+**Density chooser and fullscreen toggle.** `densityChooser()` puts a density
+control in the toolbar. Without a controlled `density` prop, the feature owns
+the choice and starts at `"comfortable"`; pass `density` to control it and
+`onDensityChange` to observe requests. `fullscreen()` puts a fullscreen toggle
+beside it, and that button hides itself where the browser will not allow
+fullscreen at all. Adapters build both from `viewControlsToolbar(props,
+fullscreen)` / `ViewControlsToolbar` in `@adapttable/core/adapter`. Density
+is an always-resolved read/write contract passed to the toolbar slots; whether
+the density button draws is decided by feature composition. Fullscreen stays
+present-or-absent from the feature and browser support.
+Adapters with a custom chrome path call `useResolvedDensity(props)` directly;
+its `ResolvedDensity` result carries the same resolved value and request
+callback.
 
 **Fullscreen.** `useFullscreen(element)` promotes the table and returns a
 `FullscreenState`: `active`, `supported`, `toggle`, `exit`, and — the part
@@ -9123,8 +9165,9 @@ the browser's own control both leave fullscreen without asking.
 
 **Density in the URL.** `useDensityUrlState(options)` returns a `Density`
 (`"comfortable"` | `"compact"`) and `onDensityChange` to spread onto the
-table, keeping a chosen layout in the URL beside sort and filters so a
-reload or a shared link reproduces it. `UseDensityUrlStateOptions` /
+table when you want the choice in the URL beside sort and filters — a reload
+or a shared link reproduces it. Pair with a controlled `density` prop; the
+chooser works without it. `UseDensityUrlStateOptions` /
 `UseDensityUrlStateResult` type it. Choosing the default removes the
 parameter rather than restating it.
 
@@ -9750,8 +9793,8 @@ your app already ships those:
 | What you import                           | min+gzip  |
 | ----------------------------------------- | --------- |
 | `useFrontendData` + `useDataTable` (core) | ~18 kB    |
-| every core export                         | ~83 kB    |
-| `DataTable` from an adapter               | ~55–67 kB |
+| every core export                         | ~79 kB    |
+| `DataTable` from an adapter               | ~56–67 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -11195,11 +11238,11 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 />;
 ```
 
-`standardFeatures()` brings the Columns menu, CSV export, find-in-table,
-fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
-columns and the status bar. Grouping, bulk actions, filters and saved views
-join when you pass their options. See [feature composition](./features.md) for
-what the preset costs against individual imports.
+`standardFeatures()` brings the Columns menu, the density chooser, CSV export,
+find-in-table, fit-columns, the fullscreen toggle, header filters, multi-sort,
+resizable columns and the status bar. Grouping, bulk actions, filters and saved
+views join when you pass their options. See [feature composition](./features.md)
+for what the preset costs against individual imports.
 
 ## The smallest upgrade
 

@@ -71,7 +71,7 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 | `labels`                    | `TableLabels`                                                   | English         | Pre-translated label overrides; missing keys fall back to English defaults.                                                                                                                                                                                                                                                                                                                                                                                              |
 | `dir`                       | `"ltr" \| "rtl"`                                                | `"ltr"`         | Text direction.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `locale`                    | `string`                                                        | —               | Active locale tag (e.g. `"ar"`, `"ar-EG"`) driving per-column `i18n` data-path resolution.                                                                                                                                                                                                                                                                                                                                                                               |
-| `density`                   | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `density`                   | `"comfortable" \| "compact"`                                    | `"comfortable"` | Row density; each adapter maps it to its kit's table size. With `densityChooser()` composed, omit this to let the feature own uncontrolled state; pass it to control density and pair with `onDensityChange` to observe requests.                                                                                                                                                                                                                                        |
 | `renderCard`                | `(row, card) => ReactNode`                                      | —               | Replace a mobile card's body; the shell keeps selection, actions and expansion. See [mobile](./mobile.md).                                                                                                                                                                                                                                                                                                                                                               |
 | `mobileBreakpoint`          | `number`                                                        | `768`           | Width (px) at or below which the card layout takes over. See [mobile](./mobile.md).                                                                                                                                                                                                                                                                                                                                                                                      |
 | `forceMobile`               | `boolean`                                                       | viewport        | Force the mobile layout instead of resolving from the viewport.                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -157,6 +157,8 @@ Types: `TableFeature` · `TableFeatureHost` · `FeaturePatch` ·
 `rememberFeatureHost` thread it into chrome, `FeatureHostProvider` /
 `useFeatureHost` hand it to hooks in the tree, and `bindFeatureHostFn`
 scopes a mapper (summary, group aggregates) to the table that invoked it.
+`RowOf<P>` derives the row type from a wrapper's `rowKey` prop so adapter
+feature hosts retain the consumer's row contract.
 
 A feature whose behaviour is a hook carries a `provider` instead —
 `FeatureProviderContribution`, whose component receives
@@ -1206,13 +1208,19 @@ with `tableErrorState(source)` and resolve the slot with `fillSlot(slot,
 state)`, both from `@adapttable/core/adapter`. See
 [customization](./customization.md).
 
-**Density chooser and fullscreen toggle.** `densityChooser` puts a density
-control in the toolbar and reports the choice through `onDensityChange`;
-`fullscreen` puts a fullscreen toggle beside it, and that button hides
-itself where the browser will not allow fullscreen at all. Adapters build
-both from `viewControlsToolbar(props, fullscreen)` / `ViewControlsToolbar`
-in `@adapttable/core/adapter`, which resolves them to present-or-absent so a
-kit renders on presence.
+**Density chooser and fullscreen toggle.** `densityChooser()` puts a density
+control in the toolbar. Without a controlled `density` prop, the feature owns
+the choice and starts at `"comfortable"`; pass `density` to control it and
+`onDensityChange` to observe requests. `fullscreen()` puts a fullscreen toggle
+beside it, and that button hides itself where the browser will not allow
+fullscreen at all. Adapters build both from `viewControlsToolbar(props,
+fullscreen)` / `ViewControlsToolbar` in `@adapttable/core/adapter`. Density
+is an always-resolved read/write contract passed to the toolbar slots; whether
+the density button draws is decided by feature composition. Fullscreen stays
+present-or-absent from the feature and browser support.
+Adapters with a custom chrome path call `useResolvedDensity(props)` directly;
+its `ResolvedDensity` result carries the same resolved value and request
+callback.
 
 **Fullscreen.** `useFullscreen(element)` promotes the table and returns a
 `FullscreenState`: `active`, `supported`, `toggle`, `exit`, and — the part
@@ -1225,8 +1233,9 @@ the browser's own control both leave fullscreen without asking.
 
 **Density in the URL.** `useDensityUrlState(options)` returns a `Density`
 (`"comfortable"` | `"compact"`) and `onDensityChange` to spread onto the
-table, keeping a chosen layout in the URL beside sort and filters so a
-reload or a shared link reproduces it. `UseDensityUrlStateOptions` /
+table when you want the choice in the URL beside sort and filters — a reload
+or a shared link reproduces it. Pair with a controlled `density` prop; the
+chooser works without it. `UseDensityUrlStateOptions` /
 `UseDensityUrlStateResult` type it. Choosing the default removes the
 parameter rather than restating it.
 

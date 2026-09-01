@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./DataTable";
@@ -51,6 +51,7 @@ describe("standard preset (chakra)", () => {
 
     expect(document.querySelector("table")).not.toBeNull();
     expect(part("column-menu-button")).not.toBeNull();
+    expect(part("density-toggle")).not.toBeNull();
     expect(part("status-bar")).not.toBeNull();
     expect(screen.queryByRole("button", { name: /export/i })).not.toBeNull();
   });
@@ -63,15 +64,22 @@ describe("standard preset (chakra)", () => {
     expect(part("saved-views-button")).toBeNull();
   });
 
-  it("composes nothing that would be inert on its own", () => {
+  it("leaves out the remaining bare feature that would be inert", () => {
     table(standardFeatures());
 
-    // The density toggle needs the host's `onDensityChange` and selection
-    // statistics need a cell range, so neither is a preset member — and
-    // neither leaves a trace here, in particular no selection column.
-    expect(part("density-toggle")).toBeNull();
+    // Selection statistics needs a cell range, so it is not a preset member
+    // and leaves no trace here, in particular no selection column.
     expect(part("selection-header")).toBeNull();
     expect(part("selection-stats")).toBeNull();
+  });
+
+  it("owns density when the caller supplies no density props", () => {
+    table(standardFeatures());
+    const toggle = part("density-toggle")!;
+
+    expect(toggle).toHaveTextContent(/comfortable/i);
+    fireEvent.click(toggle);
+    expect(toggle).toHaveTextContent(/compact/i);
   });
 
   it("adds a configured member, and only that one", () => {

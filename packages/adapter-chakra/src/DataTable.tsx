@@ -73,10 +73,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const { slots, animate = false } = props;
   const accentColor = props.accentColor;
   const { filtersMode = "popover" } = props;
-  // Map row density to Chakra's table `size` (independent of column pinning):
-  // compact → "sm", comfortable (default) → "md". An explicit `size` prop, if
-  // given, still wins for backward compatibility.
-  const size = tableSize(props);
 
   const headerFiltersOn =
     props.headerFilters === true || props.filtersMode === "header";
@@ -105,6 +101,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filtersTrigger,
     rootRef,
   } = shell;
+  // Map resolved row density to Chakra's table `size`; an explicit kit size
+  // still wins.
+  const size = tableSize({ size: props.size, density: shell.density });
   const stickyBar = useStickyToolbarLayout(
     resolveStickyToolbar(
       props.stickyHeader,

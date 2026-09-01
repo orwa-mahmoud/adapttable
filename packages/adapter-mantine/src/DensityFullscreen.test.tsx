@@ -67,6 +67,19 @@ describe("density and fullscreen (mantine)", () => {
     expect(onDensityChange).toHaveBeenCalledWith("compact");
   });
 
+  it("applies an uncontrolled choice to the rendered row spacing", () => {
+    const { container } = table({ densityChooser: true });
+    const rendered = container.querySelector("table")!;
+
+    expect(rendered.style.getPropertyValue("--table-vertical-spacing")).toBe(
+      "var(--mantine-spacing-sm)"
+    );
+    fireEvent.click(part("density-toggle")!);
+    expect(
+      rendered.style.getPropertyValue("--table-vertical-spacing")
+    ).toContain("0.25rem");
+  });
+
   it("goes back the other way from compact", () => {
     table({ densityChooser: true, density: "compact", onDensityChange });
     fireEvent.click(part("density-toggle")!);

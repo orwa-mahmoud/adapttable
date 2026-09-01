@@ -113,10 +113,10 @@ export interface ToolbarChromeProps<TRow> {
   onPrint?: () => void;
   /** `labels.print` — the print button's caption. */
   printLabel?: string;
-  /** The density the table is rendering, when the chooser is shown. */
-  density?: "comfortable" | "compact";
-  /** Change it. Present iff the host asked for the chooser. */
-  onDensityChange?: (next: "comfortable" | "compact") => void;
+  /** The density the table is rendering. */
+  density: "comfortable" | "compact";
+  /** Request a density change. */
+  onDensityChange: (next: "comfortable" | "compact") => void;
   /** Toggle fullscreen. Present iff asked for AND the browser allows it. */
   onToggleFullscreen?: () => void;
   /** Whether the table is fullscreen right now, for the button's state. */
@@ -437,20 +437,19 @@ export interface TableChrome<TRow> {
  * are absent, which is what keeps an opted-out toolbar identical.
  */
 /**
- * The density chooser and the fullscreen toggle, or nothing.
+ * The resolved density contract and the optional fullscreen toggle.
  *
- * Both resolve to present-or-absent rather than present-and-disabled, so an
- * adapter renders on presence. The fullscreen half folds in whether the
- * browser will allow it at all: a toggle that cannot work is worse than no
- * toggle, and an embedded webview is a real place where it cannot.
+ * Density is always readable and writable; feature composition decides whether
+ * a control renders for it. The fullscreen half folds in whether the browser
+ * will allow it at all.
  *
  * @public
  */
 export interface ViewControlsToolbar {
   /** Current row density. */
-  density?: "comfortable" | "compact";
-  /** Switches density, absent when the chooser is off. */
-  onDensityChange?: (next: "comfortable" | "compact") => void;
+  density: "comfortable" | "compact";
+  /** Request a density change. */
+  onDensityChange: (next: "comfortable" | "compact") => void;
   /** Enters or leaves fullscreen, absent when it is unavailable. */
   onToggleFullscreen?: () => void;
   /** Whether the table is currently fullscreen. */
@@ -464,20 +463,15 @@ export interface ViewControlsToolbar {
  */
 export function viewControlsToolbar(
   props: {
-    densityChooser?: boolean;
-    density?: "comfortable" | "compact";
-    onDensityChange?: (next: "comfortable" | "compact") => void;
+    density: "comfortable" | "compact";
+    onDensityChange: (next: "comfortable" | "compact") => void;
     fullscreen?: boolean;
   },
   fullscreen: { supported: boolean; active: boolean; toggle: () => void }
 ): ViewControlsToolbar {
   return {
-    ...(props.densityChooser === true
-      ? {
-          density: props.density ?? "comfortable",
-          onDensityChange: props.onDensityChange,
-        }
-      : {}),
+    density: props.density,
+    onDensityChange: props.onDensityChange,
     ...(props.fullscreen === true && fullscreen.supported
       ? {
           onToggleFullscreen: fullscreen.toggle,

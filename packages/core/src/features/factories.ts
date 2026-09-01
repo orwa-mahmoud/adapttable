@@ -290,15 +290,6 @@ export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
 }
 
 /**
- * Add a control that switches row density.
- *
- * @public
- */
-export function densityChooser(): StaticTableFeature {
-  return defineStatic("density-chooser", { densityChooser: true });
-}
-
-/**
  * Add a print action that lays the table out for paper.
  *
  * @public

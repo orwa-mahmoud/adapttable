@@ -154,8 +154,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     animate = false,
   } = props;
 
-  const density = props.density ?? "comfortable";
-
   // The whole shared orchestration — data tier, filter runtime, chrome,
   // scroll reset, body windowing — lives in core's shell; this file renders
   // only semantic markup with class hooks over it.
@@ -180,6 +178,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     chrome,
     table,
     labels,
+    density,
     filtersNode: filters,
     filtersOpen,
     setFiltersOpen,

@@ -66,6 +66,15 @@ describe("density and fullscreen (shadcn)", () => {
     expect(onDensityChange).toHaveBeenCalledWith("compact");
   });
 
+  it("applies an uncontrolled choice to the rendered density hook", () => {
+    const { container } = table({ densityChooser: true });
+    const root = container.querySelector('[data-adapttable-part="root"]')!;
+
+    expect(root).toHaveAttribute("data-density", "comfortable");
+    fireEvent.click(part("density-toggle")!);
+    expect(root).toHaveAttribute("data-density", "compact");
+  });
+
   it("goes back the other way from compact", () => {
     table({ densityChooser: true, density: "compact", onDensityChange });
     fireEvent.click(part("density-toggle")!);

@@ -99,7 +99,6 @@ export function DensityButton({
   onDensityChange,
   labels,
 }: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onDensityChange) return null;
   return (
     <Button
       size="sm"

@@ -13,27 +13,27 @@
  * options are inert, and shipping an inert implementation is the cost this
  * whole architecture exists to avoid. Pass the option and the feature joins.
  *
- * The same test excludes two factories that ARE callable bare: the density
- * chooser draws nothing unless the host also passes `onDensityChange`, and
- * selection statistics need a cell range — which needs `cellNavigation` — while
- * arming a row-selection column on their own. Import either directly when you
- * want it.
+ * Selection statistics is callable bare but still excluded: it needs a cell
+ * range, which needs `cellNavigation`, while arming a row-selection column on
+ * its own. Import it directly when you want it.
  *
  * Because this entry statically imports everything it can compose, its own
  * bundle contains the optional members whether or not you pass their options.
- * That is the trade the preset makes: one import instead of eleven. A caller
+ * That is the trade the preset makes: one import instead of a list. A caller
  * counting every byte imports the individual features instead — see
  * `docs/features.md` for the measured difference.
  */
 import type {
   BulkAction,
   FilterDef,
+  StaticTableFeature,
   TableFeature,
   UseSavedViewsOptions,
 } from "@adapttable/core";
 
 import { bulkActions } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
+import { densityChooser } from "./density";
 import { exportCsv } from "./export";
 import { filters } from "./filters";
 import { findInTable } from "./find-in-table";
@@ -86,11 +86,16 @@ export interface StandardFeatureOptions<TRow> {
  *
  * @public
  */
+export function standardFeatures(): StaticTableFeature[];
+export function standardFeatures<TRow>(
+  options?: StandardFeatureOptions<TRow>
+): TableFeature<TRow>[];
 export function standardFeatures<TRow>(
   options: StandardFeatureOptions<TRow> = {}
 ): TableFeature<TRow>[] {
   return [
     columnMenu(),
+    densityChooser(),
     exportCsv(),
     findInTable(),
     fitColumns(),

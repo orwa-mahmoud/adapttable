@@ -393,6 +393,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   {
@@ -413,6 +414,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   {
@@ -433,6 +435,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   {
@@ -451,6 +454,7 @@ const FIXTURES = [
       "useFilterTreeChips",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   {
@@ -471,6 +475,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
@@ -502,6 +507,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   {
@@ -522,6 +528,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
   {
@@ -542,6 +549,7 @@ const FIXTURES = [
       "useTableEditHistory",
       "FilterTreeBuilder",
       "SavedViewsMenu",
+      "DensityButton",
     ],
   },
 ].map((f) => ({

@@ -435,11 +435,11 @@ export interface FeatureProps<TRow> {
    */
   columnSelectionCheckbox?: boolean;
   /**
-   * Let the user choose the row density from the toolbar. Defaults to off.
+   * Compatibility-only v2 enabling prop. It does not compose toolbar UI.
    *
-   * The `density` prop is what the table renders; this is the control that
-   * changes it. Pair it with `useDensityUrlState` and the choice survives a
-   * reload and travels in a shared link.
+   * Import and compose `densityChooser()` from the selected kit instead.
+   *
+   * @deprecated Compose the kit's `densityChooser()` feature.
    */
   densityChooser?: boolean;
   /**

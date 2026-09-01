@@ -66,6 +66,14 @@ describe("density and fullscreen (antd)", () => {
     expect(onDensityChange).toHaveBeenCalledWith("compact");
   });
 
+  it("applies an uncontrolled choice to the rendered table", () => {
+    const { container } = table({ densityChooser: true });
+
+    expect(container.querySelector(".ant-table-medium")).not.toBeNull();
+    fireEvent.click(part("density-toggle")!);
+    expect(container.querySelector(".ant-table-small")).not.toBeNull();
+  });
+
   it("goes back the other way from compact", () => {
     table({ densityChooser: true, density: "compact", onDensityChange });
     fireEvent.click(part("density-toggle")!);

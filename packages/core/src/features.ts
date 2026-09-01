@@ -35,6 +35,7 @@ export type { CustomCellEditorRender } from "./editing/cellEditing";
 export type { ExportWriter } from "./export/exportWriter";
 export type { ExportCsvOptions } from "./export/tableCsv";
 export { cellNavigation } from "./features/cell-navigation";
+export { densityChooser } from "./features/density";
 export { editHistory } from "./features/edit-history";
 export {
   batchEditing,
@@ -51,7 +52,6 @@ export {
   columnSelectionCheckbox,
   commandPalette,
   contextMenu,
-  densityChooser,
   extraRows,
   feature,
   filterTypes,

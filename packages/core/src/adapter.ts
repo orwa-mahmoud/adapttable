@@ -221,6 +221,8 @@ export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
 export { ChromeExtrasGate } from "./features/chromeExtrasGate";
 export type { FeatureHostState } from "./features/currentHost";
 export { bindFeatureHostFn } from "./features/currentHost";
+export type { ResolvedDensity } from "./features/densityStateKey";
+export { useResolvedDensity } from "./features/densityStateKey";
 export type { RowOf } from "./features/featureHost";
 export { useTableFeatures } from "./features/featureHost";
 export { featureHostOf, rememberFeatureHost } from "./features/featureHost";

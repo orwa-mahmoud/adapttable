@@ -14,12 +14,15 @@ import {
 /**
  * The optional toolbar controls.
  *
- * Each one is drawn only when the host supplied its handler — the absent
- * handler IS the switch — and each one reports its own state back to the
- * reader: what undo can still do, that an export is running, which density
- * the next click will pick.
+ * Optional controls are drawn when their handler is present. Density is the
+ * exception: feature composition decides whether its slot exists, and the
+ * rendered slot always receives a resolved density contract.
  */
-const base = { labels: defaultLabels };
+const base = {
+  labels: defaultLabels,
+  density: "comfortable" as const,
+  onDensityChange: vi.fn(),
+};
 const part = (name: string) =>
   document.querySelector(`[data-adapttable-part="${name}"]`);
 
@@ -119,9 +122,9 @@ describe("PrintButton (mui)", () => {
 });
 
 describe("DensityButton (mui)", () => {
-  it("draws nothing without a handler", () => {
+  it("draws from the resolved density contract", () => {
     renderMui(<DensityButton {...base} />);
-    expect(part("density-toggle")).toBeNull();
+    expect(part("density-toggle")).not.toBeNull();
   });
 
   it("names the density it is in and asks for the other one", () => {

@@ -24,11 +24,11 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 />;
 ```
 
-`standardFeatures()` brings the Columns menu, CSV export, find-in-table,
-fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
-columns and the status bar. Grouping, bulk actions, filters and saved views
-join when you pass their options. See [feature composition](./features.md) for
-what the preset costs against individual imports.
+`standardFeatures()` brings the Columns menu, the density chooser, CSV export,
+find-in-table, fit-columns, the fullscreen toggle, header filters, multi-sort,
+resizable columns and the status bar. Grouping, bulk actions, filters and saved
+views join when you pass their options. See [feature composition](./features.md)
+for what the preset costs against individual imports.
 
 ## The smallest upgrade
 

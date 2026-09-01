@@ -74,7 +74,6 @@ function tableSize(
 function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   const { slots, className, classNames, animate = false } = props;
-  const size = tableSize(props);
   const { filtersMode = "popover" } = props;
   // The whole shared orchestration lives in core's shell; MUI adds only its
   // kit's row `size` over the returned bundles.
@@ -105,6 +104,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filtersTrigger,
     rootRef,
   } = shell;
+  const size = tableSize({ density: shell.density });
   const stickyBar = useStickyToolbarLayout(
     resolveStickyToolbar(
       props.stickyHeader,

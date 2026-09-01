@@ -67,6 +67,15 @@ describe("density and fullscreen (radix)", () => {
     expect(onDensityChange).toHaveBeenCalledWith("compact");
   });
 
+  it("applies an uncontrolled choice to the rendered table", () => {
+    const { container } = table({ densityChooser: true });
+    const rendered = container.querySelector("[data-size]")!;
+
+    expect(rendered).toHaveAttribute("data-size", "2");
+    fireEvent.click(part("density-toggle")!);
+    expect(rendered).toHaveAttribute("data-size", "1");
+  });
+
   it("goes back the other way from compact", () => {
     table({ densityChooser: true, density: "compact", onDensityChange });
     fireEvent.click(part("density-toggle")!);

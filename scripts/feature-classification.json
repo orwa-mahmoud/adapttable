@@ -422,10 +422,13 @@
       "replacesProps": ["densityChooser"],
       "classification": "adapter",
       "subpath": "density",
-      "implementation": ["core/src/url/useDensityUrlState.ts"],
+      "implementation": [
+        "core/src/features/density.tsx",
+        "core/src/features/densityStateKey.ts"
+      ],
       "adapterComponents": ["Toolbar"],
-      "standardPreset": false,
-      "note": "Toolbar control bound to density URL state. Out of the zero-argument preset: the toggle renders only when the host also passes onDensityChange, so composing it alone draws nothing.",
+      "standardPreset": true,
+      "note": "Toolbar control with feature-owned uncontrolled density; controlled density and onDensityChange remain supported.",
       "requiresConfig": false
     },
     "print": {
@@ -888,6 +891,7 @@
     "note": "`standardFeatures()` with no arguments returns only factories that are callable with no required configuration. A factory that needs options is inert without them, so naming it in a preset would bundle an implementation the table cannot use. Those join through `standardFeatures({ ... })` when the caller supplies what they need. A factory that is callable bare but does nothing without a host prop or a sibling feature is not a member either: the preset composes what WORKS with no further input.",
     "zeroArgument": [
       "columnMenu",
+      "densityChooser",
       "exportCsv",
       "findInTable",
       "fitColumns",

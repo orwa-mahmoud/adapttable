@@ -658,8 +658,8 @@ export interface ToolbarExtrasSlotProps {
   redoLabel?: string;
   onPrint?: () => void;
   printLabel?: string;
-  density?: "comfortable" | "compact";
-  onDensityChange?: (next: "comfortable" | "compact") => void;
+  density: "comfortable" | "compact";
+  onDensityChange: (next: "comfortable" | "compact") => void;
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
   onExportCsv?: () => void;
