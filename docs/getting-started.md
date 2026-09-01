@@ -58,16 +58,16 @@ pnpm add @adapttable/core @adapttable/unstyled
 
 ## Supported versions
 
-| Dependency        | Supported range                                                               |
-| ----------------- | ----------------------------------------------------------------------------- |
-| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)                      |
-| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                                      |
-| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                                  |
-| Chakra UI         | `^3.13.0`                                                                     |
-| Ant Design        | `^6`                                                                          |
-| Radix Themes      | `^3`                                                                          |
-| Base UI           | `^1`                                                                          |
-| Node (toolchain)  | consumers: any Node your bundler supports; building this repo needs `>=20.19` |
+| Dependency        | Supported range                                                       |
+| ----------------- | --------------------------------------------------------------------- |
+| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)              |
+| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                              |
+| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                          |
+| Chakra UI         | `^3.13.0`                                                             |
+| Ant Design        | `^6`                                                                  |
+| Radix Themes      | `^3`                                                                  |
+| Base UI           | `^1`                                                                  |
+| Node.js           | `>=22.12.0` (packed releases are CI-tested on Node 22.12 and Node 24) |
 
 Each floor is the lowest version the adapter actually runs on — verified
 by automated install-and-render probes, not guesswork.

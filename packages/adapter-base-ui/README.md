@@ -19,6 +19,8 @@ Import the adapter styles once in your app entry (or rely on the side-effect imp
 import "@adapttable/base-ui/styles.css";
 ```
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Quickstart
 
 ```tsx

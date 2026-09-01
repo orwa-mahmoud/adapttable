@@ -153,8 +153,9 @@ The floor is **Node 22.12.0**, declared identically by every published package.
 Two rules set it. A supported version is one still receiving upstream security
 support at release, and a supported version is one CI actually runs — an
 advertised range with no job behind it is a guess. So the declared range and the
-test matrix move together or not at all: CI runs the floor and the current
-Active LTS, and raising either raises both.
+test matrix move together or not at all: CI builds the packages, packs the
+published tarballs, and runs the consumer harness on the floor and the current
+Active LTS. Raising either raises both.
 
 ## Adapter parity
 

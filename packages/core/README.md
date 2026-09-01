@@ -19,6 +19,8 @@ You usually want a styled adapter on top (`@adapttable/mantine`,
 `@adapttable/core` directly when you want to render your own markup with full
 control via prop-getters.
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Features
 
 - **Automatic mobile cards** — the engine resolves the layout by viewport and every adapter renders rows as cards below the mobile breakpoint, state intact; `forceMobile`, `mobileLabel` and `hideOnMobile` tune it. [Docs](https://orwa-mahmoud.github.io/adapttable/mobile/).

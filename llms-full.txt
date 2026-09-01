@@ -65,16 +65,16 @@ pnpm add @adapttable/core @adapttable/unstyled
 
 ## Supported versions
 
-| Dependency        | Supported range                                                               |
-| ----------------- | ----------------------------------------------------------------------------- |
-| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)                      |
-| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                                      |
-| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                                  |
-| Chakra UI         | `^3.13.0`                                                                     |
-| Ant Design        | `^6`                                                                          |
-| Radix Themes      | `^3`                                                                          |
-| Base UI           | `^1`                                                                          |
-| Node (toolchain)  | consumers: any Node your bundler supports; building this repo needs `>=20.19` |
+| Dependency        | Supported range                                                       |
+| ----------------- | --------------------------------------------------------------------- |
+| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)              |
+| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                              |
+| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                          |
+| Chakra UI         | `^3.13.0`                                                             |
+| Ant Design        | `^6`                                                                  |
+| Radix Themes      | `^3`                                                                  |
+| Base UI           | `^1`                                                                  |
+| Node.js           | `>=22.12.0` (packed releases are CI-tested on Node 22.12 and Node 24) |
 
 Each floor is the lowest version the adapter actually runs on — verified
 by automated install-and-render probes, not guesswork.
@@ -546,8 +546,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 55.6 kB gzipped and the same table with
-`standardFeatures()` composed is 102.2 kB.
+Measured on MUI, the table alone is 55.5 kB gzipped and the same table with
+`standardFeatures()` composed is 101.8 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -8298,6 +8298,25 @@ fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 
+Adapter authors bind those slots without copying feature lifecycle through
+`createAdapterEditingFeatures`, `createAdapterFiltersFeature`,
+`createAdapterGroupingFeature`, `createAdapterRowDetailFeatures`,
+`createAdapterRowReorderFeature`, `createAdapterContextMenuFeature` and
+`createAdapterCommandPaletteFeature`. Each accepts kit-owned
+`AdapterFeatureComponent`s and returns ordinary feature factories. Their
+contracts are `AdapterEditingComponents`, `AdapterEditingFeatures`,
+`AdapterFiltersComponents`, `AdapterFiltersFeature`,
+`AdapterGroupingComponents`, `AdapterGroupingFeature`,
+`AdapterRowDetailComponents`, `AdapterRowDetailFeatures`,
+`AdapterRowReorderComponents`, `AdapterRowReorderFeature`,
+`AdapterContextMenuFeature` and `AdapterCommandPaletteFeature`; normalized
+`AdapterContextMenuProps` / `AdapterCommandPaletteProps` types keep the seam
+typed. `createAdapterStandardFeatures` takes
+`AdapterStandardFeatureFactories` and returns a `StandardFeaturesFactory`
+using `StandardFeatureOptions`; individual feature imports remain independent.
+`ContextMenuLiveGate` and `OptionalSidePanel` are the two invariant root-layout
+helpers. None imports a kit or belongs on the app-facing core entry.
+
 Chrome asks for the rest of a kit's parts the same way, one slot per part.
 Around a cell: `EDITABLE_CELL` (`EditableCellSlotProps`, the editor and the
 dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`
@@ -9973,7 +9992,7 @@ your app already ships those:
 | ----------------------------------------- | --------- |
 | `useFrontendData` + `useDataTable` (core) | ~18 kB    |
 | every core export                         | ~79 kB    |
-| `DataTable` from an adapter               | ~56–67 kB |
+| `DataTable` from an adapter               | ~55–67 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters

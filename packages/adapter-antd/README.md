@@ -14,6 +14,8 @@ the antd look-and-feel wired to a shareable, server-or-client data source.
 pnpm add @adapttable/antd @adapttable/core antd react react-dom
 ```
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Quickstart
 
 ```tsx

@@ -22,6 +22,9 @@
 
 ---
 
+**Runtime support:** Node.js 22.12.0 or newer and React 18 or 19. Packed
+releases are tested on Node 22.12 and Node 24.
+
 ## Features
 
 Every one of these works in **all eight adapters** — the same props, whichever kit you use.

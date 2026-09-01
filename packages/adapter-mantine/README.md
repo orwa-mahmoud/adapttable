@@ -15,6 +15,8 @@ animation. Built on the headless `@adapttable/core` engine.
 pnpm add @adapttable/mantine @adapttable/core @mantine/core @mantine/hooks react react-dom
 ```
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Quickstart
 
 ```tsx

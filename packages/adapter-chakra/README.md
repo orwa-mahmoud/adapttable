@@ -13,6 +13,8 @@ state, selection + bulk actions, RTL, and dark mode. Built on the headless
 pnpm add @adapttable/chakra @adapttable/core @chakra-ui/react @emotion/react react react-dom
 ```
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Quickstart
 
 ```tsx

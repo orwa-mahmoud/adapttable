@@ -9,6 +9,7 @@ dist/
 build/
 coverage/
 .turbo/
+/node-support-packs/
 
 # SonarQube / sonar-scanner local output. Never committed.
 .scannerwork/

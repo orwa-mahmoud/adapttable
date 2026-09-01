@@ -14,6 +14,10 @@ pnpm install
 pnpm check   # lint + typecheck + test (coverage) + build
 ```
 
+Published packages support Node.js 22.12.0 and newer, with packed-release
+checks on Node 22.12 and Node 24. Contributors use the committed Node 24
+toolchain so local work matches the primary CI jobs.
+
 ## Repo layout
 
 ```

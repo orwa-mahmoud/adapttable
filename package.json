@@ -6,7 +6,7 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "build": "turbo run build",
@@ -43,6 +43,8 @@
     "check:sitemap": "node scripts/check-sitemap.mjs",
     "check:docsurface": "node scripts/check-doc-surface.mjs",
     "consumer:harness": "node scripts/consumer-harness.mjs",
+    "node:support:pack": "node scripts/node-support-harness.mjs pack",
+    "node:support:verify": "node scripts/node-support-harness.mjs verify",
     "api:reports": "node scripts/api-reports.mjs --local",
     "api:check": "node scripts/api-reports.mjs",
     "release:gated": "pnpm run build && pnpm run publint && changeset publish",

@@ -25,6 +25,8 @@ pnpm add @adapttable/shadcn @adapttable/core react react-dom
 > @source "../node_modules/@adapttable/shadcn/dist/**/*.js";
 > ```
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Quickstart
 
 ```tsx
