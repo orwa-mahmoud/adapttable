@@ -2,10 +2,10 @@
 import { pageSizeOptions } from "@adapttable/core";
 import {
   ExportAnnouncer,
-  SearchIcon,
-  type ToolbarChromeProps,
   FeatureSlot,
   FILTER_POPOVER,
+  SearchIcon,
+  type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import { Badge, Box, Button, Flex, Spinner, TextField } from "@radix-ui/themes";
 import { type ReactNode } from "react";

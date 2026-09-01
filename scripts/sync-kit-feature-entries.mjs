@@ -96,19 +96,6 @@ const KITS = [
   },
 ];
 
-function exportBlock(subpath) {
-  return `    "./${subpath}": {
-      "import": {
-        "types": "./dist/${subpath}.d.ts",
-        "default": "./dist/${subpath}.js"
-      },
-      "require": {
-        "types": "./dist/${subpath}.d.cts",
-        "default": "./dist/${subpath}.cjs"
-      }
-    }`;
-}
-
 function ensureExports(pkgPath) {
   const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
   pkg.exports ??= {};
@@ -163,7 +150,6 @@ function kitFiles(kit) {
   const cnImport = kit.classes
     ? `import { useClassNames } from "./components/classNamesContext";\n`
     : "";
-  const cnHook = kit.classes ? "  useClassNames();\n" : "";
 
   return {
     "filters.tsx": `import {
@@ -186,7 +172,7 @@ ${cnImport}
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { ${kit.drawer} } from "./components/${kit.drawer}";
-${kit.drawer === "FilterPanel" ? `import { FilterPopover } from "./components/FilterPopover";\n` : `import { FilterPopover } from "./components/FilterPopover";\n`}
+import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
 
 function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {

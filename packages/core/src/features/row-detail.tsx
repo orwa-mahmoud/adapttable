@@ -4,12 +4,12 @@
  * The expansion hook and the nested-table renderer live on this entry.
  * Both {@link rowDetail} and {@link nestedTable} fill {@link EXPANSION_LIVE}.
  */
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import { useRowExpansion } from "../rows/useRowExpansion";
 import { nestedTableDetail, type NestedTableFor } from "../tree/nestedTable";
 import { slotRender } from "./providers";
-import { EXPANSION_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, EXPANSION_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 function LiveExpansion({

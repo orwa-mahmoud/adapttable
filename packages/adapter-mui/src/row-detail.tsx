@@ -6,8 +6,8 @@ import {
 } from "@adapttable/core/adapter";
 import {
   nestedTable as coreNested,
-  rowDetail as coreDetail,
   type NestedTableFor,
+  rowDetail as coreDetail,
 } from "@adapttable/core/features";
 
 import { ExpandToggle } from "./components/ExpandToggle";

@@ -1,24 +1,24 @@
 import {
   ACTIVE_FILTER_CHIPS,
-  type FilterOverlaySlotProps,
   extendFeature,
   FILTER_DRAWER,
   FILTER_POPOVER,
+  type FilterOverlaySlotProps,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   slotRender,
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
+  type FilterDef,
   filters as coreFilters,
   filterTypes as coreFilterTypes,
-  type FilterDef,
   type FilterTypeSpec,
 } from "@adapttable/core/features";
-import { useClassNames } from "./components/classNamesContext";
 
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
+import { useClassNames } from "./components/classNamesContext";
 import { FilterPanel } from "./components/FilterPanel";
 import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
@@ -52,17 +52,19 @@ function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {
   );
 }
 
-function ChipsSlot(props: Omit<Parameters<typeof Chips>[0], "classNames">) {
+function ChipsSlot(
+  props: Readonly<Omit<Parameters<typeof Chips>[0], "classNames">>
+) {
   const classNames = useClassNames();
   return <Chips {...props} classNames={classNames} />;
 }
 
-function DrawerSlot(props: FilterOverlaySlotProps) {
+function DrawerSlot(props: Readonly<FilterOverlaySlotProps>) {
   const classNames = useClassNames();
   return <FilterPanel {...props} classNames={classNames} />;
 }
 
-function PopoverSlot(props: FilterOverlaySlotProps) {
+function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
   const classNames = useClassNames();
   return (
     <FilterPopover

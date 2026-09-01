@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetDevWarnings } from "../utils/devWarn";
 import { feature } from "./factories";
 import { grouping } from "./grouping";
-import { virtualize } from "./virtualize";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
+import { virtualize } from "./virtualize";
 
 beforeEach(() => {
   resetDevWarnings();

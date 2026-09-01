@@ -15,7 +15,7 @@ function ChecklistSearch({
   value,
   className,
   onChange,
-}: ChecklistSearchProps) {
+}: Readonly<ChecklistSearchProps>) {
   return (
     <TextField
       size="small"
@@ -49,7 +49,7 @@ function ChecklistBox({
   className,
   countClassName,
   onChange,
-}: ChecklistCheckboxProps) {
+}: Readonly<ChecklistCheckboxProps>) {
   return (
     <FormControlLabel
       data-adapttable-part="filter-checkbox"

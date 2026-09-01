@@ -10,11 +10,11 @@ import {
   commandPalette as core,
   type CommandPaletteOptions,
 } from "@adapttable/core/features";
-import { useClassNames } from "./components/classNamesContext";
 
+import { useClassNames } from "./components/classNamesContext";
 import { CommandPalette } from "./components/CommandPalette";
 
-function LiveCommandPalette(props: UseCommandPaletteOptions) {
+function LiveCommandPalette(props: Readonly<UseCommandPaletteOptions>) {
   const palette = useCommandPalette(props);
   const classNames = useClassNames();
   return (

@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
+import { DataTable as BareDataTable } from "./DataTable";
 import { filters } from "./filters";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -20,8 +21,10 @@ const DEFS = [{ key: "status", label: "Status", type: "text" as const }];
 
 describe("filters feature (mui)", () => {
   it("draws no chip strip when the feature was never imported", () => {
+    // The shipped component, not the harness: the harness composes features
+    // from props, which is exactly what this test must not have happen.
     render(
-      <DataTable
+      <BareDataTable
         data={ROWS}
         columns={COLS}
         rowKey={(r) => r.id}

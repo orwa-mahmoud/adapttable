@@ -9,9 +9,9 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { renderRadix } from "./test-utils";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

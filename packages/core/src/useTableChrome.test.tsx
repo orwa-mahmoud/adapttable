@@ -3,8 +3,8 @@ import { type ReactNode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { buildTableCsv } from "./export/tableCsv";
-import { dirtyIndicators } from "./features/editing";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
+import { dirtyIndicators } from "./features/editing";
 import { bulkActions } from "./features/factories";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
@@ -17,7 +17,7 @@ import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
-import { useTableChrome, type TableChrome } from "./useTableChrome";
+import { type TableChrome, useTableChrome } from "./useTableChrome";
 import { resetDevWarnings } from "./utils/devWarn";
 
 interface Row {
@@ -183,7 +183,7 @@ describe("useTableChrome", () => {
     const { result } = renderLiveChrome(
       [
         grouping<Row>("name"),
-        bulkActions([{ key: "del", label: "Delete", onClick: vi.fn() }]),
+        bulkActions<Row>([{ key: "del", label: "Delete", onClick: vi.fn() }]),
       ],
       () => {
         const source = useFrontendData<Row>({
@@ -767,7 +767,7 @@ describe("useTableChrome — row mutations and lazy tree", () => {
     const hostActions = [
       { key: "edit", label: "Edit", onClick: () => undefined },
     ];
-    const { result } = renderLiveChrome([rowActions(hostActions)], () => {
+    const { result } = renderLiveChrome([rowActions<Row>(hostActions)], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         urlAdapter: adapter,

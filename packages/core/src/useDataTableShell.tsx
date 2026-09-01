@@ -20,6 +20,7 @@ import {
   disabledColumnWindow,
   disabledGridFocus,
   disabledHistory,
+  disabledSelectionStats,
 } from "./features/shellLiveStubs";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
@@ -27,9 +28,9 @@ import type { FilterDef } from "./filters/filterDefs";
 import type { FilterTypeRegistry } from "./filters/filterRegistry";
 import type { AssemblyFns } from "./layout/leanAssembly";
 import type { BaseDataTableProps } from "./props";
+import { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 import type { QuerySupport } from "./source/queryContract";
 import type { TableSource } from "./source/TableSource";
-import { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 import type { DataModeProps } from "./source/useTableDataImpl";
 import { useTableDataLean } from "./source/useTableDataLean";
 import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
@@ -200,7 +201,7 @@ export function useDataTableShell<TRow>(
   const scrollBoxElement = useRef<HTMLElement | null>(null);
   const columnWindow = disabledColumnWindow(chrome.columnLayout.visibleColumns);
   const gridFocus = disabledGridFocus();
-  const stats = null;
+  const stats = disabledSelectionStats();
   const filtersTrigger = useFilterTriggerToggle(filtersOpen, setFiltersOpen);
   // Layout-visible columns WITHOUT device filtering: the same button must
   // produce the same file on phone and desktop. The selection, the full column

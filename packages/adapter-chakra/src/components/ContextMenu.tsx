@@ -41,7 +41,7 @@ function Surface({
   onClose,
   children,
   className,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <Popover.Root
       open

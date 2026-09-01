@@ -274,8 +274,8 @@ export function applyTableFeatures<P extends object>(props: P): P {
       typeof nextAssembly === "object"
     ) {
       fromFeatures.assembly = {
-        ...(prevAssembly as object),
-        ...(nextAssembly as object),
+        ...prevAssembly,
+        ...nextAssembly,
       };
     }
   }

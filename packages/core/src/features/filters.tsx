@@ -5,10 +5,10 @@
  * imports it never walks the tree. The hook mounts in-tree through
  * {@link FILTER_CHIPS_LIVE}.
  */
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 
-import { FILTER_ENGINE_IMPL } from "../filters/filterEngine";
 import type { FilterDef } from "../filters/filterDefs";
+import { FILTER_ENGINE_IMPL } from "../filters/filterEngine";
 import {
   mergeFilterChips,
   resolveActiveFilterCount,
@@ -21,7 +21,7 @@ import {
   FeatureStateScope,
   slotRender,
 } from "./providers";
-import { FILTER_CHIPS_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, FILTER_CHIPS_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 function FiltersEngineProvider({

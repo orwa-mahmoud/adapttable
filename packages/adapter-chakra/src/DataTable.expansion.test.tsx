@@ -8,8 +8,8 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

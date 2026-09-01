@@ -9,7 +9,7 @@ import { columnMenu as core } from "@adapttable/core/features";
 
 import { ColumnMenu } from "./components/ColumnMenu";
 
-function ColumnMenuSlot(props: ColumnMenuSlotProps<never>) {
+function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<never>>) {
   return <ColumnMenu {...props} />;
 }
 

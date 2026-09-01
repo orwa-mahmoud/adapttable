@@ -6,9 +6,9 @@
 import { createMemoryAdapter } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { renderMantine } from "./test-utils";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

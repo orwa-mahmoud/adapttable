@@ -18,7 +18,7 @@ function TreeSelect({
   options,
   className,
   onChange,
-}: FilterTreeSelectProps) {
+}: Readonly<FilterTreeSelectProps>) {
   return (
     <Select
       size="small"
@@ -42,7 +42,7 @@ function TreeInput({
   type,
   className,
   onChange,
-}: FilterTreeInputProps) {
+}: Readonly<FilterTreeInputProps>) {
   if (type === "number") {
     return (
       <InputNumber
@@ -75,7 +75,7 @@ function TreeButton({
   part,
   className,
   onClick,
-}: FilterTreeButtonProps) {
+}: Readonly<FilterTreeButtonProps>) {
   return (
     <Button
       type="default"
@@ -96,7 +96,7 @@ function TreeDisclosure({
   summaryClassName,
   children,
   onExpandedChange,
-}: FilterTreeDisclosureProps) {
+}: Readonly<FilterTreeDisclosureProps>) {
   return (
     <Collapse
       ghost

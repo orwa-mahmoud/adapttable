@@ -19,11 +19,11 @@ import {
   useFetchNextPage,
   usePinnedScrollRows,
 } from "./chromeBodyShared";
+import { useColumnWindow } from "./useColumnWindow";
 import {
   useKeyedVirtualization,
   useTableVirtualization,
 } from "./useTableVirtualization";
-import { useColumnWindow } from "./useColumnWindow";
 import {
   type TableVirtualization,
   windowGroupedEntries,

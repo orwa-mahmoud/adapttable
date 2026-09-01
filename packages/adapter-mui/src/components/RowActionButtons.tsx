@@ -92,7 +92,7 @@ function ActionStrip<TRow>({
   );
 }
 
-function ActionsMenuPaper(props: PaperProps) {
+function ActionsMenuPaper(props: Readonly<PaperProps>) {
   return <Paper {...props} data-adapttable-part="row-actions-menu" />;
 }
 

@@ -4,9 +4,10 @@
 
 ```ts
 
-import { columnMenu } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { columnMenu }
+// @public (undocumented)
+export function columnMenu<TRow>(): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

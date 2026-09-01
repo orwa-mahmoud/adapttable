@@ -1,18 +1,18 @@
 import {
   ACTIVE_FILTER_CHIPS,
-  type FilterOverlaySlotProps,
   extendFeature,
   FILTER_DRAWER,
   FILTER_POPOVER,
+  type FilterOverlaySlotProps,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   slotRender,
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
+  type FilterDef,
   filters as coreFilters,
   filterTypes as coreFilterTypes,
-  type FilterDef,
   type FilterTypeSpec,
 } from "@adapttable/core/features";
 
@@ -51,7 +51,7 @@ function ChipsSlot(props: Parameters<typeof Chips>[0]) {
   return <Chips {...props} />;
 }
 
-function DrawerSlot(props: FilterOverlaySlotProps) {
+function DrawerSlot(props: Readonly<FilterOverlaySlotProps>) {
   return (
     <FilterDrawer
       open={props.open}
@@ -66,7 +66,7 @@ function DrawerSlot(props: FilterOverlaySlotProps) {
   );
 }
 
-function PopoverSlot(props: FilterOverlaySlotProps) {
+function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
   return (
     <FilterPopover
       open={props.open}

@@ -16,8 +16,8 @@ import {
   ClassNamesProvider,
   useClassNames,
 } from "./components/classNamesContext";
-import { DataTable } from "./testDataTable";
 import type { ColumnDef, DataTableClassNames } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

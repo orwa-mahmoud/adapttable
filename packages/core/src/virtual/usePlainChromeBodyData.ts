@@ -5,7 +5,7 @@
  * {@link ./useVirtualChromeBodyData} and is mounted only by the virtualize
  * feature's in-tree body.
  */
-import { useCallback, useRef, type RefCallback } from "react";
+import { type RefCallback, useCallback, useRef } from "react";
 
 import type { BaseDataTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";

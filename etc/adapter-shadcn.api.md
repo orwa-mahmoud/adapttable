@@ -54,12 +54,12 @@ export { CustomCellEditorCtrl }
 export { CustomCellEditorRender }
 
 // @public
-export type DataModeProps<TRow> = {
+export type DataModeProps<_TRow = unknown> = {
     mode: "server";
-    onQueryChange: NonNullable<UseServerDataOptions$1<TRow>["onQueryChange"]>;
+    onQueryChange: TableQueryHandler;
 } | {
     mode?: "frontend";
-    onQueryChange?: NonNullable<UseServerDataOptions$1<TRow>["onQueryChange"]>;
+    onQueryChange?: TableQueryHandler;
 };
 
 // @public
@@ -94,7 +94,7 @@ export { PivotPanel }
 export { RowActionsRenderer }
 
 // @public
-export function SavedViewsPanel(props: SavedViewsPanelProps): JSX.Element;
+export function SavedViewsPanel(props: Readonly<SavedViewsPanelProps>): JSX.Element;
 
 // @public
 export interface SavedViewsPanelProps {
@@ -317,6 +317,11 @@ export const shadcnClassNames: {
 };
 
 export { TableQuery }
+
+// @public
+export type TableQueryHandler = (query: TableQuery$1, info: {
+    signal: AbortSignal;
+}) => void | Promise<void>;
 
 export { ToolbarSlots }
 

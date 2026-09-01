@@ -4,14 +4,14 @@
  * Expansion, lazy children and the walked hierarchy live on this entry.
  * The hooks mount in-tree through {@link TREE_LIVE}.
  */
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import { buildTreeEntries, treeColumnKey } from "../tree/treeRows";
 import { useLazyChildren } from "../tree/useLazyChildren";
 import { useTreeExpansion } from "../tree/useTreeExpansion";
 import { hasLoadedChildren } from "../virtual/chromeBodyShared";
 import { slotRender } from "./providers";
-import { TREE_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, TREE_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 function LiveTree({

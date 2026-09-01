@@ -1,9 +1,9 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { renderChakra } from "./test-utils";
+import { DataTable } from "./testDataTable";
 
 /**
  * The toolbar reads Filters · Saved views · Columns · Export CSV. Every

@@ -12,7 +12,7 @@ import {
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
-import { useTableChrome, type TableChrome } from "../useTableChrome";
+import { type TableChrome, useTableChrome } from "../useTableChrome";
 import { resetDevWarnings } from "../utils/devWarn";
 
 function renderLiveChrome<TRow>(

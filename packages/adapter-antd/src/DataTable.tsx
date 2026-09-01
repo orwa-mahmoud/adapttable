@@ -47,22 +47,39 @@ import {
   useTableChrome,
   useTableData,
   useTableEditHistory,
-  useTableVirtualization,
+  type VirtualTableRow,
   windowGroupedEntries,
 } from "@adapttable/core";
 import {
+  ACTIVE_FILTER_CHIPS,
+  BATCH_EDIT_BAR,
   bindFeatureHostFn,
   bodyCellsHaveRowSpan,
+  BULK_BAR,
+  ChromeExtrasGate,
+  COLUMN_MENU,
+  type ColumnMenuSlotProps,
+  COMMAND_PALETTE_LIVE,
+  type ContextMenuLiveSlotProps,
   DEFAULT_CARD_SIZE_PX,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_ROW_PARTS,
   featureHostOf,
   FeatureHostProvider,
   FeatureProviders,
+  FeatureSlot,
   fillSlot,
+  FILTER_DRAWER,
+  FILTERS_FORM,
+  type FiltersFormSlotProps,
+  FIND_BAR,
   flattenColumnTree,
+  GRID_FOCUS_ANNOUNCER,
   insertExtraRows,
   isExtraEntry,
+  KEYED_WINDOW,
+  type KeyedVirtualization,
+  type KeyedWindowSlotProps,
   mobileCardListStyle,
   pinnedRowPart,
   pinnedRowStickyStyle,
@@ -71,16 +88,20 @@ import {
   REORDER_COLUMN_WIDTH,
   resolveRowStyle,
   resolveStickyToolbar,
+  ROW_REORDER_ANNOUNCER,
   rowClickProps,
   rowIsDirty,
   rowReorderDropStyle,
   type RowReorderState,
+  SAVED_VIEWS,
+  SIDE_PANEL,
+  STATUS_BAR,
   tableRenderModel,
   TableStatusAnnouncer,
   undoRedoToolbar,
   useExportHandler,
+  useFeatureSlotFilled,
   useFullscreen,
-  useKeyedVirtualization,
   useMountStagger,
   useOffsetHeight,
   useResolvedAdapter,
@@ -88,25 +109,7 @@ import {
   useTableFeatures,
   useTableStatusAnnouncement,
   viewControlsToolbar,
-  ACTIVE_FILTER_CHIPS,
-  BATCH_EDIT_BAR,
-  BULK_BAR,
-  COLUMN_MENU,
-  type ColumnMenuSlotProps,
-  COMMAND_PALETTE_LIVE,
-  type ContextMenuLiveSlotProps,
-  FeatureSlot,
-  FILTER_DRAWER,
-  FILTERS_FORM,
-  type FiltersFormSlotProps,
-  FIND_BAR,
-  GRID_FOCUS_ANNOUNCER,
-  ROW_REORDER_ANNOUNCER,
-  SAVED_VIEWS,
-  SIDE_PANEL,
-  STATUS_BAR,
 } from "@adapttable/core/adapter";
-import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import {
   Button,
   Checkbox,
@@ -153,6 +156,7 @@ import {
 import { MobileCards } from "./components/MobileCards";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
+import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { DataTableProps } from "./types";
 
 /**
@@ -605,9 +609,16 @@ function buildExpandable<TRow>(
           id={getRowId(record)}
           expanded={expanded}
           onToggle={() => {
+            // antd hands its own icon the click event; ours is a button that
+            // already consumed one, so `onExpand` gets a stand-in that has the
+            // two methods it calls and nothing to cancel.
             onExpand(record, {
-              stopPropagation() {},
-              preventDefault() {},
+              stopPropagation() {
+                // Nothing above this is listening.
+              },
+              preventDefault() {
+                // The toggle has no default action to prevent.
+              },
             } as Parameters<typeof onExpand>[1]);
           }}
           expandLabel={labels.expandRow}
@@ -933,44 +944,84 @@ function resolveSize(
  * page-level sentinel stays the load-more trigger. With `maxHeight` the list
  * itself is the scroll box, matching every other kit.
  */
-function useCardWindowing<TRow>(options: {
+/** What the mobile card list needs to draw itself, windowed or whole. */
+interface CardWindow<TRow> {
+  rowEntries: readonly VirtualTableRow<TRow>[] | undefined;
+  paddingTop: number;
+  paddingBottom: number;
+  measureElement?: (node: Element | null) => void;
+  listRef: (node: HTMLElement | null) => void;
+  listStyle: ReturnType<typeof mobileCardListStyle>;
+}
+
+/**
+ * Window the mobile card list, when a window is on offer.
+ *
+ * Same seam as the grouped list: the TanStack hooks arrive with `virtualize`
+ * and nowhere else, so a plain antd table renders every card and never
+ * downloads them.
+ */
+function AntdCardWindow<TRow>({
+  rows,
+  rowKey,
+  props,
+  virtualize,
+  isPaged,
+  error,
+  body,
+  children,
+}: Readonly<{
   rows: readonly TRow[];
   rowKey: (row: TRow) => string;
+  props: Readonly<DataTableProps<TRow>>;
+  /** The resolved decision: antd's own virtual Table owns the desktop path. */
   virtualize: boolean;
   isPaged: boolean;
   error: Error | null;
   body: string;
-  estimateCardSize?: number;
-  overscan?: number;
-  scrollMargin?: number;
-  maxHeight?: number;
-}) {
+  children: (window: CardWindow<TRow>) => ReactNode;
+}>): ReactNode {
+  const filled = useFeatureSlotFilled(KEYED_WINDOW);
   const scrollRef = useRef<HTMLElement | null>(null);
-  const inBox = options.maxHeight != null;
-  const virtualization = useTableVirtualization({
-    rows: options.rows,
-    rowKey: options.rowKey,
-    enabled:
-      options.virtualize &&
-      !options.isPaged &&
-      !options.error &&
-      options.body === "mobile",
-    estimateSize: options.estimateCardSize ?? DEFAULT_CARD_SIZE_PX,
-    overscan: options.overscan,
-    scrollMargin: options.scrollMargin,
-    getScrollElement: inBox ? () => scrollRef.current : undefined,
-  });
   const listRef = useCallback((node: HTMLElement | null) => {
     scrollRef.current = node;
   }, []);
-  return {
-    rowEntries: virtualization.enabled ? virtualization.rows : undefined,
-    paddingTop: virtualization.paddingTop,
-    paddingBottom: virtualization.paddingBottom,
-    measureElement: virtualization.measureElement,
-    listRef,
-    listStyle: mobileCardListStyle(options.maxHeight),
+  const listStyle = mobileCardListStyle(props.maxHeight);
+  const inBox = props.maxHeight != null;
+  const finish = (window: KeyedVirtualization) =>
+    children({
+      rowEntries: window.enabled
+        ? window.indices.map((index) => ({
+            row: rows[index]!,
+            index,
+            key: rowKey(rows[index]!),
+          }))
+        : undefined,
+      paddingTop: window.paddingTop,
+      paddingBottom: window.paddingBottom,
+      measureElement: window.measureElement,
+      listRef,
+      listStyle,
+    });
+  const slotProps: KeyedWindowSlotProps = {
+    keys: rows.map((row) => rowKey(row)),
+    enabled: virtualize && !isPaged && !error && body === "mobile",
+    estimateSize: props.estimateCardSize ?? DEFAULT_CARD_SIZE_PX,
+    overscan: props.virtualOverscan,
+    scrollMargin: props.virtualScrollMargin,
+    getScrollElement: inBox ? () => scrollRef.current : undefined,
+    children: finish,
   };
+  return filled ? (
+    <FeatureSlot slot={KEYED_WINDOW} props={slotProps} />
+  ) : (
+    finish({
+      enabled: false,
+      indices: rows.map((_, index) => index),
+      paddingTop: 0,
+      paddingBottom: 0,
+    })
+  );
 }
 
 /** Row-grouping bundle from `useTableChrome` (opt-in when `groupBy` is set). */
@@ -987,41 +1038,60 @@ interface GroupingBundle<TRow> {
  * Window grouped flat entries when virtualization is eligible. Grouping stays
  * dormant when chrome does not supply a bundle (no effective `groupBy`).
  */
-function useGroupingWindow<TRow>(options: {
+/**
+ * Window the flat group/leaf list, when a window is on offer.
+ *
+ * antd renders through its own `<Table>`, so it cannot take the shared
+ * `CHROME_BODY`; it asks `KEYED_WINDOW` instead, which only `virtualize`
+ * fills. Nothing here reaches TanStack: a table that never imported the
+ * feature gets every index and renders the whole list.
+ */
+function AntdGroupingWindow<TRow>({
+  grouping,
+  props,
+  isPaged,
+  error,
+  body,
+  isMobile,
+  children,
+}: Readonly<{
   grouping: GroupingBundle<TRow> | undefined;
-  virtualize: boolean;
+  props: Readonly<DataTableProps<TRow>>;
   isPaged: boolean;
   error: Error | null;
   body: string;
   isMobile: boolean;
-  estimateCardSize?: number;
-  virtualOverscan?: number;
-  virtualScrollMargin?: number;
-}): GroupingBundle<TRow> | undefined {
-  const groupingArmed = Boolean(options.grouping);
-  const groupKeys = options.grouping?.entries.map((entry) => entry.key) ?? [];
-  const groupBodyEligible =
-    groupingArmed &&
-    !options.isPaged &&
-    !options.error &&
-    (options.body === "desktop" || options.body === "mobile");
-  const groupVirtualization = useKeyedVirtualization({
-    keys: groupKeys,
-    enabled: Boolean(options.virtualize && groupBodyEligible),
-    estimateSize: options.isMobile
-      ? (options.estimateCardSize ?? DEFAULT_CARD_SIZE_PX)
+  children: (grouping: GroupingBundle<TRow> | undefined) => ReactNode;
+}>): ReactNode {
+  const filled = useFeatureSlotFilled(KEYED_WINDOW);
+  const keys = grouping?.entries.map((entry) => entry.key) ?? [];
+  const eligible =
+    grouping !== undefined &&
+    !isPaged &&
+    !error &&
+    (body === "desktop" || body === "mobile");
+  const windowed = (indices: readonly number[]) => {
+    if (!grouping) return children(undefined);
+    return children({
+      ...grouping,
+      entries: windowGroupedEntries(grouping.entries, indices),
+    });
+  };
+  const slotProps: KeyedWindowSlotProps = {
+    keys,
+    enabled: Boolean(props.virtualize) && eligible,
+    estimateSize: isMobile
+      ? (props.estimateCardSize ?? DEFAULT_CARD_SIZE_PX)
       : 56,
-    overscan: options.virtualOverscan,
-    scrollMargin: options.virtualScrollMargin,
-  });
-  const groupingEntries = options.grouping
-    ? windowGroupedEntries(
-        options.grouping.entries,
-        groupVirtualization.indices
-      )
-    : undefined;
-  if (!options.grouping || !groupingEntries) return options.grouping;
-  return { ...options.grouping, entries: groupingEntries };
+    overscan: props.virtualOverscan,
+    scrollMargin: props.virtualScrollMargin,
+    children: (window) => windowed(window.indices),
+  };
+  return filled ? (
+    <FeatureSlot slot={KEYED_WINDOW} props={slotProps} />
+  ) : (
+    windowed(keys.map((_, index) => index))
+  );
 }
 
 /** Props shared by mobile and desktop body regions. */
@@ -1047,7 +1117,7 @@ interface DataTableBodyRegionProps<TRow> {
   detailRender: ((row: TRow) => ReactNode) | undefined;
   detailExpansion: RowExpansionState | undefined;
   editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
-  cardWindow: ReturnType<typeof useCardWindowing<TRow>>;
+  cardWindow: CardWindow<TRow>;
   tableLabel: string | undefined;
   density: "comfortable" | "compact" | undefined;
   prefetch: DataTableProps<TRow>["prefetch"];
@@ -1671,6 +1741,106 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   };
   rememberFeatureHost(chromeProps, featureHost);
   const c = useTableChrome<TRow>(chromeProps);
+  return (
+    <ChromeExtrasGate chrome={c} props={chromeProps}>
+      {(chrome) => (
+        <AntdGroupingWindow<TRow>
+          grouping={chrome.grouping}
+          props={props}
+          isPaged={chrome.isPaged}
+          error={chrome.source.error}
+          body={chrome.body}
+          isMobile={chrome.isMobile}
+        >
+          {(grouping) => (
+            <AntdTableBody<TRow>
+              grouping={grouping}
+              props={props}
+              chromeProps={chromeProps}
+              chrome={chrome}
+              history={history}
+              featureHost={featureHost}
+              resolvedSource={resolvedSource}
+              resolvedUrlAdapter={resolvedUrlAdapter}
+              runtime={runtime}
+              filtersNode={filtersNode}
+              slots={slots}
+              className={className}
+              classNames={classNames}
+              animate={animate}
+              bordered={bordered}
+              virtualize={virtualize}
+              size={size}
+              filtersMode={filtersMode}
+            />
+          )}
+        </AntdGroupingWindow>
+      )}
+    </ChromeExtrasGate>
+  );
+}
+
+/** The assembly bundle `tableRenderModel` accepts, named without a new export. */
+type RenderModelAssembly<TRow> = Parameters<
+  typeof tableRenderModel<TRow>
+>[0]["assembly"];
+
+/** Everything the body needs from the half of the table above the gate. */
+interface AntdTableBodyProps<TRow> {
+  readonly props: Readonly<DataTableProps<TRow>>;
+  readonly chromeProps: Parameters<typeof useTableChrome<TRow>>[0];
+  readonly chrome: ReturnType<typeof useTableChrome<TRow>>;
+  readonly history: EditHistoryState<TRow>;
+  readonly featureHost: ReturnType<typeof featureHostOf>;
+  readonly resolvedSource: ReturnType<typeof useTableData<TRow>>["source"];
+  readonly resolvedUrlAdapter: ReturnType<typeof useResolvedAdapter>;
+  readonly runtime: ReturnType<typeof useTableData<TRow>>["runtime"];
+  readonly filtersNode: ReactNode;
+  readonly slots: DataTableProps<TRow>["slots"];
+  readonly className: string | undefined;
+  readonly classNames: DataTableProps<TRow>["classNames"];
+  readonly animate: boolean;
+  readonly bordered: boolean;
+  readonly virtualize: boolean;
+  readonly size: ReturnType<typeof resolveSize>;
+  readonly filtersMode: ReturnType<typeof resolveFilterMode>;
+  /**
+   * The flat group/leaf list, already windowed. antd does not use the shared
+   * chrome body (that hook arms a page sentinel and a leaf virtualizer, both
+   * of which fight antd's own virtual Table), so the window is resolved above
+   * this component and handed in.
+   */
+  readonly grouping: GroupingBundle<TRow> | undefined;
+}
+
+/**
+ * The table itself, below the extras gate.
+ *
+ * Grouping, tree, expansion, editing, row mutations and row actions are empty
+ * on base chrome and arrive only through `ChromeExtrasGate`, which is a
+ * component — so everything that reads them, hooks included, has to live under
+ * it. That is what this component is: the whole table, one level down.
+ */
+function AntdTableBody<TRow>({
+  props,
+  chromeProps,
+  chrome: c,
+  history,
+  featureHost,
+  resolvedSource,
+  resolvedUrlAdapter,
+  runtime,
+  filtersNode,
+  slots,
+  className,
+  classNames,
+  animate,
+  bordered,
+  virtualize,
+  size,
+  filtersMode,
+  grouping,
+}: Readonly<AntdTableBodyProps<TRow>>) {
   const {
     windowStart,
     cardSetSize,
@@ -1679,7 +1849,23 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     stats,
     statusAnnouncement,
   } = useAntdGridState(props, c, history);
-  const { table, confirm, getRowId } = c;
+  const { confirm, getRowId } = c;
+  // What the user actually sees. Hiding, ordering and collapsing a column group
+  // land on `columnLayout`, which the extras gate mounts above this component;
+  // progressive hiding drops columns on top of that. Base chrome's own
+  // `table.columns` predates both, so the visible set is rebuilt here the same
+  // way the shared shell rebuilds it.
+  const table = useMemo(() => {
+    const dropped = new Set(c.droppedColumns);
+    const visible = c.columnLayout.visibleColumns;
+    return {
+      ...c.table,
+      columns:
+        dropped.size === 0
+          ? visible
+          : visible.filter((column) => !dropped.has(column.key)),
+    };
+  }, [c.table, c.columnLayout.visibleColumns, c.droppedColumns]);
   const { labels, source, selection } = table;
   // The injected actions column is first-class in column management: it lives
   // in the layout state under its reserved key, so hiding it strips the
@@ -1751,20 +1937,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   useMountStagger(rootRef, [source.rows.length, c.isMobile], {
     enabled: animate,
   });
-  // antd does not use useChromeBodyData (that hook arms a page sentinel + leaf
-  // virtualizer with onEndReached — both fight antd's native virtual Table).
-  // When grouping is armed we window the flat group/leaf list ourselves.
-  const grouping = useGroupingWindow({
-    grouping: c.grouping,
-    virtualize,
-    isPaged: c.isPaged,
-    error: source.error,
-    body: c.body,
-    isMobile: c.isMobile,
-    estimateCardSize: props.estimateCardSize,
-    virtualOverscan: props.virtualOverscan,
-    virtualScrollMargin: props.virtualScrollMargin,
-  });
   const virtualBody = virtualize && !grouping && !c.isPaged;
   const resolvedTableLabel = table.getTableProps()["aria-label"];
   // In virtual mode the rows live inside antd's own fixed-height scroll
@@ -1790,22 +1962,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     source,
     virtualBody && !c.isPaged && !source.error
   );
-
-  // Window the MOBILE card list with core virtualization — desktop rows still
-  // window through antd's own native virtual `<Table>` when grouping is off.
-  // When grouping is armed, grouping.entries already carries the window.
-  const cardWindow = useCardWindowing({
-    rows: source.rows,
-    rowKey: getRowId,
-    virtualize: virtualBody,
-    isPaged: c.isPaged,
-    error: source.error,
-    body: c.body,
-    estimateCardSize: props.estimateCardSize,
-    overscan: props.virtualOverscan,
-    scrollMargin: props.virtualScrollMargin,
-    maxHeight: props.maxHeight,
-  });
 
   const treeEntries = c.tree?.entries;
   const treeEntryByRow = new Map<TRow, TreeEntry<TRow>>(
@@ -1846,6 +2002,11 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     getCellSpan: props.getCellSpan,
     pinOffset: c.columnLayout.pinOffset,
     grouping: c.grouping,
+    // Features that replace an assembly heavy — cell spanning, extra rows —
+    // write it onto the props the feature pass returns. antd assembles its own
+    // table, so it reads that here the way the shared shell does.
+    assembly: (props as Partial<{ assembly: RenderModelAssembly<TRow> }>)
+      .assembly,
   });
   const pinRowSticky = !bodyCellsHaveRowSpan(cellsByRow);
 
@@ -1963,64 +2124,79 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     />
   );
 
+  // Window the MOBILE card list through the seam — desktop rows still window
+  // through antd's own native virtual `<Table>` when grouping is off, and when
+  // grouping is armed `grouping.entries` already carries the window.
   const bodyRegion = (
-    <DataTableBodyRegion
-      gridFocus={gridFocus}
-      chromeBody={c.body}
-      errorState={c.errorState}
-      source={source}
-      editingRows={c.editingRows}
-      table={table}
-      slots={slots}
-      columns={columns}
-      rowActions={rowActions}
-      rowActionsLayout={props.rowActionsLayout}
-      renderRowActions={props.renderRowActions}
-      confirm={confirm}
-      getRowId={getRowId}
-      labels={labels}
-      emptyNode={emptyNode}
-      grouping={grouping}
-      tree={c.tree}
-      detailRender={c.detail?.render}
-      detailExpansion={c.detail?.expansion}
-      editing={c.editing}
-      cardWindow={cardWindow}
-      tableLabel={resolvedTableLabel}
-      density={props.density}
-      prefetch={props.prefetch}
-      onRowClick={props.onRowClick}
-      rowClassName={props.rowClassName}
-      isCellFlashing={props.isCellFlashing}
-      rowStyle={props.rowStyle}
-      rowHeight={props.rowHeight}
-      cardClassName={classNames?.card}
-      summaryRow={chromeProps.summaryRow}
-      renderCard={props.renderCard}
-      skeletonRows={props.skeletonRows}
-      size={size}
-      bordered={bordered}
+    <AntdCardWindow<TRow>
+      rows={source.rows}
+      rowKey={getRowId}
+      props={props}
       virtualize={virtualBody}
-      maxHeight={props.maxHeight}
-      sticky={sticky}
-      dataSource={dataSource}
-      rowSelection={rowSelection}
-      expandable={expandable}
-      summary={summary}
-      handleVirtualScroll={handleVirtualScroll}
-      handleChange={handleChange}
-      minWidth={minWidth}
-      hasPinned={hasPinned}
-      hasRowActions={hasRowActions}
-      rowReorder={c.rowReorder}
-      windowStart={windowStart}
-      cardSetSize={cardSetSize}
-      rowPinning={c.rowPinning}
-      pinnedTopRows={pinnedTopRows}
-      pinnedBottomRows={pinnedBottomRows}
-      extraRows={props.extraRows}
-      pinRowSticky={pinRowSticky}
-    />
+      isPaged={c.isPaged}
+      error={source.error}
+      body={c.body}
+    >
+      {(cardWindow) => (
+        <DataTableBodyRegion
+          gridFocus={gridFocus}
+          chromeBody={c.body}
+          errorState={c.errorState}
+          source={source}
+          editingRows={c.editingRows}
+          table={table}
+          slots={slots}
+          columns={columns}
+          rowActions={rowActions}
+          rowActionsLayout={props.rowActionsLayout}
+          renderRowActions={props.renderRowActions}
+          confirm={confirm}
+          getRowId={getRowId}
+          labels={labels}
+          emptyNode={emptyNode}
+          grouping={grouping}
+          tree={c.tree}
+          detailRender={c.detail?.render}
+          detailExpansion={c.detail?.expansion}
+          editing={c.editing}
+          cardWindow={cardWindow}
+          tableLabel={resolvedTableLabel}
+          density={props.density}
+          prefetch={props.prefetch}
+          onRowClick={props.onRowClick}
+          rowClassName={props.rowClassName}
+          isCellFlashing={props.isCellFlashing}
+          rowStyle={props.rowStyle}
+          rowHeight={props.rowHeight}
+          cardClassName={classNames?.card}
+          summaryRow={chromeProps.summaryRow}
+          renderCard={props.renderCard}
+          skeletonRows={props.skeletonRows}
+          size={size}
+          bordered={bordered}
+          virtualize={virtualBody}
+          maxHeight={props.maxHeight}
+          sticky={sticky}
+          dataSource={dataSource}
+          rowSelection={rowSelection}
+          expandable={expandable}
+          summary={summary}
+          handleVirtualScroll={handleVirtualScroll}
+          handleChange={handleChange}
+          minWidth={minWidth}
+          hasPinned={hasPinned}
+          hasRowActions={hasRowActions}
+          rowReorder={c.rowReorder}
+          windowStart={windowStart}
+          cardSetSize={cardSetSize}
+          rowPinning={c.rowPinning}
+          pinnedTopRows={pinnedTopRows}
+          pinnedBottomRows={pinnedBottomRows}
+          extraRows={props.extraRows}
+          pinRowSticky={pinRowSticky}
+        />
+      )}
+    </AntdCardWindow>
   );
 
   const contextMenuLive = {
@@ -2180,9 +2356,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                       <FeatureSlot
                         slot={SIDE_PANEL}
                         props={{
-                          panels: props.sidePanel!.panels,
-                          openPanel: props.sidePanel!.open,
-                          onOpenPanel: props.sidePanel!.onOpenChange,
+                          panels: props.sidePanel.panels,
+                          openPanel: props.sidePanel.open,
+                          onOpenPanel: props.sidePanel.onOpenChange,
                           onClose: () => {
                             props.sidePanel?.onOpenChange(null);
                           },

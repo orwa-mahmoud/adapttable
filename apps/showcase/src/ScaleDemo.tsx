@@ -6,6 +6,12 @@ import {
   useFrontendData,
   useServerData,
 } from "@adapttable/core";
+import {
+  editing as editing_,
+  rowAppearance,
+  tree as tree_,
+  virtualize as virtualize_,
+} from "@adapttable/core/features";
 import { getLabels } from "@adapttable/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -312,6 +318,21 @@ function ServerScaleTable({
         labels={getLabels("en")}
         urlSync={false}
         searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
+        // The window is what this page exists to show, so it is imported:
+        // the props beside it only tune what the feature already brought.
+        features={[
+          ...(virtual
+            ? [
+                virtualize_<BigPerson>({
+                  virtualizeColumns: virtualCols,
+                  estimateRowSize: 48,
+                }),
+              ]
+            : []),
+          ...(variableHeight
+            ? [rowAppearance<BigPerson>({ rowHeight: variableRowHeight })]
+            : []),
+        ]}
         virtualize={virtual}
         virtualizeColumns={virtualCols}
         estimateRowSize={48}
@@ -491,6 +512,19 @@ function FrontendScaleTable({
   });
   const Table = kitTable<BigPerson>(kit);
   const navHeight = useNavHeight();
+  const onScaleCellEdit = (
+    row: BigPerson,
+    _key: string,
+    nextValue: unknown
+  ) => {
+    setRows((current) =>
+      applyRowPatches(
+        current,
+        [updateRow<BigPerson>(String(row.id), { budget: Number(nextValue) })],
+        (r) => String(r.id)
+      )
+    );
+  };
   return (
     <KitProvider kit={kit} dark={dark}>
       {/* The benchmark reads these to know the burst finished and how long
@@ -509,6 +543,30 @@ function FrontendScaleTable({
           labels={getLabels("en")}
           urlSync={false}
           searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
+          // Imported, not switched on: the window, the tree and the editor
+          // each arrive with the feature that draws them.
+          features={[
+            ...(virtual
+              ? [
+                  virtualize_<BigPerson>({
+                    virtualizeColumns: virtualCols,
+                    estimateRowSize: 48,
+                  }),
+                ]
+              : []),
+            ...(variableHeight
+              ? [rowAppearance<BigPerson>({ rowHeight: variableRowHeight })]
+              : []),
+            ...(treeShape
+              ? [
+                  tree_<BigPerson>({
+                    getParentId: treeShape.getParentId,
+                    expandedIds: treeShape.expandedIds,
+                  }),
+                ]
+              : []),
+            ...(edit ? [editing_<BigPerson>(onScaleCellEdit)] : []),
+          ]}
           virtualize={virtual}
           virtualizeColumns={virtualCols}
           getParentId={treeShape?.getParentId}
@@ -520,23 +578,7 @@ function FrontendScaleTable({
           // scrolls the 50k rows while the header sticks under the app nav.
           stickyHeader
           stickyTop={navHeight}
-          onCellEdit={
-            edit
-              ? (row, _key, nextValue) => {
-                  setRows((current) =>
-                    applyRowPatches(
-                      current,
-                      [
-                        updateRow<BigPerson>(String(row.id), {
-                          budget: Number(nextValue),
-                        }),
-                      ],
-                      (r) => String(r.id)
-                    )
-                  );
-                }
-              : undefined
-          }
+          onCellEdit={edit ? onScaleCellEdit : undefined}
         />
       </div>
     </KitProvider>

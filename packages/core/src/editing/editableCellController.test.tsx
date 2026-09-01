@@ -46,6 +46,40 @@ describe("editableCellController", () => {
     expect(ctrl.mode).toBe("display");
   });
 
+  it("answers every control inertly when the cell cannot be edited", () => {
+    // An adapter's cell wires the same handlers on every table — a
+    // double-click, a blur, the conflict prompt's two buttons. On a cell with
+    // no edit channel each has to do nothing rather than be missing.
+    const ctrl = editableCellController({
+      editing: undefined,
+      row: ROWS[0]!,
+      column: COLS[2]!,
+      rowId: "1",
+      rows: ROWS,
+      columns: COLS,
+      rowKey: (r) => r.id,
+    });
+
+    expect(ctrl.editor).toBeNull();
+    expect(ctrl.isDirty).toBe(false);
+    expect(ctrl.canRollback).toBe(false);
+    expect(ctrl.validating).toBe(false);
+    expect(ctrl.selectOptions).toEqual([]);
+    expect(ctrl.draft).toBe("");
+    expect(() => {
+      ctrl.setDraft("x");
+      ctrl.commit();
+      ctrl.cancel();
+      ctrl.commitOnBlur();
+      ctrl.rollback();
+      ctrl.dismissFailure();
+      ctrl.keepConflict();
+      ctrl.takeConflict();
+      ctrl.onEditorKeyDown({ key: "Enter" } as never);
+    }).not.toThrow();
+    expect(ctrl.mode).toBe("display");
+  });
+
   it("is activatable for editable columns when onCellEdit is set", () => {
     const { result } = renderHook(() => useCellEditing());
     const onCellEdit = vi.fn();

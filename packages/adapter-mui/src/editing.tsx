@@ -1,4 +1,5 @@
 import {
+  BATCH_EDIT_BAR,
   EDITABLE_CELL,
   extendFeature,
   ROW_EDIT_ACTIONS,
@@ -7,16 +8,17 @@ import {
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/adapter";
 import {
+  batchEditing as coreBatch,
   dirtyIndicators as coreDirty,
   editHistory as coreHistory,
   editing as coreEditing,
+  type FeaturePatch,
   rowEditing as coreRowEditing,
   undoRedoButtons as coreButtons,
-  type FeaturePatch,
 } from "@adapttable/core/features";
 
 import { EditableDataCell } from "./components/EditableCell";
-import { RowEditActions } from "./components/kitControls";
+import { BatchEditBar, RowEditActions } from "./components/kitControls";
 import { UndoRedoButtons } from "./components/toolbarExtras";
 
 const cellChrome = [
@@ -79,4 +81,19 @@ export function editHistory<TRow>(
  */
 export function undoRedoButtons<TRow>(): TableFeature<TRow> {
   return extendFeature(coreButtons<TRow>(), undoChrome);
+}
+
+/**
+ * Hold every edit until the reader saves, with MUI's own save and discard
+ * buttons.
+ *
+ * @public
+ */
+export function batchEditing<TRow>(
+  onBatchEdit: Parameters<typeof coreBatch<TRow>>[0]
+): TableFeature<TRow> {
+  return extendFeature(coreBatch<TRow>(onBatchEdit), [
+    ...cellChrome,
+    slotRender(BATCH_EDIT_BAR, (props) => <BatchEditBar {...props} />),
+  ]);
 }

@@ -32,7 +32,7 @@ function Surface({
   children,
   className,
   container,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <Menu
       opened

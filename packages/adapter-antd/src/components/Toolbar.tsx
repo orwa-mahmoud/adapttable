@@ -2,9 +2,9 @@
 import { pageSizeOptions } from "@adapttable/core";
 import {
   ExportAnnouncer,
-  type ToolbarChromeProps,
   FeatureSlot,
   FILTER_POPOVER,
+  type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import { Badge, Button, Flex, Input, Select, Spin } from "antd";
 import type { ReactNode } from "react";

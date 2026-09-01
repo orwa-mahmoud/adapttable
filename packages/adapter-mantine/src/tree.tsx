@@ -1,9 +1,9 @@
 import {
   extendFeature,
   slotRender,
+  type TableFeature,
   TREE_CELL,
   TREE_TOGGLE,
-  type TableFeature,
 } from "@adapttable/core/adapter";
 import { tree as core } from "@adapttable/core/features";
 

@@ -370,15 +370,15 @@ export {
   useFilterTriggerToggle,
   useTableChrome,
 } from "./useTableChrome";
+export { humanizeKey } from "./utils/humanizeKey";
+export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
+export { getPath } from "./utils/path";
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
 export {
   useChromeBodyData,
   useVirtualChromeBodyData,
 } from "./virtual/useVirtualChromeBodyData";
-export { humanizeKey } from "./utils/humanizeKey";
-export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
-export { getPath } from "./utils/path";
 
 /* ── Labels ────────────────────────────────────────────────────────── */
 export { defaultLabels, resolveLabels } from "./labels";
@@ -952,3 +952,4 @@ export type { FeatureNoticeAppearance } from "./state/featureNotices";
 export type { SearchInputState } from "./useDataTable/useSearchInput";
 export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";
+export type { ColumnWindow } from "./virtual/useColumnWindow";

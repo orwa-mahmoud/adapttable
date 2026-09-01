@@ -6,8 +6,8 @@
  */
 import {
   COLUMN_GROUP_TOGGLE,
-  type ColumnGroupToggleProps,
   COLUMN_SELECT,
+  type ColumnGroupToggleProps,
   type ColumnSelectCheckboxChromeProps,
   EDITABLE_CELL,
   type EditableCellSlotProps,
@@ -19,58 +19,60 @@ import {
   FILTER_HEADER,
   type FilterHeaderControlProps,
   GROUP_HEADER_CARD,
-  type GroupHeaderCardSlotProps,
   GROUP_HEADER_ROW,
+  type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
   ROW_EDIT_ACTIONS,
-  type RowEditActionsProps,
   ROW_REORDER_BUTTONS,
-  type RowReorderButtonsProps,
   ROW_REORDER_HANDLE,
+  type RowEditActionsProps,
+  type RowReorderButtonsProps,
   type RowReorderHandleProps,
   TREE_CELL,
-  type TreeCellProps,
   TREE_TOGGLE,
+  type TreeCellProps,
   type TreeToggleProps,
   useFeatureSlotFilled,
 } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
 
+import { cellDisplay } from "./DisplayCell";
+
 export function OptionalEditableCell<TRow>(
-  props: EditableCellSlotProps<TRow>
+  props: Readonly<EditableCellSlotProps<TRow>>
 ): ReactNode {
+  // Computed here, not in the row: the accessor call belongs to this cell's
+  // own memo scope, so re-rendering a row for selection or expansion leaves
+  // its data cells alone.
   const display =
-    props.display ??
-    (props.column.Cell ? (
-      <props.column.Cell row={props.row} rowIndex={props.rowIndex} />
-    ) : (
-      props.column.accessor?.(props.row)
-    ));
+    props.display ?? cellDisplay(props.column, props.row, props.rowIndex);
   const filled = useFeatureSlotFilled(EDITABLE_CELL);
-  if (filled) {
-    return (
-      <FeatureSlot
-        slot={EDITABLE_CELL}
-        props={{ ...props, display } as unknown as EditableCellSlotProps<never>}
-      />
-    );
-  }
-  return display;
+  return filled ? (
+    <FeatureSlot
+      slot={EDITABLE_CELL}
+      props={{ ...props, display } as unknown as EditableCellSlotProps<never>}
+    />
+  ) : (
+    display
+  );
 }
 
-export function OptionalTreeCell<TRow>(props: TreeCellProps<TRow>): ReactNode {
+export function OptionalTreeCell<TRow>(
+  props: Readonly<TreeCellProps<TRow>>
+): ReactNode {
   const filled = useFeatureSlotFilled(TREE_CELL);
-  if (!filled) return props.children;
-  return (
+  return filled ? (
     <FeatureSlot
       slot={TREE_CELL}
       props={props as unknown as TreeCellProps<never>}
     />
+  ) : (
+    props.children
   );
 }
 
 export function OptionalTreeToggle<TRow>(
-  props: TreeToggleProps<TRow>
+  props: Readonly<TreeToggleProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot
@@ -80,16 +82,20 @@ export function OptionalTreeToggle<TRow>(
   );
 }
 
-export function OptionalFillHandle(props: FillHandleCellSlotProps): ReactNode {
+export function OptionalFillHandle(
+  props: Readonly<FillHandleCellSlotProps>
+): ReactNode {
   return <FeatureSlot slot={FILL_HANDLE} props={props} />;
 }
 
-export function OptionalExpandToggle(props: ExpandToggleSlotProps): ReactNode {
+export function OptionalExpandToggle(
+  props: Readonly<ExpandToggleSlotProps>
+): ReactNode {
   return <FeatureSlot slot={EXPAND_TOGGLE} props={props} />;
 }
 
 export function OptionalFilterHeader<TRow>(
-  props: FilterHeaderControlProps<TRow>
+  props: Readonly<FilterHeaderControlProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot
@@ -100,7 +106,7 @@ export function OptionalFilterHeader<TRow>(
 }
 
 export function OptionalRowEditActions<TRow>(
-  props: RowEditActionsProps<TRow>
+  props: Readonly<RowEditActionsProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot
@@ -111,7 +117,7 @@ export function OptionalRowEditActions<TRow>(
 }
 
 export function OptionalRowReorderHandle<TRow>(
-  props: RowReorderHandleProps<TRow>
+  props: Readonly<RowReorderHandleProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot
@@ -122,7 +128,7 @@ export function OptionalRowReorderHandle<TRow>(
 }
 
 export function OptionalRowReorderButtons<TRow>(
-  props: RowReorderButtonsProps<TRow>
+  props: Readonly<RowReorderButtonsProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot
@@ -133,19 +139,19 @@ export function OptionalRowReorderButtons<TRow>(
 }
 
 export function OptionalColumnGroupToggle(
-  props: ColumnGroupToggleProps
+  props: Readonly<ColumnGroupToggleProps>
 ): ReactNode {
   return <FeatureSlot slot={COLUMN_GROUP_TOGGLE} props={props} />;
 }
 
 export function OptionalColumnSelect(
-  props: Omit<ColumnSelectCheckboxChromeProps, "slots">
+  props: Readonly<Omit<ColumnSelectCheckboxChromeProps, "slots">>
 ): ReactNode {
   return <FeatureSlot slot={COLUMN_SELECT} props={props} />;
 }
 
 export function OptionalGroupHeaderRow<TRow>(
-  props: GroupHeaderRowSlotProps<TRow>
+  props: Readonly<GroupHeaderRowSlotProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot
@@ -156,7 +162,7 @@ export function OptionalGroupHeaderRow<TRow>(
 }
 
 export function OptionalGroupHeaderCard<TRow>(
-  props: GroupHeaderCardSlotProps<TRow>
+  props: Readonly<GroupHeaderCardSlotProps<TRow>>
 ): ReactNode {
   return (
     <FeatureSlot

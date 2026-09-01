@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { columnMenu } from "./column-menu";
 import { ColumnMenu } from "./components/ColumnMenu";
+import { DataTable as BareDataTable } from "./DataTable";
 import { DataTable } from "./testDataTable";
 
 interface Row {
@@ -298,8 +299,10 @@ describe("mui ColumnMenu", () => {
 
 describe("column menu feature (mui)", () => {
   it("draws no Columns button when the feature was never imported", () => {
+    // The shipped component, not the harness: the harness composes features
+    // from props, which is exactly what this test must not have happen.
     render(
-      <DataTable
+      <BareDataTable
         data={[{ id: "1" }]}
         columns={cols}
         rowKey={(r) => r.id}

@@ -9,11 +9,11 @@ import {
   sidePanel as core,
   type SidePanelOptions,
 } from "@adapttable/core/features";
-import { useClassNames } from "./components/classNamesContext";
 
+import { useClassNames } from "./components/classNamesContext";
 import { SidePanel } from "./components/SidePanel";
 
-function SidePanelSlot(props: Omit<SidePanelChromeProps, "slots">) {
+function SidePanelSlot(props: Readonly<Omit<SidePanelChromeProps, "slots">>) {
   const classNames = useClassNames();
   return <SidePanel {...props} classNames={classNames} />;
 }

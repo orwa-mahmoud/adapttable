@@ -7,6 +7,78 @@ import type {
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable, type DataTableProps } from "@adapttable/radix";
+import { bulkActions as bulkActions_ } from "@adapttable/radix/bulk-actions";
+import { cellNavigation as cellNavigation_ } from "@adapttable/radix/cell-navigation";
+import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/radix/column-groups";
+import { columnMenu as columnMenu_ } from "@adapttable/radix/column-menu";
+import { columnSelectionCheckbox as columnSelection_ } from "@adapttable/radix/column-selection";
+import { commandPalette as commandPalette_ } from "@adapttable/radix/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/radix/context-menu";
+import { densityChooser as densityChooser_ } from "@adapttable/radix/density";
+import {
+  batchEditing as batchEditing_,
+  editHistory as editHistory_,
+  editing as editing_,
+  rowEditing as rowEditing_,
+  undoRedoButtons as undoRedoButtons_,
+} from "@adapttable/radix/editing";
+import { exportCsv as exportCsv_ } from "@adapttable/radix/export";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/radix/filters";
+import { findInTable as findInTable_ } from "@adapttable/radix/find-in-table";
+import { fullscreen as fullscreen_ } from "@adapttable/radix/fullscreen";
+import { grouping as grouping_ } from "@adapttable/radix/grouping";
+import { headerFilters as headerFilters_ } from "@adapttable/radix/header-filters";
+import { nestedTable as nestedTable_ } from "@adapttable/radix/nested-table";
+import { print as print_ } from "@adapttable/radix/print";
+import { resizableColumns as resizableColumns_ } from "@adapttable/radix/resizable-columns";
+import { rowActions as rowActions_ } from "@adapttable/radix/row-actions";
+import { rowReorder as rowReorder_ } from "@adapttable/radix/row-reorder";
+import { savedViews as savedViews_ } from "@adapttable/radix/saved-views";
+import { sidePanel as sidePanel_ } from "@adapttable/radix/side-panel";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/radix/status-bar";
+import { tree as tree_ } from "@adapttable/radix/tree";
+
+import { kitChromeFeatures } from "./chromeFeatures";
+
+/** This kit's factories, handed to the shared builder. */
+const KIT_CHROME = {
+  cellNavigation: cellNavigation_,
+  columnSelectionCheckbox: columnSelection_,
+  densityChooser: densityChooser_,
+  batchEditing: batchEditing_,
+  editHistory: editHistory_,
+  editing: editing_,
+  grouping: grouping_,
+  rowEditing: rowEditing_,
+  rowReorder: rowReorder_,
+  tree: tree_,
+  exportCsv: exportCsv_,
+  fullscreen: fullscreen_,
+  headerFilters: headerFilters_,
+  nestedTable: nestedTable_,
+  print: print_,
+  resizableColumns: resizableColumns_,
+  rowActions: rowActions_,
+  savedViews: savedViews_,
+  undoRedoButtons: undoRedoButtons_,
+  bulkActions: bulkActions_,
+  collapsibleColumnGroups: columnGroups_,
+  columnMenu: columnMenu_,
+  commandPalette: commandPalette_,
+  contextMenu: contextMenu_,
+  filters: filters_,
+  filterTypes: filterTypes_,
+  findInTable: findInTable_,
+  selectionStats: selectionStats_,
+  sidePanel: sidePanel_,
+  statusBar: statusBar_,
+};
 import { Avatar, Badge, Box, Progress, Text, Theme } from "@radix-ui/themes";
 
 import {
@@ -257,7 +329,7 @@ export function RadixDemo({
         editing={editing}
         derivedFields={derivedFields}
         formulaColumns={formulaColumns}
-        render={(source, columns) => (
+        render={(source, { features: demoFeatures, ...columns }) => (
           <DataTable
             source={source}
             columns={
@@ -284,7 +356,38 @@ export function RadixDemo({
                   })
             }
             rowKey={(r) => r.id}
-            features={nested ? nestedOuterFeatures<Person>() : undefined}
+            features={[
+              ...(nested ? nestedOuterFeatures<Person>() : []),
+              ...kitChromeFeatures(KIT_CHROME, {
+                cellNavigation,
+                columnSelectionCheckbox,
+                densityChooser,
+                editing,
+                exportCsv,
+                focused,
+                fullscreen,
+                headerFilters,
+                nested: nested ? nestedOrders : undefined,
+                onPrint,
+                printButton,
+                undoRedoButtons,
+                urlKey,
+                bulkActions,
+                bulkActionList: makeBulkActions(locale),
+                collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                columnMenu,
+                rowActions: !(rowMutations ?? (focused && !columnGroups)),
+                commandPalette,
+                contextMenu,
+                filterControls,
+                filterDefs: filters,
+                filterTypeSpecs: demoFilterTypes(),
+                sidePanel,
+                statusBar,
+                kitFeatures: columns.kitFeatures,
+              }),
+              ...(demoFeatures ?? []),
+            ]}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

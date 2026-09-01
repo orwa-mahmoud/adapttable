@@ -7,10 +7,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
-import { DataTable } from "./testDataTable";
 import { filters as filtersFeature } from "./filters";
 import { headerFilters } from "./header-filters";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

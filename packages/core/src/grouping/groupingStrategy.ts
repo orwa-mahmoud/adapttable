@@ -6,20 +6,20 @@
  * source-provided strategy cannot replace.
  */
 import {
-  buildGroupedFlatModel,
-  type GroupAggregatesFn,
-  type GroupNode,
-  type GroupPaging,
-  type GroupSort,
-  type GroupedFlatEntry,
-} from "./groupRows";
-import {
   configureIncrementalView,
   incrementalViewOf,
 } from "../rows/incremental";
-import { serverGroupEntries } from "../source/queryGroups";
 import type { QueryGroupRow } from "../source/queryGroups";
+import { serverGroupEntries } from "../source/queryGroups";
 import type { ColumnDef } from "../types";
+import {
+  buildGroupedFlatModel,
+  type GroupAggregatesFn,
+  type GroupedFlatEntry,
+  type GroupNode,
+  type GroupPaging,
+  type GroupSort,
+} from "./groupRows";
 
 /**
  * Which engine produces the flat grouped model.
@@ -39,8 +39,8 @@ export type GroupingComputationKind = "source" | "client" | "none";
  */
 export function groupingComputationKind(input: {
   groupByKeys: readonly string[];
-  sourceGroups?: readonly QueryGroupRow[] | undefined;
-  allFilteredRows?: readonly unknown[] | undefined;
+  sourceGroups?: readonly QueryGroupRow[];
+  allFilteredRows?: readonly unknown[];
 }): GroupingComputationKind {
   if (input.groupByKeys.length === 0) return "none";
   if (input.sourceGroups) return "source";

@@ -6,6 +6,8 @@
  */
 import type { FeatureHostState } from "../features/currentHost";
 import { applyFilterExtends } from "../features/currentHost";
+import type { QueryFilterGroup } from "../source/queryContract";
+import type { ColumnDef, ExtraFilters } from "../types";
 import { computeFilterFacets, type FacetMap } from "./facets";
 import { resolveFilterRegistry } from "./filterBuiltins";
 import {
@@ -17,8 +19,6 @@ import {
 } from "./filterDefs";
 import type { FilterTypeRegistry, FilterTypeSpec } from "./filterRegistry";
 import { evaluateFilterTree } from "./filterTree";
-import type { ExtraFilters } from "../types";
-import type { QueryFilterGroup } from "../source/queryContract";
 
 /**
  * Functions the lean data hook calls only when filters are composed.
@@ -27,7 +27,7 @@ import type { QueryFilterGroup } from "../source/queryContract";
  */
 export interface FilterEngine {
   buildRuntime<TRow>(input: {
-    columns: readonly import("../types").ColumnDef<TRow>[];
+    columns: readonly ColumnDef<TRow>[];
     declaredFilters: readonly FilterDef<TRow>[] | undefined;
     locale: string | undefined;
     data: readonly TRow[];

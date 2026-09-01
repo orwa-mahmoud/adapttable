@@ -1,9 +1,9 @@
 import { pageSizeOptions } from "@adapttable/core";
 import {
   ExportAnnouncer,
-  type ToolbarChromeProps,
   FeatureSlot,
   FILTER_POPOVER,
+  type ToolbarChromeProps,
 } from "@adapttable/core/adapter";
 import { Badge, Button, Group, Select, Text, TextInput } from "@mantine/core";
 import type { ReactNode } from "react";

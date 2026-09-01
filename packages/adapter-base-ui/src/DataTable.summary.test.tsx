@@ -8,8 +8,8 @@ import { createMemoryAdapter } from "@adapttable/core";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

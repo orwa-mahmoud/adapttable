@@ -16,8 +16,8 @@ import {
 import { ConfigProvider } from "antd";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef, FilterDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

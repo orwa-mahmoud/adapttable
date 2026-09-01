@@ -20,7 +20,15 @@ import {
   useHighlight,
   useQuerySource,
 } from "@adapttable/core";
-import { rowReorder, virtualize } from "@adapttable/core/features";
+import {
+  cellSpan,
+  extraRows,
+  rowActions,
+  rowAppearance,
+  rowPinning,
+  type TableFeature,
+  virtualize,
+} from "@adapttable/core/features";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -211,7 +219,35 @@ const LARGE_ROW_ESTIMATE = 48;
  * `groupBy` / `groupAggregates` follow the same rule — frontend tier only;
  * server-paginated sources cannot regroup a full result set.
  */
+/** The kit-drawn features a page asked for, and what each needs. */
+export interface KitFeatureRequests {
+  editing?: (row: Person, key: string, nextValue: unknown) => void;
+  rowEditing?: (row: Person, patch: Record<string, unknown>) => void;
+  batchEditing?: (
+    edits: readonly { row: Person; patch: Record<string, unknown> }[]
+  ) => void;
+  grouping?: readonly string[];
+  tree?: {
+    getParentId: (row: Person) => string | undefined;
+    treeColumn: string;
+  };
+  rowReorder?: (from: number, to: number) => void;
+}
+
 export interface DemoColumnProps {
+  /**
+   * The behaviours the flags composed. Each adapter demo concatenates its own
+   * kit-chrome features onto this rather than spreading it, so neither list
+   * silently replaces the other.
+   */
+  features?: readonly TableFeature<Person>[];
+  /**
+   * What the page asked for that only the KIT can build: grouping draws a
+   * group header, editing draws an editor, reorder draws a grip. This side
+   * decides what and with which handler; the adapter's demo decides which
+   * factory, because only it knows its own kit.
+   */
+  kitFeatures?: KitFeatureRequests;
   columnLayout: ColumnLayoutState;
   onColumnLayoutChange: (next: ColumnLayoutState) => void;
   /** Table chrome follows {@link demoUrlSync}: live demo only. */
@@ -498,6 +534,96 @@ function incomingEditValue(row: Person, columnKey: string): unknown {
   }
 }
 
+/**
+ * Every behaviour the demo flags turned on, composed.
+ *
+ * The props beside them still CONFIGURE each feature — the handler, the group
+ * keys, the span function — but the import is what arms it, which is the whole
+ * point of the demo. Each kit's own demo adds the features that draw its own
+ * chrome and concatenates them onto this list.
+ */
+function composeDemoFeatures(
+  flags: Parameters<typeof frontendColumnProps>[1],
+  parts: {
+    teamSpan: NonNullable<Parameters<typeof cellSpan<Person>>[0]>;
+    demoExtraRows: Parameters<typeof extraRows>[0] | undefined;
+    accentRowStyle:
+      ((row: Person) => Record<string, string> | undefined) | undefined;
+  }
+): readonly TableFeature<Person>[] {
+  const { teamSpan, demoExtraRows, accentRowStyle } = parts;
+  return [
+    ...(flags.large
+      ? [virtualize<Person>({ estimateRowSize: LARGE_ROW_ESTIMATE })]
+      : []),
+    ...(flags.rowPinning ? [rowPinning<Person>()] : []),
+    ...(flags.rowMutations ? [rowActions<Person>()] : []),
+    ...(flags.cellSpan && teamSpan ? [cellSpan<Person>(teamSpan)] : []),
+    ...(demoExtraRows ? [extraRows<Person>(demoExtraRows)] : []),
+    ...(accentRowStyle
+      ? [rowAppearance<Person>({ rowStyle: accentRowStyle, rowHeight: 48 })]
+      : []),
+  ];
+}
+
+/** What each row-model flag configures, beside the feature that arms it. */
+function applyRowModelFlags(
+  next: DemoColumnProps,
+  flags: Parameters<typeof frontendColumnProps>[1],
+  onRowEdit: (row: Person, patch: Record<string, unknown>) => void
+): void {
+  if (flags.large) {
+    Object.assign(next, { estimateRowSize: LARGE_ROW_ESTIMATE });
+  }
+  if (flags.editing) {
+    Object.assign(next, {
+      onCellEdit: flags.onCellEdit,
+      onEditStart: flags.onEditStart,
+      onEditCancel: flags.onEditCancel,
+      onEditCommit: flags.onEditCommit,
+      rowVersion: (row: Person) => row.revision ?? 0,
+    });
+  }
+  if (flags.rowMode) {
+    Object.assign(next, { rowEditing: true, onRowEdit });
+  }
+  if (flags.grouping) {
+    Object.assign(next, {
+      groupBy: ["team", "status"],
+      groupAggregates: DEMO_GROUP_AGGREGATES,
+      groupFooters: true,
+      groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
+        b.leafRows.length - a.leafRows.length,
+    });
+  }
+  if (flags.tree) {
+    Object.assign(next, { getParentId: reportsTo, treeColumn: "person" });
+  }
+}
+
+/**
+ * What only the kit can draw, and what each needs to draw it.
+ *
+ * Core owns what grouping, editing and reordering DO; the group header, the
+ * editor and the grip are the adapter's. This side names the behaviour and the
+ * handler; the adapter's demo picks the factory.
+ */
+function kitRequests(
+  flags: Parameters<typeof frontendColumnProps>[1],
+  onRowEdit: (row: Person, patch: Record<string, unknown>) => void
+): KitFeatureRequests {
+  return {
+    ...(flags.editing ? { editing: flags.onCellEdit } : {}),
+    ...(flags.rowMode ? { rowEditing: onRowEdit } : {}),
+    ...(flags.batch ? { batchEditing: flags.onBatchEdit } : {}),
+    ...(flags.grouping ? { grouping: ["team", "status"] } : {}),
+    ...(flags.tree
+      ? { tree: { getParentId: reportsTo, treeColumn: "person" } }
+      : {}),
+    ...(flags.rowReorder ? { rowReorder: flags.onRowReorder } : {}),
+  };
+}
+
 /** Feature flags on the frontend demo, assembled away from the data hook. */
 function frontendColumnProps(
   columns: DemoColumnProps,
@@ -543,41 +669,11 @@ function frontendColumnProps(
     renderCard: cardRenderer(flags.customCard),
     groupBy: null,
   };
-  if (flags.large) {
-    Object.assign(next, {
-      estimateRowSize: LARGE_ROW_ESTIMATE,
-    });
-  }
-  if (flags.editing) {
-    Object.assign(next, {
-      onCellEdit: flags.onCellEdit,
-      onEditStart: flags.onEditStart,
-      onEditCancel: flags.onEditCancel,
-      onEditCommit: flags.onEditCommit,
-      rowVersion: (row: Person) => row.revision ?? 0,
-    });
-  }
-  if (flags.rowMode) {
-    Object.assign(next, {
-      rowEditing: true,
-      onRowEdit: (row: Person, patch: Record<string, unknown>) => {
-        flags.writePatches([updateRow(row.id, columnChanges(patch))]);
-        flags.flashRow(row.id);
-      },
-    });
-  }
-  if (flags.grouping) {
-    Object.assign(next, {
-      groupBy: ["team", "status"],
-      groupAggregates: DEMO_GROUP_AGGREGATES,
-      groupFooters: true,
-      groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
-        b.leafRows.length - a.leafRows.length,
-    });
-  }
-  if (flags.tree) {
-    Object.assign(next, { getParentId: reportsTo, treeColumn: "person" });
-  }
+  const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
+    flags.writePatches([updateRow(row.id, columnChanges(patch))]);
+    flags.flashRow(row.id);
+  };
+  applyRowModelFlags(next, flags, onRowEdit);
   if (flags.batch) {
     Object.assign(next, { batchEditing: true, onBatchEdit: flags.onBatchEdit });
   }
@@ -588,69 +684,66 @@ function frontendColumnProps(
       onDeleteRow: flags.onDeleteRow,
     });
   }
-  {
-    const composed = [
-      ...(flags.rowReorder ? [rowReorder(flags.onRowReorder)] : []),
-      ...(flags.large
-        ? [virtualize({ estimateRowSize: LARGE_ROW_ESTIMATE })]
-        : []),
-    ];
-    if (composed.length > 0) {
-      Object.assign(next, { features: composed });
-    }
-  }
   if (flags.rowPinning) {
     Object.assign(next, { onPinnedRowIdsChange: () => undefined });
   }
+  // Team is the same fact on consecutive rows in visual order — merge it,
+  // leave Person and Email alone. Reorder can break a run; that is the point.
+  // Pin keeps the run: the person moves, Core stays one cell.
+  const teamSpan = ({
+    column,
+    sectionRows,
+    sectionRowIndex,
+  }: {
+    column: { key: string };
+    sectionRows: readonly Person[];
+    sectionRowIndex: number;
+  }) => {
+    if (column.key !== "team") return undefined;
+    const span = consecutiveTeamSpan(sectionRows, sectionRowIndex);
+    return span > 1 ? { rowSpan: span } : undefined;
+  };
   if (flags.cellSpan) {
-    Object.assign(next, {
-      // Team is the same fact on consecutive rows in visual order — merge
-      // it, leave Person and Email alone. Reorder can break a run; that
-      // is the point. Pin keeps the run: the person moves, Core stays one
-      // cell.
-      getCellSpan: ({
-        column,
-        sectionRows,
-        sectionRowIndex,
-      }: {
-        column: { key: string };
-        sectionRows: readonly Person[];
-        sectionRowIndex: number;
-      }) => {
-        if (column.key !== "team") return undefined;
-        const span = consecutiveTeamSpan(sectionRows, sectionRowIndex);
-        return span > 1 ? { rowSpan: span } : undefined;
-      },
-    });
+    Object.assign(next, { getCellSpan: teamSpan });
   }
-  if (flags.extraRows && flags.extraAnchorId) {
-    const extraHost = flags.data.find((row) => row.id === flags.extraAnchorId);
-    const extraHostName = extraHost?.name ?? "this person";
-    Object.assign(next, {
-      extraRows: [
-        {
-          key: "note",
-          kind: "fullWidth" as const,
-          beforeRowId: flags.extraAnchorId,
-          render: () =>
-            `Full-width extra attached to ${extraHostName}. Drag or pin them — this note stays in front of them.`,
-        },
-      ],
-    });
+  const extraAnchorName =
+    flags.data.find((row) => row.id === flags.extraAnchorId)?.name ??
+    "this person";
+  const demoExtraRows =
+    flags.extraRows && flags.extraAnchorId
+      ? [
+          {
+            key: "note",
+            kind: "fullWidth" as const,
+            beforeRowId: flags.extraAnchorId,
+            render: () =>
+              `Full-width extra attached to ${extraAnchorName}. Drag or pin them — this note stays in front of them.`,
+          },
+        ]
+      : undefined;
+  if (demoExtraRows) {
+    Object.assign(next, { extraRows: demoExtraRows });
   }
-  if (flags.rowStyle) {
-    const accentId = flags.data[0]?.id;
-    Object.assign(next, {
-      rowStyle: (row: Person) =>
+  const accentId = flags.data[0]?.id;
+  const accentRowStyle = flags.rowStyle
+    ? (row: Person) =>
         row.id === accentId
           ? {
               backgroundColor:
                 "light-dark(oklch(0.93 0.08 95), oklch(0.38 0.07 85))",
             }
-          : undefined,
-      rowHeight: 48,
-    });
+          : undefined
+    : undefined;
+  if (accentRowStyle) {
+    Object.assign(next, { rowStyle: accentRowStyle, rowHeight: 48 });
   }
+  Object.assign(next, { kitFeatures: kitRequests(flags, onRowEdit) });
+  const composed = composeDemoFeatures(flags, {
+    teamSpan,
+    demoExtraRows,
+    accentRowStyle,
+  });
+  if (composed.length > 0) Object.assign(next, { features: composed });
   return next;
 }
 

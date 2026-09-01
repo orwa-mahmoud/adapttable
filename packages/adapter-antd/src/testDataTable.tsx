@@ -1,4 +1,4 @@
-import type { TableFeature } from "@adapttable/core/adapter";
+import { flattenColumnTree, type TableFeature } from "@adapttable/core/adapter";
 import {
   cellSpan,
   densityChooser,
@@ -24,8 +24,8 @@ import { DataTable as IsolatedDataTable } from "./DataTable";
 import {
   batchEditing,
   dirtyIndicators,
-  editing,
   editHistory,
+  editing,
   rowEditing,
   undoRedoButtons,
 } from "./editing";
@@ -50,14 +50,11 @@ function hasId<TRow>(
   return features.some((feature) => feature.id === id);
 }
 
-/**
- * Test-only: compose the kit factories that enabling props used to imply.
- * Production DataTable stays lean — import is the switch.
- */
-export function composeTestFeatures<TRow>(
-  props: DataTableProps<TRow>
-): TableFeature<TRow>[] {
-  const next = [...(props.features ?? [])];
+/** Filtering, and the header row that reads a filter. */
+function bridgeFilterProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (!hasId(next, "filters")) {
     if (Array.isArray(props.filters)) {
       next.push(filters(props.filters));
@@ -67,7 +64,7 @@ export function composeTestFeatures<TRow>(
       Boolean(props.filterLabels) ||
       Boolean(props.extraChips) ||
       props.onClearFilters != null ||
-      props.columns.some((column) => column.filter)
+      flattenColumnTree(props.columns).leaves.some((column) => column.filter)
     ) {
       next.push({ ...filters([]), apply: () => ({}) });
     }
@@ -75,6 +72,13 @@ export function composeTestFeatures<TRow>(
   if (props.filterTypes && !hasId(next, "filter-types")) {
     next.push(filterTypes(props.filterTypes));
   }
+}
+
+/** The toolbar's own controls, and the menus behind them. */
+function bridgeToolbarProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (
     (props.enableColumnMenu ||
       props.columnLayout ||
@@ -96,6 +100,13 @@ export function composeTestFeatures<TRow>(
   if (props.savedViews && !hasId(next, "saved-views")) {
     next.push(savedViews(props.savedViews));
   }
+}
+
+/** The bars and panels that sit around the table. */
+function bridgeBarProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.statusBar && !hasId(next, "status-bar")) {
     next.push(statusBar());
   }
@@ -111,6 +122,13 @@ export function composeTestFeatures<TRow>(
   if (props.findInTable && !hasId(next, "find-in-table")) {
     next.push(findInTable());
   }
+}
+
+/** Writing a cell, a row, or a batch of them. */
+function bridgeCellEditProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.onCellEdit && !hasId(next, "editing")) {
     next.push(
       editing(props.onCellEdit, {
@@ -134,12 +152,26 @@ export function composeTestFeatures<TRow>(
   ) {
     next.push(dirtyIndicators());
   }
+}
+
+/** The undo stack, and the buttons that drive it. */
+function bridgeEditHistoryProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.editHistory && !hasId(next, "edit-history")) {
     next.push(editHistory(props.editHistory));
   }
   if (props.undoRedoButtons && !hasId(next, "undo-redo-buttons")) {
     next.push(undoRedoButtons());
   }
+}
+
+/** Grouping rows, and nesting them. */
+function bridgeRowTreeProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.groupBy && !hasId(next, "grouping")) {
     next.push(grouping(props.groupBy));
   }
@@ -160,6 +192,13 @@ export function composeTestFeatures<TRow>(
   if (props.nestedTable && !hasId(next, "nested-table")) {
     next.push(nestedTable(props.nestedTable));
   }
+}
+
+/** Reordering rows, and pinning them out of the order. */
+function bridgeRowOrderProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   const onRowReorder = (
     props as DataTableProps<TRow> & {
       onRowReorder?: Parameters<typeof rowReorder<TRow>>[0];
@@ -179,6 +218,13 @@ export function composeTestFeatures<TRow>(
       })
     );
   }
+}
+
+/** The grid surface: navigation, windowing, column selection. */
+function bridgeGridProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.cellNavigation && !hasId(next, "cell-navigation")) {
     next.push(cellNavigation());
   }
@@ -194,6 +240,13 @@ export function composeTestFeatures<TRow>(
   ) {
     next.push(columnSelectionCheckbox());
   }
+}
+
+/** What a row looks like — extra rows, spans, appearance. */
+function bridgeRowShapeProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.extraRows && !hasId(next, "extra-rows")) {
     next.push(extraRows(props.extraRows));
   }
@@ -212,6 +265,13 @@ export function composeTestFeatures<TRow>(
       })
     );
   }
+}
+
+/** Resizing columns, and collapsing their groups. */
+function bridgeColumnProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.resizableColumns && !hasId(next, "resizable-columns")) {
     next.push(resizableColumns());
   }
@@ -221,12 +281,26 @@ export function composeTestFeatures<TRow>(
   ) {
     next.push(collapsibleColumnGroups());
   }
+}
+
+/** Taking the view somewhere else — export, print. */
+function bridgeOutputProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.exportCsv && !hasId(next, "export-csv")) {
     next.push(exportCsv(props.exportCsv));
   }
   if (props.onPrint && !hasId(next, "print")) {
     next.push(print(props.onPrint, Boolean(props.printButton)));
   }
+}
+
+/** What the reader does to the whole view. */
+function bridgeViewProps<TRow>(
+  props: DataTableProps<TRow>,
+  next: TableFeature<TRow>[]
+): void {
   if (props.densityChooser && !hasId(next, "density-chooser")) {
     next.push(densityChooser());
   }
@@ -251,6 +325,32 @@ export function composeTestFeatures<TRow>(
   ) {
     next.push(rowActions(props.rowActions));
   }
+}
+
+/**
+ * Test-only: compose the kit factories that enabling props used to imply.
+ * Production DataTable stays lean — import is the switch.
+ *
+ * Grouped by what each bridge turns on, in the order the shipped DataTable
+ * would see them. A feature already in `props.features` wins, so a test can
+ * compose one by hand and still pass the props around it.
+ */
+export function composeTestFeatures<TRow>(
+  props: DataTableProps<TRow>
+): TableFeature<TRow>[] {
+  const next = [...(props.features ?? [])];
+  bridgeFilterProps(props, next);
+  bridgeToolbarProps(props, next);
+  bridgeBarProps(props, next);
+  bridgeCellEditProps(props, next);
+  bridgeEditHistoryProps(props, next);
+  bridgeRowTreeProps(props, next);
+  bridgeRowOrderProps(props, next);
+  bridgeGridProps(props, next);
+  bridgeRowShapeProps(props, next);
+  bridgeColumnProps(props, next);
+  bridgeOutputProps(props, next);
+  bridgeViewProps(props, next);
   return next;
 }
 

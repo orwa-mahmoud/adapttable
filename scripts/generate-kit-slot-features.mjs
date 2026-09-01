@@ -2,7 +2,7 @@
 /**
  * Write kit feature files that fill Chrome slots. Run from the repo root.
  */
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -124,32 +124,6 @@ function cnImport(kit) {
   return kit.classes
     ? `import { useClassNames } from "./components/classNamesContext";\n`
     : "";
-}
-
-function wrapClassNames(kit, jsx) {
-  if (!kit.classes) return jsx;
-  return `(
-      <ClassNamesBox>
-        ${jsx}
-      </ClassNamesBox>
-    )`;
-}
-
-function classNamesBox(kit) {
-  if (!kit.classes) return "";
-  return `
-function ClassNamesBox({ children }: { children: ReactNode }) {
-  return children;
-}
-
-function withClassNames<P extends object>(
-  Render: (props: P & { classNames: ReturnType<typeof useClassNames> }) => ReactNode
-) {
-  return function Slotted(props: P): ReactNode {
-    return <Render {...props} classNames={useClassNames()} />;
-  };
-}
-`;
 }
 
 function write(path, contents) {
@@ -797,9 +771,6 @@ export function findInTable<TRow>(): TableFeature<TRow> {
 }
 `
   );
-
-  const unused = [classNamesBox, wrapClassNames, readFileSync];
-  void unused;
 }
 
 console.log("generated kit slot features");

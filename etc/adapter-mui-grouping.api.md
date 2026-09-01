@@ -4,9 +4,24 @@
 
 ```ts
 
-import { grouping } from '@adapttable/core/features';
+import { GroupSort } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { grouping }
+// @public
+export function grouping<TRow>(groupBy: string | readonly string[], extras?: {
+    onGroupByChange?: (groupBy: readonly string[]) => void;
+    groupAggregates?: (rows: readonly TRow[]) => unknown;
+    groupFooters?: boolean;
+    groupSort?: GroupSort<TRow>;
+    groupPageSize?: number;
+    groupRowPageSize?: number;
+    groupFilter?: (group: unknown) => boolean;
+    collapsedGroupIds?: readonly string[];
+    onCollapsedGroupIdsChange?: (ids: string[]) => void;
+    onGroupLoadMore?: (groupKey: string) => void;
+}): TableFeature<TRow>;
+
+export { GroupSort }
 
 // (No @packageDocumentation comment for this package)
 

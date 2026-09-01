@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { cellNavigation } from "./cell-navigation";
-import { batchEditing, dirtyIndicators, editing, rowEditing } from "./editing";
 import { editHistory } from "./edit-history";
+import { batchEditing, dirtyIndicators, editing, rowEditing } from "./editing";
 import { exportCsv } from "./export-csv";
 import {
   bulkActions,
@@ -31,9 +31,9 @@ import { filters } from "./filters";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
 import { grouping } from "./grouping";
+import { nestedTable, rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { selectionStats } from "./selection-stats";
-import { nestedTable, rowDetail } from "./row-detail";
 import { tree } from "./tree";
 import { virtualize } from "./virtualize";
 

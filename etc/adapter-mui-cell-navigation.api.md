@@ -4,9 +4,10 @@
 
 ```ts
 
-import { cellNavigation } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { cellNavigation }
+// @public
+export function cellNavigation<TRow>(): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

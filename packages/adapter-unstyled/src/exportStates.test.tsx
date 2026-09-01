@@ -2,8 +2,8 @@ import { xlsxWriter } from "@adapttable/core/xlsx";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 /**
  * A host-handled export takes time, and a download says nothing when it lands.

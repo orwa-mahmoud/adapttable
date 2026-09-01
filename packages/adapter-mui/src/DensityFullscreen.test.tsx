@@ -1,10 +1,10 @@
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import { densityChooser } from "./density";
 import { fullscreen } from "./fullscreen";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

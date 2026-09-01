@@ -18,7 +18,7 @@ function TreeSelect({
   options,
   className,
   onChange,
-}: FilterTreeSelectProps) {
+}: Readonly<FilterTreeSelectProps>) {
   return (
     <select
       aria-label={label}
@@ -45,7 +45,7 @@ function TreeInput({
   type,
   className,
   onChange,
-}: FilterTreeInputProps) {
+}: Readonly<FilterTreeInputProps>) {
   return (
     <input
       aria-label={label}
@@ -66,7 +66,7 @@ function TreeButton({
   part,
   className,
   onClick,
-}: FilterTreeButtonProps) {
+}: Readonly<FilterTreeButtonProps>) {
   return (
     <button
       type="button"
@@ -86,7 +86,7 @@ function TreeDisclosure({
   summaryClassName,
   children,
   onExpandedChange,
-}: FilterTreeDisclosureProps) {
+}: Readonly<FilterTreeDisclosureProps>) {
   return (
     <details
       open={expanded}

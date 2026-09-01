@@ -44,7 +44,40 @@ vi.mock("@adapttable/core/adapter", async () => {
 
       return {
         skipChromeBody: true,
+        // The live gates read these off the shell result. A mock that omits
+        // one throws inside the gate, before the component under test renders,
+        // so every field a gate touches has to be present even when empty.
+        chromeProps: {},
         chrome: {
+          // Every field a gate touches, present even when empty — an omission
+          // throws inside the gate before the component under test renders.
+          rowMutations: { canAdd: false },
+          featureNotices: [],
+          tree: undefined,
+          detail: undefined,
+          editing: undefined,
+          rowPinning: undefined,
+          columnGroups: undefined,
+          droppedColumns: [],
+          hasRowActions: false,
+          rowActions: [],
+          activeFilterCount: 0,
+          // The row universe editable cells resolve against. The extras
+          // overlay writes it onto `tableProps.rows`, which the body walks,
+          // so it has to be the rows this mock renders.
+          editingRows: [{ id: "1", name: "Alice" }],
+          getRowId: (row: { id?: string }) => row.id ?? "",
+          // The gate reads `chrome.source`, which is not the shell's `source`.
+          source: {
+            paginationMode: "paged",
+            rows: [],
+            total: 0,
+            limit: 10,
+            page: 1,
+          },
+          rootRef: { current: null },
+          // `chrome.table` is not the shell's `tableProps.table`.
+          table: { selection: undefined },
           body: mockShellState.body ?? "desktop",
           emptyVariant: mockShellState.emptyVariant ?? "noData",
           clearFilters: mockClearFilters,
@@ -55,6 +88,11 @@ vi.mock("@adapttable/core/adapter", async () => {
           allColumns: [{ key: "name", header: "Name" }],
           columnLayout: {
             state: { order: ["name"], hidden: {}, pinned: {} },
+            // The live gate reads these four past `state`.
+            visibleColumns: [{ key: "name", header: "Name" }],
+            pinOffset: () => 0,
+            setWidth: vi.fn(),
+            toggleColumnGroup: vi.fn(),
             isHidden: () => false,
             isPinned: () => undefined,
             setHidden: vi.fn(),
@@ -65,6 +103,7 @@ vi.mock("@adapttable/core/adapter", async () => {
           },
         },
         source: {
+          paginationMode: "paged",
           rows: [{ id: "1", name: "Alice" }],
           total: 20,
           limit: 10,
@@ -86,6 +125,7 @@ vi.mock("@adapttable/core/adapter", async () => {
           previousPage: "Previous page",
           nextPage: "Next page",
           showing: () => "Showing 1-10",
+          groupTotal: "Total",
           pageOf: () => "Page 1 of 2",
           columns: "Columns",
           search: "Search",
@@ -130,6 +170,8 @@ vi.mock("@adapttable/core/adapter", async () => {
         autoSizeColumns: mockAutoSizeColumns,
         autoSizeColumn: mockAutoSizeColumn,
         tableProps: {
+          // The live gate reads `tableProps.columnWindow.enabled`.
+          columnWindow: { enabled: false },
           table: {
             columns: [{ key: "name", header: "Name" }],
             labels: { sortBy: "Sort by" },

@@ -3,6 +3,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  extendFeature,
   type FeatureProviderProps,
   FeatureProviders,
   FeatureSlot,
@@ -425,5 +426,36 @@ describe("a single slot", () => {
       </FeatureProviders>
     );
     expect(screen.queryByTestId("shared")).toBeNull();
+  });
+});
+
+/**
+ * How a kit dresses a core feature.
+ *
+ * `grouping()` and `editing()` are core's behaviour; each adapter re-exports
+ * them with its own chrome attached. Attaching must not replace what core
+ * already registered, or a kit would silently drop the parts core draws.
+ */
+describe("extendFeature", () => {
+  it("keeps the base feature whole and appends the kit's renders", () => {
+    const coreRender = slotRender(TOOLBAR, () => <span data-testid="t-core" />);
+    const kitRender = slotRender(TOOLBAR, () => <span data-testid="t-kit" />);
+    const apply = () => ({ grouping: true });
+    const base: TableFeature = { id: "grouping", apply, renders: [coreRender] };
+
+    const dressed = extendFeature(base, [kitRender]);
+
+    expect(dressed.id).toBe("grouping");
+    expect(dressed.apply).toBe(apply);
+    expect(dressed.renders).toEqual([coreRender, kitRender]);
+    // The base is untouched, so re-exporting it in a second kit starts clean.
+    expect(base.renders).toEqual([coreRender]);
+  });
+
+  it("gives a base with no renders of its own just the kit's", () => {
+    const kitRender = slotRender(TOOLBAR, () => <span data-testid="t-kit" />);
+    const dressed = extendFeature({ id: "status-bar" }, [kitRender]);
+
+    expect(dressed.renders).toEqual([kitRender]);
   });
 });

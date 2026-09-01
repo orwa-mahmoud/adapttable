@@ -177,6 +177,16 @@ describe("applyCollapsedColumnGroups", () => {
     expect(next.map((column) => column.key)).toEqual(["keep", "closed"]);
   });
 
+  it("draws an empty cell where a collapsed group had columns", () => {
+    const columns = [leaf("a", "G"), leaf("b", "G")];
+    const next = applyCollapsedColumnGroups(columns, [columnGroupId(["G"])]);
+
+    expect(next).toHaveLength(1);
+    // The stub holds the group's place in the row so the header above it has
+    // something to sit on; it has no value of its own to show.
+    expect(next[0]!.accessor?.({ id: "1", email: "a@b.c" })).toBeNull();
+  });
+
   it("puts a stub on each split run of a flat group", () => {
     const columns = [leaf("a", "G"), leaf("x"), leaf("b", "G")];
     const next = applyCollapsedColumnGroups(columns, [columnGroupId(["G"])]);

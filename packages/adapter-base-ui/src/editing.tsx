@@ -12,15 +12,15 @@ import {
   dirtyIndicators as coreDirty,
   editHistory as coreHistory,
   editing as coreEditing,
+  type FeaturePatch,
   rowEditing as coreRowEditing,
   undoRedoButtons as coreButtons,
-  type FeaturePatch,
 } from "@adapttable/core/features";
 
 import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";
 
-function EditableSlot(props: EditableCellSlotProps<never>) {
+function EditableSlot(props: Readonly<EditableCellSlotProps<never>>) {
   return (
     <EditableDataCell
       {...props}

@@ -17,7 +17,7 @@ function ChecklistSearch({
   value,
   className,
   onChange,
-}: ChecklistSearchProps) {
+}: Readonly<ChecklistSearchProps>) {
   return (
     <Input
       size="sm"
@@ -47,7 +47,7 @@ function ChecklistBox({
   className,
   countClassName,
   onChange,
-}: ChecklistCheckboxProps) {
+}: Readonly<ChecklistCheckboxProps>) {
   return (
     <Checkbox
       size="sm"

@@ -12,7 +12,7 @@ import {
 
 import { StatusBar } from "./components/StatusBar";
 
-function StatusSlot(props: Omit<StatusBarChromeProps, "slots">) {
+function StatusSlot(props: Readonly<Omit<StatusBarChromeProps, "slots">>) {
   return <StatusBar {...props} />;
 }
 

@@ -10,9 +10,9 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { renderAntd } from "./test-utils";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

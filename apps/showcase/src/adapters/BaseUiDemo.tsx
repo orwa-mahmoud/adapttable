@@ -1,10 +1,82 @@
 import { DataTable, type DataTableProps } from "@adapttable/base-ui";
+import { bulkActions as bulkActions_ } from "@adapttable/base-ui/bulk-actions";
+import { cellNavigation as cellNavigation_ } from "@adapttable/base-ui/cell-navigation";
+import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/base-ui/column-groups";
+import { columnMenu as columnMenu_ } from "@adapttable/base-ui/column-menu";
+import { columnSelectionCheckbox as columnSelection_ } from "@adapttable/base-ui/column-selection";
+import { commandPalette as commandPalette_ } from "@adapttable/base-ui/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/base-ui/context-menu";
+import { densityChooser as densityChooser_ } from "@adapttable/base-ui/density";
+import {
+  batchEditing as batchEditing_,
+  editHistory as editHistory_,
+  editing as editing_,
+  rowEditing as rowEditing_,
+  undoRedoButtons as undoRedoButtons_,
+} from "@adapttable/base-ui/editing";
+import { exportCsv as exportCsv_ } from "@adapttable/base-ui/export";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/base-ui/filters";
+import { findInTable as findInTable_ } from "@adapttable/base-ui/find-in-table";
+import { fullscreen as fullscreen_ } from "@adapttable/base-ui/fullscreen";
+import { grouping as grouping_ } from "@adapttable/base-ui/grouping";
+import { headerFilters as headerFilters_ } from "@adapttable/base-ui/header-filters";
+import { nestedTable as nestedTable_ } from "@adapttable/base-ui/nested-table";
+import { print as print_ } from "@adapttable/base-ui/print";
+import { resizableColumns as resizableColumns_ } from "@adapttable/base-ui/resizable-columns";
+import { rowActions as rowActions_ } from "@adapttable/base-ui/row-actions";
+import { rowReorder as rowReorder_ } from "@adapttable/base-ui/row-reorder";
+import { savedViews as savedViews_ } from "@adapttable/base-ui/saved-views";
+import { sidePanel as sidePanel_ } from "@adapttable/base-ui/side-panel";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/base-ui/status-bar";
+import { tree as tree_ } from "@adapttable/base-ui/tree";
 import type {
   ColumnDef,
   ColumnLayoutState,
   NestedTableDefaults,
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
+
+import { kitChromeFeatures } from "./chromeFeatures";
+
+/** This kit's factories, handed to the shared builder. */
+const KIT_CHROME = {
+  cellNavigation: cellNavigation_,
+  columnSelectionCheckbox: columnSelection_,
+  densityChooser: densityChooser_,
+  batchEditing: batchEditing_,
+  editHistory: editHistory_,
+  editing: editing_,
+  grouping: grouping_,
+  rowEditing: rowEditing_,
+  rowReorder: rowReorder_,
+  tree: tree_,
+  exportCsv: exportCsv_,
+  fullscreen: fullscreen_,
+  headerFilters: headerFilters_,
+  nestedTable: nestedTable_,
+  print: print_,
+  resizableColumns: resizableColumns_,
+  rowActions: rowActions_,
+  savedViews: savedViews_,
+  undoRedoButtons: undoRedoButtons_,
+  bulkActions: bulkActions_,
+  collapsibleColumnGroups: columnGroups_,
+  columnMenu: columnMenu_,
+  commandPalette: commandPalette_,
+  contextMenu: contextMenu_,
+  filters: filters_,
+  filterTypes: filterTypes_,
+  findInTable: findInTable_,
+  selectionStats: selectionStats_,
+  sidePanel: sidePanel_,
+  statusBar: statusBar_,
+};
 
 import {
   type AvatarCellProps,
@@ -279,7 +351,7 @@ export function BaseUiDemo({
       editing={editing}
       derivedFields={derivedFields}
       formulaColumns={formulaColumns}
-      render={(source, columns) => (
+      render={(source, { features: demoFeatures, ...columns }) => (
         <DataTable
           source={source}
           columns={
@@ -306,7 +378,38 @@ export function BaseUiDemo({
                 })
           }
           rowKey={(r) => r.id}
-          features={nested ? nestedOuterFeatures<Person>() : undefined}
+          features={[
+            ...(nested ? nestedOuterFeatures<Person>() : []),
+            ...kitChromeFeatures(KIT_CHROME, {
+              cellNavigation,
+              columnSelectionCheckbox,
+              densityChooser,
+              editing,
+              exportCsv,
+              focused,
+              fullscreen,
+              headerFilters,
+              nested: nested ? nestedOrders : undefined,
+              onPrint,
+              printButton,
+              undoRedoButtons,
+              urlKey,
+              bulkActions,
+              bulkActionList: makeBulkActions(locale),
+              collapsibleColumnGroups: columns.collapsibleColumnGroups,
+              columnMenu,
+              rowActions: !(rowMutations ?? (focused && !columnGroups)),
+              commandPalette,
+              contextMenu,
+              filterControls,
+              filterDefs: filters,
+              filterTypeSpecs: demoFilterTypes(),
+              sidePanel,
+              statusBar,
+              kitFeatures: columns.kitFeatures,
+            }),
+            ...(demoFeatures ?? []),
+          ]}
           nestedTable={nested ? nestedOrders : undefined}
           defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
           cellNavigation={cellNavigation ?? editing}

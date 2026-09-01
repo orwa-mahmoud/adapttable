@@ -41,7 +41,6 @@ import {
 } from "react";
 
 import type { Density } from "../density";
-import { RowActionButtons } from "./RowActionButtons";
 import {
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -50,7 +49,7 @@ import {
   OptionalRowReorderButtons,
   OptionalTreeToggle,
 } from "./featureSlots";
-import { cellDisplay } from "./DisplayCell";
+import { RowActionButtons } from "./RowActionButtons";
 
 /**
  * Props for {@link MobileCards}: the card-relevant slice of core's shared
@@ -251,6 +250,9 @@ function MobileCardBase<TRow>({
     label: resolveMobileLabel(column),
     value: (
       <OptionalEditableCell
+        // Built inside the map, so it needs its own key: React reads these
+        // as a list even though a card renders them one at a time.
+        key={column.key}
         editing={editing}
         row={row}
         column={column}
@@ -261,7 +263,6 @@ function MobileCardBase<TRow>({
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -523,7 +524,7 @@ export function MobileCards<TRow>({
                 <OptionalGroupHeaderCard
                   key={entry.key}
                   entry={entry}
-                  columns={columns as never}
+                  columns={columns}
                   selection={selection}
                   labels={labels}
                   compact={compact}

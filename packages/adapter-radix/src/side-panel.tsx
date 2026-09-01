@@ -12,7 +12,7 @@ import {
 
 import { SidePanel } from "./components/SidePanel";
 
-function SidePanelSlot(props: Omit<SidePanelChromeProps, "slots">) {
+function SidePanelSlot(props: Readonly<Omit<SidePanelChromeProps, "slots">>) {
   return <SidePanel {...props} />;
 }
 

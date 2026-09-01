@@ -9,10 +9,10 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
-import { virtualize } from "./virtualize";
 import { renderMui } from "./test-utils";
+import { DataTable } from "./testDataTable";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;

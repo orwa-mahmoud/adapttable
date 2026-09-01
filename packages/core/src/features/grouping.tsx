@@ -5,22 +5,22 @@
  * that never imports it never carries that math. The hooks mount in-tree
  * through {@link GROUPING_LIVE}.
  */
-import { useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
-import type { GroupByInput } from "../grouping/groupKeys";
-import { formatGroupBy, parseGroupBy } from "../grouping/groupKeys";
-import type { GroupSort } from "../grouping/groupRows";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
 } from "../grouping/groupingStrategy";
+import type { GroupByInput } from "../grouping/groupKeys";
+import { formatGroupBy, parseGroupBy } from "../grouping/groupKeys";
+import type { GroupSort } from "../grouping/groupRows";
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
 import { useGroupPaging } from "../grouping/useGroupPaging";
 import { computePagination } from "../pagination/paginationMath";
 import { insertExtraRows } from "../rows/extraRows";
 import { devWarn } from "../utils/devWarn";
 import { slotRender } from "./providers";
-import { GROUPING_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 function LiveGrouping({
@@ -89,7 +89,7 @@ function LiveGrouping({
       aggregates: groupAggregates,
       footers: groupFooters === true,
       sort: groupSort,
-      filter: groupFilter as never,
+      filter: groupFilter,
       groupPageSize,
       rowPageSize: groupRowPageSize,
       paging: groupPaging.paging,

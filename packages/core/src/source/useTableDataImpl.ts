@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { resolveColumns } from "../columns/resolveColumns";
 import type { FeatureHostState } from "../features/currentHost";
@@ -133,19 +133,37 @@ export interface UseTableDataResult<TRow> {
 type DataTier = "source" | "server" | "frontend";
 
 /**
- * The public `mode` prop surface, shared by every batteries-included
- * `<DataTable>`.
+ * The consolidated query, and the abort signal for the request it starts.
+ *
+ * Written out rather than indexed off `UseServerDataOptions<TRow>`: the query
+ * does not mention the row type, and a generic indexed access forces the
+ * declaration emitter to inline this shape into every type that reaches it —
+ * which it does under a renamed type parameter it never declares.
  *
  * @public
  */
-export type DataModeProps<TRow> =
+export type TableQueryHandler = (
+  query: TableQuery,
+  info: { signal: AbortSignal }
+) => void | Promise<void>;
+
+/**
+ * The public `mode` prop surface, shared by every batteries-included
+ * `<DataTable>`.
+ *
+ * @typeParam _TRow - The row type. Every adapter writes `DataModeProps<TRow>`,
+ * so the parameter stays; the query itself never mentions a row.
+ *
+ * @public
+ */
+export type DataModeProps<_TRow = unknown> =
   | {
       mode: "server";
-      onQueryChange: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
+      onQueryChange: TableQueryHandler;
     }
   | {
       mode?: "frontend";
-      onQueryChange?: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]>;
+      onQueryChange?: TableQueryHandler;
     };
 
 function resolveTier(
@@ -183,7 +201,7 @@ function warnTierMisuse(
 
 function useQueryNotification<TRow>(
   source: TableSource<TRow>,
-  handler: NonNullable<UseServerDataOptions<TRow>["onQueryChange"]> | undefined
+  handler: TableQueryHandler | undefined
 ): void {
   const { page, limit, search, sortBy, sortDir, sortLevels, extra } = source;
   const query = useMemo<TableQuery>(
@@ -224,6 +242,149 @@ function useQueryNotification<TRow>(
  *
  * @internal
  */
+interface LoadedOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * Resolve every option list a filter def loads on its own, once each.
+ *
+ * A def whose `options` is a function names a list the host fetches — a set of
+ * assignees, the countries in use. The result is cached by key for the life of
+ * the table, so opening the Filters form twice does not fetch twice, and a def
+ * that appears later is picked up on the render that introduces it.
+ */
+function useAsyncFilterOptions(
+  enabled: boolean,
+  defs: readonly FilterDef<never>[],
+  onLoaded: (key: string, options: readonly LoadedOption[]) => void
+): void {
+  const awaitedRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    for (const def of defs) {
+      if (typeof def.options !== "function") continue;
+      if (awaitedRef.current.has(def.key)) continue;
+      awaitedRef.current.add(def.key);
+      const key = def.key;
+      void def.options().then(
+        (next) => {
+          if (alive) onLoaded(key, next);
+        },
+        () => {
+          // The form's useFilterOptions surfaces the failure.
+        }
+      );
+    }
+    return () => {
+      alive = false;
+    };
+  }, [enabled, defs, onLoaded]);
+}
+
+/**
+ * Facet counts for the checklist filters, computed here when nothing else did.
+ *
+ * A server tier answers with its own counts; a frontend one has the rows in
+ * hand, so the counts come from the same predicate the table filters with —
+ * every filter EXCEPT the one being counted, which is what makes a checklist
+ * show what each remaining choice would yield.
+ */
+function useComputedFacets<TRow>(
+  engine: FilterEngine | undefined,
+  resolved: TableSource<TRow>,
+  runtime: FilterRuntime<TRow>,
+  filterFn: (row: TRow, extra: ExtraFilters) => boolean
+): FacetMap | undefined {
+  return useMemo(() => {
+    if (!engine || resolved.facets) return resolved.facets;
+    const rows = resolved.allSearchedRows;
+    if (!rows) return undefined;
+    const keep = (row: TRow, extra: ExtraFilters) => {
+      if (!filterFn(row, extra)) return false;
+      if (!resolved.filterTree) return true;
+      return engine.evaluateTree(
+        resolved.filterTree,
+        row,
+        runtime.defs,
+        runtime.registry
+      );
+    };
+    return engine.computeFacets(
+      runtime.defs,
+      rows,
+      resolved.extra,
+      keep,
+      runtime.registry
+    );
+  }, [engine, resolved, runtime.defs, runtime.registry, filterFn]);
+}
+
+/**
+ * The tier a table is NOT on still has its hook called — that is the rule of
+ * hooks — so it is handed inert input instead: no rows, no URL, no query
+ * callback. These two say what each tier gets, in one place, so the reader can
+ * see the whole of "which tier owns this table" without walking two call sites.
+ */
+function activeOnly<T>(active: boolean, value: T, idle: T): T {
+  return active ? value : idle;
+}
+
+/** What the frontend tier is given. Inert while the table is on the server. */
+function frontendTierInput<TRow>(input: {
+  active: boolean;
+  urlSync: boolean | undefined;
+  data: readonly TRow[] | undefined;
+  engine: FilterEngine | undefined;
+  runtime: FilterRuntime<TRow>;
+  isFrontendMode: boolean;
+  loading: boolean | undefined;
+}) {
+  const { engine, runtime } = input;
+  return {
+    urlSync: activeOnly(input.active, input.urlSync, false),
+    data: activeOnly(input.active, input.data ?? [], [] as readonly TRow[]),
+    filterTreeFn: engine
+      ? (row: TRow, tree: Parameters<FilterEngine["evaluateTree"]>[0]) =>
+          engine.evaluateTree(tree, row, runtime.defs, runtime.registry)
+      : undefined,
+    arrayExtraKeys: runtime.arrayExtraKeys,
+    numberExtraKeys: runtime.numberExtraKeys,
+    isLoading: activeOnly(input.isFrontendMode, input.loading, undefined),
+  };
+}
+
+/** What the server tier is given. Inert while the table is on the frontend. */
+function serverTierInput<TRow>(input: {
+  active: boolean;
+  urlSync: boolean | undefined;
+  data: readonly TRow[] | undefined;
+  runtime: FilterRuntime<TRow>;
+  onQueryChange:
+    | ((
+        query: TableQuery,
+        info: { signal: AbortSignal }
+      ) => void | Promise<void>)
+    | undefined;
+  supports: UseServerDataOptions<TRow>["supports"];
+  facetKeys: readonly string[] | undefined;
+  facets: FacetMap | undefined;
+}) {
+  const { active, runtime } = input;
+  return {
+    urlSync: activeOnly(active, input.urlSync, false),
+    rows: activeOnly(active, input.data ?? [], [] as readonly TRow[]),
+    onQueryChange: activeOnly(active, input.onQueryChange, undefined),
+    arrayExtraKeys: runtime.arrayExtraKeys,
+    numberExtraKeys: runtime.numberExtraKeys,
+    supports: activeOnly(active, input.supports, undefined),
+    facetKeys: activeOnly(active, input.facetKeys, undefined),
+    facets: activeOnly(active, input.facets, undefined),
+  };
+}
+
 export function useTableDataWithEngine<TRow>(
   options: UseTableDataOptions<TRow>,
   engine: FilterEngine | undefined
@@ -258,10 +419,15 @@ export function useTableDataWithEngine<TRow>(
       () => Promise<readonly { value: string; label: string }[]>
     >()
   );
-  const awaitedRef = useRef(new Set<string>());
   const [loadedOptions, setLoadedOptions] = useState<
-    Record<string, readonly { value: string; label: string }[]>
+    Record<string, readonly LoadedOption[]>
   >({});
+  const onOptionsLoaded = useCallback(
+    (key: string, next: readonly LoadedOption[]) => {
+      setLoadedOptions((prev) => ({ ...prev, [key]: next }));
+    },
+    []
+  );
 
   const runtime = useMemo(() => {
     if (!engine) return EMPTY_RUNTIME as FilterRuntime<TRow>;
@@ -286,29 +452,7 @@ export function useTableDataWithEngine<TRow>(
     featureHost,
   ]);
 
-  useEffect(() => {
-    if (!engine) return;
-    let alive = true;
-    for (const def of runtime.defs) {
-      if (typeof def.options !== "function") continue;
-      if (awaitedRef.current.has(def.key)) continue;
-      awaitedRef.current.add(def.key);
-      const key = def.key;
-      void def.options().then(
-        (next) => {
-          if (alive) {
-            setLoadedOptions((prev) => ({ ...prev, [key]: next }));
-          }
-        },
-        () => {
-          // The form's useFilterOptions surfaces the failure.
-        }
-      );
-    }
-    return () => {
-      alive = false;
-    };
-  }, [engine, runtime.defs]);
+  useAsyncFilterOptions(engine !== undefined, runtime.defs, onOptionsLoaded);
 
   const tier = resolveTier(source, mode, onQueryChange);
   warnTierMisuse(source, mode, data, onQueryChange);
@@ -328,21 +472,21 @@ export function useTableDataWithEngine<TRow>(
   );
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
-    urlSync: tier === "frontend" ? urlOptions.urlSync : false,
-    data: tier === "frontend" ? (data ?? []) : [],
+    ...frontendTierInput<TRow>({
+      active: tier === "frontend",
+      urlSync: urlOptions.urlSync,
+      data,
+      engine,
+      runtime,
+      isFrontendMode: mode === "frontend",
+      loading,
+    }),
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
-    filterTreeFn: engine
-      ? (row, tree) =>
-          engine.evaluateTree(tree, row, runtime.defs, runtime.registry)
-      : undefined,
-    arrayExtraKeys: runtime.arrayExtraKeys,
-    numberExtraKeys: runtime.numberExtraKeys,
     paginationMode,
     getSearchText,
     getSortValue,
     error,
-    isLoading: mode === "frontend" ? loading : undefined,
   });
   const derivedFacetKeys = useMemo(() => {
     if (facetKeys) return facetKeys;
@@ -357,18 +501,20 @@ export function useTableDataWithEngine<TRow>(
 
   const server = useServerData<TRow>({
     ...urlOptions,
-    urlSync: tier === "server" ? urlOptions.urlSync : false,
-    rows: tier === "server" ? (data ?? []) : [],
+    ...serverTierInput<TRow>({
+      active: tier === "server",
+      urlSync: urlOptions.urlSync,
+      data,
+      runtime,
+      onQueryChange,
+      supports,
+      facetKeys: derivedFacetKeys,
+      facets: serverFacets,
+    }),
     total,
     loading,
     error,
     paginationMode,
-    onQueryChange: tier === "server" ? onQueryChange : undefined,
-    arrayExtraKeys: runtime.arrayExtraKeys,
-    numberExtraKeys: runtime.numberExtraKeys,
-    supports: tier === "server" ? supports : undefined,
-    facetKeys: tier === "server" ? derivedFacetKeys : undefined,
-    facets: tier === "server" ? serverFacets : undefined,
   });
 
   useQueryNotification(
@@ -381,28 +527,7 @@ export function useTableDataWithEngine<TRow>(
   else if (tier === "server") resolved = server;
   else resolved = frontend;
 
-  const facets = useMemo(() => {
-    if (!engine) return resolved.facets;
-    if (resolved.facets) return resolved.facets;
-    const rows = resolved.allSearchedRows;
-    if (!rows) return undefined;
-    return engine.computeFacets(
-      runtime.defs,
-      rows,
-      resolved.extra,
-      (row, extra) => {
-        if (!combinedFilterFn(row, extra)) return false;
-        if (!resolved.filterTree) return true;
-        return engine.evaluateTree(
-          resolved.filterTree,
-          row,
-          runtime.defs,
-          runtime.registry
-        );
-      },
-      runtime.registry
-    );
-  }, [engine, resolved, runtime.defs, runtime.registry, combinedFilterFn]);
+  const facets = useComputedFacets(engine, resolved, runtime, combinedFilterFn);
 
   const sourced = useMemo(
     () => (facets ? { ...resolved, facets } : resolved),

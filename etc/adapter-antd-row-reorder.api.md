@@ -4,9 +4,11 @@
 
 ```ts
 
-import { rowReorder } from '@adapttable/core/features';
+import { rowReorder as rowReorder_2 } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { rowReorder }
+// @public (undocumented)
+export function rowReorder<TRow>(onRowReorder: Parameters<typeof rowReorder_2<TRow>>[0]): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

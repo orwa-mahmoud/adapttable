@@ -8,7 +8,7 @@
  * {@link editing}, {@link rowEditing} and {@link batchEditing} all fill
  * the same slot; apply() sets the channel each one owns.
  */
-import { useEffect, useMemo, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";
 import { useBatchEditing } from "../editing/batchEditing";
@@ -19,11 +19,11 @@ import { useRowEditing } from "../editing/rowEditing";
 import { useCellSaveState } from "../editing/saveState";
 import { useCellEditing } from "../editing/useCellEditing";
 import { useEditValidation } from "../editing/validation";
+import { devWarn } from "../utils/devWarn";
 import { featureHostOf } from "./featureHost";
 import { slotRender } from "./providers";
-import { EDITING_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, EDITING_LIVE } from "./slotKeys";
 import type { FeaturePatch, TableFeature } from "./tableFeature";
-import { devWarn } from "../utils/devWarn";
 
 function LiveEditing({
   chrome,
@@ -131,7 +131,7 @@ function LiveEditing({
     if (!chrome.grouping) return chrome.source.rows as never[];
     const leaves: never[] = [];
     for (const entry of chrome.grouping.entries) {
-      if (entry.kind === "row") leaves.push(entry.row as never);
+      if (entry.kind === "row") leaves.push(entry.row);
     }
     return leaves;
   }, [chrome.grouping, chrome.source.rows]);
@@ -154,10 +154,10 @@ function LiveEditing({
       policy: props.editConflictPolicy ?? "ask",
       onEditConflict: props.onEditConflict as never,
       keep: (row) => {
-        editing.state.keepLive(row as never);
+        editing.state.keepLive(row);
       },
       take: (row, value) => {
-        editing.state.takeLive(row as never, value);
+        editing.state.takeLive(row, value);
       },
     });
   }, [

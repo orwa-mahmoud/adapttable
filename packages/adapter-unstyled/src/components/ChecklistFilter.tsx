@@ -15,7 +15,7 @@ function ChecklistSearch({
   value,
   className,
   onChange,
-}: ChecklistSearchProps) {
+}: Readonly<ChecklistSearchProps>) {
   return (
     <input
       type="search"
@@ -46,7 +46,7 @@ function ChecklistBox({
   className,
   countClassName,
   onChange,
-}: ChecklistCheckboxProps) {
+}: Readonly<ChecklistCheckboxProps>) {
   return (
     <label
       data-adapttable-part="filter-checkbox"

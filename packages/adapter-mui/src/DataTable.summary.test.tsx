@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { collapsibleColumnGroups } from "./column-groups";
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { rowDetail } from "./row-detail";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

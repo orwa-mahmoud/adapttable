@@ -147,6 +147,14 @@ describe("headerGroupRows hideLabel", () => {
     });
     expect(columnGroupHeaderCaption(rows[0]![0]!)).toBeNull();
   });
+
+  it("shows the group's name while it is open", () => {
+    // The caption is what a kit draws in the band; only the collapsed stub
+    // hides it, because there is no width left to read a name in.
+    const rows = headerGroupRows([col("name", "People")], [], true)!;
+    expect(rows[0]![0]).toMatchObject({ label: "People", hideLabel: false });
+    expect(columnGroupHeaderCaption(rows[0]![0]!)).toBe("People");
+  });
 });
 
 describe("htmlGroupedHeaderPlan", () => {

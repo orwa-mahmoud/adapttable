@@ -484,8 +484,8 @@ engine, so a host that composes a pivot table still does it in one import.
 ## Both paths, until v3
 
 ```tsx
-// Deprecated, still works:
-<DataTable groupBy="team" virtualize />;
+// Deprecated, still works for most factories:
+<DataTable groupBy="team" />;
 
 // Preferred:
 import { grouping } from "@adapttable/mantine/grouping";
@@ -493,6 +493,10 @@ import { virtualize } from "@adapttable/mantine/virtualize";
 
 <DataTable features={[grouping<Row>("team"), virtualize<Row>()]} />;
 ```
+
+`virtualize` is the exception: the enabling prop no longer windows rows. The
+factory fills `CHROME_BODY` with the TanStack-backed body; a table that never
+imports it never carries `@tanstack/react-virtual`.
 
 An explicit prop wins if both are set. Development mode warns once when a
 deprecated enabling prop is used. The props are removed in v3.
@@ -7974,6 +7978,38 @@ fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 
+Chrome asks for the rest of a kit's parts the same way, one slot per part.
+Around a cell: `EDITABLE_CELL` (`EditableCellSlotProps`, the editor and the
+dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`
+(`ExpandToggleSlotProps`), `TREE_CELL` and `TREE_TOGGLE`, `COLUMN_SELECT`,
+`COLUMN_GROUP_TOGGLE` and `FILTER_HEADER`. Around a row: `ROW_EDIT_ACTIONS`,
+`ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`,
+`GROUP_HEADER_ROW` (`GroupHeaderRowSlotProps`) and its mobile card
+`GROUP_HEADER_CARD` (`GroupHeaderCardSlotProps`). Around the table:
+`TOOLBAR_EXTRAS` (`ToolbarExtrasSlotProps` — undo/redo, export, print,
+density, fullscreen), `SAVED_VIEWS` (`SavedViewsSlotProps`),
+`GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
+(`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
+`ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which
+`virtualize` fills with the windowed body a plain table never downloads —
+`ChromeBodyGate` is what asks for it, falling back to the plain body.
+A kit dresses a core feature with its own parts through `extendFeature`.
+
+A feature whose behaviour is a hook rather than a component fills a **live**
+slot instead: the hook mounts inside the table and hands its state back down,
+so a table that never imported the feature never carries it. Chrome-shaped
+state arrives through `ChromeExtrasGate` (`ChromeExtraSlotProps`) —
+`COLUMN_LAYOUT_LIVE`, `FILTER_CHIPS_LIVE`, `GROUPING_LIVE`, `TREE_LIVE`,
+`SELECTION_LIVE`, `ROW_ACTIONS_LIVE`, `PINNING_LIVE`, `EXPANSION_LIVE` and
+`EDITING_LIVE` — and interaction state through `HistoryLiveGate`
+(`EDIT_HISTORY_LIVE`, `EditHistoryLiveSlotProps`) and `ShellLiveGate`:
+`FIND_LIVE` (`FindLiveSlotProps`), `CELL_NAV_LIVE` (`CellNavLiveSlotProps`),
+`EXPORT_LIVE` (`ExportLiveSlotProps`), `FULLSCREEN_LIVE`
+(`FullscreenLiveSlotProps`), `SELECTION_STATS_LIVE`
+(`SelectionStatsLiveSlotProps`), `COMMAND_PALETTE_LIVE` and
+`CONTEXT_MENU_LIVE` (`ContextMenuLiveSlotProps`). An unfilled live slot passes
+an inert stand-in through, so the same chrome renders either way.
+
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
 `rowEditing` · `batchEditing` · `editHistory` · `dirtyIndicators` ·
@@ -8140,6 +8176,10 @@ Props beyond the core surface, with per-kit availability.
 | `accentColor`               | kit accent union (chakra: `string`)             | —              | chakra, radix, base-ui                       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                                                                               |
 | `bordered`                  | `boolean`                                       | `false`        | antd                                         | Render the table with cell borders.                                                                                                                                                                                                                             |
 
+Mantine also publishes the spacing its density mapping uses, as
+`DENSITY_SPACING` (`DensitySpacing`) from `@adapttable/mantine/density`, so a
+host can match its own chrome to the table's rows.
+
 Each adapter also re-exports the core source builders and types, so one
 import path covers everything.
 
@@ -8187,8 +8227,19 @@ All from `@adapttable/core`.
 - `useTableChrome<TRow>(props): TableChrome<TRow>` — shared adapter
   orchestration: layout, confirm, chips, body region (`emptyVariant`,
   `isRefreshing`), `clearFilters`, footer.
-- `useChromeBodyData(chrome, props): ChromeBodyData<TRow>` — body data-flow
-  wiring: window virtualization + the infinite-scroll sentinel.
+- `useVirtualChromeBodyData(chrome, props): ChromeBodyData<TRow>` — body
+  data-flow wiring: window virtualization + the infinite-scroll sentinel.
+  `usePlainChromeBodyData` is the same shape without the virtualizer, for a
+  table that never composed `virtualize`; `VirtualItemMeta` is one windowed
+  entry and `virtualColumnSpan` is the span a windowed row's spacer cells
+  cover. `useChromeBodyData` is the former name of the virtual one and still
+  works.
+- `useDataTableShell(props, renderAutoForm): DataTableShellResult<TRow>` —
+  the whole adapter shell in one call: resolved tier, chrome, and the
+  `tableProps` / `toolbarProps` bundles a kit spreads. `DataTableShellView`
+  mounts the gates below it and hands back the finished view;
+  `finishDataTableShell` folds a body into a shell for an adapter that
+  assembles its own.
 - `useColumnLayout(options): UseColumnLayoutResult<TRow>` — headless
   visibility / order / pinning / width / collapsed-group state
   (`visibleColumns`, `toggleVisible`, `move`, `setPinned`, `setWidth`,

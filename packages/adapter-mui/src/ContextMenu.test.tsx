@@ -2,8 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { contextMenu } from "./context-menu";
-import { DataTable } from "./testDataTable";
+import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -37,10 +38,14 @@ describe("context menu (mui)", () => {
       </>
     );
 
-  /** No features composed: the import is the switch, so nothing is drawn. */
+  /**
+   * No features composed. This one renders the shipped component rather than
+   * the harness above, which exists to compose features from props — the very
+   * thing an absence test must not do.
+   */
   const bare = (extra?: Record<string, unknown>) =>
     render(
-      <DataTable
+      <BareDataTable
         data={ROWS}
         columns={COLS}
         rowKey={(r) => r.id}

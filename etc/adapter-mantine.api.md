@@ -85,6 +85,7 @@ import { SortDirection } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
+import { TableQueryHandler } from '@adapttable/core/adapter';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { ToolbarSlots } from '@adapttable/core';
@@ -426,6 +427,8 @@ export { SortDirection }
 export { TableLabels }
 
 export { TableQuery }
+
+export { TableQueryHandler }
 
 export { TableQueryParams }
 

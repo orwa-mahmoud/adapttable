@@ -2,8 +2,8 @@ import { Theme } from "@radix-ui/themes";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef, CustomCellEditorCtrl } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Task {
   id: string;

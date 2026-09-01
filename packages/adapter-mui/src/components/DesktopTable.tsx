@@ -52,7 +52,6 @@ import {
   OptionalRowReorderHandle,
   OptionalTreeCell,
 } from "./featureSlots";
-import { cellDisplay } from "./DisplayCell";
 import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
@@ -341,7 +340,6 @@ function DesktopRowBase<TRow>(
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={cellDisplay(column, row, focusIndex)}
                 />
               </OptionalTreeCell>
               <OptionalFillHandle

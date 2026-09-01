@@ -15,9 +15,10 @@ export function ContextMenuLiveGate({
   readonly children: (regionProps: Record<string, unknown>) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CONTEXT_MENU_LIVE);
-  if (!filled) return children({});
-  return (
+  return filled ? (
     <FeatureSlot slot={CONTEXT_MENU_LIVE} props={{ ...props, children }} />
+  ) : (
+    children({})
   );
 }
 
@@ -31,8 +32,10 @@ export function OptionalSidePanel({
   readonly panel: ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(SIDE_PANEL);
-  if (!filled || panel == null || panel === false) return body;
-  return (
+  const alongside = filled && panel != null && panel !== false;
+  return !alongside ? (
+    body
+  ) : (
     <div
       data-adapttable-part="table-region"
       style={{

@@ -7,9 +7,9 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

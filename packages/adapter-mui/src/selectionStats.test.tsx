@@ -2,9 +2,10 @@ import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { cellNavigation } from "./cell-navigation";
-import { DataTable } from "./testDataTable";
+import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 import { selectionStats } from "./status-bar";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -61,11 +62,20 @@ describe("selection statistics (mui)", () => {
   });
 
   it("renders nothing without the feature", () => {
-    table({
-      selectionStats: true,
-      locale: "en-US",
-      features: [cellNavigation<Row>()],
-    });
+    // The shipped component, not the harness: the harness composes features
+    // from props, which is exactly what this test must not have happen.
+    render(
+      <BareDataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        cellNavigation
+        locale="en-US"
+        selectionStats
+        features={[cellNavigation<Row>()]}
+      />
+    );
     selectBudgetColumn();
     expect(strip()).toBeNull();
   });

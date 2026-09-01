@@ -6,17 +6,18 @@
  */
 import { FILTER_ENGINE_IMPL } from "../filters/filterEngine";
 import {
-  useTableDataWithEngine,
   type UseTableDataOptions,
   type UseTableDataResult,
+  useTableDataWithEngine,
 } from "./useTableDataImpl";
 
+export { isDeclarativeFilters } from "./isDeclarativeFilters";
 export type {
   DataModeProps,
+  TableQueryHandler,
   UseTableDataOptions,
   UseTableDataResult,
 } from "./useTableDataImpl";
-export { isDeclarativeFilters } from "./isDeclarativeFilters";
 
 /**
  * Resolve the table's data tier and the declarative-filter runtime.

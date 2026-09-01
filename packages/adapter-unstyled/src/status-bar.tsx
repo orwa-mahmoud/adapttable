@@ -9,11 +9,11 @@ import {
   selectionStats as coreSelectionStats,
   statusBar as coreStatusBar,
 } from "@adapttable/core/features";
-import { useClassNames } from "./components/classNamesContext";
 
+import { useClassNames } from "./components/classNamesContext";
 import { StatusBar } from "./components/StatusBar";
 
-function StatusSlot(props: Omit<StatusBarChromeProps, "slots">) {
+function StatusSlot(props: Readonly<Omit<StatusBarChromeProps, "slots">>) {
   const classNames = useClassNames();
   return <StatusBar {...props} classNames={classNames} />;
 }

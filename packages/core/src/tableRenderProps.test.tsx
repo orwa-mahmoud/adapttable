@@ -23,12 +23,12 @@ import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
 import {
+  type TableChrome,
   useChromeScrollReset,
   useFilterTriggerToggle,
   useTableChrome,
-  type TableChrome,
 } from "./useTableChrome";
-import { useChromeBodyData } from "./virtual/useVirtualChromeBodyData";
+import { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
 
 interface Row {
   id: string;
@@ -86,8 +86,10 @@ function renderLiveBody<TRow>(
   build: () => Parameters<typeof useTableChrome<TRow>>[0]
 ) {
   const applied = applyTableFeatures({ features });
-  const box: { current: ReturnType<typeof useChromeBodyData<TRow>> } = {
-    current: undefined as unknown as ReturnType<typeof useChromeBodyData<TRow>>,
+  const box: { current: ReturnType<typeof useVirtualChromeBodyData<TRow>> } = {
+    current: undefined as unknown as ReturnType<
+      typeof useVirtualChromeBodyData<TRow>
+    >,
   };
   function BodyProbe({
     chrome,
@@ -96,7 +98,7 @@ function renderLiveBody<TRow>(
     chrome: TableChrome<TRow>;
     props: Parameters<typeof useTableChrome<TRow>>[0];
   }): ReactNode {
-    box.current = useChromeBodyData(chrome, props);
+    box.current = useVirtualChromeBodyData(chrome, props);
     return null;
   }
   function Probe() {
@@ -705,7 +707,7 @@ describe("controlled selection through the chrome", () => {
   });
 });
 
-describe("useChromeBodyData", () => {
+describe("useVirtualChromeBodyData", () => {
   it("pulls pinned rows out of the virtual window", () => {
     const adapter = createMemoryAdapter("");
     const live = renderLiveBody(
@@ -761,7 +763,7 @@ describe("useChromeBodyData", () => {
         maxHeight: 300,
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
+      return useVirtualChromeBodyData(chrome, props);
     });
     // Attaching the scroll box hands TanStack the element to track; the
     // mount effect resolves it through the chrome's getScrollElement.
@@ -792,7 +794,7 @@ describe("useChromeBodyData", () => {
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(result.current.canLoadMore).toBe(false);
     expect(result.current.virtualization.enabled).toBe(false);
@@ -810,7 +812,7 @@ describe("useChromeBodyData", () => {
       });
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(result.current.canLoadMore).toBe(true);
     expect(result.current.virtualization.enabled).toBe(false);
@@ -832,13 +834,13 @@ describe("useChromeBodyData", () => {
         virtualize: true,
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(result.current.virtualization.enabled).toBe(true);
   });
 });
 
-describe("useChromeBodyData load-more wiring", () => {
+describe("useVirtualChromeBodyData load-more wiring", () => {
   it("fetches the next page when the sentinel intersects", () => {
     const observers: { callback: IntersectionObserverCallback }[] = [];
     const originalIO = globalThis.IntersectionObserver;
@@ -885,7 +887,7 @@ describe("useChromeBodyData load-more wiring", () => {
     function Harness() {
       const props = { source, columns: cols, rowKey: (r: Row) => r.id };
       const chrome = useTableChrome<Row>(props);
-      const { loadMoreRef } = useChromeBodyData<Row>(chrome, props);
+      const { loadMoreRef } = useVirtualChromeBodyData<Row>(chrome, props);
       return <div ref={loadMoreRef} />;
     }
     render(<Harness />);
@@ -958,7 +960,7 @@ describe("isRefreshing edges", () => {
   });
 });
 
-describe("useChromeBodyData eligibility edges", () => {
+describe("useVirtualChromeBodyData eligibility edges", () => {
   it("stays disabled when the source errored, even with virtualize on", () => {
     const props = {
       source: mockSource({ error: new Error("boom") }),
@@ -968,7 +970,7 @@ describe("useChromeBodyData eligibility edges", () => {
     };
     const { result } = renderHook(() => {
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(result.current.virtualization.enabled).toBe(false);
     expect(result.current.canLoadMore).toBe(false);
@@ -984,7 +986,7 @@ describe("useChromeBodyData eligibility edges", () => {
     };
     const { result } = renderHook(() => {
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(result.current.virtualization.enabled).toBe(true);
   });
@@ -1001,13 +1003,13 @@ describe("useChromeBodyData eligibility edges", () => {
     const mobile = renderHook(() => {
       const props = { ...base, isMobile: true };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(mobile.result.current.virtualization.enabled).toBe(true);
     const desktop = renderHook(() => {
       const props = { ...base, isMobile: false };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(desktop.result.current.virtualization.enabled).toBe(true);
   });
@@ -1128,7 +1130,7 @@ describe("chrome row expansion", () => {
         renderRowDetail: (r: Row) => r.name,
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData<Row>(chrome, props);
+      return useVirtualChromeBodyData<Row>(chrome, props);
     });
     expect(warn.mock.calls.flat().join(" ")).not.toContain(
       "renderRowDetail with virtualize"

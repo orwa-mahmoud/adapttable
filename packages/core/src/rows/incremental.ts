@@ -64,15 +64,15 @@ import {
   snapshotPartitions,
 } from "./incrementalGroup";
 import {
+  attachIncrementalView as attachView,
+  incrementalViewOf as viewOf,
+} from "./incrementalView";
+import {
   applyRowPatchesWithLog,
   type RowPatch,
   type RowPatchEvent,
   type RowPatchLog,
 } from "./patch";
-import {
-  attachIncrementalView as attachView,
-  incrementalViewOf as viewOf,
-} from "./incrementalView";
 
 export { rowPatchLog } from "./patch";
 

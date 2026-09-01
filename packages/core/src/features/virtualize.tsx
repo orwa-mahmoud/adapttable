@@ -8,9 +8,15 @@
  */
 import type { ReactNode } from "react";
 
+import { useKeyedVirtualization } from "../virtual/useTableVirtualization";
 import { useVirtualChromeBodyData } from "../virtual/useVirtualChromeBodyData";
 import { slotRender } from "./providers";
-import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
+import {
+  CHROME_BODY,
+  type ChromeBodySlotProps,
+  KEYED_WINDOW,
+  type KeyedWindowSlotProps,
+} from "./slotKeys";
 import type { FeaturePatch, TableFeature } from "./tableFeature";
 
 /** Options the factory accepts — a boolean or the windowing knobs. */
@@ -45,6 +51,17 @@ function VirtualChromeBody({
 }
 
 /**
+ * The keyed window a kit that assembles its own body asks for. Mounted only
+ * when this feature fills {@link KEYED_WINDOW}.
+ */
+function KeyedWindow({
+  children,
+  ...options
+}: KeyedWindowSlotProps): ReactNode {
+  return children(useKeyedVirtualization(options));
+}
+
+/**
  * Render only the rows in view.
  *
  * ```tsx
@@ -66,6 +83,7 @@ export function virtualize<TRow>(
       slotRender(CHROME_BODY, (slotProps) => (
         <VirtualChromeBody {...slotProps} />
       )),
+      slotRender(KEYED_WINDOW, (slotProps) => <KeyedWindow {...slotProps} />),
     ],
   };
 }

@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { useSelection } from "../selection/useSelection";
 import { stableKey } from "../utils/stableKey";
 import { slotRender } from "./providers";
-import { SELECTION_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, SELECTION_LIVE } from "./slotKeys";
 
 function LiveSelection({
   chrome,

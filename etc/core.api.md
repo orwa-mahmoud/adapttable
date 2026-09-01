@@ -14,7 +14,6 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
-import { VirtualItem } from '@tanstack/react-virtual';
 
 // @public
 export interface ActionConfirm<TArg> {
@@ -629,6 +628,7 @@ export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 // @public
 export interface ChromeBodyData<TRow> {
     canLoadMore: boolean;
+    columnWindow?: ColumnWindow<TRow>;
     groupingEntries?: readonly GroupedFlatEntry<TRow>[];
     loadMoreRef: RefObject<HTMLDivElement | null>;
     pinnedBottomRows: readonly TRow[];
@@ -944,6 +944,14 @@ export function columnsHaveFooter<TRow>(columns: readonly ColumnDef<TRow>[]): bo
 
 // @public
 export function columnText<TRow>(column: ColumnDef<TRow>, row: TRow): string;
+
+// @public
+export interface ColumnWindow<TRow> {
+    columns: readonly ColumnDef<TRow>[];
+    enabled: boolean;
+    paddingEnd: number;
+    paddingStart: number;
+}
 
 // @public
 export type Command = ContextMenuItem;
@@ -3434,6 +3442,8 @@ export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
 export interface TableChrome<TRow> {
     activeFilterCount: number;
     allColumns: ColumnDef<TRow>[];
+    autoSizeColumn?: (key: string) => void;
+    autoSizeColumns?: () => void;
     body: TableBodyRegion;
     clearFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
@@ -3464,6 +3474,7 @@ export interface TableChrome<TRow> {
             groupKey?: string;
         }) => void;
     };
+    groupingArmed: boolean;
     hasRowActions: boolean;
     hasRowReorder: boolean;
     isMobile: boolean;
@@ -3483,6 +3494,7 @@ export interface TableChrome<TRow> {
         expansion: TreeExpansionState;
         columnKey?: string;
     };
+    treeShaped: boolean;
 }
 
 // @public
@@ -4047,8 +4059,8 @@ export interface UseCellSaveStateOptions<TRow> {
 // @public
 export function useChecklistFilter<TRow>(def: FilterDef<TRow>, source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">): ChecklistFilterState;
 
-// @public
-export function useChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData<TRow>;
+// @public @deprecated (undocumented)
+export const useChromeBodyData: typeof useVirtualChromeBodyData;
 
 // @public
 export function useChromeScrollReset<TRow>(ref: RefObject<HTMLElement | null>, chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): void;
@@ -4392,6 +4404,9 @@ export function useMediaQuery(query: string, defaultValue?: boolean): boolean;
 export const useOffsetHeight: typeof useOffsetHeight_2;
 
 // @public
+export function usePlainChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData<TRow>;
+
+// @public
 export function usePointerDismiss(open: boolean, dismiss: () => void, insideSelector: string): void;
 
 // @public
@@ -4564,7 +4579,7 @@ export interface UseShortcutsOptions {
     target?: () => EventTarget | null;
 }
 
-// @public
+// @public (undocumented)
 export function useTableChrome<TRow>(props: BaseDataTableProps<TRow>): TableChrome<TRow>;
 
 // @public
@@ -4659,6 +4674,9 @@ export function useTreeExpansion(controlled?: {
 }): TreeExpansionState;
 
 // @public
+export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData<TRow>;
+
+// @public
 export interface ValidationCheckResult {
     allowed: boolean;
     error?: string;
@@ -4677,12 +4695,22 @@ export function viewFromGroupedEntries<TRow>(entries: readonly GroupedFlatEntry<
 export function viewFromTreeEntries<TRow>(entries: readonly TreeEntry<TRow>[]): ExportViewEntry<TRow>[];
 
 // @public
+export interface VirtualItemMeta {
+    end: number;
+    index: number;
+    key: string | number | bigint;
+    lane: number;
+    size: number;
+    start: number;
+}
+
+// @public
 export interface VirtualTableRow<TRow> {
     index: number;
     key: string;
     row: TRow;
     sourceIndex?: number;
-    virtualItem?: VirtualItem;
+    virtualItem?: VirtualItemMeta;
 }
 
 // @public

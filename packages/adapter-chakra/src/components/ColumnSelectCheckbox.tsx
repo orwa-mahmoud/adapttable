@@ -11,7 +11,7 @@ function ColumnSelectBox({
   label,
   checked,
   onToggle,
-}: ColumnSelectCheckboxProps) {
+}: Readonly<ColumnSelectCheckboxProps>) {
   return (
     <Checkbox
       size="sm"

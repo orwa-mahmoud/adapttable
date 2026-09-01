@@ -31,7 +31,7 @@ function Surface({
   onClose,
   children,
   className,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <DropdownMenu.Root
       open

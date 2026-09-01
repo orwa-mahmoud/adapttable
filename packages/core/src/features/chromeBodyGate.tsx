@@ -100,6 +100,11 @@ function overlayChromeExtras<TRow>(
     tableProps: {
       ...shell.tableProps,
       table,
+      // The row universe an editable cell resolves its commit against. The
+      // shell captured the base chrome's, which is the page slice; grouping
+      // renders the FULL filtered set, so a commit on any row past page one
+      // would find no row and close the editor without a word.
+      rows: chrome.editingRows,
       actionsPinned:
         chrome.columnLayout.state.pinned[ACTIONS_COLUMN_KEY] === "end",
       reorderPinned:

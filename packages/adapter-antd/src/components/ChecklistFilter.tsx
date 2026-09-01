@@ -15,7 +15,7 @@ function ChecklistSearch({
   value,
   className,
   onChange,
-}: ChecklistSearchProps) {
+}: Readonly<ChecklistSearchProps>) {
   return (
     <Input
       size="small"
@@ -45,7 +45,7 @@ function ChecklistBox({
   className,
   countClassName,
   onChange,
-}: ChecklistCheckboxProps) {
+}: Readonly<ChecklistCheckboxProps>) {
   return (
     // antd routes loose props to the inner <input> and `className` to its own
     // wrapper, which would leave the part and the class on different elements.

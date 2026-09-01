@@ -36,8 +36,6 @@ import {
 import { Card, Checkbox, Descriptions, Space } from "antd";
 import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
-import { ADAPTTABLE_GROUP, type AdaptTableGroupRow } from "./grouping";
-import { RowActionButtons } from "./RowActionButtons";
 import {
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -46,7 +44,8 @@ import {
   OptionalRowReorderButtons,
   OptionalTreeToggle,
 } from "./featureSlots";
-import { cellDisplay } from "./DisplayCell";
+import { ADAPTTABLE_GROUP, type AdaptTableGroupRow } from "./grouping";
+import { RowActionButtons } from "./RowActionButtons";
 
 /**
  * The mobile counterpart of the desktop footer summary: one trailing card
@@ -226,6 +225,9 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     label: resolveMobileLabel(column),
     value: (
       <OptionalEditableCell
+        // Built inside the map, so it needs its own key: React reads these
+        // as a list even though a card renders them one at a time.
+        key={column.key}
         editing={editing}
         row={row}
         column={column}
@@ -236,7 +238,6 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={cellDisplay(column, row, rowIndex)}
       />
     ),
   }));

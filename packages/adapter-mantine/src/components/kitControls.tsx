@@ -101,7 +101,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <TextInput
       size="xs"
@@ -122,7 +122,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <NativeSelect
       size="xs"
@@ -159,7 +159,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   return (
     <Popover withinPortal position="bottom-start" shadow="sm">
       <Popover.Target>
@@ -294,7 +294,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <TextInput
       ref={focusRef}
@@ -346,7 +346,7 @@ function RowEditButton({
   part,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
   return (
     <Button
       type="button"
@@ -378,7 +378,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <Button
       type="button"
@@ -408,7 +408,7 @@ function TreeButton({
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <ActionIcon
       type="button"
@@ -462,7 +462,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <ActionIcon
       type="button"
@@ -521,7 +521,7 @@ function ReorderHandle({
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <ActionIcon
       type="button"
@@ -562,7 +562,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <ActionIcon
       type="button"
@@ -601,7 +601,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -628,7 +628,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <Button
       type="button"

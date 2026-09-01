@@ -91,7 +91,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <TextField.Root
       size="1"
@@ -112,7 +112,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <span className={className} style={{ display: "block", width: "100%" }}>
       <NativeSelect
@@ -148,7 +148,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   return (
     <Popover.Root>
       <Popover.Trigger
@@ -304,7 +304,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <TextField.Root
       ref={focusRef}
@@ -356,7 +356,7 @@ function RowEditButton({
   part,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
   return (
     <Button
       type="button"
@@ -388,7 +388,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <Button
       type="button"
@@ -418,7 +418,7 @@ function TreeButton({
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -471,7 +471,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -529,7 +529,7 @@ function ReorderHandle({
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <IconButton
       type="button"
@@ -569,7 +569,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -607,7 +607,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -634,7 +634,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <Button
       type="button"

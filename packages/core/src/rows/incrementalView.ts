@@ -15,7 +15,7 @@ const VIEWS = new WeakMap<object, unknown>();
 export function incrementalViewOf<TView>(
   rows: readonly unknown[]
 ): TView | undefined {
-  return VIEWS.get(rows as object) as TView | undefined;
+  return VIEWS.get(rows) as TView | undefined;
 }
 
 /**
@@ -27,5 +27,5 @@ export function attachIncrementalView(
   rows: readonly unknown[],
   view: unknown
 ): void {
-  VIEWS.set(rows as object, view);
+  VIEWS.set(rows, view);
 }

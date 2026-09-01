@@ -18,7 +18,7 @@ function LiveContextMenu({
   children,
   container,
   ...hookOptions
-}: ContextMenuLiveSlotProps<never>): ReactNode {
+}: Readonly<ContextMenuLiveSlotProps<never>>): ReactNode {
   const menu = useTableContextMenu(hookOptions);
   return (
     <>

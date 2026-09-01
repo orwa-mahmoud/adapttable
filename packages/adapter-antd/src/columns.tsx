@@ -55,7 +55,6 @@ import type {
   ReactNode,
 } from "react";
 
-import { RowActionButtons } from "./components/RowActionButtons";
 import {
   OptionalColumnGroupToggle,
   OptionalColumnSelect,
@@ -67,13 +66,13 @@ import {
   OptionalRowReorderHandle,
   OptionalTreeCell,
 } from "./components/featureSlots";
-import { cellDisplay } from "./components/DisplayCell";
 import {
   type AdaptTableGroupRow,
   type GroupedDataRecord,
   isAdaptTableExtraRow,
   isAdaptTableGroupRow,
 } from "./components/grouping";
+import { RowActionButtons } from "./components/RowActionButtons";
 
 /**
  * Map a logical pin side to antd's native physical `fixed` value. antd mirrors
@@ -607,7 +606,6 @@ function renderLeafDataCell<TRow>(
           rowKey={options.getRowId}
           editLabel={options.labels.editCell}
           undoLabel={options.labels.undoEdit}
-          display={cellDisplay(column, record, index)}
         />
       </OptionalTreeCell>
       <OptionalFillHandle
@@ -681,7 +679,9 @@ export function buildColumns<TRow>({
   filterRegistry,
   closeHeaderFilterOnSelect,
   isCellFlashing,
-}: BuildColumnsOptions<TRow>): TableColumnsType<GroupedDataRecord<TRow>> {
+}: Readonly<BuildColumnsOptions<TRow>>): TableColumnsType<
+  GroupedDataRecord<TRow>
+> {
   const cellOpts = {
     editing,
     rows,

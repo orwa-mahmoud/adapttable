@@ -11,15 +11,15 @@ import {
   type ContextMenuOptions,
 } from "@adapttable/core/features";
 import type { ReactNode } from "react";
-import { useClassNames } from "./components/classNamesContext";
 
+import { useClassNames } from "./components/classNamesContext";
 import { ContextMenu } from "./components/ContextMenu";
 
 function LiveContextMenu({
   children,
   container,
   ...hookOptions
-}: ContextMenuLiveSlotProps<never>): ReactNode {
+}: Readonly<ContextMenuLiveSlotProps<never>>): ReactNode {
   const menu = useTableContextMenu(hookOptions);
   const classNames = useClassNames();
   return (

@@ -22,7 +22,7 @@ function Surface({
   onClose,
   children,
   className,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <Menu
       open

@@ -1,10 +1,82 @@
 import { DataTable, type DataTableProps } from "@adapttable/antd";
+import { bulkActions as bulkActions_ } from "@adapttable/antd/bulk-actions";
+import { cellNavigation as cellNavigation_ } from "@adapttable/antd/cell-navigation";
+import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/antd/column-groups";
+import { columnMenu as columnMenu_ } from "@adapttable/antd/column-menu";
+import { columnSelectionCheckbox as columnSelection_ } from "@adapttable/antd/column-selection";
+import { commandPalette as commandPalette_ } from "@adapttable/antd/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/antd/context-menu";
+import { densityChooser as densityChooser_ } from "@adapttable/antd/density";
+import {
+  batchEditing as batchEditing_,
+  editHistory as editHistory_,
+  editing as editing_,
+  rowEditing as rowEditing_,
+  undoRedoButtons as undoRedoButtons_,
+} from "@adapttable/antd/editing";
+import { exportCsv as exportCsv_ } from "@adapttable/antd/export";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/antd/filters";
+import { findInTable as findInTable_ } from "@adapttable/antd/find-in-table";
+import { fullscreen as fullscreen_ } from "@adapttable/antd/fullscreen";
+import { grouping as grouping_ } from "@adapttable/antd/grouping";
+import { headerFilters as headerFilters_ } from "@adapttable/antd/header-filters";
+import { nestedTable as nestedTable_ } from "@adapttable/antd/nested-table";
+import { print as print_ } from "@adapttable/antd/print";
+import { resizableColumns as resizableColumns_ } from "@adapttable/antd/resizable-columns";
+import { rowActions as rowActions_ } from "@adapttable/antd/row-actions";
+import { rowReorder as rowReorder_ } from "@adapttable/antd/row-reorder";
+import { savedViews as savedViews_ } from "@adapttable/antd/saved-views";
+import { sidePanel as sidePanel_ } from "@adapttable/antd/side-panel";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/antd/status-bar";
+import { tree as tree_ } from "@adapttable/antd/tree";
 import type {
   ColumnDef,
   ColumnLayoutState,
   NestedTableDefaults,
 } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
+
+import { kitChromeFeatures } from "./chromeFeatures";
+
+/** This kit's factories, handed to the shared builder. */
+const KIT_CHROME = {
+  cellNavigation: cellNavigation_,
+  columnSelectionCheckbox: columnSelection_,
+  densityChooser: densityChooser_,
+  batchEditing: batchEditing_,
+  editHistory: editHistory_,
+  editing: editing_,
+  grouping: grouping_,
+  rowEditing: rowEditing_,
+  rowReorder: rowReorder_,
+  tree: tree_,
+  exportCsv: exportCsv_,
+  fullscreen: fullscreen_,
+  headerFilters: headerFilters_,
+  nestedTable: nestedTable_,
+  print: print_,
+  resizableColumns: resizableColumns_,
+  rowActions: rowActions_,
+  savedViews: savedViews_,
+  undoRedoButtons: undoRedoButtons_,
+  bulkActions: bulkActions_,
+  collapsibleColumnGroups: columnGroups_,
+  columnMenu: columnMenu_,
+  commandPalette: commandPalette_,
+  contextMenu: contextMenu_,
+  filters: filters_,
+  filterTypes: filterTypes_,
+  findInTable: findInTable_,
+  selectionStats: selectionStats_,
+  sidePanel: sidePanel_,
+  statusBar: statusBar_,
+};
 import {
   Avatar,
   ConfigProvider,
@@ -271,7 +343,7 @@ export function AntdDemo({
         derivedFields={derivedFields}
         formulaColumns={formulaColumns}
         columnGroups={columnGroups}
-        render={(source, columns) => (
+        render={(source, { features: demoFeatures, ...columns }) => (
           <DataTable
             source={source}
             columns={
@@ -298,7 +370,38 @@ export function AntdDemo({
                   })
             }
             rowKey={(r) => r.id}
-            features={nested ? nestedOuterFeatures<Person>() : undefined}
+            features={[
+              ...(nested ? nestedOuterFeatures<Person>() : []),
+              ...kitChromeFeatures(KIT_CHROME, {
+                cellNavigation,
+                columnSelectionCheckbox,
+                densityChooser,
+                editing,
+                exportCsv,
+                focused,
+                fullscreen,
+                headerFilters,
+                nested: nested ? nestedOrders : undefined,
+                onPrint,
+                printButton,
+                undoRedoButtons,
+                urlKey,
+                bulkActions,
+                bulkActionList: makeBulkActions(locale),
+                collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                columnMenu,
+                rowActions: !(rowMutations ?? (focused && !columnGroups)),
+                commandPalette,
+                contextMenu,
+                filterControls,
+                filterDefs: filters,
+                filterTypeSpecs: demoFilterTypes(),
+                sidePanel,
+                statusBar,
+                kitFeatures: columns.kitFeatures,
+              }),
+              ...(demoFeatures ?? []),
+            ]}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

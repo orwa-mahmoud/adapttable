@@ -6,6 +6,78 @@ import {
   type DataTableClassNames,
   type DataTableProps,
 } from "@adapttable/unstyled";
+import { bulkActions as bulkActions_ } from "@adapttable/unstyled/bulk-actions";
+import { cellNavigation as cellNavigation_ } from "@adapttable/unstyled/cell-navigation";
+import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/unstyled/column-groups";
+import { columnMenu as columnMenu_ } from "@adapttable/unstyled/column-menu";
+import { columnSelectionCheckbox as columnSelection_ } from "@adapttable/unstyled/column-selection";
+import { commandPalette as commandPalette_ } from "@adapttable/unstyled/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/unstyled/context-menu";
+import { densityChooser as densityChooser_ } from "@adapttable/unstyled/density";
+import {
+  batchEditing as batchEditing_,
+  editHistory as editHistory_,
+  editing as editing_,
+  rowEditing as rowEditing_,
+  undoRedoButtons as undoRedoButtons_,
+} from "@adapttable/unstyled/editing";
+import { exportCsv as exportCsv_ } from "@adapttable/unstyled/export";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/unstyled/filters";
+import { findInTable as findInTable_ } from "@adapttable/unstyled/find-in-table";
+import { fullscreen as fullscreen_ } from "@adapttable/unstyled/fullscreen";
+import { grouping as grouping_ } from "@adapttable/unstyled/grouping";
+import { headerFilters as headerFilters_ } from "@adapttable/unstyled/header-filters";
+import { nestedTable as nestedTable_ } from "@adapttable/unstyled/nested-table";
+import { print as print_ } from "@adapttable/unstyled/print";
+import { resizableColumns as resizableColumns_ } from "@adapttable/unstyled/resizable-columns";
+import { rowActions as rowActions_ } from "@adapttable/unstyled/row-actions";
+import { rowReorder as rowReorder_ } from "@adapttable/unstyled/row-reorder";
+import { savedViews as savedViews_ } from "@adapttable/unstyled/saved-views";
+import { sidePanel as sidePanel_ } from "@adapttable/unstyled/side-panel";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/unstyled/status-bar";
+import { tree as tree_ } from "@adapttable/unstyled/tree";
+
+import { kitChromeFeatures } from "./chromeFeatures";
+
+/** This kit's factories, handed to the shared builder. */
+const KIT_CHROME = {
+  cellNavigation: cellNavigation_,
+  columnSelectionCheckbox: columnSelection_,
+  densityChooser: densityChooser_,
+  batchEditing: batchEditing_,
+  editHistory: editHistory_,
+  editing: editing_,
+  grouping: grouping_,
+  rowEditing: rowEditing_,
+  rowReorder: rowReorder_,
+  tree: tree_,
+  exportCsv: exportCsv_,
+  fullscreen: fullscreen_,
+  headerFilters: headerFilters_,
+  nestedTable: nestedTable_,
+  print: print_,
+  resizableColumns: resizableColumns_,
+  rowActions: rowActions_,
+  savedViews: savedViews_,
+  undoRedoButtons: undoRedoButtons_,
+  bulkActions: bulkActions_,
+  collapsibleColumnGroups: columnGroups_,
+  columnMenu: columnMenu_,
+  commandPalette: commandPalette_,
+  contextMenu: contextMenu_,
+  filters: filters_,
+  filterTypes: filterTypes_,
+  findInTable: findInTable_,
+  selectionStats: selectionStats_,
+  sidePanel: sidePanel_,
+  statusBar: statusBar_,
+};
 import type { CSSProperties } from "react";
 
 import {
@@ -291,7 +363,7 @@ export function UnstyledLike({
       derivedFields={derivedFields}
       formulaColumns={formulaColumns}
       columnGroups={columnGroups}
-      render={(source, columns) => {
+      render={(source, { features: demoFeatures, ...columns }) => {
         return (
           <DataTable
             source={source}
@@ -319,7 +391,38 @@ export function UnstyledLike({
                   })
             }
             rowKey={(r) => r.id}
-            features={nested ? nestedOuterFeatures<Person>() : undefined}
+            features={[
+              ...(nested ? nestedOuterFeatures<Person>() : []),
+              ...kitChromeFeatures(KIT_CHROME, {
+                cellNavigation,
+                columnSelectionCheckbox,
+                densityChooser,
+                editing,
+                exportCsv,
+                focused,
+                fullscreen,
+                headerFilters,
+                nested: nested ? nestedOrders : undefined,
+                onPrint,
+                printButton,
+                undoRedoButtons,
+                urlKey,
+                bulkActions,
+                bulkActionList: makeBulkActions(locale),
+                collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                columnMenu,
+                rowActions: !(rowMutations ?? (focused && !columnGroups)),
+                commandPalette,
+                contextMenu,
+                filterControls,
+                filterDefs: filters,
+                filterTypeSpecs: demoFilterTypes(),
+                sidePanel,
+                statusBar,
+                kitFeatures: columns.kitFeatures,
+              }),
+              ...(demoFeatures ?? []),
+            ]}
             nestedTable={nested ? nestedOrders : undefined}
             defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
             cellNavigation={cellNavigation ?? editing}

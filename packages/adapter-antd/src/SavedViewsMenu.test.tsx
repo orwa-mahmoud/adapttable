@@ -3,8 +3,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 const labels = {
   savedViews: "Saved views",

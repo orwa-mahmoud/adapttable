@@ -34,6 +34,15 @@ export type { BatchRowEdit } from "./editing/batchEditing";
 export type { CustomCellEditorRender } from "./editing/cellEditing";
 export type { ExportWriter } from "./export/exportWriter";
 export type { ExportCsvOptions } from "./export/tableCsv";
+export { cellNavigation } from "./features/cell-navigation";
+export { editHistory } from "./features/edit-history";
+export {
+  batchEditing,
+  dirtyIndicators,
+  editing,
+  rowEditing,
+} from "./features/editing";
+export { exportCsv } from "./features/export-csv";
 export {
   bulkActions,
   cellSpan,
@@ -57,33 +66,22 @@ export {
   statusBar,
   undoRedoButtons,
 } from "./features/factories";
-export { virtualize } from "./features/virtualize";
-export { filters } from "./features/filters";
-export { rowPinning } from "./features/row-pinning";
-export { selectionStats } from "./features/selection-stats";
-export { findInTable } from "./features/find-in-table";
-export { editHistory } from "./features/edit-history";
-export { fullscreen } from "./features/fullscreen";
-export { cellNavigation } from "./features/cell-navigation";
-export { exportCsv } from "./features/export-csv";
-export { grouping } from "./features/grouping";
-export {
-  batchEditing,
-  dirtyIndicators,
-  editing,
-  rowEditing,
-} from "./features/editing";
-export { tree } from "./features/tree";
-export { nestedTable, rowDetail } from "./features/row-detail";
 export { useTableFeatures } from "./features/featureHost";
+export { filters } from "./features/filters";
+export { findInTable } from "./features/find-in-table";
+export { fullscreen } from "./features/fullscreen";
+export { grouping } from "./features/grouping";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
   FeatureRender,
   FeatureSlotKey,
 } from "./features/providers";
-export { rowReorder } from "./features/row-reorder";
 export { rowActions } from "./features/row-actions";
+export { nestedTable, rowDetail } from "./features/row-detail";
+export { rowPinning } from "./features/row-pinning";
+export { rowReorder } from "./features/row-reorder";
+export { selectionStats } from "./features/selection-stats";
 export type {
   FeatureApplyInput,
   FeaturePatch,
@@ -91,6 +89,8 @@ export type {
   TableFeatureHost,
 } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
+export { tree } from "./features/tree";
+export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export type { FilterDef } from "./filters/filterDefs";
 export type { FilterTypeSpec } from "./filters/filterRegistry";
 export type { GroupSort } from "./grouping/groupRows";
@@ -102,6 +102,7 @@ export type { RowPinState } from "./rows/rowPinning";
 export type { RowReorderHandler } from "./rows/rowReorder";
 export type { RowHeight, RowStyle } from "./rows/rowStyle";
 export type { NestedTableFor } from "./tree/nestedTable";
+export type { RowAction } from "./types";
 export type { BulkAction } from "./types";
 export type { UseSavedViewsOptions } from "./url/useSavedViews";
 

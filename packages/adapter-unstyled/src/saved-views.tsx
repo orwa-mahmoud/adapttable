@@ -9,11 +9,11 @@ import {
   savedViews as core,
   type UseSavedViewsOptions,
 } from "@adapttable/core/features";
-import { useClassNames } from "./components/classNamesContext";
 
+import { useClassNames } from "./components/classNamesContext";
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
 
-function SavedViewsSlot(props: SavedViewsSlotProps) {
+function SavedViewsSlot(props: Readonly<SavedViewsSlotProps>) {
   const classNames = useClassNames();
   return <SavedViewsMenu {...props} classNames={classNames} />;
 }

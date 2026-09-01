@@ -5,8 +5,8 @@ import {
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
-  bulkActions as core,
   type BulkAction,
+  bulkActions as core,
 } from "@adapttable/core/features";
 
 import { BulkActionBar } from "./components/BulkActionBar";

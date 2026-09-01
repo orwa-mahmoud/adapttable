@@ -1,27 +1,27 @@
 import {
   ACTIVE_FILTER_CHIPS,
-  type FilterOverlaySlotProps,
   extendFeature,
   FILTER_DRAWER,
   FILTER_POPOVER,
+  type FilterOverlaySlotProps,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   slotRender,
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
+  type FilterDef,
   filters as coreFilters,
   filterTypes as coreFilterTypes,
-  type FilterDef,
   type FilterTypeSpec,
 } from "@adapttable/core/features";
 
-import type { BaseUiAccentColor } from "./types";
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { FilterPopover } from "./components/FilterPopover";
 import { FilterTreeBuilder } from "./components/FilterTreeBuilder";
+import type { BaseUiAccentColor } from "./types";
 
 function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {
   return (
@@ -52,7 +52,7 @@ function ChipsSlot(props: Parameters<typeof Chips>[0]) {
   return <Chips {...props} />;
 }
 
-function DrawerSlot(props: FilterOverlaySlotProps) {
+function DrawerSlot(props: Readonly<FilterOverlaySlotProps>) {
   const accentColor = props.accentColor as BaseUiAccentColor | undefined;
   return (
     <FilterDrawer
@@ -68,7 +68,7 @@ function DrawerSlot(props: FilterOverlaySlotProps) {
   );
 }
 
-function PopoverSlot(props: FilterOverlaySlotProps) {
+function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
   const accentColor = props.accentColor as BaseUiAccentColor | undefined;
   return (
     <FilterPopover

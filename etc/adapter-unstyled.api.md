@@ -496,7 +496,8 @@ export function FilterPopover(input: Readonly<FilterPopoverProps>): JSX.Element;
 // @public
 export interface FilterPopoverProps {
     activeFilterCount: number;
-    children: ReactNode;
+    anchorEl?: HTMLElement | null;
+    children?: ReactNode;
     classNames: DataTableClassNames;
     dir?: Direction;
     filters: ReactNode;

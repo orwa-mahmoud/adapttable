@@ -716,6 +716,22 @@ export function resizableColumns<TRow>(): TableFeature<TRow>;
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 // @public
+export interface RowAction<TRow> {
+    color?: string;
+    confirm?: ActionConfirm<TRow>;
+    disabledReason?: (row: TRow) => string | undefined;
+    icon?: ReactNode;
+    isDisabled?: (row: TRow) => boolean;
+    isHidden?: (row: TRow) => boolean;
+    key: string;
+    label: string;
+    onClick: (row: TRow) => void;
+}
+
+// @public
+export function rowActions<TRow>(actions?: readonly RowAction<TRow>[]): TableFeature<TRow>;
+
+// @public
 export function rowAppearance<TRow>(options: {
     rowClassName?: (row: TRow, index: number) => string | undefined;
     rowStyle?: RowStyle<TRow>;
@@ -732,7 +748,7 @@ export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<s
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 
 // @public
-export function rowPinning<TRow>(options: {
+export function rowPinning<TRow>(options?: {
     pinnedRowIds?: RowPinState;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
 }): TableFeature<TRow>;
@@ -1115,7 +1131,7 @@ export interface TableStateMutators {
 }
 
 // @public
-export function tree<TRow>(options: {
+export function tree<TRow>(options?: {
     getChildren?: (row: TRow) => readonly TRow[] | undefined;
     getParentId?: (row: TRow) => string | undefined;
     hasChildren?: (row: TRow) => boolean;
@@ -1168,13 +1184,16 @@ export interface UseSavedViewsOptions {
 export function useTableFeatures<P extends object>(incoming: P): P;
 
 // @public
-export function virtualize<TRow>(options?: boolean | {
+export function virtualize<TRow>(options?: VirtualizeOptions): TableFeature<TRow>;
+
+// @public
+export type VirtualizeOptions = boolean | {
     virtualizeColumns?: boolean;
     estimateRowSize?: number;
     estimateCardSize?: number;
     virtualOverscan?: number;
     virtualScrollMargin?: number;
-}): TableFeature<TRow>;
+};
 
 // (No @packageDocumentation comment for this package)
 

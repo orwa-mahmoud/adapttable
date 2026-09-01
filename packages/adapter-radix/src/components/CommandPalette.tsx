@@ -22,7 +22,7 @@ function Surface({
   onClose,
   children,
   className,
-}: CommandPaletteSurfaceProps) {
+}: Readonly<CommandPaletteSurfaceProps>) {
   return (
     <Dialog.Root
       open

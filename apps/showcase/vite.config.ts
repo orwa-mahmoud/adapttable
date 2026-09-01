@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import tailwindcss from "@tailwindcss/vite";
@@ -150,9 +151,37 @@ const pkg = (rel: string, entry = "index", ext = "ts") =>
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
+/**
+ * Resolve every `@adapttable/<pkg>/<feature>` subpath to its TypeScript source.
+ *
+ * The showcase runs against source so it always reflects the library, and each
+ * kit now publishes one entry point per feature — which is exactly what the
+ * demo imports to arm them. Listing those by hand meant a new import silently
+ * resolved to `.../src/index.ts/<feature>` and broke the page, so the mapping
+ * is derived: `enforce: "pre"` puts it ahead of the bare-package aliases that
+ * would otherwise swallow the subpath.
+ */
+function adapttableSubpaths(): Plugin {
+  return {
+    name: "adapttable-source-subpaths",
+    enforce: "pre",
+    resolveId(id) {
+      const match = /^@adapttable\/([a-z0-9-]+)\/([a-z0-9-]+)$/.exec(id);
+      if (!match) return null;
+      const dir = match[1] === "core" ? "core" : `adapter-${match[1]}`;
+      for (const ext of ["tsx", "ts"]) {
+        const file = pkg(dir, match[2], ext);
+        if (existsSync(file)) return file;
+      }
+      return null;
+    },
+  };
+}
+
 export default defineConfig({
   base: "./",
   plugins: [
+    adapttableSubpaths(),
     react(),
     tailwindcss(),
     googleAnalytics(),
@@ -187,41 +216,23 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      // Longest key first: the bare "@adapttable/core" alias would otherwise
-      // swallow the subpath and resolve ".../index.ts/adapter".
-      "@adapttable/mui/find-in-table": pkg(
-        "adapter-mui",
-        "find-in-table",
-        "tsx"
-      ),
-      "@adapttable/mui/status-bar": pkg("adapter-mui", "status-bar", "tsx"),
-      "@adapttable/mui/command-palette": pkg(
-        "adapter-mui",
-        "command-palette",
-        "tsx"
-      ),
-      "@adapttable/mui/context-menu": pkg("adapter-mui", "context-menu", "tsx"),
-      "@adapttable/mui/side-panel": pkg("adapter-mui", "side-panel", "tsx"),
-      "@adapttable/core/features": pkg("core", "features"),
-      "@adapttable/core/adapter": pkg("core", "adapter"),
-      "@adapttable/core/xlsx": pkg("core", "xlsx"),
-      "@adapttable/core/pdf": pkg("core", "pdf"),
-      "@adapttable/core/sparkline": pkg("core", "sparkline"),
-      "@adapttable/core/pivot": pkg("core", "pivot"),
-      "@adapttable/core/formula": pkg("core", "formula"),
-      "@adapttable/core/stream": pkg("core", "stream"),
-      "@adapttable/core": pkg("core"),
-      "@adapttable/mantine": pkg("adapter-mantine"),
-      "@adapttable/mui": pkg("adapter-mui"),
-      "@adapttable/chakra": pkg("adapter-chakra"),
-      "@adapttable/unstyled": pkg("adapter-unstyled"),
-      "@adapttable/shadcn": pkg("adapter-shadcn"),
-      "@adapttable/antd": pkg("adapter-antd"),
-      "@adapttable/radix": pkg("adapter-radix"),
-      "@adapttable/base-ui": pkg("adapter-base-ui"),
-      "@adapttable/i18n": pkg("i18n"),
-    },
+    // Bare package names only, matched EXACTLY: a prefix alias would swallow
+    // `@adapttable/mui/cell-navigation` and resolve `.../src/index.ts/…`.
+    // Every subpath is resolved by `adapttableSubpaths` above, which derives
+    // the file rather than listing 100-odd entries that go stale one import
+    // at a time.
+    alias: [
+      { find: /^@adapttable\/core$/, replacement: pkg("core") },
+      { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
+      { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
+      { find: /^@adapttable\/mui$/, replacement: pkg("adapter-mui") },
+      { find: /^@adapttable\/chakra$/, replacement: pkg("adapter-chakra") },
+      { find: /^@adapttable\/unstyled$/, replacement: pkg("adapter-unstyled") },
+      { find: /^@adapttable\/shadcn$/, replacement: pkg("adapter-shadcn") },
+      { find: /^@adapttable\/antd$/, replacement: pkg("adapter-antd") },
+      { find: /^@adapttable\/radix$/, replacement: pkg("adapter-radix") },
+      { find: /^@adapttable\/base-ui$/, replacement: pkg("adapter-base-ui") },
+    ],
     dedupe: [
       "react",
       "react-dom",

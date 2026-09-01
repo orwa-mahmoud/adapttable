@@ -13,7 +13,7 @@ import {
 
 import { CommandPalette } from "./components/CommandPalette";
 
-function LiveCommandPalette(props: UseCommandPaletteOptions) {
+function LiveCommandPalette(props: Readonly<UseCommandPaletteOptions>) {
   const palette = useCommandPalette(props);
   return (
     <CommandPalette

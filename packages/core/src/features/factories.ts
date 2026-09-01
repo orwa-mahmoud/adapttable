@@ -7,13 +7,13 @@
  */
 import type { CommandPaletteOptions } from "../actions/useCommandPalette";
 import type { ContextMenuOptions } from "../actions/useTableContextMenu";
+import { columnResizeHandleProps } from "../columns/columnResize";
 import type { BatchRowEdit } from "../editing/batchEditing";
 import type { ExportCsvOptions } from "../export/tableCsv";
 import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { GroupSort } from "../grouping/groupRows";
 import type { SidePanelOptions } from "../props";
-import { columnResizeHandleProps } from "../columns/columnResize";
 import {
   buildBodyCells,
   type CellSpanAppearance,
@@ -22,10 +22,10 @@ import {
 import {
   extraCoveredTableSlots,
   extraHostFillStyle,
+  type ExtraRow,
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
-  type ExtraRow,
 } from "../rows/extraRows";
 import type { RowReorderHandler } from "../rows/rowReorder";
 import type { RowHeight, RowStyle } from "../rows/rowStyle";
@@ -263,7 +263,14 @@ export function headerFilters<TRow>(): TableFeature<TRow> {
 export function savedViews<TRow>(
   options: UseSavedViewsOptions
 ): TableFeature<TRow> {
-  return define("saved-views", { savedViews: options });
+  return {
+    id: "saved-views",
+    apply: () => ({ savedViews: options }),
+    // A view is the whole table state, columns included: restoring one writes
+    // the layout params back, so this feature has to own the layout they land
+    // in. Without it a restored view changes everything except its columns.
+    renders: [COLUMN_LAYOUT_LIVE_RENDER],
+  };
 }
 
 /**

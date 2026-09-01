@@ -7,9 +7,9 @@
  */
 import type { CSSProperties, ReactNode } from "react";
 
+import type { PinOffset } from "../columns/columnLayoutModel";
 import { PIN_Z } from "../columns/columnLayoutModel";
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
-import type { PinOffset } from "../columns/columnLayoutModel";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";

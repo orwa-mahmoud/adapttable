@@ -8,6 +8,7 @@ export default defineConfig({
   banner: { js: '"use client";' },
   entry: [
     "src/row-pinning.ts",
+    "src/batch-editing.ts",
     "src/cell-span.ts",
     "src/extra-rows.ts",
     "src/row-appearance.ts",

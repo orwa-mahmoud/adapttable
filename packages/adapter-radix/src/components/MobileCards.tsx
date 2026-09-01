@@ -34,8 +34,6 @@ import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
 import type { RadixAccentColor } from "../types";
 import { type SharedProps } from "./DesktopTable";
-import { Checkbox } from "./primitives";
-import { RowActionButtons } from "./RowActionButtons";
 import {
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -44,7 +42,8 @@ import {
   OptionalRowReorderButtons,
   OptionalTreeToggle,
 } from "./featureSlots";
-import { cellDisplay } from "./DisplayCell";
+import { Checkbox } from "./primitives";
+import { RowActionButtons } from "./RowActionButtons";
 
 /** Join the static class hook with a conditional per-row class. */
 function joinClasses(
@@ -212,6 +211,9 @@ function MobileCardBase<TRow>({
     label: resolveMobileLabel(column),
     value: (
       <OptionalEditableCell
+        // Built inside the map, so it needs its own key: React reads these
+        // as a list even though a card renders them one at a time.
+        key={column.key}
         editing={editing}
         row={row}
         column={column}
@@ -222,7 +224,6 @@ function MobileCardBase<TRow>({
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -482,7 +483,7 @@ export function MobileCards<TRow>({
                 <OptionalGroupHeaderCard
                   key={entry.key}
                   entry={entry}
-                  columns={columns as never}
+                  columns={columns}
                   selection={selection}
                   labels={labels}
                   compact={compact}

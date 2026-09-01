@@ -2,8 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { bulkActions } from "./bulk-actions";
-import { DataTable } from "./testDataTable";
+import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -20,8 +21,10 @@ const ACTIONS = [{ key: "x", label: "Archive", onClick: vi.fn() }];
 
 describe("bulk actions (mui)", () => {
   it("draws no bulk bar when the feature was never imported", () => {
+    // The shipped component, not the harness: the harness composes features
+    // from props, which is exactly what this test must not have happen.
     render(
-      <DataTable
+      <BareDataTable
         data={ROWS}
         columns={COLS}
         rowKey={(r) => r.id}

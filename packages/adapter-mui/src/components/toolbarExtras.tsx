@@ -12,7 +12,7 @@ export function UndoRedoButtons({
   canRedo,
   undoLabel,
   redoLabel,
-}: ToolbarExtrasSlotProps): ReactNode {
+}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
   if (!onUndo || !onRedo) return null;
   return (
     <>
@@ -43,7 +43,7 @@ export function ExportCsvButton({
   exportBusy,
   exportAnnouncement = "",
   exportLabel,
-}: ToolbarExtrasSlotProps): ReactNode {
+}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
   if (!onExportCsv) return null;
   return (
     <>
@@ -69,7 +69,7 @@ export function ExportCsvButton({
 export function PrintButton({
   onPrint,
   printLabel,
-}: ToolbarExtrasSlotProps): ReactNode {
+}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
   if (!onPrint) return null;
   return (
     <Button
@@ -87,7 +87,7 @@ export function DensityButton({
   density,
   onDensityChange,
   labels,
-}: ToolbarExtrasSlotProps): ReactNode {
+}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
   if (!onDensityChange) return null;
   return (
     <Button
@@ -110,7 +110,7 @@ export function FullscreenButton({
   onToggleFullscreen,
   isFullscreen,
   labels,
-}: ToolbarExtrasSlotProps): ReactNode {
+}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
   if (!onToggleFullscreen) return null;
   return (
     <Button

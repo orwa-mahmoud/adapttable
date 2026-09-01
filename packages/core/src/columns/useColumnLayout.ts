@@ -2,26 +2,26 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../types";
 import {
+  applyColumnOrder,
+  type ColumnLayoutState,
+  EMPTY_COLUMN_LAYOUT,
+  type PinSide,
+  type UseColumnLayoutResult,
+} from "./columnLayoutModel";
+import {
   applyCollapsedColumnGroups,
   type ColumnGroupRecord,
   marriedOrderHolds,
 } from "./columnTree";
 import { FALLBACK_PIN_WIDTH, parsePxWidth } from "./columnWidths";
 import { toggleCollapsedColumnGroup } from "./headerGroups";
-import {
-  applyColumnOrder,
-  EMPTY_COLUMN_LAYOUT,
-  type ColumnLayoutState,
-  type PinSide,
-  type UseColumnLayoutResult,
-} from "./columnLayoutModel";
 
 export type {
   ColumnLayoutState,
   PinLeads,
+  PinnedCellStyle,
   PinOffset,
   PinSide,
-  PinnedCellStyle,
   UseColumnLayoutResult,
 } from "./columnLayoutModel";
 export {

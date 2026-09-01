@@ -35,8 +35,6 @@ import { memo, useMemo } from "react";
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 import { type SharedProps } from "./DesktopTable";
-import { cellDisplay } from "./DisplayCell";
-import { RowActionButtons } from "./RowActionButtons";
 import {
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -45,6 +43,7 @@ import {
   OptionalRowReorderButtons,
   OptionalTreeToggle,
 } from "./featureSlots";
+import { RowActionButtons } from "./RowActionButtons";
 
 /** Per-card inputs for the memoized {@link MobileCardBase}. */
 interface MobileCardProps<TRow> {
@@ -200,6 +199,9 @@ function MobileCardBase<TRow>({
     label: resolveMobileLabel(column),
     value: (
       <OptionalEditableCell
+        // Built inside the map, so it needs its own key: React reads these
+        // as a list even though a card renders them one at a time.
+        key={column.key}
         editing={editing}
         row={row}
         column={column}
@@ -210,7 +212,6 @@ function MobileCardBase<TRow>({
         rowKey={getRowId}
         editLabel={labels.editCell}
         undoLabel={labels.undoEdit}
-        display={cellDisplay(column, row, index)}
       />
     ),
   }));
@@ -496,7 +497,7 @@ export function MobileCards<TRow>({
                 <li key={entry.key} style={{ display: "block" }}>
                   <OptionalGroupHeaderCard
                     entry={entry}
-                    columns={columns as never}
+                    columns={columns}
                     selection={selection}
                     labels={labels}
                     compact={false}

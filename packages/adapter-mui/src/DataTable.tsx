@@ -6,8 +6,8 @@ import {
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
-  CONTEXT_MENU_LIVE,
   type ContextMenuLiveSlotProps,
+  DataTableShellView,
   FeatureHostProvider,
   FeatureProviders,
   FeatureSlot,
@@ -23,14 +23,11 @@ import {
   SIDE_PANEL,
   STATUS_BAR,
   TableStatusAnnouncer,
-  DataTableShellView,
   useDataTableShell,
-  useFeatureSlotFilled,
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
 } from "@adapttable/core/adapter";
-import { OptionalSidePanel } from "./featureRoot";
 import {
   Box,
   Button,
@@ -47,21 +44,8 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
+import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { DataTableProps } from "./types";
-
-function ContextMenuLiveGate({
-  props,
-  children,
-}: {
-  readonly props: Omit<ContextMenuLiveSlotProps<never>, "children">;
-  readonly children: (regionProps: Record<string, unknown>) => ReactNode;
-}): ReactNode {
-  const filled = useFeatureSlotFilled(CONTEXT_MENU_LIVE);
-  if (!filled) return children({});
-  return (
-    <FeatureSlot slot={CONTEXT_MENU_LIVE} props={{ ...props, children }} />
-  );
-}
 
 function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
   if (children == null) return null;
@@ -121,7 +105,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   });
   const {
     chrome: c,
-    table,
     labels,
     filtersNode,
     filtersOpen,

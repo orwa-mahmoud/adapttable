@@ -1,8 +1,8 @@
 import {
   extendFeature,
   GROUP_HEADER_CARD,
-  type GroupHeaderCardSlotProps,
   GROUP_HEADER_ROW,
+  type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
   slotRender,
   type TableFeature,
@@ -12,7 +12,7 @@ import { grouping as core, type GroupSort } from "@adapttable/core/features";
 import { useClassNames } from "./components/classNamesContext";
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 
-function GroupRowSlot(props: GroupHeaderRowSlotProps<never>) {
+function GroupRowSlot(props: Readonly<GroupHeaderRowSlotProps<never>>) {
   const classNames = useClassNames();
   return <GroupHeaderRow<never> {...props} classNames={classNames} />;
 }
@@ -20,7 +20,7 @@ function GroupRowSlot(props: GroupHeaderRowSlotProps<never>) {
 function GroupCardSlot({
   compact: _compact,
   ...props
-}: GroupHeaderCardSlotProps<never>) {
+}: Readonly<GroupHeaderCardSlotProps<never>>) {
   const classNames = useClassNames();
   return <GroupHeaderCard<never> {...props} classNames={classNames} />;
 }

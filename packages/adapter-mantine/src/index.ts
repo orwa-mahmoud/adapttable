@@ -181,4 +181,7 @@ export {
   type UseServerDataOptions,
   type UseTableDataOptions,
 } from "@adapttable/core";
-export { type DataModeProps } from "@adapttable/core/adapter";
+export {
+  type DataModeProps,
+  type TableQueryHandler,
+} from "@adapttable/core/adapter";

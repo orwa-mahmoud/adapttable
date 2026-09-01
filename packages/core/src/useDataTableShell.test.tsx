@@ -3,8 +3,10 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTableShellView } from "./features/chromeBodyGate";
-import { columnMenu, resizableColumns } from "./features/factories";
+import { editing } from "./features/editing";
+import { columnMenu, resizableColumns, savedViews } from "./features/factories";
 import { filters } from "./features/filters";
+import { grouping } from "./features/grouping";
 import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
@@ -16,12 +18,12 @@ import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef, RowAction } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
 import {
+  type DataTableShellResult,
   finishDataTableShell,
   useDataTableShell,
-  type DataTableShellResult,
 } from "./useDataTableShell";
-import type { ChromeBodyData } from "./virtual/chromeBodyShared";
 import { resetDevWarnings } from "./utils/devWarn";
+import type { ChromeBodyData } from "./virtual/chromeBodyShared";
 
 interface Row {
   id: string;
@@ -39,7 +41,12 @@ const noForm = () => null;
 
 function renderLiveShell(
   features: readonly TableFeature<Row>[],
-  extra: Partial<Parameters<typeof useDataTableShell<Row>>[0]> = {},
+  // The helper always supplies `data`, so it builds a FRONTEND table. Leaving
+  // `mode` settable made `extra` a Partial of the whole tier union, and the
+  // leaked `"server"` then failed to satisfy the frontend arm it always is.
+  extra: Partial<
+    Omit<Parameters<typeof useDataTableShell<Row>>[0], "mode">
+  > = {},
   renderForm: (
     defs: readonly FilterDef<Row>[],
     source: never,
@@ -54,13 +61,31 @@ function renderLiveShell(
     urlSync: false,
     ...extra,
   });
+  return renderShellWith(props, renderForm);
+}
+
+/**
+ * Mount a shell from already-applied props and keep the finished view.
+ *
+ * One helper for every case here: the providers have to wrap the component
+ * that calls the shell, and the view only exists once the gates below it have
+ * run, so capturing it from the render prop is the only way to read it.
+ */
+function renderShellWith(
+  props: object,
+  renderForm: (
+    defs: readonly FilterDef<Row>[],
+    source: never,
+    registry: never
+  ) => ReactNode = noForm
+) {
   let view: DataTableShellResult<Row> | undefined;
   function Probe() {
-    const shell = useDataTableShell(props, renderForm as never);
+    const shell = useDataTableShell(props as never, renderForm as never);
     return (
       <DataTableShellView shell={shell}>
         {(next) => {
-          view = next;
+          view = next as DataTableShellResult<Row>;
           return null;
         }}
       </DataTableShellView>
@@ -206,25 +231,9 @@ describe("useDataTableShell", () => {
       urlAdapter: adapter,
       onPinnedRowIdsChange,
     });
-    let view: DataTableShellResult<Row> | undefined;
-    function Probe() {
-      const shell = useDataTableShell(props, noForm);
-      return (
-        <DataTableShellView shell={shell}>
-          {(next) => {
-            view = next;
-            return null;
-          }}
-        </DataTableShellView>
-      );
-    }
-    render(
-      <FeatureProviders props={props}>
-        <Probe />
-      </FeatureProviders>
-    );
+    const view = renderShellWith(props);
     act(() => {
-      view?.tableProps.rowPinning?.pin("a", "top");
+      view.current.tableProps.rowPinning?.pin("a", "top");
     });
     expect(onPinnedRowIdsChange).toHaveBeenCalledExactlyOnceWith({
       top: ["a"],
@@ -250,25 +259,9 @@ describe("useDataTableShell", () => {
       pinnedRowIds: { top: ["b"], bottom: [] },
       onPinnedRowIdsChange,
     });
-    let view: DataTableShellResult<Row> | undefined;
-    function Probe() {
-      const shell = useDataTableShell(props, noForm);
-      return (
-        <DataTableShellView shell={shell}>
-          {(next) => {
-            view = next;
-            return null;
-          }}
-        </DataTableShellView>
-      );
-    }
-    render(
-      <FeatureProviders props={props}>
-        <Probe />
-      </FeatureProviders>
-    );
+    const view = renderShellWith(props);
     act(() => {
-      view?.tableProps.rowPinning?.pin("a", "bottom");
+      view.current.tableProps.rowPinning?.pin("a", "bottom");
     });
     expect(onPinnedRowIdsChange).toHaveBeenCalledExactlyOnceWith({
       top: ["b"],
@@ -496,29 +489,13 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes every rendered column to its content", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu()],
+      features: [columnMenu<Row>()],
       data: ROWS,
       columns,
       rowKey,
       onColumnLayoutChange,
     });
-    let view: DataTableShellResult<Row> | undefined;
-    function Probe() {
-      const shell = useDataTableShell(props, noForm);
-      return (
-        <DataTableShellView shell={shell}>
-          {(next) => {
-            view = next;
-            return null;
-          }}
-        </DataTableShellView>
-      );
-    }
-    render(
-      <FeatureProviders props={props}>
-        <Probe />
-      </FeatureProviders>
-    );
+    const view = renderShellWith(props);
     // A root with one measurable cell per column is all the action needs.
     const root = document.createElement("div");
     const cell = document.createElement("div");
@@ -526,9 +503,9 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
     Object.defineProperty(cell, "scrollWidth", { value: 200 });
     root.append(cell);
     document.body.append(root);
-    view!.rootRef.current = root;
+    view.current.rootRef.current = root;
 
-    act(() => view!.autoSizeColumns());
+    act(() => view.current.autoSizeColumns());
     expect(onColumnLayoutChange).toHaveBeenCalledOnce();
     expect(onColumnLayoutChange.mock.calls[0]?.[0].widths).toMatchObject({
       name: 224,
@@ -539,37 +516,37 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes nothing when there is nothing rendered to measure", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu()],
+      features: [columnMenu<Row>()],
       data: ROWS,
       columns,
       rowKey,
       onColumnLayoutChange,
     });
-    let view: DataTableShellResult<Row> | undefined;
-    function Probe() {
-      const shell = useDataTableShell(props, noForm);
-      return (
-        <DataTableShellView shell={shell}>
-          {(next) => {
-            view = next;
-            return null;
-          }}
-        </DataTableShellView>
-      );
-    }
-    render(
-      <FeatureProviders props={props}>
-        <Probe />
-      </FeatureProviders>
-    );
-    act(() => view!.autoSizeColumns());
+    const view = renderShellWith(props);
+    act(() => view.current.autoSizeColumns());
+    expect(onColumnLayoutChange).not.toHaveBeenCalled();
+  });
+
+  it("sizes nothing at all without a layout-owning feature", () => {
+    // Column sizing writes to layout state, and that state only exists once a
+    // feature owns it. The buttons are still wired — an adapter cannot know
+    // which table it is on — so both actions have to be inert, not absent.
+    const onColumnLayoutChange = vi.fn();
+    const view = renderLiveShell([], { onColumnLayoutChange });
+
+    expect(view.current.autoSizeColumns).toBeTypeOf("function");
+    expect(view.current.autoSizeColumn).toBeTypeOf("function");
+    act(() => {
+      view.current.autoSizeColumns();
+      view.current.autoSizeColumn("name");
+    });
     expect(onColumnLayoutChange).not.toHaveBeenCalled();
   });
 
   it("sizes one named column and windows when virtualizeColumns is on", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu()],
+      features: [columnMenu<Row>()],
       data: ROWS,
       columns,
       rowKey,
@@ -580,42 +557,100 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
       columnLayout: {
         hidden: [],
         order: [],
-        pinned: { name: "start" },
+        pinned: { name: "start" as const },
         widths: {},
       },
     });
-    let view: DataTableShellResult<Row> | undefined;
-    function Probe() {
-      const shell = useDataTableShell(props, noForm);
-      return (
-        <DataTableShellView shell={shell}>
-          {(next) => {
-            view = next;
-            return null;
-          }}
-        </DataTableShellView>
-      );
-    }
-    render(
-      <FeatureProviders props={props}>
-        <Probe />
-      </FeatureProviders>
-    );
-    expect(view!.tableProps.closeHeaderFilterOnSelect).toBe(true);
+    const view = renderShellWith(props);
+    expect(view.current.tableProps.closeHeaderFilterOnSelect).toBe(true);
     const root = document.createElement("div");
     const cell = document.createElement("div");
     cell.setAttribute("data-column-key", "name");
     Object.defineProperty(cell, "scrollWidth", { value: 200 });
     root.append(cell);
     document.body.append(root);
-    view!.rootRef.current = root;
+    view.current.rootRef.current = root;
     act(() => {
-      view!.autoSizeColumn("name");
+      view.current.autoSizeColumn("name");
     });
     expect(onColumnLayoutChange).toHaveBeenCalledOnce();
     const box = document.createElement("div");
-    view!.tableProps.virtualScrollRef(box);
-    expect(view!.tableProps.columnWindow.enabled).toBe(false);
+    view.current.tableProps.virtualScrollRef(box);
+    expect(view.current.tableProps.columnWindow.enabled).toBe(false);
     root.remove();
+  });
+});
+
+/**
+ * The row universe an editable cell resolves its commit against.
+ *
+ * A grouped body renders the FULL filtered set, not a page of it, so a cell in
+ * any row past page one must still find its row when the reader presses Enter.
+ * The shell captures this before the gates run, from base chrome — where it is
+ * the page slice — so the overlay has to refresh it. When it did not, every
+ * off-page row took an edit, closed the editor and threw it away in silence.
+ */
+describe("the editing row universe survives the gates", () => {
+  it("hands editable cells the whole grouped set, not the page slice", () => {
+    const many: Row[] = Array.from({ length: 12 }, (_, i) => ({
+      id: String(i),
+      name: `Person ${i}`,
+    }));
+    const props = applyTableFeatures({
+      features: [grouping<Row>("name"), editing<Row>(vi.fn())],
+      data: many,
+      columns,
+      rowKey,
+      urlSync: false,
+      paginationMode: "paged" as const,
+      defaults: { limit: 5 },
+    });
+    const view = renderShellWith(props);
+
+    // The page is five rows; the grouped body renders all twelve, so the
+    // cell context has to be all twelve too.
+    expect(view.current.chrome.source.rows).toHaveLength(many.length);
+    expect(view.current.tableProps.rows).toHaveLength(many.length);
+  });
+
+  it("is the page slice when nothing widened it", () => {
+    const props = applyTableFeatures({
+      features: [editing<Row>(vi.fn())],
+      data: ROWS,
+      columns,
+      rowKey,
+      urlSync: false,
+    });
+    const view = renderShellWith(props);
+
+    expect(view.current.tableProps.rows).toHaveLength(ROWS.length);
+  });
+});
+
+/**
+ * A saved view is the whole table state, columns included.
+ *
+ * Restoring one writes the layout params back, so the feature has to own the
+ * layout they land in — otherwise a view changes the search, the sort and the
+ * filters, and leaves the columns exactly as they were.
+ */
+describe("savedViews owns the column layout it restores", () => {
+  it("honours a declared default layout", () => {
+    const props = applyTableFeatures({
+      features: [savedViews<Row>({ storageKey: "shell-test", urlSync: false })],
+      data: ROWS,
+      columns: [
+        { key: "name", accessor: (r: Row) => r.name },
+        { key: "note", accessor: () => "" },
+      ],
+      rowKey,
+      urlSync: false,
+      defaultColumnLayout: { hidden: ["note"] },
+    });
+    const view = renderShellWith(props);
+
+    expect(
+      view.current.chrome.columnLayout.visibleColumns.map((c) => c.key)
+    ).toEqual(["name"]);
   });
 });

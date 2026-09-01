@@ -33,7 +33,6 @@ import { Fragment, useMemo } from "react";
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
 import { HAIRLINE, SURFACE } from "../surface";
-import { RowActionButtons } from "./RowActionButtons";
 import {
   OptionalColumnGroupToggle,
   OptionalColumnSelect,
@@ -46,7 +45,7 @@ import {
   OptionalRowReorderHandle,
   OptionalTreeCell,
 } from "./featureSlots";
-import { cellDisplay } from "./DisplayCell";
+import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
   kind,
@@ -440,7 +439,6 @@ function DesktopRowBase<TRow>(
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={cellDisplay(column, row, focusIndex)}
                 />
               </OptionalTreeCell>
               <OptionalFillHandle

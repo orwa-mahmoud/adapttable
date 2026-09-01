@@ -4,13 +4,13 @@
  * The mutation hook lives on this entry. A table that never imports it
  * never carries add / duplicate / delete.
  */
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import { ACTIONS_COLUMN_KEY } from "../columns/columnMenuModel";
 import { useRowMutations } from "../rows/rowMutations";
 import type { RowAction } from "../types";
 import { slotRender } from "./providers";
-import { ROW_ACTIONS_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, ROW_ACTIONS_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 function LiveRowActions({
@@ -37,12 +37,11 @@ function LiveRowActions({
   }, [actionsHidden, hasRowActions, hostRowActions, mutationActions]);
   const hasAnyActions = hasRowActions || chrome.rowPinning !== undefined;
   const pins = chrome.rowPinning?.actions ?? [];
-  const visible =
-    actionsHidden || !hasAnyActions
-      ? undefined
-      : pins.length === 0
-        ? rowActions
-        : [...(rowActions ?? []), ...pins];
+  // Pin entries ride the same trailing column as the host's row actions, so
+  // they are appended rather than given a column of their own.
+  const withPins =
+    pins.length === 0 ? rowActions : [...(rowActions ?? []), ...pins];
+  const visible = actionsHidden || !hasAnyActions ? undefined : withPins;
   return children({
     ...chrome,
     rowMutations,

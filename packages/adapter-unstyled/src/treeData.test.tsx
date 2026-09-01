@@ -2,8 +2,8 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Node {
   id: string;

@@ -13,14 +13,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { grouping } from "./features/grouping";
 import { FeatureProviders } from "./features/providers";
+import { rowPinning } from "./features/row-pinning";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
-import { useTableChrome, type TableChrome } from "./useTableChrome";
+import { type TableChrome, useTableChrome } from "./useTableChrome";
 import type { ChromeBodyData } from "./virtual/chromeBodyShared";
-import { useChromeBodyData } from "./virtual/useVirtualChromeBodyData";
+import { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
 
 function renderLiveBody<TRow>(
   features: readonly TableFeature<TRow>[],
@@ -42,7 +43,7 @@ function renderLiveBody<TRow>(
     chrome: TableChrome<TRow>;
     props: Parameters<typeof useTableChrome<TRow>>[0];
   }): ReactNode {
-    const body = useChromeBodyData(chrome, props);
+    const body = useVirtualChromeBodyData(chrome, props);
     box.current = { chrome, body };
     return null;
   }
@@ -109,7 +110,7 @@ function renderBody(maxHeight: number | undefined) {
       maxHeight,
     };
     const chrome = useTableChrome<Row>(props);
-    return useChromeBodyData(chrome, props);
+    return useVirtualChromeBodyData(chrome, props);
   });
 }
 
@@ -173,7 +174,7 @@ describe("box-virtual suppresses the page-level load-more affordances", () => {
   });
 });
 
-describe("useChromeBodyData with row grouping", () => {
+describe("useVirtualChromeBodyData with row grouping", () => {
   beforeEach(() => {
     vi.mocked(useWindowVirtualizer).mockReturnValue(
       IDLE as unknown as ReturnType<typeof useWindowVirtualizer>
@@ -233,7 +234,7 @@ describe("useChromeBodyData with row grouping", () => {
   });
 });
 
-describe("useChromeBodyData with tree data", () => {
+describe("useVirtualChromeBodyData with tree data", () => {
   beforeEach(() => {
     vi.mocked(useWindowVirtualizer).mockReturnValue(
       IDLE as unknown as ReturnType<typeof useWindowVirtualizer>
@@ -302,7 +303,7 @@ describe("useChromeBodyData with tree data", () => {
   });
 });
 
-describe("useChromeBodyData rowHeight estimate", () => {
+describe("useVirtualChromeBodyData rowHeight estimate", () => {
   beforeEach(() => {
     vi.mocked(useWindowVirtualizer).mockReturnValue(
       IDLE as unknown as ReturnType<typeof useWindowVirtualizer>
@@ -329,7 +330,7 @@ describe("useChromeBodyData rowHeight estimate", () => {
         rowHeight: (row: Row) => (row.id === "0" ? 80 : 40),
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
+      return useVirtualChromeBodyData(chrome, props);
     });
     const estimate = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
       .estimateSize;
@@ -355,7 +356,7 @@ describe("useChromeBodyData rowHeight estimate", () => {
         rowHeight: 48,
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
+      return useVirtualChromeBodyData(chrome, props);
     });
     const estimate = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
       .estimateSize;
@@ -416,7 +417,7 @@ describe("useChromeBodyData rowHeight estimate", () => {
         rowHeight: (row: Row) => (row.id === "1" ? 72 : 40),
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
+      return useVirtualChromeBodyData(chrome, props);
     });
     const estimate = vi.mocked(useWindowVirtualizer).mock.calls.at(-1)![0]
       .estimateSize;
@@ -426,7 +427,7 @@ describe("useChromeBodyData rowHeight estimate", () => {
   });
 });
 
-describe("useChromeBodyData mobile card measurement", () => {
+describe("useVirtualChromeBodyData mobile card measurement", () => {
   beforeEach(() => {
     vi.mocked(useWindowVirtualizer).mockReturnValue(
       IDLE as unknown as ReturnType<typeof useWindowVirtualizer>
@@ -457,7 +458,7 @@ describe("useChromeBodyData mobile card measurement", () => {
         renderRowDetail: () => "detail",
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
+      return useVirtualChromeBodyData(chrome, props);
     });
     // Cards nest the detail inside the card, so the card is the item.
     expect(result.current.virtualization.measureElement).toBe(
@@ -487,9 +488,63 @@ describe("useChromeBodyData mobile card measurement", () => {
         renderRowDetail: () => "detail",
       };
       const chrome = useTableChrome<Row>(props);
-      return useChromeBodyData(chrome, props);
+      return useVirtualChromeBodyData(chrome, props);
     });
     expect(result.current.virtualization.measureElement).toBeUndefined();
     expect(result.current.virtualization.measureRowPair).toBeDefined();
+  });
+});
+
+describe("useVirtualChromeBodyData with pinned rows", () => {
+  beforeEach(() => {
+    vi.mocked(useWindowVirtualizer).mockReturnValue(
+      IDLE as unknown as ReturnType<typeof useWindowVirtualizer>
+    );
+    vi.mocked(useVirtualizer).mockReturnValue(
+      IDLE as unknown as ReturnType<typeof useVirtualizer>
+    );
+  });
+
+  it("keeps each windowed row's place in the dataset when rows are pinned", () => {
+    // Pinning lifts a row out of its position, so the window index no longer
+    // says where the row came from. Anything that counts — striping, the
+    // announcer, a range export — needs the dataset index instead.
+    vi.mocked(useWindowVirtualizer).mockReturnValue({
+      getVirtualItems: () => [
+        { index: 0, start: 0, end: 48, key: "7" },
+        { index: 1, start: 48, end: 96, key: "3" },
+      ],
+      getTotalSize: () => 2880,
+      measureElement: vi.fn(),
+      options: { scrollMargin: 0 },
+    } as unknown as ReturnType<typeof useWindowVirtualizer>);
+
+    const adapter = createMemoryAdapter("");
+    const { result } = renderLiveBody(
+      [rowPinning<Row>({ pinnedRowIds: { top: ["7"], bottom: [] } })],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "infinite",
+        });
+        return {
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+          virtualize: true as const,
+        };
+      }
+    );
+
+    expect(result.current.chrome.rowPinning).toBeDefined();
+    const windowed = result.current.body.virtualization.rows;
+    expect(windowed.length).toBeGreaterThan(0);
+    // Each entry names where its row sits in the dataset, resolved from the
+    // row's own key rather than its position in the window.
+    for (const entry of windowed) {
+      expect(entry.sourceIndex).toBe(ROWS.findIndex((r) => r.id === entry.key));
+    }
   });
 });

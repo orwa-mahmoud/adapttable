@@ -4,46 +4,46 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
-  ExportAnnouncer,
-  FeatureHostProvider,
-  FeatureProviders,
-  fillSlot,
-  resolveStickyToolbar,
-  DataTableShellView,
-  TableStatusAnnouncer,
-  useDataTableShell,
-  useMountStagger,
-  useStickyToolbarLayout,
-  useTableFeatures,
   ACTIVE_FILTER_CHIPS,
   BATCH_EDIT_BAR,
   BULK_BAR,
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
+  DataTableShellView,
+  ExportAnnouncer,
+  FeatureHostProvider,
+  FeatureProviders,
   FeatureSlot,
+  fillSlot,
   FILTER_DRAWER,
   FILTER_POPOVER,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   FIND_BAR,
   GRID_FOCUS_ANNOUNCER,
+  resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
   SIDE_PANEL,
   STATUS_BAR,
+  TableStatusAnnouncer,
+  useDataTableShell,
+  useMountStagger,
+  useStickyToolbarLayout,
+  useTableFeatures,
 } from "@adapttable/core/adapter";
-import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { ReactElement, ReactNode, RefObject } from "react";
 
+import { ClassNamesProvider } from "./components/classNamesContext";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { FiltersIcon, SearchIcon } from "./components/icons";
 import { MobileCards } from "./components/MobileCards";
 import { Footer, RowsPerPageSelect } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
-import { ClassNamesProvider } from "./components/classNamesContext";
 import { cx } from "./cx";
+import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { DataTableClassNames, DataTableProps } from "./types";
 
 // A stable default: the memoized desktop rows compare `classNames` by
@@ -611,7 +611,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                   {chrome.editing?.batch && (
                     <FeatureSlot
                       slot={BATCH_EDIT_BAR}
-                      props={{ batch: chrome.editing!.batch, labels }}
+                      props={{ batch: chrome.editing.batch, labels }}
                     />
                   )}
 
@@ -644,7 +644,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                       commandPalette: props.commandPalette,
                       labels,
                       onPrint: props.onPrint,
-                      onExport: shell.toolbarProps.onExportCsv,
+                      onExport: view.toolbarProps.onExportCsv,
                       onClearFilters: chrome.clearFilters,
                       hasFilters: chrome.activeFilterCount > 0,
                       featureHost: shell.featureHost,
@@ -680,9 +680,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         <FeatureSlot
                           slot={SIDE_PANEL}
                           props={{
-                            panels: props.sidePanel!.panels,
-                            openPanel: props.sidePanel!.open,
-                            onOpenPanel: props.sidePanel!.onOpenChange,
+                            panels: props.sidePanel.panels,
+                            openPanel: props.sidePanel.open,
+                            onOpenPanel: props.sidePanel.onOpenChange,
                             onClose: () => {
                               props.sidePanel?.onOpenChange(null);
                             },

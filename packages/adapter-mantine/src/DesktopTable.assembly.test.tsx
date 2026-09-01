@@ -12,10 +12,10 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
 import { HAIRLINE, SURFACE } from "./surface";
+import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

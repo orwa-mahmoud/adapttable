@@ -11,19 +11,19 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { ExpandChevron } from "./components/ExpandToggle";
-import { muiColor } from "./components/DesktopTable";
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
-import { DataTable } from "./testDataTable";
-import type { ColumnDef } from "./index";
 import { cellNavigation } from "./cell-navigation";
 import { columnSelectionCheckbox } from "./column-selection";
+import { muiColor } from "./components/DesktopTable";
+import { ExpandChevron } from "./components/ExpandToggle";
+import { rowEditing } from "./editing";
 import { grouping } from "./grouping";
 import { headerFilters } from "./header-filters";
-import { rowEditing } from "./editing";
+import type { ColumnDef } from "./index";
 import { rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { rowReorder } from "./row-reorder";
+import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

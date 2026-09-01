@@ -4,8 +4,8 @@ import {
   slotRender,
   type TableFeature,
 } from "@adapttable/core/adapter";
-import { bulkActions as core } from "@adapttable/core/features";
 import type { BulkAction } from "@adapttable/core/features";
+import { bulkActions as core } from "@adapttable/core/features";
 
 import { BulkBar } from "./components/BulkActionBar";
 

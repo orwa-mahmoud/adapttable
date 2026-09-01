@@ -9,6 +9,7 @@ import type { EditHistoryState } from "../editing/editHistory";
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type { FindInTableState } from "../find/useFindInTable";
 import type { GridCell } from "../focus/gridFocus";
+import type { SelectionStats } from "../focus/selectionStats";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { FullscreenState } from "../layout/useFullscreen";
 import type { ColumnDef } from "../types";
@@ -99,6 +100,17 @@ export function windowedTableAria(options: {
     getColumnHeaderProps: (col) =>
       options.columnsWindowed ? { "aria-colindex": col + 1 } : {},
   };
+}
+
+/**
+ * Selection figures before {@link selectionStats} computes them.
+ *
+ * A function rather than a constant: `const x: SelectionStats | null = null`
+ * narrows to `null` at every use, which would type the shell's field as `null`
+ * and leave an adapter unable to read the figures the live slot overlays.
+ */
+export function disabledSelectionStats(): SelectionStats | null {
+  return null;
 }
 
 /** Export button state when {@link exportCsv} is not composed. */

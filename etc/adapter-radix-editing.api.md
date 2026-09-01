@@ -4,9 +4,29 @@
 
 ```ts
 
-import { editing } from '@adapttable/core/features';
+import { batchEditing as batchEditing_2 } from '@adapttable/core/features';
+import { FeaturePatch } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { editing }
+// @public (undocumented)
+export function batchEditing<TRow>(onBatchEdit: Parameters<typeof batchEditing_2<TRow>>[0]): TableFeature<TRow>;
+
+// @public (undocumented)
+export function dirtyIndicators<TRow>(): TableFeature<TRow>;
+
+// @public (undocumented)
+export function editHistory<TRow>(options?: boolean | {
+    depth?: number;
+}): TableFeature<TRow>;
+
+// @public (undocumented)
+export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
+
+// @public (undocumented)
+export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
+
+// @public (undocumented)
+export function undoRedoButtons<TRow>(): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

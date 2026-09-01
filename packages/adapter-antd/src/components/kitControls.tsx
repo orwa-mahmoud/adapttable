@@ -90,7 +90,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <Input
       size="small"
@@ -111,7 +111,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <Select
       size="small"
@@ -198,7 +198,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   return (
     <Dropdown
       trigger={["click"]}
@@ -323,7 +323,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <Input
       ref={focusRef}
@@ -374,7 +374,7 @@ function RowEditButton({
   part,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
   return (
     <Button
       type="default"
@@ -405,7 +405,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <Button
       type="default"
@@ -434,7 +434,7 @@ function TreeButton({
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <Button
       type="text"
@@ -486,7 +486,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <Button
       type="text"
@@ -547,7 +547,7 @@ function ReorderHandle({
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <Button
       type="text"
@@ -586,7 +586,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <Button
       type="text"
@@ -623,7 +623,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -650,7 +650,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <Button
       type="default"

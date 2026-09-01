@@ -15,11 +15,6 @@ import {
   columnsHaveFooter,
   resolveColumnHeader,
 } from "../columns/columnHeader";
-import type { ColumnResizeHandleProps } from "../columns/columnResize";
-import { fittedTableStyle } from "../columns/columnSizing";
-import { pinnedColumnWidth, tableMinWidth } from "../columns/columnWidths";
-import type { HtmlGroupedHeaderCell } from "../columns/headerGroups";
-import { htmlGroupedHeaderPlan } from "../columns/headerGroups";
 import {
   edgePinStyle,
   PIN_Z,
@@ -27,6 +22,11 @@ import {
   pinnedCellStyle,
   type PinOffset,
 } from "../columns/columnLayoutModel";
+import type { ColumnResizeHandleProps } from "../columns/columnResize";
+import { fittedTableStyle } from "../columns/columnSizing";
+import { pinnedColumnWidth, tableMinWidth } from "../columns/columnWidths";
+import type { HtmlGroupedHeaderCell } from "../columns/headerGroups";
+import { htmlGroupedHeaderPlan } from "../columns/headerGroups";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { FilterDef } from "../filters/filterDefs";
 import type { GridFocusState } from "../focus/useGridFocus";
@@ -41,9 +41,15 @@ import {
   useSummaryCells,
 } from "../tableRenderProps";
 import type { TreeEntry } from "../tree/treeRows";
+import type { ColumnDef, TableLabels } from "../types";
+import type {
+  CellElementProps,
+  SortButtonElementProps,
+  UseDataTableResult,
+} from "../useDataTable/useDataTable";
+import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import {
   type AssemblyFns,
-  REORDER_COLUMN_WIDTH,
   bodyCellsHaveRowSpan,
   bodyRowEntries,
   cellsForRow,
@@ -53,6 +59,7 @@ import {
   pinnedRowCellStyle,
   pinnedRowPart,
   pinnedRowSticky,
+  REORDER_COLUMN_WIDTH,
   resolveAssembly,
   resolveRowStyle,
   rowEditingSignature,
@@ -64,15 +71,8 @@ import {
   rowSpanSignature,
   rowStyleSignature,
 } from "./leanAssembly";
-import { useOffsetHeight } from "./useOffsetHeight";
-import type { ColumnDef, TableLabels } from "../types";
-import type {
-  CellElementProps,
-  SortButtonElementProps,
-  UseDataTableResult,
-} from "../useDataTable/useDataTable";
-import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import { useHorizontalOverflow } from "./useHorizontalOverflow";
+import { useOffsetHeight } from "./useOffsetHeight";
 
 export type {
   CellElementProps,

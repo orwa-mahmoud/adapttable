@@ -5,14 +5,16 @@ import {
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
-  bulkActions as core,
   type BulkAction,
+  bulkActions as core,
 } from "@adapttable/core/features";
-import { useClassNames } from "./components/classNamesContext";
 
 import { BulkBar } from "./components/BulkActionBar";
+import { useClassNames } from "./components/classNamesContext";
 
-function BulkSlot(props: Omit<Parameters<typeof BulkBar>[0], "classNames">) {
+function BulkSlot(
+  props: Readonly<Omit<Parameters<typeof BulkBar>[0], "classNames">>
+) {
   const classNames = useClassNames();
   return <BulkBar {...props} classNames={classNames} />;
 }

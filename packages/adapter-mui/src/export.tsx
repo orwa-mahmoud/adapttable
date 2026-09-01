@@ -11,6 +11,9 @@ import {
 
 import { ExportCsvButton } from "./components/toolbarExtras";
 
+// The options type travels with the factory, as it does on every other kit.
+export type { ExportCsvOptions };
+
 /**
  * CSV export of the current view, with MUI's own toolbar button.
  *

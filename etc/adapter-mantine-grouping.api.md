@@ -4,9 +4,14 @@
 
 ```ts
 
-import { grouping } from '@adapttable/core/features';
+import { grouping as grouping_2 } from '@adapttable/core/features';
+import { GroupSort } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
 
-export { grouping }
+// @public (undocumented)
+export function grouping<TRow>(groupBy: string | readonly string[], extras?: Parameters<typeof grouping_2<TRow>>[1]): TableFeature<TRow>;
+
+export { GroupSort }
 
 // (No @packageDocumentation comment for this package)
 

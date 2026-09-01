@@ -127,7 +127,9 @@ exports `DataTable<TRow>`. The props below are the shared core surface
 URL props (`urlSync`, `urlKey`, `urlAdapter`, `savedViews`) and the `data` /
 `onQueryChange` tiers live on the adapter components, not the core prop
 surface — see [Adapter extras](#adapter-extras) and
-[URL-synced state](./url-state.md).
+[URL-synced state](./url-state.md). The two tiers are typed as `DataModeProps`,
+and the server one's callback is `TableQueryHandler`: the consolidated query
+plus the `AbortSignal` for the request it starts.
 
 ### Callbacks
 
@@ -181,6 +183,44 @@ and it draws once), `FIND_BAR` (`findInTable` from
 fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
+
+Chrome asks for the rest of a kit's parts the same way, one slot per part.
+Around a cell: `EDITABLE_CELL` (`EditableCellSlotProps`, the editor and the
+dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`
+(`ExpandToggleSlotProps`), `TREE_CELL` and `TREE_TOGGLE`, `COLUMN_SELECT`,
+`COLUMN_GROUP_TOGGLE` and `FILTER_HEADER`. Around a row: `ROW_EDIT_ACTIONS`,
+`ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`,
+`GROUP_HEADER_ROW` (`GroupHeaderRowSlotProps`) and its mobile card
+`GROUP_HEADER_CARD` (`GroupHeaderCardSlotProps`). Around the table:
+`TOOLBAR_EXTRAS` (`ToolbarExtrasSlotProps` — undo/redo, export, print,
+density, fullscreen), `SAVED_VIEWS` (`SavedViewsSlotProps`),
+`GRID_FOCUS_ANNOUNCER`, the filter surfaces `FILTER_POPOVER` / `FILTER_DRAWER`
+(`FilterOverlaySlotProps`) with `FiltersFormSlotProps` and
+`ActiveFilterChipsSlotProps`, and `CHROME_BODY` (`ChromeBodySlotProps`), which
+`virtualize` fills with the windowed body a plain table never downloads —
+`ChromeBodyGate` is what asks for it, falling back to the plain body. A kit
+that assembles its own table body — antd renders through its own `<Table>` —
+asks `KEYED_WINDOW` (`KeyedWindowSlotProps`) for a window over a keyed list
+instead, so the virtualizer stays behind the same import there too.
+A kit dresses a core feature with its own parts through `extendFeature`.
+The heavy pieces of body assembly a feature can replace — cell spanning, extra
+rows, the resize handle — are typed as `AssemblyFns`, and `virtualize` takes
+`VirtualizeOptions`.
+
+A feature whose behaviour is a hook rather than a component fills a **live**
+slot instead: the hook mounts inside the table and hands its state back down,
+so a table that never imported the feature never carries it. Chrome-shaped
+state arrives through `ChromeExtrasGate` (`ChromeExtraSlotProps`) —
+`COLUMN_LAYOUT_LIVE`, `FILTER_CHIPS_LIVE`, `GROUPING_LIVE`, `TREE_LIVE`,
+`SELECTION_LIVE`, `ROW_ACTIONS_LIVE`, `PINNING_LIVE`, `EXPANSION_LIVE` and
+`EDITING_LIVE` — and interaction state through `HistoryLiveGate`
+(`EDIT_HISTORY_LIVE`, `EditHistoryLiveSlotProps`) and `ShellLiveGate`:
+`FIND_LIVE` (`FindLiveSlotProps`), `CELL_NAV_LIVE` (`CellNavLiveSlotProps`),
+`EXPORT_LIVE` (`ExportLiveSlotProps`), `FULLSCREEN_LIVE`
+(`FullscreenLiveSlotProps`), `SELECTION_STATS_LIVE`
+(`SelectionStatsLiveSlotProps`), `COMMAND_PALETTE_LIVE` and
+`CONTEXT_MENU_LIVE` (`ContextMenuLiveSlotProps`). An unfilled live slot passes
+an inert stand-in through, so the same chrome renders either way.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
@@ -348,6 +388,10 @@ Props beyond the core surface, with per-kit availability.
 | `accentColor`               | kit accent union (chakra: `string`)             | —              | chakra, radix, base-ui                       | Accent color for primary controls (buttons, badges, active page).                                                                                                                                                                                               |
 | `bordered`                  | `boolean`                                       | `false`        | antd                                         | Render the table with cell borders.                                                                                                                                                                                                                             |
 
+Mantine also publishes the spacing its density mapping uses, as
+`DENSITY_SPACING` (`DensitySpacing`) from `@adapttable/mantine/density`, so a
+host can match its own chrome to the table's rows.
+
 Each adapter also re-exports the core source builders and types, so one
 import path covers everything.
 
@@ -395,8 +439,19 @@ All from `@adapttable/core`.
 - `useTableChrome<TRow>(props): TableChrome<TRow>` — shared adapter
   orchestration: layout, confirm, chips, body region (`emptyVariant`,
   `isRefreshing`), `clearFilters`, footer.
-- `useChromeBodyData(chrome, props): ChromeBodyData<TRow>` — body data-flow
-  wiring: window virtualization + the infinite-scroll sentinel.
+- `useVirtualChromeBodyData(chrome, props): ChromeBodyData<TRow>` — body
+  data-flow wiring: window virtualization + the infinite-scroll sentinel.
+  `usePlainChromeBodyData` is the same shape without the virtualizer, for a
+  table that never composed `virtualize`; `VirtualItemMeta` is one windowed
+  entry and `virtualColumnSpan` is the span a windowed row's spacer cells
+  cover. `useChromeBodyData` is the former name of the virtual one and still
+  works.
+- `useDataTableShell(props, renderAutoForm): DataTableShellResult<TRow>` —
+  the whole adapter shell in one call: resolved tier, chrome, and the
+  `tableProps` / `toolbarProps` bundles a kit spreads. `DataTableShellView`
+  mounts the gates below it and hands back the finished view;
+  `finishDataTableShell` folds a body into a shell for an adapter that
+  assembles its own.
 - `useColumnLayout(options): UseColumnLayoutResult<TRow>` — headless
   visibility / order / pinning / width / collapsed-group state
   (`visibleColumns`, `toggleVisible`, `move`, `setPinned`, `setWidth`,

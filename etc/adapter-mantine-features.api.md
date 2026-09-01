@@ -55,6 +55,7 @@ import { nestedTable } from '@adapttable/core/features';
 import { NestedTableFor } from '@adapttable/core/features';
 import { print as print_2 } from '@adapttable/core/features';
 import { resizableColumns } from '@adapttable/core/features';
+import { rowActions } from '@adapttable/core/features';
 import { rowAppearance } from '@adapttable/core/features';
 import { rowDetail } from '@adapttable/core/features';
 import { rowEditing } from '@adapttable/core/features';
@@ -179,6 +180,8 @@ export { NestedTableFor }
 export { print_2 as print }
 
 export { resizableColumns }
+
+export { rowActions }
 
 export { rowAppearance }
 

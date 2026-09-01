@@ -1,6 +1,15 @@
-import type { SavedView } from "@adapttable/core";
+import { savedViews as antdSavedViews } from "@adapttable/antd/saved-views";
+import { savedViews as baseUiSavedViews } from "@adapttable/base-ui/saved-views";
+import { savedViews as chakraSavedViews } from "@adapttable/chakra/saved-views";
+import type { SavedView, UseSavedViewsOptions } from "@adapttable/core";
 import { createMemoryAdapter, useSavedViews } from "@adapttable/core";
+import type { TableFeature } from "@adapttable/core/features";
 import { getLabels } from "@adapttable/i18n";
+import { savedViews as mantineSavedViews } from "@adapttable/mantine/saved-views";
+import { savedViews as muiSavedViews } from "@adapttable/mui/saved-views";
+import { savedViews as radixSavedViews } from "@adapttable/radix/saved-views";
+import { savedViews as shadcnSavedViews } from "@adapttable/shadcn/saved-views";
+import { savedViews as unstyledSavedViews } from "@adapttable/unstyled/saved-views";
 import { Suspense, useMemo, useState } from "react";
 
 import { layoutFor, rosterFor } from "./casts";
@@ -49,6 +58,37 @@ function useDemoStorage() {
 }
 
 /**
+ * `kit`'s saved-views feature, by kit key.
+ *
+ * The views menu is drawn by the adapter, and the feature is also what owns
+ * user column layout — so without this import the page shows neither the menu
+ * nor the layout its `defaultColumnLayout` asks for. Imported here rather than
+ * in the shared kit registry so the eight modules load with this page alone.
+ */
+const SAVED_VIEWS_FEATURES: Record<
+  string,
+  (options: UseSavedViewsOptions) => TableFeature<never>
+> = {
+  mantine: mantineSavedViews,
+  mui: muiSavedViews,
+  chakra: chakraSavedViews,
+  antd: antdSavedViews,
+  radix: radixSavedViews,
+  "base-ui": baseUiSavedViews,
+  shadcn: shadcnSavedViews,
+  tailwind: unstyledSavedViews,
+};
+
+/** `kit`'s saved-views feature, falling back to Mantine's. */
+function kitSavedViewsFeature(
+  kit: string,
+  options: UseSavedViewsOptions
+): TableFeature<Person> {
+  const make = SAVED_VIEWS_FEATURES[kit] ?? mantineSavedViews;
+  return make(options) as TableFeature<Person>;
+}
+
+/**
  * The saved-views page: a table, the views menu, and the management panel — in
  * whichever kit the reader picks, because a management panel is as much a kit's
  * own component as the table beside it. Only view controls: the point of the
@@ -80,6 +120,12 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   });
   const SavedViewsPanel = kitSavedViewsPanel(adapter);
   const Table = kitTable<Person>(adapter);
+  const savedViewsOptions = {
+    storageKey: "showcase-views",
+    storage,
+    urlAdapter: session,
+    urlKey: "sv",
+  };
   // The panel and the table take the same map: this page mounts both directly,
   // so the Tailwind tab's look has to come from here.
   const classNames = kitClassNames(adapter);
@@ -125,12 +171,10 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 urlKey="sv"
                 urlAdapter={session}
                 defaultColumnLayout={layoutFor("saved-views")}
-                savedViews={{
-                  storageKey: "showcase-views",
-                  storage,
-                  urlAdapter: session,
-                  urlKey: "sv",
-                }}
+                // The views menu and the column layout both come with this
+                // import: the props alone draw neither.
+                features={[kitSavedViewsFeature(adapter, savedViewsOptions)]}
+                savedViews={savedViewsOptions}
                 labels={getLabels("en")}
                 classNames={classNames}
               />

@@ -23,8 +23,8 @@ import { useMountStagger } from "./animation/useMountStagger";
 import { ColumnMenu } from "./components/ColumnMenu";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { PaginationFooter } from "./components/PaginationFooter";
-import { DataTable } from "./testDataTable";
 import { defaultLabels } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

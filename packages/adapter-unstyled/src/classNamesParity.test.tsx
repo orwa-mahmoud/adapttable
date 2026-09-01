@@ -14,13 +14,13 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterHeaderRow } from "./components/kitControls";
-import { DataTable } from "./testDataTable";
 import {
   type ColumnDef,
   type DataTableClassNames,
   defaultLabels,
 } from "./index";
 import { rowReorder } from "./row-reorder";
+import { DataTable } from "./testDataTable";
 
 vi.mock("@adapttable/core/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();

@@ -9,9 +9,9 @@ import {
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
+  type FilterDef,
   filters as coreFilters,
   filterTypes as coreFilterTypes,
-  type FilterDef,
   type FilterTypeSpec,
 } from "@adapttable/core/features";
 import { Stack } from "@mui/material";

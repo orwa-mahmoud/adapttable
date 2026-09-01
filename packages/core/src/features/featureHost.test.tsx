@@ -21,6 +21,7 @@ import { defaultLabels } from "../labels";
 import { pivot } from "../pivot/pivotModel";
 import {
   applyFilterExtends,
+  bindFeatureHostFn,
   currentFeatureHost,
   type FeatureHostState,
   runWithFeatureHost,
@@ -718,5 +719,37 @@ describe("a table owns its feature host", () => {
     assertOwned(bothHosts(hosts));
     expect(screen.getByTestId("outer-host").textContent).toBe("outer");
     expect(screen.getByTestId("inner-host").textContent).toBe("inner");
+  });
+});
+
+/**
+ * A mapper the host wrote outside the table — an `aggregate()` or a
+ * `summaryRow` — still has to resolve names against the table that invokes it,
+ * and it is invoked long after render. Binding is how it finds its own host
+ * instead of whichever table rendered last.
+ */
+describe("bindFeatureHostFn", () => {
+  const host = {
+    commands: [{ key: "only-mine" }],
+  } as unknown as FeatureHostState;
+
+  it("gives the callback its own host on every call, then clears it", () => {
+    const seen: (string | undefined)[] = [];
+    const bound = bindFeatureHostFn(host, (suffix: string) => {
+      seen.push(
+        (currentFeatureHost()?.commands[0]?.key ?? "none") + ":" + suffix
+      );
+      return suffix.length;
+    });
+
+    expect(bound?.("first")).toBe(5);
+    expect(bound?.("second")).toBe(6);
+    expect(seen).toEqual(["only-mine:first", "only-mine:second"]);
+    // The binding is scoped to the call, so nothing leaks to the next click.
+    expect(currentFeatureHost()).toBeUndefined();
+  });
+
+  it("leaves an absent callback absent rather than wrapping nothing", () => {
+    expect(bindFeatureHostFn(host, undefined)).toBeUndefined();
   });
 });

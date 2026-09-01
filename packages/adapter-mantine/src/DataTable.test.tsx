@@ -17,8 +17,8 @@ import {
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -47,7 +47,7 @@ interface HarnessProps {
   override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }
 
-function Harness(props: HarnessProps) {
+function Harness(props: Readonly<HarnessProps>) {
   const source = useFrontendData<Row>({
     data: props.rows ?? ROWS,
     urlAdapter: harnessAdapter,

@@ -8,9 +8,9 @@
 import type { ReactNode } from "react";
 
 import { asGesture } from "../editing/editHistory";
+import { useFindFocus } from "../find/useFindInTable";
 import type { CellEdit } from "../focus/cellEdits";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
-import { useFindFocus } from "../find/useFindInTable";
 import { cellFillHandler, cellPasteHandler } from "../focus/pasteRange";
 import { useGridFocus } from "../focus/useGridFocus";
 import { coveredAddressSet } from "../rows/cellSpan";

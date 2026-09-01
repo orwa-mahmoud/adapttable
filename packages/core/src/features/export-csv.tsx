@@ -7,9 +7,9 @@
  */
 import type { ReactNode } from "react";
 
+import type { ExportCsvOptions } from "../export/tableCsv";
 import { makeExportCsvHandler, resolveExportCsv } from "../export/tableCsv";
 import { useExportHandler } from "../export/useExportHandler";
-import type { ExportCsvOptions } from "../export/tableCsv";
 import { slotRender } from "./providers";
 import { EXPORT_LIVE, type ExportLiveSlotProps } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";

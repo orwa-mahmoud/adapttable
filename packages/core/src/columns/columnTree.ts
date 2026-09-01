@@ -271,9 +271,10 @@ function appendCollapsedChrome<TRow>(
     }
     const record = pass.groups.get(id);
     const path = id.split(COLUMN_GROUP_ID_SEP);
+    const render = record?.collapsedRender;
     pass.out.push(
-      record?.collapsedRender
-        ? renderColumn(id, path, record, index)
+      render
+        ? renderColumn(id, path, index, render, record?.headerTooltip)
         : stubColumn(id, path, record, index)
     );
     pass.inserted.add(id);
@@ -353,19 +354,20 @@ function stubColumn<TRow>(
   };
 }
 
+/** The summary column a collapsed group shows. Only built with a renderer. */
 function renderColumn<TRow>(
   id: string,
   path: readonly string[],
-  record: ColumnGroupRecord<TRow>,
-  index: number
+  index: number,
+  render: (row: TRow) => ReactNode,
+  headerTooltip: string | undefined
 ): ColumnDef<TRow> {
-  const render = record.collapsedRender;
   return {
     key: `${COLUMN_GROUP_RENDER_PREFIX}${id}:${String(index)}`,
     header: "",
-    headerTooltip: record.headerTooltip,
+    headerTooltip,
     width: 180,
-    accessor: render ? (row) => render(row) : () => null,
+    accessor: (row) => render(row),
     group: path.length === 1 ? path[0] : path,
     sortable: false,
   };

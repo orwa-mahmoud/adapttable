@@ -3,8 +3,8 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;
@@ -31,7 +31,7 @@ interface HarnessProps {
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
-function Harness(props: HarnessProps) {
+function Harness(props: Readonly<HarnessProps>) {
   const source = useFrontendData<Row>({
     data: ROWS,
     urlAdapter: adapter,

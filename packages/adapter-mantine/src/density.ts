@@ -1,5 +1,8 @@
 import type { MantineSpacing } from "@mantine/core";
 
+// The density feature, on the same entry every other kit publishes it from.
+export { densityChooser } from "@adapttable/core/features";
+
 /** Row density — independent of column pinning. */
 export type Density = "comfortable" | "compact";
 

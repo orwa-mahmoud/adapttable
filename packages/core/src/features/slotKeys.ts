@@ -6,56 +6,58 @@
  * the row-reorder state key away from the reorder hook. This module holds ids
  * and types only; nothing here has a runtime cost worth measuring.
  */
+import type { ReactNode } from "react";
+
 import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
 import type { UseCommandPaletteOptions } from "../actions/useCommandPalette";
 import type { TableContextMenuOptions } from "../actions/useTableContextMenu";
 import type { ColumnGroupToggleProps } from "../columns/ColumnGroupToggle";
 import type { ColumnMenuSlotProps } from "../columns/columnMenuModel";
-import type { ColumnSelectCheckboxChromeProps } from "../focus/ColumnSelectCheckbox";
-import type { CellRange } from "../focus/cellRange";
-import type { SelectionStats } from "../focus/selectionStats";
 import type { PinOffset } from "../columns/useColumnLayout";
-import type { EditHistoryState } from "../editing/editHistory";
 import type { EditableCellEditing } from "../editing/editableCellController";
+import type { EditHistoryState } from "../editing/editHistory";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,
 } from "../editing/RowEditGate";
-import type { FeatureHostState } from "../features/currentHost";
 import type { ExportContext, ExportCsvOptions } from "../export/tableCsv";
 import type { ExportHandlerState } from "../export/useExportHandler";
-import type { TableSource } from "../source/TableSource";
-import type { FilterHeaderControlProps } from "../filters/FilterHeaderRow";
+import type { FeatureHostState } from "../features/currentHost";
 import type { FiltersFormSlotProps } from "../filters/filterForm";
+import type { FilterHeaderControlProps } from "../filters/FilterHeaderRow";
 import type { ActiveFilterChipsSlotProps } from "../filters/useActiveFilterChips";
-import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { FindBarProps } from "../find/FindBar";
 import type {
   FindInTableState,
   UseFindInTableOptions,
 } from "../find/useFindInTable";
+import type { CellRange } from "../focus/cellRange";
+import type { ColumnSelectCheckboxChromeProps } from "../focus/ColumnSelectCheckbox";
+import type { SelectionStats } from "../focus/selectionStats";
+import type { StatusBarChromeProps } from "../focus/StatusBarChrome";
 import type {
   GridFocusState,
   UseGridFocusOptions,
 } from "../focus/useGridFocus";
-import type { StatusBarChromeProps } from "../focus/StatusBarChrome";
-import type { FullscreenState } from "../layout/useFullscreen";
+import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
+import type { FullscreenState } from "../layout/useFullscreen";
 import type { BaseDataTableProps } from "../props";
 import type {
   RowReorderButtonsProps,
   RowReorderHandleProps,
 } from "../rows/RowReorderHandle";
 import type { SelectionState } from "../selection/useSelection";
+import type { TableSource } from "../source/TableSource";
 import type { TreeCellProps } from "../tree/TreeCell";
 import type { TreeToggleProps } from "../tree/TreeToggle";
 import type { ColumnDef, Direction, TableLabels } from "../types";
-import type { ReactNode } from "react";
 import type { UrlStateAdapter } from "../url/adapter";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import type { BulkBarChromeProps, TableChrome } from "../useTableChrome";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
+import type { KeyedVirtualization } from "../virtual/useTableVirtualization";
 import { featureSlotKey } from "./providers";
 
 /**
@@ -195,6 +197,39 @@ export interface ChromeBodySlotProps<TRow = never> {
  */
 export const CHROME_BODY = featureSlotKey<ChromeBodySlotProps<never>>(
   "chrome-body",
+  { single: true }
+);
+
+/**
+ * A window over an opaque keyed list, for a kit that assembles its own body.
+ *
+ * antd renders through its own `<Table>`, so it cannot take {@link CHROME_BODY}
+ * — but it still has a grouped flat list to window, and windowing it means the
+ * TanStack hooks. Asking for them here keeps them where every other kit keeps
+ * them: behind {@link virtualize}, out of the plain table's graph.
+ *
+ * @public
+ */
+export interface KeyedWindowSlotProps {
+  /** One key per entry, in render order. */
+  keys: readonly string[];
+  /** Whether to window at all; false renders every entry. */
+  enabled: boolean;
+  /** Estimated pixel height of one entry. */
+  estimateSize: number;
+  /** Extra entries to render beyond the viewport. */
+  overscan?: number;
+  /** Where the list starts in the page, for a window-scrolled list. */
+  scrollMargin?: number;
+  /** The scroll box, when the list scrolls inside one rather than the page. */
+  getScrollElement?: () => Element | null;
+  /** Finish with the window this slot produced. */
+  children: (window: KeyedVirtualization) => ReactNode;
+}
+
+/** The keyed window a kit that builds its own body asks for. */
+export const KEYED_WINDOW = featureSlotKey<KeyedWindowSlotProps>(
+  "keyed-window",
   { single: true }
 );
 
@@ -560,9 +595,10 @@ export interface EditableCellSlotProps<TRow = never> {
   editLabel: string;
   undoLabel?: string;
   /**
-   * Precomputed display. Callers must compute this in the row so a
-   * memoized row still re-invokes accessors when selection or expansion
-   * changes. Empty means the slot renderer reads the column itself.
+   * The cell's display content, computed by the adapter's cell wrapper so the
+   * accessor call sits in that cell's own memo scope — re-rendering a row for
+   * selection or expansion must not re-run its data accessors. Empty means the
+   * slot renderer reads the column itself.
    */
   display?: ReactNode;
 }

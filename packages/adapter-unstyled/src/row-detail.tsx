@@ -1,3 +1,4 @@
+import type { TableLabels } from "@adapttable/core";
 import {
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
@@ -7,14 +8,14 @@ import {
 } from "@adapttable/core/adapter";
 import {
   nestedTable as coreNested,
-  rowDetail as coreDetail,
   type NestedTableFor,
+  rowDetail as coreDetail,
 } from "@adapttable/core/features";
-import type { TableLabels } from "@adapttable/core";
+
 import { useClassNames } from "./components/classNamesContext";
 import { ExpandButton } from "./components/ExpandToggle";
 
-function ExpandSlot(props: ExpandToggleSlotProps) {
+function ExpandSlot(props: Readonly<ExpandToggleSlotProps>) {
   const classNames = useClassNames();
   return (
     <ExpandButton

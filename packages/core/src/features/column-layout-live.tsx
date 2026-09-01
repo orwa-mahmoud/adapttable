@@ -5,13 +5,13 @@
  * This entry mounts {@link useColumnLayout} when a layout-owning feature
  * is composed.
  */
-import { useCallback, type ReactNode } from "react";
+import { type ReactNode, useCallback } from "react";
 
 import { autoSizeColumns as autoSizeAllColumns } from "../columns/autoSizeColumns";
 import { flattenColumnTree } from "../columns/columnTree";
 import { useColumnLayout } from "../columns/useColumnLayout";
 import { slotRender } from "./providers";
-import { COLUMN_LAYOUT_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, COLUMN_LAYOUT_LIVE } from "./slotKeys";
 
 function LiveColumnLayout({
   chrome,

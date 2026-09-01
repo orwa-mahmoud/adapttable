@@ -31,8 +31,6 @@ import { useMemo } from "react";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
-import { cellDisplay } from "./DisplayCell";
-import { RowActionButtons } from "./RowActionButtons";
 import {
   OptionalColumnGroupToggle,
   OptionalColumnSelect,
@@ -45,6 +43,7 @@ import {
   OptionalRowReorderHandle,
   OptionalTreeCell,
 } from "./featureSlots";
+import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
   kind,
@@ -307,7 +306,6 @@ function DesktopRowBase<TRow>(
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={cellDisplay(column, row, focusIndex)}
                 />
               </OptionalTreeCell>
               <OptionalFillHandle

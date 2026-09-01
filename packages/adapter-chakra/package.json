@@ -74,6 +74,16 @@
         "default": "./dist/row-pinning.cjs"
       }
     },
+    "./batch-editing": {
+      "import": {
+        "types": "./dist/batch-editing.d.ts",
+        "default": "./dist/batch-editing.js"
+      },
+      "require": {
+        "types": "./dist/batch-editing.d.cts",
+        "default": "./dist/batch-editing.cjs"
+      }
+    },
     "./cell-span": {
       "import": {
         "types": "./dist/cell-span.d.ts",

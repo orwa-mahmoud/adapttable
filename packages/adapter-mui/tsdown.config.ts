@@ -43,7 +43,7 @@ export default defineConfig({
     "src/column-menu.tsx",
     "src/cell-navigation.tsx",
     "src/pivot.ts",
-    "src/batch-editing.tsx",
+    "src/batch-editing.ts",
   ],
   format: ["esm", "cjs"],
   // The published declarations come from `src` alone. The package's own

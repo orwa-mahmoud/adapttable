@@ -22,7 +22,7 @@ function Surface({
   onClose,
   children,
   className,
-}: CommandPaletteSurfaceProps) {
+}: Readonly<CommandPaletteSurfaceProps>) {
   return (
     // The compound API, not the shorthand: `Modal` puts every prop on its
     // ROOT, which is a zero-size wrapper. The part name has to land on the

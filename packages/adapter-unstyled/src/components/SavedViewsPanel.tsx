@@ -39,7 +39,7 @@ function Row({
   controls,
   layout,
   ...rest
-}: SavedViewsPanelRowProps) {
+}: Readonly<SavedViewsPanelRowProps>) {
   const { viewsRow, viewsItem, viewsDelete } = useClassNames();
   return (
     <div className={viewsRow} style={layout.row} {...rest}>
@@ -100,7 +100,7 @@ function Input({
   onChange,
   onCommit,
   onCancel,
-}: SavedViewsPanelInputProps) {
+}: Readonly<SavedViewsPanelInputProps>) {
   const { viewsInput } = useClassNames();
   return (
     <input

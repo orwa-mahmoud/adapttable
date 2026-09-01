@@ -25,9 +25,9 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import { DataTable } from "./testDataTable";
 import { filters as filtersFeature } from "./filters";
 import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./testDataTable";
 
 interface Person {
   id: string;

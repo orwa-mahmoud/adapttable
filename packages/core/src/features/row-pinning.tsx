@@ -5,7 +5,7 @@
  * that never imports it never carries those hooks. They mount in-tree
  * through {@link PINNING_LIVE}.
  */
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 import { ACTIONS_COLUMN_KEY } from "../columns/columnMenuModel";
 import {
@@ -17,7 +17,7 @@ import {
 import { useRowPinningUrlState } from "../url/useRowPinningUrlState";
 import { devWarn } from "../utils/devWarn";
 import { slotRender } from "./providers";
-import { PINNING_LIVE, type ChromeExtraSlotProps } from "./slotKeys";
+import { type ChromeExtraSlotProps, PINNING_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
 function useLiveRowPinning<TRow>(options: {
@@ -86,12 +86,13 @@ function LivePinning({
   const hasAnyActions = chrome.hasRowActions || rowPinning !== undefined;
   const actionsHidden = chrome.columnLayout.isHidden(ACTIONS_COLUMN_KEY);
   const pins = rowPinning?.actions ?? [];
-  const rowActions =
-    actionsHidden || !hasAnyActions
-      ? undefined
-      : pins.length === 0
-        ? chrome.rowActions
-        : [...(chrome.rowActions ?? []), ...pins];
+  // Pin entries ride the same trailing column as the host's row actions, so
+  // they are appended rather than given a column of their own.
+  const withPins =
+    pins.length === 0
+      ? chrome.rowActions
+      : [...(chrome.rowActions ?? []), ...pins];
+  const rowActions = actionsHidden || !hasAnyActions ? undefined : withPins;
   return children({
     ...chrome,
     rowPinning,

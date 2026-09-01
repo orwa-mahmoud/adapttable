@@ -4,9 +4,11 @@
 
 ```ts
 
-import { savedViews } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/core/adapter';
+import { UseSavedViewsOptions } from '@adapttable/core/features';
 
-export { savedViews }
+// @public
+export function savedViews<TRow>(options: UseSavedViewsOptions): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

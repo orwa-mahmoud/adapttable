@@ -21,13 +21,13 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
 import { DesktopTable } from "./components/DesktopTable";
 import { useStableToggle } from "./components/DesktopTable";
 import { MobileCards } from "./components/MobileCards";
-import { bulkActions as bulkActionsFeature } from "./bulk-actions";
-import { DataTable } from "./testDataTable";
 import type { ColumnDef } from "./index";
 import { rowDetail } from "./row-detail";
+import { DataTable } from "./testDataTable";
 
 interface Row {
   id: string;

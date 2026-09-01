@@ -117,3 +117,84 @@ describe("useMeasuredWindowScrollMargin", () => {
     expect(result.current.scrollMargin).toBe(0);
   });
 });
+
+describe("useMeasuredWindowScrollMargin — re-measuring", () => {
+  /** A ResizeObserver that hands its callback back so a test can fire it. */
+  function stubResizeObserver() {
+    const observed: Element[] = [];
+    let fire = () => undefined as void;
+    let disconnected = 0;
+    class Stub {
+      constructor(callback: () => void) {
+        fire = callback;
+      }
+      observe(node: Element) {
+        observed.push(node);
+      }
+      disconnect() {
+        disconnected += 1;
+      }
+      unobserve() {
+        // The hook only ever disconnects.
+      }
+    }
+    vi.stubGlobal("ResizeObserver", Stub);
+    return {
+      observed,
+      fire: () => fire(),
+      get disconnected() {
+        return disconnected;
+      },
+    };
+  }
+
+  it("watches the list and the document, and re-reads when either changes", () => {
+    const ro = stubResizeObserver();
+    const box = document.createElement("div");
+    const rect = vi.spyOn(box, "getBoundingClientRect");
+    rect.mockReturnValue(fakeRect(100));
+
+    const { result, unmount } = renderHook(() =>
+      useMeasuredWindowScrollMargin(true)
+    );
+    act(() => {
+      result.current.observe(box);
+    });
+    expect(result.current.scrollMargin).toBe(100);
+    // The page above the list can grow without the list itself resizing, which
+    // is why the document element is watched.
+    expect(ro.observed).toContain(document.documentElement);
+
+    rect.mockReturnValue(fakeRect(260));
+    act(() => {
+      ro.fire();
+    });
+    expect(result.current.scrollMargin).toBe(260);
+
+    rect.mockReturnValue(fakeRect(310));
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+    expect(result.current.scrollMargin).toBe(310);
+
+    unmount();
+    expect(ro.disconnected).toBeGreaterThan(0);
+  });
+
+  it("falls back to the table root when no scroll box was observed", () => {
+    const root = document.createElement("div");
+    const cards = document.createElement("div");
+    cards.setAttribute("data-adapttable-part", "cards");
+    root.appendChild(cards);
+    vi.spyOn(cards, "getBoundingClientRect").mockReturnValue(fakeRect(140));
+
+    // Mobile cards never attach a scroll box, so the root is what gets measured.
+    const ro = stubResizeObserver();
+    const { result } = renderHook(() =>
+      useMeasuredWindowScrollMargin(true, { current: root })
+    );
+    expect(result.current.scrollMargin).toBe(140);
+    // The root is what the observer watches when there is no scroll box.
+    expect(ro.observed).toContain(root);
+  });
+});

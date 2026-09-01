@@ -12,7 +12,7 @@ import {
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
 
-function SavedViewsSlot(props: SavedViewsSlotProps) {
+function SavedViewsSlot(props: Readonly<SavedViewsSlotProps>) {
   return <SavedViewsMenu {...props} />;
 }
 

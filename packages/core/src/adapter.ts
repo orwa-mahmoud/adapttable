@@ -217,6 +217,8 @@ export {
   type ExportStatus,
   useExportHandler,
 } from "./export/useExportHandler";
+export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
+export { ChromeExtrasGate } from "./features/chromeExtrasGate";
 export type { FeatureHostState } from "./features/currentHost";
 export { bindFeatureHostFn } from "./features/currentHost";
 export { useTableFeatures } from "./features/featureHost";
@@ -234,20 +236,18 @@ export type {
   TableRuntime,
 } from "./features/providers";
 export {
+  extendFeature,
   FeatureProviders,
   FeatureSlot,
   featureSlotKey,
   featureStateKey,
   FeatureStateScope,
-  extendFeature,
   slotRender,
   useFeatureSlotFilled,
   useFeatureState,
   usePublishTableRuntime,
   useTableRuntime,
 } from "./features/providers";
-export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
-export { ChromeExtrasGate } from "./features/chromeExtrasGate";
 export { HistoryLiveGate, ShellLiveGate } from "./features/shellLiveGate";
 export type {
   CellNavLiveSlotProps,
@@ -282,8 +282,8 @@ export {
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU,
   CONTEXT_MENU_LIVE,
-  EDITABLE_CELL,
   EDIT_HISTORY_LIVE,
+  EDITABLE_CELL,
   EDITING_LIVE,
   EXPAND_TOGGLE,
   EXPANSION_LIVE,
@@ -301,9 +301,11 @@ export {
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
   GROUPING_LIVE,
+  KEYED_WINDOW,
+  type KeyedWindowSlotProps,
   PINNING_LIVE,
-  ROW_EDIT_ACTIONS,
   ROW_ACTIONS_LIVE,
+  ROW_EDIT_ACTIONS,
   ROW_REORDER_ANNOUNCER,
   ROW_REORDER_BUTTONS,
   ROW_REORDER_HANDLE,
@@ -377,7 +379,10 @@ export {
   type FindButtonProps,
   type FindSearchProps,
 } from "./find/FindBar";
-export type { FindInTableState } from "./find/useFindInTable";
+export type {
+  FindInTableState,
+  UseFindInTableOptions,
+} from "./find/useFindInTable";
 export {
   ColumnSelectCheckboxChrome,
   type ColumnSelectCheckboxChromeProps,
@@ -412,7 +417,7 @@ export {
   type StatusBarSlotProps,
   type StatusBarSlots,
 } from "./focus/StatusBarChrome";
-export type { GridFocusState } from "./focus/useGridFocus";
+export type { GridFocusState, UseGridFocusOptions } from "./focus/useGridFocus";
 export type { GroupByInput } from "./grouping/groupKeys";
 export {
   GroupMoreButtonChrome,
@@ -454,6 +459,7 @@ export {
   type DesktopVirtualPadSlot,
   useDesktopTableAssembly,
 } from "./layout/desktopTableAssembly";
+export type { AssemblyFns } from "./layout/leanAssembly";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export {
   SidePanelChrome,
@@ -565,7 +571,10 @@ export { deriveSortByOptions } from "./sort/sortByOptions";
 export type { QuerySupport } from "./source/queryContract";
 export type { TableSource } from "./source/TableSource";
 export type { UseServerDataOptions } from "./source/useServerData";
-export { type DataModeProps } from "./source/useTableData";
+export {
+  type DataModeProps,
+  type TableQueryHandler,
+} from "./source/useTableData";
 export type { Slot, TableErrorState } from "./state/errorState";
 export { fillSlot, tableErrorState } from "./state/errorState";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
@@ -643,6 +652,7 @@ export {
   viewControlsToolbar,
 } from "./useTableChrome";
 export type { Props } from "./utils/mergeProps";
+export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { ColumnSpacer, type ColumnSpacerProps } from "./virtual/ColumnSpacer";
 export {
   type ResizableVirtualizer,
@@ -658,21 +668,20 @@ export {
   useColumnWindow,
   type UseColumnWindowOptions,
 } from "./virtual/useColumnWindow";
+export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
 export {
   useKeyedVirtualization,
   useTableVirtualization,
   type UseTableVirtualizationOptions,
 } from "./virtual/useTableVirtualization";
-export type { ChromeBodyData } from "./virtual/chromeBodyShared";
-export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
 export {
   type KeyedVirtualization,
   resolveVirtualRows,
   rowSourceIndex,
   type TableVirtualization,
+  virtualColumnSpan,
   type VirtualItemMeta,
   type VirtualTableRow,
-  virtualColumnSpan,
   windowGroupedEntries,
 } from "./virtual/virtualTableModel";
 
@@ -704,7 +713,7 @@ export type { CellSaveState } from "./editing/saveState";
 export type { CellEditingState } from "./editing/useCellEditing";
 export type { EditValidationState, RowValidator } from "./editing/validation";
 export type { ExportPayload, ExportWriteContext } from "./export/exportWriter";
-export type { ExportCsvOptions } from "./export/tableCsv";
+export type { ExportContext, ExportCsvOptions } from "./export/tableCsv";
 export type {
   ColumnMenuActionFactory,
   ContextMenuItemsFactory,

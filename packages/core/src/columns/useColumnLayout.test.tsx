@@ -25,6 +25,32 @@ describe("useColumnLayout", () => {
     expect(keys(result.current.visibleColumns)).toEqual(["a", "b", "c"]);
   });
 
+  it("refuses a move that would split a married column group", () => {
+    // `marryChildren` means the group's columns travel together. Dropping an
+    // outsider between them is not a layout the reader can be shown, so the
+    // move is declined rather than half-applied.
+    const married = new Map([
+      [
+        "People",
+        {
+          id: "People",
+          childKeys: ["a", "b"],
+          marryChildren: true,
+        },
+      ],
+    ]) as never;
+    const { result } = renderHook(() =>
+      useColumnLayout({ columns, columnGroups: married })
+    );
+
+    act(() => result.current.move("c", 1));
+    expect(keys(result.current.visibleColumns)).toEqual(["a", "b", "c"]);
+
+    // A move that keeps them adjacent still goes through.
+    act(() => result.current.move("c", 0));
+    expect(keys(result.current.visibleColumns)).toEqual(["c", "a", "b"]);
+  });
+
   it("hides and shows a column (uncontrolled)", () => {
     const { result } = renderHook(() => useColumnLayout({ columns }));
     act(() => result.current.toggleVisible("b"));
