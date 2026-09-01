@@ -212,8 +212,7 @@ export const zh: Required<TableLabels> = {
   noticeVirtualizePaged: "虚拟滚动已关闭 — 此分页表格每次只显示一页。",
   noticePinNested: "分组或树开启时，行固定已关闭。",
   noticeReorderNested: "分组或树开启时，行重排已关闭。",
-  noticeGroupingUnavailable: "分组已关闭 — 此数据源未提供完整筛选结果。",
-  noticeExportAllPage: "导出全部即本页 — 完整筛选结果不可用。",
+  noticeGroupingUnavailable: "分组已关闭 — 此数据源无法分组。",
+  noticeExportAllPage: "导出全部已关闭 — 此数据源每次仅提供一页。",
   noticeEditWithoutWriter: "编辑已关闭 — 未接入写入处理函数。",
-  exportThisPage: "导出本页",
 };

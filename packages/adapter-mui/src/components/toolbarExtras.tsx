@@ -43,6 +43,8 @@ export function ExportCsvButton({
   exportBusy,
   exportAnnouncement = "",
   exportLabel,
+  exportDisabled = false,
+  exportDisabledReason = "",
 }: Readonly<ToolbarExtrasSlotProps>): ReactNode {
   if (!onExportCsv) return null;
   return (
@@ -51,8 +53,9 @@ export function ExportCsvButton({
         variant="outlined"
         size="small"
         onClick={onExportCsv}
-        disabled={exportBusy}
+        disabled={exportBusy === true || exportDisabled}
         aria-busy={exportBusy}
+        title={exportDisabled ? exportDisabledReason : undefined}
         startIcon={
           exportBusy ? (
             <CircularProgress size={14} color="inherit" />

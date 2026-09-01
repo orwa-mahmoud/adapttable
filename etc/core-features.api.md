@@ -420,6 +420,9 @@ export type ExportRowRole = "data" | "group" | "aggregate";
 export type ExportRowScope = "page" | "all" | "selected" | "range";
 
 // @public
+export type ExportScopeCapability = "all" | "page";
+
+// @public
 export interface ExportTable {
     headers: readonly string[];
     keys: readonly string[];
@@ -628,6 +631,9 @@ export function grouping<TRow>(groupBy: string | readonly string[], extras?: {
     onCollapsedGroupIdsChange?: (ids: string[]) => void;
     onGroupLoadMore?: (groupKey: string) => void;
 }): TableFeature<TRow>;
+
+// @public
+export type GroupingCapability = "client" | "server" | false;
 
 // @public
 export interface GroupNode<TRow> {
@@ -915,7 +921,6 @@ export interface TableLabels {
     exportDone?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
-    exportThisPage?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;
@@ -1091,6 +1096,7 @@ export interface TableLabels {
 export interface TableSource<TRow> extends TableStateMutators {
     readonly allFilteredRows?: readonly TRow[];
     readonly allSearchedRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
     readonly defaultLimit: number;
     readonly error: Error | null;
     readonly extra: ExtraFilters;
@@ -1115,6 +1121,15 @@ export interface TableSource<TRow> extends TableStateMutators {
 }
 
 // @public
+export interface TableSourceCapabilities {
+    readonly exportScope: ExportScopeCapability;
+    readonly fullDataset: boolean;
+    readonly grouping: GroupingCapability;
+    readonly selectAcrossPages: boolean;
+    readonly totalCount: TotalCountCapability;
+}
+
+// @public
 export interface TableStateMutators {
     clearAll: () => void;
     clearExtras: () => void;
@@ -1129,6 +1144,9 @@ export interface TableStateMutators {
     sortLevels: readonly SortLevel[];
     toggleSortLevel: (key: string) => void;
 }
+
+// @public
+export type TotalCountCapability = "exact" | "loaded";
 
 // @public
 export function tree<TRow>(options?: {

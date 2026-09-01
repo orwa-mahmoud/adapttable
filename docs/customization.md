@@ -312,7 +312,7 @@ arithmetic, so the two never disagree. The strip hosts the selection figures
 rather than repeating them, so turning it on does not print them twice.
 
 Opted-in features that cannot run (virtualize on a paged table, pin or
-reorder under grouping, `exportCsv` `scope: "all"` with only this page,
+reorder under grouping, `exportCsv` `scope: "all"` on a page-scoped source,
 edits with no writer) still show as `FeatureNotice` items
 (`FeatureNoticeKind` is the union). They live on
 `StatusBarChromeProps.notices` and `TableChrome.featureNotices`, and they
@@ -587,9 +587,11 @@ raw output for a non-spreadsheet pipeline.
 ```
 
 - `scope: "page"` (default) — the current page / loaded slice.
-- `scope: "all"` — the full filtered+sorted set when the source exposes it
-  (frontend does); server-backed sources fall back to the current page unless
-  you wire your own download against an export endpoint via `toolbar`.
+- `scope: "all"` — the full filtered+sorted set when the source can reach it
+  (frontend can). A source whose `capabilities.exportScope` is `"page"`
+  disables the button and says why, unless `request` or `fetchAll` fetches the
+  rest — see
+  [source capabilities](./data-tiers.md#what-a-source-can-do--capabilities).
 
   **"All" means every row that matched the filters, not every row on screen.**
   Display state never shrinks an export: a collapsed tree folder still writes

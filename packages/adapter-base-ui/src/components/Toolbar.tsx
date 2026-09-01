@@ -76,6 +76,8 @@ export function Toolbar<TRow>({
   onExportCsv,
   exportBusy,
   exportAnnouncement = "",
+  exportDisabled = false,
+  exportDisabledReason = "",
   exportLabel,
   showRowsPerPage,
   accentColor,
@@ -202,8 +204,9 @@ export function Toolbar<TRow>({
             variant="outline"
             color={accentColor}
             onClick={onExportCsv}
-            disabled={exportBusy}
+            disabled={exportBusy === true || exportDisabled}
             aria-busy={exportBusy}
+            title={exportDisabled ? exportDisabledReason : undefined}
           >
             {/* This adapter's own Spinner — the same one the filter form uses
                 while options load, so "working" looks the same everywhere in

@@ -567,7 +567,14 @@ export {
 } from "./rows/rowStyle";
 export type { RowExpansionState } from "./rows/useRowExpansion";
 export type { SelectionState } from "./selection/useSelection";
+export { offersAllMatching } from "./selection/useSelection";
 export { deriveSortByOptions } from "./sort/sortByOptions";
+export type {
+  ExportScopeCapability,
+  GroupingCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "./source/capabilities";
 export type { QuerySupport } from "./source/queryContract";
 export type { TableSource } from "./source/TableSource";
 export type { UseServerDataOptions } from "./source/useServerData";

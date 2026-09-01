@@ -218,10 +218,9 @@ export const pt: Required<TableLabels> = {
   noticeReorderNested:
     "A reordenação de linhas está desligada com agrupamento ou árvore ativos.",
   noticeGroupingUnavailable:
-    "O agrupamento está desligado — esta origem não fornece o conjunto filtrado completo.",
+    "O agrupamento está desativado — esta fonte não consegue agrupar.",
   noticeExportAllPage:
-    "Exportar tudo é esta página — o conjunto filtrado completo não está disponível.",
+    "Exportar tudo está desativado — esta fonte fornece uma página de cada vez.",
   noticeEditWithoutWriter:
     "A edição está desligada — nenhum handler de escrita está ligado.",
-  exportThisPage: "Exportar esta página",
 };

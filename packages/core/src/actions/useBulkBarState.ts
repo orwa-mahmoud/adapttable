@@ -1,4 +1,7 @@
-import type { SelectionState } from "../selection/useSelection";
+import {
+  offersAllMatching,
+  type SelectionState,
+} from "../selection/useSelection";
 import type { BulkAction, BulkActionContext, TableLabels } from "../types";
 import { type ConfirmHandler } from "./confirm";
 import {
@@ -83,10 +86,10 @@ export function useBulkBarState({
   });
   const errorMessage = bulkActionErrorMessage(error);
   const ids = [...selectedIds];
-  // A full page is selected but more rows match elsewhere → show the
-  // two-state "select all N matching" banner instead of the plain count.
-  const expandable =
-    selection.headerState === "all" && total > selection.visibleIds.length;
+  // A full page is selected, more rows match elsewhere, and the source can
+  // speak for them → the two-state "select all N matching" banner rather than
+  // the plain count.
+  const expandable = offersAllMatching(selection, total);
   // When "all matching" is active, bulk actions act on the WHOLE filtered
   // set: the context tells the handler (and the confirm count) so.
   const scope = selection.allMatching

@@ -394,7 +394,6 @@ export interface TableLabels {
     exportDone?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
-    exportThisPage?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;

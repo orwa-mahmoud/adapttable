@@ -217,10 +217,8 @@ export const hi: Required<TableLabels> = {
   noticePinNested: "समूहीकरण या वृक्ष चालू होने पर पंक्ति पिन बंद है।",
   noticeReorderNested:
     "समूहीकरण या वृक्ष चालू होने पर पंक्ति क्रम बदलना बंद है।",
-  noticeGroupingUnavailable:
-    "समूहीकरण बंद है — यह स्रोत पूरी फ़िल्टर की गई सूची नहीं देता।",
+  noticeGroupingUnavailable: "समूहन बंद है — यह स्रोत समूहन नहीं कर सकता।",
   noticeExportAllPage:
-    "सभी निर्यात इस पृष्ठ का है — पूरी फ़िल्टर की गई सूची उपलब्ध नहीं है।",
+    "सभी निर्यात बंद है — यह स्रोत एक बार में एक ही पृष्ठ देता है।",
   noticeEditWithoutWriter: "संपादन बंद है — कोई लेखन हैंडलर नहीं जोड़ा गया।",
-  exportThisPage: "यह पृष्ठ निर्यात करें",
 };

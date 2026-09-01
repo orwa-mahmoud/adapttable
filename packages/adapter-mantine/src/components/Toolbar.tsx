@@ -64,6 +64,8 @@ export function Toolbar<TRow>({
   onExportCsv,
   exportBusy,
   exportAnnouncement = "",
+  exportDisabled = false,
+  exportDisabledReason = "",
   exportLabel,
   showRowsPerPage,
   className,
@@ -183,6 +185,8 @@ export function Toolbar<TRow>({
               onClick={onExportCsv}
               loading={exportBusy}
               aria-busy={exportBusy}
+              disabled={exportDisabled}
+              title={exportDisabled ? exportDisabledReason : undefined}
             >
               {exportLabel}
             </Button>

@@ -413,6 +413,17 @@ export interface BulkActionRunner {
 }
 
 // @public
+export function capabilityReason(capability: keyof TableSourceCapabilities): string;
+
+// @public
+export interface CapabilitySource {
+    readonly allFilteredRows?: readonly unknown[];
+    readonly capabilities?: TableSourceCapabilities;
+    readonly groups?: unknown;
+    readonly total?: number;
+}
+
+// @public
 export interface CellEdit<TRow> {
     columnKey: string;
     row: TRow;
@@ -1566,6 +1577,9 @@ export type ExportRowRole = "data" | "group" | "aggregate";
 export type ExportRowScope = "page" | "all" | "selected" | "range";
 
 // @public
+export type ExportScopeCapability = "all" | "page";
+
+// @public
 export interface ExportTable {
     headers: readonly string[];
     keys: readonly string[];
@@ -2151,6 +2165,9 @@ export const groupedHeaderChildRule: typeof groupedHeaderChildRule_2;
 export const groupedHeaderLabelStyle: typeof groupedHeaderLabelStyle_2;
 
 // @public
+export type GroupingCapability = "client" | "server" | false;
+
+// @public
 export function groupLeafCount(entry: {
     leafIds: readonly string[];
     serverCount?: number;
@@ -2576,6 +2593,9 @@ export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "betwe
 
 // @public
 export type NumberOp = (typeof NUMBER_OPS)[number];
+
+// @public
+export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
 
 // @public @deprecated
 export const orderedCardEntries: typeof orderedCardEntries_2;
@@ -3292,6 +3312,7 @@ export interface SearchInputState {
 
 // @public
 export interface SelectionState {
+    acrossPages: boolean;
     allMatching: boolean;
     clear: () => void;
     headerState: HeaderSelectionState;
@@ -3416,6 +3437,9 @@ export function sortRows<TRow>(rows: readonly TRow[], getValue: (row: TRow) => S
 
 // @public
 export function sortRowsMulti<TRow>(rows: readonly TRow[], levels: readonly SortLevel[], getValue: (row: TRow, key: string) => SortableValue): TRow[];
+
+// @public
+export function sourceCapabilities(source: CapabilitySource, support?: QuerySupport): TableSourceCapabilities;
 
 // @public
 export function spanningArmed<TRow>(columns: readonly ColumnDef<TRow>[], getCellSpan: GetCellSpan<TRow> | undefined): boolean;
@@ -3614,7 +3638,6 @@ export interface TableLabels {
     exportDone?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
-    exportThisPage?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;
@@ -3833,6 +3856,7 @@ export interface TableQueryParams {
 export interface TableSource<TRow> extends TableStateMutators {
     readonly allFilteredRows?: readonly TRow[];
     readonly allSearchedRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
     readonly defaultLimit: number;
     readonly error: Error | null;
     readonly extra: ExtraFilters;
@@ -3854,6 +3878,15 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly sortBy: string | undefined;
     readonly sortDir: SortDirection | undefined;
     readonly total: number;
+}
+
+// @public
+export interface TableSourceCapabilities {
+    readonly exportScope: ExportScopeCapability;
+    readonly fullDataset: boolean;
+    readonly grouping: GroupingCapability;
+    readonly selectAcrossPages: boolean;
+    readonly totalCount: TotalCountCapability;
 }
 
 // @public
@@ -3923,6 +3956,9 @@ export interface ToolbarSlots {
     end?: ReactNode;
     start?: ReactNode;
 }
+
+// @public
+export type TotalCountCapability = "exact" | "loaded";
 
 // @public
 export function treeCardStyle(level: number): {
@@ -4540,6 +4576,7 @@ export function useSelection<TRow>(options: UseSelectionOptions<TRow>): Selectio
 
 // @public
 export interface UseSelectionOptions<TRow> {
+    acrossPages?: boolean;
     getId: (row: TRow) => string;
     onSelectionChange?: (selectedIds: string[]) => void;
     resetKey?: unknown;

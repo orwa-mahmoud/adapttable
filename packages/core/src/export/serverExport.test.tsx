@@ -510,17 +510,52 @@ describe("useExportHandler", () => {
     expect(button).toHaveAttribute("aria-busy", "false");
   });
 
-  it("names the button Export this page when all falls back to the page", () => {
-    function Label() {
-      const { exportLabel } = useExportHandler(
-        () => undefined,
+  it("disables the button, and says why, when all cannot reach past the page", () => {
+    const exported = vi.fn();
+    function Fallback() {
+      const { exportLabel, exportDisabled, exportDisabledReason, onExportCsv } =
+        useExportHandler(exported, undefined, "csv", true);
+      return (
+        <button
+          type="button"
+          onClick={onExportCsv}
+          disabled={exportDisabled}
+          title={exportDisabledReason}
+        >
+          {exportLabel}
+        </button>
+      );
+    }
+    render(<Fallback />);
+    const button = screen.getByRole("button");
+    // The caption still names the format the control produces — what changed
+    // is that it cannot run, and the reason travels with the control.
+    expect(button).toHaveTextContent("Export CSV");
+    expect(button).toBeDisabled();
+    expect(button.title).toBe(
+      "Export all is off — this source provides one page at a time."
+    );
+  });
+
+  it("refuses the export itself, not only through the disabled attribute", () => {
+    const exported = vi.fn();
+    function Unguarded() {
+      const { onExportCsv } = useExportHandler(
+        exported,
         undefined,
         "csv",
         true
       );
-      return <button type="button">{exportLabel}</button>;
+      // No `disabled`: a kit that forgets it, or a programmatic click, must
+      // still not get the one-page file the button never offered.
+      return (
+        <button type="button" onClick={onExportCsv}>
+          Export
+        </button>
+      );
     }
-    render(<Label />);
-    expect(screen.getByRole("button")).toHaveTextContent("Export this page");
+    render(<Unguarded />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(exported).not.toHaveBeenCalled();
   });
 });

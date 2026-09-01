@@ -7,6 +7,7 @@ import {
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
+  offersAllMatching,
   resolveDisabledReason,
 } from "@adapttable/core/adapter";
 import { Button, Group, Stack, Text, Tooltip } from "@mantine/core";
@@ -86,9 +87,7 @@ function ScopeBanner({
   total: number;
   labels: Required<TableLabels>;
 }>) {
-  if (selection.headerState !== "all" || total <= selection.visibleIds.length) {
-    return null;
-  }
+  if (!offersAllMatching(selection, total)) return null;
   return (
     <Group
       role="status"

@@ -979,13 +979,13 @@ export interface TableLabels {
   /** Status copy when row reorder is on while grouping or a tree is on. */
   noticeReorderNested?: string;
   /**
-   * Status copy when `groupBy` is set but the source cannot regroup
-   * (no `allFilteredRows`, no server groups).
+   * Status copy when `groupBy` is set and the source's capabilities say it
+   * cannot group.
    */
   noticeGroupingUnavailable?: string;
   /**
-   * Status copy when `exportCsv.scope` is `"all"` and only the current
-   * page can be written.
+   * Status copy when `exportCsv.scope` is `"all"` and the source's export
+   * scope is one page, which disables the button.
    */
   noticeExportAllPage?: string;
   /**
@@ -993,9 +993,4 @@ export interface TableLabels {
    * callback (`onCellEdit` / `onRowEdit` / `onBatchEdit`).
    */
   noticeEditWithoutWriter?: string;
-  /**
-   * Export button caption when `"all"` can only write the current page.
-   * Defaults to `"Export this page"`.
-   */
-  exportThisPage?: string;
 }

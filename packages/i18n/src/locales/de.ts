@@ -221,10 +221,9 @@ export const de: Required<TableLabels> = {
   noticeReorderNested:
     "Zeilenverschieben ist aus, solange Gruppierung oder ein Baum aktiv ist.",
   noticeGroupingUnavailable:
-    "Gruppierung ist aus — diese Quelle liefert nicht die vollständige gefilterte Menge.",
+    "Gruppierung ist aus — diese Quelle kann nicht gruppieren.",
   noticeExportAllPage:
-    "Alle exportieren ist diese Seite — die vollständige gefilterte Menge ist nicht verfügbar.",
+    "Alle exportieren ist aus — diese Quelle liefert jeweils nur eine Seite.",
   noticeEditWithoutWriter:
     "Bearbeiten ist aus — es ist kein Schreib-Handler verbunden.",
-  exportThisPage: "Diese Seite exportieren",
 };

@@ -120,6 +120,8 @@ export const DISABLED_EXPORT: ExportHandlerState = {
   exportStatus: "idle",
   exportAnnouncement: "",
   exportLabel: "Export CSV",
+  exportDisabled: false,
+  exportDisabledReason: "",
 };
 
 /** Fullscreen when {@link fullscreen} is not composed. */

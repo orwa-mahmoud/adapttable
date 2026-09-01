@@ -34,6 +34,13 @@ export interface UseSelectionOptions<TRow> {
   selectedIds?: readonly string[];
   /** Change handler; required for the controlled mode to update. */
   onSelectionChange?: (selectedIds: string[]) => void;
+  /**
+   * Whether "select all N matching" is something this source can honour.
+   * Defaults to true; the table fills it from the source's capabilities, so
+   * a source that only ever holds one page never offers a selection it
+   * cannot describe.
+   */
+  acrossPages?: boolean;
 }
 
 /**
@@ -67,6 +74,34 @@ export interface SelectionState {
   allMatching: boolean;
   /** Extend the selection to every matching row (across all pages). */
   selectAllMatching: () => void;
+  /** Whether the source can answer for rows beyond the ones on screen. */
+  acrossPages: boolean;
+}
+
+/**
+ * Whether to offer "select all N matching".
+ *
+ * Three things have to hold at once: the source can speak for rows that are
+ * not on screen, the visible page is fully selected, and there are more rows
+ * to reach. Every kit draws that banner differently and none of them decides
+ * it — a control offered by one adapter and withheld by another is the same
+ * table behaving in two ways.
+ *
+ * @param selection - The selection state.
+ * @param total - Rows in the whole filtered set.
+ * @returns True when the banner should be shown.
+ *
+ * @public
+ */
+export function offersAllMatching(
+  selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">,
+  total: number
+): boolean {
+  return (
+    selection.acrossPages &&
+    selection.headerState === "all" &&
+    total > selection.visibleIds.length
+  );
 }
 
 /**
@@ -84,6 +119,7 @@ export function useSelection<TRow>(
   options: UseSelectionOptions<TRow>
 ): SelectionState {
   const { rows, getId, resetKey } = options;
+  const acrossPages = options.acrossPages ?? true;
   const controlledValue = options.selectedIds;
   const onChange = options.onSelectionChange;
   const [internal, setInternal] = useState<Set<string>>(() => new Set());
@@ -116,7 +152,13 @@ export function useSelection<TRow>(
     []
   );
 
-  const selectAllMatching = useCallback(() => setAllMatching(true), []);
+  const selectAllMatching = useCallback(() => {
+    // Nothing offers this when the source cannot reach past the page, but a
+    // host holding the state object can still call it — and "all matching"
+    // over rows the source cannot name is a selection nobody can act on.
+    if (!acrossPages) return;
+    setAllMatching(true);
+  }, [acrossPages]);
 
   // Clear on reset-key change, but not on first mount. The effect reads the
   // LATEST size through a ref so only `resetKey` retriggers it. The guard
@@ -202,6 +244,7 @@ export function useSelection<TRow>(
       visibleIds,
       allMatching,
       selectAllMatching,
+      acrossPages,
     }),
     [
       selectedIds,
@@ -214,6 +257,7 @@ export function useSelection<TRow>(
       visibleIds,
       allMatching,
       selectAllMatching,
+      acrossPages,
     ]
   );
 }

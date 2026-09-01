@@ -3,6 +3,7 @@ import { useBulkActionRunner } from "@adapttable/core";
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
+  offersAllMatching,
 } from "@adapttable/core/adapter";
 import { Alert, Button, Space, Typography } from "antd";
 import type { ReactNode } from "react";
@@ -60,8 +61,7 @@ export function BulkBar(props: Readonly<BulkBarChromeProps>) {
   const errorMessage = bulkActionErrorMessage(runner.error);
   const ids = [...selection.selectedIds];
   const busy = runner.pending !== null;
-  const crossPage =
-    selection.headerState === "all" && total > selection.visibleIds.length;
+  const crossPage = offersAllMatching(selection, total);
   const context = selection.allMatching
     ? { allMatching: true, total }
     : undefined;

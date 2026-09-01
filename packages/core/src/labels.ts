@@ -217,12 +217,10 @@ export const defaultLabels: Required<TableLabels> = {
     "Virtualization is off — this paged table shows one page at a time.",
   noticePinNested: "Row pinning is off while grouping or a tree is on.",
   noticeReorderNested: "Row reorder is off while grouping or a tree is on.",
-  noticeGroupingUnavailable:
-    "Grouping is off — this source does not provide the full filtered set.",
+  noticeGroupingUnavailable: "Grouping is off — this source cannot group.",
   noticeExportAllPage:
-    "Export all is this page — the full filtered set is not available.",
+    "Export all is off — this source provides one page at a time.",
   noticeEditWithoutWriter: "Editing is off — no write handler is wired.",
-  exportThisPage: "Export this page",
 };
 
 /**

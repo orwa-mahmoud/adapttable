@@ -218,10 +218,9 @@ export const it: Required<TableLabels> = {
   noticeReorderNested:
     "Il riordino delle righe è disattivato con raggruppamento o albero attivi.",
   noticeGroupingUnavailable:
-    "Il raggruppamento è disattivato: questa origine non fornisce l’insieme filtrato completo.",
+    "Il raggruppamento è disattivato: questa origine non può raggruppare.",
   noticeExportAllPage:
-    "Esporta tutto è questa pagina: l’insieme filtrato completo non è disponibile.",
+    "Esporta tutto è disattivato: questa origine fornisce una pagina alla volta.",
   noticeEditWithoutWriter:
     "La modifica è disattivata: nessun gestore di scrittura è collegato.",
-  exportThisPage: "Esporta questa pagina",
 };

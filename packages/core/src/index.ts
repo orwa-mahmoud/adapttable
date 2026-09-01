@@ -427,6 +427,14 @@ export {
 /* ── Shared render contracts ───────────────────────────────────────── */
 
 /* ── Sources ───────────────────────────────────────────────────────── */
+export type {
+  CapabilitySource,
+  ExportScopeCapability,
+  GroupingCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "./source/capabilities";
+export { capabilityReason, sourceCapabilities } from "./source/capabilities";
 export type { TableSource } from "./source/TableSource";
 export {
   defaultFrontendRowId,
@@ -469,6 +477,7 @@ export {
 /* ── Selection ─────────────────────────────────────────────────────── */
 export {
   type HeaderSelectionState,
+  offersAllMatching,
   type SelectionState,
   useSelection,
   type UseSelectionOptions,

@@ -212,8 +212,7 @@ export const zhTW: Required<TableLabels> = {
   noticeVirtualizePaged: "虛擬捲動已關閉 — 此分頁表格每次只顯示一頁。",
   noticePinNested: "分組或樹狀結構開啟時，列固定已關閉。",
   noticeReorderNested: "分組或樹狀結構開啟時，列重排已關閉。",
-  noticeGroupingUnavailable: "分組已關閉 — 此資料來源未提供完整篩選結果。",
-  noticeExportAllPage: "匯出全部即本頁 — 完整篩選結果不可用。",
+  noticeGroupingUnavailable: "分組已關閉 — 此資料來源無法分組。",
+  noticeExportAllPage: "匯出全部已關閉 — 此資料來源每次僅提供一頁。",
   noticeEditWithoutWriter: "編輯已關閉 — 未接上寫入處理函式。",
-  exportThisPage: "匯出本頁",
 };

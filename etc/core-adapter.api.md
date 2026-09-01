@@ -1942,6 +1942,8 @@ export interface ExportCsvOptions<TRow = unknown> {
 export interface ExportHandlerState {
     exportAnnouncement: string;
     exportBusy: boolean;
+    exportDisabled: boolean;
+    exportDisabledReason: string;
     exportLabel: string;
     exportStatus: ExportStatus;
     onExportCsv: (() => void) | undefined;
@@ -2002,6 +2004,9 @@ export type ExportRowRole = "data" | "group" | "aggregate";
 
 // @public
 export type ExportRowScope = "page" | "all" | "selected" | "range";
+
+// @public
+export type ExportScopeCapability = "all" | "page";
 
 // @public
 export type ExportStatus = "idle" | "busy" | "done" | "failed";
@@ -2924,6 +2929,9 @@ export function groupIndentStyle(level: number): CSSProperties;
 export const GROUPING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
 // @public
+export type GroupingCapability = "client" | "server" | false;
+
+// @public
 export function GroupMoreButtonChrome(input: Readonly<GroupMoreButtonChromeProps>): ReactElement;
 
 // @public
@@ -3185,6 +3193,9 @@ export function nextPinSide(current: PinnedSide): PinnedSide;
 
 // @public
 export function normalizeEditorOptions(options: readonly CellEditorOption[] | readonly string[]): CellEditorOption[];
+
+// @public
+export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
 
 // @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[]): readonly VirtualTableRow<TRow>[];
@@ -4009,6 +4020,7 @@ export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<ne
 
 // @public
 export interface SelectionState {
+    acrossPages: boolean;
     allMatching: boolean;
     clear: () => void;
     headerState: HeaderSelectionState;
@@ -4539,7 +4551,6 @@ export interface TableLabels {
     exportDone?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
-    exportThisPage?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;
@@ -4770,6 +4781,7 @@ export interface TableRuntime<TRow = unknown> {
 export interface TableSource<TRow> extends TableStateMutators {
     readonly allFilteredRows?: readonly TRow[];
     readonly allSearchedRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
     readonly defaultLimit: number;
     readonly error: Error | null;
     readonly extra: ExtraFilters;
@@ -4791,6 +4803,15 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly sortBy: string | undefined;
     readonly sortDir: SortDirection | undefined;
     readonly total: number;
+}
+
+// @public
+export interface TableSourceCapabilities {
+    readonly exportScope: ExportScopeCapability;
+    readonly fullDataset: boolean;
+    readonly grouping: GroupingCapability;
+    readonly selectAcrossPages: boolean;
+    readonly totalCount: TotalCountCapability;
 }
 
 // @public
@@ -4857,6 +4878,8 @@ export interface ToolbarChromeProps<TRow> {
     dir?: "ltr" | "rtl";
     exportAnnouncement?: string;
     exportBusy?: boolean;
+    exportDisabled?: boolean;
+    exportDisabledReason?: string;
     exportLabel?: string;
     exportStatus?: ExportStatus;
     filtersOpen: boolean;
@@ -4896,6 +4919,8 @@ export interface ToolbarExtrasSlotProps {
     exportAnnouncement?: string;
     // (undocumented)
     exportBusy?: boolean;
+    exportDisabled?: boolean;
+    exportDisabledReason?: string;
     // (undocumented)
     exportLabel?: string;
     // (undocumented)
@@ -4926,6 +4951,9 @@ export interface ToolbarSlots {
     end?: ReactNode;
     start?: ReactNode;
 }
+
+// @public
+export type TotalCountCapability = "exact" | "loaded";
 
 // @public
 export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>>;
@@ -5516,7 +5544,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
             collapseToDepth: (depth: number) => void;
             showMore: (entry: {
                 scope: "groups" | "rows";
-                groupKey?: string;
+                groupKey? /** Cell-navigation state; inert unless `cellNavigation` is set. */ : string;
             }) => void;
         } | undefined;
         dir: Direction | undefined;
@@ -5529,6 +5557,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         exportStatus: ExportStatus;
         exportAnnouncement: string;
         exportLabel: string;
+        exportDisabled: boolean;
+        exportDisabledReason: string;
         hasFilters: boolean;
         activeFilterCount: number;
         filters: ReactNode;

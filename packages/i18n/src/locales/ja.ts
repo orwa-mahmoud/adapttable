@@ -216,10 +216,9 @@ export const ja: Required<TableLabels> = {
   noticeReorderNested:
     "グループ化またはツリーの使用中は行の並べ替えはオフです。",
   noticeGroupingUnavailable:
-    "グループ化はオフです。このソースは絞り込んだ全件を提供しません。",
+    "グループ化はオフです。このソースはグループ化できません。",
   noticeExportAllPage:
-    "すべて書き出しはこのページです。絞り込んだ全件は利用できません。",
+    "すべて書き出しはオフです。このソースは一度に 1 ページのみ提供します。",
   noticeEditWithoutWriter:
     "編集はオフです。書き込みハンドラーがつながっていません。",
-  exportThisPage: "このページを書き出す",
 };

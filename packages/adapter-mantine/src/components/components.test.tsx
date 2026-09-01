@@ -273,6 +273,7 @@ function makeSelection(
     visibleIds: ["a", "b"],
     allMatching: false,
     selectAllMatching: vi.fn(),
+    acrossPages: true,
     ...overrides,
   };
 }

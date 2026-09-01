@@ -5,6 +5,7 @@ import type {
   ResolvedPaginationMode,
   SortDirection,
 } from "../types";
+import type { TableSourceCapabilities } from "./capabilities";
 import type { QueryFilterGroup } from "./queryContract";
 import type { QueryGroupRow } from "./queryGroups";
 
@@ -102,6 +103,13 @@ export interface TableSource<TRow> extends TableStateMutators {
    * param but grouping stays dormant without `allFilteredRows`.
    */
   readonly groupBy: string | undefined;
+  /**
+   * What this source can genuinely do — full-dataset access, where grouping
+   * can happen, selection across pages, export scope, whether the total is
+   * exact. Omit it and the table infers the same answers from the shape
+   * below, exactly as it always has.
+   */
+  readonly capabilities?: TableSourceCapabilities;
   /**
    * Groups the SERVER computed, when it answered `query.groupBy` itself.
    * Present only on a server tier that declared `supports.grouping`; the table

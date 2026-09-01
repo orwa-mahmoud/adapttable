@@ -20,6 +20,7 @@ function makeSelection(over: Partial<SelectionState> = {}): SelectionState {
     visibleIds: ["a", "b"],
     allMatching: false,
     selectAllMatching: vi.fn(),
+    acrossPages: true,
     ...over,
   };
 }

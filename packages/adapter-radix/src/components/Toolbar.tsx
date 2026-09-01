@@ -76,6 +76,8 @@ export function Toolbar<TRow>({
   onExportCsv,
   exportBusy,
   exportAnnouncement = "",
+  exportDisabled = false,
+  exportDisabledReason = "",
   exportLabel,
   showRowsPerPage,
   accentColor,
@@ -202,8 +204,9 @@ export function Toolbar<TRow>({
             variant="outline"
             color={accentColor}
             onClick={onExportCsv}
-            disabled={exportBusy}
+            disabled={exportBusy === true || exportDisabled}
             aria-busy={exportBusy}
+            title={exportDisabled ? exportDisabledReason : undefined}
           >
             {/* Radix Themes' own pattern for a working button: its Spinner
                 wrapping the label, which reserves the label's width so the

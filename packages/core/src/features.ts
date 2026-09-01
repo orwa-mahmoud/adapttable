@@ -201,6 +201,12 @@ export type { SavedView } from "./url/useSavedViews";
  */
 export type { CellEditorOption } from "./editing/cellEditing";
 export type { ExportRowMeta } from "./export/exportWriter";
+export type {
+  ExportScopeCapability,
+  GroupingCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "./source/capabilities";
 export type { TableSource } from "./source/TableSource";
 export type { ColumnHeaderController, SortDirection } from "./types";
 export type { Density } from "./url/useDensityUrlState";

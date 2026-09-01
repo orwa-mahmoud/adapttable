@@ -4,6 +4,7 @@
 import type { ReactNode } from "react";
 
 import { useSelection } from "../selection/useSelection";
+import { sourceCapabilities } from "../source/capabilities";
 import { stableKey } from "../utils/stableKey";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, SELECTION_LIVE } from "./slotKeys";
@@ -21,6 +22,7 @@ function LiveSelection({
     resetKey,
     selectedIds: props.selectedIds,
     onSelectionChange: props.onSelectionChange,
+    acrossPages: sourceCapabilities(chrome.source).selectAcrossPages,
   });
   return children({
     ...chrome,

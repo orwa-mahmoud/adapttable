@@ -220,10 +220,9 @@ export const fr: Required<TableLabels> = {
   noticeReorderNested:
     "Le réordonnancement des lignes est inactif tant que le regroupement ou un arbre est actif.",
   noticeGroupingUnavailable:
-    "Le regroupement est inactif — cette source n’expose pas l’ensemble filtré complet.",
+    "Le groupement est désactivé — cette source ne peut pas grouper.",
   noticeExportAllPage:
-    "Exporter tout correspond à cette page — l’ensemble filtré complet n’est pas disponible.",
+    "Exporter tout est désactivé — cette source ne fournit qu’une page à la fois.",
   noticeEditWithoutWriter:
     "L’édition est inactive — aucun gestionnaire d’écriture n’est branché.",
-  exportThisPage: "Exporter cette page",
 };

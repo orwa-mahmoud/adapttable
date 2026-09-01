@@ -64,6 +64,7 @@ function makeSelection(
     visibleIds: [...LEAF_IDS, "3"],
     allMatching: false,
     selectAllMatching: vi.fn(),
+    acrossPages: true,
     ...overrides,
   };
 }

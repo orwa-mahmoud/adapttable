@@ -18,6 +18,7 @@ import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import type { ActiveFilterChip } from "./filters/useActiveFilterChips";
 import type { GroupByInput } from "./grouping/groupKeys";
+import { parseGroupBy } from "./grouping/groupKeys";
 import type { GroupAggregatesFn, GroupedFlatEntry } from "./grouping/groupRows";
 import type { GroupCollapseState } from "./grouping/useGroupCollapse";
 import { useEventCallback } from "./hooks/useEventCallback";
@@ -176,6 +177,14 @@ export interface ToolbarChromeProps<TRow> {
    * the user is not getting.
    */
   exportLabel?: string;
+  /**
+   * The host asked for an export the source cannot cover. Adapters render the
+   * Export button disabled rather than writing a narrower file than the button
+   * offered.
+   */
+  exportDisabled?: boolean;
+  /** Why the Export button is disabled, localized; empty while it is not. */
+  exportDisabledReason?: string;
   /**
    * When set, render an Add-row control and call this on click. Present iff
    * the host wired `onAddRow`, so the toolbar needs no second guard.
@@ -740,14 +749,27 @@ export function useTableChrome<TRow>(
     !viewSource.error &&
     (viewSource.total > 0 || viewSource.isLoading || viewSource.isFetching);
 
+  // What the host asked to group by, whatever composes the grouping engine.
+  // The notice is the chrome's to raise: a table told to group by a key its
+  // source cannot group on has to say so even when the feature that would
+  // have done the grouping was never imported.
+  const requestedGroupBy =
+    props.groupBy === undefined ? source.groupBy : props.groupBy;
+  const groupByKeys = useMemo(
+    () => parseGroupBy(requestedGroupBy),
+    [requestedGroupBy]
+  );
+
   const featureNotices = useMemo(
     () =>
       collectFeatureNotices({
         virtualize: props.virtualize,
         paginationMode: source.paginationMode,
-        groupByKeys: [],
+        groupByKeys,
         allFilteredRows: source.allFilteredRows,
         serverGroups: source.groups,
+        total: source.total,
+        capabilities: source.capabilities,
         rowPinningRequested:
           props.pinnedRowIds !== undefined ||
           props.onPinnedRowIdsChange !== undefined,
@@ -765,8 +787,11 @@ export function useTableChrome<TRow>(
     [
       props.virtualize,
       source.paginationMode,
+      groupByKeys,
       source.allFilteredRows,
       source.groups,
+      source.total,
+      source.capabilities,
       props.pinnedRowIds,
       props.onPinnedRowIdsChange,
       requestedReorder,

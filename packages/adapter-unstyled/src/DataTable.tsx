@@ -233,6 +233,8 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
           exportBusy,
           exportAnnouncement,
           exportLabel,
+          exportDisabled,
+          exportDisabledReason,
           onAddRow,
           addRowLabel,
           onUndo,
@@ -500,8 +502,13 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                           className={classNames.exportCsvButton}
                           style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                           onClick={onExportCsv}
-                          disabled={exportBusy}
+                          disabled={
+                            exportBusy === true || exportDisabled === true
+                          }
                           aria-busy={exportBusy}
+                          title={
+                            exportDisabled ? exportDisabledReason : undefined
+                          }
                         >
                           {/* No kit to borrow a loading button from, so the affordance is an
                   element the host can style — `aria-hidden` because the

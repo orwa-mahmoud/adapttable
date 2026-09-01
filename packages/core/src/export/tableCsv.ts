@@ -8,6 +8,10 @@ import type { FeatureHostState } from "../features/currentHost";
 import { type CellRange, cellRangeIndices } from "../focus/cellRange";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { GetCellSpan } from "../rows/cellSpan";
+import {
+  type CapabilitySource,
+  sourceCapabilities,
+} from "../source/capabilities";
 import type { TableSource } from "../source/TableSource";
 import type { TreeEntry } from "../tree/treeRows";
 import type { ColumnDef, ExtraFilters, SortDirection } from "../types";
@@ -317,12 +321,14 @@ export function resolveExportCsv<TRow = unknown>(
  */
 export function exportAllFallsBackToPage<TRow = unknown>(
   exportCsv: ExportCsvProp<TRow>,
-  source: Pick<TableSource<TRow>, "allFilteredRows">
+  source: CapabilitySource
 ): boolean {
   const options = resolveExportCsv(exportCsv);
+  // The source's own answer, not a guess at its shape: a host that fetches
+  // the rest itself (`request` / `fetchAll`) is covered whatever it declares.
   return Boolean(
     options?.scope === "all" &&
-    source.allFilteredRows === undefined &&
+    sourceCapabilities(source).exportScope === "page" &&
     options.request === undefined &&
     options.fetchAll === undefined
   );

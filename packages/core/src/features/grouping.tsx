@@ -18,6 +18,7 @@ import { useGroupCollapse } from "../grouping/useGroupCollapse";
 import { useGroupPaging } from "../grouping/useGroupPaging";
 import { computePagination } from "../pagination/paginationMath";
 import { insertExtraRows } from "../rows/extraRows";
+import { capabilityReason, sourceCapabilities } from "../source/capabilities";
 import { devWarn } from "../utils/devWarn";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
@@ -40,13 +41,18 @@ function LiveGrouping({
     collapsedGroupIds: props.collapsedGroupIds,
     onCollapsedGroupIdsChange: props.onCollapsedGroupIdsChange,
   });
+  const capabilities = source.capabilities;
+  const canGroup = sourceCapabilities({
+    allFilteredRows: source.allFilteredRows,
+    groups: serverGroups,
+    capabilities,
+  }).grouping;
   useEffect(() => {
-    if (groupByKeys.length === 0) return;
-    if (source.allFilteredRows || serverGroups) return;
+    if (groupByKeys.length === 0 || canGroup !== false) return;
     devWarn(
-      "groupBy is only supported on the frontend data tier (in-memory rows with allFilteredRows). Server-paginated sources cannot regroup a full result set; grouping is ignored."
+      `groupBy is ignored: ${capabilityReason("grouping")} Grouping needs either the full filtered set (\`allFilteredRows\`, which the frontend tier provides) or a source that groups server-side.`
     );
-  }, [groupByKeys, source.allFilteredRows, serverGroups]);
+  }, [groupByKeys, canGroup]);
 
   const { onGroupByChange } = props;
   const { setGroupBy: sourceSetGroupBy } = source;
@@ -72,12 +78,13 @@ function LiveGrouping({
 
   const grouping = useMemo(() => {
     if (groupByKeys.length === 0) return undefined;
-    if (!source.allFilteredRows && !serverGroups) return undefined;
     const kind = groupingComputationKind({
       groupByKeys,
       sourceGroups: serverGroups,
       allFilteredRows: source.allFilteredRows,
+      capabilities,
     });
+    if (kind === "none") return undefined;
     const entries = groupedEntriesForStrategy({
       kind,
       groupByKeys,
@@ -127,6 +134,7 @@ function LiveGrouping({
   }, [
     groupByKeys,
     serverGroups,
+    capabilities,
     source.allFilteredRows,
     chrome.columnLayout.visibleColumns,
     getRowId,

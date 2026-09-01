@@ -666,6 +666,10 @@ export interface ToolbarExtrasSlotProps {
   exportBusy?: boolean;
   exportAnnouncement?: string;
   exportLabel?: string;
+  /** The source cannot cover the export the host asked for. */
+  exportDisabled?: boolean;
+  /** Why the Export button is disabled, localized; empty while it is not. */
+  exportDisabledReason?: string;
   /** Resolved labels for density and fullscreen controls. */
   labels: Required<TableLabels>;
 }

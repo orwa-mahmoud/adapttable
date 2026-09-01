@@ -130,9 +130,9 @@ in a hundred groups. Fetch a group's rows when it opens by reacting to
 expanded, and the next response fills it in.
 
 **Without the capability**, a server tier that is asked to group says so in
-development — "grouping is only supported on the frontend data tier" — and
-renders ungrouped rather than grouping the page it happens to hold, which would
-be one page's worth of groups presented as the whole set.
+the status bar and in development, and renders ungrouped rather than grouping
+the page it happens to hold, which would be one page's worth of groups
+presented as the whole set.
 
 ## Controlling what is open
 
@@ -337,9 +337,11 @@ export function People() {
   `groupBy={["team", "status"]}` nests each key inside the one before it, to
   any depth. There is no drag-to-group panel — the keys come from your code or
   the URL.
-- **Frontend tier only.** Grouping needs the full filtered row set in memory
-  (`allFilteredRows`). Server-paginated sources log a dev-mode warning and
-  ignore grouping — see [Data tiers](./data-tiers.md).
+- **Somewhere that can group.** Either the full filtered set is in memory
+  (`allFilteredRows`) or the server returns group rows. A source that can do
+  neither — `capabilities.grouping: false`, declared or inferred — renders
+  ungrouped, says so in the status bar and warns in development. See
+  [source capabilities](./data-tiers.md#what-a-source-can-do--capabilities).
 - **Shared mapper.** `groupAggregates(rows)` uses the same
   `(rows) => Partial<Record<string, ReactNode>>` shape as `summaryRow`; reuse
   one function for both if the math is identical — or build both with

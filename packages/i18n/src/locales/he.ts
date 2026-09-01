@@ -215,9 +215,7 @@ export const he: Required<TableLabels> = {
     "הווירטואליזציה כבויה — הטבלה המחולקת לעמודים מציגה עמוד אחד בכל פעם.",
   noticePinNested: "נעיצת שורות כבויה כשיש קיבוץ או עץ.",
   noticeReorderNested: "סידור מחדש של שורות כבוי כשיש קיבוץ או עץ.",
-  noticeGroupingUnavailable:
-    "הקיבוץ כבוי — המקור אינו מספק את הסט המסונן המלא.",
-  noticeExportAllPage: "ייצוא הכל הוא העמוד הזה — הסט המסונן המלא אינו זמין.",
+  noticeGroupingUnavailable: "הקיבוץ כבוי — מקור זה אינו יכול לקבץ.",
+  noticeExportAllPage: "ייצוא הכל כבוי — מקור זה מספק עמוד אחד בכל פעם.",
   noticeEditWithoutWriter: "העריכה כבויה — לא חובר מטפל כתיבה.",
-  exportThisPage: "ייצוא העמוד הזה",
 };

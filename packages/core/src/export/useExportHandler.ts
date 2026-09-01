@@ -15,6 +15,7 @@
  */
 import { useCallback, useRef, useState } from "react";
 
+import { capabilityReason } from "../source/capabilities";
 import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { exportButtonLabel } from "./exportLabel";
@@ -53,6 +54,17 @@ export interface ExportHandlerState {
    * should have to correct.
    */
   exportLabel: string;
+  /**
+   * The export the host asked for is beyond what the source can do. Adapters
+   * render the button disabled — the reader is told, rather than handed a
+   * narrower file than the one the button offered.
+   */
+  exportDisabled: boolean;
+  /**
+   * Why the button is disabled, localized, empty while it is not. Adapters
+   * attach it to the control so the reason travels with the thing it explains.
+   */
+  exportDisabledReason: string;
 }
 
 /**
@@ -62,8 +74,9 @@ export interface ExportHandlerState {
  *   when the `exportCsv` prop is off.
  * @param labels - Resolved table labels, for the caption and the announcements.
  * @param format - The writer's extension. Defaults to `"csv"`, the built-in.
- * @param pageOnly - The handler writes the current page even though the
- *   host asked for `"all"`. The button says so instead of "Export CSV".
+ * @param pageOnly - The source holds one page and the host asked for `"all"`.
+ *   The button is disabled and says why, because the file it would write is
+ *   not the file it offered.
  *
  * @public
  */
@@ -83,6 +96,9 @@ export function useExportHandler(
   const inFlight = useRef(false);
 
   const onExportCsv = useCallback(() => {
+    // A disabled control still takes a programmatic click, and the fallback
+    // export must not slip through behind one.
+    if (pageOnly) return;
     if (!handler || inFlight.current) return;
     setExportStatus("busy");
     setRun((n) => n + 1);
@@ -124,7 +140,7 @@ export function useExportHandler(
         );
       }
     );
-  }, [handler]);
+  }, [handler, pageOnly]);
 
   // The button stays rendered while busy — disabled, not gone.
   return {
@@ -132,9 +148,11 @@ export function useExportHandler(
     exportBusy: exportStatus === "busy",
     exportStatus,
     exportAnnouncement: announcementFor(exportStatus, run, labels),
-    exportLabel: pageOnly
-      ? (labels?.exportThisPage ?? "Export this page")
-      : exportButtonLabel(labels, format),
+    exportLabel: exportButtonLabel(labels, format),
+    exportDisabled: pageOnly,
+    exportDisabledReason: pageOnly
+      ? (labels?.noticeExportAllPage ?? capabilityReason("exportScope"))
+      : "",
   };
 }
 

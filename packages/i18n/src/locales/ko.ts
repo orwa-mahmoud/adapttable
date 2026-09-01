@@ -217,10 +217,9 @@ export const ko: Required<TableLabels> = {
   noticePinNested: "그룹화 또는 트리가 켜져 있으면 행 고정은 꺼집니다.",
   noticeReorderNested: "그룹화 또는 트리가 켜져 있으면 행 재배치는 꺼집니다.",
   noticeGroupingUnavailable:
-    "그룹화는 꺼져 있습니다. 이 소스는 필터된 전체 집합을 제공하지 않습니다.",
+    "그룹화가 꺼져 있습니다. 이 소스는 그룹화할 수 없습니다.",
   noticeExportAllPage:
-    "모두 내보내기는 이 페이지입니다. 필터된 전체 집합을 쓸 수 없습니다.",
+    "모두 내보내기가 꺼져 있습니다. 이 소스는 한 번에 한 페이지만 제공합니다.",
   noticeEditWithoutWriter:
     "편집은 꺼져 있습니다. 쓰기 처리기가 연결되어 있지 않습니다.",
-  exportThisPage: "이 페이지 내보내기",
 };

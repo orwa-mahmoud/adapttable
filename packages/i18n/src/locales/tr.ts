@@ -217,10 +217,8 @@ export const tr: Required<TableLabels> = {
     "Sanallaştırma kapalı — bu sayfalanmış tablo her seferinde bir sayfa gösterir.",
   noticePinNested: "Gruplama veya ağaç açıkken satır sabitleme kapalıdır.",
   noticeReorderNested: "Gruplama veya ağaç açıkken satır sıralama kapalıdır.",
-  noticeGroupingUnavailable:
-    "Gruplama kapalı — bu kaynak tam filtrelenmiş kümeyi sağlamıyor.",
+  noticeGroupingUnavailable: "Gruplama kapalı — bu kaynak gruplayamaz.",
   noticeExportAllPage:
-    "Tümünü dışa aktarma bu sayfadır — tam filtrelenmiş küme yok.",
+    "Tümünü dışa aktarma kapalı — bu kaynak her seferinde tek sayfa verir.",
   noticeEditWithoutWriter: "Düzenleme kapalı — yazma işleyicisi bağlı değil.",
-  exportThisPage: "Bu sayfayı dışa aktar",
 };
