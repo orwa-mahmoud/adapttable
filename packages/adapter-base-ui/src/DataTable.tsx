@@ -6,6 +6,7 @@ import {
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
+  ContextMenuLiveGate,
   DataTableShellView,
   FeatureHostProvider,
   FeatureProviders,
@@ -16,6 +17,7 @@ import {
   type FiltersFormSlotProps,
   FIND_BAR,
   GRID_FOCUS_ANNOUNCER,
+  OptionalSidePanel,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
@@ -36,7 +38,6 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
-import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import { ensureBaseUiStyles } from "./injectStyles";
 import { subtleText } from "./styles";
 import type { DataTableProps } from "./types";

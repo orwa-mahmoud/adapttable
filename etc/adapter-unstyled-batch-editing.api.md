@@ -4,11 +4,11 @@
 
 ```ts
 
-import { batchEditing as batchEditing_2 } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { BatchRowEdit } from '@adapttable/core';
+import { TableFeature } from '@adapttable/core';
 
 // @public
-export function batchEditing<TRow>(onBatchEdit: Parameters<typeof batchEditing_2<TRow>>[0]): TableFeature<TRow>;
+export const batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 

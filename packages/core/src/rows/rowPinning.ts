@@ -16,6 +16,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 import type { RowAction } from "../types";
 
+export { partitionPinnedRows, rowPinSignature } from "./rowPresentation";
+
 /**
  * Which edge a pinned row sticks to.
  *
@@ -91,51 +93,6 @@ export interface RowPinningState<TRow> {
   unpin: (rowId: string) => void;
   /** Pin actions, hidden per row so a top-pinned row does not offer Pin to top. */
   actions: readonly RowAction<TRow>[];
-}
-
-/**
- * Split a row list into top pins, the scroll window, and bottom pins.
- *
- * @public
- */
-export function partitionPinnedRows<TRow>(
-  rows: readonly TRow[],
-  state: RowPinState,
-  getRowId: (row: TRow) => string
-): { top: TRow[]; scroll: TRow[]; bottom: TRow[] } {
-  const topSet = new Set(state.top);
-  const bottomSet = new Set(state.bottom);
-  const byId = new Map<string, TRow>();
-  for (const row of rows) byId.set(getRowId(row), row);
-  const top: TRow[] = [];
-  for (const id of state.top) {
-    const row = byId.get(id);
-    if (row !== undefined) top.push(row);
-  }
-  const bottom: TRow[] = [];
-  for (const id of state.bottom) {
-    const row = byId.get(id);
-    if (row !== undefined) bottom.push(row);
-  }
-  const scroll: TRow[] = [];
-  for (const row of rows) {
-    const id = getRowId(row);
-    if (!topSet.has(id) && !bottomSet.has(id)) scroll.push(row);
-  }
-  return { top, scroll, bottom };
-}
-
-/**
- * Memo digest so a virtualized row repaints when it is pinned or unpinned.
- *
- * @public
- */
-export function rowPinSignature(
-  pinning: Pick<RowPinningState<unknown>, "sideOf"> | undefined,
-  rowId: string
-): string | null {
-  if (!pinning) return null;
-  return pinning.sideOf(rowId) ?? "";
 }
 
 function withoutId(ids: readonly string[], rowId: string): string[] {

@@ -47,6 +47,106 @@ export interface ActiveFilterChipsSlotProps {
 }
 
 // @public
+export type AdapterCommandPaletteFeature = (options?: boolean | CommandPaletteOptions) => StaticTableFeature;
+
+// @public
+export type AdapterCommandPaletteProps = Omit<CommandPaletteChromeProps, "slots">;
+
+// @public
+export type AdapterContextMenuFeature = <TRow>(options?: boolean | ContextMenuOptions<TRow>) => TableFeature<TRow>;
+
+// @public
+export type AdapterContextMenuProps = Omit<ContextMenuChromeProps, "slots">;
+
+// @public
+export interface AdapterEditingComponents {
+    readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<never>>;
+    readonly EditableCell: AdapterFeatureComponent<EditableCellSlotProps<never>>;
+    readonly historyIncludesControls?: boolean;
+    readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<never>>;
+    readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
+}
+
+// @public
+export interface AdapterEditingFeatures {
+    readonly batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;
+    readonly dirtyIndicators: () => StaticTableFeature;
+    readonly editHistory: (options?: boolean | {
+        depth?: number;
+    }) => StaticTableFeature;
+    readonly editing: <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
+    readonly rowEditing: <TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
+    readonly undoRedoButtons: () => StaticTableFeature;
+}
+
+// @public
+export type AdapterFeatureComponent<TProps> = ComponentType<Readonly<TProps>>;
+
+// @public
+export interface AdapterFiltersComponents {
+    readonly ActiveFilterChips: AdapterFeatureComponent<ActiveFilterChipsSlotProps>;
+    readonly FilterDrawer: AdapterFeatureComponent<FilterOverlaySlotProps>;
+    readonly FilterPopover: AdapterFeatureComponent<FilterOverlaySlotProps>;
+    readonly FiltersForm: AdapterFeatureComponent<FiltersFormSlotProps<never>>;
+}
+
+// @public
+export interface AdapterFiltersFeature {
+    (form: ReactNode): StaticTableFeature;
+    <TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+}
+
+// @public
+export interface AdapterGroupingComponents {
+    readonly GroupHeaderCard: AdapterFeatureComponent<GroupHeaderCardSlotProps<never>>;
+    readonly GroupHeaderRow: AdapterFeatureComponent<GroupHeaderRowSlotProps<never>>;
+}
+
+// @public
+export interface AdapterGroupingFeature {
+    (groupBy: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature;
+    <TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
+}
+
+// @public
+export interface AdapterRowDetailComponents {
+    readonly ExpandToggle: AdapterFeatureComponent<ExpandToggleSlotProps>;
+}
+
+// @public
+export interface AdapterRowDetailFeatures {
+    readonly nestedTable: <TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]) => TableFeature<TRow>;
+    readonly rowDetail: <TRow>(renderRowDetail: (row: TRow) => unknown, defaultExpandedRowIds?: readonly string[]) => TableFeature<TRow>;
+}
+
+// @public
+export interface AdapterRowReorderComponents {
+    readonly RowReorderButtons: AdapterFeatureComponent<RowReorderButtonsProps<never>>;
+    readonly RowReorderHandle: AdapterFeatureComponent<RowReorderHandleProps<never>>;
+}
+
+// @public
+export type AdapterRowReorderFeature = <TRow>(onRowReorder: RowReorderHandler<TRow>) => TableFeature<TRow>;
+
+// @public
+export interface AdapterStandardFeatureFactories {
+    readonly bulkActions: (actions: readonly BulkAction[]) => StaticTableFeature;
+    readonly columnMenu: () => StaticTableFeature;
+    readonly densityChooser: () => StaticTableFeature;
+    readonly exportCsv: () => StaticTableFeature;
+    readonly filters: <TRow>(defs: readonly FilterDef<TRow>[]) => TableFeature<TRow>;
+    readonly findInTable: () => StaticTableFeature;
+    readonly fitColumns: () => StaticTableFeature;
+    readonly fullscreen: () => StaticTableFeature;
+    readonly grouping: (groupBy: string | readonly string[]) => StaticTableFeature;
+    readonly headerFilters: () => StaticTableFeature;
+    readonly multiSort: () => StaticTableFeature;
+    readonly resizableColumns: () => StaticTableFeature;
+    readonly savedViews: (options: UseSavedViewsOptions) => StaticTableFeature;
+    readonly statusBar: () => StaticTableFeature;
+}
+
+// @public
 export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
@@ -1124,6 +1224,12 @@ export interface ContextMenuItemProps {
 export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 
 // @public
+export function ContextMenuLiveGate(input: {
+    readonly props: Omit<ContextMenuLiveSlotProps<never>, "children">;
+    readonly children: (regionProps: Record<string, unknown>) => ReactNode;
+}): ReactNode;
+
+// @public
 export interface ContextMenuLiveSlotProps<TRow = never> extends TableContextMenuOptions<TRow> {
     children: (regionProps: Record<string, unknown>) => ReactNode;
     container?: HTMLElement | null;
@@ -1172,6 +1278,30 @@ export type ContextMenuTarget<TRow> = {
     rowId: string;
     columnKey: string;
 };
+
+// @public
+export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatureComponent<AdapterCommandPaletteProps>): AdapterCommandPaletteFeature;
+
+// @public
+export function createAdapterContextMenuFeature(ContextMenu: AdapterFeatureComponent<AdapterContextMenuProps>): AdapterContextMenuFeature;
+
+// @public
+export function createAdapterEditingFeatures(components: AdapterEditingComponents): AdapterEditingFeatures;
+
+// @public
+export function createAdapterFiltersFeature(components: AdapterFiltersComponents): AdapterFiltersFeature;
+
+// @public
+export function createAdapterGroupingFeature(components: AdapterGroupingComponents): AdapterGroupingFeature;
+
+// @public
+export function createAdapterRowDetailFeatures(components: AdapterRowDetailComponents): AdapterRowDetailFeatures;
+
+// @public
+export function createAdapterRowReorderFeature(components: AdapterRowReorderComponents): AdapterRowReorderFeature;
+
+// @public
+export function createAdapterStandardFeatures(factories: AdapterStandardFeatureFactories): StandardFeaturesFactory;
 
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
@@ -1339,7 +1469,7 @@ export interface DesktopRowWiring<TRow> {
     columnSpan: number;
     columnWidths?: Readonly<Record<string, number>>;
     confirm: ConfirmHandler;
-    edgeRowPin: ReturnType<typeof pinnedRowCellStyle$1>;
+    edgeRowPin: ReturnType<typeof pinnedRowCellStyle>;
     editing: EditableCellEditing<TRow> | undefined;
     editingSignature: string | null;
     expanded: boolean | undefined;
@@ -1367,7 +1497,7 @@ export interface DesktopRowWiring<TRow> {
     pinPart: ReturnType<typeof pinnedRowPart$1>;
     pinRowSticky: boolean;
     pinSignature: string;
-    pinSticky: ReturnType<typeof pinnedRowSticky$1>;
+    pinSticky: ReturnType<typeof pinnedRowSticky>;
     renderDetail: (row: TRow) => ReactNode;
     renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
     reorderPinned: boolean;
@@ -2892,6 +3022,12 @@ export const GROUPING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 export type GroupingCapability = "client" | "server" | false;
 
 // @public
+export interface GroupingExtras<TRow> extends StaticGroupingExtras {
+    groupAggregates?: (rows: readonly TRow[]) => unknown;
+    groupSort?: GroupSort<TRow>;
+}
+
+// @public
 export function GroupMoreButtonChrome(input: Readonly<GroupMoreButtonChromeProps>): ReactElement;
 
 // @public
@@ -3156,6 +3292,13 @@ export function normalizeEditorOptions(options: readonly CellEditorOption[] | re
 
 // @public
 export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
+
+// @public
+export function OptionalSidePanel(input: {
+    readonly side?: "start" | "end";
+    readonly body: ReactNode;
+    readonly panel: ReactNode;
+}): ReactNode;
 
 // @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[]): readonly VirtualTableRow<TRow>[];
@@ -3767,6 +3910,9 @@ export interface RowReorderHandleProps<TRow> {
 }
 
 // @public
+export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
+
+// @public
 export interface RowReorderHandleSlotProps {
     readonly className?: string;
     readonly dragging: boolean;
@@ -4271,7 +4417,33 @@ export interface SortLevel {
 }
 
 // @public
+export interface StandardFeatureOptions<TRow> {
+    readonly bulkActions?: readonly BulkAction[];
+    readonly filters?: readonly FilterDef<TRow>[];
+    readonly grouping?: string | readonly string[];
+    readonly savedViews?: UseSavedViewsOptions;
+}
+
+// @public
+export interface StandardFeaturesFactory {
+    (): StaticTableFeature[];
+    <TRow>(options?: StandardFeatureOptions<TRow>): TableFeature<TRow>[];
+}
+
+// @public
 export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
+
+// @public
+export interface StaticGroupingExtras {
+    collapsedGroupIds?: readonly string[];
+    groupFilter?: (group: unknown) => boolean;
+    groupFooters?: boolean;
+    groupPageSize?: number;
+    groupRowPageSize?: number;
+    onCollapsedGroupIdsChange?: (ids: string[]) => void;
+    onGroupByChange?: (groupBy: readonly string[]) => void;
+    onGroupLoadMore?: (groupKey: string) => void;
+}
 
 // @public
 export interface StaticTableFeature {

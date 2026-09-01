@@ -90,15 +90,47 @@ describe("readReport", () => {
 
   it("reads a star re-export as a forwarded target", () => {
     assert.deepEqual(
-      readReport('export * from "@adapttable/unstyled/features";\n').stars,
+      readReport("export * from '@adapttable/unstyled/features';\n").stars,
       ["@adapttable/unstyled/features"]
     );
+  });
+
+  it("records an external named re-export without inventing a local tag", () => {
+    const report = readReport(
+      "import { filterTypes } from '@adapttable/core/features';\n" +
+        "export { filterTypes }\n"
+    );
+    assert.deepEqual(publicNames(report), []);
+    assert.ok(report.exported.has("filterTypes"));
+    assert.ok(report.forwarded.has("filterTypes"));
   });
 });
 
 describe("both directions", () => {
   it("passes when the contract and the report agree", () => {
     assert.deepEqual(run(agreeing()), []);
+  });
+
+  it("accepts a named re-export as part of a declared surface", () => {
+    assert.deepEqual(
+      checkContract({
+        manifest: {
+          surfaces: { filters: ["filterTypes"] },
+          entrypoints: {
+            "filters.api.md": { surface: "filters" },
+          },
+        },
+        entrypoints: [
+          { ...ENTRY, report: "filters.api.md", isMainEntry: false },
+        ],
+        reports: {
+          "filters.api.md":
+            "import { filterTypes } from '@adapttable/core/features';\n" +
+            "export { filterTypes }\n",
+        },
+      }),
+      []
+    );
   });
 
   it("fails an @public symbol the contract does not list", () => {
@@ -246,6 +278,64 @@ describe("re-export policies", () => {
         reports: { "adapter-shadcn-features.api.md": forwarding },
       }),
       []
+    );
+  });
+
+  it("uses a canonical wildcard without copying every surface name", () => {
+    assert.deepEqual(
+      checkContract({
+        manifest: {
+          surfaces: { "kit/features": ["rowReorder", "savedViews"] },
+          entrypoints: {
+            "adapter-antd-features.api.md": {
+              reexport: "kit/features",
+              from: "@adapttable/core/features",
+            },
+          },
+        },
+        entrypoints: [
+          {
+            ...ENTRY,
+            report: "adapter-antd-features.api.md",
+            isMainEntry: false,
+          },
+        ],
+        reports: {
+          "adapter-antd-features.api.md":
+            "export * from '@adapttable/core/features';\n",
+        },
+      }),
+      []
+    );
+  });
+
+  it("fails when a canonical wildcard changes source", () => {
+    const errors = checkContract({
+      manifest: {
+        surfaces: { "kit/features": ["rowReorder"] },
+        entrypoints: {
+          "adapter-antd-features.api.md": {
+            reexport: "kit/features",
+            from: "@adapttable/core/features",
+          },
+        },
+      },
+      entrypoints: [
+        {
+          ...ENTRY,
+          report: "adapter-antd-features.api.md",
+          isMainEntry: false,
+        },
+      ],
+      reports: {
+        "adapter-antd-features.api.md":
+          "export * from '@adapttable/other/features';\n",
+      },
+    });
+    assert.ok(
+      errors.some((error) =>
+        /no longer forwards its canonical source/.test(error)
+      )
     );
   });
 

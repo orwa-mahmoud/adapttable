@@ -4,30 +4,30 @@
 
 ```ts
 
-import { batchEditing as batchEditing_2 } from '@adapttable/core/features';
-import { FeaturePatch } from '@adapttable/core/features';
-import { StaticTableFeature } from '@adapttable/core/adapter';
-import { TableFeature } from '@adapttable/core/adapter';
+import { BatchRowEdit } from '@adapttable/core';
+import { FeaturePatch } from '@adapttable/core';
+import { StaticTableFeature } from '@adapttable/core';
+import { TableFeature } from '@adapttable/core';
 
 // @public
-export function batchEditing<TRow>(onBatchEdit: Parameters<typeof batchEditing_2<TRow>>[0]): TableFeature<TRow>;
+export const batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;
 
 // @public
-export function dirtyIndicators(): StaticTableFeature;
+export const dirtyIndicators: () => StaticTableFeature;
 
 // @public
-export function editHistory(options?: boolean | {
+export const editHistory: (options?: boolean | {
     depth?: number;
-}): StaticTableFeature;
+}) => StaticTableFeature;
 
 // @public
-export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
+export const editing: <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
 
 // @public
-export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
+export const rowEditing: <TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
 
 // @public
-export function undoRedoButtons(): StaticTableFeature;
+export const undoRedoButtons: () => StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

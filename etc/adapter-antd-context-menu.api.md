@@ -4,11 +4,10 @@
 
 ```ts
 
-import { ContextMenuOptions } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { AdapterContextMenuFeature } from '@adapttable/core/adapter';
 
 // @public
-export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
+export const contextMenu: AdapterContextMenuFeature;
 
 // (No @packageDocumentation comment for this package)
 

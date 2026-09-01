@@ -13,6 +13,12 @@
 import type { PinOffset } from "../columns/useColumnLayout";
 import type { ColumnDef } from "../types";
 
+export {
+  bodyCellsHaveRowSpan,
+  cellsForRow,
+  rowSpanSignature,
+} from "./rowPresentation";
+
 /**
  * What {@link GetCellSpan} may return. Omitted sides default to 1.
  *
@@ -95,22 +101,6 @@ export interface BodyCell<TRow> {
   colSpan: number;
   /** Rows this cell covers. */
   rowSpan: number;
-}
-
-/**
- * True when any origin cell is taller than one row.
- *
- * @public
- */
-export function bodyCellsHaveRowSpan(
-  cellsByRow: ReadonlyMap<string, readonly { rowSpan: number }[]>
-): boolean {
-  for (const cells of cellsByRow.values()) {
-    for (const cell of cells) {
-      if (cell.rowSpan > 1) return true;
-    }
-  }
-  return false;
 }
 
 /**
@@ -492,30 +482,4 @@ export function coveredAddressSet<TRow>(options: {
     }
   }
   return covered;
-}
-
-/**
- * Memo digest so a virtualized row repaints when its spans change.
- *
- * @public
- */
-export function rowSpanSignature<TRow>(
-  cells: readonly BodyCell<TRow>[] | undefined
-): string {
-  if (!cells || cells.length === 0) return "";
-  return cells
-    .map((cell) => `${cell.column.key}:${cell.colSpan}x${cell.rowSpan}`)
-    .join(",");
-}
-
-/**
- * Look up a row's cells; empty when the row is unknown.
- *
- * @public
- */
-export function cellsForRow<TRow>(
-  cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined,
-  rowKey: string
-): readonly BodyCell<TRow>[] {
-  return cellsByRow?.get(rowKey) ?? [];
 }

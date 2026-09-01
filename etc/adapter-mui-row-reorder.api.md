@@ -4,11 +4,10 @@
 
 ```ts
 
-import { rowReorder as rowReorder_2 } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { AdapterRowReorderFeature } from '@adapttable/core/adapter';
 
 // @public
-export function rowReorder<TRow>(onRowReorder: Parameters<typeof rowReorder_2<TRow>>[0]): TableFeature<TRow>;
+export const rowReorder: AdapterRowReorderFeature;
 
 // (No @packageDocumentation comment for this package)
 

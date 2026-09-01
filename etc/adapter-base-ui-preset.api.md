@@ -4,25 +4,13 @@
 
 ```ts
 
-import { BulkAction } from '@adapttable/core';
-import { FilterDef } from '@adapttable/core';
-import { StaticTableFeature } from '@adapttable/core';
-import { TableFeature } from '@adapttable/core';
-import { UseSavedViewsOptions } from '@adapttable/core';
+import { StandardFeatureOptions } from '@adapttable/core/adapter';
+import { StandardFeaturesFactory } from '@adapttable/core/adapter';
+
+export { StandardFeatureOptions }
 
 // @public
-export interface StandardFeatureOptions<TRow> {
-    bulkActions?: readonly BulkAction[];
-    filters?: readonly FilterDef<TRow>[];
-    grouping?: string | readonly string[];
-    savedViews?: UseSavedViewsOptions;
-}
-
-// @public
-export function standardFeatures(): StaticTableFeature[];
-
-// @public
-export function standardFeatures<TRow>(options?: StandardFeatureOptions<TRow>): TableFeature<TRow>[];
+export const standardFeatures: StandardFeaturesFactory;
 
 // (No @packageDocumentation comment for this package)
 

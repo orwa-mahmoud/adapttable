@@ -1,22 +1,10 @@
 import {
-  ACTIVE_FILTER_CHIPS,
-  extendFeature,
-  FILTER_DRAWER,
-  FILTER_POPOVER,
-  FILTERS_FORM,
+  createAdapterFiltersFeature,
+  type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
-  slotRender,
-  type StaticTableFeature,
-  type TableFeature,
 } from "@adapttable/core/adapter";
-import {
-  type FilterDef,
-  filters as coreFilters,
-  filterTypes as coreFilterTypes,
-  type FilterTypeSpec,
-} from "@adapttable/core/features";
+export { filterTypes } from "@adapttable/core/features";
 import { Stack } from "@mui/material";
-import type { ReactNode } from "react";
 
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";
@@ -56,45 +44,14 @@ function FiltersForm({
   );
 }
 
-/**
- * Declarative filters with MUI's chip strip and filter panel.
- *
- * @public
- */
-export function filters(form: ReactNode): StaticTableFeature;
-/**
- * Declarative filters with custom definitions.
- *
- * @public
- */
-export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[]
-): TableFeature<TRow>;
-/**
- * Declarative filters with custom definitions or a hand-built panel.
- *
- * @public
- */
-export function filters<TRow>(
-  defs: readonly FilterDef<TRow>[] | ReactNode
-): TableFeature<TRow> {
-  return extendFeature(coreFilters(defs as readonly FilterDef<TRow>[]), [
-    slotRender(FILTERS_FORM, (props) => <FiltersForm {...props} />),
-    slotRender(ACTIVE_FILTER_CHIPS, (props) => <Chips {...props} />),
-    slotRender(FILTER_DRAWER, (props) => <FilterDrawer {...props} />),
-    slotRender(FILTER_POPOVER, (props) => (
-      <FilterPopover {...props} anchorEl={props.anchorEl ?? null} />
-    )),
-  ]);
+function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
+  return <FilterPopover {...props} anchorEl={props.anchorEl ?? null} />;
 }
 
-/**
- * Register custom filter types the panel can render.
- *
- * @public
- */
-export function filterTypes(
-  specs: readonly FilterTypeSpec[]
-): StaticTableFeature {
-  return coreFilterTypes(specs);
-}
+/** Declarative filters with this kit's chip strip and panel. @public */
+export const filters = createAdapterFiltersFeature({
+  FiltersForm,
+  ActiveFilterChips: Chips,
+  FilterDrawer: FilterDrawer,
+  FilterPopover: PopoverSlot,
+});

@@ -60,6 +60,7 @@ import {
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
+  ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
   DEFAULT_CARD_SIZE_PX,
   EXTRA_OVER_SPAN_ROW_STYLE,
@@ -82,6 +83,7 @@ import {
   type KeyedVirtualization,
   type KeyedWindowSlotProps,
   mobileCardListStyle,
+  OptionalSidePanel,
   pinnedRowPart,
   pinnedRowStickyStyle,
   printToolbar,
@@ -158,7 +160,6 @@ import {
 import { MobileCards } from "./components/MobileCards";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
-import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { DataTableProps } from "./types";
 
 /**

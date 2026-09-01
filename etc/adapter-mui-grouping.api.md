@@ -4,17 +4,11 @@
 
 ```ts
 
-import { GroupingExtras } from '@adapttable/core/features';
+import { AdapterGroupingFeature } from '@adapttable/core/adapter';
 import { GroupSort } from '@adapttable/core/features';
-import { StaticGroupingExtras } from '@adapttable/core/features';
-import { StaticTableFeature } from '@adapttable/core/adapter';
-import { TableFeature } from '@adapttable/core/adapter';
 
 // @public
-export function grouping(groupBy: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature;
-
-// @public
-export function grouping<TRow>(groupBy: string | readonly string[], extras: GroupingExtras<TRow>): TableFeature<TRow>;
+export const grouping: AdapterGroupingFeature;
 
 export { GroupSort }
 

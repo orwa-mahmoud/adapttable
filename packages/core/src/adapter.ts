@@ -65,6 +65,52 @@ export {
   type TableContextMenu,
   useTableContextMenu,
 } from "./actions/useTableContextMenu";
+export {
+  type AdapterCommandPaletteFeature,
+  type AdapterCommandPaletteProps,
+  createAdapterCommandPaletteFeature,
+} from "./adapterFeatures/commandPalette";
+export type { AdapterFeatureComponent } from "./adapterFeatures/component";
+export {
+  type AdapterContextMenuFeature,
+  type AdapterContextMenuProps,
+  createAdapterContextMenuFeature,
+} from "./adapterFeatures/contextMenu";
+export {
+  type AdapterEditingComponents,
+  type AdapterEditingFeatures,
+  createAdapterEditingFeatures,
+} from "./adapterFeatures/editing";
+export {
+  ContextMenuLiveGate,
+  OptionalSidePanel,
+} from "./adapterFeatures/featureRoot";
+export {
+  type AdapterFiltersComponents,
+  type AdapterFiltersFeature,
+  createAdapterFiltersFeature,
+} from "./adapterFeatures/filters";
+export {
+  type AdapterGroupingComponents,
+  type AdapterGroupingFeature,
+  createAdapterGroupingFeature,
+} from "./adapterFeatures/grouping";
+export {
+  type AdapterRowDetailComponents,
+  type AdapterRowDetailFeatures,
+  createAdapterRowDetailFeatures,
+} from "./adapterFeatures/rowDetail";
+export {
+  type AdapterRowReorderComponents,
+  type AdapterRowReorderFeature,
+  createAdapterRowReorderFeature,
+} from "./adapterFeatures/rowReorder";
+export {
+  type AdapterStandardFeatureFactories,
+  createAdapterStandardFeatures,
+  type StandardFeatureOptions,
+  type StandardFeaturesFactory,
+} from "./adapterFeatures/standardPreset";
 export type { AggregateName, Aggregator } from "./aggregate/aggregate";
 export {
   type ColumnGroupToggleButtonProps,
@@ -230,6 +276,7 @@ export {
   FeatureHostProvider,
   useFeatureHost,
 } from "./features/featureHostContext";
+export type { GroupingExtras, StaticGroupingExtras } from "./features/grouping";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
@@ -550,7 +597,7 @@ export type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
 export { type RowClickProps, rowClickProps } from "./rows/rowClickProps";
 export type { RowPinningState, RowPinSide } from "./rows/rowPinning";
 export { rowPinSignature } from "./rows/rowPinning";
-export type { RowReorderLabels } from "./rows/rowReorder";
+export type { RowReorderHandler, RowReorderLabels } from "./rows/rowReorder";
 export {
   REORDER_COLUMN_WIDTH,
   ROW_DND_MIME,

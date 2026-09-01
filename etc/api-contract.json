@@ -1072,6 +1072,22 @@
       "ActionConfirm",
       "ActiveFilterChip",
       "ActiveFilterChipsSlotProps",
+      "AdapterCommandPaletteFeature",
+      "AdapterCommandPaletteProps",
+      "AdapterContextMenuFeature",
+      "AdapterContextMenuProps",
+      "AdapterEditingComponents",
+      "AdapterEditingFeatures",
+      "AdapterFeatureComponent",
+      "AdapterFiltersComponents",
+      "AdapterFiltersFeature",
+      "AdapterGroupingComponents",
+      "AdapterGroupingFeature",
+      "AdapterRowDetailComponents",
+      "AdapterRowDetailFeatures",
+      "AdapterRowReorderComponents",
+      "AdapterRowReorderFeature",
+      "AdapterStandardFeatureFactories",
       "AggregateFn",
       "AggregateName",
       "Aggregator",
@@ -1194,6 +1210,7 @@
       "ContextMenuItem",
       "ContextMenuItemProps",
       "ContextMenuItemsFactory",
+      "ContextMenuLiveGate",
       "ContextMenuLiveSlotProps",
       "ContextMenuOptions",
       "ContextMenuPoint",
@@ -1395,6 +1412,7 @@
       "GroupedFlatEntry",
       "GroupedHeaderAlign",
       "GroupingCapability",
+      "GroupingExtras",
       "HeaderGroupCell",
       "HeaderSelectionState",
       "HistoryLiveGate",
@@ -1415,6 +1433,7 @@
       "NestedTableParent",
       "OVERLAY_MOTION",
       "OverlayTransition",
+      "OptionalSidePanel",
       "PINNED_BOTTOM_PART",
       "PINNED_TOP_PART",
       "PINNING_LIVE",
@@ -1496,6 +1515,7 @@
       "RowReorderHandleProps",
       "RowReorderHandleSlotProps",
       "RowReorderHandleSlots",
+      "RowReorderHandler",
       "RowReorderLabels",
       "RowReorderMoveButtonProps",
       "RowReorderState",
@@ -1551,7 +1571,10 @@
       "SortDirection",
       "SortLevel",
       "SortableValue",
+      "StandardFeatureOptions",
+      "StandardFeaturesFactory",
       "StaticFeatureHost",
+      "StaticGroupingExtras",
       "StaticTableFeature",
       "StatusBarChrome",
       "StatusBarChromeProps",
@@ -1636,6 +1659,14 @@
       "columnSelectLabel",
       "columnSizeStyle",
       "commitBooleanDraft",
+      "createAdapterCommandPaletteFeature",
+      "createAdapterContextMenuFeature",
+      "createAdapterEditingFeatures",
+      "createAdapterFiltersFeature",
+      "createAdapterGroupingFeature",
+      "createAdapterRowDetailFeatures",
+      "createAdapterRowReorderFeature",
+      "createAdapterStandardFeatures",
       "createDesktopRow",
       "deriveSortByOptions",
       "editableCellController",
@@ -2210,9 +2241,6 @@
     "forwards @adapttable/unstyled/extra-rows": [
       "@adapttable/unstyled/extra-rows"
     ],
-    "forwards @adapttable/unstyled/features": [
-      "@adapttable/unstyled/features"
-    ],
     "forwards @adapttable/unstyled/filters": [
       "@adapttable/unstyled/filters"
     ],
@@ -2601,7 +2629,8 @@
       "reexport": "kit/extra-rows"
     },
     "adapter-antd-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-antd-filters.api.md": {
       "surface": "kit/filters"
@@ -2715,7 +2744,8 @@
       "reexport": "kit/extra-rows"
     },
     "adapter-base-ui-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-base-ui-filters.api.md": {
       "surface": "kit/filters"
@@ -2799,7 +2829,8 @@
       "reexport": "bootstrap/editing"
     },
     "adapter-bootstrap-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-bootstrap-grouping.api.md": {
       "reexport": "bootstrap/grouping"
@@ -2859,7 +2890,8 @@
       "reexport": "kit/extra-rows"
     },
     "adapter-chakra-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-chakra-filters.api.md": {
       "surface": "kit/filters"
@@ -2973,7 +3005,8 @@
       "reexport": "kit/extra-rows"
     },
     "adapter-mantine-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-mantine-filters.api.md": {
       "surface": "kit/filters"
@@ -3087,7 +3120,8 @@
       "reexport": "kit/extra-rows"
     },
     "adapter-mui-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-mui-filters.api.md": {
       "surface": "adapter-mui-filters"
@@ -3201,7 +3235,8 @@
       "reexport": "kit/extra-rows"
     },
     "adapter-radix-features.api.md": {
-      "reexport": "kit/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/core/features"
     },
     "adapter-radix-filters.api.md": {
       "surface": "kit/filters"
@@ -3315,7 +3350,8 @@
       "reexport": "forwards @adapttable/unstyled/extra-rows"
     },
     "adapter-shadcn-features.api.md": {
-      "reexport": "forwards @adapttable/unstyled/features"
+      "reexport": "kit/features",
+      "from": "@adapttable/unstyled/features"
     },
     "adapter-shadcn-filters.api.md": {
       "reexport": "forwards @adapttable/unstyled/filters"

@@ -8,17 +8,30 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import type { PinOffset } from "../columns/columnLayoutModel";
-import { PIN_Z } from "../columns/columnLayoutModel";
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
-import type { EditableCellEditing } from "../editing/editableCellController";
 import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraEntry, ExtraRow } from "../rows/extraRows";
-import type { RowPinningState, RowPinSide } from "../rows/rowPinning";
+import type { RowPinSide } from "../rows/rowPinning";
+import { extraHostFillStyle } from "../rows/rowPresentation";
 import type { RowReorderState } from "../rows/rowReorder";
-import type { RowHeight, RowStyle } from "../rows/rowStyle";
+import type { RowStyle } from "../rows/rowStyle";
 import type { TreeEntry } from "../tree/treeRows";
 import type { ColumnDef } from "../types";
+
+export {
+  bodyCellsHaveRowSpan,
+  cellsForRow,
+  extraHostFillStyle,
+  pinnedRowCellStyle,
+  pinnedRowSticky,
+  resolveRowStyle,
+  rowEditingSignature,
+  rowIsDirty,
+  rowPinSignature,
+  rowSpanSignature,
+  rowStyleSignature,
+} from "../rows/rowPresentation";
 
 /** Width (px) reserved for the leading reorder column. */
 export const REORDER_COLUMN_WIDTH = 40;
@@ -120,27 +133,6 @@ function leanInsertExtrasBeforeRows<TRow>(
   return rows.map((row) => ({ key: getRowId(row), row }));
 }
 
-function leanExtraHostFillStyle<TRow>(
-  extraKey: string,
-  extraRows: readonly ExtraRow[] | undefined,
-  rows: readonly TRow[],
-  getRowId: (row: TRow) => string,
-  rowStyle: RowStyle<TRow> | undefined
-): CSSProperties | undefined {
-  const extra = extraRows?.find((item) => item.key === extraKey);
-  if (!extra?.beforeRowId) return undefined;
-  const index = rows.findIndex((row) => getRowId(row) === extra.beforeRowId);
-  if (index < 0) return undefined;
-  const visual = resolveRowStyle(rowStyle, undefined, rows[index]!, index);
-  if (!visual) return undefined;
-  const fill: CSSProperties = {};
-  if (visual.backgroundColor !== undefined) {
-    fill.backgroundColor = visual.backgroundColor;
-  }
-  if (visual.background !== undefined) fill.background = visual.background;
-  return Object.keys(fill).length > 0 ? fill : undefined;
-}
-
 function leanInflateBodyCellRowSpans<TRow>(
   cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>
 ): ReadonlyMap<string, readonly BodyCell<TRow>[]> {
@@ -160,7 +152,7 @@ export const LEAN_ASSEMBLY: AssemblyFns = {
   buildBodyCells: leanBuildBodyCells,
   insertExtraRows: leanInsertExtraRows,
   insertExtrasBeforeRows: leanInsertExtrasBeforeRows,
-  extraHostFillStyle: leanExtraHostFillStyle,
+  extraHostFillStyle,
   inflateBodyCellRowSpans: leanInflateBodyCellRowSpans,
   extraCoveredTableSlots: leanExtraCoveredTableSlots,
   columnResizeHandleProps: leanColumnResizeHandleProps,
@@ -208,71 +200,11 @@ export function rowFlashSignature(
   return keys.join(",");
 }
 
-/** True when any origin cell is taller than one row. */
-export function bodyCellsHaveRowSpan(
-  cellsByRow: ReadonlyMap<string, readonly { rowSpan: number }[]>
-): boolean {
-  for (const cells of cellsByRow.values()) {
-    for (const cell of cells) {
-      if (cell.rowSpan > 1) return true;
-    }
-  }
-  return false;
-}
-
-/** Memo digest so a virtualized row repaints when its spans change. */
-export function rowSpanSignature<TRow>(
-  cells: readonly BodyCell<TRow>[] | undefined
-): string {
-  if (!cells || cells.length === 0) return "";
-  return cells
-    .map((cell) => `${cell.column.key}:${cell.colSpan}x${cell.rowSpan}`)
-    .join(",");
-}
-
-/** Look up a row's cells; empty when the row is unknown. */
-export function cellsForRow<TRow>(
-  cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined,
-  rowKey: string
-): readonly BodyCell<TRow>[] {
-  return cellsByRow?.get(rowKey) ?? [];
-}
-
 /** Narrow a body slot to a host-injected extra. */
 export function isExtraEntry(entry: object): entry is ExtraEntry {
   if (!("kind" in entry)) return false;
   const kind = (entry as { kind?: unknown }).kind;
   return kind === "separator" || kind === "fullWidth";
-}
-
-/** Resolve `rowHeight` for one row. */
-function resolveRowHeight<TRow>(
-  rowHeight: RowHeight<TRow> | undefined,
-  row: TRow,
-  index: number
-): number | undefined {
-  if (rowHeight === undefined) return undefined;
-  return typeof rowHeight === "number" ? rowHeight : rowHeight(row, index);
-}
-
-/** Merge `rowStyle` with an explicit height. */
-export function resolveRowStyle<TRow>(
-  rowStyle: RowStyle<TRow> | undefined,
-  rowHeight: RowHeight<TRow> | undefined,
-  row: TRow,
-  index: number
-): CSSProperties | undefined {
-  const style = rowStyle?.(row, index);
-  const height = resolveRowHeight(rowHeight, row, index);
-  if (style === undefined && height === undefined) return undefined;
-  if (height === undefined) return style;
-  return { ...style, height };
-}
-
-/** Stable compare key for a memoized row's resolved style. */
-export function rowStyleSignature(style: CSSProperties | undefined): string {
-  if (style === undefined) return "";
-  return JSON.stringify(style);
 }
 
 /** Part name for a pinned row, or `undefined` when the row is not pinned. */
@@ -282,98 +214,6 @@ export function pinnedRowPart(
   if (side === "top") return "pinned-top";
   if (side === "bottom") return "pinned-bottom";
   return undefined;
-}
-
-/** Sticky style when the row is pinned and the kit asked for sticky pins. */
-export function pinnedRowSticky(
-  side: RowPinSide | undefined,
-  sticky: boolean,
-  headerOffsetPx: number
-):
-  | { position: "sticky"; top?: number; bottom?: number; zIndex: number }
-  | undefined {
-  if (!sticky || !side) return undefined;
-  if (side === "top") {
-    return {
-      position: "sticky",
-      top: headerOffsetPx,
-      zIndex: PIN_Z.rowPinned,
-    };
-  }
-  return {
-    position: "sticky",
-    bottom: 0,
-    zIndex: PIN_Z.rowPinned,
-  };
-}
-
-/** Extra sticky inset a cell in a pinned row needs. */
-export function pinnedRowCellStyle(
-  side: RowPinSide | undefined,
-  headerOffsetPx: number,
-  columnPinned: boolean
-): {
-  position?: "sticky";
-  top?: number;
-  bottom?: number;
-  zIndex?: number;
-} {
-  if (!side) return {};
-  const edge = side === "top" ? { top: headerOffsetPx } : { bottom: 0 };
-  return {
-    position: "sticky",
-    ...edge,
-    zIndex: columnPinned ? PIN_Z.rowPinnedColumn : PIN_Z.rowPinned,
-  };
-}
-
-/** Memo digest so a virtualized row repaints when it is pinned or unpinned. */
-export function rowPinSignature(
-  pinning: Pick<RowPinningState<unknown>, "sideOf"> | undefined,
-  rowId: string
-): string | null {
-  if (!pinning) return null;
-  return pinning.sideOf(rowId) ?? "";
-}
-
-/** Whether to mark the row dirty. */
-export function rowIsDirty<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string
-): boolean {
-  return editing?.dirty?.isRowDirty(rowId) ?? false;
-}
-
-/** Memo digest for one desktop/card row's editing state. */
-export function rowEditingSignature<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string
-): string | null {
-  if (!editing) return null;
-  const { active, draft } = editing.state;
-  const marked = editing.validation?.rowHasError(rowId) ?? false;
-  const busy = editing.validation?.isValidating(rowId, active?.columnKey ?? "");
-  const save = editing.saving?.signature ?? "";
-  const rowSave = save.includes(`${rowId} `) ? save : "";
-  const marks = editing.dirty?.signature ?? "";
-  const rowMarks = marks.includes(`${rowId} `) ? marks : "";
-  const rowMode = editing.rowEditing;
-  const rowDrafts =
-    rowMode?.activeRowId === rowId ? (rowMode.signature ?? "") : "";
-  const batchAll = editing.batch?.signature ?? "";
-  const batchRow =
-    batchAll.split(";").find((entry) => entry.startsWith(`${rowId}:`)) ?? "";
-  const live = editing.conflict?.current;
-  const conflictMark =
-    live?.rowId === rowId
-      ? `conflict:${live.columnKey}:${live.incomingValue}`
-      : "";
-  if (active?.rowId !== rowId) {
-    const base = `${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}`;
-    return marked ? `invalid${base}` : base;
-  }
-  const message = editing.validation?.errorFor(rowId, active.columnKey) ?? "";
-  return `${active.columnKey}:${draft}:${message}:${busy === true ? "1" : ""}${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}`;
 }
 
 /** Drop-edge paint for a row being reordered. */

@@ -10,6 +10,7 @@ import {
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
+  ContextMenuLiveGate,
   DataTableShellView,
   FeatureHostProvider,
   FeatureProviders,
@@ -21,6 +22,7 @@ import {
   type FiltersFormSlotProps,
   FIND_BAR,
   GRID_FOCUS_ANNOUNCER,
+  OptionalSidePanel,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
@@ -43,7 +45,6 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer, RowsPerPageSelect } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { cx } from "./cx";
-import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { DataTableClassNames, DataTableProps } from "./types";
 
 // A stable default: the memoized desktop rows compare `classNames` by

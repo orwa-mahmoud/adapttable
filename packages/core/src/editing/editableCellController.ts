@@ -31,6 +31,8 @@ import {
 } from "./useCellEditing";
 import type { CellValidator, EditValidationState } from "./validation";
 
+export { rowEditingSignature, rowIsDirty } from "../rows/rowPresentation";
+
 /**
  * Opt-in editing bundle from {@link TableChrome.editing}.
  *
@@ -456,75 +458,4 @@ export function stopCellEditKeyboard(
  */
 export function focusEditorOnMount(node: { focus: () => void } | null): void {
   node?.focus();
-}
-
-/**
- * Whether any cell in a row holds a change nobody has confirmed.
- *
- * Read by every adapter's row so the mark exists at both scales: a reader
- * scanning a long table sees which rows are unsettled without hunting for the
- * cell inside them.
- *
- * @typeParam TRow - The row type.
- * @param editing - The editing bundle from the chrome.
- * @param rowId - The row's stable id.
- * @returns Whether to mark the row.
- *
- * @public
- */
-export function rowIsDirty<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string
-): boolean {
-  return editing?.dirty?.isRowDirty(rowId) ?? false;
-}
-
-/**
- * Memo digest for one desktop/card row: `null` when editing is off (host
- * never passed `onCellEdit`); empty string when this row is idle; otherwise
- * `columnKey:draft` so only the active edit row re-renders on keystrokes.
- *
- * @public
- */
-export function rowEditingSignature<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string
-): string | null {
-  if (!editing) return null;
-  const { active, draft } = editing.state;
-  // A validation message belongs to a ROW that may not hold the active editor:
-  // a cross-field rule marks the cell it points at, and that row has to repaint
-  // to show it. Left out, a rejected commit paints nothing.
-  const marked = editing.validation?.rowHasError(rowId) ?? false;
-  const busy = editing.validation?.isValidating(rowId, active?.columnKey ?? "");
-  // A save is in flight or has failed on a cell of this row, which may hold no
-  // editor at all by then — the reader closed it and moved on.
-  const save = editing.saving?.signature ?? "";
-  const rowSave = save.includes(`${rowId} `) ? save : "";
-  // A dirty mark belongs to the row too, and outlives the editor that made it.
-  const marks = editing.dirty?.signature ?? "";
-  const rowMarks = marks.includes(`${rowId} `) ? marks : "";
-  // Row mode replaces every cell in the open row with an editor, so the row it
-  // belongs to has to repaint — including on every keystroke in any field.
-  const rowMode = editing.rowEditing;
-  const rowDrafts =
-    rowMode?.activeRowId === rowId ? (rowMode.signature ?? "") : "";
-  // A batch holds drafts for many rows at once, so each row watches its own
-  // slice of the digest — without it a typed cell never repaints.
-  const batchAll = editing.batch?.signature ?? "";
-  const batchRow =
-    batchAll.split(";").find((entry) => entry.startsWith(`${rowId}:`)) ?? "";
-  // A live conflict is asked on the open editor. Left out, the row memo
-  // sees the same draft and never paints Keep mine / Take theirs.
-  const live = editing.conflict?.current;
-  const conflictMark =
-    live?.rowId === rowId
-      ? `conflict:${live.columnKey}:${live.incomingValue}`
-      : "";
-  if (active?.rowId !== rowId) {
-    const base = `${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}`;
-    return marked ? `invalid${base}` : base;
-  }
-  const message = editing.validation?.errorFor(rowId, active.columnKey) ?? "";
-  return `${active.columnKey}:${draft}:${message}:${busy === true ? "1" : ""}${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}`;
 }

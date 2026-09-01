@@ -6,6 +6,7 @@ import {
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
+  ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
   DataTableShellView,
   FeatureHostProvider,
@@ -17,6 +18,7 @@ import {
   type FiltersFormSlotProps,
   FIND_BAR,
   GRID_FOCUS_ANNOUNCER,
+  OptionalSidePanel,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
@@ -44,7 +46,6 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
-import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import type { DataTableProps } from "./types";
 
 function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {

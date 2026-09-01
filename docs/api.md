@@ -169,6 +169,20 @@ fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 
+Adapter authors bind those slots without copying feature lifecycle through
+`createAdapterEditingFeatures`, `createAdapterFiltersFeature`,
+`createAdapterGroupingFeature`, `createAdapterRowDetailFeatures`,
+`createAdapterRowReorderFeature`, `createAdapterContextMenuFeature` and
+`createAdapterCommandPaletteFeature`. Each accepts kit-owned
+`AdapterFeatureComponent`s and returns ordinary feature factories; the
+corresponding `Adapter*Components`, `Adapter*Feature` and normalized
+`AdapterContextMenuProps` / `AdapterCommandPaletteProps` types keep the seam
+typed. `createAdapterStandardFeatures` takes
+`AdapterStandardFeatureFactories` and returns a `StandardFeaturesFactory`
+using `StandardFeatureOptions`; individual feature imports remain independent.
+`ContextMenuLiveGate` and `OptionalSidePanel` are the two invariant root-layout
+helpers. None imports a kit or belongs on the app-facing core entry.
+
 Chrome asks for the rest of a kit's parts the same way, one slot per part.
 Around a cell: `EDITABLE_CELL` (`EditableCellSlotProps`, the editor and the
 dirty mark), `FILL_HANDLE` (`FillHandleCellSlotProps`), `EXPAND_TOGGLE`

@@ -10,8 +10,10 @@ import { DEFAULT_CARD_SIZE_PX, DEFAULT_ROW_SIZE_PX } from "../constants";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import type { ComposedTableProps } from "../props";
-import type { RowPinState } from "../rows/rowPinning";
-import type { RowHeight } from "../rows/rowStyle";
+import {
+  estimateFromRowHeight,
+  partitionPinnedRows,
+} from "../rows/rowPresentation";
 import type { TreeEntry } from "../tree/treeRows";
 import type { TableChrome } from "../useTableChrome";
 import type { ColumnWindow } from "./useColumnWindow";
@@ -93,47 +95,6 @@ export function measureRowDetailAsPair(
   renderRowDetail: unknown
 ): boolean {
   return !isMobile && renderRowDetail !== undefined;
-}
-
-function estimateFromRowHeight<TRow>(
-  rowHeight: RowHeight<TRow> | undefined,
-  fallback: number,
-  rowAt: (index: number) => { row: TRow; index: number } | undefined
-): (index: number) => number {
-  if (rowHeight === undefined) return () => fallback;
-  if (typeof rowHeight === "number") return () => rowHeight;
-  return (index: number) => {
-    const found = rowAt(index);
-    if (!found) return fallback;
-    return rowHeight(found.row, found.index);
-  };
-}
-
-function partitionPinnedRows<TRow>(
-  rows: readonly TRow[],
-  state: RowPinState,
-  getRowId: (row: TRow) => string
-): { top: TRow[]; scroll: TRow[]; bottom: TRow[] } {
-  const topSet = new Set(state.top);
-  const bottomSet = new Set(state.bottom);
-  const byId = new Map<string, TRow>();
-  for (const row of rows) byId.set(getRowId(row), row);
-  const top: TRow[] = [];
-  for (const id of state.top) {
-    const row = byId.get(id);
-    if (row !== undefined) top.push(row);
-  }
-  const bottom: TRow[] = [];
-  for (const id of state.bottom) {
-    const row = byId.get(id);
-    if (row !== undefined) bottom.push(row);
-  }
-  const scroll: TRow[] = [];
-  for (const row of rows) {
-    const id = getRowId(row);
-    if (!topSet.has(id) && !bottomSet.has(id)) scroll.push(row);
-  }
-  return { top, scroll, bottom };
 }
 
 /** A card's height on a phone, a row's on a desktop — or `rowHeight`. */

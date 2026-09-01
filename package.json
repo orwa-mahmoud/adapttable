@@ -35,7 +35,7 @@
     "verify:release": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run typecheck && pnpm run test:coverage --concurrency=1 && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget && pnpm run consumer:harness && pnpm run peer:floors",
     "publint": "pnpm --filter \"./packages/*\" exec publint --strict",
     "smoke:dist": "node scripts/smoke-dist.mjs",
-    "budget": "node scripts/bundle-budget.mjs",
+    "budget": "node scripts/bundle-budget.mjs && node scripts/check-adapter-feature-isolation.mjs",
     "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:features && pnpm run check:boundary && pnpm run check:api-contract && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
     "prepare": "husky",
     "check:kits-docs": "pnpm --filter @adapttable/cli exec vitest run src/kits-docs.test.ts",

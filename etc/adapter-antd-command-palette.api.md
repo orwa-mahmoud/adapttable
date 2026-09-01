@@ -4,11 +4,10 @@
 
 ```ts
 
-import { CommandPaletteOptions } from '@adapttable/core/features';
-import { StaticTableFeature } from '@adapttable/core/adapter';
+import { AdapterCommandPaletteFeature } from '@adapttable/core/adapter';
 
 // @public
-export function commandPalette(options?: boolean | CommandPaletteOptions): StaticTableFeature;
+export const commandPalette: AdapterCommandPaletteFeature;
 
 // (No @packageDocumentation comment for this package)
 

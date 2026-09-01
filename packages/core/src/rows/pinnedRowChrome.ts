@@ -6,12 +6,16 @@
  * between a scrolled pinned column and the sticky header: otherwise a
  * pinned row slides under the header, or a pinned column paints over it.
  */
-import { PIN_Z } from "../columns/useColumnLayout";
 import type { VirtualTableRow } from "../virtual/virtualTableModel";
 import { resolveVirtualRows } from "../virtual/virtualTableModel";
 import type { RowPinSide } from "./rowPinning";
 
 export { useOffsetHeight } from "../layout/useOffsetHeight";
+export {
+  pinnedRowCellStyle,
+  pinnedRowSticky,
+  pinnedRowStickyStyle,
+} from "./rowPresentation";
 
 /**
  * `data-adapttable-part` on a pinned row in the shared tbody.
@@ -37,69 +41,6 @@ export function pinnedRowPart(
   if (side === "top") return PINNED_TOP_PART;
   if (side === "bottom") return PINNED_BOTTOM_PART;
   return undefined;
-}
-
-/**
- * Sticky style when the row is pinned and the kit asked for sticky pins.
- *
- * @public
- */
-export function pinnedRowSticky(
-  side: RowPinSide | undefined,
-  sticky: boolean,
-  headerOffsetPx: number
-): ReturnType<typeof pinnedRowStickyStyle> | undefined {
-  if (!sticky || !side) return undefined;
-  const offset = side === "bottom" ? 0 : headerOffsetPx;
-  return pinnedRowStickyStyle(side, offset);
-}
-
-/**
- * Sticky style for a pinned-row section (tbody or the row itself).
- *
- * @public
- */
-export function pinnedRowStickyStyle(
-  side: RowPinSide,
-  headerOffsetPx: number
-): { position: "sticky"; top?: number; bottom?: number; zIndex: number } {
-  if (side === "top") {
-    return {
-      position: "sticky",
-      top: headerOffsetPx,
-      zIndex: PIN_Z.rowPinned,
-    };
-  }
-  return {
-    position: "sticky",
-    bottom: 0,
-    zIndex: PIN_Z.rowPinned,
-  };
-}
-
-/**
- * Extra sticky inset a cell in a pinned row needs, and the z-index when
- * that cell is also a pinned column.
- *
- * @public
- */
-export function pinnedRowCellStyle(
-  side: RowPinSide | undefined,
-  headerOffsetPx: number,
-  columnPinned: boolean
-): {
-  position?: "sticky";
-  top?: number;
-  bottom?: number;
-  zIndex?: number;
-} {
-  if (!side) return {};
-  const edge = side === "top" ? { top: headerOffsetPx } : { bottom: 0 };
-  return {
-    position: "sticky",
-    ...edge,
-    zIndex: columnPinned ? PIN_Z.rowPinnedColumn : PIN_Z.rowPinned,
-  };
 }
 
 /**

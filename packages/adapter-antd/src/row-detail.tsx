@@ -1,15 +1,7 @@
 import {
-  EXPAND_TOGGLE,
+  createAdapterRowDetailFeatures,
   type ExpandToggleSlotProps,
-  extendFeature,
-  slotRender,
-  type TableFeature,
 } from "@adapttable/core/adapter";
-import {
-  nestedTable as coreNested,
-  type NestedTableFor,
-  rowDetail as coreDetail,
-} from "@adapttable/core/features";
 
 import { ExpandToggle } from "./components/ExpandToggle";
 
@@ -26,33 +18,11 @@ function ExpandSlot(props: Readonly<ExpandToggleSlotProps>) {
   );
 }
 
-const expandChrome = [
-  slotRender(EXPAND_TOGGLE, (props) => <ExpandSlot {...props} />),
-];
+const rowDetailFeatures = createAdapterRowDetailFeatures({
+  ExpandToggle: ExpandSlot,
+});
 
-/**
- * Render a panel under an expanded row.
- *
- * @public
- */
-export function rowDetail<TRow>(
-  renderRowDetail: (row: TRow) => unknown,
-  defaultExpandedRowIds?: readonly string[]
-): TableFeature<TRow> {
-  return extendFeature(
-    coreDetail(renderRowDetail, defaultExpandedRowIds),
-    expandChrome
-  );
-}
-
-/**
- * Render a whole table inside a row's detail panel.
- *
- * @public
- */
-export function nestedTable<TRow>(
-  nested: NestedTableFor<TRow>,
-  defaultExpandedRowIds?: readonly string[]
-): TableFeature<TRow> {
-  return extendFeature(coreNested(nested, defaultExpandedRowIds), expandChrome);
-}
+/** Render a panel under an expanded row. @public */
+export const rowDetail = rowDetailFeatures.rowDetail;
+/** Render a whole table inside an expanded row. @public */
+export const nestedTable = rowDetailFeatures.nestedTable;

@@ -38,7 +38,7 @@ const TAG = /^\/\/ @(public|beta|alpha|internal)\b/;
 const DECL =
   /^(?:export )?(?:declare )?(?:abstract )?(?:function|const|let|var|class|interface|type|enum) ([A-Za-z_$][\w$]*)/;
 const INLINE_EXPORT = /^export /;
-const STAR = /^export \* from "([^"]+)"/;
+const STAR = /^export \* from ["']([^"']+)["']/;
 
 /**
  * Read one report into `{ tagged, stars, exported }`.
@@ -61,14 +61,29 @@ export function readReport(text) {
   // File every declaration under the name a consumer writes. A renamed export
   // carries the tag of the local declaration behind it, so `print` is public
   // and `print_2` — the local name, which no import can use — never appears.
+  // A named re-export has no local declaration for API Extractor to tag. Its
+  // source owns the release tag, while this report records that it forwards
+  // the name.
   const tagged = {};
+  const forwarded = new Set();
   for (const [local, publicName] of exported) {
-    if (local in declared) tagged[publicName] = declared[local];
+    if (local in declared) {
+      tagged[publicName] = declared[local];
+    } else {
+      forwarded.add(publicName);
+    }
   }
   for (const name of inline) {
-    if (name in declared) tagged[name] = declared[name];
+    if (name in declared) {
+      tagged[name] = declared[name];
+    }
   }
-  return { tagged, stars, exported: new Set(exported.values()) };
+  return {
+    tagged,
+    stars,
+    exported: new Set(exported.values()),
+    forwarded,
+  };
 }
 
 /** One line of a report: a tag to remember, a star, a declaration, or noise. */
@@ -140,7 +155,7 @@ export function checkContract({ manifest, entrypoints, reports }) {
     const expected = surfaces[policy.surface ?? policy.reexport] ?? [];
     errors.push(
       ...(policy.reexport
-        ? reexportErrors(reportName, report, expected)
+        ? reexportErrors(reportName, report, expected, policy.from)
         : surfaceErrors(reportName, report, expected))
     );
   }
@@ -201,10 +216,28 @@ function coverageErrors(policies, entrypoints) {
 }
 
 /** A pure re-export entry: it forwards a canonical surface and declares none. */
-function reexportErrors(reportName, report, expected) {
+function reexportErrors(reportName, report, expected, source) {
   const errors = [];
   const forwarded = new Set([...report.exported, ...report.stars]);
-  const missing = expected.filter((name) => !forwarded.has(name));
+  const sourceForwarded = source !== undefined && report.stars.includes(source);
+  if (source !== undefined && !sourceForwarded) {
+    errors.push(
+      `"${reportName}" no longer forwards its canonical source "${source}"`
+    );
+  }
+  const unexpectedStars =
+    source === undefined ? [] : report.stars.filter((star) => star !== source);
+  if (unexpectedStars.length > 0) {
+    errors.push(
+      `"${reportName}" forwards ${unexpectedStars.length} unexpected wildcard source(s): ${unexpectedStars.join(", ")}`
+    );
+  }
+  // A reviewed wildcard forwards its source's whole contracted surface. The
+  // source entry has its own report policy, so its names are still checked in
+  // both directions without copying their manifest into every kit source.
+  const missing = sourceForwarded
+    ? []
+    : expected.filter((name) => !forwarded.has(name));
   if (missing.length > 0) {
     errors.push(
       `"${reportName}" no longer forwards ${missing.length} name(s) its policy promises: ${missing.slice(0, 8).join(", ")}`
@@ -224,7 +257,7 @@ function surfaceErrors(reportName, report, expected) {
   const errors = [];
   const actual = publicNames(report);
   const approved = new Set(expected);
-  const present = new Set(actual);
+  const present = new Set([...actual, ...report.forwarded]);
   const unexpected = actual.filter((name) => !approved.has(name));
   if (unexpected.length > 0) {
     errors.push(
@@ -237,7 +270,10 @@ function surfaceErrors(reportName, report, expected) {
       `"${reportName}" no longer classifies ${withdrawn.length} contracted symbol(s) @public — missing, renamed or demoted: ${withdrawn.slice(0, 8).join(", ")}`
     );
   }
-  if (expected.length > 0 && actual.length === 0) {
+  const forwardsContractedName = expected.some((name) =>
+    report.forwarded.has(name)
+  );
+  if (expected.length > 0 && actual.length === 0 && !forwardsContractedName) {
     errors.push(
       `"${reportName}" is a documented entry point whose whole surface is now internal`
     );

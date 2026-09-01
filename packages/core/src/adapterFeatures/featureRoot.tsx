@@ -1,12 +1,17 @@
+import type { ReactNode } from "react";
+
+import { FeatureSlot, useFeatureSlotFilled } from "../features/providers";
 import {
   CONTEXT_MENU_LIVE,
   type ContextMenuLiveSlotProps,
-  FeatureSlot,
   SIDE_PANEL,
-  useFeatureSlotFilled,
-} from "@adapttable/core/adapter";
-import type { ReactNode } from "react";
+} from "../features/slotKeys";
 
+/**
+ * Mount a composed context-menu feature around an adapter's table region.
+ *
+ * @public
+ */
 export function ContextMenuLiveGate({
   props,
   children,
@@ -22,6 +27,14 @@ export function ContextMenuLiveGate({
   );
 }
 
+/**
+ * Place a composed side panel beside an adapter's table region.
+ *
+ * The helper owns only invariant flex structure. The panel itself, including
+ * its portal, controls, focus behavior and pixels, remains kit-owned.
+ *
+ * @public
+ */
 export function OptionalSidePanel({
   side,
   body,
