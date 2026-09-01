@@ -1,8 +1,8 @@
 import {
   extendFeature,
   slotRender,
+  type StaticTableFeature,
   STATUS_BAR,
-  type TableFeature,
 } from "@adapttable/core/adapter";
 import {
   selectionStats as coreSelectionStats,
@@ -27,8 +27,8 @@ const draws = [
  *
  * @public
  */
-export function statusBar<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreStatusBar<TRow>(), draws);
+export function statusBar(): StaticTableFeature {
+  return extendFeature(coreStatusBar(), draws);
 }
 
 /**
@@ -36,6 +36,6 @@ export function statusBar<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function selectionStats<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreSelectionStats<TRow>(), draws);
+export function selectionStats(): StaticTableFeature {
+  return extendFeature(coreSelectionStats(), draws);
 }

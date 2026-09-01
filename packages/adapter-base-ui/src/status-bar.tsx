@@ -1,9 +1,9 @@
 import {
   extendFeature,
   slotRender,
+  type StaticTableFeature,
   STATUS_BAR,
   type StatusBarChromeProps,
-  type TableFeature,
 } from "@adapttable/core/adapter";
 import {
   selectionStats as coreSelectionStats,
@@ -18,10 +18,10 @@ function StatusSlot(props: Readonly<Omit<StatusBarChromeProps, "slots">>) {
 
 const draws = [slotRender(STATUS_BAR, (props) => <StatusSlot {...props} />)];
 
-export function statusBar<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreStatusBar<TRow>(), draws);
+export function statusBar(): StaticTableFeature {
+  return extendFeature(coreStatusBar(), draws);
 }
 
-export function selectionStats<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreSelectionStats<TRow>(), draws);
+export function selectionStats(): StaticTableFeature {
+  return extendFeature(coreSelectionStats(), draws);
 }

@@ -34,7 +34,11 @@ import type { BulkAction } from "../types";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import { COLUMN_LAYOUT_LIVE_RENDER } from "./column-layout-live";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
-import type { FeaturePatch, TableFeature } from "./tableFeature";
+import type {
+  FeaturePatch,
+  StaticTableFeature,
+  TableFeature,
+} from "./tableFeature";
 
 export type {
   BatchRowEdit,
@@ -61,6 +65,20 @@ function define<TRow>(
   patch: FeaturePatch<TRow>,
   setup?: TableFeature<TRow>["setup"]
 ): TableFeature<TRow> {
+  return setup ? { id, apply: () => patch, setup } : { id, apply: () => patch };
+}
+
+/**
+ * The same, for a feature that says nothing about the row type.
+ *
+ * Separate rather than a widened `define`, because the difference IS the
+ * contract: what comes back composes into any table with no annotation.
+ */
+function defineStatic(
+  id: string,
+  patch: FeaturePatch<unknown>,
+  setup?: StaticTableFeature["setup"]
+): StaticTableFeature {
   return setup ? { id, apply: () => patch, setup } : { id, apply: () => patch };
 }
 
@@ -102,8 +120,8 @@ export function cellSpan<TRow>(
  *
  * @public
  */
-export function extraRows<TRow>(rows: readonly ExtraRow[]): TableFeature<TRow> {
-  return define("extra-rows", {
+export function extraRows(rows: readonly ExtraRow[]): StaticTableFeature {
+  return defineStatic("extra-rows", {
     extraRows: rows,
     assembly: {
       insertExtraRows,
@@ -133,7 +151,7 @@ export function rowAppearance<TRow>(options: {
  *
  * @public
  */
-export function columnMenu<TRow>(): TableFeature<TRow> {
+export function columnMenu(): StaticTableFeature {
   return {
     id: "column-menu",
     apply: () => ({ enableColumnMenu: true }),
@@ -146,7 +164,7 @@ export function columnMenu<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function resizableColumns<TRow>(): TableFeature<TRow> {
+export function resizableColumns(): StaticTableFeature {
   return {
     id: "resizable-columns",
     apply: () => ({
@@ -162,7 +180,7 @@ export function resizableColumns<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function collapsibleColumnGroups<TRow>(): TableFeature<TRow> {
+export function collapsibleColumnGroups(): StaticTableFeature {
   return {
     id: "collapsible-column-groups",
     apply: () => ({ collapsibleColumnGroups: true }),
@@ -175,11 +193,11 @@ export function collapsibleColumnGroups<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function commandPalette<TRow>(
+export function commandPalette(
   options: boolean | CommandPaletteOptions = true
-): TableFeature<TRow> {
+): StaticTableFeature {
   const commands = typeof options === "object" ? options.commands : undefined;
-  return define(
+  return defineStatic(
     "command-palette",
     { commandPalette: options },
     commands?.length
@@ -212,8 +230,8 @@ export function contextMenu<TRow>(
  *
  * @public
  */
-export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
-  return define("side-panel", { sidePanel: options }, (host) => {
+export function sidePanel(options: SidePanelOptions): StaticTableFeature {
+  return defineStatic("side-panel", { sidePanel: options }, (host) => {
     for (const panel of options.panels) host.registerPanel(panel);
   });
 }
@@ -223,9 +241,9 @@ export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
  *
  * @public
  */
-export function bulkActions<TRow>(
+export function bulkActions(
   actions: readonly BulkAction[]
-): TableFeature<TRow> {
+): StaticTableFeature {
   return {
     id: "bulk-actions",
     apply: () => ({ bulkActions: actions }),
@@ -238,10 +256,10 @@ export function bulkActions<TRow>(
  *
  * @public
  */
-export function filterTypes<TRow>(
+export function filterTypes(
   specs: readonly FilterTypeSpec[]
-): TableFeature<TRow> {
-  return define("filter-types", { filterTypes: specs }, (host) => {
+): StaticTableFeature {
+  return defineStatic("filter-types", { filterTypes: specs }, (host) => {
     for (const spec of specs) host.registerFilterType(spec);
   });
 }
@@ -251,8 +269,8 @@ export function filterTypes<TRow>(
  *
  * @public
  */
-export function headerFilters<TRow>(): TableFeature<TRow> {
-  return define("header-filters", { headerFilters: true });
+export function headerFilters(): StaticTableFeature {
+  return defineStatic("header-filters", { headerFilters: true });
 }
 
 /**
@@ -260,9 +278,7 @@ export function headerFilters<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function savedViews<TRow>(
-  options: UseSavedViewsOptions
-): TableFeature<TRow> {
+export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
   return {
     id: "saved-views",
     apply: () => ({ savedViews: options }),
@@ -278,8 +294,8 @@ export function savedViews<TRow>(
  *
  * @public
  */
-export function densityChooser<TRow>(): TableFeature<TRow> {
-  return define("density-chooser", { densityChooser: true });
+export function densityChooser(): StaticTableFeature {
+  return defineStatic("density-chooser", { densityChooser: true });
 }
 
 /**
@@ -287,11 +303,11 @@ export function densityChooser<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function print<TRow>(
+export function print(
   onPrint: () => void,
   printButton = false
-): TableFeature<TRow> {
-  return define("print", { onPrint, printButton });
+): StaticTableFeature {
+  return defineStatic("print", { onPrint, printButton });
 }
 
 /**
@@ -299,8 +315,8 @@ export function print<TRow>(
  *
  * @public
  */
-export function statusBar<TRow>(): TableFeature<TRow> {
-  return define("status-bar", { statusBar: true });
+export function statusBar(): StaticTableFeature {
+  return defineStatic("status-bar", { statusBar: true });
 }
 
 /**
@@ -308,8 +324,8 @@ export function statusBar<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function undoRedoButtons<TRow>(): TableFeature<TRow> {
-  return define("undo-redo-buttons", { undoRedoButtons: true });
+export function undoRedoButtons(): StaticTableFeature {
+  return defineStatic("undo-redo-buttons", { undoRedoButtons: true });
 }
 
 /**
@@ -317,8 +333,8 @@ export function undoRedoButtons<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function multiSort<TRow>(): TableFeature<TRow> {
-  return define("multi-sort", { multiSort: true });
+export function multiSort(): StaticTableFeature {
+  return defineStatic("multi-sort", { multiSort: true });
 }
 
 /**
@@ -326,7 +342,7 @@ export function multiSort<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function fitColumns<TRow>(): TableFeature<TRow> {
+export function fitColumns(): StaticTableFeature {
   return {
     id: "fit-columns",
     apply: () => ({ fitColumns: true }),
@@ -339,7 +355,7 @@ export function fitColumns<TRow>(): TableFeature<TRow> {
  *
  * @public
  */
-export function columnSelectionCheckbox<TRow>(): TableFeature<TRow> {
+export function columnSelectionCheckbox(): StaticTableFeature {
   return {
     id: "column-selection-checkbox",
     apply: () => ({ columnSelectionCheckbox: true }),

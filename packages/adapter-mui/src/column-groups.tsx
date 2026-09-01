@@ -2,7 +2,7 @@ import {
   COLUMN_GROUP_TOGGLE,
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import { collapsibleColumnGroups as core } from "@adapttable/core/features";
 
@@ -13,8 +13,8 @@ import { ColumnGroupToggle } from "./components/kitControls";
  *
  * @public
  */
-export function collapsibleColumnGroups<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function collapsibleColumnGroups(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(COLUMN_GROUP_TOGGLE, (props) => (
       <ColumnGroupToggle {...props} />
     )),

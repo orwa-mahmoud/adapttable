@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { useFullscreen } from "../layout/useFullscreen";
 import { slotRender } from "./providers";
 import { FULLSCREEN_LIVE, type FullscreenLiveSlotProps } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 function LiveFullscreen({
   element,
@@ -24,7 +24,7 @@ function LiveFullscreen({
  *
  * @public
  */
-export function fullscreen<TRow>(): TableFeature<TRow> {
+export function fullscreen(): StaticTableFeature {
   return {
     id: "fullscreen",
     apply: () => ({ fullscreen: true }),

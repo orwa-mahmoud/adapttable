@@ -2,7 +2,7 @@ import {
   extendFeature,
   SAVED_VIEWS,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import {
   savedViews as core,
@@ -19,10 +19,8 @@ import { SavedViewsMenu } from "./components/SavedViewsMenu";
  *
  * @public
  */
-export function savedViews<TRow>(
-  options: UseSavedViewsOptions
-): TableFeature<TRow> {
-  return extendFeature(core<TRow>(options), [
+export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(SAVED_VIEWS, (props) => <SavedViewsMenu {...props} />),
   ]);
 }

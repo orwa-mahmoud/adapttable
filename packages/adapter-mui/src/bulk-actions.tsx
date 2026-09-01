@@ -2,7 +2,7 @@ import {
   BULK_BAR,
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import type { BulkAction } from "@adapttable/core/features";
 import { bulkActions as core } from "@adapttable/core/features";
@@ -17,10 +17,10 @@ import { BulkBar } from "./components/BulkActionBar";
  *
  * @public
  */
-export function bulkActions<TRow>(
+export function bulkActions(
   actions: readonly BulkAction[]
-): TableFeature<TRow> {
-  return extendFeature(core<TRow>(actions), [
+): StaticTableFeature {
+  return extendFeature(core(actions), [
     slotRender(BULK_BAR, (props) => <BulkBar {...props} />),
   ]);
 }

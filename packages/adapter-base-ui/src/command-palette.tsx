@@ -2,7 +2,7 @@ import {
   COMMAND_PALETTE_LIVE,
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
   useCommandPalette,
   type UseCommandPaletteOptions,
 } from "@adapttable/core/adapter";
@@ -25,10 +25,10 @@ function LiveCommandPalette(props: Readonly<UseCommandPaletteOptions>) {
   );
 }
 
-export function commandPalette<TRow>(
+export function commandPalette(
   options: boolean | CommandPaletteOptions = true
-): TableFeature<TRow> {
-  return extendFeature(core<TRow>(options), [
+): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(COMMAND_PALETTE_LIVE, (props) => (
       <LiveCommandPalette {...props} />
     )),

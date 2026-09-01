@@ -7,6 +7,7 @@ import {
   FILTERS_FORM,
   type FiltersFormSlotProps,
   slotRender,
+  type StaticTableFeature,
   type TableFeature,
 } from "@adapttable/core/adapter";
 import {
@@ -107,8 +108,8 @@ export function filters<TRow>(
   ]);
 }
 
-export function filterTypes<TRow>(
+export function filterTypes(
   specs: readonly FilterTypeSpec[]
-): TableFeature<TRow> {
+): StaticTableFeature {
   return coreFilterTypes(specs);
 }

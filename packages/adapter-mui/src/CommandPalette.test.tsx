@@ -33,7 +33,7 @@ describe("command palette (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           commandPalette
-          features={[commandPalette<Row>()]}
+          features={[commandPalette()]}
           onPrint={onPrint}
           {...extra}
         />

@@ -554,12 +554,12 @@ function composeDemoFeatures(
   const { teamSpan, demoExtraRows, accentRowStyle } = parts;
   return [
     ...(flags.large
-      ? [virtualize<Person>({ estimateRowSize: LARGE_ROW_ESTIMATE })]
+      ? [virtualize({ estimateRowSize: LARGE_ROW_ESTIMATE })]
       : []),
-    ...(flags.rowPinning ? [rowPinning<Person>()] : []),
+    ...(flags.rowPinning ? [rowPinning()] : []),
     ...(flags.rowMutations ? [rowActions<Person>()] : []),
     ...(flags.cellSpan && teamSpan ? [cellSpan<Person>(teamSpan)] : []),
-    ...(demoExtraRows ? [extraRows<Person>(demoExtraRows)] : []),
+    ...(demoExtraRows ? [extraRows(demoExtraRows)] : []),
     ...(accentRowStyle
       ? [rowAppearance<Person>({ rowStyle: accentRowStyle, rowHeight: 48 })]
       : []),

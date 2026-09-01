@@ -2,7 +2,7 @@ import {
   extendFeature,
   FILTER_HEADER,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import { headerFilters as core } from "@adapttable/core/features";
 
@@ -13,8 +13,8 @@ import { FilterHeaderTrigger } from "./components/FilterHeaderTrigger";
  *
  * @public
  */
-export function headerFilters<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function headerFilters(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(FILTER_HEADER, (props) => <FilterHeaderTrigger {...props} />),
   ]);
 }

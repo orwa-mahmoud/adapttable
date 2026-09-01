@@ -1730,7 +1730,7 @@ export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "reorder-nes
 // @public
 export interface FeaturePatch<TRow = unknown> {
     readonly [key: string]: unknown;
-    readonly __row?: TRow;
+    readonly __row?: (row: TRow) => void;
 }
 
 // @public
@@ -3454,6 +3454,18 @@ export function splitRelativeToken(raw: string): {
 export function stableKey(input: unknown): string;
 
 // @public
+export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
+
+// @public
+export interface StaticTableFeature {
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly id: string;
+    readonly provider?: FeatureProviderContribution;
+    readonly renders?: readonly FeatureRender<never>[];
+    setup?(host: StaticFeatureHost): void | (() => void);
+}
+
+// @public
 export function stepMatch(index: number, total: number, step: number): number;
 
 // @public
@@ -3571,7 +3583,7 @@ export interface TableFeature<TRow = unknown> {
 
 // @public
 export interface TableFeatureHost<TRow = unknown> {
-    readonly __row?: TRow;
+    readonly __row?: (row: TRow) => void;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;

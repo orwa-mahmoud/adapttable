@@ -261,7 +261,7 @@ describe("memoized desktop rows (MUI)", () => {
     renderTable({
       columns: tracked,
       bulkActions: actions,
-      features: [bulkActionsFeature<Row>(actions)],
+      features: [bulkActionsFeature(actions)],
     });
     expect(nameAccessor).toHaveBeenCalled();
     nameAccessor.mockClear();

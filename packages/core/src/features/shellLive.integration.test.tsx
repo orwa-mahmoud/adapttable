@@ -91,7 +91,7 @@ describe("a table that composed none of the live features", () => {
 
 describe("each live feature replaces its stand-in with the real hook", () => {
   it("findInTable opens a real find walk", () => {
-    const view = mount([findInTable<Row>()]);
+    const view = mount([findInTable()]);
 
     expect(view.current.find.open).toBe(false);
     act(() => {
@@ -105,7 +105,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
   });
 
   it("cellNavigation turns the table into a keyboard grid", () => {
-    const view = mount([cellNavigation<Row>()]);
+    const view = mount([cellNavigation()]);
 
     expect(view.current.gridFocus.enabled).toBe(true);
     act(() => {
@@ -120,7 +120,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     // the feature fills — an adapter renders the slot either way and gets
     // nothing without the import.
     const props = applyTableFeatures({
-      features: [cellNavigation<Row>()],
+      features: [cellNavigation()],
       data: ROWS,
       columns,
       rowKey: (r: Row) => r.id,
@@ -147,7 +147,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
   });
 
   it("fullscreen reports what the document supports", () => {
-    const view = mount([fullscreen<Row>()]);
+    const view = mount([fullscreen()]);
 
     // jsdom implements no fullscreen API, so `supported` is the honest answer —
     // what matters is that the real hook, not the frozen stub, produced it.
@@ -159,8 +159,8 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     const onCellEdit = vi.fn();
     const view = mount([
       editing<Row>(onCellEdit),
-      editHistory<Row>(),
-      cellNavigation<Row>(),
+      editHistory(),
+      cellNavigation(),
     ]);
 
     expect(view.current.editHistory.enabled).toBe(true);
@@ -184,7 +184,7 @@ describe("each live feature replaces its stand-in with the real hook", () => {
   });
 
   it("selectionStats reports figures for a selected range", () => {
-    const view = mount([cellNavigation<Row>(), selectionStats<Row>()]);
+    const view = mount([cellNavigation(), selectionStats()]);
 
     act(() => {
       view.current.gridFocus.selectRange({

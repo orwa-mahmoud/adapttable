@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/mantine",
   "version": "2.6.0",
-  "description": "Mantine adapter for AdaptTable — a batteries-included, themeable React data table with sorting, filtering, URL state, virtualization, RTL, dark mode, and responsive card rendering.",
+  "description": "Mantine adapter for AdaptTable \u2014 a batteries-included, themeable React data table with sorting, filtering, URL state, virtualization, RTL, dark mode, and responsive card rendering.",
   "keywords": [
     "react",
     "mantine",
@@ -408,7 +408,17 @@
         "default": "./dist/pivot.cjs"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    }
   },
   "scripts": {
     "build": "tsdown",

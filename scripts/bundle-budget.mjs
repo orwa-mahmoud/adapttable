@@ -354,6 +354,28 @@ const FIXTURES = [
   // the host has to remember to switch on. 0.1-0.4 KB gzip; the five kits
   // already on their line move 1 KB, the other three had the slack.
   {
+    // What the one-import path costs against the same kit's bare table. The
+    // preset statically composes every member it CAN, so its graph carries the
+    // configurable ones whether or not a caller passes their options — that is
+    // the trade it makes, and this is the number that states it.
+    name: "mui · preset",
+    pkg: "adapter-mui",
+    entryFile: "preset.js",
+    budgetKB: 150,
+    code: `export { standardFeatures } from "PKG";`,
+  },
+  {
+    // The same table with the preset composed into it. Against `mui · table`
+    // this is the marginal cost of the one-import path — most of the preset's
+    // own graph is chrome the table already carries, so the difference is the
+    // number a reader needs, not the preset's standalone weight.
+    name: "mui · table + preset",
+    pkg: "adapter-mui",
+    budgetKB: 160,
+    code: `export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";`,
+    alsoEntryFile: "preset.js",
+  },
+  {
     name: "mantine · table",
     pkg: "adapter-mantine",
     budgetKB: 134,
@@ -556,7 +578,15 @@ async function measure(fixture, dir) {
     "dist",
     fixture.entryFile ?? "index.js"
   );
-  writeFileSync(entry, fixture.code.replaceAll("PKG", target));
+  // A second entry, for a fixture that measures one path against another —
+  // the standard preset beside the table it is composed into.
+  const alsoTarget = fixture.alsoEntryFile
+    ? join(ROOT, "packages", fixture.pkg, "dist", fixture.alsoEntryFile)
+    : "";
+  writeFileSync(
+    entry,
+    fixture.code.replaceAll("PKG", target).replaceAll("ALSO", alsoTarget)
+  );
 
   const bundle = await Rolldown.rolldown({
     input: entry,
@@ -642,9 +672,14 @@ const PUBLISHED = [
   {
     doc: "docs/faq.md",
     find: "| `DataTable` from an adapter",
-    from: FIXTURES.filter((f) => f.pkg.startsWith("adapter-")).map(
-      (f) => f.name
-    ),
+    // The kits' own tables, not the preset fixtures measured beside them:
+    // that row is about what `DataTable` costs.
+    from: FIXTURES.filter((f) => f.name.endsWith("· table")).map((f) => f.name),
+  },
+  {
+    doc: "docs/features.md",
+    find: "Measured on MUI, the table alone is",
+    from: ["mui · table", "mui · table + preset"],
   },
   {
     doc: "docs/formulas.md",

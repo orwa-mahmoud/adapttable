@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/shadcn",
   "version": "2.6.0",
-  "description": "shadcn/ui adapter for AdaptTable — a fully-styled React data table in one import, built on the headless @adapttable/core engine and shadcn's design tokens.",
+  "description": "shadcn/ui adapter for AdaptTable \u2014 a fully-styled React data table in one import, built on the headless @adapttable/core engine and shadcn's design tokens.",
   "keywords": [
     "react",
     "data-table",
@@ -405,7 +405,17 @@
         "default": "./dist/pivot.cjs"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    }
   },
   "scripts": {
     "build": "tsdown",

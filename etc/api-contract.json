@@ -290,6 +290,10 @@
     "antd/fullscreen": [
       "fullscreen"
     ],
+    "antd/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
+    ],
     "antd/print": [
       "print"
     ],
@@ -301,6 +305,10 @@
     ],
     "base-ui/fullscreen": [
       "fullscreen"
+    ],
+    "base-ui/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "base-ui/print": [
       "print"
@@ -331,6 +339,10 @@
     ],
     "chakra/fullscreen": [
       "fullscreen"
+    ],
+    "chakra/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "chakra/print": [
       "print"
@@ -691,6 +703,8 @@
       "SortDirection",
       "SortLevel",
       "SortableValue",
+      "StaticFeatureHost",
+      "StaticTableFeature",
       "TEXT_OPS",
       "TEXT_OP_LABEL_KEYS",
       "TableBodyRegion",
@@ -1598,6 +1612,8 @@
       "SortDirection",
       "SortLevel",
       "SortableValue",
+      "StaticFeatureHost",
+      "StaticTableFeature",
       "StatusBarChrome",
       "StatusBarChromeProps",
       "StatusBarItem",
@@ -1904,6 +1920,8 @@
       "SortDirection",
       "SortLevel",
       "SortableValue",
+      "StaticFeatureHost",
+      "StaticTableFeature",
       "TableFeature",
       "TableFeatureHost",
       "TableLabels",
@@ -2530,6 +2548,10 @@
     "mantine/fullscreen": [
       "fullscreen"
     ],
+    "mantine/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
+    ],
     "mantine/print": [
       "print"
     ],
@@ -2541,6 +2563,10 @@
     ],
     "mui/fullscreen": [
       "fullscreen"
+    ],
+    "mui/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "mui/print": [
       "print"
@@ -2554,6 +2580,10 @@
     "radix/fullscreen": [
       "fullscreen"
     ],
+    "radix/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
+    ],
     "radix/print": [
       "print"
     ],
@@ -2565,6 +2595,10 @@
       "ServerFilterValue",
       "ServerTableQuery"
     ],
+    "shadcn/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
+    ],
     "unstyled/density": [
       "densityChooser"
     ],
@@ -2573,6 +2607,10 @@
     ],
     "unstyled/fullscreen": [
       "fullscreen"
+    ],
+    "unstyled/preset": [
+      "StandardFeatureOptions",
+      "standardFeatures"
     ],
     "unstyled/print": [
       "print"
@@ -2647,6 +2685,9 @@
     },
     "adapter-antd-pivot.api.md": {
       "surface": "adapter-antd-pivot"
+    },
+    "adapter-antd-preset.api.md": {
+      "surface": "antd/preset"
     },
     "adapter-antd-print.api.md": {
       "surface": "antd/print"
@@ -2758,6 +2799,9 @@
     },
     "adapter-base-ui-pivot.api.md": {
       "surface": "adapter-base-ui-pivot"
+    },
+    "adapter-base-ui-preset.api.md": {
+      "surface": "base-ui/preset"
     },
     "adapter-base-ui-print.api.md": {
       "surface": "base-ui/print"
@@ -2900,6 +2944,9 @@
     "adapter-chakra-pivot.api.md": {
       "surface": "adapter-chakra-pivot"
     },
+    "adapter-chakra-preset.api.md": {
+      "surface": "chakra/preset"
+    },
     "adapter-chakra-print.api.md": {
       "surface": "chakra/print"
     },
@@ -3010,6 +3057,9 @@
     },
     "adapter-mantine-pivot.api.md": {
       "surface": "adapter-mantine-pivot"
+    },
+    "adapter-mantine-preset.api.md": {
+      "surface": "mantine/preset"
     },
     "adapter-mantine-print.api.md": {
       "surface": "mantine/print"
@@ -3122,6 +3172,9 @@
     "adapter-mui-pivot.api.md": {
       "surface": "adapter-mui-pivot"
     },
+    "adapter-mui-preset.api.md": {
+      "surface": "mui/preset"
+    },
     "adapter-mui-print.api.md": {
       "surface": "mui/print"
     },
@@ -3232,6 +3285,9 @@
     },
     "adapter-radix-pivot.api.md": {
       "surface": "adapter-radix-pivot"
+    },
+    "adapter-radix-preset.api.md": {
+      "surface": "radix/preset"
     },
     "adapter-radix-print.api.md": {
       "surface": "radix/print"
@@ -3344,6 +3400,9 @@
     "adapter-shadcn-pivot.api.md": {
       "reexport": "forwards @adapttable/unstyled/pivot"
     },
+    "adapter-shadcn-preset.api.md": {
+      "surface": "shadcn/preset"
+    },
     "adapter-shadcn-print.api.md": {
       "reexport": "forwards @adapttable/unstyled/print"
     },
@@ -3454,6 +3513,9 @@
     },
     "adapter-unstyled-pivot.api.md": {
       "surface": "adapter-unstyled-pivot"
+    },
+    "adapter-unstyled-preset.api.md": {
+      "surface": "unstyled/preset"
     },
     "adapter-unstyled-print.api.md": {
       "surface": "unstyled/print"

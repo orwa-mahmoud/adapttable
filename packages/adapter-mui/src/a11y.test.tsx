@@ -55,7 +55,7 @@ describe("accessibility (axe) — MUI", () => {
     const actions = [{ key: "x", label: "Delete", onClick: () => undefined }];
     const { container } = renderTable({
       bulkActions: actions,
-      features: [bulkActionsFeature<Row>(actions)],
+      features: [bulkActionsFeature(actions)],
       rowActions: [{ key: "e", label: "Edit", onClick: () => undefined }],
       filterLabels: { status: (v) => `Status: ${v}` },
     });

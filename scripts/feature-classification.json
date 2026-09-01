@@ -16,7 +16,7 @@
     "single-column sorting",
     "search",
     "pagination and infinite data",
-    "column resolution \u2014 the `columns` array rendered in order, honouring `hidden`"
+    "column resolution — the `columns` array rendered in order, honouring `hidden`"
   ],
   "features": {
     "rowReorder": {
@@ -30,7 +30,7 @@
       ],
       "adapterComponents": [],
       "standardPreset": false,
-      "note": "The first feature to own its provider: the drag state machine lives on `@adapttable/core/features/row-reorder` and nothing in the base graph reaches it. Its enabling prop is gone \u2014 the feature import is the only way to arm reordering.",
+      "note": "The first feature to own its provider: the drag state machine lives on `@adapttable/core/features/row-reorder` and nothing in the base graph reaches it. Its enabling prop is gone — the feature import is the only way to arm reordering.",
       "requiresConfig": true
     },
     "rowPinning": {
@@ -333,7 +333,7 @@
       "implementation": ["core/src/layout/SidePanelChrome.tsx"],
       "adapterComponents": ["SidePanel"],
       "standardPreset": false,
-      "note": "Docked panel host \u2014 large, interaction-opened, lazy-import candidate.",
+      "note": "Docked panel host — large, interaction-opened, lazy-import candidate.",
       "requiresConfig": true
     },
     "bulkActions": {
@@ -366,7 +366,7 @@
         "ChecklistFilter"
       ],
       "standardPreset": true,
-      "note": "The filter engine plus five kit surfaces \u2014 the largest single optional contribution.",
+      "note": "The filter engine plus five kit surfaces — the largest single optional contribution.",
       "requiresConfig": true
     },
     "filterTypes": {
@@ -413,8 +413,8 @@
         "core/src/features/selection-stats.tsx"
       ],
       "adapterComponents": ["SelectionStatsBar"],
-      "standardPreset": true,
-      "note": "Aggregates over the selection, rendered as a kit bar.",
+      "standardPreset": false,
+      "note": "Aggregates over the selection, rendered as a kit bar. Out of the zero-argument preset: the figures need a cell range, which needs cellNavigation, while its apply arms a row-selection column — so alone it costs a column and shows nothing.",
       "requiresConfig": false
     },
     "densityChooser": {
@@ -424,8 +424,8 @@
       "subpath": "density",
       "implementation": ["core/src/url/useDensityUrlState.ts"],
       "adapterComponents": ["Toolbar"],
-      "standardPreset": true,
-      "note": "Toolbar control bound to density URL state.",
+      "standardPreset": false,
+      "note": "Toolbar control bound to density URL state. Out of the zero-argument preset: the toggle renders only when the host also passes onDensityChange, so composing it alone draws nothing.",
       "requiresConfig": false
     },
     "print": {
@@ -516,7 +516,7 @@
     }
   },
   "frameworkBoundary": {
-    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React and no React-coupled package. A vendor namespace is not a framework boundary \u2014 a framework-neutral dependency such as `@tanstack/virtual-core` is ordinary engine code, while `@tanstack/react-virtual` is React-coupled and belongs to the binding side. React lives in the binding layer (hooks, Chrome, focus). Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a React-coupled import.",
+    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React and no React-coupled package. A vendor namespace is not a framework boundary — a framework-neutral dependency such as `@tanstack/virtual-core` is ordinary engine code, while `@tanstack/react-virtual` is React-coupled and belongs to the binding side. React lives in the binding layer (hooks, Chrome, focus). Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a React-coupled import.",
     "forbiddenImports": [
       "react",
       "react-dom",
@@ -635,7 +635,7 @@
         "v2Path": "<DataTable onRowReorder={handler} />",
         "v3Path": "import { rowReorder } from \"@adapttable/mui/row-reorder\";\n<DataTable features={[rowReorder(handler)]} />",
         "packages": ["@adapttable/core", "every @adapttable/<kit>"],
-        "warnedBy": "removed \u2014 the feature import is the only way in",
+        "warnedBy": "removed — the feature import is the only way in",
         "test": "packages/core/src/features/row-reorder.test.tsx",
         "note": "Removed ahead of the rest because row reordering is the feature that proves the provider seam: while the prop worked, the chrome had to import the hook to serve it, and nothing could leave the graph."
       },
@@ -712,7 +712,7 @@
         "v3Path": "import { headerGroupRows } from \"@adapttable/core/adapter\"",
         "packages": ["@adapttable/core"],
         "warnedBy": "@deprecated JSDoc on each binding in packages/core/src/mainEntryAliases.ts",
-        "test": "scripts/api-warnings.test.mjs \u2014 aliasNames reads the aliases straight from the module; scripts/consumer-harness.mjs probes that each is still a value in a packed install",
+        "test": "scripts/api-warnings.test.mjs — aliasNames reads the aliases straight from the module; scripts/consumer-harness.mjs probes that each is still a value in a packed install",
         "names": [
           "COLUMN_GROUP_ID_SEP",
           "COLUMN_GROUP_RENDER_PREFIX",
@@ -804,15 +804,14 @@
         "v3Path": "<DataTable density=\"compact\" />",
         "packages": ["@adapttable/mui"],
         "warnedBy": "@deprecated JSDoc at packages/adapter-mui/src/types.ts:127",
-        "test": "packages/adapter-mui/src/DataTable.coverage.test.tsx \u2014 \"lets an explicit size prop win over density (back-compat)\""
+        "test": "packages/adapter-mui/src/DataTable.coverage.test.tsx — \"lets an explicit size prop win over density (back-compat)\""
       }
     ]
   },
   "standardFeatures": {
-    "note": "`standardFeatures()` with no arguments returns only factories that are callable with no required configuration. A factory that needs options is inert without them, so naming it in a preset would bundle an implementation the table cannot use. Those join through `standardFeatures({ ... })` when the caller supplies what they need.",
+    "note": "`standardFeatures()` with no arguments returns only factories that are callable with no required configuration. A factory that needs options is inert without them, so naming it in a preset would bundle an implementation the table cannot use. Those join through `standardFeatures({ ... })` when the caller supplies what they need. A factory that is callable bare but does nothing without a host prop or a sibling feature is not a member either: the preset composes what WORKS with no further input.",
     "zeroArgument": [
       "columnMenu",
-      "densityChooser",
       "exportCsv",
       "findInTable",
       "fitColumns",
@@ -820,7 +819,6 @@
       "headerFilters",
       "multiSort",
       "resizableColumns",
-      "selectionStats",
       "statusBar"
     ],
     "onlyWithOptions": ["bulkActions", "filters", "grouping", "savedViews"]
@@ -829,7 +827,7 @@
     "rule": "Feature subpaths are imported statically. A lazy variant is a separate, explicitly measured export, admitted only with evidence that initial-open SSR, hydration, focus order and first use are unchanged. No feature is named a lazy candidate in advance."
   },
   "provisionalBaseReview": {
-    "note": "Four capabilities were carried as provisional base members and measured before the contract was fixed. The test is both halves: essential to the three-prop table AND cheap. Each is cheap; none is reachable from `columns` + `data` + `rowKey` alone, so none stays in base. Sizes are that module's own graph bundled with React and the kits external, minified and gzipped \u2014 an upper bound, because a shared dependency is counted against every module that reaches it.",
+    "note": "Four capabilities were carried as provisional base members and measured before the contract was fixed. The test is both halves: essential to the three-prop table AND cheap. Each is cheap; none is reachable from `columns` + `data` + `rowKey` alone, so none stays in base. Sizes are that module's own graph bundled with React and the kits external, minified and gzipped — an upper bound, because a shared dependency is counted against every module that reaches it.",
     "method": "rolldown over packages/core/src, React and @tanstack external, minify + gzip",
     "reviewed": {
       "row selection": {
@@ -858,7 +856,7 @@
         "sizeKB": 0.91,
         "essentialToThreeProp": false,
         "verdict": "feature",
-        "where": "Initial order is the `columns` array, which is base. Reordering is reached only through the Columns menu \u2014 `columnReorderKeyProps` is imported by adapter ColumnMenu components and nothing else \u2014 so it ships with `columnMenu`."
+        "where": "Initial order is the `columns` array, which is base. Reordering is reached only through the Columns menu — `columnReorderKeyProps` is imported by adapter ColumnMenu components and nothing else — so it ships with `columnMenu`."
       }
     }
   },
@@ -878,7 +876,7 @@
       "unstyled": 134.8
     },
     "packedAfter": {
-      "mantine": 133.0,
+      "mantine": 133,
       "mui": 133.5,
       "chakra": 132.5,
       "antd": 126.4,
@@ -887,7 +885,7 @@
       "shadcn": 137.5,
       "unstyled": 134.1
     },
-    "absenceMarker": "ROW_DND_MIME \u2014 written and read only inside the reorder state machine, so its absence from every adapter root is the proof the machine left the base graph.",
+    "absenceMarker": "ROW_DND_MIME — written and read only inside the reorder state machine, so its absence from every adapter root is the proof the machine left the base graph.",
     "reading": "The layer costs 0.74 KB and the state machine it displaced was 1.51 KB, which is the -0.7 KB each adapter root actually moved. The layer is paid once; every further feature that moves behind it is subtraction."
   }
 }

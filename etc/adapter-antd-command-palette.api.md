@@ -5,10 +5,10 @@
 ```ts
 
 import { CommandPaletteOptions } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 
 // @public (undocumented)
-export function commandPalette<TRow>(options?: boolean | CommandPaletteOptions): TableFeature<TRow>;
+export function commandPalette(options?: boolean | CommandPaletteOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

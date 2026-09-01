@@ -34,7 +34,7 @@ describe("selected cells are visible (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        features={[cellNavigation<Row>()]}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );

@@ -2034,6 +2034,9 @@ export interface ExportWriter {
 }
 
 // @public
+export function extendFeature(base: StaticTableFeature, renders: readonly FeatureRender<never>[]): StaticTableFeature;
+
+// @public (undocumented)
 export function extendFeature<TRow>(base: TableFeature<TRow>, renders: readonly FeatureRender<never>[]): TableFeature<TRow>;
 
 // @public
@@ -2163,7 +2166,7 @@ export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "reorder-nes
 // @public
 export interface FeaturePatch<TRow = unknown> {
     readonly [key: string]: unknown;
-    readonly __row?: TRow;
+    readonly __row?: (row: TRow) => void;
 }
 
 // @public
@@ -4305,6 +4308,18 @@ export interface SortLevel {
 }
 
 // @public
+export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
+
+// @public
+export interface StaticTableFeature {
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly id: string;
+    readonly provider?: FeatureProviderContribution;
+    readonly renders?: readonly FeatureRender<never>[];
+    setup?(host: StaticFeatureHost): void | (() => void);
+}
+
+// @public
 export const STATUS_BAR: FeatureSlotKey<Omit<StatusBarChromeProps, "slots">>;
 
 // @public
@@ -4484,7 +4499,7 @@ export interface TableFeature<TRow = unknown> {
 
 // @public
 export interface TableFeatureHost<TRow = unknown> {
-    readonly __row?: TRow;
+    readonly __row?: (row: TRow) => void;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;
@@ -5156,10 +5171,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
-        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions | undefined;
         headerFilters?: boolean | undefined;
+        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions | undefined;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
@@ -5172,12 +5187,9 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance | undefined;
         locale?: string | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
-        confirm?: ConfirmHandler | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
+        rowActions?: RowAction<TRow>[] | undefined;
         tableLabel?: string | undefined;
         sortByOptions?: SortByOption[] | undefined;
         renderCard?: MobileCardRenderer<TRow> | undefined;
@@ -5190,6 +5202,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
@@ -5199,6 +5212,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
             depth?: number;
         } | undefined;
         rowClassName?: ((row: TRow, index: number) => string | undefined) | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         rowStyle?: RowStyle<TRow> | undefined;
         rowHeight?: RowHeight<TRow> | undefined;
         renderRowDetail?: ((row: TRow) => ReactNode) | undefined;
@@ -5285,6 +5299,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         statusBar?: boolean | undefined;
         undoRedoButtons?: boolean | undefined;
         printButton?: boolean | undefined;
+        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
@@ -5313,10 +5328,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
-        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions | undefined;
         headerFilters?: boolean | undefined;
+        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions | undefined;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
@@ -5329,12 +5344,9 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance | undefined;
         locale?: string | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
-        confirm?: ConfirmHandler | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
+        rowActions?: RowAction<TRow>[] | undefined;
         tableLabel?: string | undefined;
         sortByOptions?: SortByOption[] | undefined;
         renderCard?: MobileCardRenderer<TRow> | undefined;
@@ -5347,6 +5359,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
@@ -5356,6 +5369,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
             depth?: number;
         } | undefined;
         rowClassName?: ((row: TRow, index: number) => string | undefined) | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         rowStyle?: RowStyle<TRow> | undefined;
         rowHeight?: RowHeight<TRow> | undefined;
         renderRowDetail?: ((row: TRow) => ReactNode) | undefined;
@@ -5442,6 +5456,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         statusBar?: boolean | undefined;
         undoRedoButtons?: boolean | undefined;
         printButton?: boolean | undefined;
+        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;

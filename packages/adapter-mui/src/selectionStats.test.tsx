@@ -36,7 +36,7 @@ describe("selection statistics (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
-        features={[cellNavigation<Row>(), selectionStats<Row>()]}
+        features={[cellNavigation(), selectionStats()]}
         {...extra}
       />
     );
@@ -54,7 +54,7 @@ describe("selection statistics (mui)", () => {
     table({
       selectionStats: true,
       locale: "en-US",
-      features: [cellNavigation<Row>(), selectionStats<Row>()],
+      features: [cellNavigation(), selectionStats()],
     });
     selectBudgetColumn();
     expect(strip()?.textContent).toContain("Sum 40");
@@ -73,7 +73,7 @@ describe("selection statistics (mui)", () => {
         cellNavigation
         locale="en-US"
         selectionStats
-        features={[cellNavigation<Row>()]}
+        features={[cellNavigation()]}
       />
     );
     selectBudgetColumn();

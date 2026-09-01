@@ -47,7 +47,7 @@ describe("row pinning (mui)", () => {
         pinnedRowIds={{ top: [], bottom: [] }}
         onPinnedRowIdsChange={onPinnedRowIdsChange}
         features={[
-          rowPinning<Task>({
+          rowPinning({
             pinnedRowIds: { top: [], bottom: [] },
             onPinnedRowIdsChange,
           }),
@@ -71,7 +71,7 @@ describe("row pinning (mui)", () => {
         pinnedRowIds={{ top: ["1"], bottom: ["3"] }}
         onPinnedRowIdsChange={vi.fn()}
         features={[
-          rowPinning<Task>({
+          rowPinning({
             pinnedRowIds: { top: ["1"], bottom: ["3"] },
             onPinnedRowIdsChange: vi.fn(),
           }),
@@ -95,7 +95,7 @@ describe("row pinning (mui)", () => {
         urlSync={false}
         forceMobile
         onPinnedRowIdsChange={onPinnedRowIdsChange}
-        features={[rowPinning<Task>({ onPinnedRowIdsChange })]}
+        features={[rowPinning({ onPinnedRowIdsChange })]}
       />
     );
     expect(part("pinned-top")).toBeNull();

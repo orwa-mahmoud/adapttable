@@ -247,6 +247,19 @@ describe("feature factories", () => {
     expect(patch(built)).toEqual({ statusBar: true });
   });
 
+  it("feature carries a setup, so a plugin registers on the same object", () => {
+    // The escape hatch has to reach the live host as well as the prop
+    // surface: a plugin that only patched props could not register a writer,
+    // an editor or a command, and would need an API of its own.
+    const registerCommand = vi.fn();
+    const built = feature("audit", { statusBar: true }, (host) => {
+      host.registerCommand({ key: "audit", label: "Audit", onSelect: vi.fn() });
+    });
+    built.setup?.({ registerCommand } as never);
+    expect(patch(built)).toEqual({ statusBar: true });
+    expect(registerCommand).toHaveBeenCalledTimes(1);
+  });
+
   it("registers extras through setup so a plugin is not a second API", () => {
     const writer = { extension: "tsv", build: vi.fn() };
     const registerWriter = vi.fn();

@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/radix",
   "version": "2.6.0",
-  "description": "Radix Themes adapter for AdaptTable — a batteries-included Radix data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
+  "description": "Radix Themes adapter for AdaptTable \u2014 a batteries-included Radix data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",
     "radix-ui",
@@ -408,7 +408,17 @@
         "default": "./dist/pivot.cjs"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    }
   },
   "scripts": {
     "build": "tsdown",

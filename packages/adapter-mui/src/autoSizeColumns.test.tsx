@@ -50,7 +50,7 @@ describe("column auto-sizing (mui)", () => {
         urlSync={false}
         resizableColumns
         enableColumnMenu
-        features={[columnMenu<Row>()]}
+        features={[columnMenu()]}
         onColumnLayoutChange={onColumnLayoutChange}
       />
     );

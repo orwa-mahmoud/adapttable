@@ -4,13 +4,13 @@
 
 ```ts
 
-import { TableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 
 // @public (undocumented)
-export function selectionStats<TRow>(): TableFeature<TRow>;
+export function selectionStats(): StaticTableFeature;
 
 // @public (undocumented)
-export function statusBar<TRow>(): TableFeature<TRow>;
+export function statusBar(): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

@@ -34,7 +34,7 @@ describe("the fill handle (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
-        features={[cellNavigation<Row>()]}
+        features={[cellNavigation()]}
         {...extra}
       />
     );

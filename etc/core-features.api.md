@@ -51,7 +51,7 @@ export interface BulkActionContext {
 }
 
 // @public
-export function bulkActions<TRow>(actions: readonly BulkAction[]): TableFeature<TRow>;
+export function bulkActions(actions: readonly BulkAction[]): StaticTableFeature;
 
 // @public
 export type CellEditor = "text" | "number" |
@@ -80,7 +80,7 @@ export interface CellEditorOption {
 }
 
 // @public
-export function cellNavigation<TRow>(): TableFeature<TRow>;
+export function cellNavigation(): StaticTableFeature;
 
 // @public
 export interface CellProps<TRow> {
@@ -111,7 +111,7 @@ export interface ChecklistValue {
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 // @public
-export function collapsibleColumnGroups<TRow>(): TableFeature<TRow>;
+export function collapsibleColumnGroups(): StaticTableFeature;
 
 // @public
 export interface ColumnDef<TRow> {
@@ -194,7 +194,7 @@ export interface ColumnLayoutState {
 }
 
 // @public
-export function columnMenu<TRow>(): TableFeature<TRow>;
+export function columnMenu(): StaticTableFeature;
 
 // @public
 export interface ColumnMenuAction {
@@ -260,13 +260,13 @@ export interface ColumnMenuRow<TRow> {
 }
 
 // @public
-export function columnSelectionCheckbox<TRow>(): TableFeature<TRow>;
+export function columnSelectionCheckbox(): StaticTableFeature;
 
 // @public
 export type Command = ContextMenuItem;
 
 // @public
-export function commandPalette<TRow>(options?: boolean | CommandPaletteOptions): TableFeature<TRow>;
+export function commandPalette(options?: boolean | CommandPaletteOptions): StaticTableFeature;
 
 // @public
 export interface CommandPaletteOptions {
@@ -338,15 +338,15 @@ export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElemen
 export type Density = "comfortable" | "compact";
 
 // @public
-export function densityChooser<TRow>(): TableFeature<TRow>;
+export function densityChooser(): StaticTableFeature;
 
 // @public
-export function dirtyIndicators<TRow>(): TableFeature<TRow>;
+export function dirtyIndicators(): StaticTableFeature;
 
 // @public
-export function editHistory<TRow>(options?: boolean | {
+export function editHistory(options?: boolean | {
     depth?: number;
-}): TableFeature<TRow>;
+}): StaticTableFeature;
 
 // @public
 export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
@@ -459,7 +459,7 @@ export interface ExtraRow {
 export type ExtraRowKind = "separator" | "fullWidth";
 
 // @public
-export function extraRows<TRow>(rows: readonly ExtraRow[]): TableFeature<TRow>;
+export function extraRows(rows: readonly ExtraRow[]): StaticTableFeature;
 
 // @public
 export type FacetCounts = readonly ChecklistValue[];
@@ -491,7 +491,7 @@ export interface FeatureHostState<TRow = unknown> {
 // @public
 export interface FeaturePatch<TRow = unknown> {
     readonly [key: string]: unknown;
-    readonly __row?: TRow;
+    readonly __row?: (row: TRow) => void;
 }
 
 // @public
@@ -565,7 +565,7 @@ export interface FilterTypeExtend {
 }
 
 // @public
-export function filterTypes<TRow>(specs: readonly FilterTypeSpec[]): TableFeature<TRow>;
+export function filterTypes(specs: readonly FilterTypeSpec[]): StaticTableFeature;
 
 // @public
 export interface FilterTypeSpec {
@@ -597,13 +597,13 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
 }
 
 // @public
-export function findInTable<TRow>(): TableFeature<TRow>;
+export function findInTable(): StaticTableFeature;
 
 // @public
-export function fitColumns<TRow>(): TableFeature<TRow>;
+export function fitColumns(): StaticTableFeature;
 
 // @public
-export function fullscreen<TRow>(): TableFeature<TRow>;
+export function fullscreen(): StaticTableFeature;
 
 // @public
 export type GetCellSpan<TRow> = (args: GetCellSpanArgs<TRow>) => CellSpanRequest | undefined;
@@ -648,13 +648,13 @@ export interface GroupNode<TRow> {
 export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
 
 // @public
-export function headerFilters<TRow>(): TableFeature<TRow>;
+export function headerFilters(): StaticTableFeature;
 
 // @public
 export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 // @public
-export function multiSort<TRow>(): TableFeature<TRow>;
+export function multiSort(): StaticTableFeature;
 
 // @public
 export interface NestedTable {
@@ -690,7 +690,7 @@ export interface PinOffset {
 export type PinSide = "start" | "end";
 
 // @public
-function print_2<TRow>(onPrint: () => void, printButton?: boolean): TableFeature<TRow>;
+function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature;
 export { print_2 as print }
 
 // @public
@@ -716,7 +716,7 @@ export interface QueryGroupRow<TRow = unknown> {
 }
 
 // @public
-export function resizableColumns<TRow>(): TableFeature<TRow>;
+export function resizableColumns(): StaticTableFeature;
 
 // @public
 export type ResolvedPaginationMode = "infinite" | "paged";
@@ -754,10 +754,10 @@ export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<s
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 
 // @public
-export function rowPinning<TRow>(options?: {
+export function rowPinning(options?: {
     pinnedRowIds?: RowPinState;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
-}): TableFeature<TRow>;
+}): StaticTableFeature;
 
 // @public
 export interface RowPinState {
@@ -788,7 +788,7 @@ export interface SavedView {
 export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
 
 // @public
-export function savedViews<TRow>(options: UseSavedViewsOptions): TableFeature<TRow>;
+export function savedViews(options: UseSavedViewsOptions): StaticTableFeature;
 
 // @public
 export interface SavedViewsStore {
@@ -802,7 +802,7 @@ export interface SavedViewsStore {
 export type SavedViewVisibility = "private" | "team";
 
 // @public
-export function selectionStats<TRow>(): TableFeature<TRow>;
+export function selectionStats(): StaticTableFeature;
 
 // @public
 export interface Shortcut {
@@ -811,7 +811,7 @@ export interface Shortcut {
 }
 
 // @public
-export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow>;
+export function sidePanel(options: SidePanelOptions): StaticTableFeature;
 
 // @public
 export interface SidePanelEntry {
@@ -841,7 +841,19 @@ export interface SortLevel {
 }
 
 // @public
-export function statusBar<TRow>(): TableFeature<TRow>;
+export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
+
+// @public
+export interface StaticTableFeature {
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly id: string;
+    readonly provider?: FeatureProviderContribution;
+    readonly renders?: readonly FeatureRender<never>[];
+    setup?(host: StaticFeatureHost): void | (() => void);
+}
+
+// @public
+export function statusBar(): StaticTableFeature;
 
 // @public
 export interface TableFeature<TRow = unknown> {
@@ -854,7 +866,7 @@ export interface TableFeature<TRow = unknown> {
 
 // @public
 export interface TableFeatureHost<TRow = unknown> {
-    readonly __row?: TRow;
+    readonly __row?: (row: TRow) => void;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;
@@ -1160,7 +1172,7 @@ export function tree<TRow>(options?: {
 }): TableFeature<TRow>;
 
 // @public
-export function undoRedoButtons<TRow>(): TableFeature<TRow>;
+export function undoRedoButtons(): StaticTableFeature;
 
 // @public
 export interface UrlStateAdapter {
@@ -1202,7 +1214,7 @@ export interface UseSavedViewsOptions {
 export function useTableFeatures<P extends object>(incoming: P): P;
 
 // @public
-export function virtualize<TRow>(options?: VirtualizeOptions): TableFeature<TRow>;
+export function virtualize(options?: VirtualizeOptions): StaticTableFeature;
 
 // @public
 export type VirtualizeOptions = boolean | {

@@ -521,7 +521,7 @@ describe("useVirtualChromeBodyData with pinned rows", () => {
 
     const adapter = createMemoryAdapter("");
     const { result } = renderLiveBody(
-      [rowPinning<Row>({ pinnedRowIds: { top: ["7"], bottom: [] } })],
+      [rowPinning({ pinnedRowIds: { top: ["7"], bottom: [] } })],
       () => {
         const source = useFrontendData<Row>({
           data: ROWS,

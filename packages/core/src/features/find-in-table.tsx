@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import { useFindInTable } from "../find/useFindInTable";
 import { slotRender } from "./providers";
 import { FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 function LiveFind({
   children,
@@ -25,7 +25,7 @@ function LiveFind({
  *
  * @public
  */
-export function findInTable<TRow>(): TableFeature<TRow> {
+export function findInTable(): StaticTableFeature {
   return {
     id: "find-in-table",
     apply: () => ({ findInTable: true }),

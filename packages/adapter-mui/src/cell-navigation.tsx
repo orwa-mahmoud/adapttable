@@ -2,7 +2,7 @@ import {
   extendFeature,
   FILL_HANDLE,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import { cellNavigation as core } from "@adapttable/core/features";
 
@@ -13,8 +13,8 @@ import { FillHandle } from "./components/FillHandle";
  *
  * @public
  */
-export function cellNavigation<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function cellNavigation(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(FILL_HANDLE, (props) => <FillHandle {...props} />),
   ]);
 }

@@ -47,7 +47,7 @@ describe("bulk actions (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         bulkActions={ACTIONS}
-        features={[bulkActions<Row>(ACTIONS)]}
+        features={[bulkActions(ACTIONS)]}
       />
     );
     fireEvent.click(screen.getByLabelText("Select all"));

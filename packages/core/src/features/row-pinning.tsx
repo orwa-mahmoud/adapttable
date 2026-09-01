@@ -18,7 +18,7 @@ import { useRowPinningUrlState } from "../url/useRowPinningUrlState";
 import { devWarn } from "../utils/devWarn";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, PINNING_LIVE } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 function useLiveRowPinning<TRow>(options: {
   requested: boolean;
@@ -106,12 +106,12 @@ function LivePinning({
  *
  * @public
  */
-export function rowPinning<TRow>(
+export function rowPinning(
   options: {
     pinnedRowIds?: RowPinState;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
   } = {}
-): TableFeature<TRow> {
+): StaticTableFeature {
   return {
     id: "row-pinning",
     apply: () => options,

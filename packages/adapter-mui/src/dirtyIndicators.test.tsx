@@ -46,7 +46,7 @@ describe("dirty indicators (mui)", () => {
         urlSync={false}
         dirtyIndicators
         onCellEdit={onCellEdit}
-        features={[dirtyIndicators<Row>()]}
+        features={[dirtyIndicators()]}
         {...extra}
       />
     );

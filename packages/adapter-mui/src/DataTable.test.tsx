@@ -33,7 +33,7 @@ function composeBulk(
 ) {
   return {
     bulkActions: actions,
-    features: [bulkActionsFeature<Row>(actions), ...(extra ?? [])],
+    features: [bulkActionsFeature(actions), ...(extra ?? [])],
   };
 }
 
@@ -799,7 +799,7 @@ describe("actions column management (MUI)", () => {
     renderHarness({
       override: {
         enableColumnMenu: true,
-        features: [columnMenu<Row>()],
+        features: [columnMenu()],
         rowActions: [edit],
       },
     });
@@ -826,7 +826,7 @@ describe("actions column management (MUI)", () => {
     renderHarness({
       override: {
         enableColumnMenu: true,
-        features: [columnMenu<Row>()],
+        features: [columnMenu()],
         rowActions: [edit],
       },
     });
@@ -851,7 +851,7 @@ describe("actions column management (MUI)", () => {
     const first = renderHarness({
       override: {
         enableColumnMenu: true,
-        features: [columnMenu<Row>()],
+        features: [columnMenu()],
         rowActions: [edit],
         onColumnLayoutChange: (next) => (persisted = next),
       },

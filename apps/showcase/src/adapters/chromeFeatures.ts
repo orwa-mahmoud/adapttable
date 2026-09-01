@@ -7,7 +7,10 @@ import type {
   NestedTableFor,
   SidePanelOptions,
 } from "@adapttable/core";
-import type { TableFeature } from "@adapttable/core/features";
+import type {
+  StaticTableFeature,
+  TableFeature,
+} from "@adapttable/core/features";
 
 import { demoSavedViews, type Person } from "../data";
 import type { KitFeatureRequests } from "../Demo";
@@ -21,39 +24,36 @@ import type { KitFeatureRequests } from "../Demo";
  * not import, and a kit that renamed a factory fails to compile.
  */
 export interface KitChromeFactories {
-  cellNavigation: <TRow>() => TableFeature<TRow>;
-  columnSelectionCheckbox: <TRow>() => TableFeature<TRow>;
-  densityChooser: <TRow>() => TableFeature<TRow>;
-  editHistory: <TRow>() => TableFeature<TRow>;
+  cellNavigation: () => StaticTableFeature;
+  columnSelectionCheckbox: () => StaticTableFeature;
+  densityChooser: () => StaticTableFeature;
+  editHistory: () => StaticTableFeature;
   exportCsv: <TRow>() => TableFeature<TRow>;
-  fullscreen: <TRow>() => TableFeature<TRow>;
-  headerFilters: <TRow>() => TableFeature<TRow>;
+  fullscreen: () => StaticTableFeature;
+  headerFilters: () => StaticTableFeature;
   nestedTable: <TRow>(nested: NestedTableFor<TRow>) => TableFeature<TRow>;
-  print: <TRow>(
-    onPrint: () => void,
-    printButton?: boolean
-  ) => TableFeature<TRow>;
-  resizableColumns: <TRow>() => TableFeature<TRow>;
+  print: (onPrint: () => void, printButton?: boolean) => StaticTableFeature;
+  resizableColumns: () => StaticTableFeature;
   rowActions: <TRow>() => TableFeature<TRow>;
-  savedViews: <TRow>(
+  savedViews: (
     options: ReturnType<typeof demoSavedViews>
-  ) => TableFeature<TRow>;
-  undoRedoButtons: <TRow>() => TableFeature<TRow>;
-  bulkActions: <TRow>(actions: readonly BulkAction[]) => TableFeature<TRow>;
-  collapsibleColumnGroups: <TRow>() => TableFeature<TRow>;
-  columnMenu: <TRow>() => TableFeature<TRow>;
-  commandPalette: <TRow>(
+  ) => StaticTableFeature;
+  undoRedoButtons: () => StaticTableFeature;
+  bulkActions: (actions: readonly BulkAction[]) => StaticTableFeature;
+  collapsibleColumnGroups: () => StaticTableFeature;
+  columnMenu: () => StaticTableFeature;
+  commandPalette: (
     options?: boolean | CommandPaletteOptions
-  ) => TableFeature<TRow>;
+  ) => StaticTableFeature;
   contextMenu: <TRow>(
     options?: boolean | ContextMenuOptions<TRow>
   ) => TableFeature<TRow>;
   filters: <TRow>(defs: readonly FilterDef<TRow>[]) => TableFeature<TRow>;
-  filterTypes: <TRow>(specs: readonly FilterTypeSpec[]) => TableFeature<TRow>;
-  findInTable: <TRow>() => TableFeature<TRow>;
-  selectionStats: <TRow>() => TableFeature<TRow>;
-  sidePanel: <TRow>(options: SidePanelOptions) => TableFeature<TRow>;
-  statusBar: <TRow>() => TableFeature<TRow>;
+  filterTypes: (specs: readonly FilterTypeSpec[]) => StaticTableFeature;
+  findInTable: () => StaticTableFeature;
+  selectionStats: () => StaticTableFeature;
+  sidePanel: (options: SidePanelOptions) => StaticTableFeature;
+  statusBar: () => StaticTableFeature;
   /**
    * The kit-drawn behaviours: a group header, an editor, a grip.
    *
@@ -130,24 +130,18 @@ export function kitChromeFeatures(
 ): readonly TableFeature<Person>[] {
   const rich = !flags.focused;
   return [
-    ...((flags.cellNavigation ?? flags.editing)
-      ? [kit.cellNavigation<Person>()]
-      : []),
-    ...(flags.columnSelectionCheckbox
-      ? [kit.columnSelectionCheckbox<Person>()]
-      : []),
-    ...(flags.densityChooser ? [kit.densityChooser<Person>()] : []),
-    ...(flags.fullscreen ? [kit.fullscreen<Person>()] : []),
-    ...(flags.onPrint
-      ? [kit.print<Person>(flags.onPrint, flags.printButton)]
-      : []),
-    ...(flags.undoRedoButtons ? [kit.undoRedoButtons<Person>()] : []),
-    ...(flags.editing ? [kit.editHistory<Person>()] : []),
+    ...((flags.cellNavigation ?? flags.editing) ? [kit.cellNavigation()] : []),
+    ...(flags.columnSelectionCheckbox ? [kit.columnSelectionCheckbox()] : []),
+    ...(flags.densityChooser ? [kit.densityChooser()] : []),
+    ...(flags.fullscreen ? [kit.fullscreen()] : []),
+    ...(flags.onPrint ? [kit.print(flags.onPrint, flags.printButton)] : []),
+    ...(flags.undoRedoButtons ? [kit.undoRedoButtons()] : []),
+    ...(flags.editing ? [kit.editHistory()] : []),
     ...((flags.exportCsv ?? rich) ? [kit.exportCsv<Person>()] : []),
-    ...(rich ? [kit.savedViews<Person>(demoSavedViews(flags.urlKey))] : []),
-    ...(flags.headerFilters ? [kit.headerFilters<Person>()] : []),
+    ...(rich ? [kit.savedViews(demoSavedViews(flags.urlKey))] : []),
+    ...(flags.headerFilters ? [kit.headerFilters()] : []),
     ...(flags.nested ? [kit.nestedTable<Person>(flags.nested)] : []),
-    kit.resizableColumns<Person>(),
+    kit.resizableColumns(),
     // Only when the page actually shows the trailing actions column: composing
     // it always would add a column, and every column index with it.
     ...(flags.rowActions ? [kit.rowActions<Person>()] : []),
@@ -171,11 +165,9 @@ function alwaysOn(
   flags: KitChromeFlags
 ): readonly TableFeature<Person>[] {
   return [
-    ...(flags.statusBar ? [kit.statusBar<Person>()] : []),
-    ...(flags.editing
-      ? [kit.selectionStats<Person>(), kit.findInTable<Person>()]
-      : []),
-    kit.commandPalette<Person>(flags.commandPalette ?? true),
+    ...(flags.statusBar ? [kit.statusBar()] : []),
+    ...(flags.editing ? [kit.selectionStats(), kit.findInTable()] : []),
+    kit.commandPalette(flags.commandPalette ?? true),
     kit.contextMenu<Person>(flags.contextMenu ?? true),
   ];
 }
@@ -187,18 +179,16 @@ function panelChrome(
   rich: boolean
 ): readonly TableFeature<Person>[] {
   return [
-    ...(flags.collapsibleColumnGroups
-      ? [kit.collapsibleColumnGroups<Person>()]
-      : []),
-    ...((flags.columnMenu ?? rich) ? [kit.columnMenu<Person>()] : []),
-    ...(flags.sidePanel ? [kit.sidePanel<Person>(flags.sidePanel)] : []),
+    ...(flags.collapsibleColumnGroups ? [kit.collapsibleColumnGroups()] : []),
+    ...((flags.columnMenu ?? rich) ? [kit.columnMenu()] : []),
+    ...(flags.sidePanel ? [kit.sidePanel(flags.sidePanel)] : []),
     ...((flags.bulkActions ?? rich)
-      ? [kit.bulkActions<Person>(flags.bulkActionList)]
+      ? [kit.bulkActions(flags.bulkActionList)]
       : []),
     ...((flags.filterControls ?? rich)
       ? [
           kit.filters<Person>(flags.filterDefs),
-          kit.filterTypes<Person>(flags.filterTypeSpecs),
+          kit.filterTypes(flags.filterTypeSpecs),
         ]
       : []),
   ];

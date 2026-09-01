@@ -82,7 +82,12 @@ export type {
   FeatureRender,
   FeatureSlotKey,
 } from "./features/providers";
-export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
+export type {
+  StaticFeatureHost,
+  StaticTableFeature,
+  TableFeature,
+  TableFeatureHost,
+} from "./features/tableFeature";
 export {
   CHECKLIST_ITEM_HEIGHT,
   CHECKLIST_LIST_HEIGHT,

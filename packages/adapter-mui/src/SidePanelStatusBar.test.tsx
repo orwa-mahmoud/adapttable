@@ -37,8 +37,8 @@ describe("side panel and status bar (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           features={[
-            statusBar<Row>(),
-            sidePanel<Row>({
+            statusBar(),
+            sidePanel({
               panels: [],
               open: null,
               onOpenChange: () => undefined,

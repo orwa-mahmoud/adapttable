@@ -4,10 +4,10 @@
 
 ```ts
 
-import { TableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 
 // @public
-function print_2<TRow>(onPrint: () => void, printButton?: boolean): TableFeature<TRow>;
+function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature;
 export { print_2 as print }
 
 // (No @packageDocumentation comment for this package)

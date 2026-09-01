@@ -17,7 +17,7 @@ import {
   KEYED_WINDOW,
   type KeyedWindowSlotProps,
 } from "./slotKeys";
-import type { FeaturePatch, TableFeature } from "./tableFeature";
+import type { FeaturePatch, StaticTableFeature } from "./tableFeature";
 
 /** Options the factory accepts — a boolean or the windowing knobs. */
 export type VirtualizeOptions =
@@ -30,7 +30,9 @@ export type VirtualizeOptions =
       virtualScrollMargin?: number;
     };
 
-function patchOf(options: VirtualizeOptions): FeaturePatch<never> {
+// Row-independent, so the patch is typed for the row type that fits every
+// table rather than the one that fits none.
+function patchOf(options: VirtualizeOptions): FeaturePatch<unknown> {
   if (options === true || options === false) {
     return { virtualize: options };
   }
@@ -72,9 +74,9 @@ function KeyedWindow({
  *
  * @public
  */
-export function virtualize<TRow>(
+export function virtualize(
   options: VirtualizeOptions = true
-): TableFeature<TRow> {
+): StaticTableFeature {
   const patch = patchOf(options);
   return {
     id: "virtualize",

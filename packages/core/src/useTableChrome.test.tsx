@@ -183,7 +183,7 @@ describe("useTableChrome", () => {
     const { result } = renderLiveChrome(
       [
         grouping<Row>("name"),
-        bulkActions<Row>([{ key: "del", label: "Delete", onClick: vi.fn() }]),
+        bulkActions([{ key: "del", label: "Delete", onClick: vi.fn() }]),
       ],
       () => {
         const source = useFrontendData<Row>({
@@ -392,7 +392,7 @@ describe("useTableChrome", () => {
     resetDevWarnings();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     try {
-      const first = renderLiveChrome([dirtyIndicators<Row>()], () => {
+      const first = renderLiveChrome([dirtyIndicators()], () => {
         const source = useFrontendData<Row>({
           data: ROWS,
           urlAdapter: createMemoryAdapter(""),
@@ -411,7 +411,7 @@ describe("useTableChrome", () => {
       // With the handler present the combination is complete: no warning.
       warn.mockClear();
       resetDevWarnings();
-      renderLiveChrome([dirtyIndicators<Row>()], () => {
+      renderLiveChrome([dirtyIndicators()], () => {
         const source = useFrontendData<Row>({
           data: ROWS,
           urlAdapter: createMemoryAdapter(""),
@@ -504,7 +504,7 @@ describe("useTableChrome", () => {
       const onPinnedRowIdsChange = vi.fn();
       const rowKey = (r: Row) => r.id;
       const props = applyTableFeatures({
-        features: [rowPinning<Row>({ onPinnedRowIdsChange })],
+        features: [rowPinning({ onPinnedRowIdsChange })],
         columns,
         rowKey,
         onPinnedRowIdsChange,
@@ -538,10 +538,7 @@ describe("useTableChrome", () => {
       expect(chrome?.rowActions?.some((a) => a.key.includes("pin"))).toBe(true);
 
       const groupedProps = applyTableFeatures({
-        features: [
-          rowPinning<Row>({ onPinnedRowIdsChange }),
-          grouping<Row>("name"),
-        ],
+        features: [rowPinning({ onPinnedRowIdsChange }), grouping<Row>("name")],
         columns,
         rowKey,
         onPinnedRowIdsChange,

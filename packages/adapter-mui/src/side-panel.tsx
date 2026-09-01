@@ -2,7 +2,7 @@ import {
   extendFeature,
   SIDE_PANEL,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import {
   sidePanel as core,
@@ -16,8 +16,8 @@ import { SidePanel } from "./components/SidePanel";
  *
  * @public
  */
-export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
-  return extendFeature(core<TRow>(options), [
+export function sidePanel(options: SidePanelOptions): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(SIDE_PANEL, (props) => <SidePanel {...props} />),
   ]);
 }

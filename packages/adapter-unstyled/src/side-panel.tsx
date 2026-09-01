@@ -3,7 +3,7 @@ import {
   SIDE_PANEL,
   type SidePanelChromeProps,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import {
   sidePanel as core,
@@ -18,8 +18,8 @@ function SidePanelSlot(props: Readonly<Omit<SidePanelChromeProps, "slots">>) {
   return <SidePanel {...props} classNames={classNames} />;
 }
 
-export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow> {
-  return extendFeature(core<TRow>(options), [
+export function sidePanel(options: SidePanelOptions): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(SIDE_PANEL, (props) => <SidePanelSlot {...props} />),
   ]);
 }

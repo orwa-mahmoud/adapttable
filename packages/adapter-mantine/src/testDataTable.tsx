@@ -232,7 +232,7 @@ function bridgeGridProps<TRow>(
     (props.virtualize || props.virtualizeColumns) &&
     !hasId(next, "virtualize")
   ) {
-    next.push(virtualize<TRow>());
+    next.push(virtualize());
   }
   if (
     props.columnSelectionCheckbox &&

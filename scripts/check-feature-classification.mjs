@@ -195,9 +195,10 @@ function isOptional(parameter) {
 const callableBare = new Map();
 for (const block of factories.split("\nexport function ").slice(1)) {
   const name = /^(\w+)/.exec(block)?.[1];
-  const signature = /^\w+(?:<[^>]*>)?\(([\s\S]*?)\):\s*TableFeature/.exec(
-    block
-  );
+  // A row-independent factory returns `StaticTableFeature`, which is the
+  // whole point of that type — both spellings are a factory signature.
+  const signature =
+    /^\w+(?:<[^>]*>)?\(([\s\S]*?)\):\s*(?:Static)?TableFeature/.exec(block);
   if (!name || !signature) continue;
   callableBare.set(name, parameters(signature[1]).every(isOptional));
 }

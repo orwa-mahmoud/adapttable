@@ -5,10 +5,10 @@
 ```ts
 
 import { SidePanelOptions } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 
 // @public (undocumented)
-export function sidePanel<TRow>(options: SidePanelOptions): TableFeature<TRow>;
+export function sidePanel(options: SidePanelOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

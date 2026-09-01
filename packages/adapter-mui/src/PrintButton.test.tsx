@@ -37,7 +37,7 @@ describe("print button (mui)", () => {
           urlSync={false}
           features={
             extra?.printButton && extra?.onPrint
-              ? [print<Row>(extra.onPrint as () => void, true)]
+              ? [print(extra.onPrint as () => void, true)]
               : undefined
           }
           {...extra}

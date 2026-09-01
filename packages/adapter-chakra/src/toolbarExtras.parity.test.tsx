@@ -85,11 +85,11 @@ describe("toolbar extras (chakra)", () => {
   it("draws each one once its own feature is composed", () => {
     table([
       exportCsv<Row>(),
-      print<Row>(vi.fn(), true),
-      densityChooser<Row>(),
-      fullscreen<Row>(),
-      editHistory<Row>(),
-      undoRedoButtons<Row>(),
+      print(vi.fn(), true),
+      densityChooser(),
+      fullscreen(),
+      editHistory(),
+      undoRedoButtons(),
     ]);
 
     expect(part("print-button")).not.toBeNull();

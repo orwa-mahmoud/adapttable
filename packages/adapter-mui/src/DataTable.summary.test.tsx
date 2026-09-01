@@ -103,7 +103,7 @@ describe("summary row (desktop)", () => {
           return {
             bulkActions: actions,
             features: [
-              bulkActionsFeature<Row>(actions),
+              bulkActionsFeature(actions),
               rowDetail((r: Row) => <div>detail {r.id}</div>),
             ],
           };
@@ -170,7 +170,7 @@ describe("header groups (desktop)", () => {
           return {
             bulkActions: actions,
             features: [
-              bulkActionsFeature<Row>(actions),
+              bulkActionsFeature(actions),
               rowDetail((r: Row) => <div>detail {r.id}</div>),
             ],
           };
@@ -201,7 +201,7 @@ describe("header groups (desktop)", () => {
       columns: GROUPED,
       override: {
         collapsibleColumnGroups: true,
-        features: [collapsibleColumnGroups<Row>()],
+        features: [collapsibleColumnGroups()],
       },
     });
     const toggle = container.querySelector(

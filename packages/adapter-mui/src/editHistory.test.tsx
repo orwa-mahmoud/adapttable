@@ -41,7 +41,7 @@ describe("undo and redo (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
-        features={[cellNavigation<Row>(), editHistory<Row>()]}
+        features={[cellNavigation(), editHistory()]}
         {...extra}
       />
     );
@@ -87,7 +87,7 @@ describe("undo and redo (mui)", () => {
   it("records nothing without the prop", async () => {
     paste("Z");
     const onCellEdit = vi.fn();
-    table({ onCellEdit, features: [cellNavigation<Row>()] });
+    table({ onCellEdit, features: [cellNavigation()] });
     act(() => cell(0, 0).focus());
     await act(async () => {
       fireEvent.keyDown(cell(0, 0), { key: "v", ctrlKey: true });

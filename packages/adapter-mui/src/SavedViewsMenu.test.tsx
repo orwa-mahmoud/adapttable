@@ -133,7 +133,7 @@ describe("DataTable savedViews prop (MUI)", () => {
         rowKey={(r) => r.id}
         urlAdapter={adapter}
         savedViews={{ storageKey: "views", storage }}
-        features={[savedViews<Row>({ storageKey: "views", storage })]}
+        features={[savedViews({ storageKey: "views", storage })]}
       />
     );
     fireEvent.click(trigger());

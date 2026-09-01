@@ -265,7 +265,7 @@ describe("MUI coverage gaps", () => {
     const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
     mount({
       bulkActions: actions,
-      features: [bulkActionsFeature<Row>(actions)],
+      features: [bulkActionsFeature(actions)],
     });
     const rowChecks = screen.getAllByLabelText("Select row");
     fireEvent.click(rowChecks[0]!);
@@ -290,7 +290,7 @@ describe("MUI coverage gaps", () => {
   });
 
   it("opens and closes the column menu popover", async () => {
-    mount({ enableColumnMenu: true, features: [columnMenu<Row>()] });
+    mount({ enableColumnMenu: true, features: [columnMenu()] });
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     await screen.findByText("Reset columns");
     fireEvent.click(document.querySelector(".MuiBackdrop-root")!);
@@ -444,7 +444,7 @@ describe("MUI coverage gaps", () => {
       {
         forceMobile: true,
         virtualize: true,
-        features: [virtualize<Row>()],
+        features: [virtualize()],
       },
       "infinite"
     );

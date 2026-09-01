@@ -116,7 +116,7 @@ describe("row reorder (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         enableColumnMenu
-        features={[rowReorder(vi.fn()), columnMenu<Task>()]}
+        features={[rowReorder(vi.fn()), columnMenu()]}
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));

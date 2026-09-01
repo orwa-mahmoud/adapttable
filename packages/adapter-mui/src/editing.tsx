@@ -4,6 +4,7 @@ import {
   extendFeature,
   ROW_EDIT_ACTIONS,
   slotRender,
+  type StaticTableFeature,
   type TableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/adapter";
@@ -55,8 +56,8 @@ export function rowEditing<TRow>(
  *
  * @public
  */
-export function dirtyIndicators<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreDirty<TRow>(), []);
+export function dirtyIndicators(): StaticTableFeature {
+  return extendFeature(coreDirty(), []);
 }
 
 const undoChrome = [
@@ -68,9 +69,9 @@ const undoChrome = [
  *
  * @public
  */
-export function editHistory<TRow>(
+export function editHistory(
   options: boolean | { depth?: number } = true
-): TableFeature<TRow> {
+): StaticTableFeature {
   return extendFeature(coreHistory(options), undoChrome);
 }
 
@@ -79,8 +80,8 @@ export function editHistory<TRow>(
  *
  * @public
  */
-export function undoRedoButtons<TRow>(): TableFeature<TRow> {
-  return extendFeature(coreButtons<TRow>(), undoChrome);
+export function undoRedoButtons(): StaticTableFeature {
+  return extendFeature(coreButtons(), undoChrome);
 }
 
 /**
@@ -92,7 +93,7 @@ export function undoRedoButtons<TRow>(): TableFeature<TRow> {
 export function batchEditing<TRow>(
   onBatchEdit: Parameters<typeof coreBatch<TRow>>[0]
 ): TableFeature<TRow> {
-  return extendFeature(coreBatch<TRow>(onBatchEdit), [
+  return extendFeature(coreBatch(onBatchEdit), [
     ...cellChrome,
     slotRender(BATCH_EDIT_BAR, (props) => <BatchEditBar {...props} />),
   ]);

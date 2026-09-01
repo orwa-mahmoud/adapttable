@@ -323,7 +323,7 @@ describe("column menu feature (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         enableColumnMenu
-        features={[columnMenu<Row>()]}
+        features={[columnMenu()]}
       />
     );
     expect(screen.getByRole("button", { name: "Columns" })).toBeInTheDocument();

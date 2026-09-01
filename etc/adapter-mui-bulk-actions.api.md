@@ -5,10 +5,10 @@
 ```ts
 
 import { BulkAction } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 
 // @public
-export function bulkActions<TRow>(actions: readonly BulkAction[]): TableFeature<TRow>;
+export function bulkActions(actions: readonly BulkAction[]): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

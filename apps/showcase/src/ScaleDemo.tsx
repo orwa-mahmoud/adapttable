@@ -323,7 +323,7 @@ function ServerScaleTable({
         features={[
           ...(virtual
             ? [
-                virtualize_<BigPerson>({
+                virtualize_({
                   virtualizeColumns: virtualCols,
                   estimateRowSize: 48,
                 }),
@@ -548,7 +548,7 @@ function FrontendScaleTable({
           features={[
             ...(virtual
               ? [
-                  virtualize_<BigPerson>({
+                  virtualize_({
                     virtualizeColumns: virtualCols,
                     estimateRowSize: 48,
                   }),

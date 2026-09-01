@@ -37,7 +37,7 @@ describe("column virtualization (mui)", () => {
         maxHeight={300}
         features={
           extra?.virtualizeColumns === true
-            ? [virtualize<Row>({ virtualizeColumns: true })]
+            ? [virtualize({ virtualizeColumns: true })]
             : undefined
         }
         {...extra}

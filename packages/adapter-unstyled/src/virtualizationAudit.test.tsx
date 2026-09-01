@@ -46,7 +46,7 @@ describe("virtualization compatibility (unstyled)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         paginationMode="infinite"
-        features={[virtualize<Row>()]}
+        features={[virtualize()]}
         {...extra}
       />
     );

@@ -7,6 +7,7 @@ export default defineConfig({
   // hand-write a client wrapper.
   banner: { js: '"use client";' },
   entry: [
+    "src/preset.ts",
     "src/row-pinning.ts",
     "src/batch-editing.ts",
     "src/cell-span.ts",

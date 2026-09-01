@@ -14,7 +14,7 @@ import {
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
 } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 function LiveSelectionStats({
   range,
@@ -39,7 +39,7 @@ function LiveSelectionStats({
  *
  * @public
  */
-export function selectionStats<TRow>(): TableFeature<TRow> {
+export function selectionStats(): StaticTableFeature {
   return {
     id: "selection-stats",
     apply: () => ({ selectionStats: true }),

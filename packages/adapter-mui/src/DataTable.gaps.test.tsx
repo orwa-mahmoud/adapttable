@@ -194,7 +194,7 @@ describe("MUI gaps", () => {
       {
         virtualize: true,
         estimateRowSize: 40,
-        features: [virtualize<Row>({ estimateRowSize: 40 })],
+        features: [virtualize({ estimateRowSize: 40 })],
       },
       "infinite"
     );
@@ -212,7 +212,7 @@ describe("MUI gaps", () => {
       forceMobile: true,
       virtualize: true,
       estimateCardSize: 132,
-      features: [virtualize<Row>({ estimateCardSize: 132 })],
+      features: [virtualize({ estimateCardSize: 132 })],
     });
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();

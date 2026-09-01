@@ -1,7 +1,7 @@
 import {
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/adapter";
 import { fullscreen as core } from "@adapttable/core/features";
@@ -13,8 +13,8 @@ import { FullscreenButton } from "./components/toolbarExtras";
  *
  * @public
  */
-export function fullscreen<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function fullscreen(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(TOOLBAR_EXTRAS, (props) => <FullscreenButton {...props} />),
   ]);
 }

@@ -39,7 +39,7 @@ describe("column selection from the header (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        features={[cellNavigation<Row>()]}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );
@@ -55,7 +55,7 @@ describe("column selection from the header (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        features={[cellNavigation<Row>()]}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );
@@ -70,7 +70,7 @@ describe("column selection from the header (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
-        features={[cellNavigation<Row>()]}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );
@@ -96,9 +96,9 @@ describe("the column-selection header checkbox (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         features={[
-          ...(extra?.cellNavigation ? [cellNavigation<Row>()] : []),
+          ...(extra?.cellNavigation ? [cellNavigation()] : []),
           ...(extra?.columnSelectionCheckbox
-            ? [columnSelectionCheckbox<Row>()]
+            ? [columnSelectionCheckbox()]
             : []),
         ]}
         {...extra}

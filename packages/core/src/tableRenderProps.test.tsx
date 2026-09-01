@@ -712,7 +712,7 @@ describe("useVirtualChromeBodyData", () => {
     const adapter = createMemoryAdapter("");
     const live = renderLiveBody(
       [
-        rowPinning<Row>({
+        rowPinning({
           pinnedRowIds: { top: ["a"], bottom: [] },
           onPinnedRowIdsChange: () => undefined,
         }),

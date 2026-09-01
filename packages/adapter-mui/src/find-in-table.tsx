@@ -2,7 +2,7 @@ import {
   extendFeature,
   FIND_BAR,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import { findInTable as core } from "@adapttable/core/features";
 
@@ -13,8 +13,8 @@ import { FindBar } from "./components/kitControls";
  *
  * @public
  */
-export function findInTable<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function findInTable(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(FIND_BAR, (props) => <FindBar {...props} />),
   ]);
 }

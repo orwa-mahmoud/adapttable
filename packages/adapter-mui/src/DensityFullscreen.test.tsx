@@ -47,8 +47,8 @@ describe("density and fullscreen (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           features={[
-            ...(extra?.densityChooser ? [densityChooser<Row>()] : []),
-            ...(extra?.fullscreen ? [fullscreen<Row>()] : []),
+            ...(extra?.densityChooser ? [densityChooser()] : []),
+            ...(extra?.fullscreen ? [fullscreen()] : []),
           ]}
           {...extra}
         />

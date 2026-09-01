@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/chakra",
   "version": "2.6.0",
-  "description": "Chakra UI adapter for AdaptTable — a batteries-included Chakra data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
+  "description": "Chakra UI adapter for AdaptTable \u2014 a batteries-included Chakra data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",
     "chakra-ui",
@@ -404,7 +404,17 @@
         "default": "./dist/pivot.cjs"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    }
   },
   "scripts": {
     "build": "tsdown",

@@ -23,7 +23,11 @@ import { devWarn } from "../utils/devWarn";
 import { featureHostOf } from "./featureHost";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, EDITING_LIVE } from "./slotKeys";
-import type { FeaturePatch, TableFeature } from "./tableFeature";
+import type {
+  FeaturePatch,
+  StaticTableFeature,
+  TableFeature,
+} from "./tableFeature";
 
 function LiveEditing({
   chrome,
@@ -231,7 +235,7 @@ export function batchEditing<TRow>(
  *
  * @public
  */
-export function dirtyIndicators<TRow>(): TableFeature<TRow> {
+export function dirtyIndicators(): StaticTableFeature {
   return {
     id: "dirty-indicators",
     apply: () => ({ dirtyIndicators: true }),

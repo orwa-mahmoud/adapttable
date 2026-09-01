@@ -1,7 +1,7 @@
 import {
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/adapter";
 import { print as core } from "@adapttable/core/features";
@@ -13,10 +13,10 @@ import { PrintButton } from "./components/toolbarExtras";
  *
  * @public
  */
-export function print<TRow>(
+export function print(
   onPrint: () => void,
   printButton = false
-): TableFeature<TRow> {
+): StaticTableFeature {
   return extendFeature(core(onPrint, printButton), [
     slotRender(TOOLBAR_EXTRAS, (props) => <PrintButton {...props} />),
   ]);

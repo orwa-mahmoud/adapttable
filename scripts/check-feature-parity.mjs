@@ -27,10 +27,14 @@ const PUBLISHED = readdirSync(PACKAGES).filter((name) => {
   return pkg.private !== true;
 });
 
+/** `/preset` ships on every kit but is not a feature entry in the manifest. */
+const EXTRA_SUBPATHS = ["./preset"];
+
 const subpaths = [
   ...new Set(
     Object.values(manifest.features).map((feature) => `./${feature.subpath}`)
   ),
+  ...EXTRA_SUBPATHS,
 ].sort();
 
 /**
@@ -47,6 +51,35 @@ const HEADER_NAMED = /leaf\.headerProps\s*\[/;
 const HEADER_HANDOFF = /getHeaderCellProps/;
 /** shadcn renders through `@adapttable/unstyled`, so it has no header of its own. */
 const NO_HEADER_OF_ITS_OWN = new Set(["adapter-shadcn"]);
+
+/**
+ * The code, without its comments.
+ *
+ * Written as a scan rather than a regex: a comment stripper is exactly the
+ * shape that backtracks badly on a long source file, and this runs over every
+ * file in eight packages.
+ */
+function firstComment(source, index) {
+  const block = source.indexOf("/*", index);
+  const line = source.indexOf("//", index);
+  if (block === -1) return { at: line, block: false };
+  if (line === -1) return { at: block, block: true };
+  return block < line ? { at: block, block: true } : { at: line, block: false };
+}
+
+function stripComments(source) {
+  let out = "";
+  let index = 0;
+  while (index < source.length) {
+    const { at, block } = firstComment(source, index);
+    if (at === -1) return out + source.slice(index);
+    out += source.slice(index, at);
+    const close = source.indexOf(block ? "*/" : "\n", at + 2);
+    if (close === -1) return out;
+    index = block ? close + 2 : close;
+  }
+  return out;
+}
 
 const problems = [];
 
@@ -69,7 +102,11 @@ for (const adapter of PUBLISHED) {
   let passesHeaderProps = NO_HEADER_OF_ITS_OWN.has(adapter);
 
   for (const file of files) {
-    const text = readFileSync(file, "utf8");
+    const source = readFileSync(file, "utf8");
+    // An import in a doc comment is an EXAMPLE — `@adapttable/mui/preset` in
+    // the preset's own usage block is what a reader types, not what this
+    // module pulls in. Scan the code.
+    const text = stripComments(source);
     const rel = file.slice(PACKAGES.length + 1);
     if (rel.endsWith(".test.tsx") || rel.endsWith(".test.ts")) continue;
     if (HEADER_SPREAD.test(text) || HEADER_HANDOFF.test(text)) {

@@ -39,7 +39,11 @@ import {
 } from "react";
 
 import { devWarn } from "../utils/devWarn";
-import { getAppliedFeatures, type TableFeature } from "./tableFeature";
+import {
+  getAppliedFeatures,
+  type StaticTableFeature,
+  type TableFeature,
+} from "./tableFeature";
 
 /**
  * A typed handle for one piece of feature-published state.
@@ -335,10 +339,18 @@ export function slotRender<TProps>(
  *
  * @public
  */
+export function extendFeature(
+  base: StaticTableFeature,
+  renders: readonly FeatureRender<never>[]
+): StaticTableFeature;
 export function extendFeature<TRow>(
   base: TableFeature<TRow>,
   renders: readonly FeatureRender<never>[]
-): TableFeature<TRow> {
+): TableFeature<TRow>;
+export function extendFeature<TRow>(
+  base: StaticTableFeature | TableFeature<TRow>,
+  renders: readonly FeatureRender<never>[]
+): StaticTableFeature | TableFeature<TRow> {
   return {
     ...base,
     renders: [...(base.renders ?? []), ...renders],

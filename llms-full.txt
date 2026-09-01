@@ -448,14 +448,16 @@ same array — that is the public plugin surface, not a parallel API.
 
 ## What the import buys
 
-A bundler follows imports, not prop values. While a feature can still be armed
-by an enabling prop, `DataTable` has to import its implementation to serve that
-prop, so a plain table ships everything it _might_ render.
+A bundler follows imports, not prop values, so the import is the switch: a
+table downloads a feature's implementation when it names it, and not before.
+An adapter's `DataTable` is 55–67 kB gzipped and carries the base contract —
+responsive rendering, loading, error and empty states, accessibility, sorting,
+search and pagination. Everything else arrives with its own entry.
 
-Row reordering is the first feature past that: it has no enabling prop, its
-state machine lives on its own entry, and a table that does not compose
-`rowReorder` never downloads it. The rest follow, and the enabling props go
-with them.
+The props that used to arm features are inert: `enableColumnMenu`,
+`bulkActions`, `contextMenu`, `commandPalette`, `statusBar`, `sidePanel`,
+`findInTable` and the rest configure a feature you compose, and draw nothing on
+their own.
 
 ## Kit subpaths
 
@@ -470,6 +472,7 @@ Every public adapter exports the same factories:
 | `@adapttable/<kit>/virtualize`      | `virtualize`                                                      |
 | `@adapttable/<kit>/column-menu`     | `columnMenu`                                                      |
 | `@adapttable/<kit>/cell-navigation` | `cellNavigation`                                                  |
+| `@adapttable/<kit>/preset`          | `standardFeatures`, `StandardFeatureOptions`                      |
 | `@adapttable/<kit>/features`        | every factory, plus `applyTableFeatures`                          |
 | `@adapttable/<kit>/pivot`           | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …) |
 
@@ -481,30 +484,78 @@ The pivot engine stays a calculation — `import { pivot } from "@adapttable/cor
 — not a `<DataTable>` prop. The kit `/pivot` subpath is the panel plus that
 engine, so a host that composes a pivot table still does it in one import.
 
-## Both paths, until v3
+## The standard preset — one import for a good table
 
 ```tsx
-// Deprecated, still works for most factories:
-<DataTable groupBy="team" />;
+import { DataTable } from "@adapttable/mantine";
+import { standardFeatures } from "@adapttable/mantine/preset";
 
-// Preferred:
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={standardFeatures()}
+/>;
+```
+
+With no arguments it composes the features that work with nothing else
+supplied: the Columns menu, CSV export, find-in-table, fit-columns, the
+fullscreen toggle, header filters, multi-sort, resizable columns and the status
+bar.
+
+A feature that needs input joins only when you give it that input, because an
+inert implementation is exactly the weight this architecture exists to remove:
+
+```tsx
+standardFeatures({
+  grouping: "team",
+  bulkActions: [{ key: "delete", label: "Delete", onClick: remove }],
+  filters: [{ key: "team", type: "select", options: teams }],
+  savedViews: { storage: "local" },
+});
+```
+
+Two factories are callable with no arguments and are still NOT members: the
+density chooser draws nothing unless the host also passes `onDensityChange`,
+and selection statistics need a cell range — which needs `cellNavigation` —
+while arming a row-selection column on their own. Import either directly when
+you want it.
+
+The result is an ordinary array. Append to it, filter it, or replace an entry:
+
+```tsx
+features={[...standardFeatures(), auditLog(), rowReorder(reorder)]}
+```
+
+Later entries win, so re-composing a member replaces it rather than doubling
+it, and a duplicate id warns in development.
+
+**The preset entry statically imports everything it can compose**, so its own
+bundle contains the configurable members whether or not you pass their options.
+That is the trade: one import instead of nine.
+
+Measured on MUI, the table alone is 55.5 kB gzipped and the same table with
+`standardFeatures()` composed is 101.9 kB.
+A table counting every byte imports the individual features it uses instead,
+and pays for those alone — `pnpm budget` measures both paths on every run.
+
+## Types, and why no annotation is needed
+
+```tsx
 import { grouping } from "@adapttable/mantine/grouping";
 import { virtualize } from "@adapttable/mantine/virtualize";
 
-<DataTable features={[grouping<Row>("team"), virtualize<Row>()]} />;
+<DataTable features={[grouping("team"), virtualize()]} />;
 ```
 
-`virtualize` is the exception: the enabling prop no longer windows rows. The
-factory fills `CHROME_BODY` with the TanStack-backed body; a table that never
-imports it never carries `@tanstack/react-virtual`.
+A factory whose configuration says nothing about rows returns a
+`StaticTableFeature` — the same feature whatever the table holds — and composes
+into any `<DataTable>` with no type argument.
 
-An explicit prop wins if both are set. Development mode warns once when a
-deprecated enabling prop is used. The props are removed in v3.
-
-A factory that takes a row-typed callback works out the row type on its own —
-`rowReorder(handler)`, `editing(save)`. One that does not, like `grouping` or
-`virtualize`, needs it: write `grouping<Row>("team")`. Without it the feature
-resolves `TableFeature<unknown>` and the compiler says so, naming the feature.
+A factory that takes a row-typed callback returns `TableFeature<TRow>` and
+infers the row from that callback: `rowReorder(handler)`, `editing(save)`. Put
+one in a table of a different row type and the compiler refuses, naming the
+feature's own row type.
 
 A host plugin is the same object: `feature("audit-log", { statusBar: true })`,
 or a `TableFeature` with `setup(host)` for live registration.
@@ -9216,6 +9267,19 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 `defaultLabels`, `pageSizeOptions`, and the constants `DEFAULT_LIMIT` (25),
 `PAGE_SIZE_OPTIONS`, `SEARCH_DEBOUNCE_MS` (300), `AUTO_OPTIONS_LIMIT` (50),
 `ACTIONS_COLUMN_KEY` (`"actions"`).
+
+## Feature composition types
+
+| Export                         | What it is                                                                                                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.       |
+| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument. |
+| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.              |
+| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                 |
+| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                |
+| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                      |
+
+See [feature composition](./features.md).
 
 ## Source capabilities
 

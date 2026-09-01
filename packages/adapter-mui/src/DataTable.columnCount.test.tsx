@@ -47,7 +47,7 @@ function mount(extra?: Record<string, unknown>) {
       maxHeight={300}
       features={
         extra?.virtualizeColumns === true
-          ? [virtualize<Row>({ virtualizeColumns: true })]
+          ? [virtualize({ virtualizeColumns: true })]
           : undefined
       }
       {...extra}

@@ -35,7 +35,7 @@ describe("find in table (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
-        features={[findInTable<Row>(), cellNavigation<Row>()]}
+        features={[findInTable(), cellNavigation()]}
         {...extra}
       />
     );

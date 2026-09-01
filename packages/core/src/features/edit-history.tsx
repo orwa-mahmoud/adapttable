@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { useTableEditHistory } from "../editing/editHistory";
 import { slotRender } from "./providers";
 import { EDIT_HISTORY_LIVE, type EditHistoryLiveSlotProps } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 function LiveEditHistory({
   children,
@@ -30,9 +30,9 @@ function LiveEditHistory({
  *
  * @public
  */
-export function editHistory<TRow>(
+export function editHistory(
   options: boolean | { depth?: number } = true
-): TableFeature<TRow> {
+): StaticTableFeature {
   return {
     id: "edit-history",
     apply: () => ({ editHistory: options }),

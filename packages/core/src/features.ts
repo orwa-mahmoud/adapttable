@@ -85,6 +85,8 @@ export { selectionStats } from "./features/selection-stats";
 export type {
   FeatureApplyInput,
   FeaturePatch,
+  StaticFeatureHost,
+  StaticTableFeature,
   TableFeature,
   TableFeatureHost,
 } from "./features/tableFeature";

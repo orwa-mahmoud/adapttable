@@ -3,7 +3,7 @@ import {
   type ColumnMenuSlotProps,
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import { columnMenu as core } from "@adapttable/core/features";
 
@@ -13,8 +13,8 @@ function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<never>>) {
   return <ColumnMenu {...props} />;
 }
 
-export function columnMenu<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function columnMenu(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(COLUMN_MENU, (props) => <ColumnMenuSlot {...props} />),
   ]);
 }

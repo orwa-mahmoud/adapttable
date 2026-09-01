@@ -34,9 +34,9 @@ describe("toolbar order (MUI)", () => {
         filters={[{ key: "name", type: "text" }]}
         enableColumnMenu
         features={[
-          columnMenu<Row>(),
+          columnMenu(),
           filtersFeature<Row>([{ key: "name", type: "text" }]),
-          savedViews<Row>({ storageKey: "order-test" }),
+          savedViews({ storageKey: "order-test" }),
           exportCsv<Row>(),
         ]}
         exportCsv

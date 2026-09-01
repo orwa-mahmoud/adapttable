@@ -319,7 +319,12 @@ export {
   TREE_LIVE,
   TREE_TOGGLE,
 } from "./features/slotKeys";
-export type { TableFeature, TableFeatureHost } from "./features/tableFeature";
+export type {
+  StaticFeatureHost,
+  StaticTableFeature,
+  TableFeature,
+  TableFeatureHost,
+} from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
 export { applyTableFeatures } from "./features/tableFeature";
 export {

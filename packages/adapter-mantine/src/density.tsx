@@ -1,7 +1,7 @@
 import {
   extendFeature,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/adapter";
 import { densityChooser as core } from "@adapttable/core/features";
@@ -14,8 +14,8 @@ import { DensityButton } from "./components/toolbarExtras";
  *
  * @public
  */
-export function densityChooser<TRow>(): TableFeature<TRow> {
-  return extendFeature(core<TRow>(), [
+export function densityChooser(): StaticTableFeature {
+  return extendFeature(core(), [
     slotRender(TOOLBAR_EXTRAS, (props) => <DensityButton {...props} />),
   ]);
 }

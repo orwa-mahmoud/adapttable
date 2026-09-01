@@ -20,7 +20,7 @@ import {
   type CellNavLiveSlotProps,
   GRID_FOCUS_ANNOUNCER,
 } from "./slotKeys";
-import type { TableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 function LiveCellNav({
   options,
@@ -73,7 +73,7 @@ function LiveCellNav({
  *
  * @public
  */
-export function cellNavigation<TRow>(): TableFeature<TRow> {
+export function cellNavigation(): StaticTableFeature {
   return {
     id: "cell-navigation",
     apply: () => ({ cellNavigation: true }),

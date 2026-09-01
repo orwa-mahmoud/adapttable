@@ -6,13 +6,14 @@
 
 import { FilterDef } from '@adapttable/core/features';
 import { FilterTypeSpec } from '@adapttable/core/features';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 import { TableFeature } from '@adapttable/core/adapter';
 
 // @public
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
 // @public
-export function filterTypes<TRow>(specs: readonly FilterTypeSpec[]): TableFeature<TRow>;
+export function filterTypes(specs: readonly FilterTypeSpec[]): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

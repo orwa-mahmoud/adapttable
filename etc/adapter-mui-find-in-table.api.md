@@ -4,10 +4,10 @@
 
 ```ts
 
-import { TableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/core/adapter';
 
 // @public
-export function findInTable<TRow>(): TableFeature<TRow>;
+export function findInTable(): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

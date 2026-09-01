@@ -3,7 +3,7 @@ import {
   SAVED_VIEWS,
   type SavedViewsSlotProps,
   slotRender,
-  type TableFeature,
+  type StaticTableFeature,
 } from "@adapttable/core/adapter";
 import {
   savedViews as core,
@@ -16,10 +16,8 @@ function SavedViewsSlot(props: Readonly<SavedViewsSlotProps>) {
   return <SavedViewsMenu {...props} />;
 }
 
-export function savedViews<TRow>(
-  options: UseSavedViewsOptions
-): TableFeature<TRow> {
-  return extendFeature(core<TRow>(options), [
+export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
+  return extendFeature(core(options), [
     slotRender(SAVED_VIEWS, (props) => <SavedViewsSlot {...props} />),
   ]);
 }

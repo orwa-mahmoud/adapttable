@@ -37,7 +37,7 @@ const table = (extra?: { cellNavigation?: boolean }) => (
       rowKey={(r) => r.id}
       urlSync={false}
       forceMobile={false}
-      features={extra?.cellNavigation ? [cellNavigation<Row>()] : undefined}
+      features={extra?.cellNavigation ? [cellNavigation()] : undefined}
       {...extra}
     />
   </>

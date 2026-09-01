@@ -54,8 +54,20 @@ export type {
 export interface FeaturePatch<TRow = unknown> {
   /** Any other prop a feature wants to set on the table. */
   readonly [key: string]: unknown;
-  /** Phantom marker that pins the row type; never read at runtime. */
-  readonly __row?: TRow;
+  /**
+   * Phantom marker that pins the row type; never read at runtime.
+   *
+   * A FUNCTION of the row rather than the row itself, and that is the whole
+   * of why `features={[grouping("team")]}` compiles. A feature whose
+   * configuration says nothing about rows produces `TRow = unknown`, and a
+   * marker in a return position would make that patch incompatible with the
+   * table's own row type — the reason every documented example used to need
+   * an explicit `grouping<Row>("team")`. Read contravariantly instead,
+   * `unknown` is the row type that fits every table, while a genuinely wrong
+   * one (`TableFeature<Other>` into a `DataTable<Row>`) still fails, and the
+   * error still names the feature.
+   */
+  readonly __row?: (row: TRow) => void;
 }
 
 /**
@@ -113,6 +125,46 @@ export interface TableFeature<TRow = unknown> {
 }
 
 /**
+ * What a feature can register when it knows nothing about the rows.
+ *
+ * The full host's column-menu and context-menu registrations are shaped by
+ * `TRow` and are what makes {@link TableFeatureHost} invariant; a feature that
+ * needs neither is genuinely row-independent, and this is the host it sees.
+ *
+ * @public
+ */
+export type StaticFeatureHost = Omit<
+  TableFeatureHost<never>,
+  "registerColumnMenuAction" | "registerContextMenuItems" | "__row"
+>;
+
+/**
+ * A feature that says nothing about the row type.
+ *
+ * `grouping("team")`, `virtualize()` and `columnMenu()` are the same feature
+ * whatever the table holds, so they carry no `TRow` at all and compose into
+ * any `<DataTable>` with no annotation — which is what the documented
+ * `features={[grouping("team"), virtualize()]}` needs in order to compile.
+ * A row-AWARE factory (`rowReorder(fn)`, `editing(save)`) still returns
+ * {@link TableFeature} and still infers its row type from its own callback,
+ * so putting one in the wrong table remains an error that names the feature.
+ *
+ * @public
+ */
+export interface StaticTableFeature {
+  /** Stable id, exactly as {@link TableFeature.id}. */
+  readonly id: string;
+  /** Merge enabling props, exactly as {@link TableFeature.apply}. */
+  apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+  /** Register against the live table, minus the row-shaped seams. */
+  setup?(host: StaticFeatureHost): void | (() => void);
+  /** The React component this feature needs, as {@link TableFeature.provider}. */
+  readonly provider?: FeatureProviderContribution;
+  /** Named positions this feature draws into, as {@link TableFeature.renders}. */
+  readonly renders?: readonly FeatureRender<never>[];
+}
+
+/**
  * The live table a {@link TableFeature.setup} registers against.
  *
  * Every extension seam — filter types, editors, aggregators, exporters,
@@ -159,8 +211,13 @@ export interface TableFeatureHost<TRow = unknown> {
   registerContextMenuItems(
     items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]
   ): void;
-  /** Phantom marker that pins the row type; never read at runtime. */
-  readonly __row?: TRow;
+  /**
+   * Phantom marker that pins the row type; never read at runtime. Read
+   * contravariantly, for the same reason {@link FeaturePatch.__row} is: a
+   * feature that registers nothing row-shaped fits any table, and one built
+   * for the wrong row still does not.
+   */
+  readonly __row?: (row: TRow) => void;
 }
 
 const applied = new WeakSet<object>();

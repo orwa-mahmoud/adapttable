@@ -224,7 +224,7 @@ describe("useDataTableShell", () => {
     const adapter = createMemoryAdapter("");
     const onPinnedRowIdsChange = vi.fn();
     const props = applyTableFeatures({
-      features: [rowPinning<Row>({ onPinnedRowIdsChange })],
+      features: [rowPinning({ onPinnedRowIdsChange })],
       data: ROWS,
       columns,
       rowKey,
@@ -247,7 +247,7 @@ describe("useDataTableShell", () => {
     const onPinnedRowIdsChange = vi.fn();
     const props = applyTableFeatures({
       features: [
-        rowPinning<Row>({
+        rowPinning({
           pinnedRowIds: { top: ["b"], bottom: [] },
           onPinnedRowIdsChange,
         }),
@@ -405,7 +405,7 @@ describe("useDataTableShell", () => {
     try {
       const adapter = createMemoryAdapter("");
       const props = applyTableFeatures({
-        features: [virtualize<Row>()],
+        features: [virtualize()],
         data: ROWS,
         columns,
         rowKey,
@@ -489,7 +489,7 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes every rendered column to its content", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu<Row>()],
+      features: [columnMenu()],
       data: ROWS,
       columns,
       rowKey,
@@ -516,7 +516,7 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes nothing when there is nothing rendered to measure", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu<Row>()],
+      features: [columnMenu()],
       data: ROWS,
       columns,
       rowKey,
@@ -546,7 +546,7 @@ describe("useDataTableShell — the scroll box and column sizing", () => {
   it("sizes one named column and windows when virtualizeColumns is on", () => {
     const onColumnLayoutChange = vi.fn();
     const props = applyTableFeatures({
-      features: [columnMenu<Row>()],
+      features: [columnMenu()],
       data: ROWS,
       columns,
       rowKey,
@@ -637,7 +637,7 @@ describe("the editing row universe survives the gates", () => {
 describe("savedViews owns the column layout it restores", () => {
   it("honours a declared default layout", () => {
     const props = applyTableFeatures({
-      features: [savedViews<Row>({ storageKey: "shell-test", urlSync: false })],
+      features: [savedViews({ storageKey: "shell-test", urlSync: false })],
       data: ROWS,
       columns: [
         { key: "name", accessor: (r: Row) => r.name },
