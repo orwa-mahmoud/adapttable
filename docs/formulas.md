@@ -6,7 +6,7 @@ A column whose value is `=[Unit Price] * Quantity`, typed by the user rather
 than written by you.
 
 `@adapttable/core/formula` is a separate entry, so a table with no computed
-columns never downloads a parser. It costs 2.7 KB gzipped to the tables that
+columns never downloads a parser. It costs 2.8 KB gzipped to the tables that
 import it and nothing to the rest, which the bundle budget checks on every
 build.
 
@@ -100,6 +100,28 @@ because answering "what should I use when this is missing" is its whole job.
 A field the engine has no kind for — an object, a function — is `#VALUE!`
 rather than its stringification. `[object Object]` in a cell is not a
 rendering of the data; it is a rendering of nobody having decided.
+
+## Functions
+
+| Function                                      | Result                                                                          |
+| --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `SUM(values…)`                                | Sum after numeric coercion; non-numeric text is skipped.                        |
+| `AVG(values…)`                                | Mean after numeric coercion; no numbers returns `#DIV/0!`.                      |
+| `MIN(values…)` / `MAX(values…)`               | Smallest or largest value after numeric coercion.                               |
+| `ABS(value)`                                  | Absolute numeric value.                                                         |
+| `ROUND(value, places)`                        | Number rounded to the requested decimal places.                                 |
+| `POWER(base, exponent)`                       | `base` raised to `exponent`; a non-real or non-finite result returns `#VALUE!`. |
+| `SQRT(value)`                                 | Square root; a negative value returns `#VALUE!`.                                |
+| `IF(test, yes, no)`                           | One branch selected by spreadsheet truthiness.                                  |
+| `AND(values…)` / `OR(values…)` / `NOT(value)` | Boolean logic.                                                                  |
+| `CONCAT(values…)`                             | Values joined as text.                                                          |
+| `LEN(value)`                                  | Length of the displayed text.                                                   |
+| `UPPER(value)` / `LOWER(value)`               | Text converted to upper or lower case.                                          |
+| `COALESCE(values…)`                           | First value that is neither blank nor an error.                                 |
+
+For compound growth, write `=POWER(1 + rate, years)`. `POWER` and `SQRT` are
+functions only: they do not expand the grammar or reinterpret the unsupported
+`^` operator.
 
 ## Sorting and export
 

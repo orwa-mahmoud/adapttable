@@ -1108,8 +1108,8 @@ or read off a row with `toFormulaValue`, rendered with `formulaDisplay`,
 compared with `formulaSortValue`, and tested with `isFormulaError`.
 `parseFormula` returns a `ParseResult` holding a `FormulaNode` tree
 (`BinaryOp`), `formulaRefs` names what a formula reads, `evaluateFormula` runs
-one against a `FormulaScope`, and `FORMULA_FUNCTIONS` lists the built-ins. See
-[formulas](./formulas.md).
+one against a `FormulaScope`, and `FORMULA_FUNCTIONS` lists the built-ins,
+including `POWER` and `SQRT`. See [formulas](./formulas.md).
 
 **Formulas in the URL.** `useFormulaUrlState({ urlAdapter, urlSync, urlKey,
 defaultFormulas })` from `@adapttable/core/formula` returns a

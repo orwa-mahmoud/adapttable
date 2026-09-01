@@ -217,6 +217,43 @@ describe("built-in functions", () => {
     expect(shown("=MAX(name)")).toBe("0");
   });
 
+  it("raises powers and takes square roots", () => {
+    expect(shown("=POWER(2, 3)")).toBe("8");
+    expect(shown("=POWER(4, -1)")).toBe("0.25");
+    expect(shown("=POWER(1 + 0.05, 3)")).toBe("1.1576250000000001");
+    expect(shown("=SQRT(9)")).toBe("3");
+    expect(shown("=SQRT(2)")).toBe(String(Math.sqrt(2)));
+  });
+
+  it("coerces blanks, booleans and numeric text for POWER and SQRT", () => {
+    expect(shown("=POWER(note, 2)")).toBe("0");
+    expect(shown("=POWER(2, note)")).toBe("1");
+    expect(shown("=POWER()")).toBe("1");
+    expect(shown("=POWER(quantity > 0, 3)")).toBe("1");
+    expect(shown('=POWER("4", "2")')).toBe("16");
+    expect(shown("=SQRT(note)")).toBe("0");
+    expect(shown("=SQRT()")).toBe("0");
+    expect(shown('=SQRT("9")')).toBe("3");
+  });
+
+  it("returns #VALUE! for non-numeric or non-real POWER and SQRT results", () => {
+    expect(shown("=POWER(name, 2)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=POWER(2, name)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=SQRT(name)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=SQRT(-1)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=POWER(-1, 0.5)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=POWER(10, 1000)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=POWER(0, -1)")).toBe(FORMULA_ERRORS.value);
+  });
+
+  it("propagates errors through POWER and SQRT", () => {
+    expect(shown("=POWER(missing, 2)")).toBe(FORMULA_ERRORS.name);
+    expect(shown("=POWER(2, missing)")).toBe(FORMULA_ERRORS.name);
+    expect(shown("=SQRT(missing)")).toBe(FORMULA_ERRORS.name);
+    expect(shown("=SUM(POWER(-1, 0.5), 2)")).toBe(FORMULA_ERRORS.value);
+    expect(shown("=AVG(SQRT(-1), 2)")).toBe(FORMULA_ERRORS.value);
+  });
+
   it("rounds and takes absolutes", () => {
     expect(shown("=ROUND(3.14159, 2)")).toBe("3.14");
     expect(shown("=ROUND(3.7, 0)")).toBe("4");
@@ -266,8 +303,25 @@ describe("built-in functions", () => {
   });
 
   it("lists its own function names for an autocomplete", () => {
-    expect(FORMULA_FUNCTIONS).toContain("SUM");
-    expect(FORMULA_FUNCTIONS).toContain("COALESCE");
+    expect(FORMULA_FUNCTIONS).toEqual([
+      "SUM",
+      "MIN",
+      "MAX",
+      "AVG",
+      "ABS",
+      "POWER",
+      "ROUND",
+      "SQRT",
+      "IF",
+      "AND",
+      "OR",
+      "NOT",
+      "CONCAT",
+      "LEN",
+      "UPPER",
+      "LOWER",
+      "COALESCE",
+    ]);
   });
 });
 

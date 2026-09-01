@@ -250,6 +250,29 @@ function numeric(value: FormulaValue, fn: (n: number) => number): FormulaValue {
   return n.kind === "number" ? formulaNumber(fn(n.value)) : n;
 }
 
+/** A finite real result, or the spreadsheet error for an impossible number. */
+function realResult(value: number): FormulaValue {
+  return Number.isFinite(value)
+    ? formulaNumber(value)
+    : formulaError(FORMULA_ERRORS.value);
+}
+
+/** Raise one numeric value to another, propagating either operand's error. */
+function power(base: FormulaValue, exponent: FormulaValue): FormulaValue {
+  const a = asNumber(base);
+  if (a.kind !== "number") return a;
+  const b = asNumber(exponent);
+  if (b.kind !== "number") return b;
+  return realResult(a.value ** b.value);
+}
+
+/** Take a real square root, never leaking JavaScript's NaN into a cell. */
+function squareRoot(value: FormulaValue): FormulaValue {
+  const n = asNumber(value);
+  if (n.kind !== "number") return n;
+  return realResult(Math.sqrt(n.value));
+}
+
 /** Spreadsheet truthiness: zero and empty are false, everything else true. */
 function truthy(value: FormulaValue): boolean {
   switch (value.kind) {
@@ -283,7 +306,9 @@ const FUNCTIONS: Record<
   MAX: (args) => firstError(args) ?? extreme(numbersIn(args), Math.max),
   AVG: (args) => firstError(args) ?? mean(numbersIn(args)),
   ABS: (args) => numeric(arg(args, 0), Math.abs),
+  POWER: (args) => power(arg(args, 0), arg(args, 1)),
   ROUND: (args) => round(arg(args, 0), arg(args, 1)),
+  SQRT: (args) => squareRoot(arg(args, 0)),
   IF: (args) => {
     const test = arg(args, 0);
     if (test.kind === "error") return test;
