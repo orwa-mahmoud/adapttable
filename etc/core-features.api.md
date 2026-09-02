@@ -876,6 +876,12 @@ export interface NestedTableDefaults {
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 
 // @public
+export interface PinnedRows<TRow = unknown> {
+    readonly bottom?: readonly TRow[];
+    readonly top?: readonly TRow[];
+}
+
+// @public
 export type PinnedSide = PinSide | undefined;
 
 // @public
@@ -1010,6 +1016,9 @@ export interface RowMoveTarget<TRow> {
 export type RowOf<P> = P extends {
     rowKey: (row: infer TRow) => string;
 } ? TRow : unknown;
+
+// @public
+export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): TableFeature<TRow>;
 
 // @public
 export function rowPinning(options?: {

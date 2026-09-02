@@ -255,6 +255,7 @@ The source for each lives in
   editors, keyboard flow.
 - [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
+- [Pinned summary rows](./pinned-summary-rows.md) — host-owned totals outside the row model
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots
 - [Row styling and heights](./row-styling.md) — `rowStyle`, `rowHeight`, variable-height virtualizer

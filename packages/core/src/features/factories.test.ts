@@ -19,6 +19,7 @@ import {
   fitColumns,
   headerFilters,
   multiSort,
+  pinnedSummaryRows,
   print,
   resizableColumns,
   rowAppearance,
@@ -66,6 +67,13 @@ describe("feature factories", () => {
         getCellSpan,
         cellSpanAppearance: "plain",
       })
+    );
+  });
+
+  it("pinnedSummaryRows writes the host objects", () => {
+    const pinnedRows = { top: [{ id: "t" }], bottom: [{ id: "b" }] };
+    expect(patch(pinnedSummaryRows(pinnedRows))).toEqual(
+      expect.objectContaining({ pinnedRows })
     );
   });
 

@@ -19,6 +19,9 @@ import {
   isExtraEntry,
   mobileCardListStyle,
   orderedCardEntries,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
   resolveMobileLabel,
   resolveRowStyle,
   rowClickProps,
@@ -86,6 +89,8 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "cardSetSize"
   | "pinnedTopRows"
   | "pinnedBottomRows"
+  | "pinnedSummaryTop"
+  | "pinnedSummaryBottom"
   | "extraRows"
   | "maxHeight"
   | "virtualScrollRef"
@@ -154,6 +159,8 @@ interface MobileCardProps<TRow> {
   /** Rows in the whole dataset, for `aria-setsize`. */
   setSize: number;
   reorderSignature: string | null;
+  part?: string;
+  ariaLabel?: string;
 }
 
 /** The card props the memo comparator deliberately skips (see `editing`). */
@@ -193,6 +200,8 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   "setSize",
   // Or a folder opens and its own chevron never turns.
   "treeEntry",
+  "part",
+  "ariaLabel",
 ];
 
 /**
@@ -241,6 +250,8 @@ function MobileCardBase<TRow>({
   rowCount,
   setSize,
   renderCard,
+  part,
+  ariaLabel,
 }: Readonly<MobileCardProps<TRow>>) {
   // Built once and used by both paths, so a custom card shows the very
   // same value node the built-in would have — cell renderers and editors
@@ -279,11 +290,12 @@ function MobileCardBase<TRow>({
       // needs neither, because assistive tech can simply count.
       aria-posinset={setSize > rowCount ? windowStart + index + 1 : undefined}
       aria-setsize={setSize > rowCount ? setSize : undefined}
-      data-adapttable-part="card"
+      data-adapttable-part={part ?? "card"}
       withBorder
       radius="md"
       padding={cardPadding}
       role="listitem"
+      aria-label={ariaLabel}
       data-stagger=""
       data-selected={selected ? "" : undefined}
       data-dirty={rowIsDirty(editing, id) ? "" : undefined}
@@ -403,6 +415,8 @@ export function MobileCards<TRow>({
   cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   extraRows,
   renderCard,
   maxHeight,
@@ -417,7 +431,9 @@ export function MobileCards<TRow>({
     getRowId,
     rowEntries,
     pinnedTopRows,
-    pinnedBottomRows
+    pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom
   );
   // Header groups and multi-sort are desktop-only: cards have no column axis
   // to span a group label across or to chain a sort on, so neither renders
@@ -437,7 +453,8 @@ export function MobileCards<TRow>({
     key: string,
     treeEntry?: TreeEntry<TRow>
   ): ReactElement => {
-    const id = getRowId(row);
+    const side = pinnedSummarySideFromId(key);
+    const id = side ? key : getRowId(row);
     return (
       <CardItem
         key={key}
@@ -447,9 +464,9 @@ export function MobileCards<TRow>({
         columns={columns}
         labels={labels}
         confirm={confirm}
-        rowActions={rowActions}
+        rowActions={side ? undefined : rowActions}
         rowActionsLayout={rowActionsLayout}
-        renderRowActions={renderRowActions}
+        renderRowActions={side ? undefined : renderRowActions}
         className={rowClassName?.(row, index)}
         style={resolveRowStyle(rowStyle, rowHeight, row, index)}
         styleSignature={rowStyleSignature(
@@ -457,14 +474,20 @@ export function MobileCards<TRow>({
         )}
         flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
         isCellFlashing={isCellFlashing}
-        selected={selection ? selection.isSelected(id) : false}
-        expanded={expansion ? expansion.isExpanded(id) : false}
-        onToggleSelect={selection ? selection.toggle : undefined}
-        onToggleExpand={
-          expansion && renderRowDetail ? expansion.toggle : undefined
+        selected={side ? false : selection ? selection.isSelected(id) : false}
+        expanded={side ? false : expansion ? expansion.isExpanded(id) : false}
+        onToggleSelect={
+          side ? undefined : selection ? selection.toggle : undefined
         }
-        renderDetail={renderRowDetail}
-        onRowClick={onRowClick}
+        onToggleExpand={
+          side
+            ? undefined
+            : expansion && renderRowDetail
+              ? expansion.toggle
+              : undefined
+        }
+        renderDetail={side ? undefined : renderRowDetail}
+        onRowClick={side ? undefined : onRowClick}
         measureElement={measureElement}
         cardPadding={cardPadding}
         cardGap={cardGap}
@@ -472,14 +495,16 @@ export function MobileCards<TRow>({
         rows={rows}
         getRowId={getRowId}
         editingSignature={rowEditingSignature(editing, id)}
-        treeEntry={treeEntry}
-        onToggleTree={tree?.expansion.toggle}
-        rowReorder={rowReorder}
+        treeEntry={side ? undefined : treeEntry}
+        onToggleTree={side ? undefined : tree?.expansion.toggle}
+        rowReorder={side ? undefined : rowReorder}
         windowStart={windowStart}
         rowCount={rows.length}
         setSize={cardSetSize}
         reorderSignature={rowReorderSignature(rowReorder, id, index)}
-        renderCard={renderCard}
+        renderCard={side ? undefined : renderCard}
+        part={side ? pinnedSummaryPart(side) : undefined}
+        ariaLabel={side ? labels.pinnedSummaryRow : undefined}
       />
     );
   };
@@ -494,6 +519,11 @@ export function MobileCards<TRow>({
       {...table.getTableProps({ role: "list" })}
     >
       {paddingTop > 0 && <div aria-hidden style={{ height: paddingTop }} />}
+      {grouping
+        ? pinnedSummaryTop.map((row, index) =>
+            cardFor(row, index, pinnedSummaryRowId("top", index))
+          )
+        : null}
       {grouping
         ? grouping.entries.map((entry) => {
             if (isExtraEntry(entry)) {
@@ -560,6 +590,11 @@ export function MobileCards<TRow>({
               cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
             )
           )}
+      {grouping
+        ? pinnedSummaryBottom.map((row, index) =>
+            cardFor(row, index, pinnedSummaryRowId("bottom", index))
+          )
+        : null}
       {paddingBottom > 0 && (
         <div aria-hidden style={{ height: paddingBottom }} />
       )}

@@ -181,6 +181,7 @@ export function RadixDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -234,6 +235,7 @@ export function RadixDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -318,6 +320,7 @@ export function RadixDemo({
         rowMutations={rowMutations}
         rowReorder={rowReorder}
         rowPinning={rowPinning}
+        pinnedSummaryRows={pinnedSummaryRows}
         cellSpan={cellSpan}
         extraRows={extraRows}
         rowStyle={rowStyle}

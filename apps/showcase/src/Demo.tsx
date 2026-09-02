@@ -29,6 +29,7 @@ import {
   cellSpan,
   extraRows,
   type GroupingExtras,
+  pinnedSummaryRows,
   rowActions,
   rowAppearance,
   rowPinning,
@@ -80,6 +81,26 @@ import {
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
 import { usePatchSink } from "./patchSink";
 import { useRealtimeSlot } from "./realtimeSlot";
+
+function summaryPerson(id: string, name: string): Person {
+  // Materialize every derived field the showcase columns read. Numeric id
+  // hashing would turn non-numeric summary ids into Invalid Date / NaN and
+  // throw while formatting Timeline and Budget.
+  return {
+    id,
+    name,
+    email: "",
+    role: "",
+    team: "All",
+    nameAr: name,
+    roleAr: "",
+    teamAr: "الكل",
+    status: "Active",
+    budget: 0,
+    utilization: 0,
+    start: "2026-01-01",
+  };
+}
 
 /**
  * Where the rows come from.
@@ -333,6 +354,7 @@ interface DataProps {
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -565,6 +587,16 @@ function composeDemoFeatures(
       ? [virtualize({ estimateRowSize: LARGE_ROW_ESTIMATE })]
       : []),
     ...(flags.rowPinning ? [rowPinning()] : []),
+    ...(flags.pinnedSummaryRows
+      ? [
+          pinnedSummaryRows({
+            // Numeric ids so showcase derivations (timeline, load count)
+            // stay defined; namespaced feature keys still own the DOM ids.
+            top: [summaryPerson("901", "Team total")],
+            bottom: [summaryPerson("902", "Grand total")],
+          }),
+        ]
+      : []),
     ...(flags.rowMutations ? [rowActions<Person>()] : []),
     ...(flags.cellSpan && teamSpan ? [cellSpan<Person>(teamSpan)] : []),
     ...(demoExtraRows ? [extraRows(demoExtraRows)] : []),
@@ -659,6 +691,7 @@ function frontendColumnProps(
     rowMutations?: boolean;
     rowReorder?: boolean;
     rowPinning?: boolean;
+    pinnedSummaryRows?: boolean;
     cellSpan?: boolean;
     extraRows?: boolean;
     extraAnchorId?: string;
@@ -853,6 +886,7 @@ function Frontend({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -1091,6 +1125,7 @@ function Frontend({
           rowMutations,
           rowReorder,
           rowPinning,
+          pinnedSummaryRows,
           cellSpan,
           extraRows,
           extraAnchorId,
@@ -1186,6 +1221,7 @@ export function DemoBody({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -1211,6 +1247,7 @@ export function DemoBody({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -1294,6 +1331,7 @@ export function DemoBody({
       rowMutations={rowMutations}
       rowReorder={rowReorder}
       rowPinning={rowPinning}
+      pinnedSummaryRows={pinnedSummaryRows}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

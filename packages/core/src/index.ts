@@ -665,6 +665,21 @@ export {
   upsertRow,
 } from "./rows/patch";
 export {
+  allPinnedSummaryEntries,
+  EMPTY_PINNED_ROWS,
+  isPinnedSummaryRowId,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_KEY_PREFIX,
+  PINNED_SUMMARY_TOP_PART,
+  type PinnedRows,
+  pinnedSummaryEntries,
+  type PinnedSummaryEntry,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
+  resolvePinnedRows,
+} from "./rows/pinnedSummaryRows";
+export {
   type RowActionsLayout,
   type RowActionsRenderContext,
   type RowActionsRenderer,

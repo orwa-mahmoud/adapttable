@@ -162,10 +162,12 @@ function mockGroupingState(initialGroupBy?: string) {
     }),
     initializeGroupBy: vi.fn((encoded: string) => {
       groupBy = encoded;
-    }),
+    }) as ReturnType<typeof vi.fn<(encoded: string) => void>> | undefined,
     setAggregateOverrides: vi.fn((next: GroupAggregateOverrides) => {
       aggregateOverrides = next;
-    }),
+    }) as
+      | ReturnType<typeof vi.fn<(next: GroupAggregateOverrides) => void>>
+      | undefined,
   };
 }
 
@@ -180,7 +182,7 @@ function runtimeView(
   };
 }
 
-function dragTransfer(key: string) {
+function dragTransfer(_key?: string) {
   const data = new Map<string, string>();
   return {
     types: [GROUPING_COLUMN_DND_MIME],
@@ -435,10 +437,7 @@ describe("groupingPanel provider", () => {
       (next) => {
         panel = next;
       },
-      runtimeView({
-        ...groupingState,
-        grouping: { groupBy: ["team", "budget"] },
-      })
+      runtimeView(groupingState)
     );
 
     const transfer = dragTransfer("team");

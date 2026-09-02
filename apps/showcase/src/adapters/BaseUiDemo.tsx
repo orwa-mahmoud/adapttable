@@ -213,6 +213,7 @@ export function BaseUiDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -266,6 +267,7 @@ export function BaseUiDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -340,6 +342,7 @@ export function BaseUiDemo({
       rowMutations={rowMutations}
       rowReorder={rowReorder}
       rowPinning={rowPinning}
+      pinnedSummaryRows={pinnedSummaryRows}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

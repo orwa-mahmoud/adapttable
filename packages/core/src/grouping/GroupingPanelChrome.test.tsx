@@ -2,6 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { resolveLabels } from "../labels";
+import type { ColumnDef } from "../types";
+
+type AnyColumn = ColumnDef<unknown>;
 import {
   type GroupingPanelChipProps,
   GroupingPanelChrome,
@@ -122,7 +125,7 @@ const columns = [
 function mount(
   state: GroupingPanelState,
   mobile = false,
-  columnDefs = columns
+  columnDefs: readonly AnyColumn[] = columns
 ): void {
   render(
     <GroupingPanelChrome
@@ -244,7 +247,7 @@ describe("GroupingPanelChrome", () => {
 
   it("prefers mobile labels for non-string headers", () => {
     mount(panelState({ groupBy: ["code"] }), false, [
-      { key: "code", header: () => null, mobileLabel: "Code label" },
+      { key: "code", header: null, mobileLabel: "Code label" },
     ]);
     expect(
       screen.getByRole("button", { name: "Move Code label" })

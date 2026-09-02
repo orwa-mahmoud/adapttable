@@ -34,6 +34,7 @@ export const sidebar = [
       { label: "Keyboard & cell navigation", slug: "cell-navigation" },
       { label: "Row reordering", slug: "row-reordering" },
       { label: "Row pinning", slug: "row-pinning" },
+      { label: "Pinned summary rows", slug: "pinned-summary-rows" },
       { label: "Row and column spanning", slug: "row-spanning" },
       { label: "Full-width and separator rows", slug: "full-width-rows" },
       { label: "Row styling and heights", slug: "row-styling" },

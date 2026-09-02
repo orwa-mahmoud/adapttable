@@ -32,6 +32,10 @@ import type { FilterDef } from "../filters/filterDefs";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { BodyCell } from "../rows/cellSpan";
+import {
+  pinnedSummaryEntries,
+  pinnedSummaryPart,
+} from "../rows/pinnedSummaryRows";
 import { rowClickProps } from "../rows/rowClickProps";
 import type { RowPinSide } from "../rows/rowPinning";
 import {
@@ -362,7 +366,8 @@ export interface DesktopRowWiring<TRow> {
   /** Index focus and ARIA address this row by — the source index. */
   focusIndex: number;
   /** Part name for a pinned row. */
-  pinPart: ReturnType<typeof pinnedRowPart>;
+  pinPart:
+    ReturnType<typeof pinnedRowPart> | ReturnType<typeof pinnedSummaryPart>;
   /** Sticky positioning for a pinned row. */
   pinSticky: ReturnType<typeof pinnedRowSticky>;
   /** Sticky style for a pinned row's edge cell. */
@@ -905,6 +910,7 @@ interface DesktopRowWiringContext<TRow> {
   rowClassName: SharedTableRenderProps<TRow>["rowClassName"];
   isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
   getRowId: (row: TRow) => string;
+  summaryTopCount: number;
   onToggleSelect: (id: string) => void;
   onToggleExpand: (id: string) => void;
   renderDetail: (row: TRow) => ReactNode;
@@ -918,11 +924,14 @@ interface DesktopRowWiringArgs<TRow> {
   rowPinSide: RowPinSide | undefined;
   treeEntry: TreeEntry<TRow> | undefined;
   measure: boolean;
+  summary?: boolean;
 }
 
 interface DesktopBodySlotsContext<TRow> {
   pinnedTopRows: readonly TRow[];
   pinnedBottomRows: readonly TRow[];
+  pinnedSummaryTop: readonly TRow[];
+  pinnedSummaryBottom: readonly TRow[];
   extraRows: SharedTableRenderProps<TRow>["extraRows"];
   extraFill: (key: string) => CSSProperties | undefined;
   insertExtraRows: AssemblyFns<TRow>["insertExtraRows"];
@@ -932,6 +941,97 @@ interface DesktopBodySlotsContext<TRow> {
   grouping: SharedTableRenderProps<TRow>["grouping"];
   entries: TableRenderModel<TRow>["entries"];
   wiring: DesktopRowWiringContext<TRow>;
+}
+
+function summaryOrPinPart(
+  summary: boolean,
+  side: RowPinSide | undefined
+): ReturnType<typeof pinnedRowPart> | ReturnType<typeof pinnedSummaryPart> {
+  if (!summary) return pinnedRowPart(side);
+  if (!side) return undefined;
+  return pinnedSummaryPart(side);
+}
+
+function desktopFocusIndex(
+  summary: boolean,
+  sourceIndex: number,
+  windowStart: number,
+  summaryTopCount: number
+): number {
+  if (summary) return sourceIndex - windowStart;
+  return sourceIndex + summaryTopCount;
+}
+
+function omitWhenSummary(
+  summary: boolean,
+  value: boolean | undefined
+): boolean | undefined {
+  if (summary) return undefined;
+  return value;
+}
+
+function desktopSummaryRowDomProps<TRow>(args: {
+  table: UseDataTableResult<TRow>;
+  row: TRow;
+  focusIndex: number;
+  gridFocus: SharedTableRenderProps<TRow>["gridFocus"];
+  onRowClick: SharedTableRenderProps<TRow>["onRowClick"];
+  handleRowClick: (row: TRow) => void;
+  summary: boolean;
+  rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
+  index: number;
+  windowStart: number;
+  reorderAttrs:
+    | ReturnType<
+        NonNullable<
+          NonNullable<SharedTableRenderProps<TRow>["rowReorder"]>["rowAttrs"]
+        >
+      >
+    | undefined;
+  rowPinSide: RowPinSide | undefined;
+  pinPart:
+    ReturnType<typeof pinnedRowPart> | ReturnType<typeof pinnedSummaryPart>;
+  selection: TableRenderModel<TRow>["selection"];
+  id: string;
+  editing: SharedTableRenderProps<TRow>["editing"];
+  labels: Required<TableLabels>;
+  visualStyle: CSSProperties | undefined;
+  pinSticky: CSSProperties | undefined;
+  prefetch: SharedTableRenderProps<TRow>["prefetch"];
+  handlePrefetch: (row: TRow) => void;
+}): Record<string, unknown> {
+  const click =
+    args.summary || !args.onRowClick ? undefined : args.handleRowClick;
+  const dropProps = args.summary
+    ? undefined
+    : args.rowReorder?.dropProps?.(args.index, args.row, args.windowStart);
+  let selectedMark: string | undefined;
+  if (!args.summary && args.selection?.isSelected(args.id)) selectedMark = "";
+  let clickable: string | undefined;
+  if (!args.summary && args.onRowClick) clickable = "";
+  return {
+    ...args.table.getRowProps(args.row, args.focusIndex),
+    ...args.gridFocus?.getRowPropsAt(args.focusIndex),
+    ...rowClickProps(args.row, click, args.focusIndex),
+    ...dropProps,
+    ...args.reorderAttrs,
+    "data-row-pin": args.rowPinSide,
+    "data-adapttable-part": args.pinPart ?? "row",
+    "data-stagger": "",
+    "data-selected": selectedMark,
+    "data-dirty": rowIsDirty(args.editing, args.id) ? "" : undefined,
+    "data-clickable": clickable,
+    "aria-label": args.summary ? args.labels.pinnedSummaryRow : undefined,
+    style: {
+      ...args.visualStyle,
+      ...args.pinSticky,
+      ...rowReorderDropStyle(args.reorderAttrs),
+    },
+    onMouseEnter:
+      args.prefetch && !args.summary
+        ? () => args.handlePrefetch(args.row)
+        : undefined,
+  };
 }
 
 function buildDesktopRowWiring<TRow>(
@@ -982,40 +1082,51 @@ function buildDesktopRowWiring<TRow>(
     rowClassName,
     isCellFlashing,
     getRowId,
+    summaryTopCount,
     onToggleSelect,
     onToggleExpand,
     renderDetail,
   } = ctx;
   const { row, index, id, sourceIndex, rowPinSide, treeEntry, measure } = args;
+  const summary = args.summary === true;
   const bodyCells = cellsForRow(cellsByRow, id);
   const visualStyle = resolveRowStyle(rowStyle, rowHeight, row, sourceIndex);
-  const focusIndex = sourceIndex;
-  const pinPart = pinnedRowPart(rowPinSide);
+  const focusIndex = desktopFocusIndex(
+    summary,
+    sourceIndex,
+    windowStart,
+    summaryTopCount
+  );
+  const pinPart = summaryOrPinPart(summary, rowPinSide);
   const pinSticky = pinnedRowSticky(rowPinSide, pinRowSticky, rowPinOffset);
   const edgeRowPin = pinnedRowCellStyle(rowPinSide, rowPinOffset, true);
   const measureRef = measure
     ? desktopRowMeasureRef(rowPinSide, measureRowPair, index, measureElement)
     : undefined;
-  const reorderAttrs = rowReorder?.rowAttrs?.(id, index);
-  const rowDomProps = {
-    ...table.getRowProps(row, focusIndex),
-    ...gridFocus?.getRowPropsAt(focusIndex),
-    ...rowClickProps(row, onRowClick ? handleRowClick : undefined, focusIndex),
-    ...rowReorder?.dropProps?.(index, row, windowStart),
-    ...reorderAttrs,
-    "data-row-pin": rowPinSide,
-    "data-adapttable-part": pinPart ?? "row",
-    "data-stagger": "",
-    "data-selected": selection?.isSelected(id) ? "" : undefined,
-    "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
-    "data-clickable": onRowClick ? "" : undefined,
-    style: {
-      ...visualStyle,
-      ...pinSticky,
-      ...rowReorderDropStyle(reorderAttrs),
-    },
-    onMouseEnter: prefetch ? () => handlePrefetch(row) : undefined,
-  };
+  const reorderAttrs = summary ? undefined : rowReorder?.rowAttrs?.(id, index);
+  const rowDomProps = desktopSummaryRowDomProps({
+    table,
+    row,
+    focusIndex,
+    gridFocus,
+    onRowClick,
+    handleRowClick,
+    summary,
+    rowReorder,
+    index,
+    windowStart,
+    reorderAttrs,
+    rowPinSide,
+    pinPart,
+    selection,
+    id,
+    editing,
+    labels,
+    visualStyle,
+    pinSticky,
+    prefetch,
+    handlePrefetch,
+  });
   return {
     gridFocus,
     row,
@@ -1026,10 +1137,10 @@ function buildDesktopRowWiring<TRow>(
     bodyCells,
     spanSignature: rowSpanSignature(bodyCells),
     labels,
-    selected: selection ? selection.isSelected(id) : undefined,
-    expanded: expansionState ? expansionState.isExpanded(id) : undefined,
-    showActions,
-    showReorder,
+    selected: omitWhenSummary(summary, selection?.isSelected(id)),
+    expanded: omitWhenSummary(summary, expansionState?.isExpanded(id)),
+    showActions: summary ? false : showActions,
+    showReorder: summary ? false : showReorder,
     rowReorder,
     windowStart,
     rowCount: rows.length,
@@ -1084,6 +1195,30 @@ function buildDesktopRowWiring<TRow>(
     bodyPinStyle: (key: string) =>
       desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),
   };
+}
+
+function appendSummaryDesktopSlots<TRow>(
+  bodySlots: DesktopBodySlot<TRow>[],
+  ctx: DesktopBodySlotsContext<TRow>,
+  rows: readonly TRow[],
+  side: RowPinSide
+): void {
+  for (const entry of pinnedSummaryEntries(rows, side)) {
+    bodySlots.push({
+      kind: "row",
+      key: entry.id,
+      wiring: buildDesktopRowWiring(ctx.wiring, {
+        row: entry.row,
+        index: entry.index,
+        id: entry.id,
+        sourceIndex: entry.index,
+        rowPinSide: side,
+        treeEntry: undefined,
+        measure: false,
+        summary: true,
+      }),
+    });
+  }
 }
 
 function appendPinnedDesktopSlots<TRow>(
@@ -1190,6 +1325,7 @@ function collectDesktopBodySlots<TRow>(
   ctx: DesktopBodySlotsContext<TRow>
 ): DesktopBodySlot<TRow>[] {
   const bodySlots: DesktopBodySlot<TRow>[] = [];
+  appendSummaryDesktopSlots(bodySlots, ctx, ctx.pinnedSummaryTop, "top");
   appendPinnedDesktopSlots(bodySlots, ctx, ctx.pinnedTopRows, "top");
   if (ctx.paddingTop > 0) {
     bodySlots.push({
@@ -1213,6 +1349,7 @@ function collectDesktopBodySlots<TRow>(
     });
   }
   appendPinnedDesktopSlots(bodySlots, ctx, ctx.pinnedBottomRows, "bottom");
+  appendSummaryDesktopSlots(bodySlots, ctx, ctx.pinnedSummaryBottom, "bottom");
   return bodySlots;
 }
 
@@ -1271,6 +1408,8 @@ export function useDesktopTableAssembly<TRow>(
     windowStart = 0,
     pinnedTopRows = [],
     pinnedBottomRows = [],
+    pinnedSummaryTop = [],
+    pinnedSummaryBottom = [],
     rowPinning,
     columnWindow,
     fitColumns,
@@ -1299,6 +1438,8 @@ export function useDesktopTableAssembly<TRow>(
     rowReorder,
     pinnedTopRows,
     pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
     getCellSpan,
     pinOffset,
     tree,
@@ -1488,6 +1629,7 @@ export function useDesktopTableAssembly<TRow>(
     rowClassName,
     isCellFlashing,
     getRowId,
+    summaryTopCount: pinnedSummaryTop.length,
     onToggleSelect,
     onToggleExpand,
     renderDetail,
@@ -1496,6 +1638,8 @@ export function useDesktopTableAssembly<TRow>(
   const bodySlots = collectDesktopBodySlots({
     pinnedTopRows,
     pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
     extraRows,
     extraFill,
     insertExtraRows: assemblyFns.insertExtraRows,

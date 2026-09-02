@@ -48,6 +48,8 @@ export const TITLES = {
   "cell-editing.md": "React table inline cell editing — onCellEdit",
   "row-reordering.md": "React table row reordering — groups and trees",
   "row-pinning.md": "React table row pinning — sticky top and bottom",
+  "pinned-summary-rows.md":
+    "React table pinned summary rows — totals outside the row model",
   "row-spanning.md": "React table row and column spanning",
   "full-width-rows.md": "React table full-width and separator rows",
   "row-styling.md": "React table row styling and heights",
@@ -123,6 +125,8 @@ export const DESCRIPTIONS = {
     "Row reordering for React data tables — sibling reorder, cross-group moves, tree re-parenting with cycle guards, auto/confirm/never policy, keyboard menus, mobile and RTL.",
   "row-pinning.md":
     "Row pinning for React data tables — sticky top and bottom rows outside the virtual window, { top, bottom } id lists, URL-synced, mobile actions only.",
+  "pinned-summary-rows.md":
+    "Pinned summary rows for React data tables — host-owned objects stuck outside sort, filter, grouping, pagination and selection, including on grouped and tree tables.",
   "row-spanning.md":
     "Row and column spanning for React data tables — getCellSpan and column.colSpan/rowSpan emit one cell list per row so covered cells never render twice.",
   "full-width-rows.md":

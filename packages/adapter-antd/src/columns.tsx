@@ -44,6 +44,7 @@ import {
   headerGroupRows,
   isColumnGroupSummaryKey,
   mergedCellStyle,
+  pinnedSummaryRowId,
   REORDER_COLUMN_WIDTH,
   type RowReorderState,
 } from "@adapttable/core/adapter";
@@ -449,6 +450,9 @@ export interface BuildColumnsOptions<TRow> {
   windowStart?: number;
   /** Per-row body cells so `onCell` can apply col/row spans. */
   cellsByRow?: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+  /** Host-owned summary objects, keyed separately from data-row ids. */
+  pinnedSummaryTop?: readonly TRow[];
+  pinnedSummaryBottom?: readonly TRow[];
   /** Spreadsheet merge paint; omit / `"merged"` is the default look. */
   cellSpanAppearance?: CellSpanAppearance;
   /** When true, group parents render a collapse toggle. */
@@ -656,6 +660,19 @@ function renderDataCell<TRow>(
   return renderLeafDataCell(column, record, index, options, columnIndex);
 }
 
+function antdRecordId<TRow>(
+  record: TRow,
+  getRowId: (row: TRow) => string,
+  top: readonly TRow[],
+  bottom: readonly TRow[]
+): string {
+  const topIndex = top.indexOf(record);
+  if (topIndex >= 0) return pinnedSummaryRowId("top", topIndex);
+  const bottomIndex = bottom.indexOf(record);
+  if (bottomIndex >= 0) return pinnedSummaryRowId("bottom", bottomIndex);
+  return getRowId(record);
+}
+
 export function buildColumns<TRow>({
   gridFocus,
   getHeaderCellProps,
@@ -684,6 +701,8 @@ export function buildColumns<TRow>({
   rowReorder,
   windowStart = 0,
   cellsByRow,
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   cellSpanAppearance,
   collapsibleColumnGroups,
   collapsedColumnGroups,
@@ -828,7 +847,13 @@ export function buildColumns<TRow>({
             gridFocus
           );
           if (isAdaptTableGroupRow(record) || !cellsByRow) return grouped;
-          const cells = cellsForRow(cellsByRow, getRowId(record));
+          const rowId = antdRecordId(
+            record,
+            getRowId,
+            pinnedSummaryTop,
+            pinnedSummaryBottom
+          );
+          const cells = cellsForRow(cellsByRow, rowId);
           const cell = cells.find((c) => c.column.key === column.key);
           if (!cell) return { colSpan: 0 };
           const mark = cellSpanMark(cell.colSpan, cell.rowSpan);
@@ -847,11 +872,7 @@ export function buildColumns<TRow>({
             rowSpan: cell.rowSpan,
             "data-adapttable-part": "cell",
             "data-column-key": column.key,
-            "data-flash": cellFlashAttr(
-              isCellFlashing,
-              getRowId(record),
-              column.key
-            ),
+            "data-flash": cellFlashAttr(isCellFlashing, rowId, column.key),
             ...(mark ? { "data-cell-span": mark } : {}),
             style: cellHighlightStyle(
               focus,

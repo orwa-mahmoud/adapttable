@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/mantine",
   "version": "2.6.0",
-  "description": "Mantine adapter for AdaptTable \u2014 a batteries-included, themeable React data table with sorting, filtering, URL state, virtualization, RTL, dark mode, and responsive card rendering.",
+  "description": "Mantine adapter for AdaptTable — a batteries-included, themeable React data table with sorting, filtering, URL state, virtualization, RTL, dark mode, and responsive card rendering.",
   "keywords": [
     "react",
     "mantine",
@@ -78,14 +78,14 @@
         "default": "./dist/row-pinning.cjs"
       }
     },
-    "./batch-editing": {
+    "./pinned-summary-rows": {
       "import": {
-        "types": "./dist/batch-editing.d.ts",
-        "default": "./dist/batch-editing.js"
+        "types": "./dist/pinned-summary-rows.d.ts",
+        "default": "./dist/pinned-summary-rows.js"
       },
       "require": {
-        "types": "./dist/batch-editing.d.cts",
-        "default": "./dist/batch-editing.cjs"
+        "types": "./dist/pinned-summary-rows.d.cts",
+        "default": "./dist/pinned-summary-rows.cjs"
       }
     },
     "./cell-span": {
@@ -156,16 +156,6 @@
       "require": {
         "types": "./dist/grouping.d.cts",
         "default": "./dist/grouping.cjs"
-      }
-    },
-    "./grouping-panel": {
-      "import": {
-        "types": "./dist/grouping-panel.d.ts",
-        "default": "./dist/grouping-panel.js"
-      },
-      "require": {
-        "types": "./dist/grouping-panel.d.cts",
-        "default": "./dist/grouping-panel.cjs"
       }
     },
     "./tree": {
@@ -406,6 +396,26 @@
       "require": {
         "types": "./dist/column-selection.d.cts",
         "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./batch-editing": {
+      "import": {
+        "types": "./dist/batch-editing.d.ts",
+        "default": "./dist/batch-editing.js"
+      },
+      "require": {
+        "types": "./dist/batch-editing.d.cts",
+        "default": "./dist/batch-editing.cjs"
+      }
+    },
+    "./grouping-panel": {
+      "import": {
+        "types": "./dist/grouping-panel.d.ts",
+        "default": "./dist/grouping-panel.js"
+      },
+      "require": {
+        "types": "./dist/grouping-panel.d.cts",
+        "default": "./dist/grouping-panel.cjs"
       }
     },
     "./pivot": {

@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/mui",
   "version": "2.6.0",
-  "description": "Material UI adapter for AdaptTable \u2014 a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
+  "description": "Material UI adapter for AdaptTable — a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
   "keywords": [
     "react",
     "mui",
@@ -75,6 +75,16 @@
         "default": "./dist/row-pinning.cjs"
       }
     },
+    "./pinned-summary-rows": {
+      "import": {
+        "types": "./dist/pinned-summary-rows.d.ts",
+        "default": "./dist/pinned-summary-rows.js"
+      },
+      "require": {
+        "types": "./dist/pinned-summary-rows.d.cts",
+        "default": "./dist/pinned-summary-rows.cjs"
+      }
+    },
     "./cell-span": {
       "import": {
         "types": "./dist/cell-span.d.ts",
@@ -143,16 +153,6 @@
       "require": {
         "types": "./dist/grouping.d.cts",
         "default": "./dist/grouping.cjs"
-      }
-    },
-    "./grouping-panel": {
-      "import": {
-        "types": "./dist/grouping-panel.d.ts",
-        "default": "./dist/grouping-panel.js"
-      },
-      "require": {
-        "types": "./dist/grouping-panel.d.cts",
-        "default": "./dist/grouping-panel.cjs"
       }
     },
     "./tree": {
@@ -393,6 +393,16 @@
       "require": {
         "types": "./dist/column-selection.d.cts",
         "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./grouping-panel": {
+      "import": {
+        "types": "./dist/grouping-panel.d.ts",
+        "default": "./dist/grouping-panel.js"
+      },
+      "require": {
+        "types": "./dist/grouping-panel.d.cts",
+        "default": "./dist/grouping-panel.cjs"
       }
     },
     "./batch-editing": {

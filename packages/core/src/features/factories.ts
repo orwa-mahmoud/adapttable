@@ -23,6 +23,7 @@ import {
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "../rows/extraRows";
+import type { PinnedRows } from "../rows/pinnedSummaryRows";
 import type { RowHeight, RowStyle } from "../rows/rowStyle";
 import type { BulkAction } from "../types";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
@@ -125,6 +126,21 @@ export function extraRows(rows: readonly ExtraRow[]): StaticTableFeature {
       extraCoveredTableSlots,
     },
   });
+}
+
+/**
+ * Stick host-owned summary objects above and below the scroll body.
+ *
+ * The objects stay outside the row model: they are not sorted, filtered,
+ * grouped, paginated or selected. Lift-a-data-row pinning is a different
+ * feature and stays refused on grouped and tree tables.
+ *
+ * @public
+ */
+export function pinnedSummaryRows<TRow>(
+  pinnedRows: PinnedRows<TRow>
+): TableFeature<TRow> {
+  return define("pinned-summary-rows", { pinnedRows });
 }
 
 /**

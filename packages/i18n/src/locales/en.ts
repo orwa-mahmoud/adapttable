@@ -41,4 +41,7 @@ export const en: Required<TableLabels> = {
     `${label} moved to grouping position ${position}`,
   groupingAggregateChanged: (label, aggregation) =>
     `${label} group aggregation changed to ${aggregation}`,
+  pinnedSummaryRow: "Summary row",
+  pinnedSummaryTop: "Pinned summary rows at the top",
+  pinnedSummaryBottom: "Pinned summary rows at the bottom",
 };

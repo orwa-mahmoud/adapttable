@@ -36,6 +36,7 @@ export function ShadcnDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -88,6 +89,7 @@ export function ShadcnDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -146,6 +148,7 @@ export function ShadcnDemo({
       rowMutations={rowMutations}
       rowReorder={rowReorder}
       rowPinning={rowPinning}
+      pinnedSummaryRows={pinnedSummaryRows}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

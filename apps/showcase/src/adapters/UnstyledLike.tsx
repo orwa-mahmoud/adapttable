@@ -218,6 +218,7 @@ export function UnstyledLike({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -272,6 +273,7 @@ export function UnstyledLike({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -347,6 +349,7 @@ export function UnstyledLike({
       rowMutations={rowMutations}
       rowReorder={rowReorder}
       rowPinning={rowPinning}
+      pinnedSummaryRows={pinnedSummaryRows}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

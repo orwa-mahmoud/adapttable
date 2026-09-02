@@ -944,6 +944,12 @@ export interface TableLabels {
   pinToBottom?: string;
   /** Release a pinned row back into the scroll window. */
   unpinRow?: string;
+  /** Accessible name for an independent pinned summary row. */
+  pinnedSummaryRow?: string;
+  /** Visible and accessible name for the top summary band. */
+  pinnedSummaryTop?: string;
+  /** Visible and accessible name for the bottom summary band. */
+  pinnedSummaryBottom?: string;
   /** Accessible name of a decorative separator row. */
   rowSeparator?: string;
   /** Expand a collapsed column group back to its leaves. */

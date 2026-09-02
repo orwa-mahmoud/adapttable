@@ -196,6 +196,7 @@ export function MuiDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -249,6 +250,7 @@ export function MuiDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -325,6 +327,7 @@ export function MuiDemo({
         rowMutations={rowMutations}
         rowReorder={rowReorder}
         rowPinning={rowPinning}
+        pinnedSummaryRows={pinnedSummaryRows}
         cellSpan={cellSpan}
         extraRows={extraRows}
         rowStyle={rowStyle}

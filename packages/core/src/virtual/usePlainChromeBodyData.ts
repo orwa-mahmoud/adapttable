@@ -51,5 +51,7 @@ export function usePlainChromeBodyData<TRow>(
     virtualScrollRef,
     pinnedTopRows: partitioned.top,
     pinnedBottomRows: partitioned.bottom,
+    pinnedSummaryTop: chrome.pinnedRows?.top ?? [],
+    pinnedSummaryBottom: chrome.pinnedRows?.bottom ?? [],
   };
 }

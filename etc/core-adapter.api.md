@@ -3491,6 +3491,9 @@ export function isExtraEntry(entry: object): entry is ExtraEntry;
 export function isMatchedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
 // @public
+export function isPinnedSummaryRowId(id: string): boolean;
+
+// @public
 export function isSelectedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
 // @public
@@ -3678,6 +3681,12 @@ export interface PinLeads {
 export const PINNED_BOTTOM_PART = "pinned-bottom";
 
 // @public
+export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
+
+// @public
+export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
+
+// @public
 export const PINNED_TOP_PART = "pinned-top";
 
 // @public
@@ -3720,7 +3729,30 @@ export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): 
 };
 
 // @public
+export function pinnedSummaryPart(side: RowPinSide): typeof PINNED_SUMMARY_TOP_PART | typeof PINNED_SUMMARY_BOTTOM_PART;
+
+// @public
+export function pinnedSummaryRowId(side: RowPinSide, index: number): string;
+
+// @public
+export function pinnedSummarySideFromId(id: string): RowPinSide | undefined;
+
+// @public
+export interface PinnedRows<TRow = unknown> {
+    readonly bottom?: readonly TRow[];
+    readonly top?: readonly TRow[];
+}
+
+// @public
 export type PinnedSide = PinSide | undefined;
+
+// @public
+export interface PinnedSummaryEntry<TRow = unknown> {
+    readonly id: string;
+    readonly index: number;
+    readonly row: TRow;
+    readonly side: RowPinSide;
+}
 
 // @public
 export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;

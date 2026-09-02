@@ -65,6 +65,7 @@ export {
   fitColumns,
   headerFilters,
   multiSort,
+  pinnedSummaryRows,
   print,
   resizableColumns,
   rowAppearance,
@@ -125,6 +126,7 @@ export type { FeatureProps } from "./props";
 export type { SidePanelOptions } from "./props";
 export type { CellSpanAppearance, GetCellSpan } from "./rows/cellSpan";
 export type { ExtraRow } from "./rows/extraRows";
+export type { PinnedRows } from "./rows/pinnedSummaryRows";
 export type {
   RowGroupMoveHandler,
   RowMoveConfirmHandler,

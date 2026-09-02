@@ -8,6 +8,7 @@
  */
 import type { VirtualTableRow } from "../virtual/virtualTableModel";
 import { resolveVirtualRows } from "../virtual/virtualTableModel";
+import { pinnedSummaryRowId } from "./pinnedSummaryRows";
 import type { RowPinSide } from "./rowPinning";
 
 export { useOffsetHeight } from "../layout/useOffsetHeight";
@@ -55,9 +56,16 @@ export function orderedCardEntries<TRow>(
   getRowId: (row: TRow) => string,
   rowEntries: readonly VirtualTableRow<TRow>[] | undefined,
   pinnedTop: readonly TRow[],
-  pinnedBottom: readonly TRow[]
+  pinnedBottom: readonly TRow[],
+  summaryTop: readonly TRow[] = [],
+  summaryBottom: readonly TRow[] = []
 ): readonly VirtualTableRow<TRow>[] {
-  if (pinnedTop.length === 0 && pinnedBottom.length === 0) {
+  if (
+    pinnedTop.length === 0 &&
+    pinnedBottom.length === 0 &&
+    summaryTop.length === 0 &&
+    summaryBottom.length === 0
+  ) {
     return resolveVirtualRows(rows, getRowId, rowEntries);
   }
   const pinnedIds = new Set<string>();
@@ -65,13 +73,23 @@ export function orderedCardEntries<TRow>(
   for (const row of pinnedBottom) pinnedIds.add(getRowId(row));
   const indexById = new Map<string, number>();
   rows.forEach((row, index) => indexById.set(getRowId(row), index));
-  const asEntry = (row: TRow): VirtualTableRow<TRow> => {
-    const key = getRowId(row);
-    const sourceIndex = indexById.get(key) ?? 0;
+  const asEntry = (row: TRow, key = getRowId(row)): VirtualTableRow<TRow> => {
+    const sourceIndex = indexById.get(getRowId(row)) ?? 0;
     return { row, index: sourceIndex, sourceIndex, key };
   };
+  const asSummary = (
+    row: TRow,
+    side: "top" | "bottom",
+    index: number
+  ): VirtualTableRow<TRow> => asEntry(row, pinnedSummaryRowId(side, index));
   const scroll = resolveVirtualRows(rows, getRowId, rowEntries).filter(
     (entry) => !pinnedIds.has(entry.key)
   );
-  return [...pinnedTop.map(asEntry), ...scroll, ...pinnedBottom.map(asEntry)];
+  return [
+    ...summaryTop.map((row, index) => asSummary(row, "top", index)),
+    ...pinnedTop.map((row) => asEntry(row)),
+    ...scroll,
+    ...pinnedBottom.map((row) => asEntry(row)),
+    ...summaryBottom.map((row, index) => asSummary(row, "bottom", index)),
+  ];
 }

@@ -60,6 +60,10 @@ grid. The list order still puts top pins first and bottom pins last.
 
 **Grouping or a tree.** A nested list is not a flat pin stack. Passing the
 props while either is armed logs a `devWarn` and the actions do not render.
+Host-owned totals that are not data rows are a different feature —
+[`pinnedSummaryRows`](./pinned-summary-rows.md) sticks those objects above
+or below the scroll body on every table shape, including grouped and tree
+tables.
 
 ## Headless
 

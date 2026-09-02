@@ -620,6 +620,15 @@ export {
   pinnedRowStickyStyle,
   useOffsetHeight,
 } from "./rows/pinnedRowChrome";
+export type { PinnedRows, PinnedSummaryEntry } from "./rows/pinnedSummaryRows";
+export {
+  isPinnedSummaryRowId,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
+} from "./rows/pinnedSummaryRows";
 export type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
 export { type RowClickProps, rowClickProps } from "./rows/rowClickProps";
 export type {

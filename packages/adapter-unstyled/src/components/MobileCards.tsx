@@ -19,6 +19,9 @@ import {
   isExtraEntry,
   mobileCardListStyle,
   orderedCardEntries,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
   resolveMobileLabel,
   resolveRowStyle,
   rowClickProps,
@@ -104,6 +107,8 @@ interface MobileCardProps<TRow> {
   /** Rows in the whole dataset, for `aria-setsize`. */
   setSize: number;
   reorderSignature: string | null;
+  part?: string;
+  ariaLabel?: string;
 }
 
 /** The card props the memo comparator deliberately skips (see `editing`). */
@@ -144,6 +149,8 @@ const COMPARED_CARD_PROPS: readonly Exclude<
   // Or a folder opens and its own chevron never turns.
   "treeEntry",
   "renderCard",
+  "part",
+  "ariaLabel",
 ];
 
 /**
@@ -191,6 +198,8 @@ function MobileCardBase<TRow>({
   rowCount,
   setSize,
   renderCard,
+  part,
+  ariaLabel,
 }: Readonly<MobileCardProps<TRow>>) {
   // Built once and used by both paths, so a custom card shows the very same
   // value node the built-in would have — cell renderers and editors included.
@@ -227,9 +236,10 @@ function MobileCardBase<TRow>({
       // needs neither, because assistive tech can simply count.
       aria-posinset={setSize > rowCount ? windowStart + index + 1 : undefined}
       aria-setsize={setSize > rowCount ? setSize : undefined}
-      data-adapttable-part="card"
+      data-adapttable-part={part ?? "card"}
       data-stagger=""
       data-selected={selected ? "" : undefined}
+      aria-label={ariaLabel}
       data-dirty={rowIsDirty(editing, id) ? "" : undefined}
       data-clickable={clickable ? "" : undefined}
       className={cx(classNames.card, className)}
@@ -366,6 +376,8 @@ export function MobileCards<TRow>({
   cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   extraRows,
   renderCard,
   maxHeight,
@@ -377,7 +389,9 @@ export function MobileCards<TRow>({
     getRowId,
     rowEntries,
     pinnedTopRows,
-    pinnedBottomRows
+    pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom
   );
   const expansionState = renderRowDetail ? expansion : undefined;
   const summary = useSummaryCells(summaryRow, rows);
@@ -395,7 +409,8 @@ export function MobileCards<TRow>({
     key: string,
     treeEntry?: TreeEntry<TRow>
   ): ReactElement => {
-    const id = getRowId(row);
+    const side = pinnedSummarySideFromId(key);
+    const id = side ? key : getRowId(row);
     return (
       <CardItem
         key={key}
@@ -405,9 +420,9 @@ export function MobileCards<TRow>({
         columns={columns}
         labels={labels}
         confirm={confirm}
-        rowActions={rowActions}
+        rowActions={side ? undefined : rowActions}
         rowActionsLayout={rowActionsLayout}
-        renderRowActions={renderRowActions}
+        renderRowActions={side ? undefined : renderRowActions}
         classNames={classNames}
         className={rowClassName?.(row, index)}
         style={resolveRowStyle(rowStyle, rowHeight, row, index)}
@@ -416,26 +431,36 @@ export function MobileCards<TRow>({
         )}
         flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
         isCellFlashing={isCellFlashing}
-        selected={selection ? selection.isSelected(id) : false}
-        expanded={expansionState ? expansionState.isExpanded(id) : false}
-        onToggleSelect={selection ? selection.toggle : undefined}
-        onToggleExpand={expansionState ? expansionState.toggle : undefined}
-        renderDetail={renderRowDetail}
-        onRowClick={onRowClick}
+        selected={side ? false : selection ? selection.isSelected(id) : false}
+        expanded={
+          side ? false : expansionState ? expansionState.isExpanded(id) : false
+        }
+        onToggleSelect={
+          side ? undefined : selection ? selection.toggle : undefined
+        }
+        onToggleExpand={
+          side ? undefined : expansionState ? expansionState.toggle : undefined
+        }
+        renderDetail={side ? undefined : renderRowDetail}
+        onRowClick={side ? undefined : onRowClick}
         measureElement={measureElement}
         editing={editing}
         rows={rows}
         getRowId={getRowId}
         editingSignature={rowEditingSignature(editing, id)}
-        treeEntry={treeEntry}
-        onToggleTree={tree ? tree.expansion.toggle : undefined}
-        rowReorder={rowReorder}
+        treeEntry={side ? undefined : treeEntry}
+        onToggleTree={
+          side ? undefined : tree ? tree.expansion.toggle : undefined
+        }
+        rowReorder={side ? undefined : rowReorder}
         windowStart={windowStart}
         rowCount={rows.length}
         setSize={cardSetSize}
         reorderSignature={rowReorderSignature(rowReorder, id, index)}
-        clickable={Boolean(onRowClick)}
-        renderCard={renderCard}
+        clickable={side ? false : Boolean(onRowClick)}
+        renderCard={side ? undefined : renderCard}
+        part={side ? pinnedSummaryPart(side) : undefined}
+        ariaLabel={side ? labels.pinnedSummaryRow : undefined}
       />
     );
   };
@@ -457,6 +482,11 @@ export function MobileCards<TRow>({
           style={{ display: "block", height: paddingTop }}
         />
       )}
+      {grouping
+        ? pinnedSummaryTop.map((row, index) =>
+            cardFor(row, index, pinnedSummaryRowId("top", index))
+          )
+        : null}
       {grouping
         ? grouping.entries.map((entry) => {
             if (isExtraEntry(entry)) {
@@ -544,6 +574,11 @@ export function MobileCards<TRow>({
               cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
             )
           )}
+      {grouping
+        ? pinnedSummaryBottom.map((row, index) =>
+            cardFor(row, index, pinnedSummaryRowId("bottom", index))
+          )
+        : null}
       {paddingBottom > 0 && (
         <li
           data-adapttable-part="virtual-spacer"

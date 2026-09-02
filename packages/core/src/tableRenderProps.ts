@@ -38,6 +38,7 @@ import type {
 import type { ExtraRow } from "./rows/extraRows";
 import { incrementalViewOf } from "./rows/incrementalView";
 import type { MobileCardRenderer } from "./rows/mobileCard";
+import { pinnedSummaryEntries } from "./rows/pinnedSummaryRows";
 import type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
 import type { RowPinningState } from "./rows/rowPinning";
 import type { RowReorderState } from "./rows/rowReorder";
@@ -159,6 +160,10 @@ export interface SharedTableRenderProps<TRow> {
    * sticky section below it.
    */
   pinnedBottomRows?: readonly TRow[];
+  /** Host-owned summary rows stuck above the scroll window. */
+  pinnedSummaryTop?: readonly TRow[];
+  /** Host-owned summary rows stuck below the scroll window. */
+  pinnedSummaryBottom?: readonly TRow[];
   /** Headless pin state — actions live on `rowActions`; this is the lists. */
   rowPinning?: RowPinningState<TRow>;
   /**
@@ -378,6 +383,8 @@ export function tableRenderModel<TRow>(
     | "rowReorder"
     | "pinnedTopRows"
     | "pinnedBottomRows"
+    | "pinnedSummaryTop"
+    | "pinnedSummaryBottom"
     | "getCellSpan"
     | "pinOffset"
     | "tree"
@@ -447,6 +454,18 @@ export function tableRenderModel<TRow>(
       rows: visualRows,
     })
   );
+  for (const entry of [
+    ...pinnedSummaryEntries(props.pinnedSummaryTop ?? [], "top"),
+    ...pinnedSummaryEntries(props.pinnedSummaryBottom ?? [], "bottom"),
+  ]) {
+    merge(
+      assembly.buildBodyCells({
+        ...cellOptions,
+        getRowId: () => entry.id,
+        rows: [entry.row],
+      })
+    );
+  }
   // A grouped body renders `grouping.entries`, not the row list above — its
   // leaves reach the screen through a different array and would otherwise have
   // no cells built for them at all, so every grouped row would render empty.

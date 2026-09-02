@@ -511,6 +511,7 @@
       "Direction",
       "DirtyCellState",
       "EMPTY_ROW_PIN_STATE",
+      "EMPTY_PINNED_ROWS",
       "EXPORT_FETCH_ALL_MAX_ROWS",
       "EditConflict",
       "EditConflictChoice",
@@ -654,6 +655,9 @@
       "PAGE_SIZE_OPTIONS",
       "PIN_BOTTOM_ACTION_KEY",
       "PIN_TOP_ACTION_KEY",
+      "PINNED_SUMMARY_BOTTOM_PART",
+      "PINNED_SUMMARY_KEY_PREFIX",
+      "PINNED_SUMMARY_TOP_PART",
       "PIN_Z",
       "PageSelector",
       "PaginatedResponse",
@@ -665,6 +669,8 @@
       "PinSide",
       "PinnedCellStyle",
       "PinnedSide",
+      "PinnedRows",
+      "PinnedSummaryEntry",
       "Props",
       "QueryAggregate",
       "QueryCondition",
@@ -839,6 +845,7 @@
       "applyRowPatches",
       "applyRowPatchesToView",
       "applyRowPatchesWithLog",
+      "allPinnedSummaryEntries",
       "applyRowPin",
       "applyRowReorder",
       "asGesture",
@@ -1135,7 +1142,13 @@
       "windowGroupedEntries",
       "writeClipboardText",
       "writeRangeFilter",
-      "writeRangeWidget"
+      "writeRangeWidget",
+      "isPinnedSummaryRowId",
+      "pinnedSummaryEntries",
+      "pinnedSummaryPart",
+      "pinnedSummaryRowId",
+      "pinnedSummarySideFromId",
+      "resolvePinnedRows"
     ],
     "core-adapter": [
       "ACTIVE_FILTER_CHIPS",
@@ -1544,6 +1557,8 @@
       "OptionalSidePanel",
       "PINNED_BOTTOM_PART",
       "PINNED_TOP_PART",
+      "PINNED_SUMMARY_BOTTOM_PART",
+      "PINNED_SUMMARY_TOP_PART",
       "PINNING_LIVE",
       "PaginationInfo",
       "PaginationItem",
@@ -1555,6 +1570,8 @@
       "PinSide",
       "PinnedCellStyle",
       "PinnedSide",
+      "PinnedRows",
+      "PinnedSummaryEntry",
       "PivotAddProps",
       "PivotAggProps",
       "PivotConfig",
@@ -1834,6 +1851,7 @@
       "isCurrentMatchCell",
       "isExtraEntry",
       "isMatchedCell",
+      "isPinnedSummaryRowId",
       "isSelectedCell",
       "logicalAlign",
       "mergedCellStyle",
@@ -1855,6 +1873,9 @@
       "pinnedRowPart",
       "pinnedRowSticky",
       "pinnedRowStickyStyle",
+      "pinnedSummaryPart",
+      "pinnedSummaryRowId",
+      "pinnedSummarySideFromId",
       "printToolbar",
       "rememberFeatureHost",
       "resetColumnLayout",
@@ -2089,6 +2110,8 @@
       "headerFilters",
       "multiSort",
       "nestedTable",
+      "PinnedRows",
+      "pinnedSummaryRows",
       "print",
       "resizableColumns",
       "rowActions",
@@ -2444,6 +2467,9 @@
     "forwards @adapttable/unstyled/row-pinning": [
       "@adapttable/unstyled/row-pinning"
     ],
+    "forwards @adapttable/unstyled/pinned-summary-rows": [
+      "@adapttable/unstyled/pinned-summary-rows"
+    ],
     "forwards @adapttable/unstyled/row-reorder": [
       "@adapttable/unstyled/row-reorder"
     ],
@@ -2645,6 +2671,9 @@
     "kit/row-pinning": [
       "rowPinning"
     ],
+    "kit/pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
     "kit/row-reorder": [
       "rowReorder"
     ],
@@ -2842,6 +2871,9 @@
     "adapter-antd-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
     },
+    "adapter-antd-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
+    },
     "adapter-antd-row-reorder.api.md": {
       "surface": "kit/row-reorder"
     },
@@ -2959,6 +2991,9 @@
     },
     "adapter-base-ui-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
+    },
+    "adapter-base-ui-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
     },
     "adapter-base-ui-row-reorder.api.md": {
       "surface": "kit/row-reorder"
@@ -3109,6 +3144,9 @@
     "adapter-chakra-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
     },
+    "adapter-chakra-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
+    },
     "adapter-chakra-row-reorder.api.md": {
       "surface": "kit/row-reorder"
     },
@@ -3226,6 +3264,9 @@
     },
     "adapter-mantine-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
+    },
+    "adapter-mantine-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
     },
     "adapter-mantine-row-reorder.api.md": {
       "surface": "kit/row-reorder"
@@ -3345,6 +3386,9 @@
     "adapter-mui-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
     },
+    "adapter-mui-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
+    },
     "adapter-mui-row-reorder.api.md": {
       "surface": "kit/row-reorder"
     },
@@ -3462,6 +3506,9 @@
     },
     "adapter-radix-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
+    },
+    "adapter-radix-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
     },
     "adapter-radix-row-reorder.api.md": {
       "surface": "kit/row-reorder"
@@ -3581,6 +3628,9 @@
     "adapter-shadcn-row-pinning.api.md": {
       "reexport": "forwards @adapttable/unstyled/row-pinning"
     },
+    "adapter-shadcn-pinned-summary-rows.api.md": {
+      "reexport": "forwards @adapttable/unstyled/pinned-summary-rows"
+    },
     "adapter-shadcn-row-reorder.api.md": {
       "reexport": "forwards @adapttable/unstyled/row-reorder"
     },
@@ -3697,6 +3747,9 @@
     },
     "adapter-unstyled-row-pinning.api.md": {
       "reexport": "kit/row-pinning"
+    },
+    "adapter-unstyled-pinned-summary-rows.api.md": {
+      "reexport": "kit/pinned-summary-rows"
     },
     "adapter-unstyled-row-reorder.api.md": {
       "surface": "kit/row-reorder"

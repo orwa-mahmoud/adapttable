@@ -79,6 +79,9 @@ export function applyRowPatchesWithLog<TRow>(rows: readonly TRow[], patches: rea
 export function applyRowPatchLogToView<TRow>(view: IncrementalView<TRow>, log: RowPatchLog<TRow>): IncrementalView<TRow>;
 
 // @public
+export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
+
+// @public
 export function applyRowPin(state: RowPinState, rowId: string, side: RowPinSide | undefined): RowPinState;
 
 // @public
@@ -1450,6 +1453,9 @@ export interface EditValidationState<TRow> {
 }
 
 // @public
+export const EMPTY_PINNED_ROWS: PinnedRows<never>;
+
+// @public
 export const EMPTY_ROW_PIN_STATE: RowPinState;
 
 // @public
@@ -1752,6 +1758,7 @@ export interface FeatureProps<TRow> {
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
     pinnedRowIds?: RowPinState;
+    pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
     renderRowDetail?: (row: TRow) => ReactNode;
     resizableColumns?: boolean;
@@ -2452,6 +2459,9 @@ export function isMultiSelectEditor(editor: CellEditor | null): editor is {
 };
 
 // @public
+export function isPinnedSummaryRowId(id: string): boolean;
+
+// @public
 export function isRelativeDateToken(raw: string | undefined): boolean;
 
 // @public
@@ -2717,6 +2727,15 @@ export interface PasteRangeOptions<TRow> {
 }
 
 // @public
+export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
+
+// @public
+export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
+
+// @public
+export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
+
+// @public
 export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
 
 // @public
@@ -2746,10 +2765,36 @@ export interface PinnedCellStyle {
 }
 
 // @public
-export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
+export interface PinnedRows<TRow = unknown> {
+    readonly bottom?: readonly TRow[];
+    readonly top?: readonly TRow[];
+}
 
 // @public
 export type PinnedSide = PinSide | undefined;
+
+// @public
+export interface PinnedSummaryEntry<TRow = unknown> {
+    readonly id: string;
+    readonly index: number;
+    readonly row: TRow;
+    readonly side: RowPinSide;
+}
+
+// @public
+export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
+
+// @public
+export function pinnedSummaryEntries<TRow>(rows: readonly TRow[], side: RowPinSide): readonly PinnedSummaryEntry<TRow>[];
+
+// @public
+export function pinnedSummaryPart(side: RowPinSide): typeof PINNED_SUMMARY_TOP_PART | typeof PINNED_SUMMARY_BOTTOM_PART;
+
+// @public
+export function pinnedSummaryRowId(side: RowPinSide, index: number): string;
+
+// @public
+export function pinnedSummarySideFromId(id: string): RowPinSide | undefined;
 
 // @public
 export interface PinOffset {
@@ -3030,6 +3075,12 @@ export function resolveLabels(overrides: TableLabels | undefined): Required<Tabl
 
 // @public
 export function resolveLocaleTag(available: Iterable<string>, locale: string): string | undefined;
+
+// @public
+export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined): {
+    bottom: readonly TRow[];
+    top: readonly TRow[];
+};
 
 // @public
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
@@ -3876,6 +3927,9 @@ export interface TableLabels {
     pinStart?: string;
     pinToBottom?: string;
     pinToTop?: string;
+    pinnedSummaryBottom?: string;
+    pinnedSummaryRow?: string;
+    pinnedSummaryTop?: string;
     pivotAdd?: string;
     pivotAggregation?: string;
     pivotColumns?: string;

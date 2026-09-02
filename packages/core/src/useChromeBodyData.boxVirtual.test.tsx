@@ -11,6 +11,7 @@ import { act, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
+import { pinnedSummaryRows } from "./features/factories";
 import { grouping } from "./features/grouping";
 import { FeatureProviders } from "./features/providers";
 import { rowPinning } from "./features/row-pinning";
@@ -546,5 +547,41 @@ describe("useVirtualChromeBodyData with pinned rows", () => {
     for (const entry of windowed) {
       expect(entry.sourceIndex).toBe(ROWS.findIndex((r) => r.id === entry.key));
     }
+  });
+
+  it("keeps host-owned summary rows outside a virtualized window", () => {
+    const totals = { id: "totals", name: "Team total" };
+    const adapter = createMemoryAdapter("");
+    const { result } = renderLiveBody(
+      [pinnedSummaryRows({ top: [totals] }), grouping("name")],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "infinite",
+        });
+        return {
+          ...applyTableFeatures({
+            features: [pinnedSummaryRows({ top: [totals] }), grouping("name")],
+            columns: cols,
+            rowKey: (r: Row) => r.id,
+            groupBy: "name",
+            virtualize: true as const,
+          }),
+          source,
+          columns: cols,
+          rowKey: (r: Row) => r.id,
+          groupBy: "name",
+          virtualize: true as const,
+        };
+      }
+    );
+    expect(result.current.body.pinnedSummaryTop).toEqual([totals]);
+    expect(
+      result.current.body.virtualization.rows.every(
+        (row) => row.key !== "totals"
+      )
+    ).toBe(true);
   });
 });

@@ -34,6 +34,7 @@ export const DOCS = [
   "cell-editing.md",
   "row-reordering.md",
   "row-pinning.md",
+  "pinned-summary-rows.md",
   "row-spanning.md",
   "full-width-rows.md",
   "row-styling.md",

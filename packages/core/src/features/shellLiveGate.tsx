@@ -143,13 +143,17 @@ function CellNavStage<TRow>({
   const columns = chrome.columnLayout.visibleColumns;
   const options = {
     headerCheckbox: props.columnSelectionCheckbox === true,
-    rowCount: Math.max(
-      chrome.source.total,
-      windowStart + chrome.source.rows.length
-    ),
+    rowCount:
+      Math.max(chrome.source.total, windowStart + chrome.source.rows.length) +
+      (chrome.pinnedRows?.top?.length ?? 0) +
+      (chrome.pinnedRows?.bottom?.length ?? 0),
     columns,
     columnsWindowed: shell.tableProps.columnWindow.enabled,
-    rows: chrome.source.rows,
+    rows: [
+      ...(chrome.pinnedRows?.top ?? []),
+      ...chrome.source.rows,
+      ...(chrome.pinnedRows?.bottom ?? []),
+    ],
     firstRowIndex: windowStart,
     dir: props.dir,
     labels: shell.labels,

@@ -319,7 +319,7 @@ registry to learn and nothing global to collide over.
 
 ## Every factory
 
-`rowReorder` · `rowPinning` · `cellSpan` · `extraRows` · `rowAppearance` ·
+`rowReorder` · `rowPinning` · `pinnedSummaryRows` · `cellSpan` · `extraRows` · `rowAppearance` ·
 `rowDetail` · `nestedTable` · `editing` · `rowEditing` · `batchEditing` ·
 `editHistory` · `dirtyIndicators` · `grouping` · `groupingPanel` · `tree` ·
 `virtualize` ·

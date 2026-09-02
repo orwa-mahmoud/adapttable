@@ -262,6 +262,7 @@ The source for each lives in
   editors, keyboard flow.
 - [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
+- [Pinned summary rows](./pinned-summary-rows.md) — host-owned totals outside the row model
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots
 - [Row styling and heights](./row-styling.md) — `rowStyle`, `rowHeight`, variable-height virtualizer
@@ -756,7 +757,7 @@ registry to learn and nothing global to collide over.
 
 ## Every factory
 
-`rowReorder` · `rowPinning` · `cellSpan` · `extraRows` · `rowAppearance` ·
+`rowReorder` · `rowPinning` · `pinnedSummaryRows` · `cellSpan` · `extraRows` · `rowAppearance` ·
 `rowDetail` · `nestedTable` · `editing` · `rowEditing` · `batchEditing` ·
 `editHistory` · `dirtyIndicators` · `grouping` · `groupingPanel` · `tree` ·
 `virtualize` ·
@@ -3396,6 +3397,10 @@ grid. The list order still puts top pins first and bottom pins last.
 
 **Grouping or a tree.** A nested list is not a flat pin stack. Passing the
 props while either is armed logs a `devWarn` and the actions do not render.
+Host-owned totals that are not data rows are a different feature —
+[`pinnedSummaryRows`](./pinned-summary-rows.md) sticks those objects above
+or below the scroll body on every table shape, including grouped and tree
+tables.
 
 ## Headless
 
@@ -3418,6 +3423,58 @@ kit asked for sticky pins; `orderedCardEntries` is the card-list order;
 window.
 
 Labels: `pinToTop`, `pinToBottom`, `unpinRow` (`RowPinLabels`).
+
+---
+
+# React table pinned summary rows — totals that stay outside the row model
+
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `pinnedSummaryRows`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+
+▶ **See it working:** [pin, reorder and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — a host-owned total sticks above the list. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+
+These are **not** lifted data rows. You pass separate objects
+(`pinnedRows: { top, bottom }`) that never enter sort, filter, grouping,
+pagination or selection. Cells still run through the ordinary column
+pipeline — formatters, sparklines, spanning — and the rows stick above
+or below the scroll window, including on grouped and tree tables where
+[lift-a-data-row pinning](./row-pinning.md) stays refused.
+
+```tsx
+import { DataTable } from "@adapttable/mantine";
+import { pinnedSummaryRows } from "@adapttable/mantine/pinned-summary-rows";
+
+const totals = { id: "totals", name: "Team total", budget: 128_000 };
+
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(row) => row.id}
+  features={[
+    pinnedSummaryRows({
+      top: [totals],
+      bottom: [{ id: "grand", name: "Grand total", budget: 128_000 }],
+    }),
+  ]}
+/>;
+```
+
+The objects are host data. Nothing is written to the URL or a Saved View
+— a shared link does not have to invent totals the next load cannot
+recompute. They are not exported, selected, edited, reordered, or given
+pin / row-action menus.
+
+Desktop rows use `data-adapttable-part="pinned-summary-top"` /
+`"pinned-summary-bottom"` and `aria-label` from `pinnedSummaryRow`.
+Keyboard cell navigation reaches them. Mobile cards keep the same order
+and announcement; a card list has no sticky chrome.
+
+Identities are namespaced (`adapttable:pinned-summary:top:0`) so they
+never collide with a data-row id.
+
+Lift a real person with [`rowPinning`](./row-pinning.md). Stick a total
+that is not in the dataset with this factory.
+
+Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`.
 
 ---
 
@@ -9346,6 +9403,8 @@ confirmation, success, policy, sort, and cycle labels extend
 
 **Row pinning.** `pinnedRowIds` / `onPinnedRowIdsChange` take a `RowPinState` (`{ top, bottom }` of `RowPinSide`). `applyRowPin(state, rowId, side)` is the in-memory helper; `partitionPinnedRows` splits a list into top / scroll / bottom; `EMPTY_ROW_PIN_STATE` is the empty lists. `useRowPinning` returns `RowPinningState`; `rowPinSignature` is the memo digest. Action keys: `PIN_TOP_ACTION_KEY`, `PIN_BOTTOM_ACTION_KEY`, `UNPIN_ROW_ACTION_KEY`. URL: `useRowPinningUrlState` (`UseRowPinningUrlStateOptions` / `UseRowPinningUrlStateResult`) writes `rowPin=id:top,id:bottom`. Labels: `pinToTop`, `pinToBottom`, `unpinRow` (`RowPinLabels`). `rowSourceIndex(entry)` is the dataset index when pinning remapped the window. From `@adapttable/core/adapter`: `pinnedRowStickyStyle` / `pinnedRowCellStyle`, `pinnedRowPart` / `pinnedRowSticky`, `orderedCardEntries`, `useOffsetHeight`, `PINNED_TOP_PART` / `PINNED_BOTTOM_PART`. See [row pinning](./row-pinning.md).
 
+**Pinned summary rows.** `pinnedSummaryRows({ top, bottom })` (`PinnedRows`) sticks host-owned objects outside the row model — sort, filter, grouping, pagination and selection never see them, so they coexist with grouped and tree tables. Identities are `pinnedSummaryRowId(side, index)` (`PINNED_SUMMARY_KEY_PREFIX` + `:side:index`); `PinnedSummaryEntry` / `isPinnedSummaryRowId` / `pinnedSummarySideFromId` / `pinnedSummaryEntries` / `allPinnedSummaryEntries` / `resolvePinnedRows` / `EMPTY_PINNED_ROWS` are the helpers. Parts: `PINNED_SUMMARY_TOP_PART` / `PINNED_SUMMARY_BOTTOM_PART` via `pinnedSummaryPart`. Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`. Not URL or Saved Views — the objects are host data. See [pinned summary rows](./pinned-summary-rows.md).
+
 **Filter internals.** `FILTER_TYPES` lists the built-in types, `filterLabel`
 resolves a filter's caption, `filterStateKeys` names the URL keys one filter
 owns, `hasActiveHeaderFilter` says whether any of them holds a value worth
@@ -10640,6 +10699,7 @@ kits — only the look does. Every adapter ships the same batteries:
 | Inline cell editing (opt-in)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row grouping + per-group aggregates   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Interactive grouping panel            |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Pinned summary rows                   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |

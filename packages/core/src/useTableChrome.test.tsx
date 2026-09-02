@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { buildTableCsv } from "./export/tableCsv";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { dirtyIndicators } from "./features/editing";
-import { bulkActions } from "./features/factories";
+import { bulkActions, pinnedSummaryRows } from "./features/factories";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
 import { groupingPanel } from "./features/grouping-panel";
@@ -292,7 +292,7 @@ describe("useTableChrome", () => {
       { key: "name", header: "Name" },
       { key: "team", header: "Team" },
     ];
-    const { result } = renderLiveChrome([groupingPanel()], () => {
+    const { result } = renderLiveChrome<Row>([groupingPanel()], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         columns: columnsWithTeam,
@@ -589,6 +589,64 @@ describe("useTableChrome", () => {
       warn.mockRestore();
       resetDevWarnings();
     }
+  });
+
+  it("publishes host-owned summary rows even when grouping is armed", () => {
+    const totals = { id: "totals", name: "Totals" };
+    const { result } = renderLiveChrome(
+      [pinnedSummaryRows({ top: [totals] }), grouping("name")],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          ...applyTableFeatures({
+            features: [pinnedSummaryRows({ top: [totals] }), grouping("name")],
+            columns,
+            rowKey: (r: Row) => r.id,
+            groupBy: "name",
+          }),
+          source,
+          columns,
+          rowKey: (r: Row) => r.id,
+          groupBy: "name",
+        };
+      }
+    );
+    expect(result.current.pinnedRows?.top).toEqual([totals]);
+    expect(result.current.grouping).toBeDefined();
+  });
+
+  it("publishes host-owned summary rows even when the table is a tree", () => {
+    const totals = { id: "totals", name: "Totals" };
+    const { result } = renderLiveChrome(
+      [pinnedSummaryRows({ bottom: [totals] }), tree<Row>()],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          ...applyTableFeatures({
+            features: [pinnedSummaryRows({ bottom: [totals] }), tree<Row>()],
+            columns,
+            rowKey: (r: Row) => r.id,
+            getChildren: (row: Row) => (row.id === "a" ? [] : undefined),
+          }),
+          source,
+          columns,
+          rowKey: (r: Row) => r.id,
+          getChildren: (row: Row) => (row.id === "a" ? [] : undefined),
+        };
+      }
+    );
+    expect(result.current.pinnedRows?.bottom).toEqual([totals]);
+    expect(result.current.tree).toBeDefined();
   });
 
   it("controlled selection: change requests go to the handler, state stays put", () => {

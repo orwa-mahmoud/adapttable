@@ -428,6 +428,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
   const [rowMutations, setRowMutations] = useState<OnOff>("off");
   const [rowReorder, setRowReorder] = useState<OnOff>("off");
   const [rowPinning, setRowPinning] = useState<OnOff>("off");
+  const [pinnedSummaryRows, setPinnedSummaryRows] = useState<OnOff>("off");
   const [cellSpan, setCellSpan] = useState<OnOff>("off");
   const [extraRows, setExtraRows] = useState<OnOff>("off");
   const [rowStyle, setRowStyle] = useState<OnOff>("off");
@@ -508,6 +509,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     rowMutations,
     rowReorder,
     rowPinning,
+    pinnedSummaryRows,
     cellSpan,
     extraRows,
     rowStyle,
@@ -531,6 +533,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     setRowMutations("off");
     setRowReorder("off");
     setRowPinning("off");
+    setPinnedSummaryRows("off");
     setCellSpan("off");
     setExtraRows("off");
     setRowStyle("off");
@@ -565,6 +568,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
         setRowMutations("on");
         setRowReorder("on");
         setRowPinning("on");
+        setPinnedSummaryRows("on");
         setCellSpan("on");
         setExtraRows("on");
         setRowStyle("on");
@@ -903,6 +907,11 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
                       onChange={(next) => customize(setRowPinning, next)}
                     />
                     <Toggle
+                      label="Summary rows"
+                      value={pinnedSummaryRows}
+                      onChange={(next) => customize(setPinnedSummaryRows, next)}
+                    />
+                    <Toggle
                       label="Span cells"
                       value={cellSpan}
                       disabledOn={clientOnlyReason}
@@ -1005,6 +1014,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
                           onRecover={recoverFromFailure}
                           rowReorder={rowReorder === "on"}
                           rowPinning={rowPinning === "on"}
+                          pinnedSummaryRows={pinnedSummaryRows === "on"}
                           cellSpan={cellSpan === "on"}
                           extraRows={extraRows === "on"}
                           rowStyle={rowStyle === "on"}

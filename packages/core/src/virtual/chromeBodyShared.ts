@@ -51,6 +51,10 @@ export interface ChromeBodyData<TRow> {
   pinnedTopRows: readonly TRow[];
   /** Bottom-pinned rows, removed from the virtual window. */
   pinnedBottomRows: readonly TRow[];
+  /** Host-owned summary rows stuck above the scroll window. */
+  pinnedSummaryTop: readonly TRow[];
+  /** Host-owned summary rows stuck below the scroll window. */
+  pinnedSummaryBottom: readonly TRow[];
   /**
    * Horizontal column window. The lean path never windows sideways; the
    * virtualize feature fills this when `virtualizeColumns` is on.

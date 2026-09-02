@@ -449,6 +449,8 @@ describe("useDataTableShell", () => {
       virtualScrollRef: () => undefined,
       pinnedTopRows: [],
       pinnedBottomRows: [],
+      pinnedSummaryTop: [],
+      pinnedSummaryBottom: [],
     };
     const { result } = renderHook(() =>
       useDataTableShell({ data: ROWS, columns, rowKey, urlSync: false }, noForm)

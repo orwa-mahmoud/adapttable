@@ -21,6 +21,9 @@ import {
   insertExtraRows,
   isExtraEntry,
   orderedCardEntries,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
   resolveMobileLabel,
   resolveRowStyle,
   rowClickProps,
@@ -349,7 +352,38 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
  * viewports so columns never get cramped. Each card is memoized on its own
  * inputs, so a toolbar re-render (e.g. a search keystroke) re-renders no
  * unchanged card.
- *
+ */
+function summaryCardInteractive(
+  side: ReturnType<typeof pinnedSummarySideFromId>,
+  selection:
+    | { isSelected: (id: string) => boolean; toggle: (id: string) => void }
+    | null
+    | undefined,
+  expansion: RowExpansionState | undefined,
+  id: string
+): {
+  selected: boolean;
+  expanded: boolean;
+  onToggleSelect: ((id: string) => void) | undefined;
+  onToggleExpand: ((id: string) => void) | undefined;
+} {
+  if (side) {
+    return {
+      selected: false,
+      expanded: false,
+      onToggleSelect: undefined,
+      onToggleExpand: undefined,
+    };
+  }
+  return {
+    selected: Boolean(selection?.isSelected(id)),
+    expanded: Boolean(expansion?.isExpanded(id)),
+    onToggleSelect: selection?.toggle,
+    onToggleExpand: expansion?.toggle,
+  };
+}
+
+/**
  * @typeParam TRow - The row type.
  */
 export function MobileCards<TRow>({
@@ -384,6 +418,8 @@ export function MobileCards<TRow>({
   cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   extraRows,
   renderCard,
   listRef,
@@ -457,6 +493,8 @@ export function MobileCards<TRow>({
   cardSetSize?: number;
   pinnedTopRows?: readonly TRow[];
   pinnedBottomRows?: readonly TRow[];
+  pinnedSummaryTop?: readonly TRow[];
+  pinnedSummaryBottom?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
   /** Attach the virtualizer to this list (window or maxHeight box). */
   listRef?: (node: HTMLElement | null) => void;
@@ -472,7 +510,9 @@ export function MobileCards<TRow>({
     getRowId,
     rowEntries,
     pinnedTopRows,
-    pinnedBottomRows
+    pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom
   );
 
   // `memo` erases generics at module level, so the memoized card is
@@ -488,7 +528,9 @@ export function MobileCards<TRow>({
     key: string,
     treeEntry?: TreeEntry<TRow>
   ) => {
-    const id = getRowId(row);
+    const side = pinnedSummarySideFromId(key);
+    const id = side ? key : getRowId(row);
+    const interactive = summaryCardInteractive(side, selection, expansion, id);
     return (
       <li
         key={key}
@@ -501,7 +543,8 @@ export function MobileCards<TRow>({
           cardSetSize > rows.length ? windowStart + index + 1 : undefined
         }
         aria-setsize={cardSetSize > rows.length ? cardSetSize : undefined}
-        data-adapttable-part="card"
+        data-adapttable-part={side ? pinnedSummaryPart(side) : "card"}
+        aria-label={side ? labels.pinnedSummaryRow : undefined}
         style={{
           ...treeCardStyle(treeEntry?.level ?? 0),
           ...resolveRowStyle(rowStyle, rowHeight, row, index),
@@ -514,9 +557,9 @@ export function MobileCards<TRow>({
           columns={columns}
           labels={labels}
           confirm={confirm}
-          rowActions={rowActions}
+          rowActions={side ? undefined : rowActions}
           rowActionsLayout={rowActionsLayout}
-          renderRowActions={renderRowActions}
+          renderRowActions={side ? undefined : renderRowActions}
           className={
             [cardClassName, rowClassName?.(row, index)]
               .filter(Boolean)
@@ -528,24 +571,24 @@ export function MobileCards<TRow>({
           )}
           flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
           isCellFlashing={isCellFlashing}
-          selected={selection ? selection.isSelected(id) : false}
-          expanded={expansion ? expansion.isExpanded(id) : false}
-          onToggleSelect={selection ? selection.toggle : undefined}
-          onToggleExpand={expansion ? expansion.toggle : undefined}
-          renderDetail={renderRowDetail}
-          onRowClick={onRowClick}
+          selected={interactive.selected}
+          expanded={interactive.expanded}
+          onToggleSelect={interactive.onToggleSelect}
+          onToggleExpand={interactive.onToggleExpand}
+          renderDetail={side ? undefined : renderRowDetail}
+          onRowClick={side ? undefined : onRowClick}
           prefetch={prefetch}
           editing={editing}
           rows={rows}
           getRowId={getRowId}
           editingSignature={rowEditingSignature(editing, id)}
-          treeEntry={treeEntry}
-          onToggleTree={tree?.expansion.toggle}
-          rowReorder={rowReorder}
+          treeEntry={side ? undefined : treeEntry}
+          onToggleTree={side ? undefined : tree?.expansion.toggle}
+          rowReorder={side ? undefined : rowReorder}
           windowStart={windowStart}
           rowCount={rows.length}
           reorderSignature={rowReorderSignature(rowReorder, id, index)}
-          renderCard={renderCard}
+          renderCard={side ? undefined : renderCard}
         />
       </li>
     );
@@ -595,6 +638,11 @@ export function MobileCards<TRow>({
       }}
     >
       {paddingTop > 0 && <li aria-hidden style={{ height: paddingTop }} />}
+      {grouping
+        ? pinnedSummaryTop.map((row, index) =>
+            renderLeafCard(row, index, pinnedSummaryRowId("top", index))
+          )
+        : null}
       {grouping
         ? grouping.entries.map((entry) => {
             if (isExtraEntry(entry)) {
@@ -665,6 +713,11 @@ export function MobileCards<TRow>({
               renderLeafCard(slot.row, slot.index, slot.key, slot.treeEntry)
             )
           )}
+      {grouping
+        ? pinnedSummaryBottom.map((row, index) =>
+            renderLeafCard(row, index, pinnedSummaryRowId("bottom", index))
+          )
+        : null}
       {summaryRow && (
         <li>
           <SummaryCard rows={rows} columns={columns} summaryRow={summaryRow} />

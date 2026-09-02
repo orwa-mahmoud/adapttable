@@ -32,6 +32,8 @@ import { useIsMobile } from "./hooks/useIsMobile";
 import { useScrollToTableTop } from "./hooks/useScrollToTableTop";
 import { useElementWidth } from "./layout/useElementWidth";
 import type { ComposedTableProps, ToolbarSlots } from "./props";
+import type { PinnedRows } from "./rows/pinnedSummaryRows";
+import { resolvePinnedRows } from "./rows/pinnedSummaryRows";
 import type { RowMutationsState } from "./rows/rowMutations";
 import type { RowPinningState } from "./rows/rowPinning";
 import type { RowReorderState } from "./rows/rowReorder";
@@ -350,6 +352,11 @@ export interface TableChrome<TRow> {
    * and grouping/tree are off.
    */
   rowPinning?: RowPinningState<TRow>;
+  /**
+   * Host-owned summary objects stuck above and below the scroll body.
+   * Present iff `pinnedSummaryRows` was composed with at least one row.
+   */
+  pinnedRows?: PinnedRows<TRow>;
   /**
    * Whether grouping is armed — full-set overlay is on. Pinning and
    * reorder read this rather than re-parsing `groupBy`.
@@ -750,6 +757,11 @@ export function useTableChrome<TRow>(
   const rowReorder = rowReorderEnabled ? publishedReorder : undefined;
 
   const rowPinning = undefined;
+  const resolvedPinnedRows = resolvePinnedRows(props.pinnedRows);
+  const pinnedRows =
+    resolvedPinnedRows.top.length > 0 || resolvedPinnedRows.bottom.length > 0
+      ? resolvedPinnedRows
+      : undefined;
 
   const showFooter =
     isPaged &&
@@ -864,6 +876,7 @@ export function useTableChrome<TRow>(
     hasRowReorder,
     rowReorder,
     rowPinning,
+    pinnedRows,
     groupingArmed,
     treeShaped,
     editing,

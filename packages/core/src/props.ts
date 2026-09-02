@@ -27,6 +27,7 @@ import type { SidePanelEntry } from "./layout/SidePanelChrome";
 import type { CellSpanAppearance, GetCellSpan } from "./rows/cellSpan";
 import type { ExtraRow } from "./rows/extraRows";
 import type { MobileCardRenderer } from "./rows/mobileCard";
+import type { PinnedRows } from "./rows/pinnedSummaryRows";
 import type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
 import type { RowPinState } from "./rows/rowPinning";
 import type { RowHeight, RowStyle } from "./rows/rowStyle";
@@ -300,6 +301,12 @@ export interface FeatureProps<TRow> {
    * cards keep the same slots.
    */
   extraRows?: readonly ExtraRow[];
+  /**
+   * Independent summary objects stuck above and below the scroll body.
+   * They are not data rows: sorting, filtering, grouping, pagination and
+   * selection never see them. Compose `pinnedSummaryRows({ top, bottom })`.
+   */
+  pinnedRows?: PinnedRows<TRow>;
   /**
    * Delete without a confirmation dialog. Off by default — a delete is
    * destructive and the table cannot undo it.

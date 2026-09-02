@@ -67,6 +67,7 @@ change.
   editors; Enter commits, Escape cancels, Tab moves on. Omit the handler and no cell opens.
 - **Row reordering** (`onRowReorder`) — drag handle, Space-lift keyboard, dataset-relative indices. Grouping and trees refuse it.
 - **Row pinning** (`pinnedRowIds` / `onPinnedRowIdsChange`) — sticky top and bottom rows outside the virtual window. Grouping and trees refuse it.
+- **Pinned summary rows** (`pinnedRows`) — host-owned totals stuck outside sort, filter, grouping, pagination and selection, including on grouped and tree tables.
 - **Row and column spanning** (`getCellSpan`) — one cell list per row; covered cells are omitted.
 - **Full-width and separator rows** (`extraRows`) — host-injected slots spliced in by `beforeRowId`.
 - **Row styling and heights** (`rowStyle`, `rowHeight`) — conditional inline style and per-row height.

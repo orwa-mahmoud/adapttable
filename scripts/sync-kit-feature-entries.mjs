@@ -12,6 +12,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SUBPATHS = [
   "row-reorder",
   "row-pinning",
+  "pinned-summary-rows",
   "cell-span",
   "extra-rows",
   "row-appearance",
@@ -54,6 +55,7 @@ const HEADLESS = {
   "fit-columns": "fitColumns",
   "row-actions": "rowActions",
   "row-pinning": "rowPinning",
+  "pinned-summary-rows": "pinnedSummaryRows",
   virtualize: "virtualize",
 };
 

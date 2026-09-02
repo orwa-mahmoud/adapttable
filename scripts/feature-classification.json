@@ -49,6 +49,17 @@
       "note": "Pins reorder the row model and set a part name; no dedicated kit component.",
       "requiresConfig": true
     },
+    "pinnedSummaryRows": {
+      "id": "pinned-summary-rows",
+      "replacesProps": [],
+      "classification": "headless",
+      "subpath": "pinned-summary-rows",
+      "implementation": ["core/src/rows/pinnedSummaryRows.ts"],
+      "adapterComponents": [],
+      "standardPreset": false,
+      "note": "Host-owned summary objects stick outside the row model; cells use the ordinary column pipeline. Lift-a-data-row pinning stays a different feature.",
+      "requiresConfig": true
+    },
     "cellSpan": {
       "id": "cell-span",
       "replacesProps": ["getCellSpan", "cellSpanAppearance"],

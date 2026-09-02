@@ -195,6 +195,18 @@ describe("tableRenderModel", () => {
     expect(model.columnSpan).toBe(2);
   });
 
+  it("builds namespaced cells for host-owned summary rows", () => {
+    const totals = { id: "totals", name: "Team total" };
+    const model = tableRenderModel({
+      table,
+      rows: ROWS,
+      getRowId: (r) => r.id,
+      pinnedSummaryTop: [totals],
+    });
+    expect(model.cellsByRow.has("adapttable:pinned-summary:top:0")).toBe(true);
+    expect(model.entries.map((entry) => entry.key)).toEqual(["a", "b"]);
+  });
+
   it("drops pinned rows from the scroll entries so they are not drawn twice", () => {
     const model = tableRenderModel({
       table,

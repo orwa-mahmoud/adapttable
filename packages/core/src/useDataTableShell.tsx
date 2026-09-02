@@ -286,6 +286,8 @@ export function useDataTableShell<TRow>(
     reorderPinned,
     pinnedTopRows: [] as readonly TRow[],
     pinnedBottomRows: [] as readonly TRow[],
+    pinnedSummaryTop: [] as readonly TRow[],
+    pinnedSummaryBottom: [] as readonly TRow[],
     rowPinning: chrome.rowPinning,
     getCellSpan: props.getCellSpan,
     cellSpanAppearance: props.cellSpanAppearance,
@@ -498,6 +500,8 @@ export function finishDataTableShell<TRow>(
       ...shell.tableProps,
       pinnedTopRows: body.pinnedTopRows,
       pinnedBottomRows: body.pinnedBottomRows,
+      pinnedSummaryTop: body.pinnedSummaryTop,
+      pinnedSummaryBottom: body.pinnedSummaryBottom,
       rowEntries: body.virtualization.enabled
         ? body.virtualization.rows
         : undefined,

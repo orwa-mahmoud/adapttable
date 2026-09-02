@@ -16,6 +16,8 @@ import {
   makeExportCsvHandler,
   pageSizeOptions,
   partitionPinnedRows,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
   resolveColumnFooter,
   resolveExportCsv,
   resolveFilterMode,
@@ -315,39 +317,9 @@ function antdPinnedRowAttrs(
   };
 }
 
-function antdOnRow<TRow>(options: {
-  record: GroupedDataRecord<TRow>;
-  rowIndex: number | undefined;
-  getRowId: (row: TRow) => string;
-  rowPinning: RowPinningState<TRow> | undefined;
-  headerOffset: number;
-  /** Sticky pin chrome — off when a cell span would overlay the next rows. */
-  pinRowSticky: boolean;
-  rowReorder: RowReorderState<TRow> | undefined;
-  windowStart: number;
-  gridFocus: GridFocusState | undefined;
-  onRowClick: DataTableProps<TRow>["onRowClick"];
-  editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
-  prefetch: DataTableProps<TRow>["prefetch"];
-  rowStyle: ComposedProps<TRow>["rowStyle"];
-  rowHeight: ComposedProps<TRow>["rowHeight"];
-}): AntdRowHtmlAttrs {
-  const {
-    record,
-    rowIndex,
-    getRowId,
-    rowPinning,
-    headerOffset,
-    pinRowSticky,
-    rowReorder,
-    windowStart,
-    gridFocus,
-    onRowClick,
-    editing,
-    prefetch,
-    rowStyle,
-    rowHeight,
-  } = options;
+function antdExtraOrGroupRowAttrs<TRow>(
+  record: GroupedDataRecord<TRow>
+): AntdRowHtmlAttrs | undefined {
   if (isAdaptTableExtraRow(record)) {
     return {
       "data-adapttable-part": EXTRA_ROW_PARTS[record.extraKind].row,
@@ -362,22 +334,113 @@ function antdOnRow<TRow>(options: {
       "data-collapsed": record.collapsed ? "true" : undefined,
     };
   }
-  const id = getRowId(record);
+  return undefined;
+}
+
+function antdSummaryRowAttrs(
+  side: RowPinSide,
+  index: number,
+  labels: Required<TableLabels>,
+  pinRowSticky: boolean,
+  headerOffset: number,
+  rowIndex: number | undefined,
+  gridFocus: GridFocusState | undefined
+): AntdRowHtmlAttrs {
+  return {
+    role: "row",
+    "aria-label": labels.pinnedSummaryRow,
+    "data-row-pin": side,
+    "data-adapttable-part": pinnedSummaryPart(side),
+    "data-row-id": pinnedSummaryRowId(side, index),
+    ...(pinRowSticky
+      ? { style: pinnedRowStickyStyle(side, headerOffset) }
+      : {}),
+    ...(rowIndex === undefined ? {} : gridFocus?.getRowPropsAt(rowIndex)),
+  };
+}
+
+function antdOnRow<TRow>(options: {
+  record: GroupedDataRecord<TRow>;
+  rowIndex: number | undefined;
+  getRowId: (row: TRow) => string;
+  rowPinning: RowPinningState<TRow> | undefined;
+  pinnedSummaryTop?: readonly TRow[];
+  pinnedSummaryBottom?: readonly TRow[];
+  headerOffset: number;
+  /** Sticky pin chrome — off when a cell span would overlay the next rows. */
+  pinRowSticky: boolean;
+  rowReorder: RowReorderState<TRow> | undefined;
+  windowStart: number;
+  gridFocus: GridFocusState | undefined;
+  onRowClick: DataTableProps<TRow>["onRowClick"];
+  editing: NonNullable<ReturnType<typeof useTableChrome<TRow>>>["editing"];
+  prefetch: DataTableProps<TRow>["prefetch"];
+  rowStyle: ComposedProps<TRow>["rowStyle"];
+  rowHeight: ComposedProps<TRow>["rowHeight"];
+  labels: Required<TableLabels>;
+}): AntdRowHtmlAttrs {
+  const {
+    record,
+    rowIndex,
+    getRowId,
+    rowPinning,
+    pinnedSummaryTop = [],
+    pinnedSummaryBottom = [],
+    headerOffset,
+    pinRowSticky,
+    rowReorder,
+    windowStart,
+    gridFocus,
+    onRowClick,
+    editing,
+    prefetch,
+    rowStyle,
+    rowHeight,
+    labels,
+  } = options;
+  const extraOrGroup = antdExtraOrGroupRowAttrs(record);
+  if (extraOrGroup) return extraOrGroup;
+  const row = record as TRow;
+  const topIndex = pinnedSummaryTop.indexOf(row);
+  const bottomIndex = pinnedSummaryBottom.indexOf(row);
+  if (topIndex >= 0) {
+    return antdSummaryRowAttrs(
+      "top",
+      topIndex,
+      labels,
+      pinRowSticky,
+      headerOffset,
+      rowIndex,
+      gridFocus
+    );
+  }
+  if (bottomIndex >= 0) {
+    return antdSummaryRowAttrs(
+      "bottom",
+      bottomIndex,
+      labels,
+      pinRowSticky,
+      headerOffset,
+      rowIndex,
+      gridFocus
+    );
+  }
+  const id = getRowId(row);
   const pin = antdPinnedRowAttrs(
     rowPinning?.sideOf(id),
     headerOffset,
     pinRowSticky
   );
-  const visual = resolveRowStyle(rowStyle, rowHeight, record, rowIndex ?? 0);
+  const visual = resolveRowStyle(rowStyle, rowHeight, row, rowIndex ?? 0);
   const reorderStyle =
     rowReorder && rowIndex !== undefined
       ? rowReorderDropStyle(rowReorder.rowAttrs(id, rowIndex))
       : undefined;
   return {
-    ...rowClickProps(record, onRowClick, rowIndex),
+    ...rowClickProps(row, onRowClick, rowIndex),
     ...(rowReorder && rowIndex !== undefined
       ? {
-          ...rowReorder.dropProps(rowIndex, record, windowStart),
+          ...rowReorder.dropProps(rowIndex, row, windowStart),
           ...rowReorder.rowAttrs(id, rowIndex),
         }
       : {}),
@@ -400,8 +463,8 @@ function antdOnRow<TRow>(options: {
     style: { ...visual, ...reorderStyle, ...pin.style },
     "data-stagger": "",
     // antd builds its own <tr>, so the dirty mark arrives here too.
-    "data-dirty": rowIsDirty(editing, getRowId(record)) ? "" : undefined,
-    onMouseEnter: prefetch ? () => prefetch(record) : undefined,
+    "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
+    onMouseEnter: prefetch ? () => prefetch(row) : undefined,
   };
 }
 
@@ -411,24 +474,39 @@ function antdPinnedDataSource<TRow>(
   rowPinning: RowPinningState<TRow> | undefined,
   rows: readonly TRow[],
   getRowId: (row: TRow) => string,
-  dataSourceBase: readonly GroupedDataRecord<TRow>[]
+  dataSourceBase: readonly GroupedDataRecord<TRow>[],
+  pinnedRows: { top?: readonly TRow[]; bottom?: readonly TRow[] } | undefined
 ): {
   dataSource: readonly GroupedDataRecord<TRow>[];
   pinnedTopRows: readonly TRow[];
   pinnedBottomRows: readonly TRow[];
+  pinnedSummaryTop: readonly TRow[];
+  pinnedSummaryBottom: readonly TRow[];
 } {
+  const summaryTop = pinnedRows?.top ?? [];
+  const summaryBottom = pinnedRows?.bottom ?? [];
   if (grouping || treeEntries || !rowPinning) {
     return {
-      dataSource: dataSourceBase,
+      dataSource: [...summaryTop, ...dataSourceBase, ...summaryBottom],
       pinnedTopRows: [],
       pinnedBottomRows: [],
+      pinnedSummaryTop: summaryTop,
+      pinnedSummaryBottom: summaryBottom,
     };
   }
   const parts = partitionPinnedRows(rows, rowPinning.state, getRowId);
   return {
-    dataSource: [...parts.top, ...parts.scroll, ...parts.bottom],
+    dataSource: [
+      ...summaryTop,
+      ...parts.top,
+      ...parts.scroll,
+      ...parts.bottom,
+      ...summaryBottom,
+    ],
     pinnedTopRows: parts.top,
     pinnedBottomRows: parts.bottom,
+    pinnedSummaryTop: summaryTop,
+    pinnedSummaryBottom: summaryBottom,
   };
 }
 
@@ -533,7 +611,9 @@ function buildRowSelection<TRow>(
   selection: SelectionState | null | undefined,
   getRowId: (row: TRow) => string,
   labels: Required<TableLabels>,
-  fixedLeft: boolean
+  fixedLeft: boolean,
+  pinnedSummaryTop: readonly TRow[] = [],
+  pinnedSummaryBottom: readonly TRow[] = []
 ): TableProps<GroupedDataRecord<TRow>>["rowSelection"] {
   if (!selection) return undefined;
   return {
@@ -542,10 +622,20 @@ function buildRowSelection<TRow>(
     selectedRowKeys: [...selection.selectedIds],
     onSelect: (record) => {
       if (isAdaptTableGroupRow(record) || isAdaptTableExtraRow(record)) return;
+      if (
+        pinnedSummaryTop.includes(record) ||
+        pinnedSummaryBottom.includes(record)
+      ) {
+        return;
+      }
       selection.toggle(getRowId(record));
     },
     getCheckboxProps: (record): RowSelectionCheckboxProps => {
-      const skip = isAdaptTableGroupRow(record) || isAdaptTableExtraRow(record);
+      const skip =
+        isAdaptTableGroupRow(record) ||
+        isAdaptTableExtraRow(record) ||
+        pinnedSummaryTop.includes(record) ||
+        pinnedSummaryBottom.includes(record);
       return {
         disabled: skip || undefined,
         style: skip ? { display: "none" } : undefined,
@@ -1167,6 +1257,8 @@ interface DataTableBodyRegionProps<TRow> {
   rowPinning: RowPinningState<TRow> | undefined;
   pinnedTopRows: readonly TRow[];
   pinnedBottomRows: readonly TRow[];
+  pinnedSummaryTop: readonly TRow[];
+  pinnedSummaryBottom: readonly TRow[];
   extraRows: ComposedProps<TRow>["extraRows"];
   pinRowSticky: boolean;
 }
@@ -1201,7 +1293,10 @@ function DesktopTableBody<TRow>({
   rowReorder,
   windowStart,
   rowPinning,
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   pinRowSticky,
+  labels,
 }: Readonly<{
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
@@ -1233,7 +1328,10 @@ function DesktopTableBody<TRow>({
   rowReorder: RowReorderState<TRow> | undefined;
   windowStart: number;
   rowPinning: RowPinningState<TRow> | undefined;
+  pinnedSummaryTop?: readonly TRow[];
+  pinnedSummaryBottom?: readonly TRow[];
   pinRowSticky: boolean;
+  labels: Required<TableLabels>;
 }>) {
   const [theadRef, headerHeight] = useOffsetHeight();
   let stickyHeaderOffset: number | undefined;
@@ -1283,7 +1381,13 @@ function DesktopTableBody<TRow>({
       components={components}
       columns={columns}
       dataSource={[...dataSource]}
-      rowKey={(record) => groupedRowKey(record, getRowId)}
+      rowKey={(record) => {
+        const top = pinnedSummaryTop.indexOf(record as TRow);
+        if (top >= 0) return pinnedSummaryRowId("top", top);
+        const bottom = pinnedSummaryBottom.indexOf(record as TRow);
+        if (bottom >= 0) return pinnedSummaryRowId("bottom", bottom);
+        return groupedRowKey(record, getRowId);
+      }}
       size={size}
       bordered={bordered}
       virtual={virtualize && !grouping}
@@ -1301,6 +1405,8 @@ function DesktopTableBody<TRow>({
           rowIndex,
           getRowId,
           rowPinning,
+          pinnedSummaryTop,
+          pinnedSummaryBottom,
           headerOffset,
           pinRowSticky,
           rowReorder,
@@ -1311,6 +1417,7 @@ function DesktopTableBody<TRow>({
           prefetch,
           rowStyle,
           rowHeight,
+          labels,
         })
       }
       scroll={resolveScroll(
@@ -1436,6 +1543,8 @@ function DataTableBodyRegion<TRow>(
     rowPinning,
     pinnedTopRows,
     pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
     extraRows,
     pinRowSticky,
   } = props;
@@ -1494,6 +1603,8 @@ function DataTableBodyRegion<TRow>(
         cardSetSize={cardSetSize}
         pinnedTopRows={pinnedTopRows}
         pinnedBottomRows={pinnedBottomRows}
+        pinnedSummaryTop={pinnedSummaryTop}
+        pinnedSummaryBottom={pinnedSummaryBottom}
         extraRows={extraRows}
       />
     );
@@ -1528,7 +1639,10 @@ function DataTableBodyRegion<TRow>(
         rowReorder={rowReorder}
         windowStart={windowStart}
         rowPinning={rowPinning}
+        pinnedSummaryTop={pinnedSummaryTop}
+        pinnedSummaryBottom={pinnedSummaryBottom}
         pinRowSticky={pinRowSticky}
+        labels={labels}
       />
     );
   }
@@ -2036,13 +2150,16 @@ function AntdTableBody<TRow>({
     dataSource: partitionedSource,
     pinnedTopRows,
     pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
   } = antdPinnedDataSource(
     grouping,
     treeEntries,
     c.rowPinning,
     source.rows,
     getRowId,
-    dataSourceBase
+    dataSourceBase,
+    c.pinnedRows
   );
   const dataSource = resolveAntdDataSource(
     grouping,
@@ -2061,6 +2178,8 @@ function AntdTableBody<TRow>({
     rowReorder: c.rowReorder,
     pinnedTopRows,
     pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
     getCellSpan: props.getCellSpan,
     pinOffset: c.columnLayout.pinOffset,
     grouping: c.grouping,
@@ -2121,6 +2240,8 @@ function AntdTableBody<TRow>({
     rowReorder: c.rowReorder,
     windowStart,
     cellsByRow,
+    pinnedSummaryTop,
+    pinnedSummaryBottom,
     cellSpanAppearance: props.cellSpanAppearance,
     headerFilters: filtersMode === "header",
     filterDefs: runtime.defs,
@@ -2150,7 +2271,9 @@ function AntdTableBody<TRow>({
     selection,
     getRowId,
     labels,
-    hasStartPin
+    hasStartPin,
+    pinnedSummaryTop,
+    pinnedSummaryBottom
   );
   const expandable = buildExpandable(
     c.detail?.render,
@@ -2260,6 +2383,8 @@ function AntdTableBody<TRow>({
           rowPinning={c.rowPinning}
           pinnedTopRows={pinnedTopRows}
           pinnedBottomRows={pinnedBottomRows}
+          pinnedSummaryTop={pinnedSummaryTop}
+          pinnedSummaryBottom={pinnedSummaryBottom}
           extraRows={props.extraRows}
           pinRowSticky={pinRowSticky}
         />

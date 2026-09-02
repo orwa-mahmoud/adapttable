@@ -194,6 +194,7 @@ export function AntdDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
   cellSpan,
   extraRows,
   rowStyle,
@@ -247,6 +248,7 @@ export function AntdDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -331,6 +333,7 @@ export function AntdDemo({
         rowMutations={rowMutations}
         rowReorder={rowReorder}
         rowPinning={rowPinning}
+        pinnedSummaryRows={pinnedSummaryRows}
         cellSpan={cellSpan}
         extraRows={extraRows}
         rowStyle={rowStyle}

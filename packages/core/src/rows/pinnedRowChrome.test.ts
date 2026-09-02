@@ -89,6 +89,27 @@ describe("orderedCardEntries", () => {
     expect(next.map((e) => e.key)).toEqual(["c", "b", "a"]);
     expect(next[0]?.sourceIndex).toBe(2);
   });
+
+  it("wraps host summary objects outside lifted pins", () => {
+    const totals = { id: "totals", name: "Totals" };
+    const grand = { id: "grand", name: "Grand" };
+    const next = orderedCardEntries(
+      rows,
+      id,
+      undefined,
+      [rows[2]!],
+      [rows[0]!],
+      [totals],
+      [grand]
+    );
+    expect(next.map((e) => e.key)).toEqual([
+      "adapttable:pinned-summary:top:0",
+      "c",
+      "b",
+      "a",
+      "adapttable:pinned-summary:bottom:0",
+    ]);
+  });
 });
 
 describe("useOffsetHeight", () => {
