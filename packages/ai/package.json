@@ -52,6 +52,36 @@
         "default": "./dist/react.cjs"
       }
     },
+    "./json": {
+      "import": {
+        "types": "./dist/json.d.ts",
+        "default": "./dist/json.js"
+      },
+      "require": {
+        "types": "./dist/json.d.cts",
+        "default": "./dist/json.cjs"
+      }
+    },
+    "./openai": {
+      "import": {
+        "types": "./dist/openai.d.ts",
+        "default": "./dist/openai.js"
+      },
+      "require": {
+        "types": "./dist/openai.d.cts",
+        "default": "./dist/openai.cjs"
+      }
+    },
+    "./mcp": {
+      "import": {
+        "types": "./dist/mcp.d.ts",
+        "default": "./dist/mcp.js"
+      },
+      "require": {
+        "types": "./dist/mcp.d.cts",
+        "default": "./dist/mcp.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

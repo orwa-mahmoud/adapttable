@@ -19,5 +19,22 @@ next to `agentApproval()` from the kit. `approval` defaults to `"writes"`;
 `commit` defaults to `"stage"`. The root import stays React-free so a
 backend worker can speak the same three calls.
 
+## Integrations
+
+The same session maps onto provider tools without a model SDK. Tool
+`name` is the capability key. `execute` still owns validation.
+
+```ts
+import { toJsonTools, executeEnvelope } from "@adapttable/ai/json";
+import { toOpenAITools } from "@adapttable/ai/openai";
+import { toMcpTools, toMcpResources, mcpListChanged } from "@adapttable/ai/mcp";
+```
+
+- `@adapttable/ai/json` — plain JSON function tools + `AgentEnvelope`
+- `@adapttable/ai/openai` — strict function tools; `{ deferred: true }` is the portable trio
+- `@adapttable/ai/mcp` — tools in catalog order, per-key guide resources, list-changed
+
+See [agent integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/).
+
 Docs: [capability contract](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/) ·
 [reference](https://orwa-mahmoud.github.io/adapttable/ai/).

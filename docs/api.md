@@ -1198,8 +1198,13 @@ the types `AgentApply`, `AgentColumn`, `AgentManifest`, `AgentObservation`,
 `TableAgentOptions` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval`. Core chrome exports
 `AgentApprovalChrome`, `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE` and the
-slot/proposal types. See [adaptive capabilities](./agent-capabilities.md) and
-[`@adapttable/ai`](./ai.md).
+slot/proposal types. Portable adapters live on subpaths:
+`@adapttable/ai/json` (`toJsonTools`, `executeJsonTool`, `parseEnvelope`,
+`executeEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
+`executeOpenAITool`), `@adapttable/ai/mcp` (`toMcpTools`, `toMcpResources`,
+`mcpListChanged`, `executeMcpTool`). See
+[adaptive capabilities](./agent-capabilities.md),
+[`@adapttable/ai`](./ai.md) and [agent integrations](./ai-integrations.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a
