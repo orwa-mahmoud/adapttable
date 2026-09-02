@@ -17,6 +17,7 @@ import {
   type FiltersFormSlotProps,
   FIND_BAR,
   GRID_FOCUS_ANNOUNCER,
+  GROUPING_PANEL,
   OptionalSidePanel,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
@@ -289,6 +290,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                                   labels,
                                   hasRowActions,
                                   hasRowReorder,
+                                  groupingPanel: chrome.groupingPanel,
                                   dir: props.dir,
                                 } as ColumnMenuSlotProps<never>
                               }
@@ -344,6 +346,12 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         featureHost: shell.featureHost,
                       }}
                     />
+                    {view.groupingPanelProps ? (
+                      <FeatureSlot
+                        slot={GROUPING_PANEL}
+                        props={view.groupingPanelProps as never}
+                      />
+                    ) : null}
 
                     <OptionalSidePanel
                       side={props.sidePanel?.side}

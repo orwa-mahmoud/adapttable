@@ -1,5 +1,10 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
-import { fireEvent, screen } from "@testing-library/react";
+import {
+  FeatureHostProvider,
+  type FeatureHostState,
+  type GroupingPanelState,
+} from "@adapttable/core/adapter";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -60,6 +65,16 @@ const labels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
   actions: "Actions",
   reorderRow: "Reorder",
 };
@@ -290,5 +305,86 @@ describe("radix ColumnMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     const reset = await screen.findByText("Reset columns");
     expect(reset.closest('[dir="rtl"]')).not.toBeNull();
+  });
+
+  it("renders plugin choices as a Radix Select without closing the submenu", async () => {
+    const onChange = vi.fn();
+    const groupingPanel = {
+      groupBy: ["a"],
+      aggregateOverrides: {},
+      canSetAggregates: true,
+      announcement: "",
+      headerDragProps: () => ({}),
+      chipDragProps: () => ({}),
+      chipKeyboardProps: () => ({
+        tabIndex: 0,
+        role: "button",
+        "aria-label": "Move grouping",
+        onKeyDown: () => undefined,
+      }),
+      dropProps: () => ({}),
+      removeDropProps: () => ({}),
+      add: vi.fn(),
+      remove: vi.fn(),
+      moveBy: vi.fn(),
+      setAggregate: vi.fn(),
+    } satisfies GroupingPanelState;
+    const host: FeatureHostState = {
+      filterTypes: [],
+      filterExtends: [],
+      editors: new Map(),
+      aggregators: new Map(),
+      writers: [],
+      columnMenuActions: [
+        (_row, context) => {
+          expect(context.groupingPanel).toBe(groupingPanel);
+          return {
+            kind: "choice",
+            id: "aggregation",
+            label: "Group aggregation",
+            disabled: false,
+            value: "",
+            options: [
+              { value: "", label: "Default" },
+              { value: "sum", label: "Sum" },
+            ],
+            onChange,
+          };
+        },
+      ],
+      panels: [],
+      commands: [],
+      contextMenuItems: [],
+    };
+    renderRadix(
+      <FeatureHostProvider host={host}>
+        <ColumnMenu
+          allColumns={cols}
+          layout={fakeLayout()}
+          labels={labels}
+          groupingPanel={groupingPanel}
+          onAutoSize={() => undefined}
+        />
+      </FeatureHostProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Bravo" })
+    );
+    const submenu = document.querySelector(
+      '[data-adapttable-part="column-menu-submenu"]'
+    );
+    expect(submenu).not.toBeNull();
+    const [, choice] = within(submenu as HTMLElement).getAllByRole("combobox", {
+      name: "Group aggregation",
+    });
+    if (!choice) throw new Error("Expected the plugin aggregation choice");
+    fireEvent.click(choice);
+    fireEvent.click(screen.getByRole("option", { name: "Sum" }));
+
+    expect(onChange).toHaveBeenCalledWith("sum");
+    expect(submenu).toBeInTheDocument();
   });
 });

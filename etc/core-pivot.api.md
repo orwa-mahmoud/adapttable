@@ -344,6 +344,7 @@ export type SortableValue = string | number | boolean | null | undefined;
 // @public
 export interface TableLabels {
     actions?: string;
+    addGroupingColumn?: string;
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
@@ -442,7 +443,20 @@ export interface TableLabels {
         toColumn: number;
         cells: number;
     }) => string;
+    groupByColumn?: (label: string) => string;
     groupCount?: (count: number) => string;
+    groupingAdded?: (label: string) => string;
+    groupingAggregateChanged?: (label: string, aggregation: string) => string;
+    groupingAggregateColumn?: string;
+    groupingAggregation?: string;
+    groupingAggregationDefault?: string;
+    groupingAggregationNone?: string;
+    groupingAverage?: string;
+    groupingDropColumns?: string;
+    groupingDropToRemove?: string;
+    groupingMoved?: (label: string, position: number) => string;
+    groupingPanel?: string;
+    groupingRemoved?: (label: string) => string;
     groupTotal?: (label: string) => string;
     headerFilters?: string;
     hideAllColumns?: string;
@@ -453,6 +467,7 @@ export interface TableLabels {
     moreGroups?: (remaining: number) => string;
     moreRowsInGroup?: (remaining: number) => string;
     moveEnd?: string;
+    moveGroupingColumn?: (label: string) => string;
     moveRejectedCycle?: string;
     moveRejectedPolicyNever?: string;
     moveRejectedSorted?: string;
@@ -530,6 +545,7 @@ export interface TableLabels {
     relTomorrow?: string;
     relYesterday?: string;
     removeFilter?: (label: string) => string;
+    removeGroupingColumn?: (label: string) => string;
     renameColumn?: string;
     renameView?: string;
     reorderRow?: string;
@@ -587,6 +603,7 @@ export interface TableLabels {
     theirsValue?: (value: string) => string;
     to?: string;
     undoEdit?: string;
+    ungroupColumn?: (label: string) => string;
     unpin?: string;
     unpinAllColumns?: string;
     unpinRow?: string;

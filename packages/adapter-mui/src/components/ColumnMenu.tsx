@@ -7,8 +7,8 @@ import {
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import {
-  type ColumnMenuAction,
   columnMenuActions,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -31,6 +31,7 @@ import {
   Button,
   Divider,
   IconButton,
+  MenuItem,
   Popover,
   Stack,
   TextField,
@@ -207,31 +208,55 @@ function ColumnSubmenu({
   labels,
   onClose,
 }: Readonly<{
-  actions: readonly ColumnMenuAction[];
+  actions: readonly ColumnMenuItem[];
   rename: ColumnRenameEditorState;
   labels: ColumnMenuLabels;
   onClose: () => void;
 }>) {
   return (
     <Box data-adapttable-part="column-menu-submenu" sx={{ px: 0.5, pb: 0.5 }}>
-      {actions.map((action) => (
-        <Button
-          key={action.id}
-          size="small"
-          fullWidth
-          data-adapttable-part="column-menu-action"
-          disabled={
-            action.disabled || (action.id === "rename" && rename.editing)
-          }
-          sx={{ justifyContent: "flex-start" }}
-          onClick={() => {
-            action.run();
-            if (action.id !== "rename") onClose();
-          }}
-        >
-          {action.label}
-        </Button>
-      ))}
+      {actions.map((action) =>
+        "kind" in action ? (
+          <TextField
+            key={action.id}
+            select
+            size="small"
+            fullWidth
+            label={action.label}
+            value={action.value}
+            disabled={action.disabled}
+            data-adapttable-part="column-menu-choice"
+            slotProps={{
+              select: { inputProps: { "aria-label": action.label } },
+            }}
+            sx={{ my: 0.5 }}
+            onChange={(event) => action.onChange(event.target.value)}
+          >
+            {action.options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        ) : (
+          <Button
+            key={action.id}
+            size="small"
+            fullWidth
+            data-adapttable-part="column-menu-action"
+            disabled={
+              action.disabled || (action.id === "rename" && rename.editing)
+            }
+            sx={{ justifyContent: "flex-start" }}
+            onClick={() => {
+              action.run();
+              if (action.id !== "rename") onClose();
+            }}
+          >
+            {action.label}
+          </Button>
+        )
+      )}
       {rename.editing ? (
         <ColumnRenameForm rename={rename} labels={labels} />
       ) : null}
@@ -322,6 +347,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -333,6 +359,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -354,6 +381,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -459,6 +487,7 @@ export function ColumnMenu<TRow>({
   onRenameColumn,
   sortBy,
   sortDir,
+  groupingPanel,
   dir,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
@@ -576,6 +605,7 @@ export function ColumnMenu<TRow>({
               onAutoSizeColumn={onAutoSizeColumn}
               onFilterColumn={onFilterColumn}
               onRenameColumn={onRenameColumn}
+              groupingPanel={groupingPanel}
             />
           ))}
           {(hasRowReorder || hasRowActions) && <Divider sx={{ my: 0.5 }} />}

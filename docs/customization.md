@@ -146,8 +146,22 @@ editing is dormant these parts are never mounted.
 
 ### Row grouping
 
-Opt-in via `groupBy` — see [Row grouping](./row-grouping.md). When grouping
-is dormant these parts are never mounted.
+Opt in with `groupingPanel()` from the kit's `/grouping-panel` subpath — see
+[Row grouping](./row-grouping.md). The panel owns the grouped headers as well
+as the configuration strip; when it is dormant these parts are never mounted.
+
+| Part                          | Element                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `grouping-panel`              | The dedicated grouping strip above the table.                                   |
+| `grouping-drop-zone`          | A desktop insertion target for header/chip drag-and-drop.                       |
+| `grouping-item`               | One active grouping level: chip plus its following insertion target.            |
+| `grouping-chip`               | An active grouping field, with logical arrow-key movement and a remove control. |
+| `grouping-add`                | The Add grouping column select, present on desktop and mobile.                  |
+| `grouping-aggregate-controls` | Wrapper for the aggregate-column and aggregation selects.                       |
+| `grouping-aggregate-column`   | Select choosing which ungrouped data column an aggregation override applies to. |
+| `grouping-aggregate`          | `sum` / `avg` / `min` / `max` / `count` / `none` / Default select.              |
+| `grouping-remove-zone`        | Desktop drop target shown while dragging a grouping chip to remove it.          |
+| `grouping-announcer`          | Polite live region for add, move, remove, and aggregation-change feedback.      |
 
 | Part                | Element                                                               |
 | ------------------- | --------------------------------------------------------------------- |

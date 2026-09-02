@@ -28,6 +28,7 @@ import {
 import {
   cellSpan,
   extraRows,
+  type GroupingExtras,
   rowActions,
   rowAppearance,
   rowPinning,
@@ -221,7 +222,7 @@ const LARGE_ROW_ESTIMATE = 48;
  * `onCellEdit` is frontend-only: mutable local rows. Backend mode omits it
  * so editing stays fully dormant (package DNA — nothing forced).
  *
- * `groupBy` / `groupAggregates` follow the same rule — frontend tier only;
+ * Grouping follows the same rule — frontend tier only;
  * server-paginated sources cannot regroup a full result set.
  */
 /** The kit-drawn features a page asked for, and what each needs. */
@@ -231,7 +232,10 @@ export interface KitFeatureRequests {
   batchEditing?: (
     edits: readonly { row: Person; patch: Record<string, unknown> }[]
   ) => void;
-  grouping?: readonly string[];
+  grouping?: {
+    groupBy: readonly string[];
+    extras: GroupingExtras<Person>;
+  };
   tree?: {
     getParentId: (row: Person) => string | undefined;
     treeColumn: string;
@@ -250,16 +254,16 @@ export interface DemoColumnProps {
    */
   features?: readonly TableFeature<Person>[];
   /**
-   * What the page asked for that only the KIT can build: grouping draws a
-   * group header, editing draws an editor, reorder draws a grip. This side
-   * decides what and with which handler; the adapter's demo decides which
-   * factory, because only it knows its own kit.
+   * What the page asked for that only the KIT can build: grouping draws its
+   * panel and headers, editing draws an editor, reorder draws a grip. This
+   * side decides what and with which handler; the adapter's demo decides
+   * which factory, because only it knows its own kit.
    */
   kitFeatures?: KitFeatureRequests;
   columnLayout: ColumnLayoutState;
   onColumnLayoutChange: (next: ColumnLayoutState) => void;
   onColumnRename: (key: string, name: string) => void;
-  /** Table chrome follows {@link demoUrlSync}: live demo only. */
+  /** Whether table chrome follows the URL policy from {@link demoUrlSync}. */
   urlSync?: boolean;
   collapsibleColumnGroups?: boolean;
   onCellEdit?: (row: Person, key: string, nextValue: unknown) => void;
@@ -275,11 +279,6 @@ export interface DemoColumnProps {
   slots?: { error?: Slot<TableErrorState> };
   /** The demo's own mobile card layout, when that toggle is on. */
   renderCard?: MobileCardRenderer<Person>;
-  /** `null` forces grouping off even if the URL carries a groupBy. */
-  groupBy?: string | readonly string[] | null;
-  groupAggregates?: (
-    rows: readonly Person[]
-  ) => Partial<Record<string, ReactNode>>;
 }
 
 /** Adapter demos provide this — given a source + column controls, render. */
@@ -596,15 +595,6 @@ function applyRowModelFlags(
   if (flags.rowMode) {
     Object.assign(next, { rowEditing: true, onRowEdit });
   }
-  if (flags.grouping) {
-    Object.assign(next, {
-      groupBy: ["team", "status"],
-      groupAggregates: DEMO_GROUP_AGGREGATES,
-      groupFooters: true,
-      groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
-        b.leafRows.length - a.leafRows.length,
-    });
-  }
   if (flags.tree) {
     Object.assign(next, { getParentId: reportsTo, treeColumn: "person" });
   }
@@ -613,9 +603,9 @@ function applyRowModelFlags(
 /**
  * What only the kit can draw, and what each needs to draw it.
  *
- * Core owns what grouping, editing and reordering DO; the group header, the
- * editor and the grip are the adapter's. This side names the behaviour and the
- * handler; the adapter's demo picks the factory.
+ * Core owns what grouping, editing and reordering DO; the grouping controls,
+ * group headers, editor and grip are the adapter's. This side names the
+ * behaviour and the handler; the adapter's demo picks the factory.
  */
 function kitRequests(
   flags: Parameters<typeof frontendColumnProps>[1],
@@ -625,7 +615,19 @@ function kitRequests(
     ...(flags.editing ? { editing: flags.onCellEdit } : {}),
     ...(flags.rowMode ? { rowEditing: onRowEdit } : {}),
     ...(flags.batch ? { batchEditing: flags.onBatchEdit } : {}),
-    ...(flags.grouping ? { grouping: ["team", "status"] } : {}),
+    ...(flags.grouping
+      ? {
+          grouping: {
+            groupBy: ["team", "status"],
+            extras: {
+              groupAggregates: DEMO_GROUP_AGGREGATES,
+              groupFooters: true,
+              groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
+                b.leafRows.length - a.leafRows.length,
+            },
+          },
+        }
+      : {}),
     ...(flags.tree
       ? { tree: { getParentId: reportsTo, treeColumn: "person" } }
       : {}),
@@ -689,7 +691,6 @@ function frontendColumnProps(
     isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
-    groupBy: null,
   };
   const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
     flags.writePatches([updateRow(row.id, columnChanges(patch))]);
@@ -1168,8 +1169,8 @@ function Backend({
  * mounted at a time (remounted on `mode` change), so the headless source is
  * the single thing that differs — the adapter markup is identical. The column
  * layout is URL-persisted here (shared by both paths) so pin/hide/reorder
- * survive the re-mount — but only on the live demo (`urlKey="live"`).
- * Feature Lab and kit feature pages do not write the address bar.
+ * survive the re-mount. {@link demoUrlSync} enables that on the live demo and
+ * on the grouping page, where persistence is itself part of the demonstration.
  */
 export function DemoBody({
   mode,

@@ -21,6 +21,7 @@ import type { Aggregator } from "../aggregate/aggregate";
 import type {
   ColumnMenuAction,
   ColumnMenuActionContext,
+  ColumnMenuItem,
   ColumnMenuRow,
 } from "../columns/columnMenuModel";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
@@ -33,6 +34,7 @@ export type {
   Aggregator,
   ColumnMenuAction,
   ColumnMenuActionContext,
+  ColumnMenuItem,
   ColumnMenuRow,
   Command,
   ContextMenuItem,
@@ -195,7 +197,7 @@ export interface TableFeatureHost<TRow = unknown> {
     factory: (
       row: ColumnMenuRow<TRow>,
       ctx: ColumnMenuActionContext<TRow>
-    ) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined
+    ) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined
   ): void;
   /** Same `SidePanelEntry` as `sidePanel.panels`. */
   registerPanel(panel: SidePanelEntry): void;

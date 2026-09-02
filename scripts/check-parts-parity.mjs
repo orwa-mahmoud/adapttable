@@ -166,6 +166,8 @@ const FALLBACK_ONLY = {
   "column menu": [
     "column-menu",
     "column-menu-auto-size",
+    "column-menu-choice-label",
+    "column-menu-choice-select",
     "column-menu-grip",
     "column-menu-header",
     "column-menu-label",
@@ -448,10 +450,10 @@ function fail(count, headline, lines, advice) {
  * design, so comparing spellings would report the kits that take it the shared
  * way; the contract check owns those.
  */
-function themedFailures(byKit, shellParts, everyPart) {
+function themedFailures(byKit, shellParts, everyPart, coreParts) {
   const failures = [];
   for (const part of [...everyPart].sort()) {
-    if (CORE_GETTER_PARTS[part] !== undefined) continue;
+    if (coreParts.has(part) || CORE_GETTER_PARTS[part] !== undefined) continue;
     const missing = SHELL_KITS.filter(
       (pkg) =>
         !byKit.get(pkg).has(part) && EXPECTED_GAPS[pkg]?.[part] === undefined
@@ -490,7 +492,7 @@ function main() {
       "renders, or route it through the core prop-getter every kit spreads."
   );
 
-  const failures = themedFailures(byKit, shellParts, everyPart);
+  const failures = themedFailures(byKit, shellParts, everyPart, coreParts);
   fail(
     failures.length,
     `${failures.length} part(s) are rendered by some adapters and not others:`,

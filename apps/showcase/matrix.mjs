@@ -870,14 +870,16 @@ export function People({ rows, columns, onArchive }) {
     h1: "Row grouping in {kit}",
     title: "{kit} table row grouping — AdaptTable",
     description:
-      "Group rows in a {kit} data table by one key or several — nested group headers with counts, per-group subtotals, group footers, and collapse state in the URL.",
+      "Group rows interactively in a {kit} data table — drag headers, reorder grouping chips from the keyboard, use mobile selects, and override aggregations.",
     intro: [
-      "Compose `grouping(groupBy)` and rows fold into {kit} group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.",
-      "`groupAggregates` adds per-group subtotals from the same mapper `summaryRow` uses, so every header totals its whole subtree and `groupFooters` closes each group with the same numbers.",
+      "Compose `groupingPanel(groupBy, extras)` and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.",
+      "Every chip handle is keyboard movable with the arrow keys. On phones the same {kit} panel swaps drag targets for kit-native selects, without changing the grouping model.",
+      "`groupAggregates` seeds the per-group subtotal, then the panel can override a value column to sum, average, minimum, maximum, count, none, or its default. `groupFooters` still closes each group with its total.",
       "Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.",
     ],
-    card: "Nested group headers with counts, subtotals, footers and collapse state.",
+    card: "Drag, keyboard and mobile grouping controls with live aggregation overrides.",
     snippet: `import { DataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
 
 export function People({ rows, columns }) {
   return (
@@ -885,14 +887,17 @@ export function People({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      groupBy={["team", "status"]}
-      groupFooters
-      groupAggregates={(group) => ({
-        budget: group.reduce(
-          (sum, row) => sum + row.budget,
-          0
-        ),
-      })}
+      features={[
+        groupingPanel(["team", "status"], {
+          groupFooters: true,
+          groupAggregates: (group) => ({
+            budget: group.reduce(
+              (sum, row) => sum + row.budget,
+              0
+            ),
+          }),
+        }),
+      ]}
     />
   );
 }`,

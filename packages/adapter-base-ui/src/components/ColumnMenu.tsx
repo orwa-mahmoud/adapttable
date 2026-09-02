@@ -8,6 +8,8 @@ import {
 } from "@adapttable/core";
 import {
   columnMenuActions,
+  type ColumnMenuChoice,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -29,8 +31,13 @@ import { Popover } from "@base-ui/react/popover";
 import { useState } from "react";
 
 import { Button, Flex, IconButton, Separator, Text, TextField } from "../ui";
+import { NativeSelect } from "./primitives";
 
 const NOOP_RENAME = () => undefined;
+
+function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
+  return "kind" in item && item.kind === "choice";
+}
 
 function focusRenameInput(input: HTMLInputElement | null): void {
   input?.focus();
@@ -196,6 +203,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -207,6 +215,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -228,6 +237,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -306,25 +316,38 @@ function ColumnMenuRowItem<TRow>({
           data-adapttable-part="column-menu-submenu"
           gap="1"
         >
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="1"
-              variant="ghost"
-              color="gray"
-              data-adapttable-part="column-menu-action"
-              disabled={
-                action.disabled || (action.id === "rename" && rename.editing)
-              }
-              style={{ alignSelf: "flex-start" }}
-              onClick={() => {
-                action.run();
-                if (action.id !== "rename") setOpen(false);
-              }}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action) =>
+            isChoice(action) ? (
+              <NativeSelect
+                key={action.id}
+                size="1"
+                aria-label={action.label}
+                data-adapttable-part="column-menu-choice"
+                value={action.value}
+                options={action.options}
+                disabled={action.disabled}
+                onValueChange={action.onChange}
+              />
+            ) : (
+              <Button
+                key={action.id}
+                size="1"
+                variant="ghost"
+                color="gray"
+                data-adapttable-part="column-menu-action"
+                disabled={
+                  action.disabled || (action.id === "rename" && rename.editing)
+                }
+                style={{ alignSelf: "flex-start" }}
+                onClick={() => {
+                  action.run();
+                  if (action.id !== "rename") setOpen(false);
+                }}
+              >
+                {action.label}
+              </Button>
+            )
+          )}
           <ColumnRenameEditor editor={rename} labels={labels} />
         </Flex>
       ) : null}
@@ -354,6 +377,7 @@ export function ColumnMenu<TRow>({
   sortBy,
   sortDir,
   dir,
+  groupingPanel,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
   const [query, setQuery] = useState("");
@@ -454,6 +478,7 @@ export function ColumnMenu<TRow>({
                   onAutoSizeColumn={onAutoSizeColumn}
                   onFilterColumn={onFilterColumn}
                   onRenameColumn={onRenameColumn}
+                  groupingPanel={groupingPanel}
                 />
               ))}
               {(hasRowReorder || hasRowActions) && (

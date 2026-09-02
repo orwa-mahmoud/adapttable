@@ -21,6 +21,7 @@ import type { EditableCellEditing } from "./editing/editableCellController";
 import type { FilterDef } from "./filters/filterDefs";
 import type { FilterTypeRegistry } from "./filters/filterRegistry";
 import type { GridFocusState } from "./focus/useGridFocus";
+import type { GroupingPanelState } from "./grouping/groupingPanelModel";
 import type { GroupByInput } from "./grouping/groupKeys";
 import type { GroupedFlatEntry } from "./grouping/groupRows";
 import type { GroupCollapseState } from "./grouping/useGroupCollapse";
@@ -212,6 +213,8 @@ export interface SharedTableRenderProps<TRow> {
     /** Reveal the next page of groups, or of one group's rows. */
     showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
   };
+  /** Header drag wiring published only by the optional grouping panel. */
+  groupingPanel?: GroupingPanelState;
   /** Virtual row window (with absolute indices) when virtualization is on. */
   rowEntries?: readonly VirtualTableRow<TRow>[];
   /** Spacer height above the virtual window. */

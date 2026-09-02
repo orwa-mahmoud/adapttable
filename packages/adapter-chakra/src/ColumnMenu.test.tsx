@@ -1,4 +1,11 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import {
+  featureHostOf,
+  FeatureHostProvider,
+  type GroupingPanelState,
+  useTableFeatures,
+} from "@adapttable/core/adapter";
+import type { TableFeature } from "@adapttable/core/features";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
@@ -63,10 +70,81 @@ const labels = {
   columnActions: "Column actions",
   actions: "Actions",
   reorderRow: "Reorder",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 const byLabel = (name: string) =>
   document.querySelector<HTMLElement>(`[aria-label="${name}"]`)!;
+
+function groupingState(): GroupingPanelState {
+  return {
+    groupBy: ["b"],
+    aggregateOverrides: {},
+    canSetAggregates: true,
+    announcement: "",
+    headerDragProps: () => ({}),
+    chipDragProps: () => ({}),
+    chipKeyboardProps: () => ({
+      tabIndex: 0,
+      role: "button",
+      "aria-label": "Move grouping",
+      onKeyDown: () => undefined,
+    }),
+    dropProps: () => ({}),
+    removeDropProps: () => ({}),
+    add: vi.fn(),
+    remove: vi.fn(),
+    moveBy: vi.fn(),
+    setAggregate: vi.fn(),
+  };
+}
+
+function ChoiceMenu({
+  onChange,
+}: Readonly<{ onChange: (value: string) => void }>) {
+  const choiceFeature: TableFeature<Row> = {
+    id: "column-choice-test",
+    setup(host) {
+      host.registerColumnMenuAction((_row, context) =>
+        context.groupingPanel
+          ? {
+              kind: "choice",
+              id: "aggregation-test",
+              label: "Group aggregation",
+              disabled: false,
+              value: "",
+              options: [
+                { value: "", label: "Default" },
+                { value: "sum", label: "Sum" },
+              ],
+              onChange,
+            }
+          : undefined
+      );
+    },
+  };
+  const props = useTableFeatures({ features: [choiceFeature] });
+  return (
+    <FeatureHostProvider host={featureHostOf(props)}>
+      <ColumnMenu
+        allColumns={cols}
+        layout={fakeLayout()}
+        labels={labels}
+        onAutoSize={() => undefined}
+        groupingPanel={groupingState()}
+      />
+    </FeatureHostProvider>
+  );
+}
 
 describe("chakra ColumnMenu", () => {
   it("shows drop-position feedback while dragging a row", async () => {
@@ -330,5 +408,21 @@ describe("chakra ColumnMenu", () => {
     expect(
       document.querySelector('[data-adapttable-color-mode="dark"]')
     ).not.toBeNull();
+  });
+
+  it("renders plugin choices as labelled selects without closing", async () => {
+    const onChange = vi.fn();
+    renderChakra(<ChoiceMenu onChange={onChange} />);
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+    const [, choice] = screen.getAllByRole("combobox", {
+      name: "Group aggregation",
+    });
+    if (!choice) throw new Error("Expected the plugin aggregation choice");
+    fireEvent.change(choice, { target: { value: "sum" } });
+
+    expect(onChange).toHaveBeenCalledWith("sum");
+    expect(choice).toBeInTheDocument();
   });
 });

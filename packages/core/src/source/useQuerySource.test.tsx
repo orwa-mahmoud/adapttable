@@ -180,6 +180,33 @@ describe("useQuerySource", () => {
     expect(result.current.total).toBe(2);
   });
 
+  it("overlays URL group aggregation choices on server requests", () => {
+    const query = makeQuery({
+      pages: [page([{ id: "a", name: "A" }], 1)],
+    });
+    const { result } = mount(query, {
+      initial: "groupBy=team&groupAgg=name%3Anone%2Cscore%3Aavg",
+      selectPage,
+      supports: { grouping: true, aggregates: true },
+      aggregates: [
+        { key: "name", fn: "count" },
+        { key: "budget", fn: "sum" },
+      ],
+    });
+
+    const emitted = last(query.calls) as Partial<ListParams> & {
+      aggregates?: readonly { key: string; fn: string }[];
+    };
+    expect(emitted.aggregates).toEqual([
+      { key: "budget", fn: "sum" },
+      { key: "score", fn: "avg" },
+    ]);
+    expect(result.current.groupAggregateOverrides).toEqual({
+      name: "none",
+      score: "avg",
+    });
+  });
+
   it("uses the default selector for a PaginatedResponse page shape", () => {
     const usePaginatedQuery = (): InfiniteQueryLike<
       PaginatedResponse<Row>

@@ -9,6 +9,7 @@ import {
 import {
   type ColumnMenuAction,
   columnMenuActions,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -16,6 +17,7 @@ import {
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
+  type GroupingPanelState,
   hideAllColumns,
   LiveRegion,
   nextPinSide,
@@ -39,6 +41,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { KitPortal } from "./kitPortal";
+import { NativeSelect } from "./primitives";
 
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
@@ -236,6 +239,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -247,6 +251,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel?: GroupingPanelState;
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -266,6 +271,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -337,18 +343,38 @@ function ColumnMenuRowItem<TRow>({
       </HStack>
       {open ? (
         <div data-adapttable-part="column-menu-submenu">
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="xs"
-              variant="ghost"
-              data-adapttable-part="column-menu-action"
-              disabled={columnMenuActionDisabled(action, rename.editing)}
-              onClick={() => runColumnMenuAction(action, setOpen)}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action: ColumnMenuItem) =>
+            "kind" in action ? (
+              <Field.Root key={action.id} disabled={action.disabled}>
+                <Field.Label fontSize="xs">{action.label}</Field.Label>
+                <NativeSelect
+                  size="xs"
+                  aria-label={action.label}
+                  value={action.value}
+                  disabled={action.disabled}
+                  data-adapttable-part="column-menu-choice"
+                  onChange={(event) => action.onChange(event.target.value)}
+                >
+                  {action.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field.Root>
+            ) : (
+              <Button
+                key={action.id}
+                size="xs"
+                variant="ghost"
+                data-adapttable-part="column-menu-action"
+                disabled={columnMenuActionDisabled(action, rename.editing)}
+                onClick={() => runColumnMenuAction(action, setOpen)}
+              >
+                {action.label}
+              </Button>
+            )
+          )}
           {rename.editing ? (
             <ColumnRenameForm rename={rename} labels={labels} />
           ) : null}
@@ -380,6 +406,7 @@ export function ColumnMenu<TRow>({
   sortBy,
   sortDir,
   dir,
+  groupingPanel,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
   const [query, setQuery] = useState("");
@@ -473,6 +500,7 @@ export function ColumnMenu<TRow>({
                   onAutoSizeColumn={onAutoSizeColumn}
                   onFilterColumn={onFilterColumn}
                   onRenameColumn={onRenameColumn}
+                  groupingPanel={groupingPanel}
                 />
               ))}
               {(hasRowReorder || hasRowActions) && <Separator my={1} />}

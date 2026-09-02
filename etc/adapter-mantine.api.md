@@ -59,6 +59,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FindBarProps } from '@adapttable/core/adapter';
 import { getHistoryAdapter } from '@adapttable/core';
+import { GroupingPanelChromeProps } from '@adapttable/core/adapter';
 import { GroupMoreButtonProps } from '@adapttable/core/adapter';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { JSX } from 'react';
@@ -337,6 +338,9 @@ export function FindBar(props: Readonly<FindBarProps>): JSX.Element;
 export { FindBarProps }
 
 export { getHistoryAdapter }
+
+// @public
+export function GroupingPanel<TRow>(props: Readonly<Omit<GroupingPanelChromeProps<TRow>, "slots">>): JSX.Element;
 
 // @public
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;

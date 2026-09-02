@@ -12,7 +12,7 @@ tier — $999/developer when we checked in August 2026. What AG Grid has that
 AdaptTable does not is **integration**: one spreadsheet surface, tool panels
 already assembled, and a decade of behaviour at the edges of it. In AdaptTable
 those are parts you compose — a pivot engine and its panel, a range model, a
-side-panel frame you fill.
+side-panel frame you fill, and a grouping panel you opt into.
 
 So stay on AG Grid when the grid IS the product: an analytics surface where
 users pivot, drill and drag fields around all day, or a workflow that leans on
@@ -33,8 +33,6 @@ renders its own theme; AdaptTable renders _your_ UI kit's real components).
 - Assembled tool panels: AdaptTable's `sidePanel({ panels, open, onOpenChange })`
   is a frame with tabs that you fill (the pivot, saved-views and filter-tree
   panels ship; arranging them is yours)
-- Drag-a-column-to-group: AdaptTable groups from `grouping("team")` — your code or the
-  URL, no drag gesture
 
 If you rely on those and the Enterprise licence is worth it to you, that is the
 right tool. Migrate the CRUD tables, keep the analytics grid — they can run side
@@ -48,6 +46,11 @@ by side.
   selection, filters, sort, and page are props and URL state.
 - **URL-synced shareable state** built in — AG Grid exposes grid state through
   its API and leaves persistence to you.
+- **Interactive grouping in every kit** — `groupingPanel()` adds a dedicated
+  strip above the table, desktop header drag-and-drop, chip reorder/removal,
+  mobile selects, aggregation choices, RTL keyboard movement, and polite
+  announcements. `groupBy` and `groupAgg` are URL state and Saved Views capture
+  both.
 - **Free master/detail** — `rowDetail(fn)` does what AG Grid gates behind
   Enterprise master/detail (for detail panels, not nested grids).
 - **A real filter UI for free** — AG Grid's set filter, multi filter, and
@@ -84,24 +87,27 @@ Grid-level (`<AgGridReact>` → `<DataTable>`):
 | `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                  | No module registry.                                               |
 | `onGridReady` / `gridRef.current.api`              | (nothing)                                                  | Declarative props replace the imperative API.                     |
 | column tool panel (Enterprise side bar)            | `columnMenu()`                                             | Show/hide, reorder, pin — free.                                   |
+| `rowGroupPanelShow` / tool-panel grouping          | `groupingPanel()`                                          | Dedicated strip; drag headers on desktop, use selects on mobile.  |
 | `getDetailPanelContent`-style master/detail (Ent.) | `rowDetail(fn)`                                            | `(row) => ReactNode`, free.                                       |
 
 `ColDef` → `ColumnDef`:
 
-| AG Grid                             | AdaptTable                                                      | Notes                                            |
-| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
-| `field`                             | `key`                                                           | Dot paths supported.                             |
-| `headerName`                        | `header`                                                        | Auto-derived from `key` when omitted.            |
-| `valueGetter` / `valueFormatter`    | `accessor: (row) => …`                                          | One function, receives the row.                  |
-| `cellRenderer`                      | `Cell`                                                          | Component receiving `{ row, rowIndex }`.         |
-| `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                       |
-| `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.                  |
-| `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration.    |
-| `flex` / `width` / `minWidth`       | `width`                                                         | —                                                |
-| `pinned: "left" \| "right"`         | pinning via `columnMenu()` + `columnLayout`                     | Logical sides — RTL-correct.                     |
-| `hide`                              | `columnMenu()` + `columnLayout`                                 | User-facing visibility lives in the menu.        |
-| `resizable` (default true)          | `resizableColumns()` (table-level)                              | —                                                |
-| `editable`                          | `editable` + `editor` + `editing(save)`                         | Opt-in; no editor until `editing()` is composed. |
+| AG Grid                             | AdaptTable                                                      | Notes                                              |
+| ----------------------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
+| `field`                             | `key`                                                           | Dot paths supported.                               |
+| `headerName`                        | `header`                                                        | Auto-derived from `key` when omitted.              |
+| `valueGetter` / `valueFormatter`    | `accessor: (row) => …`                                          | One function, receives the row.                    |
+| `cellRenderer`                      | `Cell`                                                          | Component receiving `{ row, rowIndex }`.           |
+| `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                         |
+| `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.                    |
+| `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration.      |
+| `flex` / `width` / `minWidth`       | `width`                                                         | —                                                  |
+| `pinned: "left" \| "right"`         | pinning via `columnMenu()` + `columnLayout`                     | Logical sides — RTL-correct.                       |
+| `hide`                              | `columnMenu()` + `columnLayout`                                 | User-facing visibility lives in the menu.          |
+| `resizable` (default true)          | `resizableColumns()` (table-level)                              | —                                                  |
+| `editable`                          | `editable` + `editor` + `editing(save)`                         | Opt-in; no editor until `editing()` is composed.   |
+| `rowGroup: true`                    | Initial key in `groupingPanel(["team"])`                        | Users can add, reorder, or remove keys afterwards. |
+| `aggFunc`                           | `groupAggregates` default + panel aggregation override          | Session choices are sum/avg/min/max/count/none.    |
 
 ## Before / after
 
@@ -144,13 +150,14 @@ function PeopleGrid({ rows }: { rows: Person[] }) {
 import { DataTable } from "@adapttable/mui";
 import { bulkActions } from "@adapttable/mui/bulk-actions";
 import { columnMenu } from "@adapttable/mui/column-menu";
+import { groupingPanel } from "@adapttable/mui/grouping-panel";
 
 function PeopleTable({ people }: { people: Person[] }) {
   return (
     <DataTable
       data={people}
       rowKey={(r) => r.id}
-      features={[bulkActions([]), columnMenu()]}
+      features={[bulkActions([]), columnMenu(), groupingPanel()]}
       columns={[
         { key: "name", sortable: true },
         { key: "role" },
@@ -175,7 +182,8 @@ table is your design system's, not a themed grid.
 
 - **The analytics features are parts, not a mode.** [Pivoting](./pivot.md) is
   an engine plus its own panel; [nested grouping](./row-grouping.md) is
-  `grouping("team")` with optional aggregate options; [tree data](./tree-data.md) is
+  `groupingPanel(["team", "status"], extras)` with header drag-and-drop,
+  selects, and optional aggregate defaults; [tree data](./tree-data.md) is
   `tree({ getChildren })` or `tree({ getParentId })`; range selection, the fill
   handle and clipboard operations all need `cellNavigation()` composed (see
   [Cell navigation](./cell-navigation.md)). Each works — none is the single

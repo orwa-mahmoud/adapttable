@@ -25,7 +25,6 @@ import {
 } from "@adapttable/unstyled/filters";
 import { findInTable as findInTable_ } from "@adapttable/unstyled/find-in-table";
 import { fullscreen as fullscreen_ } from "@adapttable/unstyled/fullscreen";
-import { grouping as grouping_ } from "@adapttable/unstyled/grouping";
 import { headerFilters as headerFilters_ } from "@adapttable/unstyled/header-filters";
 import { nestedTable as nestedTable_ } from "@adapttable/unstyled/nested-table";
 import { print as print_ } from "@adapttable/unstyled/print";
@@ -40,7 +39,7 @@ import {
 } from "@adapttable/unstyled/status-bar";
 import { tree as tree_ } from "@adapttable/unstyled/tree";
 
-import { kitChromeFeatures } from "./chromeFeatures";
+import { type KitChromeFactories, kitChromeFeatures } from "./chromeFeatures";
 
 /** This kit's factories, handed to the shared builder. */
 const KIT_CHROME = {
@@ -50,7 +49,6 @@ const KIT_CHROME = {
   batchEditing: batchEditing_,
   editHistory: editHistory_,
   editing: editing_,
-  grouping: grouping_,
   rowEditing: rowEditing_,
   rowReorder: rowReorder_,
   tree: tree_,
@@ -206,6 +204,7 @@ export function UnstyledLike({
   mode,
   locale,
   classNames,
+  groupingPanelFactory,
   pageMode,
   urlKey,
   density = "comfortable",
@@ -259,6 +258,7 @@ export function UnstyledLike({
   mode: DataMode;
   locale: Locale;
   classNames: DataTableClassNames;
+  groupingPanelFactory: KitChromeFactories["groupingPanel"];
   pageMode?: PageMode;
   urlKey?: string;
   density?: Density;
@@ -389,38 +389,41 @@ export function UnstyledLike({
             rowKey={(r) => r.id}
             features={[
               ...(nested ? nestedOuterFeatures<Person>() : []),
-              ...kitChromeFeatures(KIT_CHROME, {
-                cellNavigation,
-                columnSelectionCheckbox,
-                densityChooser,
-                editing,
-                exportCsv,
-                focused,
-                fullscreen,
-                headerFilters,
-                nested: nested ? nestedOrders : undefined,
-                nestedOpenIds: nestedOpenIds(nested, source.rows),
-                onPrint,
-                printButton,
-                undoRedoButtons,
-                urlKey,
-                bulkActions,
-                bulkActionList: makeBulkActions(locale),
-                collapsibleColumnGroups: columns.collapsibleColumnGroups,
-                columnMenu,
-                rowActions:
-                  (rowMutations ?? (focused && !columnGroups))
-                    ? undefined
-                    : makeActions(locale),
-                commandPalette,
-                contextMenu,
-                filterControls,
-                filterDefs: filters,
-                filterTypeSpecs: demoFilterTypes(),
-                sidePanel,
-                statusBar,
-                kitFeatures: columns.kitFeatures,
-              }),
+              ...kitChromeFeatures(
+                { ...KIT_CHROME, groupingPanel: groupingPanelFactory },
+                {
+                  cellNavigation,
+                  columnSelectionCheckbox,
+                  densityChooser,
+                  editing,
+                  exportCsv,
+                  focused,
+                  fullscreen,
+                  headerFilters,
+                  nested: nested ? nestedOrders : undefined,
+                  nestedOpenIds: nestedOpenIds(nested, source.rows),
+                  onPrint,
+                  printButton,
+                  undoRedoButtons,
+                  urlKey,
+                  bulkActions,
+                  bulkActionList: makeBulkActions(locale),
+                  collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                  columnMenu,
+                  rowActions:
+                    (rowMutations ?? (focused && !columnGroups))
+                      ? undefined
+                      : makeActions(locale),
+                  commandPalette,
+                  contextMenu,
+                  filterControls,
+                  filterDefs: filters,
+                  filterTypeSpecs: demoFilterTypes(),
+                  sidePanel,
+                  statusBar,
+                  kitFeatures: columns.kitFeatures,
+                }
+              ),
               ...(demoFeatures ?? []),
             ]}
             onDensityChange={onDensityChange}

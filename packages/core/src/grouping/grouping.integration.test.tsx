@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ChromeExtrasGate } from "../features/chromeExtrasGate";
 import { editing } from "../features/editing";
 import { grouping } from "../features/grouping";
+import { groupingPanel } from "../features/grouping-panel";
 import { FeatureProviders } from "../features/providers";
 import {
   applyTableFeatures,
@@ -212,6 +213,38 @@ describe("useTableChrome grouping bundle", () => {
     }
   });
 
+  it("layers URL aggregate choices over developer group cells", () => {
+    const { result } = renderLiveChrome(
+      [
+        grouping<Row>("team", {
+          groupAggregates: () => ({ name: "developer", team: "kept" }),
+        }),
+      ],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          columns: [{ key: "team" }, { key: "name" }],
+          urlAdapter: createMemoryAdapter(
+            "groupAgg=name%3Acount%2Cteam%3Anone"
+          ),
+          defaults: { limit: 10 },
+        });
+        return {
+          source,
+          columns: [{ key: "team" }, { key: "name" }],
+          rowKey: (row) => row.id,
+          groupBy: "team",
+          groupAggregates: () => ({ name: "developer", team: "kept" }),
+        };
+      }
+    );
+    const core = result.current.grouping?.entries[0];
+    expect(core?.kind).toBe("group");
+    if (core?.kind === "group") {
+      expect(core.aggregateCells).toEqual({ name: 2 });
+    }
+  });
+
   it("devWarns and stays dormant when groupBy is set without allFilteredRows", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { result: sourceResult } = renderHook(() =>
@@ -237,5 +270,36 @@ describe("useTableChrome grouping bundle", () => {
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("groupBy is ignored: Grouping is off")
     );
+  });
+});
+
+describe("grouping panel integration", () => {
+  it("merges url aggregate overrides into live panel state", () => {
+    const { result } = renderLiveChrome([groupingPanel<Row>("team")], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        columns: [
+          { key: "team", header: "Team" },
+          { key: "name", header: "Name" },
+        ],
+        urlAdapter: createMemoryAdapter("groupBy=team&groupAgg=name%3Acount"),
+        defaults: { limit: 10 },
+      });
+      return {
+        source,
+        columns: [
+          { key: "team", header: "Team" },
+          { key: "name", header: "Name" },
+        ],
+        rowKey: (row) => row.id,
+        groupBy: "team",
+      };
+    });
+
+    expect(result.current.groupingPanel?.groupBy).toEqual(["team"]);
+    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
+      name: "count",
+    });
+    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
   });
 });

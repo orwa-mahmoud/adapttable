@@ -9,6 +9,8 @@ import {
 import {
   type ColumnMenuAction,
   columnMenuActions,
+  type ColumnMenuChoice,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -26,7 +28,7 @@ import {
   useColumnRenameEditor,
   useFeatureHost,
 } from "@adapttable/core/adapter";
-import { Button, Divider, Flex, Input, Popover, theme } from "antd";
+import { Button, Divider, Flex, Input, Popover, Select, theme } from "antd";
 import { type ComponentRef, useEffect, useRef, useState } from "react";
 
 /** Menu labels plus the actions-column display name. */
@@ -68,6 +70,38 @@ function columnMenuActionDisabled(
   editing: boolean
 ): boolean {
   return action.disabled || (action.id === "rename" && editing);
+}
+
+function isColumnMenuChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
+  return "kind" in item && item.kind === "choice";
+}
+
+/** A plugin-owned choice stays inside the open submenu while it changes. */
+function ColumnMenuChoiceControl({
+  choice,
+}: Readonly<{ choice: ColumnMenuChoice }>) {
+  return (
+    <Flex
+      vertical
+      gap={4}
+      data-adapttable-part="column-menu-choice"
+      style={{ padding: "4px 7px" }}
+    >
+      <span style={{ fontSize: 12 }}>{choice.label}</span>
+      <Select
+        size="small"
+        aria-label={choice.label}
+        value={choice.value}
+        disabled={choice.disabled}
+        options={choice.options.map((option) => ({ ...option }))}
+        getPopupContainer={(trigger: HTMLElement) =>
+          trigger.parentElement ?? document.body
+        }
+        onClick={(event) => event.stopPropagation()}
+        onChange={choice.onChange}
+      />
+    </Flex>
+  );
 }
 
 function ColumnRenameForm({
@@ -303,6 +337,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -315,6 +350,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -334,6 +370,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -408,18 +445,22 @@ function ColumnMenuRowItem<TRow>({
       </Flex>
       {open ? (
         <div data-adapttable-part="column-menu-submenu">
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="small"
-              type="text"
-              data-adapttable-part="column-menu-action"
-              disabled={columnMenuActionDisabled(action, rename.editing)}
-              onClick={() => runColumnMenuAction(action, setOpen)}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action) =>
+            isColumnMenuChoice(action) ? (
+              <ColumnMenuChoiceControl key={action.id} choice={action} />
+            ) : (
+              <Button
+                key={action.id}
+                size="small"
+                type="text"
+                data-adapttable-part="column-menu-action"
+                disabled={columnMenuActionDisabled(action, rename.editing)}
+                onClick={() => runColumnMenuAction(action, setOpen)}
+              >
+                {action.label}
+              </Button>
+            )
+          )}
           {rename.editing ? (
             <ColumnRenameForm
               rename={rename}
@@ -458,6 +499,7 @@ export function ColumnMenu<TRow>({
   onRenameColumn,
   sortBy,
   sortDir,
+  groupingPanel,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
   const { token } = theme.useToken();
@@ -568,6 +610,7 @@ export function ColumnMenu<TRow>({
           onAutoSizeColumn={onAutoSizeColumn}
           onFilterColumn={onFilterColumn}
           onRenameColumn={onRenameColumn}
+          groupingPanel={groupingPanel}
         />
       ))}
       {(hasRowReorder || hasRowActions) && (

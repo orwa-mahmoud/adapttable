@@ -1,4 +1,5 @@
 import type { FacetMap } from "../filters/facets";
+import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { TableStateMutators } from "../tableStateMutators";
 import type {
   ExtraFilters,
@@ -103,6 +104,11 @@ export interface TableSource<TRow> extends TableStateMutators {
    * param but grouping stays dormant without `allFilteredRows`.
    */
   readonly groupBy: string | undefined;
+  /**
+   * Session choices layered over the developer's group aggregate mapper.
+   * An absent key preserves the developer default; `"none"` hides it.
+   */
+  readonly groupAggregateOverrides?: GroupAggregateOverrides;
   /**
    * What this source can genuinely do — full-dataset access, where grouping
    * can happen, selection across pages, export scope, whether the total is

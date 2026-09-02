@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { DEFAULT_LIMIT } from "../constants";
+import {
+  type GroupAggregateOverrides,
+  parseGroupAggregateOverrides,
+  serializeGroupAggregateOverrides,
+} from "../grouping/groupAggregateOverrides";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableStateMutators } from "../tableStateMutators";
 import type {
@@ -15,6 +20,7 @@ import {
   FILTER_PREFIX,
   isEmptyFilterValue,
   MAX_LIMIT,
+  PARAM_GROUP_AGGREGATES,
   PARAM_GROUP_BY,
   PARAM_LIMIT,
   PARAM_PAGE,
@@ -88,6 +94,8 @@ export interface UseTableUrlStateResult extends TableStateMutators {
   sortDir: SortDirection | undefined;
   /** Active row-grouping keys, comma-separated, if any. */
   groupBy: string | undefined;
+  /** Session-level group aggregation choices keyed by column. */
+  groupAggregateOverrides: GroupAggregateOverrides;
   /** The extra-filter bag. */
   extra: ExtraFilters;
   /** Nested AND/OR filter tree, when one is in the URL. */
@@ -198,6 +206,10 @@ export function useTableUrlState(
   const groupByRaw = params.get(ns + PARAM_GROUP_BY);
   const groupBy =
     groupByRaw === null ? defaults.groupBy : groupByRaw || undefined;
+  const groupAggregateOverrides = useMemo(
+    () => parseGroupAggregateOverrides(params.get(ns + PARAM_GROUP_AGGREGATES)),
+    [params, ns]
+  );
   const sortLevels = useMemo(() => readSortLevels(params, ns), [params, ns]);
 
   /** Merge `defaults.extra` under the URL bag, honouring cleared markers. */
@@ -330,6 +342,27 @@ export function useTableUrlState(
     [commit, defaults.groupBy, ns, resetPage]
   );
 
+  const initializeGroupBy = useCallback(
+    (key: string) =>
+      commit((p) => {
+        if (p.has(ns + PARAM_GROUP_BY)) return;
+        p.set(ns + PARAM_GROUP_BY, key);
+        resetPage(p);
+      }),
+    [commit, ns, resetPage]
+  );
+
+  const setGroupAggregateOverrides = useCallback(
+    (overrides: GroupAggregateOverrides) =>
+      commit((p) => {
+        const encoded = serializeGroupAggregateOverrides(overrides);
+        if (encoded) p.set(ns + PARAM_GROUP_AGGREGATES, encoded);
+        else p.delete(ns + PARAM_GROUP_AGGREGATES);
+        resetPage(p);
+      }),
+    [commit, ns, resetPage]
+  );
+
   const toggleSortLevel = useCallback(
     (key: string) =>
       commit((p) => {
@@ -399,6 +432,7 @@ export function useTableUrlState(
         p.delete(ns + PARAM_SORT_DIR);
         if (defaults.groupBy) p.set(ns + PARAM_GROUP_BY, "");
         else p.delete(ns + PARAM_GROUP_BY);
+        p.delete(ns + PARAM_GROUP_AGGREGATES);
         resetPage(p);
         writeExtraWithDefaults(p, {});
         writeFilterTreeParam(p, undefined, ns);
@@ -422,12 +456,15 @@ export function useTableUrlState(
     sortBy,
     sortDir,
     groupBy,
+    groupAggregateOverrides,
     extra,
     filterTree,
     setPage,
     setLimit,
     setSort,
     setGroupBy,
+    initializeGroupBy,
+    setGroupAggregateOverrides,
     sortLevels,
     toggleSortLevel,
     setSearch,

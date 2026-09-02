@@ -690,3 +690,124 @@ button.adapttable-btn:has([data-slot="select-value"]) {
 .adapttable-select-positioner {
   z-index: var(--adapttable-overlay-z);
 }
+
+/* Interactive grouping strip. Insertion targets stay visible instead of
+ * becoming zero-width gaps, and every part wraps when the table narrows. */
+.adapttable-grouping-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--adapttable-border);
+  border-radius: var(--adapttable-radius);
+  background: var(--adapttable-soft);
+}
+
+.adapttable-grouping-panel__label {
+  flex: 0 0 100%;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+[data-adapttable-part="grouping-item"],
+[data-adapttable-part="grouping-aggregate-controls"] {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.adapttable-grouping-chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--adapttable-border);
+  border-radius: var(--adapttable-radius);
+  background: var(--adapttable-surface);
+}
+
+.adapttable-grouping-chip__handle {
+  min-width: 0;
+  cursor: grab;
+  touch-action: manipulation;
+}
+
+.adapttable-grouping-chip__handle:active {
+  cursor: grabbing;
+}
+
+.adapttable-grouping-chip__handle > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adapttable-grouping-chip__remove {
+  color: var(--adapttable-muted);
+  touch-action: manipulation;
+}
+
+.adapttable-grouping-chip[data-grouping-dragging="true"],
+.adapttable-grouping-chip:has([data-grouping-dragging="true"]) {
+  opacity: 0.55;
+}
+
+.adapttable-grouping-drop-zone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 0.75rem;
+  min-height: 2rem;
+  border: 1px dashed transparent;
+  border-radius: var(--adapttable-radius);
+  color: var(--adapttable-muted);
+  transition:
+    min-width 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.adapttable-grouping-drop-zone[data-empty="true"] {
+  min-width: min(100%, 12rem);
+  padding: 0.35rem 0.6rem;
+  border-color: var(--adapttable-border);
+}
+
+.adapttable-grouping-drop-zone[data-active="true"],
+.adapttable-grouping-drop-zone[data-drop-active="true"] {
+  min-width: 2rem;
+  border-color: var(--adapttable-accent);
+  background: color-mix(in srgb, var(--adapttable-accent) 14%, transparent);
+}
+
+.adapttable-grouping-remove-zone {
+  flex: 1 1 12rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px dashed var(--adapttable-danger);
+  border-radius: var(--adapttable-radius);
+  color: var(--adapttable-danger);
+  text-align: center;
+}
+
+.adapttable-grouping-remove-zone[data-active="true"],
+.adapttable-grouping-remove-zone[data-drop-active="true"] {
+  background: color-mix(in srgb, var(--adapttable-danger) 14%, transparent);
+}
+
+.adapttable-grouping-panel[data-mobile="true"] .adapttable-btn,
+.adapttable-grouping-panel[data-mobile="true"] .adapttable-icon-btn {
+  min-height: 2.75rem;
+}
+
+.adapttable-grouping-panel[data-mobile="true"] .adapttable-icon-btn {
+  min-width: 2.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adapttable-grouping-drop-zone {
+    transition: none;
+  }
+}

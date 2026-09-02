@@ -203,6 +203,10 @@ export const shadcnClassNames = {
   columnMenuSubmenu: "ms-6 flex flex-col gap-0.5 py-1",
   columnMenuAction:
     "w-full rounded-md px-2 py-1.5 text-start text-[13px] font-medium hover:bg-muted/60 disabled:opacity-50",
+  columnMenuChoice: "grid gap-1 rounded-md px-2 py-1.5",
+  columnMenuChoiceLabel: "text-xs font-medium text-muted-foreground",
+  columnMenuChoiceSelect:
+    "h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
   columnRenameForm:
     "ms-6 grid gap-1 rounded-md border border-border bg-background p-2",
   columnRenameLabel: "text-xs font-medium text-muted-foreground",
@@ -340,6 +344,27 @@ export const shadcnClassNames = {
   groupLabel: "text-sm font-semibold",
   groupCount: "text-xs text-muted-foreground",
   groupAggregate: "ms-auto text-xs text-muted-foreground",
+  // ── Interactive row-grouping panel ──────────────────────────────
+  groupingPanel:
+    "flex flex-wrap items-center gap-2 border-b border-border bg-muted/20 px-3 py-2",
+  groupingDropZone:
+    "inline-flex min-h-8 min-w-3 items-center justify-center rounded-md border border-dashed border-border px-2 text-xs text-muted-foreground data-[active]:border-primary data-[active]:bg-primary/10 data-[empty]:min-w-40",
+  groupingItem: "inline-flex items-center gap-2",
+  groupingChip:
+    "inline-flex items-center gap-1 rounded-md border border-border bg-background p-1 shadow-sm",
+  groupingChipHandle:
+    "inline-flex cursor-grab items-center gap-1 rounded px-1.5 py-0.5 text-sm font-medium outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring data-[grouping-dragging]:cursor-grabbing data-[grouping-dragging]:opacity-60",
+  groupingChipRemove:
+    "inline-grid size-6 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
+  groupingAdd:
+    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregateControls: "inline-flex flex-wrap items-center gap-2",
+  groupingAggregateColumn:
+    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregate:
+    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingRemoveZone:
+    "inline-flex min-h-8 items-center rounded-md border border-dashed border-destructive px-2 text-xs text-destructive data-[active]:bg-destructive/10",
   // A rejected commit reads as a form error, in the destructive tone shadcn
   // already uses for one.
   editCellError: "mt-1 block text-xs text-destructive",

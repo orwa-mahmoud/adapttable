@@ -192,6 +192,27 @@ export const it: Required<TableLabels> = {
   expandGroup: "Espandi gruppo",
   collapseGroup: "Comprimi gruppo",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "Raggruppamento righe",
+  groupingDropColumns: "Trascina qui le colonne per raggruppare",
+  addGroupingColumn: "Aggiungi colonna di raggruppamento",
+  groupByColumn: (label) => `Raggruppa per ${label}`,
+  ungroupColumn: (label) => `Annulla raggruppamento di ${label}`,
+  removeGroupingColumn: (label) => `Rimuovi ${label} dal raggruppamento`,
+  moveGroupingColumn: (label) => `Sposta il raggruppamento ${label}`,
+  groupingDropToRemove: "Rilascia qui per rimuovere il raggruppamento",
+  groupingAggregateColumn: "Colonna di aggregazione",
+  groupingAggregation: "Aggregazione gruppo",
+  groupingAggregationDefault: "Predefinita",
+  groupingAggregationNone: "Nessuna",
+  groupingAverage: "Media",
+  groupingAdded: (label) =>
+    `La colonna ${label} è stata aggiunta al raggruppamento`,
+  groupingRemoved: (label) =>
+    `La colonna ${label} è stata rimossa dal raggruppamento`,
+  groupingMoved: (label, position) =>
+    `La colonna ${label} è stata spostata alla posizione di raggruppamento ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `Aggregazione di ${label} cambiata in ${aggregation}`,
   gridRangeCopied: (cells) => `${cells} celle copiate`,
   gridRangeCopyFailed: "Copia non riuscita",
   gridRangePasted: (cells) => `${cells} celle incollate`,

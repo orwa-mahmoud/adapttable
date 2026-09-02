@@ -64,7 +64,7 @@ export interface KitChromeFactories {
   sidePanel: (options: SidePanelOptions) => StaticTableFeature;
   statusBar: () => StaticTableFeature;
   /**
-   * The kit-drawn behaviours: a group header, an editor, a grip.
+   * The kit-drawn behaviours: grouping controls, an editor, a grip.
    *
    * Written against `Person` rather than a free row type — each takes a
    * row-typed handler, so a generic slot could not accept the kit's own
@@ -76,7 +76,10 @@ export interface KitChromeFactories {
   editing: (
     onCellEdit: NonNullable<KitFeatureRequests["editing"]>
   ) => TableFeature<Person>;
-  grouping: (groupBy: readonly string[]) => TableFeature<Person>;
+  groupingPanel: (
+    groupBy: NonNullable<KitFeatureRequests["grouping"]>["groupBy"],
+    extras: NonNullable<KitFeatureRequests["grouping"]>["extras"]
+  ) => TableFeature<Person>;
   rowEditing: (
     onRowEdit: NonNullable<KitFeatureRequests["rowEditing"]>
   ) => TableFeature<Person>;
@@ -215,8 +218,8 @@ function panelChrome(
  * The behaviours only this kit can draw.
  *
  * Core owns what grouping, editing and reordering DO; each of these draws the
- * part the reader touches — a group header, an editor, a grip — so the demo
- * has to reach for the kit's own factory, not core's.
+ * part the reader touches — grouping panel and headers, editor, grip — so the
+ * demo has to reach for the kit's own factory, not core's.
  */
 function kitDrawn(
   kit: KitChromeFactories,
@@ -226,7 +229,9 @@ function kitDrawn(
     ...(asked.editing ? [kit.editing(asked.editing)] : []),
     ...(asked.rowEditing ? [kit.rowEditing(asked.rowEditing)] : []),
     ...(asked.batchEditing ? [kit.batchEditing(asked.batchEditing)] : []),
-    ...(asked.grouping ? [kit.grouping(asked.grouping)] : []),
+    ...(asked.grouping
+      ? [kit.groupingPanel(asked.grouping.groupBy, asked.grouping.extras)]
+      : []),
     ...(asked.tree ? [kit.tree(asked.tree)] : []),
     ...(asked.rowReorder
       ? [

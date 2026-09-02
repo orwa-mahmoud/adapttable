@@ -30,6 +30,13 @@ const FEATURES = [
   { entry: "editing", marker: "useCellEditing" },
   { entry: "filters", marker: "useFilterTreeChips" },
   { entry: "grouping", marker: "groupedEntriesForStrategy" },
+  {
+    entry: "grouping-panel",
+    marker: "grouping-drop-zone",
+    // The panel is interactive chrome over the existing grouping row model,
+    // so this one dependency is intentional; every other sibling stays out.
+    allows: ["grouping"],
+  },
   { entry: "row-detail", marker: "useRowExpansion" },
   { entry: "row-reorder", marker: "ROW_DND_MIME" },
   { entry: "export", marker: "export-progress-surface" },
@@ -113,6 +120,7 @@ try {
       for (const sibling of FEATURES) {
         if (
           sibling === feature ||
+          feature.allows?.includes(sibling.entry) ||
           !new RegExp(`\\b${sibling.marker}\\b`).test(code)
         ) {
           continue;

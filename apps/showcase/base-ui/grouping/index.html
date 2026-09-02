@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Group rows in a Base UI data table by one key or several — nested group headers with counts, per-group subtotals, group footers, and collapse state in the URL." />
+    <meta name="description" content="Group rows interactively in a Base UI data table — drag headers, reorder grouping chips from the keyboard, use mobile selects, and override aggregations." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/base-ui/grouping/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="Base UI table row grouping — AdaptTable" />
-    <meta property="og:description" content="Group rows in a Base UI data table by one key or several — nested group headers with counts, per-group subtotals, group footers, and collapse state in the URL." />
+    <meta property="og:description" content="Group rows interactively in a Base UI data table — drag headers, reorder grouping chips from the keyboard, use mobile selects, and override aggregations." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/base-ui/grouping/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Base UI table row grouping — AdaptTable" />
-    <meta name="twitter:description" content="Group rows in a Base UI data table by one key or several — nested group headers with counts, per-group subtotals, group footers, and collapse state in the URL." />
+    <meta name="twitter:description" content="Group rows interactively in a Base UI data table — drag headers, reorder grouping chips from the keyboard, use mobile selects, and override aggregations." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Group rows in a Base UI data table by one key or several — nested group headers with counts, per-group subtotals, group footers, and collapse state in the URL.","url":"https://orwa-mahmoud.github.io/adapttable/demo/base-ui/grouping/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Group rows interactively in a Base UI data table — drag headers, reorder grouping chips from the keyboard, use mobile selects, and override aggregations.","url":"https://orwa-mahmoud.github.io/adapttable/demo/base-ui/grouping/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -162,12 +162,14 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Base UI</p>
         <h1>Row grouping in Base UI</h1>
-        <p>Compose <code>grouping(groupBy)</code> and rows fold into Base UI group headers with counts. Pass a list and each key nests inside the one before it, however deep the nesting goes.</p>
-        <p><code>groupAggregates</code> adds per-group subtotals from the same mapper <code>summaryRow</code> uses, so every header totals its whole subtree and <code>groupFooters</code> closes each group with the same numbers.</p>
+        <p>Compose <code>groupingPanel(groupBy, extras)</code> and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.</p>
+        <p>Every chip handle is keyboard movable with the arrow keys. On phones the same Base UI panel swaps drag targets for kit-native selects, without changing the grouping model.</p>
+        <p><code>groupAggregates</code> seeds the per-group subtotal, then the panel can override a value column to sum, average, minimum, maximum, count, none, or its default. <code>groupFooters</code> still closes each group with its total.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>A group header is a table row with a spanning cell carrying the indent, a Base UI Checkbox for the tri-state group selection, and the engine's chevron inside a Base UI Button.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
+import { groupingPanel } from &quot;@adapttable/base-ui/grouping-panel&quot;;
 
 export function People({ rows, columns }) {
   return (
@@ -175,14 +177,17 @@ export function People({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      groupBy={[&quot;team&quot;, &quot;status&quot;]}
-      groupFooters
-      groupAggregates={(group) =&gt; ({
-        budget: group.reduce(
-          (sum, row) =&gt; sum + row.budget,
-          0
-        ),
-      })}
+      features={[
+        groupingPanel([&quot;team&quot;, &quot;status&quot;], {
+          groupFooters: true,
+          groupAggregates: (group) =&gt; ({
+            budget: group.reduce(
+              (sum, row) =&gt; sum + row.budget,
+              0
+            ),
+          }),
+        }),
+      ]}
     /&gt;
   );
 }</code></pre>
@@ -207,7 +212,7 @@ export function People({ rows, columns }) {
           <li><a href="../rows/">Rows in Base UI</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
           <li><a href="../editing/">Inline cell editing in Base UI</a> — Kit-native editors in the cell; every write goes through your handler.</li>
           <li><a href="../nested-tables/">Nested tables in Base UI</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../export/">Export and print in Base UI</a> — CSV, XLSX and PDF from one seam — plus a real print layout.</li>
+          <li><a href="../export/">Export and print in Base UI</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
           <li><a href="../scale/">Large datasets in Base UI</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="../tree/">Tree data in Base UI</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
           <li><a href="../mobile-cards/">Mobile cards in Base UI</a> — Every row becomes a card on phones. Automatically, with the same state.</li>

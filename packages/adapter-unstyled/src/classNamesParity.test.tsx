@@ -15,6 +15,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterHeaderRow } from "./components/kitControls";
 import { DataTable } from "./data-table.test-utils";
+import { groupingPanel } from "./grouping-panel";
 import {
   type ColumnDef,
   type DataTableClassNames,
@@ -169,6 +170,7 @@ const A11Y_PARTS = new Set([
   "column-rename-announcer",
   "header-rename-announcer",
   "row-reorder-announcer",
+  "grouping-announcer",
   "table-status-announcer",
 ]);
 
@@ -212,6 +214,10 @@ const STATE_CLASSES = new Set([
   "groupMoreCell",
   "cellMatch",
   "cellMatchCurrent",
+  // Plugin-only parts are driven with a registered host in ColumnMenu.test.
+  "columnMenuChoice",
+  "columnMenuChoiceLabel",
+  "columnMenuChoiceSelect",
 ]);
 
 function collectParts(): Map<string, Element[]> {
@@ -573,6 +579,33 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   absorb();
   groupedMobile.unmount();
 
+  // Interactive grouping panel and its drag-only remove target.
+  const interactiveGrouping = mount({
+    override: {
+      features: [groupingPanel<Row>(["team"], {})],
+    },
+  });
+  absorb();
+  const groupingTransfer = {
+    effectAllowed: "",
+    dropEffect: "",
+    values: new Map<string, string>(),
+    get types() {
+      return [...this.values.keys()];
+    },
+    setData(type: string, value: string) {
+      this.values.set(type, value);
+    },
+    getData(type: string) {
+      return this.values.get(type) ?? "";
+    },
+  };
+  fireEvent.dragStart(part("grouping-chip-handle")!, {
+    dataTransfer: groupingTransfer,
+  });
+  absorb();
+  interactiveGrouping.unmount();
+
   // Row reorder: desktop grip + header, mobile up/down. Isolated so grouping
   // does not refuse the column and fire a devWarn in the kitchen-sink mounts.
   mount({ override: { features: [rowReorder(vi.fn())] } }).unmount();
@@ -739,6 +772,9 @@ const KEYS = [
   "columnMenuMore",
   "columnMenuSubmenu",
   "columnMenuAction",
+  "columnMenuChoice",
+  "columnMenuChoiceLabel",
+  "columnMenuChoiceSelect",
   "columnRenameForm",
   "columnRenameLabel",
   "columnRenameInput",
@@ -827,6 +863,17 @@ const KEYS = [
   "groupLabel",
   "groupCount",
   "groupAggregate",
+  "groupingPanel",
+  "groupingDropZone",
+  "groupingItem",
+  "groupingChip",
+  "groupingChipHandle",
+  "groupingChipRemove",
+  "groupingAdd",
+  "groupingAggregateControls",
+  "groupingAggregateColumn",
+  "groupingAggregate",
+  "groupingRemoveZone",
   "editCellActivate",
   "editCellEditor",
   "cards",

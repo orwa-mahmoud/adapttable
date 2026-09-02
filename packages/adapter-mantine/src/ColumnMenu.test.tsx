@@ -1,4 +1,11 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import {
+  featureHostOf,
+  FeatureHostProvider,
+  type GroupingPanelState,
+  useTableFeatures,
+} from "@adapttable/core/adapter";
+import type { TableFeature } from "@adapttable/core/features";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -63,12 +70,83 @@ const labels = {
   columnNameRequired: "Enter a column name.",
   columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
     `${previous} renamed to ${name}.`,
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 // Mantine renders the dropdown in a portal whose buttons testing-library's
 // role query treats as hidden mid-transition; query by aria-label directly.
 const byLabel = (name: string) =>
   document.querySelector<HTMLElement>(`[aria-label="${name}"]`)!;
+
+function groupingState(): GroupingPanelState {
+  return {
+    groupBy: ["b"],
+    aggregateOverrides: {},
+    canSetAggregates: true,
+    announcement: "",
+    headerDragProps: () => ({}),
+    chipDragProps: () => ({}),
+    chipKeyboardProps: () => ({
+      tabIndex: 0,
+      role: "button",
+      "aria-label": "Move grouping",
+      onKeyDown: () => undefined,
+    }),
+    dropProps: () => ({}),
+    removeDropProps: () => ({}),
+    add: vi.fn(),
+    remove: vi.fn(),
+    moveBy: vi.fn(),
+    setAggregate: vi.fn(),
+  };
+}
+
+function ChoiceMenu({
+  onChange,
+}: Readonly<{ onChange: (value: string) => void }>) {
+  const choiceFeature: TableFeature<Row> = {
+    id: "column-choice-test",
+    setup(host) {
+      host.registerColumnMenuAction((_row, context) =>
+        context.groupingPanel
+          ? {
+              kind: "choice",
+              id: "aggregation-test",
+              label: "Group aggregation",
+              disabled: false,
+              value: "",
+              options: [
+                { value: "", label: "Default" },
+                { value: "sum", label: "Sum" },
+              ],
+              onChange,
+            }
+          : undefined
+      );
+    },
+  };
+  const props = useTableFeatures({ features: [choiceFeature] });
+  return (
+    <FeatureHostProvider host={featureHostOf(props)}>
+      <ColumnMenu
+        allColumns={cols}
+        layout={fakeLayout()}
+        labels={labels}
+        onAutoSize={() => undefined}
+        groupingPanel={groupingState()}
+      />
+    </FeatureHostProvider>
+  );
+}
 
 describe("mantine ColumnMenu", () => {
   it("shows drop-position feedback while dragging a row", async () => {
@@ -376,5 +454,27 @@ describe("mantine ColumnMenu", () => {
       )!
     );
     await waitFor(() => expect(renameAction).toHaveFocus());
+  });
+
+  it("renders plugin choices as labelled selects without closing", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <MantineProvider env="test">
+        <ChoiceMenu onChange={onChange} />
+      </MantineProvider>
+    );
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+    const [, choice] = screen.getAllByRole("combobox", {
+      name: "Group aggregation",
+    });
+    if (!choice) throw new Error("Expected the plugin aggregation choice");
+    await user.click(choice);
+    await user.click(await screen.findByRole("option", { name: "Sum" }));
+
+    expect(onChange).toHaveBeenCalledWith("sum");
+    expect(choice).toBeInTheDocument();
   });
 });

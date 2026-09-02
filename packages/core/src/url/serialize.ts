@@ -46,6 +46,8 @@ export const PARAM_SORT_DIR = "sortDir";
 export const PARAM_SORT = "sort";
 /** Row grouping keys, comma-separated — outermost first. */
 export const PARAM_GROUP_BY = "groupBy";
+/** Per-column group aggregate overrides. */
+export const PARAM_GROUP_AGGREGATES = "groupAgg";
 /** Keys under this prefix flow through as-is into the `extra` bag. */
 export const FILTER_PREFIX = "f_";
 /** Versioned AND/OR filter tree (`ft=1.{…}`). */

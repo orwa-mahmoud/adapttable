@@ -76,6 +76,8 @@ const FIXTURES = [
       "parseFormula",
       "useRowPatchStream",
       "useChangedCellFlash",
+      "GROUPING_COLUMN_DND_MIME",
+      "grouping-drop-zone",
     ],
   },
   {
@@ -97,7 +99,18 @@ const FIXTURES = [
       "parseFormula",
       "useRowPatchStream",
       "useChangedCellFlash",
+      "GROUPING_COLUMN_DND_MIME",
+      "grouping-drop-zone",
     ],
+  },
+  {
+    // Drag, keyboard, panel chrome, and announcements stay on the explicit
+    // feature subpath; the two fixtures above prove the table never pays it.
+    name: "core · grouping panel",
+    pkg: "core",
+    entryFile: "features.js",
+    budgetKB: 12,
+    code: `export { groupingPanel } from "PKG";`,
   },
   {
     // What the pivot engine costs the tables that ask for it, and nothing to

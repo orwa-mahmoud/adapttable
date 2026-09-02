@@ -46,6 +46,7 @@ import type {
   GridFocusState,
   UseGridFocusOptions,
 } from "../focus/useGridFocus";
+import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
 import type { FullscreenState } from "../layout/useFullscreen";
@@ -570,6 +571,12 @@ export interface ChromeExtraSlotProps<TRow = never> {
  */
 export const GROUPING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
   "grouping-live",
+  { single: true }
+);
+
+/** Adapter-owned interactive grouping strip above the table body. @public */
+export const GROUPING_PANEL = featureSlotKey<GroupingPanelSlotProps<never>>(
+  "grouping-panel",
   { single: true }
 );
 

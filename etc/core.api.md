@@ -7,7 +7,9 @@
 import { ComponentType } from 'react';
 import { CSSProperties } from 'react';
 import { DragEvent as DragEvent_2 } from 'react';
+import { HTMLAttributes } from 'react';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
+import { KeyboardEventHandler } from 'react';
 import { MouseEvent as MouseEvent_2 } from 'react';
 import { PointerEvent as PointerEvent_2 } from 'react';
 import { ReactElement } from 'react';
@@ -763,6 +765,7 @@ export interface ColumnMenuAction {
 // @public
 export interface ColumnMenuActionContext<TRow = unknown> {
     featureHost?: FeatureHostState<TRow>;
+    groupingPanel?: GroupingPanelState;
     labels: ColumnMenuLabels;
     layout: UseColumnLayoutResult<TRow>;
     onAutoSizeColumn?: (key: string) => void;
@@ -774,7 +777,27 @@ export interface ColumnMenuActionContext<TRow = unknown> {
 }
 
 // @public
-export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined;
+export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined;
+
+// @public
+export interface ColumnMenuChoice {
+    disabled: boolean;
+    id: string;
+    kind: "choice";
+    label: string;
+    onChange: (value: string) => void;
+    options: readonly ColumnMenuChoiceOption[];
+    value: string;
+}
+
+// @public
+export interface ColumnMenuChoiceOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export type ColumnMenuItem = ColumnMenuAction | ColumnMenuChoice;
 
 // @public
 export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string;
@@ -793,6 +816,11 @@ export interface ColumnMenuLabels {
     }) => string;
     columns: string;
     filterColumn: string;
+    groupByColumn: (label: string) => string;
+    groupingAggregation: string;
+    groupingAggregationDefault: string;
+    groupingAggregationNone: string;
+    groupingAverage: string;
     hideAllColumns: string;
     hideColumn: string;
     moveEnd: string;
@@ -804,10 +832,15 @@ export interface ColumnMenuLabels {
     resetColumns: string;
     saveColumnName: string;
     searchColumns: string;
+    selectionCount: string;
+    selectionMax: string;
+    selectionMin: string;
+    selectionSum: string;
     showAllColumns: string;
     showColumn: string;
     sortAscending: string;
     sortDescending: string;
+    ungroupColumn: (label: string) => string;
     unpin: string;
     unpinAllColumns: string;
 }
@@ -2074,6 +2107,12 @@ export interface GridKeyPress {
 export function groupAggregateEntries<TRow>(columns: readonly ColumnDef<TRow>[], aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined): GroupRowCell<TRow>[];
 
 // @public
+export type GroupAggregateOverride = AggregateName | "none";
+
+// @public
+export type GroupAggregateOverrides = Readonly<Partial<Record<string, GroupAggregateOverride>>>;
+
+// @public
 export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
 
 // @public
@@ -2142,6 +2181,57 @@ export type GroupedHeaderAlign = "start" | "center" | "end";
 
 // @public
 export type GroupingCapability = "client" | "server" | false;
+
+// @public
+export interface GroupingChipKeyboardProps {
+    "aria-label": string;
+    onKeyDown: KeyboardEventHandler<HTMLElement>;
+    role: "button";
+    tabIndex: 0;
+}
+
+// @public
+export interface GroupingDragProps extends Pick<HTMLAttributes<HTMLElement>, "draggable" | "onDragStart" | "onDragEnd"> {
+    "data-grouping-dragging"?: boolean;
+}
+
+// @public
+export type GroupingDragSource = "header" | "chip";
+
+// @public
+export interface GroupingDragState {
+    key: string;
+    overIndex?: number;
+    overRemove?: boolean;
+    source: GroupingDragSource;
+}
+
+// @public
+export interface GroupingDropProps extends Pick<HTMLAttributes<HTMLElement>, "onDragEnter" | "onDragOver" | "onDragLeave" | "onDrop"> {
+    "data-drop-active"?: boolean;
+}
+
+// @public
+export interface GroupingPanelInteractions {
+    add: (key: string) => void;
+    announcement: string;
+    chipDragProps: (key: string) => GroupingDragProps;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    drag?: GroupingDragState;
+    dropProps: (index: number) => GroupingDropProps;
+    headerDragProps: (key: string) => GroupingDragProps;
+    moveBy: (key: string, delta: -1 | 1) => void;
+    remove: (key: string) => void;
+    removeDropProps: () => GroupingDropProps;
+    setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
+}
+
+// @public
+export interface GroupingPanelState extends GroupingPanelInteractions {
+    aggregateOverrides: GroupAggregateOverrides;
+    canSetAggregates: boolean;
+    groupBy: readonly string[];
+}
 
 // @public
 export function groupLeafCount(entry: {
@@ -2582,6 +2672,9 @@ export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined;
 
 // @public
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
+
+// @public
+export function parseGroupAggregateOverrides(value: string | null | undefined): GroupAggregateOverrides;
 
 // @public
 export function parseGroupBy(value: GroupByInput): string[];
@@ -3338,6 +3431,9 @@ export interface SelectionStatsOptions<TRow> {
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;
 
 // @public
+export function serializeGroupAggregateOverrides(overrides: GroupAggregateOverrides): string | undefined;
+
+// @public
 export function serverGroupEntries<TRow>(options: ServerGroupEntriesOptions<TRow>): GroupedFlatEntry<TRow>[];
 
 // @public
@@ -3502,6 +3598,7 @@ export interface TableChrome<TRow> {
         }) => void;
     };
     groupingArmed: boolean;
+    groupingPanel?: GroupingPanelState;
     hasRowActions: boolean;
     hasRowReorder: boolean;
     isMobile: boolean;
@@ -3589,7 +3686,7 @@ export interface TableFeatureHost<TRow = unknown> {
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     onDispose(cleanup: () => void): void;
     registerAggregator(name: string, aggregator: Aggregator): void;
-    registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined): void;
+    registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined): void;
     registerCommand(command: Command): void;
     registerContextMenuItems(items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]): void;
     registerEditor(type: string, render: CustomCellEditorRender): void;
@@ -3601,6 +3698,7 @@ export interface TableFeatureHost<TRow = unknown> {
 // @public
 export interface TableLabels {
     actions?: string;
+    addGroupingColumn?: string;
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
@@ -3699,7 +3797,20 @@ export interface TableLabels {
         toColumn: number;
         cells: number;
     }) => string;
+    groupByColumn?: (label: string) => string;
     groupCount?: (count: number) => string;
+    groupingAdded?: (label: string) => string;
+    groupingAggregateChanged?: (label: string, aggregation: string) => string;
+    groupingAggregateColumn?: string;
+    groupingAggregation?: string;
+    groupingAggregationDefault?: string;
+    groupingAggregationNone?: string;
+    groupingAverage?: string;
+    groupingDropColumns?: string;
+    groupingDropToRemove?: string;
+    groupingMoved?: (label: string, position: number) => string;
+    groupingPanel?: string;
+    groupingRemoved?: (label: string) => string;
     groupTotal?: (label: string) => string;
     headerFilters?: string;
     hideAllColumns?: string;
@@ -3710,6 +3821,7 @@ export interface TableLabels {
     moreGroups?: (remaining: number) => string;
     moreRowsInGroup?: (remaining: number) => string;
     moveEnd?: string;
+    moveGroupingColumn?: (label: string) => string;
     moveRejectedCycle?: string;
     moveRejectedPolicyNever?: string;
     moveRejectedSorted?: string;
@@ -3787,6 +3899,7 @@ export interface TableLabels {
     relTomorrow?: string;
     relYesterday?: string;
     removeFilter?: (label: string) => string;
+    removeGroupingColumn?: (label: string) => string;
     renameColumn?: string;
     renameView?: string;
     reorderRow?: string;
@@ -3844,6 +3957,7 @@ export interface TableLabels {
     theirsValue?: (value: string) => string;
     to?: string;
     undoEdit?: string;
+    ungroupColumn?: (label: string) => string;
     unpin?: string;
     unpinAllColumns?: string;
     unpinRow?: string;
@@ -3938,6 +4052,7 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly facets?: FacetMap;
     fetchNextPage: () => void;
     readonly filterTree?: QueryFilterGroup;
+    readonly groupAggregateOverrides?: GroupAggregateOverrides;
     readonly groupBy: string | undefined;
     readonly groups?: readonly QueryGroupRow<TRow>[];
     readonly hasNextPage: boolean;
@@ -3968,9 +4083,11 @@ export interface TableSourceCapabilities {
 export interface TableStateMutators {
     clearAll: () => void;
     clearExtras: () => void;
+    initializeGroupBy?: (key: string) => void;
     setExtra: (key: string, value: FilterValue) => void;
     setExtras: (updates: ExtraFilters) => void;
     setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
+    setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
     setGroupBy: (key: string | undefined) => void;
     setLimit: (next: number) => void;
     setPage: (next: number) => void;
@@ -4663,6 +4780,7 @@ export function useServerData<TRow>(options: UseServerDataOptions<TRow>): TableS
 
 // @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+    aggregates?: readonly QueryAggregate[];
     error?: Error | null;
     expandedIds?: readonly string[];
     facetKeys?: readonly string[];
@@ -4751,6 +4869,7 @@ export interface UseTableUrlStateResult extends TableStateMutators {
     defaultLimit: number;
     extra: ExtraFilters;
     filterTree: QueryFilterGroup | undefined;
+    groupAggregateOverrides: GroupAggregateOverrides;
     groupBy: string | undefined;
     limit: number;
     page: number;
@@ -4841,6 +4960,12 @@ export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
 
 // @public
 export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
+
+// @public
+export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnDef<TRow>[]): GroupAggregatesFn<TRow> | undefined;
+
+// @public
+export function withQueryAggregateOverrides(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides): readonly QueryAggregate[] | undefined;
 
 // @public
 export function writeClipboardText(text: string): Promise<boolean>;

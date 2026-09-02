@@ -207,6 +207,43 @@ const INTERPOLATION_CASES: Record<
     call: (fn) => (fn as (parent: string) => string)("PARENT_X"),
     expects: ["PARENT_X"],
   },
+  groupByColumn: {
+    call: (fn) => (fn as (label: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  ungroupColumn: {
+    call: (fn) => (fn as (label: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  removeGroupingColumn: {
+    call: (fn) => (fn as (label: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  moveGroupingColumn: {
+    call: (fn) => (fn as (label: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  groupingAdded: {
+    call: (fn) => (fn as (label: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  groupingRemoved: {
+    call: (fn) => (fn as (label: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  groupingMoved: {
+    call: (fn) =>
+      (fn as (label: string, position: number) => string)("COLUMN_X", 47),
+    expects: ["COLUMN_X", "47"],
+  },
+  groupingAggregateChanged: {
+    call: (fn) =>
+      (fn as (label: string, aggregation: string) => string)(
+        "COLUMN_X",
+        "AGGREGATION_X"
+      ),
+    expects: ["COLUMN_X", "AGGREGATION_X"],
+  },
 };
 
 const NUMERIC_CASE = {

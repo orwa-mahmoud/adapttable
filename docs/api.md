@@ -22,6 +22,25 @@ Feature factory options are not `DataTable` props. For example, compose
 `columnMenu()`, `filters(defs)`, `editing(save)` or `virtualize()` in
 `features`; each feature page documents its options.
 
+### Interactive row grouping
+
+Each kit exports `groupingPanel` from
+`@adapttable/<kit>/grouping-panel`:
+
+```tsx
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+
+groupingPanel();
+groupingPanel(["team", "status"], extras);
+```
+
+`groupingPanel(groupBy?, extras?)` owns the ordinary grouping row model,
+group-header renderers, and the kit-native panel. The optional first argument
+is a column key or ordered list; the second is `GroupingExtras<TRow>`. Use
+plain `grouping()` only for code-fixed grouping with no interactive panel.
+When `columnMenu()` is also composed, its menu model adds Group by/Ungroup and
+per-column aggregation choices.
+
 ### Columns & layout
 
 | Prop                    | Type                                  | Default | Description                                                                                                                                               |
@@ -430,9 +449,12 @@ All from `@adapttable/core`.
 ### URL state & persistence
 
 - `useTableUrlState(options?): UseTableUrlStateResult` — page / limit /
-  search / sort / extra-filter bag in the query string, with setters
+  search / sort / grouping / group-aggregation overrides / extra-filter bag in
+  the query string, with setters
   (`setPage`, `setSearch`, `setSort`, `toggleSortLevel`, `setExtra`,
-  `setExtras`, `setFilterTree`, `clearExtras`, `clearAll`).
+  `setExtras`, `setFilterTree`, `setGroupBy`,
+  `setGroupAggregateOverrides`, `clearExtras`, `clearAll`). Group keys use
+  `groupBy`; overrides use `groupAgg`.
 - `useColumnLayoutUrlState(options?): { layout, onLayoutChange }` —
   URL-persisted column layout (hidden / order / pinned / widths / names).
 - `useColumnLayoutStorageState(options): { layout, onLayoutChange }` — the
@@ -987,6 +1009,34 @@ report a row and its open panel as one height through the virtualizer's
 **Row grouping.** `groupBy` takes a key or an ordered list; `parseGroupBy(value)`
 turns any of its forms (`GroupByInput`) into the key list and `formatGroupBy`
 back into the single comma-separated value state is stored as.
+`groupingPanel(groupBy?, extras?)` from each kit's `/grouping-panel` subpath
+adds the interactive strip and still accepts every `GroupingExtras` option.
+It publishes `GroupingPanelState`: ordered `groupBy`, drag/drop and keyboard
+bindings, `add` / `remove` / `moveBy`, and `setAggregate`.
+`GroupAggregateOverride` is `"sum" | "avg" | "min" | "max" | "count" |
+"none"`; `GroupAggregateOverrides` maps those session choices by column.
+`serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` encode the
+`groupAgg` parameter. `withGroupAggregateOverrides` layers them over a
+developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
+the same for server `query.aggregates`; an absent key preserves the developer
+choice and `"none"` removes it.
+
+Adapter authors bind the `GROUPING_PANEL` slot with
+`createAdapterGroupingPanelFeature(AdapterGroupingPanelComponents)`.
+`GroupingPanelChrome` takes `GroupingPanelChromeProps` /
+`GroupingPanelSlotProps` and a `GroupingPanelSlots` object whose required
+pieces receive `GroupingPanelSurfaceProps`, `GroupingPanelDropZoneProps`,
+`GroupingPanelChipProps`, `GroupingPanelSelectProps`, and
+`GroupingPanelRemoveZoneProps`; select entries are `GroupingPanelOption`s and
+native event wiring uses `GroupingDragProps` / `GroupingDropProps`.
+`GroupingPanelInteractions` carries those callbacks,
+`GroupingChipKeyboardProps` defines the equal keyboard path, and
+`GroupingDragState` describes the active drag while `GroupingDragSource` names
+its header-or-chip origin. Every kit exports its kit-owned `GroupingPanel`;
+Radix additionally names `RadixGroupingPanelProps`.
+Column-menu plugins return a `ColumnMenuItem`: either an ordinary action or a
+`ColumnMenuChoice` made of `ColumnMenuChoiceOption`s.
+
 `buildGroupedFlatModel(options)` walks the tree into the flat `GroupedFlatEntry`
 list adapters render — each group entry carrying its `level`, its `groupBy` key,
 its `path` and the leaves of its whole subtree — and `groupIndentStyle(level)`
@@ -1438,6 +1488,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                       |
 | `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                      |
 | `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                            |
+| `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                       |
 | `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                          |
 | `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                              |
 | `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md). |

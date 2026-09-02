@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FacetMap } from "../filters/facets";
+import { withQueryAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import { parseGroupBy } from "../grouping/groupKeys";
 import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
 import type {
@@ -179,7 +180,24 @@ export function useQuerySource<
   const paged = resolvedMode === "paged";
 
   const state = useTableUrlState(urlOptions);
-  const { page, limit, search, sortBy, sortDir, groupBy, extra } = state;
+  const {
+    page,
+    limit,
+    search,
+    sortBy,
+    sortDir,
+    groupBy,
+    groupAggregateOverrides,
+    extra,
+  } = state;
+  const effectiveAggregates = useMemo(
+    () => withQueryAggregateOverrides(aggregates, groupAggregateOverrides),
+    [aggregates, groupAggregateOverrides]
+  );
+  const effectiveGroupBy = useMemo(() => {
+    const keys = parseGroupBy(groupBy);
+    return keys.length > 0 ? keys : undefined;
+  }, [groupBy]);
 
   // Cursor mode keeps every token the server has handed out, indexed by the
   // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
@@ -212,8 +230,8 @@ export function useQuerySource<
       applyQuerySupport(
         {
           cursor,
-          groupBy: parseGroupBy(groupBy),
-          aggregates,
+          groupBy: effectiveGroupBy,
+          aggregates: effectiveAggregates,
           expandedIds,
           filterTree: state.filterTree,
           facets: facetKeys,
@@ -232,9 +250,10 @@ export function useQuerySource<
     sortBy,
     sortDir,
     groupBy,
+    effectiveGroupBy,
     sanitizeParams,
     cursor,
-    aggregates,
+    effectiveAggregates,
     expandedIds,
     supports,
     state.filterTree,
@@ -261,7 +280,7 @@ export function useQuerySource<
   // A query whose cursor trail is stale must start over rather than page into
   // a position that no longer exists: any change to what the query MEANS
   // (search, sort, filters, page size) invalidates every token already held.
-  const trailKey = `${limit}|${search}|${sortBy ?? ""}|${sortDir ?? ""}|${groupBy ?? ""}|${JSON.stringify(extra)}`;
+  const trailKey = `${limit}|${search}|${sortBy ?? ""}|${sortDir ?? ""}|${groupBy ?? ""}|${JSON.stringify(groupAggregateOverrides)}|${JSON.stringify(extra)}`;
   const previousTrailKey = useRef(trailKey);
   useEffect(() => {
     if (!cursorMode || previousTrailKey.current === trailKey) return;
@@ -341,6 +360,8 @@ export function useQuerySource<
     setLimit,
     setSort,
     setGroupBy,
+    initializeGroupBy,
+    setGroupAggregateOverrides,
     sortLevels,
     toggleSortLevel,
     setSearch,
@@ -369,6 +390,7 @@ export function useQuerySource<
       sortBy,
       sortDir,
       groupBy,
+      groupAggregateOverrides,
       extra,
       facets,
       filterTree: state.filterTree,
@@ -376,6 +398,8 @@ export function useQuerySource<
       setLimit,
       setSort,
       setGroupBy,
+      initializeGroupBy,
+      setGroupAggregateOverrides,
       sortLevels,
       toggleSortLevel,
       setSearch,
@@ -404,6 +428,7 @@ export function useQuerySource<
       sortBy,
       sortDir,
       groupBy,
+      groupAggregateOverrides,
       extra,
       facets,
       state.filterTree,
@@ -411,6 +436,8 @@ export function useQuerySource<
       setLimit,
       setSort,
       setGroupBy,
+      initializeGroupBy,
+      setGroupAggregateOverrides,
       sortLevels,
       toggleSortLevel,
       setSearch,

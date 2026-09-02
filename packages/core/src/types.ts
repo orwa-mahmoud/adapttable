@@ -1024,6 +1024,40 @@ export interface TableLabels {
   collapseGroup?: string;
   /** Leaf-count suffix on a group header, e.g. `(12)`. */
   groupCount?: (count: number) => string;
+  /** Visible and accessible name of the interactive grouping strip. */
+  groupingPanel?: string;
+  /** Instruction shown by the desktop grouping drop target. */
+  groupingDropColumns?: string;
+  /** Accessible label of the select that adds a grouping field. */
+  addGroupingColumn?: string;
+  /** Add one named column to row grouping. */
+  groupByColumn?: (label: string) => string;
+  /** Remove one named column from row grouping. */
+  ungroupColumn?: (label: string) => string;
+  /** Remove one grouping field. */
+  removeGroupingColumn?: (label: string) => string;
+  /** Keyboard drag handle for one grouping field. */
+  moveGroupingColumn?: (label: string) => string;
+  /** Chip-only drop target that removes a grouping field. */
+  groupingDropToRemove?: string;
+  /** Select the column whose group aggregate is being changed. */
+  groupingAggregateColumn?: string;
+  /** Label for a grouped-table aggregation picker. */
+  groupingAggregation?: string;
+  /** Preserve the developer-provided aggregation. */
+  groupingAggregationDefault?: string;
+  /** Explicitly hide a column's group aggregate. */
+  groupingAggregationNone?: string;
+  /** Full label for the average aggregation choice. */
+  groupingAverage?: string;
+  /** Polite announcement after adding a grouping field. */
+  groupingAdded?: (label: string) => string;
+  /** Polite announcement after removing a grouping field. */
+  groupingRemoved?: (label: string) => string;
+  /** Polite announcement after changing nesting order. */
+  groupingMoved?: (label: string, position: number) => string;
+  /** Polite announcement after changing one aggregation choice. */
+  groupingAggregateChanged?: (label: string, aggregation: string) => string;
   /**
    * Status copy when `virtualize` is on a paged table, which stays one page.
    */

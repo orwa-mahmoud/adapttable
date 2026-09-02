@@ -131,22 +131,41 @@ function ColumnMenuRowItem<TRow>({
           className="d-flex flex-column ms-4 mb-1"
           data-adapttable-part="column-menu-submenu"
         >
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="sm"
-              variant="link"
-              className="text-start text-decoration-none"
-              data-adapttable-part="column-menu-action"
-              disabled={action.disabled}
-              onClick={() => {
-                action.run();
-                setOpen(false);
-              }}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action) =>
+            "kind" in action ? (
+              <Form.Group key={action.id} className="px-2 py-1">
+                <Form.Label className="small mb-1">{action.label}</Form.Label>
+                <Form.Select
+                  size="sm"
+                  aria-label={action.label}
+                  value={action.value}
+                  disabled={action.disabled}
+                  onChange={(event) => action.onChange(event.target.value)}
+                >
+                  {action.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            ) : (
+              <Button
+                key={action.id}
+                size="sm"
+                variant="link"
+                className="text-start text-decoration-none"
+                data-adapttable-part="column-menu-action"
+                disabled={action.disabled}
+                onClick={() => {
+                  action.run();
+                  setOpen(false);
+                }}
+              >
+                {action.label}
+              </Button>
+            )
+          )}
         </div>
       )}
     </div>

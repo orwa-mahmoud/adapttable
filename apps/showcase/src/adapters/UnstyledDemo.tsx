@@ -1,6 +1,7 @@
 import type { FeatureProps } from "@adapttable/core";
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
 import type {} from "@adapttable/unstyled";
+import { groupingPanel as groupingPanel_ } from "@adapttable/unstyled/grouping-panel";
 
 import { type Locale, type Person } from "../data";
 import {
@@ -125,6 +126,7 @@ export function UnstyledDemo({
     <UnstyledLike
       mode={mode}
       locale={locale}
+      groupingPanelFactory={groupingPanel_}
       pageMode={pageMode}
       urlKey={urlKey}
       density={density}

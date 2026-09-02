@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { defaultLabels } from "../labels";
 import type { ColumnDef } from "../types";
 import {
+  type ColumnMenuAction,
   columnMenuActions,
+  type ColumnMenuItem,
   columnMenuLabel,
   columnMenuRows,
   filterColumnMenuRows,
@@ -19,6 +21,16 @@ import type { UseColumnLayoutResult } from "./useColumnLayout";
 interface Row {
   id: string;
 }
+
+function action(
+  items: readonly ColumnMenuItem[],
+  id: string
+): ColumnMenuAction {
+  const item = items.find((candidate) => candidate.id === id);
+  if (!item || "kind" in item) throw new Error(`Missing action: ${id}`);
+  return item;
+}
+
 const cols: ColumnDef<Row>[] = [
   { key: "a", header: "Alpha", accessor: (r) => r.id },
   { key: "b", header: "Bravo", accessor: (r) => r.id },
@@ -203,18 +215,18 @@ describe("column menu 2.0", () => {
         "reset",
       ])
     );
-    sortActs.find((a) => a.id === "sort-asc")!.run();
+    action(sortActs, "sort-asc").run();
     expect(onSortColumn).toHaveBeenCalledWith("b", "asc");
-    sortActs.find((a) => a.id === "sort-desc")!.run();
+    action(sortActs, "sort-desc").run();
     expect(onSortColumn).toHaveBeenCalledWith("b", "desc");
-    sortActs.find((a) => a.id === "rename")!.run();
+    action(sortActs, "rename").run();
     expect(onBeginRename).toHaveBeenCalledOnce();
     const filterActs = columnMenuActions(rows[2]!, {
       labels: defaultLabels,
       layout: l,
       onFilterColumn,
     });
-    filterActs.find((a) => a.id === "filter")!.run();
+    action(filterActs, "filter").run();
     expect(onFilterColumn).toHaveBeenCalledWith("c");
   });
 
@@ -235,17 +247,17 @@ describe("column menu 2.0", () => {
       layout: l,
       onAutoSizeColumn,
     });
-    acts.find((a) => a.id === "pin-start")!.run();
+    action(acts, "pin-start").run();
     expect(setPinned).toHaveBeenCalledWith("b", "start");
-    acts.find((a) => a.id === "pin-end")!.run();
+    action(acts, "pin-end").run();
     expect(setPinned).toHaveBeenCalledWith("b", "end");
-    acts.find((a) => a.id === "unpin")!.run();
+    action(acts, "unpin").run();
     expect(setPinned).toHaveBeenCalledWith("b", undefined);
-    acts.find((a) => a.id === "show")!.run();
+    action(acts, "show").run();
     expect(toggleVisible).toHaveBeenCalledWith("b");
-    acts.find((a) => a.id === "auto-size")!.run();
+    action(acts, "auto-size").run();
     expect(onAutoSizeColumn).toHaveBeenCalledWith("b");
-    acts.find((a) => a.id === "reset")!.run();
+    action(acts, "reset").run();
     expect(setHidden).toHaveBeenCalledWith("b", false);
     expect(setPinned).toHaveBeenCalledWith("b", undefined);
     expect(setWidth).toHaveBeenCalledWith("b", undefined);

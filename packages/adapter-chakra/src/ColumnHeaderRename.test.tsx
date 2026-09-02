@@ -33,6 +33,16 @@ const labels: ColumnMenuLabels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  groupByColumn: (label) => `Group by ${label}`,
+  ungroupColumn: (label) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 describe("Chakra ColumnHeaderRename", () => {

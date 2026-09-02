@@ -1,6 +1,6 @@
 # AdaptTable
 
-> AdaptTable is a headless, UI-agnostic React data table. A single headless engine (`@adapttable/core`) powers ready, batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui, and unstyled Tailwind. It unifies client-side and server-side data behind one `TableSource` contract, syncs search/sort/filter/page state to the URL for shareable links, supports true infinite scroll and classic paging (auto by device), optional row/card virtualization, column management (show/hide, reorder, pin, resize), automatic responsive mobile cards, and first-class i18n + RTL (Arabic). Easy by default (5-line setup), infinitely customizable (slots, classNames, render props, prop-getters). MIT licensed.
+> AdaptTable is a headless, UI-agnostic React data table. A single headless engine (`@adapttable/core`) powers ready, batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui, and unstyled Tailwind. It unifies client-side and server-side data behind one `TableSource` contract, syncs search/sort/filter/page/grouping state to the URL for shareable links, supports true infinite scroll and classic paging (auto by device), optional row/card virtualization, column management (show/hide, reorder, pin, resize), interactive row grouping (desktop header drag-and-drop, keyboard/mobile controls, aggregation choices), automatic responsive mobile cards, and first-class i18n + RTL (Arabic). Easy by default (5-line setup), infinitely customizable (slots, classNames, render props, prop-getters). MIT licensed.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -28,7 +28,11 @@ automatic table-to-card responsive layouts.
 Wrap the app once in the UI kit's own provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider, per that kit's docs); the unstyled adapter needs none.
 
 ```tsx
-import { DataTable, useFrontendData, type ColumnDef } from "@adapttable/mantine";
+import {
+  DataTable,
+  useFrontendData,
+  type ColumnDef,
+} from "@adapttable/mantine";
 
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
@@ -47,8 +51,14 @@ Swap `useFrontendData` for `useQuerySource` to drive the same table from a serve
 
 ```tsx
 import { useDataTable } from "@adapttable/core";
-const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getSearchInputProps } =
-  useDataTable({ source, columns, rowKey });
+const {
+  rows,
+  getTableProps,
+  getHeaderCellProps,
+  getRowProps,
+  getCellProps,
+  getSearchInputProps,
+} = useDataTable({ source, columns, rowKey });
 ```
 
 ## Docs
@@ -71,7 +81,7 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 - [React table full-width and separator rows — extraRows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/): host-injected slots spliced by beforeRowId, separator or one spanning cell, mobile cards keep the same slots
 - [React table row styling and heights — rowStyle, rowHeight](https://orwa-mahmoud.github.io/adapttable/row-styling/): conditional inline style and per-row height, variable-height virtualizer, desktop and mobile cards
 - [React table keyboard navigation — arrow keys, range selection & fill handle](https://orwa-mahmoud.github.io/adapttable/cell-navigation/): one tab stop, absolute aria-rowindex under virtualization, screen-reader announcements, cell-range selection, clipboard copy/paste of a range, drag-to-fill
-- [React table row grouping — nested groupBy & aggregates](https://orwa-mahmoud.github.io/adapttable/row-grouping/): one key or an ordered list, per-group subtotals sharing the summaryRow mapper, expand/collapse, frontend tier only
+- [React table row grouping — interactive panel, nested groupBy & aggregates](https://orwa-mahmoud.github.io/adapttable/row-grouping/): import `groupingPanel` from the kit's `/grouping-panel` subpath; drag desktop headers into the above-table strip, reorder/remove chips, use keyboard or mobile selects, choose session aggregates, and persist `groupBy` plus `groupAgg` in URLs and Saved Views
 - [React pivot table — rows, columns and measures](https://orwa-mahmoud.github.io/adapttable/pivot/): optional `@adapttable/core/pivot` entry, multiple dimensions on both axes, subtotals and collapsible groups
 - [React table formulas — spreadsheet columns](https://orwa-mahmoud.github.io/adapttable/formulas/): optional `@adapttable/core/formula` entry, a parsed grammar that never reaches eval, tagged values so an error is not a string
 - [React table tree data — hierarchical rows with expand/collapse](https://orwa-mahmoud.github.io/adapttable/tree-data/): getChildren or getParentId, per-level indent, mobile cards keep the hierarchy

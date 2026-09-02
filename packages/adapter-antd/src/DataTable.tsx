@@ -78,6 +78,8 @@ import {
   FIND_BAR,
   flattenColumnTree,
   GRID_FOCUS_ANNOUNCER,
+  GROUPING_PANEL,
+  type GroupingPanelSlotProps,
   insertExtraRows,
   isExtraEntry,
   KEYED_WINDOW,
@@ -652,6 +654,7 @@ function ColumnMenuSlot<TRow>({
   onRenameColumn,
   sortBy,
   sortDir,
+  groupingPanel,
 }: Readonly<{
   enabled: boolean;
   allColumns: ColumnDef<TRow>[];
@@ -668,6 +671,9 @@ function ColumnMenuSlot<TRow>({
   onRenameColumn?: (key: string, name: string) => void;
   sortBy?: string;
   sortDir?: "asc" | "desc";
+  groupingPanel?: NonNullable<
+    ReturnType<typeof useTableChrome<TRow>>["groupingPanel"]
+  >;
 }>) {
   if (!enabled) return null;
   return (
@@ -688,6 +694,7 @@ function ColumnMenuSlot<TRow>({
           hasRowActions,
           hasRowReorder,
           dir,
+          groupingPanel,
         } as ColumnMenuSlotProps<never>
       }
     />
@@ -1836,6 +1843,30 @@ interface AntdTableBodyProps<TRow> {
   readonly grouping: GroupingBundle<TRow> | undefined;
 }
 
+function AntdGroupingPanel<TRow>({
+  state,
+  columns,
+  labels,
+  mobile,
+  dir,
+}: Readonly<{
+  state: GroupingPanelSlotProps<TRow>["state"] | undefined;
+  columns: GroupingPanelSlotProps<TRow>["columns"];
+  labels: GroupingPanelSlotProps<TRow>["labels"];
+  mobile: boolean;
+  dir: GroupingPanelSlotProps<TRow>["dir"];
+}>) {
+  if (!state) return null;
+  return (
+    <FeatureSlot
+      slot={GROUPING_PANEL}
+      props={
+        { state, columns, labels, mobile, dir } as GroupingPanelSlotProps<never>
+      }
+    />
+  );
+}
+
 /**
  * The table itself, below the extras gate.
  *
@@ -2054,6 +2085,7 @@ function AntdTableBody<TRow>({
     labels,
     editing: c.editing,
     rows: c.editingRows,
+    groupingPanel: c.groupingPanel,
     getRowId,
     pinned: c.columnLayout.state.pinned,
     setWidth: props.resizableColumns ? c.columnLayout.setWidth : undefined,
@@ -2234,7 +2266,6 @@ function AntdTableBody<TRow>({
       )}
     </AntdCardWindow>
   );
-
   const contextMenuLive = {
     contextMenu: props.contextMenu,
     columns: c.allColumns,
@@ -2345,6 +2376,7 @@ function AntdTableBody<TRow>({
                       dir={props.dir}
                       hasRowActions={c.hasRowActions}
                       hasRowReorder={c.hasRowReorder}
+                      groupingPanel={c.groupingPanel}
                     />
                   }
                   {...exportHandler}
@@ -2386,6 +2418,13 @@ function AntdTableBody<TRow>({
                   }}
                 />
               )}
+              <AntdGroupingPanel
+                state={c.groupingPanel}
+                columns={c.allColumns}
+                labels={labels}
+                mobile={c.isMobile}
+                dir={props.dir}
+              />
               <div
                 className={c.body === "desktop" ? classNames?.table : undefined}
               >

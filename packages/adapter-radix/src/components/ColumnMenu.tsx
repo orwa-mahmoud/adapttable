@@ -8,6 +8,7 @@ import {
 } from "@adapttable/core";
 import {
   columnMenuActions,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -35,6 +36,8 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import { useState } from "react";
+
+import { NativeSelect } from "./primitives";
 
 const NOOP_RENAME = () => undefined;
 
@@ -114,7 +117,10 @@ function ColumnRenameEditor({
 }
 
 /** The shared Columns-menu contract, declared once in core. */
-export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
+export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow> & {
+  /** Fullscreen-safe target for the popover and nested choices. */
+  container?: HTMLElement;
+};
 
 /** Eye toggle for one menu row (a data column or the actions entry). */
 function VisibilityToggle({
@@ -201,6 +207,9 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
+  dir,
+  container,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -212,6 +221,9 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
+  dir: ColumnMenuProps<TRow>["dir"];
+  container?: HTMLElement;
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -233,6 +245,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -311,25 +324,49 @@ function ColumnMenuRowItem<TRow>({
           data-adapttable-part="column-menu-submenu"
           gap="1"
         >
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="1"
-              variant="ghost"
-              color="gray"
-              data-adapttable-part="column-menu-action"
-              disabled={
-                action.disabled || (action.id === "rename" && rename.editing)
-              }
-              style={{ alignSelf: "flex-start" }}
-              onClick={() => {
-                action.run();
-                if (action.id !== "rename") setOpen(false);
-              }}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action: ColumnMenuItem) =>
+            "kind" in action ? (
+              <Flex
+                key={action.id}
+                direction="column"
+                gap="1"
+                data-adapttable-part="column-menu-choice"
+              >
+                <Text as="span" size="1" color="gray">
+                  {action.label}
+                </Text>
+                <NativeSelect
+                  size="1"
+                  aria-label={action.label}
+                  value={action.value}
+                  options={action.options}
+                  disabled={action.disabled}
+                  dir={dir}
+                  container={container}
+                  width="100%"
+                  onValueChange={action.onChange}
+                />
+              </Flex>
+            ) : (
+              <Button
+                key={action.id}
+                size="1"
+                variant="ghost"
+                color="gray"
+                data-adapttable-part="column-menu-action"
+                disabled={
+                  action.disabled || (action.id === "rename" && rename.editing)
+                }
+                style={{ alignSelf: "flex-start" }}
+                onClick={() => {
+                  action.run();
+                  if (action.id !== "rename") setOpen(false);
+                }}
+              >
+                {action.label}
+              </Button>
+            )
+          )}
           <ColumnRenameEditor editor={rename} labels={labels} />
         </Flex>
       ) : null}
@@ -359,6 +396,8 @@ export function ColumnMenu<TRow>({
   sortBy,
   sortDir,
   dir,
+  groupingPanel,
+  container,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
   const [query, setQuery] = useState("");
@@ -379,6 +418,7 @@ export function ColumnMenu<TRow>({
         </Button>
       </Popover.Trigger>
       <Popover.Content
+        container={container}
         aria-label={labels.columns}
         align="end"
         side="bottom"
@@ -448,6 +488,9 @@ export function ColumnMenu<TRow>({
               onAutoSizeColumn={onAutoSizeColumn}
               onFilterColumn={onFilterColumn}
               onRenameColumn={onRenameColumn}
+              groupingPanel={groupingPanel}
+              dir={dir}
+              container={container}
             />
           ))}
           {(hasRowReorder || hasRowActions) && <Separator my="1" size="4" />}

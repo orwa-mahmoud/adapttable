@@ -16,6 +16,7 @@ export {
   FilterTreeBuilder,
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
+export { GroupingPanel } from "./components/GroupingPanel";
 export {
   BatchEditBar,
   type BatchEditBarProps,

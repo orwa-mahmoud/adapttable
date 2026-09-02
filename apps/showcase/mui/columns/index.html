@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server." />
+    <meta name="description" content="Rename, show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/mui/columns/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="MUI table column management — AdaptTable" />
-    <meta property="og:description" content="Show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server." />
+    <meta property="og:description" content="Rename, show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/mui/columns/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MUI table column management — AdaptTable" />
-    <meta name="twitter:description" content="Show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server." />
+    <meta name="twitter:description" content="Rename, show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server.","url":"https://orwa-mahmoud.github.io/adapttable/demo/mui/columns/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Rename, show, hide, reorder, pin and resize columns in a MUI data table from a built-in menu — and persist the layout to the URL, storage or your server.","url":"https://orwa-mahmoud.github.io/adapttable/demo/mui/columns/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -162,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for MUI</p>
         <h1>Column management in MUI</h1>
-        <p>Everything a user expects to do to a column, without writing a column-settings panel: show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.</p>
+        <p>Everything a user expects to do to a column, without writing a column-settings panel: rename, show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.</p>
         <p>Pinning is logical rather than physical, so a column pinned to the start stays on the correct side in a right-to-left layout.</p>
         <p>The arrangement is state like any other: persist it to the URL, to localStorage, or to your own server through <code>columnLayout</code> and <code>onColumnLayoutChange</code>.</p>
         <p>The menu is a Popover rather than a Menu, so the grip's arrow keys reorder columns instead of walking menu items; visibility is an eye IconButton reporting aria-pressed rather than a checkbox.</p>
@@ -201,9 +201,9 @@ export function People({ rows, columns, layout, onLayout }) {
           <li><a href="../selection/">Row selection in MUI</a> — A set of ids that survives paging, with bulk actions over it.</li>
           <li><a href="../rows/">Rows in MUI</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
           <li><a href="../editing/">Inline cell editing in MUI</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="../grouping/">Row grouping in MUI</a> — Nested group headers with counts, subtotals, footers and collapse state.</li>
+          <li><a href="../grouping/">Row grouping in MUI</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
           <li><a href="../nested-tables/">Nested tables in MUI</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../export/">Export and print in MUI</a> — CSV, XLSX and PDF from one seam — plus a real print layout.</li>
+          <li><a href="../export/">Export and print in MUI</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
           <li><a href="../scale/">Large datasets in MUI</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="../tree/">Tree data in MUI</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
           <li><a href="../mobile-cards/">Mobile cards in MUI</a> — Every row becomes a card on phones. Automatically, with the same state.</li>

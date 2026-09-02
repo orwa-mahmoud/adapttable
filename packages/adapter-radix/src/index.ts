@@ -17,6 +17,10 @@ export {
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
 export {
+  GroupingPanel,
+  type RadixGroupingPanelProps,
+} from "./components/GroupingPanel";
+export {
   BatchEditBar,
   type BatchEditBarProps,
   ColumnGroupToggle,

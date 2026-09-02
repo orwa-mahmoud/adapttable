@@ -59,6 +59,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FindBarProps } from '@adapttable/core/adapter';
 import { getHistoryAdapter } from '@adapttable/core';
+import { GroupingPanelChromeProps } from '@adapttable/core/adapter';
 import { GroupMoreButtonProps } from '@adapttable/core/adapter';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { JSX } from 'react';
@@ -278,6 +279,9 @@ export { FindBarProps }
 export { getHistoryAdapter }
 
 // @public
+export function GroupingPanel<TRow>(input: Readonly<RadixGroupingPanelProps<TRow>>): ReactNode;
+
+// @public
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;
 
 export { GroupMoreButtonProps }
@@ -297,6 +301,11 @@ export function PivotPanel(props: Readonly<Omit<PivotPanelChromeProps, "slots">>
 
 // @public
 export type RadixAccentColor = "gray" | "gold" | "bronze" | "brown" | "yellow" | "amber" | "orange" | "tomato" | "red" | "ruby" | "crimson" | "pink" | "plum" | "purple" | "violet" | "iris" | "indigo" | "blue" | "cyan" | "teal" | "jade" | "green" | "grass" | "lime" | "mint" | "sky";
+
+// @public
+export interface RadixGroupingPanelProps<TRow> extends Omit<GroupingPanelChromeProps<TRow>, "slots"> {
+    container?: HTMLElement;
+}
 
 export { resolveFilterRegistry }
 

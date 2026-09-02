@@ -6,6 +6,7 @@ import { columnMenu } from "./column-menu";
 import { ColumnMenu } from "./components/ColumnMenu";
 import { DataTable } from "./data-table.test-utils";
 import { DataTable as BareDataTable } from "./DataTable";
+import { groupingPanel } from "./grouping-panel";
 
 interface Row {
   id: string;
@@ -62,6 +63,16 @@ const labels = {
   columnNameRequired: "Enter a column name.",
   columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
     `${previous} renamed to ${name}.`,
+  groupByColumn: (name: string) => `Group by ${name}`,
+  ungroupColumn: (name: string) => `Ungroup ${name}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
   actions: "Actions",
   reorderRow: "Reorder",
 };
@@ -401,5 +412,37 @@ describe("column menu feature (mui)", () => {
       />
     );
     expect(screen.getByRole("button", { name: "Columns" })).toBeInTheDocument();
+  });
+
+  it("renders a grouping choice without closing the column submenu", async () => {
+    render(
+      <DataTable
+        data={[{ id: "1" }]}
+        columns={cols}
+        rowKey={(row) => row.id}
+        urlSync={false}
+        enableColumnMenu
+        features={[columnMenu(), groupingPanel(["a"])]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Bravo"));
+
+    const choice = screen.getByRole("combobox", {
+      name: "Group aggregation",
+    });
+    fireEvent.mouseDown(choice);
+    fireEvent.click(screen.getByRole("option", { name: "Sum" }));
+
+    expect(choice).toHaveTextContent("Sum");
+    expect(
+      screen.getByRole("button", { name: "Group by Bravo" })
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-adapttable-part="column-menu-choice"]')
+    ).toBeInTheDocument();
+    expect(screen.getByText("Reset columns")).toBeInTheDocument();
   });
 });

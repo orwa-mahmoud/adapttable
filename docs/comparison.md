@@ -50,10 +50,12 @@ integrated one. It puts pivoting, range selection, the fill handle, tree data,
 clipboard operations and Excel export in the paid Enterprise tier, and it
 renders its own look rather than your design system's. AdaptTable ships those
 same capabilities under MIT — assembled from parts rather than one spreadsheet
-surface — and is free end to end, server data and infinite scroll included,
-rendering as your UI kit's real components. Reach for AG Grid when you want that
-integrated spreadsheet product and are happy to licence it; reach for AdaptTable
-for application data tables that match your app and stay free.
+surface — plus an interactive grouping strip with header drag-and-drop,
+keyboard/mobile controls, aggregation choices, URL state, and Saved Views.
+AdaptTable is free end to end, server data and infinite scroll included,
+rendering as your UI kit's real components. Reach for AG Grid when you want its
+more mature integrated spreadsheet product and are happy to licence it; reach
+for AdaptTable for application data tables that match your app and stay free.
 
 → [Migrate from ag-Grid](./migrate-from-ag-grid.md) (CRUD tables only — the
 guide starts with when to stay).
@@ -101,6 +103,7 @@ kits — only the look does. Every adapter ships the same batteries:
 | Row expansion                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Inline cell editing (opt-in)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row grouping + per-group aggregates   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Interactive grouping panel            |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
@@ -131,9 +134,9 @@ matches unstyled feature-for-feature.
 
 - You want a mature, deeply integrated spreadsheet-analytics product and are
   happy to licence it → **AG Grid Enterprise** / **MUI X Premium**. AdaptTable
-  has pivoting, range selection, the fill handle, clipboard and Excel export
-  under MIT, but they are assembled from parts rather than one spreadsheet
-  surface.
+  has an interactive grouping panel, pivoting, range selection, the fill
+  handle, clipboard and Excel export under MIT, but they are assembled from
+  composable features rather than one spreadsheet surface.
 - You're on a framework other than React → **TanStack Table** (multi-
   framework). AdaptTable is React-only.
 - You need a spreadsheet-like editing surface today, not a responsive data

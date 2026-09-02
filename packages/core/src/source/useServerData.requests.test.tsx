@@ -51,6 +51,34 @@ function mount() {
 }
 
 describe("server-tier request guarantees", () => {
+  it("sends nested grouping and session aggregate overrides as one query", async () => {
+    const queries: TableQuery[] = [];
+    const adapter = createMemoryAdapter(
+      "groupBy=team%2Cstatus&groupAgg=budget%3Aavg%2Cperson%3Anone"
+    );
+    function Harness() {
+      useServerData<Row>({
+        rows: [],
+        total: 0,
+        urlAdapter: adapter,
+        forceMobile: false,
+        supports: { grouping: true, aggregates: true },
+        aggregates: [
+          { key: "budget", fn: "sum" },
+          { key: "person", fn: "count" },
+        ],
+        onQueryChange: (query) => {
+          queries.push(query);
+        },
+      });
+      return null;
+    }
+    render(<Harness />);
+    await waitFor(() => expect(queries).toHaveLength(1));
+    expect(queries[0]?.groupBy).toEqual(["team", "status"]);
+    expect(queries[0]?.aggregates).toEqual([{ key: "budget", fn: "avg" }]);
+  });
+
   it("emits once for a query, however many times the same value is set", async () => {
     const t = mount();
     await waitFor(() => expect(t.queries).toHaveLength(1));

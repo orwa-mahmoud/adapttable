@@ -8,6 +8,7 @@ import { dirtyIndicators } from "./features/editing";
 import { bulkActions } from "./features/factories";
 import { filters } from "./features/filters";
 import { grouping } from "./features/grouping";
+import { groupingPanel } from "./features/grouping-panel";
 import { FeatureProviders } from "./features/providers";
 import { rowActions } from "./features/row-actions";
 import { rowPinning } from "./features/row-pinning";
@@ -284,6 +285,33 @@ describe("useTableChrome", () => {
     expect(mobile).toBe(desktop);
     // And the full exportable set is present — hideOnMobile is visual only.
     expect(desktop.split("\r\n")[0]).toBe("Name,Ref");
+  });
+
+  it("merges grouping panel interactions with url-backed grouping state", () => {
+    const columnsWithTeam: ColumnDef<Row>[] = [
+      { key: "name", header: "Name" },
+      { key: "team", header: "Team" },
+    ];
+    const { result } = renderLiveChrome([groupingPanel()], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        columns: columnsWithTeam,
+        urlAdapter: createMemoryAdapter("groupBy=name&groupAgg=team%3Asum"),
+        defaults: { limit: 10 },
+      });
+      return {
+        source,
+        columns: columnsWithTeam,
+        rowKey: (row) => row.id,
+        groupBy: "name",
+      };
+    });
+    expect(result.current.groupingPanel?.groupBy).toEqual(["name"]);
+    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
+      team: "sum",
+    });
+    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
+    expect(result.current.groupingPanel?.add).toEqual(expect.any(Function));
   });
 
   it("without grouping the source passes through untouched", () => {

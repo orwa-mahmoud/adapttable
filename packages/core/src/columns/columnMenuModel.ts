@@ -1,4 +1,6 @@
 import type { FeatureHostState } from "../features/currentHost";
+import type { GroupAggregateOverride } from "../grouping/groupAggregateOverrides";
+import type { GroupingPanelState } from "../grouping/groupingPanelModel";
 import type { ColumnDef, Direction } from "../types";
 import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
 import { applyColumnOrder } from "./useColumnLayout";
@@ -236,6 +238,35 @@ export interface ColumnMenuAction {
   run: () => void;
 }
 
+/** One option in a kit-native column-menu choice control. @public */
+export interface ColumnMenuChoiceOption {
+  /** State value written when selected. */
+  value: string;
+  /** Localized visible option text. */
+  label: string;
+}
+
+/** A compact kit-native choice appended by a column-menu plugin. @public */
+export interface ColumnMenuChoice {
+  /** Discriminant used by adapters to select a native choice control. */
+  kind: "choice";
+  /** Stable action identifier. */
+  id: string;
+  /** Localized visible and accessible control label. */
+  label: string;
+  /** Whether the choice is visible but unavailable. */
+  disabled: boolean;
+  /** Controlled selected value. */
+  value: string;
+  /** Localized choices. */
+  options: readonly ColumnMenuChoiceOption[];
+  /** Commit one selected value. */
+  onChange: (value: string) => void;
+}
+
+/** An ordinary action or a compact choice control in a column submenu. @public */
+export type ColumnMenuItem = ColumnMenuAction | ColumnMenuChoice;
+
 /**
  * What a submenu needs besides the row itself.
  *
@@ -260,6 +291,8 @@ export interface ColumnMenuActionContext<TRow = unknown> {
   onBeginRename?: () => void;
   /** The host of THIS table — plugin menu actions resolve from here. */
   featureHost?: FeatureHostState<TRow>;
+  /** Interactive grouping state, when `groupingPanel()` is composed. */
+  groupingPanel?: GroupingPanelState;
 }
 
 function resetColumnDisabled<TRow>(
@@ -272,7 +305,7 @@ function resetColumnDisabled<TRow>(
 }
 
 function appendRenameAction<TRow>(
-  actions: ColumnMenuAction[],
+  actions: ColumnMenuItem[],
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
 ): void {
@@ -293,8 +326,8 @@ function appendRenameAction<TRow>(
 export function columnMenuActions<TRow>(
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
-): ColumnMenuAction[] {
-  const actions: ColumnMenuAction[] = [];
+): ColumnMenuItem[] {
+  const actions: ColumnMenuItem[] = [];
   if (row.canSort && ctx.onSortColumn) {
     actions.push(
       {
@@ -364,12 +397,53 @@ export function columnMenuActions<TRow>(
     disabled: resetColumnDisabled(row, ctx.layout),
     run: () => resetColumnLayout(row, ctx.layout),
   });
+  appendGroupingPanelActions(actions, row, ctx);
   appendPluginColumnMenuActions(actions, row, ctx);
   return actions;
 }
 
+function appendGroupingPanelActions<TRow>(
+  actions: ColumnMenuItem[],
+  row: ColumnMenuRow<TRow>,
+  ctx: ColumnMenuActionContext<TRow>
+): void {
+  const panel = ctx.groupingPanel;
+  if (!panel) return;
+  const grouped = panel.groupBy.includes(row.key);
+  actions.push({
+    id: grouped ? "ungroup-column" : "group-by-column",
+    label: grouped
+      ? ctx.labels.ungroupColumn(row.name)
+      : ctx.labels.groupByColumn(row.name),
+    disabled: false,
+    run: () => (grouped ? panel.remove(row.key) : panel.add(row.key)),
+  });
+  if (panel.groupBy.length === 0 || grouped) return;
+  actions.push({
+    kind: "choice",
+    id: "group-aggregation",
+    label: ctx.labels.groupingAggregation,
+    disabled: !panel.canSetAggregates,
+    value: panel.aggregateOverrides[row.key] ?? "",
+    options: [
+      { value: "", label: ctx.labels.groupingAggregationDefault },
+      { value: "sum", label: ctx.labels.selectionSum },
+      { value: "avg", label: ctx.labels.groupingAverage },
+      { value: "min", label: ctx.labels.selectionMin },
+      { value: "max", label: ctx.labels.selectionMax },
+      { value: "count", label: ctx.labels.selectionCount },
+      { value: "none", label: ctx.labels.groupingAggregationNone },
+    ],
+    onChange: (value) =>
+      panel.setAggregate(
+        row.key,
+        (value || undefined) as GroupAggregateOverride | undefined
+      ),
+  });
+}
+
 function appendPluginColumnMenuActions<TRow>(
-  actions: ColumnMenuAction[],
+  actions: ColumnMenuItem[],
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
 ): void {
@@ -383,8 +457,8 @@ function appendPluginColumnMenuActions<TRow>(
 }
 
 function pushColumnMenuExtra(
-  actions: ColumnMenuAction[],
-  extra: ColumnMenuAction | readonly ColumnMenuAction[]
+  actions: ColumnMenuItem[],
+  extra: ColumnMenuItem | readonly ColumnMenuItem[]
 ): void {
   if ("id" in extra) {
     actions.push(extra);
@@ -453,6 +527,26 @@ export interface ColumnMenuLabels {
   columnActions: string;
   /** Size this column to its content. */
   autoSizeColumn: string;
+  /** Add a named column to row grouping. */
+  groupByColumn: (label: string) => string;
+  /** Remove a named column from row grouping. */
+  ungroupColumn: (label: string) => string;
+  /** Label for the group aggregation choice. */
+  groupingAggregation: string;
+  /** Preserve the developer's aggregation choice. */
+  groupingAggregationDefault: string;
+  /** Explicitly hide this column's group aggregate. */
+  groupingAggregationNone: string;
+  /** Full average label used by aggregation choices. */
+  groupingAverage: string;
+  /** Count aggregation label. */
+  selectionCount: string;
+  /** Sum aggregation label. */
+  selectionSum: string;
+  /** Minimum aggregation label. */
+  selectionMin: string;
+  /** Maximum aggregation label. */
+  selectionMax: string;
 }
 
 /**
@@ -511,4 +605,6 @@ export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
    * direction unless it is handed over, and RTL flips grip against pin.
    */
   dir?: Direction;
+  /** Interactive grouping state used by plugin menu items. */
+  groupingPanel?: GroupingPanelState;
 }

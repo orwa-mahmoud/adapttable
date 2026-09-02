@@ -38,6 +38,7 @@ import {
   useRef,
 } from "react";
 
+import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import { devWarn } from "../utils/devWarn";
 import {
   getAppliedFeatures,
@@ -220,6 +221,17 @@ export interface TableRuntimeView<TRow = unknown> {
   readonly sortBy?: string;
   /** Live grouping bundle; feature providers narrow this structurally. */
   readonly grouping?: unknown;
+  /** URL/source-backed grouping state used by optional interaction chrome. */
+  readonly groupingState?: {
+    readonly groupBy: string | undefined;
+    readonly aggregateOverrides: GroupAggregateOverrides;
+    readonly columnLabel: (key: string) => string;
+    readonly setGroupBy: (key: string | undefined) => void;
+    readonly initializeGroupBy?: (key: string) => void;
+    readonly setAggregateOverrides?: (
+      overrides: GroupAggregateOverrides
+    ) => void;
+  };
   /** Live tree bundle; feature providers narrow this structurally. */
   readonly tree?: unknown;
 }

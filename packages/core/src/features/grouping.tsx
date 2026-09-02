@@ -7,6 +7,7 @@
  */
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
+import { withGroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
@@ -75,6 +76,15 @@ function LiveGrouping({
     onGroupLoadMore,
     extraRows,
   } = props;
+  const effectiveGroupAggregates = useMemo(
+    () =>
+      withGroupAggregateOverrides(
+        groupAggregates,
+        source.groupAggregateOverrides ?? {},
+        chrome.allColumns
+      ),
+    [groupAggregates, source.groupAggregateOverrides, chrome.allColumns]
+  );
 
   const grouping = useMemo(() => {
     if (groupByKeys.length === 0) return undefined;
@@ -93,7 +103,7 @@ function LiveGrouping({
       columns: chrome.columnLayout.visibleColumns,
       getRowId,
       collapsedGroupIds: groupCollapse.collapsedGroupIds,
-      aggregates: groupAggregates,
+      aggregates: effectiveGroupAggregates,
       footers: groupFooters === true,
       sort: groupSort,
       filter: groupFilter,
@@ -110,7 +120,7 @@ function LiveGrouping({
     return {
       groupBy: groupByKeys,
       collapsed: groupCollapse,
-      aggregates: groupAggregates,
+      aggregates: effectiveGroupAggregates,
       entries: withExtras,
       setGroupBy,
       showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => {
@@ -139,7 +149,7 @@ function LiveGrouping({
     chrome.columnLayout.visibleColumns,
     getRowId,
     groupCollapse,
-    groupAggregates,
+    effectiveGroupAggregates,
     groupFooters,
     groupSort,
     groupFilter,
@@ -167,6 +177,9 @@ function LiveGrouping({
   return children({
     ...chrome,
     grouping,
+    groupingPanel: chrome.groupingPanel
+      ? { ...chrome.groupingPanel, groupBy: groupByKeys }
+      : undefined,
     groupingArmed,
     source: viewSource,
     editingRows: viewSource.rows,

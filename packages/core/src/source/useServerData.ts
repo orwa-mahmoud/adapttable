@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { FacetMap } from "../filters/facets";
+import { withQueryAggregateOverrides } from "../grouping/groupAggregateOverrides";
+import { parseGroupBy } from "../grouping/groupKeys";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
 import type { SortLevel } from "../sort/compare";
@@ -13,6 +15,7 @@ import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
 import {
   applyQuerySupport,
+  type QueryAggregate,
   type QueryExtensions,
   type QuerySupport,
 } from "./queryContract";
@@ -93,6 +96,8 @@ export interface UseServerDataOptions<TRow> extends Pick<
    * the UI wanted it. See {@link QuerySupport}.
    */
   supports?: QuerySupport;
+  /** Aggregate requests to send when the endpoint supports them. */
+  aggregates?: readonly QueryAggregate[];
   /**
    * The tree nodes the reader has open, when the hierarchy lives on the server.
    * Sent as `query.expandedIds` only if the source declares
@@ -152,6 +157,7 @@ export function useServerData<TRow>(
     paginationMode = "auto",
     forceMobile,
     supports,
+    aggregates,
     expandedIds,
     facetKeys,
     facets,
@@ -164,8 +170,25 @@ export function useServerData<TRow>(
   const paged = resolvedMode === "paged";
 
   const state = useTableUrlState(urlOptions);
-  const { page, limit, search, sortBy, sortDir, groupBy, sortLevels, extra } =
-    state;
+  const {
+    page,
+    limit,
+    search,
+    sortBy,
+    sortDir,
+    groupBy,
+    groupAggregateOverrides,
+    sortLevels,
+    extra,
+  } = state;
+  const effectiveAggregates = useMemo(
+    () => withQueryAggregateOverrides(aggregates, groupAggregateOverrides),
+    [aggregates, groupAggregateOverrides]
+  );
+  const effectiveGroupBy = useMemo(() => {
+    const keys = parseGroupBy(groupBy);
+    return keys.length > 0 ? keys : undefined;
+  }, [groupBy]);
 
   // Cursor mode keeps every token the server has handed out, indexed by the
   // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
@@ -191,7 +214,8 @@ export function useServerData<TRow>(
       // an undeclared capability is dropped here, never sent and ignored.
       ...applyQuerySupport(
         {
-          groupBy: groupBy ? [groupBy] : undefined,
+          groupBy: effectiveGroupBy,
+          aggregates: effectiveAggregates,
           cursor,
           expandedIds,
           filterTree: state.filterTree,
@@ -208,7 +232,8 @@ export function useServerData<TRow>(
       sortDir,
       sortLevels,
       extra,
-      groupBy,
+      effectiveGroupBy,
+      effectiveAggregates,
       cursor,
       supports,
       expandedIds,
@@ -364,6 +389,7 @@ export function useServerData<TRow>(
     sortBy,
     sortDir,
     groupBy,
+    groupAggregateOverrides,
     extra,
     facets,
     filterTree: state.filterTree,
@@ -377,6 +403,8 @@ export function useServerData<TRow>(
     setLimit: state.setLimit,
     setSort: state.setSort,
     setGroupBy: state.setGroupBy,
+    initializeGroupBy: state.initializeGroupBy,
+    setGroupAggregateOverrides: state.setGroupAggregateOverrides,
     sortLevels: state.sortLevels,
     toggleSortLevel: state.toggleSortLevel,
     setSearch: state.setSearch,

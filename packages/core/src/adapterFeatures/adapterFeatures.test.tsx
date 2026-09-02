@@ -19,6 +19,7 @@ import { createAdapterEditingFeatures } from "./editing";
 import { ContextMenuLiveGate, OptionalSidePanel } from "./featureRoot";
 import { createAdapterFiltersFeature } from "./filters";
 import { createAdapterGroupingFeature } from "./grouping";
+import { createAdapterGroupingPanelFeature } from "./groupingPanel";
 import { createAdapterRowDetailFeatures } from "./rowDetail";
 import { createAdapterRowReorderFeature } from "./rowReorder";
 import { createAdapterStandardFeatures } from "./standardPreset";
@@ -176,6 +177,27 @@ describe("adapter feature assembly", () => {
       "row-reorder-handle",
       "row-reorder-buttons",
       "row-reorder-announcer",
+    ]);
+  });
+
+  it("binds the interactive grouping panel and group headers", () => {
+    const groupingPanel = createAdapterGroupingPanelFeature({
+      GroupHeaderRow: KitComponent,
+      GroupHeaderCard: KitComponent,
+      GroupingPanel: KitComponent,
+    });
+    const feature = groupingPanel("team");
+    expect(feature.provider).toBeDefined();
+    expect(renderSlots(feature)).toEqual([
+      "grouping-live",
+      "group-header-row",
+      "group-header-card",
+      "grouping-panel",
+    ]);
+    expectKitRenders(feature, [
+      "group-header-row",
+      "group-header-card",
+      "grouping-panel",
     ]);
   });
 

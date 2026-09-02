@@ -221,6 +221,9 @@ export interface DataTableClassNames {
     columnMenuBulk?: string;
     columnMenuBulkButton?: string;
     columnMenuButton?: string;
+    columnMenuChoice?: string;
+    columnMenuChoiceLabel?: string;
+    columnMenuChoiceSelect?: string;
     columnMenuGrip?: string;
     columnMenuHeader?: string;
     columnMenuItem?: string;
@@ -320,6 +323,17 @@ export interface DataTableClassNames {
     groupCount?: string;
     groupFooterCell?: string;
     groupFooterRow?: string;
+    groupingAdd?: string;
+    groupingAggregate?: string;
+    groupingAggregateColumn?: string;
+    groupingAggregateControls?: string;
+    groupingChip?: string;
+    groupingChipHandle?: string;
+    groupingChipRemove?: string;
+    groupingDropZone?: string;
+    groupingItem?: string;
+    groupingPanel?: string;
+    groupingRemoveZone?: string;
     groupLabel?: string;
     groupMoreCell?: string;
     groupMoreRow?: string;

@@ -170,6 +170,16 @@ const menuLabels = {
   columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
     `${previous} renamed to ${name}.`,
   reorderRow: "Reorder",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 describe("ColumnMenu hidden column", () => {

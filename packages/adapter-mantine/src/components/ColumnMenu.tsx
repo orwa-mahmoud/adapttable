@@ -7,8 +7,8 @@ import {
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import {
-  type ColumnMenuAction,
   columnMenuActions,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -16,6 +16,7 @@ import {
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
+  type GroupingPanelState,
   hideAllColumns,
   LiveRegion,
   nextPinSide,
@@ -33,6 +34,7 @@ import {
   Divider,
   Group,
   Popover,
+  Select,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -181,32 +183,53 @@ function ColumnSubmenu({
   labels,
   onClose,
 }: Readonly<{
-  actions: readonly ColumnMenuAction[];
+  actions: readonly ColumnMenuItem[];
   rename: ColumnRenameEditorState;
   labels: ColumnMenuLabels;
   onClose: () => void;
 }>) {
   return (
     <Box data-adapttable-part="column-menu-submenu" px={4} pb={4}>
-      {actions.map((action) => (
-        <Button
-          key={action.id}
-          variant="subtle"
-          size="xs"
-          fullWidth
-          justify="flex-start"
-          data-adapttable-part="column-menu-action"
-          disabled={
-            action.disabled || (action.id === "rename" && rename.editing)
-          }
-          onClick={() => {
-            action.run();
-            if (action.id !== "rename") onClose();
-          }}
-        >
-          {action.label}
-        </Button>
-      ))}
+      {actions.map((action) =>
+        "kind" in action ? (
+          <Select
+            key={action.id}
+            label={action.label}
+            aria-label={action.label}
+            size="xs"
+            value={action.value}
+            disabled={action.disabled}
+            allowDeselect={false}
+            data-adapttable-part="column-menu-choice"
+            data={action.options.map((option) => ({
+              value: option.value,
+              label: option.label,
+            }))}
+            comboboxProps={{ withinPortal: false }}
+            onChange={(value) => {
+              if (value !== null) action.onChange(value);
+            }}
+          />
+        ) : (
+          <Button
+            key={action.id}
+            variant="subtle"
+            size="xs"
+            fullWidth
+            justify="flex-start"
+            data-adapttable-part="column-menu-action"
+            disabled={
+              action.disabled || (action.id === "rename" && rename.editing)
+            }
+            onClick={() => {
+              action.run();
+              if (action.id !== "rename") onClose();
+            }}
+          >
+            {action.label}
+          </Button>
+        )
+      )}
       {rename.editing ? (
         <ColumnRenameForm rename={rename} labels={labels} />
       ) : null}
@@ -291,6 +314,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -302,6 +326,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel?: GroupingPanelState;
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -323,6 +348,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -429,6 +455,7 @@ export function ColumnMenu<TRow>({
   sortBy,
   sortDir,
   dir,
+  groupingPanel,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
   const [opened, setOpened] = useState(false);
@@ -519,6 +546,7 @@ export function ColumnMenu<TRow>({
               onAutoSizeColumn={onAutoSizeColumn}
               onFilterColumn={onFilterColumn}
               onRenameColumn={onRenameColumn}
+              groupingPanel={groupingPanel}
             />
           ))}
           {(hasRowReorder || hasRowActions) && <Divider my={4} />}

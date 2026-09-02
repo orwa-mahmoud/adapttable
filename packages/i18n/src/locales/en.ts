@@ -22,4 +22,23 @@ export const en: Required<TableLabels> = {
   moveRejectedCycle: "A row cannot move inside itself or its descendant",
   moveUnavailable: "This row move is not available",
   rootLevel: "Top level",
+  groupingPanel: "Row grouping",
+  groupingDropColumns: "Drag columns here to group",
+  addGroupingColumn: "Add grouping column",
+  groupByColumn: (label) => `Group by ${label}`,
+  ungroupColumn: (label) => `Ungroup ${label}`,
+  removeGroupingColumn: (label) => `Remove ${label} from grouping`,
+  moveGroupingColumn: (label) => `Move ${label} grouping`,
+  groupingDropToRemove: "Drop here to remove grouping",
+  groupingAggregateColumn: "Aggregate column",
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  groupingAdded: (label) => `${label} added to grouping`,
+  groupingRemoved: (label) => `${label} removed from grouping`,
+  groupingMoved: (label, position) =>
+    `${label} moved to grouping position ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} group aggregation changed to ${aggregation}`,
 };

@@ -219,6 +219,9 @@ export const shadcnClassNames: {
     columnMenuMore: string;
     columnMenuSubmenu: string;
     columnMenuAction: string;
+    columnMenuChoice: string;
+    columnMenuChoiceLabel: string;
+    columnMenuChoiceSelect: string;
     columnRenameForm: string;
     columnRenameLabel: string;
     columnRenameInput: string;
@@ -308,6 +311,17 @@ export const shadcnClassNames: {
     groupLabel: string;
     groupCount: string;
     groupAggregate: string;
+    groupingPanel: string;
+    groupingDropZone: string;
+    groupingItem: string;
+    groupingChip: string;
+    groupingChipHandle: string;
+    groupingChipRemove: string;
+    groupingAdd: string;
+    groupingAggregateControls: string;
+    groupingAggregateColumn: string;
+    groupingAggregate: string;
+    groupingRemoveZone: string;
     editCellError: string;
     editCellSaveError: string;
     editCellRollback: string;

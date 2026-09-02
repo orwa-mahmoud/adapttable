@@ -855,6 +855,23 @@ export {
 
 /* ── Row grouping ──────────────────────────────────────────────────── */
 export {
+  type GroupAggregateOverride,
+  type GroupAggregateOverrides,
+  parseGroupAggregateOverrides,
+  serializeGroupAggregateOverrides,
+  withGroupAggregateOverrides,
+  withQueryAggregateOverrides,
+} from "./grouping/groupAggregateOverrides";
+export type {
+  GroupingChipKeyboardProps,
+  GroupingDragProps,
+  GroupingDragSource,
+  GroupingDragState,
+  GroupingDropProps,
+  GroupingPanelInteractions,
+  GroupingPanelState,
+} from "./grouping/groupingPanelModel";
+export {
   formatGroupBy,
   type GroupByInput,
   parseGroupBy,
@@ -959,6 +976,9 @@ export {
 export type { TableCommandOptions } from "./actions/commandRegistry";
 export type { UseShortcutsOptions } from "./actions/useShortcuts";
 export type {
+  ColumnMenuChoice,
+  ColumnMenuChoiceOption,
+  ColumnMenuItem,
   ColumnMenuLabels,
   ColumnMenuRow,
 } from "./columns/columnMenuModel";

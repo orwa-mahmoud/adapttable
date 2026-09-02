@@ -39,6 +39,7 @@ import {
   groupedHeaderAlign,
   groupedHeaderChildRule,
   groupedHeaderLabelStyle,
+  type GroupingPanelState,
   type HeaderGroupCell,
   headerGroupRows,
   isColumnGroupSummaryKey,
@@ -410,6 +411,8 @@ export interface BuildColumnsOptions<TRow> {
   editing?: EditableCellEditing<TRow>;
   /** Current page rows (Tab advance); required when editing is set. */
   rows?: readonly TRow[];
+  /** Interactive grouping drag state for the data-column headers. */
+  groupingPanel?: GroupingPanelState;
   /** Row identity function. */
   getRowId?: (row: TRow) => string;
   /** Per-column edge pinning (logical start/end), mapped to antd's native
@@ -666,6 +669,7 @@ export function buildColumns<TRow>({
   labels,
   editing,
   rows = [],
+  groupingPanel,
   getRowId = () => "",
   pinned,
   setWidth,
@@ -876,8 +880,10 @@ export function buildColumns<TRow>({
           // adapter's own props: the kit's values still win where they
           // overlap, but nothing core adds is silently dropped.
           const core = getHeaderCellProps?.(column);
+          const groupingDrag = groupingPanel?.headerDragProps(column.key);
           return {
             ...core,
+            ...groupingDrag,
             "data-adapttable-part": "header-cell",
             "data-column-key": column.key,
             ...gridFocus?.getColumnHeaderProps(columnIndex, {

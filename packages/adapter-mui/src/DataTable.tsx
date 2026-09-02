@@ -18,6 +18,8 @@ import {
   type FiltersFormSlotProps,
   FIND_BAR,
   GRID_FOCUS_ANNOUNCER,
+  GROUPING_PANEL,
+  type GroupingPanelSlotProps,
   OptionalSidePanel,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
@@ -167,6 +169,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                 labels,
                 hasRowActions: view.hasRowActions,
                 hasRowReorder: view.hasRowReorder,
+                groupingPanel: c.groupingPanel,
                 dir: props.dir,
                 // The slot key erases the row; ColumnDef is invariant, so the
                 // table's TRow cannot be proven to be `never`.
@@ -352,6 +355,14 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         featureHost: shell.featureHost,
                       }}
                     />
+                    {view.groupingPanelProps ? (
+                      <FeatureSlot
+                        slot={GROUPING_PANEL}
+                        props={
+                          view.groupingPanelProps as GroupingPanelSlotProps<never>
+                        }
+                      />
+                    ) : null}
                     <OptionalSidePanel
                       side={props.sidePanel?.side}
                       body={

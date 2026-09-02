@@ -9,6 +9,8 @@ import {
 import {
   type ColumnDragState,
   columnMenuActions,
+  type ColumnMenuChoice,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -34,6 +36,10 @@ import type { DataTableClassNames } from "../types";
 import { MENU_PANEL_STYLE, useMenuPopover } from "./menuPopover";
 
 const NOOP_RENAME = () => undefined;
+
+function isColumnMenuChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
+  return "kind" in item && item.kind === "choice";
+}
 
 function focusRenameInput(input: HTMLInputElement | null): void {
   input?.focus();
@@ -208,6 +214,7 @@ interface ColumnMenuRowProps<TRow> {
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
   onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel?: NonNullable<ColumnMenuSlotProps<TRow>["groupingPanel"]>;
 }
 
 function ColumnMenuRowItem<TRow>({
@@ -222,6 +229,7 @@ function ColumnMenuRowItem<TRow>({
   onAutoSizeColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
 }: Readonly<ColumnMenuRowProps<TRow>>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
@@ -243,6 +251,7 @@ function ColumnMenuRowItem<TRow>({
     onAutoSizeColumn,
     onFilterColumn,
     onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   return (
     <div
@@ -305,23 +314,57 @@ function ColumnMenuRowItem<TRow>({
           data-adapttable-part="column-menu-submenu"
           className={classNames.columnMenuSubmenu}
         >
-          {actions.map((action) => (
-            <button
-              key={action.id}
-              type="button"
-              data-adapttable-part="column-menu-action"
-              className={classNames.columnMenuAction}
-              disabled={
-                action.disabled || (action.id === "rename" && rename.editing)
-              }
-              onClick={() => {
-                action.run();
-                if (action.id !== "rename") setOpen(false);
-              }}
-            >
-              {action.label}
-            </button>
-          ))}
+          {actions.map((action) => {
+            if (isColumnMenuChoice(action)) {
+              return (
+                <label
+                  key={action.id}
+                  data-adapttable-part="column-menu-choice"
+                  className={classNames.columnMenuChoice}
+                >
+                  <span
+                    data-adapttable-part="column-menu-choice-label"
+                    className={classNames.columnMenuChoiceLabel}
+                  >
+                    {action.label}
+                  </span>
+                  <select
+                    aria-label={action.label}
+                    value={action.value}
+                    disabled={action.disabled}
+                    data-adapttable-part="column-menu-choice-select"
+                    className={classNames.columnMenuChoiceSelect}
+                    onChange={(event) =>
+                      action.onChange(event.currentTarget.value)
+                    }
+                  >
+                    {action.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              );
+            }
+            return (
+              <button
+                key={action.id}
+                type="button"
+                data-adapttable-part="column-menu-action"
+                className={classNames.columnMenuAction}
+                disabled={
+                  action.disabled || (action.id === "rename" && rename.editing)
+                }
+                onClick={() => {
+                  action.run();
+                  if (action.id !== "rename") setOpen(false);
+                }}
+              >
+                {action.label}
+              </button>
+            );
+          })}
           <ColumnRenameEditor
             editor={rename}
             labels={labels}
@@ -448,6 +491,7 @@ export function ColumnMenu<TRow>({
   onSortColumn,
   onFilterColumn,
   onRenameColumn,
+  groupingPanel,
   sortBy,
   sortDir,
   dir,
@@ -550,6 +594,7 @@ export function ColumnMenu<TRow>({
                 onAutoSizeColumn={onAutoSizeColumn}
                 onFilterColumn={onFilterColumn}
                 onRenameColumn={onRenameColumn}
+                groupingPanel={groupingPanel}
               />
             ))}
             {(hasRowReorder === true || hasRowActions === true) && (

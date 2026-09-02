@@ -21,7 +21,7 @@ import {
 } from "@adapttable/base-ui/filters";
 import { findInTable as findInTable_ } from "@adapttable/base-ui/find-in-table";
 import { fullscreen as fullscreen_ } from "@adapttable/base-ui/fullscreen";
-import { grouping as grouping_ } from "@adapttable/base-ui/grouping";
+import { groupingPanel as groupingPanel_ } from "@adapttable/base-ui/grouping-panel";
 import { headerFilters as headerFilters_ } from "@adapttable/base-ui/header-filters";
 import { nestedTable as nestedTable_ } from "@adapttable/base-ui/nested-table";
 import { print as print_ } from "@adapttable/base-ui/print";
@@ -53,7 +53,7 @@ const KIT_CHROME = {
   batchEditing: batchEditing_,
   editHistory: editHistory_,
   editing: editing_,
-  grouping: grouping_,
+  groupingPanel: groupingPanel_,
   rowEditing: rowEditing_,
   rowReorder: rowReorder_,
   tree: tree_,

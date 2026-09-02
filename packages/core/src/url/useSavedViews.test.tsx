@@ -873,6 +873,7 @@ describe("useSavedViews", () => {
       "t.q=ali",
       "t.sort=name:asc,team:desc",
       "t.groupBy=team",
+      "t.groupAgg=budget:sum,person:none",
       "t.groupClosed=core",
       "t.ft=and(eq(team,core))",
       "t.colHide=email",

@@ -1,3 +1,4 @@
+import type { Direction } from "@adapttable/core";
 import {
   Checkbox as RadixCheckbox,
   Flex,
@@ -145,7 +146,11 @@ export function NativeSelect({
   triggerRef,
   options,
   width,
+  minHeight,
   className,
+  disabled,
+  dir,
+  container,
   "aria-label": ariaLabel,
   "data-adapttable-part": part,
   ...rest
@@ -159,7 +164,13 @@ export function NativeSelect({
   triggerRef?: (node: { focus: () => void } | null) => void;
   options: readonly SelectOption[];
   width?: string;
+  minHeight?: string | number;
   className?: string;
+  disabled?: boolean;
+  /** Direction copied onto the portalled listbox. */
+  dir?: Direction;
+  /** Fullscreen-safe portal target for the listbox. */
+  container?: HTMLElement;
   "aria-label"?: string;
   "data-adapttable-part"?: string;
   /** Validation and busy state from the headless layer. */
@@ -176,6 +187,7 @@ export function NativeSelect({
   return (
     <Select.Root
       size={size}
+      dir={dir}
       value={value === "" && offersEmpty ? EMPTY_VALUE : value}
       onValueChange={(next) => onValueChange(next === EMPTY_VALUE ? "" : next)}
     >
@@ -185,11 +197,12 @@ export function NativeSelect({
         data-adapttable-part={part}
         className={className}
         placeholder={placeholder}
+        disabled={disabled}
         onKeyDown={onKeyDown}
-        style={width ? { width } : undefined}
+        style={width || minHeight ? { width, minHeight } : undefined}
         {...rest}
       />
-      <Select.Content position="popper">
+      <Select.Content position="popper" container={container}>
         {options.map((option) => (
           <Select.Item
             key={option.value === "" ? EMPTY_VALUE : option.value}

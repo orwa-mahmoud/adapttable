@@ -40,6 +40,16 @@ const mockLabels: ColumnMenuProps<Row>["labels"] = {
   cancelColumnRename: "Cancel",
   columnNameRequired: "Column name is required",
   columnRenamed: ({ previous, name }) => `${previous} renamed to ${name}`,
+  groupByColumn: (label) => `Group by ${label}`,
+  ungroupColumn: (label) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 function makeLayoutMock(

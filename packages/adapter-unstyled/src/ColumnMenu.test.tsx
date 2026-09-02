@@ -1,5 +1,10 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
-import { COLUMN_DND_MIME } from "@adapttable/core/adapter";
+import {
+  COLUMN_DND_MIME,
+  FeatureHostProvider,
+  type FeatureHostState,
+  type GroupingPanelState,
+} from "@adapttable/core/adapter";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -63,6 +68,16 @@ const labels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
   actions: "Actions",
   reorderRow: "Reorder",
 };
@@ -106,6 +121,90 @@ function fakeDataTransfer(initial: Record<string, string> = {}) {
 }
 
 describe("unstyled ColumnMenu", () => {
+  it("renders a plugin choice as a labelled select and keeps it open", () => {
+    const onChange = vi.fn();
+    const groupingPanel: GroupingPanelState = {
+      groupBy: ["a"],
+      aggregateOverrides: {},
+      canSetAggregates: true,
+      announcement: "",
+      headerDragProps: () => ({}),
+      chipDragProps: () => ({}),
+      chipKeyboardProps: () => ({
+        tabIndex: 0,
+        role: "button",
+        "aria-label": "Move grouping",
+        onKeyDown: () => undefined,
+      }),
+      dropProps: () => ({}),
+      removeDropProps: () => ({}),
+      add: () => undefined,
+      remove: () => undefined,
+      moveBy: () => undefined,
+      setAggregate: () => undefined,
+    };
+    const host: FeatureHostState = {
+      filterTypes: [],
+      filterExtends: [],
+      editors: new Map(),
+      aggregators: new Map(),
+      writers: [],
+      columnMenuActions: [
+        (_row, context) => {
+          expect(context.groupingPanel).toBe(groupingPanel);
+          return {
+            kind: "choice",
+            id: "plugin-choice",
+            label: "Group aggregation",
+            disabled: false,
+            value: "",
+            options: [
+              { value: "", label: "Default" },
+              { value: "count", label: "Count" },
+            ],
+            onChange,
+          };
+        },
+      ],
+      panels: [],
+      commands: [],
+      contextMenuItems: [],
+    };
+    render(
+      <FeatureHostProvider host={host}>
+        <ColumnMenu
+          allColumns={cols}
+          onAutoSize={() => undefined}
+          layout={fakeLayout()}
+          labels={labels}
+          classNames={{
+            columnMenuChoice: "choice",
+            columnMenuChoiceLabel: "choice-label",
+            columnMenuChoiceSelect: "choice-select",
+          }}
+          groupingPanel={groupingPanel}
+        />
+      </FeatureHostProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const choice = screen.getByRole("combobox", {
+      name: "Group aggregation",
+    });
+
+    fireEvent.change(choice, { target: { value: "count" } });
+
+    expect(onChange).toHaveBeenCalledWith("count");
+    expect(choice).toHaveClass("choice-select");
+    expect(choice.closest("label")).toHaveClass("choice");
+    expect(choice.closest("label")?.querySelector("span")).toHaveClass(
+      "choice-label"
+    );
+    expect(choice).toBeInTheDocument();
+  });
+
   it("toggles visibility via the eye control", () => {
     const layout = fakeLayout();
     open(layout);

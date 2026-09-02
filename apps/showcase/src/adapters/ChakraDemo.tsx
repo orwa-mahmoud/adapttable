@@ -21,7 +21,7 @@ import {
 } from "@adapttable/chakra/filters";
 import { findInTable as findInTable_ } from "@adapttable/chakra/find-in-table";
 import { fullscreen as fullscreen_ } from "@adapttable/chakra/fullscreen";
-import { grouping as grouping_ } from "@adapttable/chakra/grouping";
+import { groupingPanel as groupingPanel_ } from "@adapttable/chakra/grouping-panel";
 import { headerFilters as headerFilters_ } from "@adapttable/chakra/header-filters";
 import { nestedTable as nestedTable_ } from "@adapttable/chakra/nested-table";
 import { print as print_ } from "@adapttable/chakra/print";
@@ -53,7 +53,7 @@ const KIT_CHROME = {
   batchEditing: batchEditing_,
   editHistory: editHistory_,
   editing: editing_,
-  grouping: grouping_,
+  groupingPanel: groupingPanel_,
   rowEditing: rowEditing_,
   rowReorder: rowReorder_,
   tree: tree_,

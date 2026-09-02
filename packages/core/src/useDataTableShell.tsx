@@ -343,6 +343,7 @@ export function useDataTableShell<TRow>(
     expansion: chrome.detail?.expansion,
     editing: chrome.editing,
     grouping: chrome.grouping,
+    groupingPanel: chrome.groupingPanel,
     dir: props.dir,
     assembly: (props as { assembly?: Partial<AssemblyFns<TRow>> }).assembly,
   };
@@ -377,6 +378,15 @@ export function useDataTableShell<TRow>(
     ...exportHandler,
     dir: props.dir,
   };
+  const groupingPanelProps = chrome.groupingPanel
+    ? {
+        state: chrome.groupingPanel,
+        columns: chrome.allColumns,
+        labels,
+        mobile: chrome.isMobile,
+        dir: props.dir,
+      }
+    : undefined;
 
   // What the table says out loud when sorting, filtering or paging rewrites the
   // body. Derived from the SETTLED source rather than from the controls, which
@@ -417,6 +427,7 @@ export function useDataTableShell<TRow>(
     /** The table's resolved URL backend — pass to saved-views UIs. */
     urlAdapter,
     chrome,
+    groupingPanelProps,
     /**
      * Props the chrome was built with. The body gate reads these.
      */

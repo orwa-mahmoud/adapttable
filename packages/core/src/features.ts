@@ -23,10 +23,13 @@ export type {
 } from "./actions/contextMenuModel";
 export type { CommandPaletteOptions } from "./actions/useCommandPalette";
 export type { ContextMenuOptions } from "./actions/useTableContextMenu";
-export type { Aggregator } from "./aggregate/aggregate";
+export type { AggregateName, Aggregator } from "./aggregate/aggregate";
 export type {
   ColumnMenuAction,
   ColumnMenuActionContext,
+  ColumnMenuChoice,
+  ColumnMenuChoiceOption,
+  ColumnMenuItem,
   ColumnMenuRow,
 } from "./columns/columnMenuModel";
 export type { BatchRowEdit } from "./editing/batchEditing";
@@ -77,6 +80,7 @@ export { findInTable } from "./features/find-in-table";
 export { fullscreen } from "./features/fullscreen";
 export type { GroupingExtras, StaticGroupingExtras } from "./features/grouping";
 export { grouping } from "./features/grouping";
+export { groupingPanel } from "./features/grouping-panel";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
@@ -101,6 +105,19 @@ export { tree } from "./features/tree";
 export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export type { FilterDef } from "./filters/filterDefs";
 export type { FilterTypeSpec } from "./filters/filterRegistry";
+export type {
+  GroupAggregateOverride,
+  GroupAggregateOverrides,
+} from "./grouping/groupAggregateOverrides";
+export type {
+  GroupingChipKeyboardProps,
+  GroupingDragProps,
+  GroupingDragSource,
+  GroupingDragState,
+  GroupingDropProps,
+  GroupingPanelInteractions,
+  GroupingPanelState,
+} from "./grouping/groupingPanelModel";
 export type { GroupSort } from "./grouping/groupRows";
 export type { RowGroupLevel, RowGroupRef } from "./grouping/groupRows";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";

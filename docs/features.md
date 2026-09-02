@@ -43,7 +43,8 @@ Every public adapter exports the same factories:
 | ----------------------------------- | ----------------------------------------------------------------- |
 | `@adapttable/<kit>/row-reorder`     | `rowReorder`                                                      |
 | `@adapttable/<kit>/saved-views`     | `savedViews`                                                      |
-| `@adapttable/<kit>/grouping`        | `grouping`                                                        |
+| `@adapttable/<kit>/grouping-panel`  | `groupingPanel` — grouping headers + interactive panel            |
+| `@adapttable/<kit>/grouping`        | `grouping` — code-fixed grouping without the interactive panel    |
 | `@adapttable/<kit>/editing`         | `editing`                                                         |
 | `@adapttable/<kit>/virtualize`      | `virtualize`                                                      |
 | `@adapttable/<kit>/column-menu`     | `columnMenu`                                                      |
@@ -79,16 +80,20 @@ supplied: the Columns menu, the density chooser, CSV export, find-in-table,
 fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
 columns and the status bar.
 
-A feature that needs input joins only when you give it that input, because an
-inert implementation is exactly the weight this architecture exists to remove:
+Configurable preset members join only when you give them input. Features
+outside the preset append to the same ordinary array:
 
 ```tsx
-standardFeatures({
-  grouping: "team",
-  bulkActions: [{ key: "delete", label: "Delete", onClick: remove }],
-  filters: [{ key: "team", type: "select", options: teams }],
-  savedViews: { storage: "local" },
-});
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+
+[
+  ...standardFeatures({
+    bulkActions: [{ key: "delete", label: "Delete", onClick: remove }],
+    filters: [{ key: "team", type: "select", options: teams }],
+    savedViews: { storage: "local" },
+  }),
+  groupingPanel("team"),
+];
 ```
 
 One factory is callable with no arguments and is still NOT a member: the
@@ -109,18 +114,18 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 57 kB gzipped and the same table with
-`standardFeatures()` composed is 108 kB.
+Measured on MUI, the table alone is 58 kB gzipped and the same table with
+`standardFeatures()` composed is 110 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
 ## Types, and why no annotation is needed
 
 ```tsx
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 import { virtualize } from "@adapttable/mantine/virtualize";
 
-<DataTable features={[grouping("team"), virtualize()]} />;
+<DataTable features={[groupingPanel("team"), virtualize()]} />;
 ```
 
 A factory whose configuration says nothing about rows returns a
@@ -297,9 +302,9 @@ for a position, and only the feature that was imported can answer.
 ### What the table guarantees
 
 - **Order comes from the ids, not from your array.** Providers nest in
-  feature-id order, so `[grouping("team"), auditLog()]` and
-  `[auditLog(), grouping("team")]` build the identical tree. Moving a line never
-  remounts a provider or discards what it was holding.
+  feature-id order, so `[groupingPanel("team"), auditLog()]` and
+  `[auditLog(), groupingPanel("team")]` build the identical tree. Moving a line
+  never remounts a provider or discards what it was holding.
 - **One provider per id.** A duplicate id warns in development and the last one
   wins, exactly as `apply` already resolves duplicates.
 - **A provider mounts when its feature arrives and unmounts when it leaves**, and
@@ -316,7 +321,8 @@ registry to learn and nothing global to collide over.
 
 `rowReorder` · `rowPinning` · `cellSpan` · `extraRows` · `rowAppearance` ·
 `rowDetail` · `nestedTable` · `editing` · `rowEditing` · `batchEditing` ·
-`editHistory` · `dirtyIndicators` · `grouping` · `tree` · `virtualize` ·
+`editHistory` · `dirtyIndicators` · `grouping` · `groupingPanel` · `tree` ·
+`virtualize` ·
 `columnMenu` · `resizableColumns` · `collapsibleColumnGroups` · `exportCsv` ·
 `cellNavigation` · `findInTable` · `fullscreen` · `commandPalette` ·
 `contextMenu` · `sidePanel` · `bulkActions` · `filters` · `filterTypes` ·

@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Export a Radix data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout." />
+    <meta name="description" content="Export a Radix data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/radix/export/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="Radix table export to CSV, Excel and PDF — AdaptTable" />
-    <meta property="og:description" content="Export a Radix data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout." />
+    <meta property="og:description" content="Export a Radix data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/radix/export/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Radix table export to CSV, Excel and PDF — AdaptTable" />
-    <meta name="twitter:description" content="Export a Radix data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout." />
+    <meta name="twitter:description" content="Export a Radix data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Export a Radix data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout.","url":"https://orwa-mahmoud.github.io/adapttable/demo/radix/export/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Export a Radix data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress.","url":"https://orwa-mahmoud.github.io/adapttable/demo/radix/export/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -164,24 +164,30 @@
         <h1>Export and print in Radix</h1>
         <p>One <code>exportCsv()</code> feature puts an export button in the toolbar, and one <code>scope</code> decides what leaves: the current page, every filtered row, or exactly the cells selected.</p>
         <p>Swap the writer and the same button produces a different file. <code>xlsxWriter</code> writes Excel outline levels for grouped rows and bolds the totals; <code>pdfWriter</code> lays out a paginated document, right-to-left scripts included when you hand it a font.</p>
+        <p>Past the 50,000-row browser cap, <code>onExportAll</code> sends the page-free current view to your backend while the kit shows determinate or indeterminate progress, Cancel, Retry, and the finished download.</p>
         <p><code>printTable</code> opens the browser's own print dialog against a layout built for paper rather than a screenshot of the page.</p>
         <p>The export control wraps its label in Radix's Spinner rather than swapping it out, which keeps the button the same width so the toolbar does not reflow when an export starts.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/radix&quot;;
-import { xlsxWriter } from &quot;@adapttable/core/xlsx&quot;;
+import { exportCsv } from &quot;@adapttable/radix/export&quot;;
 
-export function People({ rows, columns }) {
+export function People({ source, columns, api }) {
   return (
     &lt;DataTable
-      data={rows}
+      source={source}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      groupBy=&quot;team&quot;
-      exportCsv={{
-        scope: &quot;all&quot;,
-        filename: &quot;people.xlsx&quot;,
-        writer: xlsxWriter({ sheetName: &quot;People&quot; }),
-      }}
+      features={[
+        exportCsv({
+          scope: &quot;all&quot;,
+          onExportAll: async (query, controls) =&gt;
+            api.buildExport(query, {
+              signal: controls.signal,
+              onProgress: controls.setProgress,
+              onMessage: controls.setMessage,
+            }),
+        }),
+      ]}
     /&gt;
   );
 }</code></pre>
@@ -205,7 +211,7 @@ export function People({ rows, columns }) {
           <li><a href="../selection/">Row selection in Radix</a> — A set of ids that survives paging, with bulk actions over it.</li>
           <li><a href="../rows/">Rows in Radix</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
           <li><a href="../editing/">Inline cell editing in Radix</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="../grouping/">Row grouping in Radix</a> — Nested group headers with counts, subtotals, footers and collapse state.</li>
+          <li><a href="../grouping/">Row grouping in Radix</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
           <li><a href="../nested-tables/">Nested tables in Radix</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../scale/">Large datasets in Radix</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="../tree/">Tree data in Radix</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
@@ -218,7 +224,7 @@ export function People({ rows, columns }) {
           <li><a href="../accessibility/">Accessible Radix data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
         </ul>
         <p>
-          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/export-pdf/">export-pdf</a>. More of this kit:
+          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/exporting/">exporting</a>, <a href="https://orwa-mahmoud.github.io/adapttable/export-pdf/">export-pdf</a>. More of this kit:
           <a href="../">AdaptTable for Radix</a>, or
           <a href="/adapttable/demo/">the live demo</a>.
         </p>

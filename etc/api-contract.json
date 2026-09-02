@@ -16,6 +16,7 @@
       "FilterTreeBuilder",
       "FindBar",
       "GroupMoreButton",
+      "GroupingPanel",
       "PivotPanel",
       "RowEditActions",
       "RowReorderButtons",
@@ -27,6 +28,10 @@
       "SelectionStatsBar",
       "TreeCell",
       "TreeToggle"
+    ],
+    "adapter-antd-grouping-panel": [
+      "GroupingPanel",
+      "groupingPanel"
     ],
     "adapter-antd-pivot": [
       "PivotPanel"
@@ -47,6 +52,7 @@
       "FilterTreeBuilder",
       "FindBar",
       "GroupMoreButton",
+      "GroupingPanel",
       "PivotPanel",
       "RowEditActions",
       "RowReorderButtons",
@@ -58,6 +64,10 @@
       "SelectionStatsBar",
       "TreeCell",
       "TreeToggle"
+    ],
+    "adapter-base-ui-grouping-panel": [
+      "GroupingPanel",
+      "groupingPanel"
     ],
     "adapter-base-ui-pivot": [
       "PivotPanel"
@@ -84,6 +94,7 @@
       "FilterTreeBuilder",
       "FindBar",
       "GroupMoreButton",
+      "GroupingPanel",
       "PivotPanel",
       "RowEditActions",
       "RowReorderButtons",
@@ -95,6 +106,10 @@
       "SelectionStatsBar",
       "TreeCell",
       "TreeToggle"
+    ],
+    "adapter-chakra-grouping-panel": [
+      "GroupingPanel",
+      "groupingPanel"
     ],
     "adapter-chakra-pivot": [
       "PivotPanel"
@@ -124,6 +139,7 @@
       "FilterTreeBuilder",
       "FindBar",
       "GroupMoreButton",
+      "GroupingPanel",
       "PaginationFooter",
       "PaginationFooterProps",
       "PivotPanel",
@@ -139,6 +155,10 @@
       "TableSkeletonProps",
       "TreeCell",
       "TreeToggle"
+    ],
+    "adapter-mantine-grouping-panel": [
+      "GroupingPanel",
+      "groupingPanel"
     ],
     "adapter-mantine-pivot": [
       "PivotPanel"
@@ -158,6 +178,7 @@
       "FilterTreeBuilder",
       "FindBar",
       "GroupMoreButton",
+      "GroupingPanel",
       "PivotPanel",
       "RowEditActions",
       "RowReorderButtons",
@@ -192,6 +213,10 @@
     "adapter-mui-find-in-table": [
       "findInTable"
     ],
+    "adapter-mui-grouping-panel": [
+      "GroupingPanel",
+      "groupingPanel"
+    ],
     "adapter-mui-pivot": [
       "PivotPanel"
     ],
@@ -217,8 +242,10 @@
       "FilterTreeBuilder",
       "FindBar",
       "GroupMoreButton",
+      "GroupingPanel",
       "PivotPanel",
       "RadixAccentColor",
+      "RadixGroupingPanelProps",
       "RowEditActions",
       "RowReorderButtons",
       "RowReorderHandle",
@@ -229,6 +256,11 @@
       "SelectionStatsBar",
       "TreeCell",
       "TreeToggle"
+    ],
+    "adapter-radix-grouping-panel": [
+      "GroupingPanel",
+      "RadixGroupingPanelProps",
+      "groupingPanel"
     ],
     "adapter-radix-pivot": [
       "PivotPanel"
@@ -277,6 +309,10 @@
       "SelectionStatsBar",
       "TreeCell",
       "TreeToggle"
+    ],
+    "adapter-unstyled-grouping-panel": [
+      "GroupingPanel",
+      "groupingPanel"
     ],
     "adapter-unstyled-pivot": [
       "PivotPanel"
@@ -440,6 +476,9 @@
       "ColumnMenuAction",
       "ColumnMenuActionContext",
       "ColumnMenuActionFactory",
+      "ColumnMenuChoice",
+      "ColumnMenuChoiceOption",
+      "ColumnMenuItem",
       "ColumnMenuLabels",
       "ColumnMenuRow",
       "ColumnReorderKeyProps",
@@ -566,6 +605,8 @@
       "GridFocusMove",
       "GridFocusState",
       "GridKeyPress",
+      "GroupAggregateOverride",
+      "GroupAggregateOverrides",
       "GroupAggregatesFn",
       "GroupByInput",
       "GroupCollapseState",
@@ -578,6 +619,13 @@
       "GroupedFlatEntry",
       "GroupedHeaderAlign",
       "GroupingCapability",
+      "GroupingChipKeyboardProps",
+      "GroupingDragProps",
+      "GroupingDragSource",
+      "GroupingDragState",
+      "GroupingDropProps",
+      "GroupingPanelInteractions",
+      "GroupingPanelState",
       "HeaderFilterSessionProps",
       "HeaderSelectionState",
       "HighlightState",
@@ -945,6 +993,7 @@
       "parseClipboardTable",
       "parseDateOp",
       "parseFilterTree",
+      "parseGroupAggregateOverrides",
       "parseGroupBy",
       "parseListOperand",
       "parseNumberList",
@@ -990,6 +1039,7 @@
       "scalarFilterText",
       "selectionStats",
       "serializeFilterTree",
+      "serializeGroupAggregateOverrides",
       "serverGroupEntries",
       "setFilterTreeCombinator",
       "showSimpleFilterFields",
@@ -1080,6 +1130,8 @@
       "visibleColumns",
       "visibleRowActions",
       "walkFilterTreeConditions",
+      "withGroupAggregateOverrides",
+      "withQueryAggregateOverrides",
       "windowGroupedEntries",
       "writeClipboardText",
       "writeRangeFilter",
@@ -1101,6 +1153,8 @@
       "AdapterFiltersFeature",
       "AdapterGroupingComponents",
       "AdapterGroupingFeature",
+      "AdapterGroupingPanelComponents",
+      "AdapterGroupingPanelFeature",
       "AdapterRowDetailComponents",
       "AdapterRowDetailFeatures",
       "AdapterRowReorderComponents",
@@ -1198,7 +1252,10 @@
       "ColumnMenuAction",
       "ColumnMenuActionContext",
       "ColumnMenuActionFactory",
+      "ColumnMenuChoice",
+      "ColumnMenuChoiceOption",
       "ColumnMenuChromeProps",
+      "ColumnMenuItem",
       "ColumnMenuLabels",
       "ColumnMenuRow",
       "ColumnMenuSlotProps",
@@ -1417,6 +1474,7 @@
       "FullscreenState",
       "GRID_FOCUS_ANNOUNCER",
       "GROUPING_LIVE",
+      "GROUPING_PANEL",
       "GROUP_HEADER_CARD",
       "GROUP_HEADER_ROW",
       "GetCellSpan",
@@ -1426,6 +1484,8 @@
       "GridFocusAnnouncerProps",
       "GridFocusState",
       "GripIcon",
+      "GroupAggregateOverride",
+      "GroupAggregateOverrides",
       "GroupAggregatesFn",
       "GroupByInput",
       "GroupCollapseState",
@@ -1443,7 +1503,24 @@
       "GroupedFlatEntry",
       "GroupedHeaderAlign",
       "GroupingCapability",
+      "GroupingChipKeyboardProps",
+      "GroupingDragProps",
+      "GroupingDragSource",
+      "GroupingDragState",
+      "GroupingDropProps",
       "GroupingExtras",
+      "GroupingPanelChipProps",
+      "GroupingPanelChrome",
+      "GroupingPanelChromeProps",
+      "GroupingPanelDropZoneProps",
+      "GroupingPanelInteractions",
+      "GroupingPanelOption",
+      "GroupingPanelRemoveZoneProps",
+      "GroupingPanelSelectProps",
+      "GroupingPanelSlotProps",
+      "GroupingPanelSlots",
+      "GroupingPanelState",
+      "GroupingPanelSurfaceProps",
       "HeaderGroupCell",
       "HeaderSelectionState",
       "HistoryLiveGate",
@@ -1712,6 +1789,7 @@
       "createAdapterEditingFeatures",
       "createAdapterFiltersFeature",
       "createAdapterGroupingFeature",
+      "createAdapterGroupingPanelFeature",
       "createAdapterRowDetailFeatures",
       "createAdapterRowReorderFeature",
       "createAdapterStandardFeatures",
@@ -1841,6 +1919,7 @@
     ],
     "core-features": [
       "ActionConfirm",
+      "AggregateName",
       "Aggregator",
       "BatchRowEdit",
       "BulkAction",
@@ -1862,6 +1941,9 @@
       "ColumnMenuAction",
       "ColumnMenuActionContext",
       "ColumnMenuActionFactory",
+      "ColumnMenuChoice",
+      "ColumnMenuChoiceOption",
+      "ColumnMenuItem",
       "ColumnMenuLabels",
       "ColumnMenuRow",
       "Command",
@@ -1915,10 +1997,19 @@
       "FilterWidgetRenderProps",
       "GetCellSpan",
       "GetCellSpanArgs",
+      "GroupAggregateOverride",
+      "GroupAggregateOverrides",
       "GroupNode",
       "GroupSort",
       "GroupingExtras",
       "GroupingCapability",
+      "GroupingChipKeyboardProps",
+      "GroupingDragProps",
+      "GroupingDragSource",
+      "GroupingDragState",
+      "GroupingDropProps",
+      "GroupingPanelInteractions",
+      "GroupingPanelState",
       "LayoutStorage",
       "NestedTable",
       "NestedTableDefaults",
@@ -1994,6 +2085,7 @@
       "fitColumns",
       "fullscreen",
       "grouping",
+      "groupingPanel",
       "headerFilters",
       "multiSort",
       "nestedTable",
@@ -2318,6 +2410,9 @@
     ],
     "forwards @adapttable/unstyled/grouping": [
       "@adapttable/unstyled/grouping"
+    ],
+    "forwards @adapttable/unstyled/grouping-panel": [
+      "@adapttable/unstyled/grouping-panel"
     ],
     "forwards @adapttable/unstyled/header-filters": [
       "@adapttable/unstyled/header-filters"
@@ -2711,6 +2806,9 @@
     "adapter-antd-grouping.api.md": {
       "surface": "kit/grouping"
     },
+    "adapter-antd-grouping-panel.api.md": {
+      "surface": "adapter-antd-grouping-panel"
+    },
     "adapter-antd-header-filters.api.md": {
       "surface": "kit/header-filters"
     },
@@ -2825,6 +2923,9 @@
     },
     "adapter-base-ui-grouping.api.md": {
       "surface": "kit/grouping"
+    },
+    "adapter-base-ui-grouping-panel.api.md": {
+      "surface": "adapter-base-ui-grouping-panel"
     },
     "adapter-base-ui-header-filters.api.md": {
       "surface": "kit/header-filters"
@@ -2972,6 +3073,9 @@
     "adapter-chakra-grouping.api.md": {
       "surface": "kit/grouping"
     },
+    "adapter-chakra-grouping-panel.api.md": {
+      "surface": "adapter-chakra-grouping-panel"
+    },
     "adapter-chakra-header-filters.api.md": {
       "surface": "kit/header-filters"
     },
@@ -3086,6 +3190,9 @@
     },
     "adapter-mantine-grouping.api.md": {
       "surface": "kit/grouping"
+    },
+    "adapter-mantine-grouping-panel.api.md": {
+      "surface": "adapter-mantine-grouping-panel"
     },
     "adapter-mantine-header-filters.api.md": {
       "surface": "kit/header-filters"
@@ -3202,6 +3309,9 @@
     "adapter-mui-grouping.api.md": {
       "surface": "kit/grouping"
     },
+    "adapter-mui-grouping-panel.api.md": {
+      "surface": "adapter-mui-grouping-panel"
+    },
     "adapter-mui-header-filters.api.md": {
       "surface": "kit/header-filters"
     },
@@ -3316,6 +3426,9 @@
     },
     "adapter-radix-grouping.api.md": {
       "surface": "kit/grouping"
+    },
+    "adapter-radix-grouping-panel.api.md": {
+      "surface": "adapter-radix-grouping-panel"
     },
     "adapter-radix-header-filters.api.md": {
       "surface": "kit/header-filters"
@@ -3432,6 +3545,9 @@
     "adapter-shadcn-grouping.api.md": {
       "reexport": "forwards @adapttable/unstyled/grouping"
     },
+    "adapter-shadcn-grouping-panel.api.md": {
+      "reexport": "forwards @adapttable/unstyled/grouping-panel"
+    },
     "adapter-shadcn-header-filters.api.md": {
       "reexport": "forwards @adapttable/unstyled/header-filters"
     },
@@ -3545,6 +3661,9 @@
     },
     "adapter-unstyled-grouping.api.md": {
       "surface": "kit/grouping"
+    },
+    "adapter-unstyled-grouping-panel.api.md": {
+      "surface": "adapter-unstyled-grouping-panel"
     },
     "adapter-unstyled-header-filters.api.md": {
       "surface": "kit/header-filters"

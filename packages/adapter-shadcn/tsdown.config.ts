@@ -40,6 +40,7 @@ export default defineConfig({
     "src/features.ts",
     "src/row-reorder.ts",
     "src/grouping.ts",
+    "src/grouping-panel.ts",
     "src/editing.ts",
     "src/virtualize.ts",
     "src/column-menu.ts",

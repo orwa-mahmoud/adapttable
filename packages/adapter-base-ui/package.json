@@ -159,6 +159,16 @@
         "default": "./dist/grouping.cjs"
       }
     },
+    "./grouping-panel": {
+      "import": {
+        "types": "./dist/grouping-panel.d.ts",
+        "default": "./dist/grouping-panel.js"
+      },
+      "require": {
+        "types": "./dist/grouping-panel.d.cts",
+        "default": "./dist/grouping-panel.cjs"
+      }
+    },
     "./tree": {
       "import": {
         "types": "./dist/tree.d.ts",

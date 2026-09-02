@@ -108,6 +108,20 @@ function RuntimePublisher<TRow>({
     rowLabel: (row) => readableRowLabel(chrome, row),
     sortBy: chrome.source.sortBy,
     grouping: chrome.grouping,
+    groupingState: {
+      groupBy: chrome.source.groupBy,
+      aggregateOverrides: chrome.source.groupAggregateOverrides ?? {},
+      columnLabel: (key) => {
+        const column = chrome.columnLayout.visibleColumns.find(
+          (candidate) => candidate.key === key
+        );
+        if (typeof column?.header === "string") return column.header;
+        return column?.mobileLabel ?? key;
+      },
+      setGroupBy: chrome.source.setGroupBy,
+      initializeGroupBy: chrome.source.initializeGroupBy,
+      setAggregateOverrides: chrome.source.setGroupAggregateOverrides,
+    },
     tree: chrome.tree,
   });
   return children(chrome);

@@ -239,6 +239,12 @@ export interface DataTableClassNames {
   columnMenuSubmenu?: string;
   /** One action inside the per-column submenu. */
   columnMenuAction?: string;
+  /** One plugin-provided labelled choice inside a column submenu. */
+  columnMenuChoice?: string;
+  /** The visible caption for a plugin-provided column-menu choice. */
+  columnMenuChoiceLabel?: string;
+  /** The native select for a plugin-provided column-menu choice. */
+  columnMenuChoiceSelect?: string;
   /** Inline column-name editor in the Columns menu. */
   columnRenameForm?: string;
   /** Visible label for the menu rename input. */
@@ -406,6 +412,29 @@ export interface DataTableClassNames {
   groupCount?: string;
   /** One aggregate value chip in the group header. */
   groupAggregate?: string;
+  /* ── Interactive row-grouping panel ────────────────────────────── */
+  /** The grouping strip above the table body. */
+  groupingPanel?: string;
+  /** One insertion target in the grouping strip. */
+  groupingDropZone?: string;
+  /** The wrapper around one active grouping column. */
+  groupingItem?: string;
+  /** One active grouping column chip. */
+  groupingChip?: string;
+  /** The draggable, keyboard-reorderable handle in a grouping chip. */
+  groupingChipHandle?: string;
+  /** The remove control in a grouping chip. */
+  groupingChipRemove?: string;
+  /** The select that adds another grouping column. */
+  groupingAdd?: string;
+  /** The wrapper around the aggregate column and function selects. */
+  groupingAggregateControls?: string;
+  /** The aggregate target-column select. */
+  groupingAggregateColumn?: string;
+  /** The aggregate function select. */
+  groupingAggregate?: string;
+  /** The drop target that removes a dragged grouping chip. */
+  groupingRemoveZone?: string;
   /* ── Cell editing ────────────────────────────────────────────────── */
   /** The invisible activate button wrapping an editable display cell. */
   editCellActivate?: string;

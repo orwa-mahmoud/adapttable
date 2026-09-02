@@ -96,6 +96,11 @@ export {
   createAdapterGroupingFeature,
 } from "./adapterFeatures/grouping";
 export {
+  type AdapterGroupingPanelComponents,
+  type AdapterGroupingPanelFeature,
+  createAdapterGroupingPanelFeature,
+} from "./adapterFeatures/groupingPanel";
+export {
   type AdapterRowDetailComponents,
   type AdapterRowDetailFeatures,
   createAdapterRowDetailFeatures,
@@ -123,7 +128,10 @@ export {
   type ColumnMenuAction,
   type ColumnMenuActionContext,
   columnMenuActions,
+  type ColumnMenuChoice,
+  type ColumnMenuChoiceOption,
   type ColumnMenuChromeProps,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
@@ -368,6 +376,7 @@ export {
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
   GROUPING_LIVE,
+  GROUPING_PANEL,
   KEYED_WINDOW,
   type KeyedWindowSlotProps,
   PINNING_LIVE,
@@ -839,6 +848,31 @@ export type {
 export type { CellEdit } from "./focus/cellEdits";
 export type { CellRange } from "./focus/cellRange";
 export type { GridCell } from "./focus/gridFocus";
+export type {
+  GroupAggregateOverride,
+  GroupAggregateOverrides,
+} from "./grouping/groupAggregateOverrides";
+export {
+  type GroupingPanelChipProps,
+  GroupingPanelChrome,
+  type GroupingPanelChromeProps,
+  type GroupingPanelDropZoneProps,
+  type GroupingPanelOption,
+  type GroupingPanelRemoveZoneProps,
+  type GroupingPanelSelectProps,
+  type GroupingPanelSlotProps,
+  type GroupingPanelSlots,
+  type GroupingPanelSurfaceProps,
+} from "./grouping/GroupingPanelChrome";
+export type {
+  GroupingChipKeyboardProps,
+  GroupingDragProps,
+  GroupingDragSource,
+  GroupingDragState,
+  GroupingDropProps,
+  GroupingPanelInteractions,
+  GroupingPanelState,
+} from "./grouping/groupingPanelModel";
 export type { GroupNode, GroupSort } from "./grouping/groupRows";
 export type { PaginationInfo } from "./pagination/paginationMath";
 export type { PivotMeasure } from "./pivot/pivotModel";

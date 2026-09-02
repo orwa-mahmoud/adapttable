@@ -10,9 +10,10 @@ import and `features` entry are the switch; there is no `savedViews` table prop.
 
 A view captures **everything the table can put in a URL**: search, the
 multi-sort chain, page and page size, the simple filters and the advanced
-filter tree, grouping and which groups are collapsed, the whole column layout
-(order, hidden, pinned, widths, user-renamed column names, collapsed column
-groups), pinned rows, density,
+filter tree, ordered grouping keys (`groupBy`), session aggregation overrides
+(`groupAgg`), and which groups are collapsed, the whole column layout (order,
+hidden, pinned, widths, user-renamed column names, collapsed column groups),
+pinned rows, density,
 and the [pivot configuration](./pivot.md). The parts that take longest to
 rebuild by hand are exactly the parts worth capturing.
 

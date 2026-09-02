@@ -32,6 +32,16 @@ const labels: ColumnMenuLabels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  groupByColumn: (name) => `Group by ${name}`,
+  ungroupColumn: (name) => `Ungroup ${name}`,
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAverage: "Average",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 describe("AntD ColumnHeaderRename", () => {

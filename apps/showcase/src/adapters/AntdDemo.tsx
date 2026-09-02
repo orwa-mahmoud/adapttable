@@ -21,7 +21,7 @@ import {
 } from "@adapttable/antd/filters";
 import { findInTable as findInTable_ } from "@adapttable/antd/find-in-table";
 import { fullscreen as fullscreen_ } from "@adapttable/antd/fullscreen";
-import { grouping as grouping_ } from "@adapttable/antd/grouping";
+import { groupingPanel as groupingPanel_ } from "@adapttable/antd/grouping-panel";
 import { headerFilters as headerFilters_ } from "@adapttable/antd/header-filters";
 import { nestedTable as nestedTable_ } from "@adapttable/antd/nested-table";
 import { print as print_ } from "@adapttable/antd/print";
@@ -53,7 +53,7 @@ const KIT_CHROME = {
   batchEditing: batchEditing_,
   editHistory: editHistory_,
   editing: editing_,
-  grouping: grouping_,
+  groupingPanel: groupingPanel_,
   rowEditing: rowEditing_,
   rowReorder: rowReorder_,
   tree: tree_,

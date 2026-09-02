@@ -45,6 +45,40 @@ describe("useTableUrlState", () => {
     expect(result.current.sortDir).toBe("desc");
   });
 
+  it("round-trips group aggregate overrides and clears them with the view", () => {
+    const { result, adapter } = renderWith(
+      "groupBy=team&groupAgg=budget%3Asum%2Cperson%3Anone"
+    );
+    expect(result.current.groupAggregateOverrides).toEqual({
+      budget: "sum",
+      person: "none",
+    });
+
+    act(() =>
+      result.current.setGroupAggregateOverrides?.({
+        budget: "avg",
+        score: "max",
+      })
+    );
+    expect(adapter.getSearch()).toContain(
+      "groupAgg=budget%3Aavg%2Cscore%3Amax"
+    );
+    act(() => result.current.clearAll());
+    expect(result.current.groupAggregateOverrides).toEqual({});
+    expect(adapter.getSearch()).not.toContain("groupAgg");
+  });
+
+  it("initializes grouping only when the URL is silent", () => {
+    const absent = renderWith("");
+    act(() => absent.result.current.initializeGroupBy?.("team,status"));
+    expect(absent.result.current.groupBy).toBe("team,status");
+
+    const cleared = renderWith("groupBy=");
+    act(() => cleared.result.current.initializeGroupBy?.("team,status"));
+    expect(cleared.result.current.groupBy).toBeUndefined();
+    expect(cleared.adapter.getSearch()).toContain("groupBy=");
+  });
+
   it("uses the first duplicate value consistently", () => {
     const { result } = renderWith(
       "page=2&page=9&q=first&q=second&f_team=Core&f_team=Other"

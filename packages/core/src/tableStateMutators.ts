@@ -1,3 +1,4 @@
+import type { GroupAggregateOverrides } from "./grouping/groupAggregateOverrides";
 import type { SortLevel } from "./sort/compare";
 import type { QueryFilterGroup } from "./source/queryContract";
 import type { ExtraFilters, FilterValue, SortDirection } from "./types";
@@ -45,4 +46,14 @@ export interface TableStateMutators {
    * ignores grouping without `allFilteredRows`.
    */
   setGroupBy: (key: string | undefined) => void;
+  /**
+   * Set initial grouping only when the URL has no `groupBy` key at all.
+   * Interactive grouping uses this so an explicit empty marker still wins.
+   */
+  initializeGroupBy?: (key: string) => void;
+  /**
+   * Replace session-level group aggregate choices. Optional for custom
+   * sources; the built-in URL-backed sources implement it.
+   */
+  setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
 }

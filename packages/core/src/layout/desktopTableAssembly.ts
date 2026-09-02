@@ -1251,6 +1251,7 @@ export function useDesktopTableAssembly<TRow>(
     expansion,
     editing,
     grouping,
+    groupingPanel,
     rowEntries,
     paddingTop = 0,
     paddingBottom = 0,
@@ -1520,10 +1521,14 @@ export function useDesktopTableAssembly<TRow>(
     rowSpan = 1
   ): DesktopHeaderLeaf<TRow> => {
     const localStyle = headStyle(column);
-    const headerProps = table.getHeaderCellProps(
+    const baseHeaderProps = table.getHeaderCellProps(
       column,
       localStyle && { style: localStyle }
     );
+    const headerProps = {
+      ...baseHeaderProps,
+      ...groupingPanel?.headerDragProps(column.key),
+    };
     const chainDir = table.source.sortLevels.find(
       (level) => level.key === column.key
     )?.dir;

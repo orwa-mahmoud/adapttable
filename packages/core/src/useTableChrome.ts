@@ -18,9 +18,11 @@ import type {
   ExportProgressState,
   ExportStatus,
 } from "./export/useExportHandler";
+import { GROUPING_PANEL_STATE } from "./features/groupingPanelKey";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import type { ActiveFilterChip } from "./filters/useActiveFilterChips";
+import type { GroupingPanelState } from "./grouping/groupingPanelModel";
 import type { GroupByInput } from "./grouping/groupKeys";
 import { parseGroupBy } from "./grouping/groupKeys";
 import type { GroupAggregatesFn, GroupedFlatEntry } from "./grouping/groupRows";
@@ -399,6 +401,8 @@ export interface TableChrome<TRow> {
     /** Reveal the next page of groups, or of one group's rows. */
     showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
   };
+  /** Interactive grouping strip state, present only with `groupingPanel()`. */
+  groupingPanel?: GroupingPanelState;
   /**
    * The rows the editing layer must treat as present: the grouped leaf set
    * (in render order) while grouping renders the full filtered set, the
@@ -762,6 +766,24 @@ export function useTableChrome<TRow>(
     () => parseGroupBy(requestedGroupBy),
     [requestedGroupBy]
   );
+  const groupingPanelInteractions = useFeatureState(GROUPING_PANEL_STATE);
+  const groupingPanel = useMemo<GroupingPanelState | undefined>(
+    () =>
+      groupingPanelInteractions
+        ? {
+            ...groupingPanelInteractions,
+            groupBy: groupByKeys,
+            aggregateOverrides: source.groupAggregateOverrides ?? {},
+            canSetAggregates: source.setGroupAggregateOverrides !== undefined,
+          }
+        : undefined,
+    [
+      groupByKeys,
+      groupingPanelInteractions,
+      source.groupAggregateOverrides,
+      source.setGroupAggregateOverrides,
+    ]
+  );
 
   const featureNotices = useMemo(
     () =>
@@ -846,6 +868,7 @@ export function useTableChrome<TRow>(
     treeShaped,
     editing,
     grouping,
+    groupingPanel,
     tree,
     editingRows,
     showFooter,

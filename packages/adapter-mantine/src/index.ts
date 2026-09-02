@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+export { GroupingPanel } from "./components/GroupingPanel";
 export { PivotPanel } from "./components/PivotPanel";
 export { SavedViewsPanel } from "./components/SavedViewsPanel";
 export { DataTable } from "./DataTable";

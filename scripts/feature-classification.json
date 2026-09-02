@@ -176,6 +176,22 @@
       "note": "Group header rows are kit chrome; the grouping model is core.",
       "requiresConfig": true
     },
+    "groupingPanel": {
+      "id": "grouping-panel",
+      "replacesProps": [],
+      "classification": "adapter",
+      "subpath": "grouping-panel",
+      "implementation": [
+        "core/src/features/grouping-panel.tsx",
+        "core/src/grouping/GroupingPanelChrome.tsx",
+        "core/src/grouping/groupAggregateOverrides.ts",
+        "core/src/grouping/groupingPanelModel.ts"
+      ],
+      "adapterComponents": ["GroupHeader", "GroupingPanel"],
+      "standardPreset": false,
+      "note": "Optional drag, keyboard, mobile-select and aggregation chrome over the existing grouping model.",
+      "requiresConfig": false
+    },
     "tree": {
       "id": "tree",
       "replacesProps": [

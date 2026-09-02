@@ -30,7 +30,7 @@ import {
 } from "@adapttable/radix/filters";
 import { findInTable as findInTable_ } from "@adapttable/radix/find-in-table";
 import { fullscreen as fullscreen_ } from "@adapttable/radix/fullscreen";
-import { grouping as grouping_ } from "@adapttable/radix/grouping";
+import { groupingPanel as groupingPanel_ } from "@adapttable/radix/grouping-panel";
 import { headerFilters as headerFilters_ } from "@adapttable/radix/header-filters";
 import { nestedTable as nestedTable_ } from "@adapttable/radix/nested-table";
 import { print as print_ } from "@adapttable/radix/print";
@@ -55,7 +55,7 @@ const KIT_CHROME = {
   batchEditing: batchEditing_,
   editHistory: editHistory_,
   editing: editing_,
-  grouping: grouping_,
+  groupingPanel: groupingPanel_,
   rowEditing: rowEditing_,
   rowReorder: rowReorder_,
   tree: tree_,

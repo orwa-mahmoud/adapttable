@@ -480,7 +480,8 @@ Every public adapter exports the same factories:
 | ----------------------------------- | ----------------------------------------------------------------- |
 | `@adapttable/<kit>/row-reorder`     | `rowReorder`                                                      |
 | `@adapttable/<kit>/saved-views`     | `savedViews`                                                      |
-| `@adapttable/<kit>/grouping`        | `grouping`                                                        |
+| `@adapttable/<kit>/grouping-panel`  | `groupingPanel` — grouping headers + interactive panel            |
+| `@adapttable/<kit>/grouping`        | `grouping` — code-fixed grouping without the interactive panel    |
 | `@adapttable/<kit>/editing`         | `editing`                                                         |
 | `@adapttable/<kit>/virtualize`      | `virtualize`                                                      |
 | `@adapttable/<kit>/column-menu`     | `columnMenu`                                                      |
@@ -516,16 +517,20 @@ supplied: the Columns menu, the density chooser, CSV export, find-in-table,
 fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
 columns and the status bar.
 
-A feature that needs input joins only when you give it that input, because an
-inert implementation is exactly the weight this architecture exists to remove:
+Configurable preset members join only when you give them input. Features
+outside the preset append to the same ordinary array:
 
 ```tsx
-standardFeatures({
-  grouping: "team",
-  bulkActions: [{ key: "delete", label: "Delete", onClick: remove }],
-  filters: [{ key: "team", type: "select", options: teams }],
-  savedViews: { storage: "local" },
-});
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+
+[
+  ...standardFeatures({
+    bulkActions: [{ key: "delete", label: "Delete", onClick: remove }],
+    filters: [{ key: "team", type: "select", options: teams }],
+    savedViews: { storage: "local" },
+  }),
+  groupingPanel("team"),
+];
 ```
 
 One factory is callable with no arguments and is still NOT a member: the
@@ -546,18 +551,18 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 57 kB gzipped and the same table with
-`standardFeatures()` composed is 108 kB.
+Measured on MUI, the table alone is 58 kB gzipped and the same table with
+`standardFeatures()` composed is 110 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
 ## Types, and why no annotation is needed
 
 ```tsx
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 import { virtualize } from "@adapttable/mantine/virtualize";
 
-<DataTable features={[grouping("team"), virtualize()]} />;
+<DataTable features={[groupingPanel("team"), virtualize()]} />;
 ```
 
 A factory whose configuration says nothing about rows returns a
@@ -734,9 +739,9 @@ for a position, and only the feature that was imported can answer.
 ### What the table guarantees
 
 - **Order comes from the ids, not from your array.** Providers nest in
-  feature-id order, so `[grouping("team"), auditLog()]` and
-  `[auditLog(), grouping("team")]` build the identical tree. Moving a line never
-  remounts a provider or discards what it was holding.
+  feature-id order, so `[groupingPanel("team"), auditLog()]` and
+  `[auditLog(), groupingPanel("team")]` build the identical tree. Moving a line
+  never remounts a provider or discards what it was holding.
 - **One provider per id.** A duplicate id warns in development and the last one
   wins, exactly as `apply` already resolves duplicates.
 - **A provider mounts when its feature arrives and unmounts when it leaves**, and
@@ -753,7 +758,8 @@ registry to learn and nothing global to collide over.
 
 `rowReorder` · `rowPinning` · `cellSpan` · `extraRows` · `rowAppearance` ·
 `rowDetail` · `nestedTable` · `editing` · `rowEditing` · `batchEditing` ·
-`editHistory` · `dirtyIndicators` · `grouping` · `tree` · `virtualize` ·
+`editHistory` · `dirtyIndicators` · `grouping` · `groupingPanel` · `tree` ·
+`virtualize` ·
 `columnMenu` · `resizableColumns` · `collapsibleColumnGroups` · `exportCsv` ·
 `cellNavigation` · `findInTable` · `fullscreen` · `commandPalette` ·
 `contextMenu` · `sidePanel` · `bulkActions` · `filters` · `filterTypes` ·
@@ -3999,9 +4005,9 @@ because getting it wrong is invisible on screen.
 
 ---
 
-# React table row grouping — nested groups, aggregates & expand/collapse
+# React table row grouping — interactive panel, nested groups & aggregates
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`grouping("role", { groupAggregates })`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — edit the table in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [collapse groups and read per-group subtotals in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — a real table you can click, not a recording.
 
@@ -4010,11 +4016,53 @@ totals — on a mobile card, where there are no columns to align to, the same
 numbers appear captioned by their column instead. A custom renderer can place
 them the same way with `groupRowLayout` and `groupAggregateEntries`.
 
-Compose `grouping` from `@adapttable/<kit>/grouping` — one column key, or an
-ordered list to nest — and add optional per-group subtotals via
-`groupAggregates` in the factory's second argument, the **same mapper
-signature as `summaryRow`**. Omit the factory and the table never inserts group
-header rows (package DNA: opt-in). See [feature composition](./features.md).
+Compose `groupingPanel` from `@adapttable/<kit>/grouping-panel`. It owns both
+the grouped-row headers and the interactive panel, so use it instead of plain
+`grouping()` when users should be able to configure grouping:
+
+```tsx
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+
+<DataTable features={[groupingPanel()]} … />;
+<DataTable
+  features={[
+    groupingPanel(["team", "status"], {
+      groupAggregates: (rows) => ({ budget: sum(rows) }),
+    }),
+  ]}
+  …
+/>;
+```
+
+The first argument is an initial column key or ordered list; omit it to start
+with an empty strip. The second argument accepts the ordinary grouping extras,
+including `groupAggregates`, whose mapper has the **same signature as
+`summaryRow`**. Omit the factory and the table mounts neither grouping headers
+nor panel chrome. Plain `grouping()` remains the no-panel path for a host that
+deliberately fixes grouping in code. See [feature composition](./features.md).
+
+## The grouping panel
+
+On desktop, the feature adds a dedicated strip above the table. Drag any data
+header into it to group, drag the chips to change nesting order, or drag a chip
+to the remove target to ungroup it. A chip's focusable move control also
+supports Arrow Up/Down and logical Arrow Left/Right; the latter reverse in RTL
+so movement follows the visible order. Its remove button is the keyboard
+dismiss route. Every add, move, removal, and aggregation change is announced
+through a polite live region. The captions and announcement templates ship in
+all seventeen `@adapttable/i18n` locales.
+
+Every layout also provides **Add grouping column**, **Aggregate column**, and
+**Group aggregation** selects. Mobile uses these kit-native selects rather than
+header drag-and-drop. Aggregation choices are `sum`, `avg`, `min`, `max`,
+`count`, and `none`, plus **Default**. A choice is a session override for that
+column: Default (or no override) preserves the developer's
+`groupAggregates` result, while `none` explicitly hides it.
+
+Compose `columnMenu()` too and each column row gains **Group by…** or
+**Ungroup…**. While grouping is active, an ungrouped column also offers the
+same aggregation choice. Both routes write the same `groupBy` / `groupAgg`
+state, so the panel, menu, URL, and Saved Views cannot disagree.
 
 ## Paging groups, and paging inside one
 
@@ -4024,13 +4072,18 @@ inside each group:
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 <DataTable
   data={ORDERS}
   columns={columns}
   rowKey={rowKey}
-  features={[grouping("customer", { groupPageSize: 25, groupRowPageSize: 10 })]}
+  features={[
+    groupingPanel("customer", {
+      groupPageSize: 25,
+      groupRowPageSize: 10,
+    }),
+  ]}
 />;
 ```
 
@@ -4070,7 +4123,7 @@ const source = useQuerySource<Person, Params, Page>({
   source={source}
   columns={columns}
   rowKey={rowKey}
-  features={[grouping("team")]}
+  features={[groupingPanel("team")]}
 />;
 ```
 
@@ -4148,7 +4201,7 @@ Groups start expanded and collapse on their own. To hold that state yourself,
 pass the pair:
 
 ```tsx
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 const [closed, setClosed] = useState<string[]>([]);
 
@@ -4157,7 +4210,7 @@ const [closed, setClosed] = useState<string[]>([]);
   columns={columns}
   rowKey={(r) => r.id}
   features={[
-    grouping(["team", "status"], {
+    groupingPanel(["team", "status"], {
       collapsedGroupIds: closed,
       onCollapsedGroupIdsChange: setClosed,
     }),
@@ -4173,13 +4226,13 @@ extra bookkeeping.
 **In the URL**, with `useGroupCollapseUrlState`:
 
 ```tsx
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 const groups = useGroupCollapseUrlState({ urlKey: "people" });
 
 <DataTable
   {...groups}
-  features={[grouping("team")]}
+  features={[groupingPanel("team")]}
   columns={columns}
   rowKey={rowKey}
 />;
@@ -4200,14 +4253,14 @@ wants its own buttons: `expandAll()`, `collapseAll()`, and
 which of them are worth showing:
 
 ```tsx
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 <DataTable
   data={SALES}
   columns={columns}
   rowKey={(r) => r.id}
   features={[
-    grouping("region", {
+    groupingPanel("region", {
       groupAggregates: (rows) => ({ amount: sum(rows) }),
       // Biggest region first — the same rows the aggregate is computed from.
       groupSort: (a, b) => sum(b.leafRows) - sum(a.leafRows),
@@ -4247,14 +4300,14 @@ never opens or closes anything by accident.
 header carries:
 
 ```tsx
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 <DataTable
   data={PEOPLE}
   columns={columns}
   rowKey={(r) => r.id}
   features={[
-    grouping("team", {
+    groupingPanel("team", {
       groupAggregates: (rows) => ({ budget: sum(rows) }),
       groupFooters: true,
     }),
@@ -4284,11 +4337,11 @@ in `@adapttable/unstyled`).
 
 ## Nested groups
 
-`grouping` also takes an ordered list, and each key nests inside the one before
-it:
+`groupingPanel` also takes an ordered list, and each key nests inside the one
+before it:
 
 ```tsx
-features={[grouping(["team", "status"])]}
+features={[groupingPanel(["team", "status"])]}
 ```
 
 > Core (12)
@@ -4307,15 +4360,17 @@ different groups with different keys, so closing one leaves the other open, and
 closing a parent hides its whole subtree in one step. Collapsed keys serialize
 exactly as they did with one level.
 
-In the URL and in saved views the keys travel as one comma-separated value —
-`?groupBy=team,status` — so a link built before nesting existed still works,
-and `onGroupByChange` reports the keys as a list.
+In the URL and in Saved Views the keys travel as one comma-separated value —
+`?groupBy=team,status`. Session aggregation overrides travel beside them as
+`groupAgg`, for example `groupAgg=budget:sum,headcount:count`. A link built
+before the panel existed still works, and `onGroupByChange` reports the keys as
+a list.
 
 ## Example
 
 ```tsx
 import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 interface Person {
   id: string;
@@ -4345,7 +4400,7 @@ export function People() {
       ]}
       rowKey={(r) => r.id}
       features={[
-        grouping("team", {
+        groupingPanel("team", {
           groupAggregates: (rows) => ({
             budget: (
               <b>
@@ -4362,12 +4417,12 @@ export function People() {
 
 ## How it works
 
-- **Opt-in.** Compose `grouping(key)`. The source and URL state carry the
-  resolved grouping value, but neither imports or mounts the feature.
-- **One key or a list.** `grouping("team")` groups one level;
-  `grouping(["team", "status"])` nests each key inside the one before it, to
-  any depth. There is no drag-to-group panel — the keys come from your code or
-  the URL.
+- **Opt-in.** Compose `groupingPanel()` for user-configurable grouping. The
+  source and URL state carry the resolved grouping value, but neither imports
+  or mounts the feature.
+- **One key or a list.** `groupingPanel("team")` starts with one level;
+  `groupingPanel(["team", "status"])` starts nested, and users can add,
+  remove, or reorder those keys from the panel.
 - **Somewhere that can group.** Either the full filtered set is in memory
   (`allFilteredRows`) or the server returns group rows. A source that can do
   neither — `capabilities.grouping: false`, declared or inferred — renders
@@ -4377,9 +4432,12 @@ export function People() {
   `(rows) => Partial<Record<string, ReactNode>>` shape as `summaryRow`; reuse
   one function for both if the math is identical — or build both with
   `aggregate()` (below).
-- **Expand / collapse.** Groups start expanded. Collapse state is ephemeral
-  (not URL-synced). The grouping key itself serializes to the URL like sort and
-  filters.
+- **Session aggregation overrides.** `sum`, `avg`, `min`, `max`, `count`, and
+  `none` overlay the developer mapper by column. An absent/default choice
+  preserves `groupAggregates`; the choices serialize as `groupAgg`.
+- **Expand / collapse.** Groups start expanded. Collapse state can be paired
+  with `useGroupCollapseUrlState`; `groupBy` and `groupAgg` use the table's
+  ordinary URL state.
 - **Selection.** When row checkboxes are enabled, each group header exposes a
   tri-state checkbox over its leaf rows.
 
@@ -4390,11 +4448,11 @@ them instead and `aggregate()` returns that same mapper:
 
 ```tsx
 import { aggregate } from "@adapttable/core";
-import { grouping } from "@adapttable/mantine/grouping";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
 
 <DataTable
   features={[
-    grouping("role", {
+    groupingPanel("role", {
       groupAggregates: aggregate({ budget: "sum", team: "count" }, { columns }),
     }),
   ]}
@@ -4432,10 +4490,11 @@ unanswerable, not zero.
 
 ## Reorder inside a group or move between groups
 
-Compose `grouping` and the kit's `rowReorder` feature together. A reorder that
-stays inside one leaf group calls the ordinary handler with positions scoped
-to that group. Crossing a boundary — by drag, arrows, mobile controls, or
-**Move to group…** — calls `onGroupMove(row, fromGroup, toGroup, position)`.
+Compose `groupingPanel` and the kit's `rowReorder` feature together. A reorder
+that stays inside one leaf group calls the ordinary handler with positions
+scoped to that group. Crossing a boundary — by drag, arrows, mobile controls,
+or **Move to group…** — calls
+`onGroupMove(row, fromGroup, toGroup, position)`.
 
 `RowGroupRef.levels` gives the host every grouping column and raw destination
 value. `movePolicy` is `"never"` by default, `"confirm"` for a kit-native
@@ -4444,17 +4503,18 @@ confirmation, or `"auto"` for an immediate host write. See
 
 ## Options
 
-`grouping(key, extras?)` — first argument is the column key (or ordered list);
-companion options go in the second argument:
+`groupingPanel(groupBy?, extras?)` — omit the first argument for an initially
+empty user-configurable panel, or pass a column key / ordered list. Companion
+options go in the second argument:
 
-| Field / prop                | Type                                                            | Default | Description                                                                                            |
-| --------------------------- | --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | —       | Column key(s) to group by; composing `grouping` arms grouping (still requires a frontend data source). |
-| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                          |
-| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.              |
-| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                          |
-| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                                    |
-| `labels`                    | `TableLabels`                                                   | English | Override `expandGroup`, `collapseGroup`, and `groupCount` for header controls.                         |
+| Field / prop                | Type                                                            | Default | Description                                                                                          |
+| --------------------------- | --------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | `[]`    | Initial ordered grouping keys. The panel, composed column menu, URL, and source can change them.     |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                        |
+| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.            |
+| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                        |
+| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                                  |
+| `labels`                    | `TableLabels`                                                   | English | Override group headers, panel controls, menu actions, aggregation names, and announcement templates. |
 
 ## Grouped tables are a full-set view
 
@@ -4479,14 +4539,23 @@ structure the adapters do, at one level or nested:
 | `groupSelectionState` / `HeaderSelectionState` | Tri-state for a group checkbox over its leaf ids — the same enum the header select-all uses.   |
 | `windowGroupedEntries`                         | Slice a flat grouped model to a virtual window (see [Virtualization](./virtualization.md)).    |
 
+The panel state is headless too. `GroupAggregateOverride` is
+`"sum" | "avg" | "min" | "max" | "count" | "none"`, and
+`GroupAggregateOverrides` maps column keys to those choices.
+`serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` implement
+the `groupAgg` codec; `withGroupAggregateOverrides` overlays choices on a
+client mapper, and `withQueryAggregateOverrides` overlays them on server
+aggregate requests. Adapter authors build the panel with
+`GroupingPanelChrome` and its required slots.
+
 ## Notes
 
 - Bucketing uses the column's `sortValue` when present, otherwise a path lookup
   on the column key — never the JSX `accessor`.
 - Works on desktop rows and mobile cards, LTR and RTL, with and without
   `virtualize` (virtual windows count collapsed groups as one row).
-- Out of scope (by design): a drag-to-group panel and Excel-style aggregation
-  pickers. Pivoting is a separate model — see [Pivot](./pivot.md).
+- The grouping panel configures row grouping and per-group aggregates.
+  Pivoting remains a separate model — see [Pivot](./pivot.md).
 - Ant Design maps group headers onto its high-level `Table` via custom row
   rendering; every other kit renders native group header rows/cards.
 
@@ -5521,9 +5590,10 @@ import and `features` entry are the switch; there is no `savedViews` table prop.
 
 A view captures **everything the table can put in a URL**: search, the
 multi-sort chain, page and page size, the simple filters and the advanced
-filter tree, grouping and which groups are collapsed, the whole column layout
-(order, hidden, pinned, widths, user-renamed column names, collapsed column
-groups), pinned rows, density,
+filter tree, ordered grouping keys (`groupBy`), session aggregation overrides
+(`groupAgg`), and which groups are collapsed, the whole column layout (order,
+hidden, pinned, widths, user-renamed column names, collapsed column groups),
+pinned rows, density,
 and the [pivot configuration](./pivot.md). The parts that take longest to
 rebuild by hand are exactly the parts worth capturing.
 
@@ -6194,7 +6264,8 @@ Related: [Getting started](./getting-started.md) ·
 
 AdaptTable keeps the table's state in the URL query string: search (`q`),
 pagination (`page`, `limit`), sorting (`sortBy`/`sortDir`, or `sort` for a
-multi-sort chain), and every filter value (`f_<key>`). Column layout
+multi-sort chain), row grouping (`groupBy`) and session aggregation choices
+(`groupAgg`), and every filter value (`f_<key>`). Column layout
 (`colHide`, `colPin`, `colOrder`, `colW`, `colName`) joins in when you wire
 `useColumnLayoutUrlState`, and saved views capture all of it under a name.
 Reloading, sharing the link, or pressing back lands on the exact same slice.
@@ -6416,7 +6487,8 @@ modals or drawers where the address bar shouldn't change.
 | `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |
 | `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                            |
 | `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                 |
-| `groupBy`                   | `groupBy=team`                 | Active row-grouping column key (frontend tier).                                                                                                                |
+| `groupBy`                   | `groupBy=team,status`          | Ordered row-grouping column keys, outermost first. Written by `groupingPanel()` and omitted when no grouping is active.                                        |
+| `groupAgg`                  | `groupAgg=budget:sum,age:none` | Per-column session aggregation overrides: `sum`, `avg`, `min`, `max`, `count`, or `none`. A missing column preserves the developer's `groupAggregates` result. |
 | `f_<key>`                   | `f_status=active`              | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                    |
 | `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`     | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day. |
 | `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`            | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                           |
@@ -6428,7 +6500,15 @@ modals or drawers where the address bar shouldn't change.
 | `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                       |
 
 With a `urlKey` every param is prefixed: `people.q`, `people.f_status`,
-`people.colHide`, ….
+`people.groupBy`, `people.groupAgg`, `people.colHide`, ….
+
+`groupAgg` is intentionally an override map, not a replacement aggregate
+configuration. Choosing **Default** deletes that column's entry and restores
+the result declared by the table's `groupAggregates`; choosing `none` keeps an
+explicit entry that hides the aggregate. Keys are percent-encoded, malformed
+or unknown choices are ignored independently, and equivalent maps serialize in
+stable column-key order. [Row grouping](./row-grouping.md) documents the panel,
+column-menu, mobile, and keyboard routes that write this state.
 
 ### Defaults vs. explicit clears
 
@@ -7128,8 +7208,22 @@ editing is dormant these parts are never mounted.
 
 ### Row grouping
 
-Opt-in via `groupBy` — see [Row grouping](./row-grouping.md). When grouping
-is dormant these parts are never mounted.
+Opt in with `groupingPanel()` from the kit's `/grouping-panel` subpath — see
+[Row grouping](./row-grouping.md). The panel owns the grouped headers as well
+as the configuration strip; when it is dormant these parts are never mounted.
+
+| Part                          | Element                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `grouping-panel`              | The dedicated grouping strip above the table.                                   |
+| `grouping-drop-zone`          | A desktop insertion target for header/chip drag-and-drop.                       |
+| `grouping-item`               | One active grouping level: chip plus its following insertion target.            |
+| `grouping-chip`               | An active grouping field, with logical arrow-key movement and a remove control. |
+| `grouping-add`                | The Add grouping column select, present on desktop and mobile.                  |
+| `grouping-aggregate-controls` | Wrapper for the aggregate-column and aggregation selects.                       |
+| `grouping-aggregate-column`   | Select choosing which ungrouped data column an aggregation override applies to. |
+| `grouping-aggregate`          | `sum` / `avg` / `min` / `max` / `count` / `none` / Default select.              |
+| `grouping-remove-zone`        | Desktop drop target shown while dragging a grouping chip to remove it.          |
+| `grouping-announcer`          | Polite live region for add, move, remove, and aggregation-change feedback.      |
 
 | Part                | Element                                                               |
 | ------------------- | --------------------------------------------------------------------- |
@@ -8451,6 +8545,25 @@ Feature factory options are not `DataTable` props. For example, compose
 `columnMenu()`, `filters(defs)`, `editing(save)` or `virtualize()` in
 `features`; each feature page documents its options.
 
+### Interactive row grouping
+
+Each kit exports `groupingPanel` from
+`@adapttable/<kit>/grouping-panel`:
+
+```tsx
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+
+groupingPanel();
+groupingPanel(["team", "status"], extras);
+```
+
+`groupingPanel(groupBy?, extras?)` owns the ordinary grouping row model,
+group-header renderers, and the kit-native panel. The optional first argument
+is a column key or ordered list; the second is `GroupingExtras<TRow>`. Use
+plain `grouping()` only for code-fixed grouping with no interactive panel.
+When `columnMenu()` is also composed, its menu model adds Group by/Ungroup and
+per-column aggregation choices.
+
 ### Columns & layout
 
 | Prop                    | Type                                  | Default | Description                                                                                                                                               |
@@ -8859,9 +8972,12 @@ All from `@adapttable/core`.
 ### URL state & persistence
 
 - `useTableUrlState(options?): UseTableUrlStateResult` — page / limit /
-  search / sort / extra-filter bag in the query string, with setters
+  search / sort / grouping / group-aggregation overrides / extra-filter bag in
+  the query string, with setters
   (`setPage`, `setSearch`, `setSort`, `toggleSortLevel`, `setExtra`,
-  `setExtras`, `setFilterTree`, `clearExtras`, `clearAll`).
+  `setExtras`, `setFilterTree`, `setGroupBy`,
+  `setGroupAggregateOverrides`, `clearExtras`, `clearAll`). Group keys use
+  `groupBy`; overrides use `groupAgg`.
 - `useColumnLayoutUrlState(options?): { layout, onLayoutChange }` —
   URL-persisted column layout (hidden / order / pinned / widths / names).
 - `useColumnLayoutStorageState(options): { layout, onLayoutChange }` — the
@@ -9097,8 +9213,9 @@ capped at `EXPORT_FETCH_ALL_MAX_ROWS` (50,000) unless `maxRows` says otherwise;
 `fetchAllExportRows` performs that unchanged browser walk. `ExportHandlerState`
 is what `useExportHandler` returns — the click handler, `exportBusy`, an
 `ExportStatus`, `ExportProgressState`, and the text `ExportAnnouncer` reads
-out. `ExportProgressChrome` maps that shared state into an adapter's required
-`ExportProgressSlots`; `ExportProgressSurfaceSlotProps`,
+out. `ExportProgressChrome` (configured by `ExportProgressChromeProps`) maps
+that shared state into an adapter's required `ExportProgressSlots`;
+`ExportProgressSurfaceSlotProps`,
 `ExportProgressAction`, and `ExportProgressDownload` type the kit-owned
 surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
 it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
@@ -9415,6 +9532,34 @@ report a row and its open panel as one height through the virtualizer's
 **Row grouping.** `groupBy` takes a key or an ordered list; `parseGroupBy(value)`
 turns any of its forms (`GroupByInput`) into the key list and `formatGroupBy`
 back into the single comma-separated value state is stored as.
+`groupingPanel(groupBy?, extras?)` from each kit's `/grouping-panel` subpath
+adds the interactive strip and still accepts every `GroupingExtras` option.
+It publishes `GroupingPanelState`: ordered `groupBy`, drag/drop and keyboard
+bindings, `add` / `remove` / `moveBy`, and `setAggregate`.
+`GroupAggregateOverride` is `"sum" | "avg" | "min" | "max" | "count" |
+"none"`; `GroupAggregateOverrides` maps those session choices by column.
+`serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` encode the
+`groupAgg` parameter. `withGroupAggregateOverrides` layers them over a
+developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
+the same for server `query.aggregates`; an absent key preserves the developer
+choice and `"none"` removes it.
+
+Adapter authors bind the `GROUPING_PANEL` slot with
+`createAdapterGroupingPanelFeature(AdapterGroupingPanelComponents)`.
+`GroupingPanelChrome` takes `GroupingPanelChromeProps` /
+`GroupingPanelSlotProps` and a `GroupingPanelSlots` object whose required
+pieces receive `GroupingPanelSurfaceProps`, `GroupingPanelDropZoneProps`,
+`GroupingPanelChipProps`, `GroupingPanelSelectProps`, and
+`GroupingPanelRemoveZoneProps`; select entries are `GroupingPanelOption`s and
+native event wiring uses `GroupingDragProps` / `GroupingDropProps`.
+`GroupingPanelInteractions` carries those callbacks,
+`GroupingChipKeyboardProps` defines the equal keyboard path, and
+`GroupingDragState` describes the active drag while `GroupingDragSource` names
+its header-or-chip origin. Every kit exports its kit-owned `GroupingPanel`;
+Radix additionally names `RadixGroupingPanelProps`.
+Column-menu plugins return a `ColumnMenuItem`: either an ordinary action or a
+`ColumnMenuChoice` made of `ColumnMenuChoiceOption`s.
+
 `buildGroupedFlatModel(options)` walks the tree into the flat `GroupedFlatEntry`
 list adapters render — each group entry carrying its `level`, its `groupBy` key,
 its `path` and the leaves of its whole subtree — and `groupIndentStyle(level)`
@@ -9866,6 +10011,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                       |
 | `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                      |
 | `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                            |
+| `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                       |
 | `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                          |
 | `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                              |
 | `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md). |
@@ -10334,8 +10480,8 @@ your app already ships those:
 | What you import                           | min+gzip  |
 | ----------------------------------------- | --------- |
 | `useFrontendData` + `useDataTable` (core) | ~19 kB    |
-| every core export                         | ~80 kB    |
-| `DataTable` from an adapter               | ~57–69 kB |
+| every core export                         | ~81 kB    |
+| `DataTable` from an adapter               | ~58–71 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -10440,10 +10586,12 @@ integrated one. It puts pivoting, range selection, the fill handle, tree data,
 clipboard operations and Excel export in the paid Enterprise tier, and it
 renders its own look rather than your design system's. AdaptTable ships those
 same capabilities under MIT — assembled from parts rather than one spreadsheet
-surface — and is free end to end, server data and infinite scroll included,
-rendering as your UI kit's real components. Reach for AG Grid when you want that
-integrated spreadsheet product and are happy to licence it; reach for AdaptTable
-for application data tables that match your app and stay free.
+surface — plus an interactive grouping strip with header drag-and-drop,
+keyboard/mobile controls, aggregation choices, URL state, and Saved Views.
+AdaptTable is free end to end, server data and infinite scroll included,
+rendering as your UI kit's real components. Reach for AG Grid when you want its
+more mature integrated spreadsheet product and are happy to licence it; reach
+for AdaptTable for application data tables that match your app and stay free.
 
 → [Migrate from ag-Grid](./migrate-from-ag-grid.md) (CRUD tables only — the
 guide starts with when to stay).
@@ -10491,6 +10639,7 @@ kits — only the look does. Every adapter ships the same batteries:
 | Row expansion                         |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Inline cell editing (opt-in)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row grouping + per-group aggregates   |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
+| Interactive grouping panel            |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Row virtualization                    |   ✅    | ✅  |   ✅   |    ✅²     |  ✅   |   ✅    |    ✅     |    ✅    |
 | Card virtualization (mobile)          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
 | RTL / Arabic                          |   ✅    | ✅  |   ✅   |     ✅     |  ✅   |   ✅    |    ✅     |    ✅    |
@@ -10521,9 +10670,9 @@ matches unstyled feature-for-feature.
 
 - You want a mature, deeply integrated spreadsheet-analytics product and are
   happy to licence it → **AG Grid Enterprise** / **MUI X Premium**. AdaptTable
-  has pivoting, range selection, the fill handle, clipboard and Excel export
-  under MIT, but they are assembled from parts rather than one spreadsheet
-  surface.
+  has an interactive grouping panel, pivoting, range selection, the fill
+  handle, clipboard and Excel export under MIT, but they are assembled from
+  composable features rather than one spreadsheet surface.
 - You're on a framework other than React → **TanStack Table** (multi-
   framework). AdaptTable is React-only.
 - You need a spreadsheet-like editing surface today, not a responsive data
@@ -11574,7 +11723,7 @@ tier — $999/developer when we checked in August 2026. What AG Grid has that
 AdaptTable does not is **integration**: one spreadsheet surface, tool panels
 already assembled, and a decade of behaviour at the edges of it. In AdaptTable
 those are parts you compose — a pivot engine and its panel, a range model, a
-side-panel frame you fill.
+side-panel frame you fill, and a grouping panel you opt into.
 
 So stay on AG Grid when the grid IS the product: an analytics surface where
 users pivot, drill and drag fields around all day, or a workflow that leans on
@@ -11595,8 +11744,6 @@ renders its own theme; AdaptTable renders _your_ UI kit's real components).
 - Assembled tool panels: AdaptTable's `sidePanel({ panels, open, onOpenChange })`
   is a frame with tabs that you fill (the pivot, saved-views and filter-tree
   panels ship; arranging them is yours)
-- Drag-a-column-to-group: AdaptTable groups from `grouping("team")` — your code or the
-  URL, no drag gesture
 
 If you rely on those and the Enterprise licence is worth it to you, that is the
 right tool. Migrate the CRUD tables, keep the analytics grid — they can run side
@@ -11610,6 +11757,11 @@ by side.
   selection, filters, sort, and page are props and URL state.
 - **URL-synced shareable state** built in — AG Grid exposes grid state through
   its API and leaves persistence to you.
+- **Interactive grouping in every kit** — `groupingPanel()` adds a dedicated
+  strip above the table, desktop header drag-and-drop, chip reorder/removal,
+  mobile selects, aggregation choices, RTL keyboard movement, and polite
+  announcements. `groupBy` and `groupAgg` are URL state and Saved Views capture
+  both.
 - **Free master/detail** — `rowDetail(fn)` does what AG Grid gates behind
   Enterprise master/detail (for detail panels, not nested grids).
 - **A real filter UI for free** — AG Grid's set filter, multi filter, and
@@ -11646,24 +11798,27 @@ Grid-level (`<AgGridReact>` → `<DataTable>`):
 | `<AgGridProvider modules={[AllCommunityModule]}>`  | (nothing)                                                  | No module registry.                                               |
 | `onGridReady` / `gridRef.current.api`              | (nothing)                                                  | Declarative props replace the imperative API.                     |
 | column tool panel (Enterprise side bar)            | `columnMenu()`                                             | Show/hide, reorder, pin — free.                                   |
+| `rowGroupPanelShow` / tool-panel grouping          | `groupingPanel()`                                          | Dedicated strip; drag headers on desktop, use selects on mobile.  |
 | `getDetailPanelContent`-style master/detail (Ent.) | `rowDetail(fn)`                                            | `(row) => ReactNode`, free.                                       |
 
 `ColDef` → `ColumnDef`:
 
-| AG Grid                             | AdaptTable                                                      | Notes                                            |
-| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
-| `field`                             | `key`                                                           | Dot paths supported.                             |
-| `headerName`                        | `header`                                                        | Auto-derived from `key` when omitted.            |
-| `valueGetter` / `valueFormatter`    | `accessor: (row) => …`                                          | One function, receives the row.                  |
-| `cellRenderer`                      | `Cell`                                                          | Component receiving `{ row, rowIndex }`.         |
-| `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                       |
-| `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.                  |
-| `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration.    |
-| `flex` / `width` / `minWidth`       | `width`                                                         | —                                                |
-| `pinned: "left" \| "right"`         | pinning via `columnMenu()` + `columnLayout`                     | Logical sides — RTL-correct.                     |
-| `hide`                              | `columnMenu()` + `columnLayout`                                 | User-facing visibility lives in the menu.        |
-| `resizable` (default true)          | `resizableColumns()` (table-level)                              | —                                                |
-| `editable`                          | `editable` + `editor` + `editing(save)`                         | Opt-in; no editor until `editing()` is composed. |
+| AG Grid                             | AdaptTable                                                      | Notes                                              |
+| ----------------------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
+| `field`                             | `key`                                                           | Dot paths supported.                               |
+| `headerName`                        | `header`                                                        | Auto-derived from `key` when omitted.              |
+| `valueGetter` / `valueFormatter`    | `accessor: (row) => …`                                          | One function, receives the row.                    |
+| `cellRenderer`                      | `Cell`                                                          | Component receiving `{ row, rowIndex }`.           |
+| `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                         |
+| `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.                    |
+| `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration.      |
+| `flex` / `width` / `minWidth`       | `width`                                                         | —                                                  |
+| `pinned: "left" \| "right"`         | pinning via `columnMenu()` + `columnLayout`                     | Logical sides — RTL-correct.                       |
+| `hide`                              | `columnMenu()` + `columnLayout`                                 | User-facing visibility lives in the menu.          |
+| `resizable` (default true)          | `resizableColumns()` (table-level)                              | —                                                  |
+| `editable`                          | `editable` + `editor` + `editing(save)`                         | Opt-in; no editor until `editing()` is composed.   |
+| `rowGroup: true`                    | Initial key in `groupingPanel(["team"])`                        | Users can add, reorder, or remove keys afterwards. |
+| `aggFunc`                           | `groupAggregates` default + panel aggregation override          | Session choices are sum/avg/min/max/count/none.    |
 
 ## Before / after
 
@@ -11706,13 +11861,14 @@ function PeopleGrid({ rows }: { rows: Person[] }) {
 import { DataTable } from "@adapttable/mui";
 import { bulkActions } from "@adapttable/mui/bulk-actions";
 import { columnMenu } from "@adapttable/mui/column-menu";
+import { groupingPanel } from "@adapttable/mui/grouping-panel";
 
 function PeopleTable({ people }: { people: Person[] }) {
   return (
     <DataTable
       data={people}
       rowKey={(r) => r.id}
-      features={[bulkActions([]), columnMenu()]}
+      features={[bulkActions([]), columnMenu(), groupingPanel()]}
       columns={[
         { key: "name", sortable: true },
         { key: "role" },
@@ -11737,7 +11893,8 @@ table is your design system's, not a themed grid.
 
 - **The analytics features are parts, not a mode.** [Pivoting](./pivot.md) is
   an engine plus its own panel; [nested grouping](./row-grouping.md) is
-  `grouping("team")` with optional aggregate options; [tree data](./tree-data.md) is
+  `groupingPanel(["team", "status"], extras)` with header drag-and-drop,
+  selects, and optional aggregate defaults; [tree data](./tree-data.md) is
   `tree({ getChildren })` or `tree({ getParentId })`; range selection, the fill
   handle and clipboard operations all need `cellNavigation()` composed (see
   [Cell navigation](./cell-navigation.md)). Each works — none is the single

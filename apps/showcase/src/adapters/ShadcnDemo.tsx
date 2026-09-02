@@ -1,6 +1,7 @@
 import type { FeatureProps } from "@adapttable/core";
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
 import { shadcnClassNames } from "@adapttable/shadcn";
+import { groupingPanel as groupingPanel_ } from "@adapttable/shadcn/grouping-panel";
 import type {} from "@adapttable/unstyled";
 
 import { type Locale, type Person } from "../data";
@@ -131,6 +132,7 @@ export function ShadcnDemo({
     <UnstyledLike
       mode={mode}
       locale={locale}
+      groupingPanelFactory={groupingPanel_}
       pageMode={pageMode}
       urlKey={urlKey}
       density={density}

@@ -323,12 +323,12 @@ export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
 }
 
 /**
- * Table query/layout hits the address bar only on the live demo
- * (`urlKey="live"`, the `/` page). Feature Lab and adapter feature
- * pages stay off so interacting does not rewrite the URL.
+ * Table query/layout hits the address bar on the live demo and the grouping
+ * page, where URL persistence is part of the feature being demonstrated.
+ * Other feature pages stay off so interacting does not rewrite the URL.
  */
 export function demoUrlSync(urlKey?: string): boolean {
-  return urlKey === "live";
+  return urlKey === "live" || urlKey === "grp";
 }
 
 /**
