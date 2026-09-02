@@ -9,20 +9,6 @@ import { CAPABILITY_KEYS } from "../keys";
 import { createAgentSession } from "../session";
 import type { AgentObservation } from "../types";
 
-/**
- * Capability keys that item 11-B will advertise. Fixtures name them now so
- * adapters that map `session.catalog()` pick them up when the session does.
- * Today's 11-A session does not list them — that is not a fixture failure.
- */
-const PENDING_KEYS = [
-  "view.setSelection",
-  "views.apply",
-  "rows.read",
-  "rows.resolve",
-  "rows.add",
-  "rows.delete",
-] as const;
-
 const PAGE_ONLY = {
   fullDataset: true,
   grouping: "client" as const,
@@ -89,15 +75,12 @@ const fixturePath = join(
 describe("provider-free intention fixtures", () => {
   const file = JSON.parse(readFileSync(fixturePath, "utf8")) as IntentionFile;
 
-  it("is valid JSON with one row per 11-A key plus the frozen 11-B names", () => {
+  it("is valid JSON with one row per frozen capability key", () => {
     expect(file.schemaVersion).toBe("adapttable.agent.v1");
     expect(Array.isArray(file.intentions)).toBe(true);
     const keys = file.intentions.map((row) => row.expected.key);
     for (const key of CAPABILITY_KEYS) {
-      expect(keys, `missing 11-A key ${key}`).toContain(key);
-    }
-    for (const key of PENDING_KEYS) {
-      expect(keys, `missing pending 11-B key ${key}`).toContain(key);
+      expect(keys, `missing key ${key}`).toContain(key);
     }
     expect(file.intentions.find((row) => row.text === "go to page 2")).toEqual({
       text: "go to page 2",
@@ -124,17 +107,10 @@ describe("provider-free intention fixtures", () => {
       apply: {},
     });
     const toolNames = new Set(toJsonTools(session).map((tool) => tool.name));
-    for (const row of file.intentions) {
-      const key = row.expected.key;
-      const today = (CAPABILITY_KEYS as readonly string[]).includes(key);
-      if (!today) {
-        expect(PENDING_KEYS as readonly string[]).toContain(key);
-        expect(toolNames.has(key)).toBe(false);
-        continue;
-      }
-      expect(toolNames.has(key)).toBe(true);
-      const guide = session.describe(key);
-      expect(guide.key).toBe(key);
+    for (const entry of session.catalog()) {
+      expect(toolNames.has(entry.key)).toBe(true);
+      const guide = session.describe(entry.key);
+      expect(guide.key).toBe(entry.key);
       expect(guide.input).toBeDefined();
     }
   });

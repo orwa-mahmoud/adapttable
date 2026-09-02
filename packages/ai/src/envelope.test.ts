@@ -141,8 +141,8 @@ describe("executeEnvelope", () => {
         capabilities: [],
         columns: [],
         rowAddressing: { scope: "visible", key: "rowKey" },
-        limits: { pageMax: 10 },
-        policy: { write: "allow" },
+        limits: { pageMax: 10, readMax: 50 },
+        policy: { write: "allow", approval: "writes", commit: "stage" },
         source: PAGE_ONLY,
       }),
     };
