@@ -68,6 +68,7 @@ export const sidebar = [
     items: [
       { label: "API reference", slug: "api" },
       { label: "FAQ", slug: "faq" },
+      { label: "Limitations and boundaries", slug: "limitations" },
       { label: "Comparison", slug: "comparison" },
       { label: "Versioning & stability", slug: "versioning" },
     ],

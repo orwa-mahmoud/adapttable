@@ -76,6 +76,7 @@ export const TITLES = {
   "realtime.md": "Realtime React data table — live row updates",
   "api.md": "AdaptTable API reference — every export",
   "faq.md": "FAQ — the free MUI X & ag-Grid alternative",
+  "limitations.md": "Limitations and boundaries — what AdaptTable does not do",
   "comparison.md": "React table comparison — AG Grid, TanStack, MUI",
   "migrate-from-v2.md": "Upgrading from v2 — every removed prop",
   "migrate-from-v1.md": "Migrate from AdaptTable v1 to v2 — every rename",
@@ -167,6 +168,8 @@ export const DESCRIPTIONS = {
     "Complete AdaptTable API reference — DataTable props, ColumnDef, filters, source builders, prop-getters and the headless useDataTable hook for React.",
   "faq.md":
     "AdaptTable FAQ: free MIT alternative to MUI X DataGrid and ag-Grid, URL state, RTL/Arabic, client+server data, bundle size, and when to stay on TanStack.",
+  "limitations.md":
+    "Present-tense boundaries: data ownership, formula grammar, reorder policy, virtualization, export caps, adapter size, SSR, and kit coverage — each claim traced to a test or measurement.",
   "comparison.md":
     "AdaptTable against TanStack Table, ag-Grid and MUI X DataGrid, scoped to what each ships built-in: licence, size, URL state, fit.",
   "migrate-from-mantine-datatable.md":

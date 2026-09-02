@@ -108,6 +108,7 @@ const {
 - [Realtime React data table — live row updates, websockets](https://orwa-mahmoud.github.io/adapttable/realtime/): applyRowPatches as data arrives; useRowPatchStream from @adapttable/core/stream binds a WebSocket or SSE; keep the returned array so filters, sort, grouping and aggregates re-evaluate incrementally
 - [AdaptTable API reference — DataTable, columns, hooks](https://orwa-mahmoud.github.io/adapttable/api/): every prop in tables
 - [AdaptTable FAQ — free MUI X / ag-Grid alternative, RTL, SSR](https://orwa-mahmoud.github.io/adapttable/faq/): direct answers to "best headless React table", "free MUI DataGrid / ag-Grid alternative", "React table with RTL/Arabic", "same table for client and server data"
+- [Limitations and boundaries](https://orwa-mahmoud.github.io/adapttable/limitations/): present-tense limits — data ownership, formula grammar, reorder policy, virtualization, export caps, adapter size, SSR, kit coverage
 - [React data table comparison — AdaptTable vs ag-Grid, MUI X, TanStack](https://orwa-mahmoud.github.io/adapttable/comparison/): feature-by-feature vs ag-grid, TanStack Table, MUI X DataGrid, mantine-datatable
 - [AdaptTable versioning & stability policy](https://orwa-mahmoud.github.io/adapttable/versioning/): SemVer policy, committed-stable API surface, supported UI-kit versions, deprecation policy
 - [Upgrading from v2 to v3](https://orwa-mahmoud.github.io/adapttable/migrate-from-v2/): every removed enabling prop, the feature import that replaces it, and the one-import preset

@@ -2,7 +2,8 @@
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
-[comparison.md](./comparison.md).)
+[comparison.md](./comparison.md). Looking for what the product does not
+do? See [limitations.md](./limitations.md).)
 
 **Jump to a feature:** [URL state](./url-state.md) ·
 [Filtering](./filtering.md) · [Virtualization](./virtualization.md) ·
@@ -212,6 +213,13 @@ Yes — AdaptTable is **stable at 2.0** and follows semantic versioning, so
 breaking changes ship only in a major release. It is strict-TypeScript, dual
 ESM/CJS with `.d.ts` types, axe-audited for accessibility in CI, and holds
 near-100% test coverage across every adapter.
+
+## What does AdaptTable not do?
+
+Present-tense ceilings — data ownership, formula grammar, reorder policy,
+virtualization, export caps, adapter size, SSR, kit coverage — live on
+[limitations and boundaries](./limitations.md). Each claim there traces to
+a test, a measurement, or a documented decision.
 
 ## When might another library fit better?
 

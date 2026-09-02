@@ -33,6 +33,10 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
+A plain adapter `DataTable` is 60–70 kB min+gzip (measured 2026-09-02 from
+packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
+has the method and the rest of the grid.
+
 Or install manually: `@adapttable/core`, the adapter for your kit, and the
 kit's own packages (peer dependencies — skip what you already have).
 `react` / `react-dom` 18 or 19 are peers everywhere.
@@ -464,7 +468,7 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 55–67 kB gzipped and carries the base contract —
+An adapter's `DataTable` is 60–70 kB gzipped and carries the base contract —
 responsive rendering, loading, error and empty states, accessibility, sorting,
 search and pagination. Everything else arrives with its own entry.
 
@@ -552,8 +556,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 58 kB gzipped and the same table with
-`standardFeatures()` composed is 110 kB.
+Measured on MUI, the table alone is 60 kB gzipped and the same table with
+`standardFeatures()` composed is 112 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -3811,9 +3815,12 @@ Matching reads what a cell **shows**, so a column that renders a formatted date
 is found by that date rather than by the ISO string underneath. Only the loaded
 rows are searched: a hit the table cannot take you to would be a lie, so on a
 paged table find covers the page you are on, and under virtualization it covers
-what has been fetched. The query is deliberately not put in the URL — where you
-are looking is not part of the table's state, and a shared link should not reopen
-someone else's search box.
+what has been fetched. The **query** is part of the table's shareable URL state
+(a `find` param beside `q`): opening a link that carries it reopens the bar,
+runs the walk, and focuses the first hit. The current-match position stays
+ephemeral — the receiving page's data may differ, so the query reproduces and
+the cursor does not. Typing writes with replace-state after a short debounce so
+browser history stays clean.
 
 On mobile the cards are a list rather than a grid, so the bar opens and searches
 but the hits are not marked; the desktop layout is where a cell can be pointed
@@ -6540,6 +6547,7 @@ modals or drawers where the address bar shouldn't change.
 | --------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `atv`                       | `atv=1`                        | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                       |
 | `q`                         | `q=avery`                      | Committed search term.                                                                                                                                         |
+| `find`                      | `find=Ada`                     | Find-bar query (in-table walk). Empty or closed deletes the param; the current-match index is never stored.                                                    |
 | `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                    |
 | `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |
 | `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                            |
@@ -7114,6 +7122,301 @@ want the allowlist, which is almost always.
 
 Related: [data tiers](./data-tiers.md) · [URL state](./url-state.md) ·
 [filtering](./filtering.md) · [pivot tables](./pivot.md)
+
+---
+
+# Adaptive table capabilities — what an agent may do
+
+A table can tell an agent what it can do **right now**, without sending every
+row or every feature guide up front.
+
+That contract lives in `@adapttable/ai`. It is optional. `@adapttable/core`,
+every adapter root, and `@adapttable/server` import none of it. Compose
+`tableAgent` from `@adapttable/ai/react` when a table should publish a
+manifest; omit the import and the bytes stay out.
+
+## What is wired, not what is installed
+
+Capabilities come from the live table:
+
+- A table with search and pagination advertises `view.setSearch` and
+  `view.setPage`.
+- Grouping, filters, export, editing and reorder appear only when that
+  feature is composed **and** the host callback (where a write needs one)
+  is present.
+- `view.setSelection` appears when selection is wired (`apply.setSelection`).
+- `views.apply` appears when `featureIds` includes `saved-views` and
+  `apply.applyView` exists.
+- `rows.read` / `rows.resolve` appear when the table has columns.
+  `rows.read` redacts `readable: false` cells and is bounded by
+  `limits.readMax`. `scope: "full"` requires `source.fullDataset === true`.
+- `rows.add` / `rows.delete` appear when the host apply methods exist and
+  `writePolicy` is `"allow"`. `rows.delete` is destructive.
+- Data-layer truth comes from the source's
+  [`TableSourceCapabilities`](./data-tiers.md) — the manifest copies those
+  fields and never re-infers them from shape.
+
+Package availability never participates. Installing `@adapttable/ai` does
+not enable grouping on a table that never imported it.
+
+## Three portable calls
+
+Any agent runtime can speak this:
+
+1. `catalog()` — keys and one-line summaries, in a stable order.
+2. `describe(key)` — the guide plus strict input/output JSON Schemas.
+3. `execute(key, arguments, expectedRevision, idempotencyKey)` — validate,
+   refuse a stale revision, replay an idempotent key, then dispatch.
+
+Runtimes that support typed tools can wrap each described capability as its
+own tool. The three calls stay the fallback.
+
+Protocol identity is the schema version (`adapttable.agent.v1`) and the
+capability keys. Labels may be translated for people; execution is
+locale-independent.
+
+## The manifest does not send rows
+
+Initialization publishes:
+
+- table id and view revision
+- the enabled capability keys
+- readable/writable column metadata
+- how rows are addressed (`visible` / `page` / `full`)
+- limits (`pageMax`, `readMax`) and policy (`write`, `approval`, `commit`)
+- the source capability record
+
+It never dumps the dataset or every feature instruction. Bounded
+`rows.read` and write approval (`approval` / `commit` / kit chrome) live
+in [`@adapttable/ai`](./ai.md). The kit strip uses `agent-approval`,
+`agent-approval-list`, `agent-approval-approve`, `agent-approval-reject`,
+and `agent-approval-row`. Escape rejects. Enter is not a silent confirm.
+
+---
+
+# `@adapttable/ai` — catalog, describe, execute
+
+```bash
+npm install @adapttable/ai
+```
+
+The root entry is React-free and SDK-free. Use it from any agent runtime.
+The React feature is a separate import.
+
+```ts
+import { createAgentSession } from "@adapttable/ai";
+import { tableAgent } from "@adapttable/ai/react";
+```
+
+## `tableAgent({ tableId, bridge, writePolicy, approval, commit, columns, readMax })`
+
+Compose it next to the other features:
+
+```tsx
+import { tableAgent } from "@adapttable/ai/react";
+import { DataTable } from "@adapttable/mui";
+import { agentApproval } from "@adapttable/mui";
+import { filters } from "@adapttable/mui/filters";
+
+<DataTable
+  columns={columns}
+  data={rows}
+  rowKey="id"
+  features={[
+    filters(),
+    agentApproval(),
+    tableAgent({
+      tableId: "orders",
+      writePolicy: "allow",
+      approval: "writes",
+      commit: "stage",
+      bridge: {
+        publish: (manifest) => sendToRuntime(manifest),
+        attach: (session) => (runtime.session = session),
+      },
+    }),
+  ]}
+/>;
+```
+
+`writePolicy` is `"allow"` or `"deny"`. Deny strips every write key.
+Allow still goes through the host's existing edit/reorder/add/delete
+callbacks — the table never owns the data.
+
+`approval` is `"writes"` (default — every mutating key), `"destructive"`
+(only `rows.delete`), or `"never"` (skip chrome and `onApprove`; still
+validate and honour commit). Host `onApprove?: (proposal) => Promise<boolean>`
+replaces the kit strip when it is set.
+
+`commit` is `"stage"` (default — dirty/batch path; Save still belongs to
+the reader) or `"immediate"` (invoke the host callback now).
+
+`readMax` bounds `rows.read` (default 50). `scope: "full"` requires
+`source.fullDataset === true`. Readable-false columns are redacted.
+
+`columns` overlays readable/writable/type on the published column metadata.
+
+`bridge.publish` receives every new manifest (feature, column, permission or
+policy change). `bridge.attach` receives the live
+`catalog` / `describe` / `execute` session. Two tables each get their own
+session; they do not share revision or idempotency state.
+
+## Manifest shape
+
+```ts
+{
+  schemaVersion: "adapttable.agent.v1",
+  tableId: string,
+  viewRevision: number,
+  capabilities: CapabilityKey[],
+  columns: { id, label, type, readable, writable, sortable }[],
+  rowAddressing: { scope: "visible" | "page" | "full", key: "rowKey" },
+  limits: { pageMax: number, readMax: number },
+  policy: {
+    write: "deny" | "allow",
+    approval: "writes" | "destructive" | "never",
+    commit: "stage" | "immediate",
+  },
+  source: TableSourceCapabilities,
+}
+```
+
+## Capability keys
+
+Stable catalog order:
+
+`columns.describe`, `view.describe`, `view.setPage`, `view.setSort`,
+`view.setSearch`, `view.setFilters`, `view.setGroupBy`, `view.setSelection`,
+`views.apply`, `rows.read`, `rows.resolve`, `export.run`, `edit.cells`,
+`rows.add`, `rows.delete`, `rows.reorder`.
+
+`edit.cells` takes `{ edits: Array<{ column, value, rowKey?, position?, scope? }> }`
+— each edit needs `rowKey` or a 1-based `position`. Positions resolve
+before write. The execute result is
+
+`{ ok, revision, idempotencyKey, result: { proposals, applied, approval, results? } }`.
+
+`createAgentSession({ observe, apply })` is the same contract without React —
+hand it the current observation and the apply hooks. See
+[adaptive capabilities](./agent-capabilities.md).
+
+---
+
+# Agent integrations — JSON, OpenAI, MCP
+
+`@adapttable/ai` does not host a model, chat UI, or AdaptTable service.
+A table publishes a manifest. Your runtime maps that contract onto the
+tools it already speaks.
+
+```ts
+import { createAgentSession } from "@adapttable/ai";
+import { executeEnvelope, toJsonTools } from "@adapttable/ai/json";
+import { toOpenAITools } from "@adapttable/ai/openai";
+import { mcpListChanged, toMcpResources, toMcpTools } from "@adapttable/ai/mcp";
+```
+
+The root entry stays React-free. `@adapttable/ai/react` is only for
+`tableAgent`. The three integration subpaths never import a model SDK.
+
+See [adaptive capabilities](./agent-capabilities.md) and
+[`@adapttable/ai`](./ai.md) for the session itself.
+
+## Manifest → tools
+
+`catalog()` is the enabled key list, in a stable order. Each adapter
+calls `describe(key)` for the input JSON Schema and uses the capability
+key as the tool `name`. Names are never translated.
+
+Today's keys: `columns.describe`, `view.describe`, `view.setPage`,
+`view.setSort`, `view.setSearch`, `view.setFilters`, `view.setGroupBy`,
+`export.run`, `edit.cells`, `rows.reorder`.
+
+Keys that land with the write-safety / bounded-read work, advertised
+only when wired: `view.setSelection`, `views.apply`, `rows.read`,
+`rows.resolve`, `rows.add`, `rows.delete`. Adapters that map
+`session.catalog()` pick them up automatically.
+
+## Envelope
+
+Every provider call collapses to one transport-neutral operation:
+
+```ts
+interface AgentEnvelope {
+  schemaVersion: "adapttable.agent.v1";
+  tableId: string;
+  key: string;
+  args: unknown;
+  expectedRevision: number;
+  idempotencyKey: string;
+}
+```
+
+`parseEnvelope(input)` checks that shape. `executeEnvelope(session,
+envelope)` checks `schemaVersion` and `tableId ===
+session.manifest().tableId`, then calls `session.execute`. There is no
+second argument validator.
+
+Host write-safety chrome (not on the envelope) may wrap apply:
+
+- `approval`: `"writes"` | `"destructive"` | `"never"` (default `"writes"`)
+- `commit`: `"stage"` | `"immediate"` (default `"stage"`)
+
+Stage records a proposal in the host `apply.editCells` callback.
+Immediate persists through that same callback.
+
+## JSON function tools — `@adapttable/ai/json`
+
+```ts
+const tools = toJsonTools(session);
+const result = await executeJsonTool(session, {
+  name: "view.setPage",
+  arguments: { page: 2 },
+  expectedRevision: session.manifest().viewRevision,
+  idempotencyKey: "page-2",
+});
+```
+
+`executeEnvelope` and `parseEnvelope` are re-exported from this subpath.
+
+## OpenAI function tools — `@adapttable/ai/openai`
+
+```ts
+const tools = toOpenAITools(session); // strict: true by default
+const deferred = toOpenAITools(session, { deferred: true });
+```
+
+`strict: true` sets `additionalProperties: false` when the described
+schema does not already declare it. `deferred: true` returns only
+`catalog`, `describe` and `execute` — `describe` is how the runtime
+learns the rest. `executeOpenAITool` accepts string or object
+`function.arguments`.
+
+## MCP tools and resources — `@adapttable/ai/mcp`
+
+```ts
+const tools = toMcpTools(session); // catalog order
+const resources = toMcpResources(session);
+if (mcpListChanged(prev, next)) {
+  // notifications/tools/list_changed
+}
+await executeMcpTool(session, "view.setPage", { page: 2 }, revision, "k");
+```
+
+Each enabled capability is also a readable resource at
+`adapttable://table/{tableId}/capability/{key}`. The body is
+`describe(key)` JSON.
+
+Hosts that cannot refresh a dynamic tool list keep the portable trio on
+the session, or use the OpenAI deferred trio.
+
+## Examples
+
+- [ai-server-agent.ts](../examples/ai-server-agent.ts) — Node worker + HTTP envelope
+- [ai-mcp-host.ts](../examples/ai-mcp-host.ts) — tools, resources, list-changed
+- [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools
+
+Intention fixtures (no live model) live in
+`packages/ai/src/__fixtures__/intentions.json`.
 
 ---
 
@@ -8328,6 +8631,11 @@ Every table you render already:
   87"), because a control that rewrites the table silently gives a screen-reader user no
   way to tell it worked
 - honours `prefers-reduced-motion` when rows animate in
+- honours `forced-colors: active` (Windows High Contrast) and
+  `prefers-contrast: more`: focus, selection, dirty cells, validation errors
+  and find-match highlights each keep an outline, not a fill or a box-shadow,
+  so nothing is signaled by colour alone. Borders, pinned-column edges and
+  overlays use system colors (`Canvas`, `CanvasText`, `Highlight`)
 
 Every adapter is audited with `axe` in CI, on desktop and mobile card layouts.
 
@@ -8360,6 +8668,30 @@ The optional spreadsheet grid — one Tab stop, arrow keys through every cell,
 `role="grid"` — is a separate feature. See
 [keyboard & cell navigation](./cell-navigation.md). Omit that prop and the
 grid extras are absent; the default table above still stands.
+
+## High contrast and forced colors
+
+Windows High Contrast (and other `forced-colors: active` modes) strips the
+fills and box-shadows a kit painted. AdaptTable does not ask each kit to
+re-theme that itself. One stylesheet — `ForcedColorsStyle`, mounted from
+every adapter — switches those marks to system colors:
+
+| Mark        | Affordances that survive                                                               |
+| ----------- | -------------------------------------------------------------------------------------- |
+| Focus       | `outline` in `Highlight`, never a box-shadow                                           |
+| Selection   | solid outline (also in the cell style, so it is not CSS-only)                          |
+| Find match  | dashed outline; the current hit is solid                                               |
+| Dirty cell  | dotted outline — `data-dirty` is never colour-only                                     |
+| Validation  | double outline on `aria-invalid`                                                       |
+| Pinned edge | `CanvasText` border on the pin side                                                    |
+| Overlays    | find bar, command palette, saved views, side panel use `Canvas` / `CanvasText` borders |
+
+`prefers-contrast: more` thickens the focus outline to 3px. Kits that expose
+no contrast hook of their own still pick this up: the query is global.
+
+The antd adapter keeps its sticky header. The `role="grid"` lives on the
+wrapper around both of antd's tables so a screen reader walking a cell still
+finds that cell's `columnheader` in the same grid.
 
 ## Notes
 
@@ -8749,7 +9081,7 @@ feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
 `useFeatureState`. A provider sits above the chrome, so it reads the live rows
 and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather than being handed
-them; chrome offers them with `usePublishTableRuntime`. A feature also fills
+them (`featureIds()`, optional `query` for page/search/sort); chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
 `slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`,
@@ -9278,6 +9610,18 @@ surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
 it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
 itself. See [browser and server-built exports](./exporting.md).
 
+**Lean live stubs.** A ninth adapter that mounts chrome by hand still has to
+hand the table a find/grid/export/history object when those features are
+off. `DISABLED_FIND`, `DISABLED_EXPORT`, `disabledHistory` and
+`windowedTableAria` are the inert shapes the shell already uses — so the
+adapter root never imports the hooks.
+
+**High contrast.** `ForcedColorsStyle` (and `ensureForcedColorsStyles`, which
+it calls) inject `FORCED_COLORS_CSS` once per page so Windows High Contrast
+and `prefers-contrast: more` keep focus, selection, dirty cells, validation
+and find hits visible as outlines. Adapters mount it; app code rarely needs
+to. See [accessibility](./accessibility.md).
+
 **Status announcements.** Sorting, filtering and paging rewrite the body with
 nothing a screen reader can perceive, so the table says what changed through one
 polite region. `useDataTableShell` returns the message as `statusAnnouncement`
@@ -9682,7 +10026,10 @@ contains the query, in absolute addresses (`FindMatchesOptions` in);
 question and `stepMatch(index, total, step)` wraps the walk.
 `useFindInTable(options)` is the bar's state — `open`, `query`, `matches`,
 `index`, `current`, `next`, `previous` (`UseFindInTableOptions` in,
-`FindInTableState` out) — and each adapter mounts `FindBar` / `FindBarProps`
+`FindInTableState` out). The query is shareable table state: pass the same
+`urlAdapter` / `urlSync` / `urlKey` the table already uses and a `find` param
+rides beside `q`. `FIND_URL_WRITE_DEBOUNCE_MS` is the trailing debounce on
+that write (replace-state only). Each adapter mounts `FindBar` / `FindBarProps`
 over `FindBarChrome` / `FindBarChromeProps` / `FindBarSlots` /
 `FindSearchProps` / `FindButtonProps` / `FindButtonKind`.
 `useFindFocus(current, focusCell,
@@ -9749,6 +10096,27 @@ buttons, and renaming is an inline input that Escape abandons. See
 `RouterUrlAdapterOptions` is that pair. It depends on no router, so React
 Router, TanStack Router and Next.js all take two lines. See
 [URL state](./url-state.md).
+
+**Adaptive capabilities.** `@adapttable/ai` is the optional, provider-neutral
+agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
+`CapabilityKey`, `WritePolicy`, `ApprovalPolicy`, `CommitPolicy`,
+`RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
+`buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`, and
+the types `AgentApply`, `AgentColumn`, `AgentManifest`, `AgentObservation`,
+`AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
+`ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowReadQuery`, `RowRef`,
+`RowWindow`, `TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`,
+`WriteRowResult`. `@adapttable/ai/react` exports `tableAgent`,
+`TableAgentOptions` and `TABLE_AGENT_STATE`. Each published kit exports
+`agentApproval` and `AgentApproval`. Core chrome exports
+`AgentApprovalChrome`, `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE` and the
+slot/proposal types. Portable adapters live on subpaths:
+`@adapttable/ai/json` (`toJsonTools`, `executeJsonTool`, `parseEnvelope`,
+`executeEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
+`executeOpenAITool`), `@adapttable/ai/mcp` (`toMcpTools`, `toMcpResources`,
+`mcpListChanged`, `executeMcpTool`). See
+[adaptive capabilities](./agent-capabilities.md),
+[`@adapttable/ai`](./ai.md) and [agent integrations](./ai-integrations.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a
@@ -10362,7 +10730,8 @@ DataModeProps`: the base carries every prop except the data mode, which is
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
-[comparison.md](./comparison.md).)
+[comparison.md](./comparison.md). Looking for what the product does not
+do? See [limitations.md](./limitations.md).)
 
 **Jump to a feature:** [URL state](./url-state.md) ·
 [Filtering](./filtering.md) · [Virtualization](./virtualization.md) ·
@@ -10533,14 +10902,14 @@ Every package sets `sideEffects: false` and ships ESM, so unused code is
 tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured on the published builds, with React and your UI kit external because
-your app already ships those:
+Measured 2026-09-02 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+React and the UI kit external because your app already ships those):
 
 | What you import                           | min+gzip  |
 | ----------------------------------------- | --------- |
 | `useFrontendData` + `useDataTable` (core) | ~19 kB    |
-| every core export                         | ~81 kB    |
-| `DataTable` from an adapter               | ~58–71 kB |
+| every core export                         | ~82 kB    |
+| `DataTable` from an adapter               | ~60–70 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -10573,6 +10942,13 @@ breaking changes ship only in a major release. It is strict-TypeScript, dual
 ESM/CJS with `.d.ts` types, axe-audited for accessibility in CI, and holds
 near-100% test coverage across every adapter.
 
+## What does AdaptTable not do?
+
+Present-tense ceilings — data ownership, formula grammar, reorder policy,
+virtualization, export caps, adapter size, SSR, kit coverage — live on
+[limitations and boundaries](./limitations.md). Each claim there traces to
+a test, a measurement, or a documented decision.
+
 ## When might another library fit better?
 
 - You want a mature, deeply integrated spreadsheet-analytics product and are
@@ -10590,6 +10966,170 @@ near-100% test coverage across every adapter.
   Every AdaptTable adapter renders your UI kit's real components, which is the
   whole point of it — and the wrong trade if you would rather not own the
   theming at all.
+
+---
+
+# Limitations and boundaries
+
+What AdaptTable does not do, and the ceilings that are true of the
+shipped tree. Every statement below is present-tense fact with a source.
+This page is not a roadmap.
+
+## The table never owns the data
+
+AdaptTable does not mutate your array. Edits, adds, deletes and reorders
+call host callbacks (`editing()`, `batchEditing()`, `rowEditing()`,
+add/delete handlers, reorder/move handlers). Undo, dirty state and
+persistence are whatever those callbacks already do.
+[Cell editing](./cell-editing.md) · [row reordering](./row-reordering.md).
+
+## Formula grammar
+
+The optional `@adapttable/core/formula` grammar is the comparison /
+concat / sum / product / unary / primary tree in
+[formulas](./formulas.md). `^` and scientific notation (`1e5`) are
+outside it: `parseFormula` returns `ok: false` and the column reads
+`#ERROR!`. Write `x * x` or `POWER`. The function set is the table on
+that page — no `eval`, no user-defined functions, no expansion of the
+grammar through `POWER` / `SQRT`.
+
+## Row reorder and move
+
+`rowReorder` is an import. Without it the drag machine is not in the
+graph. The default move policy is `"never"`: same-group / same-parent
+reorder works; crossing a group or parent boundary is rejected with an
+announcement. `"confirm"` and `"auto"` are opt-in.
+
+A row cannot move under itself or a descendant — the cycle guard rejects
+pointer, keyboard and menu paths before any host callback.
+
+While a sort is active, same-scope order-only writes are rejected
+(“Clear sorting before changing row order”). Cross-group moves and
+re-parenting still run because they change membership. Row order is the
+host array; it is not a URL or Saved Views parameter.
+[Row reordering](./row-reordering.md).
+
+## Source capabilities
+
+A `TableSource` declares what it can retrieve. The table does not invent
+the rest:
+
+| Capability    | When it is false                                                                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fullDataset` | The browser holds the current page. `rows.read` with `scope: "full"` is denied. Export-all needs a source-owned `allFilteredRows` route or `onExportAll`. |
+| `grouping`    | `groupBy` is ignored and the status bar says why.                                                                                                         |
+| `exportScope` | The Export control is disabled with the reason on it.                                                                                                     |
+
+Declared in [data tiers](./data-tiers.md). Copied, never re-inferred, into
+the agent manifest ([adaptive capabilities](./agent-capabilities.md)).
+
+`rows.read` redacts `readable: false` cells and is bounded by
+`limits.readMax` (default 50). Installing `@adapttable/ai` does not add
+grouping, editing or a dataset the table cannot see.
+
+## Client-side size and export
+
+Without `virtualize`, the body renders every row in the current view. At
+10,000 rows that is 10,000 `<tr>`s; the virtualized measurement on the
+same set is ~24 DOM rows and stays ~24 from 1k to 100k
+([virtualization](./virtualization.md)). That is a measurement, not a
+supported-row SLA. A server page plus virtualize is the path for large
+sets.
+
+Browser `fetchAll` export walks the current query up to
+`EXPORT_FETCH_ALL_MAX_ROWS` (50,000). Hitting the cap calls `onCapped`
+and does not write a file that pretends to be complete. Beyond that,
+`onExportAll` is a host job. [Exporting](./exporting.md).
+
+## Bundle entrypoints
+
+Sizes are minified + gzipped AdaptTable bytes. React and the UI kit are
+external — an application already ships them. The method is packed
+consumer fixtures in `scripts/bundle-budget.mjs`.
+
+- A published adapter's base `DataTable` is held to **≤ 80 KB**
+  (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's item-1
+  baseline. Omitted feature markers must be absent from the base graph.
+- Optional features arrive with their import. `standardFeatures()`
+  includes only factories that run with no required argument.
+- `@adapttable/ai` is a separate package. Eleven base graphs contain none
+  of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
+  `@adapttable/ai` (`scripts/ai-isolation.mjs`).
+
+Published FAQ figures are the measurements the budget script checks, not
+a second estimate. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable) ·
+[feature composition](./features.md).
+
+Interaction timings on the Tailwind showcase (first render, sort, page,
+search, column-menu open, CLS) are locked in
+`scripts/v3-perf-baseline.json`. They are a regression gate, not a
+promise to an application.
+
+## Browser, SSR, and the e2e gate
+
+Supported runtimes: React 18 or 19, Node `>=22.12.0`, and the kit
+versions in [getting started](./getting-started.md). The table UI is
+React. Vue and Angular bindings are not in this tree.
+
+The per-PR Playwright project is **Chromium** against the built showcase
+(`playwright.config.ts`). Firefox, WebKit and a dedicated mobile project
+are not in that gate.
+
+The table is a client component. During SSR there is no `window` or
+`matchMedia`: pass `forceMobile` so server and first paint agree, and
+pass `createMemoryAdapter(search)` so URL state does not touch History.
+`@adapttable/i18n` is the one package without `"use client"`.
+[SSR & RSC](./ssr-rsc.md).
+
+`@adapttable/bootstrap` is private and unpublished. “All eight adapters”
+means Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui
+and unstyled.
+
+## Accessibility
+
+Keyboard, names, RTL and forced-colors are on by default across the eight
+published kits ([accessibility](./accessibility.md)).
+
+antd keeps a sticky header. `role="grid"` sits on the wrapper around
+both of antd's tables so a cell and its `columnheader` share one grid.
+The e2e `every body gridcell shares its columnheader with the same grid`
+walks every kit with antd sticky **on**, forbids `headers=` pointing at
+another table (W3C ACT a25f45), and requires `columnheader` in the same
+grid snapshot (`e2e/aria-parity.spec.ts`). That is the outcome of the
+sticky-header association work — it is not an open caveat.
+
+A remaining kit-specific accessibility defect is listed here only after
+a fix was attempted and failed. None is listed.
+
+## What this product is not
+
+- A spreadsheet host. Formula, pivot, fill and range paste are parts you
+  compose; they are not one locked workbook surface.
+- A hosted agent service. `@adapttable/ai` ships no model SDK, API key
+  or chat UI. Core, every adapter root and `@adapttable/server` import
+  none of those.
+- A data store. There is no built-in backend, auth or sync.
+- A config-object API. Features are imports and callbacks, not a second
+  options bag with synonyms.
+
+## Sources
+
+| Claim                                    | Source                                                                                                   |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Host callbacks own writes                | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                 |
+| Formula grammar and refused tokens       | [formulas](./formulas.md), `parseFormula`                                                                |
+| Move policy, cycle guard, sort block     | [row-reordering](./row-reordering.md)                                                                    |
+| `fullDataset` / export-all / `rows.read` | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts` |
+| `readMax` default 50                     | `packages/ai/src/session.ts` `readMaxOf`                                                                 |
+| Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                    |
+| Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
+| Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
+| AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
+| Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
+| Chromium e2e                             | `playwright.config.ts`                                                                                   |
+| SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                  |
+| antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                           |
+| React / Node / kit floors                | [getting-started](./getting-started.md)                                                                  |
 
 ---
 
@@ -10622,6 +11162,12 @@ libraries.
 | Tree data (self-referencing rows)              | ✓ (paid)  |  build it yourself   |         ✗         |    ✓ (paid)    |         **✓ MIT**         |
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
+
+A plain AdaptTable adapter `DataTable` is 60–70 kB min+gzip (measured
+2026-09-02 from packed fixtures; React and the kit stay external). Competitor
+bundle sizes are not listed here — they depend on which paid modules you
+licence and are not produced by this repo's fixtures. Method and the rest of
+the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
 ## Head-to-head
 
@@ -10750,6 +11296,7 @@ matches unstyled feature-for-feature.
 Also: [Mobile cards](./mobile.md) · [URL state](./url-state.md) ·
 [Virtualization](./virtualization.md) · [i18n & RTL](./i18n-rtl.md) ·
 [Accessibility](./accessibility.md) · [Realtime](./realtime.md) ·
+[Limitations and boundaries](./limitations.md) ·
 [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
 
 ---
@@ -11996,7 +12543,7 @@ table is your design system's, not a themed grid.
 
 v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
-what it named and nothing else. An adapter's `DataTable` is 55–67 kB gzipped
+what it named and nothing else. An adapter's `DataTable` is 60–70 kB gzipped
 because of it.
 
 Nothing else about the table changed: the same columns, the same data tiers,
@@ -12391,7 +12938,7 @@ Given `MAJOR.MINOR.PATCH`:
   unavoidable, it ships in a major with a migration note in the CHANGELOG.
 
 The published packages (`@adapttable/core`, the adapters, `@adapttable/i18n`,
-`@adapttable/server`, and `@adapttable/cli`) each follow
+`@adapttable/server`, `@adapttable/ai`, and `@adapttable/cli`) each follow
 [changesets](https://github.com/changesets/changesets) **independently**: a
 package only bumps when a changeset names it. Adapters, `@adapttable/i18n`
 and `@adapttable/server` depend on a concrete `@adapttable/core` version at
@@ -12504,6 +13051,12 @@ factory and the table share one package.
 Locale presets (`en`, `ar`, …, `zhTW`), `getLabels` / `hasLocale` /
 `locales` / `LocaleKey`, and direction helpers (`getDirection`,
 `isRtlLocale`, `primarySubtag`, `RTL_LANGUAGES`).
+
+### `@adapttable/ai`
+
+`createAgentSession`, `tableAgent` (`@adapttable/ai/react`), the
+`adapttable.agent.v1` manifest and the `CAPABILITY_KEYS` catalog. Optional —
+core and adapter roots do not re-export it.
 
 ### `@adapttable/server`
 

@@ -94,6 +94,7 @@ const IGNORED = new Set([
   "data-tiers",
   "faq",
   "getting-started",
+  "limitations",
   // Its own package (`@adapttable/server`), not something an adapter ships —
   // every adapter README claiming it would be a promise none of them keep.
   "server-queries",

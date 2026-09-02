@@ -61,6 +61,7 @@ export const DOCS = [
   "realtime.md",
   "api.md",
   "faq.md",
+  "limitations.md",
   "comparison.md",
   "migrate-from-mantine-datatable.md",
   "migrate-from-mui-x-datagrid.md",
