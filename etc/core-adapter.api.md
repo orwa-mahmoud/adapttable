@@ -1466,6 +1466,9 @@ export type Density = "comfortable" | "compact";
 export function deriveSortByOptions<TRow>(columns: readonly ColumnDef<TRow>[]): SortByOption[];
 
 // @public
+export function disabledHistory<TRow>(): EditHistoryState<TRow>;
+
+// @public
 export const DESKTOP_ACTIONS_WIDTH = 120;
 
 // @public
@@ -1703,6 +1706,12 @@ export interface DesktopVirtualPadSlot {
 
 // @public
 export type Direction = "ltr" | "rtl";
+
+// @public
+export const DISABLED_EXPORT: ExportHandlerState;
+
+// @public
+export const DISABLED_FIND: FindInTableState;
 
 // @public
 export interface DirtyCellState {
@@ -6553,6 +6562,15 @@ export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
 
 // @public
 export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
+
+// @public
+export function windowedTableAria(options: {
+    rowCount: number;
+    rowsLength: number;
+    columnsLength: number;
+    columnsWindowed: boolean;
+    firstRowIndex: number;
+}): GridFocusState;
 
 // (No @packageDocumentation comment for this package)
 

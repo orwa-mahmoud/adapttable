@@ -2,7 +2,7 @@
 
 v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
-what it named and nothing else. An adapter's `DataTable` is 55–67 kB gzipped
+what it named and nothing else. An adapter's `DataTable` is 60–70 kB gzipped
 because of it.
 
 Nothing else about the table changed: the same columns, the same data tiers,

@@ -1334,6 +1334,8 @@
       "DesktopTablePin",
       "DesktopVirtualPadSlot",
       "Direction",
+      "DISABLED_EXPORT",
+      "DISABLED_FIND",
       "DirtyCellState",
       "EDITABLE_CELL",
       "EDITING_LIVE",
@@ -1816,6 +1818,7 @@
       "createAdapterStandardFeatures",
       "createDesktopRow",
       "deriveSortByOptions",
+      "disabledHistory",
       "editableCellController",
       "editorBusyProps",
       "editorValidationProps",
@@ -1941,7 +1944,8 @@
       "useTableVirtualization",
       "viewControlsToolbar",
       "virtualColumnSpan",
-      "windowGroupedEntries"
+      "windowGroupedEntries",
+      "windowedTableAria"
     ],
     "core-features": [
       "ActionConfirm",

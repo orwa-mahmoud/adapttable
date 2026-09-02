@@ -1,0 +1,15 @@
+{
+  "measuredAt": "2026-09-02",
+  "method": "rolldown parse of packed adapter-root fixtures; Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the parse fixtures.",
+  "parseBuildMs": {
+    "unstyled · table": 100,
+    "mui · table": 92,
+    "antd · table": 213
+  },
+  "firstRenderMs": 982,
+  "sortMs": 24,
+  "pageMs": 24,
+  "searchMs": 314,
+  "panelFirstOpenMs": 99,
+  "cls": 0.0009
+}

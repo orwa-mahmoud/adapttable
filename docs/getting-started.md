@@ -26,6 +26,10 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
+A plain adapter `DataTable` is 60–70 kB min+gzip (measured 2026-09-02 from
+packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
+has the method and the rest of the grid.
+
 Or install manually: `@adapttable/core`, the adapter for your kit, and the
 kit's own packages (peer dependencies — skip what you already have).
 `react` / `react-dom` 18 or 19 are peers everywhere.

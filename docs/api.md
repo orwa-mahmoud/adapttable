@@ -698,6 +698,12 @@ surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
 it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
 itself. See [browser and server-built exports](./exporting.md).
 
+**Lean live stubs.** A ninth adapter that mounts chrome by hand still has to
+hand the table a find/grid/export/history object when those features are
+off. `DISABLED_FIND`, `DISABLED_EXPORT`, `disabledHistory` and
+`windowedTableAria` are the inert shapes the shell already uses — so the
+adapter root never imports the hooks.
+
 **High contrast.** `ForcedColorsStyle` (and `ensureForcedColorsStyles`, which
 it calls) inject `FORCED_COLORS_CSS` once per page so Windows High Contrast
 and `prefers-contrast: more` keep focus, selection, dirty cells, validation

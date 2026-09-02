@@ -291,6 +291,12 @@ export {
   useExportHandler,
 } from "./export/useExportHandler";
 export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
+export {
+  DISABLED_EXPORT,
+  DISABLED_FIND,
+  disabledHistory,
+  windowedTableAria,
+} from "./features/shellLiveStubs";
 export { ChromeExtrasGate } from "./features/chromeExtrasGate";
 export type { FeatureHostState } from "./features/currentHost";
 export { bindFeatureHostFn } from "./features/currentHost";
