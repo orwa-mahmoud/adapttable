@@ -1,5 +1,12 @@
 import { Theme } from "@radix-ui/themes";
-import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+import {
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -9,15 +16,17 @@ import { rowReorder } from "./row-reorder";
 interface Task {
   id: string;
   title: string;
+  team: string;
 }
 
 const ROWS: Task[] = [
-  { id: "1", title: "Ship" },
-  { id: "2", title: "Test" },
-  { id: "3", title: "Docs" },
+  { id: "1", title: "Ship", team: "Core" },
+  { id: "2", title: "Test", team: "Core" },
+  { id: "3", title: "Docs", team: "Web" },
 ];
 const COLS: ColumnDef<Task>[] = [
   { key: "title", header: "Title", accessor: (r) => r.title },
+  { key: "team", header: "Team", accessor: (r) => r.team },
 ];
 
 const part = (name: string) =>
@@ -97,6 +106,103 @@ describe("row reorder (radix)", () => {
     expect(part("row-reorder-handle")).toBeNull();
     fireEvent.click(part("row-reorder-down")!);
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
+  });
+
+  it("confirms grouped moves and restores focus after cancel or confirm", async () => {
+    const onGroupMove = vi.fn();
+    render(
+      <Theme>
+        <DataTable
+          data={ROWS}
+          columns={COLS}
+          rowKey={(r) => r.id}
+          urlSync={false}
+          groupBy="team"
+          features={[
+            rowReorder<Task>(vi.fn(), {
+              movePolicy: "confirm",
+              onGroupMove,
+            }),
+          ]}
+        />
+      </Theme>
+    );
+    const trigger = document.querySelectorAll<HTMLElement>(
+      '[data-adapttable-part="row-move-menu-trigger"]'
+    )[0]!;
+
+    const selectWeb = async () => {
+      fireEvent.pointerDown(trigger, { button: 0 });
+      const menu = await screen.findByRole("menu", { name: /move to group/i });
+      fireEvent.click(within(menu).getByRole("menuitem", { name: "Web" }));
+      return screen.findByRole("alertdialog", {
+        name: "Confirm row move",
+      });
+    };
+
+    let confirmation = await selectWeb();
+    fireEvent.click(
+      within(confirmation).getByRole("button", { name: "Cancel" })
+    );
+    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(onGroupMove).not.toHaveBeenCalled();
+
+    confirmation = await selectWeb();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Move" }));
+    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(onGroupMove).toHaveBeenCalledTimes(1);
+    expect(onGroupMove.mock.calls[0]?.[0]).toBe(ROWS[0]);
+  });
+
+  it("keeps rejected destinations visible with their reason in RTL", async () => {
+    render(
+      <Theme>
+        <DataTable
+          data={ROWS}
+          columns={COLS}
+          rowKey={(r) => r.id}
+          urlSync={false}
+          dir="rtl"
+          groupBy="team"
+          features={[rowReorder<Task>(vi.fn())]}
+        />
+      </Theme>
+    );
+    const trigger = document.querySelectorAll<HTMLElement>(
+      '[data-adapttable-part="row-move-menu-trigger"]'
+    )[0]!;
+    fireEvent.pointerDown(trigger, { button: 0 });
+    const menu = await screen.findByRole("menu", { name: /move to group/i });
+    const item = within(menu).getByRole("menuitem", { name: /Web/ });
+    expect(menu).toHaveAttribute("dir", "rtl");
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).toHaveTextContent("Cross-boundary row moves are disabled");
+
+    fireEvent.keyDown(menu, { key: "Escape" });
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it("renders the destination menu on mobile cards", () => {
+    render(
+      <Theme>
+        <DataTable
+          data={ROWS}
+          columns={COLS}
+          rowKey={(r) => r.id}
+          urlSync={false}
+          forceMobile
+          groupBy="team"
+          features={[
+            rowReorder<Task>(vi.fn(), {
+              movePolicy: "auto",
+              onGroupMove: vi.fn(),
+            }),
+          ]}
+        />
+      </Theme>
+    );
+    expect(part("row-reorder-handle")).toBeNull();
+    expect(part("row-move-menu-trigger")).toBeInTheDocument();
   });
 
   it("lists the reorder column in the Columns menu", async () => {

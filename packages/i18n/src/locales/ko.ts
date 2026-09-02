@@ -159,6 +159,22 @@ export const ko: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `행을 ${String(from)}에서 ${String(to)}(으)로 옮겼습니다`,
   rowReorderCancelled: "순서 변경을 취소했습니다",
+  rowMoveOptions: "행 이동 옵션",
+  moveToGroup: "그룹으로 이동…",
+  moveUnder: "하위로 이동…",
+  moveToTopLevel: "최상위로 이동",
+  confirmRowMoveTitle: "행 이동 확인",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row}을(를) ${from}에서 ${to}(으)로 이동할까요?`,
+  confirmRowMove: "이동",
+  rowMovedToGroup: (group) => `행을 ${group}(으)로 이동했습니다`,
+  rowMovedUnder: (parent) => `행을 ${parent} 아래로 이동했습니다`,
+  moveRejectedPolicyNever: "경계를 넘는 행 이동이 비활성화되어 있습니다",
+  moveRejectedSorted: "행 순서를 변경하기 전에 정렬을 해제하세요",
+  moveRejectedCycle:
+    "행을 자기 자신이나 그 하위 항목 안으로 이동할 수 없습니다",
+  moveUnavailable: "이 행 이동은 사용할 수 없습니다",
+  rootLevel: "최상위",
   pinToTop: "위에 고정",
   pinToBottom: "아래에 고정",
   unpinRow: "행 고정 해제",

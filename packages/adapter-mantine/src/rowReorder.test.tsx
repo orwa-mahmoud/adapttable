@@ -2,9 +2,11 @@ import { MantineProvider } from "@mantine/core";
 import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { RowMoveMenu } from "./components/kitControls";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
+import { tree } from "./tree";
 
 interface Task {
   id: string;
@@ -18,6 +20,20 @@ const ROWS: Task[] = [
 ];
 const COLS: ColumnDef<Task>[] = [
   { key: "title", header: "Title", accessor: (r) => r.title },
+];
+interface TreeTask extends Task {
+  children?: TreeTask[];
+}
+const TREE_ROWS: TreeTask[] = [
+  {
+    id: "parent",
+    title: "Parent",
+    children: [{ id: "child", title: "Child" }],
+  },
+  { id: "sibling", title: "Root sibling" },
+];
+const TREE_COLS: ColumnDef<TreeTask>[] = [
+  { key: "title", header: "Title", accessor: (row) => row.title },
 ];
 
 const part = (name: string) =>
@@ -97,6 +113,133 @@ describe("row reorder (mantine)", () => {
     expect(part("row-reorder-handle")).toBeNull();
     fireEvent.click(part("row-reorder-down")!);
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
+  });
+
+  it("uses an accessible Mantine menu for nested move destinations", async () => {
+    const onTreeMove = vi.fn();
+    render(
+      <MantineProvider>
+        <DataTable
+          data={TREE_ROWS}
+          columns={TREE_COLS}
+          rowKey={(row) => row.id}
+          urlSync={false}
+          features={[
+            tree({ getChildren: (row: TreeTask) => row.children }),
+            rowReorder(vi.fn(), {
+              movePolicy: "confirm",
+              onTreeMove,
+            }),
+          ]}
+        />
+      </MantineProvider>
+    );
+
+    const trigger = screen.getAllByRole("button", { name: "Move under…" })[0]!;
+    expect(trigger).toHaveAttribute(
+      "data-adapttable-part",
+      "row-move-menu-trigger"
+    );
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    const disabled = await screen.findByRole("menuitem", { name: "Child" });
+    expect(part("row-move-menu-content")).toBeInTheDocument();
+    expect(disabled).toBeInTheDocument();
+    expect(
+      disabled.hasAttribute("disabled") ||
+        disabled.getAttribute("aria-disabled") === "true"
+    ).toBe(true);
+    expect(disabled).toHaveAttribute(
+      "title",
+      "A row cannot move inside itself or its descendant"
+    );
+    expect(trigger.tabIndex).toBeGreaterThanOrEqual(0);
+    expect(onTreeMove).not.toHaveBeenCalled();
+  });
+
+  it("runs Mantine menu confirmation and cancellation callbacks", async () => {
+    const onSelect = vi.fn();
+    const onConfirm = vi.fn();
+    const onCancel = vi.fn();
+    const items = [
+      {
+        id: "destination",
+        label: "Destination",
+        disabled: false,
+        onSelect,
+      },
+    ];
+    const { rerender } = render(
+      <MantineProvider>
+        <RowMoveMenu label="Move under…" items={items} />
+      </MantineProvider>
+    );
+    let trigger = screen.getByRole("button", { name: "Move under…" });
+    trigger.focus();
+    fireEvent.click(trigger);
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Destination" })
+    );
+    expect(onSelect).toHaveBeenCalledOnce();
+
+    rerender(
+      <MantineProvider>
+        <RowMoveMenu
+          label="Move under…"
+          items={items}
+          confirmation={{
+            title: "Confirm row move",
+            description: "Move Parent to Destination?",
+            confirmLabel: "Move",
+            cancelLabel: "Cancel",
+            onConfirm,
+            onCancel,
+          }}
+        />
+      </MantineProvider>
+    );
+    expect(
+      screen.getByRole("alertdialog", {
+        name: "Confirm row move",
+        hidden: true,
+      })
+    ).toHaveAttribute("data-adapttable-part", "row-move-confirmation");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Cancel", hidden: true })
+    );
+    await Promise.resolve();
+    expect(onCancel).toHaveBeenCalledOnce();
+    expect(onConfirm).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus();
+
+    rerender(
+      <MantineProvider>
+        <RowMoveMenu label="Move under…" items={items} />
+      </MantineProvider>
+    );
+    trigger = screen.getByRole("button", { name: "Move under…" });
+    fireEvent.click(trigger);
+    rerender(
+      <MantineProvider>
+        <RowMoveMenu
+          label="Move under…"
+          items={items}
+          confirmation={{
+            title: "Confirm row move",
+            description: "Move Parent to Destination?",
+            confirmLabel: "Move",
+            cancelLabel: "Cancel",
+            onConfirm,
+            onCancel,
+          }}
+        />
+      </MantineProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Move", hidden: true }));
+    await Promise.resolve();
+    expect(onConfirm).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus();
   });
 
   it("lists the reorder column in the Columns menu", async () => {

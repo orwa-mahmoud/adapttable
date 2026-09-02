@@ -2,21 +2,24 @@ import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
+import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
 
 interface Task {
   id: string;
   title: string;
+  team: string;
 }
 
 const ROWS: Task[] = [
-  { id: "1", title: "Ship" },
-  { id: "2", title: "Test" },
-  { id: "3", title: "Docs" },
+  { id: "1", title: "Ship", team: "Core" },
+  { id: "2", title: "Test", team: "Core" },
+  { id: "3", title: "Docs", team: "Docs" },
 ];
 const COLS: ColumnDef<Task>[] = [
   { key: "title", header: "Title", accessor: (r) => r.title },
+  { key: "team", header: "Team", accessor: (r) => r.team },
 ];
 
 const part = (name: string) =>
@@ -112,6 +115,67 @@ describe("row reorder (unstyled)", () => {
     expect(down).not.toBeNull();
     fireEvent.click(down!);
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
+  });
+
+  it("offers a keyboard menu and confirms a cross-group move", () => {
+    const onGroupMove = vi.fn();
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        groupBy="team"
+        features={[
+          grouping("team"),
+          rowReorder<Task>(vi.fn(), {
+            movePolicy: "confirm",
+            onGroupMove,
+          }),
+        ]}
+      />
+    );
+
+    const trigger = screen.getAllByRole("button", {
+      name: "Move to group…",
+    })[0]!;
+    fireEvent.click(trigger);
+    const menu = trigger.closest("details")!;
+    fireEvent.click(menu.querySelector<HTMLElement>('[role="menuitem"]')!);
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "Confirm row move"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Move" }));
+
+    expect(onGroupMove).toHaveBeenCalledOnce();
+    expect(onGroupMove.mock.calls[0]?.[0]).toBe(ROWS[0]);
+    expect(onGroupMove.mock.calls[0]?.[1]).toMatchObject({ label: "Core" });
+    expect(onGroupMove.mock.calls[0]?.[2]).toMatchObject({ label: "Docs" });
+    expect(trigger).toHaveFocus();
+  });
+
+  it("keeps the nested move menu available on mobile cards", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile
+        groupBy="team"
+        features={[
+          grouping("team"),
+          rowReorder<Task>(vi.fn(), {
+            movePolicy: "never",
+            onGroupMove: vi.fn(),
+          }),
+        ]}
+      />
+    );
+
+    expect(screen.getAllByLabelText("Move to group…").length).toBeGreaterThan(
+      0
+    );
   });
 
   it("lists the reorder column in the Columns menu", async () => {

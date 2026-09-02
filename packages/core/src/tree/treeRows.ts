@@ -32,6 +32,10 @@ export interface TreeEntry<TRow> {
   expanded: boolean;
   /** Its ancestors' ids, outermost first — what collapsing a parent hides. */
   path: readonly string[];
+  /** Immediate parent id, or `undefined` for a root row. */
+  parentId?: string;
+  /** Zero-based position among rows with the same parent. */
+  siblingIndex?: number;
   /**
    * Every descendant's id, for selection: ticking a folder ticks what is in
    * it, and a parent shows as partly selected when only some are.
@@ -123,8 +127,13 @@ export function buildTreeEntries<TRow>(
     return ids;
   };
 
-  const walk = (list: readonly TRow[], level: number, path: string[]): void => {
-    for (const row of list) {
+  const walk = (
+    list: readonly TRow[],
+    level: number,
+    path: string[],
+    parentId?: string
+  ): void => {
+    for (const [siblingIndex, row] of list.entries()) {
       const key = getRowId(row);
       const children = childrenOf(row) ?? [];
       const expandable = children.length > 0 || hasChildren?.(row) === true;
@@ -136,11 +145,13 @@ export function buildTreeEntries<TRow>(
         hasChildren: expandable,
         expanded,
         path,
+        parentId,
+        siblingIndex,
         descendantIds: descendantsOf(row),
         loading: loadingIds?.has(key),
       });
       if (expanded && children.length > 0) {
-        walk(children, level + 1, [...path, key]);
+        walk(children, level + 1, [...path, key], key);
       }
     }
   };

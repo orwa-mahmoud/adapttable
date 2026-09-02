@@ -62,7 +62,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 const EXPANSION_WIDTH = 36;
-const REORDER_WIDTH = 40;
+const REORDER_WIDTH = 64;
 
 function mount(
   override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}

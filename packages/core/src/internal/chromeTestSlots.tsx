@@ -37,6 +37,7 @@ import type {
   GroupMoreButtonSlots,
 } from "../grouping/GroupMoreButton";
 import type {
+  RowMoveMenuSlotProps,
   RowReorderButtonsSlots,
   RowReorderHandleSlotProps,
   RowReorderHandleSlots,
@@ -486,8 +487,39 @@ function ReorderHandle({
   );
 }
 
+function RowMoveMenu({ label, items, confirmation }: RowMoveMenuSlotProps) {
+  return (
+    <div aria-label={label}>
+      {confirmation ? (
+        <div role="alertdialog" aria-label={confirmation.title}>
+          <p>{confirmation.description}</p>
+          <button type="button" onClick={confirmation.onConfirm}>
+            {confirmation.confirmLabel}
+          </button>
+          <button type="button" onClick={confirmation.onCancel}>
+            {confirmation.cancelLabel}
+          </button>
+        </div>
+      ) : (
+        items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            disabled={item.disabled}
+            title={item.disabledReason}
+            onClick={item.onSelect}
+          >
+            {item.label}
+          </button>
+        ))
+      )}
+    </div>
+  );
+}
+
 export const rowReorderHandleTestSlots: RowReorderHandleSlots = {
   Handle: ReorderHandle,
+  Menu: RowMoveMenu,
 };
 
 function ReorderMove({
@@ -514,4 +546,5 @@ function ReorderMove({
 
 export const rowReorderButtonsTestSlots: RowReorderButtonsSlots = {
   Button: ReorderMove,
+  Menu: RowMoveMenu,
 };

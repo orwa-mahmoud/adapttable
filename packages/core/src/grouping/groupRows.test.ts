@@ -145,7 +145,14 @@ describe("buildGroupedFlatModel", () => {
       key: "1",
       groupKey: "group:team:s:Core",
       index: 0,
+      groupPosition: 0,
+      group: {
+        id: "group:team:s:Core",
+        label: "Core",
+        levels: [{ key: "team", value: "Core", label: "Core" }],
+      },
     });
+    expect(flat[2]).toMatchObject({ kind: "row", groupPosition: 1 });
   });
 
   it("omits leaves when a group is collapsed", () => {

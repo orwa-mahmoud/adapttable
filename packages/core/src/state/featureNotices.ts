@@ -27,7 +27,6 @@ import type { TableLabels } from "../types";
 export type FeatureNoticeKind =
   | "virtualize-paged"
   | "pin-nested"
-  | "reorder-nested"
   | "grouping-unavailable"
   | "export-all-page"
   | "edit-without-writer";
@@ -76,7 +75,7 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
   rowPinningRequested: boolean;
   /** Whether the host asked for row reordering. */
   rowReorderRequested: boolean;
-  /** Grouping is armed or a tree is on — pin and reorder stay off. */
+  /** Grouping is armed or a tree is on — row pinning stays off. */
   nestedArmed: boolean;
   /** Whether any column declared an editor. */
   hasEditableColumn: boolean;
@@ -140,16 +139,6 @@ export function collectFeatureNotices<TRow>(
       message:
         labels.noticePinNested ??
         "Row pinning is off while grouping or a tree is on.",
-    });
-  }
-
-  if (input.rowReorderRequested && input.nestedArmed) {
-    notices.push({
-      kind: "reorder-nested",
-      appearance: "off",
-      message:
-        labels.noticeReorderNested ??
-        "Row reorder is off while grouping or a tree is on.",
     });
   }
 

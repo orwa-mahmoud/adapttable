@@ -34,6 +34,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -47,7 +48,16 @@ import {
   type TreeToggleProps,
   type TreeToggleSlots,
 } from "@adapttable/core/adapter";
-import { Button, IconButton, Input, Popover, Stack } from "@chakra-ui/react";
+import {
+  Button,
+  IconButton,
+  Input,
+  Menu,
+  Popover,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
 
 import { FiltersIcon } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
@@ -540,6 +550,116 @@ function ReorderHandle({
   );
 }
 
+export function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const hadConfirmationRef = useRef(false);
+  useEffect(() => {
+    const shouldOpen = Boolean(confirmation) && !hadConfirmationRef.current;
+    hadConfirmationRef.current = Boolean(confirmation);
+    if (shouldOpen) setOpen(true);
+  }, [confirmation]);
+  const setMenuOpen = (next: boolean) => {
+    setOpen(next);
+    if (!next) setTimeout(() => triggerRef.current?.focus(), 0);
+  };
+  const finish = (callback: () => void) => {
+    callback();
+    setMenuOpen(false);
+  };
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <Menu.Root
+        open={open}
+        onOpenChange={(event) => setMenuOpen(event.open)}
+        closeOnSelect={false}
+        positioning={{ placement: "bottom-start" }}
+      >
+        <Menu.Trigger asChild>
+          <IconButton
+            ref={triggerRef}
+            type="button"
+            size="xs"
+            variant="ghost"
+            aria-label={label}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            data-adapttable-part="row-move-menu-trigger"
+          >
+            ⋮
+          </IconButton>
+        </Menu.Trigger>
+        <KitPortal>
+          <Menu.Positioner>
+            <Menu.Content
+              aria-label={label}
+              data-adapttable-part="row-move-menu-content"
+              minW="12rem"
+              p={2}
+            >
+              {confirmation ? (
+                <Stack
+                  gap={2}
+                  role="alertdialog"
+                  aria-label={confirmation.title}
+                  data-adapttable-part="row-move-confirmation"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.stopPropagation();
+                    }
+                  }}
+                >
+                  <Text fontWeight="semibold" fontSize="sm">
+                    {confirmation.title}
+                  </Text>
+                  <Text fontSize="sm">{confirmation.description}</Text>
+                  <Button
+                    type="button"
+                    size="xs"
+                    onClick={() => finish(confirmation.onConfirm)}
+                  >
+                    {confirmation.confirmLabel}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="outline"
+                    onClick={() => finish(confirmation.onCancel)}
+                  >
+                    {confirmation.cancelLabel}
+                  </Button>
+                </Stack>
+              ) : (
+                items.map((item) => (
+                  <Menu.Item
+                    key={item.id}
+                    value={item.id}
+                    disabled={item.disabled}
+                    title={item.disabledReason}
+                    data-adapttable-part="row-move-menu-item"
+                    onClick={item.onSelect}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" && event.key !== " ") return;
+                      event.preventDefault();
+                      item.onSelect();
+                    }}
+                  >
+                    {item.label}
+                  </Menu.Item>
+                ))
+              )}
+            </Menu.Content>
+          </Menu.Positioner>
+        </KitPortal>
+      </Menu.Root>
+    </span>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -549,7 +669,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -584,7 +707,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

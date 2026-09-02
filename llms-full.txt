@@ -3165,11 +3165,13 @@ history of rows that no longer exist can only put back values nobody wants.
 
 ---
 
-# React table row reordering — drag handle, keyboard grab, dataset indices
+# React table row reordering — flat, grouped and tree rows
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [drag-reorder rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+
+▶ **Try grouped and tree moves:** in the [Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/), choose Grouped or Tree, then turn Reorder on. Switch adapters without losing the scenario.
 
 Import `rowReorder` from `@adapttable/<kit>/row-reorder` and a drag handle
 appears in a reserved leading column. The import is the switch: a table that
@@ -3224,16 +3226,70 @@ region (export already owns one).
 ## Mobile
 
 Cards get **up / down** buttons (`RowReorderButtons`), not a drag handle. The
-ends disable rather than wrapping.
+ends disable rather than wrapping. Grouped and tree cards also get the same
+**Move to group…** / **Move under…** menu as desktop, with 44px targets.
 
-## What it will not do
+## Grouped rows: reorder versus move
 
-**Grouping or a tree.** Nested order is not a flat splice. Composing
-`rowReorder` while either is armed logs a `devWarn` and the handle does not
-render — never a silent ignore.
+The first handler still means **reorder among siblings**. Its `from` and `to`
+are positions inside that group, not positions in the flattened list.
+Crossing a group boundary is a different write:
+
+```tsx
+rowReorder((from, to, row) => reorderInsideGroup(row, from, to), {
+  movePolicy: "confirm",
+  onGroupMove: (row, fromGroup, toGroup, position) => {
+    // toGroup.levels contains each grouping column and its raw value.
+    moveRowIntoGroup(row, toGroup.levels, position);
+  },
+});
+```
+
+Dragging over another group's row or choosing **Move to group…** calls
+`onGroupMove`. The menu lists loaded leaf groups. A nested `RowGroupRef`
+contains a stable `id`, a breadcrumb `label`, and raw `{ key, value, label }`
+levels, so the host can write the actual grouping fields.
+
+## Tree rows: reorder versus re-parent
+
+Before/after another sibling calls the ordinary reorder handler with sibling
+positions. Dropping into the middle of another node, or choosing **Move
+under…**, calls:
+
+```tsx
+rowReorder(reorderAmongSiblings, {
+  movePolicy: "confirm",
+  onTreeMove: (row, fromParent, toParent, position) => {
+    updateParentAndOrder(row, toParent.id, position);
+  },
+});
+```
+
+`toParent.id` is `null` for the top level. A row cannot move under itself or
+one of its descendants: the cycle guard rejects pointer, keyboard, and menu
+paths before any host callback runs and announces the reason.
+
+## Move policy
+
+- `"never"` (default) keeps same-group/same-parent reorder available and
+  rejects boundary changes with an announcement.
+- `"confirm"` opens the kit-native confirmation in the move menu. Confirm and
+  cancel return focus to the trigger. Supply `confirmMove(request)` to use a
+  host-owned async confirmation surface instead.
+- `"auto"` calls the matching move callback immediately.
+
+Every pointer action has a keyboard/touch equivalent. Space + arrows can cross
+the visible boundary; the destination menu reaches loaded groups and parents
+directly.
+
+When sorting is active, visual order belongs to the sort. Same-scope
+order-only writes are rejected with “Clear sorting before changing row order.”
+Cross-group moves and re-parenting remain available because they change row
+membership; the active sort remains in force.
 
 **URL / Saved Views.** Row order is the host's array. There is nothing to
-serialize.
+serialize. Drag, keyboard, mobile and menu paths call the same host callbacks,
+so host persistence receives one identical write contract.
 
 ## Column menu
 
@@ -3244,14 +3300,16 @@ Columns menu. CSV export drops it the way it drops actions
 
 ## Headless
 
-`useRowReorder(options)` (`RowReorderState` is what it returns; `RowReorderHandler`
-is the host callback; `RowReorderLabels` names the grip and the live region)
-is the grab state. `datasetIndex(localIndex, windowStart)` turns a rendered
-slot into a dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is
-the memo digest so a virtualized row repaints when it is lifted or is the drop
-target. It also carries a global in-flight bit so every visible row repaints
-once at lift and once at drop (live `dropProps` for the drag); hover still
-does not repaint untouched rows.
+`RowReorderOptions`, `RowMovePolicy`, `RowMoveRequest`, `RowDropPosition`,
+`RowGroupMoveHandler`, `RowTreeMoveHandler`, `RowTreeParentRef`,
+`RowGroupRef`, `treeMoveCreatesCycle` and `rowDropPosition` are the nested
+contracts. `RowReorderDecision` is the internal-seam result used to distinguish
+an order write, a membership move, or a rejection. `useRowReorder(options)`
+(`RowReorderState`, also exported as `TableRowReorderState`, is what it
+returns; `RowReorderHandler` is the ordinal write) is the grab state.
+`datasetIndex(localIndex, windowStart)` turns a flat rendered slot into a
+dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is the memo
+digest so a virtualized row repaints when lifted, targeted, or confirming.
 
 Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderButtons` (`RowReorderButtonsProps`) over
@@ -3259,6 +3317,11 @@ Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderAnnouncer` stays on `@adapttable/core/adapter`.
 `REORDER_COLUMN_WIDTH` is the pin-lead width every kit shares.
 `ROW_DND_MIME` is the HTML5 drag type.
+
+Styling and test hooks: `row-reorder-handle`, `row-reorder-buttons`,
+`row-reorder-up`, `row-reorder-down`, `row-move-menu`,
+`row-move-menu-trigger`, `row-move-menu-content`, `row-move-menu-item`, and
+`row-move-confirmation`.
 
 ---
 
@@ -4364,6 +4427,18 @@ values a column actually has; and while `sum` of nothing is `0`, `avg`, `min`
 and `max` of nothing are `undefined` — an average of no numbers is
 unanswerable, not zero.
 
+## Reorder inside a group or move between groups
+
+Compose `grouping` and the kit's `rowReorder` feature together. A reorder that
+stays inside one leaf group calls the ordinary handler with positions scoped
+to that group. Crossing a boundary — by drag, arrows, mobile controls, or
+**Move to group…** — calls `onGroupMove(row, fromGroup, toGroup, position)`.
+
+`RowGroupRef.levels` gives the host every grouping column and raw destination
+value. `movePolicy` is `"never"` by default, `"confirm"` for a kit-native
+confirmation, or `"auto"` for an immediate host write. See
+[row reordering](./row-reordering.md) for the complete contract.
+
 ## Options
 
 `grouping(key, extras?)` — first argument is the column key (or ordered list);
@@ -5151,6 +5226,24 @@ set, those rows fall back to it, so master/detail and nested tables can live in
 one table. The region carries `data-adapttable-part="nested-table"` and is
 announced with the label you gave it. `defaultExpandedRowIds` opens those rows
 on the first render so the inner table is visible without a click.
+
+## Reorder siblings or change parent
+
+Compose the kit's `rowReorder` feature with `tree`. Before/after drops reorder
+rows that already share a parent; the ordinary reorder handler receives
+sibling positions. A middle drop, **Move under…**, or **Move to top level**
+uses `onTreeMove(row, fromParent, toParent, position)`.
+
+Set `movePolicy` to `"auto"`, `"confirm"`, or `"never"` (the default).
+Confirmation is kit-native and restores focus to its menu trigger; a host can
+instead provide async `confirmMove`. The same controls appear on mobile cards
+and follow logical direction in RTL.
+
+The tree model carries each node's `parentId`, `siblingIndex`, and complete
+`descendantIds`. Re-parenting is rejected before the host callback when the
+target is the node itself or a descendant, so pointer and menu paths cannot
+create a cycle. See [row reordering](./row-reordering.md) for the full write
+contract and sorted-state rule.
 
 ## Headless pieces
 
@@ -6000,6 +6093,10 @@ The card's shell stays around what you return: the list-item semantics, the
 selection checkbox, the expand and tree toggles, the reorder controls, the row
 actions and the detail panel. A custom card cannot drop the parts that make
 the list usable, because it never owns them.
+
+Flat cards expose 44px up/down controls. Grouped and tree cards also expose
+the kit-native **Move to group…** / **Move under…** menu, including explicit
+confirmation when `movePolicy: "confirm"`; touch never has to emulate a drag.
 
 `card.fields` is what the built-in would have laid out — each field's
 `column`, its resolved `label` (`undefined` when the column asked for none)
@@ -7081,8 +7178,8 @@ to. The range is the one the pagination footer shows, from the same
 arithmetic, so the two never disagree. The strip hosts the selection figures
 rather than repeating them, so turning it on does not print them twice.
 
-Opted-in features that cannot run (virtualize on a paged table, pin or
-reorder under grouping, `exportCsv()` with `scope: "all"` on a page-scoped source,
+Opted-in features that cannot run (virtualize on a paged table, pin under
+grouping/tree rows, `exportCsv()` with `scope: "all"` on a page-scoped source,
 edits with no writer) still show as `FeatureNotice` items
 (`FeatureNoticeKind` is the union). They live on
 `StatusBarChromeProps.notices` and `TableChrome.featureNotices`, and they
@@ -7977,6 +8074,13 @@ On the [accessibility demo](https://orwa-mahmoud.github.io/adapttable/demo/manti
 
 If Tab never enters the table or arrows do nothing, that page is failing.
 
+Optional row reordering is keyboard-complete: Space lifts, arrows choose a
+visible target, Space drops, and Escape cancels. Group and tree moves also
+have a **Move to group…** / **Move under…** menu, so re-parenting never
+depends on drag precision. Confirm/cancel restores focus to that menu trigger,
+and a live region announces successful moves, policy rejections, sort
+conflicts, and cycle guards.
+
 ## What this page is not
 
 The optional spreadsheet grid — one Tab stop, arrow keys through every cell,
@@ -8327,7 +8431,7 @@ plus the `AbortSignal` for the request it starts.
 
 ## Feature composition
 
-`features={[rowReorder(fn)]}` from `@adapttable/<kit>/row-reorder` (or the
+`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder` (or the
 `@adapttable/<kit>/features` barrel, or `@adapttable/core/features`). The
 import is the switch, and it is the only way in — see
 [feature composition](./features.md) and, for a v2 table,
@@ -8352,7 +8456,7 @@ A feature whose behaviour is a hook carries a `provider` instead —
 feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
 `useFeatureState`. A provider sits above the chrome, so it reads the live rows
-and labels through `useTableRuntime` (`TableRuntime`) rather than being handed
+and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather than being handed
 them; chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
@@ -8954,13 +9058,37 @@ the host can pass `isCellFlashing` — a pulse, not a locate-the-row
 highlight, and never against `prefers-reduced-motion`. See
 [realtime](./realtime.md).
 
-**Row reordering.** `rowReorder(handler)` from `@adapttable/<kit>/row-reorder` arms it and `RowReorderHandler` is the write; `ROW_REORDER` is the `FeatureStateKey` its provider publishes under, so custom chrome reads the live state with `useFeatureState(ROW_REORDER)`; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `TableRowReorderState`; the adapter entry names the same contract `RowReorderState`. `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
+**Row reordering.** `rowReorder(handler, options)` from
+`@adapttable/<kit>/row-reorder` arms flat, grouped, and tree reorder.
+`RowReorderHandler` is an ordinal write: dataset positions for a flat source,
+sibling positions for grouped/tree rows. `RowReorderOptions` adds
+`movePolicy` (`RowMovePolicy`: `"auto" | "confirm" | "never"`),
+`onGroupMove` (`RowGroupMoveHandler`), `onTreeMove`
+(`RowTreeMoveHandler`), and async `confirmMove` (`RowMoveConfirmHandler`).
+Requests are `RowMoveRequest`; group destinations use `RowGroupRef` /
+`RowGroupLevel`, and tree destinations use `RowTreeParentRef`.
+`treeMoveCreatesCycle` guards re-parenting and `rowDropPosition` resolves the
+`RowDropPosition` before/inside/after pointer zone. `RowReorderDecision` is the
+headless seam's reorder/move/reject result.
+
+`ROW_REORDER` is the `FeatureStateKey` its provider publishes under, so custom
+chrome reads `RowReorderState` (`TableRowReorderState` from the main entry)
+with `useFeatureState(ROW_REORDER)`.
+`applyRowReorder`, `datasetIndex`, `useRowReorder`,
+`rowReorderSignature`, `rowReorderDropStyle`, `REORDER_COLUMN_KEY`,
+`REORDER_COLUMN_WIDTH`, and `ROW_DND_MIME` are the headless primitives.
+Nested move menus use `RowMoveMenuModel` / `RowMoveTarget`; the adapter seam is
+`RowMoveMenuSlotProps`, `RowMoveMenuItemProps`, and
+`RowMoveConfirmationProps`. Each adapter mounts
+`RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
 `RowReorderHandleChrome` / `RowReorderHandleChromeProps` /
 `RowReorderHandleSlots` / `RowReorderHandleSlotProps` and
 `RowReorderButtonsChrome` / `RowReorderButtonsChromeProps` /
 `RowReorderButtonsSlots` / `RowReorderMoveButtonProps`.
-`RowReorderAnnouncer` stays on `@adapttable/core/adapter`. See
+`RowReorderAnnouncer` stays on `@adapttable/core/adapter`. Move-menu,
+confirmation, success, policy, sort, and cycle labels extend
+`RowReorderLabels` / `TableLabels`. See
 [row reordering](./row-reordering.md).
 
 **Row and column spanning.** `getCellSpan` / `ColumnDef.colSpan` / `ColumnDef.rowSpan` produce a per-row `TableBodyCell` list (`BodyCell` on the adapter entry) through `buildBodyCells`, `cellsForRow`, `coveredAddressSet`, `rowSpanSignature`, `spanningArmed`, `bodyCellsHaveRowSpan` and `cellSpanMark`. `cellSpanAppearance` (`"merged"` / `"plain"`) is how the origin cell is painted. Arrow keys skip a covered cell; CSV writes the origin once. Types: `GetCellSpan`, `GetCellSpanArgs`, `CellSpanRequest`, `CellSpanAppearance`, `TableBodyCell`. See [row and column spanning](./row-spanning.md).

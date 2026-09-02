@@ -902,6 +902,34 @@ export interface TableLabels {
   rowMoved?: (from: number, to: number) => string;
   /** Live region: Escape cancelled a lift. */
   rowReorderCancelled?: string;
+  /** Accessible name for the row-move menu trigger. */
+  rowMoveOptions?: string;
+  /** Opens the target-group picker. */
+  moveToGroup?: string;
+  /** Opens the target-parent picker. */
+  moveUnder?: string;
+  /** Tree destination with no parent. */
+  moveToTopLevel?: string;
+  /** Heading on the built-in confirmation surface. */
+  confirmRowMoveTitle?: string;
+  /** Concrete source and destination shown before a move. */
+  confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+  /** Button that approves a pending row move. */
+  confirmRowMove?: string;
+  /** Live region: the row entered another group. */
+  rowMovedToGroup?: (group: string) => string;
+  /** Live region: the row entered another tree parent. */
+  rowMovedUnder?: (parent: string) => string;
+  /** Cross-boundary moves were disabled by policy. */
+  moveRejectedPolicyNever?: string;
+  /** Visual order cannot be written while a sort owns it. */
+  moveRejectedSorted?: string;
+  /** A tree node cannot become its own ancestor. */
+  moveRejectedCycle?: string;
+  /** The host did not provide the matching move callback. */
+  moveUnavailable?: string;
+  /** Label for the tree's root level. */
+  rootLevel?: string;
   /** Pin this row above the scroll window. */
   pinToTop?: string;
   /** Pin this row below the scroll window. */
@@ -994,7 +1022,11 @@ export interface TableLabels {
   noticeVirtualizePaged?: string;
   /** Status copy when row pin is on while grouping or a tree is on. */
   noticePinNested?: string;
-  /** Status copy when row reorder is on while grouping or a tree is on. */
+  /**
+   * Compatibility override for the former nested-reorder notice.
+   *
+   * @deprecated Nested reorder is supported and no longer emits this notice.
+   */
   noticeReorderNested?: string;
   /**
    * Status copy when `groupBy` is set and the source's capabilities say it

@@ -65,7 +65,7 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 - [React table row selection & bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/): checkboxes, bulk bar, select-all-matching
 - [React table expandable rows & detail panels](https://orwa-mahmoud.github.io/adapttable/row-expansion/): renderRowDetail, useRowExpansion
 - [React table inline cell editing — opt-in onCellEdit](https://orwa-mahmoud.github.io/adapttable/cell-editing/): text/number/select/date/checkbox editors, validation, row and batch modes, add/duplicate/delete rows, lifecycle events, live-update conflicts, keyboard commit/cancel, kit-native inputs
-- [React table row reordering — drag handle, keyboard grab](https://orwa-mahmoud.github.io/adapttable/row-reordering/): onRowReorder, Space-lift keyboard, dataset-relative indices, mobile up/down, grouping/tree refused
+- [React table row reordering — flat, grouped and tree rows](https://orwa-mahmoud.github.io/adapttable/row-reordering/): sibling reorder, cross-group moves, tree re-parenting with cycle guard, auto/confirm/never policy, drag + keyboard menu + mobile controls
 - [React table row pinning — sticky top and bottom rows](https://orwa-mahmoud.github.io/adapttable/row-pinning/): rowPin, pinRow/unpinRow, sticky sections, URL `rowPin`
 - [React table row and column spanning — getCellSpan](https://orwa-mahmoud.github.io/adapttable/row-spanning/): colSpan and rowSpan per cell, covered cells omitted, CSV writes the origin once
 - [React table full-width and separator rows — extraRows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/): host-injected slots spliced by beforeRowId, separator or one spanning cell, mobile cards keep the same slots

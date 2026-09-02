@@ -158,6 +158,23 @@ export const pt: Required<TableLabels> = {
   rowLifted: (position) => `Linha ${String(position)} levantada`,
   rowMoved: (from, to) => `Linha movida de ${String(from)} para ${String(to)}`,
   rowReorderCancelled: "Reordenação cancelada",
+  rowMoveOptions: "Opções de movimentação da linha",
+  moveToGroup: "Mover para o grupo…",
+  moveUnder: "Mover para baixo de…",
+  moveToTopLevel: "Mover para o nível superior",
+  confirmRowMoveTitle: "Confirmar movimentação da linha",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Mover ${row} de ${from} para ${to}?`,
+  confirmRowMove: "Mover",
+  rowMovedToGroup: (group) => `Linha movida para ${group}`,
+  rowMovedUnder: (parent) => `Linha movida para baixo de ${parent}`,
+  moveRejectedPolicyNever:
+    "A movimentação de linhas entre limites está desativada",
+  moveRejectedSorted: "Limpe a ordenação antes de alterar a ordem das linhas",
+  moveRejectedCycle:
+    "Uma linha não pode ser movida para dentro de si mesma ou de uma descendente",
+  moveUnavailable: "Esta movimentação de linha não está disponível",
+  rootLevel: "Nível superior",
   pinToTop: "Fixar no topo",
   pinToBottom: "Fixar no fundo",
   unpinRow: "Desafixar linha",

@@ -41,6 +41,13 @@ On the [accessibility demo](https://orwa-mahmoud.github.io/adapttable/demo/manti
 
 If Tab never enters the table or arrows do nothing, that page is failing.
 
+Optional row reordering is keyboard-complete: Space lifts, arrows choose a
+visible target, Space drops, and Escape cancels. Group and tree moves also
+have a **Move to group…** / **Move under…** menu, so re-parenting never
+depends on drag precision. Confirm/cancel restores focus to that menu trigger,
+and a live region announces successful moves, policy rejections, sort
+conflicts, and cycle guards.
+
 ## What this page is not
 
 The optional spreadsheet grid — one Tab stop, arrow keys through every cell,

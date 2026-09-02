@@ -34,6 +34,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -47,10 +48,12 @@ import {
   type TreeToggleProps,
   type TreeToggleSlots,
 } from "@adapttable/core/adapter";
+import { Menu } from "@base-ui/react/menu";
 import { Popover } from "@base-ui/react/popover";
+import { useEffect, useRef, useState } from "react";
 
 import { FiltersIcon } from "../icons";
-import { Button, IconButton, TextField } from "../ui";
+import { Button, IconButton, Text, TextField } from "../ui";
 import { AutoFilterForm } from "./AutoFilterForm";
 import { Checkbox, NativeSelect } from "./primitives";
 
@@ -550,6 +553,171 @@ function ReorderHandle({
   );
 }
 
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const confirmationRef = useRef(confirmation);
+  confirmationRef.current = confirmation;
+  useEffect(() => {
+    if (confirmation) setOpen(true);
+  }, [confirmation]);
+
+  const restoreTriggerFocus = () => {
+    queueMicrotask(() => triggerRef.current?.focus());
+  };
+  const close = () => {
+    setOpen(false);
+    restoreTriggerFocus();
+  };
+
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <Menu.Root
+        open={open}
+        onOpenChange={(next, eventDetails) => {
+          if (
+            !next &&
+            confirmationRef.current &&
+            (eventDetails.reason === "focus-out" ||
+              eventDetails.reason === "item-press")
+          ) {
+            eventDetails.cancel();
+            return;
+          }
+          if (!next) {
+            confirmationRef.current?.onCancel();
+            restoreTriggerFocus();
+          }
+          setOpen(next);
+        }}
+      >
+        <Menu.Trigger
+          render={
+            <IconButton
+              ref={triggerRef}
+              type="button"
+              size="1"
+              variant="ghost"
+              aria-label={label}
+              data-adapttable-part="row-move-menu-trigger"
+              onClick={(event) => event.stopPropagation()}
+            >
+              ⋮
+            </IconButton>
+          }
+        />
+        <Menu.Portal>
+          <Menu.Positioner side="bottom" align="start" sideOffset={4}>
+            <Menu.Popup
+              aria-label={label}
+              finalFocus={triggerRef}
+              data-adapttable-part="row-move-menu-content"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                minWidth: "12rem",
+                padding: 8,
+                background: "var(--at-surface, #fff)",
+                border: "1px solid var(--at-border, #d0d7de)",
+                borderRadius: 8,
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {confirmation ? (
+                <div
+                  role="alertdialog"
+                  aria-label={confirmation.title}
+                  data-adapttable-part="row-move-confirmation"
+                  style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                >
+                  <Text weight="bold">{confirmation.title}</Text>
+                  <Text>{confirmation.description}</Text>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 8,
+                    }}
+                  >
+                    <Button
+                      type="button"
+                      size="1"
+                      variant="soft"
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        confirmation.onCancel();
+                        close();
+                      }}
+                    >
+                      {confirmation.cancelLabel}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="1"
+                      variant="solid"
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        confirmation.onConfirm();
+                        close();
+                      }}
+                    >
+                      {confirmation.confirmLabel}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                items.map((item) => (
+                  <Menu.Item
+                    key={item.id}
+                    disabled={item.disabled}
+                    closeOnClick={false}
+                    title={item.disabledReason}
+                    data-adapttable-part="row-move-menu-item"
+                    style={{
+                      height: "auto",
+                      justifyContent: "flex-start",
+                      textAlign: "start",
+                      whiteSpace: "normal",
+                    }}
+                    onClick={() => {
+                      item.onSelect();
+                      setTimeout(() => {
+                        if (!confirmationRef.current) close();
+                      }, 0);
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Text>{item.label}</Text>
+                      {item.disabledReason ? (
+                        <Text size="1" color="gray">
+                          {item.disabledReason}
+                        </Text>
+                      ) : null}
+                    </span>
+                  </Menu.Item>
+                ))
+              )}
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+    </span>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -559,7 +727,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -594,7 +765,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

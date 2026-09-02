@@ -159,6 +159,23 @@ export const fr: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Ligne déplacée de ${String(from)} vers ${String(to)}`,
   rowReorderCancelled: "Réorganisation annulée",
+  rowMoveOptions: "Options de déplacement de la ligne",
+  moveToGroup: "Déplacer vers le groupe…",
+  moveUnder: "Déplacer sous…",
+  moveToTopLevel: "Déplacer au niveau supérieur",
+  confirmRowMoveTitle: "Confirmer le déplacement de la ligne",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Déplacer ${row} de ${from} vers ${to} ?`,
+  confirmRowMove: "Déplacer",
+  rowMovedToGroup: (group) => `Ligne déplacée vers ${group}`,
+  rowMovedUnder: (parent) => `Ligne déplacée sous ${parent}`,
+  moveRejectedPolicyNever:
+    "Les déplacements de lignes entre limites sont désactivés",
+  moveRejectedSorted: "Effacez le tri avant de modifier l’ordre des lignes",
+  moveRejectedCycle:
+    "Une ligne ne peut pas être déplacée dans elle-même ni dans l’un de ses descendants",
+  moveUnavailable: "Ce déplacement de ligne n’est pas disponible",
+  rootLevel: "Niveau supérieur",
   pinToTop: "Épingler en haut",
   pinToBottom: "Épingler en bas",
   unpinRow: "Désépingler la ligne",

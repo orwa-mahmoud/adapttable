@@ -38,6 +38,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -55,11 +56,16 @@ import {
   ActionIcon,
   Button,
   Checkbox,
+  Menu,
   NativeSelect,
+  Paper,
   Popover,
+  Portal,
   Stack,
+  Text,
   TextInput,
 } from "@mantine/core";
+import { useRef, useState } from "react";
 
 import { FiltersIcon } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
@@ -543,6 +549,143 @@ function ReorderHandle({
   );
 }
 
+export function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [opened, setOpened] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const setMenuOpen = (next: boolean) => {
+    setOpened(next);
+    if (!next) queueMicrotask(() => triggerRef.current?.focus());
+  };
+  const finish = (callback: () => void) => {
+    callback();
+    setOpened(false);
+    queueMicrotask(() => triggerRef.current?.focus());
+  };
+  if (confirmation) {
+    return (
+      <>
+        <span data-adapttable-part="row-move-menu">
+          <ActionIcon
+            ref={triggerRef}
+            type="button"
+            size="sm"
+            variant="subtle"
+            color="gray"
+            aria-label={label}
+            aria-haspopup="dialog"
+            aria-expanded="true"
+            data-adapttable-part="row-move-menu-trigger"
+          >
+            ⋮
+          </ActionIcon>
+        </span>
+        <Portal>
+          <Paper
+            shadow="md"
+            p="sm"
+            data-adapttable-part="row-move-menu-content"
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              minWidth: "12rem",
+              transform: "translate(-50%, -50%)",
+              zIndex: 400,
+            }}
+          >
+            <Stack
+              gap="xs"
+              role="alertdialog"
+              aria-label={confirmation.title}
+              data-adapttable-part="row-move-confirmation"
+              onKeyDown={(event) => {
+                if (event.key !== "Escape") return;
+                event.preventDefault();
+                finish(confirmation.onCancel);
+              }}
+            >
+              <Text fw={600} size="sm">
+                {confirmation.title}
+              </Text>
+              <Text size="sm">{confirmation.description}</Text>
+              <Button
+                type="button"
+                size="compact-xs"
+                onClick={() => finish(confirmation.onConfirm)}
+              >
+                {confirmation.confirmLabel}
+              </Button>
+              <Button
+                type="button"
+                size="compact-xs"
+                variant="default"
+                onClick={() => finish(confirmation.onCancel)}
+              >
+                {confirmation.cancelLabel}
+              </Button>
+            </Stack>
+          </Paper>
+        </Portal>
+      </>
+    );
+  }
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <Menu
+        withinPortal
+        position="bottom-start"
+        shadow="sm"
+        opened={opened}
+        onChange={setMenuOpen}
+        closeOnItemClick={false}
+      >
+        <Menu.Target>
+          <ActionIcon
+            ref={triggerRef}
+            type="button"
+            size="sm"
+            variant="subtle"
+            color="gray"
+            aria-label={label}
+            aria-haspopup="menu"
+            aria-expanded={opened}
+            data-adapttable-part="row-move-menu-trigger"
+          >
+            ⋮
+          </ActionIcon>
+        </Menu.Target>
+        <Menu.Dropdown
+          aria-label={label}
+          data-adapttable-part="row-move-menu-content"
+          miw="12rem"
+          p="xs"
+        >
+          {items.map((item) => (
+            <Menu.Item
+              key={item.id}
+              disabled={item.disabled}
+              title={item.disabledReason}
+              data-adapttable-part="row-move-menu-item"
+              onClick={item.onSelect}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                item.onSelect();
+              }}
+            >
+              {item.label}
+            </Menu.Item>
+          ))}
+        </Menu.Dropdown>
+      </Menu>
+    </span>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -552,7 +695,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -588,7 +734,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

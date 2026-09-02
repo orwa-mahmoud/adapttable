@@ -289,6 +289,7 @@ export type {
   FeatureSlotKey,
   FeatureStateKey,
   TableRuntime,
+  TableRuntimeView,
 } from "./features/providers";
 export {
   extendFeature,
@@ -489,6 +490,7 @@ export {
   type GroupMoreButtonSlots,
 } from "./grouping/GroupMoreButton";
 export type { GroupAggregatesFn, GroupedFlatEntry } from "./grouping/groupRows";
+export type { RowGroupLevel, RowGroupRef } from "./grouping/groupRows";
 export { GroupToggleSpacer } from "./grouping/GroupToggleSpacer";
 export type { GroupCollapseState } from "./grouping/useGroupCollapse";
 export {
@@ -602,6 +604,18 @@ export {
 } from "./rows/pinnedRowChrome";
 export type { RowActionsLayout, RowActionsRenderer } from "./rows/rowActions";
 export { type RowClickProps, rowClickProps } from "./rows/rowClickProps";
+export type {
+  RowDropPosition,
+  RowGroupMoveHandler,
+  RowMoveConfirmHandler,
+  RowMoveMenuModel,
+  RowMovePolicy,
+  RowMoveRequest,
+  RowMoveTarget,
+  RowReorderOptions,
+  RowTreeMoveHandler,
+  RowTreeParentRef,
+} from "./rows/rowMove";
 export type { RowPinningState, RowPinSide } from "./rows/rowPinning";
 export { rowPinSignature } from "./rows/rowPinning";
 export type { RowReorderHandler, RowReorderLabels } from "./rows/rowReorder";
@@ -613,6 +627,9 @@ export {
   type RowReorderState,
 } from "./rows/rowReorder";
 export {
+  type RowMoveConfirmationProps,
+  type RowMoveMenuItemProps,
+  type RowMoveMenuSlotProps,
   RowReorderAnnouncer,
   RowReorderButtonsChrome,
   type RowReorderButtonsChromeProps,

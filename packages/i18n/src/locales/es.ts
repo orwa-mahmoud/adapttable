@@ -157,6 +157,24 @@ export const es: Required<TableLabels> = {
   rowLifted: (position) => `Fila ${String(position)} levantada`,
   rowMoved: (from, to) => `Fila movida de ${String(from)} a ${String(to)}`,
   rowReorderCancelled: "Reordenación cancelada",
+  rowMoveOptions: "Opciones para mover la fila",
+  moveToGroup: "Mover al grupo…",
+  moveUnder: "Mover debajo de…",
+  moveToTopLevel: "Mover al nivel superior",
+  confirmRowMoveTitle: "Confirmar movimiento de fila",
+  confirmRowMoveDescription: (row, from, to) =>
+    `¿Mover ${row} de ${from} a ${to}?`,
+  confirmRowMove: "Mover",
+  rowMovedToGroup: (group) => `Fila movida a ${group}`,
+  rowMovedUnder: (parent) => `Fila movida debajo de ${parent}`,
+  moveRejectedPolicyNever:
+    "Los movimientos de filas entre límites están desactivados",
+  moveRejectedSorted:
+    "Borra la ordenación antes de cambiar el orden de las filas",
+  moveRejectedCycle:
+    "Una fila no se puede mover dentro de sí misma ni de una descendiente",
+  moveUnavailable: "Este movimiento de fila no está disponible",
+  rootLevel: "Nivel superior",
   pinToTop: "Fijar arriba",
   pinToBottom: "Fijar abajo",
   unpinRow: "Desfijar fila",

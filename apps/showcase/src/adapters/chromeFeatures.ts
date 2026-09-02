@@ -81,7 +81,8 @@ export interface KitChromeFactories {
     onRowEdit: NonNullable<KitFeatureRequests["rowEditing"]>
   ) => TableFeature<Person>;
   rowReorder: (
-    onRowReorder: NonNullable<KitFeatureRequests["rowReorder"]>
+    onRowReorder: NonNullable<KitFeatureRequests["rowReorder"]>["onRowReorder"],
+    options: NonNullable<KitFeatureRequests["rowReorder"]>["options"]
   ) => TableFeature<Person>;
   tree: (
     options: NonNullable<KitFeatureRequests["tree"]>
@@ -227,6 +228,13 @@ function kitDrawn(
     ...(asked.batchEditing ? [kit.batchEditing(asked.batchEditing)] : []),
     ...(asked.grouping ? [kit.grouping(asked.grouping)] : []),
     ...(asked.tree ? [kit.tree(asked.tree)] : []),
-    ...(asked.rowReorder ? [kit.rowReorder(asked.rowReorder)] : []),
+    ...(asked.rowReorder
+      ? [
+          kit.rowReorder(
+            asked.rowReorder.onRowReorder,
+            asked.rowReorder.options
+          ),
+        ]
+      : []),
   ];
 }

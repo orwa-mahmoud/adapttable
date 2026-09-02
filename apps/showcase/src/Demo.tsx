@@ -1,4 +1,9 @@
-import type { EditEventHandler, GroupNode } from "@adapttable/core";
+import type {
+  EditEventHandler,
+  GroupNode,
+  RowGroupRef,
+  RowReorderOptions,
+} from "@adapttable/core";
 import {
   applyRowPatchesWithLog,
   applyRowReorder,
@@ -231,7 +236,10 @@ export interface KitFeatureRequests {
     getParentId: (row: Person) => string | undefined;
     treeColumn: string;
   };
-  rowReorder?: (from: number, to: number) => void;
+  rowReorder?: {
+    onRowReorder: (from: number, to: number, row: Person) => void;
+    options: RowReorderOptions<Person>;
+  };
 }
 
 export interface DemoColumnProps {
@@ -621,7 +629,18 @@ function kitRequests(
     ...(flags.tree
       ? { tree: { getParentId: reportsTo, treeColumn: "person" } }
       : {}),
-    ...(flags.rowReorder ? { rowReorder: flags.onRowReorder } : {}),
+    ...(flags.rowReorder
+      ? {
+          rowReorder: {
+            onRowReorder: flags.onRowReorder,
+            options: {
+              movePolicy: "confirm",
+              onGroupMove: flags.onGroupMove,
+              onTreeMove: flags.onTreeMove,
+            },
+          },
+        }
+      : {}),
   };
 }
 
@@ -657,7 +676,9 @@ function frontendColumnProps(
     onAddRow: () => void;
     onDuplicateRow: (row: Person) => void;
     onDeleteRow: (row: Person) => void;
-    onRowReorder: (from: number, to: number) => void;
+    onRowReorder: (from: number, to: number, row: Person) => void;
+    onGroupMove: NonNullable<RowReorderOptions<Person>["onGroupMove"]>;
+    onTreeMove: NonNullable<RowReorderOptions<Person>["onTreeMove"]>;
     writePatches: (patches: readonly RowPatch<Person>[]) => void;
     flashRow: (id: Person["id"]) => void;
   }
@@ -746,6 +767,74 @@ function frontendColumnProps(
   });
   if (composed.length > 0) Object.assign(next, { features: composed });
   return next;
+}
+
+function sameReorderScope(
+  candidate: Person,
+  row: Person,
+  grouping: boolean | undefined,
+  tree: boolean | undefined
+): boolean {
+  if (grouping) {
+    return candidate.team === row.team && candidate.status === row.status;
+  }
+  if (tree) return reportsTo(candidate) === reportsTo(row);
+  return true;
+}
+
+function reorderDemoRows(
+  rows: readonly Person[],
+  from: number,
+  to: number,
+  row: Person,
+  grouping: boolean | undefined,
+  tree: boolean | undefined
+): readonly Person[] {
+  const sameScope = (candidate: Person) =>
+    sameReorderScope(candidate, row, grouping, tree);
+  const siblings = rows.filter(sameScope);
+  const source = siblings.findIndex((candidate) => candidate.id === row.id);
+  const reordered = applyRowReorder(siblings, source < 0 ? from : source, to);
+  let siblingIndex = 0;
+  return rows.map((candidate) => {
+    if (!sameScope(candidate)) return candidate;
+    const replacement = reordered[siblingIndex];
+    siblingIndex += 1;
+    return replacement ?? candidate;
+  });
+}
+
+function insertionIndex(
+  destinations: readonly number[],
+  position: number,
+  fallback: number
+): number {
+  if (position >= 0 && position < destinations.length) {
+    return destinations[position];
+  }
+  return (destinations.at(-1) ?? fallback - 1) + 1;
+}
+
+function groupDestinationIndices(
+  rows: readonly Person[],
+  group: RowGroupRef
+): number[] {
+  return rows.flatMap((candidate, index) =>
+    group.levels.every(
+      (level) => Reflect.get(candidate, level.key) === level.value
+    )
+      ? [index]
+      : []
+  );
+}
+
+function treeDestinationIndices(
+  rows: readonly Person[],
+  parentId: string | null
+): number[] {
+  return rows.flatMap((candidate, index) =>
+    (reportsTo(candidate) ?? null) === parentId ? [index] : []
+  );
 }
 
 function Frontend({
@@ -845,8 +934,40 @@ function Frontend({
     },
     [writePatches]
   );
-  const onRowReorder = useCallback((from: number, to: number) => {
-    setData((prev) => applyRowReorder(prev, from, to));
+  const onRowReorder = useCallback(
+    (from: number, to: number, row: Person) => {
+      setData((prev) => reorderDemoRows(prev, from, to, row, grouping, tree));
+    },
+    [grouping, tree]
+  );
+  const onGroupMove = useCallback<
+    NonNullable<RowReorderOptions<Person>["onGroupMove"]>
+  >((row, _fromGroup, toGroup, position) => {
+    setData((prev) => {
+      const remaining = prev.filter((candidate) => candidate.id !== row.id);
+      const changes = Object.fromEntries(
+        toGroup.levels.map((level) => [level.key, level.value])
+      );
+      const moved: Person = Object.assign({}, row, changes);
+      const destinations = groupDestinationIndices(remaining, toGroup);
+      const at = insertionIndex(destinations, position, remaining.length);
+      const next = remaining.slice();
+      next.splice(at, 0, moved);
+      return next;
+    });
+  }, []);
+  const onTreeMove = useCallback<
+    NonNullable<RowReorderOptions<Person>["onTreeMove"]>
+  >((row, _fromParent, toParent, position) => {
+    setData((prev) => {
+      const remaining = prev.filter((candidate) => candidate.id !== row.id);
+      const moved: Person = { ...row, managerId: toParent.id };
+      const destinations = treeDestinationIndices(remaining, toParent.id);
+      const at = insertionIndex(destinations, position, remaining.length);
+      const next = remaining.slice();
+      next.splice(at, 0, moved);
+      return next;
+    });
   }, []);
   const [activeEdit, setActiveEdit] = useState<{
     rowId: string;
@@ -1002,6 +1123,8 @@ function Frontend({
           onDuplicateRow,
           onDeleteRow,
           onRowReorder,
+          onGroupMove,
+          onTreeMove,
           writePatches,
           flashRow: flash.flashRow,
         })

@@ -26,11 +26,12 @@
       "subpath": "row-reorder",
       "implementation": [
         "core/src/features/row-reorder.tsx",
-        "core/src/rows/rowReorder.ts"
+        "core/src/rows/rowReorder.ts",
+        "core/src/rows/rowMove.ts"
       ],
-      "adapterComponents": [],
+      "adapterComponents": ["kitControls"],
       "standardPreset": false,
-      "note": "The first feature to own its provider: the drag state machine lives on `@adapttable/core/features/row-reorder` and nothing in the base graph reaches it. Its enabling prop is gone — the feature import is the only way to arm reordering.",
+      "note": "The feature provider owns flat and sibling reorder, grouped moves, tree re-parenting, confirmation policy, and cycle guards; adapters own the grip, mobile buttons, and kit-native destination menu. Nothing in the base graph reaches the move engine.",
       "requiresConfig": true
     },
     "rowPinning": {

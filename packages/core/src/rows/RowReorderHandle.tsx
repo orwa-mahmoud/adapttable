@@ -61,6 +61,60 @@ export interface RowReorderHandleSlotProps {
 export interface RowReorderHandleSlots {
   /** Renders the drag grip. */
   readonly Handle: (props: RowReorderHandleSlotProps) => ReactNode;
+  /** Renders the nested-row destination menu and confirmation. */
+  readonly Menu: (props: RowMoveMenuSlotProps) => ReactNode;
+}
+
+/**
+ * One option in the adapter-owned row destination menu.
+ *
+ * @public
+ */
+export interface RowMoveMenuItemProps {
+  /** Stable destination id. */
+  readonly id: string;
+  /** Human-readable destination. */
+  readonly label: string;
+  /** Whether the destination is unavailable. */
+  readonly disabled: boolean;
+  /** Explanation exposed for an unavailable destination. */
+  readonly disabledReason?: string;
+  /** Selects this destination. */
+  readonly onSelect: () => void;
+}
+
+/**
+ * Pending move shown inside the adapter-owned menu surface.
+ *
+ * @public
+ */
+export interface RowMoveConfirmationProps {
+  /** Confirmation heading. */
+  readonly title: string;
+  /** Concrete source-to-destination change. */
+  readonly description: string;
+  /** Approval button label. */
+  readonly confirmLabel: string;
+  /** Cancellation button label. */
+  readonly cancelLabel: string;
+  /** Commits the pending move. */
+  readonly onConfirm: () => void;
+  /** Discards the pending move. */
+  readonly onCancel: () => void;
+}
+
+/**
+ * Props for an adapter-owned nested row destination menu.
+ *
+ * @public
+ */
+export interface RowMoveMenuSlotProps {
+  /** Accessible menu trigger and content label. */
+  readonly label: string;
+  /** Loaded move destinations. */
+  readonly items: readonly RowMoveMenuItemProps[];
+  /** Pending move to approve, when confirm policy is active. */
+  readonly confirmation?: RowMoveConfirmationProps;
 }
 
 /**
@@ -94,24 +148,66 @@ export function RowReorderHandleChrome<TRow>({
 }: Readonly<RowReorderHandleChromeProps<TRow>>): ReactElement {
   const lifted = reorder.isLifted(rowId);
   const Handle = slots.Handle;
+  const Menu = slots.Menu;
+  const menu = reorder.moveMenu?.(row);
+  const ownsPending =
+    reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;
+  const pending = ownsPending ? reorder.pendingMove : undefined;
+  const from =
+    pending?.kind === "group"
+      ? pending.fromGroup.label
+      : pending?.fromParent.label;
+  const to =
+    pending?.kind === "group" ? pending.toGroup.label : pending?.toParent.label;
   return (
-    <Handle
-      label={labels.reorderRow}
-      pressed={lifted}
-      dragging={lifted}
-      className={className}
-      dragProps={reorder.dragProps(rowId, localIndex)}
-      onKeyDown={(event) => {
-        reorder.handleKeyDown(
-          event,
-          rowId,
-          localIndex,
-          row,
-          windowStart,
-          rowCount
-        );
-      }}
-    />
+    <>
+      <Handle
+        label={labels.reorderRow}
+        pressed={lifted}
+        dragging={lifted}
+        className={className}
+        dragProps={reorder.dragProps(rowId, localIndex)}
+        onKeyDown={(event) => {
+          reorder.handleKeyDown(
+            event,
+            rowId,
+            localIndex,
+            row,
+            windowStart,
+            rowCount
+          );
+        }}
+      />
+      {menu ? (
+        <Menu
+          label={menu.label}
+          items={menu.targets.map((target) => ({
+            id: target.id,
+            label: target.label,
+            disabled: target.disabledReason !== undefined,
+            disabledReason: target.disabledReason,
+            onSelect: () => reorder.selectMoveTarget(target),
+          }))}
+          confirmation={
+            pending && from && to
+              ? {
+                  title: labels.confirmRowMoveTitle ?? "Confirm row move",
+                  description:
+                    labels.confirmRowMoveDescription?.(
+                      pending.rowLabel,
+                      from,
+                      to
+                    ) ?? `Move ${pending.rowLabel} from ${from} to ${to}?`,
+                  confirmLabel: labels.confirmRowMove ?? "Move",
+                  cancelLabel: labels.cancel ?? "Cancel",
+                  onConfirm: reorder.confirmMove,
+                  onCancel: reorder.cancelMove,
+                }
+              : undefined
+          }
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -167,6 +263,8 @@ export interface RowReorderMoveButtonProps {
 export interface RowReorderButtonsSlots {
   /** Renders one move button. */
   readonly Button: (props: RowReorderMoveButtonProps) => ReactNode;
+  /** Renders the nested-row destination menu and confirmation. */
+  readonly Menu: (props: RowMoveMenuSlotProps) => ReactNode;
 }
 
 /**
@@ -200,6 +298,17 @@ export function RowReorderButtonsChrome<TRow>({
   slots,
 }: Readonly<RowReorderButtonsChromeProps<TRow>>): ReactElement {
   const Button = slots.Button;
+  const Menu = slots.Menu;
+  const menu = reorder.moveMenu?.(row);
+  const ownsPending =
+    reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;
+  const pending = ownsPending ? reorder.pendingMove : undefined;
+  const from =
+    pending?.kind === "group"
+      ? pending.fromGroup.label
+      : pending?.fromParent.label;
+  const to =
+    pending?.kind === "group" ? pending.toGroup.label : pending?.toParent.label;
   return (
     <span data-adapttable-part="row-reorder-buttons" className={className}>
       <Button
@@ -220,6 +329,35 @@ export function RowReorderButtonsChrome<TRow>({
           reorder.moveBy(localIndex, 1, row, windowStart, rowCount);
         }}
       />
+      {menu ? (
+        <Menu
+          label={menu.label}
+          items={menu.targets.map((target) => ({
+            id: target.id,
+            label: target.label,
+            disabled: target.disabledReason !== undefined,
+            disabledReason: target.disabledReason,
+            onSelect: () => reorder.selectMoveTarget(target),
+          }))}
+          confirmation={
+            pending && from && to
+              ? {
+                  title: labels.confirmRowMoveTitle ?? "Confirm row move",
+                  description:
+                    labels.confirmRowMoveDescription?.(
+                      pending.rowLabel,
+                      from,
+                      to
+                    ) ?? `Move ${pending.rowLabel} from ${from} to ${to}?`,
+                  confirmLabel: labels.confirmRowMove ?? "Move",
+                  cancelLabel: labels.cancel ?? "Cancel",
+                  onConfirm: reorder.confirmMove,
+                  onCancel: reorder.cancelMove,
+                }
+              : undefined
+          }
+        />
+      ) : null}
     </span>
   );
 }

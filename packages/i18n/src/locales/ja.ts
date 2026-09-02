@@ -157,6 +157,22 @@ export const ja: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `行を ${String(from)} から ${String(to)} へ移動しました`,
   rowReorderCancelled: "並び替えを取り消しました",
+  rowMoveOptions: "行の移動オプション",
+  moveToGroup: "グループへ移動…",
+  moveUnder: "配下へ移動…",
+  moveToTopLevel: "最上位へ移動",
+  confirmRowMoveTitle: "行の移動を確認",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row} を ${from} から ${to} へ移動しますか？`,
+  confirmRowMove: "移動",
+  rowMovedToGroup: (group) => `行を ${group} へ移動しました`,
+  rowMovedUnder: (parent) => `行を ${parent} の配下へ移動しました`,
+  moveRejectedPolicyNever: "境界を越える行の移動は無効です",
+  moveRejectedSorted: "行の順序を変更する前に並べ替えを解除してください",
+  moveRejectedCycle:
+    "行をその行自体またはその子孫の中へ移動することはできません",
+  moveUnavailable: "この行の移動は利用できません",
+  rootLevel: "最上位",
   pinToTop: "上に固定",
   pinToBottom: "下に固定",
   unpinRow: "行の固定を解除",

@@ -122,6 +122,9 @@ describe("rowReorderDropStyle", () => {
     expect(rowReorderDropStyle({ "data-drop": "after" }).boxShadow).toContain(
       "-2px"
     );
+    expect(rowReorderDropStyle({ "data-drop": "inside" }).boxShadow).toContain(
+      "0 0 0 2px"
+    );
   });
 });
 
@@ -168,13 +171,13 @@ describe("useRowReorder", () => {
     });
     expect(result.current.lifted).toEqual({ rowId: "a", from: 0 });
     expect(result.current.announcement).toBe("Row 6 lifted");
-    expect(rowReorderSignature(result.current, "a", 0)).toBe("Ldt");
+    expect(rowReorderSignature(result.current, "a", 0)).toBe("Ldtbefore");
     expect(rowReorderSignature(result.current, "b", 1)).toBe("L");
     act(() => {
       result.current.handleKeyDown(press("ArrowDown"), "a", 0, ROWS[0]!, 5, 3);
     });
     expect(result.current.overIndex).toBe(1);
-    expect(rowReorderSignature(result.current, "b", 1)).toBe("Lt");
+    expect(rowReorderSignature(result.current, "b", 1)).toBe("Ltafter");
     act(() => {
       result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 5, 3);
     });
@@ -209,6 +212,124 @@ describe("useRowReorder", () => {
     });
     expect(onRowReorder).toHaveBeenCalledOnce();
   });
+
+  it("routes a cross-group target through the host move callback", () => {
+    const onRowMove = vi.fn();
+    const request = {
+      kind: "group" as const,
+      row: ROWS[0]!,
+      rowLabel: "Ada",
+      fromGroup: {
+        id: "group:a",
+        label: "A",
+        levels: [{ key: "team", value: "a", label: "A" }],
+      },
+      toGroup: {
+        id: "group:b",
+        label: "B",
+        levels: [{ key: "team", value: "b", label: "B" }],
+      },
+      position: 1,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "auto",
+        onRowMove,
+        resolveMove: () => ({ kind: "move", request }),
+        labels: {
+          ...LABELS,
+          rowMovedToGroup: (group) => `Moved to ${group}`,
+        },
+        rowAt: (index) => ROWS[index],
+      })
+    );
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(request);
+    expect(result.current.announcement).toBe("Moved to B");
+  });
+
+  it("holds confirm-policy moves until the built-in confirmation resolves", () => {
+    const onRowMove = vi.fn();
+    const request = {
+      kind: "tree" as const,
+      row: ROWS[0]!,
+      rowLabel: "Ada",
+      fromParent: { id: null, row: null, label: "Top level" },
+      toParent: { id: "b", row: ROWS[1]!, label: "Grace" },
+      position: 0,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "confirm",
+        onRowMove,
+        resolveMove: () => ({ kind: "move", request }),
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(result.current.pendingMove).toEqual(request);
+    expect(onRowMove).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.confirmMove();
+    });
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(request);
+    expect(result.current.pendingMove).toBeNull();
+  });
+
+  it.each([
+    ["approves", () => Promise.resolve(true), 1],
+    ["declines", () => Promise.resolve(false), 0],
+    ["handles rejection", () => Promise.reject(new Error("closed")), 0],
+  ])(
+    "%s a move through the host-owned promise confirmation",
+    async (_case, confirmMove, writes) => {
+      const onRowMove = vi.fn();
+      const request = {
+        kind: "group" as const,
+        row: ROWS[0]!,
+        rowLabel: "Ada",
+        fromGroup: { id: "a", label: "A", levels: [] },
+        toGroup: { id: "b", label: "B", levels: [] },
+        position: 0,
+      };
+      const { result } = renderHook(() =>
+        useRowReorder<Task>({
+          enabled: true,
+          onRowReorder: vi.fn(),
+          movePolicy: "confirm",
+          confirmMove,
+          onRowMove,
+          resolveMove: () => ({ kind: "move", request }),
+          labels: LABELS,
+          rowAt: (index) => ROWS[index],
+        })
+      );
+
+      await act(async () => {
+        result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+        await Promise.resolve();
+      });
+
+      expect(onRowMove).toHaveBeenCalledTimes(writes);
+      expect(result.current.pendingMove).toBeNull();
+      if (writes === 0) {
+        expect(result.current.announcement).toBe("Reorder cancelled");
+      }
+    }
+  );
 
   it("marks the drop side after a later row", () => {
     const { result } = arm(vi.fn());

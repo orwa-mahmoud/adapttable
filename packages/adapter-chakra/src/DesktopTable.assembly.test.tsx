@@ -51,7 +51,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 const EXPANSION_WIDTH = 32;
-const REORDER_WIDTH = 40;
+const REORDER_WIDTH = 64;
 const PIN_BG = "var(--chakra-colors-bg)";
 
 function mount(

@@ -209,16 +209,39 @@ function providersOf<TRow>(
  *
  * @public
  */
+export interface TableRuntimeView<TRow = unknown> {
+  /** Rows in the materialized source view. */
+  readonly rows: readonly TRow[];
+  /** Stable row identity. */
+  readonly getRowId: (row: TRow) => string;
+  /** Best available human-readable row label. */
+  readonly rowLabel: (row: TRow) => string;
+  /** Active sort key, when visual order is source-controlled. */
+  readonly sortBy?: string;
+  /** Live grouping bundle; feature providers narrow this structurally. */
+  readonly grouping?: unknown;
+  /** Live tree bundle; feature providers narrow this structurally. */
+  readonly tree?: unknown;
+}
+
+/**
+ * What a provider can read about the table it wraps.
+ *
+ * @public
+ */
 export interface TableRuntime<TRow = unknown> {
   /** The row at a rendered index, or `undefined` once it has scrolled away. */
   rowAt(localIndex: number): TRow | undefined;
   /** The table's resolved labels, for announcements. */
   labels(): Readonly<Record<string, unknown>> | undefined;
+  /** Latest fully composed view, read only from event handlers. */
+  view(): TableRuntimeView<TRow> | undefined;
 }
 
 interface RuntimeCell {
   rows: readonly unknown[];
   labels: Readonly<Record<string, unknown>> | undefined;
+  view?: TableRuntimeView;
 }
 
 const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
@@ -234,12 +257,19 @@ const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
  *
  * @public
  */
-export function usePublishTableRuntime(
-  rows: readonly unknown[],
-  labels: Readonly<Record<string, unknown>> | undefined
+export function usePublishTableRuntime<TRow>(
+  rows: readonly TRow[],
+  labels: Readonly<Record<string, unknown>> | undefined,
+  view?: TableRuntimeView<TRow>
 ): void {
   const cell = useContext(TableRuntimeContext);
-  if (cell) cell.current = { rows, labels };
+  if (cell) {
+    cell.current = {
+      rows,
+      labels,
+      view: view as TableRuntimeView,
+    };
+  }
 }
 
 /**
@@ -254,6 +284,7 @@ export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow> {
       rowAt: (localIndex: number) =>
         cell?.current.rows[localIndex] as TRow | undefined,
       labels: () => cell?.current.labels,
+      view: () => cell?.current.view as TableRuntimeView<TRow> | undefined,
     }),
     [cell]
   );
@@ -451,7 +482,11 @@ export function FeatureProviders({
 }): ReactNode {
   const features = getAppliedFeatures(props);
   const providers = useMemo(() => providersOf(features ?? []), [features]);
-  const cell = useRef<RuntimeCell>({ rows: [], labels: undefined });
+  const cell = useRef<RuntimeCell>({
+    rows: [],
+    labels: undefined,
+    view: undefined,
+  });
   const renders = useMemo(() => rendersOf(features ?? []), [features]);
   const tree = providers.reduceRight<ReactNode>(
     (inner, { id, Provider, feature }) => (

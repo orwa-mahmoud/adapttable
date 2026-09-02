@@ -374,6 +374,9 @@ export interface TableLabels {
     commandEmpty?: string;
     commandPalette?: string;
     commandSearch?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
     contextMenu?: string;
     copyCells?: string;
     cutCells?: string;
@@ -446,9 +449,16 @@ export interface TableLabels {
     moreGroups?: (remaining: number) => string;
     moreRowsInGroup?: (remaining: number) => string;
     moveEnd?: string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
     moveRowDown?: string;
     moveRowUp?: string;
     moveStart?: string;
+    moveToGroup?: string;
+    moveToTopLevel?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
     moveViewDown?: string;
     moveViewUp?: string;
     nextPage?: string;
@@ -458,6 +468,7 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
+    // @deprecated
     noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
@@ -522,9 +533,13 @@ export interface TableLabels {
     resetColumns?: string;
     resizeColumn?: string;
     retry?: string;
+    rootLevel?: string;
     rowActionsMenu?: string;
     rowLifted?: (position: number) => string;
     rowMoved?: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
+    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;

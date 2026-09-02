@@ -9,7 +9,11 @@ import type { ReactNode } from "react";
 
 import type { BaseDataTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
-import { FeatureSlot, useFeatureSlotFilled } from "./providers";
+import {
+  FeatureSlot,
+  useFeatureSlotFilled,
+  usePublishTableRuntime,
+} from "./providers";
 import {
   type ChromeExtraSlotProps,
   COLUMN_LAYOUT_LIVE,
@@ -67,6 +71,48 @@ const EXTRA_SLOTS = [
   EDITING_LIVE,
 ] as const;
 
+function readableRowLabel<TRow>(chrome: TableChrome<TRow>, row: TRow): string {
+  for (const column of chrome.columnLayout.visibleColumns) {
+    const formatted = column.formatValue?.(row);
+    if (formatted !== undefined && formatted !== "") return formatted;
+    const rendered = column.accessor?.(row);
+    if (
+      typeof rendered === "string" ||
+      typeof rendered === "number" ||
+      typeof rendered === "boolean"
+    ) {
+      return String(rendered);
+    }
+  }
+  return chrome.getRowId(row);
+}
+
+function RuntimePublisher<TRow>({
+  chrome,
+  children,
+}: {
+  readonly chrome: TableChrome<TRow>;
+  readonly children: (chrome: TableChrome<TRow>) => ReactNode;
+}): ReactNode {
+  let renderedRows = chrome.source.rows;
+  if (chrome.grouping) {
+    renderedRows = chrome.grouping.entries.flatMap((entry) =>
+      entry.kind === "row" ? [entry.row] : []
+    );
+  } else if (chrome.tree) {
+    renderedRows = chrome.tree.entries.map((entry) => entry.row);
+  }
+  usePublishTableRuntime(renderedRows, chrome.table.labels, {
+    rows: chrome.source.rows,
+    getRowId: chrome.getRowId,
+    rowLabel: (row) => readableRowLabel(chrome, row),
+    sortBy: chrome.source.sortBy,
+    grouping: chrome.grouping,
+    tree: chrome.tree,
+  });
+  return children(chrome);
+}
+
 /** One link of the chain: gate on this slot, then hand the rest the result. */
 function ExtraGateChain<TRow>({
   index,
@@ -81,7 +127,7 @@ function ExtraGateChain<TRow>({
 }): ReactNode {
   const slot = EXTRA_SLOTS[index];
   return slot === undefined ? (
-    children(chrome)
+    <RuntimePublisher chrome={chrome}>{children}</RuntimePublisher>
   ) : (
     <ExtraGate slot={slot} chrome={chrome} props={props}>
       {(next) => (

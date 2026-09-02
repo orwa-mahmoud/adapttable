@@ -162,6 +162,22 @@ export const ru: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Строка перемещена с ${String(from)} на ${String(to)}`,
   rowReorderCancelled: "Перестановка отменена",
+  rowMoveOptions: "Параметры перемещения строки",
+  moveToGroup: "Переместить в группу…",
+  moveUnder: "Переместить под…",
+  moveToTopLevel: "Переместить на верхний уровень",
+  confirmRowMoveTitle: "Подтвердить перемещение строки",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Переместить ${row} из ${from} в ${to}?`,
+  confirmRowMove: "Переместить",
+  rowMovedToGroup: (group) => `Строка перемещена в ${group}`,
+  rowMovedUnder: (parent) => `Строка перемещена под ${parent}`,
+  moveRejectedPolicyNever: "Перемещение строк через границы отключено",
+  moveRejectedSorted: "Сбросьте сортировку перед изменением порядка строк",
+  moveRejectedCycle:
+    "Строку нельзя переместить внутрь неё самой или её потомка",
+  moveUnavailable: "Это перемещение строки недоступно",
+  rootLevel: "Верхний уровень",
   pinToTop: "Закрепить сверху",
   pinToBottom: "Закрепить снизу",
   unpinRow: "Открепить строку",

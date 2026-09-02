@@ -38,6 +38,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -51,7 +52,7 @@ import {
   type TreeToggleProps,
   type TreeToggleSlots,
 } from "@adapttable/core/adapter";
-import type { ChangeEvent } from "react";
+import { type ChangeEvent, useEffect, useRef } from "react";
 
 import type { DataTableClassNames } from "../types";
 import { AutoFilterForm } from "./AutoFilterForm";
@@ -597,6 +598,96 @@ function ReorderHandle({
   );
 }
 
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (confirmation && detailsRef.current) detailsRef.current.open = true;
+  }, [confirmation]);
+  const finish = (action: () => void) => {
+    action();
+    if (detailsRef.current) detailsRef.current.open = false;
+    triggerRef.current?.focus();
+  };
+  return (
+    <details
+      ref={detailsRef}
+      data-adapttable-part="row-move-menu"
+      style={{ display: "inline-block", position: "relative" }}
+    >
+      <summary
+        ref={triggerRef}
+        role="button"
+        aria-label={label}
+        data-adapttable-part="row-move-menu-trigger"
+        style={{ ...REORDER_BUTTON, cursor: "pointer", listStyle: "none" }}
+      >
+        ⋮
+      </summary>
+      <div
+        role="menu"
+        aria-label={label}
+        data-adapttable-part="row-move-menu-content"
+        style={{
+          position: "absolute",
+          zIndex: 20,
+          insetInlineStart: 0,
+          minWidth: "12rem",
+          padding: "0.5rem",
+          border: "1px solid currentColor",
+          borderRadius: "0.375rem",
+          background: "Canvas",
+          color: "CanvasText",
+        }}
+      >
+        {confirmation ? (
+          <div
+            role="alertdialog"
+            aria-label={confirmation.title}
+            data-adapttable-part="row-move-confirmation"
+          >
+            <strong>{confirmation.title}</strong>
+            <p>{confirmation.description}</p>
+            <button
+              type="button"
+              onClick={() => finish(confirmation.onConfirm)}
+            >
+              {confirmation.confirmLabel}
+            </button>{" "}
+            <button type="button" onClick={() => finish(confirmation.onCancel)}>
+              {confirmation.cancelLabel}
+            </button>
+          </div>
+        ) : (
+          items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="menuitem"
+              disabled={item.disabled}
+              title={item.disabledReason}
+              data-adapttable-part="row-move-menu-item"
+              style={{
+                display: "block",
+                width: "100%",
+                minHeight: "2.75rem",
+                textAlign: "start",
+              }}
+              onClick={item.onSelect}
+            >
+              {item.label}
+            </button>
+          ))
+        )}
+      </div>
+    </details>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -606,7 +697,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -624,7 +718,7 @@ function ReorderMove({
       aria-label={label}
       disabled={disabled}
       className={className}
-      style={REORDER_BUTTON}
+      style={{ ...REORDER_BUTTON, minWidth: "2.75rem", minHeight: "2.75rem" }}
       onClick={onClick}
     >
       {part === "row-reorder-up" ? "↑" : "↓"}
@@ -640,7 +734,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

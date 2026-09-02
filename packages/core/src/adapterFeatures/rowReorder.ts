@@ -8,6 +8,7 @@ import {
   ROW_REORDER_HANDLE,
 } from "../features/slotKeys";
 import type { TableFeature } from "../features/tableFeature";
+import type { RowReorderOptions } from "../rows/rowMove";
 import type { RowReorderHandler } from "../rows/rowReorder";
 import {
   RowReorderAnnouncer,
@@ -38,7 +39,8 @@ export interface AdapterRowReorderComponents {
  * @public
  */
 export type AdapterRowReorderFeature = <TRow>(
-  onRowReorder: RowReorderHandler<TRow>
+  onRowReorder: RowReorderHandler<TRow>,
+  options?: RowReorderOptions<TRow>
 ) => TableFeature<TRow>;
 
 /**
@@ -61,6 +63,9 @@ export function createAdapterRowReorderFeature(
     ),
   ];
 
-  return <TRow>(onRowReorder: RowReorderHandler<TRow>): TableFeature<TRow> =>
-    extendFeature(coreRowReorder(onRowReorder), renders);
+  return <TRow>(
+    onRowReorder: RowReorderHandler<TRow>,
+    options?: RowReorderOptions<TRow>
+  ): TableFeature<TRow> =>
+    extendFeature(coreRowReorder(onRowReorder, options), renders);
 }

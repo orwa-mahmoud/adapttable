@@ -161,6 +161,24 @@ export const de: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Zeile von ${String(from)} nach ${String(to)} verschoben`,
   rowReorderCancelled: "Neuordnung abgebrochen",
+  rowMoveOptions: "Optionen zum Verschieben der Zeile",
+  moveToGroup: "In Gruppe verschieben…",
+  moveUnder: "Unterordnen unter…",
+  moveToTopLevel: "Auf die oberste Ebene verschieben",
+  confirmRowMoveTitle: "Zeilenverschiebung bestätigen",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Zeile ${row} von ${from} nach ${to} verschieben?`,
+  confirmRowMove: "Verschieben",
+  rowMovedToGroup: (group) => `Zeile in ${group} verschoben`,
+  rowMovedUnder: (parent) => `Zeile unter ${parent} verschoben`,
+  moveRejectedPolicyNever:
+    "Zeilenverschiebungen über Grenzen hinweg sind deaktiviert",
+  moveRejectedSorted:
+    "Sortierung aufheben, bevor die Zeilenreihenfolge geändert wird",
+  moveRejectedCycle:
+    "Eine Zeile kann nicht in sich selbst oder einen ihrer Nachfolger verschoben werden",
+  moveUnavailable: "Diese Zeilenverschiebung ist nicht verfügbar",
+  rootLevel: "Oberste Ebene",
   pinToTop: "Oben anheften",
   pinToBottom: "Unten anheften",
   unpinRow: "Zeile lösen",

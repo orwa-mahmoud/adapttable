@@ -190,6 +190,23 @@ const INTERPOLATION_CASES: Record<
     call: (fn) => (fn as (format: string) => string)("xlsx"),
     expects: ["XLSX"],
   },
+  confirmRowMoveDescription: {
+    call: (fn) =>
+      (fn as (row: string, from: string, to: string) => string)(
+        "ROW_X",
+        "SOURCE_X",
+        "TARGET_X"
+      ),
+    expects: ["ROW_X", "SOURCE_X", "TARGET_X"],
+  },
+  rowMovedToGroup: {
+    call: (fn) => (fn as (group: string) => string)("GROUP_X"),
+    expects: ["GROUP_X"],
+  },
+  rowMovedUnder: {
+    call: (fn) => (fn as (parent: string) => string)("PARENT_X"),
+    expects: ["PARENT_X"],
+  },
 };
 
 const NUMERIC_CASE = {

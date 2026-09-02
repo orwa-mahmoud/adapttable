@@ -92,6 +92,10 @@ selection checkbox, the expand and tree toggles, the reorder controls, the row
 actions and the detail panel. A custom card cannot drop the parts that make
 the list usable, because it never owns them.
 
+Flat cards expose 44px up/down controls. Grouped and tree cards also expose
+the kit-native **Move to group…** / **Move under…** menu, including explicit
+confirmation when `movePolicy: "confirm"`; touch never has to emulate a drag.
+
 `card.fields` is what the built-in would have laid out — each field's
 `column`, its resolved `label` (`undefined` when the column asked for none)
 and its `value`, rendered exactly as the built-in renders it, cell renderers

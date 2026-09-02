@@ -5,6 +5,34 @@ import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
 
 /**
+ * One field/value pair in a nested group's address.
+ *
+ * @public
+ */
+export interface RowGroupLevel {
+  /** Column key that defines this level. */
+  readonly key: string;
+  /** Raw value the host writes when a row moves here. */
+  readonly value: unknown;
+  /** Human-readable value shown by the group header. */
+  readonly label: string;
+}
+
+/**
+ * Stable, host-usable address of one leaf group.
+ *
+ * @public
+ */
+export interface RowGroupRef {
+  /** The group row's stable key. */
+  readonly id: string;
+  /** Breadcrumb label for menus and announcements. */
+  readonly label: string;
+  /** Grouping fields and raw values, outermost first. */
+  readonly levels: readonly RowGroupLevel[];
+}
+
+/**
  * One visual row in a grouped body: a group header at some depth, or a leaf
  * data row belonging to a group. Adapters switch on `kind`.
  *
@@ -29,6 +57,8 @@ export type GroupedFlatEntry<TRow> =
       groupBy: string;
       /** The value keys from the root down to here — the node's address. */
       path: readonly string[];
+      /** Rich address used by row-move controls. */
+      group?: RowGroupRef;
       /**
        * EVERY leaf beneath this header, not just its direct children: a
        * parent's count, its aggregates and its selection state all describe
@@ -103,6 +133,10 @@ export type GroupedFlatEntry<TRow> =
       /** Index among leaves in the flat model (stable for selection chrome). */
       index: number;
       groupKey: string;
+      /** Position among this group's direct leaves. */
+      groupPosition?: number;
+      /** Rich address used by row-move controls. */
+      group?: RowGroupRef;
     }
   | ExtraEntry;
 
@@ -405,7 +439,8 @@ export function flattenGroupPartitions<TRow>(
   const walk = (
     levelPartitions: readonly GroupPartition<TRow>[],
     level: number,
-    path: readonly string[]
+    path: readonly string[],
+    parentLevels: readonly RowGroupLevel[]
   ): void => {
     const key = keys[level]!;
 
@@ -443,6 +478,15 @@ export function flattenGroupPartitions<TRow>(
       const collapsed = collapsedGroupIds.has(groupKey);
       const aggregateCells = aggregates?.(part.rows);
       const label = node.label;
+      const levels = [
+        ...parentLevels,
+        { key, value: part.value, label },
+      ] satisfies RowGroupLevel[];
+      const group: RowGroupRef = {
+        id: groupKey,
+        label: levels.map((entry) => entry.label).join(" / "),
+        levels,
+      };
 
       flat.push({
         kind: "group",
@@ -452,6 +496,7 @@ export function flattenGroupPartitions<TRow>(
         level,
         groupBy: key,
         path: here,
+        group,
         leafRows: part.rows,
         leafIds: part.rows.map((row) => getRowId(row)),
         aggregateCells,
@@ -460,10 +505,11 @@ export function flattenGroupPartitions<TRow>(
       if (collapsed) continue;
 
       if (level + 1 < keys.length) {
-        walk(part.children ?? [], level + 1, here);
+        walk(part.children ?? [], level + 1, here, levels);
       } else {
         leafIndex = emitLeaves(flat, part.rows, {
           groupKey,
+          group,
           level,
           getRowId,
           from: leafIndex,
@@ -500,7 +546,7 @@ export function flattenGroupPartitions<TRow>(
     }
   };
 
-  walk(partitions, 0, []);
+  walk(partitions, 0, [], []);
   return flat;
 }
 
@@ -571,21 +617,24 @@ function emitLeaves<TRow>(
   rows: readonly TRow[],
   options: {
     groupKey: string;
+    group: RowGroupRef;
     level: number;
     getRowId: (row: TRow) => string;
     from: number;
     limit: number;
   }
 ): number {
-  const { groupKey, level, getRowId, from, limit } = options;
+  const { groupKey, group, level, getRowId, from, limit } = options;
   let index = from;
-  for (const row of rows.slice(0, limit)) {
+  for (const [groupPosition, row] of rows.slice(0, limit).entries()) {
     flat.push({
       kind: "row",
       key: getRowId(row),
       row,
       index: index++,
       groupKey,
+      groupPosition,
+      group,
     });
   }
   const hidden = Math.max(0, rows.length - limit);

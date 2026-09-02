@@ -158,6 +158,24 @@ export const it: Required<TableLabels> = {
   rowLifted: (position) => `Riga ${String(position)} sollevata`,
   rowMoved: (from, to) => `Riga spostata da ${String(from)} a ${String(to)}`,
   rowReorderCancelled: "Riordino annullato",
+  rowMoveOptions: "Opzioni di spostamento della riga",
+  moveToGroup: "Sposta nel gruppo…",
+  moveUnder: "Sposta sotto…",
+  moveToTopLevel: "Sposta al livello principale",
+  confirmRowMoveTitle: "Conferma spostamento riga",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Spostare ${row} da ${from} a ${to}?`,
+  confirmRowMove: "Sposta",
+  rowMovedToGroup: (group) => `Riga spostata in ${group}`,
+  rowMovedUnder: (parent) => `Riga spostata sotto ${parent}`,
+  moveRejectedPolicyNever:
+    "Gli spostamenti di riga tra limiti sono disattivati",
+  moveRejectedSorted:
+    "Rimuovi l’ordinamento prima di modificare l’ordine delle righe",
+  moveRejectedCycle:
+    "Una riga non può essere spostata dentro se stessa o un suo discendente",
+  moveUnavailable: "Questo spostamento di riga non è disponibile",
+  rootLevel: "Livello principale",
   pinToTop: "Fissa in alto",
   pinToBottom: "Fissa in basso",
   unpinRow: "Sblocca riga",

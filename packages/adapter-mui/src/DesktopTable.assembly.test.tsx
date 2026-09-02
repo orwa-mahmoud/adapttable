@@ -70,7 +70,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 const EXPANSION_WIDTH = 48;
-const REORDER_WIDTH = 40;
+const REORDER_WIDTH = 64;
 const PIN_BG = "var(--mui-palette-background-paper)";
 const theme = createTheme();
 

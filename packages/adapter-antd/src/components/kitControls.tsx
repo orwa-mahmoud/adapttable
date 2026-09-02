@@ -34,6 +34,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -47,8 +48,16 @@ import {
   type TreeToggleProps,
   type TreeToggleSlots,
 } from "@adapttable/core/adapter";
-import { Button, Checkbox, Dropdown, Input, Popover, Select } from "antd";
-import { type ReactNode } from "react";
+import {
+  Button,
+  Checkbox,
+  Dropdown,
+  Input,
+  Popover,
+  Select,
+  Typography,
+} from "antd";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { FiltersIcon } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
@@ -567,6 +576,146 @@ function ReorderHandle({
   );
 }
 
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const confirmationRef = useRef(confirmation);
+  confirmationRef.current = confirmation;
+  useEffect(() => {
+    if (confirmation) setOpen(true);
+  }, [confirmation]);
+
+  const restoreTriggerFocus = () => {
+    queueMicrotask(() => triggerRef.current?.focus());
+  };
+  const close = () => {
+    setOpen(false);
+    restoreTriggerFocus();
+  };
+
+  const content = (
+    <div
+      role={confirmation ? undefined : "menu"}
+      aria-label={confirmation ? undefined : label}
+      data-adapttable-part="row-move-menu-content"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+        minWidth: "12rem",
+      }}
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          confirmationRef.current?.onCancel();
+          close();
+        }
+      }}
+    >
+      {confirmation ? (
+        <div
+          role="alertdialog"
+          aria-label={confirmation.title}
+          data-adapttable-part="row-move-confirmation"
+          style={{ display: "flex", flexDirection: "column", gap: 8 }}
+        >
+          <Typography.Text strong>{confirmation.title}</Typography.Text>
+          <Typography.Text>{confirmation.description}</Typography.Text>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button
+              size="small"
+              onClick={() => {
+                confirmation.onCancel();
+                close();
+              }}
+            >
+              {confirmation.cancelLabel}
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                confirmation.onConfirm();
+                close();
+              }}
+            >
+              {confirmation.confirmLabel}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        items.map((item) => (
+          <Button
+            key={item.id}
+            type="text"
+            role="menuitem"
+            block
+            disabled={item.disabled}
+            title={item.disabledReason}
+            data-adapttable-part="row-move-menu-item"
+            style={{ height: "auto", textAlign: "start", whiteSpace: "normal" }}
+            onClick={() => {
+              item.onSelect();
+              setTimeout(() => {
+                if (!confirmationRef.current) close();
+              }, 0);
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+              }}
+            >
+              <Typography.Text>{item.label}</Typography.Text>
+              {item.disabledReason ? (
+                <Typography.Text type="secondary">
+                  {item.disabledReason}
+                </Typography.Text>
+              ) : null}
+            </span>
+          </Button>
+        ))
+      )}
+    </div>
+  );
+
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <Popover
+        open={open}
+        trigger="click"
+        placement="bottomLeft"
+        content={content}
+        onOpenChange={(next) => {
+          if (!next) {
+            confirmationRef.current?.onCancel();
+            restoreTriggerFocus();
+          }
+          setOpen(next);
+        }}
+      >
+        <Button
+          ref={triggerRef}
+          type="text"
+          size="small"
+          aria-label={label}
+          data-adapttable-part="row-move-menu-trigger"
+          onClick={(event) => event.stopPropagation()}
+        >
+          ⋮
+        </Button>
+      </Popover>
+    </span>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -576,7 +725,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -610,7 +762,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

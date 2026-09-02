@@ -160,6 +160,22 @@ export const tr: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Satır ${String(from)} konumundan ${String(to)} konumuna taşındı`,
   rowReorderCancelled: "Yeniden sıralama iptal edildi",
+  rowMoveOptions: "Satır taşıma seçenekleri",
+  moveToGroup: "Gruba taşı…",
+  moveUnder: "Altına taşı…",
+  moveToTopLevel: "En üst düzeye taşı",
+  confirmRowMoveTitle: "Satır taşımayı onayla",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row}, ${from} konumundan ${to} konumuna taşınsın mı?`,
+  confirmRowMove: "Taşı",
+  rowMovedToGroup: (group) => `Satır ${group} grubuna taşındı`,
+  rowMovedUnder: (parent) => `Satır ${parent} altına taşındı`,
+  moveRejectedPolicyNever: "Sınırlar arası satır taşıma devre dışı",
+  moveRejectedSorted: "Satır sırasını değiştirmeden önce sıralamayı temizleyin",
+  moveRejectedCycle:
+    "Bir satır kendi içine veya alt öğelerinden birinin içine taşınamaz",
+  moveUnavailable: "Bu satır taşıma işlemi kullanılamıyor",
+  rootLevel: "En üst düzey",
   pinToTop: "Üste sabitle",
   pinToBottom: "Alta sabitle",
   unpinRow: "Satırı bırak",

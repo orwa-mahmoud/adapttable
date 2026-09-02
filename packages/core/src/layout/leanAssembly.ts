@@ -34,7 +34,7 @@ export {
 } from "../rows/rowPresentation";
 
 /** Width (px) reserved for the leading reorder column. */
-export const REORDER_COLUMN_WIDTH = 40;
+export const REORDER_COLUMN_WIDTH = 64;
 
 const LIFTED_OPACITY = 0.45;
 
@@ -218,14 +218,22 @@ export function pinnedRowPart(
 
 /** Drop-edge paint for a row being reordered. */
 export function rowReorderDropStyle(
-  attrs: { "data-dragging"?: ""; "data-drop"?: "before" | "after" } | undefined
+  attrs:
+    | {
+        "data-dragging"?: "";
+        "data-drop"?: "before" | "inside" | "after";
+      }
+    | undefined
 ): CSSProperties {
   if (attrs === undefined) return {};
   const edge = attrs["data-drop"];
   const offset = edge === "before" ? "2px" : "-2px";
+  let boxShadow: string | undefined;
+  if (edge === "inside") boxShadow = "inset 0 0 0 2px currentColor";
+  else if (edge) boxShadow = `inset 0 ${offset} 0 0 currentColor`;
   return {
     opacity: attrs["data-dragging"] === "" ? LIFTED_OPACITY : undefined,
-    boxShadow: edge ? `inset 0 ${offset} 0 0 currentColor` : undefined,
+    boxShadow,
   };
 }
 
@@ -237,10 +245,12 @@ export function rowReorderSignature<TRow>(
 ): string | null {
   if (!reorder) return null;
   const inFlight = reorder.lifted !== null ? "L" : "";
+  const confirming = reorder.pendingMove !== null ? "P" : "";
   const lifted = reorder.isLifted(rowId) ? "d" : "";
   const targeted =
     reorder.overIndex === localIndex && reorder.lifted !== null ? "t" : "";
-  return `${inFlight}${lifted}${targeted}`;
+  const position = targeted ? (reorder.overPosition ?? "") : "";
+  return `${inFlight}${confirming}${lifted}${targeted}${position}`;
 }
 
 /** Rows a body renders: tree entries when armed, otherwise the flat list. */

@@ -32,6 +32,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -52,9 +53,13 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Paper,
+  type PaperProps,
+  Popover,
   TextField,
+  Typography,
 } from "@mui/material";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 export type {
   BatchEditBarProps,
@@ -513,6 +518,129 @@ function ReorderHandle({
   );
 }
 
+function RowMoveMenuPaper(props: Readonly<PaperProps>) {
+  return <Paper {...props} data-adapttable-part="row-move-menu-content" />;
+}
+
+export function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const suppressOpenRef = useRef(false);
+  const menuId = useId();
+  const open = anchor !== null;
+  const close = () => {
+    suppressOpenRef.current = true;
+    setAnchor(null);
+    window.setTimeout(() => {
+      triggerRef.current?.focus();
+      window.setTimeout(() => {
+        suppressOpenRef.current = false;
+      }, 500);
+    }, 0);
+  };
+  const finish = (callback: () => void) => {
+    callback();
+    close();
+  };
+  if (confirmation) {
+    return (
+      <span data-adapttable-part="row-move-menu">
+        <IconButton
+          ref={triggerRef}
+          type="button"
+          size="small"
+          aria-label={label}
+          aria-haspopup="dialog"
+          aria-expanded="true"
+          aria-controls={menuId}
+          data-adapttable-part="row-move-menu-trigger"
+        >
+          ⋮
+        </IconButton>
+        <Popover
+          id={menuId}
+          anchorEl={() => triggerRef.current}
+          open
+          onClose={() => finish(confirmation.onCancel)}
+          slots={{ paper: RowMoveMenuPaper }}
+          slotProps={{ paper: { sx: { minWidth: "12rem", p: 1 } } }}
+        >
+          <div
+            role="alertdialog"
+            aria-label={confirmation.title}
+            data-adapttable-part="row-move-confirmation"
+          >
+            <Typography variant="subtitle2">{confirmation.title}</Typography>
+            <Typography variant="body2" sx={{ my: 1 }}>
+              {confirmation.description}
+            </Typography>
+            <Button
+              type="button"
+              size="small"
+              onClick={() => finish(confirmation.onConfirm)}
+            >
+              {confirmation.confirmLabel}
+            </Button>
+            <Button
+              type="button"
+              size="small"
+              onClick={() => finish(confirmation.onCancel)}
+            >
+              {confirmation.cancelLabel}
+            </Button>
+          </div>
+        </Popover>
+      </span>
+    );
+  }
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <IconButton
+        ref={triggerRef}
+        type="button"
+        size="small"
+        aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        data-adapttable-part="row-move-menu-trigger"
+        onClick={(event) => {
+          if (!suppressOpenRef.current) setAnchor(event.currentTarget);
+        }}
+      >
+        ⋮
+      </IconButton>
+      <Menu
+        id={menuId}
+        anchorEl={anchor}
+        open={open}
+        onClose={close}
+        slots={{ paper: RowMoveMenuPaper }}
+        slotProps={{
+          list: { "aria-label": label },
+          paper: { sx: { minWidth: "12rem", p: 1 } },
+        }}
+      >
+        {items.map((item) => (
+          <MenuItem
+            key={item.id}
+            disabled={item.disabled}
+            title={item.disabledReason}
+            data-adapttable-part="row-move-menu-item"
+            onClick={item.onSelect}
+          >
+            {item.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </span>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -522,7 +650,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -556,7 +687,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

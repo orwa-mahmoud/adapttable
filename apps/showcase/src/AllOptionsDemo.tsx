@@ -331,8 +331,9 @@ function compatibilityNoteFor(
   if (structured) {
     return (
       <small>
-        Reorder and pin are disabled because grouped/tree rows do not have one
-        stable flat row index.
+        Row pinning stays off for structured rows. Reorder works within each
+        group or parent; crossing a group boundary or changing parent asks for
+        confirmation.
       </small>
     );
   }
@@ -497,12 +498,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     setFailure("off");
   }, []);
   const structured = structure === "grouped" || structure === "tree";
-  const reorderReason =
-    clientOnlyReason ??
-    wholeSetWriteReason ??
-    (structured
-      ? "Row reorder is unavailable while grouped or tree rows are active."
-      : undefined);
+  const reorderReason = clientOnlyReason ?? wholeSetWriteReason;
   const pinReason =
     clientOnlyReason ??
     (structured
@@ -610,7 +606,6 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
       setRecipe(null);
       setStructure(next);
       if (next === "grouped" || next === "tree") {
-        setRowReorder("off");
         setRowPinning("off");
       }
     });

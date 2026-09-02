@@ -825,7 +825,62 @@ export function rowDetail<TRow>(renderRowDetail: (row: TRow) => unknown, default
 export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
 // @public
+export interface RowGroupLevel {
+    readonly key: string;
+    readonly label: string;
+    readonly value: unknown;
+}
+
+// @public
+export type RowGroupMoveHandler<TRow> = (row: TRow, fromGroup: RowGroupRef, toGroup: RowGroupRef, position: number) => unknown;
+
+// @public
+export interface RowGroupRef {
+    readonly id: string;
+    readonly label: string;
+    readonly levels: readonly RowGroupLevel[];
+}
+
+// @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
+
+// @public
+export type RowMoveConfirmHandler<TRow> = (request: RowMoveRequest<TRow>) => Promise<boolean>;
+
+// @public
+export interface RowMoveMenuModel<TRow> {
+    readonly kind: "group" | "tree";
+    readonly label: string;
+    readonly targets: readonly RowMoveTarget<TRow>[];
+}
+
+// @public
+export type RowMovePolicy = "auto" | "confirm" | "never";
+
+// @public
+export type RowMoveRequest<TRow> = {
+    readonly kind: "group";
+    readonly row: TRow;
+    readonly rowLabel: string;
+    readonly fromGroup: RowGroupRef;
+    readonly toGroup: RowGroupRef;
+    readonly position: number;
+} | {
+    readonly kind: "tree";
+    readonly row: TRow;
+    readonly rowLabel: string;
+    readonly fromParent: RowTreeParentRef<TRow>;
+    readonly toParent: RowTreeParentRef<TRow>;
+    readonly position: number;
+};
+
+// @public
+export interface RowMoveTarget<TRow> {
+    readonly disabledReason?: string;
+    readonly id: string;
+    readonly label: string;
+    readonly request?: RowMoveRequest<TRow>;
+}
 
 // @public
 export type RowOf<P> = P extends {
@@ -845,13 +900,31 @@ export interface RowPinState {
 }
 
 // @public
-export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>): TableFeature<TRow>;
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;
 
 // @public
 export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
 
 // @public
+export interface RowReorderOptions<TRow> {
+    readonly confirmMove?: RowMoveConfirmHandler<TRow>;
+    readonly movePolicy?: RowMovePolicy;
+    readonly onGroupMove?: RowGroupMoveHandler<TRow>;
+    readonly onTreeMove?: RowTreeMoveHandler<TRow>;
+}
+
+// @public
 export type RowStyle<TRow> = (row: TRow, index: number) => CSSProperties | undefined;
+
+// @public
+export type RowTreeMoveHandler<TRow> = (row: TRow, fromParent: RowTreeParentRef<TRow>, toParent: RowTreeParentRef<TRow>, position: number) => unknown;
+
+// @public
+export interface RowTreeParentRef<TRow> {
+    readonly id: string | null;
+    readonly label: string;
+    readonly row: TRow | null;
+}
 
 // @public
 export interface SavedView {
@@ -1003,6 +1076,9 @@ export interface TableLabels {
     commandEmpty?: string;
     commandPalette?: string;
     commandSearch?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
     contextMenu?: string;
     copyCells?: string;
     cutCells?: string;
@@ -1075,9 +1151,16 @@ export interface TableLabels {
     moreGroups?: (remaining: number) => string;
     moreRowsInGroup?: (remaining: number) => string;
     moveEnd?: string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
     moveRowDown?: string;
     moveRowUp?: string;
     moveStart?: string;
+    moveToGroup?: string;
+    moveToTopLevel?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
     moveViewDown?: string;
     moveViewUp?: string;
     nextPage?: string;
@@ -1087,6 +1170,7 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
+    // @deprecated
     noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
@@ -1151,9 +1235,13 @@ export interface TableLabels {
     resetColumns?: string;
     resizeColumn?: string;
     retry?: string;
+    rootLevel?: string;
     rowActionsMenu?: string;
     rowLifted?: (position: number) => string;
     rowMoved?: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
+    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;

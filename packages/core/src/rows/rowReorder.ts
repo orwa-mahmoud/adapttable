@@ -15,6 +15,15 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 import { isRtlElement } from "../layout/writingDirection";
+import {
+  type RowDropPosition,
+  rowDropPosition,
+  type RowMoveConfirmHandler,
+  type RowMoveMenuModel,
+  type RowMovePolicy,
+  type RowMoveRequest,
+  type RowMoveTarget,
+} from "./rowMove";
 
 /**
  * MIME type carrying the dragged row id during a reorder drag.
@@ -30,7 +39,7 @@ export { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
  *
  * @public
  */
-export const REORDER_COLUMN_WIDTH = 40;
+export const REORDER_COLUMN_WIDTH = 64;
 
 /** How far a lifted row is dimmed while it is being dragged. */
 export const ROW_REORDER_LIFTED_OPACITY = 0.45;
@@ -43,15 +52,18 @@ export const ROW_REORDER_LIFTED_OPACITY = 0.45;
  * @public
  */
 export function rowReorderDropStyle(
-  attrs: { "data-dragging"?: ""; "data-drop"?: "before" | "after" } | undefined
+  attrs: { "data-dragging"?: ""; "data-drop"?: RowDropPosition } | undefined
 ): CSSProperties {
   if (attrs === undefined) return {};
   const edge = attrs["data-drop"];
   const offset = edge === "before" ? "2px" : "-2px";
+  let boxShadow: string | undefined;
+  if (edge === "inside") boxShadow = "inset 0 0 0 2px currentColor";
+  else if (edge) boxShadow = `inset 0 ${offset} 0 0 currentColor`;
   return {
     opacity:
       attrs["data-dragging"] === "" ? ROW_REORDER_LIFTED_OPACITY : undefined,
-    boxShadow: edge ? `inset 0 ${offset} 0 0 currentColor` : undefined,
+    boxShadow,
   };
 }
 
@@ -102,6 +114,27 @@ export type RowReorderHandler<TRow> = (
 ) => void;
 
 /**
+ * Resolution of one visual row drop.
+ *
+ * @public
+ */
+export type RowReorderDecision<TRow> =
+  | {
+      readonly kind: "reorder";
+      readonly from: number;
+      readonly to: number;
+      readonly row: TRow;
+    }
+  | {
+      readonly kind: "move";
+      readonly request: RowMoveRequest<TRow>;
+    }
+  | {
+      readonly kind: "reject";
+      readonly message: string;
+    };
+
+/**
  * Labels the reorder handle and the live region need.
  *
  * @public
@@ -119,6 +152,32 @@ export interface RowReorderLabels {
   rowMoved: (from: number, to: number) => string;
   /** Announced when a reorder is abandoned. */
   rowReorderCancelled: string;
+  /** Announced after a cross-group move. */
+  rowMovedToGroup?: (group: string) => string;
+  /** Announced after a tree re-parent. */
+  rowMovedUnder?: (parent: string) => string;
+  /** Cross-boundary moves were disabled by policy. */
+  moveRejectedPolicyNever?: string;
+  /** Visual order cannot be written while a sort owns it. */
+  moveRejectedSorted?: string;
+  /** A tree node cannot become its own ancestor. */
+  moveRejectedCycle?: string;
+  /** The host did not provide the matching move callback. */
+  moveUnavailable?: string;
+  /** Label for the tree's root level. */
+  rootLevel?: string;
+  /** Opens the group destination menu. */
+  moveToGroup?: string;
+  /** Opens the tree-parent destination menu. */
+  moveUnder?: string;
+  /** Heading on a pending move confirmation. */
+  confirmRowMoveTitle?: string;
+  /** Concrete source and destination shown before a move. */
+  confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+  /** Approves a pending move. */
+  confirmRowMove?: string;
+  /** Cancels a pending move. */
+  cancel?: string;
 }
 
 /**
@@ -131,10 +190,16 @@ export interface RowReorderState<TRow> {
   lifted: { rowId: string; from: number } | null;
   /** Hovered drop index (local), or `null`. */
   overIndex: number | null;
+  /** Hovered edge, including the middle tree re-parent target. */
+  overPosition: RowDropPosition | null;
+  /** Move awaiting kit-owned confirmation, or `null`. */
+  pendingMove: RowMoveRequest<TRow> | null;
   /** Live-region text. Empty until something happens. */
   announcement: string;
   /** Whether this row is the one being moved. */
   isLifted: (rowId: string) => boolean;
+  /** Whether this row owns the open move confirmation. */
+  isMovePending?: (row: TRow) => boolean;
   /** Pointer: start a drag from this row. */
   dragProps: (
     rowId: string,
@@ -170,13 +235,21 @@ export interface RowReorderState<TRow> {
     windowStart: number,
     rowCount: number
   ) => void;
+  /** Keyboard/touch destinations for this row, when nested. */
+  moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  /** Select a destination from the move menu. */
+  selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
+  /** Confirm the move shown by the kit confirmation surface. */
+  confirmMove: () => void;
+  /** Cancel the move shown by the kit confirmation surface. */
+  cancelMove: () => void;
   /** Indicator attributes for a row. */
   rowAttrs: (
     rowId: string,
     localIndex: number
   ) => {
     "data-dragging"?: "";
-    "data-drop"?: "before" | "after";
+    "data-drop"?: RowDropPosition;
   };
 }
 
@@ -199,15 +272,31 @@ export function rowReorderSignature<TRow>(
 ): string | null {
   if (!reorder) return null;
   const inFlight = reorder.lifted !== null ? "L" : "";
+  const confirming = reorder.pendingMove !== null ? "P" : "";
   const lifted = reorder.isLifted(rowId) ? "d" : "";
   const targeted =
     reorder.overIndex === localIndex && reorder.lifted !== null ? "t" : "";
-  return `${inFlight}${lifted}${targeted}`;
+  const position = targeted ? (reorder.overPosition ?? "") : "";
+  return `${inFlight}${confirming}${lifted}${targeted}${position}`;
 }
 
 /** Whether the grip sits in a right-to-left context. */
 function isRtl(grip: HTMLElement | null): boolean {
   return isRtlElement(grip);
+}
+
+function isGrabKey(key: string): boolean {
+  return key === " " || key === "Spacebar";
+}
+
+function arrowDelta(key: string, rtl: boolean): -1 | 0 | 1 {
+  if (key === "ArrowDown" || key === (rtl ? "ArrowLeft" : "ArrowRight")) {
+    return 1;
+  }
+  if (key === "ArrowUp" || key === (rtl ? "ArrowRight" : "ArrowLeft")) {
+    return -1;
+  }
+  return 0;
 }
 
 /**
@@ -219,6 +308,15 @@ function isRtl(grip: HTMLElement | null): boolean {
 export function useRowReorder<TRow>(options: {
   enabled: boolean;
   onRowReorder?: RowReorderHandler<TRow>;
+  movePolicy?: RowMovePolicy;
+  confirmMove?: RowMoveConfirmHandler<TRow>;
+  onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
+  getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  resolveMove?: (
+    row: TRow,
+    target: TRow,
+    position: RowDropPosition
+  ) => RowReorderDecision<TRow> | undefined;
   /**
    * The three labels this state machine speaks. The other three on
    * {@link RowReorderLabels} name the grip and its mobile buttons, which the
@@ -227,9 +325,17 @@ export function useRowReorder<TRow>(options: {
   labels: Pick<
     RowReorderLabels,
     "rowLifted" | "rowMoved" | "rowReorderCancelled"
-  >;
+  > &
+    Partial<
+      Pick<
+        RowReorderLabels,
+        "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever"
+      >
+    >;
   /** Look up a row in the current source by its rendered index. */
   rowAt: (localIndex: number) => TRow | undefined;
+  /** Stable identity used to attach confirmation to its rendered row. */
+  getRowId?: (row: TRow) => string;
 }): RowReorderState<TRow> {
   const { enabled, labels } = options;
   const hostReorder = options.onRowReorder;
@@ -239,22 +345,124 @@ export function useRowReorder<TRow>(options: {
     }
   );
   const rowAt = useEventCallback(options.rowAt);
+  const getMoveMenu = useEventCallback((row: TRow) =>
+    options.getMoveMenu?.(row)
+  );
+  const resolveMove = useEventCallback(
+    (row: TRow, target: TRow, position: RowDropPosition) =>
+      options.resolveMove?.(row, target, position)
+  );
+  const hostMove = useEventCallback((request: RowMoveRequest<TRow>) =>
+    options.onRowMove?.(request)
+  );
+  const hostConfirmMove = useEventCallback((request: RowMoveRequest<TRow>) =>
+    options.confirmMove?.(request)
+  );
 
   const [lifted, setLifted] = useState<{
     rowId: string;
     from: number;
   } | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+  const [overPosition, setOverPosition] = useState<RowDropPosition | null>(
+    null
+  );
+  const [pendingMove, setPendingMove] = useState<RowMoveRequest<TRow> | null>(
+    null
+  );
   const [announcement, setAnnouncement] = useState("");
 
   const reset = useCallback(() => {
     setLifted(null);
     setOverIndex(null);
+    setOverPosition(null);
   }, []);
 
+  const announceMove = useEventCallback((request: RowMoveRequest<TRow>) => {
+    setAnnouncement(
+      request.kind === "group"
+        ? (labels.rowMovedToGroup?.(request.toGroup.label) ??
+            `Row moved to ${request.toGroup.label}`)
+        : (labels.rowMovedUnder?.(request.toParent.label) ??
+            `Row moved under ${request.toParent.label}`)
+    );
+  });
+
+  const executeMove = useEventCallback((request: RowMoveRequest<TRow>) => {
+    hostMove?.(request);
+    announceMove(request);
+    setPendingMove(null);
+    reset();
+  });
+
+  const requestMove = useEventCallback(
+    async (request: RowMoveRequest<TRow>) => {
+      const policy = options.movePolicy ?? "never";
+      if (policy === "never") {
+        setAnnouncement(
+          labels.moveRejectedPolicyNever ??
+            "Cross-boundary row moves are disabled"
+        );
+        reset();
+        return;
+      }
+      if (policy === "auto") {
+        executeMove(request);
+        return;
+      }
+      if (options.confirmMove) {
+        let approved = false;
+        try {
+          approved = (await hostConfirmMove(request)) ?? false;
+        } catch {
+          approved = false;
+        }
+        if (approved) executeMove(request);
+        else {
+          setAnnouncement(labels.rowReorderCancelled);
+          reset();
+        }
+        return;
+      }
+      setPendingMove(request);
+      reset();
+    }
+  );
+
   const commit = useEventCallback(
-    (fromLocal: number, toLocal: number, row: TRow, windowStart: number) => {
-      if (!enabled || fromLocal === toLocal) {
+    (
+      fromLocal: number,
+      toLocal: number,
+      row: TRow,
+      target: TRow,
+      windowStart: number,
+      position: RowDropPosition
+    ) => {
+      if (!enabled) {
+        reset();
+        return;
+      }
+      const decision = resolveMove?.(row, target, position);
+      if (decision?.kind === "reject") {
+        setAnnouncement(decision.message);
+        reset();
+        return;
+      }
+      if (decision?.kind === "move") {
+        void requestMove(decision.request);
+        return;
+      }
+      if (decision?.kind === "reorder") {
+        if (decision.from === decision.to) {
+          reset();
+          return;
+        }
+        onRowReorder(decision.from, decision.to, decision.row);
+        setAnnouncement(labels.rowMoved(decision.from + 1, decision.to + 1));
+        reset();
+        return;
+      }
+      if (fromLocal === toLocal) {
         reset();
         return;
       }
@@ -281,6 +489,7 @@ export function useRowReorder<TRow>(options: {
         event.dataTransfer.effectAllowed = "move";
         setLifted({ rowId, from: localIndex });
         setOverIndex(localIndex);
+        setOverPosition("before");
       },
       onDragEnd: reset,
     }),
@@ -296,6 +505,10 @@ export function useRowReorder<TRow>(options: {
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
         setOverIndex(localIndex);
+        const bounds = event.currentTarget?.getBoundingClientRect?.();
+        setOverPosition(
+          bounds ? rowDropPosition(event.clientY, bounds) : "after"
+        );
       },
       onDrop: (event) => {
         const payload = event.dataTransfer.getData(ROW_DND_MIME);
@@ -305,10 +518,23 @@ export function useRowReorder<TRow>(options: {
         const fromLocal = Number(payload.slice(sep + 1));
         if (!Number.isFinite(fromLocal)) return;
         const dragged = rowAt(fromLocal);
-        commit(fromLocal, localIndex, dragged ?? row, windowStart);
+        const bounds = event.currentTarget?.getBoundingClientRect?.();
+        const fallbackPosition =
+          overPosition ?? (localIndex > fromLocal ? "after" : "before");
+        const position = bounds
+          ? rowDropPosition(event.clientY, bounds)
+          : fallbackPosition;
+        commit(
+          fromLocal,
+          localIndex,
+          dragged ?? row,
+          row,
+          windowStart,
+          position
+        );
       },
     }),
-    [commit, lifted, rowAt]
+    [commit, lifted, overPosition, rowAt]
   );
 
   const handleKeyDown = useEventCallback(
@@ -327,35 +553,39 @@ export function useRowReorder<TRow>(options: {
         reset();
         return;
       }
-      if (event.key === " " || event.key === "Spacebar") {
+      if (isGrabKey(event.key)) {
         event.preventDefault();
         if (lifted?.rowId === rowId) {
           const to = overIndex ?? lifted.from;
-          commit(lifted.from, to, row, windowStart);
+          const target = rowAt(to) ?? row;
+          commit(
+            lifted.from,
+            to,
+            row,
+            target,
+            windowStart,
+            to > lifted.from ? "after" : "before"
+          );
           return;
         }
         setLifted({ rowId, from: localIndex });
         setOverIndex(localIndex);
+        setOverPosition("before");
         setAnnouncement(
           labels.rowLifted(datasetIndex(localIndex, windowStart) + 1)
         );
         return;
       }
       if (lifted?.rowId !== rowId) return;
-      const rtl = isRtl(event.currentTarget);
-      const down =
-        event.key === "ArrowDown" ||
-        event.key === (rtl ? "ArrowLeft" : "ArrowRight");
-      const up =
-        event.key === "ArrowUp" ||
-        event.key === (rtl ? "ArrowRight" : "ArrowLeft");
-      if (!down && !up) return;
+      const delta = arrowDelta(event.key, isRtl(event.currentTarget));
+      if (delta === 0) return;
       event.preventDefault();
       const next = Math.min(
         rowCount - 1,
-        Math.max(0, (overIndex ?? lifted.from) + (down ? 1 : -1))
+        Math.max(0, (overIndex ?? lifted.from) + delta)
       );
       setOverIndex(next);
+      setOverPosition(next > lifted.from ? "after" : "before");
     }
   );
 
@@ -369,14 +599,46 @@ export function useRowReorder<TRow>(options: {
     ) => {
       const to = localIndex + delta;
       if (to < 0 || to >= rowCount) return;
-      commit(localIndex, to, row, windowStart);
+      commit(
+        localIndex,
+        to,
+        row,
+        rowAt(to) ?? row,
+        windowStart,
+        delta > 0 ? "after" : "before"
+      );
     }
   );
+
+  const selectMoveTarget = useEventCallback((target: RowMoveTarget<TRow>) => {
+    if (target.disabledReason) {
+      setAnnouncement(target.disabledReason);
+      return;
+    }
+    if (target.request) void requestMove(target.request);
+  });
 
   const isLifted = useCallback(
     (rowId: string) => lifted?.rowId === rowId,
     [lifted]
   );
+  const isMovePending = useCallback(
+    (row: TRow) => {
+      if (!pendingMove) return false;
+      if (!options.getRowId) return pendingMove.row === row;
+      return options.getRowId(pendingMove.row) === options.getRowId(row);
+    },
+    [options.getRowId, pendingMove]
+  );
+
+  const confirmPendingMove = useEventCallback(() => {
+    if (pendingMove) executeMove(pendingMove);
+  });
+
+  const cancelMove = useEventCallback(() => {
+    setPendingMove(null);
+    setAnnouncement(labels.rowReorderCancelled);
+  });
 
   const rowAttrs = useCallback<RowReorderState<TRow>["rowAttrs"]>(
     (rowId, localIndex) => {
@@ -390,34 +652,48 @@ export function useRowReorder<TRow>(options: {
         from !== undefined && localIndex > from ? "after" : "before";
       return {
         "data-dragging": dragging ? "" : undefined,
-        "data-drop": isTarget ? dropSide : undefined,
+        "data-drop": isTarget ? (overPosition ?? dropSide) : undefined,
       };
     },
-    [isLifted, lifted, overIndex]
+    [isLifted, lifted, overIndex, overPosition]
   );
 
   return useMemo(
     () => ({
       lifted,
       overIndex,
+      overPosition,
+      pendingMove,
       announcement: enabled ? announcement : "",
       isLifted,
+      isMovePending,
       dragProps,
       dropProps,
       handleKeyDown,
       moveBy,
+      moveMenu: getMoveMenu,
+      selectMoveTarget,
+      confirmMove: confirmPendingMove,
+      cancelMove,
       rowAttrs,
     }),
     [
       lifted,
       overIndex,
+      overPosition,
+      pendingMove,
       enabled,
       announcement,
       isLifted,
+      isMovePending,
       dragProps,
       dropProps,
       handleKeyDown,
       moveBy,
+      getMoveMenu,
+      selectMoveTarget,
+      confirmPendingMove,
+      cancelMove,
       rowAttrs,
     ]
   );

@@ -124,7 +124,7 @@ plus the `AbortSignal` for the request it starts.
 
 ## Feature composition
 
-`features={[rowReorder(fn)]}` from `@adapttable/<kit>/row-reorder` (or the
+`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder` (or the
 `@adapttable/<kit>/features` barrel, or `@adapttable/core/features`). The
 import is the switch, and it is the only way in — see
 [feature composition](./features.md) and, for a v2 table,
@@ -149,7 +149,7 @@ A feature whose behaviour is a hook carries a `provider` instead —
 feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
 `useFeatureState`. A provider sits above the chrome, so it reads the live rows
-and labels through `useTableRuntime` (`TableRuntime`) rather than being handed
+and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather than being handed
 them; chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
@@ -751,13 +751,37 @@ the host can pass `isCellFlashing` — a pulse, not a locate-the-row
 highlight, and never against `prefers-reduced-motion`. See
 [realtime](./realtime.md).
 
-**Row reordering.** `rowReorder(handler)` from `@adapttable/<kit>/row-reorder` arms it and `RowReorderHandler` is the write; `ROW_REORDER` is the `FeatureStateKey` its provider publishes under, so custom chrome reads the live state with `useFeatureState(ROW_REORDER)`; `applyRowReorder(rows, from, to)` is the in-memory helper and `datasetIndex(local, windowStart)` turns a rendered slot into a dataset index. `useRowReorder` returns `TableRowReorderState`; the adapter entry names the same contract `RowReorderState`. `rowReorderSignature` is the memo digest a virtualized row compares, including a global in-flight bit so every visible row holds a live drop target for the drag. `rowReorderDropStyle` is the insertion-line CSS kits apply from `rowAttrs`. `REORDER_COLUMN_KEY` is the reserved layout key (hide / start-pin from the Columns menu), `REORDER_COLUMN_WIDTH` the pin-lead width, `ROW_DND_MIME` the HTML5 drag type. Labels: `reorderRow`, `moveRowUp`, `moveRowDown`, `rowLifted`, `rowMoved`, `rowReorderCancelled` (`RowReorderLabels`). Each adapter mounts `RowReorderHandle` / `RowReorderHandleProps` and
+**Row reordering.** `rowReorder(handler, options)` from
+`@adapttable/<kit>/row-reorder` arms flat, grouped, and tree reorder.
+`RowReorderHandler` is an ordinal write: dataset positions for a flat source,
+sibling positions for grouped/tree rows. `RowReorderOptions` adds
+`movePolicy` (`RowMovePolicy`: `"auto" | "confirm" | "never"`),
+`onGroupMove` (`RowGroupMoveHandler`), `onTreeMove`
+(`RowTreeMoveHandler`), and async `confirmMove` (`RowMoveConfirmHandler`).
+Requests are `RowMoveRequest`; group destinations use `RowGroupRef` /
+`RowGroupLevel`, and tree destinations use `RowTreeParentRef`.
+`treeMoveCreatesCycle` guards re-parenting and `rowDropPosition` resolves the
+`RowDropPosition` before/inside/after pointer zone. `RowReorderDecision` is the
+headless seam's reorder/move/reject result.
+
+`ROW_REORDER` is the `FeatureStateKey` its provider publishes under, so custom
+chrome reads `RowReorderState` (`TableRowReorderState` from the main entry)
+with `useFeatureState(ROW_REORDER)`.
+`applyRowReorder`, `datasetIndex`, `useRowReorder`,
+`rowReorderSignature`, `rowReorderDropStyle`, `REORDER_COLUMN_KEY`,
+`REORDER_COLUMN_WIDTH`, and `ROW_DND_MIME` are the headless primitives.
+Nested move menus use `RowMoveMenuModel` / `RowMoveTarget`; the adapter seam is
+`RowMoveMenuSlotProps`, `RowMoveMenuItemProps`, and
+`RowMoveConfirmationProps`. Each adapter mounts
+`RowReorderHandle` / `RowReorderHandleProps` and
 `RowReorderButtons` / `RowReorderButtonsProps` over
 `RowReorderHandleChrome` / `RowReorderHandleChromeProps` /
 `RowReorderHandleSlots` / `RowReorderHandleSlotProps` and
 `RowReorderButtonsChrome` / `RowReorderButtonsChromeProps` /
 `RowReorderButtonsSlots` / `RowReorderMoveButtonProps`.
-`RowReorderAnnouncer` stays on `@adapttable/core/adapter`. See
+`RowReorderAnnouncer` stays on `@adapttable/core/adapter`. Move-menu,
+confirmation, success, policy, sort, and cycle labels extend
+`RowReorderLabels` / `TableLabels`. See
 [row reordering](./row-reordering.md).
 
 **Row and column spanning.** `getCellSpan` / `ColumnDef.colSpan` / `ColumnDef.rowSpan` produce a per-row `TableBodyCell` list (`BodyCell` on the adapter entry) through `buildBodyCells`, `cellsForRow`, `coveredAddressSet`, `rowSpanSignature`, `spanningArmed`, `bodyCellsHaveRowSpan` and `cellSpanMark`. `cellSpanAppearance` (`"merged"` / `"plain"`) is how the origin cell is painted. Arrow keys skip a covered cell; CSV writes the origin once. Types: `GetCellSpan`, `GetCellSpanArgs`, `CellSpanRequest`, `CellSpanAppearance`, `TableBodyCell`. See [row and column spanning](./row-spanning.md).

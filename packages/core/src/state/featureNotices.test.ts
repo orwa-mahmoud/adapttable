@@ -78,17 +78,14 @@ describe("collectFeatureNotices", () => {
     ).toEqual([]);
   });
 
-  it("marks pin and reorder as off while nested", () => {
+  it("marks pin as off while nested but keeps row reorder available", () => {
     const notices = collectFeatureNotices({
       ...BASE,
       rowPinningRequested: true,
       rowReorderRequested: true,
       nestedArmed: true,
     });
-    expect(notices.map((n) => n.kind)).toEqual([
-      "pin-nested",
-      "reorder-nested",
-    ]);
+    expect(notices.map((n) => n.kind)).toEqual(["pin-nested"]);
     expect(notices.every((n) => n.appearance === "off")).toBe(true);
   });
 

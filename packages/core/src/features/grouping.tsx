@@ -164,20 +164,14 @@ function LiveGrouping({
         }
       : source;
   const groupingArmed = grouping !== undefined;
-  useEffect(() => {
-    if (!groupingArmed || !chrome.hasRowReorder) return;
-    devWarn(
-      "The row-reorder feature is ignored while grouping or a tree is armed — reorder a flat list, not a nested one."
-    );
-  }, [groupingArmed, chrome.hasRowReorder]);
   return children({
     ...chrome,
     grouping,
     groupingArmed,
     source: viewSource,
     editingRows: viewSource.rows,
-    hasRowReorder: groupingArmed ? false : chrome.hasRowReorder,
-    rowReorder: groupingArmed ? undefined : chrome.rowReorder,
+    hasRowReorder: chrome.hasRowReorder,
+    rowReorder: chrome.rowReorder,
     table: {
       ...chrome.table,
       pagination: computePagination({

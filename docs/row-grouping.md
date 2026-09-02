@@ -429,6 +429,18 @@ values a column actually has; and while `sum` of nothing is `0`, `avg`, `min`
 and `max` of nothing are `undefined` — an average of no numbers is
 unanswerable, not zero.
 
+## Reorder inside a group or move between groups
+
+Compose `grouping` and the kit's `rowReorder` feature together. A reorder that
+stays inside one leaf group calls the ordinary handler with positions scoped
+to that group. Crossing a boundary — by drag, arrows, mobile controls, or
+**Move to group…** — calls `onGroupMove(row, fromGroup, toGroup, position)`.
+
+`RowGroupRef.levels` gives the host every grouping column and raw destination
+value. `movePolicy` is `"never"` by default, `"confirm"` for a kit-native
+confirmation, or `"auto"` for an immediate host write. See
+[row reordering](./row-reordering.md) for the complete contract.
+
 ## Options
 
 `grouping(key, extras?)` — first argument is the column key (or ordered list);

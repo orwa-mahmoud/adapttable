@@ -97,11 +97,23 @@ export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export type { FilterDef } from "./filters/filterDefs";
 export type { FilterTypeSpec } from "./filters/filterRegistry";
 export type { GroupSort } from "./grouping/groupRows";
+export type { RowGroupLevel, RowGroupRef } from "./grouping/groupRows";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export type { FeatureProps } from "./props";
 export type { SidePanelOptions } from "./props";
 export type { CellSpanAppearance, GetCellSpan } from "./rows/cellSpan";
 export type { ExtraRow } from "./rows/extraRows";
+export type {
+  RowGroupMoveHandler,
+  RowMoveConfirmHandler,
+  RowMoveMenuModel,
+  RowMovePolicy,
+  RowMoveRequest,
+  RowMoveTarget,
+  RowReorderOptions,
+  RowTreeMoveHandler,
+  RowTreeParentRef,
+} from "./rows/rowMove";
 export type { RowPinState } from "./rows/rowPinning";
 export type { RowReorderHandler } from "./rows/rowReorder";
 export type { RowHeight, RowStyle } from "./rows/rowStyle";

@@ -434,7 +434,7 @@ describe("useTableChrome", () => {
     }
   });
 
-  it("arms row reorder when the feature is composed, and warns under grouping", () => {
+  it("keeps row reorder armed when grouping is composed", () => {
     resetDevWarnings();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     try {
@@ -490,9 +490,9 @@ describe("useTableChrome", () => {
           };
         }
       );
-      expect(grouped.result.current.hasRowReorder).toBe(false);
-      expect(grouped.result.current.rowReorder).toBeUndefined();
-      expect(warn.mock.calls[0]?.[0]).toContain("row-reorder");
+      expect(grouped.result.current.hasRowReorder).toBe(true);
+      expect(grouped.result.current.rowReorder).toBeDefined();
+      expect(warn).not.toHaveBeenCalled();
     } finally {
       warn.mockRestore();
       resetDevWarnings();

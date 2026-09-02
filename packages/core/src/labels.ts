@@ -157,6 +157,21 @@ export const defaultLabels: Required<TableLabels> = {
   rowLifted: (position) => `Row ${String(position)} lifted`,
   rowMoved: (from, to) => `Row moved from ${String(from)} to ${String(to)}`,
   rowReorderCancelled: "Reorder cancelled",
+  rowMoveOptions: "Row move options",
+  moveToGroup: "Move to group…",
+  moveUnder: "Move under…",
+  moveToTopLevel: "Move to top level",
+  confirmRowMoveTitle: "Confirm row move",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Move ${row} from ${from} to ${to}?`,
+  confirmRowMove: "Move",
+  rowMovedToGroup: (group) => `Row moved to ${group}`,
+  rowMovedUnder: (parent) => `Row moved under ${parent}`,
+  moveRejectedPolicyNever: "Cross-boundary row moves are disabled",
+  moveRejectedSorted: "Clear sorting before changing row order",
+  moveRejectedCycle: "A row cannot move inside itself or its descendant",
+  moveUnavailable: "This row move is not available",
+  rootLevel: "Top level",
   pinToTop: "Pin to top",
   pinToBottom: "Pin to bottom",
   unpinRow: "Unpin row",
@@ -223,7 +238,8 @@ export const defaultLabels: Required<TableLabels> = {
   noticeVirtualizePaged:
     "Virtualization is off — this paged table shows one page at a time.",
   noticePinNested: "Row pinning is off while grouping or a tree is on.",
-  noticeReorderNested: "Row reorder is off while grouping or a tree is on.",
+  noticeReorderNested:
+    "Cross-boundary row moves follow the configured move policy.",
   noticeGroupingUnavailable: "Grouping is off — this source cannot group.",
   noticeExportAllPage:
     "Export all is off — this source provides one page at a time.",

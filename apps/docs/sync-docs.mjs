@@ -45,7 +45,7 @@ export const TITLES = {
   "selection.md": "React table row selection & bulk actions",
   "row-expansion.md": "React table expandable rows — detail panels",
   "cell-editing.md": "React table inline cell editing — onCellEdit",
-  "row-reordering.md": "React table row reordering — drag handle",
+  "row-reordering.md": "React table row reordering — groups and trees",
   "row-pinning.md": "React table row pinning — sticky top and bottom",
   "row-spanning.md": "React table row and column spanning",
   "full-width-rows.md": "React table full-width and separator rows",
@@ -117,7 +117,7 @@ export const DESCRIPTIONS = {
   "cell-editing.md":
     "Inline cell editing for React CRUD tables — opt-in onCellEdit, text/number/select editors, keyboard commit/cancel, kit-native inputs across every adapter.",
   "row-reordering.md":
-    "Row reordering for React data tables — opt-in onRowReorder, a drag handle with Space-lift keyboard, dataset-relative indices, mobile up/down. Grouping and trees refuse it.",
+    "Row reordering for React data tables — sibling reorder, cross-group moves, tree re-parenting with cycle guards, auto/confirm/never policy, keyboard menus, mobile and RTL.",
   "row-pinning.md":
     "Row pinning for React data tables — sticky top and bottom rows outside the virtual window, { top, bottom } id lists, URL-synced, mobile actions only.",
   "row-spanning.md":

@@ -320,8 +320,8 @@ to. The range is the one the pagination footer shows, from the same
 arithmetic, so the two never disagree. The strip hosts the selection figures
 rather than repeating them, so turning it on does not print them twice.
 
-Opted-in features that cannot run (virtualize on a paged table, pin or
-reorder under grouping, `exportCsv()` with `scope: "all"` on a page-scoped source,
+Opted-in features that cannot run (virtualize on a paged table, pin under
+grouping/tree rows, `exportCsv()` with `scope: "all"` on a page-scoped source,
 edits with no writer) still show as `FeatureNotice` items
 (`FeatureNoticeKind` is the union). They live on
 `StatusBarChromeProps.notices` and `TableChrome.featureNotices`, and they

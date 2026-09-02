@@ -34,6 +34,7 @@ import {
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -47,7 +48,16 @@ import {
   type TreeToggleProps,
   type TreeToggleSlots,
 } from "@adapttable/core/adapter";
-import { Button, Flex, IconButton, Popover, TextField } from "@radix-ui/themes";
+import {
+  Button,
+  DropdownMenu,
+  Flex,
+  IconButton,
+  Popover,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
+import { useEffect, useRef, useState } from "react";
 
 import { FiltersIcon } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
@@ -530,6 +540,147 @@ function ReorderHandle({
   );
 }
 
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [open, setOpen] = useState(false);
+  const [direction, setDirection] = useState<"ltr" | "rtl">("ltr");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const confirmationRef = useRef(confirmation);
+  confirmationRef.current = confirmation;
+  useEffect(() => {
+    if (confirmation) setOpen(true);
+  }, [confirmation]);
+
+  const restoreTriggerFocus = () => {
+    queueMicrotask(() => triggerRef.current?.focus());
+  };
+  const close = () => {
+    setOpen(false);
+    restoreTriggerFocus();
+  };
+
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <DropdownMenu.Root
+        open={open}
+        dir={direction}
+        onOpenChange={(next) => {
+          if (next) {
+            setDirection(
+              triggerRef.current?.closest('[dir="rtl"]') ? "rtl" : "ltr"
+            );
+          } else {
+            setTimeout(() => confirmationRef.current?.onCancel(), 0);
+            restoreTriggerFocus();
+          }
+          setOpen(next);
+        }}
+      >
+        <DropdownMenu.Trigger>
+          <IconButton
+            ref={triggerRef}
+            type="button"
+            size="1"
+            variant="ghost"
+            color="gray"
+            aria-label={label}
+            data-adapttable-part="row-move-menu-trigger"
+            onClick={(event) => event.stopPropagation()}
+          >
+            ⋮
+          </IconButton>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content
+          aria-label={label}
+          align="start"
+          sideOffset={4}
+          data-adapttable-part="row-move-menu-content"
+          style={{ minWidth: "12rem", padding: 8 }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {confirmation ? (
+            <Flex
+              role="alertdialog"
+              aria-label={confirmation.title}
+              direction="column"
+              gap="2"
+              data-adapttable-part="row-move-confirmation"
+            >
+              <Text weight="bold">{confirmation.title}</Text>
+              <Text>{confirmation.description}</Text>
+              <Flex justify="end" gap="2">
+                <Button
+                  type="button"
+                  size="1"
+                  variant="soft"
+                  color="gray"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    confirmation.onCancel();
+                    close();
+                  }}
+                >
+                  {confirmation.cancelLabel}
+                </Button>
+                <Button
+                  type="button"
+                  size="1"
+                  variant="solid"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    confirmation.onConfirm();
+                    close();
+                  }}
+                >
+                  {confirmation.confirmLabel}
+                </Button>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex direction="column" gap="1">
+              {items.map((item) => (
+                <DropdownMenu.Item
+                  key={item.id}
+                  disabled={item.disabled}
+                  title={item.disabledReason}
+                  data-adapttable-part="row-move-menu-item"
+                  style={{
+                    height: "auto",
+                    justifyContent: "flex-start",
+                    textAlign: "start",
+                    whiteSpace: "normal",
+                  }}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    item.onSelect();
+                    setTimeout(() => {
+                      if (!confirmationRef.current) close();
+                    }, 0);
+                  }}
+                >
+                  <Flex direction="column" align="start">
+                    <Text>{item.label}</Text>
+                    {item.disabledReason ? (
+                      <Text size="1" color="gray">
+                        {item.disabledReason}
+                      </Text>
+                    ) : null}
+                  </Flex>
+                </DropdownMenu.Item>
+              ))}
+            </Flex>
+          )}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </span>
+  );
+}
+
 /**
  * The drag handle for reordering a row.
  *
@@ -539,7 +690,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -575,7 +729,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({

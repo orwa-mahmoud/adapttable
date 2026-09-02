@@ -1640,7 +1640,7 @@ export interface FeatureNotice {
 export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 
 // @public
-export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "reorder-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
+export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
 
 // @public
 export interface FeaturePatch<TRow = unknown> {
@@ -2072,6 +2072,7 @@ export type GroupedFlatEntry<TRow> = {
     level: number;
     groupBy: string;
     path: readonly string[];
+    group?: RowGroupRef;
     leafRows: readonly TRow[];
     leafIds: readonly string[];
     serverCount?: number;
@@ -2103,6 +2104,8 @@ export type GroupedFlatEntry<TRow> = {
     row: TRow;
     index: number;
     groupKey: string;
+    groupPosition?: number;
+    group?: RowGroupRef;
 } | TableExtraEntry;
 
 // @public
@@ -2948,6 +2951,12 @@ export interface RowActionsRenderContext<TRow> {
 export type RowActionsRenderer<TRow> = (ctx: RowActionsRenderContext<TRow>) => ReactNode;
 
 // @public
+export type RowDropPosition = "before" | "inside" | "after";
+
+// @public
+export function rowDropPosition(clientY: number, bounds: Pick<DOMRect, "top" | "height">): RowDropPosition;
+
+// @public
 export type RowEditDrafts = Readonly<Record<string, string>>;
 
 // @public
@@ -2982,7 +2991,62 @@ export interface RowExpansionState {
 }
 
 // @public
+export interface RowGroupLevel {
+    readonly key: string;
+    readonly label: string;
+    readonly value: unknown;
+}
+
+// @public
+export type RowGroupMoveHandler<TRow> = (row: TRow, fromGroup: RowGroupRef, toGroup: RowGroupRef, position: number) => unknown;
+
+// @public
+export interface RowGroupRef {
+    readonly id: string;
+    readonly label: string;
+    readonly levels: readonly RowGroupLevel[];
+}
+
+// @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
+
+// @public
+export type RowMoveConfirmHandler<TRow> = (request: RowMoveRequest<TRow>) => Promise<boolean>;
+
+// @public
+export interface RowMoveMenuModel<TRow> {
+    readonly kind: "group" | "tree";
+    readonly label: string;
+    readonly targets: readonly RowMoveTarget<TRow>[];
+}
+
+// @public
+export type RowMovePolicy = "auto" | "confirm" | "never";
+
+// @public
+export type RowMoveRequest<TRow> = {
+    readonly kind: "group";
+    readonly row: TRow;
+    readonly rowLabel: string;
+    readonly fromGroup: RowGroupRef;
+    readonly toGroup: RowGroupRef;
+    readonly position: number;
+} | {
+    readonly kind: "tree";
+    readonly row: TRow;
+    readonly rowLabel: string;
+    readonly fromParent: RowTreeParentRef<TRow>;
+    readonly toParent: RowTreeParentRef<TRow>;
+    readonly position: number;
+};
+
+// @public
+export interface RowMoveTarget<TRow> {
+    readonly disabledReason?: string;
+    readonly id: string;
+    readonly label: string;
+    readonly request?: RowMoveRequest<TRow>;
+}
 
 // @public
 export interface RowMutationHandlers<TRow> {
@@ -3062,16 +3126,51 @@ export interface RowPinState {
 }
 
 // @public
+export type RowReorderDecision<TRow> = {
+    readonly kind: "reorder";
+    readonly from: number;
+    readonly to: number;
+    readonly row: TRow;
+} | {
+    readonly kind: "move";
+    readonly request: RowMoveRequest<TRow>;
+} | {
+    readonly kind: "reject";
+    readonly message: string;
+};
+
+// @public
 export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
 
 // @public
 export interface RowReorderLabels {
+    cancel?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
     moveRowDown: string;
     moveRowUp: string;
+    moveToGroup?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
     reorderRow: string;
+    rootLevel?: string;
     rowLifted: (position: number) => string;
     rowMoved: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
     rowReorderCancelled: string;
+}
+
+// @public
+export interface RowReorderOptions<TRow> {
+    readonly confirmMove?: RowMoveConfirmHandler<TRow>;
+    readonly movePolicy?: RowMovePolicy;
+    readonly onGroupMove?: RowGroupMoveHandler<TRow>;
+    readonly onTreeMove?: RowTreeMoveHandler<TRow>;
 }
 
 // @public
@@ -3092,6 +3191,16 @@ export type RowStyle<TRow> = (row: TRow, index: number) => CSSProperties | undef
 
 // @public
 export function rowStyleArmed(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
+
+// @public
+export type RowTreeMoveHandler<TRow> = (row: TRow, fromParent: RowTreeParentRef<TRow>, toParent: RowTreeParentRef<TRow>, position: number) => unknown;
+
+// @public
+export interface RowTreeParentRef<TRow> {
+    readonly id: string | null;
+    readonly label: string;
+    readonly row: TRow | null;
+}
 
 // @public
 export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
@@ -3380,6 +3489,7 @@ export interface TableChrome<TRow> {
     table: UseDataTableResult<TRow>;
     tree?: {
         entries: readonly TreeEntry<TRow>[];
+        allEntries?: readonly TreeEntry<TRow>[];
         expansion: TreeExpansionState;
         columnKey?: string;
     };
@@ -3492,6 +3602,9 @@ export interface TableLabels {
     commandEmpty?: string;
     commandPalette?: string;
     commandSearch?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
     contextMenu?: string;
     copyCells?: string;
     cutCells?: string;
@@ -3564,9 +3677,16 @@ export interface TableLabels {
     moreGroups?: (remaining: number) => string;
     moreRowsInGroup?: (remaining: number) => string;
     moveEnd?: string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
     moveRowDown?: string;
     moveRowUp?: string;
     moveStart?: string;
+    moveToGroup?: string;
+    moveToTopLevel?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
     moveViewDown?: string;
     moveViewUp?: string;
     nextPage?: string;
@@ -3576,6 +3696,7 @@ export interface TableLabels {
     noticeExportAllPage?: string;
     noticeGroupingUnavailable?: string;
     noticePinNested?: string;
+    // @deprecated
     noticeReorderNested?: string;
     noticeVirtualizePaged?: string;
     opAfter?: string;
@@ -3640,9 +3761,13 @@ export interface TableLabels {
     resetColumns?: string;
     resizeColumn?: string;
     retry?: string;
+    rootLevel?: string;
     rowActionsMenu?: string;
     rowLifted?: (position: number) => string;
     rowMoved?: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
+    rowMoveOptions?: string;
     rowReorderCancelled?: string;
     rowSeparator?: string;
     rowsPerPage?: string;
@@ -3739,6 +3864,8 @@ export interface TableQueryParams {
 // @public
 export interface TableRowReorderState<TRow> {
     announcement: string;
+    cancelMove: () => void;
+    confirmMove: () => void;
     dragProps: (rowId: string, localIndex: number) => {
         draggable: true;
         onDragStart: (event: DragEvent_2<HTMLElement>) => void;
@@ -3750,16 +3877,21 @@ export interface TableRowReorderState<TRow> {
     };
     handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
     isLifted: (rowId: string) => boolean;
+    isMovePending?: (row: TRow) => boolean;
     lifted: {
         rowId: string;
         from: number;
     } | null;
     moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
+    moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
     overIndex: number | null;
+    overPosition: RowDropPosition | null;
+    pendingMove: RowMoveRequest<TRow> | null;
     rowAttrs: (rowId: string, localIndex: number) => {
         "data-dragging"?: "";
-        "data-drop"?: "before" | "after";
+        "data-drop"?: RowDropPosition;
     };
+    selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
 }
 
 // @public
@@ -3883,8 +4015,10 @@ export interface TreeEntry<TRow> {
     key: string;
     level: number;
     loading?: boolean;
+    parentId?: string;
     path: readonly string[];
     row: TRow;
+    siblingIndex?: number;
 }
 
 // @public
@@ -3901,6 +4035,9 @@ export interface TreeExpansionState {
 export function treeIndentStyle(level: number): {
     paddingInlineStart?: string;
 };
+
+// @public
+export function treeMoveCreatesCycle(rowId: string, descendantIds: readonly string[], targetParentId: string | null): boolean;
 
 // @public
 export interface TreeShape<TRow> {
@@ -4421,8 +4558,14 @@ export interface UseRowPinningUrlStateResult {
 export function useRowReorder<TRow>(options: {
     enabled: boolean;
     onRowReorder?: RowReorderHandler<TRow>;
-    labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled">;
+    movePolicy?: RowMovePolicy;
+    confirmMove?: RowMoveConfirmHandler<TRow>;
+    onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
+    getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+    resolveMove?: (row: TRow, target: TRow, position: RowDropPosition) => RowReorderDecision<TRow> | undefined;
+    labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled"> & Partial<Pick<RowReorderLabels, "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever">>;
     rowAt: (localIndex: number) => TRow | undefined;
+    getRowId?: (row: TRow) => string;
 }): TableRowReorderState<TRow>;
 
 // @public

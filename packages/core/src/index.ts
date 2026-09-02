@@ -671,6 +671,20 @@ export {
   visibleRowActions,
 } from "./rows/rowActions";
 export {
+  type RowDropPosition,
+  rowDropPosition,
+  type RowGroupMoveHandler,
+  type RowMoveConfirmHandler,
+  type RowMoveMenuModel,
+  type RowMovePolicy,
+  type RowMoveRequest,
+  type RowMoveTarget,
+  type RowReorderOptions,
+  type RowTreeMoveHandler,
+  type RowTreeParentRef,
+  treeMoveCreatesCycle,
+} from "./rows/rowMove";
+export {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
   type RowMutationHandlers,
@@ -694,6 +708,7 @@ export {
 export {
   applyRowReorder,
   datasetIndex,
+  type RowReorderDecision,
   type RowReorderHandler,
   type RowReorderLabels,
   useRowReorder,
@@ -860,6 +875,8 @@ export {
   type GroupPaging,
   type GroupSort,
   groupValueKey,
+  type RowGroupLevel,
+  type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
 export {

@@ -53,7 +53,6 @@ import {
   useDataTable,
   type UseDataTableResult,
 } from "./useDataTable/useDataTable";
-import { devWarn } from "./utils/devWarn";
 
 export type {
   BulkAction,
@@ -331,7 +330,8 @@ export interface TableChrome<TRow> {
   hasRowActions: boolean;
   /**
    * Whether a reorder column exists at all, hidden or not — what the column
-   * menu offers. False when grouping or a tree is armed (reorder is refused).
+   * menu offers. Grouped and tree models keep it armed and resolve sibling
+   * reorder separately from cross-boundary moves.
    */
   hasRowReorder: boolean;
   /**
@@ -363,6 +363,8 @@ export interface TableChrome<TRow> {
   tree?: {
     /** The flattened hierarchy, in render order. */
     entries: readonly TreeEntry<TRow>[];
+    /** Every loaded node, including descendants of collapsed parents. */
+    allEntries?: readonly TreeEntry<TRow>[];
     /** Which nodes are open. */
     expansion: TreeExpansionState;
     /** Which column carries the chevron and the indent. */
@@ -725,22 +727,16 @@ export function useTableChrome<TRow>(
 
   // See TableChrome.editingRows — extras overlay the grouped leaf set.
 
-  // Reorder a flat list, never a nested one: grouping and trees have their
-  // own order, and a splice through them would silently lie.
+  // Reorder publishes one engine for flat, grouped and tree rows. Nested
+  // models resolve visual targets into sibling reorders or explicit host move
+  // callbacks; they never splice the flat render list.
   // The feature owns the hook; this reads what its provider published. A table
   // that never imported `@adapttable/<kit>/row-reorder` gets `undefined` here
   // and never carries the drag state machine at all.
   const publishedReorder = useFeatureState(ROW_REORDER) as
     RowReorderState<TRow> | undefined;
   const requestedReorder = publishedReorder !== undefined;
-  const reorderBlocked = groupingArmed || treeShaped;
-  useEffect(() => {
-    if (!requestedReorder || !reorderBlocked) return;
-    devWarn(
-      "The row-reorder feature is ignored while grouping or a tree is armed — reorder a flat list, not a nested one."
-    );
-  }, [requestedReorder, reorderBlocked]);
-  const hasRowReorder = requestedReorder && !reorderBlocked;
+  const hasRowReorder = requestedReorder;
   const reorderHidden = columnLayout.isHidden(REORDER_COLUMN_KEY);
   const rowReorderEnabled = hasRowReorder && !reorderHidden;
   const rowReorder = rowReorderEnabled ? publishedReorder : undefined;
