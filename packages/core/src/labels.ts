@@ -146,6 +146,15 @@ export const defaultLabels: Required<TableLabels> = {
     count === 1 ? "1 unsaved row" : `${String(count)} unsaved rows`,
   saveAll: "Save all",
   cancelAll: "Cancel all",
+  approveProposal: "Approve",
+  rejectProposal: "Reject",
+  pendingProposals: (count) =>
+    count === 1 ? "1 proposed change" : `${String(count)} proposed changes`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "Add row",
   duplicateRow: "Duplicate row",
   deleteRow: "Delete row",

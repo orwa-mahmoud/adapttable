@@ -147,6 +147,15 @@ export const ar: Required<TableLabels> = {
     count === 1 ? "صف واحد غير محفوظ" : `${String(count)} صفوف غير محفوظة`,
   saveAll: "حفظ الكل",
   cancelAll: "إلغاء الكل",
+  approveProposal: "موافقة",
+  rejectProposal: "رفض",
+  pendingProposals: (count) =>
+    count === 1 ? "تغيير مقترح واحد" : `${String(count)} تغييرات مقترحة`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "إضافة صف",
   duplicateRow: "تكرار الصف",
   deleteRow: "حذف الصف",

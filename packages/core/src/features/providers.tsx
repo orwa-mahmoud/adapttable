@@ -39,6 +39,7 @@ import {
 } from "react";
 
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
+import type { TableSourceCapabilities } from "../source/capabilities";
 import { devWarn } from "../utils/devWarn";
 import {
   getAppliedFeatures,
@@ -250,6 +251,33 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly setLimit: (limit: number) => void;
     readonly setSearch: (search: string) => void;
     readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
+  };
+  /**
+   * Declared source capabilities from the live `TableSource`, when the
+   * source published a contract. Never inferred here.
+   */
+  readonly sourceCapabilities?: TableSourceCapabilities;
+  /** Live selection, when a selection-owning feature is composed. */
+  readonly selection?: {
+    readonly selectedIds: ReadonlySet<string>;
+    readonly replace: (ids: readonly string[] | undefined) => void;
+  };
+  /**
+   * Live editing channels. `onCellEdit` is the host callback; `stageCell`
+   * is the batch/dirty path when batch editing is composed.
+   */
+  readonly editing?: {
+    readonly onCellEdit?: (
+      row: TRow,
+      key: string,
+      nextValue: unknown
+    ) => unknown;
+    readonly stageCell?: (
+      row: TRow,
+      rowId: string,
+      columnKey: string,
+      value: string
+    ) => void;
   };
 }
 

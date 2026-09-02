@@ -148,6 +148,17 @@ export const hi: Required<TableLabels> = {
       : `${String(count)} सहेजी न गई पंक्तियाँ`,
   saveAll: "सभी सहेजें",
   cancelAll: "सभी रद्द करें",
+  approveProposal: "स्वीकृत करें",
+  rejectProposal: "अस्वीकार करें",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 प्रस्तावित परिवर्तन"
+      : `${String(count)} प्रस्तावित परिवर्तन`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "पंक्ति जोड़ें",
   duplicateRow: "पंक्ति की प्रतिलिपि बनाएँ",
   deleteRow: "पंक्ति हटाएँ",

@@ -8,7 +8,9 @@
     "view.setPage",
     "view.setSort",
     "view.setSearch",
-    "view.setFilters"
+    "view.setFilters",
+    "rows.read",
+    "rows.resolve"
   ],
   "columns": [
     {
@@ -21,8 +23,8 @@
     }
   ],
   "rowAddressing": { "scope": "visible", "key": "rowKey" },
-  "limits": { "pageMax": 100 },
-  "policy": { "write": "deny" },
+  "limits": { "pageMax": 100, "readMax": 50 },
+  "policy": { "write": "deny", "approval": "writes", "commit": "stage" },
   "source": {
     "fullDataset": false,
     "grouping": false,

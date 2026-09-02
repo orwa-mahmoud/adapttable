@@ -10,6 +10,10 @@ import type {
 } from "../columns/ColumnGroupToggle";
 import { GripIcon } from "../columns/icons";
 import type {
+  AgentApprovalListProps,
+  AgentApprovalSlots,
+} from "../editing/AgentApprovalChrome";
+import type {
   EditableCellActivateProps,
   EditableCellButtonProps,
   EditableCellSlots,
@@ -311,6 +315,25 @@ function BatchButton({
 
 export const batchEditTestSlots: BatchEditBarSlots = {
   Button: BatchButton,
+};
+
+function ApprovalList({
+  part,
+  label,
+  className,
+  children,
+}: AgentApprovalListProps) {
+  return (
+    <div data-adapttable-part={part} aria-label={label} className={className}>
+      {children}
+    </div>
+  );
+}
+
+export const agentApprovalTestSlots: AgentApprovalSlots = {
+  Approve: BatchButton,
+  Reject: BatchButton,
+  List: ApprovalList,
 };
 
 function ActivateCell({

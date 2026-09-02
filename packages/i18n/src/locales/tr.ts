@@ -148,6 +148,17 @@ export const tr: Required<TableLabels> = {
       : `${String(count)} kaydedilmemiş satır`,
   saveAll: "Tümünü kaydet",
   cancelAll: "Tümünü iptal et",
+  approveProposal: "Onayla",
+  rejectProposal: "Reddet",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 önerilen değişiklik"
+      : `${String(count)} önerilen değişiklik`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "Satır ekle",
   duplicateRow: "Satırı çoğalt",
   deleteRow: "Satırı sil",

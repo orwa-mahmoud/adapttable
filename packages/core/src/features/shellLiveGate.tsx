@@ -6,6 +6,7 @@
  */
 import type { ReactNode } from "react";
 
+import { asBatchGesture } from "../editing/editHistory";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { undoRedoToolbar, viewControlsToolbar } from "../useTableChrome";
 import { rememberFeatureHost } from "./featureHost";
@@ -56,6 +57,10 @@ export function HistoryLiveGate<TRow>({
     const chromeProps = {
       ...shell.chromeProps,
       onCellEdit: result.onCellEdit,
+      onBatchEdit: asBatchGesture(
+        shell.chromeProps.onBatchEdit,
+        result.history.record
+      ),
     };
     rememberFeatureHost(chromeProps, shell.featureHost);
     return children({

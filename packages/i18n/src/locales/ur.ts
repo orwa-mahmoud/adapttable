@@ -147,6 +147,17 @@ export const ur: Required<TableLabels> = {
     count === 1 ? "1 غیر محفوظ قطار" : `${String(count)} غیر محفوظ قطاریں`,
   saveAll: "سب محفوظ کریں",
   cancelAll: "سب منسوخ کریں",
+  approveProposal: "منظور کریں",
+  rejectProposal: "مسترد کریں",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 تجویز کردہ تبدیلی"
+      : `${String(count)} تجویز کردہ تبدیلیاں`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "قطار شامل کریں",
   duplicateRow: "قطار کی نقل بنائیں",
   deleteRow: "قطار حذف کریں",

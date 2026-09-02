@@ -147,6 +147,15 @@ export const ko: Required<TableLabels> = {
       : `${String(count)} 개의 저장되지 않은 행`,
   saveAll: "모두 저장",
   cancelAll: "모두 취소",
+  approveProposal: "승인",
+  rejectProposal: "거부",
+  pendingProposals: (count) =>
+    count === 1 ? "제안된 변경 1개" : `제안된 변경 ${String(count)}개`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "행 추가",
   duplicateRow: "행 복제",
   deleteRow: "행 삭제",

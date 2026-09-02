@@ -9,7 +9,7 @@ import {
 import { cellNavigation } from "./cell-navigation";
 import { DataTableShellView } from "./chromeBodyGate";
 import { editHistory } from "./edit-history";
-import { editing } from "./editing";
+import { batchEditing, editing } from "./editing";
 import { exportCsv } from "./export-csv";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
@@ -181,6 +181,35 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     expect(undone).toBe(1);
     expect(onCellEdit).toHaveBeenCalledWith(ROWS[0], "name", "Alice");
     expect(view.current.editHistory.canRedo).toBe(true);
+  });
+
+  it("records a batch save as one undo gesture", () => {
+    const onCellEdit = vi.fn();
+    const onBatchEdit = vi.fn();
+    const view = mount([
+      editing<Row>(onCellEdit),
+      batchEditing<Row>(onBatchEdit),
+      editHistory(),
+    ]);
+
+    act(() => {
+      view.current.chrome.editing?.batch?.setDraft(
+        ROWS[0]!,
+        "a",
+        "budget",
+        "99"
+      );
+    });
+    act(() => {
+      view.current.chrome.editing?.batch?.saveAll();
+    });
+    expect(onBatchEdit).toHaveBeenCalledOnce();
+    expect(view.current.editHistory.canUndo).toBe(true);
+
+    act(() => {
+      view.current.editHistory.undo();
+    });
+    expect(onCellEdit).toHaveBeenCalledWith(ROWS[0], "budget", 10);
   });
 
   it("selectionStats reports figures for a selected range", () => {

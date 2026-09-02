@@ -21,6 +21,30 @@ const OK = objectSchema({
   revision: { type: "integer", minimum: 1 },
 });
 
+const WRITE_RESULT = objectSchema({
+  proposals: {
+    type: "array",
+    items: objectSchema({
+      rowKey: { type: "string" },
+      column: { type: "string" },
+      before: {},
+      after: {},
+    }),
+  },
+  applied: { type: "boolean" },
+  approval: {
+    type: "string",
+    enum: ["pending", "approved", "rejected", "not-required"],
+  },
+});
+
+const ROW_KEY_OR_POSITION = objectSchema({
+  rowKey: { type: "string", minLength: 1 },
+  position: { type: "integer", minimum: 1 },
+  scope: { type: "string", enum: ["visible", "page", "full"] },
+  expectedRevision: { type: "integer", minimum: 1 },
+});
+
 const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "columns.describe": {
     key: "columns.describe",
@@ -95,6 +119,63 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
     input: objectSchema({ key: { type: ["string", "null"] } }),
     output: OK,
   },
+  "view.setSelection": {
+    key: "view.setSelection",
+    guide:
+      "Replace the current selection with the given row keys, or clear it.",
+    input: objectSchema({
+      ids: { type: "array", items: { type: "string", minLength: 1 } },
+    }),
+    output: OK,
+  },
+  "views.apply": {
+    key: "views.apply",
+    guide: "Apply a saved view by id through the host saved-views path.",
+    input: objectSchema({ viewId: { type: "string", minLength: 1 } }, [
+      "viewId",
+    ]),
+    output: OK,
+  },
+  "rows.read": {
+    key: "rows.read",
+    guide:
+      "Read a bounded, redacted row window from the current view. Unreadable columns never appear. scope full requires a full-dataset source.",
+    input: objectSchema(
+      {
+        offset: { type: "integer", minimum: 0 },
+        limit: { type: "integer", minimum: 1 },
+        columns: {
+          type: "array",
+          items: { type: "string", minLength: 1 },
+        },
+        scope: { type: "string", enum: ["visible", "page", "full"] },
+      },
+      ["offset", "limit"]
+    ),
+    output: objectSchema({
+      rows: {
+        type: "array",
+        items: objectSchema({
+          rowKey: { type: "string" },
+          cells: { type: "object" },
+        }),
+      },
+      offset: { type: "integer", minimum: 0 },
+      limit: { type: "integer", minimum: 1 },
+      redacted: { type: "array", items: { type: "string" } },
+    }),
+  },
+  "rows.resolve": {
+    key: "rows.resolve",
+    guide:
+      "Resolve a stable rowKey or a 1-based position against the named current view.",
+    input: ROW_KEY_OR_POSITION,
+    output: objectSchema({
+      rowKey: { type: "string" },
+      scope: { type: "string", enum: ["visible", "page", "full"] },
+      position: { type: "integer", minimum: 1 },
+    }),
+  },
   "export.run": {
     key: "export.run",
     guide: "Start an export through the host's existing export path.",
@@ -109,24 +190,55 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "edit.cells": {
     key: "edit.cells",
     guide:
-      "Write cells through the host onCellEdit callback. Never writes the table's own copy.",
+      "Propose cell writes. Each edit needs a rowKey or a 1-based position. Resolves the row before writing so a sort or page change cannot target the wrong record.",
     input: objectSchema(
       {
         edits: {
           type: "array",
           items: objectSchema(
             {
-              rowKey: { type: "string", minLength: 1 },
               column: { type: "string", minLength: 1 },
               value: {},
+              rowKey: { type: "string", minLength: 1 },
+              position: { type: "integer", minimum: 1 },
+              scope: { type: "string", enum: ["visible", "page", "full"] },
             },
-            ["rowKey", "column"]
+            ["column"]
           ),
         },
       },
       ["edits"]
     ),
-    output: OK,
+    output: WRITE_RESULT,
+  },
+  "rows.add": {
+    key: "rows.add",
+    guide:
+      "Add rows through the host add callback. Never writes the table's own copy.",
+    input: objectSchema(
+      {
+        rows: {
+          type: "array",
+          items: { type: "object" },
+        },
+      },
+      ["rows"]
+    ),
+    output: WRITE_RESULT,
+  },
+  "rows.delete": {
+    key: "rows.delete",
+    guide: "Delete rows through the host delete callback. This is destructive.",
+    input: objectSchema(
+      {
+        keys: {
+          type: "array",
+          items: { type: "string", minLength: 1 },
+        },
+      },
+      ["keys"]
+    ),
+    output: WRITE_RESULT,
   },
   "rows.reorder": {
     key: "rows.reorder",
@@ -138,7 +250,7 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
       },
       ["fromKey", "toKey"]
     ),
-    output: OK,
+    output: WRITE_RESULT,
   },
 };
 
@@ -150,8 +262,14 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "view.setSearch": "Change the search query.",
   "view.setFilters": "Replace the active filters.",
   "view.setGroupBy": "Change or clear grouping.",
+  "view.setSelection": "Replace or clear the current selection.",
+  "views.apply": "Apply a saved view.",
+  "rows.read": "Read a bounded, redacted row window.",
+  "rows.resolve": "Resolve a row key or 1-based position.",
   "export.run": "Export through the host export path.",
   "edit.cells": "Edit cells through the host callback.",
+  "rows.add": "Add rows through the host callback.",
+  "rows.delete": "Delete rows through the host callback.",
   "rows.reorder": "Reorder rows through the host callback.",
 };
 

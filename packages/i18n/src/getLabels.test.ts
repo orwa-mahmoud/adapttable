@@ -244,6 +244,23 @@ const INTERPOLATION_CASES: Record<
       ),
     expects: ["COLUMN_X", "AGGREGATION_X"],
   },
+  proposalChange: {
+    call: (fn) =>
+      (
+        fn as (change: {
+          row: string;
+          column?: string;
+          before?: string;
+          after?: string;
+        }) => string
+      )({
+        row: "ROW_X",
+        column: "COLUMN_X",
+        before: "BEFORE_X",
+        after: "AFTER_X",
+      }),
+    expects: ["ROW_X", "COLUMN_X", "BEFORE_X", "AFTER_X"],
+  },
 };
 
 const NUMERIC_CASE = {

@@ -50,10 +50,24 @@ function isEnabled(
       return observation.hasFilters;
     case "view.setGroupBy":
       return observation.source.grouping !== false;
+    case "view.setSelection":
+      return observation.hasSelection === true;
+    case "views.apply":
+      return features.has("saved-views") && observation.hasSavedViews === true;
+    case "rows.read":
+      return observation.columns.length > 0;
+    case "rows.resolve":
+      return observation.columns.length > 0;
     case "export.run":
       return observation.hasExport;
     case "edit.cells":
       return observation.hasEdit && observation.writePolicy === "allow";
+    case "rows.add":
+      return observation.hasAdd === true && observation.writePolicy === "allow";
+    case "rows.delete":
+      return (
+        observation.hasDelete === true && observation.writePolicy === "allow"
+      );
     case "rows.reorder":
       return observation.hasReorder && observation.writePolicy === "allow";
   }
@@ -71,8 +85,15 @@ export function buildManifest(observation: AgentObservation): AgentManifest {
       scope: observation.rowAddressScope,
       key: "rowKey",
     },
-    limits: { pageMax: observation.pageMax },
-    policy: { write: observation.writePolicy },
+    limits: {
+      pageMax: observation.pageMax,
+      readMax: observation.readMax ?? 50,
+    },
+    policy: {
+      write: observation.writePolicy,
+      approval: observation.approval ?? "writes",
+      commit: observation.commit ?? "stage",
+    },
     source: observation.source,
   };
 }

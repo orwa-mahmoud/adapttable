@@ -134,6 +134,23 @@ function RuntimePublisher<TRow>({
       setAggregateOverrides: chrome.source.setGroupAggregateOverrides,
     },
     tree: chrome.tree,
+    sourceCapabilities: chrome.source.capabilities,
+    selection: chrome.table.selection
+      ? {
+          selectedIds: chrome.table.selection.selectedIds,
+          replace: chrome.table.selection.replace,
+        }
+      : undefined,
+    editing: chrome.editing
+      ? {
+          onCellEdit: chrome.editing.onCellEdit,
+          stageCell: chrome.editing.batch
+            ? (row, rowId, columnKey, value) => {
+                chrome.editing?.batch?.setDraft(row, rowId, columnKey, value);
+              }
+            : undefined,
+        }
+      : undefined,
   });
   return children(chrome);
 }

@@ -17,7 +17,10 @@ export {
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
 export { GroupingPanel } from "./components/GroupingPanel";
+export { agentApproval } from "./agent-approval";
 export {
+  AgentApproval,
+  type AgentApprovalProps,
   BatchEditBar,
   type BatchEditBarProps,
   ColumnGroupToggle,

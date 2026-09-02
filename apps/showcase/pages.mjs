@@ -87,6 +87,8 @@ export const REPLACED_PAGES = [
 export const SHOWCASE_PAGES = [
   { key: "main", html: "./index.html", route: "/demo/", indexable: true },
   demo("all-options"),
+  // Optional AI chrome — built for kit/e2e coverage, not a marketing tile.
+  demo("agent-approval", { indexable: false }),
   // The adapter × feature matrix — a landing plus eighteen feature pages per
   // built adapter, expanded from `matrix.mjs`.
   ...matrixPages().map((page) => demo(page.dir)),

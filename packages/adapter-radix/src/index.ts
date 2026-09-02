@@ -20,7 +20,10 @@ export {
   GroupingPanel,
   type RadixGroupingPanelProps,
 } from "./components/GroupingPanel";
+export { agentApproval } from "./agent-approval";
 export {
+  AgentApproval,
+  type AgentApprovalProps,
   BatchEditBar,
   type BatchEditBarProps,
   ColumnGroupToggle,

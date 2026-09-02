@@ -873,6 +873,23 @@ export interface TableLabels {
   saveAll?: string;
   /** The control that discards one. */
   cancelAll?: string;
+  /** Approve a pending agent proposal. */
+  approveProposal?: string;
+  /** Reject a pending agent proposal. */
+  rejectProposal?: string;
+  /** How many agent proposals are waiting — "2 proposed changes". */
+  pendingProposals?: (count: number) => string;
+  /**
+   * One proposed cell change in the approval list. Names the row, the
+   * column, and the before/after values so the reader can see the write
+   * before it lands.
+   */
+  proposalChange?: (change: {
+    row: string;
+    column?: string;
+    before?: string;
+    after?: string;
+  }) => string;
   /** The toolbar control that adds a row (`onAddRow`). */
   addRow?: string;
   /** The row action that copies a row (`onDuplicateRow`). */

@@ -145,6 +145,15 @@ export const zhTW: Required<TableLabels> = {
     count === 1 ? "1 列未儲存" : `${String(count)} 列未儲存`,
   saveAll: "全部儲存",
   cancelAll: "全部取消",
+  approveProposal: "核准",
+  rejectProposal: "拒絕",
+  pendingProposals: (count) =>
+    count === 1 ? "1 項提議變更" : `${String(count)} 項提議變更`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "新增列",
   duplicateRow: "複製列",
   deleteRow: "刪除列",

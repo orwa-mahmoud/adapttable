@@ -6,15 +6,15 @@
  * slots and the inert stubs, never the hooks, so the adapter root graph
  * matches the other kits.
  */
-import type { ReactNode } from "react";
-
-import type {
-  EditHistoryState,
-  FindInTableState,
-  GridFocusState,
-  SelectionStats,
-  TableLabels,
-  TableSource,
+import {
+  asBatchGesture,
+  type BatchRowEdit,
+  type EditHistoryState,
+  type FindInTableState,
+  type GridFocusState,
+  type SelectionStats,
+  type TableLabels,
+  type TableSource,
 } from "@adapttable/core";
 import type {
   ColumnDef,
@@ -37,10 +37,11 @@ import {
   type FindLiveSlotProps,
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
-  type UseGridFocusOptions,
   useFeatureSlotFilled,
+  type UseGridFocusOptions,
   windowedTableAria,
 } from "@adapttable/core/adapter";
+import type { ReactNode } from "react";
 
 import type { DataTableProps } from "./types";
 
@@ -54,16 +55,21 @@ export function AntdHistoryGate<TRow>({
   editHistory,
   columns,
   onCellEdit,
+  onBatchEdit,
   children,
 }: {
   readonly editHistory: boolean | { depth?: number } | undefined;
   readonly columns: readonly ColumnDef<TRow>[];
   readonly onCellEdit:
     ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+  readonly onBatchEdit:
+    ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
   readonly children: (result: {
     history: EditHistoryState<TRow>;
     onCellEdit:
       ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+    onBatchEdit:
+      ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
   }) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(EDIT_HISTORY_LIVE);
@@ -71,7 +77,11 @@ export function AntdHistoryGate<TRow>({
     history: EditHistoryState<TRow>;
     onCellEdit:
       ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-  }) => children(result);
+  }) =>
+    children({
+      ...result,
+      onBatchEdit: asBatchGesture(onBatchEdit, result.history.record),
+    });
   const historyProps = {
     editHistory,
     columns,
@@ -156,10 +166,11 @@ export function AntdInteractionGate<TRow>({
           labels={labels}
         >
           {(gridFocus) => (
-            <ExportStage
+            <AfterNav
               props={props}
               source={source}
               columns={columns}
+              rows={rows}
               firstRowIndex={firstRowIndex}
               gridFocus={gridFocus}
               getRowId={getRowId}
@@ -170,24 +181,79 @@ export function AntdInteractionGate<TRow>({
               featureHost={featureHost}
               labels={labels}
               pageOnly={pageOnly}
+              find={find}
             >
-              {(exportHandler) => (
-                <StatsStage
-                  columns={columns}
-                  rows={rows}
-                  firstRowIndex={firstRowIndex}
-                  gridFocus={gridFocus}
-                >
-                  {(stats) =>
-                    children({ find, gridFocus, exportHandler, stats })
-                  }
-                </StatsStage>
-              )}
-            </ExportStage>
+              {children}
+            </AfterNav>
           )}
         </NavStage>
       )}
     </FindStage>
+  );
+}
+
+function AfterNav<TRow>({
+  props,
+  source,
+  columns,
+  rows,
+  firstRowIndex,
+  gridFocus,
+  getRowId,
+  selectedIds,
+  allColumns,
+  grouping,
+  tree,
+  featureHost,
+  labels,
+  pageOnly,
+  find,
+  children,
+}: {
+  readonly props: LiveProps<TRow>;
+  readonly source: TableSource<TRow>;
+  readonly columns: readonly ColumnDef<TRow>[];
+  readonly rows: readonly TRow[];
+  readonly firstRowIndex: number;
+  readonly gridFocus: GridFocusState;
+  readonly getRowId: (row: TRow) => string;
+  readonly selectedIds: ReadonlySet<string> | undefined;
+  readonly allColumns: readonly ColumnDef<TRow>[];
+  readonly grouping: unknown;
+  readonly tree: unknown;
+  readonly featureHost: FeatureHostState | undefined;
+  readonly labels: Required<TableLabels>;
+  readonly pageOnly: boolean;
+  readonly find: FindInTableState;
+  readonly children: (live: AntdLiveState) => ReactNode;
+}): ReactNode {
+  return (
+    <ExportStage
+      props={props}
+      source={source}
+      columns={columns}
+      firstRowIndex={firstRowIndex}
+      gridFocus={gridFocus}
+      getRowId={getRowId}
+      selectedIds={selectedIds}
+      allColumns={allColumns}
+      grouping={grouping}
+      tree={tree}
+      featureHost={featureHost}
+      labels={labels}
+      pageOnly={pageOnly}
+    >
+      {(exportHandler) => (
+        <StatsStage
+          columns={columns}
+          rows={rows}
+          firstRowIndex={firstRowIndex}
+          gridFocus={gridFocus}
+        >
+          {(stats) => children({ find, gridFocus, exportHandler, stats })}
+        </StatsStage>
+      )}
+    </ExportStage>
   );
 }
 

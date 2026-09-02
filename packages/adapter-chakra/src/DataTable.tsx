@@ -1,6 +1,8 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
   BATCH_EDIT_BAR,
   BULK_BAR,
   COLUMN_MENU,
@@ -28,6 +30,7 @@ import {
   type TableBodyRegion,
   TableStatusAnnouncer,
   useDataTableShell,
+  useFeatureState,
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
@@ -103,6 +106,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filtersTrigger,
     rootRef,
   } = shell;
+  const approval = useFeatureState(AGENT_APPROVAL_STATE);
   // Map resolved row density to Chakra's table `size`; an explicit kit size
   // still wins.
   const size = tableSize({ size: props.size, density: shell.density });
@@ -327,6 +331,15 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         props={{ batch: chrome.editing.batch, labels }}
                       />
                     )}
+                    <FeatureSlot
+                      slot={AGENT_APPROVAL}
+                      props={{
+                        proposals: approval?.proposals,
+                        onApprove: approval?.approve ?? (() => undefined),
+                        onReject: approval?.reject ?? (() => undefined),
+                        labels,
+                      }}
+                    />
 
                     {table.selection && props.bulkActions && (
                       <FeatureSlot

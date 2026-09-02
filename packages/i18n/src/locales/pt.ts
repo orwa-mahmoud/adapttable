@@ -147,6 +147,17 @@ export const pt: Required<TableLabels> = {
     count === 1 ? "1 linha não salva" : `${String(count)} linhas não salvas`,
   saveAll: "Salvar tudo",
   cancelAll: "Cancelar tudo",
+  approveProposal: "Aprovar",
+  rejectProposal: "Rejeitar",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 alteração proposta"
+      : `${String(count)} alterações propostas`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "Adicionar linha",
   duplicateRow: "Duplicar linha",
   deleteRow: "Excluir linha",

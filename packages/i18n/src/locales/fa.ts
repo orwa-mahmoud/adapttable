@@ -146,6 +146,15 @@ export const fa: Required<TableLabels> = {
     count === 1 ? "۱ ردیف ذخیره‌نشده" : `${String(count)} ردیف ذخیره‌نشده`,
   saveAll: "ذخیره همه",
   cancelAll: "لغو همه",
+  approveProposal: "تأیید",
+  rejectProposal: "رد",
+  pendingProposals: (count) =>
+    count === 1 ? "۱ تغییر پیشنهادی" : `${String(count)} تغییر پیشنهادی`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "افزودن ردیف",
   duplicateRow: "تکثیر ردیف",
   deleteRow: "حذف ردیف",

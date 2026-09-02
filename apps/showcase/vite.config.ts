@@ -168,7 +168,10 @@ function adapttableSubpaths(): Plugin {
     resolveId(id) {
       const match = /^@adapttable\/([a-z0-9-]+)\/([a-z0-9-]+)$/.exec(id);
       if (!match) return null;
-      const dir = match[1] === "core" ? "core" : `adapter-${match[1]}`;
+      const dir =
+        match[1] === "core" || match[1] === "ai" || match[1] === "i18n"
+          ? match[1]
+          : `adapter-${match[1]}`;
       for (const ext of ["tsx", "ts"]) {
         const file = pkg(dir, match[2], ext);
         if (existsSync(file)) return file;
@@ -223,6 +226,7 @@ export default defineConfig({
     // at a time.
     alias: [
       { find: /^@adapttable\/core$/, replacement: pkg("core") },
+      { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
       { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
       { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
       { find: /^@adapttable\/mui$/, replacement: pkg("adapter-mui") },

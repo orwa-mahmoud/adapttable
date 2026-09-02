@@ -148,6 +148,17 @@ export const de: Required<TableLabels> = {
       : `${String(count)} ungespeicherte Zeilen`,
   saveAll: "Alle speichern",
   cancelAll: "Alle verwerfen",
+  approveProposal: "Genehmigen",
+  rejectProposal: "Ablehnen",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 vorgeschlagene Änderung"
+      : `${String(count)} vorgeschlagene Änderungen`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "Zeile hinzufügen",
   duplicateRow: "Zeile duplizieren",
   deleteRow: "Zeile löschen",

@@ -8,6 +8,10 @@ import {
   useHeaderFilterOverlay,
 } from "@adapttable/core";
 import {
+  AgentApprovalChrome,
+  type AgentApprovalButtonProps,
+  type AgentApprovalListProps,
+  type AgentApprovalProps,
   BatchEditBarChrome,
   type BatchEditBarProps,
   type BatchEditButtonProps,
@@ -59,6 +63,7 @@ import { AutoFilterForm } from "./AutoFilterForm";
 import { FiltersIcon } from "./icons";
 
 export type {
+  AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
   FilterHeaderControlProps,
@@ -455,6 +460,55 @@ function BatchButton({
  */
 export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
+}
+
+function ApprovalButton({
+  label,
+  part,
+  className,
+  onClick,
+}: Readonly<AgentApprovalButtonProps>) {
+  return (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+function ApprovalList({
+  part,
+  label,
+  className,
+  children,
+}: Readonly<AgentApprovalListProps>) {
+  return (
+    <div data-adapttable-part={part} aria-label={label} className={className}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Approve or reject a pending agent write.
+ *
+ * @public
+ */
+export function AgentApproval(props: Readonly<AgentApprovalProps>) {
+  return (
+    <AgentApprovalChrome
+      {...props}
+      slots={{
+        Approve: ApprovalButton,
+        Reject: ApprovalButton,
+        List: ApprovalList,
+      }}
+    />
+  );
 }
 
 function TreeButton({

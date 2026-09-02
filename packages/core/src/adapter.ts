@@ -70,6 +70,7 @@ export {
   type TableContextMenu,
   useTableContextMenu,
 } from "./actions/useTableContextMenu";
+export { createAdapterAgentApprovalFeature } from "./adapterFeatures/agentApproval";
 export {
   type AdapterCommandPaletteFeature,
   type AdapterCommandPaletteProps,
@@ -227,6 +228,17 @@ export {
   SHARED_DESKTOP_ROW_KEYS,
   sortArrow,
 } from "./display";
+export {
+  AGENT_APPROVAL_STATE,
+  type AgentApprovalButtonProps,
+  AgentApprovalChrome,
+  type AgentApprovalChromeProps,
+  type AgentApprovalListProps,
+  type AgentApprovalPending,
+  type AgentApprovalProposal,
+  type AgentApprovalProps,
+  type AgentApprovalSlots,
+} from "./editing/AgentApprovalChrome";
 export type { BatchEditingState } from "./editing/batchEditing";
 export type {
   CustomCellEditorRender,
@@ -291,12 +303,6 @@ export {
   useExportHandler,
 } from "./export/useExportHandler";
 export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
-export {
-  DISABLED_EXPORT,
-  DISABLED_FIND,
-  disabledHistory,
-  windowedTableAria,
-} from "./features/shellLiveStubs";
 export { ChromeExtrasGate } from "./features/chromeExtrasGate";
 export type { FeatureHostState } from "./features/currentHost";
 export { bindFeatureHostFn } from "./features/currentHost";
@@ -333,6 +339,12 @@ export {
   useTableRuntime,
 } from "./features/providers";
 export { HistoryLiveGate, ShellLiveGate } from "./features/shellLiveGate";
+export {
+  DISABLED_EXPORT,
+  DISABLED_FIND,
+  disabledHistory,
+  windowedTableAria,
+} from "./features/shellLiveStubs";
 export type {
   CellNavLiveSlotProps,
   ChromeBodySlotProps,
@@ -355,6 +367,7 @@ export type {
 } from "./features/slotKeys";
 export {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
   BATCH_EDIT_BAR,
   BULK_BAR,
   CELL_NAV_LIVE,

@@ -11,8 +11,10 @@
 export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,
+  type ApprovalPolicy,
   CAPABILITY_KEYS,
   type CapabilityKey,
+  type CommitPolicy,
   type RowAddressScope,
   type WritePolicy,
 } from "./keys";
@@ -24,10 +26,18 @@ export type {
   AgentManifest,
   AgentObservation,
   AgentSession,
+  ApprovalOutcome,
   CapabilityGuide,
   CatalogEntry,
   ExecuteResult,
   JsonSchema,
+  ResolvedRow,
+  RowReadQuery,
+  RowRef,
+  RowWindow,
   TableAgentBridge,
+  WriteExecuteResult,
+  WriteProposal,
+  WriteRowResult,
 } from "./types";
 export { validateSchema } from "./validate";

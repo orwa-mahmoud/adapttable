@@ -145,6 +145,15 @@ export const ja: Required<TableLabels> = {
     count === 1 ? "未保存の行 1 件" : `${String(count)} 件の未保存の行`,
   saveAll: "すべて保存",
   cancelAll: "すべて取り消し",
+  approveProposal: "承認",
+  rejectProposal: "却下",
+  pendingProposals: (count) =>
+    count === 1 ? "提案 1 件" : `${String(count)} 件の提案`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "行を追加",
   duplicateRow: "行を複製",
   deleteRow: "行を削除",

@@ -826,6 +826,7 @@ export {
   useEditConflict,
 } from "./editing/editConflict";
 export {
+  asBatchGesture,
   asGesture,
   type EditHistoryEntry,
   type EditHistoryState,

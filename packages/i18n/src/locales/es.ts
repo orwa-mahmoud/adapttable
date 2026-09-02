@@ -146,6 +146,15 @@ export const es: Required<TableLabels> = {
     count === 1 ? "1 fila sin guardar" : `${String(count)} filas sin guardar`,
   saveAll: "Guardar todo",
   cancelAll: "Cancelar todo",
+  approveProposal: "Aprobar",
+  rejectProposal: "Rechazar",
+  pendingProposals: (count) =>
+    count === 1 ? "1 cambio propuesto" : `${String(count)} cambios propuestos`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "Añadir fila",
   duplicateRow: "Duplicar fila",
   deleteRow: "Eliminar fila",

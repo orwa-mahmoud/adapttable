@@ -1,6 +1,12 @@
 import type { TableSourceCapabilities } from "@adapttable/core";
 
-import type { CapabilityKey, RowAddressScope, WritePolicy } from "./keys";
+import type {
+  ApprovalPolicy,
+  CapabilityKey,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
 
 /** JSON Schema (draft 2020-12 subset) returned by `describe`. */
 export interface JsonSchema {
@@ -41,9 +47,12 @@ export interface AgentManifest {
   };
   readonly limits: {
     readonly pageMax: number;
+    readonly readMax: number;
   };
   readonly policy: {
     readonly write: WritePolicy;
+    readonly approval: ApprovalPolicy;
+    readonly commit: CommitPolicy;
   };
   /** Data-layer facts from item 5-A — never re-inferred here. */
   readonly source: TableSourceCapabilities;
@@ -76,6 +85,75 @@ export interface ExecuteResult {
   };
 }
 
+/** Address a row by stable key or by 1-based position in a named view. */
+export type RowRef =
+  | { readonly rowKey: string }
+  | {
+      readonly position: number;
+      readonly scope: RowAddressScope;
+      readonly expectedRevision: number;
+    };
+
+/** A row the session resolved before a write. */
+export interface ResolvedRow {
+  readonly rowKey: string;
+  readonly scope: RowAddressScope;
+  readonly position?: number;
+}
+
+/** One cell of a bounded, redacted row window. */
+export interface RowWindowRow {
+  readonly rowKey: string;
+  readonly cells: Readonly<Record<string, unknown>>;
+}
+
+/** Bounded window returned by `rows.read`. */
+export interface RowWindow {
+  readonly rows: readonly RowWindowRow[];
+  readonly offset: number;
+  readonly limit: number;
+  readonly redacted: readonly string[];
+}
+
+/** Query for `rows.read`. */
+export interface RowReadQuery {
+  readonly offset: number;
+  readonly limit: number;
+  readonly columns?: readonly string[];
+  readonly scope?: RowAddressScope;
+}
+
+/** One proposed cell or row mutation, returned before a write lands. */
+export interface WriteProposal {
+  readonly rowKey: string;
+  readonly column?: string;
+  readonly before?: unknown;
+  readonly after?: unknown;
+}
+
+/** Approval state recorded on a mutating execute. */
+export type ApprovalOutcome =
+  "pending" | "approved" | "rejected" | "not-required";
+
+/** Per-row outcome of a bulk write. Failures are never dropped. */
+export interface WriteRowResult {
+  readonly rowKey: string;
+  readonly column?: string;
+  readonly ok: boolean;
+  readonly error?: {
+    readonly code: string;
+    readonly message: string;
+  };
+}
+
+/** `execute` payload for mutating keys. */
+export interface WriteExecuteResult {
+  readonly proposals: readonly WriteProposal[];
+  readonly applied: boolean;
+  readonly approval: ApprovalOutcome;
+  readonly results?: readonly WriteRowResult[];
+}
+
 /**
  * What is actually wired on this table right now.
  *
@@ -88,6 +166,8 @@ export interface AgentObservation {
   readonly columns: readonly AgentColumn[];
   readonly source: TableSourceCapabilities;
   readonly writePolicy: WritePolicy;
+  readonly approval?: ApprovalPolicy;
+  readonly commit?: CommitPolicy;
   readonly hasPagination: boolean;
   readonly hasSearch: boolean;
   readonly hasSort: boolean;
@@ -95,6 +175,10 @@ export interface AgentObservation {
   readonly hasExport: boolean;
   readonly hasEdit: boolean;
   readonly hasReorder: boolean;
+  readonly hasSelection?: boolean;
+  readonly hasSavedViews?: boolean;
+  readonly hasAdd?: boolean;
+  readonly hasDelete?: boolean;
   readonly page: number;
   readonly limit: number;
   readonly search: string;
@@ -104,6 +188,7 @@ export interface AgentObservation {
   readonly filters?: unknown;
   readonly rowAddressScope: RowAddressScope;
   readonly pageMax: number;
+  readonly readMax?: number;
 }
 
 /** Host- or feature-applied mutation. */
@@ -114,10 +199,30 @@ export interface AgentApply {
   setSort?(key: string | undefined, dir?: "asc" | "desc"): void;
   setFilters?(filters: unknown): void;
   setGroupBy?(key: string | undefined): void;
+  setSelection?(ids: readonly string[] | undefined): void;
+  applyView?(viewId: string): void;
   runExport?(format: string): Promise<unknown> | void;
+  readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
+  resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
+  /**
+   * Immediate cell writes through the host edit path.
+   *
+   * The session always resolves row refs to `rowKey` before calling this.
+   */
   editCells?(
     edits: readonly { rowKey: string; column: string; value: unknown }[]
   ): Promise<unknown> | void;
+  /**
+   * Stage cell writes on the existing batch/dirty path.
+   *
+   * Absent when batch editing is not composed — the session then returns
+   * proposals with `applied: false`.
+   */
+  stageCells?(
+    edits: readonly { rowKey: string; column: string; value: unknown }[]
+  ): Promise<unknown> | void;
+  addRows?(rows: readonly Record<string, unknown>[]): Promise<unknown> | void;
+  deleteRows?(keys: readonly string[]): Promise<unknown> | void;
   reorderRows?(fromKey: string, toKey: string): Promise<unknown> | void;
 }
 

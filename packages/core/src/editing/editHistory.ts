@@ -18,6 +18,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { CellEdit } from "../focus/cellEdits";
 import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
+import type { BatchRowEdit } from "./batchEditing";
 
 /**
  * One undoable gesture: what it wrote, and what was there before.
@@ -293,5 +294,42 @@ export function asGesture<TRow>(
   return (edits) => {
     record(edits);
     apply(edits);
+  };
+}
+
+/** Flatten a batch save into the cell list history records as one gesture. */
+function cellsOfBatch<TRow>(
+  edits: readonly BatchRowEdit<TRow>[]
+): CellEdit<TRow>[] {
+  const cells: CellEdit<TRow>[] = [];
+  for (const edit of edits) {
+    for (const [columnKey, value] of Object.entries(edit.patch)) {
+      cells.push({ row: edit.row, columnKey, value });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Wrap a batch-save handler so the whole save is one undo entry.
+ *
+ * Same rule as {@link asGesture}: record first, then apply, so the inverse
+ * is read from the rows as they are now.
+ *
+ * @typeParam TRow - The row type.
+ * @param apply - The host's `onBatchEdit`, or `undefined` when batch is off.
+ * @param record - The history recorder.
+ * @returns The wrapped handler, or `undefined` when there was none to wrap.
+ *
+ * @public
+ */
+export function asBatchGesture<TRow>(
+  apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined,
+  record: (edits: readonly CellEdit<TRow>[]) => void
+): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined {
+  if (!apply) return undefined;
+  return (edits) => {
+    record(cellsOfBatch(edits));
+    return apply(edits);
   };
 }

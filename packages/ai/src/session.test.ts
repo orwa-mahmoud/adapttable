@@ -55,6 +55,8 @@ describe("enabledKeys", () => {
       "view.setPage",
       "view.setSort",
       "view.setSearch",
+      "rows.read",
+      "rows.resolve",
     ]);
   });
 
@@ -67,12 +69,17 @@ describe("enabledKeys", () => {
           "export-csv",
           "editing",
           "row-reorder",
+          "saved-views",
         ],
         source: { ...PAGE_ONLY, grouping: "client", fullDataset: true },
         hasFilters: true,
         hasExport: true,
         hasEdit: true,
         hasReorder: true,
+        hasSelection: true,
+        hasSavedViews: true,
+        hasAdd: true,
+        hasDelete: true,
       })
     );
     expect(keys).toEqual([...CAPABILITY_KEYS]);
@@ -84,11 +91,15 @@ describe("enabledKeys", () => {
         featureIds: ["editing", "row-reorder"],
         hasEdit: true,
         hasReorder: true,
+        hasAdd: true,
+        hasDelete: true,
         writePolicy: "deny",
       })
     );
     expect(keys).not.toContain("edit.cells");
     expect(keys).not.toContain("rows.reorder");
+    expect(keys).not.toContain("rows.add");
+    expect(keys).not.toContain("rows.delete");
   });
 
   it("does not advertise grouping when the source cannot group", () => {
@@ -121,6 +132,9 @@ describe("buildManifest", () => {
     expect(manifest.source).toEqual(source);
     expect(manifest.rowAddressing).toEqual({ scope: "visible", key: "rowKey" });
     expect(manifest.policy.write).toBe("allow");
+    expect(manifest.policy.approval).toBe("writes");
+    expect(manifest.policy.commit).toBe("stage");
+    expect(manifest.limits.readMax).toBe(50);
   });
 });
 
@@ -234,6 +248,11 @@ describe("createAgentSession", () => {
       setFilters: vi.fn(),
       setGroupBy: vi.fn(),
       runExport: vi.fn().mockResolvedValue({ started: true }),
+      resolveRow: vi.fn((ref: { rowKey?: string; position?: number }) =>
+        "rowKey" in ref && ref.rowKey
+          ? { rowKey: ref.rowKey, scope: "visible" as const }
+          : { rowKey: `r${String(ref.position)}`, scope: "visible" as const }
+      ),
       editCells: vi.fn().mockResolvedValue({ saved: 1 }),
       reorderRows: vi.fn().mockResolvedValue({ moved: true }),
     };
@@ -252,6 +271,18 @@ describe("createAgentSession", () => {
           hasExport: true,
           hasEdit: true,
           hasReorder: true,
+          approval: "never",
+          commit: "immediate",
+          columns: [
+            {
+              id: "name",
+              label: "Name",
+              type: "string",
+              readable: true,
+              writable: true,
+              sortable: true,
+            },
+          ],
         }),
       apply,
     });

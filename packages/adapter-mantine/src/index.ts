@@ -42,7 +42,10 @@ export {
   FilterTreeBuilder,
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
+export { agentApproval } from "./agent-approval";
 export {
+  AgentApproval,
+  type AgentApprovalProps,
   BatchEditBar,
   type BatchEditBarProps,
   ColumnGroupToggle,

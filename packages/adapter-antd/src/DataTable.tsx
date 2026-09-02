@@ -42,6 +42,8 @@ import {
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
   BATCH_EDIT_BAR,
   bindFeatureHostFn,
   bodyCellsHaveRowSpan,
@@ -97,6 +99,7 @@ import {
   TableStatusAnnouncer,
   undoRedoToolbar,
   useFeatureSlotFilled,
+  useFeatureState,
   useFullscreen,
   useMountStagger,
   useOffsetHeight,
@@ -1785,13 +1788,19 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
       editHistory={props.editHistory}
       columns={dataColumns}
       onCellEdit={props.onCellEdit}
+      onBatchEdit={props.onBatchEdit}
     >
-      {({ history, onCellEdit: recordingCellEdit }) => (
+      {({
+        history,
+        onCellEdit: recordingCellEdit,
+        onBatchEdit: recordingBatchEdit,
+      }) => (
         <AntdChromeSession
           props={props}
           density={density}
           onDensityChange={onDensityChange}
           recordingCellEdit={recordingCellEdit}
+          recordingBatchEdit={recordingBatchEdit}
           history={history}
           resolvedSource={resolvedSource}
           filtersNode={filtersNode}
@@ -1818,6 +1827,7 @@ function AntdChromeSession<TRow>({
   density,
   onDensityChange,
   recordingCellEdit,
+  recordingBatchEdit,
   history,
   resolvedSource,
   filtersNode,
@@ -1838,6 +1848,7 @@ function AntdChromeSession<TRow>({
   readonly density: ComposedProps<TRow>["density"];
   readonly onDensityChange: ComposedProps<TRow>["onDensityChange"];
   readonly recordingCellEdit: ComposedProps<TRow>["onCellEdit"];
+  readonly recordingBatchEdit: ComposedProps<TRow>["onBatchEdit"];
   readonly history: EditHistoryState<TRow>;
   readonly resolvedSource: TableSource<TRow>;
   readonly filtersNode: ReturnType<typeof resolveFiltersNode>;
@@ -1859,6 +1870,7 @@ function AntdChromeSession<TRow>({
     density,
     onDensityChange,
     onCellEdit: recordingCellEdit,
+    onBatchEdit: recordingBatchEdit,
     source: resolvedSource,
     filters: filtersNode,
     filterDefs: runtime.defs,
@@ -2030,6 +2042,7 @@ function AntdTableBody<TRow>({
     };
   }, [c.table, c.columnLayout.visibleColumns, c.droppedColumns]);
   const { labels, source, selection } = table;
+  const approval = useFeatureState(AGENT_APPROVAL_STATE);
   // The injected actions column is first-class in column management: it lives
   // in the layout state under its reserved key, so hiding it strips the
   // rowActions BEFORE buildColumns — the trailing column, summary spans, and
@@ -2535,6 +2548,15 @@ function AntdTableBody<TRow>({
                         props={{ batch: c.editing.batch, labels }}
                       />
                     )}
+                    <FeatureSlot
+                      slot={AGENT_APPROVAL}
+                      props={{
+                        proposals: approval?.proposals,
+                        onApprove: approval?.approve ?? (() => undefined),
+                        onReject: approval?.reject ?? (() => undefined),
+                        labels,
+                      }}
+                    />
 
                     {selection && props.bulkActions && (
                       <FeatureSlot

@@ -18,6 +18,7 @@ import type {
   ColumnMenuSlotProps,
 } from "../columns/columnMenuModel";
 import type { PinOffset } from "../columns/useColumnLayout";
+import type { AgentApprovalProps } from "../editing/AgentApprovalChrome";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { EditHistoryState } from "../editing/editHistory";
 import type {
@@ -101,6 +102,16 @@ export const FIND_BAR = featureSlotKey<FindBarProps>("find-bar", {
  */
 export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<never>>(
   "batch-edit-bar",
+  { single: true }
+);
+
+/**
+ * The strip that asks a reader to approve or reject an agent write.
+ *
+ * @public
+ */
+export const AGENT_APPROVAL = featureSlotKey<AgentApprovalProps>(
+  "agent-approval",
   { single: true }
 );
 

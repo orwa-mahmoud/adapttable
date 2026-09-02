@@ -17,6 +17,7 @@ function makeSelection(over: Partial<SelectionState> = {}): SelectionState {
     toggleAll: vi.fn(),
     toggleGroupLeaves: vi.fn(),
     clear: vi.fn(),
+    replace: vi.fn(),
     visibleIds: ["a", "b"],
     allMatching: false,
     selectAllMatching: vi.fn(),

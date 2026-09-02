@@ -50,6 +50,7 @@ function makeSelection(
     toggleAll: vi.fn(),
     toggleGroupLeaves: vi.fn(),
     clear: vi.fn(),
+    replace: vi.fn(),
     visibleIds: [...LEAF_IDS, "3"],
     allMatching: false,
     selectAllMatching: vi.fn(),

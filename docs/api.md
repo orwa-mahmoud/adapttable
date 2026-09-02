@@ -1187,13 +1187,18 @@ Router, TanStack Router and Next.js all take two lines. See
 
 **Adaptive capabilities.** `@adapttable/ai` is the optional, provider-neutral
 agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
-`CapabilityKey`, `WritePolicy`, `RowAddressScope`, `createAgentSession`,
-`CreateAgentSessionOptions`, `buildManifest`, `enabledKeys`, `guideOf`,
-`summaryOf`, `validateSchema`, and the types `AgentApply`, `AgentColumn`,
-`AgentManifest`, `AgentObservation`, `AgentSession`, `CapabilityGuide`,
-`CatalogEntry`, `ExecuteResult`, `JsonSchema`, `TableAgentBridge`.
-`@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions` and
-`TABLE_AGENT_STATE`. See [adaptive capabilities](./agent-capabilities.md) and
+`CapabilityKey`, `WritePolicy`, `ApprovalPolicy`, `CommitPolicy`,
+`RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
+`buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`, and
+the types `AgentApply`, `AgentColumn`, `AgentManifest`, `AgentObservation`,
+`AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
+`ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowReadQuery`, `RowRef`,
+`RowWindow`, `TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`,
+`WriteRowResult`. `@adapttable/ai/react` exports `tableAgent`,
+`TableAgentOptions` and `TABLE_AGENT_STATE`. Each published kit exports
+`agentApproval` and `AgentApproval`. Core chrome exports
+`AgentApprovalChrome`, `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE` and the
+slot/proposal types. See [adaptive capabilities](./agent-capabilities.md) and
 [`@adapttable/ai`](./ai.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from

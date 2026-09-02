@@ -150,6 +150,17 @@ export const ru: Required<TableLabels> = {
       : `${String(count)} несохранённых строк`,
   saveAll: "Сохранить всё",
   cancelAll: "Отменить всё",
+  approveProposal: "Одобрить",
+  rejectProposal: "Отклонить",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 предложенное изменение"
+      : `${String(count)} предложенных изменений`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "Добавить строку",
   duplicateRow: "Дублировать строку",
   deleteRow: "Удалить строку",

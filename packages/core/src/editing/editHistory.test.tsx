@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../types";
 import {
+  asBatchGesture,
   asGesture,
   readCellValue,
   useEditHistory,
@@ -190,6 +191,28 @@ describe("asGesture", () => {
 
   it("is nothing when there was nothing to wrap", () => {
     expect(asGesture<Row>(undefined, vi.fn())).toBeUndefined();
+  });
+});
+
+describe("asBatchGesture", () => {
+  it("records every patched cell before the host applies the batch", () => {
+    const order: string[] = [];
+    const wrapped = asBatchGesture<Row>(
+      () => order.push("apply"),
+      (edits) => {
+        order.push("record");
+        expect(edits).toEqual([
+          { row: ADA, columnKey: "name", value: "X" },
+          { row: ADA, columnKey: "budget", value: 20 },
+        ]);
+      }
+    );
+    wrapped?.([{ row: ADA, rowId: "ada", patch: { name: "X", budget: 20 } }]);
+    expect(order).toEqual(["record", "apply"]);
+  });
+
+  it("is nothing when there was nothing to wrap", () => {
+    expect(asBatchGesture<Row>(undefined, vi.fn())).toBeUndefined();
   });
 });
 

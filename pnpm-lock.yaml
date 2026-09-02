@@ -157,6 +157,9 @@ importers:
 
   apps/showcase:
     dependencies:
+      '@adapttable/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@adapttable/antd':
         specifier: workspace:*
         version: link:../../packages/adapter-antd

@@ -68,6 +68,8 @@ export interface SelectionState {
   toggleAll: () => void;
   /** Clear the entire selection. */
   clear: () => void;
+  /** Replace the selection with the given ids, or clear it when omitted. */
+  replace: (ids: readonly string[] | undefined) => void;
   /** The visible ids, in row order. */
   visibleIds: string[];
   /** True when the user chose "select all matching" across every page. */
@@ -229,6 +231,13 @@ export function useSelection<TRow>(
 
   const clear = useCallback(() => commit(() => new Set()), [commit]);
 
+  const replace = useCallback(
+    (ids: readonly string[] | undefined) => {
+      commit(() => new Set(ids ?? []));
+    },
+    [commit]
+  );
+
   // Stable identity: row-level React.memo in the adapters depends on the
   // selection object only changing when the selection actually changes.
   return useMemo(
@@ -241,6 +250,7 @@ export function useSelection<TRow>(
       toggleGroupLeaves,
       toggleAll,
       clear,
+      replace,
       visibleIds,
       allMatching,
       selectAllMatching,
@@ -254,6 +264,7 @@ export function useSelection<TRow>(
       toggleGroupLeaves,
       toggleAll,
       clear,
+      replace,
       visibleIds,
       allMatching,
       selectAllMatching,

@@ -6,6 +6,8 @@ import {
 } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
   BATCH_EDIT_BAR,
   BULK_BAR,
   COLUMN_MENU,
@@ -32,6 +34,7 @@ import {
   STATUS_BAR,
   TableStatusAnnouncer,
   useDataTableShell,
+  useFeatureState,
   useStickyToolbarLayout,
   useTableFeatures,
 } from "@adapttable/core/adapter";
@@ -133,6 +136,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filtersTrigger,
     rootRef,
   } = shell;
+  const approval = useFeatureState(AGENT_APPROVAL_STATE);
   // One binding covers headers, rows and cells: the target is resolved from
   // wherever the event started, so there is no third handler to forget.
 
@@ -358,6 +362,15 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                             props={{ batch: chrome.editing.batch, labels }}
                           />
                         )}
+                        <FeatureSlot
+                          slot={AGENT_APPROVAL}
+                          props={{
+                            proposals: approval?.proposals,
+                            onApprove: approval?.approve ?? (() => undefined),
+                            onReject: approval?.reject ?? (() => undefined),
+                            labels,
+                          }}
+                        />
 
                         {table.selection && bulkActions && (
                           <FeatureSlot

@@ -144,6 +144,15 @@ export const zh: Required<TableLabels> = {
     count === 1 ? "1 行未保存" : `${String(count)} 行未保存`,
   saveAll: "全部保存",
   cancelAll: "全部取消",
+  approveProposal: "批准",
+  rejectProposal: "拒绝",
+  pendingProposals: (count) =>
+    count === 1 ? "1 项提议更改" : `${String(count)} 项提议更改`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "添加行",
   duplicateRow: "复制行",
   deleteRow: "删除行",

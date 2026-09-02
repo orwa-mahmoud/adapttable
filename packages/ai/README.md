@@ -14,9 +14,10 @@ import { createAgentSession } from "@adapttable/ai";
 import { tableAgent } from "@adapttable/ai/react";
 ```
 
-Compose `tableAgent({ tableId, bridge, writePolicy, columns })` in the
-table's `features` array. The root import stays React-free so a backend
-worker can speak the same three calls.
+Compose `tableAgent({ tableId, bridge, writePolicy, approval, commit, columns })`
+next to `agentApproval()` from the kit. `approval` defaults to `"writes"`;
+`commit` defaults to `"stage"`. The root import stays React-free so a
+backend worker can speak the same three calls.
 
 Docs: [capability contract](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/) ·
 [reference](https://orwa-mahmoud.github.io/adapttable/ai/).

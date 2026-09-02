@@ -146,6 +146,15 @@ export const he: Required<TableLabels> = {
     count === 1 ? "שורה אחת שלא נשמרה" : `${String(count)} שורות שלא נשמרו`,
   saveAll: "שמור הכול",
   cancelAll: "בטל הכול",
+  approveProposal: "אשר",
+  rejectProposal: "דחה",
+  pendingProposals: (count) =>
+    count === 1 ? "שינוי מוצע אחד" : `${String(count)} שינויים מוצעים`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
   addRow: "הוסף שורה",
   duplicateRow: "שכפל שורה",
   deleteRow: "מחק שורה",

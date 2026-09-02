@@ -11,8 +11,8 @@
   ],
   "columns": [],
   "rowAddressing": { "scope": "visible", "key": "rowKey" },
-  "limits": { "pageMax": 100 },
-  "policy": { "write": "allow" },
+  "limits": { "pageMax": 100, "readMax": 50 },
+  "policy": { "write": "allow", "approval": "writes", "commit": "stage" },
   "source": {
     "fullDataset": false,
     "grouping": false,

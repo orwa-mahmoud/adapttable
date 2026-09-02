@@ -27,7 +27,10 @@ export {
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
 export { FiltersIcon, SearchIcon } from "./components/icons";
+export { agentApproval } from "./agent-approval";
 export {
+  AgentApproval,
+  type AgentApprovalProps,
   BatchEditBar,
   type BatchEditBarProps,
   ColumnGroupToggle,

@@ -1,6 +1,8 @@
 import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
   BATCH_EDIT_BAR,
   BULK_BAR,
   COLUMN_MENU,
@@ -28,6 +30,7 @@ import {
   STATUS_BAR,
   TableStatusAnnouncer,
   useDataTableShell,
+  useFeatureState,
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
@@ -107,6 +110,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     filtersTrigger,
     rootRef,
   } = shell;
+  const approval = useFeatureState(AGENT_APPROVAL_STATE);
   const size = tableSize({ density: shell.density });
   const stickyBar = useStickyToolbarLayout(
     resolveStickyToolbar(
@@ -330,6 +334,15 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         props={{ batch: view.chrome.editing.batch, labels }}
                       />
                     )}
+                    <FeatureSlot
+                      slot={AGENT_APPROVAL}
+                      props={{
+                        proposals: approval?.proposals,
+                        onApprove: approval?.approve ?? (() => undefined),
+                        onReject: approval?.reject ?? (() => undefined),
+                        labels,
+                      }}
+                    />
 
                     {table.selection && props.bulkActions ? (
                       <FeatureSlot
