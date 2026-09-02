@@ -657,15 +657,24 @@ set and range those scopes need, `ExportInfo` is what the lifecycle hooks
 receive. Handing an export to a backend sends an `ExportRequest`, whose
 `ExportQuery` carries the view's search, filters, sort and grouping — with
 `page` and `limit` undefined for `scope: "all"`, so "everything" cannot be
-answered with one page. `FetchAllExport` is the opt-in that lets the table page
-a server source itself, capped at `EXPORT_FETCH_ALL_MAX_ROWS` (50,000) unless
-`maxRows` says otherwise; `fetchAllExportRows` performs that walk.
-`ExportHandlerState` is what `useExportHandler` returns — the
-click handler, `exportBusy`, an `ExportStatus` and the outcome text an
-`ExportAnnouncer` reads out. `LiveRegion` (with `LiveRegionProps`) is the polite
-region underneath it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps`
-types the announcer itself. See
-[customization](./customization.md#export).
+answered with one page. `onExportAll` instead receives an `ExportAllQuery`:
+the page-free search, flat and nested filters, primary and multi-sort,
+grouping, visible/requested column keys, format, and filename. Its
+`ExportAllControls` carries an `AbortSignal` plus optional progress and message
+setters; `ExportAllResult` is `{ url }` or empty.
+
+`FetchAllExport` is the opt-in that lets the table page a server source itself,
+capped at `EXPORT_FETCH_ALL_MAX_ROWS` (50,000) unless `maxRows` says otherwise;
+`fetchAllExportRows` performs that unchanged browser walk. `ExportHandlerState`
+is what `useExportHandler` returns — the click handler, `exportBusy`, an
+`ExportStatus`, `ExportProgressState`, and the text `ExportAnnouncer` reads
+out. `ExportProgressChrome` (configured by `ExportProgressChromeProps`) maps
+that shared state into an adapter's required `ExportProgressSlots`;
+`ExportProgressSurfaceSlotProps`,
+`ExportProgressAction`, and `ExportProgressDownload` type the kit-owned
+surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
+it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
+itself. See [browser and server-built exports](./exporting.md).
 
 **Status announcements.** Sorting, filtering and paging rewrite the body with
 nothing a screen reader can perceive, so the table says what changed through one

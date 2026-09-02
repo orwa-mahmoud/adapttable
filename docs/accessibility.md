@@ -7,7 +7,8 @@ screen reader can describe. AdaptTable ships that way. There is no
 `accessible` prop to turn on.
 
 **Related:** [Keyboard & cell navigation](./cell-navigation.md) ·
-[i18n & RTL](./i18n-rtl.md) · [FAQ](./faq.md)
+[i18n & RTL](./i18n-rtl.md) · [Browser and server-built exports](./exporting.md) ·
+[FAQ](./faq.md)
 
 ## What is on by default
 
@@ -47,6 +48,12 @@ have a **Move to group…** / **Move under…** menu, so re-parenting never
 depends on drag precision. Confirm/cancel restores focus to that menu trigger,
 and a live region announces successful moves, policy rejections, sort
 conflicts, and cycle guards.
+
+Server-built exports are keyboard-complete too. Their kit-native progress
+surface exposes Cancel while busy, Retry after failure, and a real download
+link after `{ url }` settles. A polite region announces start, each reported
+progress value, completion, failure, and cancellation; no progress report
+stays indeterminate without repeatedly announcing a fake percentage.
 
 ## What this page is not
 

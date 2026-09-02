@@ -1909,6 +1909,7 @@ function AntdTableBody<TRow>({
   // produce the same file on phone and desktop. The selection and full column
   // set come along so `scope: "selected"` and `columns: "all"` behave here
   // exactly as they do in every other kit.
+  const resolvedExport = resolveExportCsv(props.exportCsv, featureHost);
   const exportHandler = useExportHandler(
     makeExportCsvHandler(
       props.exportCsv,
@@ -1933,8 +1934,9 @@ function AntdTableBody<TRow>({
     c.table.labels,
     // The button names the format it produces, so a spreadsheet writer relabels
     // it without the host retyping a translated string.
-    resolveExportCsv(props.exportCsv, featureHost)?.writer?.extension,
-    c.featureNotices.some((notice) => notice.kind === "export-all-page")
+    resolvedExport?.writer?.extension,
+    c.featureNotices.some((notice) => notice.kind === "export-all-page"),
+    resolvedExport?.scope === "all" && resolvedExport.onExportAll !== undefined
   );
 
   // The palette lists the table's own actions; its shortcut is bound here

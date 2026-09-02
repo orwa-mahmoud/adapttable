@@ -278,9 +278,12 @@ whole set.
 Capabilities describe support; they are not transport. `exportScope: "all"`
 without rows or a retrieval handler leaves Export all disabled. A source-owned
 route needs `allFilteredRows` to be present and the declaration to permit
-`"all"`. A host that wires `exportCsv.request` or `exportCsv.fetchAll` supplies
-an independent executable route, so it can fetch the rest whatever the source
-can or cannot reach.
+`"all"`. A host that wires `exportCsv.onExportAll`, `exportCsv.request`, or
+`exportCsv.fetchAll` supplies an independent executable route, so it can reach
+the rest whatever the source can or cannot retrieve. `onExportAll` is the
+server-built route: it receives the page-free current view, reports progress,
+and supports cancellation without loading rows into the table. See
+[browser and server-built exports](./exporting.md).
 
 ## Cache keys for TanStack Query and SWR
 

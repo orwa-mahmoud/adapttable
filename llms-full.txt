@@ -546,8 +546,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 56.4 kB gzipped and the same table with
-`standardFeatures()` composed is 105.4 kB.
+Measured on MUI, the table alone is 57 kB gzipped and the same table with
+`standardFeatures()` composed is 108 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -1048,9 +1048,12 @@ whole set.
 Capabilities describe support; they are not transport. `exportScope: "all"`
 without rows or a retrieval handler leaves Export all disabled. A source-owned
 route needs `allFilteredRows` to be present and the declaration to permit
-`"all"`. A host that wires `exportCsv.request` or `exportCsv.fetchAll` supplies
-an independent executable route, so it can fetch the rest whatever the source
-can or cannot reach.
+`"all"`. A host that wires `exportCsv.onExportAll`, `exportCsv.request`, or
+`exportCsv.fetchAll` supplies an independent executable route, so it can reach
+the rest whatever the source can or cannot retrieve. `onExportAll` is the
+server-built route: it receives the page-free current view, reports progress,
+and supports cancellation without loading rows into the table. See
+[browser and server-built exports](./exporting.md).
 
 ## Cache keys for TanStack Query and SWR
 
@@ -6446,6 +6449,127 @@ when there is no `window`, so nothing crashes under SSR either way.
 
 ---
 
+# React table exports — browser files and server-built jobs
+
+AdaptTable uses one `exportCsv()` feature for CSV, XLSX, PDF, and custom
+writers. Small and medium exports can be built in the browser. Large
+server-backed exports can stay beside the data while the table shows progress,
+offers cancellation, and returns the finished download to the reader.
+
+## Browser-built export
+
+For frontend data, `scope: "all"` reads the source's complete filtered and
+sorted set and builds the file directly:
+
+```tsx
+import { exportCsv } from "@adapttable/mantine/export";
+
+<DataTable
+  features={[exportCsv({ scope: "all", filename: "people.csv" })]}
+  {...props}
+/>;
+```
+
+A server source normally holds one page. `fetchAll` is the explicit
+browser-built alternative: it pages the current query, then runs the normal
+writer. The walk defaults to `EXPORT_FETCH_ALL_MAX_ROWS` (50,000). Reaching
+that cap calls `onCapped` and never pretends a partial file is complete.
+
+```tsx
+features={[
+  exportCsv({
+    scope: "all",
+    fetchAll: {
+      fetchPage: (query) => api.people.list(query),
+      onCapped: ({ rows }) => notify(`${rows} rows is the browser limit`),
+    },
+  }),
+]}
+```
+
+Use this route only when downloading every page and holding the resulting file
+in the tab is appropriate. The cap, paging behavior, and
+`onBeforeExport`/`onAfterExport` hooks are unchanged.
+
+## Server-built export with progress
+
+`onExportAll(query, controls)` is the path beyond the browser cap. The table
+does not fetch rows. It sends the page-free view only:
+
+- committed search, flat filters, and the nested filter tree;
+- the primary sort and complete multi-sort chain;
+- grouping keys, outermost first;
+- visible column keys and requested export column keys, both in display order;
+- filename and writer format.
+
+```tsx
+import { exportCsv } from "@adapttable/mantine/export";
+
+<DataTable
+  features={[
+    exportCsv({
+      scope: "all",
+      filename: "people.csv",
+      onExportAll: async (query, controls) => {
+        const job = await api.exports.start(query, {
+          signal: controls.signal,
+        });
+
+        for await (const update of api.exports.watch(job.id, {
+          signal: controls.signal,
+        })) {
+          controls.setProgress?.(update.percent);
+          controls.setMessage?.(update.message);
+          if (update.url) return { url: update.url };
+        }
+      },
+    }),
+  ]}
+  {...props}
+/>;
+```
+
+Each run gets a fresh `AbortSignal`. The surface's Cancel button aborts it;
+the host should pass that signal through every request and stop its polling or
+stream. `setProgress` is clamped to 0–100. If it is never called, the kit shows
+an indeterminate indicator. `setMessage` supplies short job-specific detail
+below the localized heading.
+
+The host settles in one of three ways:
+
+- resolve `{ url }`: the completed surface offers a **Download export** link;
+- resolve nothing: the host chose another delivery method, and the surface
+  still shows **Export complete**;
+- reject: the error surface shows the reason and a localized **Retry** button.
+
+Cancellation is not a failure. It shows and announces **Export cancelled**,
+ignores a late rejection from the aborted run, and never offers Retry for that
+run. Retry starts a new job with a new signal and the table's current view.
+
+`onExportAll` takes precedence over the generic `request` callback for
+`scope: "all"`. `request` remains available for hosts that take over page,
+selected, or range exports without the progress protocol. Neither host-owned
+route runs `onBeforeExport` or `onAfterExport`, because the table never builds
+their file.
+
+## Accessibility and adapter behavior
+
+Every published adapter renders the same lifecycle through its own components:
+a progress card and determinate bar or indeterminate spinner, plus native-kit
+Cancel and Retry controls. The card is viewport-safe on mobile and uses logical
+positioning, so it remains at the inline end in LTR and RTL.
+
+A polite live region announces start, each reported progress value, completion,
+failure, and cancellation. The Export button remains present with
+`aria-busy="true"` while a job runs, and the single-flight guard refuses a
+second start until that run settles or is cancelled.
+
+For column scopes, writers, lifecycle hooks, and headless helpers, see
+[Customization — Export](./customization.md#export). For PDF and print-specific
+options, see [PDF export and print layout](./export-pdf.md).
+
+---
+
 # React table PDF export and print layout
 
 ▶ **See it working:** [download a grouped PDF and print the same view](https://orwa-mahmoud.github.io/adapttable/demo/mantine/export/) — a real table, not a recording.
@@ -7677,8 +7801,8 @@ Headless helpers remain available: `rowsToCsv`, `downloadCsv`, and
 
 Past a certain size the browser is the wrong place to build the file: the rows
 are not all loaded, holding them would cost more memory than the tab has, and
-the work blocks the main thread. `request` hands the export to the server
-instead:
+the work blocks the main thread. `onExportAll` hands the page-free current view
+to the server and keeps the job visible:
 
 ```tsx
 import { exportCsv } from "@adapttable/mantine/export";
@@ -7687,16 +7811,16 @@ import { exportCsv } from "@adapttable/mantine/export";
   features={[
     exportCsv({
       scope: "all",
-      request: async ({ query, scope, format, columns, filename }) => {
+      onExportAll: async (query, controls) => {
         const res = await fetch("/api/people/export", {
           method: "POST",
-          body: JSON.stringify({
-            ...query,
-            scope,
-            columns: columns.map((c) => c.key),
-          }),
+          body: JSON.stringify(query),
+          signal: controls.signal,
         });
-        window.location.href = (await res.json()).url; // or queue a job and email it
+        const job = await res.json();
+        controls.setProgress?.(job.progress);
+        controls.setMessage?.(job.message);
+        return job.url ? { url: job.url } : undefined;
       },
     }),
   ]}
@@ -7704,31 +7828,22 @@ import { exportCsv } from "@adapttable/mantine/export";
 />;
 ```
 
-`query` carries the user's current view — search, filters, sort, paging — in
-the same shape a [server tier](./data-tiers.md) receives, so an endpoint that
-already answers table queries needs no new vocabulary. `format` is the
-extension the button would have produced (`"csv"`, `"xlsx"`, or whatever a
-custom writer names itself), so the server builds the file the user asked for
-rather than guessing from the filename. `rows` holds whatever the browser has
-of the scope, which is useful for a count or a confirmation even when the
-server does the real work.
+`query` carries search, flat and nested filters, single and multi-sort,
+grouping, visible and requested column keys, format, and filename — but no page
+window and no rows. `controls.signal` powers Cancel; `setProgress(0–100)` and
+`setMessage(text)` update every kit's progress surface. No progress means an
+indeterminate indicator. Resolve `{ url }` and the table offers the download;
+resolve nothing when the host delivered it another way; reject for a localized
+error with Retry.
 
-With `request` set the table builds no file and downloads nothing, so
-`onBeforeExport` and `onAfterExport` do not run — there is no file for them to
-bracket.
+The existing `fetchAll` route still pages in the browser and keeps its 50,000
+row default cap. `onExportAll` is the documented route past it. The generic
+`request` callback also remains for backend takeover of page, selected, or
+range exports without progress. Host-owned routes do not run
+`onBeforeExport`/`onAfterExport`, because the table never builds their file.
 
-Return a promise and the Export button shows **its own kit's loading
-affordance** until it settles — Mantine's, MUI's, Chakra's and Ant Design's
-loading buttons, Radix's and Base UI's spinners, and a styleable
-`exportSpinner` element in the unstyled and shadcn presets — with `aria-busy`
-throughout, so an impatient second click cannot start the same export twice. A
-rejected promise releases the button rather than leaving it stuck.
-
-Either way the outcome is **announced**: a download is silent and a failed one
-is silent in the same way, so a polite live region beside the button says
-`labels.exportDone` or `labels.exportFailed` (translated in all seventeen
-locales) when the export ends. `exportStatus` — `"idle"`, `"busy"`, `"done"` or
-`"failed"` — is on the same state for a toolbar that wants to show more.
+The full settle, cancellation, and accessibility contract is in
+[Browser and server-built exports](./exporting.md).
 
 ### The export pipeline (headless)
 
@@ -8040,7 +8155,8 @@ screen reader can describe. AdaptTable ships that way. There is no
 `accessible` prop to turn on.
 
 **Related:** [Keyboard & cell navigation](./cell-navigation.md) ·
-[i18n & RTL](./i18n-rtl.md) · [FAQ](./faq.md)
+[i18n & RTL](./i18n-rtl.md) · [Browser and server-built exports](./exporting.md) ·
+[FAQ](./faq.md)
 
 ## What is on by default
 
@@ -8080,6 +8196,12 @@ have a **Move to group…** / **Move under…** menu, so re-parenting never
 depends on drag precision. Confirm/cancel restores focus to that menu trigger,
 and a live region announces successful moves, policy rejections, sort
 conflicts, and cycle guards.
+
+Server-built exports are keyboard-complete too. Their kit-native progress
+surface exposes Cancel while busy, Retry after failure, and a real download
+link after `{ url }` settles. A polite region announces start, each reported
+progress value, completion, failure, and cancellation; no progress report
+stays indeterminate without repeatedly announcing a fake percentage.
 
 ## What this page is not
 
@@ -8964,15 +9086,23 @@ set and range those scopes need, `ExportInfo` is what the lifecycle hooks
 receive. Handing an export to a backend sends an `ExportRequest`, whose
 `ExportQuery` carries the view's search, filters, sort and grouping — with
 `page` and `limit` undefined for `scope: "all"`, so "everything" cannot be
-answered with one page. `FetchAllExport` is the opt-in that lets the table page
-a server source itself, capped at `EXPORT_FETCH_ALL_MAX_ROWS` (50,000) unless
-`maxRows` says otherwise; `fetchAllExportRows` performs that walk.
-`ExportHandlerState` is what `useExportHandler` returns — the
-click handler, `exportBusy`, an `ExportStatus` and the outcome text an
-`ExportAnnouncer` reads out. `LiveRegion` (with `LiveRegionProps`) is the polite
-region underneath it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps`
-types the announcer itself. See
-[customization](./customization.md#export).
+answered with one page. `onExportAll` instead receives an `ExportAllQuery`:
+the page-free search, flat and nested filters, primary and multi-sort,
+grouping, visible/requested column keys, format, and filename. Its
+`ExportAllControls` carries an `AbortSignal` plus optional progress and message
+setters; `ExportAllResult` is `{ url }` or empty.
+
+`FetchAllExport` is the opt-in that lets the table page a server source itself,
+capped at `EXPORT_FETCH_ALL_MAX_ROWS` (50,000) unless `maxRows` says otherwise;
+`fetchAllExportRows` performs that unchanged browser walk. `ExportHandlerState`
+is what `useExportHandler` returns — the click handler, `exportBusy`, an
+`ExportStatus`, `ExportProgressState`, and the text `ExportAnnouncer` reads
+out. `ExportProgressChrome` maps that shared state into an adapter's required
+`ExportProgressSlots`; `ExportProgressSurfaceSlotProps`,
+`ExportProgressAction`, and `ExportProgressDownload` type the kit-owned
+surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
+it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
+itself. See [browser and server-built exports](./exporting.md).
 
 **Status announcements.** Sorting, filtering and paging rewrite the body with
 nothing a screen reader can perceive, so the table says what changed through one
@@ -10203,9 +10333,9 @@ your app already ships those:
 
 | What you import                           | min+gzip  |
 | ----------------------------------------- | --------- |
-| `useFrontendData` + `useDataTable` (core) | ~18 kB    |
+| `useFrontendData` + `useDataTable` (core) | ~19 kB    |
 | every core export                         | ~80 kB    |
-| `DataTable` from an adapter               | ~56–68 kB |
+| `DataTable` from an adapter               | ~57–69 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters

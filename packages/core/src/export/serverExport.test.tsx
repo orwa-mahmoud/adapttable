@@ -22,6 +22,9 @@ import type { ColumnDef } from "../types";
 import { resetDevWarnings } from "../utils/devWarn";
 import { ExportAnnouncer } from "./ExportAnnouncer";
 import {
+  type ExportAllControls,
+  type ExportAllQuery,
+  type ExportAllResult,
   type ExportRequest,
   fetchAllExportRows,
   makeExportCsvHandler,
@@ -92,6 +95,73 @@ function serverSource(over: Partial<TableSource<Row>> = {}): TableSource<Row> {
 }
 
 describe('scope "all" over a server source', () => {
+  it("hands onExportAll the exact page-free view without resolving rows", () => {
+    const onBeforeExport = vi.fn();
+    const onExportAll =
+      vi.fn<(query: ExportAllQuery, controls: ExportAllControls) => void>();
+    const tableSource = serverSource({
+      sortLevels: [
+        { key: "name", dir: "desc" },
+        { key: "id", dir: "asc" },
+      ],
+      filterTree: {
+        combinator: "and",
+        conditions: [{ key: "team", op: "eq", value: "Core" }],
+      },
+      groupBy: "team,status",
+    });
+    const handler = makeExportCsvHandler(
+      {
+        scope: "all",
+        filename: "people.csv",
+        columns: ["name"],
+        onBeforeExport,
+        onExportAll,
+      },
+      tableSource,
+      COLUMNS
+    );
+    const controller = new AbortController();
+
+    handler?.({ signal: controller.signal });
+
+    expect(onExportAll).toHaveBeenCalledWith(
+      {
+        search: "ada",
+        sortBy: "name",
+        sortDir: "desc",
+        sortLevels: [
+          { key: "name", dir: "desc" },
+          { key: "id", dir: "asc" },
+        ],
+        filters: { team: "Core" },
+        filterTree: {
+          combinator: "and",
+          conditions: [{ key: "team", op: "eq", value: "Core" }],
+        },
+        groupBy: ["team", "status"],
+        columns: ["name"],
+        visibleColumns: ["name"],
+        format: "csv",
+        filename: "people.csv",
+      },
+      { signal: controller.signal }
+    );
+    expect(onBeforeExport).not.toHaveBeenCalled();
+  });
+
+  it("prefers the progress-aware all route over the generic request", () => {
+    const onExportAll = vi.fn();
+    const request = vi.fn();
+    makeExportCsvHandler(
+      { scope: "all", onExportAll, request },
+      serverSource(),
+      COLUMNS
+    )?.();
+    expect(onExportAll).toHaveBeenCalledTimes(1);
+    expect(request).not.toHaveBeenCalled();
+  });
+
   it("asks the backend for the set, not for a page", () => {
     const request = vi.fn();
     const handler = makeExportCsvHandler(
@@ -347,6 +417,194 @@ describe("exportCsv.request", () => {
     // No file was built, so nothing brackets the building of one.
     expect(onBeforeExport).not.toHaveBeenCalled();
     expect(onAfterExport).not.toHaveBeenCalled();
+  });
+});
+
+type OnExportAll = (
+  query: ExportAllQuery,
+  controls: ExportAllControls
+) => ExportAllResult | Promise<ExportAllResult>;
+
+function ServerExportHarness({
+  onExportAll,
+}: {
+  readonly onExportAll: OnExportAll;
+}) {
+  const state = useExportHandler(
+    makeExportCsvHandler<Row>(
+      { scope: "all", onExportAll },
+      serverSource(),
+      COLUMNS
+    ),
+    undefined,
+    "csv",
+    false,
+    true
+  );
+  const progress = state.exportProgressState;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={state.onExportCsv}
+        disabled={state.exportBusy}
+      >
+        Export
+      </button>
+      <span data-testid="status">{state.exportStatus}</span>
+      <span data-testid="progress">{progress?.value ?? "indeterminate"}</span>
+      <span data-testid="message">{progress?.message}</span>
+      <span data-testid="error">{progress?.error}</span>
+      {progress?.downloadUrl ? (
+        <a href={progress.downloadUrl}>Download export</a>
+      ) : null}
+      {progress?.onCancel ? (
+        <button type="button" onClick={progress.onCancel}>
+          Cancel
+        </button>
+      ) : null}
+      {progress?.onRetry ? (
+        <button type="button" onClick={progress.onRetry}>
+          Retry
+        </button>
+      ) : null}
+      <ExportAnnouncer announcement={state.exportAnnouncement} />
+    </>
+  );
+}
+
+describe("exportCsv.onExportAll lifecycle", () => {
+  it("reports determinate progress and a host message", () => {
+    render(
+      <ServerExportHarness
+        onExportAll={(_query, controls) => {
+          controls.setProgress?.(42);
+          controls.setMessage?.("Building 21 of 50 pages");
+          return new Promise(() => undefined);
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+
+    expect(screen.getByTestId("progress")).toHaveTextContent("42");
+    expect(screen.getByTestId("message")).toHaveTextContent(
+      "Building 21 of 50 pages"
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Export 42% complete");
+  });
+
+  it("clamps host progress to the public 0–100 range", () => {
+    render(
+      <ServerExportHarness
+        onExportAll={(_query, controls) => {
+          controls.setProgress?.(140);
+          return new Promise(() => undefined);
+        }}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+    expect(screen.getByTestId("progress")).toHaveTextContent("100");
+  });
+
+  it("stays indeterminate until an empty settlement reports done", async () => {
+    let settle!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      settle = resolve;
+    });
+    render(<ServerExportHarness onExportAll={() => pending} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+    expect(screen.getByTestId("progress")).toHaveTextContent("indeterminate");
+    expect(screen.getByRole("status")).toHaveTextContent("Preparing export");
+
+    await act(async () => {
+      settle();
+      await pending;
+    });
+    expect(screen.getByTestId("status")).toHaveTextContent("done");
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Export complete");
+  });
+
+  it("offers the URL returned by the host", async () => {
+    render(
+      <ServerExportHarness
+        onExportAll={() =>
+          Promise.resolve({ url: "/exports/people.csv?token=signed" })
+        }
+      />
+    );
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export" }).click();
+      await Promise.resolve();
+    });
+
+    expect(
+      screen.getByRole("link", { name: "Download export" })
+    ).toHaveAttribute("href", "/exports/people.csv?token=signed");
+    expect(screen.getByTestId("status")).toHaveTextContent("done");
+  });
+
+  it("shows a rejected error and retries with a fresh run", async () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const onExportAll = vi
+      .fn<OnExportAll>()
+      .mockRejectedValueOnce(new Error("Report service unavailable"))
+      .mockResolvedValueOnce(undefined);
+    render(<ServerExportHarness onExportAll={onExportAll} />);
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export" }).click();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("status")).toHaveTextContent("failed");
+    expect(screen.getByTestId("error")).toHaveTextContent(
+      "Report service unavailable"
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Export failed");
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Retry" }).click();
+      await Promise.resolve();
+    });
+    expect(onExportAll).toHaveBeenCalledTimes(2);
+    expect(onExportAll.mock.calls[0]?.[1].signal).not.toBe(
+      onExportAll.mock.calls[1]?.[1].signal
+    );
+    expect(screen.getByTestId("status")).toHaveTextContent("done");
+    warn.mockRestore();
+    resetDevWarnings();
+  });
+
+  it("aborts the host signal and ignores its late rejection", async () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    let signal: AbortSignal | undefined;
+    const onExportAll = vi.fn<OnExportAll>(
+      (_query, controls) =>
+        new Promise<void>((_resolve, reject) => {
+          signal = controls.signal;
+          controls.signal.addEventListener("abort", () => {
+            reject(new DOMException("Cancelled", "AbortError"));
+          });
+        })
+    );
+    render(<ServerExportHarness onExportAll={onExportAll} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await act(() => Promise.resolve());
+
+    expect(signal?.aborted).toBe(true);
+    expect(screen.getByTestId("status")).toHaveTextContent("cancelled");
+    expect(screen.getByRole("status")).toHaveTextContent("Export cancelled");
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+    resetDevWarnings();
   });
 });
 

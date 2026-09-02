@@ -119,6 +119,7 @@ export const DISABLED_EXPORT: ExportHandlerState = {
   exportBusy: false,
   exportStatus: "idle",
   exportAnnouncement: "",
+  exportProgressState: null,
   exportLabel: "Export CSV",
   exportDisabled: false,
   exportDisabledReason: "",

@@ -365,6 +365,33 @@ export function editHistory(options?: boolean | {
 export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
 // @public
+export interface ExportAllControls {
+    readonly setMessage?: (message: string) => void;
+    readonly setProgress?: (progress: number) => void;
+    readonly signal: AbortSignal;
+}
+
+// @public
+export interface ExportAllQuery {
+    readonly columns: readonly string[];
+    readonly filename: string;
+    readonly filters: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly format: string;
+    readonly groupBy: readonly string[];
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly visibleColumns: readonly string[];
+}
+
+// @public
+export type ExportAllResult = {
+    readonly url: string;
+} | void;
+
+// @public
 export type ExportColumnScope = "visible" | "all" | readonly string[];
 
 // @public
@@ -383,6 +410,7 @@ export interface ExportCsvOptions<TRow = unknown> {
     onBeforeExport?: (info: ExportInfo<TRow>) => boolean | void | {
         filename?: string;
     };
+    onExportAll?: (query: ExportAllQuery, controls: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
     request?: (info: ExportRequest<TRow>) => void | Promise<void>;
     scope?: ExportRowScope;
     writer?: ExportWriter;
@@ -1103,10 +1131,14 @@ export interface TableLabels {
     expandColumnGroup?: string;
     expandGroup?: string;
     expandRow?: string;
+    exportCancelled?: string;
     exportCsv?: string;
     exportDone?: string;
+    exportDownload?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
+    exportProgress?: (progress: number) => string;
+    exportStarted?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;

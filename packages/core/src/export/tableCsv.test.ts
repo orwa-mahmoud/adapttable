@@ -128,7 +128,7 @@ describe("buildTableCsv", () => {
     // The warning has to name the way out, not just the limitation: this call
     // bypasses the toolbar handler, which refuses to render the button at all.
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("`request` or `fetchAll`")
+      expect.stringContaining("`onExportAll`, `request`, or `fetchAll`")
     );
   });
 

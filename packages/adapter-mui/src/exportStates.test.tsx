@@ -1,3 +1,8 @@
+import type {
+  ExportAllControls,
+  ExportAllQuery,
+  ExportAllResult,
+} from "@adapttable/core";
 import { xlsxWriter } from "@adapttable/core/xlsx";
 import { act, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -37,7 +42,54 @@ function renderExport(request: () => Promise<void>) {
   );
 }
 
+function renderServerExport(
+  onExportAll: (
+    query: ExportAllQuery,
+    controls: ExportAllControls
+  ) => ExportAllResult | Promise<ExportAllResult>
+) {
+  const options = { scope: "all" as const, onExportAll };
+  return renderMui(
+    <DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(r) => r.id}
+      urlSync={false}
+      features={[exportCsv<Row>(options)]}
+      exportCsv={options}
+    />
+  );
+}
+
 describe("export states (MUI)", () => {
+  it("renders determinate progress and cancels through the host signal", async () => {
+    let signal: AbortSignal | undefined;
+    const { container } = renderServerExport(
+      (_query, controls) =>
+        new Promise<void>(() => {
+          signal = controls.signal;
+          controls.setProgress?.(55);
+          controls.setMessage?.("Building file");
+        })
+    );
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export CSV" }).click();
+      await Promise.resolve();
+    });
+    expect(
+      screen.getByRole("region", { name: "Preparing export" })
+    ).toHaveTextContent("Building file");
+    expect(container.querySelector(".MuiLinearProgress-root")).not.toBeNull();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Cancel" }).click();
+      await Promise.resolve();
+    });
+    expect(signal?.aborted).toBe(true);
+    expect(screen.getByRole("status")).toHaveTextContent("Export cancelled");
+  });
+
   it("shows MUI's own loading affordance while the export runs", async () => {
     let settle!: () => void;
     const { container } = renderExport(

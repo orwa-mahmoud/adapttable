@@ -7,9 +7,11 @@
  */
 import {
   ExportAnnouncer,
+  ExportProgressChrome,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import { Button } from "@chakra-ui/react";
+import { Box, Button, Progress, Spinner, Stack, Text } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
 export function UndoRedoButtons({
@@ -45,15 +47,20 @@ export function UndoRedoButtons({
   );
 }
 
-export function ExportCsvButton({
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportLabel,
-  exportDisabled = false,
-  exportDisabledReason = "",
-  accentColor,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
+export function ExportCsvButton(
+  props: Readonly<ToolbarExtrasSlotProps>
+): ReactNode {
+  const {
+    onExportCsv,
+    exportBusy,
+    exportAnnouncement = "",
+    exportProgressState = null,
+    exportLabel,
+    exportDisabled = false,
+    exportDisabledReason = "",
+    accentColor,
+    labels,
+  } = props;
   if (!onExportCsv) return null;
   return (
     <>
@@ -72,8 +79,122 @@ export function ExportCsvButton({
       >
         {exportLabel}
       </Button>
+      <ExportProgressChrome
+        progress={exportProgressState}
+        labels={labels}
+        slots={{ Surface: ExportProgressSurface }}
+      />
       <ExportAnnouncer announcement={exportAnnouncement} />
     </>
+  );
+}
+
+function ExportProgressSurface({
+  status,
+  heading,
+  message,
+  error,
+  progress,
+  progressLabel,
+  cancel,
+  retry,
+  download,
+}: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
+  let progressIndicator: ReactNode = null;
+  if (status === "busy") {
+    progressIndicator =
+      progress === undefined ? (
+        <Spinner
+          size="sm"
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+        />
+      ) : (
+        <Progress.Root
+          value={progress}
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+        >
+          <Progress.Track>
+            <Progress.Range />
+          </Progress.Track>
+        </Progress.Root>
+      );
+  }
+  return (
+    <Box
+      role="region"
+      aria-label={heading}
+      data-adapttable-part="export-progress-surface"
+      position="fixed"
+      zIndex={1400}
+      insetInlineEnd="4"
+      bottom="4"
+      width="320px"
+      maxWidth="calc(100vw - 32px)"
+      padding="4"
+      borderWidth="1px"
+      borderRadius="md"
+      bg="bg.panel"
+      boxShadow="lg"
+    >
+      <Stack gap="3">
+        <Text fontWeight="semibold" fontSize="sm">
+          {heading}
+        </Text>
+        {progressIndicator}
+        {message ? (
+          <Text fontSize="sm" data-adapttable-part="export-progress-message">
+            {message}
+          </Text>
+        ) : null}
+        {error ? (
+          <Text
+            fontSize="sm"
+            color="fg.error"
+            data-adapttable-part="export-progress-message"
+          >
+            {error}
+          </Text>
+        ) : null}
+        <Stack
+          direction="row"
+          justify="flex-end"
+          data-adapttable-part="export-progress-actions"
+        >
+          {cancel ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={cancel.onAction}
+              data-adapttable-part="export-progress-cancel"
+            >
+              {cancel.label}
+            </Button>
+          ) : null}
+          {retry ? (
+            <Button
+              size="xs"
+              onClick={retry.onAction}
+              data-adapttable-part="export-progress-retry"
+            >
+              {retry.label}
+            </Button>
+          ) : null}
+          {download ? (
+            <Button size="xs" asChild>
+              <a
+                href={download.url}
+                download
+                data-adapttable-part="export-progress-download"
+              >
+                {download.label}
+              </a>
+            </Button>
+          ) : null}
+        </Stack>
+      </Stack>
+    </Box>
   );
 }
 

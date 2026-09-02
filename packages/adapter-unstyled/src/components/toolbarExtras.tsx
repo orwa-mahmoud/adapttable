@@ -9,6 +9,8 @@
  */
 import {
   ExportAnnouncer,
+  ExportProgressChrome,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
 import type { ReactNode } from "react";
@@ -56,9 +58,11 @@ export function ExportCsvButton(
     onExportCsv,
     exportBusy,
     exportAnnouncement = "",
+    exportProgressState = null,
     exportLabel,
     exportDisabled = false,
     exportDisabledReason = "",
+    labels,
   } = props;
   const classNames = classesOf(props);
   if (!onExportCsv) return null;
@@ -86,8 +90,118 @@ export function ExportCsvButton(
         )}
         {exportLabel}
       </button>
+      <ExportProgressChrome
+        progress={exportProgressState}
+        labels={labels}
+        slots={{
+          Surface: (surface) => (
+            <ExportProgressSurface {...surface} classNames={classNames} />
+          ),
+        }}
+      />
       <ExportAnnouncer announcement={exportAnnouncement} />
     </>
+  );
+}
+
+function ExportProgressSurface({
+  status,
+  heading,
+  message,
+  error,
+  progress,
+  progressLabel,
+  cancel,
+  retry,
+  download,
+  classNames,
+}: Readonly<
+  ExportProgressSurfaceSlotProps & { classNames: DataTableClassNames }
+>): ReactNode {
+  return (
+    <section
+      aria-label={heading}
+      data-adapttable-part="export-progress-surface"
+      className={classNames.exportProgressSurface}
+      style={{
+        position: "fixed",
+        zIndex: 1400,
+        insetInlineEnd: 16,
+        bottom: 16,
+        width: 320,
+        maxWidth: "calc(100vw - 32px)",
+        padding: 16,
+        border: "1px solid currentColor",
+        borderRadius: 8,
+        background: "Canvas",
+        color: "CanvasText",
+        boxShadow: "0 8px 28px rgb(0 0 0 / 18%)",
+      }}
+    >
+      <strong>{heading}</strong>
+      {status === "busy" ? (
+        <progress
+          value={progress}
+          max={100}
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+          className={classNames.exportProgressBar}
+          style={{ display: "block", width: "100%", marginBlock: 12 }}
+        />
+      ) : null}
+      {message ? (
+        <p
+          data-adapttable-part="export-progress-message"
+          className={classNames.exportProgressMessage}
+        >
+          {message}
+        </p>
+      ) : null}
+      {error ? (
+        <p
+          data-adapttable-part="export-progress-message"
+          className={classNames.exportProgressMessage}
+        >
+          {error}
+        </p>
+      ) : null}
+      <div
+        data-adapttable-part="export-progress-actions"
+        className={classNames.exportProgressActions}
+        style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+      >
+        {cancel ? (
+          <button
+            type="button"
+            className={classNames.exportProgressCancel}
+            onClick={cancel.onAction}
+            data-adapttable-part="export-progress-cancel"
+          >
+            {cancel.label}
+          </button>
+        ) : null}
+        {retry ? (
+          <button
+            type="button"
+            className={classNames.exportProgressRetry}
+            onClick={retry.onAction}
+            data-adapttable-part="export-progress-retry"
+          >
+            {retry.label}
+          </button>
+        ) : null}
+        {download ? (
+          <a
+            href={download.url}
+            download
+            className={classNames.exportProgressDownload}
+            data-adapttable-part="export-progress-download"
+          >
+            {download.label}
+          </a>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

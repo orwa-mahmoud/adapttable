@@ -187,6 +187,12 @@ describe("the features that used to guess", () => {
         paged
       )
     ).toBe(false);
+    expect(
+      exportAllFallsBackToPage(
+        { scope: "all", onExportAll: () => undefined },
+        paged
+      )
+    ).toBe(false);
   });
 
   it("never treats a capability declaration as row transport", () => {

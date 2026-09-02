@@ -255,11 +255,12 @@
       "subpath": "export",
       "implementation": [
         "core/src/export/tableCsv.ts",
-        "core/src/export/useExportHandler.ts"
+        "core/src/export/useExportHandler.ts",
+        "core/src/export/ExportProgressChrome.tsx"
       ],
       "adapterComponents": ["Toolbar"],
       "standardPreset": true,
-      "note": "CSV writer plus the toolbar action that triggers it.",
+      "note": "Browser and server-built writers plus the toolbar action and native-kit progress surface that trigger them.",
       "requiresConfig": false
     },
     "cellNavigation": {

@@ -262,9 +262,18 @@ export {
   type ExportAnnouncerProps,
 } from "./export/ExportAnnouncer";
 export { exportButtonLabel } from "./export/exportLabel";
+export {
+  type ExportProgressAction,
+  ExportProgressChrome,
+  type ExportProgressChromeProps,
+  type ExportProgressDownload,
+  type ExportProgressSlots,
+  type ExportProgressSurfaceSlotProps,
+} from "./export/ExportProgressChrome";
 export type { ExportWriter } from "./export/exportWriter";
 export {
   type ExportHandlerState,
+  type ExportProgressState,
   type ExportStatus,
   useExportHandler,
 } from "./export/useExportHandler";
@@ -804,7 +813,13 @@ export type { CellSaveState } from "./editing/saveState";
 export type { CellEditingState } from "./editing/useCellEditing";
 export type { EditValidationState, RowValidator } from "./editing/validation";
 export type { ExportPayload, ExportWriteContext } from "./export/exportWriter";
-export type { ExportContext, ExportCsvOptions } from "./export/tableCsv";
+export type {
+  ExportAllControls,
+  ExportAllQuery,
+  ExportAllResult,
+  ExportContext,
+  ExportCsvOptions,
+} from "./export/tableCsv";
 export type {
   ColumnMenuActionFactory,
   ContextMenuItemsFactory,

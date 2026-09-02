@@ -1,8 +1,17 @@
 import {
   ExportAnnouncer,
+  ExportProgressChrome,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import { Button, CircularProgress } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import type { ReactNode } from "react";
 
 export function UndoRedoButtons({
@@ -38,14 +47,19 @@ export function UndoRedoButtons({
   );
 }
 
-export function ExportCsvButton({
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportLabel,
-  exportDisabled = false,
-  exportDisabledReason = "",
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
+export function ExportCsvButton(
+  props: Readonly<ToolbarExtrasSlotProps>
+): ReactNode {
+  const {
+    onExportCsv,
+    exportBusy,
+    exportAnnouncement = "",
+    exportProgressState = null,
+    exportLabel,
+    exportDisabled = false,
+    exportDisabledReason = "",
+    labels,
+  } = props;
   if (!onExportCsv) return null;
   return (
     <>
@@ -64,8 +78,109 @@ export function ExportCsvButton({
       >
         {exportLabel}
       </Button>
+      <ExportProgressChrome
+        progress={exportProgressState}
+        labels={labels}
+        slots={{ Surface: ExportProgressSurface }}
+      />
       <ExportAnnouncer announcement={exportAnnouncement} />
     </>
+  );
+}
+
+function ExportProgressSurface({
+  status,
+  heading,
+  message,
+  error,
+  progress,
+  progressLabel,
+  cancel,
+  retry,
+  download,
+}: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
+  return (
+    <Paper
+      role="region"
+      aria-label={heading}
+      data-adapttable-part="export-progress-surface"
+      elevation={8}
+      sx={{
+        position: "fixed",
+        zIndex: 1400,
+        insetInlineEnd: 16,
+        bottom: 16,
+        width: 320,
+        maxWidth: "calc(100vw - 32px)",
+        p: 2,
+      }}
+    >
+      <Stack spacing={1.25}>
+        <Typography variant="subtitle2">{heading}</Typography>
+        {status === "busy" ? (
+          <LinearProgress
+            variant={progress === undefined ? "indeterminate" : "determinate"}
+            value={progress}
+            aria-label={progressLabel}
+            data-adapttable-part="export-progress-bar"
+          />
+        ) : null}
+        {message ? (
+          <Typography
+            variant="body2"
+            data-adapttable-part="export-progress-message"
+          >
+            {message}
+          </Typography>
+        ) : null}
+        {error ? (
+          <Typography
+            variant="body2"
+            color="error"
+            data-adapttable-part="export-progress-message"
+          >
+            {error}
+          </Typography>
+        ) : null}
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ justifyContent: "flex-end" }}
+          data-adapttable-part="export-progress-actions"
+        >
+          {cancel ? (
+            <Button
+              size="small"
+              onClick={cancel.onAction}
+              data-adapttable-part="export-progress-cancel"
+            >
+              {cancel.label}
+            </Button>
+          ) : null}
+          {retry ? (
+            <Button
+              size="small"
+              variant="contained"
+              onClick={retry.onAction}
+              data-adapttable-part="export-progress-retry"
+            >
+              {retry.label}
+            </Button>
+          ) : null}
+          {download ? (
+            <Button
+              size="small"
+              variant="contained"
+              href={download.url}
+              download
+              data-adapttable-part="export-progress-download"
+            >
+              {download.label}
+            </Button>
+          ) : null}
+        </Stack>
+      </Stack>
+    </Paper>
   );
 }
 

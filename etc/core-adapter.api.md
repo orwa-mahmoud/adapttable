@@ -1981,6 +1981,33 @@ export const EXPANSION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 export const EXPORT_LIVE: FeatureSlotKey<ExportLiveSlotProps<never>>;
 
 // @public
+export interface ExportAllControls {
+    readonly setMessage?: (message: string) => void;
+    readonly setProgress?: (progress: number) => void;
+    readonly signal: AbortSignal;
+}
+
+// @public
+export interface ExportAllQuery {
+    readonly columns: readonly string[];
+    readonly filename: string;
+    readonly filters: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly format: string;
+    readonly groupBy: readonly string[];
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly visibleColumns: readonly string[];
+}
+
+// @public
+export type ExportAllResult = {
+    readonly url: string;
+} | void;
+
+// @public
 export function ExportAnnouncer(input: Readonly<ExportAnnouncerProps>): ReactElement;
 
 // @public
@@ -2001,6 +2028,7 @@ export interface ExportContext<TRow> {
     getCellSpan?: GetCellSpan<TRow>;
     getRowId?: (row: TRow) => string;
     grouping?: {
+        groupBy?: readonly string[];
         entries: readonly GroupedFlatEntry<TRow>[];
     };
     groupTotal?: (label: string) => string;
@@ -2026,6 +2054,7 @@ export interface ExportCsvOptions<TRow = unknown> {
     onBeforeExport?: (info: ExportInfo<TRow>) => boolean | void | {
         filename?: string;
     };
+    onExportAll?: (query: ExportAllQuery, controls: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
     request?: (info: ExportRequest<TRow>) => void | Promise<void>;
     scope?: ExportRowScope;
     writer?: ExportWriter;
@@ -2038,6 +2067,7 @@ export interface ExportHandlerState {
     exportDisabled: boolean;
     exportDisabledReason: string;
     exportLabel: string;
+    exportProgressState: ExportProgressState | null;
     exportStatus: ExportStatus;
     onExportCsv: (() => void) | undefined;
 }
@@ -2066,6 +2096,57 @@ export interface ExportPayload {
     mimeType: string;
     parts: readonly BlobPart[];
     text: string;
+}
+
+// @public
+export interface ExportProgressAction {
+    readonly label: string;
+    readonly onAction: () => void;
+}
+
+// @public
+export function ExportProgressChrome(input: Readonly<ExportProgressChromeProps>): ReactElement | null;
+
+// @public
+export interface ExportProgressChromeProps {
+    readonly labels: TableLabels;
+    readonly progress: ExportProgressState | null;
+    readonly slots: ExportProgressSlots;
+}
+
+// @public
+export interface ExportProgressDownload {
+    readonly label: string;
+    readonly url: string;
+}
+
+// @public
+export interface ExportProgressSlots {
+    readonly Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode;
+}
+
+// @public
+export interface ExportProgressState {
+    readonly downloadUrl: string | undefined;
+    readonly error: string;
+    readonly message: string;
+    readonly onCancel: (() => void) | undefined;
+    readonly onRetry: (() => void) | undefined;
+    readonly status: Exclude<ExportStatus, "idle">;
+    readonly value: number | undefined;
+}
+
+// @public
+export interface ExportProgressSurfaceSlotProps {
+    readonly cancel: ExportProgressAction | undefined;
+    readonly download: ExportProgressDownload | undefined;
+    readonly error: string;
+    readonly heading: string;
+    readonly message: string;
+    readonly progress: number | undefined;
+    readonly progressLabel: string;
+    readonly retry: ExportProgressAction | undefined;
+    readonly status: Exclude<ExportStatus, "idle">;
 }
 
 // @public
@@ -2102,7 +2183,7 @@ export type ExportRowScope = "page" | "all" | "selected" | "range";
 export type ExportScopeCapability = "all" | "page";
 
 // @public
-export type ExportStatus = "idle" | "busy" | "done" | "failed";
+export type ExportStatus = "idle" | "busy" | "done" | "failed" | "cancelled";
 
 // @public
 export interface ExportTable {
@@ -4879,10 +4960,14 @@ export interface TableLabels {
     expandColumnGroup?: string;
     expandGroup?: string;
     expandRow?: string;
+    exportCancelled?: string;
     exportCsv?: string;
     exportDone?: string;
+    exportDownload?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
+    exportProgress?: (progress: number) => string;
+    exportStarted?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;
@@ -5238,6 +5323,7 @@ export interface ToolbarChromeProps<TRow> {
     exportDisabled?: boolean;
     exportDisabledReason?: string;
     exportLabel?: string;
+    exportProgressState?: ExportProgressState | null;
     exportStatus?: ExportStatus;
     filtersOpen: boolean;
     hasFilters: boolean;
@@ -5276,6 +5362,7 @@ export interface ToolbarExtrasSlotProps {
     exportDisabled?: boolean;
     exportDisabledReason?: string;
     exportLabel?: string;
+    exportProgressState?: ExportProgressState | null;
     isFullscreen?: boolean;
     labels: Required<TableLabels>;
     onDensityChange: (next: "comfortable" | "compact") => void;
@@ -5527,12 +5614,12 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
         commandPalette?: boolean | CommandPaletteOptions;
         findInTable?: boolean;
-        dir?: Direction | undefined;
         labels?: TableLabels | undefined;
+        locale?: string | undefined;
+        dir?: Direction | undefined;
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
-        locale?: string | undefined;
         rowActions?: RowAction<TRow>[] | undefined;
         confirm?: ConfirmHandler | undefined;
         isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
@@ -5685,12 +5772,12 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
         commandPalette?: boolean | CommandPaletteOptions;
         findInTable?: boolean;
-        dir?: Direction | undefined;
         labels?: TableLabels | undefined;
+        locale?: string | undefined;
+        dir?: Direction | undefined;
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
-        locale?: string | undefined;
         rowActions?: RowAction<TRow>[] | undefined;
         confirm?: ConfirmHandler | undefined;
         isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
@@ -5923,6 +6010,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         exportBusy: boolean;
         exportStatus: ExportStatus;
         exportAnnouncement: string;
+        exportProgressState: ExportProgressState | null;
         exportLabel: string;
         exportDisabled: boolean;
         exportDisabledReason: string;
@@ -5964,7 +6052,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
 export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;
 
 // @public
-export function useExportHandler(handler: (() => void | Promise<void>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean): ExportHandlerState;
+export function useExportHandler(handler: ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean, serverBuilt?: boolean): ExportHandlerState;
 
 // @public
 export function useFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;

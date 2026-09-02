@@ -787,6 +787,10 @@ export interface TableLabels {
    * and a host that overrode that string keeps their own wording.
    */
   exportFile?: (format: string) => string;
+  /** Shown and announced when a server-built export starts. */
+  exportStarted?: string;
+  /** Visible and announced determinate export progress. */
+  exportProgress?: (progress: number) => string;
   /**
    * Announced when an export finishes. A download gives a screen-reader user
    * no feedback of its own, so without this the button simply goes quiet.
@@ -794,6 +798,10 @@ export interface TableLabels {
   exportDone?: string;
   /** Announced when an export fails, so a silent failure is never silent. */
   exportFailed?: string;
+  /** Shown and announced after the reader cancels a server-built export. */
+  exportCancelled?: string;
+  /** Link label for a server-built export that resolves a download URL. */
+  exportDownload?: string;
   /** Accessible name for starting inline cell edit (double-click / activate). */
   editCell?: string;
   /**

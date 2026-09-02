@@ -7,9 +7,11 @@
  */
 import {
   ExportAnnouncer,
+  ExportProgressChrome,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import { Button, Spinner } from "@radix-ui/themes";
+import { Button, Card, Flex, Progress, Spinner, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 
 import type { RadixAccentColor } from "../types";
@@ -49,15 +51,20 @@ export function UndoRedoButtons({
   );
 }
 
-export function ExportCsvButton({
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportLabel,
-  exportDisabled = false,
-  exportDisabledReason = "",
-  accentColor,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
+export function ExportCsvButton(
+  props: Readonly<ToolbarExtrasSlotProps>
+): ReactNode {
+  const {
+    onExportCsv,
+    exportBusy,
+    exportAnnouncement = "",
+    exportProgressState = null,
+    exportLabel,
+    exportDisabled = false,
+    exportDisabledReason = "",
+    accentColor,
+    labels,
+  } = props;
   // The kit's own accent union, narrowed the way this adapter's filter
   // overlays already narrow it off the same slot contract.
   const accent = accentColor as RadixAccentColor | undefined;
@@ -78,8 +85,109 @@ export function ExportCsvButton({
             does not reflow when the export starts. */}
         <Spinner loading={exportBusy}>{exportLabel}</Spinner>
       </Button>
+      <ExportProgressChrome
+        progress={exportProgressState}
+        labels={labels}
+        slots={{ Surface: ExportProgressSurface }}
+      />
       <ExportAnnouncer announcement={exportAnnouncement} />
     </>
+  );
+}
+
+function ExportProgressSurface({
+  status,
+  heading,
+  message,
+  error,
+  progress,
+  progressLabel,
+  cancel,
+  retry,
+  download,
+}: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
+  return (
+    <Card
+      role="region"
+      aria-label={heading}
+      data-adapttable-part="export-progress-surface"
+      size="2"
+      style={{
+        position: "fixed",
+        zIndex: 1400,
+        insetInlineEnd: 16,
+        bottom: 16,
+        width: 320,
+        maxWidth: "calc(100vw - 32px)",
+        boxShadow: "var(--shadow-5)",
+      }}
+    >
+      <Flex direction="column" gap="3">
+        <Text size="2" weight="bold">
+          {heading}
+        </Text>
+        {status === "busy" ? (
+          <Progress
+            value={progress}
+            duration={progress === undefined ? "1.5s" : undefined}
+            aria-label={progressLabel}
+            data-adapttable-part="export-progress-bar"
+          />
+        ) : null}
+        {message ? (
+          <Text size="2" data-adapttable-part="export-progress-message">
+            {message}
+          </Text>
+        ) : null}
+        {error ? (
+          <Text
+            size="2"
+            color="red"
+            data-adapttable-part="export-progress-message"
+          >
+            {error}
+          </Text>
+        ) : null}
+        <Flex
+          justify="end"
+          gap="2"
+          wrap="wrap"
+          data-adapttable-part="export-progress-actions"
+        >
+          {cancel ? (
+            <Button
+              size="1"
+              variant="soft"
+              color="gray"
+              onClick={cancel.onAction}
+              data-adapttable-part="export-progress-cancel"
+            >
+              {cancel.label}
+            </Button>
+          ) : null}
+          {retry ? (
+            <Button
+              size="1"
+              onClick={retry.onAction}
+              data-adapttable-part="export-progress-retry"
+            >
+              {retry.label}
+            </Button>
+          ) : null}
+          {download ? (
+            <Button size="1" asChild>
+              <a
+                href={download.url}
+                download
+                data-adapttable-part="export-progress-download"
+              >
+                {download.label}
+              </a>
+            </Button>
+          ) : null}
+        </Flex>
+      </Flex>
+    </Card>
   );
 }
 

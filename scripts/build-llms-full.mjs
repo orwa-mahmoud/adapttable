@@ -47,6 +47,7 @@ export const DOCS = [
   "virtualization.md",
   "mobile.md",
   "url-state.md",
+  "exporting.md",
   "export-pdf.md",
   "ssr-rsc.md",
   "server-queries.md",

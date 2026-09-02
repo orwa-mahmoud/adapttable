@@ -143,6 +143,13 @@ export const shadcnClassNames: {
     cellMatch: string;
     cellMatchCurrent: string;
     exportSpinner: string;
+    exportProgressSurface: string;
+    exportProgressBar: string;
+    exportProgressMessage: string;
+    exportProgressActions: string;
+    exportProgressCancel: string;
+    exportProgressRetry: string;
+    exportProgressDownload: string;
     filtersBackdrop: string;
     filtersPanel: string;
     filtersPopover: string;

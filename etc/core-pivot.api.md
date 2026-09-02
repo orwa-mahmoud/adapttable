@@ -401,10 +401,14 @@ export interface TableLabels {
     expandColumnGroup?: string;
     expandGroup?: string;
     expandRow?: string;
+    exportCancelled?: string;
     exportCsv?: string;
     exportDone?: string;
+    exportDownload?: string;
     exportFailed?: string;
     exportFile?: (format: string) => string;
+    exportProgress?: (progress: number) => string;
+    exportStarted?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
     filterColumn?: string;

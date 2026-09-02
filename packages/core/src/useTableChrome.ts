@@ -14,7 +14,10 @@ import { resolveColumns } from "./columns/resolveColumns";
 import { responsiveColumns } from "./columns/responsiveColumns";
 import type { EditableCellEditing } from "./editing/editableCellController";
 import type { EditHistoryState } from "./editing/editHistory";
-import type { ExportStatus } from "./export/useExportHandler";
+import type {
+  ExportProgressState,
+  ExportStatus,
+} from "./export/useExportHandler";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import type { ActiveFilterChip } from "./filters/useActiveFilterChips";
@@ -151,7 +154,7 @@ export interface ToolbarChromeProps<TRow> {
    */
   onExportCsv?: () => void;
   /**
-   * True while a host-handled export (`exportCsv.request`) is still running.
+   * True while a host-handled export is still running.
    *
    * Adapters disable the Export button and mark it busy, so the same export
    * cannot be started twice and the user can see that something is happening.
@@ -159,8 +162,7 @@ export interface ToolbarChromeProps<TRow> {
    */
   exportBusy?: boolean;
   /**
-   * What the last export did — `"idle"`, `"busy"`, `"done"` or `"failed"` —
-   * for a kit whose button shows more than a spinner.
+   * What the last export did, including a reader-cancelled host job.
    */
   exportStatus?: ExportStatus;
   /**
@@ -170,6 +172,8 @@ export interface ToolbarChromeProps<TRow> {
    * from a failed one.
    */
   exportAnnouncement?: string;
+  /** Server-built progress surface state; absent for browser-built exports. */
+  exportProgressState?: ExportProgressState | null;
   /**
    * The export button's caption, naming the format it produces — CSV by
    * default, the writer's format otherwise, localized either way. Adapters

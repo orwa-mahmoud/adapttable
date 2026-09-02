@@ -37,6 +37,7 @@ export const TITLES = {
   "column-groups.md":
     "React table column groups — spanning headers, collapsible",
   "sparkline.md": "React table sparkline columns — bar, line, area",
+  "exporting.md": "React table exports — browser files and server jobs",
   "export-pdf.md": "React table PDF export and print layout",
   "sorting.md": "React table sorting — multi-column, URL-synced",
   "filtering.md": "React table filtering — chips & URL-synced",
@@ -102,6 +103,8 @@ export const DESCRIPTIONS = {
     "Collapsible column groups for React tables — spanning headers that fold to an arrow stub, a kept child, or a cell you draw, on every UI kit adapter.",
   "sparkline.md":
     "Optional React table sparkline columns — bar, line and area as inline SVG from @adapttable/core/sparkline, so the base bundle never pays for charts.",
+  "exporting.md":
+    "Build React table exports in the browser or on the server with exact-view queries, determinate or indeterminate progress, cancellation, retry, and accessible download delivery.",
   "export-pdf.md":
     "Optional React table PDF export and print layout from @adapttable/core/pdf — pdfWriter on the export button, printTable for the browser dialog, so the base bundle never pays for a PDF writer.",
   "sorting.md":

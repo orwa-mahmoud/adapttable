@@ -765,28 +765,34 @@ export function People({ rows }) {
     h1: "Export and print in {kit}",
     title: "{kit} table export to CSV, Excel and PDF — AdaptTable",
     description:
-      "Export a {kit} data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout.",
+      "Export a {kit} data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress.",
     intro: [
       "One `exportCsv()` feature puts an export button in the toolbar, and one `scope` decides what leaves: the current page, every filtered row, or exactly the cells selected.",
       "Swap the writer and the same button produces a different file. `xlsxWriter` writes Excel outline levels for grouped rows and bolds the totals; `pdfWriter` lays out a paginated document, right-to-left scripts included when you hand it a font.",
+      "Past the 50,000-row browser cap, `onExportAll` sends the page-free current view to your backend while the kit shows determinate or indeterminate progress, Cancel, Retry, and the finished download.",
       "`printTable` opens the browser's own print dialog against a layout built for paper rather than a screenshot of the page.",
     ],
-    card: "CSV, XLSX and PDF from one seam — plus a real print layout.",
+    card: "Browser files or cancellable server jobs — CSV, XLSX and PDF.",
     snippet: `import { DataTable } from "{pkg}";
-import { xlsxWriter } from "@adapttable/core/xlsx";
+import { exportCsv } from "{pkg}/export";
 
-export function People({ rows, columns }) {
+export function People({ source, columns, api }) {
   return (
     <DataTable
-      data={rows}
+      source={source}
       columns={columns}
       rowKey={(row) => row.id}
-      groupBy="team"
-      exportCsv={{
-        scope: "all",
-        filename: "people.xlsx",
-        writer: xlsxWriter({ sheetName: "People" }),
-      }}
+      features={[
+        exportCsv({
+          scope: "all",
+          onExportAll: async (query, controls) =>
+            api.buildExport(query, {
+              signal: controls.signal,
+              onProgress: controls.setProgress,
+              onMessage: controls.setMessage,
+            }),
+        }),
+      ]}
     />
   );
 }`,
@@ -806,7 +812,7 @@ export function People({ rows, columns }) {
       tailwind:
         "The button and its spinner are both plain elements the map styles — the same construction shadcn's preset uses, in this map's own neutrals.",
     },
-    docs: ["export-pdf"],
+    docs: ["exporting", "export-pdf"],
   },
   {
     slug: "selection",

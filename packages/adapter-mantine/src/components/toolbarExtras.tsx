@@ -7,9 +7,19 @@
  */
 import {
   ExportAnnouncer,
+  ExportProgressChrome,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import { Button } from "@mantine/core";
+import {
+  Button,
+  Group,
+  Loader,
+  Paper,
+  Progress,
+  Stack,
+  Text,
+} from "@mantine/core";
 import type { ReactNode } from "react";
 
 export function UndoRedoButtons({
@@ -45,14 +55,19 @@ export function UndoRedoButtons({
   );
 }
 
-export function ExportCsvButton({
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportLabel,
-  exportDisabled = false,
-  exportDisabledReason = "",
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
+export function ExportCsvButton(
+  props: Readonly<ToolbarExtrasSlotProps>
+): ReactNode {
+  const {
+    onExportCsv,
+    exportBusy,
+    exportAnnouncement = "",
+    exportProgressState = null,
+    exportLabel,
+    exportDisabled = false,
+    exportDisabledReason = "",
+    labels,
+  } = props;
   if (!onExportCsv) return null;
   return (
     <>
@@ -70,8 +85,118 @@ export function ExportCsvButton({
       >
         {exportLabel}
       </Button>
+      <ExportProgressChrome
+        progress={exportProgressState}
+        labels={labels}
+        slots={{ Surface: ExportProgressSurface }}
+      />
       <ExportAnnouncer announcement={exportAnnouncement} />
     </>
+  );
+}
+
+function ExportProgressSurface({
+  status,
+  heading,
+  message,
+  error,
+  progress,
+  progressLabel,
+  cancel,
+  retry,
+  download,
+}: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
+  let progressIndicator: ReactNode = null;
+  if (status === "busy") {
+    progressIndicator =
+      progress === undefined ? (
+        <Loader
+          size="sm"
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+        />
+      ) : (
+        <Progress
+          value={progress}
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+        />
+      );
+  }
+  return (
+    <Paper
+      role="region"
+      aria-label={heading}
+      data-adapttable-part="export-progress-surface"
+      shadow="lg"
+      withBorder
+      p="md"
+      style={{
+        position: "fixed",
+        zIndex: 400,
+        insetInlineEnd: 16,
+        bottom: 16,
+        width: 320,
+        maxWidth: "calc(100vw - 32px)",
+      }}
+    >
+      <Stack gap="sm">
+        <Text fw={600} size="sm">
+          {heading}
+        </Text>
+        {progressIndicator}
+        {message ? (
+          <Text size="sm" data-adapttable-part="export-progress-message">
+            {message}
+          </Text>
+        ) : null}
+        {error ? (
+          <Text
+            size="sm"
+            c="red"
+            data-adapttable-part="export-progress-message"
+          >
+            {error}
+          </Text>
+        ) : null}
+        <Group
+          justify="flex-end"
+          gap="xs"
+          data-adapttable-part="export-progress-actions"
+        >
+          {cancel ? (
+            <Button
+              variant="subtle"
+              size="xs"
+              onClick={cancel.onAction}
+              data-adapttable-part="export-progress-cancel"
+            >
+              {cancel.label}
+            </Button>
+          ) : null}
+          {retry ? (
+            <Button
+              size="xs"
+              onClick={retry.onAction}
+              data-adapttable-part="export-progress-retry"
+            >
+              {retry.label}
+            </Button>
+          ) : null}
+          {download ? (
+            <Button
+              component="a"
+              href={download.url}
+              download
+              size="xs"
+              data-adapttable-part="export-progress-download"
+            >
+              {download.label}
+            </Button>
+          ) : null}
+        </Group>
+      </Stack>
+    </Paper>
   );
 }
 

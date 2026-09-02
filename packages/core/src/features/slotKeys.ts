@@ -25,7 +25,10 @@ import type {
   RowEditActionsProps,
 } from "../editing/RowEditGate";
 import type { ExportContext, ExportCsvOptions } from "../export/tableCsv";
-import type { ExportHandlerState } from "../export/useExportHandler";
+import type {
+  ExportHandlerState,
+  ExportProgressState,
+} from "../export/useExportHandler";
 import type { FeatureHostState } from "../features/currentHost";
 import type { FiltersFormSlotProps } from "../filters/filterForm";
 import type { FilterHeaderControlProps } from "../filters/FilterHeaderRow";
@@ -848,6 +851,8 @@ export interface ToolbarExtrasSlotProps {
   exportBusy?: boolean;
   /** Live-region text while exporting. */
   exportAnnouncement?: string;
+  /** Server-built progress surface state. */
+  exportProgressState?: ExportProgressState | null;
   /** Accessible export label. */
   exportLabel?: string;
   /** The source cannot cover the export the host asked for. */

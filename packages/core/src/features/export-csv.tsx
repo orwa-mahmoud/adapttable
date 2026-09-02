@@ -31,8 +31,17 @@ function LiveExport({
     context,
     featureHost
   );
-  const format = resolveExportCsv(exportCsv, featureHost)?.writer?.extension;
-  const exportHandler = useExportHandler(handler, labels, format, pageOnly);
+  const options = resolveExportCsv(exportCsv, featureHost);
+  const format = options?.writer?.extension;
+  const serverBuilt =
+    options?.scope === "all" && options.onExportAll !== undefined;
+  const exportHandler = useExportHandler(
+    handler,
+    labels,
+    format,
+    pageOnly,
+    serverBuilt
+  );
   return children(exportHandler);
 }
 

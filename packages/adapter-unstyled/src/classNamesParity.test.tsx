@@ -450,7 +450,14 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   // is left unsettled on purpose: the affordance only exists while it is.
   const exporting = mount({
     override: {
-      exportCsv: { request: () => new Promise<void>(() => undefined) },
+      exportCsv: {
+        scope: "all",
+        onExportAll: (_query, controls) => {
+          controls.setProgress?.(40);
+          controls.setMessage?.("Building file");
+          return new Promise<void>(() => undefined);
+        },
+      },
     },
   });
   await act(async () => {
@@ -459,6 +466,36 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   });
   absorb();
   exporting.unmount();
+
+  const failedExport = mount({
+    override: {
+      exportCsv: {
+        scope: "all",
+        onExportAll: () => Promise.reject(new Error("export failed")),
+      },
+    },
+  });
+  await act(async () => {
+    fireEvent.click(part("export-csv-button")!);
+    await Promise.resolve();
+  });
+  absorb();
+  failedExport.unmount();
+
+  const completedExport = mount({
+    override: {
+      exportCsv: {
+        scope: "all",
+        onExportAll: () => Promise.resolve({ url: "/export.csv" }),
+      },
+    },
+  });
+  await act(async () => {
+    fireEvent.click(part("export-csv-button")!);
+    await Promise.resolve();
+  });
+  absorb();
+  completedExport.unmount();
 
   // Drawer filters mode (panel, header, footer, close, done, backdrop) with
   // an active filter (count badge + chips + chip remove).
@@ -642,6 +679,13 @@ const KEYS = [
   "printButton",
   "exportCsvButton",
   "exportSpinner",
+  "exportProgressSurface",
+  "exportProgressBar",
+  "exportProgressMessage",
+  "exportProgressActions",
+  "exportProgressCancel",
+  "exportProgressRetry",
+  "exportProgressDownload",
   "filtersAnchor",
   "filtersBackdrop",
   "filtersPopover",

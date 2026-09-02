@@ -22,6 +22,7 @@ export const sidebar = [
       { label: "Columns", slug: "columns" },
       { label: "Column groups", slug: "column-groups" },
       { label: "Sparkline columns", slug: "sparkline" },
+      { label: "Browser and server exports", slug: "exporting" },
       { label: "PDF export and print", slug: "export-pdf" },
       { label: "Sorting", slug: "sorting" },
       { label: "Filtering", slug: "filtering" },

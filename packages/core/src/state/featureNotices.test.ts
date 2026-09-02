@@ -113,7 +113,7 @@ describe("collectFeatureNotices", () => {
     ]);
   });
 
-  it("does not notice export-all when fetchAll or request can answer", () => {
+  it("does not notice export-all when an executable route can answer", () => {
     expect(
       collectFeatureNotices({
         ...BASE,
@@ -127,6 +127,12 @@ describe("collectFeatureNotices", () => {
       collectFeatureNotices({
         ...BASE,
         exportCsv: { scope: "all", request: () => undefined },
+      })
+    ).toEqual([]);
+    expect(
+      collectFeatureNotices({
+        ...BASE,
+        exportCsv: { scope: "all", onExportAll: () => undefined },
       })
     ).toEqual([]);
     expect(

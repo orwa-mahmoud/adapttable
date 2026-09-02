@@ -819,8 +819,8 @@ Headless helpers remain available: `rowsToCsv`, `downloadCsv`, and
 
 Past a certain size the browser is the wrong place to build the file: the rows
 are not all loaded, holding them would cost more memory than the tab has, and
-the work blocks the main thread. `request` hands the export to the server
-instead:
+the work blocks the main thread. `onExportAll` hands the page-free current view
+to the server and keeps the job visible:
 
 ```tsx
 import { exportCsv } from "@adapttable/mantine/export";
@@ -829,16 +829,16 @@ import { exportCsv } from "@adapttable/mantine/export";
   features={[
     exportCsv({
       scope: "all",
-      request: async ({ query, scope, format, columns, filename }) => {
+      onExportAll: async (query, controls) => {
         const res = await fetch("/api/people/export", {
           method: "POST",
-          body: JSON.stringify({
-            ...query,
-            scope,
-            columns: columns.map((c) => c.key),
-          }),
+          body: JSON.stringify(query),
+          signal: controls.signal,
         });
-        window.location.href = (await res.json()).url; // or queue a job and email it
+        const job = await res.json();
+        controls.setProgress?.(job.progress);
+        controls.setMessage?.(job.message);
+        return job.url ? { url: job.url } : undefined;
       },
     }),
   ]}
@@ -846,31 +846,22 @@ import { exportCsv } from "@adapttable/mantine/export";
 />;
 ```
 
-`query` carries the user's current view — search, filters, sort, paging — in
-the same shape a [server tier](./data-tiers.md) receives, so an endpoint that
-already answers table queries needs no new vocabulary. `format` is the
-extension the button would have produced (`"csv"`, `"xlsx"`, or whatever a
-custom writer names itself), so the server builds the file the user asked for
-rather than guessing from the filename. `rows` holds whatever the browser has
-of the scope, which is useful for a count or a confirmation even when the
-server does the real work.
+`query` carries search, flat and nested filters, single and multi-sort,
+grouping, visible and requested column keys, format, and filename — but no page
+window and no rows. `controls.signal` powers Cancel; `setProgress(0–100)` and
+`setMessage(text)` update every kit's progress surface. No progress means an
+indeterminate indicator. Resolve `{ url }` and the table offers the download;
+resolve nothing when the host delivered it another way; reject for a localized
+error with Retry.
 
-With `request` set the table builds no file and downloads nothing, so
-`onBeforeExport` and `onAfterExport` do not run — there is no file for them to
-bracket.
+The existing `fetchAll` route still pages in the browser and keeps its 50,000
+row default cap. `onExportAll` is the documented route past it. The generic
+`request` callback also remains for backend takeover of page, selected, or
+range exports without progress. Host-owned routes do not run
+`onBeforeExport`/`onAfterExport`, because the table never builds their file.
 
-Return a promise and the Export button shows **its own kit's loading
-affordance** until it settles — Mantine's, MUI's, Chakra's and Ant Design's
-loading buttons, Radix's and Base UI's spinners, and a styleable
-`exportSpinner` element in the unstyled and shadcn presets — with `aria-busy`
-throughout, so an impatient second click cannot start the same export twice. A
-rejected promise releases the button rather than leaving it stuck.
-
-Either way the outcome is **announced**: a download is silent and a failed one
-is silent in the same way, so a polite live region beside the button says
-`labels.exportDone` or `labels.exportFailed` (translated in all seventeen
-locales) when the export ends. `exportStatus` — `"idle"`, `"busy"`, `"done"` or
-`"failed"` — is on the same state for a toolbar that wants to show more.
+The full settle, cancellation, and accessibility contract is in
+[Browser and server-built exports](./exporting.md).
 
 ### The export pipeline (headless)
 

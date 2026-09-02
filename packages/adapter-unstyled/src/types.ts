@@ -119,6 +119,20 @@ export interface DataTableClassNames {
    * style — the shadcn preset spins it.
    */
   exportSpinner?: string;
+  /** The fixed server-export progress card. */
+  exportProgressSurface?: string;
+  /** The determinate or indeterminate progress element. */
+  exportProgressBar?: string;
+  /** Host status or failure detail inside the progress card. */
+  exportProgressMessage?: string;
+  /** Action row inside the progress card. */
+  exportProgressActions?: string;
+  /** Cancel control inside the progress card. */
+  exportProgressCancel?: string;
+  /** Retry control inside the progress card. */
+  exportProgressRetry?: string;
+  /** Download link inside the completed progress card. */
+  exportProgressDownload?: string;
   /** The element the filters overlay is positioned against. */
   filtersAnchor?: string;
   /** The scrim behind the filters overlay. */

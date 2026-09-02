@@ -76,6 +76,17 @@ export const shadcnClassNames = {
   cellMatchCurrent: "bg-amber-400/80 dark:bg-amber-400/60",
   exportSpinner:
     "size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent",
+  exportProgressSurface:
+    "rounded-lg border border-border bg-card text-card-foreground shadow-xl",
+  exportProgressBar: "h-2 overflow-hidden rounded-full accent-primary",
+  exportProgressMessage: "my-2 text-sm text-muted-foreground",
+  exportProgressActions: "mt-3 flex flex-wrap justify-end gap-2",
+  exportProgressCancel:
+    "inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+  exportProgressRetry:
+    "inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90",
+  exportProgressDownload:
+    "inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
   filtersBackdrop: "fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]",
   filtersPanel:
     "fixed inset-y-0 end-0 z-50 flex w-[420px] max-w-[88vw] flex-col border-s border-border bg-card text-card-foreground shadow-2xl",

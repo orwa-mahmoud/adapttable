@@ -263,6 +263,13 @@ export interface DataTableClassNames {
     expandCell?: string;
     expandHeader?: string;
     exportCsvButton?: string;
+    exportProgressActions?: string;
+    exportProgressBar?: string;
+    exportProgressCancel?: string;
+    exportProgressDownload?: string;
+    exportProgressMessage?: string;
+    exportProgressRetry?: string;
+    exportProgressSurface?: string;
     exportSpinner?: string;
     filterCheckbox?: string;
     filterCheckboxGroup?: string;

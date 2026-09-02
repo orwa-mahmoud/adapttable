@@ -7,9 +7,11 @@
  */
 import {
   ExportAnnouncer,
+  ExportProgressChrome,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import { Button } from "antd";
+import { Button, Card, Flex, Progress, Spin, Typography } from "antd";
 import type { ReactNode } from "react";
 
 export function UndoRedoButtons({
@@ -41,14 +43,19 @@ export function UndoRedoButtons({
   );
 }
 
-export function ExportCsvButton({
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportLabel,
-  exportDisabled = false,
-  exportDisabledReason = "",
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
+export function ExportCsvButton(
+  props: Readonly<ToolbarExtrasSlotProps>
+): ReactNode {
+  const {
+    onExportCsv,
+    exportBusy,
+    exportAnnouncement = "",
+    exportProgressState = null,
+    exportLabel,
+    exportDisabled = false,
+    exportDisabledReason = "",
+    labels,
+  } = props;
   if (!onExportCsv) return null;
   return (
     <>
@@ -64,8 +71,117 @@ export function ExportCsvButton({
       >
         {exportLabel}
       </Button>
+      <ExportProgressChrome
+        progress={exportProgressState}
+        labels={labels}
+        slots={{ Surface: ExportProgressSurface }}
+      />
       <ExportAnnouncer announcement={exportAnnouncement} />
     </>
+  );
+}
+
+function ExportProgressSurface({
+  status,
+  heading,
+  message,
+  error,
+  progress,
+  progressLabel,
+  cancel,
+  retry,
+  download,
+}: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
+  let progressIndicator: ReactNode = null;
+  if (status === "busy") {
+    progressIndicator =
+      progress === undefined ? (
+        <Spin
+          size="small"
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+        />
+      ) : (
+        <Progress
+          percent={progress}
+          size="small"
+          aria-label={progressLabel}
+          data-adapttable-part="export-progress-bar"
+        />
+      );
+  }
+  return (
+    <Card
+      role="region"
+      aria-label={heading}
+      data-adapttable-part="export-progress-surface"
+      size="small"
+      title={heading}
+      style={{
+        position: "fixed",
+        zIndex: 1400,
+        insetInlineEnd: 16,
+        bottom: 16,
+        width: 320,
+        maxWidth: "calc(100vw - 32px)",
+        boxShadow: "0 8px 28px rgb(0 0 0 / 18%)",
+      }}
+    >
+      <Flex vertical gap="small">
+        {progressIndicator}
+        {message ? (
+          <Typography.Text data-adapttable-part="export-progress-message">
+            {message}
+          </Typography.Text>
+        ) : null}
+        {error ? (
+          <Typography.Text
+            type="danger"
+            data-adapttable-part="export-progress-message"
+          >
+            {error}
+          </Typography.Text>
+        ) : null}
+        <Flex
+          justify="flex-end"
+          gap="small"
+          wrap
+          data-adapttable-part="export-progress-actions"
+        >
+          {cancel ? (
+            <Button
+              size="small"
+              type="text"
+              onClick={cancel.onAction}
+              data-adapttable-part="export-progress-cancel"
+            >
+              {cancel.label}
+            </Button>
+          ) : null}
+          {retry ? (
+            <Button
+              size="small"
+              type="primary"
+              onClick={retry.onAction}
+              data-adapttable-part="export-progress-retry"
+            >
+              {retry.label}
+            </Button>
+          ) : null}
+          {download ? (
+            <Button
+              size="small"
+              type="primary"
+              href={download.url}
+              download
+              data-adapttable-part="export-progress-download"
+            >
+              {download.label}
+            </Button>
+          ) : null}
+        </Flex>
+      </Flex>
+    </Card>
   );
 }
 

@@ -32,6 +32,7 @@ const FEATURES = [
   { entry: "grouping", marker: "groupedEntriesForStrategy" },
   { entry: "row-detail", marker: "useRowExpansion" },
   { entry: "row-reorder", marker: "ROW_DND_MIME" },
+  { entry: "export", marker: "export-progress-surface" },
   { entry: "context-menu", marker: "useTableContextMenu" },
   { entry: "command-palette", marker: "useCommandPalette" },
 ];

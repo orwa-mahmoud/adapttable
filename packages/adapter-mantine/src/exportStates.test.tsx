@@ -36,6 +36,41 @@ function renderExport(request: () => Promise<void>) {
 }
 
 describe("export states (Mantine)", () => {
+  it("renders server progress and cancels through the host signal", async () => {
+    let signal: AbortSignal | undefined;
+    const { container } = renderMantine(
+      <DataTable
+        data={rows}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        exportCsv={{
+          scope: "all",
+          onExportAll: (_query, controls) =>
+            new Promise<void>(() => {
+              signal = controls.signal;
+              controls.setProgress?.(55);
+              controls.setMessage?.("Building file");
+            }),
+        }}
+      />
+    );
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export CSV" }).click();
+      await Promise.resolve();
+    });
+    expect(
+      screen.getByRole("region", { name: "Preparing export" })
+    ).toHaveTextContent("Building file");
+    expect(
+      container.querySelector('[data-adapttable-part="export-progress-bar"]')
+    ).not.toBeNull();
+
+    screen.getByRole("button", { name: "Cancel" }).click();
+    expect(signal?.aborted).toBe(true);
+  });
+
   it("shows Mantine's own loading affordance while the export runs", async () => {
     let settle!: () => void;
     renderExport(
