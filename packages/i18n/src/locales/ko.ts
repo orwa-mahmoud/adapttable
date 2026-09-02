@@ -114,6 +114,13 @@ export const ko: Required<TableLabels> = {
   hideAllColumns: "모두 숨기기",
   unpinAllColumns: "모두 고정 해제",
   resetColumn: "열 재설정",
+  renameColumn: "열 이름 바꾸기",
+  columnName: "열 이름",
+  saveColumnName: "이름 저장",
+  cancelColumnRename: "취소",
+  columnNameRequired: "열 이름을 입력하세요.",
+  columnRenamed: ({ previous, name }) =>
+    `${previous} 열의 이름을 ${name}(으)로 변경했습니다`,
   sortAscending: "오름차순 정렬",
   sortDescending: "내림차순 정렬",
   sortedBy: ({ column, ascending }) =>

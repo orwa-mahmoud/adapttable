@@ -114,6 +114,12 @@ export const zh: Required<TableLabels> = {
   hideAllColumns: "全部隐藏",
   unpinAllColumns: "全部取消固定",
   resetColumn: "重置列",
+  renameColumn: "重命名列",
+  columnName: "列名",
+  saveColumnName: "保存名称",
+  cancelColumnRename: "取消",
+  columnNameRequired: "请输入列名。",
+  columnRenamed: ({ previous, name }) => `已将列 ${previous} 重命名为 ${name}`,
   sortAscending: "升序排序",
   sortDescending: "降序排序",
   sortedBy: ({ column, ascending }) =>

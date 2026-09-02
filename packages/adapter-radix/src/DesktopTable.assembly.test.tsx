@@ -9,11 +9,13 @@
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
+  resolveLabels,
 } from "@adapttable/core";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
@@ -36,6 +38,7 @@ const COLUMNS: ColumnDef<Person>[] = [
     header: "Name",
     accessor: (row) => row.name,
     sortable: true,
+    renameable: true,
     headerTooltip: "Full name",
     headerActions: <span data-testid="name-actions">★</span>,
     group: "Person",
@@ -208,6 +211,52 @@ describe("DesktopTable assembly paint (Radix)", () => {
     expect(wrapper.querySelector("style")!.textContent ?? "").toContain(
       '[dir="rtl"]'
     );
+  });
+});
+
+describe("DesktopTable direct header rename (Radix)", () => {
+  it("renders Radix controls only with a callback and commits a trimmed name", () => {
+    const withoutCallback = mount({ enableColumnMenu: true });
+    expect(
+      screen.queryByRole("button", { name: "Rename column: Name" })
+    ).toBeNull();
+    withoutCallback.unmount();
+
+    const onColumnRename = vi.fn();
+    const integrated = mount({ enableColumnMenu: true, onColumnRename });
+    expect(
+      screen.getByRole("button", { name: "Rename column: Name" })
+    ).toBeInTheDocument();
+    integrated.unmount();
+    render(
+      <Theme>
+        <ColumnHeaderRename
+          columnKey="name"
+          name="Name"
+          labels={resolveLabels(undefined)}
+          onRenameColumn={onColumnRename}
+        >
+          <button type="button" aria-label="Sort by: Name">
+            Name
+          </button>
+        </ColumnHeaderRename>
+      </Theme>
+    );
+    const renameButton = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    fireEvent.click(renameButton);
+    expect(renameButton).toBeDisabled();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    fireEvent.change(input, { target: { value: "  Account  " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onColumnRename).toHaveBeenCalledWith("name", "Account");
+    expect(renameButton).not.toBeDisabled();
+    expect(
+      document.querySelector('[data-adapttable-part="header-rename-announcer"]')
+    ).toHaveTextContent("Column Name renamed to Account");
   });
 });
 

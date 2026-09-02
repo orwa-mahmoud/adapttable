@@ -117,6 +117,8 @@ export interface SharedTableRenderProps<TRow> {
   columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
   /** Toggle one column group. No-op unless collapse is armed. */
   onToggleColumnGroup?: (id: string) => void;
+  /** Commit a user-provided display name from kit-owned header controls. */
+  onRenameColumn?: (key: string, name: string) => void;
   /** Conditional per-row style — see `ComposedTableProps.rowStyle`. */
   rowStyle?: RowStyle<TRow>;
   /** Per-row height — see `ComposedTableProps.rowHeight`. */

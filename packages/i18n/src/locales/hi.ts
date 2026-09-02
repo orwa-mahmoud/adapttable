@@ -115,6 +115,13 @@ export const hi: Required<TableLabels> = {
   hideAllColumns: "सभी छिपाएँ",
   unpinAllColumns: "सभी अनपिन करें",
   resetColumn: "स्तंभ रीसेट करें",
+  renameColumn: "कॉलम का नाम बदलें",
+  columnName: "कॉलम का नाम",
+  saveColumnName: "नाम सहेजें",
+  cancelColumnRename: "रद्द करें",
+  columnNameRequired: "कॉलम का नाम दर्ज करें।",
+  columnRenamed: ({ previous, name }) =>
+    `कॉलम ${previous} का नाम बदलकर ${name} किया गया`,
   sortAscending: "आरोही क्रम",
   sortDescending: "अवरोही क्रम",
   sortedBy: ({ column, ascending }) =>

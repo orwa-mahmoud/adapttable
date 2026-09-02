@@ -71,6 +71,18 @@ function sanitizeWidths(value: unknown): Record<string, number> {
   return widths;
 }
 
+/** Keep only non-empty string names from a (possibly hostile) stored record. */
+function sanitizeNames(value: unknown): Record<string, string> {
+  const names: Record<string, string> = {};
+  if (!isPlainRecord(value)) return names;
+  for (const [key, name] of Object.entries(value)) {
+    if (typeof name === "string" && name.trim() !== "") {
+      names[key] = name.trim();
+    }
+  }
+  return names;
+}
+
 /**
  * Validate a parsed storage payload into a {@link ColumnLayoutState}.
  * Persisted data is external input — hand-edited or written by another
@@ -80,11 +92,13 @@ function sanitizeWidths(value: unknown): Record<string, number> {
  */
 function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null {
   if (!isPlainRecord(parsed)) return null;
+  const names = sanitizeNames(parsed.names);
   return {
     hidden: stringEntries(parsed.hidden),
     order: stringEntries(parsed.order),
     pinned: sanitizePinned(parsed.pinned),
     widths: sanitizeWidths(parsed.widths),
+    ...(Object.keys(names).length > 0 ? { names } : {}),
   };
 }
 

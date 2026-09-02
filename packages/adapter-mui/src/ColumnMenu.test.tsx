@@ -1,5 +1,5 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { columnMenu } from "./column-menu";
@@ -26,6 +26,8 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     setPinned: vi.fn(),
     move: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -53,6 +55,13 @@ const labels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
   actions: "Actions",
   reorderRow: "Reorder",
 };
@@ -294,6 +303,71 @@ describe("mui ColumnMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     const reset = await screen.findByText("Reset columns");
     expect(reset.closest('[dir="rtl"]')).not.toBeNull();
+  });
+
+  it("renames inline with validation, announcements, and focus restoration", async () => {
+    const layout = fakeLayout();
+    const onRenameColumn = vi.fn();
+    const renameableColumns = [
+      { ...cols[0]!, renameable: true },
+      cols[1]!,
+      cols[2]!,
+    ];
+    render(
+      <ColumnMenu
+        allColumns={renameableColumns}
+        layout={layout}
+        labels={labels}
+        onAutoSize={() => undefined}
+        onRenameColumn={onRenameColumn}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    renameAction.focus();
+    fireEvent.click(renameAction);
+    expect(renameAction).toBeDisabled();
+
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveAttribute(
+      "data-adapttable-part",
+      "column-rename-input"
+    );
+    await waitFor(() => expect(input).toHaveFocus());
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Account owner  " } });
+    expect(screen.queryByRole("alert")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    expect(renameAction).toBeInTheDocument();
+    await waitFor(() => expect(renameAction).toHaveFocus());
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account owner.");
+
+    fireEvent.click(renameAction);
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Column name" }), {
+      key: "Escape",
+    });
+    await waitFor(() => expect(renameAction).toHaveFocus());
+
+    fireEvent.click(renameAction);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(renameAction).toHaveFocus());
   });
 });
 

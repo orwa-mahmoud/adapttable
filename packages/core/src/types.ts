@@ -126,6 +126,12 @@ export interface ColumnDef<TRow> {
   /** Native tooltip on the header caption. */
   headerTooltip?: string;
   /**
+   * Allow the user to change this column's display name from the Columns
+   * menu. The table keeps the stable `key`; renaming is offered only when
+   * `onColumnRename` is also present.
+   */
+  renameable?: boolean;
+  /**
    * How readily this column is given up when the table is too narrow for all
    * of them. Priority 1 is kept longest, in the ordinary sense of the word.
    *
@@ -741,6 +747,18 @@ export interface TableLabels {
   unpinAllColumns?: string;
   /** Restore one column's visibility, pin and width. */
   resetColumn?: string;
+  /** Open the inline column-name editor. */
+  renameColumn?: string;
+  /** Visible label for the column-name input. */
+  columnName?: string;
+  /** Submit the column-name editor. */
+  saveColumnName?: string;
+  /** Dismiss the column-name editor without changing the name. */
+  cancelColumnRename?: string;
+  /** Validation message for an empty column name. */
+  columnNameRequired?: string;
+  /** Polite live-region message after a column name changes. */
+  columnRenamed?: (info: { previous: string; name: string }) => string;
   /** Sort this column ascending from the column-menu submenu. */
   sortAscending?: string;
   /** Sort this column descending from the column-menu submenu. */

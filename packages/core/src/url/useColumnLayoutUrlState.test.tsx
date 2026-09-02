@@ -80,6 +80,26 @@ describe("useColumnLayoutUrlState", () => {
     expect(result.current.layout.pinned).toEqual({ person: "start" });
   });
 
+  it("round-trips Unicode column names by stable key", () => {
+    const { result, adapter } = renderWith("");
+    act(() => {
+      result.current.onLayoutChange({
+        hidden: [],
+        order: [],
+        pinned: {},
+        widths: {},
+        names: { person: "صاحب الحساب" },
+      });
+    });
+    flushUrl();
+
+    expect(adapter.getSearch()).toContain("colName=");
+    const remount = renderWith(adapter.getSearch());
+    expect(remount.result.current.layout.names).toEqual({
+      person: "صاحب الحساب",
+    });
+  });
+
   it("namespaces params by urlKey so tables do not collide", () => {
     const { result, adapter } = renderWith("", { urlKey: "left" });
     act(() => {

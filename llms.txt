@@ -75,7 +75,7 @@ const { rows, getTableProps, getHeaderCellProps, getRowProps, getCellProps, getS
 - [React pivot table — rows, columns and measures](https://orwa-mahmoud.github.io/adapttable/pivot/): optional `@adapttable/core/pivot` entry, multiple dimensions on both axes, subtotals and collapsible groups
 - [React table formulas — spreadsheet columns](https://orwa-mahmoud.github.io/adapttable/formulas/): optional `@adapttable/core/formula` entry, a parsed grammar that never reaches eval, tagged values so an error is not a string
 - [React table tree data — hierarchical rows with expand/collapse](https://orwa-mahmoud.github.io/adapttable/tree-data/): getChildren or getParentId, per-level indent, mobile cards keep the hierarchy
-- [React table column management — show/hide, reorder, pin, resize](https://orwa-mahmoud.github.io/adapttable/column-management/): searchable menu, bulk show/hide, locks, pin, resize, collapsible groups, layout persistence
+- [React table column management — rename, show/hide, reorder, pin, resize](https://orwa-mahmoud.github.io/adapttable/column-management/): adapter-native rename controls, searchable menu, locks, sizing, collapsible groups, URL and Saved Views persistence
 - [React table saved views — shareable named layouts](https://orwa-mahmoud.github.io/adapttable/saved-views/): built-in menu, useSavedViews
 - [React table virtualization — 10k rows, ~24 DOM nodes](https://orwa-mahmoud.github.io/adapttable/virtualization/): row/card windowing. Measured A/B at 10,000 rows — virtualized renders 24 DOM `<tr>` vs 10,000 for a plain table (417x fewer nodes, ~half the JS heap: 169 MB vs 347 MB), and the rendered row count stays ~24 from 1k to 100k rows. Window or scroll-box mode.
 - [Client & server React table data — one TableSource API](https://orwa-mahmoud.github.io/adapttable/data-tiers/): in-memory, server query event, custom TableSource
@@ -122,7 +122,7 @@ mobile-cards, pivot, saved-views, formulas, rtl, realtime and accessibility.
 - [AdaptTable for shadcn/ui](https://orwa-mahmoud.github.io/adapttable/demo/shadcn/): a shadcn/ui data table, styled by the classes you already own
 - [AdaptTable for Tailwind](https://orwa-mahmoud.github.io/adapttable/demo/tailwind/): native controls and no opinions — every class is yours
 - [Filtering demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/filtering/): operators, checklist, AND/OR builder, chips, URL state — in every kit
-- [Column management demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/): show/hide, drag-reorder, pin and resize columns, with the layout persisted to the URL
+- [Column management demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/): rename, show/hide, drag-reorder, pin and resize columns, with the layout persisted to the URL
 - [Column groups demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/column-groups/): spanning headers that collapse to a stub, a kept child, or a custom cell
 - [Selection demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/selection/): id-based row selection that survives paging, plus bulk actions over it
 - [Rows demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/): pin, drag-reorder, merge cells, and a 3-dot row-action menu

@@ -91,7 +91,7 @@ describe("<SavedViewsMenu> (Radix)", () => {
     fireEvent.click(screen.getByText("Mine"));
     // `t.*` is restored from the snapshot (stale `t.page` dropped); the
     // foreign `other` param keeps its CURRENT value.
-    expect(adapter.getSearch()).toBe("other=2&t.q=alice");
+    expect(adapter.getSearch()).toBe("other=2&t.q=alice&t.atv=1");
   });
 
   it("deletes a view from its trailing icon button", async () => {

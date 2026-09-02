@@ -58,6 +58,7 @@ import type {
 
 import {
   OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
   OptionalColumnSelect,
   OptionalEditableCell,
   OptionalFillHandle,
@@ -422,6 +423,8 @@ export interface BuildColumnsOptions<TRow> {
   getHeaderCellProps?: (column: ColumnDef<TRow>) => CellElementProps;
   /** Layout width mutator; enables a resize handle when provided. */
   setWidth?: (key: string, width: number) => void;
+  /** Accepted-name mutator; enables direct rename when its feature slot exists. */
+  onRenameColumn?: (key: string, name: string) => void;
   /** Per-column pixel widths from the layout state. */
   columnWidths?: Readonly<Record<string, number>>;
   /** Accessible label prefix for the resize handle. */
@@ -666,6 +669,7 @@ export function buildColumns<TRow>({
   getRowId = () => "",
   pinned,
   setWidth,
+  onRenameColumn,
   columnWidths,
   resizeLabel = "Resize column",
   sortLevels = [],
@@ -719,6 +723,13 @@ export function buildColumns<TRow>({
         headerFilters && filterSource
           ? filterDefForColumn(filterDefs ?? [], column.key)
           : undefined;
+      const caption = resolveColumnHeader(
+        column,
+        columnHeaderController(column, {
+          sortDir: effectiveSortDir,
+          sortIndex: typeof sortIndex === "number" ? sortIndex : undefined,
+        })
+      );
       return {
         key: column.key,
         // A real element (not a Fragment): antd v6 attaches a `ref` to the
@@ -727,13 +738,21 @@ export function buildColumns<TRow>({
         // anchors to the (positioned) header cell, so the layout is unchanged.
         title: (
           <span title={column.headerTooltip}>
-            {resolveColumnHeader(
-              column,
-              columnHeaderController(column, {
-                sortDir: effectiveSortDir,
-                sortIndex:
-                  typeof sortIndex === "number" ? sortIndex : undefined,
-              })
+            {column.renameable === true && onRenameColumn ? (
+              <OptionalColumnHeaderRename
+                columnKey={column.key}
+                name={columnLabel(column)}
+                labels={labels}
+                onRenameColumn={onRenameColumn}
+              >
+                <span data-adapttable-part="header-caption-control">
+                  {caption}
+                </span>
+              </OptionalColumnHeaderRename>
+            ) : (
+              <span data-adapttable-part="header-caption-control">
+                {caption}
+              </span>
             )}
             {gridFocus?.columnCheckbox === true ? (
               <OptionalColumnSelect

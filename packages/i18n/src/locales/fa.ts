@@ -115,6 +115,13 @@ export const fa: Required<TableLabels> = {
   hideAllColumns: "پنهان‌کردن همه",
   unpinAllColumns: "لغو سنجاق همه",
   resetColumn: "بازنشانی ستون",
+  renameColumn: "تغییر نام ستون",
+  columnName: "نام ستون",
+  saveColumnName: "ذخیره نام",
+  cancelColumnRename: "لغو",
+  columnNameRequired: "نامی برای ستون وارد کنید.",
+  columnRenamed: ({ previous, name }) =>
+    `نام ستون ${previous} به ${name} تغییر کرد`,
   sortAscending: "مرتب‌سازی صعودی",
   sortDescending: "مرتب‌سازی نزولی",
   sortedBy: ({ column, ascending }) =>

@@ -281,6 +281,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                                   onSortColumn: (key, dir) =>
                                     shell.source.setSort(key, dir),
                                   onFilterColumn: () => setFiltersOpen(true),
+                                  onRenameColumn: props.onColumnRename
+                                    ? chrome.columnLayout.setName
+                                    : undefined,
                                   sortBy: shell.source.sortBy,
                                   sortDir: shell.source.sortDir,
                                   layout: chrome.columnLayout,

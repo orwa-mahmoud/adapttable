@@ -29,6 +29,8 @@ export interface ColumnLayoutState {
   pinned: Readonly<Record<string, PinSide>>;
   /** Per-column pixel widths. */
   widths: Readonly<Record<string, number>>;
+  /** User-provided display names by stable column key. */
+  names?: Readonly<Record<string, string>>;
   /** Collapsed column-group ids. Omit or empty — every group is open. */
   collapsedGroups?: readonly string[];
 }
@@ -75,6 +77,10 @@ export interface UseColumnLayoutResult<TRow> {
   move: (key: string, toIndex: number) => void;
   /** Set (or clear, with `undefined`) a column's pixel width. */
   setWidth: (key: string, width: number | undefined) => void;
+  /** Rename a column after trimming surrounding whitespace. Empty names are ignored. */
+  setName: (key: string, name: string) => void;
+  /** Restore a column's declared display name. */
+  resetName: (key: string) => void;
   /** Sticky inset (px) for a pinned column, by side. `undefined` if unpinned. */
   pinOffset: (key: string) => PinOffset | undefined;
   /** Restore the empty layout (all visible, declared order). */

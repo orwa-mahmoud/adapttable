@@ -158,6 +158,9 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                 onAutoSizeColumn: view.autoSizeColumn,
                 onSortColumn: (key, dir) => viewSource.setSort(key, dir),
                 onFilterColumn: () => setFiltersOpen(true),
+                onRenameColumn: props.onColumnRename
+                  ? c.columnLayout.setName
+                  : undefined,
                 sortBy: viewSource.sortBy,
                 sortDir: viewSource.sortDir,
                 layout: c.columnLayout,

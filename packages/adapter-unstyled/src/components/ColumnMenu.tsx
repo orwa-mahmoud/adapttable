@@ -12,15 +12,18 @@ import {
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
+  type ColumnRenameEditorState,
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
   hideAllColumns,
+  LiveRegion,
   nextPinSide,
   pinActionLabel,
   PinIcon,
   showAllColumns,
   unpinAllColumns,
+  useColumnRenameEditor,
   useFeatureHost,
 } from "@adapttable/core/adapter";
 import { useState } from "react";
@@ -29,6 +32,79 @@ import { createPortal } from "react-dom";
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 import { MENU_PANEL_STYLE, useMenuPopover } from "./menuPopover";
+
+const NOOP_RENAME = () => undefined;
+
+function focusRenameInput(input: HTMLInputElement | null): void {
+  input?.focus();
+}
+
+function ColumnRenameEditor({
+  editor,
+  labels,
+  classNames,
+}: Readonly<{
+  editor: ColumnRenameEditorState;
+  labels: ColumnMenuLabels;
+  classNames: DataTableClassNames;
+}>) {
+  if (!editor.editing) return null;
+  return (
+    <form
+      data-adapttable-part="column-rename-form"
+      className={classNames.columnRenameForm}
+      onSubmit={(event) => {
+        event.preventDefault();
+        editor.submit();
+      }}
+    >
+      <label
+        htmlFor={editor.inputId}
+        data-adapttable-part="column-rename-label"
+        className={classNames.columnRenameLabel}
+      >
+        {labels.columnName}
+      </label>
+      <input
+        ref={focusRenameInput}
+        id={editor.inputId}
+        value={editor.draft}
+        aria-invalid={editor.error ? true : undefined}
+        aria-describedby={editor.error ? editor.errorId : undefined}
+        data-adapttable-part="column-rename-input"
+        className={classNames.columnRenameInput}
+        onChange={(event) => editor.setDraft(event.currentTarget.value)}
+        onBlur={editor.blur}
+        onKeyDown={editor.onKeyDown}
+      />
+      {editor.error ? (
+        <span
+          id={editor.errorId}
+          role="alert"
+          data-adapttable-part="column-rename-error"
+          className={classNames.columnRenameError}
+        >
+          {editor.error}
+        </span>
+      ) : null}
+      <button
+        type="submit"
+        data-adapttable-part="column-rename-save"
+        className={classNames.columnRenameSave}
+      >
+        {labels.saveColumnName}
+      </button>
+      <button
+        type="button"
+        data-adapttable-part="column-rename-cancel"
+        className={classNames.columnRenameCancel}
+        onClick={editor.cancel}
+      >
+        {labels.cancelColumnRename}
+      </button>
+    </form>
+  );
+}
 
 /** Menu labels: the shared chrome contract plus the actions row's name. */
 type ColumnMenuRowLabels = ColumnMenuLabels & {
@@ -131,6 +207,7 @@ interface ColumnMenuRowProps<TRow> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
+  onRenameColumn?: (key: string, name: string) => void;
 }
 
 function ColumnMenuRowItem<TRow>({
@@ -144,10 +221,18 @@ function ColumnMenuRowItem<TRow>({
   onSortColumn,
   onAutoSizeColumn,
   onFilterColumn,
+  onRenameColumn,
 }: Readonly<ColumnMenuRowProps<TRow>>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
   const featureHost = useFeatureHost<TRow>();
+  const rename = useColumnRenameEditor({
+    key,
+    name,
+    onRename: onRenameColumn ?? NOOP_RENAME,
+    requiredMessage: labels.columnNameRequired,
+    renamedMessage: labels.columnRenamed,
+  });
   const actions = columnMenuActions(row, {
     featureHost,
     labels,
@@ -157,6 +242,7 @@ function ColumnMenuRowItem<TRow>({
     onSortColumn,
     onAutoSizeColumn,
     onFilterColumn,
+    onBeginRename: onRenameColumn ? rename.begin : undefined,
   });
   return (
     <div
@@ -225,17 +311,27 @@ function ColumnMenuRowItem<TRow>({
               type="button"
               data-adapttable-part="column-menu-action"
               className={classNames.columnMenuAction}
-              disabled={action.disabled}
+              disabled={
+                action.disabled || (action.id === "rename" && rename.editing)
+              }
               onClick={() => {
                 action.run();
-                setOpen(false);
+                if (action.id !== "rename") setOpen(false);
               }}
             >
               {action.label}
             </button>
           ))}
+          <ColumnRenameEditor
+            editor={rename}
+            labels={labels}
+            classNames={classNames}
+          />
         </div>
       ) : null}
+      <LiveRegion part="column-rename-announcer" statusRole={false}>
+        {rename.announcement}
+      </LiveRegion>
     </div>
   );
 }
@@ -351,6 +447,7 @@ export function ColumnMenu<TRow>({
   onAutoSizeColumn,
   onSortColumn,
   onFilterColumn,
+  onRenameColumn,
   sortBy,
   sortDir,
   dir,
@@ -452,6 +549,7 @@ export function ColumnMenu<TRow>({
                 onSortColumn={onSortColumn}
                 onAutoSizeColumn={onAutoSizeColumn}
                 onFilterColumn={onFilterColumn}
+                onRenameColumn={onRenameColumn}
               />
             ))}
             {(hasRowReorder === true || hasRowActions === true) && (

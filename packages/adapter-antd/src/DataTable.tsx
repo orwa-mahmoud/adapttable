@@ -57,6 +57,7 @@ import {
   bodyCellsHaveRowSpan,
   BULK_BAR,
   ChromeExtrasGate,
+  COLUMN_HEADER_RENAME,
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
@@ -648,6 +649,7 @@ function ColumnMenuSlot<TRow>({
   onAutoSizeColumn,
   onSortColumn,
   onFilterColumn,
+  onRenameColumn,
   sortBy,
   sortDir,
 }: Readonly<{
@@ -663,6 +665,7 @@ function ColumnMenuSlot<TRow>({
   onAutoSizeColumn?: (key: string) => void;
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   onFilterColumn?: (key: string) => void;
+  onRenameColumn?: (key: string, name: string) => void;
   sortBy?: string;
   sortDir?: "asc" | "desc";
 }>) {
@@ -677,6 +680,7 @@ function ColumnMenuSlot<TRow>({
           onAutoSizeColumn,
           onSortColumn,
           onFilterColumn,
+          onRenameColumn,
           sortBy,
           sortDir,
           layout,
@@ -1862,6 +1866,7 @@ function AntdTableBody<TRow>({
   filtersMode,
   grouping,
 }: Readonly<AntdTableBodyProps<TRow>>) {
+  const hasColumnHeaderRename = useFeatureSlotFilled(COLUMN_HEADER_RENAME);
   const {
     windowStart,
     cardSetSize,
@@ -2050,6 +2055,10 @@ function AntdTableBody<TRow>({
     getRowId,
     pinned: c.columnLayout.state.pinned,
     setWidth: props.resizableColumns ? c.columnLayout.setWidth : undefined,
+    onRenameColumn:
+      hasColumnHeaderRename && props.onColumnRename
+        ? c.columnLayout.setName
+        : undefined,
     columnWidths: c.columnLayout.state.widths,
     resizeLabel: labels.resizeColumn,
     sortLevels: source.sortLevels,
@@ -2320,6 +2329,11 @@ function AntdTableBody<TRow>({
                       onAutoSizeColumn={onAutoSizeColumn}
                       onSortColumn={(key, dir) => source.setSort(key, dir)}
                       onFilterColumn={() => setFiltersOpen(true)}
+                      onRenameColumn={
+                        props.onColumnRename
+                          ? c.columnLayout.setName
+                          : undefined
+                      }
                       sortBy={source.sortBy}
                       sortDir={source.sortDir}
                       enabled={Boolean(props.enableColumnMenu) && !c.isMobile}

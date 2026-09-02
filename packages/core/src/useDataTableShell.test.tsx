@@ -2,6 +2,7 @@ import { act, render, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { buildTableCsv } from "./export/tableCsv";
 import { DataTableShellView } from "./features/chromeBodyGate";
 import { densityChooser } from "./features/density";
 import { editing } from "./features/editing";
@@ -66,6 +67,67 @@ function renderLiveShell(
   });
   return renderShellWith(props, renderForm);
 }
+
+describe("persisted column names enter both shell forks", () => {
+  it("renames display/mobile columns and column-derived filter labels", () => {
+    let filterLabel: string | undefined;
+    const onColumnRename = vi.fn();
+    const renameableColumns: ColumnDef<Row>[] = [
+      {
+        key: "name",
+        header: "Name",
+        accessor: (row) => row.name,
+        filter: "text",
+        renameable: true,
+      },
+    ];
+    const { current } = renderLiveShell(
+      [columnMenu(), filters<Row>([])],
+      {
+        columns: renameableColumns,
+        columnLayout: {
+          hidden: [],
+          order: [],
+          pinned: {},
+          widths: {},
+          names: { name: "Account owner" },
+        },
+        onColumnLayoutChange: vi.fn(),
+        onColumnRename,
+      },
+      (defs) => {
+        filterLabel = defs[0]?.label;
+        return null;
+      }
+    );
+
+    expect(current.table.columns[0]).toMatchObject({
+      key: "name",
+      header: "Account owner",
+      mobileLabel: "Account owner",
+    });
+    expect(current.chrome.allColumns[0]?.header).toBe("Account owner");
+    expect(filterLabel).toBe("Account owner");
+    expect(current.tableProps.onRenameColumn).toBeTypeOf("function");
+    expect(current.chromeProps.onColumnRename).toBe(onColumnRename);
+    act(() => current.tableProps.onRenameColumn?.("name", "Primary contact"));
+    expect(onColumnRename).toHaveBeenCalledWith("name", "Primary contact");
+    expect(
+      buildTableCsv({
+        source: current.source,
+        columns: current.table.columns,
+      }).split("\r\n")[0]
+    ).toBe("Account owner");
+  });
+
+  it("keeps the direct rename channel dormant without columnMenu()", () => {
+    const { current } = renderLiveShell([], {
+      columns: [{ ...columns[0]!, renameable: true }],
+      onColumnRename: vi.fn(),
+    });
+    expect(current.tableProps.onRenameColumn).toBeUndefined();
+  });
+});
 
 /**
  * Mount a shell from already-applied props and keep the finished view.

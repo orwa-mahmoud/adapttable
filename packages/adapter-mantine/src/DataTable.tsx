@@ -325,6 +325,11 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                                 viewSource.setSort(key, dir)
                               }
                               onFilterColumn={() => setDrawerOpened(true)}
+                              onRenameColumn={
+                                props.onColumnRename
+                                  ? chrome.columnLayout.setName
+                                  : undefined
+                              }
                               sortBy={viewSource.sortBy}
                               sortDir={viewSource.sortDir}
                               allColumns={chrome.allColumns}

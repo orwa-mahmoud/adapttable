@@ -546,8 +546,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 55.9 kB gzipped and the same table with
-`standardFeatures()` composed is 102.2 kB.
+Measured on MUI, the table alone is 56.4 kB gzipped and the same table with
+`standardFeatures()` composed is 105.4 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -1251,6 +1251,10 @@ export function People() {
 - Cell content resolves `Cell` → `accessor` → the key's data path. `Cell` is a React component receiving `{ row, rowIndex }`; `accessor` is the lighter function form. Mini charts are a separate import — see [sparkline columns](./sparkline.md).
 - `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to the column's accessor. See [sorting](./sorting.md).
 - `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, and the column's filter all follow the resolved path — header text does not.
+- `renameable` opts a leaf into user naming when the table also provides
+  `onColumnRename`. This changes display text, mobile and export labels while
+  the key and localized data paths stay fixed. See
+  [column management](./column-management.md).
 - `hideOnMobile` / `hideOnDesktop` drop a column per layout; `mobileLabel` overrides the label on mobile cards.
 - `key` is also the value sent to a backend as `sortBy`, so keep it API-stable.
 
@@ -1264,6 +1268,7 @@ export function People() {
 | `renderFooter`  | `(ctx) => ReactNode`             | —                            | Custom summary-row cell.                                                                          |
 | `headerTooltip` | `string`                         | —                            | Native tooltip on the caption.                                                                    |
 | `headerActions` | `ReactNode`                      | —                            | Host controls after the caption.                                                                  |
+| `renameable`    | `boolean`                        | `false`                      | Allow a host-persisted user display name from the Columns menu.                                   |
 | `accessor`      | `(row) => ReactNode`             | read the key's data path     | Lightweight cell renderer.                                                                        |
 | `Cell`          | `ComponentType<CellProps<TRow>>` | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                            |
 | `sortable`      | `boolean`                        | `false`                      | Enable sorting for this column.                                                                   |
@@ -5188,13 +5193,13 @@ each piece: `tree-cell` (the indented wrapper), `tree-toggle` (the chevron), and
 
 ---
 
-# React table column management — show, hide, reorder, pin & resize
+# React table column management — rename, show, hide, reorder, pin & resize
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's features are already wired in `src/App.tsx` (`columnMenu()` + `resizableColumns()`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [pin, resize and reorder columns in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/) — a real table you can drag, not a recording.
+▶ **See it working:** [rename, pin, resize and reorder columns in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/) — a real table you can edit and drag, not a recording.
 
-Let users show/hide, reorder, pin, and resize columns — compose one factory per
+Let users rename, show/hide, reorder, pin, and resize columns — compose one factory per
 capability from `@adapttable/<kit>/<feature>`, with the resulting layout
 persistable to the URL or localStorage. The import is the switch; enabling props
 such as `enableColumnMenu` or `resizableColumns` draw nothing on their own. See
@@ -5205,10 +5210,11 @@ such as `enableColumnMenu` or `resizableColumns` draw nothing on their own. See
 
 ```tsx
 import { useColumnLayoutStorageState } from "@adapttable/core";
-import { type ColumnDef, DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { type ColumnDef, DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
 import { columnMenu } from "@adapttable/mantine/column-menu";
 import { resizableColumns } from "@adapttable/mantine/resizable-columns";
 import { rowActions } from "@adapttable/mantine/row-actions";
+import { useState } from "react";
 
 interface Person {
   id: string;
@@ -5246,8 +5252,8 @@ const people: Person[] = [
   },
 ];
 
-const columns: ColumnDef<Person>[] = [
-  { key: "name", width: 200 },
+const initialColumns: ColumnDef<Person>[] = [
+  { key: "name", width: 200, renameable: true },
   { key: "department.name", header: "Department", width: 160 },
   { key: "city", width: 140 },
   { key: "salary", align: "end", width: 140 },
@@ -5255,11 +5261,12 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 export function People() {
+  const [columns, setColumns] = useState(initialColumns);
   // Persist the user's layout to localStorage; swap for useColumnLayoutUrlState
   // (from @adapttable/core) to make it part of shareable links instead.
   const { layout, onLayoutChange } = useColumnLayoutStorageState({
     storageKey: "people-table-columns",
-    defaultColumnLayout: { pinned: { name: "left" } },
+    defaultColumnLayout: { pinned: { name: "start" } },
   });
 
   return (
@@ -5268,7 +5275,7 @@ export function People() {
       columns={columns}
       rowKey={(r) => r.id}
       features={[
-        columnMenu(), // Columns menu: show/hide, reorder, pin
+        columnMenu(), // Columns menu: rename, show/hide, reorder, pin
         resizableColumns(), // drag or arrow-key resize handles
         rowActions([
           { key: "edit", label: "Edit", onClick: (r) => console.log(r) },
@@ -5277,6 +5284,15 @@ export function People() {
       maxHeight={420} // scroll box so pinned columns visibly stick
       columnLayout={layout}
       onColumnLayoutChange={onLayoutChange}
+      onColumnRename={(key, name) => {
+        // The table updates its layout immediately. Persist the accepted
+        // domain name in the host just like an edited cell value.
+        setColumns((current) =>
+          current.map((column) =>
+            column.key === key ? { ...column, header: name } : column
+          )
+        );
+      }}
     />
   );
 }
@@ -5284,25 +5300,33 @@ export function People() {
 
 ## How it works
 
-- `columnMenu()` renders the built-in Columns menu: a search box, bulk show/hide/unpin, a visibility toggle per column, drag- or arrow-key reorder on each row's grip, a pin control, a per-column submenu (sort, pin, hide, auto-size, filter, reset one), auto-size-all, and reset-all. Hiding a column never reorders the rest. `lockPosition` / `lockVisibility` / `lockWidth` / `lockPin` on a `ColumnDef` gray out the matching controls.
+- `columnMenu()` renders the built-in Columns menu: a search box, bulk show/hide/unpin, a visibility toggle per column, drag- or arrow-key reorder on each row's grip, a pin control, a per-column submenu (sort, pin, hide, auto-size, filter, rename, reset one), auto-size-all, and reset-all. Hiding a column never reorders the rest. `lockPosition` / `lockVisibility` / `lockWidth` / `lockPin` on a `ColumnDef` gray out the matching controls.
+- Set `renameable: true` on a column and provide `onColumnRename(key, name)` to offer **Rename column**. The kit-native inline form keeps a visible label, trims on save, rejects a blank name, commits with Enter, cancels with Escape, restores focus, and announces the completed rename to screen readers. The key never changes.
+- Semantic-table adapters also put a small, named rename control beside the
+  header caption for a direct path. Ant Design keeps the menu path because its
+  native sorted title and sticky header clone own that hit target; keyboard
+  users retain the same complete rename form through the Columns menu.
+- The layout applies the accepted name immediately to desktop headers, mobile labels, the Columns menu, exports and accessible column names. The callback lets the host persist the domain name and update its `columns` definition; doing so also updates any column-derived filter label. An explicitly named standalone filter keeps its own label.
 - Pinning is logical (inline start/end), so a "left" pin sticks to the correct edge under `dir="rtl"`. It needs a horizontal scroll context to visibly stick — set `maxHeight`, or let the table exceed its container width.
 - `resizableColumns()` adds a handle to every header: drag it, or focus it and press ←/→ (16 px per step, 60 px minimum). Direction-aware, so it widens the right way in RTL.
 - The row-actions column is first-class under the reserved key `"actions"` (`ACTIONS_COLUMN_KEY`): the menu lists it with a visibility toggle and an end-pin toggle — `hidden: ["actions"]` hides it, `pinned: { actions: "right" }` pins it to the end on its own, no data-column pin required. It never reorders or resizes; it always trails.
-- The layout state is `{ hidden, order, pinned, widths, collapsedGroups? }` (`ColumnLayoutState`), keyed by column key. Uncontrolled by default; seed it with `defaultColumnLayout`, or own it with `columnLayout` + `onColumnLayoutChange` — the same controlled/uncontrolled split as a form input. `collapsedGroups` is omitted when every group is open.
-- Two ready-made persistence hooks feed the controlled mode: `useColumnLayoutUrlState({ urlKey })` keeps the layout in the query string (`colHide` / `colPin` / `colOrder` / `colW` / `colGroupCollapse` — shareable links), and `useColumnLayoutStorageState({ storageKey })` keeps it in localStorage (user preference).
+- The layout state is `{ hidden, order, pinned, widths, names?, collapsedGroups? }` (`ColumnLayoutState`), keyed by column key. Uncontrolled by default; seed it with `defaultColumnLayout`, or own it with `columnLayout` + `onColumnLayoutChange` — the same controlled/uncontrolled split as a form input. `names` and `collapsedGroups` are omitted when they carry no override.
+- Two ready-made persistence hooks feed the controlled mode: `useColumnLayoutUrlState({ urlKey })` keeps the layout in the query string (`colHide` / `colPin` / `colOrder` / `colW` / `colName` / `colGroupCollapse` — shareable links and Saved Views), and `useColumnLayoutStorageState({ storageKey })` keeps it in localStorage (user preference).
 
 ## Options
 
-| Factory / prop              | Type                                | Default | Description                                                                                                                    |
-| --------------------------- | ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `columnMenu()`              | —                                   | off     | Factory from `@adapttable/<kit>/column-menu`; composes the Columns menu (show/hide, pin, reorder).                             |
-| `resizableColumns()`        | —                                   | off     | Factory from `@adapttable/<kit>/resizable-columns`; drag/keyboard column-resize handles.                                       |
-| `fitColumns()`              | —                                   | off     | Factory from `@adapttable/<kit>/fit-columns`; columns share the container width.                                               |
-| `collapsibleColumnGroups()` | —                                   | off     | Factory from `@adapttable/<kit>/column-groups`; group headers gain a collapse toggle. See [column groups](./column-groups.md). |
-| `defaultColumnLayout`       | `Partial<ColumnLayoutState>`        | —       | Initial layout for the uncontrolled mode.                                                                                      |
-| `columnLayout`              | `ColumnLayoutState`                 | —       | Controlled layout (hidden/order/pinned/widths).                                                                                |
-| `onColumnLayoutChange`      | `(next: ColumnLayoutState) => void` | —       | Change handler for the controlled layout.                                                                                      |
-| `maxHeight`                 | `number`                            | —       | Fixed-height scroll box (px); enables sideways scroll + visible pinning.                                                       |
+| Factory / prop              | Type                                  | Default | Description                                                                                                                    |
+| --------------------------- | ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `columnMenu()`              | —                                     | off     | Factory from `@adapttable/<kit>/column-menu`; composes the Columns menu (show/hide, pin, reorder).                             |
+| `resizableColumns()`        | —                                     | off     | Factory from `@adapttable/<kit>/resizable-columns`; drag/keyboard column-resize handles.                                       |
+| `fitColumns()`              | —                                     | off     | Factory from `@adapttable/<kit>/fit-columns`; columns share the container width.                                               |
+| `collapsibleColumnGroups()` | —                                     | off     | Factory from `@adapttable/<kit>/column-groups`; group headers gain a collapse toggle. See [column groups](./column-groups.md). |
+| `defaultColumnLayout`       | `Partial<ColumnLayoutState>`          | —       | Initial layout for the uncontrolled mode.                                                                                      |
+| `columnLayout`              | `ColumnLayoutState`                   | —       | Controlled layout (hidden/order/pinned/widths/names).                                                                          |
+| `onColumnLayoutChange`      | `(next: ColumnLayoutState) => void`   | —       | Change handler for the controlled layout.                                                                                      |
+| `renameable`                | `boolean`                             | `false` | Per-column opt-in for the kit-native rename action.                                                                            |
+| `onColumnRename`            | `(key: string, name: string) => void` | —       | Host persistence callback; required before rename controls are offered.                                                        |
+| `maxHeight`                 | `number`                              | —       | Fixed-height scroll box (px); enables sideways scroll + visible pinning.                                                       |
 
 ## Notes
 
@@ -5402,7 +5426,8 @@ import and `features` entry are the switch; there is no `savedViews` table prop.
 A view captures **everything the table can put in a URL**: search, the
 multi-sort chain, page and page size, the simple filters and the advanced
 filter tree, grouping and which groups are collapsed, the whole column layout
-(order, hidden, pinned, widths, collapsed column groups), pinned rows, density,
+(order, hidden, pinned, widths, user-renamed column names, collapsed column
+groups), pinned rows, density,
 and the [pivot configuration](./pivot.md). The parts that take longest to
 rebuild by hand are exactly the parts worth capturing.
 
@@ -6070,7 +6095,7 @@ Related: [Getting started](./getting-started.md) ·
 AdaptTable keeps the table's state in the URL query string: search (`q`),
 pagination (`page`, `limit`), sorting (`sortBy`/`sortDir`, or `sort` for a
 multi-sort chain), and every filter value (`f_<key>`). Column layout
-(`colHide`, `colPin`, `colOrder`, `colW`) joins in when you wire
+(`colHide`, `colPin`, `colOrder`, `colW`, `colName`) joins in when you wire
 `useColumnLayoutUrlState`, and saved views capture all of it under a name.
 Reloading, sharing the link, or pressing back lands on the exact same slice.
 
@@ -6283,23 +6308,24 @@ modals or drawers where the address bar shouldn't change.
 
 ## Param reference
 
-| Param                       | Example                     | Meaning                                                                                                                                                        |
-| --------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `atv`                       | `atv=1`                     | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                       |
-| `q`                         | `q=avery`                   | Committed search term.                                                                                                                                         |
-| `page`                      | `page=3`                    | 1-based page; omitted at 1.                                                                                                                                    |
-| `limit`                     | `limit=50`                  | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |
-| `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`  | Single-column sort (`sortDir` falls back to `asc`).                                                                                                            |
-| `sort`                      | `sort=name:asc,age:desc`    | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                 |
-| `groupBy`                   | `groupBy=team`              | Active row-grouping column key (frontend tier).                                                                                                                |
-| `f_<key>`                   | `f_status=active`           | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                    |
-| `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`  | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day. |
-| `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`         | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                           |
-| `ft`                        | `ft=1.{"combinator":"and"}` | Versioned AND/OR filter tree. Unknown versions are dropped, never reinterpreted.                                                                               |
-| `colHide`                   | `colHide=email,phone`       | Hidden columns (keys percent-encoded).                                                                                                                         |
-| `colPin`                    | `colPin=name:left`          | Pinned columns and their side.                                                                                                                                 |
-| `colOrder`                  | `colOrder=name,role,salary` | Explicit column order.                                                                                                                                         |
-| `colW`                      | `colW=name:220`             | Per-column pixel widths.                                                                                                                                       |
+| Param                       | Example                        | Meaning                                                                                                                                                        |
+| --------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `atv`                       | `atv=1`                        | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                       |
+| `q`                         | `q=avery`                      | Committed search term.                                                                                                                                         |
+| `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                    |
+| `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |
+| `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                            |
+| `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                 |
+| `groupBy`                   | `groupBy=team`                 | Active row-grouping column key (frontend tier).                                                                                                                |
+| `f_<key>`                   | `f_status=active`              | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                    |
+| `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`     | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day. |
+| `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`            | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                           |
+| `ft`                        | `ft=1.{"combinator":"and"}`    | Versioned AND/OR filter tree. Unknown versions are dropped, never reinterpreted.                                                                               |
+| `colHide`                   | `colHide=email,phone`          | Hidden columns (keys percent-encoded).                                                                                                                         |
+| `colPin`                    | `colPin=name:left`             | Pinned columns and their side.                                                                                                                                 |
+| `colOrder`                  | `colOrder=name,role,salary`    | Explicit column order.                                                                                                                                         |
+| `colW`                      | `colW=name:220`                | Per-column pixel widths.                                                                                                                                       |
+| `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                       |
 
 With a `urlKey` every param is prefixed: `people.q`, `people.f_status`,
 `people.colHide`, ….
@@ -8201,16 +8227,17 @@ Feature factory options are not `DataTable` props. For example, compose
 
 ### Columns & layout
 
-| Prop                    | Type                                | Default | Description                                                                                                                                               |
-| ----------------------- | ----------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `columns`               | `ColumnInput<TRow>[]`               | —       | Leaf `ColumnDef`s and optional `ColumnGroupDef` parents — see [ColumnDef](#columndef) and [column groups](./column-groups.md).                            |
-| `columnLayout`          | `ColumnLayoutState`                 | —       | Controlled column layout (hidden/order/pinned/widths).                                                                                                    |
-| `onColumnLayoutChange`  | `(next: ColumnLayoutState) => void` | —       | Change handler for the controlled column layout.                                                                                                          |
-| `defaultColumnLayout`   | `Partial<ColumnLayoutState>`        | —       | Initial column layout for the uncontrolled mode.                                                                                                          |
-| `maxHeight`             | `number`                            | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                                                          |
-| `sortByOptions`         | `SortByOption[]`                    | —       | Options for a mobile sort-by select.                                                                                                                      |
-| `responsivePriority`    | `number`                            | —       | How readily this column is given up when the table is too narrow. Priority 1 is kept longest; omitting it means never dropped. See [mobile](./mobile.md). |
-| `mobileIdentityColumns` | `number`                            | `3`     | Leading desktop-visible columns kept on mobile even if `hideOnMobile`.                                                                                    |
+| Prop                    | Type                                  | Default | Description                                                                                                                                               |
+| ----------------------- | ------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `columns`               | `ColumnInput<TRow>[]`                 | —       | Leaf `ColumnDef`s and optional `ColumnGroupDef` parents — see [ColumnDef](#columndef) and [column groups](./column-groups.md).                            |
+| `columnLayout`          | `ColumnLayoutState`                   | —       | Controlled column layout (hidden/order/pinned/widths).                                                                                                    |
+| `onColumnLayoutChange`  | `(next: ColumnLayoutState) => void`   | —       | Change handler for the controlled column layout.                                                                                                          |
+| `defaultColumnLayout`   | `Partial<ColumnLayoutState>`          | —       | Initial column layout for the uncontrolled mode.                                                                                                          |
+| `onColumnRename`        | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                                                     |
+| `maxHeight`             | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                                                          |
+| `sortByOptions`         | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                                                      |
+| `responsivePriority`    | `number`                              | —       | How readily this column is given up when the table is too narrow. Priority 1 is kept longest; omitting it means never dropped. See [mobile](./mobile.md). |
+| `mobileIdentityColumns` | `number`                              | `3`     | Leading desktop-visible columns kept on mobile even if `hideOnMobile`.                                                                                    |
 
 ### Filters & search
 
@@ -8346,6 +8373,15 @@ fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
 `@adapttable/core/adapter`; see [feature composition](./features.md).
 
+Column-name controls stay kit-owned through `ColumnMenuSlotProps.onRenameColumn`
+and the optional `COLUMN_HEADER_RENAME` render slot
+(`ColumnHeaderRenameSlotProps`).
+`useColumnRenameEditor` (`UseColumnRenameEditorOptions` in,
+`ColumnRenameEditorState` out) centralizes trim/validation, Escape cancellation,
+focus restoration and the commit announcement without drawing an input in core.
+`SharedTableRenderProps.onRenameColumn` carries the same commit channel to
+semantic-table header controls; Ant Design intentionally uses the menu path.
+
 Adapter authors bind those slots without copying feature lifecycle through
 `createAdapterEditingFeatures`, `createAdapterFiltersFeature`,
 `createAdapterGroupingFeature`, `createAdapterRowDetailFeatures`,
@@ -8424,6 +8460,7 @@ Kit `/pivot` re-exports `PivotPanel` plus the `@adapttable/core/pivot` engine.
 | `renderHeader`   | `(ctx: ColumnHeaderContext<TRow>) => ReactNode`      | —             | Replace the header caption. The cell still owns sort, resize and the menu; `ctx.controller` exposes them.                                                                                                                                                                |
 | `renderFooter`   | `(ctx: ColumnFooterContext<TRow>) => ReactNode`      | —             | Replace one summary-row cell. `value` is the `summaryRow` result for this key.                                                                                                                                                                                           |
 | `headerTooltip`  | `string`                                             | —             | Native tooltip on the header caption.                                                                                                                                                                                                                                    |
+| `renameable`     | `boolean`                                            | `false`       | Offer the kit-native Rename column action when the table also has `onColumnRename`.                                                                                                                                                                                      |
 | `headerActions`  | `ReactNode`                                          | —             | Host controls after the caption, before the resize handle.                                                                                                                                                                                                               |
 | `group`          | `string \| readonly string[]`                        | —             | Presentational header group shortcut. A string is one level; a path stacks rows. Contiguous same-path columns merge; a reorder splits the group. Prefer a `ColumnGroupDef` with `children` when the group has collapse options. See [column groups](./column-groups.md). |
 | `groupShow`      | `ColumnGroupShow` (`"open" \| "closed" \| "always"`) | `"open"`      | When this leaf sits under a collapsible group: expanded only, collapsed only, or both.                                                                                                                                                                                   |
@@ -8600,7 +8637,7 @@ All from `@adapttable/core`.
   (`setPage`, `setSearch`, `setSort`, `toggleSortLevel`, `setExtra`,
   `setExtras`, `setFilterTree`, `clearExtras`, `clearAll`).
 - `useColumnLayoutUrlState(options?): { layout, onLayoutChange }` —
-  URL-persisted column layout (hidden / order / pinned / widths).
+  URL-persisted column layout (hidden / order / pinned / widths / names).
 - `useColumnLayoutStorageState(options): { layout, onLayoutChange }` — the
   localStorage counterpart (user preference rather than shareable link).
 - `useSavedViews(options: UseSavedViewsOptions): { views, save, apply, remove }`
@@ -8630,9 +8667,9 @@ All from `@adapttable/core`.
   `finishDataTableShell` folds a body into a shell for an adapter that
   assembles its own.
 - `useColumnLayout(options): UseColumnLayoutResult<TRow>` — headless
-  visibility / order / pinning / width / collapsed-group state
+  visibility / order / pinning / width / name / collapsed-group state
   (`visibleColumns`, `toggleVisible`, `move`, `setPinned`, `setWidth`,
-  `pinOffset`, `reset`, `toggleColumnGroup`).
+  `setName`, `resetName`, `pinOffset`, `reset`, `toggleColumnGroup`).
 - `useSearchInput(...)` — debounced search-input state behind
   `getSearchInputProps`.
 - `useSelection(options): SelectionState` — page-scoped selection with
@@ -9622,7 +9659,7 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 | `QueryCondition` / `QueryFilterGroup`                                                                                                                                                                                                                                                                                    | A leaf condition (`key`, `op`, `value`) and a nestable AND/OR group of them.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `isFilterGroup`                                                                                                                                                                                                                                                                                                          | Narrows a filter-tree child to a nested group while walking the tree.                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `PaginatedResponse<TRow>`                                                                                                                                                                                                                                                                                                | Standard envelope: `items`, `total`, `page`, `limit`, `hasNext`.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `ColumnLayoutState`                                                                                                                                                                                                                                                                                                      | `{ hidden, order, pinned, widths, collapsedGroups? }` — the column-layout shape.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ColumnLayoutState`                                                                                                                                                                                                                                                                                                      | `{ hidden, order, pinned, widths, names?, collapsedGroups? }` — the column-layout shape.                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `ColumnGroupDef<TRow>` / `ColumnInput<TRow>`                                                                                                                                                                                                                                                                             | A parent header with `children`, or a leaf-or-parent union. See [column groups](./column-groups.md).                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `ColumnGroupShow`                                                                                                                                                                                                                                                                                                        | `"open" \| "closed" \| "always"` — when a leaf under a collapsible group is visible.                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `ColumnGroupRecord` / `FlattenedColumns`                                                                                                                                                                                                                                                                                 | Collapse policy for one parent, and the `{ leaves, groups }` result of `flattenColumnTree`.                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -10039,7 +10076,7 @@ your app already ships those:
 | What you import                           | min+gzip  |
 | ----------------------------------------- | --------- |
 | `useFrontendData` + `useDataTable` (core) | ~18 kB    |
-| every core export                         | ~79 kB    |
+| every core export                         | ~80 kB    |
 | `DataTable` from an adapter               | ~56–68 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the

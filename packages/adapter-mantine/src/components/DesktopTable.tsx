@@ -35,6 +35,7 @@ import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
 import { HAIRLINE, SURFACE } from "../surface";
 import {
   OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
   OptionalColumnSelect,
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -145,6 +146,7 @@ function LeafHeader<TRow>({
   source,
   labels,
   resizeHandleStyle,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   paintStyle: CSSProperties;
@@ -153,6 +155,7 @@ function LeafHeader<TRow>({
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
   resizeHandleStyle: CSSProperties;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
   const headerStyle = { ...leaf.style, ...paintStyle };
@@ -185,43 +188,50 @@ function LeafHeader<TRow>({
     ...leaf.headerProps,
     ...leaf.columnHeaderProps,
   };
-  if (!column.sortable) {
-    return (
-      <Table.Th {...cellProps} {...spanProps} style={headerStyle}>
-        <span title={column.headerTooltip}>{leaf.caption}</span>
-        {columnSelect}
-        {actions}
-        {filterTrigger}
-        {resizeHandle}
-      </Table.Th>
-    );
-  }
+  const caption = column.sortable ? (
+    <Group
+      component="button"
+      gap={6}
+      wrap="nowrap"
+      display="inline-flex"
+      title={column.headerTooltip}
+      style={{
+        background: "none",
+        border: 0,
+        cursor: "pointer",
+        font: "inherit",
+        padding: 0,
+        color: leaf.sortActive
+          ? "var(--mantine-primary-color-filled)"
+          : "inherit",
+      }}
+      {...leaf.sortButtonProps}
+    >
+      <span>{leaf.caption}</span>
+      <SortIcon active={leaf.sortActive} dir={leaf.sortDir} />
+      {typeof leaf.sortIndex === "number" && (
+        <Badge component="span" size="xs" variant="light">
+          {leaf.sortIndex}
+        </Badge>
+      )}
+    </Group>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
   return (
     <Table.Th {...cellProps} {...spanProps} style={headerStyle}>
-      <Group
-        component="button"
-        gap={6}
-        wrap="nowrap"
-        display="inline-flex"
-        title={column.headerTooltip}
-        style={{
-          background: "none",
-          border: 0,
-          cursor: "pointer",
-          font: "inherit",
-          padding: 0,
-          color: leaf.sortActive
-            ? "var(--mantine-primary-color-filled)"
-            : "inherit",
-        }}
-        {...leaf.sortButtonProps}
-      >
-        <span>{leaf.caption}</span>
-        <SortIcon active={leaf.sortActive} dir={leaf.sortDir} />
-        {typeof leaf.sortIndex === "number" && (
-          <Badge component="span" size="xs" variant="light">
-            {leaf.sortIndex}
-          </Badge>
+      <Group gap={4} wrap="nowrap" display="inline-flex" align="center">
+        {column.renameable === true && onRenameColumn ? (
+          <OptionalColumnHeaderRename
+            columnKey={column.key}
+            name={leaf.columnName}
+            labels={labels}
+            onRenameColumn={onRenameColumn}
+          >
+            <span data-adapttable-part="header-caption-control">{caption}</span>
+          </OptionalColumnHeaderRename>
+        ) : (
+          <span data-adapttable-part="header-caption-control">{caption}</span>
         )}
       </Group>
       {columnSelect}
@@ -569,6 +579,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
     source: props.table.source,
     labels,
     resizeHandleStyle,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {

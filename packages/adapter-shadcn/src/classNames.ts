@@ -192,6 +192,26 @@ export const shadcnClassNames = {
   columnMenuSubmenu: "ms-6 flex flex-col gap-0.5 py-1",
   columnMenuAction:
     "w-full rounded-md px-2 py-1.5 text-start text-[13px] font-medium hover:bg-muted/60 disabled:opacity-50",
+  columnRenameForm:
+    "ms-6 grid gap-1 rounded-md border border-border bg-background p-2",
+  columnRenameLabel: "text-xs font-medium text-muted-foreground",
+  columnRenameInput:
+    "h-8 min-w-0 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  columnRenameError: "text-xs text-destructive",
+  columnRenameSave:
+    "rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90",
+  columnRenameCancel: "rounded-md px-2 py-1 text-xs font-medium hover:bg-muted",
+  headerRenameButton:
+    "ms-1 inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50",
+  headerRenameForm:
+    "inline-flex flex-wrap items-end gap-1 rounded-md border border-border bg-background p-1.5",
+  headerRenameLabel: "text-xs font-medium text-muted-foreground",
+  headerRenameInput:
+    "h-7 w-36 rounded-md border border-input bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  headerRenameError: "basis-full text-xs text-destructive",
+  headerRenameSave:
+    "h-7 rounded-md bg-primary px-2 text-xs font-medium text-primary-foreground hover:bg-primary/90",
+  headerRenameCancel: "h-7 rounded-md px-2 text-xs font-medium hover:bg-muted",
   headerActions: "ms-1 inline-flex items-center gap-0.5",
   tableFooter: "px-3 py-2 text-sm text-muted-foreground",
   resizeHandle: "hover:bg-border",

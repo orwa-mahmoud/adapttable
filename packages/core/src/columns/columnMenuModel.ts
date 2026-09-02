@@ -52,6 +52,8 @@ export interface ColumnMenuRow<TRow> {
   canSort: boolean;
   /** True when the column declared a `filter`. */
   canFilter: boolean;
+  /** True when the column allows its display name to be edited. */
+  canRename?: boolean;
 }
 
 /**
@@ -85,7 +87,7 @@ export function pinActionLabel(
 /**
  * Build the column-menu rows in the table's real order — visible and hidden
  * columns interleaved exactly as they appear (hiding never reorders the list).
- * Shared so all five adapters render an identical model and only differ in kit
+ * Shared so all eight adapters render an identical model and only differ in kit
  * markup.
  */
 /**
@@ -132,6 +134,7 @@ export function columnMenuRows<TRow>(
       canResize: column.lockWidth !== true,
       canSort: column.sortable === true,
       canFilter: column.filter !== undefined,
+      canRename: column.renameable === true,
     })
   );
 }
@@ -203,7 +206,7 @@ export function unpinAllColumns<TRow>(
 }
 
 /**
- * Restore one column's visibility, pin and width. Locks still apply.
+ * Restore one column's visibility, pin, width and display name. Locks still apply.
  *
  * @public
  */
@@ -214,6 +217,7 @@ export function resetColumnLayout<TRow>(
   if (row.canHide) layout.setHidden(row.key, false);
   if (row.canPin) layout.setPinned(row.key, undefined);
   if (row.canResize) layout.setWidth(row.key, undefined);
+  if (row.canRename === true) layout.resetName(row.key);
 }
 
 /**
@@ -252,8 +256,33 @@ export interface ColumnMenuActionContext<TRow = unknown> {
   onAutoSizeColumn?: (key: string) => void;
   /** Opens a column's filter, absent when unavailable. */
   onFilterColumn?: (key: string) => void;
+  /** Opens the kit-owned inline name editor, absent when renaming is unavailable. */
+  onBeginRename?: () => void;
   /** The host of THIS table — plugin menu actions resolve from here. */
   featureHost?: FeatureHostState<TRow>;
+}
+
+function resetColumnDisabled<TRow>(
+  row: ColumnMenuRow<TRow>,
+  layout: UseColumnLayoutResult<TRow>
+): boolean {
+  const hasCustomName =
+    row.canRename === true && layout.state.names?.[row.key] !== undefined;
+  return !row.canHide && !row.canPin && !row.canResize && !hasCustomName;
+}
+
+function appendRenameAction<TRow>(
+  actions: ColumnMenuAction[],
+  row: ColumnMenuRow<TRow>,
+  ctx: ColumnMenuActionContext<TRow>
+): void {
+  if (row.canRename !== true || !ctx.onBeginRename) return;
+  actions.push({
+    id: "rename",
+    label: ctx.labels.renameColumn,
+    disabled: false,
+    run: ctx.onBeginRename,
+  });
 }
 
 /**
@@ -328,10 +357,11 @@ export function columnMenuActions<TRow>(
       run: () => ctx.onFilterColumn?.(row.key),
     });
   }
+  appendRenameAction(actions, row, ctx);
   actions.push({
     id: "reset",
     label: ctx.labels.resetColumn,
-    disabled: !row.canHide && !row.canPin && !row.canResize,
+    disabled: resetColumnDisabled(row, ctx.layout),
     run: () => resetColumnLayout(row, ctx.layout),
   });
   appendPluginColumnMenuActions(actions, row, ctx);
@@ -365,7 +395,7 @@ function pushColumnMenuExtra(
 
 /**
  * Labels every adapter's column menu needs (pre-translated by the caller).
- * Hoisted here so the five adapters share one contract instead of
+ * Hoisted here so the eight adapters share one contract instead of
  * re-declaring it.
  *
  * @public
@@ -401,6 +431,18 @@ export interface ColumnMenuLabels {
   unpinAllColumns: string;
   /** Restore one column's own state. */
   resetColumn: string;
+  /** Open the column-name editor. */
+  renameColumn: string;
+  /** Visible label for the name input. */
+  columnName: string;
+  /** Commit a valid column name. */
+  saveColumnName: string;
+  /** Dismiss the name editor. */
+  cancelColumnRename: string;
+  /** Validation message for an empty name. */
+  columnNameRequired: string;
+  /** Polite announcement after a successful rename. */
+  columnRenamed: (info: { previous: string; name: string }) => string;
   /** Sort the column ascending. */
   sortAscending: string;
   /** Sort the column descending. */
@@ -458,6 +500,8 @@ export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   /** Open the filter UI from the submenu. */
   onFilterColumn?: (key: string) => void;
+  /** Commit a trimmed display name for a renameable column. */
+  onRenameColumn?: (key: string, name: string) => void;
   /** Column key currently sorted by, if any. */
   sortBy?: string;
   /** Direction for `sortBy`. */

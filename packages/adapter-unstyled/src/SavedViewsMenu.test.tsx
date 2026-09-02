@@ -79,7 +79,11 @@ describe("unstyled SavedViewsMenu", () => {
     // captured (the foreign param stays out); the input reset for the next.
     expect(screen.getByRole("button", { name: "Mine" })).toBeInTheDocument();
     expect(storage.read()).toEqual([
-      { name: "Mine", search: "q=alice&page=2", version: SAVED_VIEW_VERSION },
+      {
+        name: "Mine",
+        search: "q=alice&page=2&atv=1",
+        version: SAVED_VIEW_VERSION,
+      },
     ]);
     expect(input).toHaveValue("");
     expect(saveButton).toBeDisabled();

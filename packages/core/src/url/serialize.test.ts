@@ -234,10 +234,19 @@ describe("readColumnLayout", () => {
       order: [],
       pinned: { "a:b": "start" },
       widths: {},
+      names: { "a:b": "Revenue, net: €" },
     });
     const layout = readColumnLayout(new URLSearchParams(params.toString()))!;
     expect(layout.pinned).toEqual({ "a:b": "start" });
     expect(layout.hidden).toEqual(["x,y"]);
+    expect(layout.names).toEqual({ "a:b": "Revenue, net: €" });
+  });
+
+  it("keeps the first valid name and ignores blank or malformed entries", () => {
+    expect(
+      readColumnLayout(ps("colName=person:Owner,person:Ignored,blank:%20,bad"))
+        ?.names
+    ).toEqual({ person: "Owner" });
   });
 });
 
@@ -267,6 +276,7 @@ describe("writeColumnLayout", () => {
       order: ["person", "status"],
       pinned: { person: "start" },
       widths: { person: 240 },
+      names: { person: "Account owner" },
     };
     const params = ps("");
     writeColumnLayout(params, layout);

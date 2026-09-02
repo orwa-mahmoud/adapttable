@@ -83,6 +83,7 @@ export interface ColumnDef<TRow> {
     minWidth?: number;
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
+    renameable?: boolean;
     renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
     renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
     responsivePriority?: number;
@@ -353,6 +354,7 @@ export interface TableLabels {
     boolTrue?: string;
     cancel?: string;
     cancelAll?: string;
+    cancelColumnRename?: string;
     checklistClear?: string;
     checklistNoValues?: string;
     checklistSearch?: string;
@@ -362,6 +364,12 @@ export interface TableLabels {
     collapseGroup?: string;
     collapseRow?: string;
     columnActions?: string;
+    columnName?: string;
+    columnNameRequired?: string;
+    columnRenamed?: (info: {
+        previous: string;
+        name: string;
+    }) => string;
     columns?: string;
     commandEmpty?: string;
     commandPalette?: string;
@@ -507,6 +515,7 @@ export interface TableLabels {
     relTomorrow?: string;
     relYesterday?: string;
     removeFilter?: (label: string) => string;
+    renameColumn?: string;
     renameView?: string;
     reorderRow?: string;
     resetColumn?: string;
@@ -520,6 +529,7 @@ export interface TableLabels {
     rowSeparator?: string;
     rowsPerPage?: string;
     saveAll?: string;
+    saveColumnName?: string;
     savedViews?: string;
     saveRow?: string;
     saveView?: string;

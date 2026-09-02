@@ -98,6 +98,10 @@ export function People() {
 - Cell content resolves `Cell` → `accessor` → the key's data path. `Cell` is a React component receiving `{ row, rowIndex }`; `accessor` is the lighter function form. Mini charts are a separate import — see [sparkline columns](./sparkline.md).
 - `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to the column's accessor. See [sorting](./sorting.md).
 - `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, and the column's filter all follow the resolved path — header text does not.
+- `renameable` opts a leaf into user naming when the table also provides
+  `onColumnRename`. This changes display text, mobile and export labels while
+  the key and localized data paths stay fixed. See
+  [column management](./column-management.md).
 - `hideOnMobile` / `hideOnDesktop` drop a column per layout; `mobileLabel` overrides the label on mobile cards.
 - `key` is also the value sent to a backend as `sortBy`, so keep it API-stable.
 
@@ -111,6 +115,7 @@ export function People() {
 | `renderFooter`  | `(ctx) => ReactNode`             | —                            | Custom summary-row cell.                                                                          |
 | `headerTooltip` | `string`                         | —                            | Native tooltip on the caption.                                                                    |
 | `headerActions` | `ReactNode`                      | —                            | Host controls after the caption.                                                                  |
+| `renameable`    | `boolean`                        | `false`                      | Allow a host-persisted user display name from the Columns menu.                                   |
 | `accessor`      | `(row) => ReactNode`             | read the key's data path     | Lightweight cell renderer.                                                                        |
 | `Cell`          | `ComponentType<CellProps<TRow>>` | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                            |
 | `sortable`      | `boolean`                        | `false`                      | Enable sorting for this column.                                                                   |

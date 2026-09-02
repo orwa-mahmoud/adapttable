@@ -114,6 +114,13 @@ export const ja: Required<TableLabels> = {
   hideAllColumns: "すべて非表示",
   unpinAllColumns: "すべて固定解除",
   resetColumn: "列をリセット",
+  renameColumn: "列名を変更",
+  columnName: "列名",
+  saveColumnName: "名前を保存",
+  cancelColumnRename: "キャンセル",
+  columnNameRequired: "列名を入力してください。",
+  columnRenamed: ({ previous, name }) =>
+    `列 ${previous} の名前を ${name} に変更しました`,
   sortAscending: "昇順で並べ替え",
   sortDescending: "降順で並べ替え",
   sortedBy: ({ column, ascending }) =>

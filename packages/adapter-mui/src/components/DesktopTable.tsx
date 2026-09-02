@@ -42,6 +42,7 @@ import { useCallback, useMemo, useRef } from "react";
 
 import {
   OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
   OptionalColumnSelect,
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -407,6 +408,7 @@ function LeafHeader<TRow>({
   closeHeaderFilterOnSelect,
   source,
   labels,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   headSx: SxProps<Theme>;
@@ -416,11 +418,27 @@ function LeafHeader<TRow>({
   closeHeaderFilterOnSelect: boolean | undefined;
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
-  const ariaSort = leaf.headerProps["aria-sort"] as
-    "ascending" | "descending" | "none" | undefined;
-  const active = ariaSort === "ascending" || ariaSort === "descending";
+  const caption = column.sortable ? (
+    <TableSortLabel
+      active={leaf.sortActive}
+      direction={leaf.sortDir === "desc" ? "desc" : "asc"}
+      aria-label={leaf.sortButtonProps["aria-label"]}
+      onClick={leaf.sortButtonProps.onClick}
+      title={column.headerTooltip}
+    >
+      {leaf.caption}
+      {leaf.sortIndex !== undefined && (
+        <Box component="span" sx={{ fontSize: 10, ml: 0.5 }}>
+          {leaf.sortIndex}
+        </Box>
+      )}
+    </TableSortLabel>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
   return (
     <TableCell
       key={column.key}
@@ -437,27 +455,27 @@ function LeafHeader<TRow>({
         ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
       }}
     >
-      {column.sortable ? (
-        <TableSortLabel
-          active={active}
-          direction={ariaSort === "descending" ? "desc" : "asc"}
-          // Six other kits name this control "Sort by: <column>". Named only by
-          // its own text, it reads as "Person, button" — which does not say what
-          // pressing it does.
-          aria-label={leaf.sortButtonProps["aria-label"]}
-          onClick={leaf.sortButtonProps.onClick}
-          title={column.headerTooltip}
-        >
-          {leaf.caption}
-          {leaf.sortIndex !== undefined && (
-            <Box component="span" sx={{ fontSize: 10, ml: 0.5 }}>
-              {leaf.sortIndex}
+      <Box
+        component="div"
+        sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+      >
+        {column.renameable === true && onRenameColumn ? (
+          <OptionalColumnHeaderRename
+            columnKey={column.key}
+            name={leaf.columnName}
+            labels={labels}
+            onRenameColumn={onRenameColumn}
+          >
+            <Box component="span" data-adapttable-part="header-caption-control">
+              {caption}
             </Box>
-          )}
-        </TableSortLabel>
-      ) : (
-        <span title={column.headerTooltip}>{leaf.caption}</span>
-      )}
+          </OptionalColumnHeaderRename>
+        ) : (
+          <Box component="span" data-adapttable-part="header-caption-control">
+            {caption}
+          </Box>
+        )}
+      </Box>
       {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
         <OptionalColumnSelect
           label={leaf.columnSelectAriaLabel}
@@ -562,6 +580,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     closeHeaderFilterOnSelect,
     source: props.table.source,
     labels,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {

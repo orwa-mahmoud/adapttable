@@ -115,6 +115,13 @@ export const es: Required<TableLabels> = {
   hideAllColumns: "Ocultar todas",
   unpinAllColumns: "Desanclar todas",
   resetColumn: "Restablecer columna",
+  renameColumn: "Renombrar columna",
+  columnName: "Nombre de la columna",
+  saveColumnName: "Guardar nombre",
+  cancelColumnRename: "Cancelar",
+  columnNameRequired: "Introduce un nombre de columna.",
+  columnRenamed: ({ previous, name }) =>
+    `La columna ${previous} se ha renombrado a ${name}`,
   sortAscending: "Ordenar ascendente",
   sortDescending: "Ordenar descendente",
   sortedBy: ({ column, ascending }) =>

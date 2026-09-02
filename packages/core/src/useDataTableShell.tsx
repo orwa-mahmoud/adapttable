@@ -6,6 +6,7 @@ import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "./columns/columnMenuModel";
+import { applyColumnNames } from "./columns/columnNames";
 import { flattenColumnTree } from "./columns/columnTree";
 import { bindFeatureHostFn } from "./features/currentHost";
 import { useResolvedDensity } from "./features/densityStateKey";
@@ -131,9 +132,17 @@ export function useDataTableShell<TRow>(
     props.urlSync === false ? undefined : props.urlAdapter,
     props.urlSync !== false
   );
+  const persistedColumnNames =
+    props.columnLayout !== undefined
+      ? props.columnLayout.names
+      : props.defaultColumnLayout?.names;
   const dataColumns = useMemo(
-    () => flattenColumnTree(props.columns).leaves,
-    [props.columns]
+    () =>
+      applyColumnNames(
+        flattenColumnTree(props.columns).leaves,
+        persistedColumnNames
+      ),
+    [props.columns, persistedColumnNames]
   );
   // Resolve the data tier (source > onQueryChange server > frontend) and the
   // declarative-filter runtime (defs, chip labels, URL keys, predicate).
@@ -322,6 +331,10 @@ export function useDataTableShell<TRow>(
     collapsedColumnGroups: chrome.columnLayout.state.collapsedGroups,
     columnGroups: chrome.columnGroups,
     onToggleColumnGroup: chrome.columnLayout.toggleColumnGroup,
+    onRenameColumn:
+      props.enableColumnMenu && props.onColumnRename
+        ? chrome.columnLayout.setName
+        : undefined,
     rowStyle: props.rowStyle,
     rowHeight: props.rowHeight,
     renderRowDetail: chrome.detail?.render,

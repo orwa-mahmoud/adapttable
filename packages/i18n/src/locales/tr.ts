@@ -115,6 +115,13 @@ export const tr: Required<TableLabels> = {
   hideAllColumns: "Tümünü gizle",
   unpinAllColumns: "Tümünü çöz",
   resetColumn: "Sütunu sıfırla",
+  renameColumn: "Sütunu yeniden adlandır",
+  columnName: "Sütun adı",
+  saveColumnName: "Adı kaydet",
+  cancelColumnRename: "İptal",
+  columnNameRequired: "Bir sütun adı girin.",
+  columnRenamed: ({ previous, name }) =>
+    `${previous} sütununun adı ${name} olarak değiştirildi`,
   sortAscending: "Artan sırala",
   sortDescending: "Azalan sırala",
   sortedBy: ({ column, ascending }) =>

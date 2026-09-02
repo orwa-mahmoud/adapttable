@@ -8,6 +8,7 @@ import {
   type PinSide,
   type UseColumnLayoutResult,
 } from "./columnLayoutModel";
+import { applyColumnNames, declaredColumnName } from "./columnNames";
 import {
   applyCollapsedColumnGroups,
   type ColumnGroupRecord,
@@ -44,6 +45,12 @@ export interface UseColumnLayoutOptions<TRow> {
   layout?: ColumnLayoutState;
   /** Change handler; required for the controlled mode to update. */
   onLayoutChange?: (next: ColumnLayoutState) => void;
+  /**
+   * Persists a user rename in the host's domain model. The layout keeps the
+   * display override for URL/storage round-trips; the host remains responsible
+   * for updating its column definition when the name is durable application data.
+   */
+  onColumnRename?: (key: string, name: string) => void;
   /** Initial layout for the uncontrolled mode. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   /**
@@ -68,6 +75,7 @@ export function useColumnLayout<TRow>({
   columns,
   layout,
   onLayoutChange,
+  onColumnRename,
   defaultColumnLayout,
   collapsibleColumnGroups = false,
   columnGroups,
@@ -83,6 +91,19 @@ export function useColumnLayout<TRow>({
   // silently winning. `commit` advances it optimistically; renders re-sync it.
   const stateRef = useRef(state);
   stateRef.current = state;
+  // A host commonly writes the accepted name back into its `columns` prop.
+  // Keep the declaration that preceded the active override as the reset
+  // target; otherwise that controlled echo would silently redefine "reset".
+  const declaredNamesRef = useRef(new Map<string, string>());
+  const renamedKeysRef = useRef(new Set<string>());
+  for (const column of columns) {
+    if (!renamedKeysRef.current.has(column.key)) {
+      declaredNamesRef.current.set(column.key, declaredColumnName(column));
+    }
+    if (state.names?.[column.key] !== undefined) {
+      renamedKeysRef.current.add(column.key);
+    }
+  }
 
   const commit = useCallback(
     (next: ColumnLayoutState) => {
@@ -138,8 +159,62 @@ export function useColumnLayout<TRow>({
     [commit]
   );
 
+  const setName = useCallback(
+    (key: string, nextName: string) => {
+      const column = columns.find((candidate) => candidate.key === key);
+      if (column?.renameable !== true || !onColumnRename) return;
+      const name = nextName.trim();
+      if (name === "") return;
+      const current = stateRef.current;
+      const declared =
+        declaredNamesRef.current.get(key) ?? declaredColumnName(column);
+      const effective = current.names?.[key] ?? declared;
+      if (effective === name) return;
+      renamedKeysRef.current.add(key);
+      const names = { ...current.names };
+      if (name === declared) delete names[key];
+      else names[key] = name;
+      commit({
+        ...current,
+        names: Object.keys(names).length > 0 ? names : undefined,
+      });
+      onColumnRename(key, name);
+    },
+    [columns, commit, onColumnRename]
+  );
+
+  const resetName = useCallback(
+    (key: string) => {
+      const column = columns.find((candidate) => candidate.key === key);
+      const current = stateRef.current;
+      if (
+        column?.renameable !== true ||
+        !onColumnRename ||
+        current.names?.[key] === undefined
+      ) {
+        return;
+      }
+      const names = { ...current.names };
+      delete names[key];
+      commit({
+        ...current,
+        names: Object.keys(names).length > 0 ? names : undefined,
+      });
+      onColumnRename(
+        key,
+        declaredNamesRef.current.get(key) ?? declaredColumnName(column)
+      );
+    },
+    [columns, commit, onColumnRename]
+  );
+
+  const namedColumns = useMemo(
+    () => applyColumnNames(columns, state.names),
+    [columns, state.names]
+  );
+
   const visibleColumns = useMemo(() => {
-    const ordered = applyColumnOrder(columns, state.order).filter(
+    const ordered = applyColumnOrder(namedColumns, state.order).filter(
       (c) => !state.hidden.includes(c.key)
     );
     if (!collapsibleColumnGroups) return ordered;
@@ -151,7 +226,7 @@ export function useColumnLayout<TRow>({
       ),
     ];
   }, [
-    columns,
+    namedColumns,
     state.order,
     state.hidden,
     state.collapsedGroups,
@@ -193,7 +268,19 @@ export function useColumnLayout<TRow>({
     [commit, columns, columnGroups]
   );
 
-  const reset = useCallback(() => commit(EMPTY_COLUMN_LAYOUT), [commit]);
+  const reset = useCallback(() => {
+    const renamedKeys = Object.keys(stateRef.current.names ?? {});
+    commit(EMPTY_COLUMN_LAYOUT);
+    for (const key of renamedKeys) {
+      const column = columns.find((candidate) => candidate.key === key);
+      if (column?.renameable === true && onColumnRename) {
+        onColumnRename(
+          key,
+          declaredNamesRef.current.get(key) ?? declaredColumnName(column)
+        );
+      }
+    }
+  }, [columns, commit, onColumnRename]);
 
   // Precompute every pinned column's inset once per layout change — adapters
   // call `pinOffset` per cell per render, so a lookup beats re-walking the
@@ -238,6 +325,8 @@ export function useColumnLayout<TRow>({
     setPinned,
     move,
     setWidth,
+    setName,
+    resetName,
     pinOffset,
     reset,
     toggleColumnGroup,

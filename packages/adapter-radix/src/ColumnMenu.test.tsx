@@ -9,7 +9,7 @@ interface Row {
   id: string;
 }
 const cols: ColumnDef<Row>[] = [
-  { key: "a", header: "Alpha", accessor: (r) => r.id },
+  { key: "a", header: "Alpha", accessor: (r) => r.id, renameable: true },
   { key: "b", header: "Bravo", accessor: (r) => r.id },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
@@ -24,6 +24,8 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     setPinned: vi.fn(),
     move: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -47,6 +49,13 @@ const labels = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
@@ -137,6 +146,35 @@ describe("radix ColumnMenu", () => {
 
     fireEvent.click(screen.getByText("Reset columns"));
     expect(layout.reset).toHaveBeenCalled();
+  });
+
+  it("renders Radix rename controls and commits a trimmed name", async () => {
+    const onRenameColumn = vi.fn();
+    renderRadix(
+      <ColumnMenu
+        allColumns={cols}
+        layout={fakeLayout()}
+        labels={labels}
+        onAutoSize={() => undefined}
+        onRenameColumn={onRenameColumn}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    fireEvent.click(renameAction);
+    expect(renameAction).toBeDisabled();
+    fireEvent.change(screen.getByRole("textbox", { name: "Column name" }), {
+      target: { value: "  Account  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account");
+    expect(renameAction).not.toBeDisabled();
   });
 
   it("lists the actions column with an eye toggle and a one-click end pin", async () => {

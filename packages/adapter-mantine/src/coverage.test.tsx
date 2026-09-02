@@ -132,6 +132,8 @@ function hiddenLayout(): UseColumnLayoutResult<MenuRow> {
     setPinned: vi.fn(),
     move: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -160,6 +162,13 @@ const menuLabels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
   reorderRow: "Reorder",
 };
 

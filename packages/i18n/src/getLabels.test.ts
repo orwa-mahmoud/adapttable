@@ -138,6 +138,14 @@ const INTERPOLATION_CASES: Record<
     call: (fn) => (fn as (label: string) => string)("STATUS_X"),
     expects: ["STATUS_X"],
   },
+  columnRenamed: {
+    call: (fn) =>
+      (fn as (info: { previous: string; name: string }) => string)({
+        previous: "COLUMN_OLD",
+        name: "COLUMN_NEW",
+      }),
+    expects: ["COLUMN_OLD", "COLUMN_NEW"],
+  },
   sortedBy: {
     // Only the column can be asserted by substring: the direction word is the
     // part each locale translates, so it differs by design. That it BRANCHES on

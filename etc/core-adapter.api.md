@@ -240,6 +240,7 @@ export interface BaseDataTableProps<TRow> {
     onClearFilters?: () => void;
     onCollapsedGroupIdsChange?: (ids: string[]) => void;
     onColumnLayoutChange?: (next: ColumnLayoutState) => void;
+    onColumnRename?: (key: string, name: string) => void;
     onDensityChange?: (next: "comfortable" | "compact") => void;
     onEditCancel?: EditEventHandler<TRow>;
     onEditCommit?: EditEventHandler<TRow>;
@@ -723,6 +724,9 @@ export const COLUMN_GROUP_STUB_WIDTH = 36;
 export const COLUMN_GROUP_TOGGLE: FeatureSlotKey<ColumnGroupToggleProps>;
 
 // @public
+export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps>;
+
+// @public
 export const COLUMN_LAYOUT_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
 // @public
@@ -762,6 +766,7 @@ export interface ColumnDef<TRow> {
     minWidth?: number;
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
+    renameable?: boolean;
     renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
     renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
     responsivePriority?: number;
@@ -893,12 +898,22 @@ export interface ColumnHeaderController {
 }
 
 // @public
+export interface ColumnHeaderRenameSlotProps {
+    children?: ReactNode;
+    columnKey: string;
+    labels: ColumnMenuLabels;
+    name: string;
+    onRenameColumn: (key: string, name: string) => void;
+}
+
+// @public
 export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
 
 // @public
 export interface ColumnLayoutState {
     collapsedGroups?: readonly string[];
     hidden: readonly string[];
+    names?: Readonly<Record<string, string>>;
     order: readonly string[];
     pinned: Readonly<Record<string, PinSide>>;
     widths: Readonly<Record<string, number>>;
@@ -918,6 +933,7 @@ export interface ColumnMenuActionContext<TRow = unknown> {
     labels: ColumnMenuLabels;
     layout: UseColumnLayoutResult<TRow>;
     onAutoSizeColumn?: (key: string) => void;
+    onBeginRename?: () => void;
     onFilterColumn?: (key: string) => void;
     onSortColumn?: (key: string, dir: "asc" | "desc") => void;
     sortBy?: string;
@@ -941,7 +957,14 @@ export interface ColumnMenuChromeProps<TRow> {
 export interface ColumnMenuLabels {
     autoSizeColumn: string;
     autoSizeColumns: string;
+    cancelColumnRename: string;
     columnActions: string;
+    columnName: string;
+    columnNameRequired: string;
+    columnRenamed: (info: {
+        previous: string;
+        name: string;
+    }) => string;
     columns: string;
     filterColumn: string;
     hideAllColumns: string;
@@ -950,8 +973,10 @@ export interface ColumnMenuLabels {
     moveStart: string;
     pinEnd: string;
     pinStart: string;
+    renameColumn: string;
     resetColumn: string;
     resetColumns: string;
+    saveColumnName: string;
     searchColumns: string;
     showAllColumns: string;
     showColumn: string;
@@ -967,6 +992,7 @@ export interface ColumnMenuRow<TRow> {
     canHide: boolean;
     canMove: boolean;
     canPin: boolean;
+    canRename?: boolean;
     canResize: boolean;
     canSort: boolean;
     column: ColumnDef<TRow>;
@@ -989,9 +1015,26 @@ export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
     onAutoSize: () => void;
     onAutoSizeColumn?: (key: string) => void;
     onFilterColumn?: (key: string) => void;
+    onRenameColumn?: (key: string, name: string) => void;
     onSortColumn?: (key: string, dir: "asc" | "desc") => void;
     sortBy?: string;
     sortDir?: "asc" | "desc";
+}
+
+// @public
+export interface ColumnRenameEditorState {
+    announcement: string;
+    begin: () => void;
+    blur: () => void;
+    cancel: () => void;
+    draft: string;
+    editing: boolean;
+    error?: string;
+    errorId: string;
+    inputId: string;
+    onKeyDown: (event: KeyboardEvent_2<HTMLInputElement>) => void;
+    setDraft: (value: string) => void;
+    submit: () => boolean;
 }
 
 // @public
@@ -4244,6 +4287,7 @@ export interface SharedTableRenderProps<TRow> {
     maxHeight?: number;
     measureElement?: (element: Element | null) => void;
     measureRowPair?: RowPairMeasurer;
+    onRenameColumn?: (key: string, name: string) => void;
     onRowClick?: (row: TRow) => void;
     onToggleColumnGroup?: (id: string) => void;
     paddingBottom?: number;
@@ -4660,6 +4704,7 @@ export interface TableLabels {
     boolTrue?: string;
     cancel?: string;
     cancelAll?: string;
+    cancelColumnRename?: string;
     checklistClear?: string;
     checklistNoValues?: string;
     checklistSearch?: string;
@@ -4669,6 +4714,12 @@ export interface TableLabels {
     collapseGroup?: string;
     collapseRow?: string;
     columnActions?: string;
+    columnName?: string;
+    columnNameRequired?: string;
+    columnRenamed?: (info: {
+        previous: string;
+        name: string;
+    }) => string;
     columns?: string;
     commandEmpty?: string;
     commandPalette?: string;
@@ -4814,6 +4865,7 @@ export interface TableLabels {
     relTomorrow?: string;
     relYesterday?: string;
     removeFilter?: (label: string) => string;
+    renameColumn?: string;
     renameView?: string;
     reorderRow?: string;
     resetColumn?: string;
@@ -4827,6 +4879,7 @@ export interface TableLabels {
     rowSeparator?: string;
     rowsPerPage?: string;
     saveAll?: string;
+    saveColumnName?: string;
     savedViews?: string;
     saveRow?: string;
     saveView?: string;
@@ -5206,13 +5259,30 @@ export interface UseColumnLayoutResult<TRow> {
     move: (key: string, toIndex: number) => void;
     pinOffset: (key: string) => PinOffset | undefined;
     reset: () => void;
+    resetName: (key: string) => void;
     setHidden: (key: string, hidden: boolean) => void;
+    setName: (key: string, name: string) => void;
     setPinned: (key: string, side: PinSide | undefined) => void;
     setWidth: (key: string, width: number | undefined) => void;
     state: ColumnLayoutState;
     toggleColumnGroup: (id: string) => void;
     toggleVisible: (key: string) => void;
     visibleColumns: ColumnDef<TRow>[];
+}
+
+// @public
+export function useColumnRenameEditor(input: UseColumnRenameEditorOptions): ColumnRenameEditorState;
+
+// @public
+export interface UseColumnRenameEditorOptions {
+    key: string;
+    name: string;
+    onRename: (key: string, name: string) => void;
+    renamedMessage: (info: {
+        previous: string;
+        name: string;
+    }) => string;
+    requiredMessage: string;
 }
 
 // @public
@@ -5292,10 +5362,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
-        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions;
         headerFilters?: boolean;
+        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
@@ -5306,11 +5376,11 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
-        locale?: string | undefined;
         rowActions?: RowAction<TRow>[] | undefined;
         confirm?: ConfirmHandler | undefined;
         isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         onRowClick?: ((row: TRow) => void) | undefined;
+        locale?: string | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
         tableLabel?: string | undefined;
@@ -5358,6 +5428,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         columnLayout?: ColumnLayoutState | undefined;
         onColumnLayoutChange?: ((next: ColumnLayoutState) => void) | undefined;
         defaultColumnLayout?: Partial<ColumnLayoutState> | undefined;
+        onColumnRename?: ((key: string, name: string) => void) | undefined;
         maxHeight?: number | undefined;
         estimateRowSize?: number | undefined;
         estimateCardSize?: number | undefined;
@@ -5449,10 +5520,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         };
         summaryRow: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
         groupAggregates: ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined;
-        columns: ColumnInput<TRow>[];
         searchPlaceholder?: string | undefined;
         savedViews?: UseSavedViewsOptions;
         headerFilters?: boolean;
+        columns: ColumnInput<TRow>[];
         exportCsv?: boolean | ExportCsvOptions<TRow> | undefined;
         sidePanel?: SidePanelOptions;
         contextMenu?: boolean | ContextMenuOptions<TRow> | undefined;
@@ -5463,11 +5534,11 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
-        locale?: string | undefined;
         rowActions?: RowAction<TRow>[] | undefined;
         confirm?: ConfirmHandler | undefined;
         isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         onRowClick?: ((row: TRow) => void) | undefined;
+        locale?: string | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
         tableLabel?: string | undefined;
@@ -5515,6 +5586,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         columnLayout?: ColumnLayoutState | undefined;
         onColumnLayoutChange?: ((next: ColumnLayoutState) => void) | undefined;
         defaultColumnLayout?: Partial<ColumnLayoutState> | undefined;
+        onColumnRename?: ((key: string, name: string) => void) | undefined;
         maxHeight?: number | undefined;
         estimateRowSize?: number | undefined;
         estimateCardSize?: number | undefined;
@@ -5663,6 +5735,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         collapsedColumnGroups: readonly string[] | undefined;
         columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
         onToggleColumnGroup: (id: string) => void;
+        onRenameColumn: ((key: string, name: string) => void) | undefined;
         rowStyle: RowStyle<TRow> | undefined;
         rowHeight: RowHeight<TRow> | undefined;
         renderRowDetail: ((row: TRow) => ReactNode) | undefined;

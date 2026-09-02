@@ -101,6 +101,7 @@ const columns: ColumnDef<Row>[] = [
     header: "Name",
     accessor: (r) => r.name,
     sortable: true,
+    renameable: true,
     group: "Identity",
     headerActions: <button type="button">info</button>,
     editable: true,
@@ -165,6 +166,8 @@ const camel = (part: string): string =>
 const A11Y_PARTS = new Set([
   "export-announcer",
   "grid-announcer",
+  "column-rename-announcer",
+  "header-rename-announcer",
   "row-reorder-announcer",
   "table-status-announcer",
 ]);
@@ -262,6 +265,7 @@ function Harness(props: {
       savedViews={{ storageKey: "parity" }}
       exportCsv
       onAddRow={vi.fn()}
+      onColumnRename={vi.fn()}
       enableColumnMenu
       collapsibleColumnGroups
       resizableColumns
@@ -333,6 +337,11 @@ async function renderAllStates(classNames?: DataTableClassNames) {
 
   // Desktop kitchen sink: open filters, select rows, menus, detail, edit.
   const desktop = mount({});
+  fireEvent.click(part("header-rename-button")!);
+  fireEvent.change(part("header-rename-input")!, { target: { value: " " } });
+  fireEvent.submit(part("header-rename-form")!);
+  absorb();
+  fireEvent.click(part("header-rename-cancel")!);
   fireEvent.click(part("filters-button")!);
   absorb();
   const addCondition = desktop.getByRole("button", { name: "Add condition" });
@@ -367,6 +376,10 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   const more = part("column-menu-more");
   if (more) {
     fireEvent.click(more);
+    absorb();
+    fireEvent.click(desktop.getByRole("button", { name: "Rename column" }));
+    fireEvent.change(part("column-rename-input")!, { target: { value: " " } });
+    fireEvent.submit(part("column-rename-form")!);
     absorb();
   }
   // Saved views: open, name one, save — the list + delete render.
@@ -682,6 +695,19 @@ const KEYS = [
   "columnMenuMore",
   "columnMenuSubmenu",
   "columnMenuAction",
+  "columnRenameForm",
+  "columnRenameLabel",
+  "columnRenameInput",
+  "columnRenameError",
+  "columnRenameSave",
+  "columnRenameCancel",
+  "headerRenameButton",
+  "headerRenameForm",
+  "headerRenameLabel",
+  "headerRenameInput",
+  "headerRenameError",
+  "headerRenameSave",
+  "headerRenameCancel",
   "headerActions",
   "tableFooter",
   "viewsMenu",

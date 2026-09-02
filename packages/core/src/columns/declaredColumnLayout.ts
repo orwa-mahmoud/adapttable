@@ -45,6 +45,8 @@ export function declaredColumnLayout<TRow>(
     },
     move: noop,
     setWidth: noop,
+    setName: noop,
+    resetName: noop,
     pinOffset: (_key: string): PinOffset | undefined => undefined,
     reset: noop,
     toggleColumnGroup: noop,

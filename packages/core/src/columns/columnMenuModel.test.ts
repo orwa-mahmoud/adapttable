@@ -40,6 +40,8 @@ function layout(
     setPinned: () => undefined,
     move: () => undefined,
     setWidth: () => undefined,
+    setName: () => undefined,
+    resetName: () => undefined,
     pinOffset: () => undefined,
     reset: () => undefined,
     toggleColumnGroup: () => undefined,
@@ -102,7 +104,13 @@ describe("column menu 2.0", () => {
       lockPosition: true,
       lockWidth: true,
     },
-    { key: "b", header: "Bravo", accessor: (r) => r.id, sortable: true },
+    {
+      key: "b",
+      header: "Bravo",
+      accessor: (r) => r.id,
+      sortable: true,
+      renameable: true,
+    },
     { key: "c", header: "Charlie", accessor: (r) => r.id, filter: "text" },
   ];
 
@@ -114,7 +122,11 @@ describe("column menu 2.0", () => {
       canPin: false,
       canResize: false,
     });
-    expect(rows[1]).toMatchObject({ canSort: true, canFilter: false });
+    expect(rows[1]).toMatchObject({
+      canSort: true,
+      canFilter: false,
+      canRename: true,
+    });
     expect(rows[2]).toMatchObject({ canSort: false, canFilter: true });
   });
 
@@ -149,25 +161,30 @@ describe("column menu 2.0", () => {
     expect(setPinned).not.toHaveBeenCalledWith("a", undefined);
   });
 
-  it("reset one column clears hide, pin and width when unlocked", () => {
+  it("reset one column clears hide, pin, width and a custom name", () => {
     const setHidden = vi.fn();
     const setPinned = vi.fn();
     const setWidth = vi.fn();
+    const resetName = vi.fn();
     const l = layout(["b"], { b: "start" });
+    l.state = { ...l.state, names: { b: "Owner" } };
     l.setHidden = setHidden;
     l.setPinned = setPinned;
     l.setWidth = setWidth;
+    l.resetName = resetName;
     const row = columnMenuRows(locked, l)[1]!;
     resetColumnLayout(row, l);
     expect(setHidden).toHaveBeenCalledWith("b", false);
     expect(setPinned).toHaveBeenCalledWith("b", undefined);
     expect(setWidth).toHaveBeenCalledWith("b", undefined);
+    expect(resetName).toHaveBeenCalledWith("b");
   });
 
   it("builds a submenu that sorts, filters and resets", () => {
     const onSortColumn = vi.fn();
     const onFilterColumn = vi.fn();
     const onAutoSizeColumn = vi.fn();
+    const onBeginRename = vi.fn();
     const l = layout([]);
     const rows = columnMenuRows(locked, l);
     const sortActs = columnMenuActions(rows[1]!, {
@@ -175,14 +192,23 @@ describe("column menu 2.0", () => {
       layout: l,
       onSortColumn,
       onAutoSizeColumn,
+      onBeginRename,
     });
     expect(sortActs.map((a) => a.id)).toEqual(
-      expect.arrayContaining(["sort-asc", "pin-start", "pin-end", "reset"])
+      expect.arrayContaining([
+        "sort-asc",
+        "pin-start",
+        "pin-end",
+        "rename",
+        "reset",
+      ])
     );
     sortActs.find((a) => a.id === "sort-asc")!.run();
     expect(onSortColumn).toHaveBeenCalledWith("b", "asc");
     sortActs.find((a) => a.id === "sort-desc")!.run();
     expect(onSortColumn).toHaveBeenCalledWith("b", "desc");
+    sortActs.find((a) => a.id === "rename")!.run();
+    expect(onBeginRename).toHaveBeenCalledOnce();
     const filterActs = columnMenuActions(rows[2]!, {
       labels: defaultLabels,
       layout: l,

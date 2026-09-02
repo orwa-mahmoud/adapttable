@@ -234,6 +234,12 @@ export interface DataTableClassNames {
     columnMenuSubmenu?: string;
     columnMenuTitle?: string;
     columnMenuVisibility?: string;
+    columnRenameCancel?: string;
+    columnRenameError?: string;
+    columnRenameForm?: string;
+    columnRenameInput?: string;
+    columnRenameLabel?: string;
+    columnRenameSave?: string;
     columnSelect?: string;
     commandEmpty?: string;
     commandInput?: string;
@@ -317,6 +323,13 @@ export interface DataTableClassNames {
     headerCell?: string;
     headerGroupCell?: string;
     headerGroupRow?: string;
+    headerRenameButton?: string;
+    headerRenameCancel?: string;
+    headerRenameError?: string;
+    headerRenameForm?: string;
+    headerRenameInput?: string;
+    headerRenameLabel?: string;
+    headerRenameSave?: string;
     headerRow?: string;
     loading?: string;
     loadingCard?: string;

@@ -250,6 +250,7 @@ export interface DemoColumnProps {
   kitFeatures?: KitFeatureRequests;
   columnLayout: ColumnLayoutState;
   onColumnLayoutChange: (next: ColumnLayoutState) => void;
+  onColumnRename: (key: string, name: string) => void;
   /** Table chrome follows {@link demoUrlSync}: live demo only. */
   urlSync?: boolean;
   collapsibleColumnGroups?: boolean;
@@ -1128,9 +1129,14 @@ export function DemoBody({
       onLayoutChange(revealHiddenOnPin(layout, next)),
     [layout, onLayoutChange]
   );
+  // The controlled layout above owns the demo's persisted display names.
+  // Product hosts can use this channel to write the same accepted name to
+  // their schema/backend as well.
+  const onColumnRename = useCallback(() => undefined, []);
   const columns: DemoColumnProps = {
     columnLayout: layout,
     onColumnLayoutChange,
+    onColumnRename,
     collapsibleColumnGroups: columnGroups !== false,
     urlSync: syncToUrl,
   };

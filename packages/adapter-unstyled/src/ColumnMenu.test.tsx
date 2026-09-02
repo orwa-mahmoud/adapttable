@@ -1,6 +1,6 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
 import { COLUMN_DND_MIME } from "@adapttable/core/adapter";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -9,7 +9,7 @@ interface Row {
   id: string;
 }
 const cols: ColumnDef<Row>[] = [
-  { key: "a", header: "Alpha", accessor: (r) => r.id },
+  { key: "a", header: "Alpha", accessor: (r) => r.id, renameable: true },
   { key: "b", header: "Bravo", accessor: (r) => r.id },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
@@ -26,6 +26,8 @@ function fakeLayout(
     setPinned: vi.fn(),
     move: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -50,6 +52,13 @@ const labels = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
@@ -61,7 +70,8 @@ const labels = {
 function open(
   layout: UseColumnLayoutResult<Row>,
   hasRowActions = false,
-  hasRowReorder = false
+  hasRowReorder = false,
+  onRenameColumn?: (key: string, name: string) => void
 ) {
   const view = render(
     <ColumnMenu
@@ -72,6 +82,7 @@ function open(
       classNames={{}}
       hasRowActions={hasRowActions}
       hasRowReorder={hasRowReorder}
+      onRenameColumn={onRenameColumn}
     />
   );
   fireEvent.click(screen.getByRole("button", { name: "Columns" }));
@@ -311,6 +322,99 @@ describe("unstyled ColumnMenu", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Sort ascending" }));
     expect(onSortColumn).toHaveBeenCalledWith("a", "asc");
+  });
+
+  it("offers rename only when the host supplies a callback", () => {
+    const withoutRename = open(fakeLayout());
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    expect(screen.queryByRole("button", { name: "Rename column" })).toBeNull();
+    withoutRename.unmount();
+
+    open(fakeLayout(), false, false, vi.fn());
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    expect(
+      screen.getByRole("button", { name: "Rename column" })
+    ).toBeInTheDocument();
+  });
+
+  it("submits a trimmed rename and announces it", () => {
+    const onRenameColumn = vi.fn();
+    open(fakeLayout(), false, false, onRenameColumn);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    fireEvent.click(renameAction);
+
+    expect(renameAction).toBeDisabled();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    fireEvent.change(input, { target: { value: "  Account name  " } });
+    fireEvent.submit(input.closest("form")!);
+
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account name");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    expect(renameAction).not.toBeDisabled();
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account name.");
+  });
+
+  it("cancels by Escape or button without committing", async () => {
+    const onRenameColumn = vi.fn();
+    open(fakeLayout(), false, false, onRenameColumn);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    renameAction.focus();
+    fireEvent.click(renameAction);
+    fireEvent.change(screen.getByRole("textbox", { name: "Column name" }), {
+      target: { value: "Discarded" },
+    });
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Column name" }), {
+      key: "Escape",
+    });
+    expect(onRenameColumn).not.toHaveBeenCalled();
+    expect(renameAction).not.toBeDisabled();
+    await waitFor(() => expect(renameAction).toHaveFocus());
+
+    fireEvent.click(renameAction);
+    fireEvent.change(screen.getByRole("textbox", { name: "Column name" }), {
+      target: { value: "Also discarded" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onRenameColumn).not.toHaveBeenCalled();
+    expect(renameAction).not.toBeDisabled();
+  });
+
+  it("keeps a blank rename open with accessible validation", () => {
+    const onRenameColumn = vi.fn();
+    open(fakeLayout(), false, false, onRenameColumn);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Rename column" }));
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+    fireEvent.submit(input.closest("form")!);
+    expect(onRenameColumn).not.toHaveBeenCalled();
+    expect(input).toBeInTheDocument();
   });
 
   it("resets the layout", () => {

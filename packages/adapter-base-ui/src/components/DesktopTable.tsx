@@ -43,6 +43,7 @@ import type { BaseUiAccentColor } from "../types";
 import { Box, Table, Text } from "../ui";
 import {
   OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
   OptionalColumnSelect,
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -397,6 +398,7 @@ function LeafHeader<TRow>({
   source,
   labels,
   resizeHandleStyle,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   stickify: (base: CSSProperties | undefined) => CSSProperties | undefined;
@@ -407,14 +409,62 @@ function LeafHeader<TRow>({
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
   resizeHandleStyle: CSSProperties;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
+  const canRename = column.renameable === true && onRenameColumn !== undefined;
   const ariaSort = leaf.headerProps["aria-sort"] as
     "ascending" | "descending" | "none" | undefined;
   const style = stickify({
     ...leaf.style,
     ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
   });
+  const caption = column.sortable ? (
+    <button
+      type="button"
+      className="adapttable-sort-btn"
+      style={{
+        cursor: "pointer",
+        font: "inherit",
+        color: "inherit",
+        background: "none",
+        border: 0,
+        padding: 0,
+        display: "inline-flex",
+        alignItems: "center",
+      }}
+      aria-label={`${labels.sortBy}: ${leaf.columnName}`}
+      onClick={leaf.sortButtonProps.onClick}
+      title={column.headerTooltip}
+    >
+      {leaf.caption}
+      <Text as="span" aria-hidden>
+        {sortGlyph(ariaSort)}
+      </Text>
+      {leaf.sortIndex !== undefined && (
+        <Text
+          as="span"
+          aria-hidden
+          data-sort-index={leaf.sortIndex}
+          size="1"
+          weight="bold"
+          ml="1"
+          style={{
+            borderRadius: "9999px",
+            padding: "0 0.4em",
+            background: "var(--gray-a3)",
+          }}
+        >
+          {leaf.sortIndex}
+        </Text>
+      )}
+    </button>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
+  const captionControl = (
+    <span data-adapttable-part="header-caption-control">{caption}</span>
+  );
   return (
     <Table.ColumnHeaderCell
       key={column.key}
@@ -428,48 +478,17 @@ function LeafHeader<TRow>({
       rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
       style={style}
     >
-      {column.sortable ? (
-        <button
-          type="button"
-          className="adapttable-sort-btn"
-          style={{
-            cursor: "pointer",
-            font: "inherit",
-            color: "inherit",
-            background: "none",
-            border: 0,
-            padding: 0,
-            display: "inline-flex",
-            alignItems: "center",
-          }}
-          aria-label={`${labels.sortBy}: ${leaf.columnName}`}
-          onClick={leaf.sortButtonProps.onClick}
-          title={column.headerTooltip}
+      {canRename ? (
+        <OptionalColumnHeaderRename
+          columnKey={column.key}
+          name={leaf.columnName}
+          labels={labels}
+          onRenameColumn={onRenameColumn}
         >
-          {leaf.caption}
-          <Text as="span" aria-hidden>
-            {sortGlyph(ariaSort)}
-          </Text>
-          {leaf.sortIndex !== undefined && (
-            <Text
-              as="span"
-              aria-hidden
-              data-sort-index={leaf.sortIndex}
-              size="1"
-              weight="bold"
-              ml="1"
-              style={{
-                borderRadius: "9999px",
-                padding: "0 0.4em",
-                background: "var(--gray-a3)",
-              }}
-            >
-              {leaf.sortIndex}
-            </Text>
-          )}
-        </button>
+          {captionControl}
+        </OptionalColumnHeaderRename>
       ) : (
-        <span title={column.headerTooltip}>{leaf.caption}</span>
+        captionControl
       )}
       {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
         <OptionalColumnSelect
@@ -577,6 +596,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     source: props.table.source,
     labels,
     resizeHandleStyle,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {

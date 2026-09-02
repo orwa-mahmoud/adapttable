@@ -71,6 +71,7 @@ export interface ColumnDef<TRow> {
     minWidth?: number;
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
+    renameable?: boolean;
     renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
     renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
     responsivePriority?: number;

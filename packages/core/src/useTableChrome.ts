@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type ConfirmHandler, defaultConfirm } from "./actions/confirm";
 import type { UseColumnLayoutResult } from "./columns/columnLayoutModel";
 import { REORDER_COLUMN_KEY } from "./columns/columnMenuModel";
+import { applyColumnNames } from "./columns/columnNames";
 import {
   type ColumnGroupRecord,
   flattenColumnTree,
@@ -581,9 +582,17 @@ export function useTableChrome<TRow>(
   // Declarative defaults (auto headers, dot-path accessors) resolve once
   // here, so the layout, the column menu and the table all see them.
   const flattened = useMemo(() => flattenColumnTree(columns), [columns]);
-  const resolvedColumns = useMemo(
+  const declaredColumns = useMemo(
     () => resolveColumns(flattened.leaves, props.locale),
     [flattened.leaves, props.locale]
+  );
+  const persistedColumnNames =
+    props.columnLayout !== undefined
+      ? props.columnLayout.names
+      : props.defaultColumnLayout?.names;
+  const resolvedColumns = useMemo(
+    () => applyColumnNames(declaredColumns, persistedColumnNames),
+    [declaredColumns, persistedColumnNames]
   );
 
   // User column layout (hide/order/…) applied on top of the declared columns,

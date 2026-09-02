@@ -191,6 +191,11 @@ export {
   type PinnedCellStyle,
   type PinOffset,
 } from "./columns/useColumnLayout";
+export {
+  type ColumnRenameEditorState,
+  useColumnRenameEditor,
+  type UseColumnRenameEditorOptions,
+} from "./columns/useColumnRenameEditor";
 export { DEFAULT_CARD_SIZE_PX } from "./constants";
 export {
   cellHighlightStyle,
@@ -303,6 +308,7 @@ export type {
   CellNavLiveSlotProps,
   ChromeBodySlotProps,
   ChromeExtraSlotProps,
+  ColumnHeaderRenameSlotProps,
   ContextMenuLiveSlotProps,
   EditableCellSlotProps,
   EditHistoryLiveSlotProps,
@@ -325,6 +331,7 @@ export {
   CELL_NAV_LIVE,
   CHROME_BODY,
   COLUMN_GROUP_TOGGLE,
+  COLUMN_HEADER_RENAME,
   COLUMN_LAYOUT_LIVE,
   COLUMN_MENU,
   COLUMN_SELECT,

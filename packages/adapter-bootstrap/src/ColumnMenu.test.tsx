@@ -34,6 +34,12 @@ const mockLabels: ColumnMenuProps<Row>["labels"] = {
   filterColumn: "Filter column",
   autoSizeColumn: "Size column to content",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save name",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Column name is required",
+  columnRenamed: ({ previous, name }) => `${previous} renamed to ${name}`,
 };
 
 function makeLayoutMock(

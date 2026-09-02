@@ -114,6 +114,13 @@ export const zhTW: Required<TableLabels> = {
   hideAllColumns: "全部隱藏",
   unpinAllColumns: "全部取消釘選",
   resetColumn: "重設欄位",
+  renameColumn: "重新命名欄位",
+  columnName: "欄位名稱",
+  saveColumnName: "儲存名稱",
+  cancelColumnRename: "取消",
+  columnNameRequired: "請輸入欄位名稱。",
+  columnRenamed: ({ previous, name }) =>
+    `已將欄位 ${previous} 重新命名為 ${name}`,
   sortAscending: "升冪排序",
   sortDescending: "降冪排序",
   sortedBy: ({ column, ascending }) =>

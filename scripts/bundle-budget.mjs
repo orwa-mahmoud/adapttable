@@ -394,6 +394,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   {
@@ -415,6 +416,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   {
@@ -436,6 +438,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   {
@@ -455,6 +458,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   {
@@ -476,6 +480,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   // Overlay placement, empty-cell hit area, and dir on the columns panel
@@ -508,6 +513,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   {
@@ -529,6 +535,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
   {
@@ -550,6 +557,7 @@ const FIXTURES = [
       "FilterTreeBuilder",
       "SavedViewsMenu",
       "DensityButton",
+      "header-rename-form",
     ],
   },
 ].map((f) => ({

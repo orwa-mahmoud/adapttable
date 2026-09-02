@@ -1,6 +1,6 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -10,7 +10,7 @@ interface Row {
   id: string;
 }
 const cols: ColumnDef<Row>[] = [
-  { key: "a", header: "Alpha", accessor: (r) => r.id },
+  { key: "a", header: "Alpha", accessor: (r) => r.id, renameable: true },
   { key: "b", header: "Bravo", accessor: (r) => r.id },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
@@ -25,6 +25,8 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     setPinned: vi.fn(),
     move: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -48,6 +50,13 @@ const labels = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save name",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Column name is required",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
@@ -234,6 +243,73 @@ describe("chakra ColumnMenu", () => {
     );
     expect(screen.getByText("Bravo")).toBeInTheDocument();
     expect(screen.queryByText("Alpha")).toBeNull();
+  });
+
+  it("renames a data column with Chakra controls and announces it", async () => {
+    const onRenameColumn = vi.fn();
+    renderChakra(
+      <ColumnMenu
+        allColumns={cols}
+        onAutoSize={() => undefined}
+        layout={fakeLayout()}
+        labels={labels}
+        onRenameColumn={onRenameColumn}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    fireEvent.click(renameAction);
+    expect(renameAction).toBeDisabled();
+
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    fireEvent.change(input, { target: { value: " " } });
+    fireEvent.blur(input);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Column name is required"
+    );
+
+    fireEvent.change(input, { target: { value: "  Account owner  " } });
+    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    const restoredAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    expect(restoredAction).toBeEnabled();
+
+    restoredAction.focus();
+    fireEvent.click(restoredAction);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(restoredAction).toHaveFocus());
+
+    fireEvent.click(screen.getByRole("button", { name: "Reset column" }));
+    expect(screen.queryByRole("button", { name: "Rename column" })).toBeNull();
+  });
+
+  it("does not offer rename without the host callback", async () => {
+    renderChakra(
+      <ColumnMenu
+        allColumns={cols}
+        onAutoSize={() => undefined}
+        layout={fakeLayout()}
+        labels={labels}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+    expect(screen.queryByRole("button", { name: "Rename column" })).toBeNull();
   });
 
   it("copies the host dark class onto the portalled columns card", async () => {

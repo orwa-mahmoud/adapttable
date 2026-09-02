@@ -115,6 +115,13 @@ export const defaultLabels: Required<TableLabels> = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save name",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }) =>
+    `Column ${previous} renamed to ${name}`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   sortedBy: ({ column, ascending }) =>

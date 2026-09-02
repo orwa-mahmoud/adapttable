@@ -13,7 +13,10 @@ import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
 import type { UseCommandPaletteOptions } from "../actions/useCommandPalette";
 import type { TableContextMenuOptions } from "../actions/useTableContextMenu";
 import type { ColumnGroupToggleProps } from "../columns/ColumnGroupToggle";
-import type { ColumnMenuSlotProps } from "../columns/columnMenuModel";
+import type {
+  ColumnMenuLabels,
+  ColumnMenuSlotProps,
+} from "../columns/columnMenuModel";
 import type { PinOffset } from "../columns/useColumnLayout";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { EditHistoryState } from "../editing/editHistory";
@@ -137,6 +140,39 @@ export const SIDE_PANEL = featureSlotKey<Omit<SidePanelChromeProps, "slots">>(
 export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
   "column-menu",
   { single: true }
+);
+
+/**
+ * Props for a kit-owned direct column-name editor in a semantic header.
+ *
+ * @public
+ */
+export interface ColumnHeaderRenameSlotProps {
+  /** Stable column identity; renaming never changes this value. */
+  columnKey: string;
+  /** Current prose display name. */
+  name: string;
+  /** Pre-translated rename form labels and announcement builder. */
+  labels: ColumnMenuLabels;
+  /** Commit a trimmed, validated display name. */
+  onRenameColumn: (key: string, name: string) => void;
+  /** Existing caption/sort control, rendered by adapters that replace it while editing. */
+  children?: ReactNode;
+}
+
+/**
+ * Direct header entry point supplied by the optional Columns-menu feature.
+ *
+ * The adapter root renders only this inert slot boundary. The kit input and its
+ * rename controller enter the graph when the host imports `columnMenu()`.
+ *
+ * @public
+ */
+export const COLUMN_HEADER_RENAME = featureSlotKey<ColumnHeaderRenameSlotProps>(
+  "column-header-rename",
+  {
+    single: true,
+  }
 );
 
 /**

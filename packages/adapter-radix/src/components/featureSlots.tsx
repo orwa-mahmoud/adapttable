@@ -6,8 +6,10 @@
  */
 import {
   COLUMN_GROUP_TOGGLE,
+  COLUMN_HEADER_RENAME,
   COLUMN_SELECT,
   type ColumnGroupToggleProps,
+  type ColumnHeaderRenameSlotProps,
   type ColumnSelectCheckboxChromeProps,
   EDITABLE_CELL,
   type EditableCellSlotProps,
@@ -148,6 +150,12 @@ export function OptionalColumnSelect(
   props: Readonly<Omit<ColumnSelectCheckboxChromeProps, "slots">>
 ): ReactNode {
   return <FeatureSlot slot={COLUMN_SELECT} props={props} />;
+}
+
+export function OptionalColumnHeaderRename(
+  props: Readonly<ColumnHeaderRenameSlotProps & { children?: ReactNode }>
+): ReactNode {
+  return <FeatureSlot slot={COLUMN_HEADER_RENAME} props={props} />;
 }
 
 export function OptionalGroupHeaderRow<TRow>(

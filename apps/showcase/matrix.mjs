@@ -653,9 +653,9 @@ export function Ledger({ rows, columns }) {
     h1: "Column management in {kit}",
     title: "{kit} table column management — AdaptTable",
     description:
-      "Show, hide, reorder, pin and resize columns in a {kit} data table from a built-in menu — and persist the layout to the URL, storage or your server.",
+      "Rename, show, hide, reorder, pin and resize columns in a {kit} data table from a built-in menu — and persist the layout to the URL, storage or your server.",
     intro: [
-      "Everything a user expects to do to a column, without writing a column-settings panel: show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.",
+      "Everything a user expects to do to a column, without writing a column-settings panel: rename, show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.",
       "Pinning is logical rather than physical, so a column pinned to the start stays on the correct side in a right-to-left layout.",
       "The arrangement is state like any other: persist it to the URL, to localStorage, or to your own server through `columnLayout` and `onColumnLayoutChange`.",
     ],

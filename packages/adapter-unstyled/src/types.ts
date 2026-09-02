@@ -225,6 +225,32 @@ export interface DataTableClassNames {
   columnMenuSubmenu?: string;
   /** One action inside the per-column submenu. */
   columnMenuAction?: string;
+  /** Inline column-name editor in the Columns menu. */
+  columnRenameForm?: string;
+  /** Visible label for the menu rename input. */
+  columnRenameLabel?: string;
+  /** Menu column-name input. */
+  columnRenameInput?: string;
+  /** Menu column-name validation message. */
+  columnRenameError?: string;
+  /** Menu column-name save action. */
+  columnRenameSave?: string;
+  /** Menu column-name cancel action. */
+  columnRenameCancel?: string;
+  /** Direct rename control beside a semantic header caption. */
+  headerRenameButton?: string;
+  /** Direct header column-name editor. */
+  headerRenameForm?: string;
+  /** Visible label for the direct header rename input. */
+  headerRenameLabel?: string;
+  /** Direct header column-name input. */
+  headerRenameInput?: string;
+  /** Direct header column-name validation message. */
+  headerRenameError?: string;
+  /** Direct header column-name save action. */
+  headerRenameSave?: string;
+  /** Direct header column-name cancel action. */
+  headerRenameCancel?: string;
   /** Host-provided controls after a header caption. */
   headerActions?: string;
   /** Free slot under the table, above the pager. */

@@ -116,6 +116,12 @@ export const he: Required<TableLabels> = {
   hideAllColumns: "הסתר הכול",
   unpinAllColumns: "בטל נעיצה לכולן",
   resetColumn: "אפס עמודה",
+  renameColumn: "שינוי שם העמודה",
+  columnName: "שם העמודה",
+  saveColumnName: "שמירת השם",
+  cancelColumnRename: "ביטול",
+  columnNameRequired: "יש להזין שם עמודה.",
+  columnRenamed: ({ previous, name }) => `שם העמודה ${previous} שונה ל-${name}`,
   sortAscending: "מיין בסדר עולה",
   sortDescending: "מיין בסדר יורד",
   sortedBy: ({ column, ascending }) =>

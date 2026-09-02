@@ -116,6 +116,13 @@ export const ur: Required<TableLabels> = {
   hideAllColumns: "سب چھپائیں",
   unpinAllColumns: "سب ان پن کریں",
   resetColumn: "کالم ری سیٹ کریں",
+  renameColumn: "کالم کا نام تبدیل کریں",
+  columnName: "کالم کا نام",
+  saveColumnName: "نام محفوظ کریں",
+  cancelColumnRename: "منسوخ کریں",
+  columnNameRequired: "کالم کا نام درج کریں۔",
+  columnRenamed: ({ previous, name }) =>
+    `کالم ${previous} کا نام ${name} کر دیا گیا`,
   sortAscending: "صعودی ترتیب",
   sortDescending: "نزولی ترتیب",
   sortedBy: ({ column, ascending }) =>

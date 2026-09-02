@@ -115,6 +115,13 @@ export const de: Required<TableLabels> = {
   hideAllColumns: "Alle ausblenden",
   unpinAllColumns: "Alle lösen",
   resetColumn: "Spalte zurücksetzen",
+  renameColumn: "Spalte umbenennen",
+  columnName: "Spaltenname",
+  saveColumnName: "Namen speichern",
+  cancelColumnRename: "Abbrechen",
+  columnNameRequired: "Geben Sie einen Spaltennamen ein.",
+  columnRenamed: ({ previous, name }) =>
+    `Spalte ${previous} wurde in ${name} umbenannt`,
   sortAscending: "Aufsteigend sortieren",
   sortDescending: "Absteigend sortieren",
   sortedBy: ({ column, ascending }) =>

@@ -901,6 +901,11 @@ export interface BaseDataTableProps<TRow> {
   /** Initial column layout for the uncontrolled mode. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   /**
+   * Persists a user-approved display-name change. A column must also set
+   * `renameable: true`; its stable key and data contract never change.
+   */
+  onColumnRename?: (key: string, name: string) => void;
+  /**
    * Fixed-height scroll box (px). Enables sideways scrolling + column pinning;
    * the header and pinned columns pin within this box. Omit for page scroll.
    */

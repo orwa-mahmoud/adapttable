@@ -27,6 +27,7 @@ const LAYOUT: ColumnLayoutState = {
   order: [],
   pinned: { name: "start" },
   widths: { name: 220 },
+  names: { name: "Account owner" },
 };
 
 describe("useColumnLayoutStorageState", () => {
@@ -110,6 +111,7 @@ describe("useColumnLayoutStorageState", () => {
         order: "not-an-array",
         pinned: { a: "start", b: "sideways", c: 7 },
         widths: { a: 120, b: "wide", c: null },
+        names: { a: "  Owner  ", b: "", c: 7 },
       }),
     });
     const mixedView = renderHook(() =>
@@ -123,6 +125,7 @@ describe("useColumnLayoutStorageState", () => {
       order: [],
       pinned: { a: "start" },
       widths: { a: 120 },
+      names: { a: "Owner" },
     });
   });
 

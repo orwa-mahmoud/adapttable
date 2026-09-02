@@ -862,6 +862,70 @@ describe("custom header and footer", () => {
   });
 });
 
+describe("direct header column rename", () => {
+  const renameableColumns: ColumnDef<Row>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+      renameable: true,
+    },
+    { key: "city", header: "City", accessor: (row) => row.city },
+  ];
+
+  function renderRenameTable(
+    onColumnRename?: (key: string, name: string) => void
+  ) {
+    adapter = createMemoryAdapter();
+    return render(
+      <ChakraProvider value={defaultSystem}>
+        <DataTable
+          data={ROWS}
+          columns={renameableColumns}
+          rowKey={(row) => row.id}
+          enableColumnMenu
+          onColumnRename={onColumnRename}
+          urlAdapter={adapter}
+        />
+      </ChakraProvider>
+    );
+  }
+
+  it("replaces the sort caption while the header slot edits", async () => {
+    const onColumnRename = vi.fn();
+    renderRenameTable(onColumnRename);
+
+    const renameButton = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    renameButton.focus();
+    fireEvent.click(renameButton);
+    expect(renameButton).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /sort by: name/i })).toBeNull();
+
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("Name");
+    fireEvent.change(input, { target: { value: " " } });
+    fireEvent.blur(input);
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter a column name.");
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(renameButton).toHaveFocus());
+    expect(
+      screen.getByRole("button", { name: /sort by: name/i })
+    ).toBeInTheDocument();
+  });
+
+  it("omits the direct control without the host callback", () => {
+    renderRenameTable();
+    expect(
+      document.querySelector('[data-adapttable-part="header-rename-button"]')
+    ).toBeNull();
+  });
+});
+
 describe("header filter trigger", () => {
   it("puts a filter icon on the column header instead of a second row", () => {
     renderHarness({

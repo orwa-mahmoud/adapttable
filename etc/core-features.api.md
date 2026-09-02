@@ -144,6 +144,7 @@ export interface ColumnDef<TRow> {
     minWidth?: number;
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
+    renameable?: boolean;
     renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
     renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
     responsivePriority?: number;
@@ -188,6 +189,7 @@ export interface ColumnHeaderController {
 export interface ColumnLayoutState {
     collapsedGroups?: readonly string[];
     hidden: readonly string[];
+    names?: Readonly<Record<string, string>>;
     order: readonly string[];
     pinned: Readonly<Record<string, PinSide>>;
     widths: Readonly<Record<string, number>>;
@@ -210,6 +212,7 @@ export interface ColumnMenuActionContext<TRow = unknown> {
     labels: ColumnMenuLabels;
     layout: UseColumnLayoutResult<TRow>;
     onAutoSizeColumn?: (key: string) => void;
+    onBeginRename?: () => void;
     onFilterColumn?: (key: string) => void;
     onSortColumn?: (key: string, dir: "asc" | "desc") => void;
     sortBy?: string;
@@ -223,7 +226,14 @@ export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>,
 export interface ColumnMenuLabels {
     autoSizeColumn: string;
     autoSizeColumns: string;
+    cancelColumnRename: string;
     columnActions: string;
+    columnName: string;
+    columnNameRequired: string;
+    columnRenamed: (info: {
+        previous: string;
+        name: string;
+    }) => string;
     columns: string;
     filterColumn: string;
     hideAllColumns: string;
@@ -232,8 +242,10 @@ export interface ColumnMenuLabels {
     moveStart: string;
     pinEnd: string;
     pinStart: string;
+    renameColumn: string;
     resetColumn: string;
     resetColumns: string;
+    saveColumnName: string;
     searchColumns: string;
     showAllColumns: string;
     showColumn: string;
@@ -249,6 +261,7 @@ export interface ColumnMenuRow<TRow> {
     canHide: boolean;
     canMove: boolean;
     canPin: boolean;
+    canRename?: boolean;
     canResize: boolean;
     canSort: boolean;
     column: ColumnDef<TRow>;
@@ -970,6 +983,7 @@ export interface TableLabels {
     boolTrue?: string;
     cancel?: string;
     cancelAll?: string;
+    cancelColumnRename?: string;
     checklistClear?: string;
     checklistNoValues?: string;
     checklistSearch?: string;
@@ -979,6 +993,12 @@ export interface TableLabels {
     collapseGroup?: string;
     collapseRow?: string;
     columnActions?: string;
+    columnName?: string;
+    columnNameRequired?: string;
+    columnRenamed?: (info: {
+        previous: string;
+        name: string;
+    }) => string;
     columns?: string;
     commandEmpty?: string;
     commandPalette?: string;
@@ -1124,6 +1144,7 @@ export interface TableLabels {
     relTomorrow?: string;
     relYesterday?: string;
     removeFilter?: (label: string) => string;
+    renameColumn?: string;
     renameView?: string;
     reorderRow?: string;
     resetColumn?: string;
@@ -1137,6 +1158,7 @@ export interface TableLabels {
     rowSeparator?: string;
     rowsPerPage?: string;
     saveAll?: string;
+    saveColumnName?: string;
     savedViews?: string;
     saveRow?: string;
     saveView?: string;
@@ -1267,7 +1289,9 @@ export interface UseColumnLayoutResult<TRow> {
     move: (key: string, toIndex: number) => void;
     pinOffset: (key: string) => PinOffset | undefined;
     reset: () => void;
+    resetName: (key: string) => void;
     setHidden: (key: string, hidden: boolean) => void;
+    setName: (key: string, name: string) => void;
     setPinned: (key: string, side: PinSide | undefined) => void;
     setWidth: (key: string, width: number | undefined) => void;
     state: ColumnLayoutState;

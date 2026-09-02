@@ -345,6 +345,7 @@ export const BASE_COLUMNS: ColumnDef<Person>[] = [
     sortValue: (r) => r.name,
     sortable: true,
     header: STRINGS.en.person,
+    renameable: true,
   },
   {
     key: "status",
@@ -690,6 +691,7 @@ export function makeColumns(
       key: "person",
       header: s.person,
       headerTooltip: s.person,
+      renameable: true,
       sortable: true,
       sortValue: (r) => r.name,
       editable: canEdit,

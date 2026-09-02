@@ -879,6 +879,7 @@ describe("useSavedViews", () => {
       "t.colPin=name:start",
       "t.colOrder=name,team",
       "t.colW=name:200",
+      "t.colName=name:Account%20owner",
       "t.colGroupCollapse=contact",
       "t.rowPin=3:top",
       "t.density=compact",

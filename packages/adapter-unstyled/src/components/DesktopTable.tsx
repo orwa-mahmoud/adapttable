@@ -33,6 +33,7 @@ import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 import {
   OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
   OptionalColumnSelect,
   OptionalEditableCell,
   OptionalExpandToggle,
@@ -373,6 +374,7 @@ function LeafHeader<TRow>({
   source,
   labels,
   resizeHandleStyle,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   classNames: DataTableClassNames;
@@ -382,8 +384,31 @@ function LeafHeader<TRow>({
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
   resizeHandleStyle: CSSProperties;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
+  const canRename = column.renameable === true && onRenameColumn !== undefined;
+  const caption = column.sortable ? (
+    <button
+      {...leaf.sortButtonProps}
+      data-adapttable-part="sort-button"
+      className={classNames.sortButton}
+      title={column.headerTooltip}
+    >
+      {leaf.caption}
+      {typeof leaf.sortIndex === "number" && (
+        <span
+          data-adapttable-part="sort-index"
+          className={classNames.sortIndex}
+        >
+          {leaf.sortIndex}
+        </span>
+      )}
+      <span aria-hidden> {sortGlyph(leaf.sortActive, leaf.sortDir)}</span>
+    </button>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
   return (
     <th
       key={column.key}
@@ -397,26 +422,17 @@ function LeafHeader<TRow>({
       data-pinned={leaf.pinSide}
       className={classNames.headerCell}
     >
-      {column.sortable ? (
-        <button
-          {...leaf.sortButtonProps}
-          data-adapttable-part="sort-button"
-          className={classNames.sortButton}
-          title={column.headerTooltip}
+      {canRename ? (
+        <OptionalColumnHeaderRename
+          columnKey={column.key}
+          name={leaf.columnName}
+          labels={labels}
+          onRenameColumn={onRenameColumn}
         >
-          {leaf.caption}
-          {typeof leaf.sortIndex === "number" && (
-            <span
-              data-adapttable-part="sort-index"
-              className={classNames.sortIndex}
-            >
-              {leaf.sortIndex}
-            </span>
-          )}
-          <span aria-hidden> {sortGlyph(leaf.sortActive, leaf.sortDir)}</span>
-        </button>
+          {caption}
+        </OptionalColumnHeaderRename>
       ) : (
-        <span title={column.headerTooltip}>{leaf.caption}</span>
+        caption
       )}
       {leaf.showColumnCheckbox && leaf.onToggleColumn && (
         <OptionalColumnSelect
@@ -494,6 +510,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     source: props.table.source,
     labels,
     resizeHandleStyle,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {

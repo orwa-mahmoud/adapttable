@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../types";
 import {
   edgePinStyle,
+  EMPTY_COLUMN_LAYOUT,
   PIN_Z,
   pinnedCellStyle,
   useColumnLayout,
@@ -261,6 +262,124 @@ describe("useColumnLayout", () => {
     expect(result.current.state.widths.a).toBe(200);
     act(() => result.current.setWidth("a", undefined));
     expect(result.current.state.widths.a).toBeUndefined();
+  });
+
+  it("renames an opted-in column without changing its stable key", () => {
+    const onColumnRename = vi.fn();
+    const renameable: ColumnDef<Row>[] = [
+      {
+        key: "a",
+        header: "Alpha",
+        mobileLabel: "Short alpha",
+        accessor: (row) => row.id,
+        renameable: true,
+      },
+    ];
+    const { result } = renderHook(() =>
+      useColumnLayout({ columns: renameable, onColumnRename })
+    );
+
+    act(() => result.current.setName("a", "  Account owner  "));
+
+    expect(result.current.state.names).toEqual({ a: "Account owner" });
+    expect(result.current.visibleColumns[0]).toMatchObject({
+      key: "a",
+      header: "Account owner",
+      mobileLabel: "Account owner",
+    });
+    expect(onColumnRename).toHaveBeenCalledWith("a", "Account owner");
+  });
+
+  it("reports a controlled rename through both layout and domain channels", () => {
+    const onLayoutChange = vi.fn();
+    const onColumnRename = vi.fn();
+    const renameable = [{ ...columns[0]!, renameable: true }];
+    const { result } = renderHook(() =>
+      useColumnLayout({
+        columns: renameable,
+        layout: EMPTY_COLUMN_LAYOUT,
+        onLayoutChange,
+        onColumnRename,
+      })
+    );
+
+    act(() => result.current.setName("a", "Owner"));
+    expect(onLayoutChange).toHaveBeenCalledWith({
+      ...EMPTY_COLUMN_LAYOUT,
+      names: { a: "Owner" },
+    });
+    expect(onColumnRename).toHaveBeenCalledWith("a", "Owner");
+    // Controlled state changes only when the host passes the next value back.
+    expect(result.current.state.names).toBeUndefined();
+  });
+
+  it("requires both renameable and the host callback, and rejects blank names", () => {
+    const onColumnRename = vi.fn();
+    const renameable = [{ ...columns[0]!, renameable: true }];
+    const withoutCallback = renderHook(() =>
+      useColumnLayout({ columns: renameable })
+    );
+    act(() => withoutCallback.result.current.setName("a", "Changed"));
+    expect(withoutCallback.result.current.state.names).toBeUndefined();
+
+    const locked = renderHook(() =>
+      useColumnLayout({ columns, onColumnRename })
+    );
+    act(() => locked.result.current.setName("a", "Changed"));
+    expect(locked.result.current.state.names).toBeUndefined();
+
+    const blank = renderHook(() =>
+      useColumnLayout({ columns: renameable, onColumnRename })
+    );
+    act(() => blank.result.current.setName("a", "   "));
+    expect(blank.result.current.state.names).toBeUndefined();
+    expect(onColumnRename).not.toHaveBeenCalled();
+  });
+
+  it("hydrates stored names only for columns that opted into renaming", () => {
+    const renameable = [{ ...columns[0]!, renameable: true }];
+    const enabled = renderHook(() =>
+      useColumnLayout({
+        columns: renameable,
+        defaultColumnLayout: { names: { a: "Stored name" } },
+      })
+    );
+    expect(enabled.result.current.visibleColumns[0]!.header).toBe(
+      "Stored name"
+    );
+
+    const disabled = renderHook(() =>
+      useColumnLayout({
+        columns,
+        defaultColumnLayout: { names: { a: "Untrusted name" } },
+      })
+    );
+    expect(disabled.result.current.visibleColumns[0]!.header).toBe("A");
+  });
+
+  it("restores the declared name through per-column and full reset", () => {
+    const onColumnRename = vi.fn();
+    const renameable = [{ ...columns[0]!, header: "Alpha", renameable: true }];
+    const { result, rerender } = renderHook(
+      ({ currentColumns }: { currentColumns: ColumnDef<Row>[] }) =>
+        useColumnLayout({ columns: currentColumns, onColumnRename }),
+      { initialProps: { currentColumns: renameable } }
+    );
+
+    act(() => result.current.setName("a", "Owner"));
+    rerender({
+      currentColumns: [{ ...renameable[0]!, header: "Owner" }],
+    });
+    act(() => result.current.resetName("a"));
+    expect(result.current.state.names).toBeUndefined();
+    // The host echoed the accepted value into `columns`, but reset still
+    // reports the declaration that preceded the active user override.
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Alpha");
+
+    act(() => result.current.setName("a", "Person"));
+    act(() => result.current.reset());
+    expect(result.current.state).toEqual(EMPTY_COLUMN_LAYOUT);
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Alpha");
   });
 
   it("setHidden is a no-op when visibility already matches", () => {

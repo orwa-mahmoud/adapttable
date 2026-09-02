@@ -1,6 +1,6 @@
 import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -25,6 +25,8 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     setPinned: vi.fn(),
     move: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -54,6 +56,13 @@ const labels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
 };
 
 // Mantine renders the dropdown in a portal whose buttons testing-library's
@@ -287,5 +296,85 @@ describe("mantine ColumnMenu", () => {
     await user.click(screen.getByRole("button", { name: "Columns" }));
     const reset = await screen.findByText("Reset columns");
     expect(reset.closest('[dir="rtl"]')).not.toBeNull();
+  });
+
+  it("renames inline with validation, announcements, and focus restoration", async () => {
+    const user = userEvent.setup();
+    const layout = fakeLayout();
+    const onRenameColumn = vi.fn();
+    const renameableColumns = [
+      { ...cols[0]!, renameable: true },
+      cols[1]!,
+      cols[2]!,
+    ];
+    render(
+      <MantineProvider>
+        <ColumnMenu
+          allColumns={renameableColumns}
+          layout={layout}
+          labels={labels}
+          onAutoSize={() => undefined}
+          onRenameColumn={onRenameColumn}
+        />
+      </MantineProvider>
+    );
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+
+    const renameAction = screen.getByText("Rename column").closest("button")!;
+    await user.click(renameAction);
+    expect(renameAction).toBeDisabled();
+
+    const input = document.querySelector<HTMLInputElement>(
+      '[data-adapttable-part="column-rename-input"]'
+    )!;
+    expect(input).toHaveAttribute(
+      "data-adapttable-part",
+      "column-rename-input"
+    );
+    await waitFor(() => expect(input).toHaveFocus());
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="column-rename-error"]'
+    )!;
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Account owner  " } });
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-error"]')
+    ).toBeNull();
+    await user.click(
+      document.querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="column-rename-save"]'
+      )!
+    );
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    expect(renameAction).toBeInTheDocument();
+    await waitFor(() => expect(renameAction).toHaveFocus());
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account owner.");
+
+    await user.click(renameAction);
+    fireEvent.keyDown(
+      document.querySelector('[data-adapttable-part="column-rename-input"]')!,
+      { key: "Escape" }
+    );
+    await waitFor(() => expect(renameAction).toHaveFocus());
+
+    await user.click(renameAction);
+    await user.click(
+      document.querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="column-rename-cancel"]'
+      )!
+    );
+    await waitFor(() => expect(renameAction).toHaveFocus());
   });
 });

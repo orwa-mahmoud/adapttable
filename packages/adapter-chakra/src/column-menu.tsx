@@ -1,5 +1,7 @@
 import {
+  COLUMN_HEADER_RENAME,
   COLUMN_MENU,
+  type ColumnHeaderRenameSlotProps,
   type ColumnMenuSlotProps,
   extendFeature,
   slotRender,
@@ -7,10 +9,15 @@ import {
 } from "@adapttable/core/adapter";
 import { columnMenu as core } from "@adapttable/core/features";
 
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { ColumnMenu } from "./components/ColumnMenu";
 
 function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<never>>) {
   return <ColumnMenu {...props} />;
+}
+
+function ColumnHeaderRenameSlot(props: Readonly<ColumnHeaderRenameSlotProps>) {
+  return <ColumnHeaderRename {...props} />;
 }
 
 /**
@@ -24,5 +31,8 @@ function ColumnMenuSlot(props: Readonly<ColumnMenuSlotProps<never>>) {
 export function columnMenu(): StaticTableFeature {
   return extendFeature(core(), [
     slotRender(COLUMN_MENU, (props) => <ColumnMenuSlot {...props} />),
+    slotRender(COLUMN_HEADER_RENAME, (props) => (
+      <ColumnHeaderRenameSlot {...props} />
+    )),
   ]);
 }

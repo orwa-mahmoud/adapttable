@@ -125,6 +125,10 @@ function overlayChromeExtras<TRow>(
       collapsedColumnGroups: chrome.columnLayout.state.collapsedGroups,
       columnGroups: chrome.columnGroups,
       onToggleColumnGroup: chrome.columnLayout.toggleColumnGroup,
+      onRenameColumn:
+        shell.chromeProps.enableColumnMenu && shell.chromeProps.onColumnRename
+          ? chrome.columnLayout.setName
+          : undefined,
     },
     hasRowActions: chrome.hasRowActions,
   };

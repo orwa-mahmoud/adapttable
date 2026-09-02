@@ -117,6 +117,13 @@ export const ru: Required<TableLabels> = {
   hideAllColumns: "Скрыть все",
   unpinAllColumns: "Открепить все",
   resetColumn: "Сбросить столбец",
+  renameColumn: "Переименовать столбец",
+  columnName: "Название столбца",
+  saveColumnName: "Сохранить название",
+  cancelColumnRename: "Отмена",
+  columnNameRequired: "Введите название столбца.",
+  columnRenamed: ({ previous, name }) =>
+    `Столбец «${previous}» переименован в «${name}»`,
   sortAscending: "Сортировать по возрастанию",
   sortDescending: "Сортировать по убыванию",
   sortedBy: ({ column, ascending }) =>

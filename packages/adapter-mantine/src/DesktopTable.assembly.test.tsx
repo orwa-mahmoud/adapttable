@@ -5,13 +5,21 @@
  * already covered in DataTable.test.
  */
 import {
+  defaultLabels,
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
 } from "@adapttable/core";
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
@@ -251,5 +259,99 @@ describe("DesktopTable layered chrome", () => {
     ).not.toBeNull();
     fireEvent.click(screen.getAllByRole("button", { name: "Expand row" })[0]!);
     expect(screen.getByText("detail-a")).toBeInTheDocument();
+  });
+});
+
+describe("DesktopTable header rename (Mantine)", () => {
+  it("mounts the optional slot only for a renameable column", () => {
+    const { container } = mount({
+      enableColumnMenu: true,
+      onColumnRename: vi.fn(),
+      columns: COLUMNS.map((column) =>
+        column.key === "name" ? { ...column, renameable: true } : column
+      ),
+    });
+    expect(
+      screen.getByRole("button", { name: "Rename column: Name" })
+    ).toHaveAttribute("data-adapttable-part", "header-rename-button");
+    expect(
+      container.querySelectorAll(
+        '[data-adapttable-part="header-rename-button"]'
+      )
+    ).toHaveLength(1);
+  });
+
+  it("validates, commits, announces, and restores trigger focus", async () => {
+    const onColumnRename = vi.fn();
+    const { container } = render(
+      <MantineProvider>
+        <div>
+          <ColumnHeaderRename
+            columnKey="name"
+            name="Name"
+            labels={defaultLabels}
+            onRenameColumn={onColumnRename}
+          >
+            <span data-adapttable-part="header-caption-control">Name</span>
+          </ColumnHeaderRename>
+        </div>
+      </MantineProvider>
+    );
+
+    const trigger = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    expect(trigger).toHaveAttribute(
+      "data-adapttable-part",
+      "header-rename-button"
+    );
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(trigger).toBeDisabled();
+    expect(
+      container.querySelector('[data-adapttable-part="header-caption-control"]')
+    ).toBeNull();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveAttribute(
+      "data-adapttable-part",
+      "header-rename-input"
+    );
+    await waitFor(() => expect(input).toHaveFocus());
+
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Display name  " } });
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("button", { name: "Save name" })).toHaveAttribute(
+      "type",
+      "submit"
+    );
+    fireEvent.submit(
+      container.querySelector('[data-adapttable-part="header-rename-form"]')!
+    );
+    expect(
+      container.querySelector('[data-adapttable-part="header-rename-form"]')
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="header-caption-control"]')
+    ).toHaveTextContent("Name");
+    await waitFor(() =>
+      expect(onColumnRename).toHaveBeenCalledWith("name", "Display name")
+    );
+    expect(
+      screen.getByText("Column Name renamed to Display name")
+    ).toHaveAttribute("data-adapttable-part", "header-rename-announcer");
+    await waitFor(() => expect(trigger).toHaveFocus());
+
+    fireEvent.click(trigger);
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Column name" }), {
+      key: "Escape",
+    });
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });

@@ -116,6 +116,13 @@ export const pt: Required<TableLabels> = {
   hideAllColumns: "Ocultar todas",
   unpinAllColumns: "Desafixar todas",
   resetColumn: "Redefinir coluna",
+  renameColumn: "Renomear coluna",
+  columnName: "Nome da coluna",
+  saveColumnName: "Salvar nome",
+  cancelColumnRename: "Cancelar",
+  columnNameRequired: "Digite um nome para a coluna.",
+  columnRenamed: ({ previous, name }) =>
+    `Coluna ${previous} renomeada para ${name}`,
   sortAscending: "Ordenar crescente",
   sortDescending: "Ordenar decrescente",
   sortedBy: ({ column, ascending }) =>

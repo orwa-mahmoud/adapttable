@@ -116,6 +116,13 @@ export const ar: Required<TableLabels> = {
   hideAllColumns: "إخفاء الكل",
   unpinAllColumns: "إلغاء تثبيت الكل",
   resetColumn: "إعادة تعيين العمود",
+  renameColumn: "إعادة تسمية العمود",
+  columnName: "اسم العمود",
+  saveColumnName: "حفظ الاسم",
+  cancelColumnRename: "إلغاء",
+  columnNameRequired: "أدخل اسمًا للعمود.",
+  columnRenamed: ({ previous, name }) =>
+    `تمت إعادة تسمية العمود ${previous} إلى ${name}`,
   sortAscending: "ترتيب تصاعدي",
   sortDescending: "ترتيب تنازلي",
   sortedBy: ({ column, ascending }) =>

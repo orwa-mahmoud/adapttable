@@ -56,7 +56,7 @@ export const TITLES = {
   "formulas.md": "React table formulas — spreadsheet computed columns",
   "server-queries.md": "React table server queries — parse and validate",
   "tree-data.md": "React table tree data — hierarchical rows",
-  "column-management.md": "React table column management — pin, resize",
+  "column-management.md": "React table column management — rename, pin, resize",
   "saved-views.md": "React table saved views, shareable by URL",
   "virtualization.md": "React table virtualization — 50k rows, 24 nodes",
   "mobile.md": "Responsive React table — mobile card layout",
@@ -131,7 +131,7 @@ export const DESCRIPTIONS = {
   "row-grouping.md":
     "Nested React table row grouping — groupBy takes one key or an ordered list, per-group aggregates sharing the summaryRow mapper, expand/collapse, frontend tier only.",
   "column-management.md":
-    "Let users show, hide, reorder, pin and resize columns — one prop per capability, persisted to the URL or localStorage.",
+    "Let users rename, show, hide, reorder, pin and resize columns with native kit controls, persisted to the URL, Saved Views or localStorage.",
   "saved-views.md":
     "Save filters, sort and column layout as named React table views users can restore and share by URL — built into AdaptTable across every adapter.",
   "virtualization.md":
