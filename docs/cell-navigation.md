@@ -153,9 +153,12 @@ Matching reads what a cell **shows**, so a column that renders a formatted date
 is found by that date rather than by the ISO string underneath. Only the loaded
 rows are searched: a hit the table cannot take you to would be a lie, so on a
 paged table find covers the page you are on, and under virtualization it covers
-what has been fetched. The query is deliberately not put in the URL — where you
-are looking is not part of the table's state, and a shared link should not reopen
-someone else's search box.
+what has been fetched. The **query** is part of the table's shareable URL state
+(a `find` param beside `q`): opening a link that carries it reopens the bar,
+runs the walk, and focuses the first hit. The current-match position stays
+ephemeral — the receiving page's data may differ, so the query reproduces and
+the cursor does not. Typing writes with replace-state after a short debounce so
+browser history stays clean.
 
 On mobile the cards are a list rather than a grid, so the bar opens and searches
 but the hits are not marked; the desktop layout is where a cell can be pointed

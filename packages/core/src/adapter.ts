@@ -464,6 +464,7 @@ export type {
   FindInTableState,
   UseFindInTableOptions,
 } from "./find/useFindInTable";
+export { FIND_URL_WRITE_DEBOUNCE_MS } from "./find/useFindInTable";
 export {
   ColumnSelectCheckboxChrome,
   type ColumnSelectCheckboxChromeProps,

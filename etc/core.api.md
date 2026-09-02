@@ -1849,6 +1849,9 @@ export const FILTER_TREE_VERSION = 1;
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
 
 // @public
+export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+
+// @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
 // @public
@@ -4549,6 +4552,9 @@ export interface UseFindInTableOptions<TRow> {
     enabled: boolean;
     firstRowIndex?: number;
     rows: readonly TRow[];
+    urlAdapter?: UrlStateAdapter;
+    urlKey?: string;
+    urlSync?: boolean;
 }
 
 // @public

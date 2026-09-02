@@ -1102,7 +1102,10 @@ contains the query, in absolute addresses (`FindMatchesOptions` in);
 question and `stepMatch(index, total, step)` wraps the walk.
 `useFindInTable(options)` is the bar's state — `open`, `query`, `matches`,
 `index`, `current`, `next`, `previous` (`UseFindInTableOptions` in,
-`FindInTableState` out) — and each adapter mounts `FindBar` / `FindBarProps`
+`FindInTableState` out). The query is shareable table state: pass the same
+`urlAdapter` / `urlSync` / `urlKey` the table already uses and a `find` param
+rides beside `q`. `FIND_URL_WRITE_DEBOUNCE_MS` is the trailing debounce on
+that write (replace-state only). Each adapter mounts `FindBar` / `FindBarProps`
 over `FindBarChrome` / `FindBarChromeProps` / `FindBarSlots` /
 `FindSearchProps` / `FindButtonProps` / `FindButtonKind`.
 `useFindFocus(current, focusCell,

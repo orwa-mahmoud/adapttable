@@ -73,6 +73,19 @@ describe("versioned table URL state codec", () => {
     expect(written.get("atv")).toBe("1");
   });
 
+  it("keeps the find query beside q through capture and apply", () => {
+    const encoded = updateTableUrlState("q=roster&atv=1", "", (table) => {
+      table.set("find", "Ada");
+    });
+    expect(params(encoded).get("find")).toBe("Ada");
+    expect(params(encoded).get("q")).toBe("roster");
+    const captured = captureTableUrlState(encoded, "");
+    expect(params(captured).get("find")).toBe("Ada");
+    const restored = applyTableUrlState("app=keep&find=stale", captured, "");
+    expect(params(restored).get("find")).toBe("Ada");
+    expect(params(restored).get("app")).toBe("keep");
+  });
+
   it("uses the first duplicate and canonicalizes duplicates on write", () => {
     const initial = "q=first&q=second&page=2&page=9";
     const decoded = parseTableUrlState(initial, "");

@@ -286,6 +286,8 @@ export interface DemoColumnProps {
   onColumnRename: (key: string, name: string) => void;
   /** Whether table chrome follows the URL policy from {@link demoUrlSync}. */
   urlSync?: boolean;
+  /** Namespace shared with the data hook (`live.find` beside `live.q`). */
+  urlKey?: string;
   collapsibleColumnGroups?: boolean;
   onCellEdit?: (row: Person, key: string, nextValue: unknown) => void;
   onEditStart?: EditEventHandler<Person>;
@@ -1300,6 +1302,7 @@ export function DemoBody({
     onColumnRename,
     collapsibleColumnGroups: columnGroups !== false,
     urlSync: syncToUrl,
+    urlKey,
   };
 
   return mode === "backend" ? (

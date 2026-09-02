@@ -1687,7 +1687,9 @@ function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
 function useAntdGridState<TRow>(
   props: Readonly<ComposedProps<TRow>>,
   c: ReturnType<typeof useTableChrome<TRow>>,
-  history: EditHistoryState<TRow>
+  history: EditHistoryState<TRow>,
+  /** Already-resolved URL backend shared with saved views and tier hooks. */
+  urlAdapter: UrlStateAdapter
 ) {
   // antd builds its own chrome rather than using `useDataTableShell`, so it
   // calls the focus hook directly. Same derivation as the shell's: the row count
@@ -1703,6 +1705,9 @@ function useAntdGridState<TRow>(
     rows: c.source.rows,
     columns: c.columnLayout.visibleColumns,
     firstRowIndex: windowStart,
+    // Sync decision is already baked into WHICH adapter was resolved above.
+    urlAdapter,
+    urlKey: props.urlKey,
   });
   const gridFocus = useGridFocus<TRow>({
     enabled: props.cellNavigation === true,
@@ -2019,7 +2024,7 @@ function AntdTableBody<TRow>({
     gridFocus,
     stats,
     statusAnnouncement,
-  } = useAntdGridState(props, c, history);
+  } = useAntdGridState(props, c, history, resolvedUrlAdapter);
   const { confirm, getRowId } = c;
   // What the user actually sees. Hiding, ordering and collapsing a column group
   // land on `columnLayout`, which the extras gate mounts above this component;

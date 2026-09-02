@@ -122,6 +122,11 @@ function FindStage<TRow>({
     rows: chrome.source.rows,
     columns: chrome.columnLayout.visibleColumns,
     firstRowIndex: windowStartOf(shell),
+    // Same resolved adapter the shell already owns — find rides the table URL
+    // and Saved Views without a second History binding.
+    urlAdapter: shell.urlAdapter,
+    urlSync: shell.chromeProps.urlSync,
+    urlKey: shell.chromeProps.urlKey,
     children: (find: typeof DISABLED_FIND) => children({ ...live, find }),
   } as unknown as FindLiveSlotProps<never>;
   return filled ? (

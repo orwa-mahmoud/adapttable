@@ -27,7 +27,7 @@ function fakeStorage(initial: Record<string, string> = {}) {
 describe("useSavedViews", () => {
   it("captures only this table's params and re-applies them", () => {
     const adapter = createMemoryAdapter(
-      "t.q=ali&t.f_team=core&t.page=2&other.q=keep"
+      "t.q=ali&t.find=Ada&t.f_team=core&t.page=2&other.q=keep"
     );
     const storage = fakeStorage();
     const { result } = renderHook(() =>
@@ -42,12 +42,15 @@ describe("useSavedViews", () => {
     expect(result.current.views).toHaveLength(1);
     // A foreign table's params never leak into the capture.
     expect(result.current.views[0]!.search).not.toContain("other.q");
+    // Find rides along once it is in the owned-param allowlist.
+    expect(result.current.views[0]!.search).toContain("t.find=Ada");
 
     // Mutate the URL away, then apply the view.
     adapter.setSearch("t.q=changed&other.q=keep");
     act(() => result.current.apply("My view"));
     const after = new URLSearchParams(adapter.getSearch());
     expect(after.get("t.q")).toBe("ali");
+    expect(after.get("t.find")).toBe("Ada");
     expect(after.get("t.f_team")).toBe("core");
     expect(after.get("t.page")).toBe("2");
     expect(after.get("other.q")).toBe("keep");

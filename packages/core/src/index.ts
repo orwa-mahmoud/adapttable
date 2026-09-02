@@ -259,6 +259,7 @@ export {
   stepMatch,
 } from "./find/findMatches";
 export {
+  FIND_URL_WRITE_DEBOUNCE_MS,
   type FindInTableState,
   useFindFocus,
   useFindInTable,

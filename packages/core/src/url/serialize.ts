@@ -40,6 +40,8 @@ function splitRaw(raw: string | null): string[] {
 export const PARAM_PAGE = "page";
 export const PARAM_LIMIT = "limit";
 export const PARAM_SEARCH = "q";
+/** Find-bar query — the in-table walk, not the filter search term. */
+export const PARAM_FIND = "find";
 export const PARAM_SORT_BY = "sortBy";
 export const PARAM_SORT_DIR = "sortDir";
 /** Multi-sort chain: `sort=name:asc,age:desc` (keys percent-encoded). */

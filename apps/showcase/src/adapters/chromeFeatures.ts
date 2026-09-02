@@ -146,7 +146,9 @@ export function kitChromeFeatures(
 ): readonly TableFeature<Person>[] {
   const rich = !flags.focused;
   return [
-    ...((flags.cellNavigation ?? flags.editing) ? [kit.cellNavigation()] : []),
+    ...(flags.cellNavigation || flags.editing || flags.urlKey === "live"
+      ? [kit.cellNavigation()]
+      : []),
     ...(flags.columnSelectionCheckbox ? [kit.columnSelectionCheckbox()] : []),
     ...(flags.densityChooser ? [kit.densityChooser()] : []),
     ...(flags.fullscreen ? [kit.fullscreen()] : []),
@@ -186,7 +188,10 @@ function alwaysOn(
 ): readonly TableFeature<Person>[] {
   return [
     ...(flags.statusBar ? [kit.statusBar()] : []),
-    ...(flags.editing ? [kit.selectionStats(), kit.findInTable()] : []),
+    ...(flags.editing ? [kit.selectionStats()] : []),
+    // Find is shareable URL state. The live demo is the page that syncs the
+    // address bar, so the bar is on there even when editing is off.
+    ...(flags.editing || flags.urlKey === "live" ? [kit.findInTable()] : []),
     kit.commandPalette(flags.commandPalette ?? true),
     kit.contextMenu<Person>(flags.contextMenu ?? true),
   ];

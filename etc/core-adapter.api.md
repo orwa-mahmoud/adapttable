@@ -2897,6 +2897,9 @@ export const FIND_BAR: FeatureSlotKey<FindBarProps>;
 export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>>;
 
 // @public
+export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+
+// @public
 export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement | null;
 
 // @public
@@ -6330,6 +6333,9 @@ export interface UseFindInTableOptions<TRow> {
     enabled: boolean;
     firstRowIndex?: number;
     rows: readonly TRow[];
+    urlAdapter?: UrlStateAdapter;
+    urlKey?: string;
+    urlSync?: boolean;
 }
 
 // @public
