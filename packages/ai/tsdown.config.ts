@@ -1,7 +1,13 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/react.tsx"],
+  entry: [
+    "src/index.ts",
+    "src/react.tsx",
+    "src/json.ts",
+    "src/openai.ts",
+    "src/mcp.ts",
+  ],
   format: ["esm", "cjs"],
   tsconfig: "./tsconfig.build.json",
   dts: true,

@@ -1193,8 +1193,13 @@ agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 `AgentManifest`, `AgentObservation`, `AgentSession`, `CapabilityGuide`,
 `CatalogEntry`, `ExecuteResult`, `JsonSchema`, `TableAgentBridge`.
 `@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions` and
-`TABLE_AGENT_STATE`. See [adaptive capabilities](./agent-capabilities.md) and
-[`@adapttable/ai`](./ai.md).
+`TABLE_AGENT_STATE`. Portable adapters live on subpaths:
+`@adapttable/ai/json` (`toJsonTools`, `executeJsonTool`, `parseEnvelope`,
+`executeEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
+`executeOpenAITool`), `@adapttable/ai/mcp` (`toMcpTools`, `toMcpResources`,
+`mcpListChanged`, `executeMcpTool`). See
+[adaptive capabilities](./agent-capabilities.md),
+[`@adapttable/ai`](./ai.md) and [agent integrations](./ai-integrations.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a

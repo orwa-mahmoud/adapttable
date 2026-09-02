@@ -60,6 +60,7 @@ export const sidebar = [
       { label: "Realtime", slug: "realtime" },
       { label: "Adaptive capabilities", slug: "agent-capabilities" },
       { label: "@adapttable/ai", slug: "ai" },
+      { label: "Agent integrations", slug: "ai-integrations" },
     ],
   },
   {
