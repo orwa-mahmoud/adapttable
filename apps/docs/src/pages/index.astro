@@ -13,14 +13,34 @@ const DESCRIPTION =
 // The demo hero's adapter chips, same labels and accent colors as
 // apps/showcase/src/themeTokens.ts.
 const KITS = [
-  { label: "Mantine", c: "oklch(0.58 0.17 252)" },
-  { label: "MUI", c: "oklch(0.55 0.18 264)" },
-  { label: "Chakra", c: "oklch(0.6 0.1 188)" },
-  { label: "Ant Design", c: "oklch(0.56 0.2 262)" },
-  { label: "Radix", c: "oklch(0.54 0.19 280)" },
-  { label: "Base UI", c: "oklch(0.55 0.19 255)" },
-  { label: "shadcn / Tailwind", c: "oklch(0.28 0.01 264)" },
-  { label: "Custom Tailwind", c: "oklch(0.55 0.2 277)" },
+  {
+    label: "Mantine",
+    c: "oklch(0.58 0.17 252)",
+    href: `${SITE}/demo/mantine/`,
+  },
+  { label: "MUI", c: "oklch(0.55 0.18 264)", href: `${SITE}/demo/mui/` },
+  { label: "Chakra", c: "oklch(0.6 0.1 188)", href: `${SITE}/demo/chakra/` },
+  {
+    label: "Ant Design",
+    c: "oklch(0.56 0.2 262)",
+    href: `${SITE}/demo/antd/`,
+  },
+  { label: "Radix", c: "oklch(0.54 0.19 280)", href: `${SITE}/demo/radix/` },
+  {
+    label: "Base UI",
+    c: "oklch(0.55 0.19 255)",
+    href: `${SITE}/demo/base-ui/`,
+  },
+  {
+    label: "shadcn / Tailwind",
+    c: "oklch(0.28 0.01 264)",
+    href: `${SITE}/demo/shadcn/`,
+  },
+  {
+    label: "Custom Tailwind",
+    c: "oklch(0.55 0.2 277)",
+    href: `${SITE}/demo/tailwind/`,
+  },
 ];
 
 const FEATURES = [
@@ -28,48 +48,56 @@ const FEATURES = [
     viz: "filter",
     hue: "274",
     title: "Columns & filters",
+    href: `${SITE}/demo/mantine/filtering/`,
     body: "One declaration drives the widget, the URL params, the chips and the row predicate. Operator-first number and date filters: Equal, At least, At most, Between.",
   },
   {
     viz: "tiers",
     hue: "210",
     title: "Three data tiers",
+    href: `${SITE}/data-tiers/`,
     body: "Hand the table an array and it filters, sorts and pages in memory. Or own the fetch: one consolidated query event with an abort signal. Or bring a full custom TableSource.",
   },
   {
     viz: "url",
     hue: "152",
     title: "URL-synced everything",
+    href: `${SITE}/url-state/`,
     body: "Search, sort, filters, pagination, column layout and saved views live in shareable URLs — namespaced per table, SSR-safe, with a one-prop opt-out (urlSync={false}).",
   },
   {
     viz: "rows",
     hue: "60",
     title: "50,000 rows, no flinching",
+    href: `${SITE}/demo/mantine/scale/`,
     body: "Opt-in virtualization windows the DOM against the page or any max-height scroll box. The live demo scrolls fifty thousand rows with a handful of DOM nodes.",
   },
   {
     viz: "i18n",
     hue: "25",
     title: "i18n & RTL, for real",
+    href: `${SITE}/demo/mantine/rtl/`,
     body: "Label presets for ten locales. Columns map per-locale data paths, so cells, sorting and filtering follow the language. Pinning and layout are logical — Arabic and Hebrew just work.",
   },
   {
     viz: "columns",
     hue: "330",
     title: "Column management",
+    href: `${SITE}/demo/mantine/columns/`,
     body: "Show, hide, reorder, pin and resize — the row-actions column included. Capture any state as a named saved view and restore it later, per table.",
   },
   {
     viz: "bulk",
     hue: "10",
     title: "Selection & bulk actions",
+    href: `${SITE}/demo/mantine/selection/`,
     body: "Select the page — or all matches across every page. Bulk actions run through an injectable confirm, and per-row actions explain themselves with disabledReason.",
   },
   {
     viz: "a11y",
     hue: "120",
     title: "Accessible by default",
+    href: `${SITE}/demo/mantine/accessibility/`,
     body: "Real table roles, aria-sort, focus management and full keyboard navigation — column reorder and resize included, straight from the keyboard.",
   },
 ];
@@ -454,21 +482,22 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           <span class="hero__adapters-l">Renders natively in</span>
           {
             KITS.map((kit) => (
-              <span class="hero__chip" style={`--c:${kit.c}`}>
+              <a class="hero__chip" href={kit.href} style={`--c:${kit.c}`}>
                 <span class="hero__chip-dot" />
                 {kit.label}
-              </span>
+              </a>
             ))
           }
         </div>
 
-        <figure class="mock reveal" aria-hidden="true">
+        <a class="mock-link reveal" href={`${SITE}/demo/`}>
+        <figure class="mock">
           <div class="mock__toolbar">
-            <span class="mock__search">⌕ Search people…</span>
+            <span class="mock__search">Search people…</span>
             <span class="mock__spacer"></span>
-            <span class="mock__chip">Team: Core ✕</span>
-            <span class="mock__btn">≔ Filters <b>2</b></span>
-            <span class="mock__btn">Columns</span>
+            <span class="mock__chip">Team: Core</span>
+            <span class="mock__meta">Filters 2</span>
+            <span class="mock__meta">Columns</span>
           </div>
           <div class="mock__table">
             <div class="mock__row mock__row--head">
@@ -502,10 +531,10 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             }
           </div>
           <figcaption class="mock__url">
-            ?live.f_team=Core&amp;live.f_budgetMin=25000 · every bit of state
-            in a shareable URL
+            Open the live demo — every bit of state in a shareable URL
           </figcaption>
         </figure>
+        </a>
         </div>
       </section>
 
@@ -521,7 +550,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         <div class="grid">
           {
             FEATURES.map((f, n) => (
-              <article class="card" style={`--hue:${f.hue};--n:${n}`}>
+              <a class="card" href={f.href} style={`--hue:${f.hue};--n:${n}`}>
                 <div class="viz" aria-hidden="true">
                   {f.viz === "filter" && (
                     <>
@@ -587,7 +616,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
                 </div>
                 <h3>{f.title}</h3>
                 <p set:html={f.body.replace(/`([^`]+)`/g, "<code>$1</code>")} />
-              </article>
+              </a>
             ))
           }
         </div>
@@ -1056,6 +1085,10 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+  }
   /* Deck layout (desktop only): header and footer always on screen,
      the slides live in the strip between them. Mobile keeps the
      natural vertical page. */
@@ -1364,14 +1397,14 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
   .install__copy {
     display: grid;
     place-items: center;
-    width: 30px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
     border-radius: 7px;
     cursor: pointer;
     border: none;
     background: var(--page-surface-2);
     color: var(--ink-3);
-    transition: all 0.15s;
+    transition: color 0.15s;
   }
   .install__copy:hover {
     color: var(--ink);
@@ -1439,6 +1472,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 44px;
     padding: 7px 14px;
     border-radius: 999px;
     border: 1px solid var(--page-border);
@@ -1446,6 +1480,10 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
     font-size: 13.5px;
     font-weight: 600;
     color: var(--ink);
+    text-decoration: none;
+  }
+  .hero__chip:hover {
+    border-color: color-mix(in oklch, var(--c) 45%, var(--page-border));
   }
   .hero__chip-dot {
     width: 9px;
@@ -1455,8 +1493,22 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
   }
 
   /* ── The product mock, slim enough to share the hero slide ──────── */
-  .mock {
+  .mock-link {
+    display: block;
     margin: clamp(14px, 2.8vh, 30px) auto 0;
+    max-width: 860px;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  .mock-link .mock {
+    margin: 0;
+    pointer-events: none;
+  }
+  .mock-link:hover .mock {
+    border-color: color-mix(in oklch, var(--brand) 35%, var(--page-border));
+  }
+  .mock {
     max-width: 860px;
     width: 100%;
     border: 1px solid var(--page-border);
@@ -1495,25 +1547,11 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
     padding: 4px 10px;
     white-space: nowrap;
   }
-  .mock__btn {
-    border: 1px solid var(--page-border);
-    border-radius: 8px;
-    padding: 5px 11px;
+  .mock__meta {
+    font-size: 11.5px;
     font-weight: 600;
-    color: var(--ink-2);
+    color: var(--ink-3);
     white-space: nowrap;
-    background: var(--page-surface);
-  }
-  .mock__btn b {
-    display: inline-grid;
-    place-items: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 999px;
-    background: var(--brand);
-    color: #fff;
-    font-size: 10px;
-    margin-inline-start: 3px;
   }
   .mock__table {
     padding: 4px 4px 0;
@@ -1728,6 +1766,9 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
   .card {
     --tint: oklch(0.55 0.16 var(--hue));
     position: relative;
+    display: block;
+    color: inherit;
+    text-decoration: none;
     border: 1px solid var(--page-border);
     border-radius: 14px;
     padding: 18px 20px;
@@ -2108,18 +2149,15 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
     gap: 14px;
   }
   .spcard {
-    background: var(--page-surface);
-    border: 1px solid var(--page-border);
-    border-radius: 14px;
-    padding: 18px;
+    background: transparent;
+    border: none;
+    border-inline-start: 2px solid
+      color-mix(in oklch, var(--brand) calc(28% + var(--i) * 10%), var(--page-border));
+    border-radius: 0;
+    padding: 4px 0 4px 14px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background-image: linear-gradient(
-      to bottom,
-      color-mix(in oklch, var(--brand) calc(var(--i) * 1.6%), transparent),
-      transparent 40%
-    );
   }
   .spcard__rank {
     font-family: var(--mono);
