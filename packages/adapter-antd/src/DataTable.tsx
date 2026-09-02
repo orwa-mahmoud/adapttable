@@ -74,6 +74,7 @@ import {
   FeatureProviders,
   FeatureSlot,
   fillSlot,
+  ForcedColorsStyle,
   FILTER_DRAWER,
   FILTERS_FORM,
   type FiltersFormSlotProps,
@@ -135,6 +136,7 @@ import {
   cloneElement,
   type CSSProperties,
   type HTMLAttributes,
+  type TdHTMLAttributes,
   isValidElement,
   type ReactElement,
   type ReactNode,
@@ -1339,10 +1341,9 @@ function DesktopTableBody<TRow>({
   else if (sticky) stickyHeaderOffset = sticky.offsetHeader ?? 0;
   const headerOffset =
     stickyHeaderOffset === undefined ? 0 : stickyHeaderOffset + headerHeight;
-  // antd owns the <table>, <thead> and <tbody> elements, so their part names —
-  // and `role="grid"` with the ARIA dimensions — reach them through the
-  // `components` seam. Memoized: a new component identity here would remount
-  // the whole table on every render.
+  // antd owns the <table>, <thead> and <tbody> elements, so their part names
+  // reach them through the `components` seam. Memoized: a new component
+  // identity here would remount the whole table on every render.
   const getGridProps = gridFocus?.getGridProps;
   // Depends on the GETTER, not the whole state: the announcement changes on
   // every focus move, and rebuilding `components` would remount antd's table and
@@ -1353,29 +1354,43 @@ function DesktopTableBody<TRow>({
   // there. A `<tbody>` in that position is invalid twice over: inside antd's
   // holder div, and around the row divs it receives.
   const virtualBody = virtualize && !grouping;
-  const components = useMemo(
-    () => ({
+  // Cell navigation claims `role="grid"`. With a sticky header antd splits
+  // that into two `<table>`s, so the role and its keyboard handlers live on a
+  // wrapper around BOTH tables and each inner table is a `rowgroup`. Otherwise
+  // a screen reader walking the body grid finds cells whose columnheaders live
+  // in a sibling table.
+  const gridProps = getGridProps?.();
+  const isAccessibleGrid = gridProps?.role === "grid";
+  const components = useMemo(() => {
+    const props = getGridProps?.();
+    const asGrid = props?.role === "grid";
+    const inner = asGrid ? { role: "rowgroup" } : props;
+    return {
       // Core decides what belongs here: the grid role and handlers only with
       // cell navigation, but a windowed table's `aria-rowcount` regardless —
       // so this asks unconditionally rather than gating on the feature.
-      table: tableComponent(getGridProps ? getGridProps() : undefined),
+      table: tableComponent(inner),
       header: {
-        // A bounded height splits the grid into a header table and a body
-        // table, and antd resolves the header one through `header.table`. It
-        // carries the name; the grid role and its ARIA dimensions stay on the
-        // body table, where the rows are.
-        table: tableComponent(undefined),
+        // Sticky / virtual headers resolve through `header.table`. When the
+        // wrapper is the grid, this table is a rowgroup like the body table.
+        table: tableComponent(asGrid ? { role: "rowgroup" } : undefined),
         // The header height is measured only for pinned rows, so the ref stays
         // conditional; the name does not.
         wrapper: theadComponent(pinArmed ? theadRef : undefined),
         row: TheadRow,
       },
-      body: { wrapper: virtualBody ? VirtualTbodyWrapper : TbodyWrapper },
-    }),
-    [getGridProps, pinArmed, theadRef, virtualBody]
-  );
+      body: {
+        wrapper: virtualBody ? VirtualTbodyWrapper : TbodyWrapper,
+        // A <table role="rowgroup"> is no longer a table, so a bare <td>
+        // maps to `cell` instead of `gridcell`. Every body cell — including
+        // antd-owned selection cells that never go through getCellProps —
+        // has to claim the role itself.
+        ...(asGrid ? { cell: GridBodyCell } : {}),
+      },
+    };
+  }, [getGridProps, pinArmed, theadRef, virtualBody]);
 
-  return (
+  const table = (
     <Table<GroupedDataRecord<TRow>>
       aria-label={tableLabel}
       components={components}
@@ -1429,14 +1444,21 @@ function DesktopTableBody<TRow>({
       locale={{ emptyText: emptyNode }}
     />
   );
+  if (!isAccessibleGrid) return table;
+  return (
+    <div {...gridProps} aria-label={tableLabel} data-adapttable-part="grid">
+      {table}
+    </div>
+  );
 }
 
 /**
  * antd owns the `<table>` element, so its part name — plus `role="grid"` and
- * the ARIA dimensions when cell navigation is armed — reaches it through the
+ * the ARIA dimensions when cell navigation is armed — reaches the accessible
+ * grid wrapper (both header and body tables sit inside it) through the
  * documented `components` seam rather than a spread. With a sticky or
- * virtualized header antd splits the grid into a header table and a body table;
- * both are tables of ours, and both carry the name.
+ * virtualized header antd splits the markup into a header table and a body
+ * table; both carry the name, and both are `rowgroup`s of that one grid.
  *
  * Built at module scope: a component declared inside another component is a new
  * type on every render, which remounts everything below it — here that would
@@ -1454,6 +1476,10 @@ function TbodyWrapper(
   props: Readonly<HTMLAttributes<HTMLTableSectionElement>>
 ) {
   return <tbody data-adapttable-part="tbody" {...props} />;
+}
+
+function GridBodyCell(props: Readonly<TdHTMLAttributes<HTMLTableCellElement>>) {
+  return <td {...props} role="gridcell" />;
 }
 
 /**
@@ -2666,6 +2692,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   return (
     <FeatureProviders props={props}>
+      <ForcedColorsStyle />
       <DataTableContent<TRow> {...props} />
     </FeatureProviders>
   );

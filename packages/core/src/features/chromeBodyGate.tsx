@@ -8,6 +8,7 @@
  */
 import type { ReactNode } from "react";
 
+import { ForcedColorsStyle } from "../a11y/forcedColors";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
@@ -153,28 +154,31 @@ export function DataTableShellView<TRow>({
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
   return (
-    <HistoryLiveGate shell={shell}>
-      {(withHistory) => (
-        <ChromeExtrasGate
-          chrome={withHistory.chrome}
-          props={withHistory.chromeProps}
-        >
-          {(chrome) => {
-            const withExtras = overlayChromeExtras(withHistory, chrome);
-            const afterBody = (view: DataTableShellResult<TRow>) => (
-              <ShellLiveGate shell={view}>{children}</ShellLiveGate>
-            );
-            if (shell.skipChromeBody === true) {
-              return afterBody(withExtras);
-            }
-            return (
-              <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
-                {(body) => afterBody(finishDataTableShell(withExtras, body))}
-              </ChromeBodyGate>
-            );
-          }}
-        </ChromeExtrasGate>
-      )}
-    </HistoryLiveGate>
+    <>
+      <ForcedColorsStyle />
+      <HistoryLiveGate shell={shell}>
+        {(withHistory) => (
+          <ChromeExtrasGate
+            chrome={withHistory.chrome}
+            props={withHistory.chromeProps}
+          >
+            {(chrome) => {
+              const withExtras = overlayChromeExtras(withHistory, chrome);
+              const afterBody = (view: DataTableShellResult<TRow>) => (
+                <ShellLiveGate shell={view}>{children}</ShellLiveGate>
+              );
+              if (shell.skipChromeBody === true) {
+                return afterBody(withExtras);
+              }
+              return (
+                <ChromeBodyGate chrome={chrome} props={withExtras.chromeProps}>
+                  {(body) => afterBody(finishDataTableShell(withExtras, body))}
+                </ChromeBodyGate>
+              );
+            }}
+          </ChromeExtrasGate>
+        )}
+      </HistoryLiveGate>
+    </>
   );
 }

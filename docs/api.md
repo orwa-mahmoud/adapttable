@@ -698,6 +698,12 @@ surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
 it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
 itself. See [browser and server-built exports](./exporting.md).
 
+**High contrast.** `ForcedColorsStyle` (and `ensureForcedColorsStyles`, which
+it calls) inject `FORCED_COLORS_CSS` once per page so Windows High Contrast
+and `prefers-contrast: more` keep focus, selection, dirty cells, validation
+and find hits visible as outlines. Adapters mount it; app code rarely needs
+to. See [accessibility](./accessibility.md).
+
 **Status announcements.** Sorting, filtering and paging rewrite the body with
 nothing a screen reader can perceive, so the table says what changed through one
 polite region. `useDataTableShell` returns the message as `statusAnnouncement`

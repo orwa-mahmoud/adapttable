@@ -29,6 +29,11 @@ Every table you render already:
   87"), because a control that rewrites the table silently gives a screen-reader user no
   way to tell it worked
 - honours `prefers-reduced-motion` when rows animate in
+- honours `forced-colors: active` (Windows High Contrast) and
+  `prefers-contrast: more`: focus, selection, dirty cells, validation errors
+  and find-match highlights each keep an outline, not a fill or a box-shadow,
+  so nothing is signaled by colour alone. Borders, pinned-column edges and
+  overlays use system colors (`Canvas`, `CanvasText`, `Highlight`)
 
 Every adapter is audited with `axe` in CI, on desktop and mobile card layouts.
 
@@ -61,6 +66,30 @@ The optional spreadsheet grid — one Tab stop, arrow keys through every cell,
 `role="grid"` — is a separate feature. See
 [keyboard & cell navigation](./cell-navigation.md). Omit that prop and the
 grid extras are absent; the default table above still stands.
+
+## High contrast and forced colors
+
+Windows High Contrast (and other `forced-colors: active` modes) strips the
+fills and box-shadows a kit painted. AdaptTable does not ask each kit to
+re-theme that itself. One stylesheet — `ForcedColorsStyle`, mounted from
+every adapter — switches those marks to system colors:
+
+| Mark        | Affordances that survive                                                               |
+| ----------- | -------------------------------------------------------------------------------------- |
+| Focus       | `outline` in `Highlight`, never a box-shadow                                           |
+| Selection   | solid outline (also in the cell style, so it is not CSS-only)                          |
+| Find match  | dashed outline; the current hit is solid                                               |
+| Dirty cell  | dotted outline — `data-dirty` is never colour-only                                     |
+| Validation  | double outline on `aria-invalid`                                                       |
+| Pinned edge | `CanvasText` border on the pin side                                                    |
+| Overlays    | find bar, command palette, saved views, side panel use `Canvas` / `CanvasText` borders |
+
+`prefers-contrast: more` thickens the focus outline to 3px. Kits that expose
+no contrast hook of their own still pick this up: the query is global.
+
+The antd adapter keeps its sticky header. The `role="grid"` lives on the
+wrapper around both of antd's tables so a screen reader walking a cell still
+finds that cell's `columnheader` in the same grid.
 
 ## Notes
 

@@ -1985,6 +1985,9 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
 };
 
 // @public
+export function ensureForcedColorsStyles(): void;
+
+// @public
 export type EditUnit = "cell" | "row" | "batch";
 
 // @public
@@ -2898,6 +2901,12 @@ export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>>;
 
 // @public
 export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+
+// @public
+export const FORCED_COLORS_CSS: string;
+
+// @public
+export function ForcedColorsStyle(): null;
 
 // @public
 export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement | null;

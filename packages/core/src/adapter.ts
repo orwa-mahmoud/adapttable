@@ -12,6 +12,11 @@
  * @packageDocumentation
  */
 
+export {
+  ensureForcedColorsStyles,
+  FORCED_COLORS_CSS,
+  ForcedColorsStyle,
+} from "./a11y/forcedColors";
 export { LiveRegion, type LiveRegionProps } from "./a11y/LiveRegion";
 export {
   TableStatusAnnouncer,

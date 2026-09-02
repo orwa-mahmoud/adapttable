@@ -242,7 +242,9 @@ export function isCurrentMatchCell(
  * and a table that answered it in eight different accent colours would be
  * harder to read, not more native. So the kit supplies its selection fill and
  * core supplies the match fill, both overridable through
- * `--adapttable-find-match` / `--adapttable-find-match-current`.
+ * `--adapttable-find-match` / `--adapttable-find-match-current`. Each highlight
+ * also carries an outline so the mark survives `forced-colors` and is never
+ * colour-only.
  *
  * The current match wins over other matches, which win over the selection —
  * the find walk moves the selection with it, so without that order the cell
@@ -265,15 +267,29 @@ export function cellHighlightStyle(
       ...base,
       background:
         "var(--adapttable-find-match-current, rgba(255, 150, 50, 0.75))",
+      // Colour is not enough: forced-colors drops the fill, and a highlight
+      // that is only amber is invisible to anyone who cannot see that hue.
+      outline: "2px solid CanvasText",
+      outlineOffset: "-2px",
     };
   }
   if (isMatchedCell(props)) {
     return {
       ...base,
       background: "var(--adapttable-find-match, rgba(255, 213, 0, 0.45))",
+      outline: "2px dashed CanvasText",
+      outlineOffset: "-2px",
     };
   }
-  return isSelectedCell(props) ? { ...base, ...selected } : base;
+  if (isSelectedCell(props)) {
+    return {
+      ...base,
+      ...selected,
+      outline: selected.outline ?? "2px solid CanvasText",
+      outlineOffset: selected.outlineOffset ?? "-2px",
+    };
+  }
+  return base;
 }
 
 /**

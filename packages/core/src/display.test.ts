@@ -120,7 +120,12 @@ describe("cellHighlightStyle", () => {
   it("uses the kit's own fill for a selected cell", () => {
     expect(
       cellHighlightStyle({ "data-cell-selected": "" }, base, selected)
-    ).toEqual({ ...base, background: "kit-blue" });
+    ).toEqual({
+      ...base,
+      background: "kit-blue",
+      outline: "2px solid CanvasText",
+      outlineOffset: "-2px",
+    });
   });
 
   it("paints a find hit amber, over the kit's selection fill", () => {
@@ -132,6 +137,7 @@ describe("cellHighlightStyle", () => {
       selected
     );
     expect(style?.background).toContain("--adapttable-find-match");
+    expect(style?.outline).toContain("dashed");
     expect(style?.position).toBe("sticky");
   });
 
@@ -142,6 +148,7 @@ describe("cellHighlightStyle", () => {
       selected
     );
     expect(style?.background).toContain("--adapttable-find-match-current");
+    expect(style?.outline).toContain("solid");
   });
 
   it("answers the match questions on their own", () => {
