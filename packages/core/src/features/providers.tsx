@@ -234,6 +234,23 @@ export interface TableRuntimeView<TRow = unknown> {
   };
   /** Live tree bundle; feature providers narrow this structurally. */
   readonly tree?: unknown;
+  /**
+   * Page, search and sort the source currently owns.
+   *
+   * Optional so a test-published view can omit it. Live chrome fills it
+   * so a feature above the table can apply ordinary view operations.
+   */
+  readonly query?: {
+    readonly page: number;
+    readonly limit: number;
+    readonly search: string;
+    readonly sortBy?: string;
+    readonly sortDir?: "asc" | "desc";
+    readonly setPage: (page: number) => void;
+    readonly setLimit: (limit: number) => void;
+    readonly setSearch: (search: string) => void;
+    readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
+  };
 }
 
 /**
@@ -248,12 +265,15 @@ export interface TableRuntime<TRow = unknown> {
   labels(): Readonly<Record<string, unknown>> | undefined;
   /** Latest fully composed view, read only from event handlers. */
   view(): TableRuntimeView<TRow> | undefined;
+  /** Composed feature ids for this table, including optional ones. */
+  featureIds(): readonly string[];
 }
 
 interface RuntimeCell {
   rows: readonly unknown[];
   labels: Readonly<Record<string, unknown>> | undefined;
   view?: TableRuntimeView;
+  featureIds: readonly string[];
 }
 
 const TableRuntimeContext = createContext<RefObject<RuntimeCell> | undefined>(
@@ -280,6 +300,7 @@ export function usePublishTableRuntime<TRow>(
       rows,
       labels,
       view: view as TableRuntimeView,
+      featureIds: cell.current.featureIds,
     };
   }
 }
@@ -297,6 +318,7 @@ export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow> {
         cell?.current.rows[localIndex] as TRow | undefined,
       labels: () => cell?.current.labels,
       view: () => cell?.current.view as TableRuntimeView<TRow> | undefined,
+      featureIds: () => cell?.current.featureIds ?? [],
     }),
     [cell]
   );
@@ -498,7 +520,9 @@ export function FeatureProviders({
     rows: [],
     labels: undefined,
     view: undefined,
+    featureIds: (features ?? []).map((feature) => feature.id),
   });
+  cell.current.featureIds = (features ?? []).map((feature) => feature.id);
   const renders = useMemo(() => rendersOf(features ?? []), [features]);
   const tree = providers.reduceRight<ReactNode>(
     (inner, { id, Provider, feature }) => (

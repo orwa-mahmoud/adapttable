@@ -52,6 +52,8 @@ export const DOCS = [
   "export-pdf.md",
   "ssr-rsc.md",
   "server-queries.md",
+  "agent-capabilities.md",
+  "ai.md",
   "customization.md",
   "i18n-rtl.md",
   "accessibility.md",

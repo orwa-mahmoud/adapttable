@@ -58,6 +58,8 @@ export const sidebar = [
       { label: "i18n & RTL", slug: "i18n-rtl" },
       { label: "Accessibility", slug: "accessibility" },
       { label: "Realtime", slug: "realtime" },
+      { label: "Adaptive capabilities", slug: "agent-capabilities" },
+      { label: "@adapttable/ai", slug: "ai" },
     ],
   },
   {

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "adapttable.agent.v1",
+  "tableId": "custom",
+  "viewRevision": 1,
+  "capabilities": [
+    "columns.describe",
+    "view.describe",
+    "view.setPage",
+    "view.setSort",
+    "view.setSearch",
+    "view.setFilters"
+  ],
+  "columns": [
+    {
+      "id": "secret",
+      "label": "Secret",
+      "type": "string",
+      "readable": false,
+      "writable": false,
+      "sortable": false
+    }
+  ],
+  "rowAddressing": { "scope": "visible", "key": "rowKey" },
+  "limits": { "pageMax": 100 },
+  "policy": { "write": "deny" },
+  "source": {
+    "fullDataset": false,
+    "grouping": false,
+    "selectAcrossPages": false,
+    "exportScope": "page",
+    "totalCount": "loaded"
+  }
+}

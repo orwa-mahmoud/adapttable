@@ -97,6 +97,8 @@ const IGNORED = new Set([
   // Its own package (`@adapttable/server`), not something an adapter ships —
   // every adapter README claiming it would be a promise none of them keep.
   "server-queries",
+  "agent-capabilities",
+  "ai",
   "url-state",
   // Whole-table quality, not an opt-in feature — lives under Beyond the table.
   "accessibility",

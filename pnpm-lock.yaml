@@ -14,6 +14,7 @@ overrides:
   '@adapttable/radix': workspace:*
   '@adapttable/shadcn': workspace:*
   '@adapttable/unstyled': workspace:*
+  '@adapttable/ai': workspace:*
   eslint-plugin-sonarjs>minimatch: ^10.2.3
   undici: ^7.29.0
   fast-uri: ^3.1.5
@@ -656,6 +657,25 @@ importers:
       vitest-axe:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
+
+  packages/ai:
+    dependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../core
+      react-compiler-runtime:
+        specifier: ^1.0.0
+        version: 1.0.0(react@19.2.8)
+    devDependencies:
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
 
   packages/cli: {}
 

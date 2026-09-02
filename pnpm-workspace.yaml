@@ -30,6 +30,7 @@ overrides:
   "@adapttable/radix": "workspace:*"
   "@adapttable/shadcn": "workspace:*"
   "@adapttable/unstyled": "workspace:*"
+  "@adapttable/ai": "workspace:*"
   "eslint-plugin-sonarjs>minimatch": "^10.2.3"
   # CRLF injection, cache-control disclosure, cookie injection, response
   # desync, private-cache crash

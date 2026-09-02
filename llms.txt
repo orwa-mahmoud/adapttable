@@ -22,6 +22,7 @@ automatic table-to-card responsive layouts.
 - [@adapttable/unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-unstyled): Headless/unstyled adapter with `data-*` + `className` hooks for Tailwind or any custom CSS.
 - [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/i18n): Locale presets for 17 languages (English, Arabic, German, Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean, Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional Chinese) + RTL direction helpers.
 - [@adapttable/cli](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/cli): `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.
+- [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute` and `tableAgent`. Not in the core or adapter roots.
 
 ## Quickstart (batteries-included)
 
@@ -97,6 +98,8 @@ const {
 - [React table PDF export and print layout](https://orwa-mahmoud.github.io/adapttable/export-pdf/): optional `@adapttable/core/pdf` entry, `pdfWriter` on the export button, `printTable` for the browser dialog
 - [React table URL state — shareable filters, sort, and page](https://orwa-mahmoud.github.io/adapttable/url-state/): adapters, urlKey namespacing, urlSync opt-out
 - [Server queries — parse and validate the table's query](https://orwa-mahmoud.github.io/adapttable/server-queries/): `@adapttable/server` validates page, sort, filters, filter tree and pivot against an allowlist of columns before they reach a backend
+- [Adaptive table capabilities](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/): what a live table advertises to an agent — wired keys only, no row dump
+- [@adapttable/ai](https://orwa-mahmoud.github.io/adapttable/ai/): `tableAgent`, the versioned manifest, catalog/describe/execute
 - [React table with SSR, server components & streaming](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/): Next.js App Router client boundary, DOM-free rendering, hydration, Suspense
 - [Responsive React table — automatic mobile card layout](https://orwa-mahmoud.github.io/adapttable/mobile/): rows become cards below the mobile breakpoint automatically — same filters, search, selection and URL state; sort-by select, infinite scroll via paginationMode auto, per-column mobileLabel/hideOnMobile, forceMobile to pin either layout.
 - [React table i18n & RTL — Arabic, Hebrew, 17 locales](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/): 17 locales, per-locale data paths, logical layout

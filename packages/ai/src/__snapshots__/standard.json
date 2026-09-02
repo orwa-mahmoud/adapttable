@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "adapttable.agent.v1",
+  "tableId": "standard",
+  "viewRevision": 1,
+  "capabilities": [
+    "columns.describe",
+    "view.describe",
+    "view.setPage",
+    "view.setSort",
+    "view.setSearch",
+    "view.setFilters",
+    "view.setGroupBy",
+    "export.run"
+  ],
+  "columns": [
+    {
+      "id": "name",
+      "label": "Name",
+      "type": "string",
+      "readable": true,
+      "writable": false,
+      "sortable": true
+    }
+  ],
+  "rowAddressing": { "scope": "visible", "key": "rowKey" },
+  "limits": { "pageMax": 100 },
+  "policy": { "write": "allow" },
+  "source": {
+    "fullDataset": true,
+    "grouping": "client",
+    "selectAcrossPages": false,
+    "exportScope": "page",
+    "totalCount": "loaded"
+  }
+}

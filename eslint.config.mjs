@@ -26,6 +26,7 @@ const sonarRecommended = /** @type {import("eslint").Linter.Config} */ (
 const REACT_SOURCES = [
   "packages/core/**/*.{ts,tsx}",
   "packages/adapter-*/**/*.{ts,tsx}",
+  "packages/ai/src/react.tsx",
   "apps/showcase/**/*.{ts,tsx}",
   "examples/**/*.{ts,tsx}",
 ];
@@ -83,7 +84,8 @@ export default defineConfig(
   {
     // The React rules run only where React does. `version: "detect"` reads the
     // installed `react`, and three lint contexts have none — `@adapttable/cli`
-    // and `@adapttable/server` are React-free on purpose, and root `scripts/`
+    // `@adapttable/ai` (root) and `@adapttable/server` are React-free on
+    // purpose, and root `scripts/`
     // is build tooling — so running them everywhere printed a startup warning
     // per context and fell back to guessing a version.
     //

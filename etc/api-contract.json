@@ -317,6 +317,35 @@
     "adapter-unstyled-pivot": [
       "PivotPanel"
     ],
+    "ai": [
+      "AGENT_SCHEMA_VERSION",
+      "AgentApply",
+      "AgentColumn",
+      "AgentManifest",
+      "AgentObservation",
+      "AgentSession",
+      "buildManifest",
+      "CAPABILITY_KEYS",
+      "CapabilityGuide",
+      "CapabilityKey",
+      "CatalogEntry",
+      "CreateAgentSessionOptions",
+      "createAgentSession",
+      "enabledKeys",
+      "ExecuteResult",
+      "guideOf",
+      "JsonSchema",
+      "RowAddressScope",
+      "summaryOf",
+      "TableAgentBridge",
+      "validateSchema",
+      "WritePolicy"
+    ],
+    "ai-react": [
+      "TABLE_AGENT_STATE",
+      "TableAgentOptions",
+      "tableAgent"
+    ],
     "antd/density": [
       "densityChooser"
     ],
@@ -3783,6 +3812,12 @@
     },
     "adapter-unstyled.api.md": {
       "surface": "adapter-unstyled"
+    },
+    "ai.api.md": {
+      "surface": "ai"
+    },
+    "ai-react.api.md": {
+      "surface": "ai-react"
     },
     "cli.api.md": {
       "surface": "cli"

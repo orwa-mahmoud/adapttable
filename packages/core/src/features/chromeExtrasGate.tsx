@@ -107,6 +107,17 @@ function RuntimePublisher<TRow>({
     getRowId: chrome.getRowId,
     rowLabel: (row) => readableRowLabel(chrome, row),
     sortBy: chrome.source.sortBy,
+    query: {
+      page: chrome.source.page,
+      limit: chrome.source.limit,
+      search: chrome.source.search,
+      sortBy: chrome.source.sortBy,
+      sortDir: chrome.source.sortDir,
+      setPage: chrome.source.setPage,
+      setLimit: chrome.source.setLimit,
+      setSearch: chrome.source.setSearch,
+      setSort: chrome.source.setSort,
+    },
     grouping: chrome.grouping,
     groupingState: {
       groupBy: chrome.source.groupBy,

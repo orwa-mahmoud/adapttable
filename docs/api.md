@@ -169,7 +169,7 @@ feature-id order. It publishes through `FeatureStateScope` under a
 `FeatureStateKey` from `featureStateKey`, and anything below reads it with
 `useFeatureState`. A provider sits above the chrome, so it reads the live rows
 and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather than being handed
-them; chrome offers them with `usePublishTableRuntime`. A feature also fills
+them (`featureIds()`, optional `query` for page/search/sort); chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
 `slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`,
@@ -1184,6 +1184,17 @@ buttons, and renaming is an inline input that Escape abandons. See
 `RouterUrlAdapterOptions` is that pair. It depends on no router, so React
 Router, TanStack Router and Next.js all take two lines. See
 [URL state](./url-state.md).
+
+**Adaptive capabilities.** `@adapttable/ai` is the optional, provider-neutral
+agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
+`CapabilityKey`, `WritePolicy`, `RowAddressScope`, `createAgentSession`,
+`CreateAgentSessionOptions`, `buildManifest`, `enabledKeys`, `guideOf`,
+`summaryOf`, `validateSchema`, and the types `AgentApply`, `AgentColumn`,
+`AgentManifest`, `AgentObservation`, `AgentSession`, `CapabilityGuide`,
+`CatalogEntry`, `ExecuteResult`, `JsonSchema`, `TableAgentBridge`.
+`@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions` and
+`TABLE_AGENT_STATE`. See [adaptive capabilities](./agent-capabilities.md) and
+[`@adapttable/ai`](./ai.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a

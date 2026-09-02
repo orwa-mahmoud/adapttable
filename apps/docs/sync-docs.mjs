@@ -58,6 +58,9 @@ export const TITLES = {
   "pivot.md": "React pivot table — rows, columns and measures",
   "formulas.md": "React table formulas — spreadsheet computed columns",
   "server-queries.md": "React table server queries — parse and validate",
+  "agent-capabilities.md":
+    "Adaptive table capabilities — catalog, describe, execute",
+  "ai.md": "@adapttable/ai — tableAgent manifest and session",
   "tree-data.md": "React table tree data — hierarchical rows",
   "column-management.md": "React table column management — rename, pin, resize",
   "saved-views.md": "React table saved views, shareable by URL",
@@ -187,6 +190,10 @@ export const DESCRIPTIONS = {
     "Add spreadsheet-style formulas to a React table — computed columns typed at runtime, with functions, references and live recalculation.",
   "server-queries.md":
     "Parse and validate AdaptTable's URL state on the server — typed queries for filtering, sorting and paging your backend can trust.",
+  "agent-capabilities.md":
+    "What a live AdaptTable advertises to an agent — wired capabilities only, no row dump, a portable catalog/describe/execute contract.",
+  "ai.md":
+    "Reference for @adapttable/ai: tableAgent, the versioned manifest, capability keys, and the three-stage session.",
   "tree-data.md":
     "Render hierarchical rows in a React data table — compose tree({ getChildren }) for expandable data with keyboard access and announcements.",
   "migrate-from-v2.md":

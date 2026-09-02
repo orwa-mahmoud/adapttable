@@ -206,7 +206,7 @@ jobs:
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
+            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           pnpm lint $f --concurrency=1
@@ -233,7 +233,7 @@ jobs:
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
+            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           pnpm typecheck $f
@@ -273,7 +273,7 @@ jobs:
           - name: chakra · mantine
           - name: radix · base-ui
           - name: shadcn · unstyled · bootstrap
-          - name: server · cli · i18n
+          - name: server · cli · i18n · ai
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -288,7 +288,7 @@ jobs:
             "chakra · mantine") f="--filter=@adapttable/chakra --filter=@adapttable/mantine" ;;
             "radix · base-ui") f="--filter=@adapttable/radix --filter=@adapttable/base-ui" ;;
             "shadcn · unstyled · bootstrap") f="--filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            "server · cli · i18n") f="--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
+            "server · cli · i18n · ai") f="--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/ai" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           pnpm test:coverage $f --concurrency=1

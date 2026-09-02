@@ -5465,6 +5465,7 @@ export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>,
 
 // @public
 export interface TableRuntime<TRow = unknown> {
+    featureIds(): readonly string[];
     labels(): Readonly<Record<string, unknown>> | undefined;
     rowAt(localIndex: number): TRow | undefined;
     view(): TableRuntimeView<TRow> | undefined;
@@ -5481,6 +5482,17 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly setGroupBy: (key: string | undefined) => void;
         readonly initializeGroupBy?: (key: string) => void;
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+    };
+    readonly query?: {
+        readonly page: number;
+        readonly limit: number;
+        readonly search: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly setPage: (page: number) => void;
+        readonly setLimit: (limit: number) => void;
+        readonly setSearch: (search: string) => void;
+        readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
     };
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
