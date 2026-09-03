@@ -8,164 +8,111 @@ import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
 export interface AgentApply {
-    // (undocumented)
     addRows?(rows: readonly Record<string, unknown>[]): unknown;
-    // (undocumented)
     applyView?(viewId: string): void;
-    // (undocumented)
     deleteRows?(keys: readonly string[]): unknown;
-    editCells?(edits: readonly {
-        rowKey: string;
-        column: string;
-        value: unknown;
-    }[]): unknown;
-    // (undocumented)
+    editCells?(edits: readonly AgentCellEdit[]): unknown;
     readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
-    // (undocumented)
     reorderRows?(fromKey: string, toKey: string): unknown;
-    // (undocumented)
     resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
-    // (undocumented)
     runExport?(format: string): unknown;
-    // (undocumented)
     setFilters?(filters: unknown): void;
-    // (undocumented)
     setGroupBy?(key: string | undefined): void;
-    // (undocumented)
     setLimit?(limit: number): void;
-    // (undocumented)
     setPage?(page: number): void;
-    // (undocumented)
     setSearch?(search: string): void;
-    // (undocumented)
     setSelection?(ids: readonly string[] | undefined): void;
-    // (undocumented)
     setSort?(key: string | undefined, dir?: "asc" | "desc"): void;
-    stageCells?(edits: readonly {
-        rowKey: string;
-        column: string;
-        value: unknown;
-    }[]): unknown;
+    stageCells?(edits: readonly AgentCellEdit[]): unknown;
+}
+
+// @public
+export interface AgentCellEdit {
+    readonly column: string;
+    readonly rowKey: string;
+    readonly value: unknown;
 }
 
 // @public
 export interface AgentColumn {
-    // (undocumented)
     readonly id: string;
-    // (undocumented)
     readonly label: string;
-    // (undocumented)
     readonly readable: boolean;
-    // (undocumented)
     readonly sortable: boolean;
-    // (undocumented)
     readonly type: string;
-    // (undocumented)
     readonly writable: boolean;
 }
 
 // @public
+export interface AgentLimits {
+    readonly pageMax: number;
+    readonly readMax: number;
+}
+
+// @public
 export interface AgentManifest {
-    // (undocumented)
     readonly capabilities: readonly CapabilityKey[];
-    // (undocumented)
     readonly columns: readonly AgentColumn[];
-    // (undocumented)
-    readonly limits: {
-        readonly pageMax: number;
-        readonly readMax: number;
-    };
-    // (undocumented)
-    readonly policy: {
-        readonly write: WritePolicy;
-        readonly approval: ApprovalPolicy;
-        readonly commit: CommitPolicy;
-    };
-    // (undocumented)
-    readonly rowAddressing: {
-        readonly scope: RowAddressScope;
-        readonly key: string;
-    };
-    // (undocumented)
+    readonly limits: AgentLimits;
+    readonly policy: AgentPolicy;
+    readonly rowAddressing: AgentRowAddressing;
     readonly schemaVersion: string;
     readonly source: TableSourceCapabilities;
-    // (undocumented)
     readonly tableId: string;
-    // (undocumented)
     readonly viewRevision: number;
 }
 
 // @public
 export interface AgentObservation {
-    // (undocumented)
     readonly approval?: ApprovalPolicy;
-    // (undocumented)
     readonly columns: readonly AgentColumn[];
-    // (undocumented)
     readonly commit?: CommitPolicy;
-    // (undocumented)
     readonly featureIds: readonly string[];
-    // (undocumented)
     readonly filters?: unknown;
-    // (undocumented)
     readonly groupBy?: string;
-    // (undocumented)
     readonly hasAdd?: boolean;
-    // (undocumented)
     readonly hasDelete?: boolean;
-    // (undocumented)
     readonly hasEdit: boolean;
-    // (undocumented)
     readonly hasExport: boolean;
-    // (undocumented)
     readonly hasFilters: boolean;
-    // (undocumented)
     readonly hasPagination: boolean;
-    // (undocumented)
     readonly hasReorder: boolean;
-    // (undocumented)
     readonly hasSavedViews?: boolean;
-    // (undocumented)
     readonly hasSearch: boolean;
-    // (undocumented)
     readonly hasSelection?: boolean;
-    // (undocumented)
     readonly hasSort: boolean;
-    // (undocumented)
     readonly limit: number;
-    // (undocumented)
     readonly page: number;
-    // (undocumented)
     readonly pageMax: number;
-    // (undocumented)
     readonly readMax?: number;
-    // (undocumented)
     readonly rowAddressScope: RowAddressScope;
-    // (undocumented)
     readonly search: string;
-    // (undocumented)
     readonly sortBy?: string;
-    // (undocumented)
     readonly sortDir?: "asc" | "desc";
-    // (undocumented)
     readonly source: TableSourceCapabilities;
-    // (undocumented)
     readonly tableId: string;
-    // (undocumented)
     readonly viewRevision: number;
-    // (undocumented)
     readonly writePolicy: WritePolicy;
 }
 
 // @public
+export interface AgentPolicy {
+    readonly approval: ApprovalPolicy;
+    readonly commit: CommitPolicy;
+    readonly write: WritePolicy;
+}
+
+// @public
+export interface AgentRowAddressing {
+    readonly key: string;
+    readonly scope: RowAddressScope;
+}
+
+// @public
 export interface AgentSession {
-    // (undocumented)
     catalog(): readonly CatalogEntry[];
-    // (undocumented)
     describe(key: string): CapabilityGuide;
-    // (undocumented)
     execute(key: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
-    // (undocumented)
     manifest(): AgentManifest;
 }
 
@@ -180,15 +127,10 @@ export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "vi
 
 // @public
 export interface CapabilityGuide {
-    // (undocumented)
     readonly guide: string;
-    // (undocumented)
     readonly input: JsonSchema;
-    // (undocumented)
     readonly key: CapabilityKey;
-    // (undocumented)
     readonly output: JsonSchema;
-    // (undocumented)
     readonly schemaVersion: string;
 }
 
@@ -197,9 +139,7 @@ export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export interface CatalogEntry {
-    // (undocumented)
     readonly key: CapabilityKey;
-    // (undocumented)
     readonly summary: string;
 }
 
@@ -207,92 +147,75 @@ export interface CatalogEntry {
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
+export interface ExecuteError {
+    readonly code: string;
+    readonly message: string;
+}
+
+// @public
 export function executeOpenAITool(session: AgentSession, call: OpenAIToolCall, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
 
 // @public
 export interface ExecuteResult {
-    // (undocumented)
-    readonly error?: {
-        readonly code: string;
-        readonly message: string;
-    };
-    // (undocumented)
+    readonly error?: ExecuteError;
     readonly idempotencyKey: string;
-    // (undocumented)
     readonly ok: boolean;
-    // (undocumented)
     readonly result?: unknown;
-    // (undocumented)
     readonly revision: number;
 }
 
 // @public
 export interface JsonSchema {
-    // (undocumented)
     readonly $schema?: string;
-    // (undocumented)
     readonly additionalProperties?: boolean | JsonSchema;
-    // (undocumented)
     readonly const?: unknown;
-    // (undocumented)
     readonly description?: string;
-    // (undocumented)
     readonly enum?: readonly unknown[];
-    // (undocumented)
     readonly items?: JsonSchema;
-    // (undocumented)
     readonly maximum?: number;
-    // (undocumented)
     readonly minimum?: number;
-    // (undocumented)
     readonly minLength?: number;
-    // (undocumented)
     readonly properties?: Readonly<Record<string, JsonSchema>>;
-    // (undocumented)
     readonly required?: readonly string[];
-    // (undocumented)
     readonly type?: string | readonly string[];
 }
 
 // @public
+export interface OpenAIFunctionDefinition {
+    readonly description: string;
+    readonly name: string;
+    readonly parameters: JsonSchema;
+    readonly strict?: boolean;
+}
+
+// @public
 export interface OpenAIFunctionTool {
-    // (undocumented)
-    readonly function: {
-        readonly name: string;
-        readonly description: string;
-        readonly parameters: JsonSchema;
-        readonly strict?: boolean;
-    };
-    // (undocumented)
+    readonly function: OpenAIFunctionDefinition;
     readonly type: "function";
 }
 
 // @public
 export interface OpenAIToolCall {
-    // (undocumented)
-    readonly function: {
-        readonly name: string;
-        readonly arguments: unknown;
-    };
-    // (undocumented)
+    readonly function: OpenAIToolCallFunction;
     readonly id?: string;
 }
 
-// @public (undocumented)
+// @public
+export interface OpenAIToolCallFunction {
+    readonly arguments: unknown;
+    readonly name: string;
+}
+
+// @public
 export interface OpenAIToolsOptions {
-    // (undocumented)
     readonly deferred?: boolean;
-    // (undocumented)
     readonly strict?: boolean;
 }
 
 // @public
 export interface ResolvedRow {
-    // (undocumented)
     readonly position?: number;
-    // (undocumented)
     readonly rowKey: string;
-    // (undocumented)
     readonly scope: RowAddressScope;
 }
 
@@ -300,51 +223,45 @@ export interface ResolvedRow {
 export type RowAddressScope = "visible" | "page" | "full";
 
 // @public
+export interface RowKeyRef {
+    readonly rowKey: string;
+}
+
+// @public
+export interface RowPositionRef {
+    readonly expectedRevision: number;
+    readonly position: number;
+    readonly scope: RowAddressScope;
+}
+
+// @public
 export interface RowReadQuery {
-    // (undocumented)
     readonly columns?: readonly string[];
-    // (undocumented)
     readonly limit: number;
-    // (undocumented)
     readonly offset: number;
-    // (undocumented)
     readonly scope?: RowAddressScope;
 }
 
 // @public
-export type RowRef = {
-    readonly rowKey: string;
-} | {
-    readonly position: number;
-    readonly scope: RowAddressScope;
-    readonly expectedRevision: number;
-};
+export type RowRef = RowKeyRef | RowPositionRef;
 
 // @public
 export interface RowWindow {
-    // (undocumented)
     readonly limit: number;
-    // (undocumented)
     readonly offset: number;
-    // (undocumented)
     readonly redacted: readonly string[];
-    // (undocumented)
     readonly rows: readonly RowWindowRow[];
 }
 
 // @public
 export interface RowWindowRow {
-    // (undocumented)
     readonly cells: Readonly<Record<string, unknown>>;
-    // (undocumented)
     readonly rowKey: string;
 }
 
 // @public
 export interface TableAgentBridge {
-    // (undocumented)
     attach?(session: AgentSession): void;
-    // (undocumented)
     publish?(manifest: AgentManifest): void;
 }
 
@@ -353,13 +270,9 @@ export function toOpenAITools(session: AgentSession, options?: OpenAIToolsOption
 
 // @public
 export interface WriteExecuteResult {
-    // (undocumented)
     readonly applied: boolean;
-    // (undocumented)
     readonly approval: ApprovalOutcome;
-    // (undocumented)
     readonly proposals: readonly WriteProposal[];
-    // (undocumented)
     readonly results?: readonly WriteRowResult[];
 }
 
@@ -368,28 +281,17 @@ export type WritePolicy = "deny" | "allow";
 
 // @public
 export interface WriteProposal {
-    // (undocumented)
     readonly after?: unknown;
-    // (undocumented)
     readonly before?: unknown;
-    // (undocumented)
     readonly column?: string;
-    // (undocumented)
     readonly rowKey: string;
 }
 
 // @public
 export interface WriteRowResult {
-    // (undocumented)
     readonly column?: string;
-    // (undocumented)
-    readonly error?: {
-        readonly code: string;
-        readonly message: string;
-    };
-    // (undocumented)
+    readonly error?: ExecuteError;
     readonly ok: boolean;
-    // (undocumented)
     readonly rowKey: string;
 }
 

@@ -193,11 +193,8 @@ export interface AgentApprovalListProps {
 
 // @public
 export interface AgentApprovalPending {
-    // (undocumented)
     readonly approve: () => void;
-    // (undocumented)
     readonly proposals: readonly AgentApprovalProposal[];
-    // (undocumented)
     readonly reject: () => void;
 }
 
@@ -6006,6 +6003,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
+        rowActions?: RowAction<TRow>[] | undefined;
+        confirm?: ConfirmHandler | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         locale?: string | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
@@ -6021,12 +6022,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
         onCellFill?: ((edits: CellEdit<TRow>[]) => void) | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         validateRow?: RowValidator<TRow> | undefined;
         onEditRollback?: ((previous: TRow, columnKey: string) => void) | undefined;
         formatEditError?: ((error: unknown) => string) | undefined;
@@ -6073,14 +6072,12 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
-        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
         stickyToolbar?: boolean | undefined;
         scrollToTopOnChange?: boolean | undefined;
         scrollTopGap?: number | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
         selectionStats?: boolean;
         editHistory?: boolean | {
             depth?: number;
@@ -6165,6 +6162,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         rowActionsLayout?: RowActionsLayout | undefined;
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
+        rowActions?: RowAction<TRow>[] | undefined;
+        confirm?: ConfirmHandler | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         locale?: string | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
@@ -6180,12 +6181,10 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
         onCellFill?: ((edits: CellEdit<TRow>[]) => void) | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         validateRow?: RowValidator<TRow> | undefined;
         onEditRollback?: ((previous: TRow, columnKey: string) => void) | undefined;
         formatEditError?: ((error: unknown) => string) | undefined;
@@ -6232,14 +6231,12 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
-        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
         stickyToolbar?: boolean | undefined;
         scrollToTopOnChange?: boolean | undefined;
         scrollTopGap?: number | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
         selectionStats?: boolean;
         editHistory?: boolean | {
             depth?: number;
