@@ -338,6 +338,74 @@ describe("createAgentSession", () => {
     expect(result.error?.code).toBe("apply-failed");
     expect(result.error?.message).toBe("nope");
   });
+
+  it("stringifies a non-Error throw and treats missing args as {}", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: {
+        setPage: () => {
+          throw "nope";
+        },
+      },
+    });
+    const described = await session.execute(
+      "columns.describe",
+      undefined,
+      1,
+      "empty-args"
+    );
+    expect(described.ok).toBe(true);
+    const result = await session.execute(
+      "view.setPage",
+      { page: 2 },
+      1,
+      "throw-string"
+    );
+    expect(result.error?.code).toBe("apply-failed");
+    expect(result.error?.message).toBe("nope");
+  });
+
+  it("reads an empty window when the host does not wire readRows", async () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: [],
+          hasEdit: false,
+        }),
+      apply: {},
+    });
+    const result = await session.execute(
+      "rows.read",
+      { offset: 0, limit: 10, columns: ["name"] },
+      1,
+      "empty-read"
+    );
+    expect(result.ok).toBe(true);
+    expect(result.result).toMatchObject({
+      rows: [],
+      offset: 0,
+      limit: 10,
+    });
+  });
+
+  it("returns undefined from export.run when the host hook is silent", async () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["export-csv"],
+          hasExport: true,
+        }),
+      apply: { runExport: vi.fn() },
+    });
+    const result = await session.execute(
+      "export.run",
+      { format: "csv" },
+      1,
+      "x0"
+    );
+    expect(result.ok).toBe(true);
+    expect(result.result).toBeUndefined();
+  });
 });
 
 describe("validateSchema", () => {
@@ -382,5 +450,12 @@ describe("validateSchema", () => {
         { a: "ok" }
       )
     ).toBeUndefined();
+    expect(validateSchema({ type: "array" }, [])).toBeUndefined();
+    expect(
+      validateSchema(
+        { type: "object", additionalProperties: false },
+        { extra: 1 }
+      )
+    ).toMatch(/not allowed/);
   });
 });

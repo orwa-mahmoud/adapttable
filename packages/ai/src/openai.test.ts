@@ -253,4 +253,24 @@ describe("executeOpenAITool", () => {
     );
     expect(describeNotObject.error?.code).toBe("invalid-arguments");
   });
+
+  it("stringifies a non-Error from describe or argument parsing", async () => {
+    const session: AgentSession = {
+      catalog: () => [],
+      describe: () => {
+        throw "no guide";
+      },
+      execute: vi.fn(),
+      manifest,
+    };
+    const described = await executeOpenAITool(
+      session,
+      { function: { name: "describe", arguments: { key: "view.setPage" } } },
+      1,
+      "desc-throw"
+    );
+    expect(described.ok).toBe(false);
+    expect(described.error?.code).toBe("describe-failed");
+    expect(described.error?.message).toBe("no guide");
+  });
 });
