@@ -54,6 +54,22 @@ import {
 } from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
 
+/** Drop row-interaction props on pinned summary cards. */
+function unlessPinned<T>(
+  side: ReturnType<typeof pinnedSummarySideFromId>,
+  value: T | undefined
+): T | undefined {
+  return side ? undefined : value;
+}
+
+function unlessPinnedMatch(
+  side: ReturnType<typeof pinnedSummarySideFromId>,
+  match: ((id: string) => boolean) | undefined,
+  id: string
+): boolean {
+  return Boolean(unlessPinned(side, match)?.(id));
+}
+
 /**
  * Props for {@link MobileCards}: the card-relevant slice of core's shared
  * render contract (no header/pinning/resize concerns on mobile) plus the
@@ -464,9 +480,9 @@ export function MobileCards<TRow>({
         columns={columns}
         labels={labels}
         confirm={confirm}
-        rowActions={side ? undefined : rowActions}
+        rowActions={unlessPinned(side, rowActions)}
         rowActionsLayout={rowActionsLayout}
-        renderRowActions={side ? undefined : renderRowActions}
+        renderRowActions={unlessPinned(side, renderRowActions)}
         className={rowClassName?.(row, index)}
         style={resolveRowStyle(rowStyle, rowHeight, row, index)}
         styleSignature={rowStyleSignature(
@@ -474,20 +490,15 @@ export function MobileCards<TRow>({
         )}
         flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
         isCellFlashing={isCellFlashing}
-        selected={side ? false : selection ? selection.isSelected(id) : false}
-        expanded={side ? false : expansion ? expansion.isExpanded(id) : false}
-        onToggleSelect={
-          side ? undefined : selection ? selection.toggle : undefined
-        }
-        onToggleExpand={
-          side
-            ? undefined
-            : expansion && renderRowDetail
-              ? expansion.toggle
-              : undefined
-        }
-        renderDetail={side ? undefined : renderRowDetail}
-        onRowClick={side ? undefined : onRowClick}
+        selected={unlessPinnedMatch(side, selection?.isSelected, id)}
+        expanded={unlessPinnedMatch(side, expansion?.isExpanded, id)}
+        onToggleSelect={unlessPinned(side, selection?.toggle)}
+        onToggleExpand={unlessPinned(
+          side,
+          renderRowDetail ? expansion?.toggle : undefined
+        )}
+        renderDetail={unlessPinned(side, renderRowDetail)}
+        onRowClick={unlessPinned(side, onRowClick)}
         measureElement={measureElement}
         cardPadding={cardPadding}
         cardGap={cardGap}
@@ -495,14 +506,14 @@ export function MobileCards<TRow>({
         rows={rows}
         getRowId={getRowId}
         editingSignature={rowEditingSignature(editing, id)}
-        treeEntry={side ? undefined : treeEntry}
-        onToggleTree={side ? undefined : tree?.expansion.toggle}
-        rowReorder={side ? undefined : rowReorder}
+        treeEntry={unlessPinned(side, treeEntry)}
+        onToggleTree={unlessPinned(side, tree?.expansion.toggle)}
+        rowReorder={unlessPinned(side, rowReorder)}
         windowStart={windowStart}
         rowCount={rows.length}
         setSize={cardSetSize}
         reorderSignature={rowReorderSignature(rowReorder, id, index)}
-        renderCard={side ? undefined : renderCard}
+        renderCard={unlessPinned(side, renderCard)}
         part={side ? pinnedSummaryPart(side) : undefined}
         ariaLabel={side ? labels.pinnedSummaryRow : undefined}
       />
