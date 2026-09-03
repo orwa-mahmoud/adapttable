@@ -350,8 +350,6 @@ export function FilterHeaderTrigger<TRow>(
           <div
             {...sessionProps}
             data-adapttable-part="filter-header-cell"
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={(event) => event.stopPropagation()}
             style={{
               position: "fixed",
               top: anchor.top,
