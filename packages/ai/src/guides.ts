@@ -273,10 +273,20 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "rows.reorder": "Reorder rows through the host callback.",
 };
 
+/**
+ * One-line English summary for a capability key.
+ *
+ * @public
+ */
 export function summaryOf(key: CapabilityKey): string {
   return SUMMARIES[key];
 }
 
+/**
+ * Full describe() guide for a capability key, including input/output schemas.
+ *
+ * @public
+ */
 export function guideOf(key: CapabilityKey): CapabilityGuide {
   return { schemaVersion: AGENT_SCHEMA_VERSION, ...GUIDES[key] };
 }

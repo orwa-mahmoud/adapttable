@@ -10,20 +10,36 @@ import type { AgentSession, ExecuteResult } from "./types";
  * `"writes"`); `commit` is `"stage"` | `"immediate"` (default `"stage"`).
  * Those fields are not on the envelope — the session already validates
  * arguments, revision and idempotency.
+ *
+ * @public
  */
 export interface AgentEnvelope {
+  /** Schema family. Must be `adapttable.agent.v1`. */
   readonly schemaVersion: "adapttable.agent.v1";
+  /** Table identity the session was created for. */
   readonly tableId: string;
+  /** Capability key to run. */
   readonly key: string;
+  /** Arguments for that capability. */
   readonly args: unknown;
+  /** View revision the caller observed. */
   readonly expectedRevision: number;
+  /** Caller-supplied replay key. */
   readonly idempotencyKey: string;
 }
 
-/** Host approval gate. Default `"writes"` when 11-B chrome is composed. */
+/**
+ * Host approval gate. Default `"writes"` when 11-B chrome is composed.
+ *
+ * @public
+ */
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
-/** Whether the host apply path persists or only records a proposal. */
+/**
+ * Whether the host apply path persists or only records a proposal.
+ *
+ * @public
+ */
 export type CommitPolicy = "stage" | "immediate";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -34,6 +50,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * Parse an unknown JSON body into an {@link AgentEnvelope}.
  *
  * Throws on a malformed payload. Argument rules stay in `session.execute`.
+ *
+ * @public
  */
 export function parseEnvelope(input: unknown): AgentEnvelope {
   if (!isRecord(input)) {
@@ -72,6 +90,8 @@ export function parseEnvelope(input: unknown): AgentEnvelope {
 
 /**
  * Identity check, then `session.execute`. No second argument validator.
+ *
+ * @public
  */
 export function executeEnvelope(
   session: AgentSession,

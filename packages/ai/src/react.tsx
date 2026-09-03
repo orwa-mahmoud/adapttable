@@ -61,29 +61,56 @@ const PAGE_ONLY_SOURCE = {
   totalCount: "loaded" as const,
 };
 
+/**
+ * Feature-state key for the live {@link AgentSession}.
+ *
+ * @public
+ */
 export const TABLE_AGENT_STATE = featureStateKey<AgentSession>("table-agent");
 
+/**
+ * Per-column overrides the React feature merges onto live columns.
+ *
+ * @public
+ */
+export interface TableAgentColumnPatch {
+  /** Whether `rows.read` may return this column. */
+  readonly readable?: boolean;
+  /** Whether `edit.cells` may write this column. */
+  readonly writable?: boolean;
+  /** Declared value type. */
+  readonly type?: string;
+  /** Whether the column accepts sort. */
+  readonly sortable?: boolean;
+  /** Display label. */
+  readonly label?: string;
+}
+
+/**
+ * Options for {@link tableAgent}.
+ *
+ * @public
+ */
 export interface TableAgentOptions {
+  /** Host-supplied table identity. */
   readonly tableId: string;
+  /** Whether host callbacks already authorize writes. */
   readonly writePolicy?: WritePolicy;
+  /** When a write must be confirmed. */
   readonly approval?: ApprovalPolicy;
+  /** Whether an approved write stages or persists. */
   readonly commit?: CommitPolicy;
+  /** Host confirmation. When set, chrome is skipped. */
   readonly onApprove?: (proposal: unknown) => Promise<boolean>;
-  readonly columns?: Readonly<
-    Record<
-      string,
-      Partial<
-        Pick<
-          AgentColumn,
-          "readable" | "writable" | "type" | "sortable" | "label"
-        >
-      >
-    >
-  >;
+  /** Per-column readability, writability, and labels. */
+  readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
+  /** Largest `rows.read` window. */
   readonly readMax?: number;
+  /** Host callbacks for manifest and session attach. */
   readonly bridge?: TableAgentBridge;
   /** Host- or test-supplied observation. Live tables omit this. */
   readonly observe?: () => AgentObservation;
+  /** Extra apply callbacks the live table does not already expose. */
   readonly apply?: AgentApply;
 }
 

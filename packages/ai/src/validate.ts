@@ -72,6 +72,8 @@ function checkObject(
  *
  * The describe() schemas stay inside this subset so execute() does not
  * need a third-party validator.
+ *
+ * @public
  */
 export function validateSchema(
   schema: JsonSchema,

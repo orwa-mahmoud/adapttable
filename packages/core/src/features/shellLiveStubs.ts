@@ -18,7 +18,7 @@ import type { ColumnWindow } from "../virtual/useColumnWindow";
 const noop = (): void => undefined;
 const empty = (): Record<string, unknown> => ({});
 
-/** Find state when {@link findInTable} is not composed. */
+/** Find state when `findInTable` is not composed. @public */
 export const DISABLED_FIND: FindInTableState = {
   open: false,
   setOpen: noop,
@@ -32,7 +32,7 @@ export const DISABLED_FIND: FindInTableState = {
   previous: noop,
 };
 
-/** Grid focus when {@link cellNavigation} is not composed. */
+/** Grid focus when `cellNavigation` is not composed. @public */
 export const DISABLED_GRID_FOCUS: GridFocusState = {
   enabled: false,
   active: null,
@@ -57,7 +57,7 @@ export const DISABLED_GRID_FOCUS: GridFocusState = {
   copyCells: noop,
 };
 
-/** Grid focus when {@link cellNavigation} is not composed. */
+/** Grid focus when `cellNavigation` is not composed. @public */
 export function disabledGridFocus(): GridFocusState {
   return DISABLED_GRID_FOCUS;
 }
@@ -67,8 +67,10 @@ export function disabledGridFocus(): GridFocusState {
  *
  * A paged or column-windowed table still has to name its real size — assistive
  * tech can only count the slice in the DOM. That is core table accessibility,
- * not cell navigation: composing {@link cellNavigation} must not be required
+ * not cell navigation: composing `cellNavigation` must not be required
  * for `aria-rowcount` / `aria-colcount` / the matching indices.
+ *
+ * @public
  */
 export function windowedTableAria(options: {
   rowCount: number;
@@ -103,17 +105,19 @@ export function windowedTableAria(options: {
 }
 
 /**
- * Selection figures before {@link selectionStats} computes them.
+ * Selection figures before `selectionStats` computes them.
  *
  * A function rather than a constant: `const x: SelectionStats | null = null`
  * narrows to `null` at every use, which would type the shell's field as `null`
  * and leave an adapter unable to read the figures the live slot overlays.
+ *
+ * @public
  */
 export function disabledSelectionStats(): SelectionStats | null {
   return null;
 }
 
-/** Export button state when {@link exportCsv} is not composed. */
+/** Export button state when `exportCsv` is not composed. @public */
 export const DISABLED_EXPORT: ExportHandlerState = {
   onExportCsv: undefined,
   exportBusy: false,
@@ -125,7 +129,7 @@ export const DISABLED_EXPORT: ExportHandlerState = {
   exportDisabledReason: "",
 };
 
-/** Fullscreen when {@link fullscreen} is not composed. */
+/** Fullscreen when `fullscreen` is not composed. @public */
 export const DISABLED_FULLSCREEN: FullscreenState = {
   active: false,
   supported: false,
@@ -134,7 +138,7 @@ export const DISABLED_FULLSCREEN: FullscreenState = {
   container: undefined,
 };
 
-/** History when {@link editHistory} is not composed. */
+/** History when `editHistory` is not composed. @public */
 export function disabledHistory<TRow>(): EditHistoryState<TRow> {
   return {
     enabled: false,
@@ -147,7 +151,7 @@ export function disabledHistory<TRow>(): EditHistoryState<TRow> {
   };
 }
 
-/** Every column, no spacers — the lean table never windows sideways. */
+/** Every column, no spacers — the lean table never windows sideways. @public */
 export function disabledColumnWindow<TRow>(
   columns: readonly ColumnDef<TRow>[]
 ): ColumnWindow<TRow> {

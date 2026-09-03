@@ -20,8 +20,11 @@ import type { TableLabels } from "../types";
  * @public
  */
 export interface AgentApprovalPending {
+  /** Proposed writes waiting for a human decision. */
   readonly proposals: readonly AgentApprovalProposal[];
+  /** Confirm the proposals and continue the host write path. */
   readonly approve: () => void;
+  /** Dismiss the proposals without writing. */
   readonly reject: () => void;
 }
 

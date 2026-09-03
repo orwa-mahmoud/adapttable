@@ -11,32 +11,70 @@ export {
 } from "./keys";
 export type * from "./types";
 
-/** Chat Completions function-tool shape. No `openai` package dependency. */
-export interface OpenAIFunctionTool {
-  readonly type: "function";
-  readonly function: {
-    readonly name: string;
-    readonly description: string;
-    readonly parameters: JsonSchema;
-    readonly strict?: boolean;
-  };
+/**
+ * Function payload inside an OpenAI tool definition.
+ *
+ * @public
+ */
+export interface OpenAIFunctionDefinition {
+  /** Capability key, or a portable trio name. */
+  readonly name: string;
+  /** English tool description. */
+  readonly description: string;
+  /** JSON Schema for the tool arguments. */
+  readonly parameters: JsonSchema;
+  /** When true, the model must honour `additionalProperties: false`. */
+  readonly strict?: boolean;
 }
 
+/**
+ * Chat Completions function-tool shape. No `openai` package dependency.
+ *
+ * @public
+ */
+export interface OpenAIFunctionTool {
+  /** Always `"function"`. */
+  readonly type: "function";
+  /** Named function the model may call. */
+  readonly function: OpenAIFunctionDefinition;
+}
+
+/**
+ * Options for {@link toOpenAITools}.
+ *
+ * @public
+ */
 export interface OpenAIToolsOptions {
+  /** Default true. Sets `additionalProperties: false` when unset on the schema. */
   readonly strict?: boolean;
+  /** Return only catalog / describe / execute. */
   readonly deferred?: boolean;
+}
+
+/**
+/**
+ * Function payload inside an OpenAI tool call.
+ *
+ * @public
+ */
+export interface OpenAIToolCallFunction {
+  /** Capability key, or a portable trio name. */
+  readonly name: string;
+  /** JSON string from the model, or an already-parsed value. */
+  readonly arguments: unknown;
 }
 
 /**
  * OpenAI tool-call payload. `function.arguments` is a JSON string from the
  * model or an already-parsed value.
+ *
+ * @public
  */
 export interface OpenAIToolCall {
+  /** Provider-assigned call id, when present. */
   readonly id?: string;
-  readonly function: {
-    readonly name: string;
-    readonly arguments: unknown;
-  };
+  /** Function the model invoked. */
+  readonly function: OpenAIToolCallFunction;
 }
 
 const PORTABLE_TRIO: readonly {
@@ -110,6 +148,8 @@ function asTool(
  * described schema does not already declare it. `deferred` returns only
  * the portable catalog / describe / execute trio — `describe` is how the
  * runtime learns the rest.
+ *
+ * @public
  */
 export function toOpenAITools(
   session: AgentSession,
@@ -220,6 +260,8 @@ function runPortableExecute(
  * Map an OpenAI tool call onto the session. Capability names go to
  * `session.execute`. The deferred trio (`catalog` / `describe` / `execute`)
  * calls those session methods. No second argument validator.
+ *
+ * @public
  */
 export async function executeOpenAITool(
   session: AgentSession,

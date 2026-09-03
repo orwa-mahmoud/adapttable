@@ -18,6 +18,8 @@ const FEATURE_FOR: Partial<Record<CapabilityKey, string>> = {
  *
  * Package presence never participates. A grouping key stays off when the
  * source says grouping is false, even if the feature id is listed.
+ *
+ * @public
  */
 export function enabledKeys(observation: AgentObservation): CapabilityKey[] {
   const features = new Set(observation.featureIds);
@@ -73,7 +75,11 @@ function isEnabled(
   }
 }
 
-/** Deterministic manifest for one observation. */
+/**
+ * Deterministic manifest for one observation.
+ *
+ * @public
+ */
 export function buildManifest(observation: AgentObservation): AgentManifest {
   return {
     schemaVersion: AGENT_SCHEMA_VERSION,

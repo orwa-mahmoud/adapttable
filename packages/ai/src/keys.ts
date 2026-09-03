@@ -5,7 +5,7 @@
  * are for people; execution is locale-independent.
  */
 
-/** Manifest and describe/execute schema family. */
+/** Manifest and describe/execute schema family. @public */
 export const AGENT_SCHEMA_VERSION = "adapttable.agent.v1";
 
 /**
@@ -34,10 +34,18 @@ export const CAPABILITY_KEYS = [
   "rows.reorder",
 ] as const;
 
-/** One advertised operation. */
+/**
+ * One advertised operation.
+ *
+ * @public
+ */
 export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
-/** Whether the host already authorized data writes through its callbacks. */
+/**
+ * Whether the host already authorized data writes through its callbacks.
+ *
+ * @public
+ */
 export type WritePolicy = "deny" | "allow";
 
 /**
@@ -46,6 +54,8 @@ export type WritePolicy = "deny" | "allow";
  * - `writes` — every mutating key (default)
  * - `destructive` — only `rows.delete` (and future destructive keys)
  * - `never` — skip chrome and `onApprove`; still validate and honour commit
+ *
+ * @public
  */
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
@@ -54,13 +64,19 @@ export type ApprovalPolicy = "writes" | "destructive" | "never";
  *
  * - `stage` — dirty/batch path; Save still belongs to the reader (default)
  * - `immediate` — invoke the host callback now
+ *
+ * @public
  */
 export type CommitPolicy = "stage" | "immediate";
 
-/** How an agent may address rows without receiving the whole dataset. */
+/**
+ * How an agent may address rows without receiving the whole dataset.
+ *
+ * @public
+ */
 export type RowAddressScope = "visible" | "page" | "full";
 
-/** Keys that mutate table data (not ordinary view state). */
+/** Keys that mutate table data (not ordinary view state). @public */
 export const WRITE_KEYS = [
   "edit.cells",
   "rows.add",
@@ -68,9 +84,11 @@ export const WRITE_KEYS = [
   "rows.reorder",
 ] as const;
 
+/** One mutating capability key. @public */
 export type WriteKey = (typeof WRITE_KEYS)[number];
 
-/** Keys that remove records. */
+/** Keys that remove records. @public */
 export const DESTRUCTIVE_KEYS = ["rows.delete"] as const;
 
+/** One destructive capability key. @public */
 export type DestructiveKey = (typeof DESTRUCTIVE_KEYS)[number];

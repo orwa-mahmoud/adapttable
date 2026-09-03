@@ -10,17 +10,33 @@ export {
 } from "./keys";
 export type * from "./types";
 
-/** Provider-neutral function-tool definition. `name` is the capability key. */
+/**
+ * Provider-neutral function-tool definition. `name` is the capability key.
+ *
+ * @public
+ */
 export interface JsonFunctionTool {
+  /** Capability key. */
   readonly name: string;
+  /** English tool description from `describe`. */
   readonly description: string;
+  /** JSON Schema for the tool arguments. */
   readonly parameters: JsonSchema;
 }
 
+/**
+ * One provider-neutral tool invocation.
+ *
+ * @public
+ */
 export interface JsonToolCall {
+  /** Capability key. */
   readonly name: string;
+  /** Arguments for that capability. */
   readonly arguments: unknown;
+  /** View revision the caller observed. */
   readonly expectedRevision: number;
+  /** Caller-supplied replay key. */
   readonly idempotencyKey: string;
 }
 
@@ -28,6 +44,8 @@ export interface JsonToolCall {
  * Map `session.catalog()` onto JSON function tools, in catalog order.
  *
  * Parameters come from `describe(key).input`. Names are never translated.
+ *
+ * @public
  */
 export function toJsonTools(
   session: AgentSession
@@ -42,7 +60,11 @@ export function toJsonTools(
   });
 }
 
-/** Thin mapper — `session.execute` owns validation. */
+/**
+ * Thin mapper — `session.execute` owns validation.
+ *
+ * @public
+ */
 export function executeJsonTool(
   session: AgentSession,
   call: JsonToolCall

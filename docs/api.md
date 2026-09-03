@@ -1192,12 +1192,14 @@ agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 `CapabilityKey`, `WritePolicy`, `ApprovalPolicy`, `CommitPolicy`,
 `RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
 `buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`, and
-the types `AgentApply`, `AgentColumn`, `AgentManifest`, `AgentObservation`,
+the types `AgentApply`, `AgentCellEdit`, `AgentColumn`, `AgentLimits`,
+`AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
 `AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
-`ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowReadQuery`, `RowRef`,
-`RowWindow`, `RowWindowRow`, `TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`,
-`WriteRowResult`. `@adapttable/ai/react` exports `tableAgent`,
-`TableAgentOptions` and `TABLE_AGENT_STATE`. Each published kit exports
+`ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
+`RowPositionRef`, `RowReadQuery`, `RowRef`, `RowWindow`, `RowWindowRow`,
+`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`.
+`@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
+`TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
 exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE`, `AgentApprovalPending`,
@@ -1206,8 +1208,9 @@ exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
 `executeJsonTool`, `JsonToolCall`, `parseEnvelope`, `executeEnvelope`,
 `AgentEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
-`OpenAIFunctionTool`, `OpenAIToolsOptions`, `executeOpenAITool`,
-`OpenAIToolCall`), `@adapttable/ai/mcp` (`toMcpTools`, `McpTool`,
+`OpenAIFunctionTool`, `OpenAIFunctionDefinition`, `OpenAIToolsOptions`,
+`executeOpenAITool`, `OpenAIToolCall`, `OpenAIToolCallFunction`),
+`@adapttable/ai/mcp` (`toMcpTools`, `McpTool`,
 `toMcpResources`, `McpResource`, `mcpListChanged`, `executeMcpTool`). See
 [adaptive capabilities](./agent-capabilities.md),
 [`@adapttable/ai`](./ai.md) and [agent integrations](./ai-integrations.md).

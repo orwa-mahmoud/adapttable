@@ -15,22 +15,36 @@ export {
 } from "./keys";
 export type * from "./types";
 
-/** MCP `tools/list` item. No `@modelcontextprotocol/sdk` dependency. */
+/**
+ * MCP `tools/list` item. No `@modelcontextprotocol/sdk` dependency.
+ *
+ * @public
+ */
 export interface McpTool {
+  /** Capability key. */
   readonly name: string;
+  /** English tool description from `describe`. */
   readonly description: string;
+  /** JSON Schema for the tool arguments. */
   readonly inputSchema: JsonSchema;
 }
 
 /**
  * MCP resource plus the readable body. `text` is `describe(key)` JSON so a
  * host can serve `resources/read` without a second lookup.
+ *
+ * @public
  */
 export interface McpResource {
+  /** `adapttable://table/{tableId}/capability/{key}`. */
   readonly uri: string;
+  /** Capability key. */
   readonly name: string;
+  /** English description from `describe`. */
   readonly description: string;
+  /** Always JSON. */
   readonly mimeType: "application/json";
+  /** Serialized `describe(key)` guide. */
   readonly text: string;
 }
 
@@ -44,6 +58,8 @@ function capabilityUri(tableId: string, key: string): string {
  * Hosts that cannot refresh a dynamic tool list still have the portable
  * trio on the session (`catalog` / `describe` / `execute`) and on the
  * OpenAI deferred adapter.
+ *
+ * @public
  */
 export function toMcpTools(session: AgentSession): readonly McpTool[] {
   return session.catalog().map((entry) => {
@@ -58,6 +74,8 @@ export function toMcpTools(session: AgentSession): readonly McpTool[] {
 
 /**
  * One resource per enabled capability. Body is the `describe(key)` guide.
+ *
+ * @public
  */
 export function toMcpResources(session: AgentSession): readonly McpResource[] {
   const tableId = session.manifest().tableId;
@@ -77,6 +95,8 @@ export function toMcpResources(session: AgentSession): readonly McpResource[] {
  * Whether an MCP host should emit `notifications/tools/list_changed`.
  *
  * True when the advertised capability list changes (membership or order).
+ *
+ * @public
  */
 export function mcpListChanged(
   prev: AgentManifest,
@@ -88,7 +108,11 @@ export function mcpListChanged(
   return left.some((key, index) => key !== right[index]);
 }
 
-/** Thin mapper — `session.execute` owns validation. */
+/**
+ * Thin mapper — `session.execute` owns validation.
+ *
+ * @public
+ */
 export function executeMcpTool(
   session: AgentSession,
   name: string,

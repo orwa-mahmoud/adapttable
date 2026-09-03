@@ -31,6 +31,11 @@ import type {
 } from "./types";
 import { validateSchema } from "./validate";
 
+/**
+ * Inputs for {@link createAgentSession}.
+ *
+ * @public
+ */
 export interface CreateAgentSessionOptions {
   /** Latest wired state. Called on every catalog/describe/execute. */
   observe: () => AgentObservation;
@@ -84,6 +89,8 @@ class ApplyError extends Error {
  *
  * Runtimes that support typed tools can wrap each `describe` result; the
  * generic catalog/describe/execute calls stay the portable fallback.
+ *
+ * @public
  */
 export function createAgentSession(
   options: CreateAgentSessionOptions
