@@ -11,6 +11,11 @@ coverage/
 .turbo/
 /node-support-packs/
 
+# Stryker mutation testing — generated reports and scratch.
+.stryker-tmp/
+reports/mutation/
+**/reports/mutation/
+
 # SonarQube / sonar-scanner local output. Never committed.
 .scannerwork/
 .sonar/
