@@ -7368,7 +7368,10 @@ The root entry stays React-free. `@adapttable/ai/react` is only for
 Transform any agent's action format, then call `session.execute`.
 
 ```ts
-import { runCustomBridge, createBridgeSession } from "../examples/ai-custom-bridge";
+import {
+  runCustomBridge,
+  createBridgeSession,
+} from "../examples/ai-custom-bridge";
 
 const session = createBridgeSession({
   setFilters: (filters) => applyHostFilters(filters),

@@ -1,8 +1,8 @@
 # AdaptTable v3 release receipt
 
 Prepared locally on the `v3` branch. Owner reviews before push or publish.
-Item 15 folds the full gate and Sonar measures into the evidence block at
-the end.
+Item 8 is the final punch-list gate; its command totals and Sonar measures
+are in the evidence block at the end.
 
 ## Removals and replacements
 
@@ -39,14 +39,14 @@ plain-adapter ceiling is **80 KB** and at least 35% below the item-1
 baseline. FAQ / getting-started / comparison figures are the measurements
 `scripts/published-figures.mjs` checks against this run.
 
-Measured 2026-09-03 from `pnpm budget` (this tree):
+Measured 2026-09-04 from `pnpm budget` (this tree):
 
 | Import                         | min+gzip              |
 | ------------------------------ | --------------------- |
 | core simple                    | 19.4 KB               |
-| core every export              | 82.7 KB               |
-| mantine / mui / unstyled table | 62.0 / 60.8 / 62.5 KB |
-| chakra / antd / radix          | 63.4 / 64.0 / 63.4 KB |
+| core every export              | 83.1 KB               |
+| mantine / mui / unstyled table | 61.9 / 60.8 / 62.4 KB |
+| chakra / antd / radix          | 63.3 / 64.1 / 63.3 KB |
 | base-ui / shadcn               | 70.4 / 66.4 KB        |
 | mui + `standardFeatures()`     | 112.4 KB              |
 | mui all features               | 113.0 KB              |
@@ -87,7 +87,7 @@ config each package already ships. `pnpm api:check` is the gate.
 
 | Command                                        | What it proves                              |
 | ---------------------------------------------- | ------------------------------------------- |
-| `pnpm check`                                   | Full library gate (item 15)                 |
+| `pnpm check`                                   | Full library gate (item 8)                  |
 | `pnpm test:e2e`                                | Chromium against the built showcase         |
 | `pnpm test:e2e:nightly`                        | Firefox, WebKit, Pixel 5                    |
 | `pnpm test:e2e:axe`                            | Serious/critical axe on kit + feature pages |
@@ -124,19 +124,21 @@ npm trusted publisher, org 2FA, second owner, and an offline recovery
 note — parked under item 13. This tree publishes through GitHub OIDC and
 does not read `NPM_TOKEN`.
 
-## Item 15 evidence
+## Item 8 evidence
 
-Recorded 2026-09-03 on `v3` at `9a4feb9c`.
+Recorded 2026-09-04 on `v3` at `b3173496` (gate tree; this receipt is the following commit).
 
-| Gate                             | Result                                                                                                         |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `pnpm check`                     | EXIT 0. No lint or API-Extractor `Warning:` lines.                                                             |
-| Bundle budgets                   | 72 fixtures within budget. 9 published size figures match. Isolation: 72 packed graphs clean.                  |
-| `pnpm test:e2e`                  | 1444 passed (Chromium + chromium-dev).                                                                         |
-| `pnpm verify:release`            | EXIT 0: migrate:rehearse (8 kits × preset + minimal + refusals), consumer:harness, peer:floors (6 kit floors). |
-| `pnpm sonar:coverage`            | EXIT 0. `fix-lcov-paths` rewrote 13 lcov files.                                                                |
-| sonar-scanner → `localhost:9000` | EXECUTION SUCCESS. CE task `2007812e-0692-402a-b509-166f88eac086` → SUCCESS.                                   |
-| Open issues (`resolved=false`)   | **0**                                                                                                          |
-| Hotspots `TO_REVIEW`             | **0**                                                                                                          |
+| Gate                               | Result                                                                                                                        |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                       | EXIT 0. No lint or API-Extractor `Warning:` lines.                                                                            |
+| Bundle budgets                     | 72 fixtures within budget. 9 published size figures match. Isolation: 72 packed graphs clean.                                 |
+| `pnpm test:e2e`                    | 1579 passed (Chromium + chromium-dev).                                                                                        |
+| Packed Node-support                | 13 published packages install and load on Node 24.19.0 and Node 22.12.0.                                                      |
+| `pnpm verify:release`              | EXIT 0: migrate:rehearse (8 kits × preset + minimal + refusals), consumer:harness, peer:floors (6 kit floors).                |
+| Two `pnpm build && pnpm api:check` | Identical 718 report/declaration hashes. Combined SHA-256 `8e2c69869f4a3569120d2124d9ae4b47d967e879d87dd9563b669b0260853e2f`. |
+| `pnpm sonar:coverage`              | EXIT 0. `fix-lcov-paths` rewrote 13 lcov files.                                                                               |
+| sonar-scanner → `localhost:9000`   | EXECUTION SUCCESS. CE task `70d44982-9910-421c-9adb-bee923c6c787` → SUCCESS (`02059a78-a58d-41ad-ad74-124b335b4ca2`).         |
+| Open issues (`resolved=false`)     | **0**                                                                                                                         |
+| Hotspots `TO_REVIEW`               | **0**                                                                                                                         |
 
-The one leftover maintainability smell from the prior scan (`typescript:S6478` on the unstyled export-progress surface defined inside the button) is gone: that surface is a module-scope slot that reads `useClassNames()`. No new suppressions. Coverage floors and budgets were not lowered.
+No new suppressions. Coverage floors and budgets were not lowered. Re-review of items 1–7 after this gate found no new boundary defects; the snag log still has no open entries. Publishing remains blocked on the parked npm trusted-publisher owner actions.
