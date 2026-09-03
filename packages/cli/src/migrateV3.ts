@@ -264,11 +264,46 @@ function rewriteCoreImports(source: string): {
   return { code, movedImports, issues };
 }
 
+/** Next index after a quoted JSX attribute, or -1 when the quote never closes. */
+function skipQuoted(source: string, from: number, quote: string): number {
+  let i = from + 1;
+  while (i < source.length) {
+    const ch = source[i];
+    if (ch === "\\" && quote !== "`") {
+      i += 2;
+      continue;
+    }
+    if (ch === quote) return i + 1;
+    i += 1;
+  }
+  return -1;
+}
+
+/**
+ * Index of the `>` that ends an opening JSX tag, counting `{…}` so a `>`
+ * inside `rowKey={(row) => row.id}` is not treated as the tag closer.
+ */
+function openingTagEnd(source: string, afterName: number): number {
+  let i = afterName;
+  let depth = 0;
+  while (i < source.length) {
+    const ch = source[i];
+    if (ch === '"' || ch === "'" || ch === "`") {
+      i = skipQuoted(source, i, ch);
+      if (i < 0) return -1;
+      continue;
+    }
+    if (ch === "{") depth += 1;
+    else if (ch === "}") depth = Math.max(0, depth - 1);
+    else if (ch === ">" && depth === 0) return i;
+    i += 1;
+  }
+  return -1;
+}
+
 /**
  * Opening `<DataTable …>` / `<DataTable …/>` spans, including props whose
- * values contain `=>` or nested `>`. A naive `[\s\S]*?>` stops at the first
- * `>` inside `rowKey={(row) => row.id}` and misses every enabling prop after
- * it.
+ * values contain `=>` or nested `>`.
  */
 function eachDataTableOpeningTag(
   source: string,
@@ -277,41 +312,8 @@ function eachDataTableOpeningTag(
   const start = /<(?:[A-Za-z_$][\w$]*\.)*DataTable\b/g;
   for (const match of source.matchAll(start)) {
     const from = match.index;
-    let i = from + match[0].length;
-    let depth = 0;
-    let quote: string | null = null;
-    while (i < source.length) {
-      const ch = source[i];
-      if (quote) {
-        if (ch === "\\" && quote !== "`") {
-          i += 2;
-          continue;
-        }
-        if (ch === quote) quote = null;
-        i += 1;
-        continue;
-      }
-      if (ch === '"' || ch === "'" || ch === "`") {
-        quote = ch;
-        i += 1;
-        continue;
-      }
-      if (ch === "{") {
-        depth += 1;
-        i += 1;
-        continue;
-      }
-      if (ch === "}") {
-        depth = Math.max(0, depth - 1);
-        i += 1;
-        continue;
-      }
-      if (ch === ">" && depth === 0) {
-        visit(source.slice(from, i + 1), from);
-        break;
-      }
-      i += 1;
-    }
+    const end = openingTagEnd(source, from + match[0].length);
+    if (end >= 0) visit(source.slice(from, end + 1), from);
   }
 }
 
