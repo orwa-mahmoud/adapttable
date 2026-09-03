@@ -506,7 +506,7 @@ jobs:
           name: showcase-dist
           path: apps/showcase/dist/
       - name: Run E2E smoke suite
-        run: pnpm exec playwright test --shard=${{ matrix.shard }}/9
+        run: pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
         env:
           SHOWCASE_SKIP_BUILD: "1"
       - name: Upload report on failure
