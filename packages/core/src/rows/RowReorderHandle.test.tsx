@@ -195,14 +195,7 @@ describe("RowReorderHandle menu", () => {
           label: "Move to group…",
           targets: [{ id: "b", label: "B", request }],
         }),
-        labels: {
-          ...LABELS,
-          confirmRowMoveTitle: "Confirm row move",
-          confirmRowMoveDescription: (row, from, to) =>
-            `Move ${row} from ${from} to ${to}?`,
-          confirmRowMove: "Move",
-          cancel: "Cancel",
-        },
+        labels: LABELS,
         rowAt: () => ROW,
       })
     );

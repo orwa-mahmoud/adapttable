@@ -9,8 +9,12 @@ import { useTableChrome } from "../useTableChrome";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
 import { batchEditing } from "./editing";
 import { grouping } from "./grouping";
-import { FeatureProviders, useTableRuntime } from "./providers";
-import { applyTableFeatures } from "./tableFeature";
+import {
+  FeatureProviders,
+  type TableRuntimeView,
+  useTableRuntime,
+} from "./providers";
+import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
 
 interface Row {
@@ -24,23 +28,21 @@ const ROWS: Row[] = [
   { id: "b", name: "Bob", score: 4 },
 ];
 
-function Probe<TRow>({
+function Probe({
   features,
   columns,
   extraProps,
   onView,
 }: {
-  features: Parameters<typeof applyTableFeatures<TRow>>[0]["features"];
-  columns: readonly ColumnDef<TRow>[];
-  extraProps?: Record<string, unknown>;
-  onView: (
-    view: ReturnType<ReturnType<typeof useTableRuntime<TRow>>["view"]>
-  ) => void;
+  features: readonly TableFeature<Row>[];
+  columns: ColumnDef<Row>[];
+  extraProps?: { groupBy?: string };
+  onView: (view: TableRuntimeView<Row> | undefined) => void;
 }) {
   const applied = applyTableFeatures({ features, columns });
   function Table() {
-    const source = useFrontendData<TRow>({
-      data: ROWS as unknown as readonly TRow[],
+    const source = useFrontendData<Row>({
+      data: ROWS,
       urlAdapter: createMemoryAdapter(""),
       columns,
       paginationMode: "paged",
@@ -49,10 +51,10 @@ function Probe<TRow>({
       ...applied,
       source,
       columns,
-      rowKey: (row: TRow) => (row as Row).id,
+      rowKey: (row: Row) => row.id,
       ...extraProps,
     };
-    const chrome = useTableChrome<TRow>(props);
+    const chrome = useTableChrome<Row>(props);
     return (
       <ChromeExtrasGate chrome={chrome} props={props}>
         {() => <Reader onView={onView} />}
@@ -62,11 +64,9 @@ function Probe<TRow>({
   function Reader({
     onView: publish,
   }: {
-    onView: (
-      view: ReturnType<ReturnType<typeof useTableRuntime<TRow>>["view"]>
-    ) => void;
+    onView: (view: TableRuntimeView<Row> | undefined) => void;
   }) {
-    const runtime = useTableRuntime<TRow>();
+    const runtime = useTableRuntime<Row>();
     useEffect(() => {
       publish(runtime.view());
     });
@@ -81,8 +81,7 @@ function Probe<TRow>({
 
 describe("ChromeExtrasGate runtime publish", () => {
   it("labels rows from format, accessor, or id and exposes grouping labels", () => {
-    const views: ReturnType<ReturnType<typeof useTableRuntime<Row>>["view"]>[] =
-      [];
+    const views: (TableRuntimeView<Row> | undefined)[] = [];
     const columns: ColumnDef<Row>[] = [
       {
         key: "name",
@@ -115,12 +114,11 @@ describe("ChromeExtrasGate runtime publish", () => {
   });
 
   it("falls back to the row id and publishes tree rows", () => {
-    const views: ReturnType<ReturnType<typeof useTableRuntime<Row>>["view"]>[] =
-      [];
+    const views: (TableRuntimeView<Row> | undefined)[] = [];
     render(
       <Probe
         features={[tree({ getParentId: () => undefined })]}
-        columns={[{ key: "id", accessor: () => ({}) }]}
+        columns={[{ key: "id", accessor: () => null }]}
         onView={(view) => views.push(view)}
       />
     );

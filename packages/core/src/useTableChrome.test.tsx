@@ -944,6 +944,8 @@ describe("toolbar halves", () => {
           canRedo: false,
           undo,
           redo,
+          clear: vi.fn(),
+          record: vi.fn(),
         },
         { undoEdit: "Undo", redoEdit: "Redo" }
       )
