@@ -13,6 +13,7 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
+    "test:mutation": "pnpm --filter @adapttable/core test:mutation",
     "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "test:e2e": "playwright test",
     "e2e:if-needed": "node scripts/e2e-if-needed.mjs",

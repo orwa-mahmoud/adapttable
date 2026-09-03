@@ -9,6 +9,19 @@
       "entry": ["src/*.ts!", "src/*.tsx!"],
       "project": ["src/**/*.{ts,tsx}!"]
     },
+    "packages/core": {
+      "entry": [
+        "src/*.ts!",
+        "src/*.tsx!",
+        "stryker.config.mjs",
+        "vitest.mutation.config.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}!",
+        "stryker.config.mjs",
+        "vitest.mutation.config.ts"
+      ]
+    },
     "apps/showcase": {
       "entry": [
         "index.html",

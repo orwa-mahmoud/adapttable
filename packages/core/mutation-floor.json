@@ -1,0 +1,5 @@
+{
+  "break": 89,
+  "measured": 89.66,
+  "note": "Ratchet `break` upward to the last measured mutation score; never lower it without a written reason. Stryker fails the run when the score drops below this floor."
+}

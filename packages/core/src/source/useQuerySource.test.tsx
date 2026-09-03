@@ -26,6 +26,28 @@ const page = (items: Row[], total: number): Page => ({
 });
 const selectPage = (p: Page) => ({ rows: p.items, total: p.pagination.total });
 
+function stableQuery(
+  data: InfiniteQueryLike<Page>["data"]
+): () => InfiniteQueryLike<Page> {
+  return () => ({
+    data,
+    isLoading: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: vi.fn(),
+    refetch: vi.fn(),
+    error: null,
+  });
+}
+
+function selectWithSuffix(suffix: string) {
+  return (p: Page) => ({
+    rows: p.items.map((row) => ({ ...row, name: `${row.name}${suffix}` })),
+    total: p.pagination.total,
+  });
+}
+
 function makeQuery(opts?: {
   pages?: Page[];
   isLoading?: boolean;
@@ -102,6 +124,53 @@ describe("useQuerySource", () => {
     });
     const view = mount(query, {});
     expect(view.result.current.rows).toHaveLength(1);
+  });
+
+  it("does not re-project when an unmemoized selectPage identity changes", () => {
+    const usePaginatedQuery = stableQuery({
+      pages: [page([{ id: "a", name: "A" }], 1)],
+      pageParams: [0],
+    });
+    const adapter = createMemoryAdapter("");
+    const { result, rerender } = renderHook(
+      ({ suffix }: { suffix: string }) =>
+        useQuerySource<Row, ListParams, Page>({
+          usePaginatedQuery,
+          urlAdapter: adapter,
+          selectPage: selectWithSuffix(suffix),
+        }),
+      { initialProps: { suffix: "-v1" } }
+    );
+    expect(result.current.rows[0]?.name).toBe("A-v1");
+    rerender({ suffix: "-v2" });
+    expect(result.current.rows[0]?.name).toBe("A-v1");
+  });
+
+  it("uses the latest selectPage once query data changes", () => {
+    const first = {
+      pages: [page([{ id: "a", name: "A" }], 1)],
+      pageParams: [0],
+    };
+    const second = {
+      pages: [page([{ id: "b", name: "B" }], 1)],
+      pageParams: [0],
+    };
+    let data = first;
+    const usePaginatedQuery = () => stableQuery(data)();
+    const adapter = createMemoryAdapter("");
+    const { result, rerender } = renderHook(
+      ({ suffix }: { suffix: string }) =>
+        useQuerySource<Row, ListParams, Page>({
+          usePaginatedQuery,
+          urlAdapter: adapter,
+          selectPage: selectWithSuffix(suffix),
+        }),
+      { initialProps: { suffix: "-v1" } }
+    );
+    expect(result.current.rows[0]?.name).toBe("A-v1");
+    data = second;
+    rerender({ suffix: "-v2" });
+    expect(result.current.rows[0]?.name).toBe("B-v2");
   });
 
   it("keeps the source identity stable across unrelated re-renders", () => {
