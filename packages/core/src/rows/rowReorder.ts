@@ -337,7 +337,7 @@ export function useRowReorder<TRow>(options: {
   /** Stable identity used to attach confirmation to its rendered row. */
   getRowId?: (row: TRow) => string;
 }): RowReorderState<TRow> {
-  const { enabled, labels } = options;
+  const { enabled, labels, getRowId } = options;
   const hostReorder = options.onRowReorder;
   const onRowReorder = useEventCallback(
     (from: number, to: number, row: TRow) => {
@@ -625,10 +625,10 @@ export function useRowReorder<TRow>(options: {
   const isMovePending = useCallback(
     (row: TRow) => {
       if (!pendingMove) return false;
-      if (!options.getRowId) return pendingMove.row === row;
-      return options.getRowId(pendingMove.row) === options.getRowId(row);
+      if (!getRowId) return pendingMove.row === row;
+      return getRowId(pendingMove.row) === getRowId(row);
     },
-    [options.getRowId, pendingMove]
+    [getRowId, pendingMove]
   );
 
   const confirmPendingMove = useEventCallback(() => {
