@@ -311,15 +311,18 @@ export function useQuerySource<
     TRow,
     TPage
   >;
-  const selectorRef = useRef(selector);
-  selectorRef.current = selector;
+  const selectorRef = useRef({ project: selector, invalidation: selectorKey });
+  selectorRef.current = { project: selector, invalidation: selectorKey };
 
   const { rows, total, facets } = useMemo(() => {
     const pages = query.data?.pages;
-    if (!pages?.length) {
+    const { project, invalidation } = selectorRef.current;
+    // selectorKey is the host invalidation token. The selector itself lives
+    // on the ref so an inline function does not re-project every render; a
+    // key change both updates the ref and re-runs this memo.
+    if (!pages?.length || invalidation !== selectorKey) {
       return { rows: [] as readonly TRow[], total: 0, facets: undefined };
     }
-    const project = selectorRef.current;
     if (paged) {
       const lastPage = pages.at(-1)!;
       const projected = project(lastPage);
