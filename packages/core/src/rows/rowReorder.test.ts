@@ -793,6 +793,42 @@ describe("useRowReorder", () => {
     root.remove();
   });
 
+  it("ignores a host reorder that lands on the same index", () => {
+    const onRowReorder = vi.fn();
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder,
+        resolveMove: () => ({ kind: "reorder", from: 1, to: 1, row: ROWS[1]! }),
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    act(() => {
+      result.current.moveBy(1, 1, ROWS[1]!, 0, ROWS.length);
+    });
+    expect(onRowReorder).not.toHaveBeenCalled();
+    expect(result.current.lifted).toBeNull();
+  });
+
+  it("writes a host-resolved reorder that changes index", () => {
+    const onRowReorder = vi.fn();
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder,
+        resolveMove: () => ({ kind: "reorder", from: 0, to: 2, row: ROWS[0]! }),
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 2, ROWS[0]);
+    expect(result.current.announcement).toBe("Row moved from 1 to 3");
+  });
+
   it("drops in place on a second Space without writing", () => {
     const onRowReorder = vi.fn();
     const { result } = arm(onRowReorder);

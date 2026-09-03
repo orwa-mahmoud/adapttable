@@ -344,6 +344,28 @@ describe("useColumnLayout", () => {
     act(() => blank.result.current.setName("a", "   "));
     expect(blank.result.current.state.names).toBeUndefined();
     expect(onColumnRename).not.toHaveBeenCalled();
+
+    const idle = renderHook(() =>
+      useColumnLayout({ columns: renameable, onColumnRename })
+    );
+    act(() => idle.result.current.resetName("a"));
+    expect(idle.result.current.state.names).toBeUndefined();
+    expect(onColumnRename).toHaveBeenCalledTimes(0);
+  });
+
+  it("clears an override when the typed name matches the declaration", () => {
+    const onColumnRename = vi.fn();
+    const { result } = renderHook(() =>
+      useColumnLayout({
+        columns: [renameableColumn("Alpha")],
+        onColumnRename,
+      })
+    );
+    act(() => result.current.setName("a", "Owner"));
+    expect(result.current.state.names).toEqual({ a: "Owner" });
+    act(() => result.current.setName("a", "Alpha"));
+    expect(result.current.state.names).toBeUndefined();
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Alpha");
   });
 
   it("hydrates stored names only for columns that opted into renaming", () => {
