@@ -33,6 +33,114 @@ export {
   pinnedCellStyle,
 } from "./columnLayoutModel";
 
+function rememberDeclaredName(
+  key: string,
+  declared: string,
+  declaredNames: Map<string, string>,
+  renamedKeys: Set<string>,
+  staleEcho: string | undefined
+): void {
+  if (renamedKeys.has(key)) return;
+  if (staleEcho === undefined || declared !== staleEcho) {
+    declaredNames.set(key, declared);
+  }
+  renamedKeys.add(key);
+}
+
+function reconcileStaleEcho(
+  key: string,
+  declared: string,
+  declaredNames: Map<string, string>,
+  renamedKeys: Set<string>,
+  staleEchoes: Map<string, string>,
+  staleEcho: string
+): void {
+  if (declared === staleEcho) return;
+  staleEchoes.delete(key);
+  renamedKeys.delete(key);
+  declaredNames.set(key, declared);
+}
+
+function dropMissingRenameKeys(
+  liveKeys: ReadonlySet<string>,
+  declaredNames: Map<string, string>,
+  renamedKeys: Set<string>,
+  staleEchoes: Map<string, string>
+): void {
+  const tracked = new Set([
+    ...declaredNames.keys(),
+    ...renamedKeys,
+    ...staleEchoes.keys(),
+  ]);
+  for (const key of tracked) {
+    if (liveKeys.has(key)) continue;
+    declaredNames.delete(key);
+    renamedKeys.delete(key);
+    staleEchoes.delete(key);
+  }
+}
+
+/**
+ * Keep the declaration that preceded an active rename as the reset target,
+ * then resume tracking the live header once that override ends and the host
+ * is no longer echoing the discarded name.
+ */
+function syncRenameBaselines<TRow>(
+  columns: readonly ColumnDef<TRow>[],
+  names: Readonly<Record<string, string>> | undefined,
+  declaredNames: Map<string, string>,
+  renamedKeys: Set<string>,
+  staleEchoes: Map<string, string>
+): void {
+  const liveKeys = new Set<string>();
+  for (const column of columns) {
+    liveKeys.add(column.key);
+    const declared = declaredColumnName(column);
+    const override = names?.[column.key];
+    const staleEcho = staleEchoes.get(column.key);
+
+    if (override !== undefined) {
+      rememberDeclaredName(
+        column.key,
+        declared,
+        declaredNames,
+        renamedKeys,
+        staleEcho
+      );
+      staleEchoes.delete(column.key);
+      continue;
+    }
+
+    if (staleEcho !== undefined) {
+      reconcileStaleEcho(
+        column.key,
+        declared,
+        declaredNames,
+        renamedKeys,
+        staleEchoes,
+        staleEcho
+      );
+      continue;
+    }
+
+    if (!renamedKeys.has(column.key)) {
+      declaredNames.set(column.key, declared);
+    }
+  }
+
+  dropMissingRenameKeys(liveKeys, declaredNames, renamedKeys, staleEchoes);
+}
+
+function endRenameOverride(
+  key: string,
+  lastOverride: string | undefined,
+  renamedKeys: Set<string>,
+  staleEchoes: Map<string, string>
+): void {
+  renamedKeys.delete(key);
+  if (lastOverride !== undefined) staleEchoes.set(key, lastOverride);
+}
+
 /**
  * Options for `useColumnLayout`.
  *
@@ -92,18 +200,18 @@ export function useColumnLayout<TRow>({
   const stateRef = useRef(state);
   stateRef.current = state;
   // A host commonly writes the accepted name back into its `columns` prop.
-  // Keep the declaration that preceded the active override as the reset
-  // target; otherwise that controlled echo would silently redefine "reset".
+  // Capture the declaration when a rename becomes active and ignore that
+  // echo only while the override (or its stale post-reset echo) is live.
   const declaredNamesRef = useRef(new Map<string, string>());
   const renamedKeysRef = useRef(new Set<string>());
-  for (const column of columns) {
-    if (!renamedKeysRef.current.has(column.key)) {
-      declaredNamesRef.current.set(column.key, declaredColumnName(column));
-    }
-    if (state.names?.[column.key] !== undefined) {
-      renamedKeysRef.current.add(column.key);
-    }
-  }
+  const staleEchoesRef = useRef(new Map<string, string>());
+  syncRenameBaselines(
+    columns,
+    state.names,
+    declaredNamesRef.current,
+    renamedKeysRef.current,
+    staleEchoesRef.current
+  );
 
   const commit = useCallback(
     (next: ColumnLayoutState) => {
@@ -170,10 +278,20 @@ export function useColumnLayout<TRow>({
         declaredNamesRef.current.get(key) ?? declaredColumnName(column);
       const effective = current.names?.[key] ?? declared;
       if (effective === name) return;
-      renamedKeysRef.current.add(key);
       const names = { ...current.names };
-      if (name === declared) delete names[key];
-      else names[key] = name;
+      if (name === declared) {
+        const lastOverride = names[key];
+        delete names[key];
+        endRenameOverride(
+          key,
+          lastOverride,
+          renamedKeysRef.current,
+          staleEchoesRef.current
+        );
+      } else {
+        renamedKeysRef.current.add(key);
+        names[key] = name;
+      }
       commit({
         ...current,
         names: Object.keys(names).length > 0 ? names : undefined,
@@ -194,8 +312,15 @@ export function useColumnLayout<TRow>({
       ) {
         return;
       }
+      const lastOverride = current.names?.[key];
       const names = { ...current.names };
       delete names[key];
+      endRenameOverride(
+        key,
+        lastOverride,
+        renamedKeysRef.current,
+        staleEchoesRef.current
+      );
       commit({
         ...current,
         names: Object.keys(names).length > 0 ? names : undefined,
@@ -269,7 +394,16 @@ export function useColumnLayout<TRow>({
   );
 
   const reset = useCallback(() => {
-    const renamedKeys = Object.keys(stateRef.current.names ?? {});
+    const names = stateRef.current.names ?? {};
+    const renamedKeys = Object.keys(names);
+    for (const key of renamedKeys) {
+      endRenameOverride(
+        key,
+        names[key],
+        renamedKeysRef.current,
+        staleEchoesRef.current
+      );
+    }
     commit(EMPTY_COLUMN_LAYOUT);
     for (const key of renamedKeys) {
       const column = columns.find((candidate) => candidate.key === key);

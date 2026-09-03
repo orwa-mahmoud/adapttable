@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../types";
 import {
+  type ColumnLayoutState,
   edgePinStyle,
   EMPTY_COLUMN_LAYOUT,
   PIN_Z,
@@ -19,6 +20,15 @@ const columns: ColumnDef<Row>[] = [
   { key: "c", header: "C", accessor: (r) => r.id },
 ];
 const keys = (cols: ColumnDef<Row>[]) => cols.map((c) => c.key);
+
+function renameableColumn(header: string, key = "a"): ColumnDef<Row> {
+  return {
+    key,
+    header,
+    accessor: (row) => row.id,
+    renameable: true,
+  };
+}
 
 describe("useColumnLayout", () => {
   it("returns all columns in declared order by default", () => {
@@ -380,6 +390,131 @@ describe("useColumnLayout", () => {
     act(() => result.current.reset());
     expect(result.current.state).toEqual(EMPTY_COLUMN_LAYOUT);
     expect(onColumnRename).toHaveBeenLastCalledWith("a", "Alpha");
+  });
+
+  it("resumes the current declared name after reset and host reconciliation", () => {
+    const onColumnRename = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ currentColumns }: { currentColumns: ColumnDef<Row>[] }) =>
+        useColumnLayout({ columns: currentColumns, onColumnRename }),
+      { initialProps: { currentColumns: [renameableColumn("Alpha")] } }
+    );
+
+    act(() => result.current.setName("a", "Owner"));
+    rerender({ currentColumns: [renameableColumn("Owner")] });
+    // Stale echo after reset must not become the next baseline.
+    act(() => result.current.resetName("a"));
+    rerender({ currentColumns: [renameableColumn("Owner")] });
+    rerender({ currentColumns: [renameableColumn("Alpha")] });
+    rerender({ currentColumns: [renameableColumn("Title")] });
+
+    act(() => result.current.setName("a", "Nickname"));
+    act(() => result.current.resetName("a"));
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Title");
+  });
+
+  it("tracks a later declared name after a controlled reset reconciles", () => {
+    const onColumnRename = vi.fn();
+    const onLayoutChange = vi.fn();
+    const { result, rerender } = renderHook(
+      ({
+        currentColumns,
+        layout,
+      }: {
+        currentColumns: ColumnDef<Row>[];
+        layout: ColumnLayoutState;
+      }) =>
+        useColumnLayout({
+          columns: currentColumns,
+          layout,
+          onLayoutChange,
+          onColumnRename,
+        }),
+      {
+        initialProps: {
+          currentColumns: [renameableColumn("Alpha")],
+          layout: EMPTY_COLUMN_LAYOUT,
+        },
+      }
+    );
+
+    act(() => result.current.setName("a", "Owner"));
+    const renamed = onLayoutChange.mock.calls.at(-1)![0] as ColumnLayoutState;
+    rerender({
+      currentColumns: [renameableColumn("Owner")],
+      layout: renamed,
+    });
+    act(() => result.current.resetName("a"));
+    const cleared = onLayoutChange.mock.calls.at(-1)![0] as ColumnLayoutState;
+    rerender({
+      currentColumns: [renameableColumn("Owner")],
+      layout: cleared,
+    });
+    rerender({
+      currentColumns: [renameableColumn("Alpha")],
+      layout: cleared,
+    });
+    rerender({
+      currentColumns: [renameableColumn("Title")],
+      layout: cleared,
+    });
+
+    act(() => result.current.setName("a", "Nickname"));
+    const renamedAgain = onLayoutChange.mock.calls.at(
+      -1
+    )![0] as ColumnLayoutState;
+    rerender({
+      currentColumns: [renameableColumn("Nickname")],
+      layout: renamedAgain,
+    });
+    act(() => result.current.resetName("a"));
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Title");
+  });
+
+  it("does not inherit a prior baseline when the same key is removed and re-added", () => {
+    const onColumnRename = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ currentColumns }: { currentColumns: ColumnDef<Row>[] }) =>
+        useColumnLayout({ columns: currentColumns, onColumnRename }),
+      { initialProps: { currentColumns: [renameableColumn("Alpha")] } }
+    );
+
+    act(() => result.current.setName("a", "Owner"));
+    rerender({ currentColumns: [] });
+    rerender({ currentColumns: [renameableColumn("Replacement")] });
+
+    act(() => result.current.resetName("a"));
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Replacement");
+  });
+
+  it("resets one column without disturbing another active rename", () => {
+    const onColumnRename = vi.fn();
+    const pair: ColumnDef<Row>[] = [
+      renameableColumn("Alpha"),
+      renameableColumn("Bravo", "b"),
+    ];
+    const { result, rerender } = renderHook(
+      ({ currentColumns }: { currentColumns: ColumnDef<Row>[] }) =>
+        useColumnLayout({ columns: currentColumns, onColumnRename }),
+      { initialProps: { currentColumns: pair } }
+    );
+
+    act(() => result.current.setName("a", "Owner A"));
+    act(() => result.current.setName("b", "Owner B"));
+    rerender({
+      currentColumns: [
+        { ...pair[0]!, header: "Owner A" },
+        { ...pair[1]!, header: "Owner B" },
+      ],
+    });
+
+    act(() => result.current.resetName("a"));
+    expect(onColumnRename).toHaveBeenLastCalledWith("a", "Alpha");
+    expect(result.current.state.names).toEqual({ b: "Owner B" });
+
+    act(() => result.current.resetName("b"));
+    expect(onColumnRename).toHaveBeenLastCalledWith("b", "Bravo");
+    expect(result.current.state.names).toBeUndefined();
   });
 
   it("setHidden is a no-op when visibility already matches", () => {
