@@ -127,4 +127,126 @@ describe("RowReorderButtons", () => {
     fireEvent.click(screen.getByRole("button", { name: "Move row up" }));
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(1, 0, ROW);
   });
+
+  it("offers destination items and a disabled reason from the move menu", () => {
+    const onRowMove = vi.fn();
+    const request = {
+      kind: "group" as const,
+      row: ROW,
+      rowLabel: "Ada",
+      fromGroup: { id: "a", label: "A", levels: [] },
+      toGroup: { id: "b", label: "B", levels: [] },
+      position: 0,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "auto",
+        onRowMove,
+        getMoveMenu: () => ({
+          kind: "group",
+          label: "Move to group…",
+          targets: [
+            { id: "b", label: "B", request },
+            { id: "blocked", label: "Blocked", disabledReason: "not allowed" },
+          ],
+        }),
+        labels: LABELS,
+        rowAt: () => ROW,
+      })
+    );
+    render(
+      <RowReorderButtonsChrome
+        slots={rowReorderButtonsTestSlots}
+        reorder={result.current}
+        labels={LABELS}
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Blocked" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "B" }));
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(request);
+  });
+});
+
+describe("RowReorderHandle menu", () => {
+  it("confirms a pending destination from the grip menu", () => {
+    const onRowMove = vi.fn();
+    const request = {
+      kind: "group" as const,
+      row: ROW,
+      rowLabel: "Ada",
+      fromGroup: { id: "a", label: "A", levels: [] },
+      toGroup: { id: "b", label: "B", levels: [] },
+      position: 0,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "confirm",
+        onRowMove,
+        getMoveMenu: () => ({
+          kind: "group",
+          label: "Move to group…",
+          targets: [{ id: "b", label: "B", request }],
+        }),
+        labels: {
+          ...LABELS,
+          confirmRowMoveTitle: "Confirm row move",
+          confirmRowMoveDescription: (row, from, to) =>
+            `Move ${row} from ${from} to ${to}?`,
+          confirmRowMove: "Move",
+          cancel: "Cancel",
+        },
+        rowAt: () => ROW,
+      })
+    );
+    const { rerender } = render(
+      <RowReorderHandleChrome
+        slots={rowReorderHandleTestSlots}
+        reorder={result.current}
+        labels={{
+          ...LABELS,
+          confirmRowMoveTitle: "Confirm row move",
+          confirmRowMoveDescription: (row, from, to) =>
+            `Move ${row} from ${from} to ${to}?`,
+          confirmRowMove: "Move",
+          cancel: "Cancel",
+        }}
+        rowId="a"
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "B" }));
+    rerender(
+      <RowReorderHandleChrome
+        slots={rowReorderHandleTestSlots}
+        reorder={result.current}
+        labels={{
+          ...LABELS,
+          confirmRowMoveTitle: "Confirm row move",
+          confirmRowMoveDescription: (row, from, to) =>
+            `Move ${row} from ${from} to ${to}?`,
+          confirmRowMove: "Move",
+          cancel: "Cancel",
+        }}
+        rowId="a"
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("Ada");
+    fireEvent.click(screen.getByRole("button", { name: "Move" }));
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(request);
+  });
 });

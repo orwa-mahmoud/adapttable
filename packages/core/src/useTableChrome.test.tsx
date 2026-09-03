@@ -18,7 +18,12 @@ import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
 import type { ColumnDef } from "./types";
 import { createMemoryAdapter } from "./url/adapter";
-import { type TableChrome, useTableChrome } from "./useTableChrome";
+import {
+  printToolbar,
+  type TableChrome,
+  undoRedoToolbar,
+  useTableChrome,
+} from "./useTableChrome";
 import { resetDevWarnings } from "./utils/devWarn";
 
 interface Row {
@@ -922,5 +927,37 @@ describe("useTableChrome — row mutations and lazy tree", () => {
       result.current.tree?.expansion.toggle("a");
     });
     expect(onLoadChildren).not.toHaveBeenCalled();
+  });
+});
+
+describe("toolbar halves", () => {
+  it("exposes undo, redo and print only when the host asked and they can run", () => {
+    const undo = vi.fn();
+    const redo = vi.fn();
+    const onPrint = vi.fn();
+    expect(
+      undoRedoToolbar(
+        true,
+        {
+          enabled: true,
+          canUndo: true,
+          canRedo: false,
+          undo,
+          redo,
+        },
+        { undoEdit: "Undo", redoEdit: "Redo" }
+      )
+    ).toEqual({
+      onUndo: undo,
+      onRedo: redo,
+      canUndo: true,
+      canRedo: false,
+      undoLabel: "Undo",
+      redoLabel: "Redo",
+    });
+    expect(printToolbar(true, onPrint, { print: "Print" })).toEqual({
+      onPrint,
+      printLabel: "Print",
+    });
   });
 });

@@ -192,6 +192,29 @@ describe("rowReorder", () => {
     expect(move.mock.calls[0]?.[2]).toMatchObject({ label: "B" });
   });
 
+  it("rejects a cross-group move when the host did not wire onGroupMove", () => {
+    const entries = buildGroupedFlatModel({
+      rows: ROWS,
+      groupBy: "team",
+      columns: [
+        { key: "team", header: "Team", accessor: (row: Row) => row.team },
+      ],
+      getRowId: (row) => row.id,
+      collapsedGroupIds: new Set<string>(),
+    });
+    let state: RowReorderState<Row> | undefined;
+    mount(
+      rowReorder<Row>(vi.fn(), { movePolicy: "auto" }),
+      { moveUnavailable: "no host move" },
+      (next) => {
+        state = next;
+      },
+      runtimeView({ grouping: { entries } })
+    );
+    act(() => state!.moveBy(0, 1, ROWS[0]!, 0, ROWS.length));
+    expect(state!.announcement).toBe("no host move");
+  });
+
   it("holds grouped moves for confirmation and rejects them under never policy", () => {
     const entries = buildGroupedFlatModel({
       rows: ROWS,

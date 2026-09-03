@@ -57,6 +57,16 @@ describe("defaultLabels — every function label", () => {
     ],
     findMatchCount: [2, 7],
     groupTotal: ["Core"],
+    proposalChange: [
+      {
+        row: "ROW_X",
+        column: "COLUMN_X",
+        before: "BEFORE_X",
+        after: "AFTER_X",
+      },
+    ],
+    columnRenamed: [{ previous: "COLUMN_OLD", name: "COLUMN_NEW" }],
+    sortedBy: [{ column: "COLUMN_X", ascending: true }],
   };
 
   it("returns a real string for the arguments it is given", () => {
@@ -86,5 +96,25 @@ describe("defaultLabels — every function label", () => {
 
   it("says No matches when a find turns up nothing", () => {
     expect(defaultLabels.findMatchCount(1, 0)).toBe("No matches");
+  });
+
+  it("formats one pending proposal and a change without a column or value", () => {
+    expect(defaultLabels.pendingProposals(1)).toBe("1 proposed change");
+    expect(defaultLabels.pendingProposals(3)).toBe("3 proposed changes");
+    expect(defaultLabels.proposalChange({ row: "ROW_X" })).toBe("ROW_X");
+    expect(
+      defaultLabels.proposalChange({
+        row: "ROW_X",
+        column: "COLUMN_X",
+        after: "AFTER_X",
+      })
+    ).toContain("AFTER_X");
+    expect(
+      defaultLabels.proposalChange({
+        row: "ROW_X",
+        column: "COLUMN_X",
+        before: "BEFORE_X",
+      })
+    ).toContain("BEFORE_X");
   });
 });

@@ -13,6 +13,7 @@ import {
 import { COMMAND_PALETTE_LIVE, SIDE_PANEL } from "../features/slotKeys";
 import type { TableFeature } from "../features/tableFeature";
 import { applyTableFeatures } from "../features/tableFeature";
+import { createAdapterAgentApprovalFeature } from "./agentApproval";
 import { createAdapterCommandPaletteFeature } from "./commandPalette";
 import { createAdapterContextMenuFeature } from "./contextMenu";
 import { createAdapterEditingFeatures } from "./editing";
@@ -199,6 +200,13 @@ describe("adapter feature assembly", () => {
       "group-header-card",
       "grouping-panel",
     ]);
+  });
+
+  it("binds the kit approval strip to the agent-approval slot", () => {
+    const feature = createAdapterAgentApprovalFeature(KitComponent);
+    expect(feature.id).toBe("agent-approval");
+    expect(renderSlots(feature)).toEqual(["agent-approval"]);
+    expectKitRenders(feature, ["agent-approval"]);
   });
 
   it("owns live context-menu and command-palette hooks in core assembly", () => {

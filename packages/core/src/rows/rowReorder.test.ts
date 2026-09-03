@@ -161,6 +161,10 @@ describe("useRowReorder", () => {
       result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 0, 3);
     });
     expect(result.current.lifted).toBeNull();
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, 3);
+    });
+    expect(result.current.announcement).toBe("");
   });
 
   it("lifts on Space, moves on arrows, drops on Space", () => {
@@ -448,6 +452,152 @@ describe("useRowReorder", () => {
     });
     expect(result.current.overIndex).toBe(1);
     table.remove();
+  });
+
+  it("pins a pending move to getRowId and cancels it without writing", () => {
+    const onRowMove = vi.fn();
+    const request = {
+      kind: "tree" as const,
+      row: ROWS[0]!,
+      rowLabel: "Ada",
+      fromParent: { id: null, row: null, label: "Top level" },
+      toParent: { id: "b", row: ROWS[1]!, label: "Grace" },
+      position: 0,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "confirm",
+        onRowMove,
+        resolveMove: () => ({ kind: "move", request }),
+        getRowId: (row) => row.id,
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(result.current.isMovePending?.({ id: "a", title: "copy" })).toBe(
+      true
+    );
+    expect(result.current.isMovePending?.(ROWS[1]!)).toBe(false);
+    act(() => {
+      result.current.cancelMove();
+    });
+    expect(result.current.pendingMove).toBeNull();
+    expect(result.current.announcement).toBe("Reorder cancelled");
+    expect(onRowMove).not.toHaveBeenCalled();
+  });
+
+  it("falls back to row identity when getRowId is omitted", () => {
+    const request = {
+      kind: "tree" as const,
+      row: ROWS[0]!,
+      rowLabel: "Ada",
+      fromParent: { id: null, row: null, label: "Top level" },
+      toParent: { id: "b", row: ROWS[1]!, label: "Grace" },
+      position: 0,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "confirm",
+        resolveMove: () => ({ kind: "move", request }),
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(result.current.isMovePending?.(ROWS[0]!)).toBe(true);
+    expect(result.current.isMovePending?.({ id: "a", title: "Ada" })).toBe(
+      false
+    );
+  });
+
+  it("rejects a cross-boundary move when policy is never", () => {
+    const onRowMove = vi.fn();
+    const request = {
+      kind: "group" as const,
+      row: ROWS[0]!,
+      rowLabel: "Ada",
+      fromGroup: { id: "a", label: "A", levels: [] },
+      toGroup: { id: "b", label: "B", levels: [] },
+      position: 0,
+    };
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "never",
+        onRowMove,
+        resolveMove: () => ({ kind: "move", request }),
+        labels: {
+          ...LABELS,
+          moveRejectedPolicyNever: "stays put",
+        },
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    act(() => {
+      result.current.selectMoveTarget({
+        id: "b",
+        label: "B",
+        request,
+      });
+    });
+    expect(onRowMove).not.toHaveBeenCalled();
+    expect(result.current.announcement).toBe("stays put");
+  });
+
+  it("announces a disabled move target without starting a write", () => {
+    const onRowMove = vi.fn();
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        onRowMove,
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    act(() => {
+      result.current.selectMoveTarget({
+        id: "blocked",
+        label: "Blocked",
+        disabledReason: "not allowed",
+      });
+    });
+    expect(result.current.announcement).toBe("not allowed");
+    expect(onRowMove).not.toHaveBeenCalled();
+  });
+
+  it("mirrors RTL ArrowRight as a move toward the start", () => {
+    const { result } = arm(vi.fn());
+    const root = document.createElement("div");
+    root.setAttribute("dir", "rtl");
+    const grip = document.createElement("button");
+    root.append(grip);
+    document.body.append(root);
+    act(() => {
+      result.current.handleKeyDown(press(" "), "b", 1, ROWS[1]!, 0, 3);
+    });
+    act(() => {
+      result.current.handleKeyDown(
+        press("ArrowRight", { currentTarget: grip }),
+        "b",
+        1,
+        ROWS[1]!,
+        0,
+        3
+      );
+    });
+    expect(result.current.overIndex).toBe(0);
+    root.remove();
   });
 
   it("drops in place on a second Space without writing", () => {
