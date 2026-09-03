@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/core",
   "version": "2.9.0",
-  "description": "Headless, UI-agnostic React data table engine \u2014 state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
+  "description": "Headless, UI-agnostic React data table engine — state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
   "keywords": [
     "react",
     "data-table",
@@ -145,6 +145,7 @@
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:mutation": "stryker run",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist coverage .turbo"
@@ -158,10 +159,13 @@
     }
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
     "@tanstack/react-query": "^5.102.6",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
+    "fast-check": "^4.9.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
