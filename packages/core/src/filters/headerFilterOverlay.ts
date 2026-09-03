@@ -248,9 +248,16 @@ export function useHeaderFilterOverlay<TRow>(
     registry: props.registry,
   });
   const session = `[${SESSION_ATTR}="${id}"]`;
+  // Antd clones the header cell, so two triggers share one `openKey`. A click
+  // inside the clone's overlay is "outside" the other session and would clear
+  // the shared host. Treat every header-filter session as inside.
+  const inside =
+    host != null
+      ? `[${SESSION_ATTR}],[data-adapttable-part="filter-header-cell"]`
+      : session;
   const selector = options?.nestedSelector
-    ? `${session},${options.nestedSelector}`
-    : session;
+    ? `${inside},${options.nestedSelector}`
+    : inside;
   usePointerDismiss(
     open && options?.pointerDismiss !== false,
     dismiss,

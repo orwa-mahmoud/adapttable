@@ -358,4 +358,36 @@ describe("useHeaderFilterOverlay", () => {
     expect(screen.getByTestId("probe")).toHaveAttribute("data-open", "1");
     expect(screen.getByTestId("probe")).toHaveAttribute("data-nonce", "1");
   });
+
+  it("does not treat a cloned header's overlay as an outside press", async () => {
+    function Probe({ name }: { name: string }) {
+      const overlay = useHeaderFilterOverlay({
+        source,
+        def: { key: "name", type: "text" },
+      });
+      return (
+        <div {...overlay.sessionProps} data-testid={name}>
+          <button type="button" onClick={() => overlay.setOpen(true)}>
+            open {name}
+          </button>
+          {overlay.open ? <span data-testid={`${name}-open`} /> : null}
+        </div>
+      );
+    }
+    render(
+      <HeaderFilterOpenProvider>
+        <Probe name="left" />
+        <Probe name="right" />
+      </HeaderFilterOpenProvider>
+    );
+    fireEvent.click(screen.getByText("open left"));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    fireEvent.mouseDown(screen.getByTestId("right"));
+    expect(screen.getByTestId("left-open")).toBeInTheDocument();
+    expect(screen.getByTestId("right-open")).toBeInTheDocument();
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByTestId("left-open")).toBeNull();
+  });
 });
