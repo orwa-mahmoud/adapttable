@@ -130,13 +130,23 @@ const patchStream = (): Plugin => ({
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       });
-      res.write("data: tick\n\n");
-      const id = setInterval(() => {
-        res.write("data: tick\n\n");
-      }, PATCH_STREAM_INTERVAL_MS);
-      req.on("close", () => {
-        clearInterval(id);
-      });
+      const tick = () => {
+        try {
+          if (res.writableEnded || res.destroyed) {
+            clearInterval(id);
+            return;
+          }
+          res.write("data: tick\n\n");
+        } catch {
+          clearInterval(id);
+        }
+      };
+      const id = setInterval(tick, PATCH_STREAM_INTERVAL_MS);
+      const stop = () => clearInterval(id);
+      req.on("close", stop);
+      res.on("close", stop);
+      res.on("error", stop);
+      tick();
     });
   },
 });

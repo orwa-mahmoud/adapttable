@@ -107,19 +107,43 @@ function fileFor(urlPath) {
   return existsSync(index) ? index : null;
 }
 
+function isClientAbort(err) {
+  const code = err && typeof err === "object" && "code" in err ? err.code : "";
+  return (
+    code === "EPIPE" ||
+    code === "ECONNRESET" ||
+    code === "ERR_STREAM_DESTROYED" ||
+    code === "ERR_STREAM_PREMATURE_CLOSE"
+  );
+}
+
 function patchStream(req, res) {
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
   });
-  res.write("data: tick\n\n");
-  const id = setInterval(() => {
-    res.write("data: tick\n\n");
-  }, PATCH_STREAM_INTERVAL_MS);
-  req.on("close", () => {
-    clearInterval(id);
+  const tick = () => {
+    try {
+      if (res.writableEnded || res.destroyed) {
+        clearInterval(id);
+        return;
+      }
+      res.write("data: tick\n\n");
+    } catch (err) {
+      if (!isClientAbort(err)) throw err;
+      clearInterval(id);
+    }
+  };
+  const id = setInterval(tick, PATCH_STREAM_INTERVAL_MS);
+  const stop = () => clearInterval(id);
+  req.on("close", stop);
+  res.on("close", stop);
+  res.on("error", (err) => {
+    if (!isClientAbort(err)) throw err;
+    stop();
   });
+  tick();
 }
 
 build();
@@ -128,6 +152,12 @@ if (!existsSync(DIST)) {
   console.error(`no build at ${DIST}`);
   process.exit(1);
 }
+
+process.on("uncaughtException", (err) => {
+  if (isClientAbort(err)) return;
+  console.error(err);
+  process.exit(1);
+});
 
 createServer((req, res) => {
   const url = req.url ?? "/";
