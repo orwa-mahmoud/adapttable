@@ -483,10 +483,11 @@ All from `@adapttable/core`.
   cover.
 - `useDataTableShell(props, renderAutoForm): DataTableShellResult<TRow>` —
   the whole adapter shell in one call: resolved tier, chrome, and the
-  `tableProps` / `toolbarProps` bundles a kit spreads. `DataTableShellView`
-  mounts the gates below it and hands back the finished view;
-  `finishDataTableShell` folds a body into a shell for an adapter that
-  assembles its own.
+  `DataTableShellTableProps` / `DataTableShellToolbarProps` bundles a kit
+  spreads, plus `DataTableShellChromeProps` and
+  `DataTableShellGroupingPanelProps`. `DataTableShellView` mounts the gates
+  below it and hands back the finished view; `finishDataTableShell` folds a
+  body into a shell for an adapter that assembles its own.
 - `useColumnLayout(options): UseColumnLayoutResult<TRow>` — headless
   visibility / order / pinning / width / name / collapsed-group state
   (`visibleColumns`, `toggleVisible`, `move`, `setPinned`, `setWidth`,
@@ -1692,7 +1693,10 @@ layout state, `PaginationInfo` from `computePagination`, the
 **Orchestration.** `useDataTableShell(props, renderAutoForm)` is the whole
 shared engine behind a batteries-included `<DataTable>` — it resolves the
 data tier, builds the declarative-filter runtime, wires the chrome, and
-returns the `tableProps` / `toolbarProps` bundles. `useStickyToolbarLayout`
+returns the `tableProps` / `toolbarProps` bundles
+(`DataTableShellTableProps`, `DataTableShellToolbarProps`,
+`DataTableShellChromeProps`, `DataTableShellGroupingPanelProps`).
+`useStickyToolbarLayout`
 and `resolveStickyToolbar` park search and page-size with a sticky header.
 `DataTableShellProps`
 is its kit-agnostic prop surface and `DataModeProps` the discriminated

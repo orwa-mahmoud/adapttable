@@ -8,7 +8,12 @@ import {
 } from "./columns/columnMenuModel";
 import { applyColumnNames } from "./columns/columnNames";
 import { flattenColumnTree } from "./columns/columnTree";
-import { bindFeatureHostFn } from "./features/currentHost";
+import type { EditHistoryState } from "./editing/editHistory";
+import type { ExportHandlerState } from "./export/useExportHandler";
+import {
+  bindFeatureHostFn,
+  type FeatureHostState,
+} from "./features/currentHost";
 import { useResolvedDensity } from "./features/densityStateKey";
 import {
   featureHostOf,
@@ -26,18 +31,30 @@ import {
 } from "./features/shellLiveStubs";
 import type { FacetMap } from "./filters/facets";
 import { resolveFilterMode, toolbarShowsFilters } from "./filters/filterChrome";
-import type { FilterDef } from "./filters/filterDefs";
+import type { FilterDef, FilterRuntime } from "./filters/filterDefs";
 import type { FilterTypeRegistry } from "./filters/filterRegistry";
+import type { ChipLabelResolver } from "./filters/useActiveFilterChips";
+import type { FindInTableState } from "./find/useFindInTable";
+import type { SelectionStats } from "./focus/selectionStats";
+import type { GridFocusState } from "./focus/useGridFocus";
+import type { GroupingPanelState } from "./grouping/groupingPanelModel";
 import type { AssemblyFns } from "./layout/leanAssembly";
-import type { ComposedTableProps } from "./props";
+import type { FullscreenState } from "./layout/useFullscreen";
+import type { ComposedTableProps, ToolbarSlots } from "./props";
 import { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 import type { QuerySupport } from "./source/queryContract";
 import type { TableSource } from "./source/TableSource";
 import type { DataModeProps } from "./source/useTableDataImpl";
 import { useTableDataLean } from "./source/useTableDataLean";
+import type { SharedTableRenderProps } from "./tableRenderProps";
+import type { ColumnDef, Direction, SortByOption, TableLabels } from "./types";
 import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
+import type { Density } from "./url/useDensityUrlState";
+import type { UseDataTableResult } from "./useDataTable/useDataTable";
 import {
+  type FilterTriggerToggle,
   printToolbar,
+  type TableChrome,
   undoRedoToolbar,
   useChromeScrollReset,
   useFilterTriggerToggle,
@@ -45,6 +62,7 @@ import {
   viewControlsToolbar,
 } from "./useTableChrome";
 import type { ChromeBodyData } from "./virtual/chromeBodyShared";
+import type { ColumnWindow } from "./virtual/useColumnWindow";
 import type { VirtualTableRow } from "./virtual/virtualTableModel";
 
 export type { FacetMap, QuerySupport, UrlStateAdapter };
@@ -95,6 +113,200 @@ export type DataTableShellProps<TRow> = Omit<
 } & DataModeProps<TRow>;
 
 /**
+ * Chrome props the shell passes into {@link TableChrome}. Named so the
+ * adapter declaration does not re-infer this bag from object spread order.
+ *
+ * @public
+ */
+export type DataTableShellChromeProps<TRow> = DataTableShellProps<TRow> & {
+  /** Resolved density every adapter renders. */
+  density: Density;
+  /** Request a density change. */
+  onDensityChange: (next: Density) => void;
+  /** The table's resolved URL backend. */
+  urlAdapter: UrlStateAdapter;
+  /** The resolved data source. */
+  source: TableSource<TRow>;
+  /** Filter form node, declarative or host-supplied. */
+  filters: ReactNode;
+  /** Declarative filter definitions. */
+  filterDefs: readonly FilterDef<TRow>[];
+  /** Chip label resolvers keyed by filter id. */
+  filterLabels: Record<string, ChipLabelResolver>;
+};
+
+/**
+ * Kit-agnostic table/card render bundle the shell builds. Extends the shared
+ * render contract with the two fields only the shell fills.
+ *
+ * @public
+ */
+export interface DataTableShellTableProps<
+  TRow,
+> extends SharedTableRenderProps<TRow> {
+  /** Whether the injected actions column is end-pinned. */
+  actionsPinned: boolean;
+  /** Text direction, when the host set one. */
+  dir?: Direction;
+  /** Horizontal window the lean table always publishes, even when inert. */
+  columnWindow: ColumnWindow<TRow>;
+  /** Scroll-box callback the shell always installs. */
+  virtualScrollRef: RefCallback<HTMLElement>;
+}
+
+/**
+ * Kit-agnostic toolbar bundle the shell builds before an adapter adds its
+ * filter-trigger and kit extras.
+ *
+ * @public
+ */
+export interface DataTableShellToolbarProps<TRow> extends ExportHandlerState {
+  /** Headless table state and prop-getters. */
+  table: UseDataTableResult<TRow>;
+  /** Whether the search input renders. */
+  searchable: boolean;
+  /** Placeholder for the search input. */
+  searchPlaceholder?: string;
+  /** Options for an explicit sort-by control. */
+  sortByOptions?: SortByOption[];
+  /** Extra caller-supplied toolbar content. */
+  toolbar?: ReactNode;
+  /** Caller-supplied content for the toolbar ends. */
+  toolbarSlots?: ToolbarSlots;
+  /** Put the last edit back. */
+  onUndo?: () => void;
+  /** Do the last undone edit again. */
+  onRedo?: () => void;
+  /** Whether there is anything to undo. */
+  canUndo?: boolean;
+  /** Whether there is anything to redo. */
+  canRedo?: boolean;
+  /** Undo button caption. */
+  undoLabel?: string;
+  /** Redo button caption. */
+  redoLabel?: string;
+  /** Open the print dialog. */
+  onPrint?: () => void;
+  /** Print button caption. */
+  printLabel?: string;
+  /** Density the table is rendering. */
+  density: Density;
+  /** Request a density change. */
+  onDensityChange: (next: Density) => void;
+  /** Toggle fullscreen when the feature is armed. */
+  onToggleFullscreen?: () => void;
+  /** Whether the table is fullscreen. */
+  isFullscreen?: boolean;
+  /** Whether a filters affordance should render. */
+  hasFilters: boolean;
+  /** Number shown on the filters badge. */
+  activeFilterCount: number;
+  /** Filter form node. */
+  filters: ReactNode;
+  /** Clear every active filter. */
+  onClearFilters: () => void;
+  /** Whether to show the rows-per-page control. */
+  showRowsPerPage: boolean;
+  /** Add-row handler when the host wired one. */
+  onAddRow?: () => void;
+  /** Add-row control caption. */
+  addRowLabel: string;
+  /** Text direction. */
+  dir?: Direction;
+}
+
+/**
+ * Grouping-strip props the shell exposes when the grouping-panel feature is
+ * composed.
+ *
+ * @public
+ */
+export interface DataTableShellGroupingPanelProps<TRow> {
+  /** Live grouping-panel state. */
+  state: GroupingPanelState;
+  /** Columns the strip can group by. */
+  columns: ColumnDef<TRow>[];
+  /** Resolved labels. */
+  labels: Required<TableLabels>;
+  /** Whether the table is in the mobile layout. */
+  mobile: boolean;
+  /** Text direction. */
+  dir: Direction | undefined;
+}
+
+/**
+ * What {@link useDataTableShell} returns, before or after the body gate.
+ * Declared as an explicit contract so API Extractor does not emit a
+ * `ReturnType` whose member order follows bundler traversal.
+ *
+ * @public
+ */
+export interface DataTableShellResult<TRow> {
+  /** Cell-navigation state; inert unless `cellNavigation` is set. */
+  gridFocus: GridFocusState;
+  /** What to announce when the rows change. */
+  statusAnnouncement: string;
+  /** What the selection adds up to; `null` unless `selectionStats` is set. */
+  selectionStats: SelectionStats | null;
+  /** Undo/redo controls; inert unless `editHistory` is set. */
+  editHistory: EditHistoryState<TRow>;
+  /** Find-bar state; inert unless `findInTable` is set. */
+  find: FindInTableState;
+  /** The chrome's view facade over the resolved source. */
+  source: TableSource<TRow>;
+  /** Declarative-filter runtime. */
+  runtime: FilterRuntime<TRow>;
+  /** The table's resolved URL backend. */
+  urlAdapter: UrlStateAdapter;
+  /** Shared adapter chrome. */
+  chrome: TableChrome<TRow>;
+  /** Grouping-strip props when that feature is composed. */
+  groupingPanelProps: DataTableShellGroupingPanelProps<TRow> | undefined;
+  /** Props the chrome was built with. */
+  chromeProps: DataTableShellChromeProps<TRow>;
+  /** When true, the view leaves `tableProps` alone. */
+  skipChromeBody: boolean;
+  /** The overflow box both windows attach to. */
+  scrollBoxElement: RefObject<HTMLElement | null>;
+  /** Headless table state and prop-getters. */
+  table: UseDataTableResult<TRow>;
+  /** Resolved labels. */
+  labels: Required<TableLabels>;
+  /** Density every adapter renders. */
+  density: Density;
+  /** Filter form node. */
+  filtersNode: ReactNode;
+  /** Whether the filter container is open. */
+  filtersOpen: boolean;
+  /** Open or close the filter container. */
+  setFiltersOpen: (open: boolean) => void;
+  /** Filter-trigger pointer/click pairing. */
+  filtersTrigger: FilterTriggerToggle;
+  /** Table root measured for progressive column hiding. */
+  rootRef: RefObject<HTMLDivElement | null>;
+  /** Fullscreen state and portal container. */
+  fullscreen: FullscreenState;
+  /** Size every rendered column to its content. */
+  autoSizeColumns: () => void;
+  /** Size one named column to its content. */
+  autoSizeColumn: (key: string) => void;
+  /** Infinite-scroll sentinel; the body gate overlays the real one. */
+  loadMoreRef: RefObject<HTMLDivElement | null>;
+  /** Whether more rows can be fetched. */
+  canLoadMore: boolean;
+  /** Whether an actions column exists, hidden or not. */
+  hasRowActions: boolean;
+  /** Whether a reorder column exists, hidden or not. */
+  hasRowReorder: boolean;
+  /** Kit-agnostic table/card render bundle. */
+  tableProps: DataTableShellTableProps<TRow>;
+  /** Kit-agnostic toolbar bundle. */
+  toolbarProps: DataTableShellToolbarProps<TRow>;
+  /** Feature host this table owns. */
+  featureHost: FeatureHostState | undefined;
+}
+
+/**
  * The whole shared orchestration behind a batteries-included `<DataTable>`:
  * resolve the data tier, build the declarative-filter runtime, wire the table
  * chrome (selection, columns, pagination, scroll reset, body virtualization),
@@ -119,7 +331,7 @@ export function useDataTableShell<TRow>(
     source: TableSource<TRow>,
     registry: FilterTypeRegistry
   ) => ReactNode
-) {
+): DataTableShellResult<TRow> {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);
   const { density, onDensityChange: requestDensityChange } =
@@ -185,7 +397,7 @@ export function useDataTableShell<TRow>(
     isDeclarativeFilters(props.filters) || props.filters === undefined
       ? autoForm
       : props.filters;
-  const chromeProps = {
+  const chromeProps: DataTableShellChromeProps<TRow> = {
     ...props,
     density,
     onDensityChange: requestDensityChange,
@@ -274,7 +486,7 @@ export function useDataTableShell<TRow>(
 
   // Body-dependent fields start inert. {@link finishDataTableShell} overlays
   // the window, pins, and load-more sentinel once a body path has run in-tree.
-  const tableProps = {
+  const tableProps: DataTableShellTableProps<TRow> = {
     table,
     gridFocus,
     rows: chrome.editingRows,
@@ -352,7 +564,7 @@ export function useDataTableShell<TRow>(
 
   // The kit-agnostic slice of the toolbar's props — the adapter spreads this
   // and adds its filters-mode wiring, saved-views / column menus, and colour.
-  const toolbarProps = {
+  const toolbarProps: DataTableShellToolbarProps<TRow> = {
     table,
     searchable: props.searchable !== false,
     searchPlaceholder: props.searchPlaceholder,
@@ -456,7 +668,7 @@ export function useDataTableShell<TRow>(
     /** Size every rendered column to its content. */
     autoSizeColumns,
     autoSizeColumn,
-    loadMoreRef: { current: null } as RefObject<HTMLDivElement | null>,
+    loadMoreRef: { current: null },
     canLoadMore: false,
     hasRowActions,
     hasRowReorder,
@@ -520,15 +732,6 @@ export function finishDataTableShell<TRow>(
     },
   };
 }
-
-/**
- * What {@link useDataTableShell} returns, before or after the body gate.
- *
- * @public
- */
-export type DataTableShellResult<TRow> = ReturnType<
-  typeof useDataTableShell<TRow>
->;
 
 export type { FilterRuntime } from "./filters/filterDefs";
 export type { GroupAggregatesFn } from "./grouping/groupRows";

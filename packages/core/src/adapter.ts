@@ -779,8 +779,12 @@ export type {
 } from "./useDataTable/useDataTable";
 export { type SearchInputState } from "./useDataTable/useSearchInput";
 export type {
+  DataTableShellChromeProps,
+  DataTableShellGroupingPanelProps,
   DataTableShellProps,
   DataTableShellResult,
+  DataTableShellTableProps,
+  DataTableShellToolbarProps,
 } from "./useDataTableShell";
 export { finishDataTableShell, useDataTableShell } from "./useDataTableShell";
 export type { PrintToolbar, TableChrome } from "./useTableChrome";
