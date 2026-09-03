@@ -119,6 +119,14 @@ const SERVER_SAFE = [
     pkg: "cli",
     reactFree: true,
   },
+  {
+    // Catalog, describe, execute, and the JSON / OpenAI / MCP mappers run in
+    // a host without React. `@adapttable/ai/react` is the client entry and
+    // is deliberately not listed here.
+    pkg: "ai",
+    only: /^\.\/dist\/(index|json|openai|mcp)\.(js|cjs)$/,
+    reactFree: true,
+  },
 ];
 
 /**
