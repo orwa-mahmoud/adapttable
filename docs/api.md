@@ -201,8 +201,9 @@ semantic-table header controls; Ant Design intentionally uses the menu path.
 Adapter authors bind those slots without copying feature lifecycle through
 `createAdapterEditingFeatures`, `createAdapterFiltersFeature`,
 `createAdapterGroupingFeature`, `createAdapterRowDetailFeatures`,
-`createAdapterRowReorderFeature`, `createAdapterContextMenuFeature` and
-`createAdapterCommandPaletteFeature`. Each accepts kit-owned
+`createAdapterRowReorderFeature`, `createAdapterContextMenuFeature`,
+`createAdapterCommandPaletteFeature` and
+`createAdapterAgentApprovalFeature`. Each accepts kit-owned
 `AdapterFeatureComponent`s and returns ordinary feature factories. Their
 contracts are `AdapterEditingComponents`, `AdapterEditingFeatures`,
 `AdapterFiltersComponents`, `AdapterFiltersFeature`,
@@ -970,8 +971,9 @@ them through `onCellEdit` (`UseEditHistoryOptions` in, `EditHistoryState` out �
 `EditHistoryEntry` the recorded pair. `useTableEditHistory(props)` is the
 table-level wiring — it takes the `editHistory` prop
 (`TableEditHistoryProps`) and returns the history plus the commit channel that
-records each inline edit as a one-cell gesture. `asGesture(apply, record)` makes
-a batch handler one undo entry instead, and `readCellValue(row, column)` reads a
+records each inline edit as a one-cell gesture. `asGesture(apply, record)` wraps
+a cell-edit handler as one undo entry. `asBatchGesture(apply, record)` does the
+same for `onBatchEdit`, so one save is one undo. `readCellValue(row, column)` reads a
 cell's current value unstringified — what an undo puts back. On `<DataTable>` the prop is
 `editHistory`. See [cell editing](./cell-editing.md).
 
@@ -1196,13 +1198,17 @@ the types `AgentApply`, `AgentColumn`, `AgentManifest`, `AgentObservation`,
 `RowWindow`, `TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`,
 `WriteRowResult`. `@adapttable/ai/react` exports `tableAgent`,
 `TableAgentOptions` and `TABLE_AGENT_STATE`. Each published kit exports
-`agentApproval` and `AgentApproval`. Core chrome exports
-`AgentApprovalChrome`, `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE` and the
-slot/proposal types. Portable adapters live on subpaths:
-`@adapttable/ai/json` (`toJsonTools`, `executeJsonTool`, `parseEnvelope`,
-`executeEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
-`executeOpenAITool`), `@adapttable/ai/mcp` (`toMcpTools`, `toMcpResources`,
-`mcpListChanged`, `executeMcpTool`). See
+`agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
+exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
+`AGENT_APPROVAL`, `AGENT_APPROVAL_STATE`, `AgentApprovalPending`,
+`AgentApprovalProposal`, `AgentApprovalButtonProps`,
+`AgentApprovalListProps` and `AgentApprovalSlots`. Portable adapters live
+on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
+`executeJsonTool`, `JsonToolCall`, `parseEnvelope`, `executeEnvelope`,
+`AgentEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
+`OpenAIFunctionTool`, `OpenAIToolsOptions`, `executeOpenAITool`,
+`OpenAIToolCall`), `@adapttable/ai/mcp` (`toMcpTools`, `McpTool`,
+`toMcpResources`, `McpResource`, `mcpListChanged`, `executeMcpTool`). See
 [adaptive capabilities](./agent-capabilities.md),
 [`@adapttable/ai`](./ai.md) and [agent integrations](./ai-integrations.md).
 

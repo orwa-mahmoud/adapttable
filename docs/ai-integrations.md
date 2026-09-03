@@ -72,7 +72,9 @@ const result = await executeJsonTool(session, {
 });
 ```
 
-`executeEnvelope` and `parseEnvelope` are re-exported from this subpath.
+`toJsonTools` returns `JsonFunctionTool[]`. `executeJsonTool` takes a
+`JsonToolCall`. `executeEnvelope` and `parseEnvelope` are re-exported
+from this subpath.
 
 ## OpenAI function tools — `@adapttable/ai/openai`
 
@@ -81,11 +83,13 @@ const tools = toOpenAITools(session); // strict: true by default
 const deferred = toOpenAITools(session, { deferred: true });
 ```
 
-`strict: true` sets `additionalProperties: false` when the described
-schema does not already declare it. `deferred: true` returns only
-`catalog`, `describe` and `execute` — `describe` is how the runtime
-learns the rest. `executeOpenAITool` accepts string or object
-`function.arguments`.
+`toOpenAITools` returns `OpenAIFunctionTool[]`. `OpenAIToolsOptions`
+accepts `strict` and `deferred`. `strict: true` sets
+`additionalProperties: false` when the described schema does not already
+declare it. `deferred: true` returns only `catalog`, `describe` and
+`execute` — `describe` is how the runtime learns the rest.
+`executeOpenAITool` accepts an `OpenAIToolCall` whose
+`function.arguments` may be a string or an object.
 
 ## MCP tools and resources — `@adapttable/ai/mcp`
 
@@ -98,7 +102,8 @@ if (mcpListChanged(prev, next)) {
 await executeMcpTool(session, "view.setPage", { page: 2 }, revision, "k");
 ```
 
-Each enabled capability is also a readable resource at
+`toMcpTools` returns `McpTool[]`. `toMcpResources` returns
+`McpResource[]`. Each enabled capability is also a readable resource at
 `adapttable://table/{tableId}/capability/{key}`. The body is
 `describe(key)` JSON.
 
