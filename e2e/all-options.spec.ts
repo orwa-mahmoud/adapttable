@@ -205,16 +205,19 @@ test("Feature Lab disables combinations the data model cannot honor", async ({
     .click();
   await expect(
     page
-      .getByRole("group", { name: "reorder" })
+      .getByRole("group", { name: "pin rows" })
       .getByRole("button", { name: "On", exact: true })
   ).toBeDisabled();
-  for (const group of ["reorder", "pin rows"]) {
-    await expect(
-      page
-        .getByRole("group", { name: group })
-        .getByRole("button", { name: "Off", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
-  }
+  await expect(
+    page
+      .getByRole("group", { name: "pin rows" })
+      .getByRole("button", { name: "Off", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page
+      .getByRole("group", { name: "reorder" })
+      .getByRole("button", { name: "On", exact: true })
+  ).toBeEnabled();
 
   await page
     .getByRole("group", { name: "data source" })
