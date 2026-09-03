@@ -5,6 +5,7 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ExtraFilters } from "../types";
@@ -12,6 +13,7 @@ import { defaultFilterRegistry } from "./filterBuiltins";
 import type { FilterFormSource } from "./filterForm";
 import {
   bindHeaderFilterDismiss,
+  HeaderFilterOpenProvider,
   headerFilterFieldIsComplete,
   useHeaderFilterOverlay,
   usePointerDismiss,
@@ -315,5 +317,45 @@ describe("useHeaderFilterOverlay", () => {
     });
     expect(result.current.open).toBe(false);
     expect(result.current.resetKey).toBeGreaterThan(0);
+  });
+
+  it("keeps the overlay open across a remount when a host is present", () => {
+    function Probe({ nonce }: { nonce: number }) {
+      const overlay = useHeaderFilterOverlay(
+        {
+          source,
+          def: { key: "name", type: "text" },
+        },
+        { pointerDismiss: false }
+      );
+      return (
+        <button
+          type="button"
+          data-testid="probe"
+          data-nonce={nonce}
+          data-open={overlay.open ? "1" : "0"}
+          onClick={() => overlay.setOpen(true)}
+        >
+          open
+        </button>
+      );
+    }
+    function Host() {
+      const [nonce, setNonce] = useState(0);
+      return (
+        <HeaderFilterOpenProvider>
+          <Probe key={nonce} nonce={nonce} />
+          <button type="button" onClick={() => setNonce((n) => n + 1)}>
+            remount
+          </button>
+        </HeaderFilterOpenProvider>
+      );
+    }
+    render(<Host />);
+    fireEvent.click(screen.getByTestId("probe"));
+    expect(screen.getByTestId("probe")).toHaveAttribute("data-open", "1");
+    fireEvent.click(screen.getByText("remount"));
+    expect(screen.getByTestId("probe")).toHaveAttribute("data-open", "1");
+    expect(screen.getByTestId("probe")).toHaveAttribute("data-nonce", "1");
   });
 });

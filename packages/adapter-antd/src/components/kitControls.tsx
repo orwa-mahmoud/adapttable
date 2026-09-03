@@ -60,7 +60,14 @@ import {
   Select,
   Typography,
 } from "antd";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 
 import { FiltersIcon } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
@@ -287,45 +294,87 @@ export function FilterHeaderTrigger<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
   const active = hasActiveHeaderFilter(props);
+  const triggerRef = useRef<HTMLSpanElement>(null);
+  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(
+    null
+  );
   const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
     props,
     {
-      nestedSelector: ".ant-popover,.ant-select-dropdown,.ant-picker-dropdown",
+      nestedSelector: ".ant-dropdown,.ant-select-dropdown,.ant-picker-dropdown",
     }
   );
+  useLayoutEffect(() => {
+    if (!open) {
+      setAnchor(null);
+      return;
+    }
+    const update = (): void => {
+      const box = triggerRef.current?.getBoundingClientRect();
+      if (box == null) return;
+      setAnchor({ top: box.bottom + 4, left: box.left });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open]);
   return (
-    <Popover
-      trigger={[]}
-      open={open}
-      placement="bottomLeft"
-      destroyOnHidden
-      content={
-        <div
-          {...sessionProps}
-          data-adapttable-part="filter-header-cell"
-          style={{ minWidth: "20rem" }}
-        >
-          <AutoFilterForm
-            defs={[props.def]}
-            source={source}
-            labels={props.labels}
-            registry={props.registry}
-          />
-        </div>
-      }
-    >
-      <Button
+    <>
+      <span
         {...sessionProps}
-        type={active ? "primary" : "text"}
-        size="small"
-        aria-label={filterLabel(props.def)}
-        data-adapttable-part="filter-header-trigger"
-        data-active={active ? "" : undefined}
-        onClick={() => setOpen(!open)}
+        ref={triggerRef}
+        style={{ display: "inline-flex" }}
       >
-        <FiltersIcon size={14} />
-      </Button>
-    </Popover>
+        <Button
+          type={active ? "primary" : "text"}
+          size="small"
+          aria-label={filterLabel(props.def)}
+          data-adapttable-part="filter-header-trigger"
+          data-active={active ? "" : undefined}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            setOpen(!open);
+          }}
+        >
+          <FiltersIcon size={14} />
+        </Button>
+      </span>
+      {open &&
+        anchor != null &&
+        createPortal(
+          <div
+            {...sessionProps}
+            data-adapttable-part="filter-header-cell"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              position: "fixed",
+              top: anchor.top,
+              left: anchor.left,
+              zIndex: 1050,
+              minWidth: "20rem",
+              padding: 12,
+              background: "var(--ant-color-bg-elevated, #fff)",
+              boxShadow:
+                "var(--ant-box-shadow-secondary, 0 6px 16px rgba(0,0,0,0.08))",
+              borderRadius: 8,
+            }}
+          >
+            <AutoFilterForm
+              defs={[props.def]}
+              source={source}
+              labels={props.labels}
+              registry={props.registry}
+            />
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
 

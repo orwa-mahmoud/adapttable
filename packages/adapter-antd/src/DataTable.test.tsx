@@ -2009,6 +2009,29 @@ describe("header filter trigger", () => {
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
     ).not.toBeNull();
   });
+
+  it("keeps the overlay open after the operator changes", () => {
+    renderHarness({
+      override: {
+        headerFilters: true,
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    fireEvent.click(
+      document.querySelector('[data-adapttable-part="filter-header-trigger"]')!
+    );
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+    fireEvent.mouseDown(
+      document.querySelector('[data-adapttable-part="filter-operator"]')!
+    );
+    const option = document.querySelectorAll(".ant-select-item-option")[1];
+    if (option) fireEvent.click(option);
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+  });
 });
 
 describe("sparkline column", () => {

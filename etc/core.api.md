@@ -5,6 +5,7 @@
 ```ts
 
 import { ComponentType } from 'react';
+import { Context } from 'react';
 import { CSSProperties } from 'react';
 import { DragEvent as DragEvent_2 } from 'react';
 import { HTMLAttributes } from 'react';
@@ -2306,6 +2307,20 @@ export function hasEditableColumns(columns: readonly EditableColumnLike[]): bool
 
 // @public
 export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
+
+// @public
+export const HeaderFilterOpenContext: Context<HeaderFilterOpenHost | null>;
+
+// @public
+export interface HeaderFilterOpenHost {
+    readonly openKey: string | null;
+    readonly setOpenKey: (key: string | null) => void;
+}
+
+// @public
+export function HeaderFilterOpenProvider(input: {
+    readonly children: ReactNode;
+}): ReactNode;
 
 // @public
 export interface HeaderFilterSessionProps {

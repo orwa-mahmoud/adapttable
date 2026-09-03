@@ -9,6 +9,7 @@ import {
   type GroupByInput,
   type GroupCollapseState,
   type GroupedFlatEntry,
+  HeaderFilterOpenProvider,
   isDeclarativeFilters,
   pageSizeOptions,
   partitionPinnedRows,
@@ -2689,8 +2690,10 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const props = useTableFeatures(incoming);
   return (
     <FeatureProviders props={props}>
-      <ForcedColorsStyle />
-      <DataTableContent<TRow> {...props} />
+      <HeaderFilterOpenProvider>
+        <ForcedColorsStyle />
+        <DataTableContent<TRow> {...props} />
+      </HeaderFilterOpenProvider>
     </FeatureProviders>
   );
 }

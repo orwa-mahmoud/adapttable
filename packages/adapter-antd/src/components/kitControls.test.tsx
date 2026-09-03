@@ -1,7 +1,7 @@
 import type { QueryFilterGroup } from "@adapttable/core";
 import { fireEvent, screen } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   defaultLabels,
@@ -229,6 +229,21 @@ describe("kit header filter trigger (antd)", () => {
     renderAntd(<TriggerHarness />);
     fireEvent.click(trigger());
 
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+  });
+
+  it("does not let the opening click reach a parent sort handler", () => {
+    const onSort = vi.fn();
+    renderAntd(
+      <th onClick={onSort}>
+        <TriggerHarness />
+      </th>
+    );
+    fireEvent.click(trigger());
+
+    expect(onSort).not.toHaveBeenCalled();
     expect(
       document.querySelector('[data-adapttable-part="filter-header-cell"]')
     ).not.toBeNull();

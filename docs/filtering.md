@@ -255,7 +255,9 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   clicks. Pass `closeHeaderFilterOnSelect` to dismiss after a finished
   single-control write (`useHeaderFilterOverlay` /
   `bindHeaderFilterDismiss` / `headerFilterFieldIsComplete` /
-  `usePointerDismiss` / `HeaderFilterSessionProps`).
+  `usePointerDismiss` / `HeaderFilterSessionProps` /
+  `HeaderFilterOpenProvider` / `HeaderFilterOpenContext` /
+  `HeaderFilterOpenHost`).
 - **Range widgets**: `useRangeFilterWidget` is the kit-agnostic logic behind
   `numberRange` / `dateRange` fields — it returns a `RangeWidgetState` whose
   `RangeFieldWidget` entries carry the visible bounds, the active

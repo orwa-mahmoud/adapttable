@@ -3,7 +3,17 @@
  * ignore nested kit dropdowns as "outside", and optionally dismiss once
  * a complete value is written (`closeOnSelect`).
  */
-import { useCallback, useEffect, useId, useState } from "react";
+import {
+  createContext,
+  createElement,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
 
 import type { ExtraFilters } from "../types";
 import { defaultFilterRegistry } from "./filterBuiltins";
@@ -29,6 +39,42 @@ export const SESSION_ATTR = "data-adapttable-header-filter";
 export interface HeaderFilterSessionProps {
   /** Ties the trigger and its overlay to one editing session. */
   readonly [SESSION_ATTR]: string;
+}
+
+/**
+ * Host for header-filter open state that survives a kit remounting its
+ * column title (antd rebuilds `columns[].title` on every extra-filter write).
+ *
+ * @public
+ */
+export interface HeaderFilterOpenHost {
+  /** Column key whose overlay is open, or `null` when none is. */
+  readonly openKey: string | null;
+  /** Open this column's overlay, or pass `null` to close. */
+  readonly setOpenKey: (key: string | null) => void;
+}
+
+/**
+ * Context filled by {@link HeaderFilterOpenProvider}.
+ *
+ * @public
+ */
+export const HeaderFilterOpenContext =
+  createContext<HeaderFilterOpenHost | null>(null);
+
+/**
+ * Hold header-filter open state above kit headers that remount on writes.
+ *
+ * @public
+ */
+export function HeaderFilterOpenProvider({
+  children,
+}: {
+  readonly children: ReactNode;
+}): ReactNode {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const value = useMemo(() => ({ openKey, setOpenKey }), [openKey]);
+  return createElement(HeaderFilterOpenContext.Provider, { value }, children);
 }
 
 /**
@@ -176,12 +222,25 @@ export function useHeaderFilterOverlay<TRow>(
 } {
   const rawId = useId();
   const id = rawId.replaceAll(":", "");
-  const [open, setOpen] = useState(false);
+  const persistKey = props.def.key;
+  const host = useContext(HeaderFilterOpenContext);
+  const [localOpen, setLocalOpen] = useState(false);
   const [resetKey, setResetKey] = useState(0);
+  const open = host != null ? host.openKey === persistKey : localOpen;
+  const setOpen = useCallback(
+    (next: boolean) => {
+      if (host != null) {
+        host.setOpenKey(next ? persistKey : null);
+        return;
+      }
+      setLocalOpen(next);
+    },
+    [host, persistKey]
+  );
   const dismiss = useCallback(() => {
     setOpen(false);
     setResetKey((key) => key + 1);
-  }, []);
+  }, [setOpen]);
   const source = bindHeaderFilterDismiss(props.source, {
     def: props.def,
     closeOnSelect: props.closeOnSelect === true,

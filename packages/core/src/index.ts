@@ -190,6 +190,9 @@ export {
 } from "./filters/filterTreeMutations";
 export {
   bindHeaderFilterDismiss,
+  HeaderFilterOpenContext,
+  type HeaderFilterOpenHost,
+  HeaderFilterOpenProvider,
   headerFilterFieldIsComplete,
   type HeaderFilterSessionProps,
   useHeaderFilterOverlay,
