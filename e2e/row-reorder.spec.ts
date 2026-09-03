@@ -220,6 +220,9 @@ for (const adapter of ADAPTERS) {
       await expect(part(page, "row-reorder-announcer")).toContainText(
         "Row moved to"
       );
+      await expect(
+        page.locator('[data-adapttable-part="row-move-confirmation"]:visible')
+      ).toHaveCount(0);
 
       const trigger = part(page, "row-move-menu-trigger").first();
       await expect(trigger).toBeVisible();
