@@ -293,6 +293,38 @@ it("every function label in every locale interpolates ALL its arguments", () => 
  * translation that drops the ternary still compiles, still interpolates the
  * column, and quietly tells every user the order is ascending.
  */
+it("every locale formats a proposal change without a column or value", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const rowOnly = labels.proposalChange({ row: "ROW_X" });
+    const withColumn = labels.proposalChange({
+      row: "ROW_X",
+      column: "COLUMN_X",
+    });
+    const afterOnly = labels.proposalChange({
+      row: "ROW_X",
+      column: "COLUMN_X",
+      after: "AFTER_X",
+    });
+    const beforeOnly = labels.proposalChange({
+      row: "ROW_X",
+      column: "COLUMN_X",
+      before: "BEFORE_X",
+    });
+
+    expect(rowOnly, `${tag} row-only`).toBe("ROW_X");
+    expect(withColumn, `${tag} field`).toContain("ROW_X");
+    expect(withColumn, `${tag} field`).toContain("COLUMN_X");
+    expect(afterOnly, `${tag} after-only`).toContain("AFTER_X");
+    expect(beforeOnly, `${tag} before-only`).toContain("BEFORE_X");
+    expect(afterOnly, `${tag} must not collapse to the field`).not.toBe(
+      withColumn
+    );
+    expect(beforeOnly, `${tag} must not collapse to the field`).not.toBe(
+      withColumn
+    );
+  }
+});
+
 it("every locale distinguishes ascending from descending", () => {
   for (const [tag, labels] of Object.entries(locales)) {
     const up = labels.sortedBy({ column: "C", ascending: true });
