@@ -283,4 +283,49 @@ describe("tableAgent", () => {
     expect(setLimit).toHaveBeenCalledWith(25);
     expect(setGroupBy).not.toHaveBeenCalled();
   });
+
+  it("omits add and delete unless the host wired those callbacks", async () => {
+    let session: AgentSession | undefined;
+    const { rerender } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            bridge: { attach: (s) => (session = s) },
+          }),
+        ]}
+        view={{
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).not.toEqual(
+      expect.arrayContaining(["rows.add", "rows.delete"])
+    );
+
+    session = undefined;
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            apply: { addRows: vi.fn(), deleteRows: vi.fn() },
+            bridge: { attach: (s) => (session = s) },
+          }),
+        ]}
+        view={{
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const keys = session!.catalog().map((entry) => entry.key);
+    expect(keys).toContain("rows.add");
+    expect(keys).toContain("rows.delete");
+  });
 });

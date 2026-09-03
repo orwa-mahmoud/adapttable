@@ -19,13 +19,13 @@ describe("the generated showcase pages", () => {
   const files = showcaseHtmlFiles();
 
   it("writes one page per matrix entry and per replaced address", () => {
-    // Twenty-one pages per adapter — a landing plus twenty features — across all
-    // eight kits, plus the eight replaced top-level addresses. Kit
+    // Twenty-two pages per adapter — a landing plus twenty-one features — across
+    // all eight kits, plus the eight replaced top-level addresses. Kit
     // `/accessibility/` URLs are matrix pages again, not redirects to editing.
     // Written out rather than recomputed from the matrix: the writer reads
     // that same list, so a derived count would agree with itself no matter
     // what it produced.
-    assert.equal(files.length, 8 * 21 + 8);
+    assert.equal(files.length, 8 * 22 + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -79,6 +79,17 @@ describe("the generated showcase pages", () => {
       assert.match(file.html, /pinnedSummaryRows/);
       assert.match(file.html, /summaryRow/);
       assert.match(file.html, /groupAggregates/);
+    }
+  });
+
+  it("names the v3 AI integration capabilities in static HTML", () => {
+    const ai = files.filter((file) => file.dir.endsWith("/ai"));
+    assert.equal(ai.length, 8);
+    for (const file of ai) {
+      assert.match(file.html, /tableAgent/);
+      assert.match(file.html, /session\.execute|catalog/);
+      assert.match(file.html, /agentApproval/);
+      assert.match(file.html, /tool-call playground|Tool-call playground/i);
     }
   });
 

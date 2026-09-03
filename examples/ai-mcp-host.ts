@@ -4,17 +4,8 @@
  * `toMcpTools` / `toMcpResources` wrap one `createAgentSession`. When the
  * live table composes a new feature, compare manifests with `mcpListChanged`
  * and emit `notifications/tools/list_changed`. Hosts that cannot refresh a
- * dynamic tool list keep the portable trio on the session
- * (`catalog` / `describe` / `execute`) or use `@adapttable/ai/openai`
- * `{ deferred: true }`.
- *
- * Frozen 11-B keys that will appear in `catalog()` when wired:
- *   view.setSelection, views.apply, rows.read, rows.resolve,
- *   rows.add, rows.delete
- *
- * Host policy (future `tableAgent` options, not envelope fields):
- *   approval: "writes" | "destructive" | "never"  (default "writes")
- *   commit:   "stage" | "immediate"               (default "stage")
+ * dynamic tool list keep the portable trio (`catalog` / `describe` /
+ * `execute`) or use `@adapttable/ai/openai` `{ deferred: true }`.
  */
 import type { AgentObservation } from "@adapttable/ai";
 import { createAgentSession } from "@adapttable/ai";
@@ -82,7 +73,6 @@ export async function runMcpHostExample(): Promise<void> {
     toMcpResources(before).map((resource) => resource.uri)
   );
 
-  const proposals: unknown[] = [];
   const after = createAgentSession({
     observe: () =>
       observation({
@@ -91,21 +81,15 @@ export async function runMcpHostExample(): Promise<void> {
         hasPagination: true,
       }),
     apply: {
-      editCells: (edits) => {
-        // commit: "stage" — record a proposal. "immediate" would persist.
-        proposals.push({ commit: "stage", edits });
-        return { staged: true, edits };
-      },
+      editCells: (edits) => ({ staged: true, edits }),
     },
   });
-
-  const changed = mcpListChanged(before.manifest(), after.manifest());
-  console.log("mcpListChanged after composing edit.cells:", changed);
-  if (!changed) {
-    throw new Error("expected list-changed when edit.cells becomes wired");
-  }
   console.log(
-    "MCP tools (editing wired):",
+    "list changed:",
+    mcpListChanged(before.manifest(), after.manifest())
+  );
+  console.log(
+    "MCP tools (editing composed):",
     toMcpTools(after).map((tool) => tool.name)
   );
 
@@ -113,20 +97,10 @@ export async function runMcpHostExample(): Promise<void> {
     after,
     "view.setPage",
     { page: 2 },
-    1,
-    "mcp-page"
+    after.manifest().viewRevision,
+    "mcp-page-2"
   );
-  console.log("execute view.setPage →", page);
-
-  const salary = await executeMcpTool(
-    after,
-    "edit.cells",
-    { edits: [{ rowKey: "5", column: "salary", value: 20000 }] },
-    1,
-    "mcp-sal"
-  );
-  console.log("execute edit.cells →", salary);
-  console.log("staged proposals:", proposals);
+  console.log("executeMcpTool view.setPage →", page);
 }
 
 void runMcpHostExample();

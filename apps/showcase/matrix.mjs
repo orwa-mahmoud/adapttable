@@ -253,6 +253,7 @@ const FEATURE_DEMAND_ORDER = [
   "rtl",
   "realtime",
   "accessibility",
+  "ai",
 ];
 
 /**
@@ -263,9 +264,8 @@ const FEATURE_DEMAND_ORDER = [
  * and the docs already own that search. Column groups, RTL, realtime, rows,
  * nested tables and accessibility used to answer once for all eight kits (or
  * live only in the Lab / docs); they are features of a kit page now, the same
- * as filtering or grouping. Accessibility is last in demand order — it is on
- * by default, and the first tile to give up if a stronger search destination
- * needs the slot.
+ * as filtering or grouping. AI is last in demand order — optional, and the
+ * first tile to give up if a stronger search destination needs the slot.
  *
  * @type {MatrixFeature[]}
  */
@@ -1334,6 +1334,63 @@ export function Sales({ rows, columns }) {
     },
     docs: ["row-grouping", "pinned-summary-rows", "full-width-rows"],
   },
+  {
+    slug: "ai",
+    label: "AI",
+    h1: "AI integrations in {kit}",
+    title: "{kit} AI table integrations — AdaptTable",
+    description:
+      "Drive a live {kit} data table through catalog, describe and execute — a local tool-call playground, no model, no credentials, and writes that still go through the host.",
+    intro: [
+      "`@adapttable/ai` is optional and provider-neutral. Compose `tableAgent` next to {kit}'s `filters` and `agentApproval`. The session advertises only what this table has mounted: filtering and a host-owned write here, never grouping or pivoting.",
+      "The panel above the grid is a tool-call playground, not a language model. It shows the live compact catalog, lets you inspect one capability schema, and runs curated `session.execute` calls. Filter Core team. Propose Jonah's salary. Approve stages it; Save commits it.",
+      "Three integration levels share that session: a custom bridge that maps any agent format onto `execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI or MCP helpers from your own runtime. Execution never requires another model call.",
+    ],
+    card: "Live catalog, describe, execute — no model, host-owned writes.",
+    snippet: `import { tableAgent } from "@adapttable/ai/react";
+import { DataTable, agentApproval } from "{pkg}";
+import { editing } from "{pkg}/editing";
+import { filters } from "{pkg}/filters";
+
+export function Orders({ rows, columns, onEdit }) {
+  return (
+    <DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(row) => row.id}
+      features={[
+        filters([{ key: "team", type: "multiSelect", getValue: (row) => row.team }]),
+        agentApproval(),
+        editing(onEdit),
+        tableAgent({
+          tableId: "orders",
+          writePolicy: "allow",
+          approval: "writes",
+          commit: "stage",
+          columns: { salary: { type: "number", writable: true } },
+        }),
+      ]}
+    />
+  );
+}`,
+    notes: {
+      mantine:
+        "The Filters button and the approval strip are Mantine controls. The playground above them is host chrome — it calls the same session a custom bridge would call.",
+      mui: "The Filters button and the approval strip are MUI. The playground is host chrome so a tool-call is not mistaken for a chat box drawn in Material.",
+      chakra:
+        "Filters and approval are Chakra. The playground stays host chrome: catalog chips and execute buttons, not a generated assistant panel.",
+      antd: "Filters and approval are antd. The playground is host chrome that prints capability keys and runs execute — antd does not grow a chat UI.",
+      radix:
+        "Filters and approval are Radix Themes. The playground is host chrome; the session is the same catalog / describe / execute trio.",
+      "base-ui":
+        "Filters and approval are Base UI. The playground is host chrome so the kit's table stays the only Base UI surface on the page.",
+      shadcn:
+        "Filters and approval wear the preset. The playground is host chrome — capability keys and execute buttons, not a second component library.",
+      tailwind:
+        "Filters and approval carry the map's classes. The playground is host chrome so a tool-call is labelled as one, not as a language model.",
+    },
+    docs: ["ai-integrations", "ai", "agent-capabilities"],
+  },
 ];
 
 /**
@@ -1358,6 +1415,15 @@ function inDemandOrder(features) {
 
 /** The matrix features, in the order the landing grid and rails show them. */
 export const MATRIX_FEATURES = inDemandOrder(MATRIX_FEATURES_DEFINED);
+
+/**
+ * The kit the header "AI demo" link opens.
+ *
+ * One destination, not eight competing primary links. Chosen after a real
+ * look at every published adapter page: Mantine is the site default and the
+ * strongest pairing of instrument panel plus kit table.
+ */
+export const CANONICAL_AI_ADAPTER = "mantine";
 
 /**
  * The adapter landing page's own copy.

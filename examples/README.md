@@ -20,6 +20,9 @@ complete, copy-pasteable React component — wrap it in your kit's provider
 | [shadcn-basic.tsx](./shadcn-basic.tsx)                     | `@adapttable/shadcn`   | shadcn/ui tokens, no provider                   |
 | [unstyled-tailwind.tsx](./unstyled-tailwind.tsx)           | `@adapttable/unstyled` | Tailwind classes + RTL/i18n                     |
 | [headless.tsx](./headless.tsx)                             | `@adapttable/core`     | Fully custom markup via prop-getters            |
+| [ai-custom-bridge.ts](./ai-custom-bridge.ts)               | `@adapttable/ai`       | Any agent format → `session.execute`            |
+| [ai-one-call.ts](./ai-one-call.ts)                         | `@adapttable/ai/json`  | Text + actions, no model round trip             |
+| [ai-result-return.ts](./ai-result-return.ts)               | `@adapttable/ai/json`  | Optional ExecuteResult return loop              |
 | [ai-server-agent.ts](./ai-server-agent.ts)                 | `@adapttable/ai`       | Node session, envelope HTTP, salary idempotency |
 | [ai-mcp-host.ts](./ai-mcp-host.ts)                         | `@adapttable/ai/mcp`   | MCP tools, resources, list-changed              |
 | [ai-browser-agent.tsx](./ai-browser-agent.tsx)             | `@adapttable/ai/react` | JSON tools, capability growth, stage vs commit  |

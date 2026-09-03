@@ -1,8 +1,15 @@
-# Agent integrations — JSON, OpenAI, MCP
+# Agent integrations — catalog, describe, execute
 
-`@adapttable/ai` does not host a model, chat UI, or AdaptTable service.
-A table publishes a manifest. Your runtime maps that contract onto the
-tools it already speaks.
+`@adapttable/ai` does not host a model, a chat UI, or an AdaptTable service.
+A live table publishes a compact catalog. Your runtime maps that contract
+onto the tools it already speaks, then calls `session.execute`.
+
+[Try the interactive demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+— a labelled tool-call playground on a real Mantine table. No credentials.
+No network model call.
+
+See [adaptive capabilities](./agent-capabilities.md) and
+[`@adapttable/ai`](./ai.md) for the session itself.
 
 ```ts
 import { createAgentSession } from "@adapttable/ai";
@@ -14,27 +21,43 @@ import { mcpListChanged, toMcpResources, toMcpTools } from "@adapttable/ai/mcp";
 The root entry stays React-free. `@adapttable/ai/react` is only for
 `tableAgent`. The three integration subpaths never import a model SDK.
 
-See [adaptive capabilities](./agent-capabilities.md) and
-[`@adapttable/ai`](./ai.md) for the session itself.
+## Three integration levels
 
-## Manifest → tools
+### 1. Custom frontend bridge
 
-`catalog()` is the enabled key list, in a stable order. Each adapter
-calls `describe(key)` for the input JSON Schema and uses the capability
-key as the tool `name`. Names are never translated.
+Transform any agent's action format, then call `session.execute`.
 
-Today's keys: `columns.describe`, `view.describe`, `view.setPage`,
-`view.setSort`, `view.setSearch`, `view.setFilters`, `view.setGroupBy`,
-`export.run`, `edit.cells`, `rows.reorder`.
+```ts
+import {
+  runCustomBridge,
+  createBridgeSession,
+} from "../examples/ai-custom-bridge";
 
-Keys that land with the write-safety / bounded-read work, advertised
-only when wired: `view.setSelection`, `views.apply`, `rows.read`,
-`rows.resolve`, `rows.add`, `rows.delete`. Adapters that map
-`session.catalog()` pick them up automatically.
+const session = createBridgeSession({
+  setFilters: (filters) => applyHostFilters(filters),
+});
 
-## Envelope
+await runCustomBridge(
+  session,
+  { tool: "view.setFilters", input: { filters: { team: ["Core"] } } },
+  "bridge-filter-core"
+);
+```
 
-Every provider call collapses to one transport-neutral operation:
+Compiling source: [ai-custom-bridge.ts](../examples/ai-custom-bridge.ts).
+
+### 2. `AgentEnvelope` on your transport
+
+Carry a versioned envelope over HTTP, a websocket, or postMessage. Parse
+it in the browser or worker, then execute. There is no second argument
+validator — `session.execute` owns that.
+
+```ts
+import { executeEnvelope, parseEnvelope } from "@adapttable/ai/json";
+
+const envelope = parseEnvelope(body);
+const result = await executeEnvelope(session, envelope);
+```
 
 ```ts
 interface AgentEnvelope {
@@ -47,71 +70,98 @@ interface AgentEnvelope {
 }
 ```
 
-`parseEnvelope(input)` checks that shape. `executeEnvelope(session,
-envelope)` checks `schemaVersion` and `tableId ===
-session.manifest().tableId`, then calls `session.execute`. There is no
-second argument validator.
+Compiling source: [ai-server-agent.ts](../examples/ai-server-agent.ts).
 
-Host write-safety chrome (not on the envelope) may wrap apply:
+### 3. Optional JSON / OpenAI / MCP helpers
+
+Use these from **your** agent runtime. LangChain or any other framework
+may consume the JSON tools. None of them become an AdaptTable dependency.
+
+```ts
+const tools = toJsonTools(session);
+const openai = toOpenAITools(session, { deferred: true });
+const mcp = toMcpTools(session);
+```
+
+Compiling source: [ai-mcp-host.ts](../examples/ai-mcp-host.ts).
+
+## One-call response — result stays in the app
+
+A model may return text and structured actions in one response. Execute
+the actions, then show success or error in application or table UI.
+Sending `ExecuteResult` back to the model is optional.
+
+```ts
+import { applyTurnWithoutRoundTrip } from "../examples/ai-one-call";
+
+const { text, results } = await applyTurnWithoutRoundTrip(session, turn);
+showInApp(text, results);
+```
+
+Compiling source: [ai-one-call.ts](../examples/ai-one-call.ts).
+
+## Optional result-return loop
+
+```ts
+import { applyTurnAndReply } from "../examples/ai-result-return";
+
+await applyTurnAndReply(session, turn, (text, results) => {
+  sendBackToYourRuntime(text, results);
+});
+```
+
+Compiling source: [ai-result-return.ts](../examples/ai-result-return.ts).
+
+Do not add a chat-response wrapper to AdaptTable. The turn envelope is
+application-owned.
+
+## Catalog is live-table-derived
+
+`catalog()` lists only capabilities enabled by mounted features, column
+permissions, source support and host callbacks. A table with filtering
+and pagination must not advertise editing, grouping or pivoting.
+
+Two equally valid ways to learn schemas:
+
+1. Compact `catalog → describe → execute` — describe one key when needed.
+2. Eager helpers (`toJsonTools`, `toOpenAITools`) that call `describe`
+   for every enabled key.
+
+```ts
+for (const entry of session.catalog()) {
+  const guide = session.describe(entry.key);
+  await session.execute(entry.key, args, revision, idempotencyKey);
+}
+```
+
+Host write-safety chrome (not on the envelope):
 
 - `approval`: `"writes"` | `"destructive"` | `"never"` (default `"writes"`)
 - `commit`: `"stage"` | `"immediate"` (default `"stage"`)
 
-Stage records a proposal in the host `apply.editCells` callback.
-Immediate persists through that same callback.
+Stage records a proposal in the host edit callback. Immediate persists
+through that same callback. Approve, then Save, then Undo — the table
+never owns the data.
 
-## JSON function tools — `@adapttable/ai/json`
-
-```ts
-const tools = toJsonTools(session);
-const result = await executeJsonTool(session, {
-  name: "view.setPage",
-  arguments: { page: 2 },
-  expectedRevision: session.manifest().viewRevision,
-  idempotencyKey: "page-2",
-});
-```
+## JSON, OpenAI, MCP
 
 `toJsonTools` returns `JsonFunctionTool[]`. `executeJsonTool` takes a
 `JsonToolCall`. `executeEnvelope` and `parseEnvelope` are re-exported
-from this subpath.
+from `@adapttable/ai/json`.
 
-## OpenAI function tools — `@adapttable/ai/openai`
+`toOpenAITools(session, { deferred: true })` returns only `catalog`,
+`describe` and `execute`. `strict: true` is the default.
 
-```ts
-const tools = toOpenAITools(session); // strict: true by default
-const deferred = toOpenAITools(session, { deferred: true });
-```
-
-`toOpenAITools` returns `OpenAIFunctionTool[]`. `OpenAIToolsOptions`
-accepts `strict` and `deferred`. `strict: true` sets
-`additionalProperties: false` when the described schema does not already
-declare it. `deferred: true` returns only `catalog`, `describe` and
-`execute` — `describe` is how the runtime learns the rest.
-`executeOpenAITool` accepts an `OpenAIToolCall` whose
-`function.arguments` may be a string or an object.
-
-## MCP tools and resources — `@adapttable/ai/mcp`
-
-```ts
-const tools = toMcpTools(session); // catalog order
-const resources = toMcpResources(session);
-if (mcpListChanged(prev, next)) {
-  // notifications/tools/list_changed
-}
-await executeMcpTool(session, "view.setPage", { page: 2 }, revision, "k");
-```
-
-`toMcpTools` returns `McpTool[]`. `toMcpResources` returns
-`McpResource[]`. Each enabled capability is also a readable resource at
-`adapttable://table/{tableId}/capability/{key}`. The body is
-`describe(key)` JSON.
-
-Hosts that cannot refresh a dynamic tool list keep the portable trio on
-the session, or use the OpenAI deferred trio.
+`toMcpTools` / `toMcpResources` list enabled keys. Each capability is
+also a resource at
+`adapttable://table/{tableId}/capability/{key}`. `mcpListChanged`
+decides when to emit `notifications/tools/list_changed`.
 
 ## Examples
 
+- [ai-custom-bridge.ts](../examples/ai-custom-bridge.ts) — any agent format → `execute`
+- [ai-one-call.ts](../examples/ai-one-call.ts) — text + actions, no model round trip
+- [ai-result-return.ts](../examples/ai-result-return.ts) — optional result return
 - [ai-server-agent.ts](../examples/ai-server-agent.ts) — Node worker + HTTP envelope
 - [ai-mcp-host.ts](../examples/ai-mcp-host.ts) — tools, resources, list-changed
 - [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools

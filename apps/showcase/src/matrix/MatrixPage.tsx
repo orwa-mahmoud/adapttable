@@ -41,6 +41,7 @@ import {
   Pivot,
   Rows,
   Sigma,
+  Spark,
   Star,
   Tree,
 } from "../sectionIcons";
@@ -85,6 +86,7 @@ const FEATURE_ICONS: Record<string, (props: { size?: number }) => ReactNode> = {
   scale: Database,
   selection: CheckSquare,
   tree: Tree,
+  ai: Spark,
 };
 
 /**

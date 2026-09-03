@@ -79,4 +79,16 @@ describe("v3 showcase snippets compile", () => {
       /export \{ pinnedSummaryRows \}/
     );
   });
+
+  it("ai imports published session factories", () => {
+    const snippet = fill(featureBySlug("ai").snippet);
+    assert.match(snippet, /from "@adapttable\/ai\/react"/);
+    assert.match(snippet, /tableAgent/);
+    assert.match(snippet, /from "@adapttable\/mantine"/);
+    assert.match(snippet, /agentApproval/);
+    assert.match(snippet, /from "@adapttable\/mantine\/filters"/);
+    assert.match(snippet, /from "@adapttable\/mantine\/editing"/);
+    assert.ok(mantinePkg.exports["./filters"]);
+    assert.ok(mantinePkg.exports["./editing"]);
+  });
 });

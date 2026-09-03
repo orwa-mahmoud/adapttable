@@ -119,3 +119,5 @@ export const Grip = make([
 ]);
 /** A sum bar under a column — aggregation, not a data row. */
 export const Sigma = make(["M5 5h14l-8 7 8 7H5"]);
+/** Catalog keys branching from one table — AI integrations, not a chat bubble. */
+export const Spark = make(["M4 12h6l2-7 2 14 2-7h6", "M12 3v2", "M12 19v2"]);

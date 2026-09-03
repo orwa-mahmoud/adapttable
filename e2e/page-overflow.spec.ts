@@ -7,7 +7,7 @@ import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
  *
  * A page-level horizontal scrollbar is the one layout fault that touches every
  * page at once, because it comes from the shared chrome rather than from a
- * demo: the nav is on top of all twenty of them, and anything in it that
+ * demo: the nav is on top of all twenty-one of them, and anything in it that
  * cannot fit pushes the whole document wider than the viewport. jsdom has no
  * layout, so only a real browser can measure it. The nav's own metrics — one
  * row at every desktop width, panels that float rather than widen the bar —

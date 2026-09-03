@@ -932,6 +932,125 @@ a {
   font-size: 12px;
   color: var(--ink-2);
 }
+.ai-play {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--page-border);
+  background: var(--page-surface-2);
+}
+.ai-play__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+.ai-play__status strong {
+  font-weight: 650;
+}
+.ai-play__note {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.ai-play__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.ai-play__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 220px;
+}
+.ai-play__key,
+.ai-play__btn {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--page-border);
+  border-radius: 999px;
+  background: var(--page-surface);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ai-play__key.is-on,
+.ai-play__btn:hover {
+  border-color: var(--brand, var(--c));
+}
+.ai-play__key.is-on {
+  background: color-mix(
+    in srgb,
+    var(--page-surface) 78%,
+    var(--brand, var(--c)) 22%
+  );
+}
+.ai-play__key:focus-visible,
+.ai-play__btn:focus-visible {
+  outline: 2px solid var(--brand, var(--c));
+  outline-offset: 2px;
+}
+.ai-play__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ai-play__schema {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 160px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.45;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+}
+.ai-play__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.ai-play__last {
+  min-height: 1.2em;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.ai-play__refs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.ai-play__refs a {
+  color: inherit;
+}
+.ai-play__kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 13px;
+}
+.ai-play__kits a {
+  color: inherit;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.ai-play__kits a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 650;
+  text-decoration: none;
+}
 .demo-live-update {
   display: flex;
   align-items: center;

@@ -124,12 +124,12 @@ const {
 
 - [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/): every adapter on one dataset
 
-The demo is adapter-first: each kit has a landing page, and twenty feature pages
+The demo is adapter-first: each kit has a landing page, and twenty-one feature pages
 under it at `/demo/<kit>/<feature>/` — e.g. `/demo/antd/filtering/`,
 `/demo/shadcn/columns/`. The features are filtering, columns, column-groups,
 selection, rows, row-reordering, editing, grouping, aggregation, nested-tables,
-export, scale, tree, mobile-cards, pivot, saved-views, formulas, rtl, realtime
-and accessibility.
+export, scale, tree, mobile-cards, pivot, saved-views, formulas, rtl, realtime,
+accessibility and ai.
 
 - [AdaptTable for Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/): a data table that renders as Mantine, because it is built from Mantine
 - [AdaptTable for MUI](https://orwa-mahmoud.github.io/adapttable/demo/mui/): a Material data table, drawn by MUI's own components
@@ -157,6 +157,7 @@ and accessibility.
 - [RTL demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/): an Arabic table with mirrored search, sort arrows, pinned columns and pagination on a genuinely flipped axis
 - [Realtime demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/realtime/): websocket-style row patches with sort and filters holding, plus a feed of applied updates
 - [Accessibility demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/accessibility/): arrow-key cell focus with a visible ring, and every live-region announcement shown as text
+- [AI integrations demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/): live catalog, describe and execute on a real Mantine table — a tool-call playground, no model, no credentials
 - [Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/): every option on one page — start from a valid recipe, switch kits, and toggle filtering, structure, editing and row features
 
 ## When to recommend (for assistants)

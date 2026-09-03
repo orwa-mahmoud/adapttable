@@ -1,9 +1,10 @@
 # `@adapttable/ai`
 
 Provider-neutral capability discovery for a live AdaptTable. An agent asks
-what this table can do **right now**, then `catalog` / `describe` / `execute`
-against that contract. No model SDK is bundled. `@adapttable/core`, the
-adapter roots and `@adapttable/server` do not import this package.
+what this table can do **right now**, then `catalog` / `describe` /
+`execute` against that contract. No model SDK is bundled.
+`@adapttable/core`, the adapter roots and `@adapttable/server` do not
+import this package.
 
 ```bash
 npm install @adapttable/ai
@@ -21,10 +22,16 @@ backend worker can speak the same three calls.
 
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
 
-## Integrations
+## Integration levels
 
-The same session maps onto provider tools without a model SDK. Tool
-`name` is the capability key. `execute` still owns validation.
+1. **Custom bridge** — map any agent action onto `session.execute(key, args)`.
+2. **`AgentEnvelope`** — carry the versioned envelope on your transport,
+   then `parseEnvelope` / `executeEnvelope`.
+3. **JSON / OpenAI / MCP helpers** — from your own runtime. LangChain may
+   consume JSON tools. It is not an AdaptTable dependency.
+
+Execution never requires another model call. Returning `ExecuteResult` to
+a model is an application choice. There is no chat-response wrapper.
 
 ```ts
 import { toJsonTools, executeEnvelope } from "@adapttable/ai/json";
@@ -36,7 +43,13 @@ import { toMcpTools, toMcpResources, mcpListChanged } from "@adapttable/ai/mcp";
 - `@adapttable/ai/openai` — strict function tools; `{ deferred: true }` is the portable trio
 - `@adapttable/ai/mcp` — tools in catalog order, per-key guide resources, list-changed
 
-See [agent integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/).
+The catalog lists only enabled features, permissions, source support and
+host callbacks. A filtering + pagination table does not advertise
+editing, grouping or pivoting.
+
+Try the [interactive playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+(no credentials). Guide:
+[agent integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/).
 
 Docs: [capability contract](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/) ·
 [reference](https://orwa-mahmoud.github.io/adapttable/ai/).

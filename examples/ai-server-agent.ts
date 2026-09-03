@@ -3,13 +3,6 @@
  *
  * A worker holds one `createAgentSession` and accepts `AgentEnvelope` JSON
  * over HTTP. `executeEnvelope` is the only dispatch.
- *
- * Host write-safety (item 11-B) is not composed here. When it is:
- *   approval: "writes" | "destructive" | "never"  (default "writes")
- *   commit:   "stage" | "immediate"               (default "stage")
- * A host that wants a proposal instead of a persist sets `commit: "stage"`
- * and records `apply.editCells` into a review queue. `commit: "immediate"`
- * writes through the same callback.
  */
 import type { AgentApply, AgentObservation } from "@adapttable/ai";
 import { createAgentSession } from "@adapttable/ai";
@@ -72,13 +65,8 @@ function observation(patch: Partial<AgentObservation> = {}): AgentObservation {
   };
 }
 
-/** Proposals recorded when the host treats `commit` as `"stage"`. */
 const proposals: unknown[] = [];
 
-/**
- * Same `edit.cells` callback either way. The host chooses stage vs
- * immediate — the session does not grow a second write path.
- */
 function applyFor(commit: "stage" | "immediate"): AgentApply {
   return {
     setPage: (page) => {
@@ -96,8 +84,6 @@ function applyFor(commit: "stage" | "immediate"): AgentApply {
 }
 
 export async function runServerAgentExample(): Promise<void> {
-  // Start minimal (pagination + search + sort). Editing is wired so the
-  // salary envelope below is a real `edit.cells` call.
   let revision = 1;
   const session = createAgentSession({
     observe: () =>
@@ -114,7 +100,6 @@ export async function runServerAgentExample(): Promise<void> {
     session.catalog().map((entry) => entry.key)
   );
 
-  // Capability growth: composing filters adds `view.setFilters`.
   const withFilters = createAgentSession({
     observe: () =>
       observation({
@@ -136,8 +121,6 @@ export async function runServerAgentExample(): Promise<void> {
   const salaryArgs = {
     edits: [{ rowKey: "5", column: "salary", value: 20000 }],
   };
-  // 11-B argument shape (fixture / future execute):
-  // { position: 5, scope: "visible", column: "salary", value: 20000 }
   const first = await session.execute(
     "edit.cells",
     salaryArgs,
@@ -152,10 +135,6 @@ export async function runServerAgentExample(): Promise<void> {
   );
   console.log("edit.cells first →", first);
   console.log("edit.cells replay (same idempotency key) →", replay);
-  console.log(
-    "replay equals first:",
-    JSON.stringify(replay) === JSON.stringify(first)
-  );
   console.log("staged proposals:", proposals);
 
   const envelope: AgentEnvelope = {
@@ -169,11 +148,6 @@ export async function runServerAgentExample(): Promise<void> {
   console.log("HTTP 200 ←", await handleAgentPost(session, envelope));
 }
 
-/**
- * Drop-in request handler. Parse the JSON body, then `executeEnvelope`.
- * A host that wants immediate persistence uses `applyFor("immediate")`
- * when constructing the session — not a second envelope type.
- */
 export async function handleAgentPost(
   session: ReturnType<typeof createAgentSession>,
   body: unknown

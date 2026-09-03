@@ -1,14 +1,9 @@
 /**
- * In-browser agent — `@adapttable/ai/react` + `@adapttable/ai/json`.
+ * Browser integration — `tableAgent` plus an application-owned envelope.
  *
- * A live table would compose `tableAgent({ tableId, bridge })` next to
- * `filters()` / `editing()`. This example drives the same
- * `createAgentSession` + `executeEnvelope` contract with an in-memory
- * observe/apply so it stays kit-free. Do not invent a second session.
- *
- * Host policy (future `tableAgent` options):
- *   approval: "writes" | "destructive" | "never"  (default "writes")
- *   commit:   "stage" | "immediate"               (default "stage")
+ * Compose `tableAgent` on a live `DataTable` next to `filters()` / `editing()`.
+ * This file drives the same `createAgentSession` contract in memory so it
+ * typechecks without a kit provider.
  */
 import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 import {
@@ -70,18 +65,11 @@ function observation(patch: Partial<AgentObservation> = {}): AgentObservation {
   };
 }
 
-const SALARY_EDIT = {
-  edits: [{ rowKey: "5", column: "salary", value: 20000 }],
-};
-
-/**
- * Compose this feature on a live `DataTable` `features` array. The example
- * below uses `createAgentSession` with the same observe/apply so it can
- * run without mounting a kit provider.
- */
 export const browserAgentFeature = tableAgent({
   tableId: TABLE_ID,
   writePolicy: "allow",
+  approval: "writes",
+  commit: "stage",
   columns: {
     salary: { writable: true, type: "number" },
   },
@@ -124,12 +112,12 @@ export function AiBrowserAgentExample(): ReactNode {
       schemaVersion: "adapttable.agent.v1",
       tableId: TABLE_ID,
       key: "edit.cells",
-      args: SALARY_EDIT,
+      args: { edits: [{ rowKey: "5", column: "salary", value: 20000 }] },
       expectedRevision: session.manifest().viewRevision,
       idempotencyKey: `salary-${commit}`,
     });
     write(
-      `${commit} salary 20000 on rowKey "5" → ${result.ok ? "ok" : result.error?.message}`
+      `${commit} salary 20000 → ${result.ok ? "ok" : result.error?.message}`
     );
   };
 
@@ -142,10 +130,8 @@ export function AiBrowserAgentExample(): ReactNode {
       </p>
       <p>
         Catalog starts without filters
-        {filterOn ? " — filters are now composed." : "."} 11-B will also
-        advertise <code>view.setSelection</code>, <code>views.apply</code>,{" "}
-        <code>rows.read</code>, <code>rows.resolve</code>, <code>rows.add</code>
-        , <code>rows.delete</code> when those are wired.
+        {filterOn ? " — filters are now composed." : "."} Composing filters adds{" "}
+        <code>view.setFilters</code>. Omitted features stay off the catalog.
       </p>
       <ul>
         {tools.map((tool) => (
