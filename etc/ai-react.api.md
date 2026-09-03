@@ -11,24 +11,24 @@ import { TableSourceCapabilities } from '@adapttable/core';
 // @public
 export interface AgentApply {
     // (undocumented)
-    addRows?(rows: readonly Record<string, unknown>[]): Promise<unknown> | void;
+    addRows?(rows: readonly Record<string, unknown>[]): unknown;
     // (undocumented)
     applyView?(viewId: string): void;
     // (undocumented)
-    deleteRows?(keys: readonly string[]): Promise<unknown> | void;
+    deleteRows?(keys: readonly string[]): unknown;
     editCells?(edits: readonly {
         rowKey: string;
         column: string;
         value: unknown;
-    }[]): Promise<unknown> | void;
+    }[]): unknown;
     // (undocumented)
     readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
     // (undocumented)
-    reorderRows?(fromKey: string, toKey: string): Promise<unknown> | void;
+    reorderRows?(fromKey: string, toKey: string): unknown;
     // (undocumented)
     resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
     // (undocumented)
-    runExport?(format: string): Promise<unknown> | void;
+    runExport?(format: string): unknown;
     // (undocumented)
     setFilters?(filters: unknown): void;
     // (undocumented)
@@ -47,7 +47,7 @@ export interface AgentApply {
         rowKey: string;
         column: string;
         value: unknown;
-    }[]): Promise<unknown> | void;
+    }[]): unknown;
 }
 
 // @public

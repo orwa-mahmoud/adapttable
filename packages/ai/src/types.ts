@@ -201,17 +201,18 @@ export interface AgentApply {
   setGroupBy?(key: string | undefined): void;
   setSelection?(ids: readonly string[] | undefined): void;
   applyView?(viewId: string): void;
-  runExport?(format: string): Promise<unknown> | void;
+  runExport?(format: string): unknown;
   readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
   resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
   /**
    * Immediate cell writes through the host edit path.
    *
    * The session always resolves row refs to `rowKey` before calling this.
+   * The host may return a proposal or persist receipt, sync or async.
    */
   editCells?(
     edits: readonly { rowKey: string; column: string; value: unknown }[]
-  ): Promise<unknown> | void;
+  ): unknown;
   /**
    * Stage cell writes on the existing batch/dirty path.
    *
@@ -220,10 +221,10 @@ export interface AgentApply {
    */
   stageCells?(
     edits: readonly { rowKey: string; column: string; value: unknown }[]
-  ): Promise<unknown> | void;
-  addRows?(rows: readonly Record<string, unknown>[]): Promise<unknown> | void;
-  deleteRows?(keys: readonly string[]): Promise<unknown> | void;
-  reorderRows?(fromKey: string, toKey: string): Promise<unknown> | void;
+  ): unknown;
+  addRows?(rows: readonly Record<string, unknown>[]): unknown;
+  deleteRows?(keys: readonly string[]): unknown;
+  reorderRows?(fromKey: string, toKey: string): unknown;
 }
 
 /** Session the three-stage contract speaks. */
