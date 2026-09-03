@@ -7,9 +7,6 @@
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
-export const AGENT_SCHEMA_VERSION = "adapttable.agent.v1";
-
-// @public
 export interface AgentApply {
     // (undocumented)
     addRows?(rows: readonly Record<string, unknown>[]): Promise<unknown> | void;
@@ -68,6 +65,22 @@ export interface AgentColumn {
 }
 
 // @public
+export interface AgentEnvelope {
+    // (undocumented)
+    readonly args: unknown;
+    // (undocumented)
+    readonly expectedRevision: number;
+    // (undocumented)
+    readonly idempotencyKey: string;
+    // (undocumented)
+    readonly key: string;
+    // (undocumented)
+    readonly schemaVersion: "adapttable.agent.v1";
+    // (undocumented)
+    readonly tableId: string;
+}
+
+// @public
 export interface AgentManifest {
     // (undocumented)
     readonly capabilities: readonly CapabilityKey[];
@@ -81,8 +94,8 @@ export interface AgentManifest {
     // (undocumented)
     readonly policy: {
         readonly write: WritePolicy;
-        readonly approval: ApprovalPolicy;
-        readonly commit: CommitPolicy;
+        readonly approval: ApprovalPolicy_2;
+        readonly commit: CommitPolicy_2;
     };
     // (undocumented)
     readonly rowAddressing: {
@@ -101,11 +114,11 @@ export interface AgentManifest {
 // @public
 export interface AgentObservation {
     // (undocumented)
-    readonly approval?: ApprovalPolicy;
+    readonly approval?: ApprovalPolicy_2;
     // (undocumented)
     readonly columns: readonly AgentColumn[];
     // (undocumented)
-    readonly commit?: CommitPolicy;
+    readonly commit?: CommitPolicy_2;
     // (undocumented)
     readonly featureIds: readonly string[];
     // (undocumented)
@@ -179,9 +192,6 @@ export type ApprovalOutcome = "pending" | "approved" | "rejected" | "not-require
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
-export function buildManifest(observation: AgentObservation): AgentManifest;
-
-// @public
 export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
 
 // @public
@@ -213,17 +223,10 @@ export interface CatalogEntry {
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
-export function createAgentSession(options: CreateAgentSessionOptions): AgentSession;
-
-// @public (undocumented)
-export interface CreateAgentSessionOptions {
-    apply: AgentApply;
-    observe: () => AgentObservation;
-    onApprove?: (proposal: unknown) => Promise<boolean>;
-}
+export function executeEnvelope(session: AgentSession, envelope: AgentEnvelope): Promise<ExecuteResult>;
 
 // @public
-export function enabledKeys(observation: AgentObservation): CapabilityKey[];
+export function executeJsonTool(session: AgentSession, call: JsonToolCall): Promise<ExecuteResult>;
 
 // @public
 export interface ExecuteResult {
@@ -242,8 +245,15 @@ export interface ExecuteResult {
     readonly revision: number;
 }
 
-// @public (undocumented)
-export function guideOf(key: CapabilityKey): CapabilityGuide;
+// @public
+export interface JsonFunctionTool {
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly parameters: JsonSchema;
+}
 
 // @public
 export interface JsonSchema {
@@ -272,6 +282,21 @@ export interface JsonSchema {
     // (undocumented)
     readonly type?: string | readonly string[];
 }
+
+// @public (undocumented)
+export interface JsonToolCall {
+    // (undocumented)
+    readonly arguments: unknown;
+    // (undocumented)
+    readonly expectedRevision: number;
+    // (undocumented)
+    readonly idempotencyKey: string;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
+export function parseEnvelope(input: unknown): AgentEnvelope;
 
 // @public
 export interface ResolvedRow {
@@ -327,9 +352,6 @@ export interface RowWindowRow {
     readonly rowKey: string;
 }
 
-// @public (undocumented)
-export function summaryOf(key: CapabilityKey): string;
-
 // @public
 export interface TableAgentBridge {
     // (undocumented)
@@ -339,7 +361,7 @@ export interface TableAgentBridge {
 }
 
 // @public
-export function validateSchema(schema: JsonSchema, value: unknown, path?: string): string | undefined;
+export function toJsonTools(session: AgentSession): readonly JsonFunctionTool[];
 
 // @public
 export interface WriteExecuteResult {

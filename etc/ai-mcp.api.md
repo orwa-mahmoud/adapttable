@@ -7,9 +7,6 @@
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
-export const AGENT_SCHEMA_VERSION = "adapttable.agent.v1";
-
-// @public
 export interface AgentApply {
     // (undocumented)
     addRows?(rows: readonly Record<string, unknown>[]): Promise<unknown> | void;
@@ -179,9 +176,6 @@ export type ApprovalOutcome = "pending" | "approved" | "rejected" | "not-require
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
-export function buildManifest(observation: AgentObservation): AgentManifest;
-
-// @public
 export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
 
 // @public
@@ -213,17 +207,7 @@ export interface CatalogEntry {
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
-export function createAgentSession(options: CreateAgentSessionOptions): AgentSession;
-
-// @public (undocumented)
-export interface CreateAgentSessionOptions {
-    apply: AgentApply;
-    observe: () => AgentObservation;
-    onApprove?: (proposal: unknown) => Promise<boolean>;
-}
-
-// @public
-export function enabledKeys(observation: AgentObservation): CapabilityKey[];
+export function executeMcpTool(session: AgentSession, name: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
 
 // @public
 export interface ExecuteResult {
@@ -241,9 +225,6 @@ export interface ExecuteResult {
     // (undocumented)
     readonly revision: number;
 }
-
-// @public (undocumented)
-export function guideOf(key: CapabilityKey): CapabilityGuide;
 
 // @public
 export interface JsonSchema {
@@ -271,6 +252,33 @@ export interface JsonSchema {
     readonly required?: readonly string[];
     // (undocumented)
     readonly type?: string | readonly string[];
+}
+
+// @public
+export function mcpListChanged(prev: AgentManifest, next: AgentManifest): boolean;
+
+// @public
+export interface McpResource {
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    readonly mimeType: "application/json";
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly text: string;
+    // (undocumented)
+    readonly uri: string;
+}
+
+// @public
+export interface McpTool {
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    readonly inputSchema: JsonSchema;
+    // (undocumented)
+    readonly name: string;
 }
 
 // @public
@@ -327,9 +335,6 @@ export interface RowWindowRow {
     readonly rowKey: string;
 }
 
-// @public (undocumented)
-export function summaryOf(key: CapabilityKey): string;
-
 // @public
 export interface TableAgentBridge {
     // (undocumented)
@@ -339,7 +344,10 @@ export interface TableAgentBridge {
 }
 
 // @public
-export function validateSchema(schema: JsonSchema, value: unknown, path?: string): string | undefined;
+export function toMcpResources(session: AgentSession): readonly McpResource[];
+
+// @public
+export function toMcpTools(session: AgentSession): readonly McpTool[];
 
 // @public
 export interface WriteExecuteResult {

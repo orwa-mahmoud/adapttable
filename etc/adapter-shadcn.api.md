@@ -4,6 +4,7 @@
 
 ```ts
 
+import { agentApproval } from '@adapttable/unstyled';
 import { BaseDataTableProps } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
@@ -36,6 +37,8 @@ import { TableQuery } from '@adapttable/core';
 import { ToolbarSlots } from '@adapttable/core';
 import { UseServerDataOptions } from '@adapttable/core';
 import { UseTableDataOptions } from '@adapttable/core';
+
+export { agentApproval }
 
 export { BaseDataTableProps }
 

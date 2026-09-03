@@ -6,6 +6,7 @@
 
 import { ActionConfirm } from '@adapttable/core';
 import { ActiveFilterChip } from '@adapttable/core';
+import { AgentApprovalProps } from '@adapttable/core/adapter';
 import { BaseDataTableProps } from '@adapttable/core';
 import { BatchEditBarProps } from '@adapttable/core/adapter';
 import { BulkAction } from '@adapttable/core';
@@ -83,6 +84,7 @@ import { Slot } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
+import { StaticTableFeature } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
@@ -123,6 +125,14 @@ export interface ActiveFilterChipsProps {
     label: string;
     onClearAll?: () => void;
 }
+
+// @public
+export function AgentApproval(props: Readonly<AgentApprovalProps>): JSX.Element;
+
+// @public
+export function agentApproval(): StaticTableFeature;
+
+export { AgentApprovalProps }
 
 // @public
 export function AutoFilterForm<TRow>(input: Readonly<AutoFilterFormProps<TRow>>): JSX.Element;

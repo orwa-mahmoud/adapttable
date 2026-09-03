@@ -613,6 +613,7 @@ export interface FeatureProps<TRow> {
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
     pinnedRowIds?: RowPinState;
+    pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
     renderRowDetail?: (row: TRow) => ReactNode;
     resizableColumns?: boolean;
@@ -885,6 +886,9 @@ export interface PinnedRows<TRow = unknown> {
 export type PinnedSide = PinSide | undefined;
 
 // @public
+export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): TableFeature<TRow>;
+
+// @public
 export interface PinOffset {
     inset: number;
     side: PinSide;
@@ -1016,9 +1020,6 @@ export interface RowMoveTarget<TRow> {
 export type RowOf<P> = P extends {
     rowKey: (row: infer TRow) => string;
 } ? TRow : unknown;
-
-// @public
-export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): TableFeature<TRow>;
 
 // @public
 export function rowPinning(options?: {
@@ -1183,6 +1184,7 @@ export interface TableLabels {
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
+    approveProposal?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;
     boolAny?: string;
@@ -1352,8 +1354,12 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
+    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
+    pinnedSummaryBottom?: string;
+    pinnedSummaryRow?: string;
+    pinnedSummaryTop?: string;
     pinStart?: string;
     pinToBottom?: string;
     pinToTop?: string;
@@ -1369,8 +1375,15 @@ export interface TableLabels {
     pivotTotal?: string;
     previousPage?: string;
     print?: string;
+    proposalChange?: (change: {
+        row: string;
+        column?: string;
+        before?: string;
+        after?: string;
+    }) => string;
     readOnlyViewBadge?: string;
     redoEdit?: string;
+    rejectProposal?: string;
     relLastN?: string;
     relNextN?: string;
     relPreviousMonth?: string;

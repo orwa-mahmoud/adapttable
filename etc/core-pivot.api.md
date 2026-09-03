@@ -348,6 +348,7 @@ export interface TableLabels {
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
+    approveProposal?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;
     boolAny?: string;
@@ -517,8 +518,12 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
+    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
+    pinnedSummaryBottom?: string;
+    pinnedSummaryRow?: string;
+    pinnedSummaryTop?: string;
     pinStart?: string;
     pinToBottom?: string;
     pinToTop?: string;
@@ -534,8 +539,15 @@ export interface TableLabels {
     pivotTotal?: string;
     previousPage?: string;
     print?: string;
+    proposalChange?: (change: {
+        row: string;
+        column?: string;
+        before?: string;
+        after?: string;
+    }) => string;
     readOnlyViewBadge?: string;
     redoEdit?: string;
+    rejectProposal?: string;
     relLastN?: string;
     relNextN?: string;
     relPreviousMonth?: string;

@@ -67,6 +67,9 @@ export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
 
 // @public
+export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
+
+// @public
 export function applyRowPatches<TRow>(rows: readonly TRow[], patches: readonly RowPatch<TRow>[], getRowId: (row: TRow) => string): readonly TRow[];
 
 // @public
@@ -79,13 +82,13 @@ export function applyRowPatchesWithLog<TRow>(rows: readonly TRow[], patches: rea
 export function applyRowPatchLogToView<TRow>(view: IncrementalView<TRow>, log: RowPatchLog<TRow>): IncrementalView<TRow>;
 
 // @public
-export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
-
-// @public
 export function applyRowPin(state: RowPinState, rowId: string, side: RowPinSide | undefined): RowPinState;
 
 // @public
 export function applyRowReorder<T>(rows: readonly T[], from: number, to: number): T[];
+
+// @public
+export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
 
 // @public
 export function asGesture<TRow>(apply: ((edits: CellEdit<TRow>[]) => void) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: CellEdit<TRow>[]) => void) | undefined;
@@ -578,6 +581,8 @@ export interface ChromeBodyData<TRow> {
     groupingEntries?: readonly GroupedFlatEntry<TRow>[];
     loadMoreRef: RefObject<HTMLDivElement | null>;
     pinnedBottomRows: readonly TRow[];
+    pinnedSummaryBottom: readonly TRow[];
+    pinnedSummaryTop: readonly TRow[];
     pinnedTopRows: readonly TRow[];
     treeEntries?: readonly TreeEntry<TRow>[];
     virtualization: TableVirtualization<TRow>;
@@ -1849,9 +1854,6 @@ export const FILTER_TREE_VERSION = 1;
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
 
 // @public
-export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
-
-// @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
 // @public
@@ -1990,6 +1992,9 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
     readonly labels: Required<TableLabels>;
     readonly source: FilterFormSource<TRow>;
 }
+
+// @public
+export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
 
 // @public
 export interface FindInTableState {
@@ -2730,15 +2735,6 @@ export interface PasteRangeOptions<TRow> {
 }
 
 // @public
-export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
-
-// @public
-export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
-
-// @public
-export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
-
-// @public
 export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
 
 // @public
@@ -2760,12 +2756,24 @@ export interface PinLeads {
 }
 
 // @public
+export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
+
+// @public
+export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
+
+// @public
+export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
+
+// @public
 export interface PinnedCellStyle {
     insetInlineEnd?: number;
     insetInlineStart?: number;
     position: "sticky";
     zIndex: number;
 }
+
+// @public
+export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
 
 // @public
 export interface PinnedRows<TRow = unknown> {
@@ -2777,18 +2785,15 @@ export interface PinnedRows<TRow = unknown> {
 export type PinnedSide = PinSide | undefined;
 
 // @public
+export function pinnedSummaryEntries<TRow>(rows: readonly TRow[], side: RowPinSide): readonly PinnedSummaryEntry<TRow>[];
+
+// @public
 export interface PinnedSummaryEntry<TRow = unknown> {
     readonly id: string;
     readonly index: number;
     readonly row: TRow;
     readonly side: RowPinSide;
 }
-
-// @public
-export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
-
-// @public
-export function pinnedSummaryEntries<TRow>(rows: readonly TRow[], side: RowPinSide): readonly PinnedSummaryEntry<TRow>[];
 
 // @public
 export function pinnedSummaryPart(side: RowPinSide): typeof PINNED_SUMMARY_TOP_PART | typeof PINNED_SUMMARY_BOTTOM_PART;
@@ -3081,8 +3086,8 @@ export function resolveLocaleTag(available: Iterable<string>, locale: string): s
 
 // @public
 export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined): {
-    bottom: readonly TRow[];
     top: readonly TRow[];
+    bottom: readonly TRow[];
 };
 
 // @public
@@ -3450,6 +3455,7 @@ export interface SelectionState {
     clear: () => void;
     headerState: HeaderSelectionState;
     isSelected: (id: string) => boolean;
+    replace: (ids: readonly string[] | undefined) => void;
     selectAllMatching: () => void;
     selectedCount: number;
     selectedIds: ReadonlySet<string>;
@@ -3659,6 +3665,7 @@ export interface TableChrome<TRow> {
     isPaged: boolean;
     isRefreshing: boolean;
     mergedChips: readonly ActiveFilterChip[];
+    pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
     rowActions?: RowAction<TRow>[];
     rowMutations: RowMutationsState<TRow>;
@@ -3756,6 +3763,7 @@ export interface TableLabels {
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
+    approveProposal?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;
     boolAny?: string;
@@ -3925,14 +3933,15 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
+    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
-    pinStart?: string;
-    pinToBottom?: string;
-    pinToTop?: string;
     pinnedSummaryBottom?: string;
     pinnedSummaryRow?: string;
     pinnedSummaryTop?: string;
+    pinStart?: string;
+    pinToBottom?: string;
+    pinToTop?: string;
     pivotAdd?: string;
     pivotAggregation?: string;
     pivotColumns?: string;
@@ -3945,8 +3954,15 @@ export interface TableLabels {
     pivotTotal?: string;
     previousPage?: string;
     print?: string;
+    proposalChange?: (change: {
+        row: string;
+        column?: string;
+        before?: string;
+        after?: string;
+    }) => string;
     readOnlyViewBadge?: string;
     redoEdit?: string;
+    rejectProposal?: string;
     relLastN?: string;
     relNextN?: string;
     relPreviousMonth?: string;

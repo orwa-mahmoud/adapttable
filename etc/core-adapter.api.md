@@ -162,6 +162,71 @@ export interface AdapterStandardFeatureFactories {
 }
 
 // @public
+export const AGENT_APPROVAL: FeatureSlotKey<AgentApprovalProps>;
+
+// @public
+export const AGENT_APPROVAL_STATE: FeatureStateKey<AgentApprovalPending | null>;
+
+// @public
+export interface AgentApprovalButtonProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly part: string;
+}
+
+// @public
+export function AgentApprovalChrome(input: Readonly<AgentApprovalChromeProps>): ReactElement | null;
+
+// @public
+export interface AgentApprovalChromeProps extends AgentApprovalProps {
+    readonly slots: AgentApprovalSlots;
+}
+
+// @public
+export interface AgentApprovalListProps {
+    readonly children: ReactNode;
+    readonly className?: string;
+    readonly label: string;
+    readonly part: string;
+}
+
+// @public
+export interface AgentApprovalPending {
+    // (undocumented)
+    readonly approve: () => void;
+    // (undocumented)
+    readonly proposals: readonly AgentApprovalProposal[];
+    // (undocumented)
+    readonly reject: () => void;
+}
+
+// @public
+export interface AgentApprovalProposal {
+    readonly after?: unknown;
+    readonly before?: unknown;
+    readonly column?: string;
+    readonly rowKey: string;
+}
+
+// @public
+export interface AgentApprovalProps {
+    readonly buttonClassName?: string;
+    readonly className?: string;
+    readonly labels?: TableLabels;
+    readonly onApprove: () => void;
+    readonly onReject: () => void;
+    readonly proposals?: readonly AgentApprovalProposal[];
+}
+
+// @public
+export interface AgentApprovalSlots {
+    readonly Approve: (props: AgentApprovalButtonProps) => ReactNode;
+    readonly List: (props: AgentApprovalListProps) => ReactNode;
+    readonly Reject: (props: AgentApprovalButtonProps) => ReactNode;
+}
+
+// @public
 export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
@@ -682,6 +747,8 @@ export interface ChromeBodyData<TRow> {
     groupingEntries?: readonly GroupedFlatEntry<TRow>[];
     loadMoreRef: RefObject<HTMLDivElement | null>;
     pinnedBottomRows: readonly TRow[];
+    pinnedSummaryBottom: readonly TRow[];
+    pinnedSummaryTop: readonly TRow[];
     pinnedTopRows: readonly TRow[];
     treeEntries?: readonly TreeEntry<TRow>[];
     virtualization: TableVirtualization<TRow>;
@@ -1370,6 +1437,9 @@ export type ContextMenuTarget<TRow> = {
 };
 
 // @public
+export function createAdapterAgentApprovalFeature(AgentApproval: AdapterFeatureComponent<AgentApprovalProps>): StaticTableFeature;
+
+// @public
 export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatureComponent<AdapterCommandPaletteProps>): AdapterCommandPaletteFeature;
 
 // @public
@@ -1464,9 +1534,6 @@ export type Density = "comfortable" | "compact";
 
 // @public
 export function deriveSortByOptions<TRow>(columns: readonly ColumnDef<TRow>[]): SortByOption[];
-
-// @public
-export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 
 // @public
 export const DESKTOP_ACTIONS_WIDTH = 120;
@@ -1590,7 +1657,7 @@ export interface DesktopRowWiring<TRow> {
     onToggleSelect: (id: string) => void;
     onToggleTree?: (id: string) => void;
     pinOffset?: (key: string) => PinOffset | undefined;
-    pinPart: ReturnType<typeof pinnedRowPart$1>;
+    pinPart: ReturnType<typeof pinnedRowPart$1> | ReturnType<typeof pinnedSummaryPart>;
     pinRowSticky: boolean;
     pinSignature: string;
     pinSticky: ReturnType<typeof pinnedRowSticky>;
@@ -1708,12 +1775,6 @@ export interface DesktopVirtualPadSlot {
 export type Direction = "ltr" | "rtl";
 
 // @public
-export const DISABLED_EXPORT: ExportHandlerState;
-
-// @public
-export const DISABLED_FIND: FindInTableState;
-
-// @public
 export interface DirtyCellState {
     confirm: (rowId: string, columnKey: string) => void;
     confirmAll: () => void;
@@ -1724,6 +1785,15 @@ export interface DirtyCellState {
     mark: (rowId: string, columnKey: string) => void;
     signature: string;
 }
+
+// @public
+export const DISABLED_EXPORT: ExportHandlerState;
+
+// @public
+export const DISABLED_FIND: FindInTableState;
+
+// @public
+export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 
 // @public
 export const EDIT_HISTORY_LIVE: FeatureSlotKey<EditHistoryLiveSlotProps<never>>;
@@ -1994,9 +2064,6 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
 };
 
 // @public
-export function ensureForcedColorsStyles(): void;
-
-// @public
 export type EditUnit = "cell" | "row" | "batch";
 
 // @public
@@ -2016,6 +2083,9 @@ export interface EditValidationState<TRow> {
     rowHasError: (rowId: string) => boolean;
     signature: string;
 }
+
+// @public
+export function ensureForcedColorsStyles(): void;
 
 // @public
 export const EXPAND_TOGGLE: FeatureSlotKey<ExpandToggleSlotProps>;
@@ -2447,6 +2517,7 @@ export interface FeatureProps<TRow> {
     onPrint?: () => void;
     onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
     pinnedRowIds?: RowPinState;
+    pinnedRows?: PinnedRows<TRow>;
     printButton?: boolean;
     renderRowDetail?: (row: TRow) => ReactNode;
     resizableColumns?: boolean;
@@ -2912,12 +2983,6 @@ export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>>;
 export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
 
 // @public
-export const FORCED_COLORS_CSS: string;
-
-// @public
-export function ForcedColorsStyle(): null;
-
-// @public
 export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement | null;
 
 // @public
@@ -3001,6 +3066,12 @@ export interface FlattenedColumns<TRow> {
 export function focusEditorOnMount(node: {
     focus: () => void;
 } | null): void;
+
+// @public
+export const FORCED_COLORS_CSS: string;
+
+// @public
+export function ForcedColorsStyle(): null;
 
 // @public
 export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps>;
@@ -3641,7 +3712,7 @@ export function OptionalSidePanel(input: {
 }): ReactNode;
 
 // @public
-export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[]): readonly VirtualTableRow<TRow>[];
+export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
 
 // @public
 export const OVERLAY_MOTION: {
@@ -3739,6 +3810,12 @@ export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx:
 export function pinnedRowPart(side: RowPinSide | undefined): typeof PINNED_TOP_PART | typeof PINNED_BOTTOM_PART | undefined;
 
 // @public
+export interface PinnedRows<TRow = unknown> {
+    readonly bottom?: readonly TRow[];
+    readonly top?: readonly TRow[];
+}
+
+// @public
 export function pinnedRowSticky(side: RowPinSide | undefined, sticky: boolean, headerOffsetPx: number): ReturnType<typeof pinnedRowStickyStyle> | undefined;
 
 // @public
@@ -3750,21 +3827,6 @@ export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): 
 };
 
 // @public
-export function pinnedSummaryPart(side: RowPinSide): typeof PINNED_SUMMARY_TOP_PART | typeof PINNED_SUMMARY_BOTTOM_PART;
-
-// @public
-export function pinnedSummaryRowId(side: RowPinSide, index: number): string;
-
-// @public
-export function pinnedSummarySideFromId(id: string): RowPinSide | undefined;
-
-// @public
-export interface PinnedRows<TRow = unknown> {
-    readonly bottom?: readonly TRow[];
-    readonly top?: readonly TRow[];
-}
-
-// @public
 export type PinnedSide = PinSide | undefined;
 
 // @public
@@ -3774,6 +3836,15 @@ export interface PinnedSummaryEntry<TRow = unknown> {
     readonly row: TRow;
     readonly side: RowPinSide;
 }
+
+// @public
+export function pinnedSummaryPart(side: RowPinSide): typeof PINNED_SUMMARY_TOP_PART | typeof PINNED_SUMMARY_BOTTOM_PART;
+
+// @public
+export function pinnedSummaryRowId(side: RowPinSide, index: number): string;
+
+// @public
+export function pinnedSummarySideFromId(id: string): RowPinSide | undefined;
 
 // @public
 export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
@@ -4635,6 +4706,7 @@ export interface SelectionState {
     clear: () => void;
     headerState: HeaderSelectionState;
     isSelected: (id: string) => boolean;
+    replace: (ids: readonly string[] | undefined) => void;
     selectAllMatching: () => void;
     selectedCount: number;
     selectedIds: ReadonlySet<string>;
@@ -4744,6 +4816,8 @@ export interface SharedTableRenderProps<TRow> {
     paddingBottom?: number;
     paddingTop?: number;
     pinnedBottomRows?: readonly TRow[];
+    pinnedSummaryBottom?: readonly TRow[];
+    pinnedSummaryTop?: readonly TRow[];
     pinnedTopRows?: readonly TRow[];
     pinOffset?: (key: string) => PinOffset | undefined;
     prefetch?: (row: TRow) => void;
@@ -5044,6 +5118,7 @@ export interface TableChrome<TRow> {
     isPaged: boolean;
     isRefreshing: boolean;
     mergedChips: readonly ActiveFilterChip[];
+    pinnedRows?: PinnedRows<TRow>;
     rootRef: RefObject<HTMLDivElement | null>;
     rowActions?: RowAction<TRow>[];
     rowMutations: RowMutationsState<TRow>;
@@ -5151,6 +5226,7 @@ export interface TableLabels {
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
+    approveProposal?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;
     boolAny?: string;
@@ -5320,8 +5396,12 @@ export interface TableLabels {
         total: number;
     }) => string;
     pageSelected?: (count: number) => string;
+    pendingProposals?: (count: number) => string;
     pendingRows?: (count: number) => string;
     pinEnd?: string;
+    pinnedSummaryBottom?: string;
+    pinnedSummaryRow?: string;
+    pinnedSummaryTop?: string;
     pinStart?: string;
     pinToBottom?: string;
     pinToTop?: string;
@@ -5337,8 +5417,15 @@ export interface TableLabels {
     pivotTotal?: string;
     previousPage?: string;
     print?: string;
+    proposalChange?: (change: {
+        row: string;
+        column?: string;
+        before?: string;
+        after?: string;
+    }) => string;
     readOnlyViewBadge?: string;
     redoEdit?: string;
+    rejectProposal?: string;
     relLastN?: string;
     relNextN?: string;
     relPreviousMonth?: string;
@@ -5461,7 +5548,7 @@ export interface TableRenderModel<TRow> {
 }
 
 // @public
-export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "rowActions" | "getRowId" | "rowEntries" | "renderRowDetail" | "expansion" | "columnWindow" | "editing" | "rowReorder" | "pinnedTopRows" | "pinnedBottomRows" | "getCellSpan" | "pinOffset" | "tree" | "grouping" | "extraRows" | "assembly">): TableRenderModel<TRow>;
+export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "rowActions" | "getRowId" | "rowEntries" | "renderRowDetail" | "expansion" | "columnWindow" | "editing" | "rowReorder" | "pinnedTopRows" | "pinnedBottomRows" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "getCellSpan" | "pinOffset" | "tree" | "grouping" | "extraRows" | "assembly">): TableRenderModel<TRow>;
 
 // @public
 export interface TableRuntime<TRow = unknown> {
@@ -5473,6 +5560,10 @@ export interface TableRuntime<TRow = unknown> {
 
 // @public
 export interface TableRuntimeView<TRow = unknown> {
+    readonly editing?: {
+        readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+        readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    };
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: unknown;
     readonly groupingState?: {
@@ -5496,7 +5587,12 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
+    readonly selection?: {
+        readonly selectedIds: ReadonlySet<string>;
+        readonly replace: (ids: readonly string[] | undefined) => void;
+    };
     readonly sortBy?: string;
+    readonly sourceCapabilities?: TableSourceCapabilities;
     readonly tree?: unknown;
 }
 
@@ -5911,10 +6007,6 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
         locale?: string | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
-        confirm?: ConfirmHandler | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
         tableLabel?: string | undefined;
@@ -5929,10 +6021,12 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
         onCellFill?: ((edits: CellEdit<TRow>[]) => void) | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         validateRow?: RowValidator<TRow> | undefined;
         onEditRollback?: ((previous: TRow, columnKey: string) => void) | undefined;
         formatEditError?: ((error: unknown) => string) | undefined;
@@ -5979,12 +6073,14 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
+        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
         stickyToolbar?: boolean | undefined;
         scrollToTopOnChange?: boolean | undefined;
         scrollTopGap?: number | undefined;
+        rowActions?: RowAction<TRow>[] | undefined;
         selectionStats?: boolean;
         editHistory?: boolean | {
             depth?: number;
@@ -6007,6 +6103,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onPinnedRowIdsChange?: (next: RowPinState) => void;
         getCellSpan?: GetCellSpan<TRow> | undefined;
         extraRows?: readonly ExtraRow[];
+        pinnedRows?: PinnedRows<TRow> | undefined;
         confirmDeleteRow?: boolean;
         getChildren?: ((row: TRow) => readonly TRow[] | undefined) | undefined;
         getParentId?: ((row: TRow) => string | undefined) | undefined;
@@ -6069,10 +6166,6 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         renderRowActions?: RowActionsRenderer<TRow> | undefined;
         cellSpanAppearance?: CellSpanAppearance;
         locale?: string | undefined;
-        rowActions?: RowAction<TRow>[] | undefined;
-        confirm?: ConfirmHandler | undefined;
-        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
-        onRowClick?: ((row: TRow) => void) | undefined;
         rowKey: (row: TRow) => string;
         features?: readonly TableFeature<NoInfer<TRow>>[] | undefined;
         tableLabel?: string | undefined;
@@ -6087,10 +6180,12 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         paginationMode?: PaginationMode | undefined;
         mobileIdentityColumns?: number | undefined;
         prefetch?: ((row: TRow) => void) | undefined;
+        onRowClick?: ((row: TRow) => void) | undefined;
         onRowsChange?: ((rows: readonly TRow[]) => void) | undefined;
         onCellCut?: ((range: CellRange) => void) | undefined;
         onCellPaste?: ((edits: CellEdit<TRow>[]) => void) | undefined;
         onCellFill?: ((edits: CellEdit<TRow>[]) => void) | undefined;
+        isCellFlashing?: ((rowId: string, columnKey: string) => boolean) | undefined;
         validateRow?: RowValidator<TRow> | undefined;
         onEditRollback?: ((previous: TRow, columnKey: string) => void) | undefined;
         formatEditError?: ((error: unknown) => string) | undefined;
@@ -6137,12 +6232,14 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
         toolbar?: ReactNode;
         toolbarSlots?: ToolbarSlots | undefined;
+        confirm?: ConfirmHandler | undefined;
         skeletonRows?: number | undefined;
         stickyTop?: number | undefined;
         stickyHeader?: boolean | undefined;
         stickyToolbar?: boolean | undefined;
         scrollToTopOnChange?: boolean | undefined;
         scrollTopGap?: number | undefined;
+        rowActions?: RowAction<TRow>[] | undefined;
         selectionStats?: boolean;
         editHistory?: boolean | {
             depth?: number;
@@ -6165,6 +6262,7 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         onPinnedRowIdsChange?: (next: RowPinState) => void;
         getCellSpan?: GetCellSpan<TRow> | undefined;
         extraRows?: readonly ExtraRow[];
+        pinnedRows?: PinnedRows<TRow> | undefined;
         confirmDeleteRow?: boolean;
         getChildren?: ((row: TRow) => readonly TRow[] | undefined) | undefined;
         getParentId?: ((row: TRow) => string | undefined) | undefined;
@@ -6229,6 +6327,8 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
         reorderPinned: boolean;
         pinnedTopRows: readonly TRow[];
         pinnedBottomRows: readonly TRow[];
+        pinnedSummaryTop: readonly TRow[];
+        pinnedSummaryBottom: readonly TRow[];
         rowPinning: RowPinningState<TRow> | undefined;
         getCellSpan: GetCellSpan<TRow> | undefined;
         cellSpanAppearance: CellSpanAppearance | undefined;
@@ -6573,9 +6673,6 @@ export interface VirtualTableRow<TRow> {
 export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
 
 // @public
-export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
-
-// @public
 export function windowedTableAria(options: {
     rowCount: number;
     rowsLength: number;
@@ -6583,6 +6680,9 @@ export function windowedTableAria(options: {
     columnsWindowed: boolean;
     firstRowIndex: number;
 }): GridFocusState;
+
+// @public
+export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
 
 // (No @packageDocumentation comment for this package)
 
