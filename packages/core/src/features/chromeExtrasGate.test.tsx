@@ -1,17 +1,17 @@
 import { render } from "@testing-library/react";
 import { useEffect } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { batchEditing } from "./editing";
-import { grouping } from "./grouping";
-import { FeatureProviders, useTableRuntime } from "./providers";
-import { tree } from "./tree";
-import { applyTableFeatures } from "./tableFeature";
 import { useFrontendData } from "../source/useFrontendData";
 import type { ColumnDef } from "../types";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableChrome } from "../useTableChrome";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
+import { batchEditing } from "./editing";
+import { grouping } from "./grouping";
+import { FeatureProviders, useTableRuntime } from "./providers";
+import { applyTableFeatures } from "./tableFeature";
+import { tree } from "./tree";
 
 interface Row {
   id: string;
