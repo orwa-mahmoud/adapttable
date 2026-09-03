@@ -776,6 +776,7 @@ function RowMoveMenu({
         trigger="click"
         placement="bottomLeft"
         content={content}
+        destroyOnHidden
         onOpenChange={(next) => {
           if (!next) {
             confirmationRef.current?.onCancel();
