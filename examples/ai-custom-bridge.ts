@@ -5,8 +5,8 @@
  * that shape onto a capability key and arguments, then calls the live
  * session. No model SDK. No second session type.
  */
-import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 import type { AgentSession, ExecuteResult } from "@adapttable/ai";
+import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 
 const TABLE_ID = "orders";
 

@@ -5,13 +5,13 @@
  * add a chat-response wrapper. After execute, this path does not send
  * `ExecuteResult` back to a model.
  */
+import type { AgentSession, ExecuteResult } from "@adapttable/ai";
 import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 import {
   type AgentEnvelope,
   executeEnvelope,
   parseEnvelope,
 } from "@adapttable/ai/json";
-import type { AgentSession, ExecuteResult } from "@adapttable/ai";
 
 const TABLE_ID = "orders";
 
