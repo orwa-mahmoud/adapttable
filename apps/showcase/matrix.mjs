@@ -238,8 +238,10 @@ const FEATURE_DEMAND_ORDER = [
   "column-groups",
   "selection",
   "rows",
+  "row-reordering",
   "editing",
   "grouping",
+  "aggregation",
   "nested-tables",
   "export",
   "scale",
@@ -254,7 +256,7 @@ const FEATURE_DEMAND_ORDER = [
 ];
 
 /**
- * The eighteen features that get a page per adapter.
+ * The matrix features that get a page per adapter.
  *
  * Curated rather than exhaustive: these are the ones people search for by name
  * and evaluate a table on. Pagination is not among them — every table pages,
@@ -402,13 +404,13 @@ export function Spend({ rows, fields }) {
     h1: "Spreadsheet formulas in {kit}",
     title: "{kit} table formulas — AdaptTable",
     description:
-      "Add computed columns to a {kit} data table from spreadsheet formulas — ROUND, IF, UPPER, string joins and aggregates, with errors reported in the cell that caused them.",
+      "Add computed columns to a {kit} data table from spreadsheet formulas — ROUND, POWER, SQRT, IF, UPPER, string joins and aggregates, with errors reported in the cell that caused them.",
     intro: [
       "A formula column is a column nobody wrote code for: type `=ROUND(budget * 0.15, 0)` and the table computes it per row, sorts it, filters it and exports it like any other column.",
-      "The engine covers arithmetic, comparison, string joins, IF, and the aggregate functions a footer needs. A bad reference reports in the cell that caused it rather than blanking the table, and a circular reference reports `#CYCLE!` instead of recursing.",
+      "The engine covers arithmetic including POWER and SQRT, comparison, string joins, IF, and the aggregate functions a footer needs. A bad reference reports in the cell that caused it rather than blanking the table, and a circular reference reports `#CYCLE!` instead of recursing.",
       "Formula columns serialize to the URL with everything else, so a derived column travels in the same link as the filters it sits beside.",
     ],
-    card: "Computed columns typed as formulas, errors reported in the cell.",
+    card: "ROUND, POWER, SQRT, IF — computed columns, errors in the cell.",
     snippet: `import { DataTable } from "{pkg}";
 import { buildFormulaColumns } from "@adapttable/core/formula";
 
@@ -515,13 +517,13 @@ export function People({ rows, onSave }) {
     h1: "Tree data in {kit}",
     title: "{kit} tree table — AdaptTable",
     description:
-      "Render hierarchical rows in a {kit} data table — parent/child nesting, chevrons, keyboard traversal and expansion state carried in the URL.",
+      "Render hierarchical rows in a {kit} data table — parent/child nesting, chevrons, keyboard traversal, expansion in the URL, and host-owned moves that stay inside a parent.",
     intro: [
       "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Point the table at `getChildren` or `getParentId` and it renders the hierarchy.",
       "Children indent under their parent, a chevron opens and closes each branch, and arrow keys walk the tree the way a tree widget should. Expansion is part of the table's state, so it lives in the URL like everything else.",
-      "Sorting and filtering apply within the tree rather than flattening it — a branch keeps its shape, and a matching child keeps its ancestors on screen.",
+      "Sorting and filtering apply within the tree rather than flattening it. Moving a child under a new parent is a host callback on the row-reordering page — the table never rewrites your tree.",
     ],
-    card: "Rows that contain rows — nesting, chevrons, keyboard traversal.",
+    card: "Nesting, chevrons, URL expansion, and host-owned tree moves.",
     snippet: `import { DataTable } from "{pkg}";
 
 export function Org({ people, columns }) {
@@ -699,13 +701,13 @@ export function People({ rows, columns, layout, onLayout }) {
     h1: "Filtering in {kit}",
     title: "{kit} table filtering — AdaptTable",
     description:
-      "Filter a {kit} data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, and removable chips.",
+      "Filter a {kit} data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, removable chips, and a find query that rides the same versioned URL.",
     intro: [
       "Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.",
-      "For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself.",
-      "The whole filter state lives in the URL, so a filtered view is a link someone can send — and the popover, drawer, inputs and chips are all {kit} components.",
+      "For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself. Quick find is a different control — it highlights matching cells and writes `find=` into the same URL namespace; it does not replace the filter tree.",
+      "Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all {kit} components.",
     ],
-    card: "Kit-native operators, date ranges, checklists, an AND/OR tree, chips.",
+    card: "Operators, an AND/OR tree, chips, and find in the same URL.",
     snippet: `import { DataTable } from "{pkg}";
 
 const columns = [
@@ -874,7 +876,7 @@ export function People({ rows, columns, onArchive }) {
     intro: [
       "Compose `groupingPanel(groupBy, extras)` and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.",
       "Every chip handle is keyboard movable with the arrow keys. On phones the same {kit} panel swaps drag targets for kit-native selects, without changing the grouping model.",
-      "`groupAggregates` seeds the per-group subtotal, then the panel can override a value column to sum, average, minimum, maximum, count, none, or its default. `groupFooters` still closes each group with its total.",
+      "`groupAggregates` seeds the per-group subtotal, then the panel can override a value column. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.",
       "Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.",
     ],
     card: "Drag, keyboard and mobile grouping controls with live aggregation overrides.",
@@ -917,7 +919,7 @@ export function People({ rows, columns }) {
       tailwind:
         "The group row, toggle, label, count and aggregate all carry the map's classes with a dark variant; group footers and the show-more row are not in the map, so those two read as browser defaults.",
     },
-    docs: ["row-grouping"],
+    docs: ["row-grouping", "pinned-summary-rows", "row-reordering"],
   },
   {
     slug: "column-groups",
@@ -1090,23 +1092,22 @@ export function People({ rows, columns, setRows }) {
     h1: "Rows in {kit}",
     title: "{kit} table rows — AdaptTable",
     description:
-      "Pin, drag-reorder and merge cells in a {kit} data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks.",
+      "Pin and merge cells in a {kit} data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks.",
     intro: [
-      "A row is more than a record. Pin it under the header or to the floor of the scroll box, drag it by the grip (Space lifts, arrows move, Space drops), and merge cells that share a team so the name is written once.",
-      '`onRowReorder`, `onPinnedRowIdsChange`, `getCellSpan` and `rowActionsLayout="menu"` are the four props this page turns on. Add and delete are callbacks to the host — the table never owns the data.',
-      "The grips, the pin actions, the menu and the merged cells are {kit}.",
+      "A row is more than a record. Pin it under the header or to the floor of the scroll box, merge cells that share a team so the name is written once, and add or delete through the 3-dot menu.",
+      '`onPinnedRowIdsChange`, `getCellSpan` and `rowActionsLayout="menu"` are the props this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.',
+      "The pin actions, the menu and the merged cells are {kit}. Independent pinned summary rows — totals that are not data rows — live on the aggregation page.",
     ],
-    card: "Pin, drag-reorder, merge cells, and a 3-dot menu per row.",
+    card: "Pin rows, merge cells, and a 3-dot menu for add and delete.",
     snippet: `import { DataTable } from "{pkg}";
 
-export function People({ rows, columns, onReorder, setPinned, spanTeam }) {
+export function People({ rows, columns, setPinned, spanTeam }) {
   return (
     <DataTable
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
       rowActionsLayout="menu"
-      onRowReorder={onReorder}
       onPinnedRowIdsChange={setPinned}
       getCellSpan={spanTeam}
     />
@@ -1114,19 +1115,19 @@ export function People({ rows, columns, onReorder, setPinned, spanTeam }) {
 }`,
     notes: {
       mantine:
-        "The grip is a Mantine ActionIcon, pin and delete live in a Mantine Menu, and a Team merge is one Table.Td with rowspan — the same row chrome as the rest of a Mantine table.",
-      mui: "The grip is an IconButton, pin and delete live in a MUI Menu, and a Team merge is one TableCell with rowSpan inside the same TableRow the unmerged cells sit on.",
+        "Pin and delete live in a Mantine Menu, and a Team merge is one Table.Td with rowspan — the same row chrome as the rest of a Mantine table. The drag grip lives on the row-reordering page.",
+      mui: "Pin and delete live in a MUI Menu, and a Team merge is one TableCell with rowSpan inside the same TableRow the unmerged cells sit on. The drag grip lives on the row-reordering page.",
       chakra:
-        "The grip is a Chakra IconButton, pin and delete live in a Chakra Menu, and a Team merge is one Table.Cell with rowSpan.",
-      antd: "The grip is antd's own handle column, pin and delete live in an antd Dropdown, and a Team merge is rowspan through antd's onCell hook so the span happens inside antd's Table.",
+        "Pin and delete live in a Chakra Menu, and a Team merge is one Table.Cell with rowSpan. The drag grip lives on the row-reordering page.",
+      antd: "Pin and delete live in an antd Dropdown, and a Team merge is rowspan through antd's onCell hook so the span happens inside antd's Table. The drag grip lives on the row-reordering page.",
       radix:
-        "The grip is a Radix IconButton, pin and delete live in a Radix DropdownMenu, and a Team merge is one Table.Cell with rowSpan.",
+        "Pin and delete live in a Radix DropdownMenu, and a Team merge is one Table.Cell with rowSpan. The drag grip lives on the row-reordering page.",
       "base-ui":
-        "The grip is a Base UI Button, pin and delete live in a Base UI Menu, and a Team merge is one table cell with rowSpan.",
+        "Pin and delete live in a Base UI Menu, and a Team merge is one table cell with rowSpan. The drag grip lives on the row-reordering page.",
       shadcn:
-        "The grip and the 3-dot trigger wear the preset's button classes, the menu is the same surface as every other overlay, and a Team merge is one td with rowspan.",
+        "The 3-dot trigger wears the preset's button classes, the menu is the same surface as every other overlay, and a Team merge is one td with rowspan. The drag grip lives on the row-reordering page.",
       tailwind:
-        "The grip, the menu trigger and the merged cell all carry the map's classes; rowspan is the browser's, so the fill is yours to dress.",
+        "The menu trigger and the merged cell carry the map's classes; rowspan is the browser's, so the fill is yours to dress. The drag grip lives on the row-reordering page.",
     },
     docs: ["row-pinning", "row-reordering", "row-spanning"],
   },
@@ -1189,13 +1190,13 @@ export function People({ rows, columns, orderColumns }) {
     h1: "Accessible {kit} data table",
     title: "{kit} accessible data table — AdaptTable",
     description:
-      "Use a {kit} data table from the keyboard or a screen reader — arrow-key cell focus with a visible ring, live announcements, and a header checkbox that selects a column without a modifier key.",
+      "Use a {kit} data table from the keyboard or a screen reader — arrow-key cell focus with a visible ring, live announcements, high-contrast and forced-colors affordances, and a header checkbox that selects a column without a modifier key.",
     intro: [
       "Tab into the grid and the arrows move a visible focus, one cell at a time. Home and End jump to the row's edges.",
       "Every move, sort, filter and edit is announced through a live region — the part of a table a sighted reader cannot check, so this page repeats those announcements as text as they happen.",
-      "`columnSelectionCheckbox` puts a named checkbox on each header so a column can be selected without a modifier key a touchscreen does not have. The grid and the checkboxes are {kit}.",
+      "`columnSelectionCheckbox` puts a named checkbox on each header so a column can be selected without a modifier key a touchscreen does not have. Focus, selection, status and disabled controls stay legible in high contrast and forced-colors — nothing is color-only. The grid and the checkboxes are {kit}.",
     ],
-    card: "Arrow-key focus, a visible ring, and every announcement shown as text.",
+    card: "Arrow-key focus, a visible ring, forced-colors, and live announcements.",
     snippet: `import { DataTable } from "{pkg}";
 
 export function People({ rows, columns }) {
@@ -1227,6 +1228,112 @@ export function People({ rows, columns }) {
     },
     docs: ["accessibility", "cell-navigation"],
   },
+  {
+    slug: "row-reordering",
+    label: "Row reordering",
+    h1: "Row reordering in {kit}",
+    title: "{kit} row reordering — AdaptTable",
+    description:
+      "Move rows in a {kit} data table — flat, grouped and tree data, pointer and keyboard, a confirm policy, stable row identity, and host-owned persistence.",
+    intro: [
+      "Compose `rowReorder` from `{pkg}/row-reorder` and a grip appears. Space lifts a row, arrows move it, Space drops it. The table never mutates your array: `onRowReorder` asks the host, and the host writes.",
+      '`movePolicy: "confirm"` opens the kit\'s own move menu before a drop lands. Grouped moves stay inside a group unless `onGroupMove` says otherwise; tree moves stay under the same parent unless `onTreeMove` accepts a new one. A second move cannot start while a host confirmation is still pending.',
+      "Row identity is the row key, not the visual index — a virtual window or a later page does not lie about where the row sat. The grip, the move buttons and the confirmation menu are {kit}.",
+    ],
+    card: "Flat, grouped and tree moves — keyboard, confirm, host writes.",
+    snippet: `import { DataTable } from "{pkg}";
+import { applyRowReorder } from "@adapttable/core";
+import { rowReorder } from "{pkg}/row-reorder";
+
+export function Tasks({ rows, setRows, columns }) {
+  return (
+    <DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(row) => row.id}
+      features={[
+        rowReorder((from, to) => {
+          setRows((current) => applyRowReorder(current, from, to));
+        }, { movePolicy: "confirm" }),
+      ]}
+    />
+  );
+}`,
+    notes: {
+      mantine:
+        "The grip is a Mantine ActionIcon and the confirmation is a Mantine Menu — Space, arrows and Escape stay on the same control the rest of a Mantine table already uses.",
+      mui: "The grip is an IconButton and the confirmation is a MUI Menu of MenuItems, so a keyboard drop lands in the same overlay pattern as the row-action menu.",
+      chakra:
+        "The grip is a Chakra IconButton and the confirmation is a Chakra Menu; pending host confirmation disables the handle rather than leaving a second drag live.",
+      antd: "The grip is antd's own handle column and the confirmation is an antd Dropdown, so a drop that needs approval uses the same overlay antd already uses for row actions.",
+      radix:
+        "The grip is a Radix IconButton and the confirmation is a Radix DropdownMenu — focus returns to the handle after a confirm or a cancel.",
+      "base-ui":
+        "The grip is a Base UI Button and the confirmation is a Base UI Menu; the announcer sits beside them so a keyboard move is heard once.",
+      shadcn:
+        "The grip wears the preset's button classes and the confirmation is the same overlay surface as every other menu on the table.",
+      tailwind:
+        "The grip and the confirmation menu carry the map's classes; the announcer is a live region, so a keyboard move is heard even when the handle is only a native button.",
+    },
+    docs: ["row-reordering"],
+  },
+  {
+    slug: "aggregation",
+    label: "Aggregation",
+    h1: "Aggregation in {kit}",
+    title: "{kit} table aggregation — AdaptTable",
+    description:
+      "Show independent summary rows, pinned top and bottom totals, grouped aggregates and a footer grand total in a {kit} data table — the same computation the source can run.",
+    intro: [
+      "A summary row is not a pinned data row and not a group footer. `summaryRow` writes a grand total in the table footer. `pinnedSummaryRows` sticks host-owned totals above or below the scroll box. `groupAggregates` plus `groupFooters` close each group.",
+      "Filter the table and every total recomputes from the rows that remain — client `aggregate()` and a source that already computed the same numbers share one mapper shape. Extra full-width rows stay attached to a person, not to a total.",
+      "The footer, the pinned summaries and the group totals render through {kit}'s own table rows. Building and reordering group levels stays on the grouping page.",
+    ],
+    card: "Footer totals, pinned summaries, group aggregates — not data rows.",
+    snippet: `import { aggregate } from "@adapttable/core";
+import { DataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+import { pinnedSummaryRows } from "{pkg}/pinned-summary-rows";
+
+export function Sales({ rows, columns }) {
+  const budgetSum = aggregate({ budget: "sum" }, { columns });
+  return (
+    <DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(row) => row.id}
+      summaryRow={budgetSum}
+      features={[
+        groupingPanel(["team"], {
+          groupAggregates: budgetSum,
+          groupFooters: true,
+        }),
+        pinnedSummaryRows({
+          top: [{ id: "team-total", name: "Team total" }],
+          bottom: [{ id: "grand-total", name: "Grand total" }],
+        }),
+      ]}
+    />
+  );
+}`,
+    notes: {
+      mantine:
+        "The footer is a Mantine Table.Tfoot, group totals close a Mantine table row, and pinned summaries are extra rows the same Table already knows how to stick.",
+      mui: "The footer is a real TableFooter, group totals sit in TableRows, and pinned summaries use the same sticky TableRow path as a pinned data row — the label tells them apart.",
+      chakra:
+        "Group totals and the footer are Table.Row cells; pinned summaries are additional rows with the kit's sticky positioning, not a second table.",
+      antd: "Group totals splice into antd's dataSource the same way group headers do; the footer is antd's Table.Summary, and pinned summaries are extra records the adapter marks.",
+      radix:
+        "The footer, group totals and pinned summaries are real Table.Row elements, so a screen reader hears them as rows of the same table.",
+      "base-ui":
+        "Totals render as Base UI table rows; the pinned pair uses the adapter's sticky classes rather than a portal, so they stay in the scroll box.",
+      shadcn:
+        "Footer and group totals sit on the same bg-card surface; pinned summaries keep the preset's sticky row classes so they do not look like another table.",
+      tailwind:
+        "The footer, group totals and pinned summaries carry the map's row and cell classes; the numbers are tabular, the distinction is the label and the part name.",
+    },
+    docs: ["row-grouping", "pinned-summary-rows", "full-width-rows"],
+  },
 ];
 
 /**
@@ -1249,7 +1356,7 @@ function inDemandOrder(features) {
   return FEATURE_DEMAND_ORDER.map((slug) => bySlug[slug]);
 }
 
-/** The eighteen features, in the order the landing grid and rails show them. */
+/** The matrix features, in the order the landing grid and rails show them. */
 export const MATRIX_FEATURES = inDemandOrder(MATRIX_FEATURES_DEFINED);
 
 /**
@@ -1271,8 +1378,8 @@ export const LANDING = {
     "The engine is headless and shared — sorting, filtering, grouping, the pivot, URL state, saved views and export live in @adapttable/core. Every control you can see and click is {surface}.",
     "That is the whole trade: one model to learn, and a table that belongs in a {kit} app rather than sitting inside one.",
   ],
-  /** The heading over the eighteen feature pages. */
-  gridTitle: "Eighteen features, each on its own {kit} page",
+  /** The heading over the feature pages — count comes from the matrix. */
+  gridTitle: `${String(MATRIX_FEATURES.length)} features, each on its own {kit} page`,
   gridLead:
     "Every one is the same engine and {kit}'s own components. Each page carries the code for that feature and a table you can drive.",
   /** The heading over the other seven kits. */

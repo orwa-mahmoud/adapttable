@@ -73,9 +73,9 @@ export const Globe = make([
 ]);
 export const Warning = make(["M12 4l9 16H3l9-16z", "M12 10v4", "M12 17.2v.1"]);
 
-/* The eighteen feature marks. Each draws the shape of the thing rather than a
-   symbol for it: a pivot is a grid with a marked row and column, grouping is
-   rows folded under a header, a tree is a trunk with branches. */
+/* Feature marks. Each draws the shape of the thing rather than a symbol for
+   it: a pivot is a grid with a marked row and column, grouping is rows folded
+   under a header, a tree is a trunk with branches. */
 export const Filter = make(["M3 5h18l-7 8v6l-4 2v-8L3 5z"]);
 export const Pivot = make([
   "M4 4h16v16H4z",
@@ -108,3 +108,14 @@ export const Pencil = make([
   "M13 20h7",
 ]);
 export const CheckSquare = make(["M4 4h16v16H4z", "M8 12l3 3 5-6"]);
+/** Three stacked rows with a lift handle — row reordering. */
+export const Grip = make([
+  "M8 7h8",
+  "M8 12h8",
+  "M8 17h8",
+  "M5 7h.01",
+  "M5 12h.01",
+  "M5 17h.01",
+]);
+/** A sum bar under a column — aggregation, not a data row. */
+export const Sigma = make(["M5 5h14l-8 7 8 7H5"]);

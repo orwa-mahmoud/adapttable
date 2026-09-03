@@ -53,6 +53,20 @@ const EXAMPLES: readonly {
     specs: [{ key: "shout", header: "Shouted", formula: "=UPPER(name)" }],
   },
   {
+    label: "=POWER(2, 3)",
+    specs: [{ key: "power", header: "Power", formula: "=POWER(2, 3)" }],
+  },
+  {
+    label: "=SQRT(budget)",
+    specs: [
+      {
+        key: "root",
+        header: "Root",
+        formula: "=ROUND(SQRT(budget), 0)",
+      },
+    ],
+  },
+  {
     label: "=budget / 0 → #DIV/0!",
     specs: [{ key: "broken", header: "Broken", formula: "=budget / 0" }],
   },

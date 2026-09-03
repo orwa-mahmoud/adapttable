@@ -1,7 +1,7 @@
 /**
  * Which demo a feature page mounts under its seam.
  *
- * Every body is lazy, and that is not an optimisation detail: all nineteen
+ * Every body is lazy, and that is not an optimisation detail: all twenty
  * matrix pages boot the same entry module, so a static import here would ship
  * the pivot engine, the PDF writer and the formula parser to a reader who
  * opened the columns page. One `import()` per feature means each page carries
@@ -54,6 +54,11 @@ export const FEATURE_BODIES: Record<string, ComponentType<FeatureBodyProps>> = {
   ),
   pivot: load(() => import("../PivotDemo"), "PivotDemo"),
   realtime: load(() => import("../RealtimeDemo"), "RealtimeDemo"),
+  aggregation: load(() => import("../AggregationDemo"), "AggregationDemo"),
+  "row-reordering": load(
+    () => import("../RowReorderingDemo"),
+    "RowReorderingDemo"
+  ),
   rows: load(() => import("../RowsDemo"), "RowsDemo"),
   rtl: load(() => import("../RtlSection"), "RtlSection"),
   "saved-views": load(() => import("../SavedViewsDemo"), "SavedViewsDemo"),

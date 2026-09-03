@@ -90,7 +90,7 @@ export const SHOWCASE_PAGES = [
   demo("all-options"),
   // Optional AI chrome — built for kit/e2e coverage, not a marketing tile.
   demo("agent-approval", { indexable: false }),
-  // The adapter × feature matrix — a landing plus eighteen feature pages per
+  // The adapter × feature matrix — a landing plus the matrix feature pages per
   // built adapter, expanded from `matrix.mjs`.
   ...matrixPages().map((page) => demo(page.dir)),
   // The addresses those pages replaced.

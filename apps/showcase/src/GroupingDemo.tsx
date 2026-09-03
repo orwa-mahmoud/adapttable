@@ -61,7 +61,8 @@ export function GroupingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           <Check size={12} /> Focus a chip handle; arrow keys change its level
         </span>
         <span className="hint">
-          <Check size={12} /> Override any value column’s aggregation
+          <Check size={12} /> Override any value column’s aggregation — pinned
+          totals live on aggregation, moves on row-reordering
         </span>
         <span className="hint">
           <Check size={12} /> Export writes the grouped sheet — outline + totals

@@ -7,7 +7,7 @@
  * heading and copy — the demo is client-rendered, so an empty root is an empty
  * page to everything that does not run JavaScript.
  *
- * A hundred and fifty-two of those files (eight adapters × eighteen
+ * A hundred and sixty-eight of those files (eight adapters × twenty
  * features, plus a landing each) cannot be hand-written and stay true. So they
  * are written from
  * `apps/showcase/matrix.mjs`, the same module the live page renders from: one

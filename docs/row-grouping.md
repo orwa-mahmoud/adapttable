@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — edit the table in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [collapse groups and read per-group subtotals in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — a real table you can click, not a recording.
+▶ **See it working:** [collapse groups and override aggregations in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — a real table you can click, not a recording. Independent pinned totals and the footer grand total live on the [aggregation page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/aggregation/).
 
 Each subtotal renders in its own column's cell, so it sits under the column it
 totals — on a mobile card, where there are no columns to align to, the same

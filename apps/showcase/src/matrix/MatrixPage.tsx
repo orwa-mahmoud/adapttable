@@ -32,6 +32,7 @@ import {
   Filter,
   Formula,
   Globe,
+  Grip,
   Keyboard,
   Nested,
   Pencil,
@@ -39,6 +40,7 @@ import {
   Pin,
   Pivot,
   Rows,
+  Sigma,
   Star,
   Tree,
 } from "../sectionIcons";
@@ -71,11 +73,13 @@ const FEATURE_ICONS: Record<string, (props: { size?: number }) => ReactNode> = {
   filtering: Filter,
   formulas: Formula,
   grouping: Rows,
+  aggregation: Sigma,
   "mobile-cards": Phone,
   "nested-tables": Nested,
   pivot: Pivot,
   realtime: Bolt,
   rows: Pin,
+  "row-reordering": Grip,
   rtl: Globe,
   "saved-views": Star,
   scale: Database,
@@ -228,7 +232,7 @@ function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
   );
 }
 
-/** The eighteen features of one kit, as a grid of links. */
+/** The matrix features of one kit, as a grid of links. */
 function FeatureGrid({
   adapter,
   root,

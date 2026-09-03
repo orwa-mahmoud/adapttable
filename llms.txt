@@ -124,11 +124,12 @@ const {
 
 - [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/): every adapter on one dataset
 
-The demo is adapter-first: each kit has a landing page, and eighteen feature pages
+The demo is adapter-first: each kit has a landing page, and twenty feature pages
 under it at `/demo/<kit>/<feature>/` — e.g. `/demo/antd/filtering/`,
 `/demo/shadcn/columns/`. The features are filtering, columns, column-groups,
-selection, rows, editing, grouping, nested-tables, export, scale, tree,
-mobile-cards, pivot, saved-views, formulas, rtl, realtime and accessibility.
+selection, rows, row-reordering, editing, grouping, aggregation, nested-tables,
+export, scale, tree, mobile-cards, pivot, saved-views, formulas, rtl, realtime
+and accessibility.
 
 - [AdaptTable for Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/): a data table that renders as Mantine, because it is built from Mantine
 - [AdaptTable for MUI](https://orwa-mahmoud.github.io/adapttable/demo/mui/): a Material data table, drawn by MUI's own components

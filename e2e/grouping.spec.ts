@@ -1,6 +1,11 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
-import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import {
+  adapterByKey,
+  builtAdapters,
+  featureBySlug,
+  fillTemplate,
+} from "../apps/showcase/matrix.mjs";
 
 import { gotoFromFeatureGrid } from "./nav";
 
@@ -17,6 +22,10 @@ import { gotoFromFeatureGrid } from "./nav";
  * the page no longer needs — and it widens to the whole grid as the
  * remaining adapters' pages arrive.
  */
+const KIT = builtAdapters()[0]!.key;
+const ADAPTER = adapterByKey(KIT)!;
+const FEATURE = featureBySlug("grouping")!;
+const copy = (text: string) => fillTemplate(text, ADAPTER);
 const KITS = builtAdapters().map((adapter) => adapter.key);
 
 async function choose(
@@ -44,6 +53,26 @@ async function choose(
 test("is reachable from the kit's feature grid", async ({ page }) => {
   await gotoFromFeatureGrid(page, "mantine", "Grouping");
   await expect(page).toHaveURL(/\/grouping\/$/);
+});
+
+test("answers the search phrase without JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(`/${KIT}/grouping/`, { waitUntil: "domcontentloaded" });
+
+  await expect(page).toHaveTitle(copy(FEATURE.title));
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    "content",
+    copy(FEATURE.description)
+  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    copy(FEATURE.h1)
+  );
+  await expect(page.locator("main")).toContainText(
+    copy(FEATURE.intro[0]!).replaceAll("`", "").slice(0, 60)
+  );
+  await expect(page.locator("main")).toContainText("aggregation page");
+  await context.close();
 });
 
 for (const kit of KITS) {

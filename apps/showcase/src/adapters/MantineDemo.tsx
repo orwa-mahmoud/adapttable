@@ -177,6 +177,7 @@ export function MantineDemo({
   rowReorder,
   rowPinning,
   pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -231,6 +232,7 @@ export function MantineDemo({
   rowReorder?: boolean;
   rowPinning?: boolean;
   pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -311,6 +313,7 @@ export function MantineDemo({
         rowReorder={rowReorder}
         rowPinning={rowPinning}
         pinnedSummaryRows={pinnedSummaryRows}
+        summaryRow={summaryRow}
         cellSpan={cellSpan}
         extraRows={extraRows}
         rowStyle={rowStyle}

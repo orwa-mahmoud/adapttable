@@ -495,7 +495,7 @@ export function AppNav({
     { key: "demo", label: "Live demo", href: href("") },
     { key: "all-options", label: "Feature Lab", href: href("all-options") },
   ];
-  /** The current kit's eighteen feature pages — the phone picker's only home for
+  /** The current kit's matrix feature pages — the phone picker's only home for
    * them, since a phone has neither the landing grid nor the feature rail in
    * reach of the bar. */
   const kitFeaturePages: readonly NavPage[] = MATRIX_FEATURES.map(

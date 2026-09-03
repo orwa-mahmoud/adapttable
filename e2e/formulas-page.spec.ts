@@ -80,6 +80,19 @@ test("a typed formula becomes a column of computed values", async ({
   ).toContainText("Doubled");
 });
 
+test("POWER and SQRT compute from the example buttons", async ({ page }) => {
+  await page.goto(`/${KIT}/formulas/`);
+  await page.getByTestId("formula-example-power").click();
+  await expect(
+    table(page).locator('tbody [data-column-key="power"]').first()
+  ).toHaveText("8");
+
+  await page.getByTestId("formula-example-root").click();
+  await expect(
+    table(page).locator('tbody [data-column-key="root"]').first()
+  ).toHaveText("159");
+});
+
 test("a formula that cannot compute shows its error in the cell", async ({
   page,
 }) => {

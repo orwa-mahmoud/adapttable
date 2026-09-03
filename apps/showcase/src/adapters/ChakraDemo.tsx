@@ -190,6 +190,7 @@ export function ChakraDemo({
   rowReorder,
   rowPinning,
   pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -244,6 +245,7 @@ export function ChakraDemo({
   rowReorder?: boolean;
   rowPinning?: boolean;
   pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -322,6 +324,7 @@ export function ChakraDemo({
           rowReorder={rowReorder}
           rowPinning={rowPinning}
           pinnedSummaryRows={pinnedSummaryRows}
+          summaryRow={summaryRow}
           cellSpan={cellSpan}
           extraRows={extraRows}
           rowStyle={rowStyle}

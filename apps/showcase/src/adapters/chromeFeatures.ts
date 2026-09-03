@@ -191,7 +191,9 @@ function alwaysOn(
     ...(flags.editing ? [kit.selectionStats()] : []),
     // Find is shareable URL state. The live demo is the page that syncs the
     // address bar, so the bar is on there even when editing is off.
-    ...(flags.editing || flags.urlKey === "live" ? [kit.findInTable()] : []),
+    ...(flags.editing || flags.urlKey === "live" || flags.urlKey === "flt"
+      ? [kit.findInTable()]
+      : []),
     kit.commandPalette(flags.commandPalette ?? true),
     kit.contextMenu<Person>(flags.contextMenu ?? true),
   ];

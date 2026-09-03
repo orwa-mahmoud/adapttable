@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — pass `onPinnedRowIdsChange` and pin actions appear. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [pin, reorder and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — sticky pins, a drag grip, Team written once down consecutive teammates (pin keeps that one merge), and a 3-dot menu. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [pin and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — sticky pins, Team written once down consecutive teammates (pin keeps that one merge), and a 3-dot menu. Movement lives on the [row-reordering page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/). The same pages exist for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Pass `pinnedRowIds` and/or `onPinnedRowIdsChange` and every row gains icon-only
 Pin to top / Pin to bottom / Unpin (labels on hover and as the accessible name).

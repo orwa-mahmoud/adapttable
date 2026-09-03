@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { builtAdapters, MATRIX_FEATURES } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
 import { isRedirectPage } from "./sitemap-routes.mjs";
 
@@ -91,6 +92,29 @@ describe("the showcase page manifest", () => {
       sorted(SHOWCASE_PAGES.map((page) => page.html)),
       entriesOnDisk()
     );
+  });
+
+  it("registers row-reordering and aggregation for every published adapter", () => {
+    const slugs = ["row-reordering", "aggregation"];
+    for (const slug of slugs) {
+      assert.ok(
+        MATRIX_FEATURES.some((feature) => feature.slug === slug),
+        slug
+      );
+    }
+    const routes = new Set(
+      SHOWCASE_PAGES.filter((page) => page.indexable).map((page) => page.route)
+    );
+    const adapters = builtAdapters();
+    assert.equal(adapters.length, 8);
+    for (const adapter of adapters) {
+      for (const slug of slugs) {
+        const route = `/demo/${adapter.key}/${slug}/`;
+        assert.ok(routes.has(route), route);
+      }
+    }
+    assert.equal(routes.has("/demo/bootstrap/row-reordering/"), false);
+    assert.equal(routes.has("/demo/bootstrap/aggregation/"), false);
   });
 
   it("gives every page its own key and its own route", () => {

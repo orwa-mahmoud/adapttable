@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, and removable chips." />
+    <meta name="description" content="Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, removable chips, and a find query that rides the same versioned URL." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/antd/filtering/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="Ant Design table filtering — AdaptTable" />
-    <meta property="og:description" content="Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, and removable chips." />
+    <meta property="og:description" content="Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, removable chips, and a find query that rides the same versioned URL." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/antd/filtering/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Ant Design table filtering — AdaptTable" />
-    <meta name="twitter:description" content="Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, and removable chips." />
+    <meta name="twitter:description" content="Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, removable chips, and a find query that rides the same versioned URL." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, and removable chips.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Filter a Ant Design data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, removable chips, and a find query that rides the same versioned URL.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -163,8 +163,8 @@
         <p class="at-fallback__kicker">AdaptTable for Ant Design</p>
         <h1>Filtering in Ant Design</h1>
         <p>Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.</p>
-        <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself.</p>
-        <p>The whole filter state lives in the URL, so a filtered view is a link someone can send — and the popover, drawer, inputs and chips are all Ant Design components.</p>
+        <p>For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself. Quick find is a different control — it highlights matching cells and writes <code>find=</code> into the same URL namespace; it does not replace the filter tree.</p>
+        <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Ant Design components.</p>
         <p>The popover lets antd portal its Selects and pickers to the body the way antd does everywhere, and teaches the outside-click handler to ignore those layers instead — numbers filter through an InputNumber, and each active filter is a closable Tag.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
@@ -207,20 +207,22 @@ export function People({ rows }) {
           <li><a href="../columns/">Column management in Ant Design</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Ant Design</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Ant Design</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in Ant Design</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
+          <li><a href="../rows/">Rows in Ant Design</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in Ant Design</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
           <li><a href="../editing/">Inline cell editing in Ant Design</a> — Kit-native editors in the cell; every write goes through your handler.</li>
           <li><a href="../grouping/">Row grouping in Ant Design</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="../aggregation/">Aggregation in Ant Design</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in Ant Design</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../export/">Export and print in Ant Design</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
           <li><a href="../scale/">Large datasets in Ant Design</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in Ant Design</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
+          <li><a href="../tree/">Tree data in Ant Design</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="../mobile-cards/">Mobile cards in Ant Design</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Ant Design</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in Ant Design</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — Computed columns typed as formulas, errors reported in the cell.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Ant Design data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in Ant Design</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
+          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
         </ul>
         <p>
           Reference: <a href="https://orwa-mahmoud.github.io/adapttable/filtering/">filtering</a>, <a href="https://orwa-mahmoud.github.io/adapttable/filter-tree/">filter-tree</a>, <a href="https://orwa-mahmoud.github.io/adapttable/url-state/">url-state</a>. More of this kit:

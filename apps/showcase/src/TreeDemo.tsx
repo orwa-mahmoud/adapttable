@@ -27,6 +27,10 @@ export function TreeDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         <span className="hint">
           <Check size={12} /> expansion is carried in the URL
         </span>
+        <span className="hint">
+          <Check size={12} /> moving a child under a new parent is on
+          row-reordering
+        </span>
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter}>

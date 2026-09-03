@@ -323,12 +323,18 @@ export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
 }
 
 /**
- * Table query/layout hits the address bar on the live demo and the grouping
- * page, where URL persistence is part of the feature being demonstrated.
- * Other feature pages stay off so interacting does not rewrite the URL.
+ * Table query/layout hits the address bar on pages whose subject is that
+ * persistence: the live demo, grouping, filtering (including find), and
+ * aggregation (totals follow the same filter URL). Other feature pages stay
+ * off so interacting does not rewrite the address.
  */
 export function demoUrlSync(urlKey?: string): boolean {
-  return urlKey === "live" || urlKey === "grp";
+  return (
+    urlKey === "live" ||
+    urlKey === "grp" ||
+    urlKey === "flt" ||
+    urlKey === "agg"
+  );
 }
 
 /**

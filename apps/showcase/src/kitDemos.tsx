@@ -36,6 +36,7 @@ export type KitDemoProps = Readonly<{
   rowReorder?: boolean;
   rowPinning?: boolean;
   pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;

@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal and expansion state carried in the URL." />
+    <meta name="description" content="Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal, expansion in the URL, and host-owned moves that stay inside a parent." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/antd/tree/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="Ant Design tree table — AdaptTable" />
-    <meta property="og:description" content="Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal and expansion state carried in the URL." />
+    <meta property="og:description" content="Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal, expansion in the URL, and host-owned moves that stay inside a parent." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/antd/tree/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Ant Design tree table — AdaptTable" />
-    <meta name="twitter:description" content="Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal and expansion state carried in the URL." />
+    <meta name="twitter:description" content="Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal, expansion in the URL, and host-owned moves that stay inside a parent." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal and expansion state carried in the URL.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/tree/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Render hierarchical rows in a Ant Design data table — parent/child nesting, chevrons, keyboard traversal, expansion in the URL, and host-owned moves that stay inside a parent.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/tree/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -164,7 +164,7 @@
         <h1>Tree data in Ant Design</h1>
         <p>A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Point the table at <code>getChildren</code> or <code>getParentId</code> and it renders the hierarchy.</p>
         <p>Children indent under their parent, a chevron opens and closes each branch, and arrow keys walk the tree the way a tree widget should. Expansion is part of the table's state, so it lives in the URL like everything else.</p>
-        <p>Sorting and filtering apply within the tree rather than flattening it — a branch keeps its shape, and a matching child keeps its ancestors on screen.</p>
+        <p>Sorting and filtering apply within the tree rather than flattening it. Moving a child under a new parent is a host callback on the row-reordering page — the table never rewrites your tree.</p>
         <p>The branch toggle is a text Button with a rotating caret rather than antd's built-in expand icon, which the adapter draws itself so the label follows the table's locale instead of the provider's.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
@@ -195,23 +195,25 @@ export function Org({ people, columns }) {
         </ul>
         <h2>More Ant Design features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in Ant Design</a> — Kit-native operators, date ranges, checklists, an AND/OR tree, chips.</li>
+          <li><a href="../filtering/">Filtering in Ant Design</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
           <li><a href="../columns/">Column management in Ant Design</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Ant Design</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Ant Design</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in Ant Design</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
+          <li><a href="../rows/">Rows in Ant Design</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in Ant Design</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
           <li><a href="../editing/">Inline cell editing in Ant Design</a> — Kit-native editors in the cell; every write goes through your handler.</li>
           <li><a href="../grouping/">Row grouping in Ant Design</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="../aggregation/">Aggregation in Ant Design</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in Ant Design</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../export/">Export and print in Ant Design</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
           <li><a href="../scale/">Large datasets in Ant Design</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="../mobile-cards/">Mobile cards in Ant Design</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Ant Design</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in Ant Design</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — Computed columns typed as formulas, errors reported in the cell.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Ant Design data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in Ant Design</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
+          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
         </ul>
         <p>
           Reference: <a href="https://orwa-mahmoud.github.io/adapttable/tree-data/">tree-data</a>. More of this kit:

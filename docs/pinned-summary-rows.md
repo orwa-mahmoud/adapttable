@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `pinnedSummaryRows`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [pin, reorder and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — a host-owned total sticks above the list. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [pinned summaries and group totals in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/aggregation/) — host-owned totals stick above and below the list, and they are not data rows. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 These are **not** lifted data rows. You pass separate objects
 (`pinnedRows: { top, bottom }`) that never enter sort, filter, grouping,

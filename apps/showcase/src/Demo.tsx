@@ -302,6 +302,8 @@ export interface DemoColumnProps {
   slots?: { error?: Slot<TableErrorState> };
   /** The demo's own mobile card layout, when that toggle is on. */
   renderCard?: MobileCardRenderer<Person>;
+  /** Footer grand total, when the aggregation page asks for one. */
+  summaryRow?: typeof DEMO_GROUP_AGGREGATES;
 }
 
 /** Adapter demos provide this — given a source + column controls, render. */
@@ -357,6 +359,7 @@ interface DataProps {
   rowReorder?: boolean;
   rowPinning?: boolean;
   pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -591,11 +594,22 @@ function composeDemoFeatures(
     ...(flags.rowPinning ? [rowPinning()] : []),
     ...(flags.pinnedSummaryRows
       ? [
-          pinnedSummaryRows({
+          pinnedSummaryRows<Person>({
             // Numeric ids so showcase derivations (timeline, load count)
             // stay defined; namespaced feature keys still own the DOM ids.
-            top: [summaryPerson("901", "Team total")],
-            bottom: [summaryPerson("902", "Grand total")],
+            // Host-owned totals: the demo sums the array it already owns.
+            top: [
+              {
+                ...summaryPerson("901", "Team total"),
+                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
+              },
+            ],
+            bottom: [
+              {
+                ...summaryPerson("902", "Grand total"),
+                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
+              },
+            ],
           }),
         ]
       : []),
@@ -694,6 +708,8 @@ function frontendColumnProps(
     rowReorder?: boolean;
     rowPinning?: boolean;
     pinnedSummaryRows?: boolean;
+    /** Footer grand total — same mapper shape as group aggregates. */
+    summaryRow?: boolean;
     cellSpan?: boolean;
     extraRows?: boolean;
     extraAnchorId?: string;
@@ -744,6 +760,9 @@ function frontendColumnProps(
   }
   if (flags.rowPinning) {
     Object.assign(next, { onPinnedRowIdsChange: () => undefined });
+  }
+  if (flags.summaryRow) {
+    Object.assign(next, { summaryRow: DEMO_GROUP_AGGREGATES });
   }
   // Team is the same fact on consecutive rows in visual order — merge it,
   // leave Person and Email alone. Reorder can break a run; that is the point.
@@ -889,6 +908,7 @@ function Frontend({
   rowReorder,
   rowPinning,
   pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -1128,6 +1148,7 @@ function Frontend({
           rowReorder,
           rowPinning,
           pinnedSummaryRows,
+          summaryRow,
           cellSpan,
           extraRows,
           extraAnchorId,
@@ -1206,8 +1227,9 @@ function Backend({
  * mounted at a time (remounted on `mode` change), so the headless source is
  * the single thing that differs — the adapter markup is identical. The column
  * layout is URL-persisted here (shared by both paths) so pin/hide/reorder
- * survive the re-mount. {@link demoUrlSync} enables that on the live demo and
- * on the grouping page, where persistence is itself part of the demonstration.
+ * survive the re-mount. {@link demoUrlSync} enables that on the live demo,
+ * grouping, filtering, and aggregation pages, where persistence is itself
+ * part of the demonstration.
  */
 export function DemoBody({
   mode,
@@ -1224,6 +1246,7 @@ export function DemoBody({
   rowReorder,
   rowPinning,
   pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -1250,6 +1273,7 @@ export function DemoBody({
   rowReorder?: boolean;
   rowPinning?: boolean;
   pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -1335,6 +1359,7 @@ export function DemoBody({
       rowReorder={rowReorder}
       rowPinning={rowPinning}
       pinnedSummaryRows={pinnedSummaryRows}
+      summaryRow={summaryRow}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

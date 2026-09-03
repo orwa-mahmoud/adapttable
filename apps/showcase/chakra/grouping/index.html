@@ -164,7 +164,7 @@
         <h1>Row grouping in Chakra</h1>
         <p>Compose <code>groupingPanel(groupBy, extras)</code> and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.</p>
         <p>Every chip handle is keyboard movable with the arrow keys. On phones the same Chakra panel swaps drag targets for kit-native selects, without changing the grouping model.</p>
-        <p><code>groupAggregates</code> seeds the per-group subtotal, then the panel can override a value column to sum, average, minimum, maximum, count, none, or its default. <code>groupFooters</code> still closes each group with its total.</p>
+        <p><code>groupAggregates</code> seeds the per-group subtotal, then the panel can override a value column. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>A group header is a Table.Row with a spanning cell — IconButton chevron, Chakra Checkbox, Text label and count — and the footer is that same row with its controls removed.</p>
         <h2>The code</h2>
@@ -205,26 +205,28 @@ export function People({ rows, columns }) {
         </ul>
         <h2>More Chakra features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in Chakra</a> — Kit-native operators, date ranges, checklists, an AND/OR tree, chips.</li>
+          <li><a href="../filtering/">Filtering in Chakra</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
           <li><a href="../columns/">Column management in Chakra</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Chakra</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Chakra</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in Chakra</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
+          <li><a href="../rows/">Rows in Chakra</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in Chakra</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
           <li><a href="../editing/">Inline cell editing in Chakra</a> — Kit-native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../aggregation/">Aggregation in Chakra</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in Chakra</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../export/">Export and print in Chakra</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
           <li><a href="../scale/">Large datasets in Chakra</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in Chakra</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
+          <li><a href="../tree/">Tree data in Chakra</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="../mobile-cards/">Mobile cards in Chakra</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Chakra</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in Chakra</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Chakra</a> — Computed columns typed as formulas, errors reported in the cell.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Chakra</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Chakra data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in Chakra</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Chakra data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
+          <li><a href="../accessibility/">Accessible Chakra data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
         </ul>
         <p>
-          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/row-grouping/">row-grouping</a>. More of this kit:
+          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/row-grouping/">row-grouping</a>, <a href="https://orwa-mahmoud.github.io/adapttable/pinned-summary-rows/">pinned-summary-rows</a>, <a href="https://orwa-mahmoud.github.io/adapttable/row-reordering/">row-reordering</a>. More of this kit:
           <a href="../">AdaptTable for Chakra</a>, or
           <a href="/adapttable/demo/">the live demo</a>.
         </p>

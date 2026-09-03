@@ -43,15 +43,15 @@ test("answers the search phrase without JavaScript", async ({ browser }) => {
 });
 
 for (const kit of KITS) {
-  test(`${kit}: pin, reorder, merge and a row-action menu on one table`, async ({
+  test(`${kit}: pin, merge and a row-action menu on one table`, async ({
     page,
   }) => {
     await page.goto(`/${kit}/rows/`);
     const root = demo(page).locator(`[data-adapter="${kit}"]`);
     await expect(root.first()).toBeVisible();
     await expect(
-      root.locator('[data-adapttable-part="reorder-cell"]').first()
-    ).toBeVisible();
+      root.locator('[data-adapttable-part="reorder-cell"]')
+    ).toHaveCount(0);
     await expect(
       root.locator('[data-adapttable-part="row-actions-trigger"]').first()
     ).toBeVisible();
