@@ -11,6 +11,7 @@ import { ensureBaseUiStyles } from "./injectStyles";
 
 ensureBaseUiStyles();
 
+export { agentApproval } from "./agent-approval";
 export {
   ChecklistFilter,
   type ChecklistFilterProps,
@@ -21,7 +22,6 @@ export {
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
 export { GroupingPanel } from "./components/GroupingPanel";
-export { agentApproval } from "./agent-approval";
 export {
   AgentApproval,
   type AgentApprovalProps,

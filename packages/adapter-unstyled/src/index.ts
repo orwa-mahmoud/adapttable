@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+export { agentApproval } from "./agent-approval";
 export {
   AutoFilterForm,
   type AutoFilterFormProps,
@@ -27,7 +28,6 @@ export {
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
 export { FiltersIcon, SearchIcon } from "./components/icons";
-export { agentApproval } from "./agent-approval";
 export {
   AgentApproval,
   type AgentApprovalProps,

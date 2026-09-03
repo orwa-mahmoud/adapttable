@@ -6,9 +6,9 @@
  * local `DataTable` below shadows the unstyled one with the shadcn preset baked
  * in.
  */
+export { agentApproval } from "./agent-approval";
 export { shadcnClassNames } from "./classNames";
 export { DataTable } from "./DataTable";
-export { agentApproval } from "./agent-approval";
 // The panels are native markup, so the preset's classes are the only
 // difference: the saved-views panel honors the `views*` keys and comes
 // pre-wired below, the same way `DataTable` does. The pivot panel has no keys

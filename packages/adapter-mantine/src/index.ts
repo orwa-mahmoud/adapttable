@@ -19,6 +19,7 @@ export type {
 } from "./types";
 
 /* Styled sub-components (also overridable / reusable on their own). */
+export { agentApproval } from "./agent-approval";
 export {
   ActiveFilterChips,
   type ActiveFilterChipsProps,
@@ -42,7 +43,6 @@ export {
   FilterTreeBuilder,
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
-export { agentApproval } from "./agent-approval";
 export {
   AgentApproval,
   type AgentApprovalProps,
