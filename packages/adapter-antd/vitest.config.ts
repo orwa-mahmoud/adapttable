@@ -5,15 +5,10 @@ import { sharedConfig } from "../../vitest.shared.ts";
 export default mergeConfig(sharedConfig, {
   test: {
     setupFiles: ["./vitest.setup.ts"],
-    // antd 6's cold cssinjs render is the slowest first paint in the repo
-    // (see vitest.shared's CI note). When turbo runs every package's suite
-    // at once — full gate or the forced sonar:coverage matrix — letting
-    // this suite ALSO fan its files across worker threads oversubscribes
-    // the cores enough that the first grouping test blows the per-test
-    // budget (observed three times locally at ~35s vs the 30s limit;
-    // deterministic solo). Run this package's files serially everywhere,
-    // exactly as the shared config already does on CI.
-    fileParallelism: false,
+    // Cold cssinjs + coverage instrumentation regularly lands the first
+    // desktop Table test in the 35–45s range on a loaded machine. Shared
+    // default is 30s; this package keeps the wider local/CI budget.
+    testTimeout: 60_000,
     coverage: {
       exclude: ["src/test-utils.tsx"],
       thresholds: {

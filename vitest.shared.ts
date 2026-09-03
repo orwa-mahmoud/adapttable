@@ -2,6 +2,11 @@ import babel from "@rolldown/plugin-babel";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+import {
+  vitestFileParallelism,
+  vitestMaxWorkers,
+} from "./scripts/vitest-workers.mjs";
+
 /**
  * Shared Vitest configuration consumed by every package via
  * `mergeConfig(sharedConfig, { ... })`. Centralises the jsdom
@@ -24,17 +29,13 @@ export const sharedConfig = defineConfig({
     css: true,
     clearMocks: true,
     restoreMocks: true,
-    // `turbo` already runs every package's suite in parallel, so the aggregate
-    // thread count is what matters, not one suite's. Letting each vitest ALSO
-    // fan its files across worker threads oversubscribes the cores several
-    // times over — on the 2-core CI runner and equally on a 10-core laptop
-    // running ten suites at once — and antd 6's cold cssinjs render (paid once,
-    // by the first test of the suite) blows past the per-test timeout under
-    // that thrash. One thread per suite keeps the total near the core count and
-    // makes the full gate deterministic.
-    fileParallelism: false,
-    // Generous per-test budget for that same cold first render on a loaded CI
-    // runner. This only widens the time limit — assertions are unchanged.
+    // CI is 2-core and already shards packages across jobs — one worker.
+    // Local turbo takes a slice per suite; a solo filter run uses half the
+    // cores. See scripts/vitest-workers.mjs.
+    fileParallelism: vitestFileParallelism(),
+    maxWorkers: vitestMaxWorkers(),
+    // Generous per-test budget for Ant Design's cold cssinjs first paint.
+    // This only widens the time limit — assertions are unchanged.
     testTimeout: 30000,
     coverage: {
       provider: "v8",

@@ -209,7 +209,8 @@ jobs:
             tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          pnpm lint $f --concurrency=1
+          # 2-core runner: two packages at once, each lint is one process.
+          pnpm lint $f --concurrency=2
 
   typescript:
     name: TypeScript
@@ -291,7 +292,9 @@ jobs:
             "server · cli · i18n · ai") f="--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/ai" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          pnpm test:coverage $f --concurrency=1
+          # 2-core runner + one Vitest worker per package. Pair/triple shards
+          # can run two suites at once; solo shards stay one package.
+          pnpm test:coverage $f --concurrency=2
 
   unit:
     name: Unit
