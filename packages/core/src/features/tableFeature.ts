@@ -13,13 +13,20 @@
  * register here rather than through a parallel API.
  */
 import type { Command } from "../actions/commandRegistry";
+import type {
+  ContextMenuItem,
+  ContextMenuTarget,
+} from "../actions/contextMenuModel";
 import type { Aggregator } from "../aggregate/aggregate";
 import type {
-  ColumnMenuAction,
   ColumnMenuActionContext,
+  ColumnMenuItem,
+  ColumnMenuRow,
 } from "../columns/columnMenuModel";
+import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
+import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import type { FeatureProviderContribution, FeatureRender } from "./providers";
 
 export type { Command } from "../actions/commandRegistry";
