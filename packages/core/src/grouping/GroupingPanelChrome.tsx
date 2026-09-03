@@ -270,7 +270,9 @@ export function GroupingPanelChrome<TRow>({
           data-adapttable-part="grouping-remove-zone"
         />
       ) : null}
-      <LiveRegion part="grouping-announcer">{state.announcement}</LiveRegion>
+      <LiveRegion part="grouping-announcer" statusRole={false}>
+        {state.announcement}
+      </LiveRegion>
     </Surface>
   );
 }
