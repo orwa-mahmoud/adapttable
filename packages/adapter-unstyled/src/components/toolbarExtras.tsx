@@ -13,9 +13,10 @@ import {
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import { type ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
 
 import type { DataTableClassNames } from "../types";
+import { useClassNames } from "./classNamesContext";
 
 /** The class map the unstyled kit styles its controls through. */
 const classesOf = (props: Readonly<ToolbarExtrasSlotProps>) =>
@@ -65,15 +66,6 @@ export function ExportCsvButton(
     labels,
   } = props;
   const classNames = classesOf(props);
-  const Surface = useMemo(
-    () =>
-      function BoundExportProgressSurface(
-        surface: ExportProgressSurfaceSlotProps
-      ) {
-        return <ExportProgressSurface {...surface} classNames={classNames} />;
-      },
-    [classNames]
-  );
   if (!onExportCsv) return null;
   return (
     <>
@@ -103,7 +95,7 @@ export function ExportCsvButton(
         progress={exportProgressState}
         labels={labels}
         slots={{
-          Surface,
+          Surface: ExportProgressSurface,
         }}
       />
       <ExportAnnouncer announcement={exportAnnouncement} />
@@ -121,10 +113,8 @@ function ExportProgressSurface({
   cancel,
   retry,
   download,
-  classNames,
-}: Readonly<
-  ExportProgressSurfaceSlotProps & { classNames: DataTableClassNames }
->): ReactNode {
+}: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
+  const classNames = useClassNames();
   return (
     <section
       aria-label={heading}
