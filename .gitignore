@@ -1,3 +1,6 @@
+# Isolated Nightshift / agent worktrees nested under this clone. Never committed.
+/worktrees/
+
 # Private working context (plans, notes, AI/skill/tool output). Never committed.
 ai_docs/
 

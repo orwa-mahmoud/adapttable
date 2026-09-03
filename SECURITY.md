@@ -21,9 +21,9 @@ When reporting, please include:
 - A description of the vulnerability and its impact.
 - Steps to reproduce or a proof of concept, if available.
 
-You can expect an initial acknowledgement within a few days. Once a fix is
-ready we will coordinate a release and credit you in the advisory unless you
-prefer to remain anonymous.
+Response targets (acknowledgement, triage, fix windows) are in
+[GOVERNANCE.md](./GOVERNANCE.md). Once a fix is ready we will coordinate a
+release and credit you in the advisory unless you prefer to remain anonymous.
 
 ## Scope
 
