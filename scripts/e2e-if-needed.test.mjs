@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { e2ePlan, isE2eRelated, isE2eSpec } from "./e2e-if-needed.mjs";
+import {
+  DEFAULT_E2E_PROJECTS,
+  e2ePlan,
+  isE2eRelated,
+  isE2eSpec,
+  projectsFor,
+  VISUAL_E2E_PROJECTS,
+} from "./e2e-if-needed.mjs";
 
 describe("e2ePlan", () => {
   it("skips docs-only diffs", () => {
@@ -42,5 +49,22 @@ describe("path matchers", () => {
   it("does not treat a helper as a spec", () => {
     assert.equal(isE2eSpec("e2e/feature-lab.ts"), false);
     assert.equal(isE2eSpec("e2e/rtl.spec.ts"), true);
+  });
+});
+
+describe("projectsFor", () => {
+  it("keeps the per-PR Chromium projects for the default suite", () => {
+    assert.deepEqual(projectsFor([]), DEFAULT_E2E_PROJECTS);
+    assert.deepEqual(projectsFor(["e2e/rtl.spec.ts"]), DEFAULT_E2E_PROJECTS);
+    assert.ok(DEFAULT_E2E_PROJECTS.includes("--project=chromium"));
+    assert.ok(DEFAULT_E2E_PROJECTS.includes("--project=chromium-dev"));
+  });
+
+  it("routes visual specs to the Chromium visual project", () => {
+    assert.deepEqual(
+      projectsFor(["e2e/visual/v3-ui.spec.ts"]),
+      VISUAL_E2E_PROJECTS
+    );
+    assert.deepEqual(VISUAL_E2E_PROJECTS, ["--project=chromium-visual"]);
   });
 });
