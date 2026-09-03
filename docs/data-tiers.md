@@ -377,12 +377,30 @@ the way you configured it, and these guarantees do not apply.
   [`examples/mui-query-source.tsx`](../examples/mui-query-source.tsx) for a complete
   runnable version.
 - `selectPage` is read through a ref: the projected rows recompute when
-  fetched pages (or pagination mode) change, not when the selector
-  function's identity changes. That is the intended design — callers who
-  need a new selector to re-project without a data change must memoize it.
-  An unmemoized inline selector that closes over changing values will keep
-  showing the previous projection until the next fetch. There is no
-  `selectorKey`.
+  fetched pages, pagination mode, or `selectorKey` change — not when the
+  selector function's identity changes. Memoizing `selectPage` alone cannot
+  trigger a re-projection. Pass the closed-over input as `selectorKey`
+  when a memoized selector must re-run against unchanged fetched pages:
+
+  ```tsx
+  const selectPage = useCallback(
+    (page: Page) => ({
+      rows: page.items.map((row) => ({ ...row, name: `${row.name}${suffix}` })),
+      total: page.pagination.total,
+    }),
+    [suffix]
+  );
+  const source = useQuerySource({
+    usePaginatedQuery,
+    selectPage,
+    selectorKey: suffix,
+  });
+  ```
+
+  `selectorKey` accepts only a stable `string` or `number`. An unmemoized
+  inline selector that closes over changing values and omits the key will
+  keep showing the previous projection until the next fetch.
+
 - On the server tier, `source.refetch()` re-emits the current query;
   out-of-range pages and stale responses are handled for you via the abort
   signal.

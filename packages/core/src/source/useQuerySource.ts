@@ -89,12 +89,19 @@ export interface UseQuerySourceOptions<
    * Page → `{ rows, total? }` selector. Defaults to reading {@link PaginatedResponse}.
    *
    * The selector is read through a ref so the rows memo only refires when
-   * upstream query data (or pagination mode) changes. An unmemoized inline
-   * selector that changes identity — or closed-over values — without a data
-   * change will not re-project. Memoize the selector if it must update
-   * independently of the fetched pages.
+   * upstream query data, pagination mode, or {@link UseQuerySourceOptions.selectorKey}
+   * changes. An unmemoized inline selector that changes identity — or
+   * closed-over values — without a data or key change will not re-project.
    */
   selectPage?: PageSelector<TRow, TPage>;
+  /**
+   * Explicit invalidation for {@link UseQuerySourceOptions.selectPage}.
+   * Omitting it preserves today's behavior: the latest selector is used on
+   * the next fetch, not on the next render. Pass a stable string or number
+   * (never an object or function) when a memoized selector closes over a
+   * projection input that can change without new query data.
+   */
+  selectorKey?: string | number;
   /**
    * Static params merged into every query call (e.g. a parent scope id).
    * The live table state always wins on collision: `page`, `limit`,
@@ -170,6 +177,7 @@ export function useQuerySource<
   const {
     usePaginatedQuery,
     selectPage,
+    selectorKey,
     baseParams,
     paginationMode = "auto",
     sanitizeParams,
@@ -333,7 +341,7 @@ export function useQuerySource<
     // Mirror the paged branch / useFrontendData: when the source reports no
     // grand total, fall back to the accumulated row count rather than 0.
     return { rows: acc, total: lastTotal ?? acc.length, facets: lastFacets };
-  }, [query.data, paged]);
+  }, [query.data, paged, selectorKey]);
 
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
   // total is known and nothing is in flight.

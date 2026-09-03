@@ -1665,7 +1665,8 @@ full set: `UseDataTableOptions`, `UseFrontendDataOptions`,
 `UseColumnLayoutOptions`, `UseColumnLayoutStorageStateOptions` /
 `UseColumnLayoutStorageStateResult`, `UseColumnLayoutUrlStateOptions` /
 `UseColumnLayoutUrlStateResult`, `UseRowPinningUrlStateOptions` /
-`UseRowPinningUrlStateResult`, `UseQuerySourceOptions`,
+`UseRowPinningUrlStateResult`, `UseQuerySourceOptions` (`selectPage` plus
+optional `selectorKey` to re-project unchanged pages),
 `UseActiveFilterChipsOptions`,
 `UseExtraChipsOptions`, `UseBulkActionRunnerOptions`,
 `UseBulkBarStateOptions`, `UseInfiniteScrollOptions`,

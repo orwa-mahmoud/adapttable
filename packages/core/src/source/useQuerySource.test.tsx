@@ -146,6 +146,101 @@ describe("useQuerySource", () => {
     expect(result.current.rows[0]?.name).toBe("A-v1");
   });
 
+  it("does not re-project infinite pages when only selectPage identity changes", () => {
+    const usePaginatedQuery = stableQuery({
+      pages: [
+        page([{ id: "a", name: "A" }], 2),
+        page([{ id: "b", name: "B" }], 2),
+      ],
+      pageParams: [0, 1],
+    });
+    const adapter = createMemoryAdapter("");
+    const { result, rerender } = renderHook(
+      ({ suffix }: { suffix: string }) =>
+        useQuerySource<Row, ListParams, Page>({
+          usePaginatedQuery,
+          urlAdapter: adapter,
+          paginationMode: "infinite",
+          selectPage: selectWithSuffix(suffix),
+        }),
+      { initialProps: { suffix: "-v1" } }
+    );
+    expect(result.current.rows.map((row) => row.name)).toEqual([
+      "A-v1",
+      "B-v1",
+    ]);
+    rerender({ suffix: "-v2" });
+    expect(result.current.rows.map((row) => row.name)).toEqual([
+      "A-v1",
+      "B-v1",
+    ]);
+  });
+
+  it("re-projects unchanged pages when selectorKey changes", () => {
+    const usePaginatedQuery = stableQuery({
+      pages: [page([{ id: "a", name: "A" }], 1)],
+      pageParams: [0],
+    });
+    const adapter = createMemoryAdapter("");
+    const { result, rerender } = renderHook(
+      ({ suffix }: { suffix: string }) =>
+        useQuerySource<Row, ListParams, Page>({
+          usePaginatedQuery,
+          urlAdapter: adapter,
+          selectPage: selectWithSuffix(suffix),
+          selectorKey: suffix,
+        }),
+      { initialProps: { suffix: "-v1" } }
+    );
+    expect(result.current.rows[0]?.name).toBe("A-v1");
+    const first = result.current;
+    rerender({ suffix: "-v2" });
+    expect(result.current.rows[0]?.name).toBe("A-v2");
+    expect(result.current).not.toBe(first);
+  });
+
+  it("re-projects infinite pages when selectorKey changes", () => {
+    const usePaginatedQuery = stableQuery({
+      pages: [
+        page([{ id: "a", name: "A" }], 2),
+        page([{ id: "b", name: "B" }], 2),
+      ],
+      pageParams: [0, 1],
+    });
+    const adapter = createMemoryAdapter("");
+    const { result, rerender } = renderHook(
+      ({ suffix }: { suffix: string }) =>
+        useQuerySource<Row, ListParams, Page>({
+          usePaginatedQuery,
+          urlAdapter: adapter,
+          paginationMode: "infinite",
+          selectPage: selectWithSuffix(suffix),
+          selectorKey: suffix,
+        }),
+      { initialProps: { suffix: "-v1" } }
+    );
+    expect(result.current.rows.map((row) => row.name)).toEqual([
+      "A-v1",
+      "B-v1",
+    ]);
+    rerender({ suffix: "-v2" });
+    expect(result.current.rows.map((row) => row.name)).toEqual([
+      "A-v2",
+      "B-v2",
+    ]);
+  });
+
+  it("keeps row and source identity when selectorKey is unchanged", () => {
+    const q = makeQuery({ pages: [page([{ id: "a", name: "A" }], 1)] });
+    const view = mount(q, { selectPage, selectorKey: "stable" });
+    const first = view.result.current;
+    const firstRows = first.rows;
+    view.rerender();
+    view.rerender();
+    expect(view.result.current).toBe(first);
+    expect(view.result.current.rows).toBe(firstRows);
+  });
+
   it("uses the latest selectPage once query data changes", () => {
     const first = {
       pages: [page([{ id: "a", name: "A" }], 1)],

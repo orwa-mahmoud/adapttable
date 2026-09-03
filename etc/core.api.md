@@ -4737,6 +4737,7 @@ export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams, T
     nextCursor?: (page: TPage) => string | null | undefined;
     paginationMode?: PaginationMode;
     sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
+    selectorKey?: string | number;
     selectPage?: PageSelector<TRow, TPage>;
     supports?: QuerySupport;
     usePaginatedQuery: (params: Partial<TParams>) => InfiniteQueryLike<TPage>;
