@@ -136,8 +136,8 @@ describe("row reorder (unstyled)", () => {
       />
     );
 
-    const trigger = screen.getAllByRole("button", {
-      name: "Move to group…",
+    const trigger = screen.getAllByLabelText("Move to group…", {
+      selector: "[data-adapttable-part='row-move-menu-trigger']",
     })[0]!;
     fireEvent.click(trigger);
     const menu = trigger.closest("details")!;
