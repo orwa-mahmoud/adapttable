@@ -86,6 +86,20 @@ describe("versioned table URL state codec", () => {
     expect(params(restored).get("app")).toBe("keep");
   });
 
+  it("drops live keys the saved view does not mention", () => {
+    const captured = captureTableUrlState("q=ali&sortBy=name&atv=1", "");
+    const restored = applyTableUrlState(
+      "q=changed&sortBy=keep&page=3&formula=total:=1&atv=1",
+      captured,
+      ""
+    );
+    const next = params(restored);
+    expect(next.get("q")).toBe("ali");
+    expect(next.get("sortBy")).toBe("name");
+    expect(next.get("page")).toBeNull();
+    expect(next.get("formula")).toBeNull();
+  });
+
   it("uses the first duplicate and canonicalizes duplicates on write", () => {
     const initial = "q=first&q=second&page=2&page=9";
     const decoded = parseTableUrlState(initial, "");

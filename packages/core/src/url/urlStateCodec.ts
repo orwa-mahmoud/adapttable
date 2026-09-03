@@ -202,7 +202,10 @@ export function applyTableUrlState(
     search,
     namespace,
     (table) => {
-      for (const key of table.keys()) table.delete(key);
+      // Snapshot first — deleting while iterating `URLSearchParams.keys()`
+      // skips the key that slides into the just-removed slot.
+      const stale = new Set(table.keys());
+      for (const key of stale) table.delete(key);
       if (!markerValid) return;
       saved.canonical.forEach((value, key) => {
         if (key !== namespace + PARAM_URL_STATE_VERSION) {
