@@ -112,6 +112,7 @@ const smokeTest = (kit, providerImport, wrapped) => `import {
   DataTable,
   type ColumnDef,
 } from "@adapttable/${kit}";
+import { standardFeatures } from "@adapttable/${kit}/preset";
 ${providerImport}
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -125,7 +126,7 @@ const ROWS: Row[] = [
   { id: "2", name: "Floor Beta" },
 ];
 const columns: ColumnDef<Row>[] = [
-  { key: "name", label: "Name", filter: "text", sortable: true },
+  { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
 ];
 
 // Interactions run against document.body via screen — every kit portals
@@ -151,7 +152,10 @@ describe("@adapttable/${kit} at its kit floor", () => {
     // Filters: the toolbar button opens the kit's native popover with the
     // declared text filter inside.
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
-    expect(await screen.findAllByRole("textbox")).not.toHaveLength(0);
+    // The field is labelled by the def, not always role="textbox" — Chakra
+    // 3.13 and Radix Themes 3 expose a combobox/operator first. Antd labels
+    // both the operator and the value with the column name.
+    expect((await screen.findAllByLabelText(/Name/)).length).toBeGreaterThan(0);
     fireEvent.keyDown(document.body, { key: "Escape" });
 
     // Selection: bulkActions turns checkboxes on; ticking one row must
@@ -248,8 +252,10 @@ function runCell(cell, coreTarball, packDir) {
         data={ROWS}
         columns={columns}
         rowKey={(r) => r.id}
-        enableColumnMenu
-        bulkActions={[{ key: "zap", label: "Zap", onClick: () => undefined }]}
+        features={standardFeatures({
+          filters: [{ key: "name", type: "text", label: "Name" }],
+          bulkActions: [{ key: "zap", label: "Zap", onClick: () => undefined }],
+        })}
       />`;
     writeFileSync(
       join(dir, "floor.test.tsx"),
