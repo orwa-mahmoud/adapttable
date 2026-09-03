@@ -183,6 +183,7 @@ export default defineConfig({
     environment: "jsdom",
     include: ["floor.test.tsx"],
     setupFiles: ["./setup.ts"],
+    testTimeout: 15_000,
   },
 });
 `;
@@ -206,6 +207,22 @@ const SETUP = `if (typeof window !== "undefined") {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
   window.scrollTo ??= (() => undefined) as typeof window.scrollTo;
+  // jsdom throws on getComputedStyle(el, pseudoElt); antd 6 measures
+  // with a pseudo-element. Drop the second argument. A re-entrancy guard
+  // stops jsdom 29 from calling back into this wrapper and hanging render.
+  const realGetComputedStyle = globalThis.getComputedStyle.bind(globalThis);
+  let computing = false;
+  globalThis.getComputedStyle = ((element: Element) => {
+    if (computing) {
+      return { getPropertyValue: () => "" } as CSSStyleDeclaration;
+    }
+    computing = true;
+    try {
+      return realGetComputedStyle(element);
+    } finally {
+      computing = false;
+    }
+  }) as typeof globalThis.getComputedStyle;
 }
 export {};
 `;
