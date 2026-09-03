@@ -42,7 +42,7 @@ test("is reachable from the kit's feature grid", async ({ page }) => {
 test("answers the search phrase without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(`/${KIT}/realtime/`);
+  await page.goto(`/${KIT}/realtime/`, { waitUntil: "domcontentloaded" });
 
   await expect(page).toHaveTitle(copy(FEATURE.title));
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
