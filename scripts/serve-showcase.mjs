@@ -148,7 +148,18 @@ createServer((req, res) => {
     // The suite must see the build it just made, never a cached earlier one.
     "Cache-Control": "no-store",
   });
-  createReadStream(file).pipe(res);
+  // Playwright aborts in-flight navigations under parallel load. An unhandled
+  // `EPIPE` / `ERR_STREAM_DESTROYED` from the file stream kills this process
+  // and the rest of the suite then fails with `ERR_CONNECTION_REFUSED`.
+  const stream = createReadStream(file);
+  const abort = () => {
+    stream.destroy();
+    if (!res.writableEnded) res.destroy();
+  };
+  stream.on("error", abort);
+  res.on("error", abort);
+  res.on("close", () => stream.destroy());
+  stream.pipe(res);
 }).listen(PORT, () => {
   console.log(`showcase served from ${DIST} on http://localhost:${PORT}`);
 });
