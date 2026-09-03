@@ -24,7 +24,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares one floor in the repo and every package", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 14);
+    assert.equal(manifests.length, 15);
     for (const manifest of manifests) {
       assert.equal(json(manifest).engines?.node, FLOOR, manifest);
     }

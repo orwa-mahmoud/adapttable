@@ -19,6 +19,8 @@ next to `agentApproval()` from the kit. `approval` defaults to `"writes"`;
 `commit` defaults to `"stage"`. The root import stays React-free so a
 backend worker can speak the same three calls.
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Integrations
 
 The same session maps onto provider tools without a model SDK. Tool

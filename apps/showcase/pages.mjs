@@ -30,9 +30,10 @@
  *   showcase under `/demo/`. Trailing slash always: that is the form Pages
  *   serves a directory index at, and the form the sitemap has to carry.
  * @property {boolean} indexable Whether the route belongs in the sitemap. A
- *   page that must build but must never be indexed sets `false`; a redirect
- *   stub is that case, because listing one asks a crawler to index a URL whose
- *   whole content is "the page is elsewhere".
+ *   page that must build but must never be indexed sets `false`. Redirect
+ *   stubs use that because listing one asks a crawler to index a URL whose
+ *   whole content is "the page is elsewhere". A kit/e2e lab that is not a
+ *   marketing tile uses it too and still boots a bundle.
  */
 
 import { matrixPages } from "./matrix.mjs";

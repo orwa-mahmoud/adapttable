@@ -31,9 +31,9 @@ const VIEWPORTS = [
 ] as const;
 
 /**
- * The one non-indexable entry is a meta-refresh stub with no layout of its own
- * — `scripts/showcase-pages.test.mjs` holds it to that — and it forwards to a
- * page already measured here.
+ * Non-indexable entries are either meta-refresh stubs (no layout of their
+ * own) or kit/e2e labs that stay off the sitemap. Overflow is measured on
+ * the indexable pages the nav actually offers.
  */
 const PAGES = SHOWCASE_PAGES.filter((page) => page.indexable);
 
