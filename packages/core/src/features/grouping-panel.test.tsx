@@ -155,8 +155,11 @@ function mockGroupingState(initialGroupBy?: string) {
     get aggregateOverrides() {
       return aggregateOverrides;
     },
-    columnLabel: (key: string) =>
-      key === "team" ? "Team" : key === "budget" ? "Budget" : key,
+    columnLabel: (key: string) => {
+      if (key === "team") return "Team";
+      if (key === "budget") return "Budget";
+      return key;
+    },
     setGroupBy: vi.fn((next?: string) => {
       groupBy = next;
     }),
@@ -267,7 +270,7 @@ describe("groupingPanel provider", () => {
   });
 
   it("seeds initial keys once through grouping state", () => {
-    const groupingState = mockGroupingState(undefined);
+    const groupingState = mockGroupingState();
     mountProvider(
       groupingPanel(["budget"]),
       undefined,
@@ -417,7 +420,7 @@ describe("groupingPanel provider", () => {
   });
 
   it("falls back to setGroupBy when initializeGroupBy is absent", () => {
-    const groupingState = mockGroupingState(undefined);
+    const groupingState = mockGroupingState();
     groupingState.initializeGroupBy = undefined;
     mountProvider(
       groupingPanel(["team"]),
