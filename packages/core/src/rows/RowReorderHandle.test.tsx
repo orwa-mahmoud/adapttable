@@ -242,4 +242,95 @@ describe("RowReorderHandle menu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Move" }));
     expect(onRowMove).toHaveBeenCalledExactlyOnceWith(request);
   });
+
+  it("disables the grip while host confirmation is pending", () => {
+    let resolve!: (value: boolean) => void;
+    const confirmMove = vi.fn(
+      () =>
+        new Promise<boolean>((ok) => {
+          resolve = ok;
+        })
+    );
+    const { result } = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "confirm",
+        confirmMove,
+        resolveMove: () => ({
+          kind: "move",
+          request: {
+            kind: "group",
+            row: ROW,
+            rowLabel: "Ada",
+            fromGroup: { id: "a", label: "A", levels: [] },
+            toGroup: { id: "b", label: "B", levels: [] },
+            position: 0,
+          },
+        }),
+        labels: LABELS,
+        rowAt: () => ROW,
+      })
+    );
+    const { rerender } = render(
+      <RowReorderHandleChrome
+        slots={rowReorderHandleTestSlots}
+        reorder={result.current}
+        labels={LABELS}
+        rowId="a"
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    fireEvent.keyDown(screen.getByRole("button", { name: "Reorder row" }), {
+      key: " ",
+    });
+    rerender(
+      <RowReorderHandleChrome
+        slots={rowReorderHandleTestSlots}
+        reorder={result.current}
+        labels={LABELS}
+        rowId="a"
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    fireEvent.keyDown(screen.getByRole("button", { name: "Reorder row" }), {
+      key: "ArrowDown",
+    });
+    rerender(
+      <RowReorderHandleChrome
+        slots={rowReorderHandleTestSlots}
+        reorder={result.current}
+        labels={LABELS}
+        rowId="a"
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    fireEvent.keyDown(screen.getByRole("button", { name: "Reorder row" }), {
+      key: " ",
+    });
+    rerender(
+      <RowReorderHandleChrome
+        slots={rowReorderHandleTestSlots}
+        reorder={result.current}
+        labels={LABELS}
+        rowId="a"
+        localIndex={0}
+        row={ROW}
+        windowStart={0}
+        rowCount={3}
+      />
+    );
+    expect(result.current.hostConfirmPending).toBe(true);
+    expect(screen.getByRole("button", { name: "Reorder row" })).toBeDisabled();
+    resolve(false);
+  });
 });

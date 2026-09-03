@@ -14,7 +14,6 @@ import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraEntry, ExtraRow } from "../rows/extraRows";
 import type { RowPinSide } from "../rows/rowPinning";
 import { extraHostFillStyle } from "../rows/rowPresentation";
-import type { RowReorderState } from "../rows/rowReorder";
 import type { RowStyle } from "../rows/rowStyle";
 import type { TreeEntry } from "../tree/treeRows";
 import type { ColumnDef } from "../types";
@@ -237,21 +236,7 @@ export function rowReorderDropStyle(
   };
 }
 
-/** Memo digest for one row's reorder state. */
-export function rowReorderSignature<TRow>(
-  reorder: RowReorderState<TRow> | undefined,
-  rowId: string,
-  localIndex: number
-): string | null {
-  if (!reorder) return null;
-  const inFlight = reorder.lifted !== null ? "L" : "";
-  const confirming = reorder.pendingMove !== null ? "P" : "";
-  const lifted = reorder.isLifted(rowId) ? "d" : "";
-  const targeted =
-    reorder.overIndex === localIndex && reorder.lifted !== null ? "t" : "";
-  const position = targeted ? (reorder.overPosition ?? "") : "";
-  return `${inFlight}${confirming}${lifted}${targeted}${position}`;
-}
+export { rowReorderSignature } from "../rows/rowReorder";
 
 /** Rows a body renders: tree entries when armed, otherwise the flat list. */
 export function bodyRowEntries<TRow>(

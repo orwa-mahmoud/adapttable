@@ -143,6 +143,9 @@ returns; `RowReorderHandler` is the ordinal write) is the grab state.
 `datasetIndex(localIndex, windowStart)` turns a flat rendered slot into a
 dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is the memo
 digest so a virtualized row repaints when lifted, targeted, or confirming.
+`hostConfirmPending` is true while a host-owned `confirmMove` promise is
+unresolved — adapters disable grips, buttons and menu items then, and a
+second move is ignored until that promise settles.
 
 Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderButtons` (`RowReorderButtonsProps`) over

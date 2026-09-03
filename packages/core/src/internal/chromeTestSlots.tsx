@@ -488,6 +488,7 @@ function ReorderHandle({
   label,
   pressed,
   dragging,
+  disabled,
   className,
   dragProps,
   onKeyDown,
@@ -501,6 +502,7 @@ function ReorderHandle({
       className={className}
       aria-label={label}
       aria-pressed={pressed}
+      disabled={disabled}
       style={{ ...REORDER_BUTTON, cursor: pressed ? "grabbing" : "grab" }}
       {...dragProps}
       onKeyDown={onKeyDown}

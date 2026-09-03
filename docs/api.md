@@ -812,7 +812,8 @@ headless seam's reorder/move/reject result.
 
 `ROW_REORDER` is the `FeatureStateKey` its provider publishes under, so custom
 chrome reads `RowReorderState` (`TableRowReorderState` from the main entry)
-with `useFeatureState(ROW_REORDER)`.
+with `useFeatureState(ROW_REORDER)`. `hostConfirmPending` is the inert-controls
+flag while a host-owned `confirmMove` is outstanding.
 `applyRowReorder`, `datasetIndex`, `useRowReorder`,
 `rowReorderSignature`, `rowReorderDropStyle`, `REORDER_COLUMN_KEY`,
 `REORDER_COLUMN_WIDTH`, and `ROW_DND_MIME` are the headless primitives.

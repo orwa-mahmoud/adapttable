@@ -4525,6 +4525,7 @@ export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => v
 // @public
 export interface RowReorderHandleSlotProps {
     readonly className?: string;
+    readonly disabled: boolean;
     readonly dragging: boolean;
     readonly dragProps: ReturnType<RowReorderState<unknown>["dragProps"]>;
     readonly label: string;
@@ -4596,6 +4597,7 @@ export interface RowReorderState<TRow> {
         onDrop: (event: DragEvent_2<HTMLElement>) => void;
     };
     handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
+    hostConfirmPending: boolean;
     isLifted: (rowId: string) => boolean;
     isMovePending?: (row: TRow) => boolean;
     lifted: {

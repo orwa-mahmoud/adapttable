@@ -4111,6 +4111,7 @@ export interface TableRowReorderState<TRow> {
         onDrop: (event: DragEvent_2<HTMLElement>) => void;
     };
     handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
+    hostConfirmPending: boolean;
     isLifted: (rowId: string) => boolean;
     isMovePending?: (row: TRow) => boolean;
     lifted: {

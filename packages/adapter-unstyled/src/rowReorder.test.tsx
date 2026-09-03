@@ -1,6 +1,9 @@
 import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import type { TableRowReorderState } from "@adapttable/core";
+
+import { RowReorderHandle } from "./components/kitControls";
 import { DataTable } from "./data-table.test-utils";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
@@ -193,5 +196,62 @@ describe("row reorder (unstyled)", () => {
     expect(
       await screen.findByRole("button", { name: "Hide column: Reorder row" })
     ).toBeInTheDocument();
+  });
+});
+
+describe("row reorder host confirmation (unstyled handle)", () => {
+  const LABELS = {
+    reorderRow: "Reorder row",
+    moveRowUp: "Move row up",
+    moveRowDown: "Move row down",
+    rowLifted: () => "",
+    rowMoved: () => "",
+    rowReorderCancelled: "",
+    moveToGroup: "Move to group…",
+  };
+
+  it("makes the kit grip and menu inert while host confirmation is pending", () => {
+    const reorder = {
+      lifted: null,
+      overIndex: null,
+      overPosition: null,
+      pendingMove: null,
+      hostConfirmPending: true,
+      announcement: "",
+      isLifted: () => false,
+      dragProps: () => ({
+        draggable: true as const,
+        onDragStart: () => undefined,
+        onDragEnd: () => undefined,
+      }),
+      dropProps: () => ({
+        onDragOver: () => undefined,
+        onDrop: () => undefined,
+      }),
+      handleKeyDown: () => undefined,
+      moveBy: () => undefined,
+      moveMenu: () => ({
+        kind: "group" as const,
+        label: "Move to group…",
+        targets: [{ id: "docs", label: "Docs" }],
+      }),
+      selectMoveTarget: () => undefined,
+      confirmMove: () => undefined,
+      cancelMove: () => undefined,
+      rowAttrs: () => ({}),
+    } as unknown as TableRowReorderState<Task>;
+    render(
+      <RowReorderHandle
+        reorder={reorder}
+        labels={LABELS}
+        rowId="1"
+        localIndex={0}
+        row={ROWS[0]!}
+        windowStart={0}
+        rowCount={2}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Reorder row" })).toBeDisabled();
+    expect(screen.getByRole("menuitem", { name: "Docs" })).toBeDisabled();
   });
 });

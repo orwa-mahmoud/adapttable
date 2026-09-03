@@ -11,7 +11,7 @@
  * does not lie to the host about where the row sits.
  */
 import type { CSSProperties, DragEvent, KeyboardEvent } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 import { isRtlElement } from "../layout/writingDirection";
@@ -194,6 +194,12 @@ export interface RowReorderState<TRow> {
   overPosition: RowDropPosition | null;
   /** Move awaiting kit-owned confirmation, or `null`. */
   pendingMove: RowMoveRequest<TRow> | null;
+  /**
+   * Host-owned `confirmMove` is awaiting a decision. Kits disable grips,
+   * buttons and menu items while this is true; they must not draw a second
+   * confirmation surface.
+   */
+  hostConfirmPending: boolean;
   /** Live-region text. Empty until something happens. */
   announcement: string;
   /** Whether this row is the one being moved. */
@@ -272,7 +278,9 @@ export function rowReorderSignature<TRow>(
 ): string | null {
   if (!reorder) return null;
   const inFlight = reorder.lifted !== null ? "L" : "";
-  const confirming = reorder.pendingMove !== null ? "P" : "";
+  const confirming =
+    (reorder.pendingMove !== null ? "P" : "") +
+    (reorder.hostConfirmPending ? "H" : "");
   const lifted = reorder.isLifted(rowId) ? "d" : "";
   const targeted =
     reorder.overIndex === localIndex && reorder.lifted !== null ? "t" : "";
@@ -370,7 +378,24 @@ export function useRowReorder<TRow>(options: {
   const [pendingMove, setPendingMove] = useState<RowMoveRequest<TRow> | null>(
     null
   );
+  const [hostConfirmPending, setHostConfirmPending] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const pendingMoveRef = useRef(pendingMove);
+  pendingMoveRef.current = pendingMove;
+  const mountedRef = useRef(true);
+  const nextConfirmToken = useRef(0);
+  const activeConfirmToken = useRef(0);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      activeConfirmToken.current = 0;
+    };
+  }, []);
+
+  const isLocked = () =>
+    activeConfirmToken.current !== 0 || pendingMoveRef.current !== null;
 
   const reset = useCallback(() => {
     setLifted(null);
@@ -395,8 +420,24 @@ export function useRowReorder<TRow>(options: {
     reset();
   });
 
+  const settleHostConfirm = useEventCallback(
+    (token: number, request: RowMoveRequest<TRow>, approved: boolean) => {
+      if (!mountedRef.current || activeConfirmToken.current !== token) {
+        return;
+      }
+      activeConfirmToken.current = 0;
+      setHostConfirmPending(false);
+      if (approved) executeMove(request);
+      else {
+        setAnnouncement(labels.rowReorderCancelled);
+        reset();
+      }
+    }
+  );
+
   const requestMove = useEventCallback(
     async (request: RowMoveRequest<TRow>) => {
+      if (isLocked()) return;
       const policy = options.movePolicy ?? "never";
       if (policy === "never") {
         setAnnouncement(
@@ -411,17 +452,17 @@ export function useRowReorder<TRow>(options: {
         return;
       }
       if (options.confirmMove) {
+        const token = ++nextConfirmToken.current;
+        activeConfirmToken.current = token;
+        setHostConfirmPending(true);
+        reset();
         let approved = false;
         try {
           approved = (await hostConfirmMove(request)) ?? false;
         } catch {
           approved = false;
         }
-        if (approved) executeMove(request);
-        else {
-          setAnnouncement(labels.rowReorderCancelled);
-          reset();
-        }
+        settleHostConfirm(token, request, approved);
         return;
       }
       setPendingMove(request);
@@ -442,6 +483,7 @@ export function useRowReorder<TRow>(options: {
         reset();
         return;
       }
+      if (isLocked()) return;
       const decision = resolveMove?.(row, target, position);
       if (decision?.kind === "reject") {
         setAnnouncement(decision.message);
@@ -478,7 +520,7 @@ export function useRowReorder<TRow>(options: {
     (rowId, localIndex) => ({
       draggable: true,
       onDragStart: (event) => {
-        if (!enabled) {
+        if (!enabled || isLocked()) {
           event.preventDefault();
           return;
         }
@@ -547,6 +589,7 @@ export function useRowReorder<TRow>(options: {
       rowCount: number
     ) => {
       if (!enabled) return;
+      if (isLocked() && event.key !== "Escape") return;
       if (event.key === "Escape" && lifted) {
         event.preventDefault();
         setAnnouncement(labels.rowReorderCancelled);
@@ -599,6 +642,7 @@ export function useRowReorder<TRow>(options: {
     ) => {
       const to = localIndex + delta;
       if (to < 0 || to >= rowCount) return;
+      if (isLocked()) return;
       commit(
         localIndex,
         to,
@@ -664,6 +708,7 @@ export function useRowReorder<TRow>(options: {
       overIndex,
       overPosition,
       pendingMove,
+      hostConfirmPending,
       announcement: enabled ? announcement : "",
       isLifted,
       isMovePending,
@@ -682,6 +727,7 @@ export function useRowReorder<TRow>(options: {
       overIndex,
       overPosition,
       pendingMove,
+      hostConfirmPending,
       enabled,
       announcement,
       isLifted,

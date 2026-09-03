@@ -45,6 +45,8 @@ export interface RowReorderHandleSlotProps {
   readonly pressed: boolean;
   /** Whether a drag is in progress. */
   readonly dragging: boolean;
+  /** Whether another move already owns confirmation. */
+  readonly disabled: boolean;
   /** Class for the element. */
   readonly className?: string;
   /** Pointer bindings that start and track the drag. */
@@ -150,6 +152,7 @@ export function RowReorderHandleChrome<TRow>({
   const Handle = slots.Handle;
   const Menu = slots.Menu;
   const menu = reorder.moveMenu?.(row);
+  const moveLocked = Boolean(reorder.hostConfirmPending || reorder.pendingMove);
   const ownsPending =
     reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;
   const pending = ownsPending ? reorder.pendingMove : undefined;
@@ -165,6 +168,7 @@ export function RowReorderHandleChrome<TRow>({
         label={labels.reorderRow}
         pressed={lifted}
         dragging={lifted}
+        disabled={moveLocked}
         className={className}
         dragProps={reorder.dragProps(rowId, localIndex)}
         onKeyDown={(event) => {
@@ -184,7 +188,7 @@ export function RowReorderHandleChrome<TRow>({
           items={menu.targets.map((target) => ({
             id: target.id,
             label: target.label,
-            disabled: target.disabledReason !== undefined,
+            disabled: moveLocked || target.disabledReason !== undefined,
             disabledReason: target.disabledReason,
             onSelect: () => reorder.selectMoveTarget(target),
           }))}
@@ -300,6 +304,7 @@ export function RowReorderButtonsChrome<TRow>({
   const Button = slots.Button;
   const Menu = slots.Menu;
   const menu = reorder.moveMenu?.(row);
+  const moveLocked = Boolean(reorder.hostConfirmPending || reorder.pendingMove);
   const ownsPending =
     reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;
   const pending = ownsPending ? reorder.pendingMove : undefined;
@@ -314,7 +319,7 @@ export function RowReorderButtonsChrome<TRow>({
       <Button
         label={labels.moveRowUp}
         part="row-reorder-up"
-        disabled={localIndex <= 0}
+        disabled={moveLocked || localIndex <= 0}
         className={upClassName}
         onClick={() => {
           reorder.moveBy(localIndex, -1, row, windowStart, rowCount);
@@ -323,7 +328,7 @@ export function RowReorderButtonsChrome<TRow>({
       <Button
         label={labels.moveRowDown}
         part="row-reorder-down"
-        disabled={localIndex >= rowCount - 1}
+        disabled={moveLocked || localIndex >= rowCount - 1}
         className={downClassName}
         onClick={() => {
           reorder.moveBy(localIndex, 1, row, windowStart, rowCount);
@@ -335,7 +340,7 @@ export function RowReorderButtonsChrome<TRow>({
           items={menu.targets.map((target) => ({
             id: target.id,
             label: target.label,
-            disabled: target.disabledReason !== undefined,
+            disabled: moveLocked || target.disabledReason !== undefined,
             disabledReason: target.disabledReason,
             onSelect: () => reorder.selectMoveTarget(target),
           }))}

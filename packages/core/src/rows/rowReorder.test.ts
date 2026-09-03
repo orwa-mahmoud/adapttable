@@ -329,11 +329,204 @@ describe("useRowReorder", () => {
 
       expect(onRowMove).toHaveBeenCalledTimes(writes);
       expect(result.current.pendingMove).toBeNull();
+      expect(result.current.hostConfirmPending).toBe(false);
       if (writes === 0) {
         expect(result.current.announcement).toBe("Reorder cancelled");
       }
     }
   );
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((ok, fail) => {
+      resolve = ok;
+      reject = fail;
+    });
+    return { promise, resolve, reject };
+  }
+
+  const GROUP_REQUEST = {
+    kind: "group" as const,
+    row: ROWS[0]!,
+    rowLabel: "Ada",
+    fromGroup: { id: "a", label: "A", levels: [] },
+    toGroup: { id: "b", label: "B", levels: [] },
+    position: 0,
+  };
+
+  function armHostConfirm(confirmMove: () => Promise<boolean>) {
+    const onRowMove = vi.fn();
+    const view = renderHook(() =>
+      useRowReorder<Task>({
+        enabled: true,
+        onRowReorder: vi.fn(),
+        movePolicy: "confirm",
+        confirmMove,
+        onRowMove,
+        resolveMove: () => ({ kind: "move", request: GROUP_REQUEST }),
+        labels: LABELS,
+        rowAt: (index) => ROWS[index],
+      })
+    );
+    return { ...view, onRowMove };
+  }
+
+  it("owns host confirmation before the host promise and blocks a second move", async () => {
+    const first = deferred<boolean>();
+    const confirmMove = vi.fn(() => first.promise);
+    const { result, onRowMove } = armHostConfirm(confirmMove);
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(confirmMove).toHaveBeenCalledOnce();
+    expect(result.current.hostConfirmPending).toBe(true);
+    expect(result.current.pendingMove).toBeNull();
+    expect(rowReorderSignature(result.current, "a", 0)).toContain("H");
+
+    await act(async () => {
+      first.resolve(true);
+      await first.promise;
+    });
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(GROUP_REQUEST);
+    expect(result.current.hostConfirmPending).toBe(false);
+    expect(result.current.announcement).toBe("Row moved to B");
+  });
+
+  it("ignores a later host resolve after decline and recovers", async () => {
+    const first = deferred<boolean>();
+    const second = deferred<boolean>();
+    let calls = 0;
+    const confirmMove = vi.fn(() => {
+      calls += 1;
+      return calls === 1 ? first.promise : second.promise;
+    });
+    const { result, onRowMove } = armHostConfirm(confirmMove);
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+      result.current.moveBy(1, -1, ROWS[1]!, 0, ROWS.length);
+    });
+    await act(async () => {
+      first.resolve(false);
+      await first.promise;
+    });
+    expect(onRowMove).not.toHaveBeenCalled();
+    expect(result.current.announcement).toBe("Reorder cancelled");
+    expect(result.current.hostConfirmPending).toBe(false);
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(confirmMove).toHaveBeenCalledTimes(2);
+    expect(result.current.hostConfirmPending).toBe(true);
+    await act(async () => {
+      second.resolve(true);
+      await second.promise;
+    });
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(GROUP_REQUEST);
+  });
+
+  it("ignores a later host rejection after a newer confirm owns the token", async () => {
+    const first = deferred<boolean>();
+    const second = deferred<boolean>();
+    let calls = 0;
+    const confirmMove = vi.fn(() => {
+      calls += 1;
+      return calls === 1 ? first.promise : second.promise;
+    });
+    const { result, onRowMove } = armHostConfirm(confirmMove);
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    await act(async () => {
+      first.resolve(false);
+      await first.promise;
+    });
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    await act(async () => {
+      second.resolve(true);
+      await second.promise;
+    });
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(GROUP_REQUEST);
+    expect(result.current.announcement).toBe("Row moved to B");
+  });
+
+  it("does not write or announce after unmount", async () => {
+    const pending = deferred<boolean>();
+    const confirmMove = vi.fn(() => pending.promise);
+    const { result, onRowMove, unmount } = armHostConfirm(confirmMove);
+
+    act(() => {
+      result.current.moveBy(0, 1, ROWS[0]!, 0, ROWS.length);
+    });
+    expect(result.current.hostConfirmPending).toBe(true);
+    unmount();
+    await act(async () => {
+      pending.resolve(true);
+      await pending.promise;
+    });
+    expect(onRowMove).not.toHaveBeenCalled();
+  });
+
+  it("serializes a second keyboard drop while host confirmation is pending", async () => {
+    const pending = deferred<boolean>();
+    const confirmMove = vi.fn(() => pending.promise);
+    const { result, onRowMove } = armHostConfirm(confirmMove);
+
+    act(() => {
+      result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 0, 3);
+    });
+    act(() => {
+      result.current.handleKeyDown(press("ArrowDown"), "a", 0, ROWS[0]!, 0, 3);
+    });
+    act(() => {
+      result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 0, 3);
+    });
+    act(() => {
+      result.current.handleKeyDown(press(" "), "b", 1, ROWS[1]!, 0, 3);
+    });
+    act(() => {
+      result.current.handleKeyDown(press(" "), "b", 1, ROWS[1]!, 0, 3);
+    });
+    expect(confirmMove).toHaveBeenCalledOnce();
+    expect(result.current.hostConfirmPending).toBe(true);
+    await act(async () => {
+      pending.resolve(true);
+      await pending.promise;
+    });
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(GROUP_REQUEST);
+  });
+
+  it("serializes a second menu selection while host confirmation is pending", async () => {
+    const pending = deferred<boolean>();
+    const confirmMove = vi.fn(() => pending.promise);
+    const { result, onRowMove } = armHostConfirm(confirmMove);
+
+    act(() => {
+      result.current.selectMoveTarget({
+        id: "b",
+        label: "B",
+        request: GROUP_REQUEST,
+      });
+      result.current.selectMoveTarget({
+        id: "b",
+        label: "B",
+        request: { ...GROUP_REQUEST, position: 1 },
+      });
+    });
+    expect(confirmMove).toHaveBeenCalledOnce();
+    await act(async () => {
+      pending.resolve(true);
+      await pending.promise;
+    });
+    expect(onRowMove).toHaveBeenCalledExactlyOnceWith(GROUP_REQUEST);
+  });
 
   it("marks the drop side after a later row", () => {
     const { result } = arm(vi.fn());
