@@ -5,5 +5,5 @@
     "types": ["node", "react"],
     "verbatimModuleSyntax": false
   },
-  "include": ["*.tsx", "css.d.ts"]
+  "include": ["*.tsx", "*.ts", "css.d.ts"]
 }

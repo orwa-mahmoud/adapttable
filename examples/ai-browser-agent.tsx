@@ -10,14 +10,14 @@
  *   approval: "writes" | "destructive" | "never"  (default "writes")
  *   commit:   "stage" | "immediate"               (default "stage")
  */
-import { createAgentSession, type AgentObservation } from "@adapttable/ai";
+import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 import {
   executeEnvelope,
   executeJsonTool,
   toJsonTools,
 } from "@adapttable/ai/json";
 import { tableAgent } from "@adapttable/ai/react";
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useMemo, useRef, useState } from "react";
 
 const TABLE_ID = "employees";
 

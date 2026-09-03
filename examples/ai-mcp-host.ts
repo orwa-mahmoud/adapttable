@@ -16,6 +16,7 @@
  *   approval: "writes" | "destructive" | "never"  (default "writes")
  *   commit:   "stage" | "immediate"               (default "stage")
  */
+import type { AgentObservation } from "@adapttable/ai";
 import { createAgentSession } from "@adapttable/ai";
 import {
   executeMcpTool,
@@ -23,7 +24,6 @@ import {
   toMcpResources,
   toMcpTools,
 } from "@adapttable/ai/mcp";
-import type { AgentObservation } from "@adapttable/ai";
 
 const TABLE_ID = "employees";
 

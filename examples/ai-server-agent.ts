@@ -11,13 +11,13 @@
  * and records `apply.editCells` into a review queue. `commit: "immediate"`
  * writes through the same callback.
  */
+import type { AgentApply, AgentObservation } from "@adapttable/ai";
 import { createAgentSession } from "@adapttable/ai";
 import {
   type AgentEnvelope,
   executeEnvelope,
   parseEnvelope,
 } from "@adapttable/ai/json";
-import type { AgentApply, AgentObservation } from "@adapttable/ai";
 
 const TABLE_ID = "employees";
 
