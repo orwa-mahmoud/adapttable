@@ -33,7 +33,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 60–70 kB min+gzip (measured 2026-09-02 from
+A plain adapter `DataTable` is 61–70 kB min+gzip (measured 2026-09-03 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -468,7 +468,7 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 60–70 kB gzipped and carries the base contract —
+An adapter's `DataTable` is 61–70 kB gzipped and carries the base contract —
 responsive rendering, loading, error and empty states, accessibility, sorting,
 search and pagination. Everything else arrives with its own entry.
 
@@ -556,7 +556,7 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 60 kB gzipped and the same table with
+Measured on MUI, the table alone is 61 kB gzipped and the same table with
 `standardFeatures()` composed is 112 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
@@ -10916,7 +10916,7 @@ React and the UI kit external because your app already ships those):
 | ----------------------------------------- | --------- |
 | `useFrontendData` + `useDataTable` (core) | ~19 kB    |
 | every core export                         | ~82 kB    |
-| `DataTable` from an adapter               | ~60–70 kB |
+| `DataTable` from an adapter               | ~61–70 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -11177,8 +11177,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 60–70 kB min+gzip (measured
-2026-09-02 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 61–70 kB min+gzip (measured
+2026-09-03 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
@@ -12557,8 +12557,9 @@ table is your design system's, not a themed grid.
 
 v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
-what it named and nothing else. An adapter's `DataTable` is 60–70 kB gzipped
-because of it.
+what it named and nothing else. Measured adapter sizes live in the
+[FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable); the acceptance ceiling
+is 80 KB min+gzip.
 
 Nothing else about the table changed: the same columns, the same data tiers,
 the same URL state, the same labels.
@@ -12781,6 +12782,11 @@ meant, and `density="comfortable"` is `size="medium"`.
 The compiler finds every call site: a removed prop is not in
 `DataTableProps` any more, so `tsc` names each one. There is no deprecation
 warning to grep for, because there is nothing left to deprecate.
+
+This repository rehearses that upgrade against packed tarballs for every
+published kit — preset-equivalent first, then the four-import minimal path —
+with `pnpm migrate:rehearse`. Headless consumers keep `useDataTable`. The
+release receipt is `scripts/v3-receipt.md`.
 
 Run the v3 codemod over the source directories:
 

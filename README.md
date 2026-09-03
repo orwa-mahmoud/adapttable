@@ -112,7 +112,9 @@ place: **[the comparison page](https://orwa-mahmoud.github.io/adapttable/compari
 | `@adapttable/unstyled` | Headless primitives + Tailwind / shadcn classes.                           |
 | `@adapttable/shadcn`   | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset. |
 | `@adapttable/i18n`     | Optional locale presets (17 languages, incl. RTL) + direction helpers.     |
-| `@adapttable/cli`      | `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.    |
+| `@adapttable/cli`      | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source. |
+| `@adapttable/server`   | React-free query parsing for a host backend.                               |
+| `@adapttable/ai`       | Optional provider-neutral table agent contract.                            |
 
 ## Install
 

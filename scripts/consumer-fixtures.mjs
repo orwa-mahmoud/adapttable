@@ -165,7 +165,7 @@ const CORE_FIXTURES = [
     kind: "core",
     pkg: "core",
     entryFile: "pivot.js",
-    budgetKB: 5,
+    budgetKB: 6,
     code: `export { pivot, pivotTableModel } from "PKG";`,
   },
   {

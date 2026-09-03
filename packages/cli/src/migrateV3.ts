@@ -264,15 +264,62 @@ function rewriteCoreImports(source: string): {
   return { code, movedImports, issues };
 }
 
+/**
+ * Opening `<DataTable …>` / `<DataTable …/>` spans, including props whose
+ * values contain `=>` or nested `>`. A naive `[\s\S]*?>` stops at the first
+ * `>` inside `rowKey={(row) => row.id}` and misses every enabling prop after
+ * it.
+ */
+function eachDataTableOpeningTag(
+  source: string,
+  visit: (text: string, index: number) => void
+): void {
+  const start = /<(?:[A-Za-z_$][\w$]*\.)*DataTable\b/g;
+  for (const match of source.matchAll(start)) {
+    const from = match.index;
+    let i = from + match[0].length;
+    let depth = 0;
+    let quote: string | null = null;
+    while (i < source.length) {
+      const ch = source[i];
+      if (quote) {
+        if (ch === "\\" && quote !== "`") {
+          i += 2;
+          continue;
+        }
+        if (ch === quote) quote = null;
+        i += 1;
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === "`") {
+        quote = ch;
+        i += 1;
+        continue;
+      }
+      if (ch === "{") {
+        depth += 1;
+        i += 1;
+        continue;
+      }
+      if (ch === "}") {
+        depth = Math.max(0, depth - 1);
+        i += 1;
+        continue;
+      }
+      if (ch === ">" && depth === 0) {
+        visit(source.slice(from, i + 1), from);
+        break;
+      }
+      i += 1;
+    }
+  }
+}
+
 function reportAmbiguousUsages(
   source: string,
   issues: V3MigrationIssue[]
 ): void {
-  const openingTag =
-    /<(?:[A-Za-z_$][\w$]*\.)*DataTable\b(?:<[^>\n]+>)?[\s\S]*?>/g;
-  for (const tag of source.matchAll(openingTag)) {
-    const tagIndex = tag.index;
-    const text = tag[0];
+  eachDataTableOpeningTag(source, (text, tagIndex) => {
     for (const prop of REMOVED_DATA_TABLE_PROPS) {
       const propMatch = new RegExp(
         String.raw`(?:^|\s)(${prop})(?=\s*(?:=|\s|/?>))`
@@ -287,7 +334,7 @@ function reportAmbiguousUsages(
         )
       );
     }
-  }
+  });
 
   const ambiguousPatterns: readonly [RegExp, string][] = [
     [

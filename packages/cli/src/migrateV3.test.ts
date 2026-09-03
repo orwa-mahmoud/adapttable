@@ -69,6 +69,29 @@ export { DataTable, rows };
     ]);
   });
 
+  it("reports enabling props that follow an arrow rowKey", () => {
+    const input = `export const table = (
+  <DataTable
+    data={rows}
+    columns={columns}
+    rowKey={(row) => row.id}
+    enableColumnMenu
+    exportCsv
+    groupBy="city"
+  />
+);
+`;
+    const result = migrateV3Source(input);
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("DataTable.enableColumnMenu"),
+        expect.stringContaining("DataTable.exportCsv"),
+        expect.stringContaining("DataTable.groupBy"),
+      ])
+    );
+  });
+
   it("reports behavior-dependent migrations without changing them", () => {
     const input = `import { useChromeBodyData } from "@adapttable/core";
 

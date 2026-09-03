@@ -2,8 +2,9 @@
 
 v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
-what it named and nothing else. An adapter's `DataTable` is 60–70 kB gzipped
-because of it.
+what it named and nothing else. Measured adapter sizes live in the
+[FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable); the acceptance ceiling
+is 80 KB min+gzip.
 
 Nothing else about the table changed: the same columns, the same data tiers,
 the same URL state, the same labels.
@@ -226,6 +227,11 @@ meant, and `density="comfortable"` is `size="medium"`.
 The compiler finds every call site: a removed prop is not in
 `DataTableProps` any more, so `tsc` names each one. There is no deprecation
 warning to grep for, because there is nothing left to deprecate.
+
+This repository rehearses that upgrade against packed tarballs for every
+published kit — preset-equivalent first, then the four-import minimal path —
+with `pnpm migrate:rehearse`. Headless consumers keep `useDataTable`. The
+release receipt is `scripts/v3-receipt.md`.
 
 Run the v3 codemod over the source directories:
 
