@@ -30,6 +30,11 @@ const EVIDENCE = [
   ["scripts/ai-isolation.mjs", "createAgentSession"],
   ["scripts/v3-perf-baseline.json", "firstRenderMs"],
   ["playwright.config.ts", 'name: "chromium"'],
+  ["playwright.config.ts", 'name: "firefox"'],
+  ["playwright.config.ts", 'name: "webkit"'],
+  [".github/workflows/e2e-nightly.yml", "workflow_dispatch"],
+  ["e2e/axe-audit.spec.ts", "serious or critical"],
+  ["e2e/visual/v3-ui.spec.ts", "toHaveScreenshot"],
   ["e2e/aria-parity.spec.ts", "every body gridcell shares its columnheader"],
 ];
 
@@ -89,6 +94,9 @@ describe("limitations page claims", () => {
     assert.match(page, /PLAIN_ADAPTER_CEILING_KB/);
     assert.match(page, /EXPORT_FETCH_ALL_MAX_ROWS/);
     assert.match(page, /playwright\.config\.ts/);
+    assert.match(page, /e2e-nightly\.yml/);
+    assert.match(page, /e2e\/axe-audit\.spec\.ts/);
+    assert.match(page, /e2e\/visual\//);
     assert.match(page, /e2e\/aria-parity\.spec\.ts/);
     assert.match(page, /scripts\/v3-perf-baseline\.json/);
     assert.match(page, /scripts\/ai-isolation\.mjs/);

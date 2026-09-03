@@ -101,8 +101,12 @@ versions in [getting started](./getting-started.md). The table UI is
 React. Vue and Angular bindings are not in this tree.
 
 The per-PR Playwright project is **Chromium** against the built showcase
-(`playwright.config.ts`). Firefox, WebKit and a dedicated mobile project
-are not in that gate.
+(`playwright.config.ts`). Firefox, WebKit and a Pixel 5 mobile project
+run on the nightly/pre-release workflow
+(`.github/workflows/e2e-nightly.yml`), not on every PR. Chromium visual
+baselines live in `e2e/visual/` and are compared on that same nightly
+job. An axe audit walks every kit landing plus key feature pages
+(`e2e/axe-audit.spec.ts`) and fails on serious or critical findings.
 
 The table is a client component. During SSR there is no `window` or
 `matchMedia`: pass `forceMobile` so server and first paint agree, and
@@ -156,6 +160,9 @@ a fix was attempted and failed. None is listed.
 | AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
 | Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
 | Chromium e2e                             | `playwright.config.ts`                                                                                   |
+| Nightly Firefox / WebKit / Pixel 5       | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                         |
+| Showcase axe audit                       | `e2e/axe-audit.spec.ts`                                                                                  |
+| Visual baselines                         | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                       |
 | SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                  |
 | antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                           |
 | React / Node / kit floors                | [getting-started](./getting-started.md)                                                                  |
