@@ -235,7 +235,11 @@ for (const focused of [
   }) => {
     await page.goto(focused.path);
     await expect(page.locator("[data-stagger]").first()).toBeVisible();
-    for (const name of ["Filters", "Saved views", "Columns"]) {
+    const hidden =
+      focused.name === "grouping"
+        ? (["Filters", "Saved views"] as const)
+        : (["Filters", "Saved views", "Columns"] as const);
+    for (const name of hidden) {
       await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
         0
       );

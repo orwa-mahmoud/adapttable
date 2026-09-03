@@ -78,6 +78,7 @@ export function GroupingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   dark={dark}
                   urlKey="grp"
                   grouping
+                  columnMenu
                   exportCsv={EXPORT_GROUPED_AS_XLSX}
                   forceMobile={mobile}
                   focused
