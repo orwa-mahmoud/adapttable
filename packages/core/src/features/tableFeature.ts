@@ -13,37 +13,31 @@
  * register here rather than through a parallel API.
  */
 import type { Command } from "../actions/commandRegistry";
+import type { Aggregator } from "../aggregate/aggregate";
 import type {
+  ColumnMenuAction,
+  ColumnMenuActionContext,
+} from "../columns/columnMenuModel";
+import type { ExportWriter } from "../export/exportWriter";
+import type { FilterTypeSpec } from "../filters/filterRegistry";
+import type { FeatureProviderContribution, FeatureRender } from "./providers";
+
+export type { Command } from "../actions/commandRegistry";
+export type {
   ContextMenuItem,
   ContextMenuTarget,
 } from "../actions/contextMenuModel";
-import type { Aggregator } from "../aggregate/aggregate";
-import type {
+export type { Aggregator } from "../aggregate/aggregate";
+export type {
   ColumnMenuAction,
   ColumnMenuActionContext,
   ColumnMenuItem,
   ColumnMenuRow,
 } from "../columns/columnMenuModel";
-import type { CustomCellEditorRender } from "../editing/cellEditing";
-import type { ExportWriter } from "../export/exportWriter";
-import type { FilterTypeSpec } from "../filters/filterRegistry";
-import type { SidePanelEntry } from "../layout/SidePanelChrome";
-import type { FeatureProviderContribution, FeatureRender } from "./providers";
-
-export type {
-  Aggregator,
-  ColumnMenuAction,
-  ColumnMenuActionContext,
-  ColumnMenuItem,
-  ColumnMenuRow,
-  Command,
-  ContextMenuItem,
-  ContextMenuTarget,
-  CustomCellEditorRender,
-  ExportWriter,
-  FilterTypeSpec,
-  SidePanelEntry,
-};
+export type { CustomCellEditorRender } from "../editing/cellEditing";
+export type { ExportWriter } from "../export/exportWriter";
+export type { FilterTypeSpec } from "../filters/filterRegistry";
+export type { SidePanelEntry } from "../layout/SidePanelChrome";
 
 /**
  * Internal table configuration a composed feature may write.

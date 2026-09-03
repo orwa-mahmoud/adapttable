@@ -656,7 +656,6 @@ function RowMoveMenu({
     >
       <summary
         ref={triggerRef}
-        role="button"
         aria-label={label}
         data-adapttable-part="row-move-menu-trigger"
         style={{ ...REORDER_BUTTON, cursor: "pointer", listStyle: "none" }}

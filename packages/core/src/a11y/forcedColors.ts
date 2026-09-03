@@ -107,7 +107,7 @@ export function ensureForcedColorsStyles(): void {
   if (document.getElementById(FORCED_COLORS_STYLE_ID)) return;
   const el = document.createElement("style");
   el.id = FORCED_COLORS_STYLE_ID;
-  el.setAttribute("data-adapttable-forced-colors", "");
+  el.dataset.adapttableForcedColors = "";
   el.textContent = FORCED_COLORS_CSS;
   document.head.appendChild(el);
 }

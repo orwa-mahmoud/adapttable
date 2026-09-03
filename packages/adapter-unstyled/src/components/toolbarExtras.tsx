@@ -13,7 +13,7 @@ import {
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/core/adapter";
-import type { ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import type { DataTableClassNames } from "../types";
 
@@ -65,6 +65,15 @@ export function ExportCsvButton(
     labels,
   } = props;
   const classNames = classesOf(props);
+  const Surface = useMemo(
+    () =>
+      function BoundExportProgressSurface(
+        surface: ExportProgressSurfaceSlotProps
+      ) {
+        return <ExportProgressSurface {...surface} classNames={classNames} />;
+      },
+    [classNames]
+  );
   if (!onExportCsv) return null;
   return (
     <>
@@ -94,9 +103,7 @@ export function ExportCsvButton(
         progress={exportProgressState}
         labels={labels}
         slots={{
-          Surface: (surface) => (
-            <ExportProgressSurface {...surface} classNames={classNames} />
-          ),
+          Surface,
         }}
       />
       <ExportAnnouncer announcement={exportAnnouncement} />

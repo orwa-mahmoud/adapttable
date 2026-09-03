@@ -172,7 +172,7 @@ export function AgentApprovalChrome({
   onReject,
   slots,
 }: Readonly<AgentApprovalChromeProps>): ReactElement | null {
-  const regionRef = useRef<HTMLDivElement>(null);
+  const regionRef = useRef<HTMLElement>(null);
   const pending = proposals ?? [];
   const count = pending.length;
 
@@ -203,11 +203,10 @@ export function AgentApprovalChrome({
   const List = slots.List;
 
   return (
-    <div
+    <section
       ref={regionRef}
       data-adapttable-part="agent-approval"
       className={className}
-      role="region"
       aria-label={heading}
       tabIndex={-1}
       style={{ display: "flex", alignItems: "flex-start", gap: "0.5em" }}
@@ -242,6 +241,6 @@ export function AgentApprovalChrome({
         className={buttonClassName}
         onClick={onApprove}
       />
-    </div>
+    </section>
   );
 }

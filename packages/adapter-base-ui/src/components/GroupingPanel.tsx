@@ -46,17 +46,17 @@ const slots: GroupingPanelSlots = {
     dropProps,
     ...rest
   }: GroupingPanelDropZoneProps) => (
-    <div
-      role="group"
+    <fieldset
       aria-label={label}
       className="adapttable-grouping-drop-zone"
       data-empty={empty ? true : undefined}
       data-active={active ? true : undefined}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
       {empty ? label : <span aria-hidden="true" />}
-    </div>
+    </fieldset>
   ),
   Chip: ({
     label,
@@ -120,16 +120,16 @@ const slots: GroupingPanelSlots = {
     dropProps,
     ...rest
   }: GroupingPanelRemoveZoneProps) => (
-    <div
-      role="group"
+    <fieldset
       aria-label={label}
       className="adapttable-grouping-remove-zone"
       data-active={active ? true : undefined}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
       {label}
-    </div>
+    </fieldset>
   ),
 };
 

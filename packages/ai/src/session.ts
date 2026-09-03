@@ -1,7 +1,6 @@
 import { errorMessage } from "./errorMessage";
 import { guideOf, summaryOf } from "./guides";
 import {
-  AGENT_SCHEMA_VERSION,
   type ApprovalPolicy,
   CAPABILITY_KEYS,
   type CapabilityKey,
@@ -418,7 +417,7 @@ async function resolveRowArg(
   if (!apply.resolveRow) {
     throw new ApplyError("apply-failed", "resolveRow is not wired");
   }
-  return Promise.resolve(apply.resolveRow(ref));
+  return apply.resolveRow(ref);
 }
 
 async function decideApproval(
@@ -652,4 +651,4 @@ async function applyEach<T extends { rowKey: string; column?: string }>(
   return { applied, results };
 }
 
-export { AGENT_SCHEMA_VERSION };
+export { AGENT_SCHEMA_VERSION } from "./keys";

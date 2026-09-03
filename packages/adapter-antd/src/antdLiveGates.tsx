@@ -16,22 +16,20 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import type {
-  ColumnDef,
-  ExportHandlerState,
-  FeatureHostState,
-  FeatureProps,
-} from "@adapttable/core/adapter";
 import {
   CELL_NAV_LIVE,
   type CellNavLiveSlotProps,
+  type ColumnDef,
   DISABLED_EXPORT,
   DISABLED_FIND,
   disabledHistory,
   EDIT_HISTORY_LIVE,
   type EditHistoryLiveSlotProps,
+  type ExportHandlerState,
   EXPORT_LIVE,
   type ExportLiveSlotProps,
+  type FeatureHostState,
+  type FeatureProps,
   FeatureSlot,
   FIND_LIVE,
   type FindLiveSlotProps,

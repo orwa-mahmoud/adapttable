@@ -82,17 +82,17 @@ function DropZone({
 }: Readonly<GroupingPanelDropZoneProps>): ReactElement {
   const classNames = useClassNames();
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label={label}
       data-empty={empty || undefined}
       data-active={active || undefined}
       className={classNames.groupingDropZone}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
       {empty ? label : <span aria-hidden="true">│</span>}
-    </div>
+    </fieldset>
   );
 }
 
@@ -176,16 +176,16 @@ function RemoveZone({
 }: Readonly<GroupingPanelRemoveZoneProps>): ReactElement {
   const classNames = useClassNames();
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label={label}
       data-active={active || undefined}
       className={classNames.groupingRemoveZone}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
       {label}
-    </div>
+    </fieldset>
   );
 }
 

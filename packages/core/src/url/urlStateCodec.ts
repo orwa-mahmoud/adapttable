@@ -202,7 +202,7 @@ export function applyTableUrlState(
     search,
     namespace,
     (table) => {
-      for (const key of [...table.keys()]) table.delete(key);
+      for (const key of table.keys()) table.delete(key);
       if (!markerValid) return;
       saved.canonical.forEach((value, key) => {
         if (key !== namespace + PARAM_URL_STATE_VERSION) {

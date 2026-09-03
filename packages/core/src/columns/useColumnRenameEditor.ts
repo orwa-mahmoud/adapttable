@@ -81,8 +81,8 @@ export function useColumnRenameEditor({
   const inputId = useId();
   const errorId = `${inputId}-error`;
   const [editing, setEditing] = useState(false);
-  const [draft, setDraftState] = useState(name);
-  const [error, setError] = useState<string>();
+  const [draft, setDraft] = useState(name);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [announcement, setAnnouncement] = useState("");
   const returnFocus = useRef<HTMLElement | null>(null);
 
@@ -92,13 +92,13 @@ export function useColumnRenameEditor({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    setDraftState(name);
+    setDraft(name);
     setError(undefined);
     setEditing(true);
   }, [name]);
 
-  const setDraft = useCallback((value: string) => {
-    setDraftState(value);
+  const updateDraft = useCallback((value: string) => {
+    setDraft(value);
     if (value.trim() !== "") setError(undefined);
   }, []);
 
@@ -113,7 +113,7 @@ export function useColumnRenameEditor({
   }, []);
 
   const cancel = useCallback(() => {
-    setDraftState(name);
+    setDraft(name);
     close();
   }, [close, name]);
 
@@ -151,7 +151,7 @@ export function useColumnRenameEditor({
     errorId,
     announcement,
     begin,
-    setDraft,
+    setDraft: updateDraft,
     blur,
     submit,
     cancel,

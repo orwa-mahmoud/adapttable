@@ -55,28 +55,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 export function parseEnvelope(input: unknown): AgentEnvelope {
   if (!isRecord(input)) {
-    throw new Error("envelope must be an object");
+    throw new TypeError("envelope must be an object");
   }
   if (input.schemaVersion !== AGENT_SCHEMA_VERSION) {
-    throw new Error(`envelope schemaVersion must be "${AGENT_SCHEMA_VERSION}"`);
+    throw new TypeError(
+      `envelope schemaVersion must be "${AGENT_SCHEMA_VERSION}"`
+    );
   }
   if (typeof input.tableId !== "string" || input.tableId.length === 0) {
-    throw new Error("envelope tableId must be a non-empty string");
+    throw new TypeError("envelope tableId must be a non-empty string");
   }
   if (typeof input.key !== "string" || input.key.length === 0) {
-    throw new Error("envelope key must be a non-empty string");
+    throw new TypeError("envelope key must be a non-empty string");
   }
   if (
     typeof input.expectedRevision !== "number" ||
     !Number.isFinite(input.expectedRevision)
   ) {
-    throw new Error("envelope expectedRevision must be a finite number");
+    throw new TypeError("envelope expectedRevision must be a finite number");
   }
   if (
     typeof input.idempotencyKey !== "string" ||
     input.idempotencyKey.length === 0
   ) {
-    throw new Error("envelope idempotencyKey must be a non-empty string");
+    throw new TypeError("envelope idempotencyKey must be a non-empty string");
   }
   return {
     schemaVersion: AGENT_SCHEMA_VERSION,

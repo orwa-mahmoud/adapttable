@@ -11,7 +11,7 @@ import {
   type GroupingPanelSurfaceProps,
 } from "@adapttable/core/adapter";
 import { Box, Card, Flex, IconButton, Text } from "@radix-ui/themes";
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import { NativeSelect } from "./primitives";
 
@@ -254,8 +254,12 @@ export function GroupingPanel<TRow>({
   container,
   ...props
 }: Readonly<RadixGroupingPanelProps<TRow>>): ReactNode {
+  const portal = useMemo(
+    () => ({ dir: props.dir, container }),
+    [props.dir, container]
+  );
   return (
-    <GroupingPanelPortalContext.Provider value={{ dir: props.dir, container }}>
+    <GroupingPanelPortalContext.Provider value={portal}>
       <GroupingPanelChrome {...props} slots={slots} />
     </GroupingPanelPortalContext.Provider>
   );
