@@ -226,16 +226,16 @@ for (const adapter of ADAPTERS) {
 
       const trigger = part(page, "row-move-menu-trigger").first();
       await expect(trigger).toBeVisible();
-      await trigger.focus();
-      await trigger.press(" ");
+      // Click, not Space: after the confirm dialog closes, Space is eaten by
+      // a kit overlay that is no longer :visible but still intercepts keys.
+      await trigger.click();
       const destination = pagePart(page, "row-move-menu-item")
         .filter({
           visible: true,
         })
         .first();
       await expect(destination).toBeVisible();
-      await destination.focus();
-      await destination.press("Enter");
+      await destination.click();
       confirmation = page.locator(
         '[data-adapttable-part="row-move-confirmation"]:visible'
       );
