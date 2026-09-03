@@ -568,7 +568,6 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
         setRowMutations("on");
         setRowReorder("on");
         setRowPinning("on");
-        setPinnedSummaryRows("on");
         setCellSpan("on");
         setExtraRows("on");
         setRowStyle("on");

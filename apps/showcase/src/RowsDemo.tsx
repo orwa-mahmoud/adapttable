@@ -42,7 +42,6 @@ export function RowsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 rowMutations
                 rowReorder
                 rowPinning
-                pinnedSummaryRows
                 cellSpan
                 focused
               />
