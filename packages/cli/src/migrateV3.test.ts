@@ -125,4 +125,31 @@ const table = (
     expect(result.code).toBe(input);
     expect(result.issues).toHaveLength(1);
   });
+
+  it("scans past an escaped quote inside a DataTable attribute", () => {
+    const input = `<DataTable title="say \\"hi\\"" enableColumnMenu />\n`;
+    const result = migrateV3Source(input);
+    expect(result.changed).toBe(false);
+    expect(result.issues.map((issue) => issue.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("DataTable.enableColumnMenu"),
+      ])
+    );
+  });
+
+  it("skips a DataTable whose opening quote never closes", () => {
+    const input = `<DataTable title="unclosed enableColumnMenu\n`;
+    const result = migrateV3Source(input);
+    expect(result.code).toBe(input);
+    expect(result.changed).toBe(false);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("skips a DataTable whose opening tag never ends", () => {
+    const input = `<DataTable enableColumnMenu\n`;
+    const result = migrateV3Source(input);
+    expect(result.code).toBe(input);
+    expect(result.changed).toBe(false);
+    expect(result.issues).toEqual([]);
+  });
 });
