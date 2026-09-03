@@ -7,6 +7,7 @@ import { defaultLabels, type TableLabels } from "@adapttable/core";
  */
 export const en: Required<TableLabels> = {
   ...defaultLabels,
+  exportDismiss: "Dismiss",
   rowMoveOptions: "Row move options",
   moveToGroup: "Move to group…",
   moveUnder: "Move under…",

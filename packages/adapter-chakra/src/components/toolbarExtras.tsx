@@ -71,6 +71,7 @@ export function ExportCsvButton(
         size="sm"
         variant="outline"
         colorPalette={accentColor}
+        data-adapttable-part="export-csv-button"
         onClick={onExportCsv}
         loading={exportBusy}
         aria-busy={exportBusy}
@@ -98,6 +99,7 @@ function ExportProgressSurface({
   progressLabel,
   cancel,
   retry,
+  dismiss,
   download,
 }: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
   let progressIndicator: ReactNode = null;
@@ -139,9 +141,21 @@ function ExportProgressSurface({
       boxShadow="lg"
     >
       <Stack gap="3">
-        <Text fontWeight="semibold" fontSize="sm">
-          {heading}
-        </Text>
+        <Stack direction="row" justify="space-between" align="center">
+          <Text fontWeight="semibold" fontSize="sm">
+            {heading}
+          </Text>
+          {dismiss ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={dismiss.onAction}
+              data-adapttable-part="export-progress-dismiss"
+            >
+              {dismiss.label}
+            </Button>
+          ) : null}
+        </Stack>
         {progressIndicator}
         {message ? (
           <Text fontSize="sm" data-adapttable-part="export-progress-message">

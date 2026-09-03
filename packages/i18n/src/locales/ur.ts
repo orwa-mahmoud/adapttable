@@ -138,6 +138,7 @@ export const ur: Required<TableLabels> = {
   exportFailed: "برآمد ناکام ہو گئی",
   exportCancelled: "برآمد منسوخ کر دی گئی",
   exportDownload: "برآمد ڈاؤن لوڈ کریں",
+  exportDismiss: "برآمد بند کریں",
   editCell: "سیل میں ترمیم",
   undoEdit: "واپس کریں",
   redoEdit: "دوبارہ کریں",

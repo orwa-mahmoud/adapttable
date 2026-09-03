@@ -48,6 +48,11 @@ export interface ExportProgressState {
   readonly onCancel: (() => void) | undefined;
   /** Start a fresh run. Present only after failure. */
   readonly onRetry: (() => void) | undefined;
+  /**
+   * Clear a finished surface. Present for done, failed, and cancelled — never
+   * while busy, where Cancel is the only way out.
+   */
+  readonly onDismiss: (() => void) | undefined;
 }
 
 /**
@@ -132,6 +137,8 @@ export function useExportHandler(
   const inFlight = useRef(false);
   const activeRun = useRef(0);
   const controller = useRef<AbortController | null>(null);
+  const statusRef = useRef(exportStatus);
+  statusRef.current = exportStatus;
 
   const cancelExport = useCallback(() => {
     const current = controller.current;
@@ -145,6 +152,21 @@ export function useExportHandler(
     setErrorMessage("");
     setDownloadUrl(undefined);
     setExportStatus("cancelled");
+  }, []);
+
+  const dismissExport = useCallback(() => {
+    const status = statusRef.current;
+    if (
+      inFlight.current ||
+      (status !== "done" && status !== "failed" && status !== "cancelled")
+    ) {
+      return;
+    }
+    setProgress(undefined);
+    setMessage("");
+    setErrorMessage("");
+    setDownloadUrl(undefined);
+    setExportStatus("idle");
   }, []);
 
   const onExportCsv = useCallback(() => {
@@ -255,6 +277,12 @@ export function useExportHandler(
           downloadUrl,
           onCancel: exportStatus === "busy" ? cancelExport : undefined,
           onRetry: exportStatus === "failed" ? onExportCsv : undefined,
+          onDismiss:
+            exportStatus === "done" ||
+            exportStatus === "failed" ||
+            exportStatus === "cancelled"
+              ? dismissExport
+              : undefined,
         }
       : null;
 

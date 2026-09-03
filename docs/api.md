@@ -697,7 +697,8 @@ out. `ExportProgressChrome` (configured by `ExportProgressChromeProps`) maps
 that shared state into an adapter's required `ExportProgressSlots`;
 `ExportProgressSurfaceSlotProps`,
 `ExportProgressAction`, and `ExportProgressDownload` type the kit-owned
-surface. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
+surface. Terminal states expose `onDismiss` / a Dismiss action; busy work
+keeps Cancel only. `LiveRegion` (with `LiveRegionProps`) is the polite region underneath
 it and `GridFocusAnnouncer`'s, and `ExportAnnouncerProps` types the announcer
 itself. See [browser and server-built exports](./exporting.md).
 

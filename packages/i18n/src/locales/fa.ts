@@ -137,6 +137,7 @@ export const fa: Required<TableLabels> = {
   exportFailed: "خروجی گرفتن ناموفق بود",
   exportCancelled: "خروجی گرفتن لغو شد",
   exportDownload: "دانلود خروجی",
+  exportDismiss: "بستن خروجی",
   editCell: "ویرایش سلول",
   undoEdit: "بازگردانی",
   redoEdit: "بازانجام",

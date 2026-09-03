@@ -133,6 +133,8 @@ export interface DataTableClassNames {
   exportProgressRetry?: string;
   /** Download link inside the completed progress card. */
   exportProgressDownload?: string;
+  /** Dismiss control on a finished, failed, or cancelled progress card. */
+  exportProgressDismiss?: string;
   /** The element the filters overlay is positioned against. */
   filtersAnchor?: string;
   /** The scrim behind the filters overlay. */

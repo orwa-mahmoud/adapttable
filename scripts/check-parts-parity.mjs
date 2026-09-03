@@ -221,7 +221,6 @@ const FALLBACK_ONLY = {
     "checkbox",
     "empty-clear",
     "expand-button",
-    "export-csv-button",
     "export-spinner",
     "retry-button",
     "sort-button",

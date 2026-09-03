@@ -135,6 +135,7 @@ export const zh: Required<TableLabels> = {
   exportFailed: "导出失败",
   exportCancelled: "导出已取消",
   exportDownload: "下载导出文件",
+  exportDismiss: "关闭导出",
   editCell: "编辑单元格",
   undoEdit: "撤销",
   redoEdit: "重做",

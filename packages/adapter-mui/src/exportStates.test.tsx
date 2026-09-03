@@ -88,6 +88,13 @@ describe("export states (MUI)", () => {
     });
     expect(signal?.aborted).toBe(true);
     expect(screen.getByRole("status")).toHaveTextContent("Export cancelled");
+    await act(async () => {
+      screen.getByRole("button", { name: "Dismiss" }).click();
+      await Promise.resolve();
+    });
+    expect(
+      screen.queryByRole("region", { name: "Export cancelled" })
+    ).toBeNull();
   });
 
   it("shows MUI's own loading affordance while the export runs", async () => {

@@ -802,6 +802,8 @@ export interface TableLabels {
   exportCancelled?: string;
   /** Link label for a server-built export that resolves a download URL. */
   exportDownload?: string;
+  /** Dismisses a finished, failed, or cancelled server-export surface. */
+  exportDismiss?: string;
   /** Accessible name for starting inline cell edit (double-click / activate). */
   editCell?: string;
   /**

@@ -136,6 +136,7 @@ export const fr: Required<TableLabels> = {
   exportFailed: "Échec de l’export",
   exportCancelled: "Export annulé",
   exportDownload: "Télécharger l’export",
+  exportDismiss: "Fermer l’export",
   editCell: "Modifier la cellule",
   undoEdit: "Annuler",
   redoEdit: "Rétablir",

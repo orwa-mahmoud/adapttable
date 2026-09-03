@@ -719,6 +719,7 @@ const KEYS = [
   "exportProgressCancel",
   "exportProgressRetry",
   "exportProgressDownload",
+  "exportProgressDismiss",
   "filtersAnchor",
   "filtersBackdrop",
   "filtersPopover",

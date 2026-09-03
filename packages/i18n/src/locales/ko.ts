@@ -136,6 +136,7 @@ export const ko: Required<TableLabels> = {
   exportFailed: "내보내기 실패",
   exportCancelled: "내보내기 취소됨",
   exportDownload: "내보내기 다운로드",
+  exportDismiss: "내보내기 닫기",
   editCell: "셀 편집",
   undoEdit: "되돌리기",
   redoEdit: "다시 실행",

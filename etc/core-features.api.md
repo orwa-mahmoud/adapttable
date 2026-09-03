@@ -1241,6 +1241,7 @@ export interface TableLabels {
     expandRow?: string;
     exportCancelled?: string;
     exportCsv?: string;
+    exportDismiss?: string;
     exportDone?: string;
     exportDownload?: string;
     exportFailed?: string;

@@ -41,6 +41,13 @@ test.describe("server-built export progress", () => {
       await expect(surface).toHaveAccessibleName("Export cancelled");
       await expect(page.getByRole("status")).toContainText("Export cancelled");
       await expect(exportButton).toHaveAttribute("aria-busy", "false");
+
+      const dismiss = surface.getByRole("button", { name: "Dismiss" });
+      await dismiss.focus();
+      await expect(dismiss).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(surface).toHaveCount(0);
+      await expect(exportButton).toBeFocused();
     });
   }
 
@@ -60,6 +67,8 @@ test.describe("server-built export progress", () => {
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(390);
     await surface.getByRole("button", { name: "Cancel" }).click();
+    await surface.getByRole("button", { name: "Dismiss" }).click();
+    await expect(surface).toHaveCount(0);
   });
 
   test("the progress surface inherits RTL and localized controls", async ({
@@ -79,5 +88,7 @@ test.describe("server-built export progress", () => {
     ).toBe("rtl");
     await surface.getByRole("button", { name: "إلغاء" }).click();
     await expect(surface).toHaveAccessibleName("تم إلغاء التصدير");
+    await surface.getByRole("button", { name: "إغلاق التصدير" }).click();
+    await expect(surface).toHaveCount(0);
   });
 });

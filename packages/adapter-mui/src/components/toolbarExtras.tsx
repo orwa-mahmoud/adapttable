@@ -66,6 +66,7 @@ export function ExportCsvButton(
       <Button
         variant="outlined"
         size="small"
+        data-adapttable-part="export-csv-button"
         onClick={onExportCsv}
         disabled={exportBusy === true || exportDisabled}
         aria-busy={exportBusy}
@@ -97,6 +98,7 @@ function ExportProgressSurface({
   progressLabel,
   cancel,
   retry,
+  dismiss,
   download,
 }: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
   return (
@@ -116,7 +118,22 @@ function ExportProgressSurface({
       }}
     >
       <Stack spacing={1.25}>
-        <Typography variant="subtitle2">{heading}</Typography>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
+          <Typography variant="subtitle2">{heading}</Typography>
+          {dismiss ? (
+            <Button
+              size="small"
+              onClick={dismiss.onAction}
+              data-adapttable-part="export-progress-dismiss"
+            >
+              {dismiss.label}
+            </Button>
+          ) : null}
+        </Stack>
         {status === "busy" ? (
           <LinearProgress
             variant={progress === undefined ? "indeterminate" : "determinate"}

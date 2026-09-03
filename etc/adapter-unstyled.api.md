@@ -279,6 +279,7 @@ export interface DataTableClassNames {
     exportProgressActions?: string;
     exportProgressBar?: string;
     exportProgressCancel?: string;
+    exportProgressDismiss?: string;
     exportProgressDownload?: string;
     exportProgressMessage?: string;
     exportProgressRetry?: string;

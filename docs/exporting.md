@@ -91,6 +91,12 @@ The host settles in one of three ways:
   still shows **Export complete**;
 - reject: the error surface shows the reason and a localized **Retry** button.
 
+Every terminal state — complete with or without a URL, failed, or cancelled —
+also offers a localized **Dismiss** control. Dismiss returns the surface to
+idle, clears the stale message, error, and download URL, and restores focus to
+the Export button. It does not abort or restart a job. Busy work keeps
+**Cancel** only; Dismiss never replaces it.
+
 Cancellation is not a failure. It shows and announces **Export cancelled**,
 ignores a late rejection from the aborted run, and never offers Retry for that
 run. Retry starts a new job with a new signal and the table's current view.
@@ -105,8 +111,10 @@ their file.
 
 Every published adapter renders the same lifecycle through its own components:
 a progress card and determinate bar or indeterminate spinner, plus native-kit
-Cancel and Retry controls. The card is viewport-safe on mobile and uses logical
-positioning, so it remains at the inline end in LTR and RTL.
+Cancel, Retry, Download, and Dismiss controls. The card is viewport-safe on
+mobile and uses logical positioning, so it remains at the inline end in LTR
+and RTL. Dismiss sits at the inline end of the heading so RTL placement stays
+correct.
 
 A polite live region announces start, each reported progress value, completion,
 failure, and cancellation. The Export button remains present with

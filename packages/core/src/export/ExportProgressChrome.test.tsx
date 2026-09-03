@@ -29,6 +29,11 @@ function renderProgress(
                 {props.retry.label}
               </button>
             ) : null}
+            {props.dismiss ? (
+              <button type="button" onClick={props.dismiss.onAction}>
+                {props.dismiss.label}
+              </button>
+            ) : null}
             {props.download ? (
               <a href={props.download.url}>{props.download.label}</a>
             ) : null}
@@ -56,6 +61,7 @@ describe("ExportProgressChrome", () => {
       downloadUrl: undefined,
       onCancel,
       onRetry: undefined,
+      onDismiss: undefined,
     });
     expect(screen.getByTestId("status")).toHaveTextContent("busy");
     expect(screen.getByTestId("heading")).toHaveTextContent(
@@ -66,6 +72,9 @@ describe("ExportProgressChrome", () => {
       .getByRole("button", { name: defaultLabels.cancel ?? "Cancel" })
       .click();
     expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: defaultLabels.exportDismiss })
+    ).toBeNull();
 
     rerender(
       <ExportProgressChrome
@@ -77,6 +86,7 @@ describe("ExportProgressChrome", () => {
           downloadUrl: "https://files.example/export.csv",
           onCancel: undefined,
           onRetry: undefined,
+          onDismiss: vi.fn(),
         }}
         labels={defaultLabels}
         slots={{
@@ -110,6 +120,7 @@ describe("ExportProgressChrome", () => {
           downloadUrl: undefined,
           onCancel: undefined,
           onRetry,
+          onDismiss: vi.fn(),
         }}
         labels={{}}
         slots={{
@@ -144,17 +155,81 @@ describe("ExportProgressChrome", () => {
           downloadUrl: undefined,
           onCancel: undefined,
           onRetry: undefined,
+          onDismiss: vi.fn(),
         }}
         labels={{}}
         slots={{
           Surface: (props) => (
             <div data-testid="surface">
               <span data-testid="heading">{props.heading}</span>
+              {props.dismiss ? (
+                <button type="button" onClick={props.dismiss.onAction}>
+                  {props.dismiss.label}
+                </button>
+              ) : null}
             </div>
           ),
         }}
       />
     );
     expect(screen.getByTestId("heading")).toHaveTextContent("Export cancelled");
+    expect(screen.getByRole("button", { name: "Dismiss" })).toBeInTheDocument();
+  });
+
+  it("offers Dismiss on a completed export without a download URL", () => {
+    const onDismiss = vi.fn();
+    renderProgress({
+      status: "done",
+      value: 100,
+      message: "",
+      error: "",
+      downloadUrl: undefined,
+      onCancel: undefined,
+      onRetry: undefined,
+      onDismiss,
+    });
+    expect(screen.queryByRole("link")).toBeNull();
+    screen.getByRole("button", { name: defaultLabels.exportDismiss }).click();
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("restores focus to the export trigger after dismiss", () => {
+    const onDismiss = vi.fn();
+    render(
+      <>
+        <button
+          type="button"
+          {...{
+            "data-adapttable-part": ["export-csv", "button"].join("-"),
+          }}
+        >
+          Export CSV
+        </button>
+        <ExportProgressChrome
+          progress={{
+            status: "cancelled",
+            value: undefined,
+            message: "",
+            error: "",
+            downloadUrl: undefined,
+            onCancel: undefined,
+            onRetry: undefined,
+            onDismiss,
+          }}
+          labels={defaultLabels}
+          slots={{
+            Surface: (props) =>
+              props.dismiss ? (
+                <button type="button" onClick={props.dismiss.onAction}>
+                  {props.dismiss.label}
+                </button>
+              ) : null,
+          }}
+        />
+      </>
+    );
+    screen.getByRole("button", { name: defaultLabels.exportDismiss }).click();
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Export CSV" })).toHaveFocus();
   });
 });

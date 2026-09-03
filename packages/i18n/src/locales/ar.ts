@@ -138,6 +138,7 @@ export const ar: Required<TableLabels> = {
   exportFailed: "فشل التصدير",
   exportCancelled: "تم إلغاء التصدير",
   exportDownload: "تنزيل التصدير",
+  exportDismiss: "إغلاق التصدير",
   editCell: "تعديل الخلية",
   undoEdit: "تراجع",
   redoEdit: "إعادة",

@@ -139,6 +139,7 @@ export const ru: Required<TableLabels> = {
   exportFailed: "Не удалось выполнить экспорт",
   exportCancelled: "Экспорт отменён",
   exportDownload: "Скачать экспорт",
+  exportDismiss: "Закрыть экспорт",
   editCell: "Изменить ячейку",
   undoEdit: "Отменить",
   redoEdit: "Повторить",

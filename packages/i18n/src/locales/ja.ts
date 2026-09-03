@@ -136,6 +136,7 @@ export const ja: Required<TableLabels> = {
   exportFailed: "エクスポートに失敗しました",
   exportCancelled: "エクスポートをキャンセルしました",
   exportDownload: "エクスポートをダウンロード",
+  exportDismiss: "エクスポートを閉じる",
   editCell: "セルを編集",
   undoEdit: "元に戻す",
   redoEdit: "やり直す",

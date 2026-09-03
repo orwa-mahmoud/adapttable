@@ -112,6 +112,7 @@ function ExportProgressSurface({
   progressLabel,
   cancel,
   retry,
+  dismiss,
   download,
 }: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
   const classNames = useClassNames();
@@ -135,7 +136,25 @@ function ExportProgressSurface({
         boxShadow: "0 8px 28px rgb(0 0 0 / 18%)",
       }}
     >
-      <strong>{heading}</strong>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <strong style={{ flex: 1 }}>{heading}</strong>
+        {dismiss ? (
+          <button
+            type="button"
+            className={classNames.exportProgressDismiss}
+            onClick={dismiss.onAction}
+            data-adapttable-part="export-progress-dismiss"
+          >
+            {dismiss.label}
+          </button>
+        ) : null}
+      </div>
       {status === "busy" ? (
         <progress
           value={progress}

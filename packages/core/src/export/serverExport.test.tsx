@@ -468,6 +468,11 @@ function ServerExportHarness({
           Retry
         </button>
       ) : null}
+      {progress?.onDismiss ? (
+        <button type="button" onClick={progress.onDismiss}>
+          Dismiss
+        </button>
+      ) : null}
       <ExportAnnouncer announcement={state.exportAnnouncement} />
     </>
   );
@@ -605,6 +610,86 @@ describe("exportCsv.onExportAll lifecycle", () => {
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
     resetDevWarnings();
+  });
+
+  it("dismisses terminal surfaces without aborting or restarting", async () => {
+    const onExportAll = vi
+      .fn<OnExportAll>()
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ url: "/exports/later.csv" });
+    render(<ServerExportHarness onExportAll={onExportAll} />);
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export" }).click();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("status")).toHaveTextContent("done");
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Cancel" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(screen.getByTestId("status")).toHaveTextContent("idle");
+    expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
+    expect(screen.getByTestId("message")).toHaveTextContent("");
+    expect(screen.getByTestId("error")).toHaveTextContent("");
+    expect(onExportAll).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export" }).click();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("status")).toHaveTextContent("done");
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/exports/later.csv"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByTestId("status")).toHaveTextContent("idle");
+    expect(onExportAll).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps Retry on failure until dismiss clears the error", async () => {
+    resetDevWarnings();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    render(
+      <ServerExportHarness
+        onExportAll={() => Promise.reject(new Error("disk full"))}
+      />
+    );
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export" }).click();
+      await Promise.resolve();
+    });
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(screen.getByTestId("error")).toHaveTextContent("disk full");
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(screen.getByTestId("status")).toHaveTextContent("idle");
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+    expect(screen.getByTestId("error")).toHaveTextContent("");
+  });
+
+  it("dismisses a cancelled surface and leaves the host job aborted", () => {
+    let signal: AbortSignal | undefined;
+    render(
+      <ServerExportHarness
+        onExportAll={(_query, controls) => {
+          signal = controls.signal;
+          return new Promise(() => undefined);
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+    expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+
+    expect(signal?.aborted).toBe(true);
+    expect(screen.getByTestId("status")).toHaveTextContent("idle");
+    expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
   });
 });
 

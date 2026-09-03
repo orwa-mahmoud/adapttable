@@ -63,6 +63,7 @@ export function ExportCsvButton(
           button disables itself, which is the kit's language for "working"
           rather than a bare greyed-out control. */}
       <Button
+        data-adapttable-part="export-csv-button"
         onClick={onExportCsv}
         loading={exportBusy}
         aria-busy={exportBusy}
@@ -90,6 +91,7 @@ function ExportProgressSurface({
   progressLabel,
   cancel,
   retry,
+  dismiss,
   download,
 }: Readonly<ExportProgressSurfaceSlotProps>): ReactNode {
   let progressIndicator: ReactNode = null;
@@ -117,6 +119,18 @@ function ExportProgressSurface({
       data-adapttable-part="export-progress-surface"
       size="small"
       title={heading}
+      extra={
+        dismiss ? (
+          <Button
+            size="small"
+            type="text"
+            onClick={dismiss.onAction}
+            data-adapttable-part="export-progress-dismiss"
+          >
+            {dismiss.label}
+          </Button>
+        ) : undefined
+      }
       style={{
         position: "fixed",
         zIndex: 1400,

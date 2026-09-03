@@ -49,6 +49,8 @@ export interface ExportProgressSurfaceSlotProps {
   readonly cancel: ExportProgressAction | undefined;
   /** Retry action after failure. */
   readonly retry: ExportProgressAction | undefined;
+  /** Dismiss action after done, failed, or cancelled. */
+  readonly dismiss: ExportProgressAction | undefined;
   /** Download link after a URL settlement. */
   readonly download: ExportProgressDownload | undefined;
 }
@@ -121,6 +123,17 @@ export function ExportProgressChrome({
             }
           : undefined
       }
+      dismiss={
+        progress.onDismiss
+          ? {
+              label: labels.exportDismiss ?? "Dismiss",
+              onAction: () => {
+                progress.onDismiss?.();
+                focusExportTrigger();
+              },
+            }
+          : undefined
+      }
       download={
         progress.downloadUrl
           ? {
@@ -131,6 +144,20 @@ export function ExportProgressChrome({
       }
     />
   );
+}
+
+const EXPORT_CSV_BUTTON_PART = "export-csv-button";
+
+function focusExportTrigger(): void {
+  const named = document.querySelector<HTMLElement>(
+    `[data-adapttable-part=${JSON.stringify(EXPORT_CSV_BUTTON_PART)}]`
+  );
+  if (!named) return;
+  // Kits sometimes put the part on a wrapper; the control that started the
+  // export is the nearest button, which is also what a keyboard user returns to.
+  const trigger =
+    named.closest("button") ?? named.querySelector("button") ?? named;
+  trigger.focus();
 }
 
 function headingFor(

@@ -137,6 +137,7 @@ export const he: Required<TableLabels> = {
   exportFailed: "הייצוא נכשל",
   exportCancelled: "הייצוא בוטל",
   exportDownload: "הורדת הייצוא",
+  exportDismiss: "סגור ייצוא",
   editCell: "עריכת תא",
   undoEdit: "בטל",
   redoEdit: "בצע שוב",

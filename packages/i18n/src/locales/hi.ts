@@ -137,6 +137,7 @@ export const hi: Required<TableLabels> = {
   exportFailed: "निर्यात विफल",
   exportCancelled: "निर्यात रद्द किया गया",
   exportDownload: "निर्यात डाउनलोड करें",
+  exportDismiss: "निर्यात बंद करें",
   editCell: "सेल संपादित करें",
   undoEdit: "पूर्ववत करें",
   redoEdit: "फिर से करें",

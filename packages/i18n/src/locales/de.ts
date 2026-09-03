@@ -137,6 +137,7 @@ export const de: Required<TableLabels> = {
   exportFailed: "Export fehlgeschlagen",
   exportCancelled: "Export abgebrochen",
   exportDownload: "Export herunterladen",
+  exportDismiss: "Export schließen",
   editCell: "Zelle bearbeiten",
   undoEdit: "Rückgängig",
   redoEdit: "Wiederholen",

@@ -2348,6 +2348,7 @@ export interface ExportProgressState {
     readonly error: string;
     readonly message: string;
     readonly onCancel: (() => void) | undefined;
+    readonly onDismiss: (() => void) | undefined;
     readonly onRetry: (() => void) | undefined;
     readonly status: Exclude<ExportStatus, "idle">;
     readonly value: number | undefined;
@@ -2356,6 +2357,7 @@ export interface ExportProgressState {
 // @public
 export interface ExportProgressSurfaceSlotProps {
     readonly cancel: ExportProgressAction | undefined;
+    readonly dismiss: ExportProgressAction | undefined;
     readonly download: ExportProgressDownload | undefined;
     readonly error: string;
     readonly heading: string;
@@ -5370,6 +5372,7 @@ export interface TableLabels {
     expandRow?: string;
     exportCancelled?: string;
     exportCsv?: string;
+    exportDismiss?: string;
     exportDone?: string;
     exportDownload?: string;
     exportFailed?: string;

@@ -137,6 +137,7 @@ export const tr: Required<TableLabels> = {
   exportFailed: "Dışa aktarma başarısız",
   exportCancelled: "Dışa aktarma iptal edildi",
   exportDownload: "Dışa aktarmayı indir",
+  exportDismiss: "Dışa aktarmayı kapat",
   editCell: "Hücreyi düzenle",
   undoEdit: "Geri al",
   redoEdit: "Yinele",

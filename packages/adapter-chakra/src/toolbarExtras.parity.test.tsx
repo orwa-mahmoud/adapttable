@@ -103,10 +103,7 @@ describe("toolbar extras (chakra)", () => {
     expect(part("fullscreen-toggle")).toBeNull();
     expect(part("undo-button")).toBeNull();
     expect(part("redo-button")).toBeNull();
-    // The themed kits render a kit Button here and deliberately do not name
-    // it a part (`export-csv-button` is unstyled's native control), so the
-    // caption is what identifies it in every kit.
-    expect(screen.queryByRole("button", { name: /export/i })).toBeNull();
+    expect(part("export-csv-button")).toBeNull();
   });
 
   it("draws each one once its own feature is composed", () => {
@@ -124,7 +121,7 @@ describe("toolbar extras (chakra)", () => {
     expect(part("fullscreen-toggle")).not.toBeNull();
     expect(part("undo-button")).not.toBeNull();
     expect(part("redo-button")).not.toBeNull();
-    expect(screen.queryByRole("button", { name: /export/i })).not.toBeNull();
+    expect(part("export-csv-button")).not.toBeNull();
   });
 
   it("disables export with the localized reason when no route exists", () => {

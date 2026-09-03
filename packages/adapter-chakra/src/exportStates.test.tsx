@@ -67,8 +67,21 @@ describe("export states (Chakra)", () => {
       container.querySelector('[data-adapttable-part="export-progress-bar"]')
     ).not.toBeNull();
 
-    screen.getByRole("button", { name: "Cancel" }).click();
+    await act(async () => {
+      screen.getByRole("button", { name: "Cancel" }).click();
+      await Promise.resolve();
+    });
     expect(signal?.aborted).toBe(true);
+    expect(
+      screen.getByRole("region", { name: "Export cancelled" })
+    ).toBeInTheDocument();
+    await act(async () => {
+      screen.getByRole("button", { name: "Dismiss" }).click();
+      await Promise.resolve();
+    });
+    expect(
+      screen.queryByRole("region", { name: "Export cancelled" })
+    ).toBeNull();
   });
 
   it("shows Chakra's own loading affordance while the export runs", async () => {

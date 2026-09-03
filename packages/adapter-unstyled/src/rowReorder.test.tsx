@@ -1,7 +1,6 @@
+import type { TableRowReorderState } from "@adapttable/core";
 import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
-import type { TableRowReorderState } from "@adapttable/core";
 
 import { RowReorderHandle } from "./components/kitControls";
 import { DataTable } from "./data-table.test-utils";

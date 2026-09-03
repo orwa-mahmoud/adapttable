@@ -153,6 +153,7 @@ export const shadcnClassNames: {
     exportProgressCancel: string;
     exportProgressRetry: string;
     exportProgressDownload: string;
+    exportProgressDismiss: string;
     filtersBackdrop: string;
     filtersPanel: string;
     filtersPopover: string;
