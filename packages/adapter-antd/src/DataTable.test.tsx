@@ -2026,10 +2026,20 @@ describe("header filter trigger", () => {
     fireEvent.mouseDown(
       document.querySelector('[data-adapttable-part="filter-operator"]')!
     );
+    fireEvent.click(
+      document.querySelector('[data-adapttable-part="filter-operator"]')!
+    );
     const option = document.querySelectorAll(".ant-select-item-option")[1];
-    if (option) fireEvent.click(option);
+    expect(option).toBeTruthy();
+    fireEvent.mouseDown(option!);
+    fireEvent.click(option!);
     expect(
       document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+    expect(
+      document.querySelector(
+        '[data-adapttable-part="filter-header-cell"] .ant-select-item-option'
+      )
     ).not.toBeNull();
   });
 });

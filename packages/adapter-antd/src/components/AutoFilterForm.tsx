@@ -40,6 +40,19 @@ export interface AutoFilterFormProps<TRow> {
   registry?: FilterTypeRegistry;
 }
 
+/**
+ * Header-filter overlays dismiss on a true outside press. Antd Select menus
+ * default to `document.body`, which is outside — pin them to the overlay
+ * when one is open. The Filters popover/drawer keep the body portal so a
+ * scrolling panel cannot clip the list.
+ */
+function filterSelectPopupContainer(trigger: HTMLElement): HTMLElement {
+  const overlay = trigger.closest(
+    '[data-adapttable-part="filter-header-cell"]'
+  );
+  return overlay instanceof HTMLElement ? overlay : document.body;
+}
+
 /** A scalar state value as input text (`""` when unset). */
 function scalarValue(value: FilterValue): string {
   return typeof value === "string" ? value : "";
@@ -71,6 +84,7 @@ function RelativeTokenField({
         style={{ flex: "1 1 8.5rem", minWidth: "8.5rem" }}
         aria-label={labels.opRelative}
         value={preset}
+        getPopupContainer={filterSelectPopupContainer}
         onChange={(next) => {
           const found = RELATIVE_PRESETS.find((p) => p === next);
           if (found) onValue(joinRelativeToken(found, n));
@@ -152,6 +166,7 @@ function RangeField<TRow>({
         data-adapttable-part="filter-operator"
         placeholder={labels.operator}
         value={op}
+        getPopupContainer={filterSelectPopupContainer}
         onChange={(next) => {
           const found = ops.find((choice) => choice === next);
           setOp(found);
@@ -208,6 +223,7 @@ function TextFilterField<TRow>({
         aria-label={`${label} ${labels.operator}`}
         data-adapttable-part="filter-operator"
         value={op}
+        getPopupContainer={filterSelectPopupContainer}
         onChange={(next) => {
           const found = ops.find((choice) => choice === next);
           if (found) write(found, value);
@@ -245,6 +261,7 @@ function BooleanFilterField<TRow>({
       aria-label={label}
       data-adapttable-part="filter-select"
       value={choice}
+      getPopupContainer={filterSelectPopupContainer}
       onChange={(next) => {
         if (next === "" || next === "true" || next === "false") write(next);
       }}
@@ -267,7 +284,8 @@ interface ControlProps<TRow> {
 /**
  * The kit-native widget for one definition. Every control reads
  * `extra[stateKey]` and writes through `setExtra` / `setExtras`; popup menus
- * use antd's portal so the scrolling filter panel cannot clip them. Empty text
+ * stay in the header-filter overlay when one is open, and otherwise portal to
+ * `document.body` so a scrolling Filters panel cannot clip them. Empty text
  * or an empty list clears the key (and its URL param).
  *
  * Select/multiSelect choices resolve through `useFilterOptions`, never by
@@ -299,6 +317,7 @@ function FilterControl<TRow>({
           aria-label={label}
           value={scalarValue(extra[def.key])}
           loading={loading}
+          getPopupContainer={filterSelectPopupContainer}
           onChange={(next) => setExtra(def.key, next)}
           options={[
             { value: "", label: "All" },
@@ -322,6 +341,7 @@ function FilterControl<TRow>({
           placeholder={label}
           loading={loading}
           style={{ width: "100%" }}
+          getPopupContainer={filterSelectPopupContainer}
           options={options.map((option) => ({
             label: option.label,
             value: option.value,

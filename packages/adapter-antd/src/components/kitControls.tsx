@@ -301,7 +301,8 @@ export function FilterHeaderTrigger<TRow>(
   const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
     props,
     {
-      nestedSelector: ".ant-dropdown,.ant-select-dropdown,.ant-picker-dropdown",
+      nestedSelector:
+        ".ant-dropdown,.ant-select-dropdown,.ant-picker-dropdown,[role='listbox']",
     }
   );
   useLayoutEffect(() => {

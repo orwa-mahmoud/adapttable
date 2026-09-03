@@ -450,4 +450,22 @@ describe("<AutoFilterForm> operator-first range widgets (Ant Design)", () => {
       shippedOp: "gte",
     });
   });
+
+  it("keeps the operator list inside a header-filter overlay", () => {
+    render(
+      <div data-adapttable-part="filter-header-cell">
+        <AutoFilterForm
+          defs={[{ key: "name", type: "text", label: "Person" }]}
+          source={staticSource({})}
+          labels={defaultLabels}
+        />
+      </div>
+    );
+    openOperator("Person Operator");
+    expect(
+      document.querySelector(
+        '[data-adapttable-part="filter-header-cell"] .ant-select-item-option'
+      )
+    ).not.toBeNull();
+  });
 });
