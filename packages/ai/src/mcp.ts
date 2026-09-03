@@ -5,6 +5,16 @@ import type {
   JsonSchema,
 } from "./types";
 
+export {
+  type ApprovalPolicy,
+  CAPABILITY_KEYS,
+  type CapabilityKey,
+  type CommitPolicy,
+  type RowAddressScope,
+  type WritePolicy,
+} from "./keys";
+export type * from "./types";
+
 /** MCP `tools/list` item. No `@modelcontextprotocol/sdk` dependency. */
 export interface McpTool {
   readonly name: string;

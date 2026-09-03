@@ -35,6 +35,7 @@ export type {
   RowReadQuery,
   RowRef,
   RowWindow,
+  RowWindowRow,
   TableAgentBridge,
   WriteExecuteResult,
   WriteProposal,

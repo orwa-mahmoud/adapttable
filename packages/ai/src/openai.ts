@@ -1,5 +1,15 @@
 import type { AgentSession, ExecuteResult, JsonSchema } from "./types";
 
+export {
+  type ApprovalPolicy,
+  CAPABILITY_KEYS,
+  type CapabilityKey,
+  type CommitPolicy,
+  type RowAddressScope,
+  type WritePolicy,
+} from "./keys";
+export type * from "./types";
+
 /** Chat Completions function-tool shape. No `openai` package dependency. */
 export interface OpenAIFunctionTool {
   readonly type: "function";

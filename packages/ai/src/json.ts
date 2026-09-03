@@ -2,6 +2,13 @@ import type { AgentSession, ExecuteResult, JsonSchema } from "./types";
 
 export type { AgentEnvelope, ApprovalPolicy, CommitPolicy } from "./envelope";
 export { executeEnvelope, parseEnvelope } from "./envelope";
+export {
+  CAPABILITY_KEYS,
+  type CapabilityKey,
+  type RowAddressScope,
+  type WritePolicy,
+} from "./keys";
+export type * from "./types";
 
 /** Provider-neutral function-tool definition. `name` is the capability key. */
 export interface JsonFunctionTool {

@@ -43,6 +43,16 @@ import type {
   WriteProposal,
 } from "./types";
 
+export {
+  type ApprovalPolicy,
+  CAPABILITY_KEYS,
+  type CapabilityKey,
+  type CommitPolicy,
+  type RowAddressScope,
+  type WritePolicy,
+} from "./keys";
+export type * from "./types";
+
 const PAGE_ONLY_SOURCE = {
   fullDataset: false,
   grouping: false as const,

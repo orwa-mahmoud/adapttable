@@ -1195,7 +1195,7 @@ agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 the types `AgentApply`, `AgentColumn`, `AgentManifest`, `AgentObservation`,
 `AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
 `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowReadQuery`, `RowRef`,
-`RowWindow`, `TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`,
+`RowWindow`, `RowWindowRow`, `TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`,
 `WriteRowResult`. `@adapttable/ai/react` exports `tableAgent`,
 `TableAgentOptions` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
