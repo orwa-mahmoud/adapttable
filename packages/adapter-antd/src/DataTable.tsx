@@ -26,9 +26,9 @@ import {
   type TableLabels,
   tableMinWidth,
   type TableSource,
-  type UrlStateAdapter,
   toolbarShowsFilters,
   type TreeEntry,
+  type UrlStateAdapter,
   useChromeScrollReset,
   type UseColumnLayoutResult,
   type UseDataTableResult,
@@ -64,12 +64,12 @@ import {
   FeatureProviders,
   FeatureSlot,
   fillSlot,
-  ForcedColorsStyle,
   FILTER_DRAWER,
   FILTERS_FORM,
   type FiltersFormSlotProps,
   FIND_BAR,
   flattenColumnTree,
+  ForcedColorsStyle,
   GRID_FOCUS_ANNOUNCER,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
@@ -126,11 +126,11 @@ import {
   cloneElement,
   type CSSProperties,
   type HTMLAttributes,
-  type TdHTMLAttributes,
   isValidElement,
   type ReactElement,
   type ReactNode,
   type Ref,
+  type TdHTMLAttributes,
   type UIEventHandler,
   useCallback,
   useMemo,
@@ -2086,6 +2086,16 @@ function AntdTableBody<TRow>({
     enabled: animate,
   });
   const virtualBody = virtualize && !grouping && !c.isPaged;
+  // antd's native virtual table (and any maxHeight box) already scrolls
+  // inside a fixed-height scroller. The toolbar sits outside that box, so
+  // page-sticky search would detach from the card while rows scroll in the
+  // box — pin the toolbar only when the page itself is the scroller.
+  const inScrollBox =
+    props.maxHeight != null || (virtualBody && c.body === "desktop");
+  const stickyBar = useStickyToolbarLayout(
+    resolveStickyToolbar(props.stickyHeader, props.stickyToolbar, inScrollBox),
+    props.stickyTop ?? 0
+  );
   const resolvedTableLabel = table.getTableProps()["aria-label"];
   // In virtual mode the rows live inside antd's own fixed-height scroll
   // container, so the page-level sentinel never reaches the viewport — the
@@ -2285,20 +2295,6 @@ function AntdTableBody<TRow>({
           table.columns,
           summaryLeadingCells(rowSelection, expandable, Boolean(c.rowReorder)),
           hasRowActions
-        );
-        // antd's native virtual table (and any maxHeight box) already scrolls
-        // inside a fixed-height scroller. The toolbar sits outside that box, so
-        // page-sticky search would detach from the card while rows scroll in the
-        // box — pin the toolbar only when the page itself is the scroller.
-        const inScrollBox =
-          props.maxHeight != null || (virtualBody && c.body === "desktop");
-        const stickyBar = useStickyToolbarLayout(
-          resolveStickyToolbar(
-            props.stickyHeader,
-            props.stickyToolbar,
-            inScrollBox
-          ),
-          props.stickyTop ?? 0
         );
         const sticky: TableProps<unknown>["sticky"] = props.stickyHeader
           ? { offsetHeader: inScrollBox ? 0 : stickyBar.headerOffset }
