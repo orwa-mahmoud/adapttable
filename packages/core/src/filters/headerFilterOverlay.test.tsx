@@ -13,8 +13,8 @@ import { defaultFilterRegistry } from "./filterBuiltins";
 import type { FilterFormSource } from "./filterForm";
 import {
   bindHeaderFilterDismiss,
-  HeaderFilterOpenProvider,
   headerFilterFieldIsComplete,
+  HeaderFilterOpenProvider,
   useHeaderFilterOverlay,
   usePointerDismiss,
 } from "./headerFilterOverlay";
