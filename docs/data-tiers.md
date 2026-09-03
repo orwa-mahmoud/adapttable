@@ -376,6 +376,13 @@ the way you configured it, and these guarantees do not apply.
   `InfiniteQueryLike`, so TanStack Query stays a type-only peer. See
   [`examples/mui-query-source.tsx`](../examples/mui-query-source.tsx) for a complete
   runnable version.
+- `selectPage` is read through a ref: the projected rows recompute when
+  fetched pages (or pagination mode) change, not when the selector
+  function's identity changes. That is the intended design — callers who
+  need a new selector to re-project without a data change must memoize it.
+  An unmemoized inline selector that closes over changing values will keep
+  showing the previous projection until the next fetch. There is no
+  `selectorKey`.
 - On the server tier, `source.refetch()` re-emits the current query;
   out-of-range pages and stale responses are handled for you via the abort
   signal.

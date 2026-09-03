@@ -85,7 +85,15 @@ export interface UseQuerySourceOptions<
    * receives the merged params and must return an {@link InfiniteQueryLike}.
    */
   usePaginatedQuery: (params: Partial<TParams>) => InfiniteQueryLike<TPage>;
-  /** Page → `{ items, total }` selector. Defaults to reading {@link PaginatedResponse}. */
+  /**
+   * Page → `{ rows, total? }` selector. Defaults to reading {@link PaginatedResponse}.
+   *
+   * The selector is read through a ref so the rows memo only refires when
+   * upstream query data (or pagination mode) changes. An unmemoized inline
+   * selector that changes identity — or closed-over values — without a data
+   * change will not re-project. Memoize the selector if it must update
+   * independently of the fetched pages.
+   */
   selectPage?: PageSelector<TRow, TPage>;
   /**
    * Static params merged into every query call (e.g. a parent scope id).
