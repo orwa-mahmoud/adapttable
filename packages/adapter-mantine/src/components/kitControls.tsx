@@ -9,7 +9,6 @@ import {
 } from "@adapttable/core";
 import {
   AgentApprovalChrome,
-  type AgentApprovalButtonProps,
   type AgentApprovalListProps,
   type AgentApprovalProps,
   BatchEditBarChrome,
@@ -413,26 +412,6 @@ export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
 }
 
-function ApprovalButton({
-  label,
-  part,
-  className,
-  onClick,
-}: Readonly<AgentApprovalButtonProps>) {
-  return (
-    <Button
-      type="button"
-      size="xs"
-      variant="default"
-      data-adapttable-part={part}
-      className={className}
-      onClick={onClick}
-    >
-      {label}
-    </Button>
-  );
-}
-
 function ApprovalList({
   part,
   label,
@@ -456,8 +435,8 @@ export function AgentApproval(props: Readonly<AgentApprovalProps>) {
     <AgentApprovalChrome
       {...props}
       slots={{
-        Approve: ApprovalButton,
-        Reject: ApprovalButton,
+        Approve: BatchButton,
+        Reject: BatchButton,
         List: ApprovalList,
       }}
     />
