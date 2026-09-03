@@ -192,16 +192,21 @@ function main() {
     { "headless.tsx": HEADLESS_V3 }
   );
   writeFileSync(join(scratch, "mantine-v2-rich.tsx"), v2RichApp("mantine"));
+  writeFileSync(
+    join(scratch, "mantine-v2-minimal.tsx"),
+    v2MinimalApp("mantine")
+  );
   console.log("headless + packed CLI ok");
 
   for (const kit of KITS) {
     const kitDir = mkdtempSync(join(tmpdir(), `v3-rehearse-${kit}-`));
     scratches.push(kitDir);
+    const kitPkg = `@adapttable/${kit}`;
     const dependencies = {
       react: "18.3.1",
       "react-dom": "18.3.1",
       "@adapttable/core": `file:${tarballs["@adapttable/core"]}`,
-      [`@adapttable/${kit}`]: `file:${tarballs[`@adapttable/${kit}`]}`,
+      [kitPkg]: `file:${tarballs[kitPkg]}`,
       ...KIT_PEERS[kit],
     };
     if (kit === "shadcn") {
@@ -226,8 +231,9 @@ function main() {
     "cli.js"
   );
   const rich = join(scratch, "mantine-v2-rich.tsx");
+  const lean = join(scratch, "mantine-v2-minimal.tsx");
   process.stdout.write("packed migrate-v3 moves adapter aliases … ");
-  const first = migrateOutput(cli, scratch, [rich]);
+  const first = migrateOutput(cli, scratch, [rich, lean]);
   if (!/moved 1 adapter import/.test(first)) {
     console.error(`\n✗ expected one moved import, got:\n${first}`);
     process.exit(1);
@@ -241,6 +247,14 @@ function main() {
     console.error("\n✗ migrate-v3 guessed an enabling-prop rewrite");
     process.exit(1);
   }
+  const rewrittenLean = readFileSync(lean, "utf8");
+  if (
+    !rewrittenLean.includes("enableColumnMenu") ||
+    !rewrittenLean.includes("exportCsv")
+  ) {
+    console.error("\n✗ migrate-v3 rewrote the lean v2 enabling props");
+    process.exit(1);
+  }
   if (!/ambiguous migration/.test(first)) {
     console.error(
       `\n✗ enabling props should be reported, not rewritten:\n${first}`
@@ -250,7 +264,7 @@ function main() {
   console.log("ok");
 
   process.stdout.write("packed migrate-v3 second run is a no-op … ");
-  const second = migrateOutput(cli, scratch, [rich, "--check"]);
+  const second = migrateOutput(cli, scratch, [rich, lean, "--check"]);
   if (!second.includes("Would update 0 file")) {
     console.error(`\n✗ second run was not a no-op:\n${second}`);
     process.exit(1);
