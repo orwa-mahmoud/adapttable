@@ -44,11 +44,11 @@ Measured 2026-09-03 from `pnpm budget` (this tree):
 | Import                         | min+gzip              |
 | ------------------------------ | --------------------- |
 | core simple                    | 19.4 KB               |
-| core every export              | 82.5 KB               |
-| mantine / mui / unstyled table | 61.9 / 60.8 / 62.4 KB |
-| chakra / antd / radix          | 63.3 / 64.0 / 63.3 KB |
+| core every export              | 82.7 KB               |
+| mantine / mui / unstyled table | 62.0 / 60.8 / 62.5 KB |
+| chakra / antd / radix          | 63.4 / 64.0 / 63.4 KB |
 | base-ui / shadcn               | 70.4 / 66.4 KB        |
-| mui + `standardFeatures()`     | 112.2 KB              |
+| mui + `standardFeatures()`     | 112.4 KB              |
 | mui all features               | 113.0 KB              |
 
 Published FAQ / getting-started / comparison range is **61–70 kB**. Ceiling
@@ -126,4 +126,17 @@ does not read `NPM_TOKEN`.
 
 ## Item 15 evidence
 
-_Empty until the final uninterrupted gate and Sonar 0/0 run._
+Recorded 2026-09-03 on `v3` at `9a4feb9c`.
+
+| Gate                             | Result                                                                                                         |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                     | EXIT 0. No lint or API-Extractor `Warning:` lines.                                                             |
+| Bundle budgets                   | 72 fixtures within budget. 9 published size figures match. Isolation: 72 packed graphs clean.                  |
+| `pnpm test:e2e`                  | 1444 passed (Chromium + chromium-dev).                                                                         |
+| `pnpm verify:release`            | EXIT 0: migrate:rehearse (8 kits × preset + minimal + refusals), consumer:harness, peer:floors (6 kit floors). |
+| `pnpm sonar:coverage`            | EXIT 0. `fix-lcov-paths` rewrote 13 lcov files.                                                                |
+| sonar-scanner → `localhost:9000` | EXECUTION SUCCESS. CE task `2007812e-0692-402a-b509-166f88eac086` → SUCCESS.                                   |
+| Open issues (`resolved=false`)   | **0**                                                                                                          |
+| Hotspots `TO_REVIEW`             | **0**                                                                                                          |
+
+The one leftover maintainability smell from the prior scan (`typescript:S6478` on the unstyled export-progress surface defined inside the button) is gone: that surface is a module-scope slot that reads `useClassNames()`. No new suppressions. Coverage floors and budgets were not lowered.
