@@ -1,3 +1,4 @@
+import { errorMessage } from "./errorMessage";
 import { guideOf, summaryOf } from "./guides";
 import {
   AGENT_SCHEMA_VERSION,
@@ -183,8 +184,7 @@ export function createAgentSession(
       if (error instanceof ApplyError) {
         return fail(error.code, error.message);
       }
-      const message = error instanceof Error ? error.message : String(error);
-      return fail("apply-failed", message);
+      return fail("apply-failed", errorMessage(error));
     }
   };
 
@@ -630,7 +630,7 @@ async function applyEach<T extends { rowKey: string; column?: string }>(
       await write(item);
       results.push({ rowKey: item.rowKey, column: item.column, ok: true });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = errorMessage(error);
       const code = error instanceof ApplyError ? error.code : "apply-failed";
       results.push({
         rowKey: item.rowKey,

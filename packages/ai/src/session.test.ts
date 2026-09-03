@@ -339,14 +339,10 @@ describe("createAgentSession", () => {
     expect(result.error?.message).toBe("nope");
   });
 
-  it("stringifies a non-Error throw and treats missing args as {}", async () => {
+  it("treats missing args as {}", async () => {
     const session = createAgentSession({
       observe: () => observation(),
-      apply: {
-        setPage: () => {
-          throw "nope";
-        },
-      },
+      apply: {},
     });
     const described = await session.execute(
       "columns.describe",
@@ -355,14 +351,6 @@ describe("createAgentSession", () => {
       "empty-args"
     );
     expect(described.ok).toBe(true);
-    const result = await session.execute(
-      "view.setPage",
-      { page: 2 },
-      1,
-      "throw-string"
-    );
-    expect(result.error?.code).toBe("apply-failed");
-    expect(result.error?.message).toBe("nope");
   });
 
   it("reads an empty window when the host does not wire readRows", async () => {

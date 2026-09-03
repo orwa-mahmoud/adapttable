@@ -1,3 +1,4 @@
+import { errorMessage } from "./errorMessage";
 import type { AgentSession, ExecuteResult, JsonSchema } from "./types";
 
 export {
@@ -185,8 +186,12 @@ function runDescribe(
   try {
     return ok(session, idempotencyKey, session.describe(key));
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return fail(session, idempotencyKey, "describe-failed", message);
+    return fail(
+      session,
+      idempotencyKey,
+      "describe-failed",
+      errorMessage(error)
+    );
   }
 }
 
@@ -226,8 +231,12 @@ export async function executeOpenAITool(
   try {
     args = parseArguments(call.function.arguments);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return fail(session, idempotencyKey, "invalid-arguments", message);
+    return fail(
+      session,
+      idempotencyKey,
+      "invalid-arguments",
+      errorMessage(error)
+    );
   }
 
   const name = call.function.name;

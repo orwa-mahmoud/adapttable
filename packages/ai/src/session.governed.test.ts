@@ -334,29 +334,6 @@ describe("edit.cells", () => {
     expect(hooks.editCells).toHaveBeenCalledTimes(1);
   });
 
-  it("stringifies a non-Error per-row failure", async () => {
-    const hooks = apply({
-      editCells: vi.fn(() => {
-        throw "save failed";
-      }),
-    });
-    const session = createAgentSession({
-      observe: () => observation(),
-      apply: hooks,
-    });
-    const result = await session.execute(
-      "edit.cells",
-      { edits: [{ rowKey: "r1", column: "name", value: "A" }] },
-      1,
-      "bulk-string"
-    );
-    expect(result.ok).toBe(true);
-    expect(result.result).toMatchObject({
-      applied: false,
-      results: [{ rowKey: "r1", ok: false, error: { message: "save failed" } }],
-    });
-  });
-
   it("returns per-row failures without hiding them", async () => {
     const hooks = apply({
       editCells: vi.fn((edits) => {

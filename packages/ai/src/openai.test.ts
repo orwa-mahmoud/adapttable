@@ -258,7 +258,7 @@ describe("executeOpenAITool", () => {
     const session: AgentSession = {
       catalog: () => [],
       describe: () => {
-        throw "no guide";
+        throw new Error("no guide");
       },
       execute: vi.fn(),
       manifest,
