@@ -232,14 +232,23 @@ function observationFromRuntime(
     writePolicy: options.writePolicy ?? "allow",
     approval: options.approval ?? "writes",
     commit: options.commit ?? "stage",
-    hasPagination: Boolean(query?.setPage),
-    hasSearch: Boolean(query?.setSearch),
-    hasSort: Boolean(query?.setSort),
-    hasFilters: ids.includes("filters"),
-    hasExport: ids.includes("export-csv"),
-    hasEdit: ids.includes("editing"),
-    hasReorder: ids.includes("row-reorder"),
-    hasSelection: apply.setSelection !== undefined,
+    hasPagination:
+      options.apply?.setPage !== undefined || Boolean(query?.setPage),
+    hasSearch:
+      options.apply?.setSearch !== undefined || Boolean(query?.setSearch),
+    hasSort: options.apply?.setSort !== undefined || Boolean(query?.setSort),
+    hasFilters:
+      options.apply?.setFilters !== undefined ||
+      Boolean(liveQueryFilters(query).setExtras),
+    hasExport: options.apply?.runExport !== undefined,
+    hasEdit:
+      options.apply?.editCells !== undefined ||
+      options.apply?.stageCells !== undefined ||
+      Boolean(view?.editing?.onCellEdit) ||
+      Boolean(view?.editing?.stageCell),
+    hasReorder: options.apply?.reorderRows !== undefined,
+    hasSelection:
+      options.apply?.setSelection !== undefined || Boolean(view?.selection),
     hasSavedViews: ids.includes("saved-views") && apply.applyView !== undefined,
     hasAdd: options.apply?.addRows !== undefined,
     hasDelete: options.apply?.deleteRows !== undefined,
@@ -262,7 +271,9 @@ function liveEditCells(
   if (extra?.editCells) return extra.editCells(edits);
   const view = runtime.view();
   const onCellEdit = view?.editing?.onCellEdit;
-  if (!onCellEdit) return;
+  if (!onCellEdit) {
+    throw new Error("editCells is not wired");
+  }
   for (const edit of edits) {
     const row = findRow(view, edit.rowKey);
     if (!row) {
@@ -280,7 +291,9 @@ function liveStageCells(
   if (extra?.stageCells) return extra.stageCells(edits);
   const view = runtime.view();
   const stage = view?.editing?.stageCell;
-  if (!stage) return;
+  if (!stage) {
+    throw new Error("stageCells is not wired");
+  }
   for (const edit of edits) {
     const row = findRow(view, edit.rowKey);
     if (!row) {
@@ -329,6 +342,52 @@ function pickResolveRow(
   };
 }
 
+interface LiveQueryFilters {
+  extra?: unknown;
+  setExtras?: (extra: Record<string, unknown>) => void;
+  clearExtras?: () => void;
+}
+
+function liveQueryFilters(
+  query: NonNullable<TableRuntimeView["query"]> | undefined
+): LiveQueryFilters {
+  return query ? (query as LiveQueryFilters) : {};
+}
+
+function applyLiveFilters(
+  query: NonNullable<TableRuntimeView["query"]> | undefined,
+  filters: unknown
+): boolean {
+  const live = liveQueryFilters(query);
+  if (!live.setExtras && !live.clearExtras) return false;
+  if (filters == null) {
+    live.clearExtras?.();
+    return true;
+  }
+  if (typeof filters !== "object" || Array.isArray(filters)) {
+    throw new Error("setFilters requires a filter object");
+  }
+  if (Object.keys(filters).length === 0) {
+    live.clearExtras?.();
+    return true;
+  }
+  live.setExtras?.(filters as Record<string, unknown>);
+  return true;
+}
+
+function requireQuery<
+  K extends "setPage" | "setLimit" | "setSearch" | "setSort",
+>(
+  view: () => TableRuntimeView<unknown> | undefined,
+  name: K
+): NonNullable<NonNullable<TableRuntimeView["query"]>[K]> {
+  const fn = view()?.query?.[name];
+  if (!fn) {
+    throw new Error(`${name} is not wired`);
+  }
+  return fn;
+}
+
 function applyFromRuntime(
   runtime: ReturnType<typeof useTableRuntime>,
   columns: readonly AgentColumn[],
@@ -336,26 +395,77 @@ function applyFromRuntime(
 ): AgentApply {
   const view = () => runtime.view();
   const apply: AgentApply = {
-    setPage: (page) => view()?.query?.setPage(page),
-    setLimit: (limit) => view()?.query?.setLimit(limit),
-    setSearch: (search) => view()?.query?.setSearch(search),
-    setSort: (key, dir) => view()?.query?.setSort(key, dir),
-    setGroupBy: (key) => view()?.groupingState?.setGroupBy(key),
-    setFilters: (filters) => extra?.setFilters?.(filters),
-    applyView: (viewId) => extra?.applyView?.(viewId),
-    runExport: (format) => extra?.runExport?.(format),
     readRows: pickReadRows(extra, view, columns),
     resolveRow: pickResolveRow(extra, view),
+    setPage: (page) => {
+      if (extra?.setPage) extra.setPage(page);
+      else requireQuery(view, "setPage")(page);
+    },
+    setLimit: (limit) => {
+      if (extra?.setLimit) extra.setLimit(limit);
+      else requireQuery(view, "setLimit")(limit);
+    },
+    setSearch: (search) => {
+      if (extra?.setSearch) extra.setSearch(search);
+      else requireQuery(view, "setSearch")(search);
+    },
+    setSort: (key, dir) => {
+      if (extra?.setSort) extra.setSort(key, dir);
+      else requireQuery(view, "setSort")(key, dir);
+    },
+    setGroupBy: (key) => {
+      if (extra?.setGroupBy) {
+        extra.setGroupBy(key);
+        return;
+      }
+      const grouping = view()?.groupingState;
+      if (!grouping) throw new Error("setGroupBy is not wired");
+      grouping.setGroupBy(key);
+    },
+    setFilters: (filters) => {
+      if (!applyLiveFilters(view()?.query, filters)) {
+        throw new Error("setFilters is not wired");
+      }
+    },
     editCells: (edits) => liveEditCells(runtime, extra, edits),
     stageCells: (edits) => liveStageCells(runtime, extra, edits),
-    addRows: (rows) => extra?.addRows?.(rows),
-    deleteRows: (keys) => extra?.deleteRows?.(keys),
-    reorderRows: (fromKey, toKey) => extra?.reorderRows?.(fromKey, toKey),
   };
-  if (extra?.setSelection ?? view()?.selection) {
-    apply.setSelection = (ids) => liveSetSelection(runtime, extra, ids);
+  if (extra?.applyView) {
+    apply.applyView = (viewId) => extra.applyView?.(viewId);
   }
+  if (extra?.runExport) {
+    apply.runExport = (format) => extra.runExport?.(format);
+  }
+  if (extra?.addRows) apply.addRows = (rows) => extra.addRows?.(rows);
+  if (extra?.deleteRows) apply.deleteRows = (keys) => extra.deleteRows?.(keys);
+  if (extra?.reorderRows) {
+    apply.reorderRows = (fromKey, toKey) => extra.reorderRows?.(fromKey, toKey);
+  }
+  apply.setSelection = (ids) => liveSetSelection(runtime, extra, ids);
   return apply;
+}
+
+function viewFingerprint(view: TableRuntimeView<unknown> | undefined): string {
+  const query = view?.query;
+  const rows = liveRows(view);
+  const getRowId = view?.getRowId;
+  const rowIds = getRowId ? rows.map((row) => getRowId(row)) : [];
+  const selected = view?.selection
+    ? [...view.selection.selectedIds].sort((left, right) =>
+        left.localeCompare(right)
+      )
+    : [];
+  return JSON.stringify({
+    page: query?.page ?? 1,
+    limit: query?.limit ?? 10,
+    search: query?.search ?? "",
+    sortBy: query?.sortBy ?? null,
+    sortDir: query?.sortDir ?? null,
+    groupBy: view?.groupingState?.groupBy ?? null,
+    extra: liveQueryFilters(query).extra ?? null,
+    rowIds,
+    selected,
+  });
 }
 
 function isMutatingKey(key: string): boolean {
@@ -373,50 +483,89 @@ function TableAgentProvider({
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
   const [revision, setRevision] = useState(1);
+  const revisionRef = useRef(revision);
+  revisionRef.current = revision;
   const [pending, setPending] = useState<{
+    proposals: readonly WriteProposal[];
+    resolve: (ok: boolean) => void;
+  } | null>(null);
+  const pendingRef = useRef<{
     proposals: readonly WriteProposal[];
     resolve: (ok: boolean) => void;
   } | null>(null);
   const bump = useRef(() => setRevision((n) => n + 1));
   bump.current = () => setRevision((n) => n + 1);
 
+  const stamp = viewFingerprint(runtime.view());
+  const stampRef = useRef<string | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (stampRef.current === undefined) {
+      stampRef.current = stamp;
+      return;
+    }
+    if (stampRef.current === stamp) return;
+    stampRef.current = stamp;
+    bump.current();
+  }, [stamp]);
+
   const hostApprove = options.onApprove;
   const waitForChrome = useRef<(proposal: unknown) => Promise<boolean>>(() =>
     Promise.resolve(false)
   );
-  waitForChrome.current = (proposal) =>
-    new Promise<boolean>((resolve) => {
+  waitForChrome.current = (proposal) => {
+    if (pendingRef.current) {
+      return Promise.reject(new Error("an approval is already pending"));
+    }
+    return new Promise<boolean>((resolve) => {
       const list = Array.isArray(proposal) ? (proposal as WriteProposal[]) : [];
-      setPending({
+      const entry = {
         proposals: list,
-        resolve: (ok) => {
+        resolve: (ok: boolean) => {
+          if (pendingRef.current !== entry) return;
+          pendingRef.current = null;
           setPending(null);
           resolve(ok);
         },
-      });
+      };
+      pendingRef.current = entry;
+      setPending(entry);
     });
+  };
+
+  useEffect(
+    () => () => {
+      pendingRef.current?.resolve(false);
+    },
+    []
+  );
 
   const session = useMemo(() => {
-    const apply = {
-      ...applyFromRuntime(
-        runtime,
-        options.columns
-          ? Object.entries(options.columns).map(([id, extra]) => ({
-              id,
-              label: extra.label ?? id,
-              type: extra.type ?? "unknown",
-              readable: extra.readable ?? true,
-              writable: extra.writable ?? false,
-              sortable: extra.sortable ?? false,
-            }))
-          : [],
-        options.apply
-      ),
-      ...options.apply,
+    const fromRuntime = applyFromRuntime(
+      runtime,
+      options.columns
+        ? Object.entries(options.columns).map(([id, extra]) => ({
+            id,
+            label: extra.label ?? id,
+            type: extra.type ?? "unknown",
+            readable: extra.readable ?? true,
+            writable: extra.writable ?? false,
+            sortable: extra.sortable ?? false,
+          }))
+        : [],
+      options.apply
+    );
+    const apply: AgentApply = { ...fromRuntime, ...options.apply };
+    apply.setFilters = (filters) => {
+      options.apply?.setFilters?.(filters);
+      const applied = applyLiveFilters(runtime.view()?.query, filters);
+      if (!options.apply?.setFilters && !applied) {
+        throw new Error("setFilters is not wired");
+      }
     };
     const observe =
       options.observe ??
-      (() => observationFromRuntime(options, runtime, revision, apply));
+      (() =>
+        observationFromRuntime(options, runtime, revisionRef.current, apply));
     const onApprove =
       hostApprove ??
       (options.approval === "never"
@@ -443,7 +592,7 @@ function TableAgentProvider({
       },
       manifest: () => inner.manifest(),
     };
-  }, [options, runtime, revision, hostApprove]);
+  }, [options, runtime, hostApprove]);
 
   useEffect(() => {
     options.bridge?.attach?.(session);

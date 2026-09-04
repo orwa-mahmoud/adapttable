@@ -55,6 +55,7 @@ export const DOCS = [
   "agent-capabilities.md",
   "ai.md",
   "ai-integrations.md",
+  "ai-http.md",
   "customization.md",
   "i18n-rtl.md",
   "accessibility.md",

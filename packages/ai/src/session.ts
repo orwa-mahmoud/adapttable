@@ -95,6 +95,7 @@ export function createAgentSession(
   options: CreateAgentSessionOptions
 ): AgentSession {
   const replay = new Map<string, ExecuteResult>();
+  const inflight = new Map<string, Promise<ExecuteResult>>();
 
   const catalog = (): CatalogEntry[] => {
     const observation = options.observe();
@@ -115,15 +116,12 @@ export function createAgentSession(
     return guideOf(key);
   };
 
-  const execute = async (
+  const runExecute = async (
     key: string,
     args: unknown,
     expectedRevision: number,
     idempotencyKey: string
   ): Promise<ExecuteResult> => {
-    const cached = replay.get(idempotencyKey);
-    if (cached) return cached;
-
     const fail = (code: string, message: string): ExecuteResult => {
       const result: ExecuteResult = {
         ok: false,
@@ -163,6 +161,7 @@ export function createAgentSession(
         args ?? {},
         observation,
         options.apply,
+        options.observe,
         options.onApprove
       );
       if (
@@ -194,6 +193,24 @@ export function createAgentSession(
     }
   };
 
+  const execute = (
+    key: string,
+    args: unknown,
+    expectedRevision: number,
+    idempotencyKey: string
+  ): Promise<ExecuteResult> => {
+    const cached = replay.get(idempotencyKey);
+    if (cached) return Promise.resolve(cached);
+    const running = inflight.get(idempotencyKey);
+    if (running) return running;
+
+    const pending = runExecute(key, args, expectedRevision, idempotencyKey);
+    inflight.set(idempotencyKey, pending);
+    return pending.finally(() => {
+      inflight.delete(idempotencyKey);
+    });
+  };
+
   return {
     catalog,
     describe,
@@ -212,11 +229,21 @@ function isWriteResult(value: unknown): value is WriteExecuteResult {
   );
 }
 
+function assertApply<K extends keyof AgentApply>(
+  apply: AgentApply,
+  name: K
+): asserts apply is AgentApply & Required<Pick<AgentApply, K>> {
+  if (apply[name] === undefined) {
+    throw new ApplyError("not-wired", `${String(name)} is not wired`);
+  }
+}
+
 async function dispatch(
   key: CapabilityKey,
   args: unknown,
   observation: AgentObservation,
   apply: AgentApply,
+  observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<unknown> {
   const body = args as Record<string, unknown>;
@@ -241,51 +268,62 @@ async function dispatch(
           `page ${page} exceeds pageMax ${observation.pageMax}`
         );
       }
-      apply.setPage?.(page);
-      if (typeof body.limit === "number") apply.setLimit?.(body.limit);
+      assertApply(apply, "setPage");
+      apply.setPage(page);
+      if (typeof body.limit === "number") {
+        assertApply(apply, "setLimit");
+        apply.setLimit(body.limit);
+      }
       return { ok: true, revision: observation.viewRevision + 1 };
     }
     case "view.setSort": {
       const sortKey = body.key as string | null | undefined;
-      apply.setSort?.(
+      assertApply(apply, "setSort");
+      apply.setSort(
         sortKey ?? undefined,
         body.dir as "asc" | "desc" | undefined
       );
       return { ok: true, revision: observation.viewRevision + 1 };
     }
     case "view.setSearch":
-      apply.setSearch?.(typeof body.query === "string" ? body.query : "");
+      assertApply(apply, "setSearch");
+      apply.setSearch(typeof body.query === "string" ? body.query : "");
       return { ok: true, revision: observation.viewRevision + 1 };
     case "view.setFilters":
-      apply.setFilters?.(body.filters);
+      assertApply(apply, "setFilters");
+      apply.setFilters(body.filters);
       return { ok: true, revision: observation.viewRevision + 1 };
     case "view.setGroupBy": {
       const groupKey = body.key as string | null | undefined;
-      apply.setGroupBy?.(groupKey ?? undefined);
+      assertApply(apply, "setGroupBy");
+      apply.setGroupBy(groupKey ?? undefined);
       return { ok: true, revision: observation.viewRevision + 1 };
     }
     case "view.setSelection": {
       const ids = body.ids as readonly string[] | undefined;
-      apply.setSelection?.(ids);
+      assertApply(apply, "setSelection");
+      apply.setSelection(ids);
       return { ok: true, revision: observation.viewRevision + 1 };
     }
     case "views.apply":
-      apply.applyView?.(String(body.viewId));
+      assertApply(apply, "applyView");
+      apply.applyView(String(body.viewId));
       return { ok: true, revision: observation.viewRevision + 1 };
     case "rows.read":
       return readRows(body, observation, apply);
     case "rows.resolve":
       return resolveRowArg(body, observation, apply);
     case "export.run":
-      return apply.runExport?.(String(body.format));
+      assertApply(apply, "runExport");
+      return apply.runExport(String(body.format));
     case "edit.cells":
-      return mutateCells(body, observation, apply, onApprove);
+      return mutateCells(body, observation, apply, observe, onApprove);
     case "rows.add":
-      return mutateAdd(body, observation, apply, onApprove);
+      return mutateAdd(body, observation, apply, observe, onApprove);
     case "rows.delete":
-      return mutateDelete(body, observation, apply, onApprove);
+      return mutateDelete(body, observation, apply, observe, onApprove);
     case "rows.reorder":
-      return mutateReorder(body, observation, apply, onApprove);
+      return mutateReorder(body, observation, apply, observe, onApprove);
   }
 }
 
@@ -445,6 +483,7 @@ async function mutateCells(
   body: Record<string, unknown>,
   observation: AgentObservation,
   apply: AgentApply,
+  observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
   const edits = body.edits as Record<string, unknown>[];
@@ -478,6 +517,7 @@ async function mutateCells(
     "edit.cells",
     observation,
     proposals,
+    observe,
     onApprove,
     async () => {
       const commit = commitOf(observation);
@@ -494,6 +534,9 @@ async function mutateCells(
         }
         await Promise.resolve(apply.stageCells(resolved));
         return { applied: true };
+      }
+      if (!apply.editCells) {
+        throw new ApplyError("not-wired", "editCells is not wired");
       }
       return applyEach(resolved, async (edit) => {
         await Promise.resolve(apply.editCells?.([edit]));
@@ -525,6 +568,7 @@ async function mutateAdd(
   body: Record<string, unknown>,
   observation: AgentObservation,
   apply: AgentApply,
+  observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
   const rows = body.rows as Record<string, unknown>[];
@@ -537,9 +581,11 @@ async function mutateAdd(
     "rows.add",
     observation,
     proposals,
+    observe,
     onApprove,
     async () => {
-      await Promise.resolve(apply.addRows?.(rows));
+      assertApply(apply, "addRows");
+      await Promise.resolve(apply.addRows(rows));
       return { applied: true };
     }
   );
@@ -549,6 +595,7 @@ async function mutateDelete(
   body: Record<string, unknown>,
   observation: AgentObservation,
   apply: AgentApply,
+  observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
   const keys = body.keys as string[];
@@ -557,8 +604,10 @@ async function mutateDelete(
     "rows.delete",
     observation,
     proposals,
+    observe,
     onApprove,
     async () => {
+      assertApply(apply, "deleteRows");
       return applyEach(
         keys.map((rowKey) => ({ rowKey })),
         async (entry) => {
@@ -573,6 +622,7 @@ async function mutateReorder(
   body: Record<string, unknown>,
   observation: AgentObservation,
   apply: AgentApply,
+  observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
   const fromKey = String(body.fromKey);
@@ -585,9 +635,11 @@ async function mutateReorder(
     "rows.reorder",
     observation,
     proposals,
+    observe,
     onApprove,
     async () => {
-      await Promise.resolve(apply.reorderRows?.(fromKey, toKey));
+      assertApply(apply, "reorderRows");
+      await Promise.resolve(apply.reorderRows(fromKey, toKey));
       return { applied: true };
     }
   );
@@ -597,6 +649,7 @@ async function finishWrite(
   key: CapabilityKey,
   observation: AgentObservation,
   proposals: readonly WriteProposal[],
+  observe: () => AgentObservation,
   onApprove: ((proposal: unknown) => Promise<boolean>) | undefined,
   applyWrite: () => Promise<{
     applied: boolean;
@@ -606,6 +659,13 @@ async function finishWrite(
   const approval = await decideApproval(key, observation, proposals, onApprove);
   if (approval === "pending" || approval === "rejected") {
     return writePayload(proposals, false, approval);
+  }
+  const latest = observe();
+  if (latest.viewRevision !== observation.viewRevision) {
+    throw new ApplyError(
+      "revision-mismatch",
+      `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+    );
   }
   try {
     const outcome = await applyWrite();

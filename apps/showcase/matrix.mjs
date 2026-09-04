@@ -1343,8 +1343,8 @@ export function Sales({ rows, columns }) {
       "Drive a live {kit} data table through catalog, describe and execute — a local tool-call playground, no model, no credentials, and writes that still go through the host.",
     intro: [
       "`@adapttable/ai` is optional and provider-neutral. Compose `tableAgent` next to {kit}'s `filters` and `agentApproval`. The session advertises only what this table has mounted: filtering and a host-owned write here, never grouping or pivoting.",
-      "The panel above the grid is a tool-call playground, not a language model. It shows the live compact catalog, lets you inspect one capability schema, and runs curated `session.execute` calls. Filter Core team. Propose Jonah's salary. Approve stages it; Save commits it.",
-      "Three integration levels share that session: a custom bridge that maps any agent format onto `execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI or MCP helpers from your own runtime. Execution never requires another model call.",
+      "The panel above the grid defaults to Simulated: local scripted `session.execute` buttons, not a language model. Filter Core team, then Clear filter before proposing Jonah's salary. Approve stages it; Save commits it. Switch to Connect backend to send a real message to an endpoint you run — same table session, same kit approval chrome. Setup is on the Connect a backend docs page.",
+      "Three integration levels share that session: a custom bridge that maps any agent format onto `execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.",
     ],
     card: "Live catalog, describe, execute — no model, host-owned writes.",
     snippet: `import { tableAgent } from "@adapttable/ai/react";
@@ -1389,7 +1389,7 @@ export function Orders({ rows, columns, onEdit }) {
       tailwind:
         "Filters and approval carry the map's classes. The playground is host chrome so a tool-call is labelled as one, not as a language model.",
     },
-    docs: ["ai-integrations", "ai", "agent-capabilities"],
+    docs: ["ai-http", "ai-integrations", "ai", "agent-capabilities"],
   },
 ];
 

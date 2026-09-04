@@ -40,6 +40,7 @@ import {
 
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { TableSourceCapabilities } from "../source/capabilities";
+import type { ExtraFilters } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   getAppliedFeatures,
@@ -251,6 +252,9 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly setLimit: (limit: number) => void;
     readonly setSearch: (search: string) => void;
     readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
+    readonly extra?: ExtraFilters;
+    readonly setExtras?: (extra: ExtraFilters) => void;
+    readonly clearExtras?: () => void;
   };
   /**
    * Declared source capabilities from the live `TableSource`, when the

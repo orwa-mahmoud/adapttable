@@ -117,6 +117,9 @@ function RuntimePublisher<TRow>({
       setLimit: chrome.source.setLimit,
       setSearch: chrome.source.setSearch,
       setSort: chrome.source.setSort,
+      extra: chrome.source.extra,
+      setExtras: chrome.source.setExtras,
+      clearExtras: chrome.source.clearExtras,
     },
     grouping: chrome.grouping,
     groupingState: {

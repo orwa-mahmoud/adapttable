@@ -87,6 +87,7 @@ describe("tableAgent", () => {
           tableAgent({
             tableId: "one",
             columns: { name: { type: "string" } },
+            apply: { setFilters: vi.fn() },
             bridge: {
               publish: (m) => manifests.push(m),
               attach: (s) => attached.push(s),
@@ -113,6 +114,122 @@ describe("tableAgent", () => {
     await waitFor(() =>
       expect(getByTestId("keys").textContent).toContain("view.setFilters")
     );
+  });
+
+  it("omits view.setFilters until an apply path exists", async () => {
+    let session: AgentSession | undefined;
+    const { rerender, getByTestId } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "filters" },
+        ]}
+        view={{
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(getByTestId("keys").textContent).not.toContain("view.setFilters");
+
+    session = undefined;
+    const setExtras = vi.fn();
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "filters" },
+        ]}
+        view={{
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+            extra: {},
+            setExtras,
+            clearExtras: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("view.setFilters")
+    );
+    await session!.execute(
+      "view.setFilters",
+      { filters: { team: ["Core"] } },
+      session!.manifest().viewRevision,
+      "live-filter"
+    );
+    expect(setExtras).toHaveBeenCalledWith({ team: ["Core"] });
+  });
+
+  it("keeps one session and bumps revision when the live view changes", async () => {
+    const attached: AgentSession[] = [];
+    const feature = tableAgent({
+      tableId: "one",
+      bridge: { attach: (s) => attached.push(s) },
+    });
+    const { rerender } = render(
+      <Harness
+        features={[feature]}
+        view={{
+          rows: [{ id: "a" }],
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: () => "a",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(attached).toHaveLength(1));
+    expect(attached[0]!.manifest().viewRevision).toBe(1);
+
+    rerender(
+      <Harness
+        features={[feature]}
+        view={{
+          rows: [{ id: "b" }],
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: () => "b",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() =>
+      expect(attached[0]!.manifest().viewRevision).toBeGreaterThan(1)
+    );
+    expect(attached.at(-1)).toBe(attached[0]);
   });
 
   it("uses a host observe/apply pair and keeps two tables isolated", async () => {
@@ -327,5 +444,51 @@ describe("tableAgent", () => {
     const keys = session!.catalog().map((entry) => entry.key);
     expect(keys).toContain("rows.add");
     expect(keys).toContain("rows.delete");
+  });
+
+  it("rejects a second chrome approval while one is pending", async () => {
+    let session: AgentSession | undefined;
+    const editCells = vi.fn();
+    const { unmount } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            approval: "writes",
+            commit: "immediate",
+            columns: { name: { type: "string", writable: true } },
+            apply: {
+              editCells,
+              resolveRow: () => ({ rowKey: "r1", scope: "visible" }),
+            },
+            bridge: { attach: (next) => (session = next) },
+          }),
+          { id: "editing" },
+        ]}
+        view={{
+          rows: [{ id: "r1" }],
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: () => "Ada",
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const first = session!.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada Lovelace" }] },
+      session!.manifest().viewRevision,
+      "edit-1"
+    );
+    const second = await session!.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Other" }] },
+      session!.manifest().viewRevision,
+      "edit-2"
+    );
+    expect(second.ok).toBe(false);
+    expect(second.error?.message).toMatch(/already pending/);
+    expect(editCells).not.toHaveBeenCalled();
+    unmount();
+    await first;
   });
 });

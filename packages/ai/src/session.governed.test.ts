@@ -312,6 +312,35 @@ describe("edit.cells", () => {
     expect(result.error?.code).toBe("column-not-writable");
   });
 
+  it("shares one in-flight execute for the same idempotency key", async () => {
+    let release!: (ok: boolean) => void;
+    const gate = new Promise<boolean>((resolve) => {
+      release = resolve;
+    });
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => gate,
+    });
+    const first = session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "same"
+    );
+    const second = session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Other" }] },
+      1,
+      "same"
+    );
+    release(true);
+    const [a, b] = await Promise.all([first, second]);
+    expect(a).toEqual(b);
+    expect(hooks.editCells).toHaveBeenCalledTimes(1);
+  });
+
   it("replays the same idempotency key", async () => {
     const hooks = apply();
     const session = createAgentSession({
@@ -447,6 +476,30 @@ describe("approval and commit", () => {
     expect(hooks.editCells).not.toHaveBeenCalled();
   });
 
+  it("rechecks the view revision after approval before writing", async () => {
+    let revision = 1;
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () =>
+        observation({ viewRevision: revision, approval: "writes" }),
+      apply: hooks,
+      onApprove: () => {
+        revision = 2;
+        return Promise.resolve(true);
+      },
+    });
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "stale-after-approve"
+    );
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("revision-mismatch");
+    expect(hooks.editCells).not.toHaveBeenCalled();
+    expect(hooks.stageCells).not.toHaveBeenCalled();
+  });
+
   it("records a rejected approval without writing", async () => {
     const session = createAgentSession({
       observe: () => observation({ approval: "writes" }),
@@ -496,6 +549,22 @@ describe("approval and commit", () => {
     );
     expect(hooks.editCells).not.toHaveBeenCalled();
     expect(result.result).toMatchObject({ applied: false });
+  });
+
+  it("immediate commit without editCells is not-wired", async () => {
+    const hooks = apply({ editCells: undefined });
+    const session = createAgentSession({
+      observe: () => observation({ approval: "never", commit: "immediate" }),
+      apply: hooks,
+    });
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "no-edit"
+    );
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("not-wired");
   });
 
   it("commit immediate calls editCells now", async () => {

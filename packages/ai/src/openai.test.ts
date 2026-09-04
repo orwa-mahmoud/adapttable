@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { AGENT_SCHEMA_VERSION } from "./keys";
-import { executeOpenAITool, toOpenAITools } from "./openai";
+import {
+  executeOpenAITool,
+  fromOpenAIToolName,
+  toOpenAIToolName,
+  toOpenAITools,
+} from "./openai";
 import { createAgentSession } from "./session";
 import type {
   AgentManifest,
@@ -74,8 +79,10 @@ describe("toOpenAITools", () => {
     const tools = toOpenAITools(session);
     expect(tools.every((tool) => tool.type === "function")).toBe(true);
     expect(tools.map((tool) => tool.function.name)).toEqual(
-      session.catalog().map((entry) => entry.key)
+      session.catalog().map((entry) => toOpenAIToolName(entry.key))
     );
+    expect(tools.map((tool) => tool.function.name)).toContain("view_setPage");
+    expect(tools.some((tool) => tool.function.name.includes("."))).toBe(false);
     expect(tools.every((tool) => tool.function.strict === true)).toBe(true);
     expect(
       tools.every(
@@ -120,6 +127,17 @@ describe("toOpenAITools", () => {
       "describe",
       "execute",
     ]);
+    expect(tools[2]?.function.parameters.required).toEqual(["key", "args"]);
+    expect(tools[2]?.function.parameters.properties?.args).toMatchObject({
+      type: "object",
+    });
+  });
+
+  it("maps catalog dots to OpenAI-safe names and back", () => {
+    expect(toOpenAIToolName("view.setPage")).toBe("view_setPage");
+    expect(fromOpenAIToolName("view_setPage")).toBe("view.setPage");
+    expect(fromOpenAIToolName("view.setPage")).toBe("view.setPage");
+    expect(fromOpenAIToolName("catalog")).toBe("catalog");
   });
 });
 
@@ -149,6 +167,14 @@ describe("executeOpenAITool", () => {
     expect(fromObject.ok).toBe(true);
     expect(apply.setPage).toHaveBeenCalledWith(2);
     expect(apply.setPage).toHaveBeenCalledWith(3);
+    const fromSafe = await executeOpenAITool(
+      session,
+      { function: { name: "view_setPage", arguments: { page: 4 } } },
+      1,
+      "safe"
+    );
+    expect(fromSafe.ok).toBe(true);
+    expect(apply.setPage).toHaveBeenCalledWith(4);
   });
 
   it("treats an empty argument string as {} and reports invalid JSON", async () => {

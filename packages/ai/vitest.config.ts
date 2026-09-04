@@ -1,8 +1,17 @@
+import { fileURLToPath } from "node:url";
+
 import { mergeConfig } from "vitest/config";
 
 import { sharedConfig } from "../../vitest.shared.ts";
 
 export default mergeConfig(sharedConfig, {
+  resolve: {
+    alias: {
+      "@adapttable/ai/http": fileURLToPath(
+        new URL("./src/http.ts", import.meta.url)
+      ),
+    },
+  },
   test: {
     environment: "jsdom",
     coverage: {

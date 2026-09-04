@@ -10,6 +10,11 @@ import type { BatchRowEdit, ColumnDef, FilterDef } from "@adapttable/core";
 import type { TableFeature } from "@adapttable/core/features";
 import { Suspense, useMemo, useState } from "react";
 
+import {
+  AiBackendConnect,
+  AiModeSwitch,
+  type AiPlayMode,
+} from "./AiBackendConnect";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import { DemoFallback } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
@@ -107,13 +112,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [session, setSession] = useState<AgentSession | null>(null);
   const [selectedKey, setSelectedKey] = useState("view.setFilters");
   const [last, setLast] = useState("");
+  const [mode, setMode] = useState<AiPlayMode>("simulated");
   const Table = kitTable<PlaygroundRow>(adapter);
   const factories =
     AI_KIT_FEATURES[adapter as AiKitKey] ?? AI_KIT_FEATURES.mantine;
-  const visible = useMemo(
-    () => (teamFilter ? rows.filter((row) => row.team === teamFilter) : rows),
-    [rows, teamFilter]
-  );
+  const jonahVisible =
+    !teamFilter || SEED.find((row) => row.id === "j1")?.team === teamFilter;
 
   const features = useMemo((): TableFeature<PlaygroundRow>[] => {
     const sessionFeature = tableAgent({
@@ -183,8 +187,9 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         <p className="ai-play__status" id="ai-play-title">
           <strong>Tool-call playground</strong>
           <span className="ai-play__note">
-            Not a language model. These buttons call{" "}
-            <code>session.execute</code>. No credentials. No network model call.
+            {mode === "simulated"
+              ? "Simulated — local scripted buttons, not a real model. No credentials. No network model call."
+              : "Connect backend — the live table session sends compact capabilities to your endpoint."}
           </span>
         </p>
         <div className="ai-play__toolbar">
@@ -216,6 +221,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           >
             Allow editing
           </button>
+          <AiModeSwitch mode={mode} onMode={setMode} />
           <button
             type="button"
             className={`seg__btn${rtl ? " is-on" : ""}`}
@@ -232,45 +238,60 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         >
           {schema || "Attach a session to inspect a capability."}
         </pre>
-        <div className="ai-play__actions">
-          <button
-            type="button"
-            className="ai-play__btn"
-            onClick={() =>
-              void run(
-                "view.setFilters",
-                { filters: { team: ["Core"] } },
-                "filter-core"
-              )
-            }
-          >
-            Filter Core team
-          </button>
-          <button
-            type="button"
-            className="ai-play__btn"
-            disabled={!allowEdit}
-            onClick={() =>
-              void run(
-                "edit.cells",
-                {
-                  edits: [{ rowKey: "j1", column: "salary", value: 20_000 }],
-                },
-                "jonah-salary"
-              )
-            }
-          >
-            Propose Jonah&apos;s salary
-          </button>
-          <output className="ai-play__last" data-testid="ai-last">
-            {last}
-          </output>
-        </div>
+        {mode === "simulated" ? (
+          <div className="ai-play__actions">
+            <button
+              type="button"
+              className="ai-play__btn"
+              onClick={() =>
+                void run(
+                  "view.setFilters",
+                  { filters: { team: ["Core"] } },
+                  "filter-core"
+                )
+              }
+            >
+              Filter Core team
+            </button>
+            <button
+              type="button"
+              className="ai-play__btn"
+              disabled={!teamFilter}
+              onClick={() =>
+                void run("view.setFilters", { filters: {} }, "clear-filter")
+              }
+            >
+              Clear filter
+            </button>
+            <button
+              type="button"
+              className="ai-play__btn"
+              disabled={!allowEdit || !jonahVisible}
+              onClick={() =>
+                void run(
+                  "edit.cells",
+                  {
+                    edits: [{ rowKey: "j1", column: "salary", value: 20_000 }],
+                  },
+                  "jonah-salary"
+                )
+              }
+            >
+              Propose Jonah&apos;s salary
+            </button>
+            <output className="ai-play__last" data-testid="ai-last">
+              {last}
+            </output>
+          </div>
+        ) : (
+          <AiBackendConnect session={session} mode={mode} />
+        )}
         <p className="ai-play__refs">
           <Check size={12} />{" "}
           {teamFilter
-            ? `Active host filter: team = ${teamFilter}`
-            : "No host filter"}
+            ? `Active filter: team = ${teamFilter}`
+            : "No active filter"}
+          <a href={`${DOCS_URL}ai-http/`}>Connect a backend</a>
           <a href={`${DOCS_URL}ai-integrations/`}>AI integrations</a>
         </p>
         <nav
@@ -291,7 +312,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       <KitProvider kit={adapter} dark={dark} dir={rtl ? "rtl" : "ltr"}>
         <Suspense fallback={<DemoFallback />}>
           <Table
-            data={visible}
+            data={rows}
             columns={COLUMNS}
             rowKey={(row: PlaygroundRow) => row.id}
             urlSync={false}

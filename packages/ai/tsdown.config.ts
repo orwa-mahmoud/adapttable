@@ -31,6 +31,12 @@ export default defineConfig([
   },
   {
     ...common,
-    entry: ["src/index.ts", "src/json.ts", "src/openai.ts", "src/mcp.ts"],
+    entry: [
+      "src/index.ts",
+      "src/json.ts",
+      "src/openai.ts",
+      "src/mcp.ts",
+      "src/http.ts",
+    ],
   },
 ]);

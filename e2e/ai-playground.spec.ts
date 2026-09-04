@@ -57,6 +57,14 @@ for (const kit of kits) {
     await expect(
       page.getByRole("radiogroup", { name: "Live catalog" })
     ).toBeVisible();
+    await expect(page.getByTestId("ai-mode-simulated")).toHaveAttribute(
+      "aria-checked",
+      "true"
+    );
+    await expect(page.getByTestId("ai-backend")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Filter Core team" })
+    ).toBeVisible();
   });
 
   test(`${kit} catalog drops edit.cells when editing is turned off`, async ({
@@ -98,8 +106,35 @@ for (const kit of kits) {
     await expect(page.getByText("Chioma Eze")).toBeVisible();
     await expect(page.getByText("Jonah Okonkwo")).toHaveCount(0);
     await expect(page.getByText("Sefa Demir")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Propose Jonah's salary" })
+    ).toBeDisabled();
+    await page.getByRole("button", { name: "Clear filter" }).click();
+    await expect(page.getByText("Jonah Okonkwo")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Propose Jonah's salary" })
+    ).toBeEnabled();
   });
 }
+
+test("Connect backend stays idle until Connect and returns to simulated", async ({
+  page,
+}) => {
+  await openPlayground(page, CANONICAL_AI_ADAPTER);
+  await page.getByTestId("ai-mode-backend").click();
+  await expect(page.getByTestId("ai-backend")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Filter Core team" })
+  ).toHaveCount(0);
+  await expect(page.getByTestId("ai-backend-send")).toHaveCount(0);
+  await expect(page.getByTestId("ai-backend-connect")).toBeEnabled();
+  await mountedTable(page);
+  await page.getByTestId("ai-mode-simulated").click();
+  await expect(page.getByTestId("ai-backend")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Filter Core team" })
+  ).toBeVisible();
+});
 
 test("AI demo nav goes to the canonical kit page", async ({ page }) => {
   await page.goto("/");

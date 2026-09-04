@@ -1,4 +1,5 @@
 import { errorMessage } from "./errorMessage";
+import { CAPABILITY_KEYS, type CapabilityKey } from "./keys";
 import type { AgentSession, ExecuteResult, JsonSchema } from "./types";
 
 export {
@@ -51,7 +52,6 @@ export interface OpenAIToolsOptions {
   readonly deferred?: boolean;
 }
 
-/**
 /**
  * Function payload inside an OpenAI tool call.
  *
@@ -112,12 +112,36 @@ const PORTABLE_TRIO: readonly {
       additionalProperties: false,
       properties: {
         key: { type: "string", minLength: 1 },
-        args: {},
+        args: { type: "object", additionalProperties: true },
       },
-      required: ["key"],
+      required: ["key", "args"],
     },
   },
 ];
+
+const FROM_OPENAI_TOOL_NAME = new Map<string, CapabilityKey>(
+  CAPABILITY_KEYS.map((key) => [key.replaceAll(".", "_"), key])
+);
+
+/**
+ * OpenAI function names may only use `[a-zA-Z0-9_-]`. Catalog keys keep
+ * their dots; eager tools replace each `.` with `_`.
+ *
+ * @public
+ */
+export function toOpenAIToolName(key: string): string {
+  return key.replaceAll(".", "_");
+}
+
+/**
+ * Map an OpenAI function name back to a catalog key. Dotted names and
+ * the portable trio pass through unchanged.
+ *
+ * @public
+ */
+export function fromOpenAIToolName(name: string): string {
+  return FROM_OPENAI_TOOL_NAME.get(name) ?? name;
+}
 
 function withStrictParameters(schema: JsonSchema, strict: boolean): JsonSchema {
   if (!strict || schema.additionalProperties !== undefined) return schema;
@@ -163,7 +187,12 @@ export function toOpenAITools(
   }
   return session.catalog().map((entry) => {
     const guide = session.describe(entry.key);
-    return asTool(entry.key, guide.guide, guide.input, strict);
+    return asTool(
+      toOpenAIToolName(entry.key),
+      guide.guide,
+      guide.input,
+      strict
+    );
   });
 }
 
@@ -281,7 +310,7 @@ export async function executeOpenAITool(
     );
   }
 
-  const name = call.function.name;
+  const name = fromOpenAIToolName(call.function.name);
   if (name === "catalog") {
     return ok(session, idempotencyKey, session.catalog());
   }

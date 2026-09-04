@@ -150,12 +150,21 @@ never owns the data.
 from `@adapttable/ai/json`.
 
 `toOpenAITools(session, { deferred: true })` returns only `catalog`,
-`describe` and `execute`. `strict: true` is the default.
+`describe` and `execute`. `strict: true` is the default. Eager tools
+replace each `.` in a catalog key with `_` (`view.setPage` →
+`view_setPage`) because OpenAI function names cannot contain dots.
+`executeOpenAITool` maps those names back, and still accepts the dotted
+catalog key. Deferred `execute` requires both `key` and `args`.
 
 `toMcpTools` / `toMcpResources` list enabled keys. Each capability is
 also a resource at
 `adapttable://table/{tableId}/capability/{key}`. `mcpListChanged`
 decides when to emit `notifications/tools/list_changed`.
+
+`@adapttable/ai/http` is the optional ready-made transport: post the
+compact manifest to your endpoint and execute returned actions through
+the same session. Setup, protocol and the runnable example live on
+[connect a backend](./ai-http.md).
 
 ## Examples
 
@@ -165,6 +174,7 @@ decides when to emit `notifications/tools/list_changed`.
 - [ai-server-agent.ts](../examples/ai-server-agent.ts) — Node worker + HTTP envelope
 - [ai-mcp-host.ts](../examples/ai-mcp-host.ts) — tools, resources, list-changed
 - [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools
+- [ai-http-backend.ts](../examples/ai-http-backend.ts) — runnable OpenAI/Anthropic/Gemini/DeepSeek server
 
 Intention fixtures (no live model) live in
 `packages/ai/src/__fixtures__/intentions.json`.

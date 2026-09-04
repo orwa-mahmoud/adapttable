@@ -243,6 +243,34 @@ describe("createAgentSession", () => {
     expect(applyB.setPage).toHaveBeenCalledWith(2);
   });
 
+  it("fails when an advertised apply handler is missing", async () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["filters", "export-csv"],
+          hasFilters: true,
+          hasExport: true,
+        }),
+      apply: {},
+    });
+    const filters = await session.execute(
+      "view.setFilters",
+      { filters: { team: ["Core"] } },
+      1,
+      "nof"
+    );
+    expect(filters.ok).toBe(false);
+    expect(filters.error?.code).toBe("not-wired");
+    const exported = await session.execute(
+      "export.run",
+      { format: "csv" },
+      1,
+      "nox"
+    );
+    expect(exported.ok).toBe(false);
+    expect(exported.error?.code).toBe("not-wired");
+  });
+
   it("dispatches filters, grouping, export, edit and reorder when wired", async () => {
     const apply = {
       setFilters: vi.fn(),

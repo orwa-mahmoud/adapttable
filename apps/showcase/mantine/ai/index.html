@@ -163,8 +163,8 @@
         <p class="at-fallback__kicker">AdaptTable for Mantine</p>
         <h1>AI integrations in Mantine</h1>
         <p><code>@adapttable/ai</code> is optional and provider-neutral. Compose <code>tableAgent</code> next to Mantine's <code>filters</code> and <code>agentApproval</code>. The session advertises only what this table has mounted: filtering and a host-owned write here, never grouping or pivoting.</p>
-        <p>The panel above the grid is a tool-call playground, not a language model. It shows the live compact catalog, lets you inspect one capability schema, and runs curated <code>session.execute</code> calls. Filter Core team. Propose Jonah's salary. Approve stages it; Save commits it.</p>
-        <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI or MCP helpers from your own runtime. Execution never requires another model call.</p>
+        <p>The panel above the grid defaults to Simulated: local scripted <code>session.execute</code> buttons, not a language model. Filter Core team, then Clear filter before proposing Jonah's salary. Approve stages it; Save commits it. Switch to Connect backend to send a real message to an endpoint you run — same table session, same kit approval chrome. Setup is on the Connect a backend docs page.</p>
+        <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
         <p>The Filters button and the approval strip are Mantine controls. The playground above them is host chrome — it calls the same session a custom bridge would call.</p>
         <h2>The code</h2>
         <pre><code>import { tableAgent } from &quot;@adapttable/ai/react&quot;;
@@ -229,7 +229,7 @@ export function Orders({ rows, columns, onEdit }) {
           <li><a href="../accessibility/">Accessible Mantine data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
         </ul>
         <p>
-          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/ai-integrations/">ai-integrations</a>, <a href="https://orwa-mahmoud.github.io/adapttable/ai/">ai</a>, <a href="https://orwa-mahmoud.github.io/adapttable/agent-capabilities/">agent-capabilities</a>. More of this kit:
+          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/ai-http/">ai-http</a>, <a href="https://orwa-mahmoud.github.io/adapttable/ai-integrations/">ai-integrations</a>, <a href="https://orwa-mahmoud.github.io/adapttable/ai/">ai</a>, <a href="https://orwa-mahmoud.github.io/adapttable/agent-capabilities/">agent-capabilities</a>. More of this kit:
           <a href="../">AdaptTable for Mantine</a>, or
           <a href="/adapttable/demo/">the live demo</a>.
         </p>

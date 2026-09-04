@@ -1212,12 +1212,19 @@ exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
 `executeJsonTool`, `JsonToolCall`, `parseEnvelope`, `executeEnvelope`,
 `AgentEnvelope`), `@adapttable/ai/openai` (`toOpenAITools`,
+`toOpenAIToolName`, `fromOpenAIToolName`,
 `OpenAIFunctionTool`, `OpenAIFunctionDefinition`, `OpenAIToolsOptions`,
 `executeOpenAITool`, `OpenAIToolCall`, `OpenAIToolCallFunction`),
 `@adapttable/ai/mcp` (`toMcpTools`, `McpTool`,
-`toMcpResources`, `McpResource`, `mcpListChanged`, `executeMcpTool`). See
+`toMcpResources`, `McpResource`, `mcpListChanged`, `executeMcpTool`),
+`@adapttable/ai/http` (`createAgentHttpClient`, `connectAgentHttp`,
+`runAgentHttpTurn`, `parseAgentHttpRequest`, `parseAgentHttpResponse`,
+`AGENT_HTTP_SCHEMA`, `AgentHttpKind`, `AgentHttpMessage`, `AgentHttpNeeds`,
+`AgentHttpAction`, `AgentHttpRequest`, `AgentHttpResponse`,
+`AgentHttpClientOptions`, `AgentHttpTurnResult`). See
 [adaptive capabilities](./agent-capabilities.md),
-[`@adapttable/ai`](./ai.md) and [agent integrations](./ai-integrations.md).
+[`@adapttable/ai`](./ai.md), [agent integrations](./ai-integrations.md)
+and [connect a backend](./ai-http.md).
 
 **Server queries.** `parseTableQuery(input, schema)` from
 `@adapttable/server` validates a request against a `QuerySchema` and returns a

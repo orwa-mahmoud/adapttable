@@ -27,7 +27,12 @@ const ENTRIES = [
   },
   {
     file: "openai.js",
-    exports: ["toOpenAITools", "executeOpenAITool"],
+    exports: [
+      "toOpenAITools",
+      "executeOpenAITool",
+      "toOpenAIToolName",
+      "fromOpenAIToolName",
+    ],
   },
   {
     file: "mcp.js",
@@ -36,6 +41,16 @@ const ENTRIES = [
       "toMcpResources",
       "mcpListChanged",
       "executeMcpTool",
+    ],
+  },
+  {
+    file: "http.js",
+    exports: [
+      "createAgentHttpClient",
+      "connectAgentHttp",
+      "runAgentHttpTurn",
+      "parseAgentHttpRequest",
+      "parseAgentHttpResponse",
     ],
   },
 ];
@@ -70,5 +85,5 @@ for (const entry of ENTRIES) {
 }
 
 console.log(
-  "✓ @adapttable/ai json, openai and mcp export the adapter functions without openai, MCP SDK or React"
+  "✓ @adapttable/ai json, openai, mcp and http export the adapter functions without openai, MCP SDK or React"
 );

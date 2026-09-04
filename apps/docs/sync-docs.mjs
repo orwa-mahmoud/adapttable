@@ -62,6 +62,7 @@ export const TITLES = {
     "Adaptive table capabilities — catalog, describe, execute",
   "ai.md": "@adapttable/ai — tableAgent manifest and session",
   "ai-integrations.md": "Agent integrations — JSON, OpenAI and MCP adapters",
+  "ai-http.md": "Connect a backend — HTTP bridge and example server",
   "tree-data.md": "React table tree data — hierarchical rows",
   "column-management.md": "React table column management — rename, pin, resize",
   "saved-views.md": "React table saved views, shareable by URL",
@@ -200,6 +201,8 @@ export const DESCRIPTIONS = {
     "Reference for @adapttable/ai: tableAgent, the versioned manifest, capability keys, and the three-stage session.",
   "ai-integrations.md":
     "Map a live AdaptTable session onto JSON function tools, OpenAI strict tools and MCP tools/resources — no hosted service or model SDK.",
+  "ai-http.md":
+    "Connect a live AdaptTable to your backend: optional HTTP bridge, the request/response protocol, and a runnable OpenAI/Anthropic/Gemini/DeepSeek example.",
   "tree-data.md":
     "Render hierarchical rows in a React data table — compose tree({ getChildren }) for expandable data with keyboard access and announcements.",
   "migrate-from-v2.md":

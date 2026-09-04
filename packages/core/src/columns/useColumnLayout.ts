@@ -123,9 +123,13 @@ function syncRenameBaselines<TRow>(
       continue;
     }
 
-    if (!renamedKeys.has(column.key)) {
-      declaredNames.set(column.key, declared);
+    // Host dropped the override through controlled `layout.names` without
+    // calling resetName. Resume the live declaration so a later rename
+    // or reset does not restore the discarded label.
+    if (renamedKeys.has(column.key)) {
+      renamedKeys.delete(column.key);
     }
+    declaredNames.set(column.key, declared);
   }
 
   dropMissingRenameKeys(liveKeys, declaredNames, renamedKeys, staleEchoes);

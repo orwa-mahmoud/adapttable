@@ -101,6 +101,7 @@ const IGNORED = new Set([
   "agent-capabilities",
   "ai",
   "ai-integrations",
+  "ai-http",
   "url-state",
   // Whole-table quality, not an opt-in feature — lives under Beyond the table.
   "accessibility",

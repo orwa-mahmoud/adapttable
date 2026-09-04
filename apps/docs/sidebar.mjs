@@ -61,6 +61,7 @@ export const sidebar = [
       { label: "Adaptive capabilities", slug: "agent-capabilities" },
       { label: "@adapttable/ai", slug: "ai" },
       { label: "Agent integrations", slug: "ai-integrations" },
+      { label: "Connect a backend", slug: "ai-http" },
     ],
   },
   {

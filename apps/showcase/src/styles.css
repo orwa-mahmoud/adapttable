@@ -1017,6 +1017,38 @@ a {
   gap: 8px;
   align-items: center;
 }
+.ai-play__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ai-play__backend,
+.ai-play__chat {
+  display: grid;
+  gap: 10px;
+}
+.ai-play__field {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  min-width: min(100%, 280px);
+  flex: 1 1 220px;
+}
+.ai-play__field input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+  background: var(--page-surface);
+  color: inherit;
+  font: inherit;
+}
+.ai-play__log {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 13px;
+  color: var(--ink-2);
+}
 .ai-play__last {
   min-height: 1.2em;
   color: var(--ink-2);
