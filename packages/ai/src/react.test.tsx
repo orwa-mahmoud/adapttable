@@ -446,6 +446,85 @@ describe("tableAgent", () => {
     expect(keys).toContain("rows.delete");
   });
 
+  it("keeps one session across new options objects and bumps revision on row values", async () => {
+    let session: AgentSession | undefined;
+    const setPage = vi.fn();
+    const view = (name: string): TableRuntimeView => ({
+      rows: [{ id: "r1", name }],
+      getRowId: (row) => (row as { id: string }).id,
+      rowLabel: () => name,
+      query: {
+        page: 1,
+        limit: 10,
+        search: "",
+        setPage,
+        setLimit: vi.fn(),
+        setSearch: vi.fn(),
+        setSort: vi.fn(),
+      },
+    });
+    const { rerender } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            apply: { setPage },
+            bridge: { attach: (next) => (session = next) },
+          }),
+        ]}
+        view={view("Ada")}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const first = session!;
+    await first.execute(
+      "view.setPage",
+      { page: 2 },
+      first.manifest().viewRevision,
+      "page-once"
+    );
+    expect(setPage).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            apply: { setPage },
+            bridge: { attach: (next) => (session = next) },
+          }),
+        ]}
+        view={view("Ada")}
+      />
+    );
+    await waitFor(() => expect(session).toBe(first));
+    const replayed = await first.execute(
+      "view.setPage",
+      { page: 9 },
+      first.manifest().viewRevision,
+      "page-once"
+    );
+    expect(replayed.ok).toBe(true);
+    expect(setPage).toHaveBeenCalledTimes(1);
+    const afterReplay = first.manifest().viewRevision;
+
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            apply: { setPage },
+            bridge: { attach: (next) => (session = next) },
+          }),
+        ]}
+        view={view("Ada Lovelace")}
+      />
+    );
+    await waitFor(() =>
+      expect(first.manifest().viewRevision).toBeGreaterThan(afterReplay)
+    );
+  });
+
   it("rejects a second chrome approval while one is pending", async () => {
     let session: AgentSession | undefined;
     const editCells = vi.fn();

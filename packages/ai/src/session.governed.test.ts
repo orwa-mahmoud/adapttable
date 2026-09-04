@@ -646,6 +646,88 @@ describe("selection, views, add and delete", () => {
     expect(result.error?.message).toBe("cannot move");
   });
 
+  it("does not cache a cancelled execute and rejects an aborted approval", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: (_proposal, signal) => {
+        if (!signal) return Promise.resolve(true);
+        return new Promise((resolve) => {
+          signal.addEventListener("abort", () => resolve(false), {
+            once: true,
+          });
+        });
+      },
+    });
+    const cancelled = new AbortController();
+    cancelled.abort();
+    const skipped = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "cancel-early",
+      cancelled.signal
+    );
+    expect(skipped.error?.code).toBe("cancelled");
+    expect(hooks.editCells).not.toHaveBeenCalled();
+
+    const late = new AbortController();
+    const pending = session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "cancel-late",
+      late.signal
+    );
+    late.abort();
+    const rejected = await pending;
+    expect(rejected.ok).toBe(true);
+    expect(rejected.result).toMatchObject({
+      approval: "rejected",
+      applied: false,
+    });
+    expect(hooks.editCells).not.toHaveBeenCalled();
+
+    const retried = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "cancel-early"
+    );
+    expect(retried.error?.code).not.toBe("cancelled");
+
+    const allowed = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve(true),
+    });
+    const withSignal = await allowed.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "approve-signal",
+      new AbortController().signal
+    );
+    expect(withSignal.ok).toBe(true);
+    expect(hooks.editCells).toHaveBeenCalled();
+
+    const exploding = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.reject(new Error("approve failed")),
+    });
+    const boom = await exploding.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "approve-throw",
+      new AbortController().signal
+    );
+    expect(boom.error?.code).toBe("apply-failed");
+    expect(boom.error?.message).toBe("approve failed");
+  });
+
   it("defaults approval to writes when the observation omits it", async () => {
     const hooks = apply();
     const session = createAgentSession({

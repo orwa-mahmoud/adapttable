@@ -128,6 +128,7 @@ test("Connect backend stays idle until Connect and returns to simulated", async 
   ).toHaveCount(0);
   await expect(page.getByTestId("ai-backend-send")).toHaveCount(0);
   await expect(page.getByTestId("ai-backend-connect")).toBeEnabled();
+  await expect(page.getByTestId("ai-backend-token")).toBeVisible();
   await mountedTable(page);
   await page.getByTestId("ai-mode-simulated").click();
   await expect(page.getByTestId("ai-backend")).toHaveCount(0);

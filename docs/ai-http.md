@@ -40,17 +40,20 @@ on the response, `returnResults` on the client).
 From this repository:
 
 ```bash
-cp examples/ai-http-backend.env.example .env
+cp examples/ai-http-backend.env.example examples/.env.ai-http
 ```
 
-Edit `.env`. Set `AGENT_PROVIDER` to `openai`, `anthropic`, `gemini` or
-`deepseek`, and the matching API key. Never commit that file.
+Edit `examples/.env.ai-http`. Set `AGENT_PROVIDER` to `openai`,
+`anthropic`, `gemini` or `deepseek`, and the matching API key. Do not
+overwrite an existing root `.env`. Never commit the filled file.
 
 ```bash
-pnpm exec tsx examples/ai-http-backend.ts
+pnpm --filter @adapttable/ai build
+pnpm --filter @adapttable/examples ai-http
 ```
 
-The process listens on `http://127.0.0.1:8787` by default.
+The process binds `127.0.0.1` on port `8787` by default. A non-loopback
+`AGENT_HOST` requires `AGENT_HTTP_TOKEN`.
 
 **Local showcase (reliable).** Hosted GitHub Pages cannot be assumed to reach
 `localhost` — browsers treat that as a cross-origin public-site request, and
@@ -61,14 +64,17 @@ pnpm --filter @adapttable/showcase dev
 ```
 
 Open `/mantine/ai/` (or any adapter AI page). Choose **Connect backend**. The
-URL defaults to `http://127.0.0.1:8787`. Click **Connect**. A valid hello body
-is required; a random 200 is a failure. Then type a message and **Send**.
-Writes still go through that kit’s approval and staged-save chrome.
+URL defaults to `http://127.0.0.1:8787`. If the example set
+`AGENT_HTTP_TOKEN`, paste that same value into **Endpoint token** (Bearer
+for the HTTP endpoint — not a provider API key). Click **Connect**. A valid
+hello body is required; a random 200 is a failure. Then type a message and
+**Send**. Writes still go through that kit’s approval and staged-save chrome.
 
 **Hosted showcase.** Deploy the example with HTTPS, set
 `AGENT_ALLOWED_ORIGINS` to `https://orwa-mahmoud.github.io`, set
-`AGENT_HTTP_TOKEN`, and paste the public URL into Connect backend. Do not
-point the hosted page at `localhost`.
+`AGENT_HTTP_TOKEN` and a non-loopback `AGENT_HOST`, then paste the public
+URL and the same endpoint token into Connect backend. Do not point the
+hosted page at `localhost`.
 
 ### Environment
 
@@ -79,7 +85,9 @@ See [ai-http-backend.env.example](../examples/ai-http-backend.env.example).
 | `AGENT_PROVIDER`                                                               | `openai` (default), `anthropic`, `gemini`, or `deepseek`           |
 | `AGENT_MODEL`                                                                  | Optional override. Each provider has a default.                    |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY` | Server-side only                                                   |
-| `AGENT_HTTP_TOKEN`                                                             | Optional. When set, the example requires `Authorization: Bearer …` |
+| `AGENT_HTTP_TOKEN`                                                             | Required when `AGENT_HOST` is not loopback. Bearer on the endpoint |
+| `AGENT_HOST`                                                                   | Bind address. Default `127.0.0.1`                                  |
+| `AGENT_ENV_FILE`                                                               | Optional extra env file. Existing process.env keys win             |
 | `AGENT_ALLOWED_ORIGINS`                                                        | Comma-separated origins. Defaults to local showcase ports          |
 | `AGENT_PORT`                                                                   | Default `8787`                                                     |
 | `AGENT_MAX_BODY`                                                               | Default `65536` bytes                                              |
@@ -149,5 +157,6 @@ Import `parseAgentHttpRequest` / `parseAgentHttpResponse` from
 ## Live provider test (owner)
 
 Automated checks use mocked providers and never spend money. To try a real
-model: fill `.env`, start `examples/ai-http-backend.ts`, run the local
+model: fill `examples/.env.ai-http`, start the example with
+`pnpm --filter @adapttable/examples ai-http`, run the local
 showcase, Connect, and send a message. That live test is yours.

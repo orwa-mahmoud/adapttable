@@ -5,6 +5,8 @@
   "description": "Typechecked example components for every AdaptTable adapter (not published).",
   "type": "module",
   "scripts": {
+    "ai-http": "node --experimental-strip-types ./ai-http-backend.ts",
+    "test": "node --experimental-strip-types --test ./ai-http-backend.test.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },

@@ -243,6 +243,167 @@ describe("createAgentHttpClient", () => {
     expect(bodies[1]?.rows).toBe(1);
   });
 
+  it("scopes read cache keys and keeps earlier guides across discovery rounds", async () => {
+    let reads = 0;
+    const live = session({
+      readRows: (query: { columns?: readonly string[] }) => {
+        reads += 1;
+        return {
+          offset: 0,
+          limit: 1,
+          redacted: ["ssn"],
+          rows: [
+            {
+              rowKey: `r${String(reads)}`,
+              cells: {
+                name: query.columns?.includes("name") ? `Ada-${reads}` : "x",
+              },
+            },
+          ],
+        };
+      },
+    });
+    const firstBodies: { guides?: string[]; columns?: string[] }[] = [];
+    await runAgentHttpTurn(live, "Describe then read", {
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        firstBodies.push({
+          guides: body.descriptions?.map((guide) => guide.key),
+          columns: body.rows?.[0]
+            ? Object.keys(body.rows[0].rows[0]?.cells ?? {})
+            : undefined,
+        });
+        if (!body.descriptions?.length) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            needs: { describe: ["rows.read"] },
+          });
+        }
+        if (!body.rows?.length) {
+          expect(
+            body.descriptions?.some((guide) => guide.key === "rows.read")
+          ).toBe(true);
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+          });
+        }
+        expect(
+          body.descriptions?.some((guide) => guide.key === "rows.read")
+        ).toBe(true);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Ada.",
+        });
+      },
+    });
+    expect(firstBodies.at(-1)?.guides).toContain("rows.read");
+    expect(reads).toBe(1);
+
+    await runAgentHttpTurn(live, "Read again", {
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        if (!body.rows?.length) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+          });
+        }
+        expect(body.rows?.[0]?.rows[0]?.rowKey).toBe("r2");
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Again.",
+        });
+      },
+    });
+    expect(reads).toBe(2);
+  });
+
+  it("binds omitted expectedRevision to the request snapshot", async () => {
+    let revision = 1;
+    const setPage = vi.fn();
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: revision, approval: "never" }),
+      apply: { setPage },
+    });
+    const result = await runAgentHttpTurn(live, "Page 2", {
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        revision = 2;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          actions: [
+            {
+              key: "view.setPage",
+              args: { page: 2 },
+              idempotencyKey: "page-2",
+            },
+          ],
+        });
+      },
+    });
+    expect(result.results[0]?.error?.code).toBe("revision-mismatch");
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("skips remaining actions after cancel without undoing completed writes", async () => {
+    const setPage = vi.fn();
+    const editCells = vi.fn();
+    const controller = new AbortController();
+    const live = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: {
+        setPage,
+        editCells,
+        resolveRow: () => ({ rowKey: "r1", scope: "visible" as const }),
+      },
+      onApprove: () => {
+        controller.abort();
+        return new Promise(() => undefined);
+      },
+    });
+    const result = await runAgentHttpTurn(
+      live,
+      "Write then edit",
+      {
+        endpoint: "https://agent.example/turn",
+        request: () =>
+          Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            actions: [
+              {
+                key: "view.setPage",
+                args: { page: 2 },
+                idempotencyKey: "page-done",
+              },
+              {
+                key: "edit.cells",
+                args: {
+                  edits: [{ rowKey: "r1", column: "name", value: "Ada" }],
+                },
+                idempotencyKey: "edit-pending",
+              },
+              {
+                key: "view.setPage",
+                args: { page: 3 },
+                idempotencyKey: "page-skip",
+              },
+            ],
+          }),
+      },
+      { signal: controller.signal }
+    );
+    expect(setPage).toHaveBeenCalledTimes(1);
+    expect(setPage).toHaveBeenCalledWith(2);
+    expect(editCells).not.toHaveBeenCalled();
+    expect(result.results[0]?.ok).toBe(true);
+    expect(result.results[1]?.result).toMatchObject({
+      approval: "rejected",
+      applied: false,
+    });
+    expect(result.results[2]?.error?.code).toBe("cancelled");
+  });
+
   it("honours revision, idempotency and does not retry a failed write", async () => {
     const editCells = vi.fn();
     const live = session({ editCells });
@@ -378,6 +539,35 @@ describe("createAgentHttpClient", () => {
     );
     expect(seen[0]).toBeUndefined();
     expect(seen[1]?.[0]?.ok).toBe(true);
+    const text = await runAgentHttpTurn(
+      live,
+      "Page 2",
+      {
+        endpoint: "https://agent.example/turn",
+        request: (body) => {
+          if (!body.results) {
+            return Promise.resolve({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              text: "Moved.",
+              continueWithResults: true,
+              actions: [
+                {
+                  key: "view.setPage",
+                  args: { page: 2 },
+                  idempotencyKey: "p2-text",
+                },
+              ],
+            });
+          }
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Noted.",
+          });
+        },
+      },
+      { returnResults: true }
+    );
+    expect(text.text).toBe("Noted.");
   });
 
   it("rejects empty messages, empty bodies and a rejected hello", async () => {

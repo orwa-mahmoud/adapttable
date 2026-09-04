@@ -129,7 +129,74 @@ describe("toOpenAITools", () => {
     ]);
     expect(tools[2]?.function.parameters.required).toEqual(["key", "args"]);
     expect(tools[2]?.function.parameters.properties?.args).toMatchObject({
-      type: "object",
+      type: "string",
+    });
+  });
+
+  it("emits OpenAI-strict schemas: closed objects, required optionals, no open maps", () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["filters", "editing"],
+          hasFilters: true,
+          hasEdit: true,
+          hasAdd: true,
+        }),
+      apply: {
+        setFilters: vi.fn(),
+        editCells: vi.fn(),
+        addRows: vi.fn(),
+      },
+    });
+    const tools = toOpenAITools(session);
+    const deferred = toOpenAITools(session, { deferred: true });
+
+    const walk = (value: unknown): void => {
+      if (!value || typeof value !== "object") return;
+      const schema = value as {
+        additionalProperties?: unknown;
+        properties?: Record<string, unknown>;
+        required?: readonly string[];
+        items?: unknown;
+        type?: unknown;
+      };
+      if (schema.type === "object" || schema.properties) {
+        expect(schema.additionalProperties).not.toBe(true);
+        expect(schema.additionalProperties).toBe(false);
+        const keys = Object.keys(schema.properties ?? {});
+        expect(schema.required).toEqual(keys);
+      }
+      if (schema.properties) {
+        for (const child of Object.values(schema.properties)) {
+          walk(child);
+        }
+      }
+      if (schema.items && typeof schema.items === "object") {
+        walk(schema.items);
+      }
+    };
+
+    for (const tool of [...tools, ...deferred]) {
+      walk(tool.function.parameters);
+      expect(tool.function.parameters.additionalProperties).not.toBe(true);
+    }
+
+    const page = tools.find((tool) => tool.function.name === "view_setPage");
+    expect(page?.function.parameters.required).toEqual(["page", "limit"]);
+    expect(page?.function.parameters.properties?.limit).toMatchObject({
+      type: ["integer", "null"],
+    });
+
+    const filters = tools.find(
+      (tool) => tool.function.name === "view_setFilters"
+    );
+    expect(filters?.function.parameters.properties?.filters).toMatchObject({
+      type: "string",
+    });
+
+    const execute = deferred.find((tool) => tool.function.name === "execute");
+    expect(execute?.function.parameters.properties?.args).toMatchObject({
+      type: "string",
     });
   });
 
@@ -236,6 +303,108 @@ describe("executeOpenAITool", () => {
     );
     expect(ran.ok).toBe(true);
     expect(apply.setPage).toHaveBeenCalledWith(2);
+    const fromJsonArgs = await executeOpenAITool(
+      session,
+      {
+        function: {
+          name: "execute",
+          arguments: {
+            key: "view.setPage",
+            args: JSON.stringify({ page: 5 }),
+          },
+        },
+      },
+      1,
+      "ex-json"
+    );
+    expect(fromJsonArgs.ok).toBe(true);
+    expect(apply.setPage).toHaveBeenCalledWith(5);
+    const badArgs = await executeOpenAITool(
+      session,
+      {
+        function: {
+          name: "execute",
+          arguments: { key: "view.setPage", args: "{not-json" },
+        },
+      },
+      1,
+      "ex-bad"
+    );
+    expect(badArgs.error?.code).toBe("invalid-arguments");
+  });
+
+  it("coerces nullable omitted fields and JSON-string free-form values", async () => {
+    const setPage = vi.fn();
+    const setFilters = vi.fn();
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["filters"],
+          hasFilters: true,
+          hasAdd: true,
+          approval: "never",
+        }),
+      apply: { setPage, setFilters, addRows: vi.fn() },
+    });
+    const page = await executeOpenAITool(
+      session,
+      {
+        function: {
+          name: "view_setPage",
+          arguments: { page: 2, limit: null },
+        },
+      },
+      1,
+      "nullable-limit"
+    );
+    expect(page.ok).toBe(true);
+    expect(setPage).toHaveBeenCalledWith(2);
+    const filters = await executeOpenAITool(
+      session,
+      {
+        function: {
+          name: "view_setFilters",
+          arguments: { filters: JSON.stringify({ team: ["Core"] }) },
+        },
+      },
+      1,
+      "filters-json"
+    );
+    expect(filters.ok).toBe(true);
+    expect(setFilters).toHaveBeenCalledWith({ team: ["Core"] });
+    const addRows = vi.fn();
+    const adding = createAgentSession({
+      observe: () =>
+        observation({ hasAdd: true, approval: "never", writePolicy: "allow" }),
+      apply: { addRows },
+    });
+    const added = await executeOpenAITool(
+      adding,
+      {
+        function: {
+          name: "rows_add",
+          arguments: { rows: [JSON.stringify({ name: "Ada" })] },
+        },
+      },
+      1,
+      "add-json"
+    );
+    expect(added, added.error?.message ?? "rows.add failed").toMatchObject({
+      ok: true,
+    });
+    expect(addRows).toHaveBeenCalledWith([{ name: "Ada" }]);
+    const badFilters = await executeOpenAITool(
+      session,
+      {
+        function: {
+          name: "view_setFilters",
+          arguments: { filters: "{not-json" },
+        },
+      },
+      1,
+      "filters-bad"
+    );
+    expect(badFilters.idempotencyKey).toBe("filters-bad");
   });
 
   it("returns errors for a bad deferred describe or execute payload", async () => {

@@ -17,7 +17,6 @@ import {
   type ReactNode,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -101,7 +100,10 @@ export interface TableAgentOptions {
   /** Whether an approved write stages or persists. */
   readonly commit?: CommitPolicy;
   /** Host confirmation. When set, chrome is skipped. */
-  readonly onApprove?: (proposal: unknown) => Promise<boolean>;
+  readonly onApprove?: (
+    proposal: unknown,
+    signal?: AbortSignal
+  ) => Promise<boolean>;
   /** Per-column readability, writability, and labels. */
   readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
   /** Largest `rows.read` window. */
@@ -365,7 +367,7 @@ function applyLiveFilters(
     return true;
   }
   if (typeof filters !== "object" || Array.isArray(filters)) {
-    throw new Error("setFilters requires a filter object");
+    throw new TypeError("setFilters requires a filter object");
   }
   if (Object.keys(filters).length === 0) {
     live.clearExtras?.();
@@ -445,16 +447,32 @@ function applyFromRuntime(
   return apply;
 }
 
-function viewFingerprint(view: TableRuntimeView<unknown> | undefined): string {
+function stableRow(row: unknown): unknown {
+  try {
+    return structuredClone(row);
+  } catch {
+    return String(row);
+  }
+}
+
+function viewFingerprint(
+  view: TableRuntimeView<unknown> | undefined,
+  options: TableAgentOptions,
+  featureIds: readonly string[]
+): string {
   const query = view?.query;
   const rows = liveRows(view);
   const getRowId = view?.getRowId;
-  const rowIds = getRowId ? rows.map((row) => getRowId(row)) : [];
+  const rowPayloads = rows.map((row) => ({
+    id: getRowId ? getRowId(row) : null,
+    row: stableRow(row),
+  }));
   const selected = view?.selection
     ? [...view.selection.selectedIds].sort((left, right) =>
         left.localeCompare(right)
       )
     : [];
+  const extras = liveQueryFilters(query);
   return JSON.stringify({
     page: query?.page ?? 1,
     limit: query?.limit ?? 10,
@@ -462,10 +480,149 @@ function viewFingerprint(view: TableRuntimeView<unknown> | undefined): string {
     sortBy: query?.sortBy ?? null,
     sortDir: query?.sortDir ?? null,
     groupBy: view?.groupingState?.groupBy ?? null,
-    extra: liveQueryFilters(query).extra ?? null,
-    rowIds,
+    extra: extras.extra ?? null,
+    rowPayloads,
     selected,
+    tableId: options.tableId,
+    writePolicy: options.writePolicy ?? "allow",
+    approval: options.approval ?? "writes",
+    commit: options.commit ?? "stage",
+    columns: options.columns ?? null,
+    readMax: options.readMax ?? 50,
+    featureIds: [...featureIds].sort((left, right) =>
+      left.localeCompare(right)
+    ),
+    wired: {
+      setPage: present(options.apply, "setPage") || present(query, "setPage"),
+      setSearch:
+        present(options.apply, "setSearch") || present(query, "setSearch"),
+      setSort: present(options.apply, "setSort") || present(query, "setSort"),
+      setFilters:
+        present(options.apply, "setFilters") || present(extras, "setExtras"),
+      runExport: present(options.apply, "runExport"),
+      editCells:
+        present(options.apply, "editCells") ||
+        present(options.apply, "stageCells"),
+      addRows: present(options.apply, "addRows"),
+      deleteRows: present(options.apply, "deleteRows"),
+      reorderRows: present(options.apply, "reorderRows"),
+      setSelection:
+        present(options.apply, "setSelection") || view?.selection != null,
+      applyView: present(options.apply, "applyView"),
+    },
   });
+}
+
+function present(record: object | undefined, key: string): boolean {
+  return record != null && Object.hasOwn(record, key);
+}
+
+function asCallable(
+  value: unknown
+): ((...input: unknown[]) => unknown) | undefined {
+  if (typeof value !== "function") return undefined;
+  return value as (...input: unknown[]) => unknown;
+}
+
+function currentApply(
+  options: TableAgentOptions,
+  runtime: ReturnType<typeof useTableRuntime>
+): AgentApply {
+  const fromRuntime = applyFromRuntime(
+    runtime,
+    options.columns
+      ? Object.entries(options.columns).map(([id, extra]) => ({
+          id,
+          label: extra.label ?? id,
+          type: extra.type ?? "unknown",
+          readable: extra.readable ?? true,
+          writable: extra.writable ?? false,
+          sortable: extra.sortable ?? false,
+        }))
+      : [],
+    options.apply
+  );
+  const apply: AgentApply = { ...fromRuntime, ...options.apply };
+  apply.setFilters = (filters) => {
+    options.apply?.setFilters?.(filters);
+    const applied = applyLiveFilters(runtime.view()?.query, filters);
+    if (!options.apply?.setFilters && !applied) {
+      throw new Error("setFilters is not wired");
+    }
+  };
+  return apply;
+}
+
+function bindLiveSession(
+  optionsRef: { current: TableAgentOptions },
+  runtimeRef: { current: ReturnType<typeof useTableRuntime> },
+  revisionRef: { current: number },
+  waitForChrome: {
+    current: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+  },
+  bump: { current: () => void }
+): AgentSession {
+  const apply = new Proxy<AgentApply>(
+    {},
+    {
+      get(_target, prop) {
+        if (typeof prop !== "string") return undefined;
+        const live = currentApply(
+          optionsRef.current,
+          runtimeRef.current
+        ) as Record<string, unknown>;
+        if (!(prop in live)) return undefined;
+        return (...args: unknown[]) => {
+          const latest = currentApply(
+            optionsRef.current,
+            runtimeRef.current
+          ) as Record<string, unknown>;
+          const fn = asCallable(latest[prop]);
+          if (!fn) return undefined;
+          return fn(...args);
+        };
+      },
+    }
+  );
+  const observe = () => {
+    const options = optionsRef.current;
+    if (options.observe) return options.observe();
+    return observationFromRuntime(
+      options,
+      runtimeRef.current,
+      revisionRef.current,
+      apply
+    );
+  };
+  const onApprove = (proposal: unknown, signal?: AbortSignal) => {
+    const options = optionsRef.current;
+    if (options.onApprove) return options.onApprove(proposal, signal);
+    if (options.approval === "never") return Promise.resolve(true);
+    return waitForChrome.current(proposal, signal);
+  };
+  const inner = createAgentSession({ observe, apply, onApprove });
+  return {
+    catalog: () => inner.catalog(),
+    describe: (key: string) => inner.describe(key),
+    execute: async (
+      key: string,
+      args: unknown,
+      expectedRevision: number,
+      idempotencyKey: string,
+      signal?: AbortSignal
+    ) => {
+      const result = await inner.execute(
+        key,
+        args,
+        expectedRevision,
+        idempotencyKey,
+        signal
+      );
+      if (result.ok && isMutatingKey(key)) bump.current();
+      return result;
+    },
+    manifest: () => inner.manifest(),
+  };
 }
 
 function isMutatingKey(key: string): boolean {
@@ -496,39 +653,49 @@ function TableAgentProvider({
   const bump = useRef(() => setRevision((n) => n + 1));
   bump.current = () => setRevision((n) => n + 1);
 
-  const stamp = viewFingerprint(runtime.view());
   const stampRef = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
+    const live = viewFingerprint(runtime.view(), options, runtime.featureIds());
     if (stampRef.current === undefined) {
-      stampRef.current = stamp;
+      stampRef.current = live;
       return;
     }
-    if (stampRef.current === stamp) return;
-    stampRef.current = stamp;
+    if (stampRef.current === live) return;
+    stampRef.current = live;
     bump.current();
-  }, [stamp]);
+  });
 
   const hostApprove = options.onApprove;
-  const waitForChrome = useRef<(proposal: unknown) => Promise<boolean>>(() =>
-    Promise.resolve(false)
-  );
-  waitForChrome.current = (proposal) => {
+  const waitForChrome = useRef<
+    (proposal: unknown, signal?: AbortSignal) => Promise<boolean>
+  >(() => Promise.resolve(false));
+  waitForChrome.current = (proposal, signal) => {
     if (pendingRef.current) {
       return Promise.reject(new Error("an approval is already pending"));
     }
     return new Promise<boolean>((resolve) => {
       const list = Array.isArray(proposal) ? (proposal as WriteProposal[]) : [];
-      const entry = {
+      const entry: {
+        proposals: readonly WriteProposal[];
+        resolve: (ok: boolean) => void;
+      } = {
         proposals: list,
         resolve: (ok: boolean) => {
           if (pendingRef.current !== entry) return;
           pendingRef.current = null;
           setPending(null);
+          signal?.removeEventListener("abort", onAbort);
           resolve(ok);
         },
       };
+      const onAbort = () => entry.resolve(false);
       pendingRef.current = entry;
       setPending(entry);
+      if (signal?.aborted) {
+        entry.resolve(false);
+        return;
+      }
+      signal?.addEventListener("abort", onAbort, { once: true });
     });
   };
 
@@ -539,60 +706,26 @@ function TableAgentProvider({
     []
   );
 
-  const session = useMemo(() => {
-    const fromRuntime = applyFromRuntime(
-      runtime,
-      options.columns
-        ? Object.entries(options.columns).map(([id, extra]) => ({
-            id,
-            label: extra.label ?? id,
-            type: extra.type ?? "unknown",
-            readable: extra.readable ?? true,
-            writable: extra.writable ?? false,
-            sortable: extra.sortable ?? false,
-          }))
-        : [],
-      options.apply
-    );
-    const apply: AgentApply = { ...fromRuntime, ...options.apply };
-    apply.setFilters = (filters) => {
-      options.apply?.setFilters?.(filters);
-      const applied = applyLiveFilters(runtime.view()?.query, filters);
-      if (!options.apply?.setFilters && !applied) {
-        throw new Error("setFilters is not wired");
-      }
-    };
-    const observe =
-      options.observe ??
-      (() =>
-        observationFromRuntime(options, runtime, revisionRef.current, apply));
-    const onApprove =
-      hostApprove ??
-      (options.approval === "never"
-        ? undefined
-        : (proposal: unknown) => waitForChrome.current(proposal));
-    const inner = createAgentSession({ observe, apply, onApprove });
-    return {
-      catalog: () => inner.catalog(),
-      describe: (key: string) => inner.describe(key),
-      execute: async (
-        key: string,
-        args: unknown,
-        expectedRevision: number,
-        idempotencyKey: string
-      ) => {
-        const result = await inner.execute(
-          key,
-          args,
-          expectedRevision,
-          idempotencyKey
-        );
-        if (result.ok && isMutatingKey(key)) bump.current();
-        return result;
-      },
-      manifest: () => inner.manifest(),
-    };
-  }, [options, runtime, hostApprove]);
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+  const runtimeRef = useRef(runtime);
+  runtimeRef.current = runtime;
+  const sessionRef = useRef<AgentSession | null>(null);
+  sessionRef.current ??= bindLiveSession(
+    optionsRef,
+    runtimeRef,
+    revisionRef,
+    waitForChrome,
+    bump
+  );
+  const session = sessionRef.current;
+  const published: AgentSession = {
+    catalog: () => session.catalog(),
+    describe: (key) => session.describe(key),
+    execute: (key, args, expectedRevision, idempotencyKey, signal) =>
+      session.execute(key, args, expectedRevision, idempotencyKey, signal),
+    manifest: () => session.manifest(),
+  };
 
   useEffect(() => {
     options.bridge?.attach?.(session);
@@ -617,7 +750,7 @@ function TableAgentProvider({
         };
 
   return (
-    <FeatureStateScope stateKey={TABLE_AGENT_STATE} value={session}>
+    <FeatureStateScope stateKey={TABLE_AGENT_STATE} value={published}>
       <FeatureStateScope stateKey={AGENT_APPROVAL_STATE} value={approvalValue}>
         {children}
       </FeatureStateScope>

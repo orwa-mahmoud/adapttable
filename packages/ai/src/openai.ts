@@ -46,7 +46,11 @@ export interface OpenAIFunctionTool {
  * @public
  */
 export interface OpenAIToolsOptions {
-  /** Default true. Sets `additionalProperties: false` when unset on the schema. */
+  /**
+   * Default true. Rewrites parameters for OpenAI structured outputs:
+   * `additionalProperties: false`, every property required, originally
+   * optional fields nullable, free-form objects as JSON strings.
+   */
   readonly strict?: boolean;
   /** Return only catalog / describe / execute. */
   readonly deferred?: boolean;
@@ -112,7 +116,10 @@ const PORTABLE_TRIO: readonly {
       additionalProperties: false,
       properties: {
         key: { type: "string", minLength: 1 },
-        args: { type: "object", additionalProperties: true },
+        args: {
+          type: "string",
+          description: "JSON object of capability arguments",
+        },
       },
       required: ["key", "args"],
     },
@@ -143,9 +150,103 @@ export function fromOpenAIToolName(name: string): string {
   return FROM_OPENAI_TOOL_NAME.get(name) ?? name;
 }
 
+function typeList(schema: JsonSchema): string[] {
+  if (!schema.type) return [];
+  return typeof schema.type === "string" ? [schema.type] : [...schema.type];
+}
+
+function isClosedEmptyObject(schema: JsonSchema): boolean {
+  return (
+    schema.additionalProperties === false &&
+    Object.keys(schema.properties ?? {}).length === 0
+  );
+}
+
+function isOpenObject(schema: JsonSchema): boolean {
+  if (schema.enum || schema.const !== undefined) return false;
+  if (isClosedEmptyObject(schema)) return false;
+  const types = typeList(schema);
+  const objectish = types.length === 0 || types.includes("object");
+  return objectish && Object.keys(schema.properties ?? {}).length === 0;
+}
+
+function withNull(schema: JsonSchema): JsonSchema {
+  const types = typeList(schema);
+  if (types.includes("null")) return schema;
+  if (types.length === 0) return { ...schema, type: ["object", "null"] };
+  return { ...schema, type: [...types, "null"] };
+}
+
+/**
+ * OpenAI `strict: true` requires `additionalProperties: false` and every
+ * property listed in `required`. Optional fields become required + nullable.
+ * Free-form objects become a JSON string — OpenAI forbids open maps.
+ */
+function toStrictOpenAISchema(schema: JsonSchema): JsonSchema {
+  if (isOpenObject(schema)) {
+    return {
+      type: "string",
+      description: schema.description ?? "JSON value encoded as a string",
+    };
+  }
+  const items = schema.items
+    ? { items: toStrictOpenAISchema(schema.items) }
+    : {};
+  const properties = schema.properties;
+  if (!properties) {
+    return {
+      ...schema,
+      ...(schema.type === "object" ? { additionalProperties: false } : {}),
+      ...items,
+    };
+  }
+  const next: Record<string, JsonSchema> = {};
+  const originallyRequired = new Set(schema.required ?? []);
+  const required: string[] = [];
+  for (const [key, child] of Object.entries(properties)) {
+    const strictChild = toStrictOpenAISchema(child);
+    next[key] = originallyRequired.has(key)
+      ? strictChild
+      : withNull(strictChild);
+    required.push(key);
+  }
+  return {
+    ...schema,
+    type: schema.type ?? "object",
+    additionalProperties: false,
+    properties: next,
+    required,
+    ...items,
+  };
+}
+
 function withStrictParameters(schema: JsonSchema, strict: boolean): JsonSchema {
-  if (!strict || schema.additionalProperties !== undefined) return schema;
-  return { ...schema, additionalProperties: false };
+  if (!strict) return schema;
+  return toStrictOpenAISchema(schema);
+}
+
+function coerceOpenAIArgs(schema: JsonSchema, value: unknown): unknown {
+  if (isOpenObject(schema) && typeof value === "string") {
+    try {
+      return JSON.parse(value) as unknown;
+    } catch {
+      return value;
+    }
+  }
+  const itemSchema = schema.items;
+  if (Array.isArray(value) && itemSchema) {
+    return value.map((item) => coerceOpenAIArgs(itemSchema, item));
+  }
+  if (!isRecord(value) || !schema.properties) return value;
+  const required = new Set(schema.required ?? []);
+  const next: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(schema.properties)) {
+    if (!(key in value)) continue;
+    const raw = value[key];
+    if (raw === null && !required.has(key)) continue;
+    next[key] = coerceOpenAIArgs(child, raw);
+  }
+  return next;
 }
 
 function asTool(
@@ -168,10 +269,9 @@ function asTool(
 /**
  * Map the session onto OpenAI function tools.
  *
- * `strict` (default true) sets `additionalProperties: false` when the
- * described schema does not already declare it. `deferred` returns only
- * the portable catalog / describe / execute trio — `describe` is how the
- * runtime learns the rest.
+ * `strict` (default true) rewrites each tool schema for OpenAI structured
+ * outputs. `deferred` returns only the portable catalog / describe / execute
+ * trio — `describe` is how the runtime learns the rest.
  *
  * @public
  */
@@ -282,7 +382,22 @@ function runPortableExecute(
     );
   }
   const body = isRecord(args) ? args : {};
-  return session.execute(key, body.args, expectedRevision, idempotencyKey);
+  let payload: unknown = body.args;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload) as unknown;
+    } catch (error) {
+      return Promise.resolve(
+        fail(session, idempotencyKey, "invalid-arguments", errorMessage(error))
+      );
+    }
+  }
+  try {
+    payload = coerceOpenAIArgs(session.describe(key).input, payload);
+  } catch {
+    // session.execute reports unknown / unwired keys
+  }
+  return session.execute(key, payload, expectedRevision, idempotencyKey);
 }
 
 /**
@@ -321,5 +436,11 @@ export async function executeOpenAITool(
     return runPortableExecute(session, args, expectedRevision, idempotencyKey);
   }
 
-  return session.execute(name, args, expectedRevision, idempotencyKey);
+  let payload = args;
+  try {
+    payload = coerceOpenAIArgs(session.describe(name).input, args);
+  } catch {
+    // session.execute reports unknown / unwired keys
+  }
+  return session.execute(name, payload, expectedRevision, idempotencyKey);
 }

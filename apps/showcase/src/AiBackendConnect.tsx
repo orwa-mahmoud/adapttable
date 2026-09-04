@@ -67,6 +67,7 @@ export function AiModeSwitch({
 
 export function AiBackendConnect({ session, mode }: AiBackendConnectProps) {
   const [endpoint, setEndpoint] = useState("http://127.0.0.1:8787");
+  const [endpointToken, setEndpointToken] = useState("");
   const [status, setStatus] = useState<
     "idle" | "connecting" | "ready" | "error"
   >("idle");
@@ -108,9 +109,11 @@ export function AiBackendConnect({ session, mode }: AiBackendConnectProps) {
     const pending = new AbortController();
     abortRef.current = pending;
     try {
+      const token = endpointToken.trim();
       const client = createAgentHttpClient({
         endpoint: url,
         timeoutMs: 20_000,
+        ...(token ? { headers: { authorization: `Bearer ${token}` } } : {}),
       });
       const hello = await client.connect(session, pending.signal);
       clientRef.current = client;
@@ -137,6 +140,7 @@ export function AiBackendConnect({ session, mode }: AiBackendConnectProps) {
     try {
       const result: AgentHttpTurnResult = await client.send(session, message, {
         signal: pending.signal,
+        returnResults: true,
       });
       const outcomes = result.results.map(outcomeLine);
       setLines((current) => [
@@ -158,7 +162,8 @@ export function AiBackendConnect({ session, mode }: AiBackendConnectProps) {
     <div className="ai-play__backend" data-testid="ai-backend">
       <p className="ai-play__note">
         Messages and permitted table context go to the endpoint you connect.
-        Provider keys stay on that server.{" "}
+        Provider keys stay on that server. Endpoint token is the backend Bearer
+        (`AGENT_HTTP_TOKEN`), not a model key.{" "}
         <a href={`${DOCS_URL}ai-http/`}>Connect a backend</a>
       </p>
       <div className="ai-play__actions">
@@ -171,6 +176,18 @@ export function AiBackendConnect({ session, mode }: AiBackendConnectProps) {
             data-testid="ai-backend-url"
             disabled={status === "ready" || status === "connecting"}
             onChange={(event) => setEndpoint(event.target.value)}
+          />
+        </label>
+        <label className="ai-play__field">
+          <span>Endpoint token</span>
+          <input
+            type="password"
+            value={endpointToken}
+            autoComplete="off"
+            data-testid="ai-backend-token"
+            disabled={status === "ready" || status === "connecting"}
+            placeholder="AGENT_HTTP_TOKEN (Bearer)"
+            onChange={(event) => setEndpointToken(event.target.value)}
           />
         </label>
         {status === "ready" ? (

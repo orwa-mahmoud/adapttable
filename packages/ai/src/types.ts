@@ -476,7 +476,8 @@ export interface AgentSession {
     key: string,
     args: unknown,
     expectedRevision: number,
-    idempotencyKey: string
+    idempotencyKey: string,
+    signal?: AbortSignal
   ): Promise<ExecuteResult>;
   /** Deterministic snapshot for the current observation. */
   manifest(): AgentManifest;

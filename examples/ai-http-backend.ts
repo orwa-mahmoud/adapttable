@@ -5,17 +5,19 @@
  * protocol from `@adapttable/ai/http`. This file is the supported example
  * that the showcase "Connect backend" mode talks to.
  *
- *   cp examples/ai-http-backend.env.example .env
+ *   cp examples/ai-http-backend.env.example examples/.env.ai-http
  *   # fill AGENT_PROVIDER + the matching API key
- *   pnpm exec tsx examples/ai-http-backend.ts
+ *   pnpm --filter @adapttable/examples ai-http
  */
-import { timingSafeEqual } from "node:crypto";
+import { randomBytes, timingSafeEqual } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import {
   createServer,
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   AGENT_HTTP_SCHEMA,
@@ -25,7 +27,52 @@ import {
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
 
+function applyEnvLine(line: string): void {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith("#")) return;
+  const eq = trimmed.indexOf("=");
+  if (eq <= 0) return;
+  const key = trimmed.slice(0, eq).trim();
+  let value = trimmed.slice(eq + 1).trim();
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1);
+  }
+  if (process.env[key] !== undefined) return;
+  process.env[key] = value;
+}
+
+function loadEnvFile(path: string): void {
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
+    applyEnvLine(line);
+  }
+}
+
+function moduleDir(): string | undefined {
+  try {
+    const url = import.meta.url;
+    if (!url.startsWith("file:")) return undefined;
+    return fileURLToPath(new URL(".", url));
+  } catch {
+    return undefined;
+  }
+}
+
+function loadAgentEnv(): void {
+  const explicit = process.env.AGENT_ENV_FILE;
+  if (explicit) loadEnvFile(resolve(explicit));
+  const here = moduleDir();
+  if (here) loadEnvFile(resolve(here, ".env.ai-http"));
+  loadEnvFile(resolve(process.cwd(), ".env"));
+}
+
+loadAgentEnv();
+
 const PORT = Number(process.env.AGENT_PORT ?? 8787);
+const HOST = process.env.AGENT_HOST ?? "127.0.0.1";
 const MAX_BODY = Number(process.env.AGENT_MAX_BODY ?? 65_536);
 const PROVIDER = (process.env.AGENT_PROVIDER ?? "openai").toLowerCase();
 const MODEL = process.env.AGENT_MODEL ?? defaultModel(PROVIDER);
@@ -184,7 +231,11 @@ function userPrompt(request: AgentHttpRequest): string {
   return parts.join("\n\n");
 }
 
-function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
+function asReply(
+  raw: string,
+  request: AgentHttpRequest,
+  turnNonce: string
+): AgentHttpResponse {
   const body: unknown = JSON.parse(raw);
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new TypeError("provider returned a non-object");
@@ -197,14 +248,10 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
             ? (action as Record<string, unknown>)
             : {};
         const key = typeof item.key === "string" ? item.key : "unknown";
-        const idempotencyKey =
-          typeof item.idempotencyKey === "string" && item.idempotencyKey
-            ? item.idempotencyKey
-            : `${request.tableId}:${key}:${String(index)}`;
         return {
           key,
           args: item.args ?? {},
-          idempotencyKey,
+          idempotencyKey: `${turnNonce}:${String(index)}`,
           expectedRevision:
             typeof item.expectedRevision === "number"
               ? item.expectedRevision
@@ -238,7 +285,7 @@ export async function handleExampleAgentTurn(
     user: userPrompt(request),
     signal,
   });
-  return asReply(raw, request);
+  return asReply(raw, request, randomBytes(8).toString("hex"));
 }
 
 async function completeOpenAI(
@@ -410,13 +457,29 @@ export async function handleExampleHttp(
   }
 }
 
+function isLoopbackHost(host: string): boolean {
+  return host === "127.0.0.1" || host === "::1" || host === "localhost";
+}
+
+/** Non-loopback binds require an endpoint token. @public */
+export function exampleRequiresToken(host: string, token: string): boolean {
+  return !isLoopbackHost(host) && token === "";
+}
+
 function start(): void {
+  const token = process.env.AGENT_HTTP_TOKEN ?? "";
+  if (exampleRequiresToken(HOST, token)) {
+    console.error(
+      "AGENT_HOST is not loopback. Set AGENT_HTTP_TOKEN before binding externally."
+    );
+    process.exit(1);
+  }
   const server = createServer((req, res) => {
     void handleExampleHttp(req, res);
   });
-  server.listen(PORT, () => {
+  server.listen(PORT, HOST, () => {
     console.log(
-      `AdaptTable AI example listening on http://127.0.0.1:${String(PORT)}`
+      `AdaptTable AI example listening on http://${HOST}:${String(PORT)}`
     );
     console.log(
       `Provider: ${PROVIDER} (model ${MODEL}). Keys stay on this process.`

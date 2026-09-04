@@ -44,7 +44,7 @@ export interface CreateAgentSessionOptions {
    * Host confirmation. When set, chrome is skipped.
    * When omitted and approval is required, execute returns `approval: "pending"`.
    */
-  onApprove?: (proposal: unknown) => Promise<boolean>;
+  onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
 }
 
 function isCapabilityKey(key: string): key is CapabilityKey {
@@ -120,7 +120,8 @@ export function createAgentSession(
     key: string,
     args: unknown,
     expectedRevision: number,
-    idempotencyKey: string
+    idempotencyKey: string,
+    signal?: AbortSignal
   ): Promise<ExecuteResult> => {
     const fail = (code: string, message: string): ExecuteResult => {
       const result: ExecuteResult = {
@@ -162,7 +163,7 @@ export function createAgentSession(
         observation,
         options.apply,
         options.observe,
-        options.onApprove
+        bindApprove(options.onApprove, signal)
       );
       if (
         isWriteResult(payload) &&
@@ -197,14 +198,29 @@ export function createAgentSession(
     key: string,
     args: unknown,
     expectedRevision: number,
-    idempotencyKey: string
+    idempotencyKey: string,
+    signal?: AbortSignal
   ): Promise<ExecuteResult> => {
+    if (signal?.aborted) {
+      return Promise.resolve({
+        ok: false,
+        revision: options.observe().viewRevision,
+        idempotencyKey,
+        error: { code: "cancelled", message: "execute cancelled" },
+      });
+    }
     const cached = replay.get(idempotencyKey);
     if (cached) return Promise.resolve(cached);
     const running = inflight.get(idempotencyKey);
     if (running) return running;
 
-    const pending = runExecute(key, args, expectedRevision, idempotencyKey);
+    const pending = runExecute(
+      key,
+      args,
+      expectedRevision,
+      idempotencyKey,
+      signal
+    );
     inflight.set(idempotencyKey, pending);
     return pending.finally(() => {
       inflight.delete(idempotencyKey);
@@ -244,7 +260,7 @@ async function dispatch(
   observation: AgentObservation,
   apply: AgentApply,
   observe: () => AgentObservation,
-  onApprove?: (proposal: unknown) => Promise<boolean>
+  onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>
 ): Promise<unknown> {
   const body = args as Record<string, unknown>;
   switch (key) {
@@ -462,12 +478,37 @@ async function decideApproval(
   key: CapabilityKey,
   observation: AgentObservation,
   proposal: unknown,
-  onApprove?: (proposal: unknown) => Promise<boolean>
+  onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>
 ): Promise<ApprovalOutcome> {
   if (!needsApproval(key, approvalOf(observation))) return "not-required";
   if (!onApprove) return "pending";
   const allowed = await onApprove(proposal);
   return allowed ? "approved" : "rejected";
+}
+
+function bindApprove(
+  onApprove: CreateAgentSessionOptions["onApprove"] | undefined,
+  signal?: AbortSignal
+): CreateAgentSessionOptions["onApprove"] | undefined {
+  if (!onApprove) return undefined;
+  return async (proposal) => {
+    if (signal?.aborted) return false;
+    if (!signal) return onApprove(proposal, signal);
+    return new Promise<boolean>((resolve, reject) => {
+      const onAbort = () => resolve(false);
+      signal.addEventListener("abort", onAbort, { once: true });
+      onApprove(proposal, signal).then(
+        (allowed) => {
+          signal.removeEventListener("abort", onAbort);
+          resolve(allowed);
+        },
+        (error: unknown) => {
+          signal.removeEventListener("abort", onAbort);
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      );
+    });
+  };
 }
 
 function writePayload(

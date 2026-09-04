@@ -154,7 +154,10 @@ from `@adapttable/ai/json`.
 replace each `.` in a catalog key with `_` (`view.setPage` →
 `view_setPage`) because OpenAI function names cannot contain dots.
 `executeOpenAITool` maps those names back, and still accepts the dotted
-catalog key. Deferred `execute` requires both `key` and `args`.
+catalog key. Deferred `execute` requires both `key` and `args` (`args` is
+a JSON string under `strict`). Strict mode lists every property in
+`required`, forbids open maps, and treats originally-optional fields as
+nullable.
 
 `toMcpTools` / `toMcpResources` list enabled keys. Each capability is
 also a resource at

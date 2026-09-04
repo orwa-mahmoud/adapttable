@@ -19,6 +19,7 @@ import type {
 
 export {
   AGENT_SCHEMA_VERSION,
+  AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,
   type ApprovalPolicy,
   CAPABILITY_KEYS,
   type CapabilityKey,
@@ -27,9 +28,6 @@ export {
   type WritePolicy,
 } from "./keys";
 export type * from "./types";
-
-/** Schema family shared with the session and envelope. @public */
-export const AGENT_HTTP_SCHEMA = AGENT_SCHEMA_VERSION;
 
 /** Hello probe versus a user turn. @public */
 export type AgentHttpKind = "hello" | "turn";
@@ -75,7 +73,7 @@ export interface AgentHttpAction {
   readonly args?: unknown;
   /** Caller-supplied replay key. Required so a retry cannot mint a new write. */
   readonly idempotencyKey: string;
-  /** Revision the backend observed. Defaults to the live manifest. */
+  /** Revision the backend observed. Defaults to the request snapshot. */
   readonly expectedRevision?: number;
 }
 
@@ -400,7 +398,7 @@ async function postJson(
   if (!endpoint) throw new Error("agent HTTP endpoint is required");
   const fetchImpl = options.fetch ?? globalThis.fetch;
   if (typeof fetchImpl !== "function") {
-    throw new Error("agent HTTP requires fetch");
+    throw new TypeError("agent HTTP requires fetch");
   }
   const headers = new Headers(await resolveHeaders(options.headers));
   if (!headers.has("content-type")) {
@@ -449,9 +447,66 @@ async function exchange(
   }
 }
 
+function newHttpTurnId(): string {
+  return globalThis.crypto.randomUUID();
+}
+
+function readIdempotencyKey(
+  turnId: string,
+  revision: number,
+  index: number,
+  query: RowReadQuery
+): string {
+  const columns = [...(query.columns ?? [])]
+    .sort((left, right) => left.localeCompare(right))
+    .join(",");
+  const scope = query.scope ?? "";
+  return [
+    "http-read",
+    turnId,
+    String(revision),
+    String(index),
+    String(query.offset),
+    String(query.limit),
+    columns,
+    scope,
+  ].join(":");
+}
+
+function mergeGuides(
+  current: readonly CapabilityGuide[] | undefined,
+  incoming: readonly CapabilityGuide[]
+): CapabilityGuide[] {
+  const next = [...(current ?? [])];
+  const indexByKey = new Map(next.map((guide, index) => [guide.key, index]));
+  for (const guide of incoming) {
+    const existing = indexByKey.get(guide.key);
+    if (existing === undefined) {
+      indexByKey.set(guide.key, next.length);
+      next.push(guide);
+    } else {
+      next[existing] = guide;
+    }
+  }
+  return next;
+}
+
+function cancelledResult(
+  session: AgentSession,
+  idempotencyKey: string
+): ExecuteResult {
+  return {
+    ok: false,
+    revision: session.manifest().viewRevision,
+    idempotencyKey,
+    error: { code: "cancelled", message: "agent HTTP cancelled" },
+  };
+}
+
 async function fulfillNeeds(
   session: AgentSession,
-  needs: AgentHttpNeeds | undefined
+  needs: AgentHttpNeeds | undefined,
+  turnId: string
 ): Promise<{
   descriptions: CapabilityGuide[];
   rows: RowWindow[];
@@ -469,7 +524,7 @@ async function fulfillNeeds(
       "rows.read",
       query,
       revision,
-      `http-read-${String(index)}-${query.offset}-${query.limit}`
+      readIdempotencyKey(turnId, revision, index, query)
     );
     if (!result.ok) {
       throw new Error(result.error?.message ?? "rows.read failed");
@@ -486,16 +541,23 @@ async function fulfillNeeds(
 
 async function executeActions(
   session: AgentSession,
-  actions: readonly AgentHttpAction[]
+  actions: readonly AgentHttpAction[],
+  snapshotRevision: number,
+  signal?: AbortSignal
 ): Promise<ExecuteResult[]> {
   const results: ExecuteResult[] = [];
   for (const action of actions) {
+    if (signal?.aborted) {
+      results.push(cancelledResult(session, action.idempotencyKey));
+      continue;
+    }
     results.push(
       await session.execute(
         action.key,
         action.args ?? {},
-        action.expectedRevision ?? session.manifest().viewRevision,
-        action.idempotencyKey
+        action.expectedRevision ?? snapshotRevision,
+        action.idempotencyKey,
+        signal
       )
     );
   }
@@ -543,31 +605,31 @@ export async function runAgentHttpTurn(
   const trimmed = message.trim();
   if (!trimmed) throw new Error("agent HTTP turn requires a message");
 
+  const turnId = newHttpTurnId();
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let fulfilled = { describe: 0, read: 0 };
   let last: AgentHttpResponse | undefined;
+  let snapshotRevision = session.manifest().viewRevision;
 
   for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
-    last = await exchange(
-      options,
-      compactRequest(session, "turn", {
-        message: trimmed,
-        conversation: extras.conversation,
-        descriptions,
-        rows,
-      }),
-      extras.signal
-    );
+    const request = compactRequest(session, "turn", {
+      message: trimmed,
+      conversation: extras.conversation,
+      descriptions,
+      rows,
+    });
+    snapshotRevision = request.manifest.viewRevision;
+    last = await exchange(options, request, extras.signal);
     const needs = last.needs;
     const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
     if (asked === 0) break;
     if (round === MAX_NEED_ROUNDS) {
       throw new Error("agent HTTP asked for discovery too many times");
     }
-    const next = await fulfillNeeds(session, needs);
-    descriptions = next.descriptions;
-    rows = next.rows;
+    const next = await fulfillNeeds(session, needs, turnId);
+    descriptions = mergeGuides(descriptions, next.descriptions);
+    rows = [...(rows ?? []), ...next.rows];
     fulfilled = {
       describe: fulfilled.describe + next.describe,
       read: fulfilled.read + next.read,
@@ -575,9 +637,15 @@ export async function runAgentHttpTurn(
   }
 
   if (!last) throw new Error("agent HTTP returned no response");
-  const results = await executeActions(session, last.actions ?? []);
+  const results = await executeActions(
+    session,
+    last.actions ?? [],
+    snapshotRevision,
+    extras.signal
+  );
+  let text = last.text ?? "";
   if (extras.returnResults && last.continueWithResults && results.length > 0) {
-    await exchange(
+    const continued = await exchange(
       options,
       compactRequest(session, "turn", {
         message: trimmed,
@@ -586,9 +654,10 @@ export async function runAgentHttpTurn(
       }),
       extras.signal
     );
+    if (continued.text) text = continued.text;
   }
   return {
-    text: last.text ?? "",
+    text,
     results,
     needsFulfilled: fulfilled,
   };
