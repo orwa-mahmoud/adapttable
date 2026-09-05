@@ -1,5 +1,5 @@
-import type { FeatureProps } from "@adapttable/core";
-import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/core";
+import type { ColumnDef, FeatureProps } from "@adapttable/react";
 import type {} from "@adapttable/unstyled";
 import { groupingPanel as groupingPanel_ } from "@adapttable/unstyled/grouping-panel";
 

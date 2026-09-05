@@ -27,7 +27,6 @@ import {
   editing as chakraEditing,
   undoRedoButtons as chakraUndo,
 } from "@adapttable/chakra/editing";
-import type { BatchRowEdit, ColumnDef } from "@adapttable/core";
 import { agentApproval as mantineApproval } from "@adapttable/mantine";
 import {
   batchEditing as mantineBatch,
@@ -49,6 +48,7 @@ import {
   editing as radixEditing,
   undoRedoButtons as radixUndo,
 } from "@adapttable/radix/editing";
+import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
 import { agentApproval as shadcnApproval } from "@adapttable/shadcn";
 import {
   batchEditing as shadcnBatch,

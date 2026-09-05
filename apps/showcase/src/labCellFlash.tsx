@@ -1,4 +1,4 @@
-import { useChangedCellFlash } from "@adapttable/core/stream";
+import { useChangedCellFlash } from "@adapttable/react/stream";
 import { type ReactNode, useMemo, useRef, useState } from "react";
 
 import { PatchSinkProvider } from "./patchSink";

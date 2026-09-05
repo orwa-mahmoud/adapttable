@@ -1,5 +1,5 @@
-import type { FeatureProps } from "@adapttable/core";
-import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/core";
+import type { ColumnDef, FeatureProps } from "@adapttable/react";
 import { shadcnClassNames } from "@adapttable/shadcn";
 import { groupingPanel as groupingPanel_ } from "@adapttable/shadcn/grouping-panel";
 import type {} from "@adapttable/unstyled";

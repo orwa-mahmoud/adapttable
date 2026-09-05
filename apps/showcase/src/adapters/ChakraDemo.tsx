@@ -35,13 +35,13 @@ import {
   statusBar as statusBar_,
 } from "@adapttable/chakra/status-bar";
 import { tree as tree_ } from "@adapttable/chakra/tree";
-import type { FeatureProps } from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/core";
+import { getDirection, getLabels } from "@adapttable/i18n";
 import type {
   ColumnDef,
-  ColumnLayoutState,
+  FeatureProps,
   NestedTableDefaults,
-} from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
+} from "@adapttable/react";
 
 import { kitChromeFeatures } from "./chromeFeatures";
 

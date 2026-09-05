@@ -1,4 +1,4 @@
-import type { TableFeature } from "@adapttable/core";
+import type { TableFeature } from "@adapttable/react/features";
 
 const OUTER: TableFeature[] = [
   {

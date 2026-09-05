@@ -18,6 +18,7 @@
     "@adapttable/chakra": "workspace:*",
     "@adapttable/core": "workspace:*",
     "@adapttable/i18n": "workspace:*",
+    "@adapttable/react": "workspace:*",
     "@adapttable/mantine": "workspace:*",
     "@adapttable/mui": "workspace:*",
     "@adapttable/radix": "workspace:*",

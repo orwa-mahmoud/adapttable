@@ -1,18 +1,17 @@
-import type { CellProps, ColumnDef } from "@adapttable/core";
 import {
   applyRowPatches,
   applyRowPatchesWithLog,
   updateRow,
-  useFrontendData,
-  useServerData,
 } from "@adapttable/core";
+import { getLabels } from "@adapttable/i18n";
+import type { CellProps, ColumnDef } from "@adapttable/react";
+import { useFrontendData, useServerData } from "@adapttable/react";
 import {
   editing as editing_,
   rowAppearance,
   tree as tree_,
   virtualize as virtualize_,
-} from "@adapttable/core/features";
-import { getLabels } from "@adapttable/i18n";
+} from "@adapttable/react/features";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";

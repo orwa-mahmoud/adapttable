@@ -1,13 +1,13 @@
-import type {
-  PivotPanelChromeProps,
-  SavedViewsPanelChromeProps,
-} from "@adapttable/core/adapter";
 import {
   DataTable,
   type DataTableProps,
   PivotPanel,
   SavedViewsPanel,
 } from "@adapttable/mantine";
+import type {
+  PivotPanelChromeProps,
+  SavedViewsPanelChromeProps,
+} from "@adapttable/react/adapter";
 import type { DataTableClassNames } from "@adapttable/unstyled";
 import { MantineProvider } from "@mantine/core";
 import { type ComponentType, lazy, type ReactNode, Suspense } from "react";

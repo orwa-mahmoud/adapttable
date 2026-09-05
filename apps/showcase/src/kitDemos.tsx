@@ -1,6 +1,6 @@
-import type { FeatureProps } from "@adapttable/core";
-import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/core";
 import type {} from "@adapttable/mantine";
+import type { ColumnDef, FeatureProps } from "@adapttable/react";
 import {
   type ComponentType,
   lazy,

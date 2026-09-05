@@ -1,13 +1,14 @@
 import { savedViews as antdSavedViews } from "@adapttable/antd/saved-views";
 import { savedViews as baseUiSavedViews } from "@adapttable/base-ui/saved-views";
 import { savedViews as chakraSavedViews } from "@adapttable/chakra/saved-views";
-import type { SavedView, UseSavedViewsOptions } from "@adapttable/core";
-import { createMemoryAdapter, useSavedViews } from "@adapttable/core";
-import type { TableFeature } from "@adapttable/core/features";
 import { getLabels } from "@adapttable/i18n";
 import { savedViews as mantineSavedViews } from "@adapttable/mantine/saved-views";
 import { savedViews as muiSavedViews } from "@adapttable/mui/saved-views";
 import { savedViews as radixSavedViews } from "@adapttable/radix/saved-views";
+import type { UseSavedViewsOptions } from "@adapttable/react";
+import type { SavedView } from "@adapttable/react";
+import { createMemoryAdapter, useSavedViews } from "@adapttable/react";
+import type { TableFeature } from "@adapttable/react/features";
 import { savedViews as shadcnSavedViews } from "@adapttable/shadcn/saved-views";
 import { savedViews as unstyledSavedViews } from "@adapttable/unstyled/saved-views";
 import { Suspense, useMemo, useState } from "react";

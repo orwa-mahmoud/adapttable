@@ -1,9 +1,4 @@
-import type {
-  ColumnDef,
-  ColumnLayoutState,
-  FeatureProps,
-  NestedTableDefaults,
-} from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable } from "@adapttable/mui";
 import { bulkActions as bulkActions_ } from "@adapttable/mui/bulk-actions";
@@ -38,6 +33,11 @@ import { rowReorder as rowReorder_ } from "@adapttable/mui/row-reorder";
 import { savedViews as savedViews_ } from "@adapttable/mui/saved-views";
 import { sidePanel as sidePanel_ } from "@adapttable/mui/side-panel";
 import { tree as tree_ } from "@adapttable/mui/tree";
+import type {
+  ColumnDef,
+  FeatureProps,
+  NestedTableDefaults,
+} from "@adapttable/react";
 
 import { kitChromeFeatures } from "./chromeFeatures";
 

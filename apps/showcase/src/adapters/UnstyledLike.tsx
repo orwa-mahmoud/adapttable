@@ -1,7 +1,10 @@
-import type { FeatureProps } from "@adapttable/core";
 import type { ColumnLayoutState } from "@adapttable/core";
-import type { ColumnDef, NestedTableDefaults } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
+import type {
+  ColumnDef,
+  FeatureProps,
+  NestedTableDefaults,
+} from "@adapttable/react";
 import { DataTable, type DataTableClassNames } from "@adapttable/unstyled";
 import { bulkActions as bulkActions_ } from "@adapttable/unstyled/bulk-actions";
 import { cellNavigation as cellNavigation_ } from "@adapttable/unstyled/cell-navigation";

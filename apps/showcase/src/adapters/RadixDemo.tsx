@@ -1,11 +1,6 @@
 import "@radix-ui/themes/styles.css";
 
-import type { FeatureProps } from "@adapttable/core";
-import type {
-  ColumnDef,
-  ColumnLayoutState,
-  NestedTableDefaults,
-} from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/core";
 import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable } from "@adapttable/radix";
 import { bulkActions as bulkActions_ } from "@adapttable/radix/bulk-actions";
@@ -44,6 +39,11 @@ import {
   statusBar as statusBar_,
 } from "@adapttable/radix/status-bar";
 import { tree as tree_ } from "@adapttable/radix/tree";
+import type {
+  ColumnDef,
+  FeatureProps,
+  NestedTableDefaults,
+} from "@adapttable/react";
 
 import { kitChromeFeatures } from "./chromeFeatures";
 

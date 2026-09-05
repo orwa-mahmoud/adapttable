@@ -1,12 +1,12 @@
 import {
   buildGroupedFlatModel,
-  type ColumnDef,
   type ExportAllControls,
   type ExportAllResult,
   type ExportCsvOptions,
   viewFromGroupedEntries,
 } from "@adapttable/core";
 import { pdfWriter, printTable } from "@adapttable/core/pdf";
+import type { ColumnDef } from "@adapttable/react";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { rosterFor } from "./casts";
