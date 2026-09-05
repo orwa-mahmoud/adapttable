@@ -18,6 +18,14 @@ const CORE_SRC = join(
   "src"
 );
 
+const REACT_SRC = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "packages",
+  "react",
+  "src"
+);
+
 /** Every field the classifier reads, with the safe defaults a test overrides. */
 const classify = (over) =>
   classifyForgottenExport({
@@ -181,12 +189,14 @@ describe("the value-backed class", () => {
   // derived from. If that stops being true, the reason for the deferral is
   // gone and this fails rather than quietly carrying on.
   it("every listed symbol really is a value a public type is built from", () => {
+    // The editable-cell controller moved to the React binding in v3; the
+    // constants themselves stayed neutral.
     const sources = [
-      "filters/filterDefs.ts",
-      "formula/evaluate.ts",
-      "editing/cellEditing.ts",
-      "editing/editableCellController.ts",
-    ].map((f) => readFileSync(join(CORE_SRC, f), "utf8"));
+      join(CORE_SRC, "filters/filterDefs.ts"),
+      join(CORE_SRC, "formula/evaluate.ts"),
+      join(CORE_SRC, "editing/cellEditing.ts"),
+      join(REACT_SRC, "editing/editableCellController.ts"),
+    ].map((f) => readFileSync(f, "utf8"));
     const all = sources.join("\n");
     for (const symbol of new Set(VALUE_BACKED.map(([, s]) => s))) {
       const declaresValue = new RegExp(

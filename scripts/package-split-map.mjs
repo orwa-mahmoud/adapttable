@@ -33,56 +33,6 @@ const REACT_CHROME_NAMES = new Set([
   "MultiSelectEditorChromeProps",
 ]);
 
-const HTTP_SURFACE = [
-  "AGENT_HTTP_SCHEMA",
-  "AGENT_SCHEMA_VERSION",
-  "AgentApply",
-  "AgentCellEdit",
-  "AgentColumn",
-  "AgentHttpAction",
-  "AgentHttpClientOptions",
-  "AgentHttpKind",
-  "AgentHttpMessage",
-  "AgentHttpNeeds",
-  "AgentHttpRequest",
-  "AgentHttpResponse",
-  "AgentHttpTurnResult",
-  "AgentLimits",
-  "AgentManifest",
-  "AgentObservation",
-  "AgentPolicy",
-  "AgentRowAddressing",
-  "AgentSession",
-  "ApprovalOutcome",
-  "ApprovalPolicy",
-  "CAPABILITY_KEYS",
-  "CapabilityGuide",
-  "CapabilityKey",
-  "CatalogEntry",
-  "CommitPolicy",
-  "connectAgentHttp",
-  "createAgentHttpClient",
-  "ExecuteError",
-  "ExecuteResult",
-  "JsonSchema",
-  "parseAgentHttpRequest",
-  "parseAgentHttpResponse",
-  "ResolvedRow",
-  "RowAddressScope",
-  "RowKeyRef",
-  "RowPositionRef",
-  "RowReadQuery",
-  "RowRef",
-  "RowWindow",
-  "RowWindowRow",
-  "runAgentHttpTurn",
-  "TableAgentBridge",
-  "WriteExecuteResult",
-  "WritePolicy",
-  "WriteProposal",
-  "WriteRowResult",
-];
-
 const CLASSES = new Set([
   "neutral-model",
   "neutral-operation",
@@ -201,7 +151,6 @@ function proposedImport(current, cls, dir) {
 }
 
 function entrySymbols(entry, manifest) {
-  if (entry.dir === "ai" && entry.subpath === "./http") return HTTP_SURFACE;
   const policy = manifest.entrypoints[entry.report];
   if (!policy) return [];
   const surface = policy.surface ?? policy.reexport;
@@ -300,14 +249,6 @@ export function splitMapErrors(map, manifest) {
       errors.push(`unmapped extra ${row.export} on ${row.currentImport}`);
     }
   }
-  const http = map.symbols.filter(
-    (row) => row.currentImport === "@adapttable/ai/http"
-  );
-  if (http.length !== HTTP_SURFACE.length) {
-    errors.push(
-      `@adapttable/ai/http must list ${HTTP_SURFACE.length} exports (has ${http.length})`
-    );
-  }
   return errors;
 }
 
@@ -322,13 +263,13 @@ export function representativeExamplesAgree(map) {
   if (source?.class !== "neutral-model") {
     errors.push("TableSource must be classified neutral-model");
   }
-  const hook = by("@adapttable/core", "useDataTable");
+  const hook = by("@adapttable/react", "useDataTable");
   if (!hook || hook.proposedImport !== "@adapttable/react") {
-    errors.push("useDataTable must move to @adapttable/react");
+    errors.push("useDataTable must live on @adapttable/react");
   }
-  const cols = by("@adapttable/core", "ColumnDef");
+  const cols = by("@adapttable/react", "ColumnDef");
   if (!cols || cols.proposedImport !== "@adapttable/react") {
-    errors.push("ColumnDef must move to @adapttable/react");
+    errors.push("ColumnDef must live on @adapttable/react");
   }
   const kit = by("@adapttable/mui", "DataTable");
   if (!kit || kit.proposedImport !== "@adapttable/mui") {
@@ -342,9 +283,9 @@ export function representativeExamplesAgree(map) {
   if (!agent || agent.proposedImport !== "@adapttable/ai/react") {
     errors.push("tableAgent must stay on @adapttable/ai/react");
   }
-  const query = by("@adapttable/core", "useQuerySource");
+  const query = by("@adapttable/react", "useQuerySource");
   if (!query || query.proposedImport !== "@adapttable/react") {
-    errors.push("useQuerySource must move to @adapttable/react");
+    errors.push("useQuerySource must live on @adapttable/react");
   }
   return errors;
 }

@@ -31,7 +31,7 @@ const mantinePkg = JSON.parse(
 describe("v3 showcase snippets compile", () => {
   it("row-reordering imports published factories", () => {
     const snippet = fill(featureBySlug("row-reordering").snippet);
-    assert.match(snippet, /from "@adapttable\/core"/);
+    assert.match(snippet, /from "@adapttable\/react"/);
     assert.match(snippet, /applyRowReorder/);
     assert.match(snippet, /from "@adapttable\/mantine\/row-reorder"/);
     assert.match(snippet, /rowReorder/);
@@ -39,7 +39,7 @@ describe("v3 showcase snippets compile", () => {
     assert.ok(corePkg.exports["."]);
     assert.ok(mantinePkg.exports["./row-reorder"]);
     assert.match(
-      readFileSync(`${ROOT}/packages/core/src/index.ts`, "utf8"),
+      readFileSync(`${ROOT}/packages/react/src/index.ts`, "utf8"),
       /applyRowReorder/
     );
     assert.match(

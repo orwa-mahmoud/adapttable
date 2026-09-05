@@ -39,13 +39,10 @@ import { exportedNames } from "./packed-names.mjs";
  * finding, including a different symbol on one of these same reports.
  */
 export const VALUE_BACKED = [
-  ["core-adapter.api.md", "FILTER_TYPES"],
-  ["core-features.api.md", "FILTER_TYPES"],
   ["core-formula.api.md", "FILTER_TYPES"],
   ["core-pdf.api.md", "FILTER_TYPES"],
   ["core-pivot.api.md", "FILTER_TYPES"],
   ["core-query.api.md", "FORMULA_ERRORS"],
-  ["core-sparkline.api.md", "FILTER_TYPES"],
   ["core-xlsx.api.md", "FILTER_TYPES"],
 ];
 

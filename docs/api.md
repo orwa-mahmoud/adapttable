@@ -1345,7 +1345,7 @@ captions, the corner cell's `rowHeader`, the per-level `indent`, and
 See [pivot tables](./pivot.md#rendering-it-with-your-kit).
 
 **Replacing a mobile card's body.** `renderCard(row, card)` returns the card's
-content; the shell renders around it. `renderCard` has the type `MobileCardRenderer`, and `card` is a
+content; the shell renders around it. `renderCard` has the type `ReactMobileCardRenderer` from `@adapttable/react`, and `card` is a
 `MobileCardModel`: `index`,
 `selected`, `expanded`, and `fields` — a `MobileCardField` per column carrying
 its `column`, resolved `label` (`undefined` when the column asked for none) and

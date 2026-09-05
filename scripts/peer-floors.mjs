@@ -238,7 +238,7 @@ function packInto(pkgDir, dest) {
   return lines[lines.length - 1].trim();
 }
 
-function runCell(cell, coreTarball, packDir) {
+function runCell(cell, workspaceTarballs, packDir) {
   const adapterTarball = packInto(cell.pkg, packDir);
   const dir = mkdtempSync(join(tmpdir(), `floor-${cell.kit}-`));
   try {
@@ -249,6 +249,10 @@ function runCell(cell, coreTarball, packDir) {
       type: "module",
       dependencies: {
         [`@adapttable/${cell.kit}`]: `file:${adapterTarball}`,
+        // Named directly, not only overridden: the binding is not published
+        // yet, and npm's peer resolution needs a concrete node for it.
+        "@adapttable/core": `file:${workspaceTarballs.core}`,
+        "@adapttable/react": `file:${workspaceTarballs.react}`,
         ...cell.deps,
         ...REACT,
       },
@@ -260,9 +264,13 @@ function runCell(cell, coreTarball, packDir) {
         jsdom: "^29.0.0",
         vitest: "^4.0.0",
       },
-      // The adapter's ^-ranged core dependency must resolve to the LOCAL
-      // build, not the registry's published 1.x.
-      overrides: { "@adapttable/core": `file:${coreTarball}` },
+      // The adapter's ^-ranged workspace dependencies must resolve to the
+      // LOCAL build, not the registry — and `@adapttable/react` is not
+      // published at all yet, so an unpinned range fails to install.
+      overrides: {
+        "@adapttable/core": `file:${workspaceTarballs.core}`,
+        "@adapttable/react": `file:${workspaceTarballs.react}`,
+      },
     };
     writeFileSync(join(dir, "package.json"), JSON.stringify(pkg, null, 2));
     writeFileSync(join(dir, "vitest.config.ts"), VITEST_CONFIG);
@@ -312,7 +320,10 @@ function main() {
   const packDir = mkdtempSync(join(tmpdir(), "peer-floors-packs-"));
   let failed = false;
   try {
-    const coreTarball = packInto("core", packDir);
+    const workspaceTarballs = {
+      core: packInto("core", packDir),
+      react: packInto("react", packDir),
+    };
     for (const cell of cells) {
       process.stdout.write(
         `• @adapttable/${cell.kit} × ${Object.entries(cell.deps)
@@ -320,7 +331,7 @@ function main() {
           .map(([name, version]) => `${name}@${version}`)
           .join(" + ")} … `
       );
-      const { ok, output } = runCell(cell, coreTarball, packDir);
+      const { ok, output } = runCell(cell, workspaceTarballs, packDir);
       process.stdout.write(ok ? "ok\n" : "FAIL\n");
       if (!ok) {
         failed = true;

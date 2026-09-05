@@ -33,7 +33,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 63–72 kB min+gzip (measured 2026-09-03 from
+A plain adapter `DataTable` is 62–72 kB min+gzip (measured 2026-09-06 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -468,7 +468,7 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 63–72 kB gzipped and carries the base contract —
+An adapter's `DataTable` is 62–72 kB gzipped and carries the base contract —
 responsive rendering, loading, error and empty states, accessibility, sorting,
 search and pagination. Everything else arrives with its own entry.
 
@@ -556,7 +556,7 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 63 kB gzipped and the same table with
+Measured on MUI, the table alone is 62 kB gzipped and the same table with
 `standardFeatures()` composed is 114 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
@@ -10554,7 +10554,7 @@ captions, the corner cell's `rowHeader`, the per-level `indent`, and
 See [pivot tables](./pivot.md#rendering-it-with-your-kit).
 
 **Replacing a mobile card's body.** `renderCard(row, card)` returns the card's
-content; the shell renders around it. `renderCard` has the type `MobileCardRenderer`, and `card` is a
+content; the shell renders around it. `renderCard` has the type `ReactMobileCardRenderer` from `@adapttable/react`, and `card` is a
 `MobileCardModel`: `index`,
 `selected`, `expanded`, and `fields` — a `MobileCardField` per column carrying
 its `column`, resolved `label` (`undefined` when the column asked for none) and
@@ -11239,7 +11239,7 @@ React and the UI kit external because your app already ships those):
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~21 kB    |
 | every core export                          | ~50 kB    |
-| `DataTable` from an adapter                | ~63–72 kB |
+| `DataTable` from an adapter                | ~62–72 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -11500,7 +11500,7 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 63–72 kB min+gzip (measured
+A plain AdaptTable adapter `DataTable` is 62–72 kB min+gzip (measured
 2026-09-03 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of

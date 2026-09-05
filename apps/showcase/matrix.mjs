@@ -1242,7 +1242,7 @@ export function People({ rows, columns }) {
     ],
     card: "Flat, grouped and tree moves — keyboard, confirm, host writes.",
     snippet: `import { DataTable } from "{pkg}";
-import { applyRowReorder } from "@adapttable/core";
+import { applyRowReorder } from "@adapttable/react";
 import { rowReorder } from "{pkg}/row-reorder";
 
 export function Tasks({ rows, setRows, columns }) {

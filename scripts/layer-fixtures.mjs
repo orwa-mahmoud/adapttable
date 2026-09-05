@@ -158,13 +158,15 @@ export const pivoted = pivot;
 `;
 
 /** Slots, class maps, render callbacks, and shadcn's preset merging. */
-export const CUSTOMIZATION = String.raw`// The renderer types come from @adapttable/core: a kit republishes 128 core
-// names but not these three, so core is the documented route that has them.
+export const CUSTOMIZATION = String.raw`// A kit republishes 128 core names but not these renderer types, so the
+// owning package is the documented route. The card renderer is React's: its
+// field values are rendered, so they are ReactNode and not the neutral
+// model's unknown.
+import type { RowActionsRenderer } from "@adapttable/core";
 import type {
-  MobileCardRenderer,
-  RowActionsRenderer,
-} from "@adapttable/core";
-import type { ToolbarSlots } from "@adapttable/react";
+  ReactMobileCardRenderer,
+  ToolbarSlots,
+} from "@adapttable/react";
 import type {
   ColumnDef,
   DataTableClassNames,
@@ -200,10 +202,10 @@ const classNames: DataTableClassNames = {
 
 const toolbarSlots: ToolbarSlots = { end: <button type="button">Mine</button> };
 
-const renderCard: MobileCardRenderer<Row> = (_row, card) => (
+const renderCard: ReactMobileCardRenderer<Row> = (_row, card) => (
   <article>
     {card.fields.map((field) => (
-      <p key={field.column.key}>{String(field.value)}</p>
+      <p key={field.column.key}>{field.value}</p>
     ))}
   </article>
 );
