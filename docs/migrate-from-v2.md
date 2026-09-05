@@ -248,3 +248,98 @@ updates. Enabling props, `FilterTypeRegistry.register` / `extend`,
 reports each location and exits non-zero without rewriting it. Use those
 locations with the inventory above; no feature order or option mapping is
 guessed.
+
+Item 16 extends the same command for the package split below: React hooks,
+Chrome, and renderer types move from `@adapttable/core` to
+`@adapttable/react`. Until that ships, the map is the contract — not a
+runtime.
+
+## v3 package split
+
+v3's remaining foundation change: `@adapttable/core` becomes framework-neutral
+and React moves to `@adapttable/react`. Kit `DataTable` imports do not change.
+Capabilities do not disappear. Relocation is not deletion.
+
+The complete symbol map — every current public export, its kind, class, and
+destination — is [`scripts/v3-package-split-map.json`](../scripts/v3-package-split-map.json).
+`node scripts/check-package-split-map.mjs` fails if a published typed entry
+is missing from the map or a mapped symbol has no current home. Read
+[ARCHITECTURE.md](../ARCHITECTURE.md) for the package graph and the engine /
+column / AI contracts.
+
+### How to read a move
+
+| Today's import                                    | After the split                                  | What moved                                          |
+| ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------- |
+| `@adapttable/core` → `useDataTable`               | `@adapttable/react`                              | Headless React hook                                 |
+| `@adapttable/core` → `ColumnDef`                  | `@adapttable/react`                              | React column (extends neutral `ColumnModel`)        |
+| `@adapttable/core` → `TableSource`                | `@adapttable/core`                               | Unchanged                                           |
+| `@adapttable/core` → `useQuerySource`             | `@adapttable/react`                              | React source hook; query types stay on core         |
+| `@adapttable/core` → `useTableChrome`             | `@adapttable/react`                              | Chrome binding                                      |
+| `@adapttable/core/adapter` → `HeaderGroupCell`    | `@adapttable/react/adapter`                      | React adapter chrome                                |
+| `@adapttable/core/adapter` → `sourceCapabilities` | `@adapttable/core` or `@adapttable/core/adapter` | Neutral helper stays in core                        |
+| `@adapttable/core/features` → `grouping`          | `@adapttable/react/features`                     | Feature factory that returns a React `TableFeature` |
+| `@adapttable/core/pivot` → `pivot`                | `@adapttable/core/pivot`                         | Pure engine                                         |
+| `@adapttable/core/pivot` → `usePivotUrlState`     | `@adapttable/react/pivot`                        | React hook                                          |
+| `@adapttable/mui` → `DataTable`                   | `@adapttable/mui`                                | Unchanged                                           |
+| `@adapttable/ai` → `createAgentSession`           | `@adapttable/ai`                                 | Unchanged                                           |
+| `@adapttable/ai/react` → `tableAgent`             | `@adapttable/ai/react`                           | Stays; depends on `@adapttable/react`               |
+| `@adapttable/ai/http` → `createAgentHttpClient`   | `@adapttable/ai/http`                            | Unchanged                                           |
+
+No public symbol is retired by this split. A row in the map whose
+`proposedImport` equals `currentImport` is a keep. Every other row is a
+specifier change only, unless `behavior` is non-empty.
+
+### Representative consumers
+
+Plain engine (no React installed) — item 10 must make this typecheck and run:
+
+```ts
+import {
+  sourceCapabilities,
+  type TableSourceCapabilities,
+} from "@adapttable/core";
+import { pivot } from "@adapttable/core/pivot";
+
+const capabilities: TableSourceCapabilities = sourceCapabilities({
+  allFilteredRows: rows,
+  total: rows.length,
+});
+const result = pivot(rows, { rows: ["team"], columns: [], measures: [] });
+```
+
+Headless React — today's `useDataTable` with the new specifier:
+
+```tsx
+import { useDataTable, type ColumnDef } from "@adapttable/react";
+
+const columns: ColumnDef<Person>[] = [{ key: "name", header: "Name" }];
+const table = useDataTable({ data: people, columns, rowKey: (r) => r.id });
+```
+
+Kit — no import change:
+
+```tsx
+import { DataTable } from "@adapttable/mui";
+import { grouping } from "@adapttable/mui/grouping";
+
+<DataTable
+  data={people}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={[grouping("team")]}
+/>;
+```
+
+AI — root stays React-free; the React feature binds to the live engine:
+
+```ts
+import { createAgentSession } from "@adapttable/ai";
+import { tableAgent } from "@adapttable/ai/react";
+
+const session = createAgentSession({ observe, apply });
+const feature = tableAgent({ tableId: "orders" });
+```
+
+These four snippets must keep agreeing with the frozen contracts in
+ARCHITECTURE.md as items 10–15 land. They are examples, not published stubs.
