@@ -18,6 +18,7 @@ export {
   createTableEngine,
   type CreateTableEngineOptions,
   type TableEngine,
+  type TableEngineConfigPatch,
   type TableOperation,
   type TableRevisionAxis,
   type TableRevisions,
@@ -26,9 +27,9 @@ export {
 } from "./engine/createTableEngine";
 export {
   createNeutralTable,
-  revisionToken,
   type NeutralTable,
   type NeutralTableBinding,
+  revisionToken,
 } from "./engine/neutralTable";
 export { engineSearchText } from "./engine/searchText";
 export type {
@@ -277,39 +278,39 @@ export {
   type TableQueryKeyOptions,
 } from "./source/queryKey";
 export type { Slot, TableErrorState } from "./state/errorState";
+export { isBrowser } from "./utils/env";
 export { humanizeKey } from "./utils/humanizeKey";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { getPath } from "./utils/path";
-export { isBrowser } from "./utils/env";
 /* ── Labels ────────────────────────────────────────────────────────── */
 export { defaultLabels, resolveLabels } from "./labels";
 /* ── Constants ─────────────────────────────────────────────────────── */
 export {
+  DEFAULT_CARD_SIZE_PX,
   DEFAULT_LIMIT,
+  DEFAULT_ROW_SIZE_PX,
+  MOBILE_BREAKPOINT_PX,
   PAGE_SIZE_OPTIONS,
   pageSizeOptions,
   SEARCH_DEBOUNCE_MS,
-  DEFAULT_CARD_SIZE_PX,
-  DEFAULT_ROW_SIZE_PX,
-  MOBILE_BREAKPOINT_PX,
   VIRTUAL_OVERSCAN,
 } from "./constants";
-export {
-  routerUrlAdapter,
-  type RouterUrlAdapterOptions,
-} from "./url/routerAdapter";
-export type { UrlStateAdapter } from "./url/urlStateAdapter";
 export type { DisplayValue } from "./display";
-export type { CssProperties } from "./style/cssProperties";
+export {
+  type ChecklistValue,
+  collectChecklistValues,
+} from "./filters/checklistValues";
 export type { ChipLabelResolver } from "./filters/filterDefs";
 export {
   type FilterFormSource,
   listFilterValues,
 } from "./filters/filterFormModel";
+export type { CssProperties } from "./style/cssProperties";
 export {
-  type ChecklistValue,
-  collectChecklistValues,
-} from "./filters/checklistValues";
+  routerUrlAdapter,
+  type RouterUrlAdapterOptions,
+} from "./url/routerAdapter";
+export type { UrlStateAdapter } from "./url/urlStateAdapter";
 /* ── Shared render contracts ───────────────────────────────────────── */
 
 /* ── Sources ───────────────────────────────────────────────────────── */
@@ -375,18 +376,42 @@ export {
   computePagination,
   type PaginationInfo,
 } from "./pagination/paginationMath";
+export type { ExtraEntry as TableExtraEntry } from "./rows/extraRows";
 export {
   type TableVirtualization,
   type VirtualItemMeta,
   type VirtualTableRow,
   windowGroupedEntries,
 } from "./virtual/virtualTableModel";
-export type { ExtraEntry as TableExtraEntry } from "./rows/extraRows";
 /* ── Utils ─────────────────────────────────────────────────────────── */
 export { mergeProps, type Props } from "./utils/mergeProps";
 export { stableKey } from "./utils/stableKey";
 /* ── Rows ──────────────────────────────────────────────────────────── */
 
+export {
+  booleanDraft,
+  type CellEditCommit,
+  type CellEditor,
+  type CellEditorOption,
+  type CellEditTarget,
+  type CustomCellEditorCtrl,
+  type CustomCellEditorRender,
+  type EditableColumnLike,
+  editorInputType,
+  formatMultiDraft,
+  hasEditableColumns,
+  isBooleanEditor,
+  isCellEditable,
+  isCustomEditor,
+  isDraftChecked,
+  isMultiSelectEditor,
+  isSelectEditor,
+  MULTI_SEPARATOR,
+  normalizeEditorOptions,
+  parseCellEditValue,
+  readMultiDraft,
+  resolveCellEditor,
+} from "./editing/cellEditing";
 export {
   buildBodyCells,
   type CellSpanAppearance,
@@ -483,30 +508,6 @@ export {
   treeIndentStyle,
   type TreeShape,
 } from "./tree/treeRows";
-export {
-  booleanDraft,
-  type CellEditCommit,
-  type CellEditor,
-  type CellEditorOption,
-  type CellEditTarget,
-  type CustomCellEditorCtrl,
-  type CustomCellEditorRender,
-  type EditableColumnLike,
-  editorInputType,
-  formatMultiDraft,
-  hasEditableColumns,
-  isBooleanEditor,
-  isCellEditable,
-  isCustomEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
-  MULTI_SEPARATOR,
-  normalizeEditorOptions,
-  parseCellEditValue,
-  readMultiDraft,
-  resolveCellEditor,
-} from "./editing/cellEditing";
 /* ── Row grouping ──────────────────────────────────────────────────── */
 export {
   type GroupAggregateOverride,
@@ -609,6 +610,7 @@ export {
  * runtime shape; the rest are types.
  */
 export type { TableCommandOptions } from "./actions/commandRegistry";
+export * from "./bindingExports";
 export type {
   ColumnMenuChoice,
   ColumnMenuChoiceOption,
@@ -633,5 +635,3 @@ export type {
   FeatureNoticeAppearance,
   FeatureNoticeKind,
 } from "./state/featureNotices";
-
-export * from "./bindingExports";

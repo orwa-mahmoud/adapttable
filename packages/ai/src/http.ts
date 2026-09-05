@@ -18,8 +18,8 @@ import type {
 } from "./types";
 
 export {
-  AGENT_SCHEMA_VERSION,
   AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,
+  AGENT_SCHEMA_VERSION,
   type ApprovalPolicy,
   CAPABILITY_KEYS,
   type CapabilityKey,
@@ -171,6 +171,15 @@ const MAX_DESCRIBE_NEEDS = 16;
 const MAX_READ_NEEDS = 16;
 const MAX_ACTIONS = 32;
 const MAX_REQUEST_BYTES = 256_000;
+/** A backend cannot make this client hold an unbounded body in memory. */
+const MAX_RESPONSE_BYTES = 512_000;
+/**
+ * Guides and row windows accumulated across discovery rounds. Deliberately
+ * well under {@link MAX_REQUEST_BYTES}: the context is carried inside every
+ * later request, so it needs its own budget to be a real limit and to name
+ * discovery as the thing that overflowed.
+ */
+const MAX_CONTEXT_BYTES = 128_000;
 
 /** Structured HTTP bridge failure with a stable machine code. @public */
 export class AgentHttpError extends Error {
@@ -223,8 +232,12 @@ function assertTurnContext(
   }
 }
 
+function jsonBytes(value: unknown): number {
+  return new TextEncoder().encode(JSON.stringify(value) ?? "").byteLength;
+}
+
 function requestBytes(body: AgentHttpRequest): number {
-  return new TextEncoder().encode(JSON.stringify(body)).byteLength;
+  return jsonBytes(body);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -486,7 +499,11 @@ async function resolveHeaders(
 
 function abortReason(signal: AbortSignal): Error {
   const reason: unknown = signal.reason;
-  return reason instanceof Error ? reason : new Error("agent HTTP cancelled");
+  // An explicit reason — a timeout, a host's own error — is carried through.
+  // A bare abort() yields a platform AbortError, which is reported in this
+  // bridge's own vocabulary instead.
+  if (reason instanceof Error && reason.name !== "AbortError") return reason;
+  return new Error("agent HTTP cancelled");
 }
 
 function abortPromise(signal: AbortSignal): Promise<never> {
@@ -498,6 +515,29 @@ function abortPromise(signal: AbortSignal): Promise<never> {
     }
     signal.addEventListener("abort", fail, { once: true });
   });
+}
+
+function assertResponseSize(bytes: number): void {
+  if (bytes > MAX_RESPONSE_BYTES) {
+    throw new AgentHttpError(
+      "payload-too-large",
+      `agent HTTP response exceeds ${MAX_RESPONSE_BYTES} bytes`
+    );
+  }
+}
+
+/** Guides and rows carried between rounds are bounded like the request is. */
+function assertContextSize(
+  descriptions: readonly CapabilityGuide[] | undefined,
+  rows: readonly RowWindow[] | undefined
+): void {
+  const bytes = jsonBytes({ descriptions, rows });
+  if (bytes > MAX_CONTEXT_BYTES) {
+    throw new AgentHttpError(
+      "payload-too-large",
+      `agent HTTP turn context exceeds ${MAX_CONTEXT_BYTES} bytes`
+    );
+  }
 }
 
 function httpError(status: number, body: string): Error {
@@ -514,7 +554,18 @@ async function postJson(
   body: AgentHttpRequest,
   signal: AbortSignal
 ): Promise<unknown> {
-  if (options.request) return options.request(body, signal);
+  // A signal that is already aborted starts no network work at all.
+  if (signal.aborted) throw abortReason(signal);
+  if (options.request) {
+    // The callback is free to ignore the signal, so the timeout is enforced
+    // out here rather than trusting it to return.
+    const value = await Promise.race([
+      Promise.resolve(options.request(body, signal)),
+      abortPromise(signal),
+    ]);
+    assertResponseSize(jsonBytes(value));
+    return value;
+  }
   const endpoint = options.endpoint.trim();
   if (!endpoint) throw new Error("agent HTTP endpoint is required");
   const fetchImpl = options.fetch ?? globalThis.fetch;
@@ -543,8 +594,9 @@ async function postJson(
     }
     throw new Error(`agent HTTP connection failed: ${errorMessage(error)}`);
   }
-  const text = await response.text();
+  const text = await Promise.race([response.text(), abortPromise(signal)]);
   if (!response.ok) throw httpError(response.status, text);
+  assertResponseSize(new TextEncoder().encode(text).byteLength);
   if (text.trim() === "") {
     throw new TypeError("agent HTTP response was empty");
   }
@@ -721,7 +773,7 @@ export async function runAgentHttpTurn(
   if (!trimmed) throw new Error("agent HTTP turn requires a message");
 
   const turnId = newHttpTurnId();
-  let snapshot = turnSnapshot(session, turnId);
+  const snapshot = turnSnapshot(session, turnId);
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let fulfilled = { describe: 0, read: 0 };
@@ -745,6 +797,7 @@ export async function runAgentHttpTurn(
     const next = await fulfillNeeds(session, needs, snapshot);
     descriptions = mergeGuides(descriptions, next.descriptions);
     rows = [...(rows ?? []), ...next.rows];
+    assertContextSize(descriptions, rows);
     fulfilled = {
       describe: fulfilled.describe + next.describe,
       read: fulfilled.read + next.read,
@@ -753,7 +806,7 @@ export async function runAgentHttpTurn(
 
   if (!last) throw new Error("agent HTTP returned no response");
   assertTurnContext(session, snapshot);
-  let results = await executeActions(
+  let results: readonly ExecuteResult[] = await executeActions(
     session,
     last.actions ?? [],
     snapshot.revision,
@@ -761,58 +814,95 @@ export async function runAgentHttpTurn(
   );
   let text = last.text ?? "";
   if (extras.returnResults && last.continueWithResults) {
-    descriptions = undefined;
-    rows = undefined;
-    snapshot = turnSnapshot(session, turnId);
-    let continuationRound = 0;
-    while (continuationRound < MAX_NEED_ROUNDS) {
-      continuationRound += 1;
-      assertTurnContext(session, snapshot);
-      const continued = await exchange(
-        options,
-        compactRequest(session, "turn", {
-          message: trimmed,
-          conversation: extras.conversation,
-          descriptions,
-          rows,
-          results,
-        }),
-        extras.signal
-      );
-      if (continued.actions?.length) {
-        results = [
-          ...results,
-          ...(await executeActions(
-            session,
-            continued.actions,
-            snapshot.revision,
-            extras.signal
-          )),
-        ];
-      }
-      const followNeeds = continued.needs;
-      const asked =
-        (followNeeds?.describe?.length ?? 0) + (followNeeds?.read?.length ?? 0);
-      if (asked > 0) {
-        const next = await fulfillNeeds(session, followNeeds, snapshot);
-        descriptions = mergeGuides(descriptions, next.descriptions);
-        rows = [...(rows ?? []), ...next.rows];
-        fulfilled = {
-          describe: fulfilled.describe + next.describe,
-          read: fulfilled.read + next.read,
-        };
-        continue;
-      }
-      if (continued.text) text = continued.text;
-      if (!continued.continueWithResults) break;
-      if (!continued.actions?.length && asked === 0) break;
-    }
+    const continuation = await continueTurn(session, options, {
+      message: trimmed,
+      conversation: extras.conversation,
+      signal: extras.signal,
+      turnId,
+      results,
+    });
+    results = continuation.results;
+    if (continuation.text) text = continuation.text;
+    fulfilled = {
+      describe: fulfilled.describe + continuation.fulfilled.describe,
+      read: fulfilled.read + continuation.fulfilled.read,
+    };
   }
   return {
     text,
     results,
     needsFulfilled: fulfilled,
   };
+}
+
+/**
+ * Post execute receipts back and keep going while the backend still has work.
+ *
+ * The loop is governed like the first one: a fresh snapshot for the new
+ * logical round, the context re-checked before every exchange, discovery
+ * rounds bounded, and any actions run through the same session.
+ */
+async function continueTurn(
+  session: AgentSession,
+  options: AgentHttpClientOptions,
+  input: {
+    readonly message: string;
+    readonly conversation?: readonly AgentHttpMessage[];
+    readonly signal?: AbortSignal;
+    readonly turnId: string;
+    readonly results: readonly ExecuteResult[];
+  }
+): Promise<{
+  readonly results: readonly ExecuteResult[];
+  readonly text: string;
+  readonly fulfilled: { describe: number; read: number };
+}> {
+  const snapshot = turnSnapshot(session, input.turnId);
+  let descriptions: CapabilityGuide[] | undefined;
+  let rows: RowWindow[] | undefined;
+  let results = input.results;
+  let text = "";
+  const fulfilled = { describe: 0, read: 0 };
+
+  for (let round = 0; round < MAX_NEED_ROUNDS; round += 1) {
+    assertTurnContext(session, snapshot);
+    const continued = await exchange(
+      options,
+      compactRequest(session, "turn", {
+        message: input.message,
+        conversation: input.conversation,
+        descriptions,
+        rows,
+        results,
+      }),
+      input.signal
+    );
+    if (continued.actions?.length) {
+      results = [
+        ...results,
+        ...(await executeActions(
+          session,
+          continued.actions,
+          snapshot.revision,
+          input.signal
+        )),
+      ];
+    }
+    const needs = continued.needs;
+    const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
+    if (asked > 0) {
+      const next = await fulfillNeeds(session, needs, snapshot);
+      descriptions = mergeGuides(descriptions, next.descriptions);
+      rows = [...(rows ?? []), ...next.rows];
+      assertContextSize(descriptions, rows);
+      fulfilled.describe += next.describe;
+      fulfilled.read += next.read;
+      continue;
+    }
+    if (continued.text) text = continued.text;
+    if (!continued.continueWithResults || !continued.actions?.length) break;
+  }
+  return { results, text, fulfilled };
 }
 
 /**

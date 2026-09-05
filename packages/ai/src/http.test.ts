@@ -828,6 +828,99 @@ describe("createAgentHttpClient", () => {
   });
 });
 
+describe("transport limits and cancellation", () => {
+  it("never invokes a custom transport when the signal is already aborted", async () => {
+    const live = session();
+    const request = vi.fn().mockResolvedValue({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      text: "should never be produced",
+    });
+    const cancelled = new AbortController();
+    cancelled.abort();
+    await expect(
+      runAgentHttpTurn(
+        live,
+        "Hi",
+        { endpoint: "https://agent.example/turn", request },
+        { signal: cancelled.signal }
+      )
+    ).rejects.toThrow(/cancelled/);
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it("times out a custom transport that ignores its signal", async () => {
+    const live = session();
+    await expect(
+      runAgentHttpTurn(live, "Hi", {
+        endpoint: "https://agent.example/turn",
+        timeoutMs: 5,
+        // Deliberately ignores `signal` — the client must not hang on it.
+        request: () => new Promise<unknown>(() => undefined),
+      })
+    ).rejects.toThrow(/timed out/);
+  });
+
+  it("rejects a response body larger than the client accepts", async () => {
+    const live = session();
+    const huge = "x".repeat(600_000);
+    await expect(
+      runAgentHttpTurn(live, "Hi", {
+        endpoint: "https://agent.example/turn",
+        fetch: () =>
+          Promise.resolve(
+            okResponse({ schemaVersion: AGENT_SCHEMA_VERSION, text: huge })
+          ),
+      })
+    ).rejects.toThrow(/response exceeds/);
+  });
+
+  it("rejects an oversized response from a custom transport too", async () => {
+    const live = session();
+    await expect(
+      runAgentHttpTurn(live, "Hi", {
+        endpoint: "https://agent.example/turn",
+        request: () =>
+          Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "y".repeat(600_000),
+          }),
+      })
+    ).rejects.toThrow(/response exceeds/);
+  });
+
+  it("bounds the context accumulated across discovery rounds", async () => {
+    const live = createAgentSession({
+      observe: () => observation(),
+      apply: {
+        setPage: vi.fn(),
+        // Every read returns a large window, so two rounds overflow the cap.
+        readRows: (query) => ({
+          offset: query.offset,
+          limit: query.limit,
+          redacted: [],
+          rows: Array.from({ length: 40 }, (_, index) => ({
+            rowKey: `r${String(index)}`,
+            cells: { name: "z".repeat(4_000) },
+          })),
+        }),
+        resolveRow: () => ({ rowKey: "r1", scope: "visible" as const }),
+      },
+    });
+    await expect(
+      runAgentHttpTurn(live, "Hi", {
+        endpoint: "https://agent.example/turn",
+        fetch: () =>
+          Promise.resolve(
+            okResponse({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              needs: { read: [{ offset: 0, limit: 40, scope: "visible" }] },
+            })
+          ),
+      })
+    ).rejects.toThrow(/context exceeds/);
+  });
+});
+
 describe("example backend protocol", () => {
   it("speaks the same hello and text-plus-actions contract as the bridge", async () => {
     const { createServer } = await import("node:http");

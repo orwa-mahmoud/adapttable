@@ -1,3 +1,4 @@
+import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import {
   applyTableFeatures,
   FeatureProviders,
@@ -5,7 +6,6 @@ import {
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
-import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import { render, waitFor } from "@testing-library/react";
 import { useLayoutEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -27,6 +27,11 @@ function Harness({
       <Reader />
     </FeatureProviders>
   );
+}
+
+/** Whether a row object carries a `name` field worth declaring a column for. */
+function hasNameField(row: unknown): boolean {
+  return typeof row === "object" && row !== null && "name" in row;
 }
 
 function Publisher({ view }: { view?: TableRuntimeView }) {
@@ -56,10 +61,9 @@ function Publisher({ view }: { view?: TableRuntimeView }) {
     if (!engineRef.current) {
       const engine = createTableEngine({
         data: view.rows as { id: string; name?: string }[],
-        columns:
-          view.rows[0] && "name" in (view.rows[0] as object)
-            ? [{ key: "name", header: "Name", sortable: true }]
-            : [],
+        columns: hasNameField(view.rows[0])
+          ? [{ key: "name", header: "Name", sortable: true }]
+          : [],
         rowKey: (row) => (row as { id: string }).id,
       });
       engineRef.current = engine as ReturnType<typeof createTableEngine>;
@@ -76,7 +80,7 @@ function Publisher({ view }: { view?: TableRuntimeView }) {
     rowsRef.current = view.rows;
     engineRef.current.invalidate(
       ["data"],
-      { data: view.rows as { id: string; name?: string }[] },
+      { data: view.rows },
       { silent: true }
     );
   });

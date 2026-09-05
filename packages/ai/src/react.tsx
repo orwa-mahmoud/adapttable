@@ -21,6 +21,12 @@ import {
   useState,
 } from "react";
 
+import type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
 import {
   agentColumnsFromNeutral,
   monotonicRevision,
@@ -29,13 +35,6 @@ import {
   resolveRowFromNeutral,
   revisionToken,
 } from "./liveTable";
-
-import type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";
 import { createAgentSession } from "./session";
 import type {
   AgentApply,

@@ -1,11 +1,11 @@
+import { applyRowPatches, rowPatchLog, updateRow } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { applyRowPatches, rowPatchLog, updateRow } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
 import { createMemoryAdapter } from "../url/adapter";
-import { resetDevWarnings } from "@adapttable/core";
 import {
   defaultFrontendRowId,
   defaultSearchText,
@@ -401,5 +401,159 @@ describe("useFrontendData — incremental patches", () => {
     rerender();
     expect(result.current.rows).toBe(first);
     expect(renders).toBeLessThan(10);
+  });
+});
+
+/**
+ * The hook returns rows AND exposes the engine that produced them. Anything
+ * a consumer can read twice must read the same both ways.
+ */
+describe("useFrontendData — the source and its engine agree", () => {
+  it("reports the same page, limit and window through both APIs", () => {
+    const adapter = createMemoryAdapter("page=2&limit=1");
+    const { result } = renderHook(() =>
+      useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    const source = result.current;
+    const snapshot = source.tableEngine!.snapshot();
+    expect(source.page).toBe(snapshot.page);
+    expect(source.limit).toBe(snapshot.limit);
+    expect(source.total).toBe(snapshot.total);
+    expect(source.rows).toEqual(source.tableEngine!.rows("page"));
+    expect(source.rows.map((row) => row.id)).toEqual(["b"]);
+  });
+
+  it("follows a page change through both APIs", () => {
+    const adapter = createMemoryAdapter("page=1&limit=1");
+    const { result } = renderHook(() =>
+      useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    expect(result.current.rows.map((row) => row.id)).toEqual(["a"]);
+
+    act(() => {
+      result.current.setPage(3);
+    });
+    expect(result.current.page).toBe(3);
+    expect(result.current.tableEngine!.snapshot().page).toBe(3);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["c"]);
+    expect(
+      result.current.tableEngine!.rows("page").map((row) => row.id)
+    ).toEqual(["c"]);
+  });
+
+  it("follows a limit change without losing the page window", () => {
+    const adapter = createMemoryAdapter("page=2&limit=1");
+    const { result } = renderHook(() =>
+      useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    expect(result.current.rows.map((row) => row.id)).toEqual(["b"]);
+    act(() => {
+      result.current.setLimit(3);
+    });
+    const snapshot = result.current.tableEngine!.snapshot();
+    expect(result.current.limit).toBe(snapshot.limit);
+    expect(result.current.page).toBe(snapshot.page);
+    expect(result.current.rows).toEqual(
+      result.current.tableEngine!.rows("page")
+    );
+  });
+
+  it("clamps both APIs to the same page when the data shrinks", () => {
+    const adapter = createMemoryAdapter("page=3&limit=1");
+    const { result, rerender } = renderHook(
+      (props: { data: Row[] }) =>
+        useFrontendData<Row>({
+          data: props.data,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        }),
+      { initialProps: { data: ROWS } }
+    );
+    expect(result.current.page).toBe(3);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["c"]);
+
+    rerender({ data: [ROWS[0]!] });
+    const source = result.current;
+    const snapshot = source.tableEngine!.snapshot();
+    expect(source.total).toBe(1);
+    expect(source.page).toBe(1);
+    expect(snapshot.page).toBe(1);
+    expect(snapshot.requestedPage).toBe(3);
+    expect(source.rows.map((row) => row.id)).toEqual(["a"]);
+    expect(source.rows).toEqual(source.tableEngine!.rows("page"));
+
+    // Restoring the rows restores the requested page in both APIs.
+    rerender({ data: ROWS });
+    expect(result.current.page).toBe(3);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["c"]);
+  });
+
+  it("keeps one engine when the pagination strategy changes", () => {
+    const adapter = createMemoryAdapter("page=2&limit=1");
+    const { result, rerender } = renderHook(
+      (props: { mobile: boolean }) =>
+        useFrontendData<Row>({
+          data: ROWS,
+          columns: cols,
+          urlAdapter: adapter,
+          paginationMode: "auto",
+          forceMobile: props.mobile,
+        }),
+      { initialProps: { mobile: false } }
+    );
+    const engine = result.current.tableEngine;
+    expect(result.current.paginationMode).toBe("paged");
+    expect(result.current.rows.map((row) => row.id)).toEqual(["b"]);
+
+    rerender({ mobile: true });
+    // Same committed engine — a strategy change reconfigures, never replaces.
+    expect(result.current.tableEngine).toBe(engine);
+    expect(result.current.paginationMode).toBe("infinite");
+    // Infinite grows the window instead of slicing one page.
+    expect(result.current.rows.map((row) => row.id)).toEqual(["a", "b"]);
+    expect(result.current.rows).toEqual(
+      result.current.tableEngine!.rows("page")
+    );
+  });
+
+  it("serves two consumers of the same committed engine identically", () => {
+    const adapter = createMemoryAdapter("page=1&limit=2");
+    const { result } = renderHook(() =>
+      useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    const engine = result.current.tableEngine!;
+    // A second consumer — an agent session, a devtool — reads the engine
+    // directly while the table reads the hook's return value.
+    expect(engine.rows("page")).toEqual(result.current.rows);
+    expect(engine.rows("full")).toEqual(result.current.allFilteredRows);
+    expect(engine.snapshot().total).toBe(result.current.total);
+
+    act(() => {
+      result.current.setSearch("bob");
+    });
+    expect(engine.snapshot().search).toBe("bob");
+    expect(engine.rows("page")).toEqual(result.current.rows);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["b"]);
   });
 });

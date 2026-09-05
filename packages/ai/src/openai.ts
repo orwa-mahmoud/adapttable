@@ -188,8 +188,9 @@ function withNull(schema: JsonSchema): JsonSchema {
         ? { ...schema, type: ["object", "null"] }
         : { ...schema, type: [...types, "null"] };
   }
-  if (Array.isArray(next.enum) && !next.enum.includes(null)) {
-    return { ...next, enum: [...next.enum, null] };
+  const values: readonly unknown[] | undefined = next.enum;
+  if (values && !values.includes(null)) {
+    return { ...next, enum: [...values, null] };
   }
   return next;
 }

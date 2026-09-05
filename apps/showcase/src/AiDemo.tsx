@@ -4,11 +4,12 @@
  * Not a language model. Buttons call `session.execute`. Writes go through
  * the host and the kit's approval / staged-save chrome.
  */
-import type { AgentSession } from "@adapttable/ai";
+import type { AgentManifest, AgentSession } from "@adapttable/ai";
 import { tableAgent } from "@adapttable/ai/react";
-import type { BatchRowEdit, ColumnDef, FilterDef } from "@adapttable/core";
-import type { TableFeature } from "@adapttable/core/features";
-import { Suspense, useMemo, useState } from "react";
+import type { FilterDef } from "@adapttable/core";
+import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
+import type { TableFeature } from "@adapttable/react/features";
+import { Suspense, useMemo, useRef, useState } from "react";
 
 import {
   AiBackendConnect,
@@ -20,6 +21,7 @@ import { DemoFallback } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
 import { DOCS_URL, SHOWCASE_ADAPTERS } from "./matrix/content";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
+import { focusRovingRadio, moveRovingRadioIndex } from "./rovingRadio";
 import { Check } from "./sectionIcons";
 
 interface PlaygroundRow {
@@ -110,9 +112,17 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [rows, setRows] = useState<PlaygroundRow[]>(() => [...SEED]);
   const [teamFilter, setTeamFilter] = useState<string | undefined>();
   const [session, setSession] = useState<AgentSession | null>(null);
+  // The session identity is deliberately stable, so it alone never re-renders
+  // this panel. The table publishes a new manifest whenever its wiring changes
+  // — a capability turned on or off, a revision bump — and holding that in
+  // state is what makes the catalog below re-read after the table settles.
+  // Reading it without this lands one render early, showing the previous
+  // table's capabilities.
+  const [manifest, setManifest] = useState<AgentManifest | null>(null);
   const [selectedKey, setSelectedKey] = useState("view.setFilters");
   const [last, setLast] = useState("");
   const [mode, setMode] = useState<AiPlayMode>("simulated");
+  const catalogRef = useRef<HTMLDivElement>(null);
   const Table = kitTable<PlaygroundRow>(adapter);
   const factories =
     AI_KIT_FEATURES[adapter as AiKitKey] ?? AI_KIT_FEATURES.mantine;
@@ -133,7 +143,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       apply: {
         setFilters: (filters) => setTeamFilter(teamFromFilters(filters)),
       },
-      bridge: { attach: setSession },
+      bridge: { attach: setSession, publish: setManifest },
     }) as TableFeature<PlaygroundRow>;
     const next: TableFeature<PlaygroundRow>[] = [
       factories.filters([TEAM_FILTER]),
@@ -154,7 +164,20 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     ];
   }, [allowEdit, factories]);
 
-  const catalog = session?.catalog() ?? [];
+  // `manifest` is read so this recomputes on every published change.
+  const catalog = manifest ? (session?.catalog() ?? []) : [];
+
+  // The table never owns the data, so a filter the agent asks for is applied
+  // here, by the host, to the rows the table is given. `view.setFilters`
+  // reporting ok while every row stayed on screen would be a lie.
+  //
+  // Memoised because the identity matters: a fresh array on every render
+  // re-invalidates the engine's data, which bumps the revision, which
+  // republishes the manifest, which re-renders this panel — a loop.
+  const visibleRows = useMemo(
+    () => (teamFilter ? rows.filter((row) => row.team === teamFilter) : rows),
+    [rows, teamFilter]
+  );
   const selected = catalog.some((entry) => entry.key === selectedKey)
     ? selectedKey
     : (catalog[0]?.key ?? "");
@@ -181,6 +204,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     setLast(approval ? `${key} ok · ${approval}` : `${key} ok`);
   };
 
+  const filterCore = () =>
+    void run("view.setFilters", { filters: { team: ["Core"] } }, "filter-core");
+
+  const clearFilter = () =>
+    void run("view.setFilters", { filters: {} }, "clear-filter");
+
   return (
     <div className="mx-demo" dir={rtl ? "rtl" : "ltr"} data-adapter={adapter}>
       <section className="ai-play" aria-labelledby="ai-play-title">
@@ -194,6 +223,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         </p>
         <div className="ai-play__toolbar">
           <div
+            ref={catalogRef}
             className="ai-play__keys"
             role="radiogroup"
             aria-label="Live catalog"
@@ -205,8 +235,23 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 type="button"
                 role="radio"
                 aria-checked={entry.key === selected}
+                // Roving tabindex: only the checked radio is in the tab
+                // order, and the arrows move between them from there.
+                tabIndex={entry.key === selected ? 0 : -1}
                 className={`ai-play__key${entry.key === selected ? " is-on" : ""}`}
                 onClick={() => setSelectedKey(entry.key)}
+                onKeyDown={(event) => {
+                  const keys = catalog.map((item) => item.key);
+                  const next = moveRovingRadioIndex(
+                    event,
+                    keys.length,
+                    keys.indexOf(selected)
+                  );
+                  if (next === undefined) return;
+                  event.preventDefault();
+                  setSelectedKey(keys[next]);
+                  focusRovingRadio(catalogRef.current, next);
+                }}
               >
                 {entry.key}
               </button>
@@ -240,26 +285,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         </pre>
         {mode === "simulated" ? (
           <div className="ai-play__actions">
-            <button
-              type="button"
-              className="ai-play__btn"
-              onClick={() =>
-                void run(
-                  "view.setFilters",
-                  { filters: { team: ["Core"] } },
-                  "filter-core"
-                )
-              }
-            >
+            <button type="button" className="ai-play__btn" onClick={filterCore}>
               Filter Core team
             </button>
             <button
               type="button"
               className="ai-play__btn"
               disabled={!teamFilter}
-              onClick={() =>
-                void run("view.setFilters", { filters: {} }, "clear-filter")
-              }
+              onClick={clearFilter}
             >
               Clear filter
             </button>
@@ -284,7 +317,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             </output>
           </div>
         ) : (
-          <AiBackendConnect session={session} mode={mode} />
+          <AiBackendConnect
+            session={session}
+            mode={mode}
+            onFilterCore={filterCore}
+            onClearFilter={clearFilter}
+          />
         )}
         <p className="ai-play__refs">
           <Check size={12} />{" "}
@@ -312,7 +350,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       <KitProvider kit={adapter} dark={dark} dir={rtl ? "rtl" : "ltr"}>
         <Suspense fallback={<DemoFallback />}>
           <Table
-            data={rows}
+            data={visibleRows}
             columns={COLUMNS}
             rowKey={(row: PlaygroundRow) => row.id}
             urlSync={false}

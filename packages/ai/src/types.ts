@@ -124,6 +124,31 @@ export interface AgentManifest {
 }
 
 /**
+ * Side-effect-free description of what a governed write would do.
+ *
+ * The session resolves a plan first, shows it to approval, revalidates the
+ * table, and only then runs the capability's `execute`.
+ *
+ * @public
+ */
+export interface CapabilityPlan {
+  /** Per-row before/after the approver sees. */
+  readonly proposals: readonly WriteProposal[];
+  /** Opaque handback — the session returns it on {@link AgentCapabilityContext.plan}. */
+  readonly payload?: unknown;
+}
+
+/**
+ * Whether a capability can honour `commit: "stage"`.
+ *
+ * `"unsupported"` is the default for custom writes: a stage-mode table
+ * rejects the call before the handler runs rather than committing it.
+ *
+ * @public
+ */
+export type CapabilityStaging = "supported" | "unsupported";
+
+/**
  * Governed capability extension registered on one table session.
  *
  * @public
@@ -141,13 +166,29 @@ export interface AgentCapabilityDefinition {
   };
   /** Effect class used for approval defaults on custom writes. */
   readonly kind?: "read" | "view" | "write" | "destructive";
+  /**
+   * Whether `commit: "stage"` is honoured. Defaults to `"unsupported"` for
+   * `write` and `destructive` kinds — the session rejects a staged call with
+   * `commit-incompatible` before `execute` runs.
+   */
+  readonly staging?: CapabilityStaging;
   /** Whether this capability is wired for the current observation. */
   isEnabled(observation: AgentObservation): boolean;
-  /** Execute after schema validation and revision checks. */
-  execute(
+  /**
+   * Resolve the proposal for a `write` or `destructive` capability without
+   * touching host data. Omit and the session proposes the validated
+   * arguments themselves.
+   */
+  plan?(
     context: AgentCapabilityContext,
     args: unknown
-  ): Promise<unknown> | unknown;
+  ): Promise<CapabilityPlan> | CapabilityPlan;
+  /**
+   * Apply the capability. For a governed write this runs only after the
+   * session has enforced write policy, commit mode and approval, and has
+   * revalidated the revision.
+   */
+  execute(context: AgentCapabilityContext, args: unknown): unknown;
 }
 
 /**
@@ -163,6 +204,13 @@ export interface AgentCapabilityContext {
     proposal: unknown,
     signal?: AbortSignal
   ) => Promise<boolean>;
+  /**
+   * The approved plan, on the `execute` call of a governed write. Absent
+   * during `plan` itself and for read/view capabilities.
+   */
+  readonly plan?: CapabilityPlan;
+  /** Commit mode the session resolved for this call. */
+  readonly commit?: CommitPolicy;
 }
 
 /**

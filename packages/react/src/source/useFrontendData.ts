@@ -1,16 +1,3 @@
-import { useCallback, useMemo, useRef } from "react";
-
-import { createTableEngine, type TableEngine } from "@adapttable/core";
-import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
-import {
-  attachIncrementalView,
-  incrementalSearchText,
-  type IncrementalView,
-  type IncrementalViewConfig,
-  incrementalViewConfig,
-  incrementalViewOf,
-} from "@adapttable/core";
-import { type RowPatchLog, rowPatchLog } from "@adapttable/core";
 import type { SortLevel } from "@adapttable/core";
 import type {
   ExtraFilters,
@@ -18,15 +5,27 @@ import type {
   SortableValue,
   SortDirection,
 } from "@adapttable/core";
+import type { QueryFilterGroup } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
+import { createTableEngine, type TableEngine } from "@adapttable/core";
+import {
+  incrementalSearchText,
+  type IncrementalView,
+  type IncrementalViewConfig,
+  incrementalViewConfig,
+  incrementalViewOf,
+} from "@adapttable/core";
+import { type RowPatchLog, rowPatchLog } from "@adapttable/core";
+import { devWarn } from "@adapttable/core";
+import { stableKey } from "@adapttable/core";
+import { useCallback, useMemo, useRef } from "react";
+
 import type { ColumnDef } from "../columnDef";
+import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
-import { devWarn } from "@adapttable/core";
-import { stableKey } from "@adapttable/core";
-import type { QueryFilterGroup } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
 
 /** Narrows an accessor's `ReactNode` to a sortable primitive, else `null`. */
 const toSortable = (value: unknown): SortableValue =>
@@ -238,34 +237,24 @@ export function useFrontendData<TRow>(
 
   const engineRef = useRef<TableEngine<TRow> | undefined>(undefined);
   const dataRef = useRef(data);
-  const modeRef = useRef(resolvedMode);
   const fingerprintRef = useRef<string | undefined>(undefined);
-  if (modeRef.current !== resolvedMode && engineRef.current) {
-    engineRef.current.dispose();
-    engineRef.current = undefined;
-  }
-  modeRef.current = resolvedMode;
-  if (!engineRef.current) {
-    engineRef.current = createTableEngine({
-      data,
-      columns: columns ?? [],
-      rowKey: getRowId,
-      paginationMode: paged ? "paged" : "infinite",
-      defaults: {
-        page,
-        limit,
-        search,
-        sortBy,
-        sortDir,
-        extra: state.extra,
-        groupBy,
-      },
-      filterFn,
-      getSearchText: projectSearchText,
-    });
-    dataRef.current = data;
-    fingerprintRef.current = undefined;
-  }
+  engineRef.current ??= createTableEngine({
+    data,
+    columns: columns ?? [],
+    rowKey: getRowId,
+    paginationMode: paged ? "paged" : "infinite",
+    defaults: {
+      page,
+      limit,
+      search,
+      sortBy,
+      sortDir,
+      extra: state.extra,
+      groupBy,
+    },
+    filterFn,
+    getSearchText: projectSearchText,
+  });
   const engine = engineRef.current;
   if (data !== dataRef.current) {
     const log = rowPatchLog(data);
@@ -274,9 +263,23 @@ export function useFrontendData<TRow>(
     engine.invalidate(["data"], { data }, { silent: true });
     dataRef.current = data;
   }
-  const nextFingerprint = hookViewFingerprint(fingerprint);
+
+  // One transaction carries the whole controlled view — query state, the
+  // pagination strategy, and the page window — so the engine this hook
+  // exposes can never describe a different window than the rows it returns.
+  // Silent: the render that supplied these values reads them straight back,
+  // and no subscriber is woken from inside a render.
+  const nextFingerprint = `${hookViewFingerprint(fingerprint)}|${resolvedMode}|${String(page)}|${String(limit)}`;
   if (fingerprintRef.current !== nextFingerprint) {
-    engine.configure(hookConfig, { silent: true });
+    engine.configure(
+      {
+        ...hookConfig,
+        paginationMode: paged ? "paged" : "infinite",
+        page,
+        limit,
+      },
+      { silent: true }
+    );
     fingerprintRef.current = nextFingerprint;
   }
   const view = incrementalViewOf(engine.rows("full"));
@@ -295,7 +298,6 @@ export function useFrontendData<TRow>(
   }
 
   const sorted = view.sorted;
-  attachIncrementalView(sorted, view);
 
   // Facets read allSearchedRows: after search, BEFORE extra filters.
   // view.filtered already applied filterFn, so a selected checklist
@@ -307,21 +309,20 @@ export function useFrontendData<TRow>(
       projectSearchText(row).toLowerCase().includes(term)
     );
   }, [data, search, projectSearchText]);
-  const total = sorted.length;
-  const lastPage = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
-  const safePage = Math.min(Math.max(page, 1), lastPage);
+
+  // The engine owns clamping, so `page` here is the page actually shown —
+  // the same one `engine.snapshot().page` reports.
+  const snapshot = engine.snapshot();
+  const total = snapshot.total;
+  const safePage = snapshot.page;
 
   // The view object is NOT a dependency: hosts rebuild extra/columns
   // (and useTableData's filterTreeFn) every render. A new view identity
   // must not mint a new page slice or radix/base-ui findInTable loops.
-  const rows = useMemo<readonly TRow[]>(() => {
-    if (paged) {
-      const start = (safePage - 1) * limit;
-      return sorted.slice(start, start + limit);
-    }
-    return sorted.slice(0, safePage * limit);
-  }, [sorted, paged, safePage, limit]);
-  attachIncrementalView(rows, view);
+  const rows = useMemo<readonly TRow[]>(
+    () => engine.rows("page"),
+    [engine, sorted, paged, safePage, limit]
+  );
 
   const hasNextPage = !paged && safePage * limit < total;
 

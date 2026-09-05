@@ -62,14 +62,16 @@ export function transportCellValue(value: unknown): unknown {
   if (kind === "string" || kind === "number" || kind === "boolean") {
     return value;
   }
-  if (kind === "bigint") return value.toString();
-  if (kind === "function") {
+  if (typeof value === "bigint") return value.toString();
+  if (typeof value === "function") {
+    // An anonymous function reports an empty name, not a missing one.
+    const name = (value as { name?: string }).name;
     return {
       __adapttable: "function",
-      name: (value as { name?: string }).name || "anonymous",
+      name: name === undefined || name === "" ? "anonymous" : name,
     };
   }
-  if (kind === "symbol") return String(value);
+  if (typeof value === "symbol") return value.toString();
   if (value instanceof Date) return value.toISOString();
   try {
     JSON.stringify(value);
@@ -276,9 +278,11 @@ export function observationFromNeutral<TRow>(
       ops.setFilters === true || options.apply?.setFilters !== undefined,
     hasExport: options.apply?.runExport !== undefined,
     hasEdit:
+      ops.editCells === true ||
       options.apply?.editCells !== undefined ||
       options.apply?.stageCells !== undefined,
-    hasReorder: options.apply?.reorderRows !== undefined,
+    hasReorder:
+      ops.reorderRows === true || options.apply?.reorderRows !== undefined,
     hasSelection:
       options.apply?.setSelection !== undefined || ops.setSelection === true,
     hasSavedViews:

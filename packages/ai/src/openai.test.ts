@@ -206,6 +206,91 @@ describe("toOpenAITools", () => {
     });
   });
 
+  it("converts a custom schema, including nested optional enums, to strict form", () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: {},
+      capabilities: [
+        {
+          key: "demo.report",
+          summary: "Build a report.",
+          kind: "read",
+          isEnabled: () => true,
+          guide: {
+            guide: "Build a report over the visible rows.",
+            input: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                title: { type: "string" },
+                format: { type: "string", enum: ["csv", "pdf"] },
+                window: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    unit: { type: "string", enum: ["day", "week"] },
+                    size: { type: "integer" },
+                  },
+                  required: ["size"],
+                },
+                tags: {
+                  type: "array",
+                  items: { type: "string", enum: ["draft", "final"] },
+                },
+                meta: { type: "object" },
+              },
+              required: ["title"],
+            },
+            output: {
+              type: "object",
+              additionalProperties: false,
+              properties: { url: { type: "string" } },
+              required: ["url"],
+            },
+          },
+          execute: () => ({ url: "https://example.test/r" }),
+        },
+      ],
+    });
+    const tool = toOpenAITools(session).find(
+      (entry) => entry.function.name === "demo_report"
+    );
+    const params = tool!.function.parameters;
+    // Every property required; the optional ones carry null in both places.
+    expect(params.required).toEqual([
+      "title",
+      "format",
+      "window",
+      "tags",
+      "meta",
+    ]);
+    expect(params.properties?.format).toMatchObject({
+      type: ["string", "null"],
+      enum: ["csv", "pdf", null],
+    });
+    // A nested object is converted too, and its own optional enum with it.
+    const window = params.properties?.window as {
+      required?: readonly string[];
+      properties?: Record<string, unknown>;
+      additionalProperties?: unknown;
+    };
+    expect(window.additionalProperties).toBe(false);
+    expect(window.required).toEqual(["unit", "size"]);
+    expect(window.properties?.unit).toMatchObject({
+      type: ["string", "null"],
+      enum: ["day", "week", null],
+    });
+    // Array items keep their enum without a spurious null — the array itself
+    // is the nullable member, not each element.
+    const tags = params.properties?.tags as { items?: { enum?: unknown[] } };
+    expect(tags.items?.enum).toEqual(["draft", "final"]);
+    // A free-form object cannot be an open map under strict mode. This one is
+    // optional too, so it is stringified AND nullable.
+    expect(params.properties?.meta).toMatchObject({
+      type: ["string", "null"],
+    });
+  });
+
   it("maps catalog dots to OpenAI-safe names and back", () => {
     expect(toOpenAIToolName("view.setPage")).toBe("view_setPage");
     expect(fromOpenAIToolName("view_setPage")).toBe("view.setPage");

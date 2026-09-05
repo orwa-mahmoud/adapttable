@@ -33,7 +33,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 61–70 kB min+gzip (measured 2026-09-03 from
+A plain adapter `DataTable` is 63–72 kB min+gzip (measured 2026-09-03 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -468,7 +468,7 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 61–70 kB gzipped and carries the base contract —
+An adapter's `DataTable` is 63–72 kB gzipped and carries the base contract —
 responsive rendering, loading, error and empty states, accessibility, sorting,
 search and pagination. Everything else arrives with its own entry.
 
@@ -556,8 +556,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 61 kB gzipped and the same table with
-`standardFeatures()` composed is 112 kB.
+Measured on MUI, the table alone is 63 kB gzipped and the same table with
+`standardFeatures()` composed is 114 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -7494,7 +7494,10 @@ from `@adapttable/ai/json`.
 replace each `.` in a catalog key with `_` (`view.setPage` →
 `view_setPage`) because OpenAI function names cannot contain dots.
 `executeOpenAITool` maps those names back, and still accepts the dotted
-catalog key. Deferred `execute` requires both `key` and `args`.
+catalog key. Deferred `execute` requires both `key` and `args` (`args` is
+a JSON string under `strict`). Strict mode lists every property in
+`required`, forbids open maps, and treats originally-optional fields as
+nullable.
 
 `toMcpTools` / `toMcpResources` list enabled keys. Each capability is
 also a resource at
@@ -7560,20 +7563,34 @@ on the response, `returnResults` on the client).
 
 ## Path 1 — run our example
 
+Prerequisites: Node 22.6 or newer (the example runs TypeScript directly with
+`--experimental-strip-types`) and `pnpm install` at the repository root.
+
 From this repository:
 
 ```bash
-cp examples/ai-http-backend.env.example .env
+cp -n examples/ai-http-backend.env.example examples/.env.ai-http
 ```
 
-Edit `.env`. Set `AGENT_PROVIDER` to `openai`, `anthropic`, `gemini` or
-`deepseek`, and the matching API key. Never commit that file.
+`-n` keeps an env file you already filled in — the copy is skipped rather
+than overwritten.
+
+Edit `examples/.env.ai-http`. Set `AGENT_PROVIDER` to `openai`,
+`anthropic`, `gemini` or `deepseek`, and the matching API key. Never commit
+the filled file.
 
 ```bash
-pnpm exec tsx examples/ai-http-backend.ts
+pnpm --filter @adapttable/ai build
+pnpm --filter @adapttable/examples ai-http
 ```
 
-The process listens on `http://127.0.0.1:8787` by default.
+The server refuses to start on a configuration it cannot use: an
+`AGENT_PORT` that is not a port, an empty `AGENT_HOST` or `AGENT_MODEL`, an
+unknown `AGENT_PROVIDER`, or a provider whose API key is missing. Each of
+those exits with the name of the variable to fix.
+
+The process binds `127.0.0.1` on port `8787` by default. A non-loopback
+`AGENT_HOST` requires `AGENT_HTTP_TOKEN`.
 
 **Local showcase (reliable).** Hosted GitHub Pages cannot be assumed to reach
 `localhost` — browsers treat that as a cross-origin public-site request, and
@@ -7584,28 +7601,50 @@ pnpm --filter @adapttable/showcase dev
 ```
 
 Open `/mantine/ai/` (or any adapter AI page). Choose **Connect backend**. The
-URL defaults to `http://127.0.0.1:8787`. Click **Connect**. A valid hello body
-is required; a random 200 is a failure. Then type a message and **Send**.
-Writes still go through that kit’s approval and staged-save chrome.
+URL defaults to `http://127.0.0.1:8787`. If the example set
+`AGENT_HTTP_TOKEN`, paste that same value into **Endpoint token** (Bearer
+for the HTTP endpoint — not a provider API key). Click **Connect**. A valid
+hello body is required; a random 200 is a failure. Then type a message and
+**Send**. Writes still go through that kit’s approval and staged-save chrome.
 
 **Hosted showcase.** Deploy the example with HTTPS, set
 `AGENT_ALLOWED_ORIGINS` to `https://orwa-mahmoud.github.io`, set
-`AGENT_HTTP_TOKEN`, and paste the public URL into Connect backend. Do not
-point the hosted page at `localhost`.
+`AGENT_HTTP_TOKEN` and a non-loopback `AGENT_HOST`, then paste the public
+URL and the same endpoint token into Connect backend. Do not point the
+hosted page at `localhost`.
 
 ### Environment
 
 See [ai-http-backend.env.example](../examples/ai-http-backend.env.example).
+
+Values are read in this order, and the first one that sets a key wins:
+
+1. the real process environment — no file overrides what the shell, the
+   container or the CI runner already set;
+2. the file named by `AGENT_ENV_FILE`;
+3. `.env.ai-http` beside the example;
+4. `.env` in the working directory.
+
+Files are parsed by Node itself (`process.loadEnvFile`), not a bespoke
+reader.
 
 | Variable                                                                       | Role                                                               |
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
 | `AGENT_PROVIDER`                                                               | `openai` (default), `anthropic`, `gemini`, or `deepseek`           |
 | `AGENT_MODEL`                                                                  | Optional override. Each provider has a default.                    |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY` | Server-side only                                                   |
-| `AGENT_HTTP_TOKEN`                                                             | Optional. When set, the example requires `Authorization: Bearer …` |
+| `AGENT_HTTP_TOKEN`                                                             | Required when `AGENT_HOST` is not loopback. Bearer on the endpoint |
+| `AGENT_HOST`                                                                   | Bind address. Default `127.0.0.1`                                  |
+| `AGENT_ENV_FILE`                                                               | Optional extra env file. Existing process.env keys win             |
 | `AGENT_ALLOWED_ORIGINS`                                                        | Comma-separated origins. Defaults to local showcase ports          |
 | `AGENT_PORT`                                                                   | Default `8787`                                                     |
 | `AGENT_MAX_BODY`                                                               | Default `65536` bytes                                              |
+
+`AGENT_ALLOWED_ORIGINS` is a CORS list. CORS is a browser convenience, not
+authentication: it tells a browser which pages may read the response, and
+nothing at all to curl, a script, or any non-browser client. `AGENT_HTTP_TOKEN`
+is what actually authenticates a caller — set it on every bind you do not
+fully control.
 
 The example does not log credentials or table contents. It is not an open
 proxy: it only calls the configured provider.
@@ -7672,7 +7711,8 @@ Import `parseAgentHttpRequest` / `parseAgentHttpResponse` from
 ## Live provider test (owner)
 
 Automated checks use mocked providers and never spend money. To try a real
-model: fill `.env`, start `examples/ai-http-backend.ts`, run the local
+model: fill `examples/.env.ai-http`, start the example with
+`pnpm --filter @adapttable/examples ai-http`, run the local
 showcase, Connect, and send a message. That live test is yours.
 
 ---
@@ -11186,11 +11226,11 @@ zero UI-kit dependencies.
 Measured 2026-09-02 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
-| What you import                           | min+gzip  |
-| ----------------------------------------- | --------- |
-| `useFrontendData` + `useDataTable` (core) | ~19 kB    |
-| every core export                         | ~83 kB    |
-| `DataTable` from an adapter               | ~61–70 kB |
+| What you import                            | min+gzip  |
+| ------------------------------------------ | --------- |
+| `useFrontendData` + `useDataTable` (react) | ~21 kB    |
+| every core export                          | ~50 kB    |
+| `DataTable` from an adapter                | ~63–72 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -11451,7 +11491,7 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 61–70 kB min+gzip (measured
+A plain AdaptTable adapter `DataTable` is 63–72 kB min+gzip (measured
 2026-09-03 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
@@ -13077,6 +13117,101 @@ updates. Enabling props, `FilterTypeRegistry.register` / `extend`,
 reports each location and exits non-zero without rewriting it. Use those
 locations with the inventory above; no feature order or option mapping is
 guessed.
+
+Item 16 extends the same command for the package split below: React hooks,
+Chrome, and renderer types move from `@adapttable/core` to
+`@adapttable/react`. Until that ships, the map is the contract — not a
+runtime.
+
+## v3 package split
+
+v3's remaining foundation change: `@adapttable/core` becomes framework-neutral
+and React moves to `@adapttable/react`. Kit `DataTable` imports do not change.
+Capabilities do not disappear. Relocation is not deletion.
+
+The complete symbol map — every current public export, its kind, class, and
+destination — is [`scripts/v3-package-split-map.json`](../scripts/v3-package-split-map.json).
+`node scripts/check-package-split-map.mjs` fails if a published typed entry
+is missing from the map or a mapped symbol has no current home. Read
+[ARCHITECTURE.md](../ARCHITECTURE.md) for the package graph and the engine /
+column / AI contracts.
+
+### How to read a move
+
+| Today's import                                    | After the split                                  | What moved                                          |
+| ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------- |
+| `@adapttable/core` → `useDataTable`               | `@adapttable/react`                              | Headless React hook                                 |
+| `@adapttable/core` → `ColumnDef`                  | `@adapttable/react`                              | React column (extends neutral `ColumnModel`)        |
+| `@adapttable/core` → `TableSource`                | `@adapttable/core`                               | Unchanged                                           |
+| `@adapttable/core` → `useQuerySource`             | `@adapttable/react`                              | React source hook; query types stay on core         |
+| `@adapttable/core` → `useTableChrome`             | `@adapttable/react`                              | Chrome binding                                      |
+| `@adapttable/core/adapter` → `HeaderGroupCell`    | `@adapttable/react/adapter`                      | React adapter chrome                                |
+| `@adapttable/core/adapter` → `sourceCapabilities` | `@adapttable/core` or `@adapttable/core/adapter` | Neutral helper stays in core                        |
+| `@adapttable/core/features` → `grouping`          | `@adapttable/react/features`                     | Feature factory that returns a React `TableFeature` |
+| `@adapttable/core/pivot` → `pivot`                | `@adapttable/core/pivot`                         | Pure engine                                         |
+| `@adapttable/core/pivot` → `usePivotUrlState`     | `@adapttable/react/pivot`                        | React hook                                          |
+| `@adapttable/mui` → `DataTable`                   | `@adapttable/mui`                                | Unchanged                                           |
+| `@adapttable/ai` → `createAgentSession`           | `@adapttable/ai`                                 | Unchanged                                           |
+| `@adapttable/ai/react` → `tableAgent`             | `@adapttable/ai/react`                           | Stays; depends on `@adapttable/react`               |
+| `@adapttable/ai/http` → `createAgentHttpClient`   | `@adapttable/ai/http`                            | Unchanged                                           |
+
+No public symbol is retired by this split. A row in the map whose
+`proposedImport` equals `currentImport` is a keep. Every other row is a
+specifier change only, unless `behavior` is non-empty.
+
+### Representative consumers
+
+Plain engine (no React installed) — item 10 must make this typecheck and run:
+
+```ts
+import {
+  sourceCapabilities,
+  type TableSourceCapabilities,
+} from "@adapttable/core";
+import { pivot } from "@adapttable/core/pivot";
+
+const capabilities: TableSourceCapabilities = sourceCapabilities({
+  allFilteredRows: rows,
+  total: rows.length,
+});
+const result = pivot(rows, { rows: ["team"], columns: [], measures: [] });
+```
+
+Headless React — today's `useDataTable` with the new specifier:
+
+```tsx
+import { useDataTable, type ColumnDef } from "@adapttable/react";
+
+const columns: ColumnDef<Person>[] = [{ key: "name", header: "Name" }];
+const table = useDataTable({ data: people, columns, rowKey: (r) => r.id });
+```
+
+Kit — no import change:
+
+```tsx
+import { DataTable } from "@adapttable/mui";
+import { grouping } from "@adapttable/mui/grouping";
+
+<DataTable
+  data={people}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={[grouping("team")]}
+/>;
+```
+
+AI — root stays React-free; the React feature binds to the live engine:
+
+```ts
+import { createAgentSession } from "@adapttable/ai";
+import { tableAgent } from "@adapttable/ai/react";
+
+const session = createAgentSession({ observe, apply });
+const feature = tableAgent({ tableId: "orders" });
+```
+
+These four snippets must keep agreeing with the frozen contracts in
+ARCHITECTURE.md as items 10–15 land. They are examples, not published stubs.
 
 ---
 

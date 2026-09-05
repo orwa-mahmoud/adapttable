@@ -1,14 +1,15 @@
+import { guideOf, summaryOf } from "../guides";
 import {
   AGENT_SCHEMA_VERSION,
   CAPABILITY_KEYS,
   type CapabilityKey,
 } from "../keys";
-import { guideOf, summaryOf } from "../guides";
 import type {
   AgentCapabilityContext,
   AgentCapabilityDefinition,
   AgentObservation,
   CapabilityGuide,
+  CapabilityPlan,
 } from "../types";
 import { isBuiltInEnabled } from "./enabled";
 
@@ -17,6 +18,18 @@ type BuiltInDispatch = (
   context: AgentCapabilityContext,
   args: unknown
 ) => Promise<unknown>;
+
+type BuiltInPlanner = (
+  key: CapabilityKey,
+  context: AgentCapabilityContext,
+  args: unknown
+) => Promise<CapabilityPlan>;
+
+/** Built-in plan and apply halves, supplied by the session. */
+export interface BuiltInHandlers {
+  readonly plan: BuiltInPlanner;
+  readonly execute: BuiltInDispatch;
+}
 
 /** Resolved registry for one session. */
 export interface CapabilityRegistry {
@@ -71,11 +84,13 @@ class SessionCapabilityRegistry implements CapabilityRegistry {
 /** Register built-ins and custom capabilities for one session. */
 export function createCapabilityRegistry(
   custom: readonly AgentCapabilityDefinition[],
-  dispatchBuiltIn: BuiltInDispatch
+  builtIn: BuiltInHandlers
 ): CapabilityRegistry {
   const definitions = new Map<string, AgentCapabilityDefinition>();
   for (const key of CAPABILITY_KEYS) {
     const guide = guideOf(key);
+    const kind = capabilityKind(key);
+    const governed = kind === "write" || kind === "destructive";
     definitions.set(key, {
       key,
       summary: summaryOf(key),
@@ -84,9 +99,14 @@ export function createCapabilityRegistry(
         input: guide.input,
         output: guide.output,
       },
-      kind: capabilityKind(key),
+      kind,
+      // edit.cells is the only built-in with a staging path (stageCells).
+      staging: key === "edit.cells" ? "supported" : "unsupported",
       isEnabled: (observation) => isBuiltInEnabled(key, observation),
-      execute: (context, args) => dispatchBuiltIn(key, context, args),
+      plan: governed
+        ? (context, args) => builtIn.plan(key, context, args)
+        : undefined,
+      execute: (context, args) => builtIn.execute(key, context, args),
     });
   }
   for (const def of custom) {

@@ -1,7 +1,7 @@
 /** @vitest-environment node */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { createTableEngine } from "./createTableEngine";
 import { createNeutralTable } from "./neutralTable";
 
@@ -163,6 +163,124 @@ describe("createTableEngine", () => {
     expect(engine.snapshot().groupBy).toBe("team");
     engine.configure({ groupBy: undefined });
     expect(engine.snapshot().groupBy).toBeUndefined();
+    engine.dispose();
+  });
+
+  it("reports the page it is showing and remembers the one requested", () => {
+    const engine = createTableEngine({
+      data: people,
+      columns,
+      rowKey: (row) => row.id,
+      defaults: { limit: 1 },
+    });
+    engine.dispatch({ type: "setPage", page: 3 });
+    expect(engine.snapshot().page).toBe(3);
+    expect(engine.rows("page").map((row) => row.id)).toEqual(["3"]);
+
+    // Shrinking the data leaves page 3 past the end.
+    engine.invalidate(["data"], { data: [people[0]!] });
+    const shrunk = engine.snapshot();
+    expect(shrunk.total).toBe(1);
+    expect(shrunk.lastPage).toBe(1);
+    expect(shrunk.page).toBe(1);
+    expect(shrunk.requestedPage).toBe(3);
+    expect(engine.rows("page").map((row) => row.id)).toEqual(["1"]);
+
+    // The request survives, so restoring the rows restores the page.
+    engine.invalidate(["data"], { data: people });
+    expect(engine.snapshot().page).toBe(3);
+    expect(engine.rows("page").map((row) => row.id)).toEqual(["3"]);
+    engine.dispose();
+  });
+
+  it("commits page and limit as one configure transaction", () => {
+    const engine = createTableEngine({
+      data: people,
+      columns,
+      rowKey: (row) => row.id,
+      defaults: { limit: 1, page: 3 },
+    });
+    const seen: number[] = [];
+    engine.subscribe(["view"], () => {
+      seen.push(engine.snapshot().page);
+    });
+
+    // setLimit alone is a user action: it returns to page 1.
+    engine.dispatch({ type: "setLimit", limit: 2 });
+    expect(engine.snapshot().page).toBe(1);
+
+    // configure replays controlled state without that reset.
+    engine.configure({ page: 2, limit: 1 });
+    expect(engine.snapshot().page).toBe(2);
+    expect(engine.snapshot().limit).toBe(1);
+    expect(seen).toEqual([1, 2]);
+
+    // An unchanged transaction notifies nobody.
+    engine.configure({ page: 2, limit: 1 });
+    expect(seen).toEqual([1, 2]);
+    engine.dispose();
+  });
+
+  it("moves the window on page or limit without re-deriving rows", () => {
+    const engine = createTableEngine({
+      data: people,
+      columns,
+      rowKey: (row) => row.id,
+      defaults: { limit: 1, sortBy: "spend", sortDir: "asc" },
+    });
+    const derivedBefore = engine.rows("full");
+    engine.configure({ page: 2 });
+    // Paging slices an existing derivation; it never rebuilds it.
+    expect(engine.rows("full")).toBe(derivedBefore);
+    expect(engine.rows("page").map((row) => row.id)).toEqual(["3"]);
+    engine.dispose();
+  });
+
+  it("applies a changed locale, pagination mode and row identity", () => {
+    const engine = createTableEngine({
+      data: [
+        { id: "1", ref: "a", nameEn: "Ada", nameAr: "آدا" },
+        { id: "2", ref: "b", nameEn: "Alan", nameAr: "آلان" },
+      ],
+      columns: [{ key: "nameEn", i18n: { ar: "nameAr" } }],
+      rowKey: (row) => row.id,
+      locale: "en",
+      defaults: { limit: 1 },
+    });
+    const first = engine.rowByKey("1");
+    expect(engine.cellValue(first!, "nameEn")).toBe("Ada");
+
+    engine.configure({ locale: "ar" });
+    expect(engine.cellValue(first!, "nameEn")).toBe("آدا");
+    expect(engine.snapshot().revisions.schema).toBeGreaterThan(1);
+
+    engine.configure({ paginationMode: "infinite" });
+    engine.dispatch({ type: "setPage", page: 2 });
+    expect(engine.rows("page")).toHaveLength(2);
+
+    engine.configure({ getRowId: (row) => row.ref });
+    expect(engine.rowByKey("1")).toBeUndefined();
+    expect(engine.rowByKey("a")).toBeDefined();
+    expect(engine.rowKey(first!)).toBe("a");
+    engine.dispose();
+  });
+
+  it("re-derives on a bare data invalidate after an in-place mutation", () => {
+    const rows = [
+      { id: "1", name: "Ada", team: "eng", spend: 30 },
+      { id: "2", name: "Alan", team: "ops", spend: 10 },
+    ];
+    const engine = createTableEngine({
+      data: rows,
+      columns,
+      rowKey: (row) => row.id,
+      defaults: { search: "ada" },
+    });
+    expect(engine.rows("full").map((row) => row.id)).toEqual(["1"]);
+
+    rows[1]!.name = "Adalyn";
+    engine.invalidate(["data"]);
+    expect(engine.rows("full").map((row) => row.id)).toEqual(["1", "2"]);
     engine.dispose();
   });
 });

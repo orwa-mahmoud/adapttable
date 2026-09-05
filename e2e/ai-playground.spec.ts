@@ -29,6 +29,64 @@ async function catalogText(page: Page): Promise<string> {
   return (await page.getByTestId("ai-catalog").innerText()).trim();
 }
 
+const MOCK_BACKEND = "http://127.0.0.1:8787";
+
+async function installMockAgentBackend(page: Page): Promise<void> {
+  await page.route(MOCK_BACKEND, async (route) => {
+    if (route.request().method() === "OPTIONS") {
+      await route.fulfill({ status: 204 });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}") as {
+      kind?: string;
+    };
+    if (body.kind === "hello") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          schemaVersion: "adapttable.agent.v1",
+          ok: true,
+          text: "Mock backend ready.",
+        }),
+      });
+      return;
+    }
+    if (body.kind === "turn") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          schemaVersion: "adapttable.agent.v1",
+          text: "Filtered to Core team.",
+          actions: [
+            {
+              key: "view.setFilters",
+              args: { filters: { team: ["Core"] } },
+              idempotencyKey: `mock-filter-${String(Date.now())}`,
+            },
+          ],
+        }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "unknown request" }),
+    });
+  });
+}
+
+async function connectMockBackend(page: Page): Promise<void> {
+  await installMockAgentBackend(page);
+  await page.getByTestId("ai-mode-backend").click();
+  await page.getByTestId("ai-backend-connect").click();
+  await expect(page.getByTestId("ai-backend-notice")).toContainText(
+    "Mock backend ready"
+  );
+}
+
 async function jonahSalary(page: Page): Promise<string> {
   const row = page.getByRole("row", { name: /Jonah/ });
   const editor = row.locator('[data-adapttable-part="edit-cell-editor"]');
@@ -115,6 +173,20 @@ for (const kit of kits) {
       page.getByRole("button", { name: "Propose Jonah's salary" })
     ).toBeEnabled();
   });
+
+  test(`${kit} connect backend filters through mock HTTP`, async ({ page }) => {
+    await openPlayground(page, kit);
+    await connectMockBackend(page);
+    await page.getByTestId("ai-backend-message").fill("Filter Core team");
+    await page.getByTestId("ai-backend-send").click();
+    await expect(page.getByTestId("ai-backend-log")).toContainText(
+      "Assistant · Filtered to Core team."
+    );
+    await expect(page.getByText("Chioma Eze")).toBeVisible();
+    await expect(page.getByText("Jonah Okonkwo")).toHaveCount(0);
+    await page.getByTestId("ai-backend-clear-filter").click();
+    await expect(page.getByText("Jonah Okonkwo")).toBeVisible();
+  });
 }
 
 test("Connect backend stays idle until Connect and returns to simulated", async ({
@@ -123,9 +195,7 @@ test("Connect backend stays idle until Connect and returns to simulated", async 
   await openPlayground(page, CANONICAL_AI_ADAPTER);
   await page.getByTestId("ai-mode-backend").click();
   await expect(page.getByTestId("ai-backend")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Filter Core team" })
-  ).toHaveCount(0);
+  await expect(page.getByTestId("ai-backend-filter-core")).toBeVisible();
   await expect(page.getByTestId("ai-backend-send")).toHaveCount(0);
   await expect(page.getByTestId("ai-backend-connect")).toBeEnabled();
   await expect(page.getByTestId("ai-backend-token")).toBeVisible();

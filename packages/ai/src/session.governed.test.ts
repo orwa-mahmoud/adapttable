@@ -317,7 +317,33 @@ describe("edit.cells", () => {
     expect(result.error?.code).toBe("column-not-writable");
   });
 
-  it("shares one in-flight execute for the same idempotency key", async () => {
+  it("shares one in-flight execute for an identical concurrent request", async () => {
+    let release!: (ok: boolean) => void;
+    const gate = new Promise<boolean>((resolve) => {
+      release = resolve;
+    });
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => gate,
+    });
+    const args = { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] };
+    const first = session.execute("edit.cells", args, 1, "same");
+    const second = session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "same"
+    );
+    release(true);
+    const [a, b] = await Promise.all([first, second]);
+    expect(a).toEqual(b);
+    expect(a.ok).toBe(true);
+    expect(hooks.editCells).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails an in-flight duplicate id carrying a different payload", async () => {
     let release!: (ok: boolean) => void;
     const gate = new Promise<boolean>((resolve) => {
       release = resolve;
@@ -334,16 +360,50 @@ describe("edit.cells", () => {
       1,
       "same"
     );
-    const second = session.execute(
+    const second = await session.execute(
       "edit.cells",
       { edits: [{ rowKey: "r1", column: "name", value: "Other" }] },
       1,
       "same"
     );
+    expect(second.ok).toBe(false);
+    expect(second.error?.code).toBe("idempotency-mismatch");
     release(true);
-    const [a, b] = await Promise.all([first, second]);
-    expect(a).toEqual(b);
+    const settled = await first;
+    expect(settled.ok).toBe(true);
     expect(hooks.editCells).toHaveBeenCalledTimes(1);
+    expect(hooks.editCells).toHaveBeenCalledWith([
+      { rowKey: "r1", column: "name", value: "Ada" },
+    ]);
+  });
+
+  it("fails a pending duplicate id that names a different capability", async () => {
+    let release!: (ok: boolean) => void;
+    const gate = new Promise<boolean>((resolve) => {
+      release = resolve;
+    });
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => gate,
+    });
+    const first = session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "shared"
+    );
+    const second = await session.execute(
+      "rows.delete",
+      { keys: ["r2"] },
+      1,
+      "shared"
+    );
+    expect(second.error?.code).toBe("idempotency-mismatch");
+    expect(hooks.deleteRows).not.toHaveBeenCalled();
+    release(true);
+    await first;
   });
 
   it("replays the same idempotency key", async () => {
@@ -857,9 +917,9 @@ describe("execution lifecycle", () => {
   });
 
   it("resolves before-values beyond the first read window by row identity", async () => {
-    const readRows = vi.fn(async (query: RowReadQuery) => {
+    const readRows = vi.fn((query: RowReadQuery) => {
       const slice = WINDOW.rows.slice(query.offset, query.offset + query.limit);
-      return {
+      return Promise.resolve({
         offset: query.offset,
         limit: query.limit,
         redacted: ["ssn"],
@@ -867,7 +927,7 @@ describe("execution lifecycle", () => {
           rowKey: row.rowKey,
           cells: { salary: row.cells.salary },
         })),
-      };
+      });
     });
     const hooks = apply({ readRows });
     const session = createAgentSession({

@@ -82,7 +82,16 @@ export interface TableSnapshot<TRow = unknown> {
   readonly revisions: TableRevisions;
   readonly columns: readonly ColumnMetadata<TRow>[];
   readonly capabilities: TableSourceCapabilities;
+  /**
+   * The page the engine is actually showing. A requested page past the end
+   * reports the last page, so this always matches `rows("page")`; the
+   * request is remembered and applies again if the data grows back.
+   */
   readonly page: number;
+  /** Page requested by the host, before clamping. */
+  readonly requestedPage: number;
+  /** Last page for the current row count and limit. */
+  readonly lastPage: number;
   readonly limit: number;
   readonly search: string;
   readonly sortBy: string | undefined;
@@ -128,6 +137,34 @@ export interface CreateTableEngineOptions<TRow> {
 }
 
 /**
+ * Live configuration a binding may replay onto a committed engine.
+ *
+ * Extends the incremental query options with the creation-level settings
+ * that remain changeable: `locale`, `paginationMode` and row identity.
+ * `tableId` and `defaults` are identity and seed values — they are read
+ * once, at creation.
+ *
+ * @public
+ */
+export interface TableEngineConfigPatch<TRow> extends Partial<
+  IncrementalViewConfig<TRow>
+> {
+  /** Active locale for `i18n` column paths. */
+  readonly locale?: string;
+  /** `"paged"` slices one page; `"infinite"` grows the window. */
+  readonly paginationMode?: "paged" | "infinite";
+  /**
+   * Requested 1-based page. Unlike `dispatch({ type: "setLimit" })`, a patch
+   * carrying both `page` and `limit` lands as one transaction and does not
+   * reset to page 1 — that reset belongs to a user changing the page size,
+   * not to a binding replaying controlled state.
+   */
+  readonly page?: number;
+  /** Rows per page. */
+  readonly limit?: number;
+}
+
+/**
  * Framework-neutral table.
  *
  * @public
@@ -150,9 +187,14 @@ export interface TableEngine<TRow = unknown> {
    * chrome) without a second derivation path.
    */
   readonly configure: (
-    patch: Partial<IncrementalViewConfig<TRow>>,
+    patch: TableEngineConfigPatch<TRow>,
     options?: { silent?: boolean }
   ) => void;
+  /**
+   * Mark axes stale. Invalidating `"data"` without a new array re-derives
+   * from the array the engine already holds, so a host that mutated its rows
+   * in place gets fresh results and not merely a new revision token.
+   */
   readonly invalidate: (
     axes: readonly TableRevisionAxis[],
     next?: {
@@ -175,28 +217,64 @@ interface EngineView<TRow> {
   selectedIds: readonly string[];
   data: readonly TRow[];
   columns: readonly ColumnMetadata<TRow>[];
+  locale: string | undefined;
+  paginationMode: "paged" | "infinite";
+  getRowId: (row: TRow) => string;
   filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
   getSearchText?: (row: TRow) => string;
-  filterTree?: IncrementalViewConfig<TRow>["filterTree"];
-  filterTreeFn?: IncrementalViewConfig<TRow>["filterTreeFn"];
-  sortLevels?: IncrementalViewConfig<TRow>["sortLevels"];
-  getSortValue?: IncrementalViewConfig<TRow>["getSortValue"];
-  groupAggregates?: IncrementalViewConfig<TRow>["groupAggregates"];
-  groupSort?: IncrementalViewConfig<TRow>["groupSort"];
-  groupFilter?: IncrementalViewConfig<TRow>["groupFilter"];
-  groupFooters?: IncrementalViewConfig<TRow>["groupFooters"];
-  collapsedGroupIds?: IncrementalViewConfig<TRow>["collapsedGroupIds"];
-  blankLabel?: IncrementalViewConfig<TRow>["blankLabel"];
-  groupPageSize?: IncrementalViewConfig<TRow>["groupPageSize"];
-  rowPageSize?: IncrementalViewConfig<TRow>["rowPageSize"];
-  paging?: IncrementalViewConfig<TRow>["paging"];
-  summaryRow?: IncrementalViewConfig<TRow>["summaryRow"];
-  aggregateSpec?: IncrementalViewConfig<TRow>["aggregateSpec"];
-  aggregateOptions?: IncrementalViewConfig<TRow>["aggregateOptions"];
+  filterTree?: NonNullable<IncrementalViewConfig<TRow>["filterTree"]>;
+  filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
+  sortLevels?: NonNullable<IncrementalViewConfig<TRow>["sortLevels"]>;
+  getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
+  groupAggregates?: NonNullable<IncrementalViewConfig<TRow>["groupAggregates"]>;
+  groupSort?: NonNullable<IncrementalViewConfig<TRow>["groupSort"]>;
+  groupFilter?: NonNullable<IncrementalViewConfig<TRow>["groupFilter"]>;
+  groupFooters?: NonNullable<IncrementalViewConfig<TRow>["groupFooters"]>;
+  collapsedGroupIds?: NonNullable<
+    IncrementalViewConfig<TRow>["collapsedGroupIds"]
+  >;
+  blankLabel?: NonNullable<IncrementalViewConfig<TRow>["blankLabel"]>;
+  groupPageSize?: NonNullable<IncrementalViewConfig<TRow>["groupPageSize"]>;
+  rowPageSize?: NonNullable<IncrementalViewConfig<TRow>["rowPageSize"]>;
+  paging?: NonNullable<IncrementalViewConfig<TRow>["paging"]>;
+  summaryRow?: NonNullable<IncrementalViewConfig<TRow>["summaryRow"]>;
+  aggregateSpec?: NonNullable<IncrementalViewConfig<TRow>["aggregateSpec"]>;
+  aggregateOptions?: NonNullable<
+    IncrementalViewConfig<TRow>["aggregateOptions"]
+  >;
 }
 
 const EMPTY_EXTRA: ExtraFilters = {};
 let tableSeq = 0;
+
+/**
+ * Configure keys that map straight onto the view. `locale`, `sortBy` and
+ * `sortDir` belong here too — they need no normalizing, only the `in` test
+ * so that passing `undefined` clears them.
+ */
+const PASS_THROUGH_KEYS = [
+  "locale",
+  "sortBy",
+  "sortDir",
+  "filterFn",
+  "getSearchText",
+  "filterTree",
+  "filterTreeFn",
+  "sortLevels",
+  "getSortValue",
+  "groupAggregates",
+  "groupSort",
+  "groupFilter",
+  "groupFooters",
+  "collapsedGroupIds",
+  "blankLabel",
+  "groupPageSize",
+  "rowPageSize",
+  "paging",
+  "summaryRow",
+  "aggregateSpec",
+  "aggregateOptions",
+] as const satisfies readonly (keyof EngineView<never>)[];
 
 function bump(
   revisions: TableRevisions,
@@ -218,6 +296,27 @@ function defaultSearchText<TRow>(row: TRow): string {
   return engineSearchText(row);
 }
 
+/** What a changed view key costs: a rebuild, a re-derive, or just a slice. */
+type ViewChangeKind = "schema" | "identity" | "window" | "view";
+
+function viewChangeKind(key: keyof EngineView<never>): ViewChangeKind {
+  if (key === "columns" || key === "locale") return "schema";
+  if (key === "getRowId") return "identity";
+  // page and limit move the window only — they never re-derive.
+  if (key === "page" || key === "limit") return "window";
+  return "view";
+}
+
+function axesForChange(
+  changed: ReadonlySet<ViewChangeKind>
+): readonly TableRevisionAxis[] {
+  const axes: TableRevisionAxis[] = [];
+  if (changed.has("view") || changed.has("window")) axes.push("view");
+  if (changed.has("schema")) axes.push("schema");
+  if (changed.has("identity")) axes.push("data");
+  return axes;
+}
+
 /**
  * Create a table engine over in-memory rows.
  *
@@ -228,8 +327,6 @@ export function createTableEngine<TRow>(
 ): TableEngine<TRow> {
   const getSearchText = options.getSearchText ?? defaultSearchText;
   const filterFn = options.filterFn;
-  const paginationMode = options.paginationMode ?? "paged";
-  const locale = options.locale;
   const defaults = options.defaults ?? {};
   const tableId = options.tableId ?? `table-${++tableSeq}`;
 
@@ -244,6 +341,9 @@ export function createTableEngine<TRow>(
     selectedIds: [],
     data: options.data,
     columns: options.columns,
+    locale: options.locale,
+    paginationMode: options.paginationMode ?? "paged",
+    getRowId: options.rowKey,
     filterFn: options.filterFn,
     getSearchText,
   };
@@ -260,7 +360,7 @@ export function createTableEngine<TRow>(
 
   function viewConfig(): IncrementalViewConfig<TRow> {
     return {
-      getRowId: options.rowKey,
+      getRowId: view.getRowId,
       getSearchText: view.getSearchText ?? getSearchText,
       filterFn: view.filterFn ?? filterFn,
       extra: view.extra,
@@ -310,15 +410,24 @@ export function createTableEngine<TRow>(
     view = { ...view, data: next };
   }
 
+  /** Last page for the rows currently derived. */
+  function lastPageOf(): number {
+    return Math.max(
+      1,
+      Math.ceil(derived.sorted.length / Math.max(view.limit, 1))
+    );
+  }
+
+  /** The page actually shown — the request clamped to what exists. */
+  function effectivePage(): number {
+    return Math.min(Math.max(view.page, 1), lastPageOf());
+  }
+
   function pagedRows(): readonly TRow[] {
     const sorted = derived.sorted;
-    const lastPage = Math.max(
-      1,
-      Math.ceil(sorted.length / Math.max(view.limit, 1))
-    );
-    const page = Math.min(Math.max(view.page, 1), lastPage);
+    const page = effectivePage();
     const slice =
-      paginationMode === "infinite"
+      view.paginationMode === "infinite"
         ? sorted.slice(0, page * view.limit)
         : sorted.slice((page - 1) * view.limit, page * view.limit);
     attachIncrementalView(slice, derived);
@@ -344,58 +453,52 @@ export function createTableEngine<TRow>(
   }
 
   function applyConfigurePatch(
-    patch: Partial<IncrementalViewConfig<TRow>>
+    patch: TableEngineConfigPatch<TRow>
   ): readonly TableRevisionAxis[] {
     const next: EngineView<TRow> = { ...view };
-    let viewChanged = false;
-    let schemaChanged = false;
+    const changed = new Set<ViewChangeKind>();
 
     const assign = <K extends keyof EngineView<TRow>>(
       key: K,
       value: EngineView<TRow>[K]
     ): void => {
-      if (!Object.is(view[key], value)) {
-        next[key] = value;
-        if (key === "columns") schemaChanged = true;
-        else viewChanged = true;
-      }
+      if (Object.is(view[key], value)) return;
+      next[key] = value;
+      changed.add(viewChangeKind(key));
     };
 
+    // Keys the patch hands straight to the view. `in` is the test, so an
+    // explicit `undefined` clears a value and an absent key leaves it alone.
+    for (const key of PASS_THROUGH_KEYS) {
+      if (key in patch) assign(key, patch[key]);
+    }
+    // The rest normalize, default, or refuse an empty value.
+    if (typeof patch.page === "number") {
+      assign("page", Math.max(1, Math.round(patch.page)));
+    }
+    if (typeof patch.limit === "number") {
+      assign("limit", Math.max(1, Math.round(patch.limit)));
+    }
     if ("search" in patch) assign("search", patch.search ?? "");
-    if ("sortBy" in patch) assign("sortBy", patch.sortBy);
-    if ("sortDir" in patch) assign("sortDir", patch.sortDir);
     if ("groupBy" in patch) assign("groupBy", normalizeGroupBy(patch.groupBy));
     if ("extra" in patch) assign("extra", patch.extra ?? EMPTY_EXTRA);
-    if ("columns" in patch && patch.columns) assign("columns", patch.columns);
-    if ("filterFn" in patch) assign("filterFn", patch.filterFn);
-    if ("getSearchText" in patch) assign("getSearchText", patch.getSearchText);
-    if ("filterTree" in patch) assign("filterTree", patch.filterTree);
-    if ("filterTreeFn" in patch) assign("filterTreeFn", patch.filterTreeFn);
-    if ("sortLevels" in patch) assign("sortLevels", patch.sortLevels);
-    if ("getSortValue" in patch) assign("getSortValue", patch.getSortValue);
-    if ("groupAggregates" in patch)
-      assign("groupAggregates", patch.groupAggregates);
-    if ("groupSort" in patch) assign("groupSort", patch.groupSort);
-    if ("groupFilter" in patch) assign("groupFilter", patch.groupFilter);
-    if ("groupFooters" in patch) assign("groupFooters", patch.groupFooters);
-    if ("collapsedGroupIds" in patch)
-      assign("collapsedGroupIds", patch.collapsedGroupIds);
-    if ("blankLabel" in patch) assign("blankLabel", patch.blankLabel);
-    if ("groupPageSize" in patch) assign("groupPageSize", patch.groupPageSize);
-    if ("rowPageSize" in patch) assign("rowPageSize", patch.rowPageSize);
-    if ("paging" in patch) assign("paging", patch.paging);
-    if ("summaryRow" in patch) assign("summaryRow", patch.summaryRow);
-    if ("aggregateSpec" in patch) assign("aggregateSpec", patch.aggregateSpec);
-    if ("aggregateOptions" in patch)
-      assign("aggregateOptions", patch.aggregateOptions);
+    // Replacing columns, row identity or the paging strategy with nothing is
+    // never meaningful, so an empty value is ignored rather than applied.
+    if (patch.columns) assign("columns", patch.columns);
+    if (patch.getRowId) assign("getRowId", patch.getRowId);
+    if (patch.paginationMode) assign("paginationMode", patch.paginationMode);
 
-    if (!viewChanged && !schemaChanged) return [];
+    if (changed.size === 0) return [];
     view = next;
-    syncDerived();
-    const axes: TableRevisionAxis[] = [];
-    if (viewChanged) axes.push("view");
-    if (schemaChanged) axes.push("schema");
-    return axes;
+    if (changed.has("identity")) {
+      // Row identity decides membership in every incremental bucket, so the
+      // view is rebuilt rather than reconciled.
+      derived = createIncrementalView(view.data, viewConfig());
+      attachIncrementalView(derived.sorted, derived);
+    } else if (changed.has("view") || changed.has("schema")) {
+      syncDerived();
+    }
+    return axesForChange(changed);
   }
 
   function notify(changed: readonly TableRevisionAxis[]): void {
@@ -420,7 +523,9 @@ export function createTableEngine<TRow>(
           allFilteredRows: sorted,
           total: sorted.length,
         }),
-        page: view.page,
+        page: effectivePage(),
+        requestedPage: view.page,
+        lastPage: lastPageOf(),
         limit: view.limit,
         search: view.search,
         sortBy: view.sortBy,
@@ -439,7 +544,7 @@ export function createTableEngine<TRow>(
       assertLive();
       const column = columnMap().get(columnKey);
       if (!column) return undefined;
-      return cellValue(row, column, locale);
+      return cellValue(row, column, view.locale);
     },
     rows(scope) {
       assertLive();
@@ -448,11 +553,11 @@ export function createTableEngine<TRow>(
     },
     rowByKey(rowKey) {
       assertLive();
-      return view.data.find((row) => options.rowKey(row) === rowKey);
+      return view.data.find((row) => view.getRowId(row) === rowKey);
     },
     rowKey(row) {
       assertLive();
-      return options.rowKey(row);
+      return view.getRowId(row);
     },
     subscribe(axes, listener) {
       assertLive();
@@ -524,6 +629,11 @@ export function createTableEngine<TRow>(
       if (next?.data) {
         replaceData(next.data);
         if (!changed.includes("data")) changed = [...changed, "data"];
+      } else if (axes.includes("data")) {
+        // In-place mutation: rebuild from the array the engine already holds
+        // so derived results move with the revision token.
+        derived = createIncrementalView(view.data, viewConfig());
+        attachIncrementalView(derived.sorted, derived);
       }
       if (next?.columns) {
         view = { ...view, columns: next.columns };

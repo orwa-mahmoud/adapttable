@@ -37,20 +37,31 @@ on the response, `returnResults` on the client).
 
 ## Path 1 — run our example
 
+Prerequisites: Node 22.6 or newer (the example runs TypeScript directly with
+`--experimental-strip-types`) and `pnpm install` at the repository root.
+
 From this repository:
 
 ```bash
-cp examples/ai-http-backend.env.example examples/.env.ai-http
+cp -n examples/ai-http-backend.env.example examples/.env.ai-http
 ```
 
+`-n` keeps an env file you already filled in — the copy is skipped rather
+than overwritten.
+
 Edit `examples/.env.ai-http`. Set `AGENT_PROVIDER` to `openai`,
-`anthropic`, `gemini` or `deepseek`, and the matching API key. Do not
-overwrite an existing root `.env`. Never commit the filled file.
+`anthropic`, `gemini` or `deepseek`, and the matching API key. Never commit
+the filled file.
 
 ```bash
 pnpm --filter @adapttable/ai build
 pnpm --filter @adapttable/examples ai-http
 ```
+
+The server refuses to start on a configuration it cannot use: an
+`AGENT_PORT` that is not a port, an empty `AGENT_HOST` or `AGENT_MODEL`, an
+unknown `AGENT_PROVIDER`, or a provider whose API key is missing. Each of
+those exits with the name of the variable to fix.
 
 The process binds `127.0.0.1` on port `8787` by default. A non-loopback
 `AGENT_HOST` requires `AGENT_HTTP_TOKEN`.
@@ -80,6 +91,17 @@ hosted page at `localhost`.
 
 See [ai-http-backend.env.example](../examples/ai-http-backend.env.example).
 
+Values are read in this order, and the first one that sets a key wins:
+
+1. the real process environment — no file overrides what the shell, the
+   container or the CI runner already set;
+2. the file named by `AGENT_ENV_FILE`;
+3. `.env.ai-http` beside the example;
+4. `.env` in the working directory.
+
+Files are parsed by Node itself (`process.loadEnvFile`), not a bespoke
+reader.
+
 | Variable                                                                       | Role                                                               |
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
 | `AGENT_PROVIDER`                                                               | `openai` (default), `anthropic`, `gemini`, or `deepseek`           |
@@ -91,6 +113,12 @@ See [ai-http-backend.env.example](../examples/ai-http-backend.env.example).
 | `AGENT_ALLOWED_ORIGINS`                                                        | Comma-separated origins. Defaults to local showcase ports          |
 | `AGENT_PORT`                                                                   | Default `8787`                                                     |
 | `AGENT_MAX_BODY`                                                               | Default `65536` bytes                                              |
+
+`AGENT_ALLOWED_ORIGINS` is a CORS list. CORS is a browser convenience, not
+authentication: it tells a browser which pages may read the response, and
+nothing at all to curl, a script, or any non-browser client. `AGENT_HTTP_TOKEN`
+is what actually authenticates a caller — set it on every bind you do not
+fully control.
 
 The example does not log credentials or table contents. It is not an open
 proxy: it only calls the configured provider.

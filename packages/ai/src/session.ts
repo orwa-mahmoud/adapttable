@@ -1,8 +1,8 @@
-import { errorMessage } from "./errorMessage";
 import {
-  createCapabilityRegistry,
   type CapabilityRegistry,
+  createCapabilityRegistry,
 } from "./capabilities/registry";
+import { errorMessage } from "./errorMessage";
 import { summaryOf } from "./guides";
 import {
   type ApprovalPolicy,
@@ -20,6 +20,7 @@ import type {
   AgentSession,
   ApprovalOutcome,
   CapabilityGuide,
+  CapabilityPlan,
   CatalogEntry,
   ExecuteResult,
   ResolvedRow,
@@ -31,6 +32,9 @@ import type {
   WriteRowResult,
 } from "./types";
 import { validateSchema } from "./validate";
+
+/** Replay records kept per session before the oldest non-mutation is dropped. */
+const DEFAULT_REPLAY_CACHE_SIZE = 200;
 
 /**
  * Inputs for {@link createAgentSession}.
@@ -49,11 +53,14 @@ export interface CreateAgentSessionOptions {
   onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
   /** Custom governed capabilities registered on this table session. */
   capabilities?: readonly AgentCapabilityDefinition[];
+  /**
+   * How many replay results this session keeps. Defaults to 200. Accepted
+   * mutations keep their deduplication guarantee for the whole session even
+   * after their result is evicted — a replayed key then reports
+   * `replay-expired` rather than running the write twice.
+   */
+  replayCacheSize?: number;
 }
-
-const sessionRegistryRef: { current: CapabilityRegistry | undefined } = {
-  current: undefined,
-};
 
 function approvalOf(observation: AgentObservation): ApprovalPolicy {
   return observation.approval ?? "writes";
@@ -67,31 +74,24 @@ function readMaxOf(observation: AgentObservation): number {
   return observation.readMax ?? 50;
 }
 
-function isWriteCapability(
-  registry: ReturnType<typeof createCapabilityRegistry>,
-  key: string
-): boolean {
-  const kind = registry.get(key)?.kind;
+function kindOf(
+  definition: AgentCapabilityDefinition
+): NonNullable<AgentCapabilityDefinition["kind"]> {
+  return definition.kind ?? "view";
+}
+
+function isGoverned(definition: AgentCapabilityDefinition): boolean {
+  const kind = kindOf(definition);
   return kind === "write" || kind === "destructive";
 }
 
-function isDestructiveCapability(
-  registry: ReturnType<typeof createCapabilityRegistry>,
-  key: string
-): boolean {
-  return registry.get(key)?.kind === "destructive";
-}
-
 function needsApproval(
-  key: string,
-  policy: ApprovalPolicy,
-  registry: ReturnType<typeof createCapabilityRegistry>
+  definition: AgentCapabilityDefinition,
+  policy: ApprovalPolicy
 ): boolean {
   if (policy === "never") return false;
-  if (policy === "destructive") {
-    return isDestructiveCapability(registry, key);
-  }
-  return isWriteCapability(registry, key);
+  if (policy === "destructive") return kindOf(definition) === "destructive";
+  return isGoverned(definition);
 }
 
 class ApplyError extends Error {
@@ -102,9 +102,21 @@ class ApplyError extends Error {
   }
 }
 
+/**
+ * Session-owned re-checks a handler runs after every awaited boundary.
+ * Never handed to custom capability code.
+ */
+interface SessionGuard {
+  readonly observe: () => AgentObservation;
+  readonly isEnabled: (key: string, observation: AgentObservation) => boolean;
+}
+
 interface ReplayRecord {
   readonly capabilityKey: string;
   readonly fingerprint: string;
+  readonly args: unknown;
+  /** A governed write reached its handler — never run this key again. */
+  readonly mutation: boolean;
   readonly result: ExecuteResult;
 }
 
@@ -112,83 +124,85 @@ function executeFingerprint(key: string, args: unknown): string {
   return JSON.stringify({ key, args: args ?? {} });
 }
 
-function storeReplay(
-  replay: Map<string, ReplayRecord>,
-  idempotencyKey: string,
-  key: string,
-  args: unknown,
-  result: ExecuteResult
-): void {
-  replay.set(idempotencyKey, {
-    capabilityKey: key,
-    fingerprint: executeFingerprint(key, args),
-    result,
-  });
+/**
+ * Bounded replay store. Results are evicted oldest-first; the identity of an
+ * accepted mutation is retained for the session so its key can never execute
+ * a second time.
+ */
+class ReplayStore {
+  readonly #capacity: number;
+  readonly #records = new Map<string, ReplayRecord>();
+  readonly #mutations = new Map<string, string>();
+
+  constructor(capacity: number) {
+    this.#capacity = Math.max(1, Math.floor(capacity));
+  }
+
+  get(key: string): ReplayRecord | undefined {
+    const record = this.#records.get(key);
+    if (!record) return undefined;
+    this.#records.delete(key);
+    this.#records.set(key, record);
+    return record;
+  }
+
+  /** Fingerprint of an accepted mutation whose result is no longer cached. */
+  retiredMutation(key: string): string | undefined {
+    if (this.#records.has(key)) return undefined;
+    return this.#mutations.get(key);
+  }
+
+  set(key: string, record: ReplayRecord): void {
+    if (record.mutation) this.#mutations.set(key, record.fingerprint);
+    this.#records.delete(key);
+    this.#records.set(key, record);
+    for (const oldest of this.#records.keys()) {
+      if (this.#records.size <= this.#capacity) break;
+      this.#records.delete(oldest);
+    }
+  }
 }
 
-function filterRowWindow(
+function readableAllowlist(
+  columns: readonly AgentColumn[],
+  wanted: readonly string[] | undefined
+): Set<string> {
+  const readable = columns
+    .filter((column) => column.readable)
+    .map((column) => column.id);
+  if (!wanted) return new Set(readable);
+  const declared = new Set(readable);
+  return new Set(wanted.filter((id) => declared.has(id)));
+}
+
+/**
+ * Project a host window onto what the CURRENT declaration permits: allowed
+ * columns only, no more rows than the permitted limit, and window metadata
+ * that describes the window actually returned.
+ */
+function projectWindow(
   window: RowWindow,
-  observation: AgentObservation,
-  wanted?: readonly string[]
+  allow: ReadonlySet<string>,
+  columns: readonly AgentColumn[],
+  offset: number,
+  limit: number
 ): RowWindow {
-  const hidden = new Set(redactedIds(observation.columns));
-  const rows = window.rows.map((row) => {
+  const rows = window.rows.slice(0, limit).map((row) => {
     const cells: Record<string, unknown> = {};
     for (const [id, value] of Object.entries(row.cells)) {
-      if (hidden.has(id)) continue;
-      if (wanted && !wanted.includes(id)) continue;
+      if (!allow.has(id)) continue;
       cells[id] = value;
     }
     return { rowKey: row.rowKey, cells };
   });
-  return {
-    rows,
-    offset: window.offset,
-    limit: window.limit,
-    redacted: [...hidden],
-  };
+  return { rows, offset, limit, redacted: redactedIds(columns) };
 }
 
-function refreshReplayResult(
-  record: ReplayRecord,
-  key: string,
-  observe: () => AgentObservation
-): ExecuteResult {
-  const observation = observe();
-  if (record.capabilityKey === "rows.read" && record.result.ok) {
-    const body = record.result.result as RowWindow;
-    return {
-      ...record.result,
-      revision: observation.viewRevision,
-      result: filterRowWindow(body, observation),
-    };
-  }
-  if (record.capabilityKey === "columns.describe" && record.result.ok) {
-    return {
-      ...record.result,
-      revision: observation.viewRevision,
-      result: { columns: observation.columns },
-    };
-  }
-  if (key === "rows.read" || key === "columns.describe") {
-    return {
-      ...record.result,
-      revision: observation.viewRevision,
-    };
-  }
-  return record.result;
-}
-
-function assertImmediateCommit(
-  key: CapabilityKey,
-  observation: AgentObservation
-): void {
-  if (commitOf(observation) === "stage") {
-    throw new ApplyError(
-      "commit-incompatible",
-      `${key} requires commit: immediate on this table`
-    );
-  }
+/** A non-negative integer bound, ignoring a missing or unusable value. */
+function boundedInt(value: unknown, fallback: number): number {
+  const parsed = typeof value === "number" ? Math.floor(value) : Number.NaN;
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, parsed);
 }
 
 /**
@@ -202,13 +216,26 @@ function assertImmediateCommit(
 export function createAgentSession(
   options: CreateAgentSessionOptions
 ): AgentSession {
-  const replay = new Map<string, ReplayRecord>();
-  const inflight = new Map<string, Promise<ExecuteResult>>();
-  const registry = createCapabilityRegistry(
-    options.capabilities ?? [],
-    dispatchBuiltIn
+  const replay = new ReplayStore(
+    options.replayCacheSize ?? DEFAULT_REPLAY_CACHE_SIZE
   );
-  sessionRegistryRef.current = registry;
+  const inflight = new Map<
+    string,
+    { fingerprint: string; promise: Promise<ExecuteResult> }
+  >();
+  const registry: CapabilityRegistry = createCapabilityRegistry(
+    options.capabilities ?? [],
+    {
+      plan: (key, context, args) => planBuiltIn(key, context, args, guard),
+      execute: (key, context, args) =>
+        dispatchBuiltIn(key, context, args, guard),
+    }
+  );
+  const guard: SessionGuard = {
+    observe: () => options.observe(),
+    isEnabled: (key, observation) =>
+      registry.enabledKeys(observation).includes(key),
+  };
 
   const catalog = (): CatalogEntry[] => {
     const observation = options.observe();
@@ -229,6 +256,153 @@ export function createAgentSession(
     return registry.describe(key);
   };
 
+  /**
+   * Re-check the table after an awaited boundary. A revision move, a
+   * capability that stopped being wired, or a withdrawn write permission all
+   * deny the call rather than letting it proceed on the entry snapshot.
+   */
+  const revalidate = (
+    key: string,
+    entry: AgentObservation,
+    governed: boolean
+  ): AgentObservation => {
+    const latest = options.observe();
+    if (latest.viewRevision !== entry.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${entry.viewRevision}, table is at ${latest.viewRevision}`
+      );
+    }
+    if (!guard.isEnabled(key, latest)) {
+      throw new ApplyError(
+        "not-wired",
+        `capability "${key}" is not wired on this table`
+      );
+    }
+    if (governed && latest.writePolicy !== "allow") {
+      throw new ApplyError(
+        "write-denied",
+        `writes are not permitted on this table`
+      );
+    }
+    return latest;
+  };
+
+  /**
+   * The one governed path. Built-ins and custom definitions both run here,
+   * so a custom `kind: "write"` cannot execute without the same policy,
+   * commit-mode, approval and revalidation checks a built-in gets.
+   */
+  const runCapability = async (
+    definition: AgentCapabilityDefinition,
+    key: string,
+    args: unknown,
+    entry: AgentObservation,
+    signal: AbortSignal | undefined,
+    state: { invokedWrite: boolean }
+  ): Promise<unknown> => {
+    const approve = bindApprove(options.onApprove, signal);
+    const baseContext: AgentCapabilityContext = {
+      observation: entry,
+      apply: options.apply,
+      observe: options.observe,
+      onApprove: approve,
+    };
+    if (!isGoverned(definition)) {
+      return definition.execute(baseContext, args);
+    }
+
+    if (entry.writePolicy !== "allow") {
+      throw new ApplyError(
+        "write-denied",
+        `writes are not permitted on this table`
+      );
+    }
+    const commit = commitOf(entry);
+    if (
+      commit === "stage" &&
+      (definition.staging ?? "unsupported") !== "supported"
+    ) {
+      throw new ApplyError(
+        "commit-incompatible",
+        `${key} requires commit: immediate on this table`
+      );
+    }
+
+    const plan: CapabilityPlan = definition.plan
+      ? await definition.plan(baseContext, args)
+      : { proposals: [] };
+    revalidate(key, entry, true);
+
+    const subject =
+      plan.proposals.length > 0
+        ? plan.proposals
+        : { capability: key, arguments: args ?? {} };
+    const approval = await decideApproval(definition, entry, subject, approve);
+    if (approval === "pending" || approval === "rejected") {
+      return writePayload(plan.proposals, false, approval);
+    }
+    revalidate(key, entry, true);
+
+    const context: AgentCapabilityContext = {
+      ...baseContext,
+      plan,
+      commit,
+    };
+    state.invokedWrite = true;
+    try {
+      const payload = await definition.execute(context, args);
+      return decorateWrite(payload, plan, approval);
+    } catch (error) {
+      if (error instanceof BulkFailure) {
+        return writePayload(plan.proposals, false, approval, error.results);
+      }
+      throw error;
+    }
+  };
+
+  /** Resolve the capability, or the reason the call cannot start. */
+  const preflight = (
+    key: string,
+    args: unknown,
+    expectedRevision: number
+  ):
+    | {
+        readonly definition: AgentCapabilityDefinition;
+        readonly observation: AgentObservation;
+      }
+    | { readonly code: string; readonly message: string } => {
+    if (!registry.has(key)) {
+      return {
+        code: "unknown-capability",
+        message: `unknown capability "${key}"`,
+      };
+    }
+    const observation = options.observe();
+    if (!registry.enabledKeys(observation).includes(key)) {
+      return {
+        code: "not-wired",
+        message: `capability "${key}" is not wired on this table`,
+      };
+    }
+    if (expectedRevision !== observation.viewRevision) {
+      return {
+        code: "revision-mismatch",
+        message: `expected revision ${expectedRevision}, table is at ${observation.viewRevision}`,
+      };
+    }
+    const invalid = validateSchema(registry.describe(key).input, args ?? {});
+    if (invalid) return { code: "invalid-arguments", message: invalid };
+    const definition = registry.get(key);
+    if (!definition) {
+      return {
+        code: "unknown-capability",
+        message: `unknown capability "${key}"`,
+      };
+    }
+    return { definition, observation };
+  };
+
   const runExecute = async (
     key: string,
     args: unknown,
@@ -236,6 +410,17 @@ export function createAgentSession(
     idempotencyKey: string,
     signal?: AbortSignal
   ): Promise<ExecuteResult> => {
+    const state = { invokedWrite: false };
+    const record = (result: ExecuteResult): ExecuteResult => {
+      replay.set(idempotencyKey, {
+        capabilityKey: key,
+        fingerprint: executeFingerprint(key, args),
+        args,
+        mutation: state.invokedWrite,
+        result,
+      });
+      return result;
+    };
     const fail = (code: string, message: string): ExecuteResult => {
       const result: ExecuteResult = {
         ok: false,
@@ -243,83 +428,43 @@ export function createAgentSession(
         idempotencyKey,
         error: { code, message },
       };
-      if (code !== "cancelled" && code !== "revision-mismatch") {
-        storeReplay(replay, idempotencyKey, key, args, result);
-      }
-      return result;
+      if (code === "cancelled" || code === "revision-mismatch") return result;
+      return record(result);
     };
 
-    if (!registry.has(key)) {
-      return fail("unknown-capability", `unknown capability "${key}"`);
-    }
-
-    const observation = options.observe();
-    if (!registry.enabledKeys(observation).includes(key)) {
-      return fail(
-        "not-wired",
-        `capability "${key}" is not wired on this table`
-      );
-    }
-    if (expectedRevision !== observation.viewRevision) {
-      return fail(
-        "revision-mismatch",
-        `expected revision ${expectedRevision}, table is at ${observation.viewRevision}`
-      );
-    }
-
-    const guide = registry.describe(key);
-    const invalid = validateSchema(guide.input, args ?? {});
-    if (invalid) return fail("invalid-arguments", invalid);
+    const resolved = preflight(key, args, expectedRevision);
+    if ("code" in resolved) return fail(resolved.code, resolved.message);
 
     try {
-      const definition = registry.get(key);
-      if (!definition) {
-        return fail("unknown-capability", `unknown capability "${key}"`);
-      }
-      const context: AgentCapabilityContext = {
-        observation,
-        apply: options.apply,
-        observe: options.observe,
-        onApprove: bindApprove(options.onApprove, signal),
-      };
-      const payload = await definition.execute(context, args ?? {});
-      if (
-        isWriteResult(payload) &&
-        (payload.approval === "pending" || payload.approval === "cancelled") &&
-        !payload.applied
-      ) {
+      const payload = await runCapability(
+        resolved.definition,
+        key,
+        args,
+        resolved.observation,
+        signal,
+        state
+      );
+      const unfinished = unfinishedWrite(payload);
+      if (unfinished) {
         return {
-          ok: payload.approval === "pending",
+          ok: unfinished === "pending",
           revision: options.observe().viewRevision,
           idempotencyKey,
-          result: payload.approval === "pending" ? payload : undefined,
+          result: unfinished === "pending" ? payload : undefined,
           error:
-            payload.approval === "cancelled"
+            unfinished === "cancelled"
               ? { code: "cancelled", message: "approval cancelled" }
               : undefined,
         };
       }
-      const next = options.observe();
-      const result: ExecuteResult = {
+      return record({
         ok: true,
-        revision: next.viewRevision,
+        revision: options.observe().viewRevision,
         idempotencyKey,
         result: payload,
-      };
-      storeReplay(replay, idempotencyKey, key, args, result);
-      return result;
+      });
     } catch (error) {
-      if (error instanceof ApplyError) {
-        if (error.code === "cancelled") {
-          return {
-            ok: false,
-            revision: options.observe().viewRevision,
-            idempotencyKey,
-            error: { code: "cancelled", message: error.message },
-          };
-        }
-        return fail(error.code, error.message);
-      }
+      if (error instanceof ApplyError) return fail(error.code, error.message);
       return fail("apply-failed", errorMessage(error));
     }
   };
@@ -339,35 +484,60 @@ export function createAgentSession(
         error: { code: "cancelled", message: "execute cancelled" },
       });
     }
+    const fingerprint = executeFingerprint(key, args);
+    const mismatch = (): ExecuteResult => ({
+      ok: false,
+      revision: options.observe().viewRevision,
+      idempotencyKey,
+      error: {
+        code: "idempotency-mismatch",
+        message:
+          "idempotency key was already used for a different capability or payload",
+      },
+    });
+
     const cached = replay.get(idempotencyKey);
     if (cached) {
-      const fingerprint = executeFingerprint(key, args);
-      if (cached.fingerprint !== fingerprint) {
-        return Promise.resolve({
-          ok: false,
-          revision: options.observe().viewRevision,
-          idempotencyKey,
-          error: {
-            code: "idempotency-mismatch",
-            message:
-              "idempotency key was already used for a different capability or payload",
-          },
-        });
-      }
-      return Promise.resolve(refreshReplayResult(cached, key, options.observe));
+      if (cached.fingerprint !== fingerprint)
+        return Promise.resolve(mismatch());
+      return Promise.resolve(
+        refreshReplayResult(cached, idempotencyKey, guard)
+      );
     }
-    const running = inflight.get(idempotencyKey);
-    if (running) return running;
 
-    const pending = runExecute(
-      key,
-      args,
-      expectedRevision,
-      idempotencyKey,
-      signal
-    );
-    inflight.set(idempotencyKey, pending);
-    return pending.finally(() => {
+    // An accepted mutation keeps its identity after its result is evicted.
+    const retired = replay.retiredMutation(idempotencyKey);
+    if (retired !== undefined) {
+      if (retired !== fingerprint) return Promise.resolve(mismatch());
+      return Promise.resolve({
+        ok: false,
+        revision: options.observe().viewRevision,
+        idempotencyKey,
+        error: {
+          code: "replay-expired",
+          message:
+            "this write was already accepted; its result is no longer cached and it will not run again",
+        },
+      });
+    }
+
+    const running = inflight.get(idempotencyKey);
+    if (running) {
+      if (running.fingerprint !== fingerprint)
+        return Promise.resolve(mismatch());
+      return running.promise;
+    }
+
+    // Reserve the key before any handler can run, so a synchronous re-entry
+    // joins this execution instead of starting a second one.
+    const entry = {
+      fingerprint,
+      promise: Promise.resolve().then(() =>
+        runExecute(key, args, expectedRevision, idempotencyKey, signal)
+      ),
+    };
+    inflight.set(idempotencyKey, entry);
+    return entry.promise.finally(() => {
       inflight.delete(idempotencyKey);
     });
   };
@@ -383,6 +553,80 @@ export function createAgentSession(
   };
 }
 
+/**
+ * Re-derive a cached read against the current declaration. A replay never
+ * discloses a column, a row count or a scope the table no longer permits.
+ */
+function refreshReplayResult(
+  record: ReplayRecord,
+  idempotencyKey: string,
+  guard: SessionGuard
+): ExecuteResult {
+  const observation = guard.observe();
+  const key = record.capabilityKey;
+  if (key !== "rows.read" && key !== "columns.describe") return record.result;
+
+  const denied = (code: string, message: string): ExecuteResult => ({
+    ok: false,
+    revision: observation.viewRevision,
+    idempotencyKey,
+    error: { code, message },
+  });
+
+  if (!guard.isEnabled(key, observation)) {
+    return denied(
+      "not-wired",
+      `capability "${key}" is not wired on this table`
+    );
+  }
+  if (!record.result.ok) {
+    return { ...record.result, revision: observation.viewRevision };
+  }
+  if (key === "columns.describe") {
+    return {
+      ...record.result,
+      revision: observation.viewRevision,
+      result: { columns: observation.columns },
+    };
+  }
+
+  const body = (record.args ?? {}) as Record<string, unknown>;
+  try {
+    assertScope(body.scope as RowAddressScope | undefined, observation);
+  } catch (error) {
+    const code = error instanceof ApplyError ? error.code : "apply-failed";
+    return denied(code, errorMessage(error));
+  }
+  const window = record.result.result as RowWindow;
+  const wanted = body.columns as readonly string[] | undefined;
+  const allow = readableAllowlist(observation.columns, wanted);
+  const limit = Math.min(window.limit, readMaxOf(observation));
+  return {
+    ...record.result,
+    revision: observation.viewRevision,
+    result: projectWindow(
+      window,
+      allow,
+      observation.columns,
+      window.offset,
+      limit
+    ),
+  };
+}
+
+/**
+ * A write that stopped at approval, so nothing was applied. Anything else —
+ * including a rejected proposal — is a completed, replayable outcome.
+ */
+function unfinishedWrite(
+  payload: unknown
+): "pending" | "cancelled" | undefined {
+  if (!isWriteResult(payload) || payload.applied) return undefined;
+  if (payload.approval === "pending") return "pending";
+  if (payload.approval === "cancelled") return "cancelled";
+  return undefined;
+}
+
 function isWriteResult(value: unknown): value is WriteExecuteResult {
   if (!value || typeof value !== "object") return false;
   const record = value as Record<string, unknown>;
@@ -391,6 +635,25 @@ function isWriteResult(value: unknown): value is WriteExecuteResult {
     typeof record.applied === "boolean" &&
     typeof record.approval === "string"
   );
+}
+
+/**
+ * Keep a handler's own payload, but make the session's approval decision the
+ * authority on any write result it returned.
+ */
+function decorateWrite(
+  payload: unknown,
+  plan: CapabilityPlan,
+  approval: ApprovalOutcome
+): unknown {
+  if (!isWriteResult(payload)) return payload;
+  if (payload.approval === "cancelled") return payload;
+  return {
+    ...payload,
+    proposals:
+      payload.proposals.length > 0 ? payload.proposals : plan.proposals,
+    approval,
+  };
 }
 
 function assertApply<K extends keyof AgentApply>(
@@ -402,12 +665,36 @@ function assertApply<K extends keyof AgentApply>(
   }
 }
 
+/** Side-effect-free proposal for a built-in write. */
+async function planBuiltIn(
+  key: CapabilityKey,
+  context: AgentCapabilityContext,
+  args: unknown,
+  guard: SessionGuard
+): Promise<CapabilityPlan> {
+  const { observation, apply } = context;
+  const body = args as Record<string, unknown>;
+  switch (key) {
+    case "edit.cells":
+      return planCells(body, observation, apply, guard);
+    case "rows.add":
+      return planAdd(body);
+    case "rows.delete":
+      return planDelete(body);
+    case "rows.reorder":
+      return planReorder(body);
+    default:
+      return { proposals: [] };
+  }
+}
+
 async function dispatchBuiltIn(
   key: CapabilityKey,
   context: AgentCapabilityContext,
-  args: unknown
+  args: unknown,
+  guard: SessionGuard
 ): Promise<unknown> {
-  const { observation, apply, observe, onApprove } = context;
+  const { observation, apply } = context;
   const body = args as Record<string, unknown>;
   switch (key) {
     case "columns.describe":
@@ -474,20 +761,20 @@ async function dispatchBuiltIn(
       apply.applyView(String(body.viewId));
       return { ok: true, revision: observation.viewRevision + 1 };
     case "rows.read":
-      return readRows(body, observation, apply);
+      return readRows(body, observation, apply, guard);
     case "rows.resolve":
       return resolveRowArg(body, observation, apply);
     case "export.run":
       assertApply(apply, "runExport");
       return apply.runExport(String(body.format));
     case "edit.cells":
-      return mutateCells(body, observation, apply, observe, onApprove);
+      return applyCells(context);
     case "rows.add":
-      return mutateAdd(body, observation, apply, observe, onApprove);
+      return applyAdd(context);
     case "rows.delete":
-      return mutateDelete(body, observation, apply, observe, onApprove);
+      return applyDelete(context);
     case "rows.reorder":
-      return mutateReorder(body, observation, apply, observe, onApprove);
+      return applyReorder(context);
   }
 }
 
@@ -531,39 +818,58 @@ function assertScope(
   return resolved;
 }
 
+/**
+ * Read a row window. The allowlist comes from the CURRENT declaration and is
+ * re-derived after the host callback returns, so an over-returning callback,
+ * an undeclared column or a tightened ceiling cannot disclose data the table
+ * does not permit right now.
+ */
 async function readRows(
   body: Record<string, unknown>,
   observation: AgentObservation,
-  apply: AgentApply
+  apply: AgentApply,
+  guard: SessionGuard
 ): Promise<RowWindow> {
-  const scope = assertScope(
-    body.scope as RowAddressScope | undefined,
-    observation
-  );
-  const offset = body.offset as number;
-  const requested = body.limit as number;
-  const limit = Math.min(requested, readMaxOf(observation));
+  const requestedScope = body.scope as RowAddressScope | undefined;
+  const scope = assertScope(requestedScope, observation);
+  const readMax = readMaxOf(observation);
+  const offset = boundedInt(body.offset, 0);
+  const limit = Math.min(boundedInt(body.limit, readMax), readMax);
   const wanted = body.columns as readonly string[] | undefined;
-  const hidden = new Set(redactedIds(observation.columns));
-  const query: RowReadQuery = { offset, limit, columns: wanted, scope };
+  const allow = readableAllowlist(observation.columns, wanted);
+  const query: RowReadQuery = {
+    offset,
+    limit,
+    columns: [...allow],
+    scope,
+  };
   const window = apply.readRows
     ? await Promise.resolve(apply.readRows(query))
-    : { rows: [], offset, limit, redacted: [...hidden] };
-  const rows = window.rows.map((row) => {
-    const cells: Record<string, unknown> = {};
-    for (const [id, value] of Object.entries(row.cells)) {
-      if (hidden.has(id)) continue;
-      if (wanted && !wanted.includes(id)) continue;
-      cells[id] = value;
-    }
-    return { rowKey: row.rowKey, cells };
-  });
-  return {
-    rows,
-    offset: window.offset,
-    limit: window.limit,
-    redacted: [...hidden],
-  };
+    : { rows: [], offset, limit, redacted: redactedIds(observation.columns) };
+
+  // The awaited callback is a boundary: re-authorize before disclosing.
+  const latest = guard.observe();
+  if (latest.viewRevision !== observation.viewRevision) {
+    throw new ApplyError(
+      "revision-mismatch",
+      `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+    );
+  }
+  if (!guard.isEnabled("rows.read", latest)) {
+    throw new ApplyError(
+      "not-wired",
+      `capability "rows.read" is not wired on this table`
+    );
+  }
+  assertScope(requestedScope, latest);
+  const permitted = Math.min(limit, readMaxOf(latest));
+  return projectWindow(
+    window,
+    readableAllowlist(latest.columns, wanted),
+    latest.columns,
+    offset,
+    permitted
+  );
 }
 
 function isRowKeyRef(
@@ -623,13 +929,12 @@ async function resolveRowArg(
 }
 
 async function decideApproval(
-  key: string,
+  definition: AgentCapabilityDefinition,
   observation: AgentObservation,
   proposal: unknown,
-  onApprove: ((proposal: unknown) => Promise<boolean>) | undefined,
-  registry: ReturnType<typeof createCapabilityRegistry>
+  onApprove: ((proposal: unknown) => Promise<boolean>) | undefined
 ): Promise<ApprovalOutcome> {
-  if (!needsApproval(key, approvalOf(observation), registry)) {
+  if (!needsApproval(definition, approvalOf(observation))) {
     return "not-required";
   }
   if (!onApprove) return "pending";
@@ -675,18 +980,23 @@ function writePayload(
   return { proposals, applied, approval, results };
 }
 
-async function mutateCells(
+interface CellEdit {
+  rowKey: string;
+  column: string;
+  value: unknown;
+}
+
+async function planCells(
   body: Record<string, unknown>,
   observation: AgentObservation,
   apply: AgentApply,
-  observe: () => AgentObservation,
-  onApprove?: (proposal: unknown) => Promise<boolean>
-): Promise<WriteExecuteResult> {
+  guard: SessionGuard
+): Promise<CapabilityPlan> {
   const edits = body.edits as Record<string, unknown>[];
   if (!Array.isArray(edits) || edits.length === 0) {
     throw new ApplyError("invalid-arguments", "at least one edit is required");
   }
-  const resolved: { rowKey: string; column: string; value: unknown }[] = [];
+  const resolved: CellEdit[] = [];
   const proposals: WriteProposal[] = [];
   for (const edit of edits) {
     if (typeof edit.column !== "string") {
@@ -700,6 +1010,15 @@ async function mutateCells(
       apply
     );
     const before = await peekCell(apply, observation, row.rowKey, edit.column);
+    // resolveRow and the peek both awaited host code.
+    const latest = guard.observe();
+    if (latest.viewRevision !== observation.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+      );
+    }
+    writableColumn(latest.columns, edit.column);
     resolved.push({
       rowKey: row.rowKey,
       column: edit.column,
@@ -712,35 +1031,43 @@ async function mutateCells(
       after: edit.value,
     });
   }
-  return finishWrite(
-    "edit.cells",
-    observation,
-    proposals,
-    observe,
-    onApprove,
-    async () => {
-      const commit = commitOf(observation);
-      if (commit === "stage") {
-        if (!apply.stageCells) {
-          return {
-            applied: false,
-            results: resolved.map((edit) => ({
-              rowKey: edit.rowKey,
-              column: edit.column,
-              ok: true,
-            })),
-          };
-        }
-        await Promise.resolve(apply.stageCells(resolved));
-        return { applied: true };
-      }
-      if (!apply.editCells) {
-        throw new ApplyError("not-wired", "editCells is not wired");
-      }
-      return applyEach(resolved, async (edit) => {
-        await Promise.resolve(apply.editCells?.([edit]));
-      });
+  return { proposals, payload: resolved };
+}
+
+async function applyCells(
+  context: AgentCapabilityContext
+): Promise<WriteExecuteResult> {
+  const { observation, apply, plan } = context;
+  const resolved = (plan?.payload ?? []) as CellEdit[];
+  const proposals = plan?.proposals ?? [];
+  const commit = context.commit ?? commitOf(observation);
+  if (commit === "stage") {
+    if (!apply.stageCells) {
+      return writePayload(
+        proposals,
+        false,
+        "not-required",
+        resolved.map((edit) => ({
+          rowKey: edit.rowKey,
+          column: edit.column,
+          ok: true,
+        }))
+      );
     }
+    await Promise.resolve(apply.stageCells(resolved));
+    return writePayload(proposals, true, "not-required");
+  }
+  if (!apply.editCells) {
+    throw new ApplyError("not-wired", "editCells is not wired");
+  }
+  const outcome = await applyEach(resolved, async (edit) => {
+    await Promise.resolve(apply.editCells?.([edit]));
+  });
+  return writePayload(
+    proposals,
+    outcome.applied,
+    "not-required",
+    outcome.results
   );
 }
 
@@ -770,127 +1097,73 @@ async function peekCell(
   return undefined;
 }
 
-async function mutateAdd(
-  body: Record<string, unknown>,
-  observation: AgentObservation,
-  apply: AgentApply,
-  observe: () => AgentObservation,
-  onApprove?: (proposal: unknown) => Promise<boolean>
-): Promise<WriteExecuteResult> {
-  assertImmediateCommit("rows.add", observation);
+function planAdd(body: Record<string, unknown>): CapabilityPlan {
   const rows = body.rows as Record<string, unknown>[];
   const proposals: WriteProposal[] = rows.map((row, index) => ({
     rowKey:
       typeof row.rowKey === "string" ? row.rowKey : `new:${String(index + 1)}`,
     after: row,
   }));
-  return finishWrite(
-    "rows.add",
-    observation,
-    proposals,
-    observe,
-    onApprove,
-    async () => {
-      assertApply(apply, "addRows");
-      await Promise.resolve(apply.addRows(rows));
-      return { applied: true };
-    }
-  );
+  return { proposals, payload: rows };
 }
 
-async function mutateDelete(
-  body: Record<string, unknown>,
-  observation: AgentObservation,
-  apply: AgentApply,
-  observe: () => AgentObservation,
-  onApprove?: (proposal: unknown) => Promise<boolean>
+async function applyAdd(
+  context: AgentCapabilityContext
 ): Promise<WriteExecuteResult> {
-  assertImmediateCommit("rows.delete", observation);
+  const { apply, plan } = context;
+  const rows = (plan?.payload ?? []) as Record<string, unknown>[];
+  assertApply(apply, "addRows");
+  await Promise.resolve(apply.addRows(rows));
+  return writePayload(plan?.proposals ?? [], true, "not-required");
+}
+
+function planDelete(body: Record<string, unknown>): CapabilityPlan {
   const keys = body.keys as string[];
   const proposals: WriteProposal[] = keys.map((rowKey) => ({ rowKey }));
-  return finishWrite(
-    "rows.delete",
-    observation,
-    proposals,
-    observe,
-    onApprove,
-    async () => {
-      assertApply(apply, "deleteRows");
-      return applyEach(
-        keys.map((rowKey) => ({ rowKey })),
-        async (entry) => {
-          await Promise.resolve(apply.deleteRows?.([entry.rowKey]));
-        }
-      );
+  return { proposals, payload: keys };
+}
+
+async function applyDelete(
+  context: AgentCapabilityContext
+): Promise<WriteExecuteResult> {
+  const { apply, plan } = context;
+  const keys = (plan?.payload ?? []) as string[];
+  assertApply(apply, "deleteRows");
+  const outcome = await applyEach(
+    keys.map((rowKey) => ({ rowKey })),
+    async (entry) => {
+      await Promise.resolve(apply.deleteRows?.([entry.rowKey]));
     }
+  );
+  return writePayload(
+    plan?.proposals ?? [],
+    outcome.applied,
+    "not-required",
+    outcome.results
   );
 }
 
-async function mutateReorder(
-  body: Record<string, unknown>,
-  observation: AgentObservation,
-  apply: AgentApply,
-  observe: () => AgentObservation,
-  onApprove?: (proposal: unknown) => Promise<boolean>
-): Promise<WriteExecuteResult> {
-  assertImmediateCommit("rows.reorder", observation);
+function planReorder(body: Record<string, unknown>): CapabilityPlan {
   const fromKey = String(body.fromKey);
   const toKey = String(body.toKey);
   const proposals: WriteProposal[] = [
     { rowKey: fromKey, after: toKey },
     { rowKey: toKey, before: fromKey },
   ];
-  return finishWrite(
-    "rows.reorder",
-    observation,
-    proposals,
-    observe,
-    onApprove,
-    async () => {
-      assertApply(apply, "reorderRows");
-      await Promise.resolve(apply.reorderRows(fromKey, toKey));
-      return { applied: true };
-    }
-  );
+  return { proposals, payload: { fromKey, toKey } };
 }
 
-async function finishWrite(
-  key: CapabilityKey,
-  observation: AgentObservation,
-  proposals: readonly WriteProposal[],
-  observe: () => AgentObservation,
-  onApprove: ((proposal: unknown) => Promise<boolean>) | undefined,
-  applyWrite: () => Promise<{
-    applied: boolean;
-    results?: readonly WriteRowResult[];
-  }>
+async function applyReorder(
+  context: AgentCapabilityContext
 ): Promise<WriteExecuteResult> {
-  const approval = await decideApproval(
-    key,
-    observation,
-    proposals,
-    onApprove,
-    sessionRegistryRef.current!
-  );
-  if (approval === "pending" || approval === "rejected") {
-    return writePayload(proposals, false, approval);
-  }
-  const latest = observe();
-  if (latest.viewRevision !== observation.viewRevision) {
-    throw new ApplyError(
-      "revision-mismatch",
-      `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
-    );
-  }
-  try {
-    const outcome = await applyWrite();
-    return writePayload(proposals, outcome.applied, approval, outcome.results);
-  } catch (error) {
-    if (error instanceof BulkFailure) {
-      return writePayload(proposals, false, approval, error.results);
-    }
-    throw error;
-  }
+  const { apply, plan } = context;
+  const { fromKey, toKey } = (plan?.payload ?? {}) as {
+    fromKey: string;
+    toKey: string;
+  };
+  assertApply(apply, "reorderRows");
+  await Promise.resolve(apply.reorderRows(fromKey, toKey));
+  return writePayload(plan?.proposals ?? [], true, "not-required");
 }
 
 class BulkFailure extends Error {

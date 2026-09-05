@@ -1,6 +1,6 @@
+import { enabledBuiltInKeys } from "./capabilities/enabled";
 import { AGENT_SCHEMA_VERSION, type CapabilityKey } from "./keys";
 import type { AgentManifest, AgentObservation } from "./types";
-import { enabledBuiltInKeys } from "./capabilities/enabled";
 
 /**
  * Which built-in capabilities this observation actually wires.

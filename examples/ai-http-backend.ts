@@ -5,12 +5,15 @@
  * protocol from `@adapttable/ai/http`. This file is the supported example
  * that the showcase "Connect backend" mode talks to.
  *
- *   cp examples/ai-http-backend.env.example examples/.env.ai-http
+ * Needs Node 22.6+ (TypeScript runs through --experimental-strip-types) and
+ * `pnpm install` at the repository root.
+ *
+ *   cp -n examples/ai-http-backend.env.example examples/.env.ai-http
  *   # fill AGENT_PROVIDER + the matching API key
  *   pnpm --filter @adapttable/examples ai-http
  */
 import { randomBytes, timingSafeEqual } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import {
   createServer,
   type IncomingMessage,
@@ -27,28 +30,14 @@ import {
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
 
-function applyEnvLine(line: string): void {
-  const trimmed = line.trim();
-  if (!trimmed || trimmed.startsWith("#")) return;
-  const eq = trimmed.indexOf("=");
-  if (eq <= 0) return;
-  const key = trimmed.slice(0, eq).trim();
-  let value = trimmed.slice(eq + 1).trim();
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    value = value.slice(1, -1);
-  }
-  if (process.env[key] !== undefined) return;
-  process.env[key] = value;
-}
-
+/**
+ * Read one `.env` file with Node's own parser. A variable already present in
+ * the real environment wins, so nothing a file says can override what the
+ * shell, the container or the CI runner set.
+ */
 function loadEnvFile(path: string): void {
   if (!existsSync(path)) return;
-  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
-    applyEnvLine(line);
-  }
+  process.loadEnvFile(path);
 }
 
 function moduleDir(): string | undefined {
@@ -61,6 +50,16 @@ function moduleDir(): string | undefined {
   }
 }
 
+/**
+ * Env precedence, highest first:
+ *
+ * 1. the real process environment — never overwritten by any file;
+ * 2. `AGENT_ENV_FILE`, when it names a file;
+ * 3. `.env.ai-http` beside this example;
+ * 4. `.env` in the working directory.
+ *
+ * Earlier files win over later ones, because a key already set is kept.
+ */
 function loadAgentEnv(): void {
   const explicit = process.env.AGENT_ENV_FILE;
   if (explicit) loadEnvFile(resolve(explicit));
@@ -394,22 +393,22 @@ export function completeForProvider(provider: string): ExampleComplete {
     );
 }
 
-function providerReady(provider: string): string | undefined {
-  if (provider === "anthropic" && !process.env.ANTHROPIC_API_KEY) {
-    return "ANTHROPIC_API_KEY is missing";
-  }
-  if (provider === "gemini" && !process.env.GEMINI_API_KEY) {
-    return "GEMINI_API_KEY is missing";
-  }
-  if (provider === "deepseek" && !process.env.DEEPSEEK_API_KEY) {
-    return "DEEPSEEK_API_KEY is missing";
-  }
-  if (provider === "openai" && !process.env.OPENAI_API_KEY) {
-    return "OPENAI_API_KEY is missing";
-  }
-  if (!["openai", "anthropic", "gemini", "deepseek"].includes(provider)) {
+const PROVIDER_KEY_VAR: Readonly<Record<string, string>> = {
+  openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  gemini: "GEMINI_API_KEY",
+  deepseek: "DEEPSEEK_API_KEY",
+};
+
+function providerReady(
+  provider: string,
+  env: NodeJS.ProcessEnv = process.env
+): string | undefined {
+  const keyVar = PROVIDER_KEY_VAR[provider];
+  if (!keyVar) {
     return `unsupported AGENT_PROVIDER "${provider}". Add an adapter in completeForProvider.`;
   }
+  if (!env[keyVar]) return `${keyVar} is missing`;
   return undefined;
 }
 
@@ -466,7 +465,45 @@ export function exampleRequiresToken(host: string, token: string): boolean {
   return !isLoopbackHost(host) && token === "";
 }
 
+/**
+ * Check the numbers and names this server was configured with, so a typo
+ * fails at startup with the variable's name instead of a random port or a
+ * provider call that never had a key.
+ *
+ * @public
+ */
+export function exampleConfigError(env: NodeJS.ProcessEnv): string | undefined {
+  const port = env.AGENT_PORT;
+  if (port !== undefined && !isPort(port)) {
+    return `AGENT_PORT must be a whole number between 1 and 65535, got "${port}"`;
+  }
+  const maxBody = env.AGENT_MAX_BODY;
+  if (maxBody !== undefined && !isPositiveInt(maxBody)) {
+    return `AGENT_MAX_BODY must be a positive whole number of bytes, got "${maxBody}"`;
+  }
+  if (env.AGENT_HOST?.trim() === "") {
+    return "AGENT_HOST is empty. Remove it to bind 127.0.0.1, or name a host.";
+  }
+  if (env.AGENT_MODEL?.trim() === "") {
+    return `AGENT_MODEL is empty. Remove it to use this provider's default.`;
+  }
+  return providerReady((env.AGENT_PROVIDER ?? "openai").toLowerCase(), env);
+}
+
+function isPort(value: string): boolean {
+  return isPositiveInt(value) && Number(value) <= 65_535;
+}
+
+function isPositiveInt(value: string): boolean {
+  return /^\d+$/.test(value.trim()) && Number(value) > 0;
+}
+
 function start(): void {
+  const configError = exampleConfigError(process.env);
+  if (configError) {
+    console.error(configError);
+    process.exit(1);
+  }
   const token = process.env.AGENT_HTTP_TOKEN ?? "";
   if (exampleRequiresToken(HOST, token)) {
     console.error(

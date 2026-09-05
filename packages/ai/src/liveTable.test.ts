@@ -1,19 +1,24 @@
 import {
-  createTableEngine,
   createNeutralTable,
+  createTableEngine,
   revisionToken,
 } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
 import {
   agentColumnsFromNeutral,
+  observationFromNeutral,
   readRowsFromNeutral,
   resolveRowFromNeutral,
   rowAddressScopeForNeutral,
   transportCellValue,
 } from "./liveTable";
 
-type Row = { id: string; name: string; team: string };
+interface Row {
+  id: string;
+  name: string;
+  team: string;
+}
 
 const COLUMNS = [
   { key: "name", header: "Name", sortable: true },
@@ -140,6 +145,27 @@ describe("liveTable bridge", () => {
     expect(window.redacted).toContain("team");
     expect(window.rows[0]?.cells.team).toBeUndefined();
     expect(window.rows[0]?.cells.name).toBe("Ada");
+  });
+
+  it("advertises edit when the neutral binding wires editCells", () => {
+    const neutral = createNeutralTable(
+      createTableEngine({
+        data: [{ id: "1", name: "Ada", team: "ops" }],
+        columns: COLUMNS,
+        rowKey: (row) => row.id,
+      }),
+      "demo",
+      { operations: () => ({ editCells: true, setFilters: true }) }
+    );
+    const observation = observationFromNeutral(
+      neutral,
+      { tableId: "demo" },
+      1,
+      {},
+      ["editing", "filters"]
+    );
+    expect(observation.hasEdit).toBe(true);
+    expect(observation.hasFilters).toBe(true);
   });
 
   it("resolves computed and nested values through the engine cell path", () => {

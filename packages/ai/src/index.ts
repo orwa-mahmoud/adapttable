@@ -8,6 +8,7 @@
  *
  * @packageDocumentation
  */
+export { openAiToolNameMap } from "./capabilities/registry";
 export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,
@@ -18,7 +19,6 @@ export {
   type RowAddressScope,
   type WritePolicy,
 } from "./keys";
-export { openAiToolNameMap } from "./capabilities/registry";
 export { buildManifest, enabledKeys } from "./manifest";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
 export type {
@@ -35,6 +35,8 @@ export type {
   AgentSession,
   ApprovalOutcome,
   CapabilityGuide,
+  CapabilityPlan,
+  CapabilityStaging,
   CatalogEntry,
   ExecuteError,
   ExecuteResult,

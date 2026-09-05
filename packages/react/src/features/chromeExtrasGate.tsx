@@ -5,13 +5,13 @@
  * Empty slots pass chrome through unchanged, so the lean table never
  * imports those modules.
  */
+import { createNeutralTable } from "@adapttable/core";
 import type { ReactNode } from "react";
 import { useRef } from "react";
 
-import { createNeutralTable } from "@adapttable/core";
+import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
 import type { BaseDataTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
-import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
 import {
   FeatureSlot,
   useFeatureSlotFilled,
@@ -168,6 +168,18 @@ function RuntimePublisher<TRow>({
     visibleRows: () => renderedRows,
     operations: () => deriveRuntimeOperations(runtimeView),
   };
+
+  // The neutral table is created once and keeps whatever binding object it was
+  // handed, so it is handed a stable one that reads the CURRENT render's
+  // binding on every call. Passing `bindingRef.current` directly would freeze
+  // the first render's view, and a capability the host later turns off — or on
+  // — would never reach the agent.
+  const liveBindingRef = useRef({
+    visibleRows: (): readonly TRow[] =>
+      bindingRef.current.visibleRows?.() ?? [],
+    operations: (): Readonly<Record<string, boolean>> =>
+      bindingRef.current.operations?.() ?? {},
+  });
   const neutralRef = useRef<ReturnType<typeof createNeutralTable<TRow>> | null>(
     null
   );
@@ -175,7 +187,7 @@ function RuntimePublisher<TRow>({
     neutralRef.current = createNeutralTable(
       engine,
       engine.tableId,
-      bindingRef.current
+      liveBindingRef.current
     );
   }
   const neutralTable = engine ? (neutralRef.current ?? undefined) : undefined;
