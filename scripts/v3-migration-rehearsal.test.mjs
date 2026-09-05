@@ -47,6 +47,7 @@ describe("v3 migration fixtures", () => {
       assert.match(v3, new RegExp(`from "@adapttable/${kit}/export"`));
       assert.match(v3, new RegExp(`from "@adapttable/${kit}/grouping"`));
       assert.match(v3, new RegExp(`from "@adapttable/${kit}/editing"`));
+      assert.match(v3, /from "@adapttable\/react"/);
       assert.doesNotMatch(v3, /standardFeatures|enableColumnMenu|groupBy=/);
     }
   });
@@ -69,8 +70,8 @@ describe("v3 migration fixtures", () => {
     );
   });
 
-  it("headless consumers stay on core prop-getters", () => {
-    assert.match(HEADLESS_V3, /from "@adapttable\/core"/);
+  it("headless consumers stay on react prop-getters", () => {
+    assert.match(HEADLESS_V3, /from "@adapttable\/react"/);
     assert.match(HEADLESS_V3, /useDataTable/);
     assert.doesNotMatch(HEADLESS_V3, /@adapttable\/(mui|mantine|antd)/);
   });

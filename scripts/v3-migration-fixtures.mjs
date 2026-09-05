@@ -99,7 +99,7 @@ export const V3Preset = () => (
  * cell editing — nothing else.
  */
 export function v3MinimalApp(kit) {
-  return String.raw`import type { TableFeature } from "@adapttable/core";
+  return String.raw`import type { TableFeature } from "@adapttable/react";
 import type { ColumnDef } from "@adapttable/${kit}";
 import { DataTable } from "@adapttable/${kit}";
 import { columnMenu } from "@adapttable/${kit}/column-menu";
@@ -179,8 +179,8 @@ ${probes}
 }
 
 /** Headless consumers keep the same three-prop engine. Kit-free. */
-export const HEADLESS_V3 = String.raw`import type { ColumnDef } from "@adapttable/core";
-import { useDataTable, useFrontendData } from "@adapttable/core";
+export const HEADLESS_V3 = String.raw`import type { ColumnDef } from "@adapttable/react";
+import { useDataTable, useFrontendData } from "@adapttable/react";
 
 type Row = { id: string; name: string };
 const rows: Row[] = [{ id: "1", name: "Ada" }];

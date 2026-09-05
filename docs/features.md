@@ -26,7 +26,7 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 61–70 kB gzipped and carries the base contract —
+An adapter's `DataTable` is 63–72 kB gzipped and carries the base contract —
 responsive rendering, loading, error and empty states, accessibility, sorting,
 search and pagination. Everything else arrives with its own entry.
 
@@ -114,8 +114,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 61 kB gzipped and the same table with
-`standardFeatures()` composed is 112 kB.
+Measured on MUI, the table alone is 63 kB gzipped and the same table with
+`standardFeatures()` composed is 114 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 

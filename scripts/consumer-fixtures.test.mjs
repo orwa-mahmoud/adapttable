@@ -78,5 +78,12 @@ describe("consumer fixtures", () => {
     assert.ok(
       FIXTURES.some((fixture) => fixture.name === "core · simple table")
     );
+    assert.ok(
+      FIXTURES.some((fixture) => fixture.name === "react · simple table")
+    );
+    const editing = FIXTURES.find(
+      (fixture) => fixture.name === "mui · + editing"
+    );
+    assert.ok(editing?.code.includes("export { editing }"));
   });
 });

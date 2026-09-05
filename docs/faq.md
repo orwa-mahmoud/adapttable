@@ -177,11 +177,11 @@ zero UI-kit dependencies.
 Measured 2026-09-02 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
-| What you import                           | min+gzip  |
-| ----------------------------------------- | --------- |
-| `useFrontendData` + `useDataTable` (core) | ~19 kB    |
-| every core export                         | ~83 kB    |
-| `DataTable` from an adapter               | ~61–70 kB |
+| What you import                            | min+gzip  |
+| ------------------------------------------ | --------- |
+| `useFrontendData` + `useDataTable` (react) | ~21 kB    |
+| every core export                          | ~50 kB    |
+| `DataTable` from an adapter                | ~63–72 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters

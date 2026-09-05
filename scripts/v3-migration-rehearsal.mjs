@@ -187,6 +187,7 @@ function main() {
       react: "18.3.1",
       "react-dom": "18.3.1",
       "@adapttable/core": `file:${tarballs["@adapttable/core"]}`,
+      "@adapttable/react": `file:${tarballs["@adapttable/react"]}`,
       "@adapttable/cli": `file:${tarballs["@adapttable/cli"]}`,
     },
     { "headless.tsx": HEADLESS_V3 }
@@ -206,6 +207,7 @@ function main() {
       react: "18.3.1",
       "react-dom": "18.3.1",
       "@adapttable/core": `file:${tarballs["@adapttable/core"]}`,
+      "@adapttable/react": `file:${tarballs["@adapttable/react"]}`,
       [kitPkg]: `file:${tarballs[kitPkg]}`,
       ...KIT_PEERS[kit],
     };
@@ -239,7 +241,7 @@ function main() {
     process.exit(1);
   }
   const rewritten = readFileSync(rich, "utf8");
-  if (!rewritten.includes("@adapttable/core/adapter")) {
+  if (!rewritten.includes("@adapttable/react/adapter")) {
     console.error("\n✗ migrate-v3 did not move headerGroupRows to /adapter");
     process.exit(1);
   }

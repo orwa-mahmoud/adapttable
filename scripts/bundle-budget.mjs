@@ -175,8 +175,8 @@ export async function provePlantedLeak(dir) {
 const PUBLISHED = [
   {
     doc: "docs/faq.md",
-    find: "| `useFrontendData` + `useDataTable` (core)",
-    from: ["core · simple table"],
+    find: "| `useFrontendData` + `useDataTable` (react)",
+    from: ["react · simple table"],
   },
   {
     doc: "docs/faq.md",

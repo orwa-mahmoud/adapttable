@@ -8,7 +8,7 @@ import { exportedNames, missingNames, NAMEABLE } from "./packed-names.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 /** An installed `@adapttable/<pkg>` maps to `packages/<dir>` in the tree. */
-const DIRS = { core: "core", shadcn: "adapter-shadcn" };
+const DIRS = { core: "core", react: "react", shadcn: "adapter-shadcn" };
 const distOf = (pkg) => join(REPO_ROOT, "packages", DIRS[pkg], "dist");
 
 /** The shape a rolled-up entry ends with: one long export block. */
@@ -93,7 +93,7 @@ describe("the built declarations honour NAMEABLE", () => {
     );
   }
 
-  const sparkline = join(distOf("core"), "sparkline.d.ts");
+  const sparkline = join(distOf("react"), "sparkline.d.ts");
   it(
     "and the reader is strict enough to fail",
     { skip: !existsSync(sparkline) },

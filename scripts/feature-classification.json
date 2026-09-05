@@ -548,7 +548,7 @@
     }
   },
   "frameworkBoundary": {
-    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React and no React-coupled package. A vendor namespace is not a framework boundary — a framework-neutral dependency such as `@tanstack/virtual-core` is ordinary engine code, while `@tanstack/react-virtual` is React-coupled and belongs to the binding side. React lives in the binding layer (hooks, Chrome, focus). Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a React-coupled import.",
+    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React and no React-coupled package. A vendor namespace is not a framework boundary — a framework-neutral dependency such as `@tanstack/virtual-core` is ordinary engine code, while `@tanstack/react-virtual` is React-coupled and belongs to the binding side. React lives in the binding layer (hooks, Chrome, focus). Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a React-coupled import. Shipped neutral entrypoints are walked transitively through dist.",
     "forbiddenImports": [
       "react",
       "react-dom",
@@ -556,6 +556,31 @@
       "react-dom/*",
       "react-compiler-runtime",
       "@tanstack/react-*"
+    ],
+    "forbiddenReach": [
+      "react",
+      "react-dom",
+      "react-compiler-runtime",
+      "@adapttable/react"
+    ],
+    "neutralEntrypoints": [
+      {
+        "pkg": "core",
+        "subpaths": [
+          ".",
+          "./query",
+          "./pivot",
+          "./stream",
+          "./formula",
+          "./xlsx",
+          "./pdf"
+        ]
+      },
+      { "pkg": "server", "subpaths": ["."] },
+      {
+        "pkg": "ai",
+        "subpaths": [".", "./json", "./openai", "./mcp"]
+      }
     ],
     "engineModules": [
       "core/src/actions/commandRegistry.ts",
@@ -751,9 +776,9 @@
         "id": "main-entry-aliases",
         "removes": "72 adapter-machinery aliases re-exported from the main entry",
         "v2Path": "import { headerGroupRows } from \"@adapttable/core\"",
-        "v3Path": "import { headerGroupRows } from \"@adapttable/core/adapter\"",
+        "v3Path": "import { headerGroupRows } from \"@adapttable/react/adapter\"",
         "packages": ["@adapttable/core"],
-        "warnedBy": "removed — @adapttable/core/adapter is the only route",
+        "warnedBy": "removed — @adapttable/react/adapter is the only route",
         "test": "scripts/layer-fixtures.mjs — adapter probes reach every moved name and removedAliasProbe rejects each from the main entry",
         "names": [
           "COLUMN_GROUP_ID_SEP",

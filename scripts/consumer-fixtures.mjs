@@ -115,17 +115,14 @@ const CORE_FIXTURES = [
     kind: "core",
     pkg: "core",
     budgetKB: 20,
-    code: `export { useFrontendData, useDataTable } from "PKG";`,
+    code: `export { createTableEngine } from "PKG";`,
+    present: ["createTableEngine"],
     absent: [
       "toCsv",
       "Blob",
       "download",
       "virtual",
-      "PIVOT_BLANK",
-      "parseFormula",
       "useRowPatchStream",
-      "useChangedCellFlash",
-      "GROUPING_COLUMN_DND_MIME",
       "grouping-drop-zone",
     ],
   },
@@ -135,22 +132,7 @@ const CORE_FIXTURES = [
     pkg: "core",
     budgetKB: 93,
     code: `export * from "PKG";`,
-    absent: [
-      "PIVOT_BLANK",
-      "parseFormula",
-      "useRowPatchStream",
-      "useChangedCellFlash",
-      "GROUPING_COLUMN_DND_MIME",
-      "grouping-drop-zone",
-    ],
-  },
-  {
-    name: "core · grouping panel",
-    kind: "core",
-    pkg: "core",
-    entryFile: "features.js",
-    budgetKB: 12,
-    code: `export { groupingPanel } from "PKG";`,
+    absent: ["useRowPatchStream", "grouping-drop-zone"],
   },
   {
     name: "core · pivot",
@@ -159,14 +141,6 @@ const CORE_FIXTURES = [
     entryFile: "pivot.js",
     budgetKB: 5,
     code: `export { pivot } from "PKG";`,
-  },
-  {
-    name: "core · pivot rendered",
-    kind: "core",
-    pkg: "core",
-    entryFile: "pivot.js",
-    budgetKB: 6,
-    code: `export { pivot, pivotTableModel } from "PKG";`,
   },
   {
     name: "core · formula",
@@ -182,7 +156,8 @@ const CORE_FIXTURES = [
     pkg: "core",
     entryFile: "stream.js",
     budgetKB: 5,
-    code: `export { useRowPatchStream } from "PKG";`,
+    code: `export { openRowPatchStream, parseRowPatchFrame } from "PKG";`,
+    absent: ["useState", "useRowPatchStream"],
   },
   {
     name: "core · query",
@@ -206,6 +181,44 @@ const CORE_FIXTURES = [
     budgetKB: 2,
     code: `export { parseTableQuery } from "PKG";`,
     absent: ["useState", "PIVOT_BLANK", "toCsv"],
+  },
+];
+
+const REACT_FIXTURES = [
+  {
+    name: "react · simple table",
+    kind: "react",
+    pkg: "react",
+    budgetKB: 35,
+    code: `export { useFrontendData, useDataTable } from "PKG";`,
+    present: ["useDataTable", "useFrontendData"],
+    absent: ["grouping-drop-zone"],
+  },
+  {
+    name: "react · grouping panel",
+    kind: "react",
+    pkg: "react",
+    entryFile: "features.js",
+    budgetKB: 12,
+    code: `export { groupingPanel } from "PKG";`,
+    present: ["groupingPanel"],
+  },
+  {
+    name: "react · pivot rendered",
+    kind: "react",
+    pkg: "react",
+    entryFile: "pivot.js",
+    budgetKB: 8,
+    code: `export { pivotTableModel } from "PKG";`,
+  },
+  {
+    name: "react · stream hook",
+    kind: "react",
+    pkg: "react",
+    entryFile: "stream.js",
+    budgetKB: 6,
+    code: `export { useRowPatchStream } from "PKG";`,
+    present: ["useRowPatchStream"],
   },
 ];
 
@@ -250,6 +263,7 @@ function featureDeltaFixtures() {
   return uniqueFeatureSubpaths().map((subpath) => {
     const marker = FEATURE_MARKERS[subpath];
     const present = marker ? [marker] : [];
+    const namedImport = subpath === "editing";
     return {
       name: `${DELTA_KIT} · + ${subpath}`,
       kind: "feature-delta",
@@ -257,7 +271,9 @@ function featureDeltaFixtures() {
       pkg,
       alsoEntryFile: `${subpath}.js`,
       budgetKB: 160,
-      code: `export { DataTable } from "PKG";\nexport * from "ALSO";`,
+      code: namedImport
+        ? `export { DataTable } from "PKG";\nexport { editing } from "ALSO";`
+        : `export { DataTable } from "PKG";\nexport * from "ALSO";`,
       present,
       absent: absentExcept(present),
     };
@@ -326,6 +342,7 @@ function allFeatureFixture() {
 
 export const FIXTURES = [
   ...CORE_FIXTURES,
+  ...REACT_FIXTURES,
   ...adapterBaseFixtures(),
   ...presetFixtures(),
   ...featureDeltaFixtures(),
@@ -343,7 +360,7 @@ export function plantedLeakFixture(root = ROOT) {
     kind: "planted-leak",
     pkg: "adapter-antd",
     code: `export { DataTable } from "PKG";\nexport { useTableEditHistory } from ${JSON.stringify(
-      join(root, "packages/core/dist/index.js")
+      join(root, "packages/react/dist/index.js")
     )};`,
     absent: ["useTableEditHistory"],
   };

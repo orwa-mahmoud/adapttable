@@ -11,7 +11,8 @@ framework-neutral engine — models, sort, filter, page, revisions — lives in
 pnpm add @adapttable/react @adapttable/core
 ```
 
-Requires Node.js **22.12.0 or newer** and React 18 or 19.
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Requires React 18 or 19.
 
 ## Usage
 

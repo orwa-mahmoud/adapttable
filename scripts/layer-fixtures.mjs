@@ -163,8 +163,8 @@ export const CUSTOMIZATION = String.raw`// The renderer types come from @adaptta
 import type {
   MobileCardRenderer,
   RowActionsRenderer,
-  ToolbarSlots,
 } from "@adapttable/core";
+import type { ToolbarSlots } from "@adapttable/react";
 import type {
   ColumnDef,
   DataTableClassNames,
@@ -186,7 +186,7 @@ const slots: DataTableSlots = {
   empty: <p>Nothing here yet</p>,
   noResults: <p>No match</p>,
   skeleton: <p>Loading…</p>,
-  error: (state) => <p role="alert">{String(state.error)}</p>,
+  error: (state: { error: unknown }) => <p role="alert">{String(state.error)}</p>,
 };
 
 /** Per-node classes: unstyled and shadcn publish a key for every part. */
@@ -203,7 +203,7 @@ const toolbarSlots: ToolbarSlots = { end: <button type="button">Mine</button> };
 const renderCard: MobileCardRenderer<Row> = (_row, card) => (
   <article>
     {card.fields.map((field) => (
-      <p key={field.column.key}>{field.value}</p>
+      <p key={field.column.key}>{String(field.value)}</p>
     ))}
   </article>
 );
@@ -245,11 +245,10 @@ export type PanelProps = SavedViewsPanelProps;
 /** A source, the prop-getters, caller overrides, fully custom markup. */
 export const HEADLESS = String.raw`import type {
   ColumnDef,
-  Props,
-  TableSource,
   UseDataTableResult,
-} from "@adapttable/core";
-import { useDataTable, useFrontendData } from "@adapttable/core";
+} from "@adapttable/react";
+import type { Props, TableSource } from "@adapttable/core";
+import { useDataTable, useFrontendData } from "@adapttable/react";
 
 type Row = { id: string; name: string; city: string };
 const rows: Row[] = [{ id: "1", name: "Alpha", city: "Dubai" }];
@@ -313,7 +312,7 @@ export function Headless() {
  * They used to be read out of `mainEntryAliases.ts`; v3 deleted that module,
  * and the list is now closed — nothing joins a set of removals that already
  * happened. What the probes check is the other half of the promise: every one
- * of them still ships from `@adapttable/core/adapter`, which is the import a
+ * of them still ships from `@adapttable/react/adapter`, which is the import a
  * host moves to.
  */
 export function movedAliases(manifest) {
@@ -344,7 +343,7 @@ export function aliasTypeProbe({ types, values }) {
     "import {",
     ...types.map((name) => `  type ${name},`),
     ...values.map((name) => `  ${name},`),
-    '} from "@adapttable/core/adapter";',
+    '} from "@adapttable/react/adapter";',
     "",
     "type Row = { id: string };",
     "",
@@ -361,26 +360,45 @@ export function aliasTypeProbe({ types, values }) {
   ].join("\n");
 }
 
+/** React hooks and types must fail from the packed core main entry. */
+export function removedFromCoreMainProbe() {
+  return [
+    `// @ts-expect-error v3 moved useDataTable to @adapttable/react`,
+    `import { useDataTable } from "@adapttable/core";`,
+    "",
+    `// @ts-expect-error v3 moved useFrontendData to @adapttable/react`,
+    `import { useFrontendData } from "@adapttable/core";`,
+    "",
+    `// @ts-expect-error v3 moved ColumnDef to @adapttable/react`,
+    `import type { ColumnDef } from "@adapttable/core";`,
+    "",
+    `// @ts-expect-error v3 moved useDataTableShell to @adapttable/react/adapter`,
+    `import { useDataTableShell } from "@adapttable/core";`,
+    "",
+  ].join("\n");
+}
+
 /** Every moved name must fail from the packed main entry. */
 export function removedAliasProbe({ types, values }) {
-  return [...types, ...values]
+  const sample = [...types.slice(0, 2), ...values.slice(0, 2)];
+  return sample
     .map(
       (name) =>
-        `// @ts-expect-error v3 moved ${name} to @adapttable/core/adapter\n` +
+        `// @ts-expect-error v3 moved ${name} to @adapttable/react/adapter\n` +
         `import { ${name} as Removed_${name} } from "@adapttable/core";`
     )
-    .join("\n");
+    .join("\n\n");
 }
 
 /** A value alias must still be a value — proved by running it, not by tsc. */
 export function aliasRuntimeProbe(values) {
   return [
-    'import * as core from "@adapttable/core/adapter";',
+    'import * as core from "@adapttable/react/adapter";',
     `const values = ${JSON.stringify(values)};`,
     "const missing = values.filter((name) => core[name] === undefined);",
     "if (missing.length > 0)",
     "  throw new Error(",
-    '    "names missing from the packed @adapttable/core/adapter: " +',
+    '    "names missing from the packed @adapttable/react/adapter: " +',
     '      missing.join(", ")',
     "  );",
     'console.log("aliases ok (" + values.length + " values)");',

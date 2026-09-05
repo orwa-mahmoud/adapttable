@@ -3,9 +3,9 @@
  *
  *   node scripts/ai-isolation.mjs
  *
- * `@adapttable/core`, `@adapttable/core/adapter`, every published adapter
- * root and `@adapttable/server` must not mention the agent protocol. A
- * table pays for discovery only when it imports `@adapttable/ai`.
+ * `@adapttable/core`, `@adapttable/react`, every published adapter root and
+ * `@adapttable/server` must not mention the agent protocol. A table pays for
+ * discovery only when it imports `@adapttable/ai`.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -21,7 +21,7 @@ const MARKERS = [
 
 const GRAPHS = [
   "packages/core/dist/index.js",
-  "packages/core/dist/adapter.js",
+  "packages/react/dist/index.js",
   "packages/server/dist/index.js",
   "packages/adapter-mantine/dist/index.js",
   "packages/adapter-mui/dist/index.js",

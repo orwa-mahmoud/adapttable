@@ -284,6 +284,10 @@ export {
   PAGE_SIZE_OPTIONS,
   pageSizeOptions,
   SEARCH_DEBOUNCE_MS,
+  DEFAULT_CARD_SIZE_PX,
+  DEFAULT_ROW_SIZE_PX,
+  MOBILE_BREAKPOINT_PX,
+  VIRTUAL_OVERSCAN,
 } from "./constants";
 export {
   routerUrlAdapter,

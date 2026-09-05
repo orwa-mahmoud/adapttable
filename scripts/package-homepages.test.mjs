@@ -11,6 +11,7 @@ const SITE = "https://orwa-mahmoud.github.io/adapttable";
 const HUB = `${SITE}/demo/`;
 const HUB_PACKAGES = new Set([
   "@adapttable/core",
+  "@adapttable/react",
   "@adapttable/i18n",
   "@adapttable/cli",
   "@adapttable/server",

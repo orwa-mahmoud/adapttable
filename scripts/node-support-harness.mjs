@@ -31,9 +31,9 @@ const NPM_BIN = join(
   process.platform === "win32" ? "npm.cmd" : "npm"
 );
 
-/** Extra published core subpaths kept in addition to every package root. */
+/** Extra published subpaths kept in addition to every package root. */
 export const EXTRA_PROBE_ROUTES = Object.freeze([
-  "@adapttable/core/adapter",
+  "@adapttable/react/adapter",
   "@adapttable/core/query",
 ]);
 

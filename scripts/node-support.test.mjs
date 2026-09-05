@@ -29,6 +29,7 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/mantine",
   "@adapttable/mui",
   "@adapttable/radix",
+  "@adapttable/react",
   "@adapttable/server",
   "@adapttable/shadcn",
   "@adapttable/unstyled",
@@ -48,7 +49,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares one floor in the repo and every package", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 15);
+    assert.equal(manifests.length, 16);
     for (const manifest of manifests) {
       assert.equal(json(manifest).engines?.node, FLOOR, manifest);
     }
@@ -92,7 +93,7 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 13);
+    assert.equal(names.length, 14);
     assert.ok(!names.includes("@adapttable/bootstrap"));
   });
 
@@ -134,6 +135,7 @@ describe("supported Node contract", () => {
     for (const extra of EXTRA_PROBE_ROUTES) {
       assert.ok(routes.includes(extra), extra);
     }
+    assert.ok(routes.includes("@adapttable/react"));
     assert.ok(
       ["@adapttable/antd", "@adapttable/mui", "@adapttable/shadcn"].every(
         (name) => routes.includes(name)

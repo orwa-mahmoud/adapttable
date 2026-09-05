@@ -19,13 +19,14 @@
  * `@adapttable/`, `entry` the `dist/<entry>.d.ts` that must name them.
  */
 export const NAMEABLE = [
-  ["core", "features", ["BulkAction", "ExportWriter", "TableFeature"]],
-  ["core", "sparkline", ["ColumnDef", "SparklineColumnSpec"]],
-  ["core", "pivot", ["ColumnDef", "PivotConfig"]],
+  ["react", "features", ["BulkAction", "ExportWriter", "TableFeature"]],
+  ["react", "sparkline", ["ColumnDef", "SparklineColumnSpec"]],
+  ["core", "pivot", ["PivotConfig"]],
+  ["react", "pivot", ["ColumnDef", "PivotTableModel"]],
   ["core", "xlsx", ["ExportViewEntry", "ExportWriter"]],
   ["core", "pdf", ["ExportWriter", "PrintPageBreak"]],
   [
-    "core",
+    "react",
     "adapter",
     [
       "ColumnDef",
@@ -45,12 +46,9 @@ export const NAMEABLE = [
 /**
  * The type-level half of the same promise, compiled against the tarballs
  * under all three module resolutions.
- *
- * Assignability alone would not prove one canonical declaration — four
- * structural copies of `ColumnDef` also assign — so this runs beside the
- * by-name check on the emitted declarations, which a renamed duplicate fails.
  */
-export const NAMEABLE_PROBE = `import type { ColumnDef } from "@adapttable/core";
+export const NAMEABLE_PROBE = `import type { TableSource } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
 import type {
   ColumnDef as AdapterColumnDef,
   ContextMenuPoint,
@@ -58,24 +56,25 @@ import type {
   Props,
   TableContextMenuOptions,
   UseCommandPaletteOptions,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type {
   BulkAction,
   ExportWriter as FeaturesExportWriter,
   TableFeature,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 import type {
   ExportWriter as PdfExportWriter,
   PrintPageBreak,
 } from "@adapttable/core/pdf";
+import type { PivotConfig } from "@adapttable/core/pivot";
 import type {
   ColumnDef as PivotColumnDef,
-  PivotConfig,
-} from "@adapttable/core/pivot";
+  PivotTableModel,
+} from "@adapttable/react/pivot";
 import type {
   ColumnDef as SparklineColumnDef,
   SparklineColumnSpec,
-} from "@adapttable/core/sparkline";
+} from "@adapttable/react/sparkline";
 import type {
   ExportViewEntry,
   ExportWriter as XlsxExportWriter,
@@ -101,6 +100,7 @@ export type Nameable = {
   feature: TableFeature<Row>;
   spec: SparklineColumnSpec<Row>;
   pivotConfig: PivotConfig;
+  pivotModel: PivotTableModel;
   view: ExportViewEntry<Row>;
   pageBreak: PrintPageBreak;
   props: Props;
@@ -109,6 +109,7 @@ export type Nameable = {
   contextMenu: TableContextMenuOptions<Row>;
   palette: UseCommandPaletteOptions;
   savedViewsPanel: SavedViewsPanelProps;
+  source: TableSource<Row>;
 };
 
 // The panel's props name no core chrome type, so a consumer can write the
@@ -125,11 +126,6 @@ export const panel: SavedViewsPanelProps = {
 
 /**
  * Every name an emitted declaration file exports, however it spells it.
- *
- * Both shapes a bundler emits are read: the trailing `export { … }` block a
- * rolled-up entry ends with, and a directly exported declaration. A renamed
- * duplicate lands under its generated name (`ColumnDef$1`), so it never
- * answers for the bare one — which is the point.
  */
 export function exportedNames(dts) {
   const names = new Set();
@@ -141,8 +137,6 @@ export function exportedNames(dts) {
       names.add(renamed ? renamed[1] : spec.replace(/^type /, ""));
     }
   }
-  // Single spaces, not `\s+`: emitted declarations are machine-written, and
-  // a chain of variable-width runs backtracks super-linearly on long files.
   for (const decl of dts.matchAll(
     /^export (?:declare )?(?:abstract )?(?:function|const|let|var|class|interface|type|enum) ([A-Za-z_$][\w$]*)/gm
   )) {
