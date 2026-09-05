@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  AgentHttpError,
   connectAgentHttp,
   createAgentHttpClient,
   parseAgentHttpRequest,
@@ -142,6 +143,22 @@ describe("parseAgentHttpRequest / parseAgentHttpResponse", () => {
       ],
     });
     expect(parsed.actions?.[0]?.idempotencyKey).toBe("page-2");
+  });
+
+  it("rejects a non-numeric action expectedRevision", () => {
+    expect(() =>
+      parseAgentHttpResponse({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        actions: [
+          {
+            key: "view.setPage",
+            args: { page: 2 },
+            idempotencyKey: "page-2",
+            expectedRevision: "1",
+          },
+        ],
+      })
+    ).toThrow(/expectedRevision must be a finite number/);
   });
 });
 
@@ -326,23 +343,24 @@ describe("createAgentHttpClient", () => {
       observe: () => observation({ viewRevision: revision, approval: "never" }),
       apply: { setPage },
     });
-    const result = await runAgentHttpTurn(live, "Page 2", {
-      endpoint: "https://agent.example/turn",
-      request: () => {
-        revision = 2;
-        return Promise.resolve({
-          schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
-            {
-              key: "view.setPage",
-              args: { page: 2 },
-              idempotencyKey: "page-2",
-            },
-          ],
-        });
-      },
-    });
-    expect(result.results[0]?.error?.code).toBe("revision-mismatch");
+    await expect(
+      runAgentHttpTurn(live, "Page 2", {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          revision = 2;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            actions: [
+              {
+                key: "view.setPage",
+                args: { page: 2 },
+                idempotencyKey: "page-2",
+              },
+            ],
+          });
+        },
+      })
+    ).rejects.toMatchObject({ code: "context-stale" });
     expect(setPage).not.toHaveBeenCalled();
   });
 
@@ -661,7 +679,7 @@ describe("createAgentHttpClient", () => {
         manifest: {},
         catalog: "nope",
       })
-    ).toThrow(/catalog/);
+    ).toThrow(/manifest\.schemaVersion|catalog/);
     expect(() => parseAgentHttpResponse(null)).toThrow(/object/);
     expect(() =>
       parseAgentHttpResponse({
@@ -673,15 +691,17 @@ describe("createAgentHttpClient", () => {
       schemaVersion: AGENT_SCHEMA_VERSION,
       needs: {
         describe: ["rows.read", 1],
-        read: [
-          { offset: 0, limit: 2, columns: ["name", 2], scope: "visible" },
-          { scope: "nope" },
-        ],
+        read: [{ offset: 0, limit: 2, columns: ["name", 2], scope: "visible" }],
       },
     });
     expect(withNeeds.needs?.describe).toEqual(["rows.read"]);
     expect(withNeeds.needs?.read?.[0]?.scope).toBe("visible");
-    expect(withNeeds.needs?.read?.[1]?.scope).toBeUndefined();
+    expect(() =>
+      parseAgentHttpResponse({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        needs: { read: [{ offset: 0, limit: 1, scope: "nope" }] },
+      })
+    ).toThrow(/read\.scope/);
 
     await expect(connectAgentHttp(live, { endpoint: "   " })).rejects.toThrow(
       /endpoint/
@@ -770,6 +790,41 @@ describe("createAgentHttpClient", () => {
     await expect(client.send(live, "Ping")).resolves.toMatchObject({
       text: "ok",
     });
+  });
+
+  it("rejects discovery when the table revision changes mid-turn", async () => {
+    let revision = 1;
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: revision }),
+      apply: {
+        readRows: vi.fn().mockResolvedValue({
+          rows: [{ rowKey: "r1", cells: { name: "Ada" } }],
+          offset: 0,
+          limit: 10,
+          redacted: [],
+        }),
+      },
+    });
+    let round = 0;
+    await expect(
+      runAgentHttpTurn(live, "Who is visible?", {
+        endpoint: "https://agent.example/turn",
+        request: (_body) => {
+          round += 1;
+          if (round === 1) {
+            return Promise.resolve({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+            });
+          }
+          revision = 2;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "done",
+          });
+        },
+      })
+    ).rejects.toBeInstanceOf(AgentHttpError);
   });
 });
 

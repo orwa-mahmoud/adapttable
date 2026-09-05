@@ -181,9 +181,17 @@ function isOpenObject(schema: JsonSchema): boolean {
 
 function withNull(schema: JsonSchema): JsonSchema {
   const types = typeList(schema);
-  if (types.includes("null")) return schema;
-  if (types.length === 0) return { ...schema, type: ["object", "null"] };
-  return { ...schema, type: [...types, "null"] };
+  let next = schema;
+  if (!types.includes("null")) {
+    next =
+      types.length === 0
+        ? { ...schema, type: ["object", "null"] }
+        : { ...schema, type: [...types, "null"] };
+  }
+  if (Array.isArray(next.enum) && !next.enum.includes(null)) {
+    return { ...next, enum: [...next.enum, null] };
+  }
+  return next;
 }
 
 /**

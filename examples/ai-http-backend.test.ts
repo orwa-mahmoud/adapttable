@@ -4,16 +4,17 @@ import { describe, it } from "node:test";
 import { AGENT_HTTP_SCHEMA, type AgentHttpRequest } from "@adapttable/ai/http";
 
 import {
+  completeForProvider,
   exampleRequiresToken,
   handleExampleAgentTurn,
 } from "./ai-http-backend.ts";
 
-function request(): AgentHttpRequest {
+function request(kind: "hello" | "turn" = "turn"): AgentHttpRequest {
   return {
     schemaVersion: AGENT_HTTP_SCHEMA,
-    kind: "turn",
+    kind,
     tableId: "orders",
-    message: "Go to page 2",
+    message: kind === "turn" ? "Go to page 2" : undefined,
     catalog: [],
     manifest: {
       schemaVersion: AGENT_HTTP_SCHEMA,
@@ -46,6 +47,19 @@ describe("exampleRequiresToken", () => {
 });
 
 describe("handleExampleAgentTurn", () => {
+  it("returns a typed hello without calling the provider", async () => {
+    const complete = () => {
+      throw new Error("provider must not run on hello");
+    };
+    const hello = await handleExampleAgentTurn(
+      request("hello"),
+      complete,
+      new AbortController().signal
+    );
+    assert.equal(hello.ok, true);
+    assert.match(hello.text ?? "", /Connected/i);
+  });
+
   it("mints a unique action id per turn even when the model repeats one", async () => {
     const complete = () =>
       Promise.resolve(
@@ -69,4 +83,42 @@ describe("handleExampleAgentTurn", () => {
     );
     assert.match(first.actions?.[0]?.idempotencyKey ?? "", /^[0-9a-f]+:0$/);
   });
+
+  it("rejects malformed provider JSON", async () => {
+    const complete = () => Promise.resolve('"not-an-object"');
+    await assert.rejects(
+      handleExampleAgentTurn(request(), complete, new AbortController().signal),
+      /non-object/
+    );
+  });
+
+  it("forwards needs and text-only replies from mocked providers", async () => {
+    const complete = () =>
+      Promise.resolve(
+        JSON.stringify({
+          text: "Need a guide.",
+          needs: { describe: ["edit.cells"] },
+        })
+      );
+    const reply = await handleExampleAgentTurn(
+      request(),
+      complete,
+      new AbortController().signal
+    );
+    assert.equal(reply.text, "Need a guide.");
+    assert.deepEqual(reply.needs?.describe, ["edit.cells"]);
+  });
+});
+
+describe("completeForProvider", () => {
+  for (const provider of [
+    "openai",
+    "anthropic",
+    "gemini",
+    "deepseek",
+  ] as const) {
+    it(`registers a complete function for ${provider}`, () => {
+      assert.equal(typeof completeForProvider(provider), "function");
+    });
+  }
 });

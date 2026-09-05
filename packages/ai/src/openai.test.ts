@@ -198,6 +198,12 @@ describe("toOpenAITools", () => {
     expect(execute?.function.parameters.properties?.args).toMatchObject({
       type: "string",
     });
+
+    const sort = tools.find((tool) => tool.function.name === "view_setSort");
+    expect(sort?.function.parameters.properties?.dir).toMatchObject({
+      type: ["string", "null"],
+      enum: ["asc", "desc", null],
+    });
   });
 
   it("maps catalog dots to OpenAI-safe names and back", () => {

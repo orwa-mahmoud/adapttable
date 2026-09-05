@@ -167,6 +167,65 @@ export interface AgentHttpTurnResult {
 }
 
 const MAX_NEED_ROUNDS = 3;
+const MAX_DESCRIBE_NEEDS = 16;
+const MAX_READ_NEEDS = 16;
+const MAX_ACTIONS = 32;
+const MAX_REQUEST_BYTES = 256_000;
+
+/** Structured HTTP bridge failure with a stable machine code. @public */
+export class AgentHttpError extends Error {
+  readonly code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "AgentHttpError";
+    this.code = code;
+  }
+}
+
+interface TurnSnapshot {
+  readonly turnId: string;
+  readonly revision: number;
+  readonly policyKey: string;
+}
+
+function policyKey(manifest: AgentManifest): string {
+  return JSON.stringify({
+    write: manifest.policy.write,
+    approval: manifest.policy.approval,
+    commit: manifest.policy.commit,
+    capabilities: manifest.capabilities,
+  });
+}
+
+function turnSnapshot(session: AgentSession, turnId: string): TurnSnapshot {
+  const manifest = session.manifest();
+  return {
+    turnId,
+    revision: manifest.viewRevision,
+    policyKey: policyKey(manifest),
+  };
+}
+
+function assertTurnContext(
+  session: AgentSession,
+  snapshot: TurnSnapshot
+): void {
+  const manifest = session.manifest();
+  const nextPolicy = policyKey(manifest);
+  if (
+    manifest.viewRevision !== snapshot.revision ||
+    nextPolicy !== snapshot.policyKey
+  ) {
+    throw new AgentHttpError(
+      "context-stale",
+      `table context changed during turn (revision ${snapshot.revision} → ${manifest.viewRevision})`
+    );
+  }
+}
+
+function requestBytes(body: AgentHttpRequest): number {
+  return new TextEncoder().encode(JSON.stringify(body)).byteLength;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -205,6 +264,7 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
   if (!isRecord(input.manifest)) {
     throw new TypeError("agent HTTP manifest must be an object");
   }
+  validateManifestShape(input.manifest);
   if (!Array.isArray(input.catalog)) {
     throw new TypeError("agent HTTP catalog must be an array");
   }
@@ -248,6 +308,9 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
   const actions = Array.isArray(input.actions)
     ? input.actions.map(asAction)
     : undefined;
+  if (actions && actions.length > MAX_ACTIONS) {
+    throw new TypeError(`agent HTTP actions exceed limit of ${MAX_ACTIONS}`);
+  }
   return {
     schemaVersion: AGENT_SCHEMA_VERSION,
     ok: typeof input.ok === "boolean" ? input.ok : undefined,
@@ -261,6 +324,33 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
   };
 }
 
+function validateManifestShape(value: Record<string, unknown>): void {
+  if (value.schemaVersion !== AGENT_SCHEMA_VERSION) {
+    throw new TypeError(
+      `agent HTTP manifest.schemaVersion must be "${AGENT_SCHEMA_VERSION}"`
+    );
+  }
+  if (typeof value.tableId !== "string" || value.tableId.length === 0) {
+    throw new TypeError(
+      "agent HTTP manifest.tableId must be a non-empty string"
+    );
+  }
+  if (
+    typeof value.viewRevision !== "number" ||
+    !Number.isFinite(value.viewRevision)
+  ) {
+    throw new TypeError(
+      "agent HTTP manifest.viewRevision must be a finite number"
+    );
+  }
+  if (!Array.isArray(value.capabilities)) {
+    throw new TypeError("agent HTTP manifest.capabilities must be an array");
+  }
+  if (!isRecord(value.policy)) {
+    throw new TypeError("agent HTTP manifest.policy must be an object");
+  }
+}
+
 function asAction(value: unknown): AgentHttpAction {
   if (!isRecord(value)) {
     throw new TypeError("agent HTTP action must be an object");
@@ -271,11 +361,20 @@ function asAction(value: unknown): AgentHttpAction {
   if (!idempotencyKey) {
     throw new TypeError("agent HTTP action.idempotencyKey is required");
   }
+  let expectedRevision: number | undefined;
+  if ("expectedRevision" in value && value.expectedRevision !== undefined) {
+    expectedRevision = asFiniteNumber(value.expectedRevision);
+    if (expectedRevision === undefined) {
+      throw new TypeError(
+        "agent HTTP action.expectedRevision must be a finite number"
+      );
+    }
+  }
   return {
     key,
     args: "args" in value ? value.args : {},
     idempotencyKey,
-    expectedRevision: asFiniteNumber(value.expectedRevision),
+    expectedRevision,
   };
 }
 
@@ -285,6 +384,11 @@ function asNeeds(value: Record<string, unknown>): AgentHttpNeeds {
         (entry): entry is string => typeof entry === "string"
       )
     : undefined;
+  if (describe && describe.length > MAX_DESCRIBE_NEEDS) {
+    throw new TypeError(
+      `agent HTTP needs.describe exceeds limit of ${MAX_DESCRIBE_NEEDS}`
+    );
+  }
   const read = Array.isArray(value.read)
     ? value.read.filter(isRecord).map((entry) => {
         const columns = Array.isArray(entry.columns)
@@ -299,15 +403,32 @@ function asNeeds(value: Record<string, unknown>): AgentHttpNeeds {
           entry.scope === "full"
         ) {
           scope = entry.scope;
+        } else if (entry.scope !== undefined) {
+          throw new TypeError(
+            'agent HTTP read.scope must be "visible", "page", or "full"'
+          );
+        }
+        const offset = asFiniteNumber(entry.offset);
+        const limit = asFiniteNumber(entry.limit);
+        if (entry.offset !== undefined && offset === undefined) {
+          throw new TypeError("agent HTTP read.offset must be a finite number");
+        }
+        if (entry.limit !== undefined && limit === undefined) {
+          throw new TypeError("agent HTTP read.limit must be a finite number");
         }
         return {
-          offset: asFiniteNumber(entry.offset) ?? 0,
-          limit: asFiniteNumber(entry.limit) ?? 10,
+          offset: offset ?? 0,
+          limit: limit ?? 10,
           ...(columns ? { columns } : {}),
           ...(scope ? { scope } : {}),
         };
       })
     : undefined;
+  if (read && read.length > MAX_READ_NEEDS) {
+    throw new TypeError(
+      `agent HTTP needs.read exceeds limit of ${MAX_READ_NEEDS}`
+    );
+  }
   return { describe, read };
 }
 
@@ -439,6 +560,12 @@ async function exchange(
   body: AgentHttpRequest,
   signal?: AbortSignal
 ): Promise<AgentHttpResponse> {
+  if (requestBytes(body) > MAX_REQUEST_BYTES) {
+    throw new AgentHttpError(
+      "payload-too-large",
+      `agent HTTP request exceeds ${MAX_REQUEST_BYTES} bytes`
+    );
+  }
   const merged = mergeSignals(options.timeoutMs, signal);
   try {
     return parseAgentHttpResponse(await postJson(options, body, merged.signal));
@@ -457,20 +584,7 @@ function readIdempotencyKey(
   index: number,
   query: RowReadQuery
 ): string {
-  const columns = [...(query.columns ?? [])]
-    .sort((left, right) => left.localeCompare(right))
-    .join(",");
-  const scope = query.scope ?? "";
-  return [
-    "http-read",
-    turnId,
-    String(revision),
-    String(index),
-    String(query.offset),
-    String(query.limit),
-    columns,
-    scope,
-  ].join(":");
+  return `http-read:${JSON.stringify({ turnId, revision, index, query })}`;
 }
 
 function mergeGuides(
@@ -506,25 +620,26 @@ function cancelledResult(
 async function fulfillNeeds(
   session: AgentSession,
   needs: AgentHttpNeeds | undefined,
-  turnId: string
+  snapshot: TurnSnapshot
 ): Promise<{
   descriptions: CapabilityGuide[];
   rows: RowWindow[];
   describe: number;
   read: number;
 }> {
+  assertTurnContext(session, snapshot);
   const descriptions: CapabilityGuide[] = [];
   const rows: RowWindow[] = [];
   for (const key of needs?.describe ?? []) {
     descriptions.push(session.describe(key));
   }
-  const revision = session.manifest().viewRevision;
   for (const [index, query] of (needs?.read ?? []).entries()) {
+    assertTurnContext(session, snapshot);
     const result = await session.execute(
       "rows.read",
       query,
-      revision,
-      readIdempotencyKey(turnId, revision, index, query)
+      snapshot.revision,
+      readIdempotencyKey(snapshot.turnId, snapshot.revision, index, query)
     );
     if (!result.ok) {
       throw new Error(result.error?.message ?? "rows.read failed");
@@ -606,20 +721,20 @@ export async function runAgentHttpTurn(
   if (!trimmed) throw new Error("agent HTTP turn requires a message");
 
   const turnId = newHttpTurnId();
+  let snapshot = turnSnapshot(session, turnId);
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let fulfilled = { describe: 0, read: 0 };
   let last: AgentHttpResponse | undefined;
-  let snapshotRevision = session.manifest().viewRevision;
 
   for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
+    assertTurnContext(session, snapshot);
     const request = compactRequest(session, "turn", {
       message: trimmed,
       conversation: extras.conversation,
       descriptions,
       rows,
     });
-    snapshotRevision = request.manifest.viewRevision;
     last = await exchange(options, request, extras.signal);
     const needs = last.needs;
     const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
@@ -627,7 +742,7 @@ export async function runAgentHttpTurn(
     if (round === MAX_NEED_ROUNDS) {
       throw new Error("agent HTTP asked for discovery too many times");
     }
-    const next = await fulfillNeeds(session, needs, turnId);
+    const next = await fulfillNeeds(session, needs, snapshot);
     descriptions = mergeGuides(descriptions, next.descriptions);
     rows = [...(rows ?? []), ...next.rows];
     fulfilled = {
@@ -637,24 +752,61 @@ export async function runAgentHttpTurn(
   }
 
   if (!last) throw new Error("agent HTTP returned no response");
-  const results = await executeActions(
+  assertTurnContext(session, snapshot);
+  let results = await executeActions(
     session,
     last.actions ?? [],
-    snapshotRevision,
+    snapshot.revision,
     extras.signal
   );
   let text = last.text ?? "";
-  if (extras.returnResults && last.continueWithResults && results.length > 0) {
-    const continued = await exchange(
-      options,
-      compactRequest(session, "turn", {
-        message: trimmed,
-        conversation: extras.conversation,
-        results,
-      }),
-      extras.signal
-    );
-    if (continued.text) text = continued.text;
+  if (extras.returnResults && last.continueWithResults) {
+    descriptions = undefined;
+    rows = undefined;
+    snapshot = turnSnapshot(session, turnId);
+    let continuationRound = 0;
+    while (continuationRound < MAX_NEED_ROUNDS) {
+      continuationRound += 1;
+      assertTurnContext(session, snapshot);
+      const continued = await exchange(
+        options,
+        compactRequest(session, "turn", {
+          message: trimmed,
+          conversation: extras.conversation,
+          descriptions,
+          rows,
+          results,
+        }),
+        extras.signal
+      );
+      if (continued.actions?.length) {
+        results = [
+          ...results,
+          ...(await executeActions(
+            session,
+            continued.actions,
+            snapshot.revision,
+            extras.signal
+          )),
+        ];
+      }
+      const followNeeds = continued.needs;
+      const asked =
+        (followNeeds?.describe?.length ?? 0) + (followNeeds?.read?.length ?? 0);
+      if (asked > 0) {
+        const next = await fulfillNeeds(session, followNeeds, snapshot);
+        descriptions = mergeGuides(descriptions, next.descriptions);
+        rows = [...(rows ?? []), ...next.rows];
+        fulfilled = {
+          describe: fulfilled.describe + next.describe,
+          read: fulfilled.read + next.read,
+        };
+        continue;
+      }
+      if (continued.text) text = continued.text;
+      if (!continued.continueWithResults) break;
+      if (!continued.actions?.length && asked === 0) break;
+    }
   }
   return {
     text,
