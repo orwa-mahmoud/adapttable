@@ -87,6 +87,10 @@ export function defaultCsvValue<TRow>(
 ): unknown {
   const fromExport = column.exportValue?.(row);
   if (isTypedCell(fromExport)) return fromExport;
+  // What the column reads is the value the table shows. A binding that drew
+  // something instead of returning data fails `isTypedCell` and falls through.
+  const fromAccessor = column.accessor?.(row);
+  if (isTypedCell(fromAccessor)) return fromAccessor;
   const fromSort = column.sortValue?.(row);
   return isTypedCell(fromSort) ? fromSort : (fromSort ?? "");
 }

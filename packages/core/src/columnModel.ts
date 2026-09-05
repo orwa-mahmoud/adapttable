@@ -116,6 +116,17 @@ export interface ColumnModel<TRow = unknown> {
     row: TRow
   ) => string | undefined | Promise<string | undefined>;
   /**
+   * What this column reads from a row.
+   *
+   * Neutral here, because export, clipboard and selection statistics all need
+   * a cell's value and none of them can render one. A binding narrows it to
+   * whatever it renders — `@adapttable/react`'s `ColumnDef.accessor` returns
+   * a `ReactNode` — and every context that needs plain data keeps the value
+   * only when it is already a primitive or a Date, falling through to
+   * `sortValue` when the binding returned something it drew instead.
+   */
+  accessor?: (row: TRow) => unknown;
+  /**
    * Primitive extractor used by the client-side sort comparator.
    */
   sortValue?: (row: TRow) => SortableValue;

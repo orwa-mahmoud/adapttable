@@ -1,6 +1,6 @@
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import * as env from "../utils/env";
 import { downloadCsv, matrixToCsv, rowsToCsv } from "./csv";
 
@@ -19,6 +19,56 @@ const COLS: ColumnModel<Row>[] = [
   { key: "name", header: "Name", exportValue: (r) => r.name },
   { key: "amount", header: "Amount", exportValue: (r) => r.amount },
 ];
+
+describe("rowsToCsv cell resolution", () => {
+  it("reads a column that only declares an accessor", () => {
+    const columns: ColumnModel<Row>[] = [
+      { key: "name", header: "Name", accessor: (r) => r.name },
+      { key: "amount", header: "Amount", accessor: (r) => r.amount },
+    ];
+    const csv = rowsToCsv(ROWS, columns);
+    expect(csv.split("\r\n")[1]).toBe("Alice,1200");
+  });
+
+  it("prefers exportValue, then the accessor, then sortValue", () => {
+    const both: ColumnModel<Row>[] = [
+      {
+        key: "name",
+        header: "Name",
+        exportValue: () => "from-export",
+        accessor: () => "from-accessor",
+        sortValue: () => "from-sort",
+      },
+    ];
+    expect(rowsToCsv([ROWS[0]!], both).split("\r\n")[1]).toBe("from-export");
+
+    const accessorFirst: ColumnModel<Row>[] = [
+      {
+        key: "name",
+        header: "Name",
+        accessor: () => "from-accessor",
+        sortValue: () => "from-sort",
+      },
+    ];
+    expect(rowsToCsv([ROWS[0]!], accessorFirst).split("\r\n")[1]).toBe(
+      "from-accessor"
+    );
+  });
+
+  it("falls through to sortValue when a binding drew the cell instead", () => {
+    // A React accessor returning an element is not data — the export keeps
+    // looking rather than writing "[object Object]" into the file.
+    const drawn: ColumnModel<Row>[] = [
+      {
+        key: "name",
+        header: "Name",
+        accessor: () => ({ type: "span", props: {} }),
+        sortValue: (r) => r.name,
+      },
+    ];
+    expect(rowsToCsv([ROWS[0]!], drawn).split("\r\n")[1]).toBe("Alice");
+  });
+});
 
 describe("rowsToCsv", () => {
   it("emits a header row from string headers and resolves accessors", () => {
@@ -43,7 +93,7 @@ describe("rowsToCsv", () => {
       {
         key: "rich",
         header: "Rich",
-        exportValue: (r) => ({ jsx: r.name }) as unknown as string,
+        exportValue: (r) => ({ jsx: r.name }),
         sortValue: (r) => r.amount,
       },
       { key: "cellOnly", header: "Cell only" },
