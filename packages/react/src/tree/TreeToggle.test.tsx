@@ -5,11 +5,11 @@
  * inherits from it: the accessible name in both states, the footprint a leaf
  * keeps so a column stays aligned, and the loading flag a lazy node carries.
  */
+import type { TreeEntry } from "@adapttable/core";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { treeToggleTestSlots } from "../internal/chromeTestSlots";
-import type { TreeEntry } from "@adapttable/core";
 import { TreeToggleChrome } from "./TreeToggle";
 
 interface Row {

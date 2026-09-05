@@ -4,13 +4,12 @@
  * every former `switch (def.type)` looks up a spec instead.
  */
 import type { DisplayValue } from "../display";
-
 import type { QueryCondition } from "../source/queryContract";
 import type { ExtraFilters, TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import type { FilterDef, FilterType } from "./filterDefs";
-import type { FilterFormSource } from "./filterFormModel";
 import type { ChipLabelResolver } from "./filterDefs";
+import type { FilterFormSource } from "./filterFormModel";
 
 /**
  * Built-in widget a kit AutoFilterForm / header row already knows how to draw.

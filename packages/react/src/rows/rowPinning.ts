@@ -11,10 +11,10 @@
  * but there is no sticky chrome. The order of the list still puts top pins
  * first and bottom pins last.
  */
+import type { RowAction } from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { RowAction } from "@adapttable/core";
 
 export { partitionPinnedRows, rowPinSignature } from "@adapttable/core";
 

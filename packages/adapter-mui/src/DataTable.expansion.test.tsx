@@ -5,7 +5,6 @@
  */
 import { defaultConfirm } from "@adapttable/core";
 import type { RowExpansionState } from "@adapttable/react";
-
 import {
   createMemoryAdapter,
   useDataTable,

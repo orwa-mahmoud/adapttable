@@ -12,9 +12,9 @@
  * checkbox. Three adapters rendering three copies of the same `<div role=
  * "group">` is the defect this exists to avoid.
  */
+import { formatMultiDraft, readMultiDraft } from "@adapttable/core";
 import type { KeyboardEvent, ReactNode } from "react";
 
-import { formatMultiDraft, readMultiDraft } from "@adapttable/core";
 import {
   type EditableCellEditorCtrl,
   editorValidationProps,

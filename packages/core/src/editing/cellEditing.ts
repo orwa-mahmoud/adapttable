@@ -1,6 +1,5 @@
 import type { ColumnModelEditor } from "../columnModel";
 import type { DisplayValue } from "../display";
-
 import type { FeatureHostState } from "../features/currentHost";
 import { currentFeatureHost } from "../features/currentHost";
 import type { SortableValue } from "../types";
@@ -129,7 +128,7 @@ export interface EditableColumnLike<TRow = unknown> {
   /** Whether the column is editable, per row when it is a function. */
   editable?: boolean | { bivarianceHack(row: TRow): boolean }["bivarianceHack"];
   /** Which editor the cell opens. Defaults to a text field. */
-  editor?: CellEditor | ColumnModelEditor | unknown;
+  editor?: ColumnModelEditor;
   /** Turns the stored value into the draft text the editor starts with. */
   editValue?: { bivarianceHack(row: TRow): string }["bivarianceHack"];
   /** Turns the draft text back into the stored value's type. */
@@ -318,7 +317,7 @@ const BUILTIN_EDITORS = new Set<string>([
 ]);
 
 function resolveEditorValue(
-  editor: CellEditor | ColumnModelEditor,
+  editor: ColumnModelEditor,
   host?: FeatureHostState
 ): CellEditor {
   if (typeof editor === "string" && BUILTIN_EDITORS.has(editor)) {
@@ -346,10 +345,7 @@ export function resolveCellEditor(
   host?: FeatureHostState
 ): CellEditor | null {
   if (column.editable === undefined || column.editable === false) return null;
-  const editor =
-    column.editor === undefined
-      ? "text"
-      : (column.editor as ColumnModelEditor | CellEditor);
+  const editor = column.editor ?? "text";
   return resolveEditorValue(editor, host);
 }
 

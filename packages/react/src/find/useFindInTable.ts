@@ -10,6 +10,12 @@
  * reopens the bar and restarts the walk at the first hit. The current-match
  * index stays ephemeral — the receiving page's data may differ.
  */
+import type { CellRange } from "@adapttable/core";
+import type { GridCell } from "@adapttable/core";
+import { singleCellRange } from "@adapttable/core";
+import { PARAM_FIND } from "@adapttable/core";
+import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
+import { findMatches, matchKeySet, stepMatch } from "@adapttable/core";
 import {
   useCallback,
   useEffect,
@@ -19,14 +25,8 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import type { CellRange } from "@adapttable/core";
-import { singleCellRange } from "@adapttable/core";
-import type { GridCell } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
-import { PARAM_FIND } from "@adapttable/core";
-import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
-import { findMatches, matchKeySet, stepMatch } from "@adapttable/core";
 
 /**
  * Trailing debounce for writing the find query to the URL. Typing must not

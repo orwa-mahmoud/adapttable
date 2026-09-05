@@ -71,29 +71,6 @@ export type {
 } from "./types";
 
 /* Re-exported headless engine — source builders, hooks, and types. */
-export type { CellProps, ColumnDef, ColumnInput } from "@adapttable/react";
-export {
-  type ActiveFilterChip,
-  type SavedView,
-  type ToolbarSlots,
-  useDataTable,
-  type UseDataTableResult,
-  useFrontendData,
-  type UseFrontendDataOptions,
-  useQuerySource,
-  type UseQuerySourceOptions,
-  useSavedViews,
-  type UseSavedViewsOptions,
-  type UseSavedViewsResult,
-  useServerData,
-  type UseServerDataOptions,
-  useTableData,
-  type UseTableDataOptions,
-  type UseTableDataResult,
-  useTableUrlState,
-  type UseTableUrlStateOptions,
-  type UseTableUrlStateResult,
-} from "@adapttable/react";
 export {
   type BulkAction,
   type ColorScheme,
@@ -128,6 +105,29 @@ export {
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
+export type { CellProps, ColumnDef, ColumnInput } from "@adapttable/react";
+export {
+  type ActiveFilterChip,
+  type SavedView,
+  type ToolbarSlots,
+  useDataTable,
+  type UseDataTableResult,
+  useFrontendData,
+  type UseFrontendDataOptions,
+  useQuerySource,
+  type UseQuerySourceOptions,
+  useSavedViews,
+  type UseSavedViewsOptions,
+  type UseSavedViewsResult,
+  useServerData,
+  type UseServerDataOptions,
+  useTableData,
+  type UseTableDataOptions,
+  type UseTableDataResult,
+  useTableUrlState,
+  type UseTableUrlStateOptions,
+  type UseTableUrlStateResult,
+} from "@adapttable/react";
 
 /* Router / custom-source integration types. */
 export { type ActionConfirm, type SortableValue } from "@adapttable/core";
@@ -150,6 +150,15 @@ export type { DataTablePropsBase } from "./types";
    needs — CSV options, column layout, cell editors, tier props —
    without ever depending on @adapttable/core directly. */
 export {
+  type BulkActionContext,
+  type CellEditor,
+  type ChipLabelResolver,
+  type CustomCellEditorCtrl,
+  type CustomCellEditorRender,
+  type ExportCsvOptions,
+  FILTER_TYPES,
+} from "@adapttable/core";
+export {
   type BaseDataTableProps,
   type ColumnLayoutState,
   type EditConflict,
@@ -162,13 +171,4 @@ export {
   type EditLifecycle,
   type EditUnit,
 } from "@adapttable/react";
-export {
-  type BulkActionContext,
-  type CellEditor,
-  type ChipLabelResolver,
-  type CustomCellEditorCtrl,
-  type CustomCellEditorRender,
-  type ExportCsvOptions,
-  FILTER_TYPES,
-} from "@adapttable/core";
 export { type DataModeProps } from "@adapttable/react/adapter";

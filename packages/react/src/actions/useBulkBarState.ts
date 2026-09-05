@@ -1,13 +1,14 @@
-import {
-  offersAllMatching,
-  type SelectionState,
-} from "../selection/useSelection";
 import type {
   BulkAction,
   BulkActionContext,
   TableLabels,
 } from "@adapttable/core";
 import { type ConfirmHandler } from "@adapttable/core";
+
+import {
+  offersAllMatching,
+  type SelectionState,
+} from "../selection/useSelection";
 import {
   bulkActionErrorMessage,
   type BulkActionOutcome,

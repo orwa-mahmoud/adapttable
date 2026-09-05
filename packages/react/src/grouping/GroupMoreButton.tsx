@@ -4,9 +4,8 @@
  * Wording and the part name stay here so they cannot drift. Adapters pass
  * the button the end user clicks.
  */
-import type { ReactElement, ReactNode } from "react";
-
 import type { TableLabels } from "@adapttable/core";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * Props for an adapter `GroupMoreButton` — no slots on the public API.

@@ -12,7 +12,6 @@
  * or the retry it should offer.
  */
 import type { DisplayValue } from "../display";
-
 import type { TableSource } from "../source/TableSource";
 
 /**
@@ -43,6 +42,13 @@ export interface TableErrorState {
  */
 export type Slot<TState> = DisplayValue | ((state: TState) => DisplayValue);
 
+/** The function form of a slot, told apart from a node the host handed over. */
+function isSlotBuilder<TState>(
+  slot: Slot<TState> | undefined
+): slot is (state: TState) => DisplayValue {
+  return typeof slot === "function";
+}
+
 /**
  * Resolve a slot the host may have replaced.
  *
@@ -55,8 +61,8 @@ export type Slot<TState> = DisplayValue | ((state: TState) => DisplayValue);
 export function fillSlot<TState>(
   slot: Slot<TState> | undefined,
   state: TState
-): DisplayValue {
-  return typeof slot === "function" ? slot(state) : slot;
+): DisplayValue | undefined {
+  return isSlotBuilder(slot) ? slot(state) : slot;
 }
 
 /**

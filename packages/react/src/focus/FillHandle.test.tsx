@@ -6,12 +6,12 @@
  * on the selection's corner, and nowhere else — and that it disappears
  * entirely when there is nothing to fill or nobody to receive it.
  */
+import type { CellRange } from "@adapttable/core";
 import { fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
-import type { CellRange } from "@adapttable/core";
 import { FillHandleChrome, type FillHandleSlots } from "./FillHandle";
 import { useGridFocus } from "./useGridFocus";
 

@@ -3,12 +3,12 @@
  * main suite skips: default aria-label, non-string header → key, custom
  * selectionGetId, and aria-selected omitted when selection is inactive.
  */
+import type { BulkAction } from "@adapttable/core";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useFrontendData } from "../source/useFrontendData";
-import type { BulkAction } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
+import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useDataTable, type UseDataTableOptions } from "./useDataTable";
 

@@ -1,4 +1,9 @@
 import {
+  booleanDraft,
+  formatMultiDraft,
+  isCustomEditor,
+} from "@adapttable/core";
+import {
   type ReactElement,
   type ReactNode,
   useLayoutEffect,
@@ -6,11 +11,6 @@ import {
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
-import {
-  booleanDraft,
-  formatMultiDraft,
-  isCustomEditor,
-} from "@adapttable/core";
 import {
   editableCellController,
   type EditableCellEditing,

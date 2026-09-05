@@ -73,7 +73,7 @@ const slots: GroupingPanelSlots = {
     <Box
       role="group"
       aria-label={label}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
       sx={
         empty
@@ -222,7 +222,7 @@ const slots: GroupingPanelSlots = {
       variant="outlined"
       role="region"
       aria-label={label}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
       sx={{
         display: "inline-flex",

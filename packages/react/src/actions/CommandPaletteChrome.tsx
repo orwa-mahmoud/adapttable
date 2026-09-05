@@ -24,6 +24,8 @@
  * What the kit owns is every visible piece: the dialog surface, the input,
  * the rows.
  */
+import type { TableLabels } from "@adapttable/core";
+import { type Command, filterCommands } from "@adapttable/core";
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -32,9 +34,6 @@ import {
   useRef,
   useState,
 } from "react";
-
-import type { TableLabels } from "@adapttable/core";
-import { type Command, filterCommands } from "@adapttable/core";
 
 export type { Command };
 

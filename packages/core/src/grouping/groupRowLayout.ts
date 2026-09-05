@@ -30,7 +30,7 @@ export interface GroupRowCell<
   /** The column this cell sits under. */
   column: TCol;
   /** That column's aggregate, or `undefined` for an empty cell. */
-  node: DisplayValue;
+  node: DisplayValue | undefined;
 }
 
 /**

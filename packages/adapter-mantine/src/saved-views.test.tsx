@@ -1,6 +1,5 @@
 import { defaultLabels } from "@adapttable/core";
 import type { LayoutStorage } from "@adapttable/react";
-
 import {
   type ColumnDef,
   createMemoryAdapter,

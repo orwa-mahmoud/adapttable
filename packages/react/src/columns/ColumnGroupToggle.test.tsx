@@ -1,10 +1,10 @@
+import type { HeaderGroupCell } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { columnGroupTestSlots } from "../internal/chromeTestSlots";
-import { defaultLabels } from "@adapttable/core";
 import { ColumnGroupToggleChrome } from "./ColumnGroupToggle";
-import type { HeaderGroupCell } from "@adapttable/core";
 
 const cell = (over: Partial<HeaderGroupCell> = {}): HeaderGroupCell => ({
   key: "g",

@@ -4,9 +4,9 @@
  * Expansion, lazy children and the walked hierarchy live on this entry.
  * The hooks mount in-tree through {@link TREE_LIVE}.
  */
+import { buildTreeEntries, treeColumnKey } from "@adapttable/core";
 import { type ReactNode, useMemo } from "react";
 
-import { buildTreeEntries, treeColumnKey } from "@adapttable/core";
 import { useLazyChildren } from "../tree/useLazyChildren";
 import { useTreeExpansion } from "../tree/useTreeExpansion";
 import { hasLoadedChildren } from "../virtual/chromeBodyShared";

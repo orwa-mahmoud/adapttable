@@ -5,19 +5,20 @@
  * table never downloads this module.
  */
 import { FILTER_ENGINE_IMPL } from "@adapttable/core";
+
 import {
   type UseTableDataOptions,
   type UseTableDataResult,
   useTableDataWithEngine,
 } from "./useTableDataImpl";
 
-export { isDeclarativeFilters } from "@adapttable/core";
 export type {
   DataModeProps,
   TableQueryHandler,
   UseTableDataOptions,
   UseTableDataResult,
 } from "./useTableDataImpl";
+export { isDeclarativeFilters } from "@adapttable/core";
 
 /**
  * Resolve the table's data tier and the declarative-filter runtime.

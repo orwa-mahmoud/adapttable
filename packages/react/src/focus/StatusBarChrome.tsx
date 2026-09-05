@@ -18,14 +18,14 @@
  * a row of text is still that kit's text — its muted colour, its numeric
  * font, its spacing — so core supplies no markup for it.
  */
-import type { ReactNode } from "react";
-
-import { computePagination } from "@adapttable/core";
 import type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
+import { computePagination } from "@adapttable/core";
+import type { ReactNode } from "react";
 
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
 import type { SelectionStats } from "@adapttable/core";
+
 import {
   SelectionStatsChrome,
   type SelectionStatsSlots,

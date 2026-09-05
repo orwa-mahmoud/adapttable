@@ -4,9 +4,9 @@
  * What matters here is what a spreadsheet user expects: which way a drag is
  * going, which cells it covers, and whether the values count on or repeat.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { fillDirection, fillRangeEdits, fillTargetRange } from "./fillRange";
 
 interface Row {

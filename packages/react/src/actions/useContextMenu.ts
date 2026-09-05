@@ -16,9 +16,8 @@
  * put focus back on it. A menu that drops focus to the document leaves a
  * keyboard user at the top of the page, having lost the row they were on.
  */
-import { useCallback, useRef, useState } from "react";
-
 import type { ContextMenuTarget } from "@adapttable/core";
+import { useCallback, useRef, useState } from "react";
 
 /**
  * Where on screen the menu should appear.

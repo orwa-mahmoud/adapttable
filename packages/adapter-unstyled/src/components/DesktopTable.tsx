@@ -1,7 +1,7 @@
 /** The desktop table: header, pinned columns, rows and summary. */
-import { edgePinStyle, PIN_Z } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
-import { resolveColumnFooter, type ColumnDef } from "@adapttable/react";
+import { edgePinStyle, PIN_Z } from "@adapttable/core";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellSpanMark,

@@ -23,7 +23,6 @@
  * cell is an empty cell rather than a zero.
  */
 import type { DisplayValue } from "../display";
-
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,

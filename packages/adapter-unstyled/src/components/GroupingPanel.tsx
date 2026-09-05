@@ -88,7 +88,7 @@ function DropZone({
       data-active={active || undefined}
       className={classNames.groupingDropZone}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       {empty ? label : <span aria-hidden="true">│</span>}
@@ -181,7 +181,7 @@ function RemoveZone({
       data-active={active || undefined}
       className={classNames.groupingRemoveZone}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       {label}

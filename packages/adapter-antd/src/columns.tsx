@@ -1,8 +1,3 @@
-import {
-  ACTIONS_COLUMN_KEY,
-  REORDER_COLUMN_KEY,
-  columnResizeHandleProps,
-} from "@adapttable/core";
 import type {
   ConfirmHandler,
   FilterDef,
@@ -15,16 +10,21 @@ import type {
   TreeEntry,
 } from "@adapttable/core";
 import type { CellSpanAppearance, SortLevel } from "@adapttable/core";
-import { columnHeaderController, filterDefForColumn } from "@adapttable/react";
+import {
+  ACTIONS_COLUMN_KEY,
+  columnResizeHandleProps,
+  REORDER_COLUMN_KEY,
+} from "@adapttable/core";
 import type { CellElementProps, EditableCellEditing } from "@adapttable/react";
+import { columnHeaderController, filterDefForColumn } from "@adapttable/react";
+import { type ColumnDef, resolveColumnHeader } from "@adapttable/react";
 import type {
   FilterFormSource,
   GridFocusState,
   GroupCollapseState,
+  GroupingDragProps,
   PinSide,
 } from "@adapttable/react/adapter";
-
-import { type ColumnDef, resolveColumnHeader } from "@adapttable/react";
 import {
   type BodyCell,
   cellFlashAttr,
@@ -616,7 +616,7 @@ function renderLeafDataCell<TRow>(
         <OptionalEditableCell
           editing={options.editing}
           row={record}
-          column={column as ColumnDef<TRow>}
+          column={column}
           rowId={options.getRowId(record)}
           rowIndex={index}
           rows={options.rows}
@@ -902,7 +902,8 @@ export function buildColumns<TRow>({
           // adapter's own props: the kit's values still win where they
           // overlap, but nothing core adds is silently dropped.
           const core = getHeaderCellProps?.(column);
-          const groupingDrag = groupingPanel?.headerDragProps(column.key);
+          const groupingDrag = groupingPanel?.headerDragProps(column.key) as
+            GroupingDragProps | undefined;
           return {
             ...core,
             ...groupingDrag,

@@ -1,20 +1,3 @@
-import type { CSSProperties, ReactNode } from "react";
-import { createElement, useCallback, useEffect, useMemo } from "react";
-
-import { columnFlexShares, columnSizeStyle } from "@adapttable/core";
-import { resolveColumns } from "../columns/resolveColumns";
-import { visibleReactColumns } from "../columns/reactColumns";
-import { SEARCH_DEBOUNCE_MS } from "@adapttable/core";
-import {
-  type ActiveFilterChip,
-  type ChipLabelResolver,
-} from "../filters/useActiveFilterChips";
-import { useExtraChips } from "../filters/useExtraChips";
-import { resolveLabels } from "@adapttable/core";
-import { computePagination, type PaginationInfo } from "@adapttable/core";
-import { type SelectionState, useSelection } from "../selection/useSelection";
-import { nextSort } from "@adapttable/core";
-import { deriveSortByOptions } from "@adapttable/core";
 import type { TableSource } from "@adapttable/core";
 import type {
   BulkAction,
@@ -23,10 +6,27 @@ import type {
   SortDirection,
   TableLabels,
 } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
+import { columnFlexShares, columnSizeStyle } from "@adapttable/core";
+import { SEARCH_DEBOUNCE_MS } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
+import { computePagination, type PaginationInfo } from "@adapttable/core";
+import { nextSort } from "@adapttable/core";
+import { deriveSortByOptions } from "@adapttable/core";
 import { devWarn } from "@adapttable/core";
 import { mergeProps, type Props } from "@adapttable/core";
 import { stableKey } from "@adapttable/core";
+import type { CSSProperties, ReactNode } from "react";
+import { createElement, useCallback, useEffect, useMemo } from "react";
+
+import type { ColumnDef } from "../columnDef";
+import { visibleReactColumns } from "../columns/reactColumns";
+import { resolveColumns } from "../columns/resolveColumns";
+import {
+  type ActiveFilterChip,
+  type ChipLabelResolver,
+} from "../filters/useActiveFilterChips";
+import { useExtraChips } from "../filters/useExtraChips";
+import { type SelectionState, useSelection } from "../selection/useSelection";
 import { useSearchInput } from "./useSearchInput";
 
 const EMPTY_LABELS: Readonly<Record<string, ChipLabelResolver>> = {};

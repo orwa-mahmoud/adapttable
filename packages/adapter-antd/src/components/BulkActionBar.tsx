@@ -112,7 +112,7 @@ export function BulkBar(props: Readonly<BulkBarChromeProps>) {
               size="small"
               type="primary"
               danger={isDangerColor(action.color)}
-              icon={action.icon}
+              icon={action.icon as ReactNode}
               title={action.disabledReason?.(ids)}
               disabled={action.disabledReason?.(ids) !== undefined || busy}
               onClick={() => runner.run(action, ids, context)}

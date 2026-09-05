@@ -1,9 +1,13 @@
 /**
  * Neutral consumer: engine operations without React installed.
  */
-import { createTableEngine, type ColumnMetadata } from "@adapttable/core";
+import { type ColumnMetadata, createTableEngine } from "@adapttable/core";
 
-type Row = { id: string; name: string; team: string };
+interface Row {
+  id: string;
+  name: string;
+  team: string;
+}
 
 const columns: ColumnMetadata<Row>[] = [
   { key: "name", header: "Name", sortable: true },

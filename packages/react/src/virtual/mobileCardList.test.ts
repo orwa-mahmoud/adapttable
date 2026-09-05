@@ -1,7 +1,6 @@
+import { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
-
-import { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 
 describe("mobileCardListStyle", () => {
   it("is omitted when the list is not a scroll box", () => {

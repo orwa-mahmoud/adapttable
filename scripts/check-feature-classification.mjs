@@ -341,17 +341,19 @@ const codemodSource = readFileSync(
   join(PACKAGES, "cli", "src", "migrateV3.ts"),
   "utf8"
 );
-const codemodAliasStart = codemodSource.indexOf(
-  "const MOVED_CORE_EXPORTS = new Set(["
-);
-const codemodAliasEnd = codemodSource.indexOf("]);", codemodAliasStart);
+// The codemod's route table maps every moved export to the package that now
+// owns it, keyed by the specifier a v2 source imported it from. Read the
+// symbol keys: a specifier key starts with "@", a symbol never does.
+// Only the names that left core's MAIN entry are main-entry aliases; the
+// table's other blocks are subpath moves, which this inventory does not cover.
+const codemodAliasStart = codemodSource.indexOf('"@adapttable/core": {');
+const codemodAliasEnd = codemodSource.indexOf("\n  },", codemodAliasStart);
 const codemodAliases = new Set(
-  codemodSource
-    .slice(codemodAliasStart, codemodAliasEnd)
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith('"') && line.endsWith('",'))
-    .map((line) => JSON.parse(line.slice(0, -1)))
+  [
+    ...codemodSource
+      .slice(codemodAliasStart, codemodAliasEnd)
+      .matchAll(/^[ \t]+"?([A-Za-z_$][\w$]*)"?:[ \t]*"@adapttable\//gm),
+  ].map((match) => match[1])
 );
 for (const name of inventoried) {
   if (!codemodAliases.has(name)) {

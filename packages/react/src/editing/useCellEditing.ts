@@ -6,8 +6,6 @@
  * only surface editors when the table passes `onCellEdit` (see
  * {@link TableChrome.editing}) and a column sets `editable`.
  */
-import { useCallback, useMemo, useRef, useState } from "react";
-
 import {
   type CellEditCommit,
   type CellEditTarget,
@@ -16,6 +14,8 @@ import {
   readEditableCellValue,
   stepEditableCell,
 } from "@adapttable/core";
+import { useCallback, useMemo, useRef, useState } from "react";
+
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 

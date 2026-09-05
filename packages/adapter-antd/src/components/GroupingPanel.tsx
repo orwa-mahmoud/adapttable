@@ -50,7 +50,7 @@ const slots: GroupingPanelSlots = {
       size="small"
       role="group"
       aria-label={label}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
       styles={{ body: { padding: empty ? "6px 10px" : "6px 8px" } }}
       style={{
@@ -161,7 +161,7 @@ const slots: GroupingPanelSlots = {
       size="small"
       role="group"
       aria-label={label}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
       styles={{ body: { padding: "6px 10px" } }}
       style={{

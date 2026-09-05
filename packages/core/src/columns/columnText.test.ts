@@ -1,9 +1,9 @@
 /**
  * A column's cell as text.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { columnText } from "./columnText";
 
 interface Row {

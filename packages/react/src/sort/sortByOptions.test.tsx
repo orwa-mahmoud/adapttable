@@ -1,7 +1,7 @@
+import { deriveSortByOptions } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
-import { deriveSortByOptions } from "@adapttable/core";
 
 interface Row {
   id: string;

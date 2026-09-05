@@ -1,9 +1,9 @@
+import { safeLocalStorage } from "@adapttable/core";
+import { applyTableUrlState, captureTableUrlState } from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { LayoutStorage } from "../columns/useColumnLayoutStorageState";
-import { safeLocalStorage } from "@adapttable/core";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
-import { applyTableUrlState, captureTableUrlState } from "@adapttable/core";
 
 /**
  * One captured view: a name plus the table's own URL params.

@@ -2,8 +2,8 @@ import { render } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it } from "vitest";
 
-import { useFrontendData } from "../source/useFrontendData";
 import type { ColumnDef } from "../columnDef";
+import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableChrome } from "../useTableChrome";
 import { ChromeExtrasGate } from "./chromeExtrasGate";

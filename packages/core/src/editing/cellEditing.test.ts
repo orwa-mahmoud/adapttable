@@ -1,6 +1,6 @@
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import {
   applyCellEditCommit,
   booleanDraft,

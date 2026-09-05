@@ -3,14 +3,14 @@
  * it: no type arguments anywhere. That IS the assertion — this file has to
  * compile clean.
  */
-import type { TableFeature } from "@adapttable/core";
+import type { TableFeature } from "@adapttable/react";
 import {
   columnMenu,
   grouping,
   multiSort,
   rowReorder,
   virtualize,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 interface Person {
   id: string;

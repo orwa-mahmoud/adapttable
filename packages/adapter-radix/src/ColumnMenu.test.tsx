@@ -1,6 +1,5 @@
 import type { UseColumnLayoutResult } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
-
 import {
   FeatureHostProvider,
   type FeatureHostState,

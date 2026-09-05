@@ -8,7 +8,7 @@
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue;
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
@@ -20,7 +20,7 @@ export function deserializePivot(raw: string | null): PivotConfig;
 export function deserializePivotState(raw: string | null): PivotUrlState;
 
 // @public
-export type DisplayValue = unknown;
+export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
 export const FILTER_TREE_PARAM = "ft";

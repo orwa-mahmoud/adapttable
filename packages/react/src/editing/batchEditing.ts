@@ -12,16 +12,16 @@
  * also what makes the write atomic if the host wants it to be — a single request
  * with every change in it.
  */
-import { useCallback, useMemo, useRef, useState } from "react";
-
 import type { FeatureHostState } from "@adapttable/core";
-import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditableColumnLike } from "@adapttable/core";
 import {
   parseCellEditValue,
   readEditableCellValue,
   resolveCellEditor,
 } from "@adapttable/core";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 

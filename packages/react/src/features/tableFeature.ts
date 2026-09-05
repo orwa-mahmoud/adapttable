@@ -23,10 +23,12 @@ import type {
 import type { CustomCellEditorRender } from "@adapttable/core";
 import type { ExportWriter } from "@adapttable/core";
 import type { FilterTypeSpec } from "@adapttable/core";
-import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import type { FeatureRegistration, NeutralFeatureHost } from "@adapttable/core";
+
+import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import type { FeatureProviderContribution, FeatureRender } from "./providers";
 
+export type { SidePanelEntry } from "../layout/SidePanelChrome";
 export type { Command } from "@adapttable/core";
 export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
 export type { Aggregator } from "@adapttable/core";
@@ -39,7 +41,6 @@ export type {
 export type { CustomCellEditorRender } from "@adapttable/core";
 export type { ExportWriter } from "@adapttable/core";
 export type { FilterTypeSpec } from "@adapttable/core";
-export type { SidePanelEntry } from "../layout/SidePanelChrome";
 
 /**
  * Internal table configuration a composed feature may write.

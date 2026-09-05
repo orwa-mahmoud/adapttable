@@ -16,6 +16,7 @@
  * })
  * ```
  */
+export type { ColumnDef } from "./columnDef";
 export {
   finiteSparklineValues,
   Sparkline,
@@ -26,7 +27,6 @@ export {
   type SparklineProps,
   sparklineSummary,
 } from "./columns/sparkline";
-export type { ColumnDef } from "./columnDef";
 
 /**
  * The member types the signatures above hand back.

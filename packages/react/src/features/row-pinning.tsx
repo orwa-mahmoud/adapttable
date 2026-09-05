@@ -5,9 +5,10 @@
  * that never imports it never carries those hooks. They mount in-tree
  * through {@link PINNING_LIVE}.
  */
+import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
+import { devWarn } from "@adapttable/core";
 import { type ReactNode, useEffect } from "react";
 
-import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
 import {
   type RowPinLabels,
   type RowPinningState,
@@ -15,7 +16,6 @@ import {
   useRowPinning,
 } from "../rows/rowPinning";
 import { useRowPinningUrlState } from "../url/useRowPinningUrlState";
-import { devWarn } from "@adapttable/core";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, PINNING_LIVE } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";

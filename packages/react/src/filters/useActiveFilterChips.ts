@@ -1,7 +1,6 @@
-import { useMemo } from "react";
-
 import type { FilterValue, TableLabels } from "@adapttable/core";
 import type { ChipLabelResolver } from "@adapttable/core";
+import { useMemo } from "react";
 
 /**
  * A single removable filter chip.

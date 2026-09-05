@@ -1,7 +1,6 @@
-import { resolveLabels } from "@adapttable/core";
 import type { GroupAggregateOverrides } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
-
 import type { GroupingPanelState } from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";

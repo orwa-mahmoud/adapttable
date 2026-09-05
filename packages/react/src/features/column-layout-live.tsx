@@ -5,11 +5,11 @@
  * This entry mounts {@link useColumnLayout} when a layout-owning feature
  * is composed.
  */
+import { autoSizeColumns as autoSizeAllColumns } from "@adapttable/core";
 import { type ReactNode, useCallback } from "react";
 
-import { autoSizeColumns as autoSizeAllColumns } from "@adapttable/core";
-import { applyReactColumnNames } from "../columns/reactColumns";
 import { flattenReactColumnTree } from "../columns/flattenColumnTree";
+import { applyReactColumnNames } from "../columns/reactColumns";
 import { resolveColumns } from "../columns/resolveColumns";
 import { useColumnLayout } from "../columns/useColumnLayout";
 import { slotRender } from "./providers";

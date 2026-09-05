@@ -1,9 +1,9 @@
+import type { ExtraFilters, FilterDef, FilterOption } from "@adapttable/core";
 import {
   defaultFilterRegistry,
   defaultLabels,
   resolveFilterRegistry,
 } from "@adapttable/core";
-import type { ExtraFilters, FilterDef, FilterOption } from "@adapttable/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";

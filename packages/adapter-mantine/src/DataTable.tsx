@@ -1,7 +1,6 @@
-import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
+import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import type { UseSavedViewsOptions } from "@adapttable/react";
-
 import {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
@@ -56,12 +55,7 @@ function ColumnMenuSlot<TRow>({
   ...props
 }: Readonly<{ enabled: boolean } & ColumnMenuSlotProps<TRow>>) {
   if (!enabled) return null;
-  return (
-    <FeatureSlot
-      slot={COLUMN_MENU}
-      props={props as unknown as ColumnMenuSlotProps<never>}
-    />
-  );
+  return <FeatureSlot slot={COLUMN_MENU} props={props} />;
 }
 
 /**

@@ -555,6 +555,8 @@ export {
   type DataModeProps,
   type TableQueryHandler,
 } from "./source/useTableData";
+export type { Slot } from "./state/slots";
+export { fillSlot } from "./state/slots";
 export {
   type SharedTableRenderProps,
   type TableRenderModel,
@@ -690,7 +692,7 @@ export type {
 } from "@adapttable/core";
 export type { QuerySupport } from "@adapttable/core";
 export type { TableSource } from "@adapttable/core";
-export type { Slot, TableErrorState } from "@adapttable/core";
+export type { TableErrorState } from "@adapttable/core";
 export type { FeatureNoticeAppearance } from "@adapttable/core";
 export type { TreeEntry } from "@adapttable/core";
 export type {
@@ -825,7 +827,7 @@ export {
   rowStyleSignature,
 } from "@adapttable/core";
 export { deriveSortByOptions } from "@adapttable/core";
-export { fillSlot, tableErrorState } from "@adapttable/core";
+export { tableErrorState } from "@adapttable/core";
 export { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 export {
   type KeyedVirtualization,

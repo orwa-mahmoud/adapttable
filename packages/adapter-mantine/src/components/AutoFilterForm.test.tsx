@@ -1,13 +1,13 @@
-import {
-  defaultFilterRegistry,
-  defaultLabels,
-  resolveFilterRegistry,
-} from "@adapttable/core";
 import type {
   ExtraFilters,
   FilterDef,
   TableLabels,
   TableSource,
+} from "@adapttable/core";
+import {
+  defaultFilterRegistry,
+  defaultLabels,
+  resolveFilterRegistry,
 } from "@adapttable/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

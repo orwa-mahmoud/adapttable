@@ -3,10 +3,10 @@
  * membership, sort position, group bucket or total fails these tests —
  * they compare against the same primitives the table already uses.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
 import { aggregate } from "../aggregate/aggregate";
+import type { ColumnModel } from "../columnModel";
 import type { FilterDef } from "../filters/filterDefs";
 import { evaluateFilterTree } from "../filters/filterTree";
 import {
@@ -165,7 +165,7 @@ function oracle(
     ? buildGroupedFlatModel({
         rows: sorted,
         groupBy: config.groupBy,
-        columns: (config.columns ?? []) as readonly ColumnModel<Person>[],
+        columns: config.columns ?? [],
         getRowId: config.getRowId,
         collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
         aggregates: config.groupAggregates,

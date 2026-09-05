@@ -10,16 +10,16 @@
  * host ONE patch. Cancel throws all of it away. The unit changes; nothing else
  * does — the same editors, the same validators, the same save states.
  */
-import { useCallback, useMemo, useRef, useState } from "react";
-
 import type { FeatureHostState } from "@adapttable/core";
-import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditableColumnLike } from "@adapttable/core";
 import {
   parseCellEditValue,
   readEditableCellValue,
   resolveCellEditor,
 } from "@adapttable/core";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import { useEventCallback } from "../hooks/useEventCallback";
 import type { EditEventHandler } from "./editingEvents";
 import { observeEdit } from "./editingEvents";
 

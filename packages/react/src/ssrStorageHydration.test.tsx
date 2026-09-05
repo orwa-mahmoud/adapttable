@@ -4,6 +4,7 @@
  * markup even when the store is populated — persisted layouts and saved
  * views hydrate in an effect after mount, never in an initializer.
  */
+import * as env from "@adapttable/core";
 import { act } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
@@ -12,7 +13,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useColumnLayoutStorageState } from "./columns/useColumnLayoutStorageState";
 import { createMemoryAdapter } from "./url/adapter";
 import { useSavedViews } from "./url/useSavedViews";
-import * as env from "@adapttable/core";
 
 const adapter = createMemoryAdapter("");
 

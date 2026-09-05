@@ -9,7 +9,6 @@
  */
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -87,7 +86,7 @@ describe("renderCard", () => {
     render(
       <Harness
         renderCard={(_row, card) => (
-          <p>{card.fields.map((field) => field.value as ReactNode)}</p>
+          <p>{card.fields.map((field) => field.value)}</p>
         )}
       />
     );

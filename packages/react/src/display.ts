@@ -1,5 +1,7 @@
+import { type CellSpanAppearance, cellSpanMark } from "@adapttable/core";
 import type { CSSProperties } from "react";
 
+import type { ColumnDef } from "./columnDef";
 import {
   edgePinStyle,
   type PinLeads,
@@ -7,8 +9,6 @@ import {
   type PinOffset,
   type PinSide,
 } from "./columns/useColumnLayout";
-import { type CellSpanAppearance, cellSpanMark } from "@adapttable/core";
-import type { ColumnDef } from "./columnDef";
 
 export type { PinSide };
 

@@ -5,11 +5,10 @@
  * wide a rendered cell is — a cell holding a badge, an avatar and a name has no
  * width the data could report.
  */
-import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-
 import { autoSizeColumns, measureColumnWidth } from "@adapttable/core";
 import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "@adapttable/core";
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 /** jsdom lays nothing out, so each cell is told how wide its content is. */
 function table(

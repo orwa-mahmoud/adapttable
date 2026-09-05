@@ -1,6 +1,6 @@
-import { edgePinStyle, PIN_Z, pinnedCellStyle } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
-import { resolveColumnFooter, type ColumnDef } from "@adapttable/react";
+import { edgePinStyle, PIN_Z, pinnedCellStyle } from "@adapttable/core";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellHighlightStyle,
@@ -799,7 +799,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
               {columns.map((column) => (
                 <Table.Td
                   key={column.key}
-                  {...props.table.getCellProps(column as ColumnDef<TRow>)}
+                  {...props.table.getCellProps(column)}
                   fw={600}
                   c="dimmed"
                 >

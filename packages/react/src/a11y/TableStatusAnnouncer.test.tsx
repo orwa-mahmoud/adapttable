@@ -6,10 +6,10 @@
  * region is in the DOM from the first paint, it starts empty, and it does not
  * claim a second `role="status"` on a table that already has one.
  */
+import { defaultLabels } from "@adapttable/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { defaultLabels } from "@adapttable/core";
 import { TableStatusAnnouncer } from "./TableStatusAnnouncer";
 import { useTableStatusAnnouncement } from "./useTableStatusAnnouncement";
 

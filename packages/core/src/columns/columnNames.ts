@@ -7,7 +7,7 @@ export function declaredColumnName<TRow>(column: ColumnMetadata<TRow>): string {
 }
 
 /** Apply layout-owned display names without changing stable column keys. */
-export function applyColumnNames<TCol extends ColumnMetadata<any>>(
+export function applyColumnNames<TCol extends ColumnMetadata<never>>(
   columns: readonly TCol[],
   names: Readonly<Record<string, string>> | undefined
 ): TCol[] {

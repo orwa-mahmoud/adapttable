@@ -432,10 +432,66 @@ desktop-visible columns so every card keeps enough identity to be useful.
 <DataTable mobileIdentityColumns={2} />
 ```
 
+## The engine, and why it has no React in it
+
+Filtering, sorting, paging and grouping are decisions about data, not about
+the DOM. In v3 they live in `@adapttable/core` as a plain object with no
+framework in its import graph, and `@adapttable/react` is the binding that
+subscribes a component tree to one.
+
+```ts
+import { createTableEngine } from "@adapttable/core";
+
+const engine = createTableEngine({
+  data: people,
+  columns: [{ key: "name", sortable: true }],
+  rowKey: (row) => row.id,
+  defaults: { limit: 25 },
+});
+
+engine.dispatch({ type: "setSearch", search: "ada" });
+engine.rows("page"); // the rows that page shows
+```
+
+`CreateTableEngineOptions` is what you build one from. `data`, `columns`,
+`rowKey`, `locale`, `paginationMode`, `filterFn` and `getSearchText` stay
+live — change one and the engine follows. `tableId` and `defaults` are read
+once, because an identity and a seed cannot be retroactively different.
+
+`TableEngine` is the handle:
+
+| Member                                            | What it gives you                                                                                                                 |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `snapshot()`                                      | A `TableSnapshot`: the current query state, the page it is showing, and the four revision counters.                               |
+| `rows(scope)`                                     | A `TableRowScope` — `"page"`, `"visible"` or `"full"`.                                                                            |
+| `dispatch(operation)`                             | A `TableOperation` a person performed: `setSort`, `setSearch`, `setPage`, `setLimit`, `setFilters`, `setGroupBy`, `setSelection`. |
+| `configure(patch)`                                | A `TableEngineConfigPatch` — controlled state a binding replays. Pass `{ silent: true }` to move without waking subscribers.      |
+| `invalidate(axes, next)`                          | Tell it the data or columns changed. `invalidate(["data"])` with no new array re-derives from the rows it already holds.          |
+| `subscribe(axes, listener)`                       | Wake on a `TableRevisionAxis` — `data`, `view`, `schema` or `policy` — and nothing else.                                          |
+| `cellValue` / `rowByKey` / `rowKey` / `getColumn` | Read one cell, find a row, take a row's identity, look up a column.                                                               |
+
+`TableRevisions` carries those four counters. They are separate so a consumer
+can wake on the one it cares about: a virtualizer on `data`, a toolbar on
+`view`, an agent on `policy`.
+
+`snapshot().page` is the page actually on screen. Ask for page 9 of a table
+that shrank to three and it reports the last page, while `requestedPage`
+remembers what you asked for — so restoring the rows restores the page,
+instead of stranding a reader on page 1.
+
+### Handing the engine to something that is not a table
+
+`createNeutralTable(engine, tableId, binding)` wraps one as a `NeutralTable`:
+the same rows and revisions plus an `operations` map saying which of them are
+actually wired right now. That is the shape `@adapttable/ai` reads, and the
+`NeutralTableBinding` is how a host tells it what the surrounding UI can do.
+An operation that stops being wired disappears from the map, so nothing is
+offered a capability the table can no longer perform.
+
 ## The two ways to use it
 
 1. **Batteries-included** — `import { DataTable } from "@adapttable/<kit>"`.
-2. **Headless** — `import { useDataTable } from "@adapttable/core"` and render
+2. **Headless** — `import { useDataTable } from "@adapttable/react"` and render
    your own markup with the returned prop-getters.
 
 ---
@@ -6611,6 +6667,34 @@ hook records it as an empty-valued param (`q=`, `f_status=`) so the default
 does not instantly resurrect — a missing param means "default applies", an
 empty one means "explicitly cleared".
 
+## Reading and writing the params yourself
+
+The codecs the table uses are published, so a route handler, a saved-view
+store, or a test can read and write the same URL without mounting a table.
+
+`parseTableUrlState(search)` reads a whole query string into table state;
+`updateTableUrlState(search, patch)` returns the next query string;
+`applyTableUrlState` and `captureTableUrlState` move that state on and off a
+live table.
+
+Each param has a named constant and, where the value is not a plain string, a
+reader and a writer:
+
+| Constant                                        | Reader / writer                                                        |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `PARAM_PAGE`, `PARAM_LIMIT`                     | `readPage`, `readLimit`                                                |
+| `PARAM_SEARCH`, `PARAM_FIND`                    | plain strings                                                          |
+| `PARAM_SORT_BY`, `PARAM_SORT_DIR`               | `readSortDir`; the chain is `readSortLevels` / `writeSortLevels`       |
+| `PARAM_GROUP_BY`, `PARAM_GROUP_AGGREGATES`      | ordered keys and the per-column overrides                              |
+| `PARAM_COL_HIDDEN`                              | `readColumnLayout` / `writeColumnLayout` cover the whole column layout |
+| `PARAM_DENSITY`, `PARAM_FORMULA`, `PARAM_PIVOT` | the density, formula-column and pivot codecs                           |
+| `f_<key>`                                       | `readExtra` / `writeExtra`                                             |
+| `ft`                                            | `readFilterTreeParam` / `writeFilterTreeParam`                         |
+| row pins                                        | `readRowPins` / `writeRowPins`                                         |
+
+Writing a value that equals the default deletes the param instead of spelling
+it out, which is what keeps a shared link short.
+
 ## SSR
 
 The default History-API adapter hydrates from an empty query string (the
@@ -7227,6 +7311,52 @@ It never dumps the dataset or every feature instruction. Bounded
 in [`@adapttable/ai`](./ai.md). The kit strip uses `agent-approval`,
 `agent-approval-list`, `agent-approval-approve`, `agent-approval-reject`,
 and `agent-approval-row`. Escape rejects. Enter is not a silent confirm.
+
+## Registering a capability of your own
+
+`createAgentSession({ capabilities })` takes `AgentCapabilityDefinition`s. A
+definition carries a namespaced `key`, a one-line `summary` for the catalog, a
+`guide` with JSON Schema for its input and output, an `isEnabled(observation)`
+that decides whether it is wired right now, and `execute`.
+
+```ts
+const archive: AgentCapabilityDefinition = {
+  key: "orders.archive",
+  summary: "Archive an order.",
+  kind: "write",
+  guide: { guide: "…", input: archiveInput, output: archiveOutput },
+  isEnabled: (observation) => observation.writePolicy === "allow",
+  execute: (context, args) => host.archive((args as ArchiveArgs).rowKey),
+};
+```
+
+`kind` is what makes it governed. A `"write"` or `"destructive"` capability
+goes through the same path as a built-in mutation, and the session — not your
+handler — enforces it:
+
+1. the table's write policy, then the commit mode;
+2. `plan`, if you wrote one, to resolve a side-effect-free `CapabilityPlan`
+   the approver can read;
+3. approval, when the table's `approval` policy asks for it;
+4. the revision and the permissions again, after every await;
+5. only then `execute`.
+
+A handler that never calls `onApprove` therefore cannot write unapproved, and a
+denied or still-pending approval calls it zero times.
+
+Staging is declared, not assumed. A governed capability defaults to
+`staging: "unsupported"`, so a table running `commit: "stage"` rejects the call
+with `commit-incompatible` before your handler runs rather than committing
+something the host wanted staged. Set `staging: "supported"` when the
+capability really can stage.
+
+`AgentCapabilityContext` is what `execute` receives: the `observation` it was
+authorized against, the host's `apply` callbacks, a live `observe()`, the bound
+`onApprove`, and — for a governed write — the approved `plan` and the resolved
+`commit` mode.
+
+A `read` or `view` capability skips all of it. Nothing about a view operation
+asks for write approval.
 
 ---
 
@@ -9659,6 +9789,18 @@ All from `@adapttable/core`.
 
 ### URL state & persistence
 
+- **The codecs themselves**, for reading and writing the query string without
+  a table — see [URL state](./url-state.md#reading-and-writing-the-params-yourself).
+  `parseTableUrlState(search)` reads a whole query string;
+  `updateTableUrlState(search, patch)` returns the next one;
+  `applyTableUrlState` / `captureTableUrlState` move that state on and off a
+  live table. Per param: `PARAM_PAGE`, `PARAM_LIMIT`, `PARAM_SEARCH`,
+  `PARAM_FIND`, `PARAM_SORT_BY`, `PARAM_SORT_DIR`, `PARAM_GROUP_BY`,
+  `PARAM_GROUP_AGGREGATES`, `PARAM_COL_HIDDEN`, `PARAM_DENSITY`,
+  `PARAM_FORMULA`, `PARAM_PIVOT`, with `readPage`, `readLimit`, `readSortDir`,
+  `readSortLevels` / `writeSortLevels`, `readColumnLayout` /
+  `writeColumnLayout`, `readExtra` / `writeExtra`, `readFilterTreeParam` /
+  `writeFilterTreeParam`, and `readRowPins` / `writeRowPins`.
 - `useTableUrlState(options?): UseTableUrlStateResult` — page / limit /
   search / sort / grouping / group-aggregation overrides / extra-filter bag in
   the query string, with setters
@@ -9718,6 +9860,60 @@ All from `@adapttable/core`.
   affordances.
 - `useFilterTriggerToggle()` / `useChromeScrollReset()` — filter-trigger
   open state / scroll reset on query change.
+
+### The neutral engine
+
+Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-react-in-it).
+
+- `createTableEngine(options: CreateTableEngineOptions): TableEngine` — build
+  an engine over in-memory rows. Filter, sort, page and group run here, with no
+  React in the import graph.
+- `TableEngine` — the handle: `snapshot()`, `rows(scope)`, `dispatch(op)`,
+  `configure(patch)`, `invalidate(axes, next)`, `subscribe(axes, listener)`,
+  `cellValue`, `rowByKey`, `rowKey`, `getColumn`, `dispose()`.
+- `TableSnapshot` — query state plus `page` (the page actually shown),
+  `requestedPage`, `lastPage`, `total` and `revisions`.
+- `TableOperation` — a person's action: `setSort`, `setSearch`, `setPage`,
+  `setLimit`, `setFilters`, `setGroupBy`, `setSelection`.
+- `TableRowScope` — `"page"`, `"visible"` or `"full"`.
+- `TableRevisions` / `TableRevisionAxis` — the four counters (`data`, `view`,
+  `schema`, `policy`) and the axis names you subscribe to.
+- `cellValue(row, column, locale?)` — resolve one cell's value, following a
+  column's `i18n` path.
+- `createNeutralTable(engine, tableId, binding?): NeutralTable` — wrap an
+  engine as the shape `@adapttable/ai` reads: rows, revisions, and an
+  `operations` map of what is wired right now. `NeutralTableBinding` is how a
+  host supplies the visible rows and that map.
+- `devWarn(message)` — development-only warning, printed once per message.
+
+### The builder tier
+
+`@adapttable/react/adapter` publishes what the eight kits are made of, for
+anyone wiring a ninth. App code rarely reaches for these; each is here because
+an adapter or a plugin genuinely needs it.
+
+| Name                                                                                                                                     | What it is                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useTableEngine(options)`                                                                                                                | Subscribe a React tree to one `TableEngine`. Two calls are two isolated tables.                                                                                                    |
+| `revisionToken(revisions)`                                                                                                               | Collapse the four revision counters into one comparable string.                                                                                                                    |
+| `engineSearchText(row)` / `cellSortValue` / `resolveColumnPath`                                                                          | The engine's default searchable text, its sort-value resolution, and a column's `i18n` path.                                                                                       |
+| `FeatureRegistration` / `NeutralFeatureHost` / `currentFeatureHost()` / `runWithFeatureHost`                                             | How a feature registers with the host, and the ambient host a registration runs against.                                                                                           |
+| `collectFeatureNotices(input)` / `CollectFeatureNoticesInput`                                                                            | The dev-time notices a table raises when a feature is asked for something it cannot do.                                                                                            |
+| `groupedEntriesForStrategy(options)` / `GroupedEntriesForStrategyOptions` / `groupingComputationKind` / `GroupingComputationKind`        | Which grouping computation a view needs, and the entries it produces.                                                                                                              |
+| `groupingDragKey` / `moveGroupingKey` / `moveGroupingKeyBy` / `removeGroupingKey` / `hasGroupingColumnDrag` / `GROUPING_COLUMN_DND_MIME` | Reordering the grouping panel's keys by pointer or keyboard.                                                                                                                       |
+| `EMPTY_COLUMN_LAYOUT` / `applyColumnOrder` / `applyColumnNames` / `declaredColumnLayout` / `declaredColumnName`                          | The column-layout value and the pure functions that move it.                                                                                                                       |
+| `MIN_COLUMN_WIDTH` / `MAX_COLUMN_WIDTH` / `FALLBACK_PIN_WIDTH`                                                                           | Resize clamps, and the width a pin assumes when a column declares none.                                                                                                            |
+| `responsiveColumns(...)` / `ResponsiveColumns` / `ResponsiveFit`                                                                         | Which columns survive at a given width, and what had to be dropped.                                                                                                                |
+| `flattenReactColumnTree` / `resolveNeutralColumnHeaders` / `columnLetter`                                                                | Flatten a grouped column tree, resolve neutral headers, and the spreadsheet letter for an index.                                                                                   |
+| `resolveAssembly(...)`                                                                                                                   | The desktop table assembly a kit renders from.                                                                                                                                     |
+| `readEditableCellValue` / `stepEditableCell`                                                                                             | Read the value under an editable cell, and step the editor to the next one.                                                                                                        |
+| `contextMenuItems(...)` / `ContextMenuModelOptions`                                                                                      | The context-menu model, before a kit draws it.                                                                                                                                     |
+| `RowPinLookup` / `RowReorderDigest`                                                                                                      | Pin membership by row id, and the memo digest a reorder compares.                                                                                                                  |
+| `FilterEngine` / `FILTER_ENGINE_IMPL` / `FILTER_PREFIX` / `withFilterType` / `isEmptyFilterValue` / `applyFilterExtends`                 | The filter engine behind the declarative filters, its param prefix, and the helpers that extend it.                                                                                |
+| `applyQuerySupport` / `applyGroupLeafSelection` / `appendByKey`                                                                          | Narrow a query to what an endpoint supports, apply a leaf selection, append keyed entries.                                                                                         |
+| `DEFAULT_ROW_SIZE_PX` / `MOBILE_BREAKPOINT_PX` / `VIRTUAL_OVERSCAN` / `MAX_LIMIT`                                                        | The row-height estimate, the mobile breakpoint, the virtualizer overscan, and the page-size ceiling.                                                                               |
+| `CssProperties` / `ElementRef` / `isRtlElement` / `isBrowser` / `safeLocalStorage` / `safeSheetName` / `resetDevWarnings`                | Style and environment helpers: a style object, a ref that may be a callback, direction, environment probes, a spreadsheet-safe sheet name, and the dev-warning reset a test calls. |
+| `AgentHttpError` / `openAiToolNameMap` / `FakeSocket`                                                                                    | The HTTP bridge's structured failure, the reversible OpenAI tool-name map, and the in-memory socket the realtime tests drive.                                                      |
 
 ### Utilities
 
@@ -10405,7 +10601,8 @@ agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 `CapabilityKey`, `WritePolicy`, `ApprovalPolicy`, `CommitPolicy`,
 `RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
 `buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`, and
-the types `AgentApply`, `AgentCellEdit`, `AgentColumn`, `AgentLimits`,
+the types `AgentApply`, `AgentCapabilityContext`, `AgentCapabilityDefinition`,
+`AgentCellEdit`, `AgentColumn`, `AgentLimits`,
 `AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
 `AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
 `ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
@@ -10566,7 +10763,9 @@ a node, or a function receiving the `TableErrorState` the built-in was
 showing — `error`, `retry` (absent when the source cannot re-fetch, so a
 static `data` array offers no dead button) and `retrying`. Adapters derive it
 with `tableErrorState(source)` and resolve the slot with `fillSlot(slot,
-state)`, both from `@adapttable/core/adapter`. See
+state)`, both from `@adapttable/react/adapter`, where the slot and the node
+it resolves to are React content. `@adapttable/core` exports the neutral pair
+for a non-React host. See
 [customization](./customization.md).
 
 **Density chooser and fullscreen toggle.** `densityChooser()` puts a density
@@ -10832,12 +11031,16 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 | `ColorScheme`                                                                                                                                                                                                                                                                                                            | `"light" \| "dark" \| "auto"`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `PaginationMode`                                                                                                                                                                                                                                                                                                         | `"infinite" \| "paged" \| "auto"` (`"auto"` resolves by viewport: mobile → infinite).                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `FilterValue` / `ExtraFilters`                                                                                                                                                                                                                                                                                           | One URL-round-tripped filter value / the keyed bag of them.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `ColumnMetadata<TRow>` / `ColumnModel<TRow>`                                                                                                                                                                                                                                                                             | The neutral column the engine reads, and its alias on the main entry. `ColumnDef` is the React column that extends it.                                                                                                                                                                                                                                                                                                                                                                               |
+| `ColumnModelFilter<TRow>` / `ColumnModelEditor`                                                                                                                                                                                                                                                                          | A neutral column's declarative filter and editor, before a binding narrows them — `ColumnDef` narrows both to `ColumnFilter` and `CellEditor`.                                                                                                                                                                                                                                                                                                                                                       |
+| `DisplayValue`                                                                                                                                                                                                                                                                                                           | What a binding stores for a cell it will render — a primitive, or an object only that binding understands. The engine hands it back untouched and stringifies it only when it is already a primitive. React's faces of these say `ReactNode` instead.                                                                                                                                                                                                                                                                                                                                      |
+| `MobileCardRenderer<TRow>`                                                                                                                                                                                                                                                                                               | The neutral mobile-card renderer. A React table wants `ReactMobileCardRenderer`, whose field values are `ReactNode`.                                                                                                                                                                                                                                                                                                                                                                                 |
 | `SummaryRowFn<TRow>`                                                                                                                                                                                                                                                                                                     | Map a set of rows to per-column summary cells — one shape for `summaryRow` and `groupAggregates`. The React face of core's neutral `GroupAggregatesFn`, so its values are `ReactNode`.                                                                                                                                                                                                                                                                                                               |
 | `ReactComputedColumnSpec<TRow, TValue>`                                                                                                                                                                                                                                                                                  | Input to `computed` from `@adapttable/react`: the neutral spec with a React `column`.                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `ReactFormulaColumnsResult<TRow>`                                                                                                                                                                                                                                                                                        | What `buildFormulaColumns` from `@adapttable/react/formula` returns — the neutral result with `ColumnDef` columns.                                                                                                                                                                                                                                                                                                                                                                                   |
 | `ReactColumnGroupDef<TRow>`                                                                                                                                                                                                                                                                                              | A parent header whose children are React `ColumnDef`s.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `ReactUseColumnLayoutResult<TRow>`                                                                                                                                                                                                                                                                                       | `useColumnLayout`'s result over React columns.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `ReactMobileCardField<TRow>` / `ReactMobileCardModel<TRow>` / `ReactMobileCardRenderer<TRow>`                                                                                                                                                                                                                            | One card field / a card's model / a custom card body, with `ReactNode` values rather than the neutral model's `unknown`. See [mobile cards](./mobile.md).                                                                                                                                                                                                                                                                                                                                            |
+| `ReactMobileCardField<TRow>` / `ReactMobileCardModel<TRow>` / `ReactMobileCardRenderer<TRow>`                                                                                                                                                                                                                            | One card field / a card's model / a custom card body, with `ReactNode` values rather than the neutral model's `DisplayValue`. See [mobile cards](./mobile.md).                                                                                                                                                                                                                                                                                                                                            |
 | `ReactColumnResizeHandleProps` / `toReactColumnResizeHandleProps`                                                                                                                                                                                                                                                        | Resize-handle props typed for a React element / convert the neutral props to them. For adapter authors, from `@adapttable/react/adapter`.                                                                                                                                                                                                                                                                                                                                                            |
 | `TableEngineConfigPatch<TRow>`                                                                                                                                                                                                                                                                                           | Live configuration a binding replays onto a committed engine: the incremental query options plus `locale`, `paginationMode`, `page` and `limit`.                                                                                                                                                                                                                                                                                                                                                     |
 | `CapabilityPlan` / `CapabilityStaging`                                                                                                                                                                                                                                                                                   | A governed write's side-effect-free proposal / whether a capability honours `commit: "stage"`. See [AI integrations](./ai-integrations.md).                                                                                                                                                                                                                                                                                                                                                          |
@@ -13099,6 +13302,133 @@ without writing the object by hand.
 
 **MUI's `size` prop.** Use `density`: `density="compact"` is what `size="small"`
 meant, and `density="comfortable"` is `size="medium"`.
+
+The React binding took the rest of the main entry with it — the hooks, the
+React column and the prop-getters a host imports directly:
+
+| Removed from `@adapttable/core`    | v3 import           |
+| ---------------------------------- | ------------------- |
+| `aggregate`                        | `@adapttable/react` |
+| `AggregateOptions`                 | `@adapttable/react` |
+| `Aggregator`                       | `@adapttable/react` |
+| `BaseDataTableProps`               | `@adapttable/react` |
+| `BulkAction`                       | `@adapttable/react` |
+| `CellElementProps`                 | `@adapttable/react` |
+| `ChromeBodyData`                   | `@adapttable/react` |
+| `ColumnFooterContext`              | `@adapttable/react` |
+| `ColumnGroupDef`                   | `@adapttable/react` |
+| `ColumnGroupRecord`                | `@adapttable/react` |
+| `ColumnHeaderController`           | `@adapttable/react` |
+| `columnHeaderLabel`                | `@adapttable/react` |
+| `ColumnReorderKeyProps`            | `@adapttable/react` |
+| `ColumnResizeHandleProps`          | `@adapttable/react` |
+| `ComputedColumnSpec`               | `@adapttable/react` |
+| `CustomCellEditorRender`           | `@adapttable/react` |
+| `EditableCellActivateControlProps` | `@adapttable/react` |
+| `EditableCellControls`             | `@adapttable/react` |
+| `EditableCellGate`                 | `@adapttable/react` |
+| `EditableCellGateProps`            | `@adapttable/react` |
+| `ExportContext`                    | `@adapttable/react` |
+| `exportViewFromChrome`             | `@adapttable/react` |
+| `ExtraRow`                         | `@adapttable/react` |
+| `FeatureProps`                     | `@adapttable/react` |
+| `FeatureProviderContribution`      | `@adapttable/react` |
+| `FeatureProviderProps`             | `@adapttable/react` |
+| `FeatureRender`                    | `@adapttable/react` |
+| `FilterChromeMode`                 | `@adapttable/react` |
+| `FilterTypeSpec`                   | `@adapttable/react` |
+| `groupAggregateEntries`            | `@adapttable/react` |
+| `GroupAggregatesFn`                | `@adapttable/react` |
+| `GroupedFlatEntry`                 | `@adapttable/react` |
+| `GroupingChipKeyboardProps`        | `@adapttable/react` |
+| `GroupingDragProps`                | `@adapttable/react` |
+| `GroupingDropProps`                | `@adapttable/react` |
+| `GroupRowCell`                     | `@adapttable/react` |
+| `groupRowLayout`                   | `@adapttable/react` |
+| `HeaderFilterOpenProvider`         | `@adapttable/react` |
+| `headerFilterStickTop`             | `@adapttable/react` |
+| `IncrementalView`                  | `@adapttable/react` |
+| `IncrementalViewConfig`            | `@adapttable/react` |
+| `isDeclarativeFilters`             | `@adapttable/react` |
+| `MobileCardField`                  | `@adapttable/react` |
+| `MobileCardRenderer`               | `@adapttable/react` |
+| `MultiSelectEditorCheckboxProps`   | `@adapttable/react` |
+| `MultiSelectEditorChrome`          | `@adapttable/react` |
+| `MultiSelectEditorChromeProps`     | `@adapttable/react` |
+| `MultiSelectEditorSlots`           | `@adapttable/react` |
+| `NestedTable`                      | `@adapttable/react` |
+| `renderRegisteredFilter`           | `@adapttable/react` |
+| `resolveColumnFooter`              | `@adapttable/react` |
+| `resolveColumnHeader`              | `@adapttable/react` |
+| `RowAction`                        | `@adapttable/react` |
+| `RowActionsRenderer`               | `@adapttable/react` |
+| `RowStyle`                         | `@adapttable/react` |
+| `SidePanelEntry`                   | `@adapttable/react` |
+| `Slot`                             | `@adapttable/react` |
+| `TableChrome`                      | `@adapttable/react` |
+| `TableExtraEntry`                  | `@adapttable/react` |
+| `TableRowReorderState`             | `@adapttable/react` |
+| `ToolbarSlots`                     | `@adapttable/react` |
+| `useActiveFilterChips`             | `@adapttable/react` |
+| `useBatchEditing`                  | `@adapttable/react` |
+| `useBooleanFilterWidget`           | `@adapttable/react` |
+| `useBulkActionRunner`              | `@adapttable/react` |
+| `useCellEditing`                   | `@adapttable/react` |
+| `useCellSaveState`                 | `@adapttable/react` |
+| `useChecklistFilter`               | `@adapttable/react` |
+| `useChromeScrollReset`             | `@adapttable/react` |
+| `useColorScheme`                   | `@adapttable/react` |
+| `useColumnDragState`               | `@adapttable/react` |
+| `useColumnLayout`                  | `@adapttable/react` |
+| `useColumnLayoutStorageState`      | `@adapttable/react` |
+| `useColumnLayoutUrlState`          | `@adapttable/react` |
+| `UseDataTableResult`               | `@adapttable/react` |
+| `useDebounce`                      | `@adapttable/react` |
+| `useDensityUrlState`               | `@adapttable/react` |
+| `useDirtyCells`                    | `@adapttable/react` |
+| `useEditConflict`                  | `@adapttable/react` |
+| `useEditHistory`                   | `@adapttable/react` |
+| `useExtraChips`                    | `@adapttable/react` |
+| `useFilterOptions`                 | `@adapttable/react` |
+| `useFilterTreeChips`               | `@adapttable/react` |
+| `useFilterTriggerToggle`           | `@adapttable/react` |
+| `useFindFocus`                     | `@adapttable/react` |
+| `useFindInTable`                   | `@adapttable/react` |
+| `useFrontendData`                  | `@adapttable/react` |
+| `useGridFocus`                     | `@adapttable/react` |
+| `useGroupCollapse`                 | `@adapttable/react` |
+| `useGroupCollapseUrlState`         | `@adapttable/react` |
+| `useGroupPaging`                   | `@adapttable/react` |
+| `useHeaderFilterOverlay`           | `@adapttable/react` |
+| `useHighlight`                     | `@adapttable/react` |
+| `useHorizontalOverflow`            | `@adapttable/react` |
+| `useInfiniteScroll`                | `@adapttable/react` |
+| `useIsMobile`                      | `@adapttable/react` |
+| `useLazyChildren`                  | `@adapttable/react` |
+| `useMediaQuery`                    | `@adapttable/react` |
+| `usePointerDismiss`                | `@adapttable/react` |
+| `usePrefersReducedMotion`          | `@adapttable/react` |
+| `useRangeFilterWidget`             | `@adapttable/react` |
+| `useRowEditing`                    | `@adapttable/react` |
+| `useRowExpansion`                  | `@adapttable/react` |
+| `useRowMutations`                  | `@adapttable/react` |
+| `useRowPinning`                    | `@adapttable/react` |
+| `useRowPinningUrlState`            | `@adapttable/react` |
+| `useRowReorder`                    | `@adapttable/react` |
+| `useSavedViews`                    | `@adapttable/react` |
+| `useScrollToTableTop`              | `@adapttable/react` |
+| `UseScrollToTableTopOptions`       | `@adapttable/react` |
+| `useSearchInput`                   | `@adapttable/react` |
+| `useSelection`                     | `@adapttable/react` |
+| `useServerData`                    | `@adapttable/react` |
+| `useShortcuts`                     | `@adapttable/react` |
+| `useTableData`                     | `@adapttable/react` |
+| `UseTableDataOptions`              | `@adapttable/react` |
+| `useTableEditHistory`              | `@adapttable/react` |
+| `useTableUrlState`                 | `@adapttable/react` |
+| `useTableVirtualization`           | `@adapttable/react` |
+| `useTextFilterWidget`              | `@adapttable/react` |
+| `useTreeExpansion`                 | `@adapttable/react` |
 
 ## Checking the upgrade
 

@@ -1,6 +1,6 @@
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import {
   COLUMN_GROUP_RENDER_PREFIX,
   COLUMN_GROUP_STUB_PREFIX,

@@ -1,19 +1,19 @@
+import type { ExtraFilters } from "@adapttable/core";
+import type { FilterDef } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
+import { defaultFilterRegistry } from "@adapttable/core";
+import { withFilterType } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
 import { filterHeaderTestSlots } from "../internal/chromeTestSlots";
-import { defaultLabels } from "@adapttable/core";
-import type { ExtraFilters } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
 import {
   filterDefForColumn,
   FilterHeaderChrome,
   FilterHeaderControlChrome,
   headerFilterStickTop,
 } from "./FilterHeaderRow";
-import { withFilterType } from "@adapttable/core";
 
 interface Row {
   name: string;

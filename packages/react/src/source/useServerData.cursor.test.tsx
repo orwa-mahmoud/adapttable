@@ -6,13 +6,13 @@
  * rather than sending a token describing a result set that no longer exists,
  * and a source which never declares `supports.cursor` sees none of it.
  */
+import type { TableSource } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
 import { act, render, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMemoryAdapter } from "../url/adapter";
-import { resetDevWarnings } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
 import { type TableQuery, useServerData } from "./useServerData";
 
 interface Row {

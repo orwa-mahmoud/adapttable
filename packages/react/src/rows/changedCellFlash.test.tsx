@@ -1,8 +1,8 @@
+import type { RowPatchEvent } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useChangedCellFlash } from "./changedCellFlash";
-import type { RowPatchEvent } from "@adapttable/core";
 
 interface Row {
   id: string;

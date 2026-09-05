@@ -27,13 +27,9 @@
  * `data-grid-cell` attribute so the mechanism does not need a ref per cell —
  * with 100,000 rows, a ref map is a leak with extra steps.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { columnText } from "@adapttable/core";
-import { useEventCallback } from "../hooks/useEventCallback";
 import type { Direction, TableLabels } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
 import type { CellEdit } from "@adapttable/core";
+import { columnText } from "@adapttable/core";
 import {
   type CellRange,
   cellRangeBounds,
@@ -57,6 +53,10 @@ import {
   sameGridCell,
 } from "@adapttable/core";
 import { pasteRangeEdits } from "@adapttable/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import type { ColumnDef } from "../columnDef";
+import { useEventCallback } from "../hooks/useEventCallback";
 
 /**
  * The attribute a focusable cell carries, so focus can find it in the DOM.

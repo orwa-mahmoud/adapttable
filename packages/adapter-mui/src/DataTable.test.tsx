@@ -1,5 +1,4 @@
-import type { ColumnLayoutState } from "@adapttable/react";
-
+import type { ColumnLayoutState, TableErrorState } from "@adapttable/react";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import { createTheme, ThemeProvider } from "@mui/material";
@@ -347,7 +346,7 @@ describe("<DataTable> (MUI)", () => {
       refetch,
       override: {
         slots: {
-          error: (state: { error: Error; retry: () => void }) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

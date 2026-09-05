@@ -15,10 +15,9 @@
  * labels the table already ships in every locale, so the count a user hears is
  * the same string the footer shows them.
  */
-import { useEffect, useRef, useState } from "react";
-
-import { computePagination } from "@adapttable/core";
 import type { SortDirection, TableLabels } from "@adapttable/core";
+import { computePagination } from "@adapttable/core";
+import { useEffect, useRef, useState } from "react";
 
 export type { SortDirection };
 

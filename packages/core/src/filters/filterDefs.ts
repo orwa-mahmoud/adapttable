@@ -214,7 +214,6 @@ export function resolveFilterDefs<TRow>(
     const path = localizedColumnPath(column, locale);
     const declaredLabel =
       typeof base === "object" &&
-      base !== null &&
       "label" in base &&
       typeof base.label === "string"
         ? base.label

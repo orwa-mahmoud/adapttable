@@ -6,17 +6,16 @@
  * {@link resolveAssembly} when the owning feature is composed.
  */
 import type { ColumnMetadata } from "../columnModel";
-import type { CssProperties } from "../style/cssProperties";
-import type { DisplayValue } from "../display";
-
 import type { PinOffset } from "../columns/columnLayoutModel";
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
+import type { DisplayValue } from "../display";
 import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraEntry, ExtraRow } from "../rows/extraRows";
 import type { RowPinSide } from "../rows/rowPinModel";
 import { extraHostFillStyle } from "../rows/rowPresentation";
 import type { RowStyle } from "../rows/rowStyle";
+import type { CssProperties } from "../style/cssProperties";
 import type { TreeEntry } from "../tree/treeRows";
 
 export {

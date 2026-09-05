@@ -216,7 +216,7 @@ function bridgeRowOrderProps<TRow>(
   next: TableFeature<TRow>[]
 ): void {
   const onRowReorder = (
-    props as DataTableProps<TRow> & {
+    props as HarnessProps<TRow> & {
       onRowReorder?: Parameters<typeof rowReorder<TRow>>[0];
     }
   ).onRowReorder;

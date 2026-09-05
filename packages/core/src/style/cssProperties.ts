@@ -4,6 +4,4 @@
  *
  * @public
  */
-export type CssProperties = {
-  [key: string]: string | number | undefined;
-};
+export type CssProperties = Record<string, string | number | undefined>;

@@ -6,9 +6,9 @@
  * `exportValue` must contribute the number it exports, not the string it
  * renders.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { selectionStats } from "./selectionStats";
 
 interface Row {

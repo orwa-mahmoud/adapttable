@@ -1,24 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
 import type { FacetMap } from "@adapttable/core";
-import { withQueryAggregateOverrides } from "@adapttable/core";
-import { parseGroupBy } from "@adapttable/core";
-import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
 import type {
   PaginatedResponse,
   PaginationMode,
   TableQueryParams,
 } from "@adapttable/core";
-import {
-  useTableUrlState,
-  type UseTableUrlStateOptions,
-} from "../url/useTableUrlState";
+import type { TableSource } from "@adapttable/core";
+import { withQueryAggregateOverrides } from "@adapttable/core";
+import { parseGroupBy } from "@adapttable/core";
 import {
   applyQuerySupport,
   type QueryAggregate,
   type QuerySupport,
 } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
+import {
+  useTableUrlState,
+  type UseTableUrlStateOptions,
+} from "../url/useTableUrlState";
 
 /**
  * The minimal shape `useQuerySource` reads from a `useInfiniteQuery`

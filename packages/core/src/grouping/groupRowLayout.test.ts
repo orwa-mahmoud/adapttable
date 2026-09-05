@@ -5,9 +5,9 @@
  * its own column's cell, not at the end of a spanning row where a wide table
  * puts it past the visible edge.
  */
-import type { ColumnMetadata } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnMetadata } from "../columnModel";
 import {
   groupAggregateEntries,
   groupLeafCount,

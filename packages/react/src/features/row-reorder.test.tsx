@@ -1,10 +1,10 @@
+import { buildGroupedFlatModel } from "@adapttable/core";
+import { buildTreeEntries } from "@adapttable/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { buildGroupedFlatModel } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
 import type { RowReorderState } from "../rows/rowReorder";
-import { buildTreeEntries } from "@adapttable/core";
 import {
   FeatureProviders,
   type TableRuntimeView,

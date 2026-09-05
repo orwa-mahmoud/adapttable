@@ -1,3 +1,4 @@
+import { formatMultiDraft } from "@adapttable/core";
 import {
   act,
   fireEvent,
@@ -7,10 +8,9 @@ import {
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { editableCellTestSlots } from "../internal/chromeTestSlots";
 import type { ColumnDef } from "../columnDef";
+import { editableCellTestSlots } from "../internal/chromeTestSlots";
 import { useBatchEditing } from "./batchEditing";
-import { formatMultiDraft } from "@adapttable/core";
 import { focusEditorOnMount } from "./editableCellController";
 import {
   commitBooleanDraft,

@@ -48,6 +48,8 @@ const OPTIONS = {
   paths: {
     "@adapttable/core": ["packages/core/src/index.ts"],
     "@adapttable/core/*": ["packages/core/src/*.ts"],
+    "@adapttable/react": ["packages/react/src/index.ts"],
+    "@adapttable/react/*": ["packages/react/src/*.ts"],
     "@adapttable/mui": ["packages/adapter-mui/src/index.ts"],
     "@adapttable/mui/*": ["packages/adapter-mui/src/*.ts"],
   },
@@ -112,7 +114,7 @@ for (const fixture of ["preset-bare.tsx", "preset-configured.tsx"]) {
 }
 
 const presetContract = (packageName) => `
-import type { StaticTableFeature, TableFeature } from "@adapttable/core";
+import type { StaticTableFeature, TableFeature } from "@adapttable/react";
 import {
   standardFeatures,
   type StandardFeatureOptions,

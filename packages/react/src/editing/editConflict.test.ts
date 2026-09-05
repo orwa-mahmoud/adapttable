@@ -1,10 +1,10 @@
 /**
  * A live row changing under an open editor is a conflict, not a discard.
  */
+import type { EditableColumnLike } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { EditableColumnLike } from "@adapttable/core";
 import {
   liveRowChanged,
   resolveConflictChoice,

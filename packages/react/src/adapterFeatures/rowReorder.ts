@@ -1,3 +1,4 @@
+import type { RowReorderOptions } from "@adapttable/core";
 import { createElement } from "react";
 
 import { extendFeature, slotRender } from "../features/providers";
@@ -8,7 +9,6 @@ import {
   ROW_REORDER_HANDLE,
 } from "../features/slotKeys";
 import type { TableFeature } from "../features/tableFeature";
-import type { RowReorderOptions } from "@adapttable/core";
 import type { RowReorderHandler } from "../rows/rowReorder";
 import {
   RowReorderAnnouncer,

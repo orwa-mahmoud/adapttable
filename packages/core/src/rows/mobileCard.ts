@@ -70,4 +70,4 @@ export interface MobileCardModel<TRow> {
 export type MobileCardRenderer<TRow> = (
   row: TRow,
   card: MobileCardModel<TRow>
-) => DisplayValue;
+) => DisplayValue | undefined;

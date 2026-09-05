@@ -3,13 +3,17 @@
  * adapters pass the Search, Select, range inputs and multi menu the
  * end user clicks. Same defs and extra bag the panel uses (#282).
  */
-import type { CSSProperties, ReactElement, ReactNode } from "react";
-
 import type { TableLabels } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
-import { ColumnSpacer } from "../virtual/ColumnSpacer";
 import { defaultFilterRegistry } from "@adapttable/core";
 import { type FilterDef, filterLabel, filterStateKeys } from "@adapttable/core";
+import {
+  type FilterTypeRegistry,
+  renderRegisteredFilter,
+} from "@adapttable/core";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
+
+import type { ColumnDef } from "../columnDef";
+import { ColumnSpacer } from "../virtual/ColumnSpacer";
 import {
   type FilterFormSource,
   listFilterValues,
@@ -17,10 +21,6 @@ import {
   useRangeFilterWidget,
   useTextFilterWidget,
 } from "./filterForm";
-import {
-  type FilterTypeRegistry,
-  renderRegisteredFilter,
-} from "@adapttable/core";
 import { useFilterOptions } from "./useFilterOptions";
 
 export type { FilterFormSource, FilterTypeRegistry };

@@ -1,6 +1,3 @@
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
 import type { BulkAction, RowAction } from "@adapttable/core";
 import { resetDevWarnings } from "@adapttable/core";
 import {
@@ -9,6 +6,9 @@ import {
   resolveDisabledReason,
   runRowAction,
 } from "@adapttable/core";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { useBulkActionRunner } from "./useBulkActionRunner";
 
 interface Row {

@@ -1,7 +1,6 @@
 /** Removable chips for the active filters. */
 import type { TableLabels } from "@adapttable/core";
 import type { ActiveFilterChip } from "@adapttable/react";
-
 import { Button, Flex, Tag } from "antd";
 
 /** Removable antd tag chips. */

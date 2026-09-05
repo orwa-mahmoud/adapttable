@@ -27,6 +27,11 @@
  *   scoped to the tree that provided it — including a table nested inside
  *   another table's row detail.
  */
+import type { GroupAggregateOverrides } from "@adapttable/core";
+import type { NeutralTable } from "@adapttable/core";
+import type { TableSourceCapabilities } from "@adapttable/core";
+import type { ExtraFilters } from "@adapttable/core";
+import { devWarn } from "@adapttable/core";
 import {
   type ComponentType,
   createContext,
@@ -38,11 +43,6 @@ import {
   useRef,
 } from "react";
 
-import type { GroupAggregateOverrides } from "@adapttable/core";
-import type { NeutralTable } from "@adapttable/core";
-import type { TableSourceCapabilities } from "@adapttable/core";
-import type { ExtraFilters } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
 import {
   getAppliedFeatures,
   type StaticTableFeature,

@@ -64,3 +64,49 @@ It never dumps the dataset or every feature instruction. Bounded
 in [`@adapttable/ai`](./ai.md). The kit strip uses `agent-approval`,
 `agent-approval-list`, `agent-approval-approve`, `agent-approval-reject`,
 and `agent-approval-row`. Escape rejects. Enter is not a silent confirm.
+
+## Registering a capability of your own
+
+`createAgentSession({ capabilities })` takes `AgentCapabilityDefinition`s. A
+definition carries a namespaced `key`, a one-line `summary` for the catalog, a
+`guide` with JSON Schema for its input and output, an `isEnabled(observation)`
+that decides whether it is wired right now, and `execute`.
+
+```ts
+const archive: AgentCapabilityDefinition = {
+  key: "orders.archive",
+  summary: "Archive an order.",
+  kind: "write",
+  guide: { guide: "…", input: archiveInput, output: archiveOutput },
+  isEnabled: (observation) => observation.writePolicy === "allow",
+  execute: (context, args) => host.archive((args as ArchiveArgs).rowKey),
+};
+```
+
+`kind` is what makes it governed. A `"write"` or `"destructive"` capability
+goes through the same path as a built-in mutation, and the session — not your
+handler — enforces it:
+
+1. the table's write policy, then the commit mode;
+2. `plan`, if you wrote one, to resolve a side-effect-free `CapabilityPlan`
+   the approver can read;
+3. approval, when the table's `approval` policy asks for it;
+4. the revision and the permissions again, after every await;
+5. only then `execute`.
+
+A handler that never calls `onApprove` therefore cannot write unapproved, and a
+denied or still-pending approval calls it zero times.
+
+Staging is declared, not assumed. A governed capability defaults to
+`staging: "unsupported"`, so a table running `commit: "stage"` rejects the call
+with `commit-incompatible` before your handler runs rather than committing
+something the host wanted staged. Set `staging: "supported"` when the
+capability really can stage.
+
+`AgentCapabilityContext` is what `execute` receives: the `observation` it was
+authorized against, the host's `apply` callbacks, a live `observe()`, the bound
+`onApprove`, and — for a governed write — the approved `plan` and the resolved
+`commit` mode.
+
+A `read` or `view` capability skips all of it. Nothing about a view operation
+asks for write approval.

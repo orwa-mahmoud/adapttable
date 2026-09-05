@@ -7,9 +7,8 @@
  *
  * @packageDocumentation
  */
-import type { ExtraFilters, SortDirection, ColumnModel } from "./columnModel";
+import type { ColumnModel, ExtraFilters, SortDirection } from "./columnModel";
 import type { DisplayValue } from "./display";
-
 import type { FacetMap } from "./filters/facets";
 
 export type {

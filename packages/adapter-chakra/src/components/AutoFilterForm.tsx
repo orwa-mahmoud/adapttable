@@ -1,3 +1,9 @@
+import type {
+  Direction,
+  FilterDef,
+  FilterTypeRegistry,
+  TableLabels,
+} from "@adapttable/core";
 import {
   defaultFilterRegistry,
   filterLabel,
@@ -9,12 +15,6 @@ import {
   resolveLabels,
   splitRelativeToken,
 } from "@adapttable/core";
-import type {
-  Direction,
-  FilterDef,
-  FilterTypeRegistry,
-  TableLabels,
-} from "@adapttable/core";
 import {
   CHECKLIST_LIST_HEIGHT,
   filterOpLabel,
@@ -22,13 +22,12 @@ import {
   scalarFilterText,
   useFilterOptions,
 } from "@adapttable/react";
-import type { FilterFormSource } from "@adapttable/react/adapter";
-
 import {
   useBooleanFilterWidget,
   useRangeFilterWidget,
   useTextFilterWidget,
 } from "@adapttable/react";
+import type { FilterFormSource } from "@adapttable/react/adapter";
 import {
   Checkbox,
   HStack,
@@ -37,7 +36,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { type ReactNode, useId } from "react";
+import { type ReactElement, type ReactNode, useId } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 import { FormField, NativeSelect } from "./primitives";
@@ -324,7 +323,7 @@ function AutoFilterField<TRow>({
   labels: Required<TableLabels>;
   accentColor?: string;
   registry: FilterTypeRegistry;
-}>) {
+}>): ReactElement | null {
   const id = useId();
   const { extra, setExtra } = source;
   const label = filterLabel(def);
@@ -332,7 +331,7 @@ function AutoFilterField<TRow>({
   // `loading` so the select/checkbox controls can show a native affordance.
   const { options, loading } = useFilterOptions(def);
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactNode;
+  if (custom) return custom as ReactElement;
   switch (filterWidgetKind(def, registry)) {
     case "text":
       return <TextFilterField def={def} source={source} labels={labels} />;

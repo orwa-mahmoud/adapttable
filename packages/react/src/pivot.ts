@@ -22,7 +22,21 @@
  * <DataTable {...pivotTableModel(result)} />;
  * ```
  */
+export type { ColumnDef } from "./columnDef";
+export {
+  PIVOT_ROW_COLUMN_KEY,
+  type PivotTableModel,
+  pivotTableModel,
+  type PivotTableModelOptions,
+} from "./pivot/pivotTableModel";
+export {
+  usePivotUrlState,
+  type UsePivotUrlStateOptions,
+  type UsePivotUrlStateResult,
+} from "./pivot/pivotUrlState";
+export type { UrlStateAdapter } from "./url/adapter";
 export type { AggregateName, Aggregator } from "@adapttable/core";
+export type { TableLabels } from "@adapttable/core";
 export {
   assignField,
   availableFields,
@@ -50,12 +64,6 @@ export {
   type PivotRowKind,
 } from "@adapttable/core";
 export {
-  PIVOT_ROW_COLUMN_KEY,
-  type PivotTableModel,
-  pivotTableModel,
-  type PivotTableModelOptions,
-} from "./pivot/pivotTableModel";
-export {
   deserializePivot,
   deserializePivotState,
   type PivotUrlState,
@@ -63,19 +71,11 @@ export {
   serializePivotState,
 } from "@adapttable/core";
 export {
-  usePivotUrlState,
-  type UsePivotUrlStateOptions,
-  type UsePivotUrlStateResult,
-} from "./pivot/pivotUrlState";
-export {
   type QueryPivotPage,
   type QueryPivotRow,
   type ServerPivotOptions,
   serverPivotResult,
 } from "@adapttable/core";
-export type { ColumnDef } from "./columnDef";
-export type { TableLabels } from "@adapttable/core";
-export type { UrlStateAdapter } from "./url/adapter";
 
 /**
  * The member types the signatures above hand back.

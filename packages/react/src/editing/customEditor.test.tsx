@@ -5,11 +5,11 @@
  * these cover the seams: what the component is handed, and that activation,
  * focus, the keyboard flow and the commit still belong to the table.
  */
+import type { CustomCellEditorCtrl } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { editableCellTestSlots } from "../internal/chromeTestSlots";
-import type { CustomCellEditorCtrl } from "@adapttable/core";
 import { EditableCellGate } from "./EditableCellGate";
 import { useRowEditing } from "./rowEditing";
 import { useCellEditing } from "./useCellEditing";

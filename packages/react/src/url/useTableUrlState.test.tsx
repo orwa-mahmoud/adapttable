@@ -1,9 +1,9 @@
+import * as env from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { resetDevWarnings } from "@adapttable/core";
-import * as env from "@adapttable/core";
 import { createMemoryAdapter } from "./adapter";
 import { useTableUrlState } from "./useTableUrlState";
 

@@ -2,8 +2,8 @@
  * Distinct checklist values and counts. Widget state lives on
  * `@adapttable/react`.
  */
-import type { FilterDef, FilterOption } from "./filterDefs";
 import { getPath } from "../utils/path";
+import type { FilterDef, FilterOption } from "./filterDefs";
 
 /**
  * One distinct value in a checklist, with its count in the current set.

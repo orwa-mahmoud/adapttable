@@ -1,9 +1,7 @@
-import { useState } from "react";
-
 import type { TableSource } from "@adapttable/core";
 import type { FilterValue, TableLabels } from "@adapttable/core";
-import { type FilterDef, filterLabel, RANGE_SUFFIXES } from "@adapttable/core";
 import type { FilterTypeRegistry } from "@adapttable/core";
+import { type FilterDef, filterLabel, RANGE_SUFFIXES } from "@adapttable/core";
 import {
   DATE_OP_LABEL_KEYS,
   DATE_OPS,
@@ -24,6 +22,7 @@ import {
   writeRangeFilter,
 } from "@adapttable/core";
 import { isRelativeDateToken } from "@adapttable/core";
+import { useState } from "react";
 
 /**
  * Operand shape for a selected range operator.

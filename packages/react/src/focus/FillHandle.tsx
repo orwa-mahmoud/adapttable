@@ -3,9 +3,9 @@
  * selection corner and supplies the drag props; the adapter renders the
  * visible handle with its own component and styling.
  */
+import { sameGridCell } from "@adapttable/core";
 import type { ReactNode } from "react";
 
-import { sameGridCell } from "@adapttable/core";
 import type { GridFocusState } from "./useGridFocus";
 
 /**

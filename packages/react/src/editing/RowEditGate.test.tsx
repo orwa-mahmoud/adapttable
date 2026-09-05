@@ -5,6 +5,10 @@
  * seam: which cell renders an editor, which field takes focus, and the three
  * controls that end the edit.
  */
+import type {
+  CustomCellEditorCtrl,
+  EditableColumnLike,
+} from "@adapttable/core";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -14,10 +18,6 @@ import {
   rowEditTestSlots,
 } from "../internal/chromeTestSlots";
 import { useBatchEditing } from "./batchEditing";
-import type {
-  CustomCellEditorCtrl,
-  EditableColumnLike,
-} from "@adapttable/core";
 import type { EditableCellEditorCtrl } from "./EditableCellGate";
 import {
   BatchEditBarChrome,

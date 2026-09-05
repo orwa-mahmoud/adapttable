@@ -6,9 +6,9 @@
  * become a vehicle for markup that was meant to be a cell. A header of
  * `<b>Name</b>` that lands unescaped is an XSS bug, not a formatting one.
  */
-import type { ColumnModel } from "../columnModel";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import * as env from "../utils/env";
 import { buildExportTable } from "./exportWriter";
 import {
@@ -261,7 +261,7 @@ describe("buildPrintTableHtml", () => {
   it("falls back to a column key when the header is not text", () => {
     const html = buildPrintTableHtml(
       buildExportTable(ROWS, [
-        { key: "name", header: 1 as never, exportValue: (row) => row.name },
+        { key: "name", header: 1, exportValue: (row) => row.name },
       ])
     );
     expect(html).toContain(">name</th>");

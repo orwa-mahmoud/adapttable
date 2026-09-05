@@ -17,8 +17,7 @@
  * });
  * ```
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-
+import type { RowPatchStreamStatus } from "@adapttable/core";
 import { applyRowPatches, type RowPatch } from "@adapttable/core";
 import {
   openRowPatchStream,
@@ -26,7 +25,7 @@ import {
   type StreamSocket,
 } from "@adapttable/core";
 import { parseRowPatchFrame } from "@adapttable/core";
-import type { RowPatchStreamStatus } from "@adapttable/core";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * What {@link useRowPatchStream} needs.

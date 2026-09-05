@@ -6,9 +6,8 @@
  * This file is the shared model: which actions are visible, and the context
  * a custom renderer receives.
  */
-import type { DisplayValue } from "../display";
-
 import type { ConfirmHandler } from "../actions/confirm";
+import type { DisplayValue } from "../display";
 import type { RowAction, TableLabels } from "../types";
 
 /**

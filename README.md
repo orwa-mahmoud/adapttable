@@ -81,7 +81,7 @@ function People({ rows }: { rows: Person[] }) {
 
 ```tsx
 // Headless — full control, zero opinions, render your own markup.
-import { useDataTable } from "@adapttable/core";
+import { useDataTable } from "@adapttable/react";
 
 const { getTableProps, getRowProps, rows } = useDataTable({
   source,
@@ -102,7 +102,8 @@ place: **[the comparison page](https://orwa-mahmoud.github.io/adapttable/compari
 
 | Package                | What it is                                                                 |
 | ---------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core`     | Headless engine. Zero UI-kit imports. Hooks, state, prop-getters, types.   |
+| `@adapttable/core`     | The engine. Filter, sort, page and group, with no framework in its graph.  |
+| `@adapttable/react`    | The React binding: hooks, `ColumnDef`, prop-getters, structural Chrome.    |
 | `@adapttable/mantine`  | Mantine adapter — batteries-included `<DataTable>`.                        |
 | `@adapttable/mui`      | Material UI adapter.                                                       |
 | `@adapttable/chakra`   | Chakra UI adapter.                                                         |
@@ -123,7 +124,7 @@ place: **[the comparison page](https://orwa-mahmoud.github.io/adapttable/compari
 npx @adapttable/cli init
 
 # …or install manually:
-pnpm add @adapttable/core @adapttable/mantine
+pnpm add @adapttable/mantine
 ```
 
 **Try it first, no install:** [open a live starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine) (Mantine) — or [any other kit](https://orwa-mahmoud.github.io/adapttable/getting-started/#try-it-in-stackblitz).
@@ -144,7 +145,7 @@ const source = useFrontendData({ data }); // client-side filter/sort/slice
 2. **`slots`** — replace the `skeleton` and `empty` sub-parts with your own components.
 3. **`classNames` per part** — restyle without replacing (the **unstyled** adapter exposes a class hook + `data-*` state attribute for every node).
 4. **A custom `toolbar` slot** and an **injectable `confirm`** handler for action dialogs.
-5. **Prop-getters (fully headless)** — build the entire markup yourself with `@adapttable/core`.
+5. **Prop-getters (fully headless)** — build the entire markup yourself with `@adapttable/react`.
 
 See the [customization guide](https://orwa-mahmoud.github.io/adapttable/customization/) for details.
 

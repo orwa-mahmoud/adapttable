@@ -5,15 +5,15 @@
  * imports it never carries keyboard-grid state. The hook mounts in-tree
  * through {@link CELL_NAV_LIVE}.
  */
+import type { CellEdit } from "@adapttable/core";
+import { cellFillHandler, cellPasteHandler } from "@adapttable/core";
+import { coveredAddressSet } from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import { asGesture } from "../editing/editHistory";
 import { useFindFocus } from "../find/useFindInTable";
-import type { CellEdit } from "@adapttable/core";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
-import { cellFillHandler, cellPasteHandler } from "@adapttable/core";
 import { useGridFocus } from "../focus/useGridFocus";
-import { coveredAddressSet } from "@adapttable/core";
 import { slotRender } from "./providers";
 import {
   CELL_NAV_LIVE,

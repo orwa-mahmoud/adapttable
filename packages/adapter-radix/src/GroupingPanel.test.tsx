@@ -1,6 +1,5 @@
 import { defaultLabels } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
-
 import type { GroupingPanelState } from "@adapttable/react/adapter";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen } from "@testing-library/react";

@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { createTableEngine } from "./createTableEngine";
 import { createNeutralTable, revisionToken } from "./neutralTable";
 
-type Row = { id: string; label: string };
+interface Row {
+  id: string;
+  label: string;
+}
 
 describe("createNeutralTable binding", () => {
   it("uses binding visible rows for the visible scope", () => {

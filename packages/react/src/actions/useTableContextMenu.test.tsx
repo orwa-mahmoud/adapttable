@@ -7,10 +7,10 @@
  * deserves. That is the part an adapter would otherwise have to get right
  * eight times.
  */
+import { defaultLabels } from "@adapttable/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { defaultLabels } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
 import { useTableContextMenu } from "./useTableContextMenu";
 

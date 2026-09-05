@@ -1,6 +1,3 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-
-import type { ColumnDef } from "../columnDef";
 import {
   applyColumnOrder,
   type ColumnLayoutState,
@@ -9,7 +6,6 @@ import {
   type UseColumnLayoutResult,
 } from "@adapttable/core";
 import { declaredColumnName } from "@adapttable/core";
-import { applyReactColumnNames } from "./reactColumns";
 import {
   applyCollapsedColumnGroups,
   type ColumnGroupRecord,
@@ -17,6 +13,10 @@ import {
 } from "@adapttable/core";
 import { FALLBACK_PIN_WIDTH, parsePxWidth } from "@adapttable/core";
 import { toggleCollapsedColumnGroup } from "@adapttable/core";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import type { ColumnDef } from "../columnDef";
+import { applyReactColumnNames } from "./reactColumns";
 
 export type {
   ColumnLayoutState,

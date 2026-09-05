@@ -288,6 +288,9 @@ importers:
       '@adapttable/radix':
         specifier: workspace:*
         version: link:../packages/adapter-radix
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../packages/react
       '@adapttable/shadcn':
         specifier: workspace:*
         version: link:../packages/adapter-shadcn

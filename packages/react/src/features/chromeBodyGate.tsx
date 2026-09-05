@@ -6,10 +6,10 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
+import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import { ForcedColorsStyle } from "../a11y/forcedColors";
-import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
 import type { ComposedTableProps } from "../props";
 import {
   type DataTableShellResult,

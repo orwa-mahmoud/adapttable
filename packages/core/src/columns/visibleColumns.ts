@@ -25,7 +25,7 @@ export type TableLayout = "desktop" | "mobile";
  *
  * @public
  */
-export function visibleColumns<TCol extends ColumnMetadata<any>>(
+export function visibleColumns<TCol extends ColumnMetadata<never>>(
   columns: readonly TCol[],
   layout: TableLayout,
   mobileIdentityColumns = 3

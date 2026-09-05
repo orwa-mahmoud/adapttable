@@ -1,18 +1,27 @@
+import type { GroupingPanelState } from "@adapttable/core";
+import type { GroupByInput } from "@adapttable/core";
+import type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
+import type { PinnedRows } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
+import { type ConfirmHandler, defaultConfirm } from "@adapttable/core";
+import { REORDER_COLUMN_KEY } from "@adapttable/core";
+import { type ColumnGroupRecord } from "@adapttable/core";
+import { responsiveColumns } from "@adapttable/core";
+import { parseGroupBy } from "@adapttable/core";
+import { resolvePinnedRows } from "@adapttable/core";
+import { type TableErrorState, tableErrorState } from "@adapttable/core";
+import { collectFeatureNotices, type FeatureNotice } from "@adapttable/core";
 import type { ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { type ConfirmHandler, defaultConfirm } from "@adapttable/core";
-import type { ReactUseColumnLayoutResult } from "./columns/useColumnLayout";
-import { REORDER_COLUMN_KEY } from "@adapttable/core";
+import type { ColumnDef } from "./columnDef";
+import { flattenReactColumnTree } from "./columns/flattenColumnTree";
 import {
   applyReactColumnNames,
   declaredReactColumnLayout,
 } from "./columns/reactColumns";
-import { flattenReactColumnTree } from "./columns/flattenColumnTree";
-import { type ColumnGroupRecord } from "@adapttable/core";
-import type { ColumnDef } from "./columnDef";
 import { resolveColumns } from "./columns/resolveColumns";
-import { responsiveColumns } from "@adapttable/core";
+import type { ReactUseColumnLayoutResult } from "./columns/useColumnLayout";
 import type { EditableCellEditing } from "./editing/editableCellController";
 import type { EditHistoryState } from "./editing/editHistory";
 import type {
@@ -23,36 +32,28 @@ import { GROUPING_PANEL_STATE } from "./features/groupingPanelKey";
 import { useFeatureState } from "./features/providers";
 import { ROW_REORDER } from "./features/rowReorderKey";
 import type { ActiveFilterChip } from "./filters/useActiveFilterChips";
-import type { GroupingPanelState } from "@adapttable/core";
-import type { GroupByInput } from "@adapttable/core";
-import { parseGroupBy } from "@adapttable/core";
-import type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
 import type { GroupCollapseState } from "./grouping/useGroupCollapse";
 import { useEventCallback } from "./hooks/useEventCallback";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useScrollToTableTop } from "./hooks/useScrollToTableTop";
 import { useElementWidth } from "./layout/useElementWidth";
 import type { ComposedTableProps, ToolbarSlots } from "./props";
-import type { PinnedRows } from "@adapttable/core";
-import { resolvePinnedRows } from "@adapttable/core";
 import type { RowMutationsState } from "./rows/rowMutations";
 import type { RowPinningState } from "./rows/rowPinning";
 import type { RowReorderState } from "./rows/rowReorder";
 import type { RowExpansionState } from "./rows/useRowExpansion";
 import type { SelectionState } from "./selection/useSelection";
-import type { TableSource } from "@adapttable/core";
-import { type TableErrorState, tableErrorState } from "@adapttable/core";
-import { collectFeatureNotices, type FeatureNotice } from "@adapttable/core";
 
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
 import type { TreeEntry } from "@adapttable/core";
-import type { TreeExpansionState } from "./tree/useTreeExpansion";
 import type {
   BulkAction,
   RowAction,
   SortByOption,
   TableLabels,
 } from "@adapttable/core";
+
+import type { TreeExpansionState } from "./tree/useTreeExpansion";
 import {
   useDataTable,
   type UseDataTableResult,

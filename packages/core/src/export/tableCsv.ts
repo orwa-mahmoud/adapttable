@@ -1,10 +1,9 @@
 import type { ColumnMetadata } from "../columnModel";
-import type { DisplayValue } from "../display";
-
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import type { DisplayValue } from "../display";
 import type { FeatureHostState } from "../features/currentHost";
 import { type CellRange, cellRangeIndices } from "../focus/cellRange";
 import { parseGroupBy } from "../grouping/groupKeys";

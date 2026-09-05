@@ -1,9 +1,10 @@
+import type { FilterDef } from "@adapttable/core";
+import type { BulkAction } from "@adapttable/core";
+
 import type {
   StaticTableFeature,
   TableFeature,
 } from "../features/tableFeature";
-import type { FilterDef } from "@adapttable/core";
-import type { BulkAction } from "@adapttable/core";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 
 /**

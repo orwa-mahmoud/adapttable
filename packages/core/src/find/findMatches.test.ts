@@ -1,9 +1,9 @@
 /**
  * Where the query appears — and what a find refuses to claim.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { findMatches, matchKey, matchKeySet, stepMatch } from "./findMatches";
 
 interface Row {

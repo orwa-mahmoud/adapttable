@@ -10,6 +10,7 @@ import { render, renderHook } from "@testing-library/react";
 import { act, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { pinnedSummaryRows } from "./features/factories";
 import { grouping } from "./features/grouping";
@@ -18,7 +19,6 @@ import { rowPinning } from "./features/row-pinning";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
-import type { ColumnDef } from "./columnDef";
 import { createMemoryAdapter } from "./url/adapter";
 import { type TableChrome, useTableChrome } from "./useTableChrome";
 import type { ChromeBodyData } from "./virtual/chromeBodyShared";

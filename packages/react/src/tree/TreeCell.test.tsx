@@ -6,12 +6,12 @@
  * reads as a flat list with chevrons scattered through it — the bug this
  * component exists to make impossible.
  */
+import type { TreeEntry } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { treeToggleTestSlots } from "../internal/chromeTestSlots";
 import { TreeCellChrome } from "./TreeCell";
-import type { TreeEntry } from "@adapttable/core";
 
 interface Row {
   id: string;

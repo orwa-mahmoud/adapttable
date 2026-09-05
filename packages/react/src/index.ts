@@ -446,6 +446,7 @@ export {
   useGroupPaging,
 } from "./grouping/useGroupPaging";
 export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
+export type { Slot } from "./state/slots";
 export {
   useGroupCollapseUrlState,
   type UseGroupCollapseUrlStateOptions,
@@ -460,4 +461,4 @@ export type { SearchInputState } from "./useDataTable/useSearchInput";
 export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";
 export type { ColumnWindow } from "./virtual/useColumnWindow";
-export type { Slot, TableErrorState } from "@adapttable/core";
+export type { TableErrorState } from "@adapttable/core";

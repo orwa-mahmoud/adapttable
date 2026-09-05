@@ -37,7 +37,7 @@ export const ASSUMED_COLUMN_WIDTH = 150;
 
 /** What {@link responsiveColumns} needs to know about the container. */
 export interface ResponsiveFit<
-  TCol extends ColumnMetadata<any> = ColumnMetadata<any>,
+  TCol extends ColumnMetadata<never> = ColumnMetadata<never>,
 > {
   /** The columns in render order, after the user's own hiding. */
   columns: TCol[];
@@ -51,7 +51,7 @@ export interface ResponsiveFit<
 
 /** The result of fitting columns to a container. */
 export interface ResponsiveColumns<
-  TCol extends ColumnMetadata<any> = ColumnMetadata<any>,
+  TCol extends ColumnMetadata<never> = ColumnMetadata<never>,
 > {
   /**
    * The columns that fit, in their original order — and the very same array
@@ -97,7 +97,7 @@ function dropOrder<TRow>(
  * @param fit - The columns, the width to fit them in, and the widths to use.
  * @returns The columns that fit and the keys dropped to get there.
  */
-export function responsiveColumns<TCol extends ColumnMetadata<any>>({
+export function responsiveColumns<TCol extends ColumnMetadata<never>>({
   columns,
   available,
   widths,

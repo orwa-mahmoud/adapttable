@@ -1,5 +1,6 @@
-import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
 import type { PaginationMode, ResolvedPaginationMode } from "@adapttable/core";
+import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
+
 import { useMediaQuery } from "./useMediaQuery";
 
 /** The media query that matches the mobile layout at the default width. */

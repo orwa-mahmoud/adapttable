@@ -5,9 +5,9 @@
  * share-the-container for a small one. These check who wins when several
  * answers are available at once.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import {
   columnFlexShares,
   columnSizeStyle,

@@ -106,7 +106,6 @@ import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
 import { RowStyle } from '@adapttable/core';
-import { Slot } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -1506,7 +1505,8 @@ export interface SidePanelOptions {
     side?: "start" | "end";
 }
 
-export { Slot }
+// @public
+export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
 // @public
 export interface SortButtonElementProps extends Props {

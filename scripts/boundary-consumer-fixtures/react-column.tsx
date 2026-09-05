@@ -4,7 +4,11 @@
 import type { ColumnDef } from "@adapttable/react";
 import type { ReactNode } from "react";
 
-type Row = { id: string; name: string; spend: number };
+interface Row {
+  id: string;
+  name: string;
+  spend: number;
+}
 
 const columns: ColumnDef<Row>[] = [
   {

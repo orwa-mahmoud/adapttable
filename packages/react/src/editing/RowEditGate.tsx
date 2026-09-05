@@ -8,10 +8,7 @@
  * rather than in nine adapters, because a second copy of "which editor does this
  * column want" is a second place for the answer to drift.
  */
-import type { ReactElement, ReactNode } from "react";
-
 import type { TableLabels } from "@adapttable/core";
-import type { BatchEditingState } from "./batchEditing";
 import {
   type CellEditor,
   type EditableColumnLike,
@@ -19,6 +16,9 @@ import {
   normalizeEditorOptions,
   resolveCellEditor,
 } from "@adapttable/core";
+import type { ReactElement, ReactNode } from "react";
+
+import type { BatchEditingState } from "./batchEditing";
 import { focusEditorOnMount } from "./editableCellController";
 import type { EditableCellEditorCtrl } from "./EditableCellGate";
 import type { RowEditingState } from "./rowEditing";

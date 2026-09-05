@@ -6,11 +6,11 @@
  * a guarantee nobody tests is one a refactor can quietly withdraw. The docs
  * state the same four promises; if one of these fails, the docs became wrong.
  */
+import type { TableSource } from "@adapttable/core";
 import { act, render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { createMemoryAdapter } from "../url/adapter";
-import type { TableSource } from "@adapttable/core";
 import { type TableQuery, useServerData } from "./useServerData";
 
 interface Row {

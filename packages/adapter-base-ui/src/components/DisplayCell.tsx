@@ -1,5 +1,4 @@
 import type { ColumnDef } from "@adapttable/react";
-
 import type { ReactNode } from "react";
 
 /**

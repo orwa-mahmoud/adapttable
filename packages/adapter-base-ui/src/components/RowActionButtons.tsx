@@ -1,5 +1,4 @@
 /** The trailing row-action buttons, shared by rows and cards. */
-import { runRowAction, visibleRowActions } from "@adapttable/core";
 import type {
   ConfirmHandler,
   RowAction,
@@ -7,6 +6,7 @@ import type {
   RowActionsRenderer,
   TableLabels,
 } from "@adapttable/core";
+import { runRowAction, visibleRowActions } from "@adapttable/core";
 import { resolveDisabledReason } from "@adapttable/react/adapter";
 import { Menu } from "@base-ui/react/menu";
 import type { ReactNode } from "react";

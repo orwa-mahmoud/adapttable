@@ -1,7 +1,6 @@
-import type { ReactElement, ReactNode } from "react";
-
 import type { TableLabels } from "@adapttable/core";
 import type { HeaderGroupCell } from "@adapttable/core";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * Props for an adapter `ColumnGroupToggle` — no slots on the public API.

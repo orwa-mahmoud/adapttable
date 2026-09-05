@@ -14,9 +14,9 @@
  * region that names it for assistive technology, and the fall back to a
  * hand-built panel for rows that have no nested table.
  */
+import type { TableLabels } from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 
-import type { TableLabels } from "@adapttable/core";
 import type { Density } from "../url/useDensityUrlState";
 
 /**

@@ -1,7 +1,7 @@
+import { defaultLabels } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { defaultLabels } from "@adapttable/core";
 import type { SelectionState } from "../selection/useSelection";
 import { useBulkBarState } from "./useBulkBarState";
 

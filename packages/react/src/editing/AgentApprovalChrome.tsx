@@ -5,11 +5,11 @@
  * required kit slot — core never draws a button. Invisible live-region
  * announcements are the one thing this chrome owns itself.
  */
+import type { TableLabels } from "@adapttable/core";
 import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import { featureStateKey } from "../features/providers";
-import type { TableLabels } from "@adapttable/core";
 
 /**
  * Live pending-approval state published by the optional agent feature.

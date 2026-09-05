@@ -6,10 +6,10 @@
  * changed. So the rules that matter are about the patch — never a partial write,
  * never an untouched field, never a write at all when nothing was edited.
  */
+import type { EditableColumnLike } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { EditableColumnLike } from "@adapttable/core";
 import { useRowEditing } from "./rowEditing";
 
 interface Task {

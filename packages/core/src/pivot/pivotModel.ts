@@ -31,14 +31,13 @@
  * {@link PIVOT_BLANK}, rather than being dropped. Rows that fall in no column
  * silently disappearing is how a pivot table lies about a total.
  */
-import type { ColumnModel, ColumnMetadata } from "../columnModel";
-import type { DisplayValue } from "../display";
-
 import {
   type AggregateName,
   type Aggregator,
   resolveAggregateValue,
 } from "../aggregate/aggregate";
+import type { ColumnMetadata, ColumnModel } from "../columnModel";
+import type { DisplayValue } from "../display";
 import { compareValues } from "../sort/compare";
 import type { SortableValue } from "../types";
 
@@ -154,7 +153,7 @@ export interface PivotRow {
   /** The dimension value this line is labelled with. */
   label: string;
   /** One value per entry of {@link PivotResult.columnLeaves}, in order. */
-  cells: readonly DisplayValue[];
+  cells: readonly (DisplayValue | undefined)[];
   /** How many source rows it covers — for "12 rows" affordances. */
   count: number;
 }
@@ -187,7 +186,10 @@ export interface PivotOptions<TRow> {
    */
   columns?: readonly ColumnModel<TRow>[];
   /** Format a computed cell. Receives the raw result and the measure. */
-  format?: (value: DisplayValue, measure: PivotMeasure) => DisplayValue;
+  format?: (
+    value: DisplayValue | undefined,
+    measure: PivotMeasure
+  ) => DisplayValue | undefined;
   /**
    * Subtotal keys the user has collapsed. A collapsed line keeps its own
    * totals and drops everything beneath it.
@@ -327,7 +329,7 @@ function cellsOf<TRow>(
   byKey: ReadonlyMap<string, ColumnMetadata<TRow>>,
   aggregate: (leaf: PivotColumnLeaf) => Aggregator,
   format: PivotOptions<TRow>["format"]
-): DisplayValue[] {
+): (DisplayValue | undefined)[] {
   return leaves.map((leaf) => {
     const matching = leaf.total
       ? covered
@@ -451,7 +453,7 @@ interface BodyInput<TRow> {
   byKey: ReadonlyMap<string, ColumnMetadata<TRow>>;
   subtotals: boolean;
   collapsed: ReadonlySet<string>;
-  cells: (covered: readonly TRow[]) => DisplayValue[];
+  cells: (covered: readonly TRow[]) => (DisplayValue | undefined)[];
 }
 
 /**

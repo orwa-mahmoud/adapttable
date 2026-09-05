@@ -1,3 +1,4 @@
+import type { FilterDef } from "@adapttable/core";
 import { createElement, type ReactNode } from "react";
 
 import { filters as coreFilters } from "../features/filters";
@@ -13,7 +14,6 @@ import type {
   StaticTableFeature,
   TableFeature,
 } from "../features/tableFeature";
-import type { FilterDef } from "@adapttable/core";
 import type { FiltersFormSlotProps } from "../filters/filterForm";
 import type { ActiveFilterChipsSlotProps } from "../filters/useActiveFilterChips";
 import type { AdapterFeatureComponent } from "./component";

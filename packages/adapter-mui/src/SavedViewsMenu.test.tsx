@@ -4,7 +4,6 @@
  * the table's own URL backend.
  */
 import type { LayoutStorage } from "@adapttable/react";
-
 import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

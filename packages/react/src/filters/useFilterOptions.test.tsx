@@ -1,6 +1,3 @@
-import { renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { resetDevWarnings } from "@adapttable/core";
 import {
   AUTO_OPTIONS_LIMIT,
@@ -8,6 +5,9 @@ import {
   type FilterOption,
   materializeAutoOptions,
 } from "@adapttable/core";
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { useFilterOptions } from "./useFilterOptions";
 
 beforeEach(() => resetDevWarnings());

@@ -27,7 +27,7 @@ describe("resolveColumnHeader", () => {
       key: "fullName",
       header: "Name",
       renderHeader: ({ controller }) =>
-        `${controller.label}:${controller.sortDir ?? "none"}`,
+        `${controller.label as string}:${controller.sortDir ?? "none"}`,
     };
     const controller = columnHeaderController(column, {
       sortDir: "desc",
@@ -45,7 +45,7 @@ describe("resolveColumnFooter", () => {
     expect(resolveColumnFooter(name, "12")).toBe("12");
     const column: ColumnDef<Row> = {
       key: "fullName",
-      renderFooter: ({ value }) => `total ${value}`,
+      renderFooter: ({ value }) => `total ${value as number}`,
     };
     expect(resolveColumnFooter(column, 3)).toBe("total 3");
   });

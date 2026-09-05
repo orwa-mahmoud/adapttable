@@ -7,17 +7,17 @@
  * ship. Here the omission would be quieter still: a palette whose shortcut
  * was never bound simply never appears, and nothing on screen is missing.
  */
-import { useCallback, useMemo, useState } from "react";
-
 import type { FeatureHostState } from "@adapttable/core";
-import { appendByKey } from "@adapttable/core";
-import { useFeatureHost } from "../features/featureHostContext";
 import type { TableLabels } from "@adapttable/core";
+import { appendByKey } from "@adapttable/core";
 import {
   type Command,
   type TableCommandOptions,
   tableCommands,
 } from "@adapttable/core";
+import { useCallback, useMemo, useState } from "react";
+
+import { useFeatureHost } from "../features/featureHostContext";
 import { type Shortcut, useShortcuts } from "./useShortcuts";
 
 /** The command key the default shortcut runs. */

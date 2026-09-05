@@ -129,43 +129,46 @@ function checkSourceEngineModules() {
   return { missing, violations };
 }
 
+/** The runtime file beside a resolved declaration entry. */
+function runtimeFileFor(file) {
+  if (file.endsWith(".d.ts")) return file.replace(/\.d\.ts$/, ".js");
+  if (file.endsWith(".d.cts")) return file.replace(/\.d\.cts$/, ".cjs");
+  return file;
+}
+
+/** One published neutral entry: the graph it pulls in and the types it ships. */
+function checkNeutralEntry(pkgName, subpath, pkgDirByName) {
+  const resolved = resolvePublishedEntry(pkgName, subpath, pkgDirByName);
+  const label = `${pkgName}${subpath === "." ? "" : subpath.replace(/^\.\//, "/")}`;
+  if (resolved.missing) return [`missing neutral entry ${label}`];
+
+  const runtime = runtimeFileFor(resolved.file);
+  if (!existsSync(runtime)) return [`missing neutral runtime for ${label}`];
+
+  const violations = checkTransitiveGraph({
+    entryFiles: [runtime],
+    pkgDirByName,
+    label,
+  });
+  const types = resolved.file.endsWith(".d.ts")
+    ? resolved.file
+    : runtime.replace(/\.(js|cjs|mjs)$/, ".d.ts");
+  if (existsSync(types)) {
+    for (const hit of declarationViolations(types)) {
+      violations.push(`${label}: ${relative(ROOT, types)} ${hit}`);
+    }
+  }
+  return violations;
+}
+
 function checkNeutralEntrypoints() {
   const pkgDirByName = buildPkgDirByName();
   const violations = [];
   for (const { pkg, subpaths } of neutralEntrypoints) {
-    const pkgName = `@adapttable/${pkg}`;
     for (const subpath of subpaths) {
-      const resolved = resolvePublishedEntry(pkgName, subpath, pkgDirByName);
-      const label = `${pkgName}${subpath === "." ? "" : subpath.replace(/^\.\//, "/")}`;
-      if (resolved.missing) {
-        violations.push(`missing neutral entry ${label}`);
-        continue;
-      }
-      let runtime = resolved.file;
-      if (runtime.endsWith(".d.ts")) {
-        runtime = runtime.replace(/\.d\.ts$/, ".js");
-      } else if (runtime.endsWith(".d.cts")) {
-        runtime = runtime.replace(/\.d\.cts$/, ".cjs");
-      }
-      if (!existsSync(runtime)) {
-        violations.push(`missing neutral runtime for ${label}`);
-        continue;
-      }
       violations.push(
-        ...checkTransitiveGraph({
-          entryFiles: [runtime],
-          pkgDirByName,
-          label,
-        })
+        ...checkNeutralEntry(`@adapttable/${pkg}`, subpath, pkgDirByName)
       );
-      const types = resolved.file.endsWith(".d.ts")
-        ? resolved.file
-        : runtime.replace(/\.(js|cjs|mjs)$/, ".d.ts");
-      if (existsSync(types)) {
-        for (const hit of declarationViolations(types)) {
-          violations.push(`${label}: ${relative(ROOT, types)} ${hit}`);
-        }
-      }
     }
   }
   return violations;

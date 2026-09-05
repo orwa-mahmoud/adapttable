@@ -21,6 +21,19 @@ export * from "@adapttable/unstyled";
    needs — CSV options, column layout, cell editors, tier props —
    without ever depending on @adapttable/core directly. */
 export {
+  type BulkActionContext,
+  type CellEditor,
+  type ChipLabelResolver,
+  type ColumnFilter,
+  type CustomCellEditorCtrl,
+  type CustomCellEditorRender,
+  type ExportCsvOptions,
+  FILTER_TYPES,
+  type MobileCardRenderer,
+  type RowActionsRenderer,
+  type TableQuery,
+} from "@adapttable/core";
+export {
   type BaseDataTableProps,
   type ColumnLayoutState,
   type EditConflict,
@@ -36,19 +49,6 @@ export {
   type UseServerDataOptions,
   type UseTableDataOptions,
 } from "@adapttable/react";
-export {
-  type BulkActionContext,
-  type CellEditor,
-  type ChipLabelResolver,
-  type ColumnFilter,
-  type CustomCellEditorCtrl,
-  type CustomCellEditorRender,
-  type ExportCsvOptions,
-  FILTER_TYPES,
-  type MobileCardRenderer,
-  type RowActionsRenderer,
-  type TableQuery,
-} from "@adapttable/core";
 export {
   type DataModeProps,
   type TableQueryHandler,

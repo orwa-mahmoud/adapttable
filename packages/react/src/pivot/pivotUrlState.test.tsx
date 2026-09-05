@@ -6,13 +6,13 @@
  * back, the overlay that covers the gap until the write lands, and the SSR rule
  * it shares with the other URL hooks.
  */
+import { EMPTY_PIVOT_CONFIG } from "@adapttable/core";
+import { pivot, type PivotConfig } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMemoryAdapter, type UrlStateAdapter } from "../url/adapter";
-import { EMPTY_PIVOT_CONFIG } from "@adapttable/core";
-import { pivot, type PivotConfig } from "@adapttable/core";
 import { PIVOT_URL_WRITE_DEBOUNCE_MS, usePivotUrlState } from "./pivotUrlState";
 
 /** Rows whose region/team paths give two subtotal lines to fold. */

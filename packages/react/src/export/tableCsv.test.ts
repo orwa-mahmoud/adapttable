@@ -1,8 +1,4 @@
-import { createElement } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { TableSource } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
 import { resetDevWarnings } from "@adapttable/core";
 import {
   buildTableCsv,
@@ -10,6 +6,10 @@ import {
   makeExportCsvHandler,
   resolveExportCsv,
 } from "@adapttable/core";
+import { createElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { ColumnDef } from "../columnDef";
 
 beforeEach(() => {
   resetDevWarnings();

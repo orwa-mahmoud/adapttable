@@ -3,9 +3,8 @@
  * hide it from the Columns menu, end-pin it in ONE click with zero data
  * columns pinned, and round-trip both through layout persistence.
  */
-import { useColumnLayoutStorageState } from "@adapttable/react";
 import type { LayoutStorage } from "@adapttable/react";
-
+import { useColumnLayoutStorageState } from "@adapttable/react";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";

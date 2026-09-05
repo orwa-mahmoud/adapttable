@@ -5,14 +5,15 @@
  * a find/grid/export/history/fullscreen object — the same shape, doing
  * nothing. These live here so the gates never import the hooks.
  */
+import type { GridCell } from "@adapttable/core";
+import type { SelectionStats } from "@adapttable/core";
+
+import type { ColumnDef } from "../columnDef";
 import type { EditHistoryState } from "../editing/editHistory";
 import type { ExportHandlerState } from "../export/useExportHandler";
 import type { FindInTableState } from "../find/useFindInTable";
-import type { GridCell } from "@adapttable/core";
-import type { SelectionStats } from "@adapttable/core";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { FullscreenState } from "../layout/useFullscreen";
-import type { ColumnDef } from "../columnDef";
 import type { ColumnWindow } from "../virtual/useColumnWindow";
 
 const noop = (): void => undefined;

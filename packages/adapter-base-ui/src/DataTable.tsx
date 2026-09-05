@@ -6,7 +6,6 @@ import {
   BATCH_EDIT_BAR,
   BULK_BAR,
   COLUMN_MENU,
-  type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   ContextMenuLiveGate,
   DataTableShellView,
@@ -277,27 +276,25 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                           props.enableColumnMenu && !chrome.isMobile ? (
                             <FeatureSlot
                               slot={COLUMN_MENU}
-                              props={
-                                {
-                                  allColumns: chrome.allColumns,
-                                  onAutoSize: view.autoSizeColumns,
-                                  onAutoSizeColumn: view.autoSizeColumn,
-                                  onSortColumn: (key, dir) =>
-                                    shell.source.setSort(key, dir),
-                                  onFilterColumn: () => setFiltersOpen(true),
-                                  onRenameColumn: props.onColumnRename
-                                    ? chrome.columnLayout.setName
-                                    : undefined,
-                                  sortBy: shell.source.sortBy,
-                                  sortDir: shell.source.sortDir,
-                                  layout: chrome.columnLayout,
-                                  labels,
-                                  hasRowActions,
-                                  hasRowReorder,
-                                  groupingPanel: chrome.groupingPanel,
-                                  dir: props.dir,
-                                } as ColumnMenuSlotProps<never>
-                              }
+                              props={{
+                                allColumns: chrome.allColumns,
+                                onAutoSize: view.autoSizeColumns,
+                                onAutoSizeColumn: view.autoSizeColumn,
+                                onSortColumn: (key, dir) =>
+                                  shell.source.setSort(key, dir),
+                                onFilterColumn: () => setFiltersOpen(true),
+                                onRenameColumn: props.onColumnRename
+                                  ? chrome.columnLayout.setName
+                                  : undefined,
+                                sortBy: shell.source.sortBy,
+                                sortDir: shell.source.sortDir,
+                                layout: chrome.columnLayout,
+                                labels,
+                                hasRowActions,
+                                hasRowReorder,
+                                groupingPanel: chrome.groupingPanel,
+                                dir: props.dir,
+                              }}
                             />
                           ) : undefined
                         }

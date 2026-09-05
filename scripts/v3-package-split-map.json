@@ -19083,6 +19083,14 @@
       "behavior": ""
     },
     {
+      "export": "fillSlot",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "FILTER_CHIPS_LIVE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -20932,6 +20940,14 @@
     },
     {
       "export": "SidePanelTabProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "Slot",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
@@ -23959,6 +23975,14 @@
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "Slot",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "react-binding",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },

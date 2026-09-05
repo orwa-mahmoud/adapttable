@@ -36,7 +36,7 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 // @public
 export interface AggregateOptions<TRow> {
     columns?: readonly ColumnMetadata<TRow>[];
-    format?: (value: DisplayValue, key: string) => DisplayValue;
+    format?: (value: DisplayValue | undefined, key: string) => DisplayValue | undefined;
     host?: FeatureHostState;
 }
 
@@ -44,7 +44,7 @@ export interface AggregateOptions<TRow> {
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue;
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
@@ -56,7 +56,7 @@ export function appendByKey<T>(first: readonly T[], second: readonly T[], keyOf:
 export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnMetadata<TRow>[];
 
 // @public
-export function applyColumnNames<TCol extends ColumnMetadata<any>>(columns: readonly TCol[], names: Readonly<Record<string, string>> | undefined): TCol[];
+export function applyColumnNames<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], names: Readonly<Record<string, string>> | undefined): TCol[];
 
 // @public
 export function applyColumnOrder<TRow>(columns: readonly ColumnMetadata<TRow>[], order: readonly string[]): ColumnMetadata<TRow>[];
@@ -506,7 +506,7 @@ export interface ColumnGroupDef<TRow> {
     readonly align?: GroupedHeaderAlign;
     readonly children: readonly ColumnInput<TRow>[];
     readonly collapsedKey?: string;
-    readonly collapsedRender?: (row: TRow) => DisplayValue;
+    readonly collapsedRender?: (row: TRow) => DisplayValue | undefined;
     readonly header: string;
     readonly headerTooltip?: string;
     readonly marryChildren?: boolean;
@@ -526,7 +526,7 @@ export interface ColumnGroupRecord<TRow> {
     readonly align?: GroupedHeaderAlign;
     readonly childKeys: readonly string[];
     readonly collapsedKey?: string;
-    readonly collapsedRender?: (row: TRow) => DisplayValue;
+    readonly collapsedRender?: (row: TRow) => DisplayValue | undefined;
     readonly headerTooltip?: string;
     readonly id: string;
     readonly label: string;
@@ -715,10 +715,9 @@ export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
 }
 
 // @public
-export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter" | "editor"> & {
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter"> & {
     header?: unknown;
     filter?: unknown;
-    editor?: unknown;
 };
 
 // @public
@@ -976,9 +975,7 @@ export interface CreateTableEngineOptions<TRow> {
 }
 
 // @public
-export type CssProperties = {
-    [key: string]: string | number | undefined;
-};
+export type CssProperties = Record<string, string | number | undefined>;
 
 // @public
 export const csvWriter: ExportWriter;
@@ -1028,8 +1025,8 @@ export const DATE_OPS: readonly ["before", "after", "on", "gte", "lte", "between
 // @public
 export type DateOp = (typeof DATE_OPS)[number];
 
-// @public (undocumented)
-export function declaredColumnLayout<TCol extends ColumnMetadata<any>>(columns: readonly TCol[]): Omit<UseColumnLayoutResult<any>, "visibleColumns"> & {
+// @public
+export function declaredColumnLayout<TCol extends ColumnMetadata<never>>(columns: readonly TCol[]): Omit<UseColumnLayoutResult<never>, "visibleColumns"> & {
     visibleColumns: TCol[];
 };
 
@@ -1073,7 +1070,7 @@ export function devWarn(message: string): void;
 export type Direction = "ltr" | "rtl";
 
 // @public
-export type DisplayValue = unknown;
+export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
 export function downloadCsv(filename: string, csv: string): void;
@@ -1109,7 +1106,7 @@ export interface EditableCellEditing<_TRow = unknown> {
         current?: {
             rowId: string;
             columnKey: string;
-            incomingValue: unknown;
+            incomingValue: string;
         };
     };
     // (undocumented)
@@ -1132,7 +1129,7 @@ export interface EditableCellEditing<_TRow = unknown> {
             rowId: string;
             columnKey: string;
         } | null;
-        draft?: unknown;
+        draft?: string;
     };
     // (undocumented)
     validation?: {
@@ -1147,7 +1144,7 @@ export interface EditableColumnLike<TRow = unknown> {
     editable?: boolean | {
         bivarianceHack(row: TRow): boolean;
     }["bivarianceHack"];
-    editor?: CellEditor | ColumnModelEditor | unknown;
+    editor?: ColumnModelEditor;
     editValue?: {
         bivarianceHack(row: TRow): string;
     }["bivarianceHack"];
@@ -1536,7 +1533,7 @@ export interface FillRangeOptions<TRow> {
 }
 
 // @public
-export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): DisplayValue;
+export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): DisplayValue | undefined;
 
 // @public
 export function fillTargetRange(source: CellRange, to: GridCell): CellRange;
@@ -1900,7 +1897,7 @@ export type GroupAggregateOverride = AggregateName | "none";
 export type GroupAggregateOverrides = Readonly<Partial<Record<string, GroupAggregateOverride>>>;
 
 // @public
-export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, unknown>>;
+export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 
 // @public
 export type GroupByInput = string | readonly string[] | null | undefined;
@@ -1953,7 +1950,7 @@ export type GroupedFlatEntry<TRow> = {
     leafRows: readonly TRow[];
     leafIds: readonly string[];
     serverCount?: number;
-    aggregateCells?: Partial<Record<string, unknown>>;
+    aggregateCells?: Partial<Record<string, DisplayValue>>;
     collapsed: boolean;
 } | {
     kind: "groupFooter";
@@ -1964,7 +1961,7 @@ export type GroupedFlatEntry<TRow> = {
     label: string;
     leafRows: readonly TRow[];
     leafIds: readonly string[];
-    aggregateCells?: Partial<Record<string, unknown>>;
+    aggregateCells?: Partial<Record<string, DisplayValue>>;
 } | {
     kind: "groupMore";
     key: string;
@@ -2111,7 +2108,7 @@ export interface GroupPaging {
 // @public
 export interface GroupRowCell<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
     column: TCol;
-    node: DisplayValue;
+    node: DisplayValue | undefined;
 }
 
 // @public
@@ -2192,7 +2189,7 @@ export function incrementalSearchText<TRow>(row: TRow): string;
 
 // @public
 export interface IncrementalView<TRow> {
-    readonly aggregates: Partial<Record<string, unknown>> | undefined;
+    readonly aggregates: Partial<Record<string, DisplayValue>> | undefined;
     readonly filtered: readonly TRow[];
     readonly groups: readonly GroupedFlatEntry<TRow>[] | undefined;
     readonly rows: readonly TRow[];
@@ -2225,7 +2222,7 @@ export interface IncrementalViewConfig<TRow> {
     sortBy?: string;
     sortDir?: SortDirection;
     sortLevels?: readonly SortLevel[];
-    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, unknown>>;
+    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 }
 
 // @public
@@ -2299,7 +2296,7 @@ export function isCustomEditor(editor: CellEditor | null): editor is {
 };
 
 // @public
-export function isDeclarativeFilters<TRow>(filters: readonly FilterDef<TRow>[] | DisplayValue): filters is readonly FilterDef<TRow>[];
+export function isDeclarativeFilters<TRow>(filters: DisplayValue | undefined): filters is readonly FilterDef<TRow>[];
 
 // @public
 export function isDraftChecked(draft: string): boolean;
@@ -2446,7 +2443,7 @@ export interface MobileCardModel<TRow> {
 }
 
 // @public
-export type MobileCardRenderer<TRow> = (row: TRow, card: MobileCardModel<TRow>) => DisplayValue;
+export type MobileCardRenderer<TRow> = (row: TRow, card: MobileCardModel<TRow>) => DisplayValue | undefined;
 
 // @public
 export function moveField(config: PivotConfig, zone: PivotZone, index: number, delta: -1 | 1): PivotConfig;
@@ -2868,7 +2865,7 @@ export interface PivotOptions<TRow> {
     aggregators?: ReadonlyMap<string, Aggregator>;
     collapsed?: ReadonlySet<string>;
     columns?: readonly ColumnModel<TRow>[];
-    format?: (value: DisplayValue, measure: PivotMeasure) => DisplayValue;
+    format?: (value: DisplayValue | undefined, measure: PivotMeasure) => DisplayValue | undefined;
 }
 
 // @public
@@ -2881,7 +2878,7 @@ export interface PivotResult {
 
 // @public
 export interface PivotRow {
-    cells: readonly DisplayValue[];
+    cells: readonly (DisplayValue | undefined)[];
     count: number;
     depth: number;
     key: string;
@@ -3229,16 +3226,16 @@ export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowH
 export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
 
 // @public
-export interface ResponsiveColumns<TCol extends ColumnMetadata<any> = ColumnMetadata<any>> {
+export interface ResponsiveColumns<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
     columns: TCol[];
     dropped: readonly string[];
 }
 
 // @public
-export function responsiveColumns<TCol extends ColumnMetadata<any>>(input: ResponsiveFit<TCol>): ResponsiveColumns<TCol>;
+export function responsiveColumns<TCol extends ColumnMetadata<never>>(input: ResponsiveFit<TCol>): ResponsiveColumns<TCol>;
 
 // @public
-export interface ResponsiveFit<TCol extends ColumnMetadata<any> = ColumnMetadata<any>> {
+export interface ResponsiveFit<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
     available: number | undefined;
     columns: TCol[];
     extra?: number;
@@ -4386,7 +4383,7 @@ export interface VirtualTableRow<TRow> {
 }
 
 // @public
-export function visibleColumns<TCol extends ColumnMetadata<any>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns?: number): TCol[];
+export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns?: number): TCol[];
 
 // @public
 export function visibleRowActions<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];

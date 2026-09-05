@@ -1,6 +1,5 @@
 import type { TableLabels } from "@adapttable/core";
 import type { UseSavedViewsOptions } from "@adapttable/react";
-
 import { useSavedViews } from "@adapttable/react";
 import {
   Box,

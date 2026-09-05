@@ -52,7 +52,7 @@ const slots: GroupingPanelSlots = {
       data-empty={empty ? true : undefined}
       data-active={active ? true : undefined}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       {empty ? label : <span aria-hidden="true" />}
@@ -125,7 +125,7 @@ const slots: GroupingPanelSlots = {
       className="adapttable-grouping-remove-zone"
       data-active={active ? true : undefined}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       {label}

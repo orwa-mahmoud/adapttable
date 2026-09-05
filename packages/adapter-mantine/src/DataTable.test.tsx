@@ -1,5 +1,6 @@
-import { useColumnLayoutUrlState } from "@adapttable/react";
 import type { TableSource } from "@adapttable/core";
+import type { TableErrorState } from "@adapttable/react";
+import { useColumnLayoutUrlState } from "@adapttable/react";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import { MantineProvider } from "@mantine/core";
@@ -364,7 +365,7 @@ describe("<DataTable> (Mantine)", () => {
       refetch,
       override: {
         slots: {
-          error: (state: { error: Error; retry: () => void }) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

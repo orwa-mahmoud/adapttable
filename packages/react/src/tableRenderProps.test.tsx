@@ -1,13 +1,4 @@
-import { act, render, renderHook } from "@testing-library/react";
-import { type ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
-
 import { columnResizeHandleProps } from "@adapttable/core";
-import { ChromeExtrasGate } from "./features/chromeExtrasGate";
-import { FeatureProviders } from "./features/providers";
-import { rowDetail } from "./features/row-detail";
-import { rowPinning } from "./features/row-pinning";
-import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { buildBodyCells } from "@adapttable/core";
 import {
   extraCoveredTableSlots,
@@ -17,9 +8,18 @@ import {
   insertExtrasBeforeRows,
 } from "@adapttable/core";
 import { createIncrementalView } from "@adapttable/core";
+import { act, render, renderHook } from "@testing-library/react";
+import { type ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
+
+import type { ColumnDef } from "./columnDef";
+import { ChromeExtrasGate } from "./features/chromeExtrasGate";
+import { FeatureProviders } from "./features/providers";
+import { rowDetail } from "./features/row-detail";
+import { rowPinning } from "./features/row-pinning";
+import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { useFrontendData } from "./source/useFrontendData";
 import { tableRenderModel, useSummaryCells } from "./tableRenderProps";
-import type { ColumnDef } from "./columnDef";
 import { createMemoryAdapter } from "./url/adapter";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
 import {

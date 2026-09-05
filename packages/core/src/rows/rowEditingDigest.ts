@@ -8,7 +8,7 @@ export interface EditableCellEditing<_TRow = unknown> {
   dirty?: { isRowDirty(rowId: string): boolean; signature?: string };
   state: {
     active?: { rowId: string; columnKey: string } | null;
-    draft?: unknown;
+    draft?: string;
   };
   validation?: {
     rowHasError(rowId: string): boolean;
@@ -19,6 +19,6 @@ export interface EditableCellEditing<_TRow = unknown> {
   rowEditing?: { activeRowId?: string; signature?: string };
   batch?: { signature?: string };
   conflict?: {
-    current?: { rowId: string; columnKey: string; incomingValue: unknown };
+    current?: { rowId: string; columnKey: string; incomingValue: string };
   };
 }

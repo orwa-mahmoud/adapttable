@@ -1,13 +1,6 @@
-import { fireEvent, render, renderHook, screen } from "@testing-library/react";
-import { StrictMode } from "react";
-import { describe, expect, it, vi } from "vitest";
-
-import { useCommandPalette } from "../actions/useCommandPalette";
-import { useTableContextMenu } from "../actions/useTableContextMenu";
 import { aggregate, type AggregateSpec } from "@adapttable/core";
 import { columnMenuActions } from "@adapttable/core";
-import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
-import { type CellEditor, resolveCellEditor } from "@adapttable/core";
+import { resolveCellEditor } from "@adapttable/core";
 import { resolveExportCsv } from "@adapttable/core";
 import { defaultFilterRegistry, resolveFilterRegistry } from "@adapttable/core";
 import { filterTypeDefaultOp, type FilterTypeSpec } from "@adapttable/core";
@@ -20,6 +13,13 @@ import {
   type FeatureHostState,
   runWithFeatureHost,
 } from "@adapttable/core";
+import { fireEvent, render, renderHook, screen } from "@testing-library/react";
+import { StrictMode } from "react";
+import { describe, expect, it, vi } from "vitest";
+
+import { useCommandPalette } from "../actions/useCommandPalette";
+import { useTableContextMenu } from "../actions/useTableContextMenu";
+import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
 import { filterTypes } from "./factories";
 import { featureHostOf, useTableFeatures } from "./featureHost";
 import { FeatureHostProvider, useFeatureHost } from "./featureHostContext";
@@ -170,7 +170,7 @@ describe("useTableFeatures", () => {
         {
           key: "tint",
           editable: true,
-          editor: "color" as CellEditor,
+          editor: "color",
         },
         featureHostOf(props)
       );
@@ -522,7 +522,7 @@ describe("useTableFeatures", () => {
       resolveCellEditor({
         key: "tint",
         editable: true,
-        editor: "color" as CellEditor,
+        editor: "color",
       })
     ).toBe("color");
   });

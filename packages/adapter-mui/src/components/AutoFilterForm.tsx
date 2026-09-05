@@ -1,3 +1,10 @@
+import type {
+  FilterDef,
+  FilterTypeRegistry,
+  FilterValue,
+  TableLabels,
+  TableSource,
+} from "@adapttable/core";
 import {
   defaultFilterRegistry,
   filterLabel,
@@ -8,19 +15,11 @@ import {
   renderRegisteredFilter,
   splitRelativeToken,
 } from "@adapttable/core";
-import type {
-  FilterDef,
-  FilterTypeRegistry,
-  FilterValue,
-  TableLabels,
-  TableSource,
-} from "@adapttable/core";
 import {
   filterOpLabel,
   listFilterValues,
   useFilterOptions,
 } from "@adapttable/react";
-
 import {
   useBooleanFilterWidget,
   useRangeFilterWidget,
@@ -35,7 +34,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 
@@ -367,9 +366,11 @@ function FilterField<TRow>({
   source,
   labels,
   registry,
-}: Readonly<LabeledFieldProps<TRow> & { registry: FilterTypeRegistry }>) {
+}: Readonly<
+  LabeledFieldProps<TRow> & { registry: FilterTypeRegistry }
+>): ReactElement | null {
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom as ReactNode;
+  if (custom) return custom as ReactElement;
   switch (filterWidgetKind(def, registry)) {
     case "text":
       return <TextFilter def={def} source={source} labels={labels} />;

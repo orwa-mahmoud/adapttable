@@ -20,7 +20,6 @@
  */
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
-
 import type { FeatureHostState } from "../features/currentHost";
 import { currentFeatureHost } from "../features/currentHost";
 import type { SortableValue } from "../types";
@@ -47,7 +46,7 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
  */
 export type Aggregator<TValue = SortableValue> = (
   values: readonly TValue[]
-) => DisplayValue;
+) => DisplayValue | undefined;
 
 /**
  * What to compute per column: a built-in name, or your own function.
@@ -71,7 +70,10 @@ export interface AggregateOptions<TRow> {
    * Format a computed value for display. Receives the raw result and the
    * column key: `format: (v, key) => key === "budget" ? money.format(v) : v`.
    */
-  format?: (value: DisplayValue, key: string) => DisplayValue;
+  format?: (
+    value: DisplayValue | undefined,
+    key: string
+  ) => DisplayValue | undefined;
   /**
    * The host of the table this mapper will run in. Omit it when the
    * table binds the call with `runWithFeatureHost`.

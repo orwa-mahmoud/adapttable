@@ -7,9 +7,6 @@
  * arriving as a number is a data-loss bug the user cannot undo.
  */
 
-import { describe, expect, it } from "vitest";
-
-import type { ColumnDef } from "../columnDef";
 import { buildExportTable } from "@adapttable/core";
 import {
   buildTableXlsx,
@@ -17,6 +14,9 @@ import {
   safeSheetName,
   xlsxWriter,
 } from "@adapttable/core";
+import { describe, expect, it } from "vitest";
+
+import type { ColumnDef } from "../columnDef";
 
 interface Row {
   name: string;

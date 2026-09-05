@@ -1,13 +1,26 @@
+import type { FacetMap } from "@adapttable/core";
+import type { FilterDef, FilterRuntime } from "@adapttable/core";
+import type { FilterTypeRegistry } from "@adapttable/core";
+import type { SelectionStats } from "@adapttable/core";
+import type { GroupingPanelState } from "@adapttable/core";
+import type { AssemblyFns } from "@adapttable/core";
+import type { QuerySupport } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
+import type { Direction, SortByOption, TableLabels } from "@adapttable/core";
+import type { VirtualTableRow } from "@adapttable/core";
+import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
+import { bindFeatureHostFn, type FeatureHostState } from "@adapttable/core";
+import { resolveFilterMode, toolbarShowsFilters } from "@adapttable/core";
+import { isDeclarativeFilters } from "@adapttable/core";
 import type { ReactNode, RefCallback, RefObject } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useTableStatusAnnouncement } from "./a11y/useTableStatusAnnouncement";
-import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
-import { applyReactColumnNames } from "./columns/reactColumns";
+import type { ColumnDef } from "./columnDef";
 import { flattenReactColumnTree } from "./columns/flattenColumnTree";
+import { applyReactColumnNames } from "./columns/reactColumns";
 import type { EditHistoryState } from "./editing/editHistory";
 import type { ExportHandlerState } from "./export/useExportHandler";
-import { bindFeatureHostFn, type FeatureHostState } from "@adapttable/core";
 import { useResolvedDensity } from "./features/densityStateKey";
 import {
   featureHostOf,
@@ -23,26 +36,14 @@ import {
   disabledHistory,
   disabledSelectionStats,
 } from "./features/shellLiveStubs";
-import type { FacetMap } from "@adapttable/core";
-import { resolveFilterMode, toolbarShowsFilters } from "@adapttable/core";
-import type { FilterDef, FilterRuntime } from "@adapttable/core";
-import type { FilterTypeRegistry } from "@adapttable/core";
 import type { ChipLabelResolver } from "./filters/useActiveFilterChips";
 import type { FindInTableState } from "./find/useFindInTable";
-import type { SelectionStats } from "@adapttable/core";
 import type { GridFocusState } from "./focus/useGridFocus";
-import type { GroupingPanelState } from "@adapttable/core";
-import type { AssemblyFns } from "@adapttable/core";
 import type { FullscreenState } from "./layout/useFullscreen";
 import type { ComposedTableProps, ToolbarSlots } from "./props";
-import { isDeclarativeFilters } from "@adapttable/core";
-import type { QuerySupport } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
 import type { DataModeProps } from "./source/useTableDataImpl";
 import { useTableDataLean } from "./source/useTableDataLean";
 import type { SharedTableRenderProps } from "./tableRenderProps";
-import type { Direction, SortByOption, TableLabels } from "@adapttable/core";
-import type { ColumnDef } from "./columnDef";
 import { type UrlStateAdapter, useResolvedAdapter } from "./url/adapter";
 import type { Density } from "./url/useDensityUrlState";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
@@ -58,7 +59,6 @@ import {
 } from "./useTableChrome";
 import type { ChromeBodyData } from "./virtual/chromeBodyShared";
 import type { ColumnWindow } from "./virtual/useColumnWindow";
-import type { VirtualTableRow } from "@adapttable/core";
 
 export type { FacetMap, QuerySupport, UrlStateAdapter };
 
@@ -729,7 +729,7 @@ export function finishDataTableShell<TRow>(
   };
 }
 
+export type { TableChrome } from "./useTableChrome";
 export type { FilterRuntime } from "@adapttable/core";
 export type { GroupAggregatesFn } from "@adapttable/core";
 export type { Direction } from "@adapttable/core";
-export type { TableChrome } from "./useTableChrome";

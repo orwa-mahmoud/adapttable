@@ -14,10 +14,10 @@
  * hideable and end-pinnable with the actions column, and confirmable through
  * the same dialog a host's own destructive action uses.
  */
+import type { RowAction, TableLabels } from "@adapttable/core";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { RowAction, TableLabels } from "@adapttable/core";
 
 /**
  * How a table asks for a row to be added, copied or removed.

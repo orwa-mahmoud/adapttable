@@ -1,14 +1,14 @@
+import { defaultConfirm } from "@adapttable/core";
+import { columnResizeHandleProps } from "@adapttable/core";
+import { insertExtraRows, insertExtrasBeforeRows } from "@adapttable/core";
 import { renderHook } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { defaultConfirm } from "@adapttable/core";
-import { columnResizeHandleProps } from "@adapttable/core";
-import { insertExtraRows, insertExtrasBeforeRows } from "@adapttable/core";
+import type { ColumnDef } from "../columnDef";
 import { REORDER_COLUMN_WIDTH } from "../rows/rowReorder";
 import { useFrontendData } from "../source/useFrontendData";
 import { tableRenderModel } from "../tableRenderProps";
-import type { ColumnDef } from "../columnDef";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableChrome } from "../useTableChrome";
 import {

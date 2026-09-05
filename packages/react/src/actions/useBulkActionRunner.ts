@@ -1,7 +1,6 @@
-import { useCallback, useState } from "react";
-
 import type { BulkAction, BulkActionContext } from "@adapttable/core";
 import type { ConfirmHandler } from "@adapttable/core";
+import { useCallback, useState } from "react";
 
 /**
  * A bulk-action rejection as display text, or `null` when there is none.

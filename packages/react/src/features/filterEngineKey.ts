@@ -5,6 +5,7 @@
  * table sees `undefined` and keeps search/sort/page only.
  */
 import type { FilterEngine } from "@adapttable/core";
+
 import { featureStateKey } from "./providers";
 
 /**

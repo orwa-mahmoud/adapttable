@@ -372,7 +372,8 @@ export function createAgentSession(
         readonly observation: AgentObservation;
       }
     | { readonly code: string; readonly message: string } => {
-    if (!registry.has(key)) {
+    const definition = registry.get(key);
+    if (!definition) {
       return {
         code: "unknown-capability",
         message: `unknown capability "${key}"`,
@@ -391,15 +392,8 @@ export function createAgentSession(
         message: `expected revision ${expectedRevision}, table is at ${observation.viewRevision}`,
       };
     }
-    const invalid = validateSchema(registry.describe(key).input, args ?? {});
+    const invalid = validateSchema(definition.guide.input, args ?? {});
     if (invalid) return { code: "invalid-arguments", message: invalid };
-    const definition = registry.get(key);
-    if (!definition) {
-      return {
-        code: "unknown-capability",
-        message: `unknown capability "${key}"`,
-      };
-    }
     return { definition, observation };
   };
 

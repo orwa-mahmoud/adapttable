@@ -26,6 +26,11 @@ export {
   useChangedCellFlash,
   type UseChangedCellFlashOptions,
 } from "./rows/changedCellFlash";
+export {
+  type RowPatchStreamState,
+  useRowPatchStream,
+  type UseRowPatchStreamOptions,
+} from "./stream/useRowPatchStream";
 export type { RowPatch, RowPatchEvent } from "@adapttable/core";
 export {
   openRowPatchStream,
@@ -41,11 +46,6 @@ export {
   isStreamSettled,
   type RowPatchStreamStatus,
 } from "@adapttable/core";
-export {
-  type RowPatchStreamState,
-  useRowPatchStream,
-  type UseRowPatchStreamOptions,
-} from "./stream/useRowPatchStream";
 
 /**
  * The member types the signatures above hand back.

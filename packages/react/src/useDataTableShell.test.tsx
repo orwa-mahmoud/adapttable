@@ -1,8 +1,12 @@
+import type { FilterDef } from "@adapttable/core";
+import type { RowAction } from "@adapttable/core";
+import { buildTableCsv } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { buildTableCsv } from "@adapttable/core";
+import type { ColumnDef } from "./columnDef";
 import { DataTableShellView } from "./features/chromeBodyGate";
 import { densityChooser } from "./features/density";
 import { editing } from "./features/editing";
@@ -16,10 +20,7 @@ import { rowPinning } from "./features/row-pinning";
 import { rowReorder } from "./features/row-reorder";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { virtualize } from "./features/virtualize";
-import type { FilterDef } from "@adapttable/core";
 import { useFrontendData } from "./source/useFrontendData";
-import type { RowAction } from "@adapttable/core";
-import type { ColumnDef } from "./columnDef";
 import { createMemoryAdapter } from "./url/adapter";
 import {
   type DataTableShellProps,
@@ -27,7 +28,6 @@ import {
   finishDataTableShell,
   useDataTableShell,
 } from "./useDataTableShell";
-import { resetDevWarnings } from "@adapttable/core";
 import type { ChromeBodyData } from "./virtual/chromeBodyShared";
 
 interface Row {

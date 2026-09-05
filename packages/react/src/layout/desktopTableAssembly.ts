@@ -1,20 +1,11 @@
 /** Shared desktop-table assembly — wiring, not pixels. */
-import {
-  type CSSProperties,
-  memo,
-  type ReactElement,
-  type ReactNode,
-  type RefCallback,
-  useCallback,
-  useRef,
-} from "react";
-
 import type { ConfirmHandler } from "@adapttable/core";
-import {
-  columnHeaderController,
-  columnsHaveFooter,
-  resolveColumnHeader,
-} from "../columns/columnHeader";
+import type { HtmlGroupedHeaderCell } from "@adapttable/core";
+import type { FilterDef } from "@adapttable/core";
+import type { GroupedFlatEntry } from "@adapttable/core";
+import type { BodyCell } from "@adapttable/core";
+import type { TreeEntry } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
 import {
   edgePinStyle,
   PIN_Z,
@@ -22,35 +13,10 @@ import {
   pinnedCellStyle,
   type PinOffset,
 } from "@adapttable/core";
-import type { ReactColumnResizeHandleProps } from "../columns/reactColumnResize";
-import { toReactColumnResizeHandleProps } from "../columns/reactColumnResize";
 import { fittedTableStyle } from "@adapttable/core";
 import { pinnedColumnWidth, tableMinWidth } from "@adapttable/core";
-import type { HtmlGroupedHeaderCell } from "@adapttable/core";
 import { htmlGroupedHeaderPlan } from "@adapttable/core";
-import type { EditableCellEditing } from "../editing/editableCellController";
-import type { FilterDef } from "@adapttable/core";
-import type { GridFocusState } from "../focus/useGridFocus";
-import type { GroupedFlatEntry } from "@adapttable/core";
-import type { BodyCell } from "@adapttable/core";
 import { pinnedSummaryEntries, pinnedSummaryPart } from "@adapttable/core";
-import { rowClickProps } from "../rows/rowClickProps";
-import type { RowPinSide } from "../rows/rowPinning";
-import {
-  type SharedTableRenderProps,
-  type TableRenderModel,
-  tableRenderModel,
-  useSummaryCells,
-} from "../tableRenderProps";
-import type { TreeEntry } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
-import type {
-  CellElementProps,
-  SortButtonElementProps,
-  UseDataTableResult,
-} from "../useDataTable/useDataTable";
-import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import {
   type AssemblyFns,
   bodyCellsHaveRowSpan,
@@ -73,9 +39,43 @@ import {
   rowStyleSignature,
 } from "@adapttable/core";
 import {
-  rowIsDirty,
+  type CSSProperties,
+  memo,
+  type ReactElement,
+  type ReactNode,
+  type RefCallback,
+  useCallback,
+  useRef,
+} from "react";
+
+import type { ColumnDef } from "../columnDef";
+import {
+  columnHeaderController,
+  columnsHaveFooter,
+  resolveColumnHeader,
+} from "../columns/columnHeader";
+import type { ReactColumnResizeHandleProps } from "../columns/reactColumnResize";
+import { toReactColumnResizeHandleProps } from "../columns/reactColumnResize";
+import type { EditableCellEditing } from "../editing/editableCellController";
+import {
   rowEditingSignature,
+  rowIsDirty,
 } from "../editing/editableCellController";
+import type { GridFocusState } from "../focus/useGridFocus";
+import { rowClickProps } from "../rows/rowClickProps";
+import type { RowPinSide } from "../rows/rowPinning";
+import {
+  type SharedTableRenderProps,
+  type TableRenderModel,
+  tableRenderModel,
+  useSummaryCells,
+} from "../tableRenderProps";
+import type {
+  CellElementProps,
+  SortButtonElementProps,
+  UseDataTableResult,
+} from "../useDataTable/useDataTable";
+import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import { useHorizontalOverflow } from "./useHorizontalOverflow";
 import { useOffsetHeight } from "./useOffsetHeight";
 

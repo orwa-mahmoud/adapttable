@@ -1,6 +1,5 @@
 import type { Direction, TableLabels } from "@adapttable/core";
 import type { UseSavedViewsOptions } from "@adapttable/react";
-
 import { useSavedViews } from "@adapttable/react";
 import { Button, Divider, Flex, Input, Popover } from "antd";
 import { useEffect, useRef, useState } from "react";

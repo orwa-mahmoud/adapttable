@@ -6,9 +6,9 @@
  * "Hide column" over a column locked against hiding is worse than one that
  * lists nothing — the user reads it as broken rather than as forbidden.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { defaultLabels } from "../labels";
 import { contextMenuItems, type ContextMenuTarget } from "./contextMenuModel";
 

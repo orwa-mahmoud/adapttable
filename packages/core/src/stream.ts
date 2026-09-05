@@ -7,6 +7,12 @@
  * @packageDocumentation
  */
 export type { RowPatch, RowPatchEvent } from "./rows/patch";
+export type {
+  InsertPatch,
+  RemovePatch,
+  UpdatePatch,
+  UpsertPatch,
+} from "./rows/patch";
 export {
   openRowPatchStream,
   type OpenRowPatchStreamOptions,
@@ -21,9 +27,3 @@ export {
   isStreamSettled,
   type RowPatchStreamStatus,
 } from "./stream/status";
-export type {
-  InsertPatch,
-  RemovePatch,
-  UpdatePatch,
-  UpsertPatch,
-} from "./rows/patch";

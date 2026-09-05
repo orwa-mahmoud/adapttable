@@ -8,6 +8,7 @@
  * {@link editing}, {@link rowEditing} and {@link batchEditing} all fill
  * the same slot; apply() sets the channel each one owns.
  */
+import { devWarn } from "@adapttable/core";
 import { type ReactNode, useEffect, useMemo } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";
@@ -19,7 +20,6 @@ import { useRowEditing } from "../editing/rowEditing";
 import { useCellSaveState } from "../editing/saveState";
 import { useCellEditing } from "../editing/useCellEditing";
 import { useEditValidation } from "../editing/validation";
-import { devWarn } from "@adapttable/core";
 import { featureHostOf } from "./featureHost";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, EDITING_LIVE } from "./slotKeys";

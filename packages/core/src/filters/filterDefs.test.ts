@@ -1,6 +1,6 @@
-import type { ColumnModel } from "../columnModel";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { resetDevWarnings } from "../utils/devWarn";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import {

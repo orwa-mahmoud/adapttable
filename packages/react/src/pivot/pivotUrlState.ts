@@ -27,10 +27,10 @@ import {
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
 
 export type { UrlStateAdapter };
+import type { PivotConfig } from "@adapttable/core";
 import { PARAM_PIVOT } from "@adapttable/core";
 import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
 import { EMPTY_PIVOT_CONFIG } from "@adapttable/core";
-import type { PivotConfig } from "@adapttable/core";
 import {
   deserializePivotState,
   type PivotUrlState,

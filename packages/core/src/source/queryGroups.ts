@@ -12,7 +12,6 @@
  * the same rows, filled from a different source of truth.
  */
 import type { DisplayValue } from "../display";
-
 import {
   formatGroupLabel,
   type GroupedFlatEntry,

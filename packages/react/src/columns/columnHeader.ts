@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import { columnHeaderLabel } from "@adapttable/core";
+import type { ReactNode } from "react";
 
 import type {
   ColumnDef,

@@ -5,9 +5,9 @@
  * `exportValue` separates the two, and the two hooks give the host the one
  * moment where the file's contents are known and nothing has happened yet.
  */
-import type { ColumnModel } from "../columnModel";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import type { TableSource } from "../source/TableSource";
 import { buildTableCsv, downloadTableCsv, type ExportInfo } from "./tableCsv";
 

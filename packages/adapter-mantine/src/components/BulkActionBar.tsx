@@ -1,6 +1,5 @@
 import type { BulkAction, TableLabels } from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
-
 import { useBulkActionRunner } from "@adapttable/react";
 import {
   bulkActionErrorMessage,

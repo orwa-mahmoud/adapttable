@@ -5,6 +5,13 @@
  * table composes {@link virtualize}. The base table graph must not reach this
  * file — types and pure helpers live in {@link ./virtualTableModel}.
  */
+import { VIRTUAL_OVERSCAN } from "@adapttable/core";
+import {
+  type KeyedVirtualization,
+  type TableVirtualization,
+  type VirtualItemMeta,
+  type VirtualTableRow,
+} from "@adapttable/core";
 import {
   useVirtualizer,
   useWindowVirtualizer,
@@ -12,14 +19,7 @@ import {
 } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { VIRTUAL_OVERSCAN } from "@adapttable/core";
 import { useRowPairMeasurer } from "./measureRowPair";
-import {
-  type KeyedVirtualization,
-  type TableVirtualization,
-  type VirtualItemMeta,
-  type VirtualTableRow,
-} from "@adapttable/core";
 
 export type {
   KeyedVirtualization,

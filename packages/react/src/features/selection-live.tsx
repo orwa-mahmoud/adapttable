@@ -1,11 +1,11 @@
 /**
  * Row selection — mounts only when a selection-owning feature is composed.
  */
+import { sourceCapabilities } from "@adapttable/core";
+import { stableKey } from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import { useSelection } from "../selection/useSelection";
-import { sourceCapabilities } from "@adapttable/core";
-import { stableKey } from "@adapttable/core";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, SELECTION_LIVE } from "./slotKeys";
 

@@ -9,8 +9,8 @@
  *   may itself contain a comma); numbers are parsed back.
  * - Default values are omitted to keep the URL clean.
  */
-import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
 import type { ColumnLayoutState } from "../columns/columnLayoutModel";
+import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
 import {
   parseFilterTree,
   serializeFilterTree,

@@ -1,7 +1,7 @@
+import type { ExtraFilters } from "@adapttable/core";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ExtraFilters } from "@adapttable/core";
 import { useExtraChips } from "./useExtraChips";
 
 const labels = {

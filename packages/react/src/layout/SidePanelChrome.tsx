@@ -26,9 +26,8 @@
  * the same chrome hold a filter form, a column list, or a pivot builder
  * without knowing what any of them are.
  */
-import { type KeyboardEvent, type ReactNode, useCallback, useRef } from "react";
-
 import type { TableLabels } from "@adapttable/core";
+import { type KeyboardEvent, type ReactNode, useCallback, useRef } from "react";
 
 /**
  * One panel in the side panel's strip.

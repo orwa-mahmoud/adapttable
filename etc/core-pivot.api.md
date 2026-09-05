@@ -8,7 +8,7 @@
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue;
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
@@ -70,7 +70,7 @@ export function deserializePivot(raw: string | null): PivotConfig;
 export function deserializePivotState(raw: string | null): PivotUrlState;
 
 // @public
-export type DisplayValue = unknown;
+export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
 export const EMPTY_PIVOT_CONFIG: PivotConfig;
@@ -139,7 +139,7 @@ export interface PivotOptions<TRow> {
     aggregators?: ReadonlyMap<string, Aggregator>;
     collapsed?: ReadonlySet<string>;
     columns?: readonly ColumnModel<TRow>[];
-    format?: (value: DisplayValue, measure: PivotMeasure) => DisplayValue;
+    format?: (value: DisplayValue | undefined, measure: PivotMeasure) => DisplayValue | undefined;
 }
 
 // @public
@@ -152,7 +152,7 @@ export interface PivotResult {
 
 // @public
 export interface PivotRow {
-    cells: readonly DisplayValue[];
+    cells: readonly (DisplayValue | undefined)[];
     count: number;
     depth: number;
     key: string;

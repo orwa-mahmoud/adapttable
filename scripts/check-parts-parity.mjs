@@ -319,7 +319,9 @@ function partsOf(pkg) {
 }
 
 /**
- * The part names core's chrome owns.
+ * The part names the shared chrome owns — `@adapttable/core` and the React
+ * binding together, since the split put the engine in one and the structural
+ * Chrome in the other.
  *
  * Core names a part in four ways, and only the first looks like the others:
  * the attribute it renders itself, the `part` prop it hands a kit's slot to put
@@ -331,7 +333,14 @@ function partsOf(pkg) {
  */
 function corePartNames() {
   const found = new Set();
-  for (const file of sourceFiles(join(PACKAGES, "core", "src"))) {
+  // The shared chrome spans two packages since the v3 split: the neutral
+  // engine in `core`, and the structural Chrome and prop-getters in `react`.
+  // Both are upstream of every kit, so both count as "core owns this name".
+  const shared = [
+    ...sourceFiles(join(PACKAGES, "core", "src")),
+    ...sourceFiles(join(PACKAGES, "react", "src")),
+  ];
+  for (const file of shared) {
     const text = readFileSync(file, "utf8");
     for (const match of text.matchAll(
       /["']?data-adapttable-part["']?\s*[=:]\s*["']([a-z0-9-]+)["']/g

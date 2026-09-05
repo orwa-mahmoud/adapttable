@@ -5,9 +5,9 @@
  * up: a grand total that disagrees with its subtotals, or a row that falls
  * into no column and quietly vanishes, is a pivot table lying about the data.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import {
   pivot,
   PIVOT_BLANK,

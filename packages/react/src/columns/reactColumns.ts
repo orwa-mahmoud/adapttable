@@ -1,8 +1,8 @@
 import {
   applyColumnNames,
   declaredColumnLayout,
-  visibleColumns,
   type TableLayout,
+  visibleColumns,
 } from "@adapttable/core";
 
 import type { ColumnDef } from "../columnDef";

@@ -1,8 +1,4 @@
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-
 import type { FeatureHostState } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
-import type { BatchEditingState } from "./batchEditing";
 import {
   type CellEditCommit,
   type CellEditor,
@@ -15,6 +11,14 @@ import {
   resolveCellEditor,
   resolveCommitValue,
 } from "@adapttable/core";
+import {
+  rowEditingSignature as coreRowEditingSignature,
+  rowIsDirty as coreRowIsDirty,
+} from "@adapttable/core";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+
+import type { ColumnDef } from "../columnDef";
+import type { BatchEditingState } from "./batchEditing";
 import type { DirtyCellState } from "./dirtyCells";
 import type { EditConflict, EditConflictState } from "./editConflict";
 import type { EditLifecycle } from "./editingEvents";
@@ -30,11 +34,6 @@ import {
   type CellEditingState,
 } from "./useCellEditing";
 import type { CellValidator, EditValidationState } from "./validation";
-
-import {
-  rowEditingSignature as coreRowEditingSignature,
-  rowIsDirty as coreRowIsDirty,
-} from "@adapttable/core";
 
 /**
  * Opt-in editing bundle from {@link TableChrome.editing}.

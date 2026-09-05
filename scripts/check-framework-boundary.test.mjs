@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { join, dirname } from "node:path";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -50,15 +52,33 @@ describe("framework boundary checker", () => {
   });
 
   it("rejects React types in neutral declarations", () => {
-    const violations = checkTransitiveGraph({
-      entryFiles: [join(NEGATIVE, "react-type.d.ts")],
-      pkgDirByName: buildPkgDirByName(),
-      label: "planted react-type",
-    });
-    assert.ok(
-      violations.some((v) => /React/.test(v)),
-      violations.join("\n")
+    // Written here rather than checked in: a declaration file inside the
+    // repo is real typed source, and this one is a planted defect — the
+    // inline `import("react")` shape tsc emits when a React type leaks
+    // into a neutral d.ts.
+    const dir = mkdtempSync(join(tmpdir(), "adapttable-boundary-"));
+    const file = join(dir, "react-type.d.ts");
+    writeFileSync(
+      file,
+      'export type LeakedCell = import("react").ReactNode;\n'
     );
+    try {
+      const violations = checkTransitiveGraph({
+        entryFiles: [file],
+        pkgDirByName: buildPkgDirByName(),
+        label: "planted react-type",
+      });
+      assert.ok(
+        violations.some((v) => /React/.test(v)),
+        violations.join("\n")
+      );
+      assert.ok(
+        violations.some((v) => v.includes('import("react")')),
+        violations.join("\n")
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("flags unresolved @adapttable/core/adapter from a neutral graph", () => {

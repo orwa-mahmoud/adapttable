@@ -6,12 +6,12 @@
  * overlay that covers the gap between a keystroke and the URL, and the SSR rule
  * it shares with the other URL hooks.
  */
+import type { FormulaColumnSpec } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMemoryAdapter } from "../url/adapter";
-import type { FormulaColumnSpec } from "@adapttable/core";
 import {
   FORMULA_URL_WRITE_DEBOUNCE_MS,
   useFormulaUrlState,

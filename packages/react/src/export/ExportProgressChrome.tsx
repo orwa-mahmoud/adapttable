@@ -1,6 +1,6 @@
+import type { TableLabels } from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 
-import type { TableLabels } from "@adapttable/core";
 import type { ExportProgressState, ExportStatus } from "./useExportHandler";
 
 /**

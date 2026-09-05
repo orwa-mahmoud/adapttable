@@ -1,11 +1,11 @@
+import type { QueryFilterGroup } from "@adapttable/core";
+import type { FilterDef } from "@adapttable/core";
+import { defaultFilterRegistry } from "@adapttable/core";
+import { withFilterType } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { type ChangeEvent, useState } from "react";
 import { describe, expect, it } from "vitest";
 
-import type { QueryFilterGroup } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
-import { withFilterType } from "@adapttable/core";
 import { FilterTreeChrome, type FilterTreeSlots } from "./FilterTreeChrome";
 
 interface Row {

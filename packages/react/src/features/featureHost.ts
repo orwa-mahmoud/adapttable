@@ -4,15 +4,11 @@
  * tree by {@link FeatureHostProvider}. Chrome that runs in the same render
  * receives it as an argument; it is not left on a module stack.
  */
-import { useLayoutEffect, useRef } from "react";
-
 import type { Command } from "@adapttable/core";
 import type { Aggregator } from "@adapttable/core";
 import type { CustomCellEditorRender } from "@adapttable/core";
 import type { ExportWriter } from "@adapttable/core";
 import type { FilterTypeSpec } from "@adapttable/core";
-import type { SidePanelEntry } from "../layout/SidePanelChrome";
-import type { FeatureProps } from "../props";
 import {
   appendByKey,
   type ColumnMenuActionFactory,
@@ -20,6 +16,10 @@ import {
   type FeatureHostState,
   type FilterTypeExtend,
 } from "@adapttable/core";
+import { useLayoutEffect, useRef } from "react";
+
+import type { SidePanelEntry } from "../layout/SidePanelChrome";
+import type { FeatureProps } from "../props";
 import {
   applyTableFeatures,
   getAppliedFeatures,

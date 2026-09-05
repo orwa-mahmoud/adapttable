@@ -5,7 +5,7 @@
  * Hide / reorder / pin / resize live on {@link useColumnLayout} and mount
  * only when a layout-owning feature is composed.
  */
-import type { ColumnModel, ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../columnModel";
 import {
   EMPTY_COLUMN_LAYOUT,
   type PinOffset,
@@ -17,22 +17,23 @@ function noop(): void {
   // User layout mutations are a feature. The base table cannot change them.
 }
 
+/** The one layout field a host may declare directly on a column. */
+interface DeclaredHidden {
+  hidden?: boolean;
+}
+
 /**
  * Layout that only honours what the host declared on each column.
  *
  * @public
  */
-type DeclaredColumn<TRow> = ColumnModel<TRow> & { hidden?: boolean };
-
-export function declaredColumnLayout<TCol extends ColumnMetadata<any>>(
+export function declaredColumnLayout<TCol extends ColumnMetadata<never>>(
   columns: readonly TCol[]
-): Omit<UseColumnLayoutResult<any>, "visibleColumns"> & {
+): Omit<UseColumnLayoutResult<never>, "visibleColumns"> & {
   visibleColumns: TCol[];
 } {
-  const declared = columns as readonly DeclaredColumn<any>[];
-  const visibleColumns = declared.filter(
-    (column) => column.hidden !== true
-  ) as TCol[];
+  const declared = columns as readonly (TCol & DeclaredHidden)[];
+  const visibleColumns = declared.filter((column) => column.hidden !== true);
   const hiddenKeys = new Set(
     declared
       .filter((column) => column.hidden === true)

@@ -1,8 +1,8 @@
+import { defaultLabels } from "@adapttable/core";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { agentApprovalTestSlots } from "../internal/chromeTestSlots";
-import { defaultLabels } from "@adapttable/core";
 import { AgentApprovalChrome } from "./AgentApprovalChrome";
 
 function part(name: string) {

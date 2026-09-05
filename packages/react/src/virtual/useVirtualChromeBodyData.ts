@@ -4,11 +4,15 @@
  * Import only from the virtualize feature. The base table graph must not
  * reach this file.
  */
+import { devWarn } from "@adapttable/core";
+import {
+  type TableVirtualization,
+  windowGroupedEntries,
+} from "@adapttable/core";
 import { useCallback, useMemo, useRef } from "react";
 
 import type { ComposedTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
-import { devWarn } from "@adapttable/core";
 import {
   type ChromeBodyData,
   entryKeys,
@@ -24,10 +28,6 @@ import {
   useKeyedVirtualization,
   useTableVirtualization,
 } from "./useTableVirtualization";
-import {
-  type TableVirtualization,
-  windowGroupedEntries,
-} from "@adapttable/core";
 import { useMeasuredWindowScrollMargin } from "./windowScrollMargin";
 
 /**

@@ -15,11 +15,10 @@
  * the adapter fills with its own kit's component, so a Mantine panel is built
  * from Mantine buttons and an antd panel from antd buttons.
  */
-import type { ReactNode } from "react";
-
 import type { AggregateName } from "@adapttable/core";
-import { resolveLabels } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
+import type { PivotConfig } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
 import {
   assignField,
   availableFields,
@@ -30,7 +29,7 @@ import {
   removeField,
   setMeasureAgg,
 } from "@adapttable/core";
-import type { PivotConfig } from "@adapttable/core";
+import type { ReactNode } from "react";
 
 export type { AggregateName, PivotConfig, PivotField, PivotZone };
 

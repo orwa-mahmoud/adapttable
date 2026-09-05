@@ -1,4 +1,5 @@
 import type { TableSource } from "@adapttable/core";
+import type { TableErrorState } from "@adapttable/react";
 import {
   type ColumnLayoutState,
   createMemoryAdapter,
@@ -237,7 +238,7 @@ describe("<DataTable> (Ant Design)", () => {
       refetch,
       override: {
         slots: {
-          error: (state: { error: Error; retry: () => void }) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

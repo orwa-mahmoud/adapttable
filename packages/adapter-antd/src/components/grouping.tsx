@@ -1,7 +1,6 @@
-import { groupSelectionState } from "@adapttable/core";
 import type { GroupedFlatEntry, TableLabels } from "@adapttable/core";
+import { groupSelectionState } from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
-
 import {
   type ExtraEntry,
   groupIndentStyle,
@@ -89,7 +88,10 @@ function toExtraDataRecord(entry: ExtraEntry): AdaptTableExtraRow {
     [ADAPTTABLE_EXTRA]: true,
     key: entry.key,
     extraKind: entry.kind,
-    render: entry.kind === "fullWidth" ? entry.render : undefined,
+    render:
+      entry.kind === "fullWidth"
+        ? (entry.render as () => ReactNode)
+        : undefined,
   };
 }
 
@@ -116,7 +118,9 @@ function toGroupDataRecord<TRow>(
       entry.leafIds.length,
     leafIds: entry.leafIds,
     aggregateCells:
-      entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+      entry.kind === "groupMore"
+        ? undefined
+        : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
     collapsed: entry.kind === "group" && entry.collapsed,
   };
 }

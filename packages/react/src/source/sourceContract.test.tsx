@@ -1,10 +1,10 @@
+import type { PaginatedResponse } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { PaginatedResponse } from "@adapttable/core";
 import { createMemoryAdapter } from "../url/adapter";
-import type { TableSource } from "@adapttable/core";
 import { useFrontendData } from "./useFrontendData";
 import { type InfiniteQueryLike, useQuerySource } from "./useQuerySource";
 import { useServerData } from "./useServerData";

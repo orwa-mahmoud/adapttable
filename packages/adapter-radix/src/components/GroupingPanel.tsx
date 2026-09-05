@@ -81,7 +81,7 @@ const slots: GroupingPanelSlots = {
       role="group"
       aria-label={label}
       data-active={active || undefined}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
       style={{
         alignSelf: "stretch",
@@ -214,7 +214,7 @@ const slots: GroupingPanelSlots = {
       role="group"
       aria-label={label}
       data-active={active || undefined}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
       style={{
         alignSelf: "stretch",

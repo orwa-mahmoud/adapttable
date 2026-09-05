@@ -1,6 +1,5 @@
-import type { ColumnModel, ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata, ColumnModel } from "../columnModel";
 import type { DisplayValue } from "../display";
-
 import type { ColumnGroupShow } from "../types";
 import {
   COLUMN_GROUP_ID_SEP,
@@ -36,7 +35,7 @@ export interface ColumnGroupDef<TRow> {
    * Cell shown for every row while this group is collapsed. Takes
    * precedence over {@link ColumnGroupDef.collapsedKey}.
    */
-  readonly collapsedRender?: (row: TRow) => DisplayValue;
+  readonly collapsedRender?: (row: TRow) => DisplayValue | undefined;
   /**
    * Keep these children adjacent through reorder. Default `true` for a
    * tree group; the flat `column.group` shortcut still splits on drag.
@@ -72,7 +71,7 @@ export interface ColumnGroupRecord<TRow> {
   /** Column shown as the summary while the group is collapsed. */
   readonly collapsedKey?: string;
   /** Renders a synthetic summary cell while collapsed. */
-  readonly collapsedRender?: (row: TRow) => DisplayValue;
+  readonly collapsedRender?: (row: TRow) => DisplayValue | undefined;
   /** Keeps the group's columns together when columns are reordered. */
   readonly marryChildren: boolean;
   /** Tooltip on the group header. */
@@ -202,7 +201,7 @@ interface MutableGroup<TRow> {
   id: string;
   label: string;
   collapsedKey?: string;
-  collapsedRender?: (row: TRow) => DisplayValue;
+  collapsedRender?: (row: TRow) => DisplayValue | undefined;
   marryChildren: boolean;
   headerTooltip?: string;
   align?: GroupedHeaderAlign;
@@ -360,7 +359,7 @@ function renderColumn<TRow>(
   id: string,
   path: readonly string[],
   index: number,
-  render: (row: TRow) => DisplayValue,
+  render: (row: TRow) => DisplayValue | undefined,
   headerTooltip: string | undefined
 ): ColumnMetadata<TRow> {
   return {
@@ -370,11 +369,11 @@ function renderColumn<TRow>(
     width: 180,
     formatValue: (row) => {
       const value = render(row);
-      return typeof value === "string"
-        ? value
-        : typeof value === "number" || typeof value === "boolean"
-          ? String(value)
-          : "";
+      if (typeof value === "string") return value;
+      if (typeof value === "number" || typeof value === "boolean") {
+        return String(value);
+      }
+      return "";
     },
     group: path.length === 1 ? path[0] : path,
     sortable: false,

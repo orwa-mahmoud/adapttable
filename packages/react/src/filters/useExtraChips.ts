@@ -1,6 +1,6 @@
+import type { ExtraFilters, FilterValue } from "@adapttable/core";
 import { useCallback, useMemo } from "react";
 
-import type { ExtraFilters, FilterValue } from "@adapttable/core";
 import {
   type ActiveFilterChip,
   type ChipLabelResolver,

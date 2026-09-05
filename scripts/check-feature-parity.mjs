@@ -81,6 +81,21 @@ function stripComments(source) {
   return out;
 }
 
+/**
+ * The layers a kit is built ON: the neutral engine and the React binding,
+ * either at any subpath. Everything else under `@adapttable/` is another
+ * kit's pixels, which is what this rule keeps out.
+ */
+const SHARED_LAYERS = ["@adapttable/core", "@adapttable/react"];
+/** shadcn's kit IS unstyled's components restyled, so it builds on them too. */
+const KIT_LAYER = new Map([["adapter-shadcn", "@adapttable/unstyled"]]);
+const ADAPTTABLE_IMPORT = /from\s+["'](@adapttable\/[^"']+)["']/g;
+
+/** True when `specifier` names `pkg` itself or one of its subpaths. */
+function isFrom(specifier, pkg) {
+  return specifier === pkg || specifier.startsWith(`${pkg}/`);
+}
+
 const problems = [];
 
 for (const adapter of PUBLISHED) {
@@ -100,6 +115,8 @@ for (const adapter of PUBLISHED) {
     .map((name) => join(src, name));
 
   let passesHeaderProps = NO_HEADER_OF_ITS_OWN.has(adapter);
+  const own = KIT_LAYER.get(adapter);
+  const allowed = own ? [...SHARED_LAYERS, own] : SHARED_LAYERS;
 
   for (const file of files) {
     const source = readFileSync(file, "utf8");
@@ -117,15 +134,11 @@ for (const adapter of PUBLISHED) {
         `${rel}: reads named fields off leaf.headerProps without spreading it`
       );
     }
-    if (/from\s+["']@adapttable\/(?!core)[^"']+["']/.test(text)) {
-      const other = text.match(/from\s+["'](@adapttable\/(?!core)[^"']+)["']/);
-      if (
-        other &&
-        !rel.startsWith("adapter-shadcn/") &&
-        other[1] !== "@adapttable/unstyled" &&
-        other[1] !== "@adapttable/unstyled/features"
-      ) {
-        problems.push(`${rel}: imports sibling kit ${other[1]}`);
+    for (const specifier of new Set(
+      [...text.matchAll(ADAPTTABLE_IMPORT)].map((match) => match[1])
+    )) {
+      if (!allowed.some((layer) => isFrom(specifier, layer))) {
+        problems.push(`${rel}: imports sibling kit ${specifier}`);
       }
     }
     if (

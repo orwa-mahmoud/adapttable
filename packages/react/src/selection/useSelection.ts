@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
 import { applyGroupLeafSelection } from "@adapttable/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Tri-state of the "select all visible" header control.

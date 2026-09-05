@@ -1,6 +1,5 @@
-import { createContext, type ReactNode, useContext } from "react";
-
 import type { FeatureHostState } from "@adapttable/core";
+import { createContext, type ReactNode, useContext } from "react";
 
 /**
  * The host of the table whose tree this is. Hooks under

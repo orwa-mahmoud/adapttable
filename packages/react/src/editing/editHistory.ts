@@ -13,11 +13,11 @@
  * "undo that paste" — and it is why the batch routes come through here rather
  * than each cell recording itself.
  */
+import type { CellEdit } from "@adapttable/core";
+import { getPath } from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import type { CellEdit } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
-import { getPath } from "@adapttable/core";
 import type { BatchRowEdit } from "./batchEditing";
 
 /**

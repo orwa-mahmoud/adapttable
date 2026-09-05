@@ -6,7 +6,6 @@
  */
 import type { TableLabels } from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
-
 import {
   COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,

@@ -6,9 +6,9 @@
  * conflict handling — applies to a paste without paste knowing. These check the
  * parsing a spreadsheet actually writes, and the limits a paste must respect.
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import {
   cellPasteHandler,
   parseClipboardTable,

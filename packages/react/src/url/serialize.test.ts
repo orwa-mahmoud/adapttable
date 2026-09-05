@@ -1,6 +1,3 @@
-import { describe, expect, it } from "vitest";
-
-import type { ColumnLayoutState } from "../columns/useColumnLayout";
 import type { FilterValue } from "@adapttable/core";
 import {
   isEmptyFilterValue,
@@ -16,6 +13,9 @@ import {
   writeFilterTreeParam,
   writeRowPins,
 } from "@adapttable/core";
+import { describe, expect, it } from "vitest";
+
+import type { ColumnLayoutState } from "../columns/useColumnLayout";
 
 const ps = (s: string) => new URLSearchParams(s);
 

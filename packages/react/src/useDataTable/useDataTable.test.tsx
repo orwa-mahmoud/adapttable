@@ -1,11 +1,11 @@
+import type { BulkAction } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useFrontendData } from "../source/useFrontendData";
-import type { BulkAction } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
+import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
-import { resetDevWarnings } from "@adapttable/core";
 import { useDataTable, type UseDataTableOptions } from "./useDataTable";
 
 interface Row {

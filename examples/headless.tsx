@@ -2,7 +2,7 @@ import {
   type ColumnDef,
   useDataTable,
   useFrontendData,
-} from "@adapttable/core";
+} from "@adapttable/react";
 
 interface Row {
   id: string;

@@ -5,9 +5,9 @@
  * moments — what I can see, everything that matched, or just the rows I
  * ticked — and picking one should never require rebuilding the data by hand.
  */
-import type { ColumnModel } from "../columnModel";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import type { TableSource } from "../source/TableSource";
 import { resetDevWarnings } from "../utils/devWarn";
 import { buildTableCsv, resolveExportColumns } from "./tableCsv";

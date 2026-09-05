@@ -81,10 +81,9 @@ export interface ColumnHeaderController {
 }
 
 // @public
-export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter" | "editor"> & {
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter"> & {
     header?: unknown;
     filter?: unknown;
-    editor?: unknown;
 };
 
 // @public
@@ -156,7 +155,7 @@ export interface CustomCellEditorCtrl {
 export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
 
 // @public
-export type DisplayValue = unknown;
+export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
 export interface ExportPayload {

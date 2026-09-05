@@ -4,11 +4,11 @@
  * The mutation hook lives on this entry. A table that never imports it
  * never carries add / duplicate / delete.
  */
+import type { RowAction } from "@adapttable/core";
+import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
 import { type ReactNode, useMemo } from "react";
 
-import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
 import { useRowMutations } from "../rows/rowMutations";
-import type { RowAction } from "@adapttable/core";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, ROW_ACTIONS_LIVE } from "./slotKeys";
 import type { TableFeature } from "./tableFeature";

@@ -1,4 +1,5 @@
 import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 import type { ExtraEntry } from "../rows/extraRows";
 import { getPath } from "../utils/path";
 
@@ -73,7 +74,7 @@ export type GroupedFlatEntry<TRow> =
        */
       serverCount?: number;
       /** Present when the host passed `groupAggregates`. */
-      aggregateCells?: Partial<Record<string, unknown>>;
+      aggregateCells?: Partial<Record<string, DisplayValue>>;
       collapsed: boolean;
     }
   | {
@@ -96,7 +97,7 @@ export type GroupedFlatEntry<TRow> =
       label: string;
       leafRows: readonly TRow[];
       leafIds: readonly string[];
-      aggregateCells?: Partial<Record<string, unknown>>;
+      aggregateCells?: Partial<Record<string, DisplayValue>>;
     }
   | {
       /**
@@ -180,7 +181,7 @@ export type GroupSort<TRow> =
  */
 export type GroupAggregatesFn<TRow> = (
   rows: readonly TRow[]
-) => Partial<Record<string, unknown>>;
+) => Partial<Record<string, DisplayValue>>;
 
 /**
  * What `buildGroupedFlatModel` needs to flatten grouped rows into the single

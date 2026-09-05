@@ -27,10 +27,10 @@
  * here. Every visible control is a required slot the adapter fills with its
  * own kit's component.
  */
+import type { TableLabels } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
 import { type CSSProperties, type ReactNode, useState } from "react";
 
-import { resolveLabels } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
 import type { SavedView } from "./useSavedViews";
 
 export type { SavedView };

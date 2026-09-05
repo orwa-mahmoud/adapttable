@@ -149,9 +149,7 @@ describe("buildTablePdf", () => {
     const text = latin1(
       buildTablePdf({
         rows: ROWS,
-        columns: [
-          { key: "name", header: 1 as never, exportValue: (row) => row.name },
-        ],
+        columns: [{ key: "name", header: 1, exportValue: (row) => row.name }],
       })
     );
     expect(text).toContain("(name)");

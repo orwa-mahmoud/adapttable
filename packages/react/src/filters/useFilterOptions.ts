@@ -1,8 +1,8 @@
+import type { FilterDef, FilterOption } from "@adapttable/core";
+import { devWarn } from "@adapttable/core";
 import { useEffect, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import { devWarn } from "@adapttable/core";
-import type { FilterDef, FilterOption } from "@adapttable/core";
 
 /**
  * Resolved choices for a select/multiSelect control.

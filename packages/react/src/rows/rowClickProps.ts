@@ -1,6 +1,5 @@
-import type { HTMLAttributes } from "react";
-
 import { rowClickProps as coreRowClickProps } from "@adapttable/core";
+import type { HTMLAttributes } from "react";
 
 /**
  * React-compatible row activation props for `<tr>` and card roots.

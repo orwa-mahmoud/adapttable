@@ -7,9 +7,8 @@
  * and how many extra leaves per group — which is all the model needs to show
  * one more page of either.
  */
-import { useCallback, useMemo, useState } from "react";
-
 import type { GroupPaging } from "@adapttable/core";
+import { useCallback, useMemo, useState } from "react";
 
 /**
  * Paging state and the one action that changes it.

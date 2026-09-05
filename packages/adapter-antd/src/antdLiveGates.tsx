@@ -6,18 +6,18 @@
  * slots and the inert stubs, never the hooks, so the adapter root graph
  * matches the other kits.
  */
-import { asBatchGesture } from "@adapttable/react";
-import type {
-  BatchRowEdit,
-  EditHistoryState,
-  FindInTableState,
-} from "@adapttable/react";
-import type { GridFocusState } from "@adapttable/react/adapter";
 import type {
   SelectionStats,
   TableLabels,
   TableSource,
 } from "@adapttable/core";
+import type {
+  BatchRowEdit,
+  EditHistoryState,
+  FindInTableState,
+} from "@adapttable/react";
+import { asBatchGesture } from "@adapttable/react";
+import type { GridFocusState } from "@adapttable/react/adapter";
 import {
   CELL_NAV_LIVE,
   type CellNavLiveSlotProps,

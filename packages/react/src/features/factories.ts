@@ -5,11 +5,11 @@
  * Each factory is a {@link TableFeature}: host plugins are the same type
  * in the same `features` array.
  */
-import type { CommandPaletteOptions } from "../actions/useCommandPalette";
-import type { ContextMenuOptions } from "../actions/useTableContextMenu";
-import { columnResizeHandleProps } from "@adapttable/core";
 import type { FilterTypeSpec } from "@adapttable/core";
-import type { SidePanelOptions } from "../props";
+import type { PinnedRows } from "@adapttable/core";
+import type { RowHeight, RowStyle } from "@adapttable/core";
+import type { BulkAction } from "@adapttable/core";
+import { columnResizeHandleProps } from "@adapttable/core";
 import {
   buildBodyCells,
   type CellSpanAppearance,
@@ -23,9 +23,10 @@ import {
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "@adapttable/core";
-import type { PinnedRows } from "@adapttable/core";
-import type { RowHeight, RowStyle } from "@adapttable/core";
-import type { BulkAction } from "@adapttable/core";
+
+import type { CommandPaletteOptions } from "../actions/useCommandPalette";
+import type { ContextMenuOptions } from "../actions/useTableContextMenu";
+import type { SidePanelOptions } from "../props";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import { COLUMN_LAYOUT_LIVE_RENDER } from "./column-layout-live";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
@@ -49,11 +50,11 @@ export type {
   UseSavedViewsOptions,
 };
 export type { BatchRowEdit } from "../editing/batchEditing";
+export type { RowReorderHandler } from "../rows/rowReorder";
+export type { NestedTableFor } from "../tree/nestedTable";
 export type { ExportCsvOptions } from "@adapttable/core";
 export type { FilterDef } from "@adapttable/core";
 export type { GroupSort } from "@adapttable/core";
-export type { RowReorderHandler } from "../rows/rowReorder";
-export type { NestedTableFor } from "../tree/nestedTable";
 
 function define<TRow>(
   id: string,

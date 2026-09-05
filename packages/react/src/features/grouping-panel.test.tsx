@@ -1,4 +1,15 @@
-import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
+import type { GroupAggregateOverrides } from "@adapttable/core";
+import {
+  columnMenuActions,
+  type ColumnMenuChoice,
+  type ColumnMenuRow,
+} from "@adapttable/core";
+import {
+  GROUPING_COLUMN_DND_MIME,
+  type GroupingPanelInteractions,
+  type GroupingPanelState,
+} from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
 import {
   act,
   fireEvent,
@@ -6,21 +17,10 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
+import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  columnMenuActions,
-  type ColumnMenuChoice,
-  type ColumnMenuRow,
-} from "@adapttable/core";
 import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
-import type { GroupAggregateOverrides } from "@adapttable/core";
-import {
-  GROUPING_COLUMN_DND_MIME,
-  type GroupingPanelInteractions,
-  type GroupingPanelState,
-} from "@adapttable/core";
-import { defaultLabels } from "@adapttable/core";
 import { featureHostOf, useTableFeatures } from "./featureHost";
 import { groupingPanel } from "./grouping-panel";
 import { GROUPING_PANEL_STATE } from "./groupingPanelKey";

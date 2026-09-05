@@ -181,9 +181,8 @@ export interface ColumnModel<TRow = unknown> {
  */
 export type ColumnMetadata<TRow = unknown> = Omit<
   ColumnModel<TRow>,
-  "header" | "filter" | "editor"
+  "header" | "filter"
 > & {
   header?: unknown;
   filter?: unknown;
-  editor?: unknown;
 };

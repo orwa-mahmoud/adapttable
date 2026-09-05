@@ -31,15 +31,15 @@
  * `collapsed` set the engine reads. The indent, the part name and the
  * grand-total captions are structure, which is core's.
  */
+import type { TableLabels } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
 import type { ReactNode } from "react";
 
-import { resolveLabels } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
 
 export type { TableLabels };
-import { measureLabel, type PivotField } from "@adapttable/core";
 import type { PivotColumnLeaf, PivotResult, PivotRow } from "@adapttable/core";
+import { measureLabel, type PivotField } from "@adapttable/core";
 
 /**
  * The key of the row-header column — the one down the side, holding each

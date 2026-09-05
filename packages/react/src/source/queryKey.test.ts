@@ -5,9 +5,9 @@
  * did, and the full key starts with the base key so prefix invalidation
  * catches every page of a view and nothing outside it.
  */
+import { tableQueryBaseKey, tableQueryKey } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
-import { tableQueryBaseKey, tableQueryKey } from "@adapttable/core";
 import type { TableQuery } from "./useServerData";
 
 function query(overrides: Partial<TableQuery> = {}): TableQuery {

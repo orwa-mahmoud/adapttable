@@ -1,7 +1,7 @@
+import { FakeSocket } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { FakeSocket } from "@adapttable/core";
 import {
   useRowPatchStream,
   type UseRowPatchStreamOptions,

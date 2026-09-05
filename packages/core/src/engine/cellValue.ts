@@ -1,7 +1,7 @@
 /**
  * Resolve a cell value from a neutral column. Never reads React renderers.
  */
-import type { SortableValue, ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata, SortableValue } from "../columnModel";
 import { getPath } from "../utils/path";
 
 function asSortable(value: unknown): SortableValue {

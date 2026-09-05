@@ -21,9 +21,9 @@ import {
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
 
 export type { UrlStateAdapter };
+import type { FormulaColumnSpec } from "@adapttable/core";
 import { PARAM_FORMULA } from "@adapttable/core";
 import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
-import type { FormulaColumnSpec } from "@adapttable/core";
 import {
   deserializeFormulaColumns,
   serializeFormulaColumns,

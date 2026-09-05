@@ -7,12 +7,12 @@
  * batteries-included shell also writes this when pinning is armed and the
  * host has not taken control.
  */
+import { readRowPins, writeRowPins } from "@adapttable/core";
+import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 import { EMPTY_ROW_PIN_STATE, type RowPinState } from "../rows/rowPinning";
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
-import { readRowPins, writeRowPins } from "@adapttable/core";
-import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
 
 /**
  * What {@link useRowPinningUrlState} needs.

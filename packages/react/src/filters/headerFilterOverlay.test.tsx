@@ -1,3 +1,5 @@
+import type { ExtraFilters } from "@adapttable/core";
+import { defaultFilterRegistry } from "@adapttable/core";
 import {
   act,
   fireEvent,
@@ -8,8 +10,6 @@ import {
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ExtraFilters } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
 import type { FilterFormSource } from "./filterForm";
 import {
   bindHeaderFilterDismiss,

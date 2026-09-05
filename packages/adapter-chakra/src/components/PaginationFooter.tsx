@@ -1,6 +1,6 @@
 /** Row count and the windowed pager. */
-import { pageSizeOptions } from "@adapttable/core";
 import type { PaginationInfo, TableLabels } from "@adapttable/core";
+import { pageSizeOptions } from "@adapttable/core";
 import { paginationSlots } from "@adapttable/react/adapter";
 import { Button, HStack, Text } from "@chakra-ui/react";
 

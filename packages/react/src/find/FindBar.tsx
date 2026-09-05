@@ -2,10 +2,10 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the end user clicks.
  */
+import type { TableLabels } from "@adapttable/core";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { focusEditorOnMount } from "../editing/editableCellController";
-import type { TableLabels } from "@adapttable/core";
 import type { FindInTableState } from "./useFindInTable";
 
 export type { FindInTableState };

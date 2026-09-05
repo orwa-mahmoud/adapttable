@@ -1,7 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
-
 import { defaultLabels } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
 import {
   type ColumnMenuAction,
   columnMenuActions,
@@ -16,6 +13,9 @@ import {
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core";
+import { describe, expect, it, vi } from "vitest";
+
+import type { ColumnDef } from "../columnDef";
 import type { UseColumnLayoutResult } from "./useColumnLayout";
 
 interface Row {

@@ -1,11 +1,12 @@
-import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
+import { resolveLabels } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { resolveLabels } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
 
 type AnyColumn = ColumnDef<unknown>;
+import type { GroupingPanelState } from "@adapttable/core";
+
 import {
   type GroupingPanelChipProps,
   GroupingPanelChrome,
@@ -15,7 +16,6 @@ import {
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
 } from "./GroupingPanelChrome";
-import type { GroupingPanelState } from "@adapttable/core";
 
 const slots: GroupingPanelSlots = {
   Surface: ({
@@ -36,11 +36,7 @@ const slots: GroupingPanelSlots = {
     empty: _empty,
     ...props
   }: GroupingPanelDropZoneProps) => (
-    <div
-      aria-label={label}
-      {...(dropProps as HTMLAttributes<HTMLDivElement>)}
-      {...props}
-    />
+    <div aria-label={label} {...dropProps} {...props} />
   ),
   Chip: ({
     label,
@@ -51,11 +47,7 @@ const slots: GroupingPanelSlots = {
     ...props
   }: GroupingPanelChipProps) => (
     <span {...props}>
-      <button
-        type="button"
-        {...(dragProps as ButtonHTMLAttributes<HTMLButtonElement>)}
-        {...(keyboardProps as unknown as ButtonHTMLAttributes<HTMLButtonElement>)}
-      >
+      <button type="button" {...dragProps} {...keyboardProps}>
         {label}
       </button>
       <button type="button" aria-label={removeLabel} onClick={onRemove}>
@@ -95,11 +87,7 @@ const slots: GroupingPanelSlots = {
     active: _active,
     ...props
   }: GroupingPanelRemoveZoneProps) => (
-    <div
-      aria-label={label}
-      {...(dropProps as HTMLAttributes<HTMLDivElement>)}
-      {...props}
-    />
+    <div aria-label={label} {...dropProps} {...props} />
   ),
 };
 

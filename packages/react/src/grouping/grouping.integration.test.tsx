@@ -1,3 +1,4 @@
+import { resetDevWarnings } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -14,7 +15,6 @@ import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
 import { type TableChrome, useTableChrome } from "../useTableChrome";
-import { resetDevWarnings } from "@adapttable/core";
 
 function renderLiveChrome<TRow>(
   features: readonly TableFeature<TRow>[],

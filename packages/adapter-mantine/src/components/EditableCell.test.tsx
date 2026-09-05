@@ -7,7 +7,6 @@
  */
 import { formatMultiDraft } from "@adapttable/core";
 import type { EditableCellEditorCtrl } from "@adapttable/react";
-
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

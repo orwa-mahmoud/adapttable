@@ -1,9 +1,10 @@
-import type { ColumnMetadata } from "../columnModel";
 import {
   aggregate,
   AGGREGATE_NAMES,
   type AggregateName,
 } from "../aggregate/aggregate";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 import type { QueryAggregate } from "../source/queryContract";
 import type { GroupAggregatesFn } from "./groupRows";
 
@@ -103,7 +104,7 @@ export function withGroupAggregateOverrides<TRow>(
   }
   const calculate = aggregate<TRow>(spec, { columns });
   return (rows) => {
-    const result: Partial<Record<string, unknown>> = { ...base?.(rows) };
+    const result: Partial<Record<string, DisplayValue>> = { ...base?.(rows) };
     const calculated = calculate(rows);
     for (const [key, fn] of entries) {
       if (fn === "none") delete result[key];

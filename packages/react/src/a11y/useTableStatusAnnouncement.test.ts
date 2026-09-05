@@ -5,10 +5,10 @@
  * the one that matters most and is easiest to get wrong: the FIRST settle, where
  * a table that has only just arrived must say nothing at all.
  */
+import { defaultLabels } from "@adapttable/core";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { defaultLabels } from "@adapttable/core";
 import {
   resolveTableStatus,
   type TableStatusAnnouncementOptions,

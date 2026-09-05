@@ -120,7 +120,6 @@ import { FeatureNoticeAppearance } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
 import { FeatureRegistration } from '@adapttable/core';
 import { FetchAllExport } from '@adapttable/core';
-import { fillSlot } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
@@ -263,7 +262,6 @@ import { RowTreeMoveHandler } from '@adapttable/core';
 import { RowTreeParentRef } from '@adapttable/core';
 import { SelectionStats } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core';
-import { Slot } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -2408,7 +2406,8 @@ export interface FillHandleSlots {
     readonly Handle: (props: FillHandleSlotProps) => ReactNode;
 }
 
-export { fillSlot }
+// @public
+export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): ReactNode;
 
 // @public
 export const FILTER_CHIPS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
@@ -4281,7 +4280,8 @@ export interface SidePanelTabProps {
     readonly selected: boolean;
 }
 
-export { Slot }
+// @public
+export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
 // @public
 export function slotRender<TProps>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => ReactNode): FeatureRender<TProps>;

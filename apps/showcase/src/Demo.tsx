@@ -5,7 +5,6 @@ import type {
   RowGroupRef,
   RowPatch,
   RowReorderOptions,
-  Slot,
   TableErrorState,
   TableSource,
 } from "@adapttable/core";
@@ -20,6 +19,7 @@ import type {
   EditEventHandler,
   ReactMobileCardModel,
   ReactMobileCardRenderer,
+  Slot,
 } from "@adapttable/react";
 import {
   applyRowReorder,

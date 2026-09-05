@@ -1,14 +1,12 @@
+import type { GroupedFlatEntry, TableLabels } from "@adapttable/core";
 import {
   groupAggregateEntries,
   groupLeafCount,
   groupRowLayout,
   groupSelectionState,
 } from "@adapttable/core";
-import type { GroupedFlatEntry, TableLabels } from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
-
 import type { ColumnDef } from "@adapttable/react";
-
 import {
   groupIndentStyle,
   groupRowParts,

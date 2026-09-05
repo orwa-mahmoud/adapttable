@@ -1,8 +1,8 @@
+import type { FilterDef } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { defaultLabels } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
 import { filterTreeChipLabel, useFilterTreeChips } from "./useFilterTreeChips";
 
 interface Row {

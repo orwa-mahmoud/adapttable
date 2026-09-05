@@ -7,10 +7,10 @@ import type { ReactNode } from "react";
 /**
  * One field of a mobile card, as a React host receives it.
  *
- * The neutral model types `value` as `DisplayValue` (`unknown`) because a
- * non-React binding stores whatever it renders. Here the value is already
- * React content — the column's `Cell` or accessor, wrapped in the cell editor
- * when editing is armed — so it can go straight into JSX.
+ * The neutral model types `value` as `DisplayValue`, because a non-React
+ * binding stores whatever it renders. Here the value is already React content
+ * — the column's `Cell` or accessor, wrapped in the cell editor when editing
+ * is armed — so it can go straight into JSX.
  *
  * @public
  */

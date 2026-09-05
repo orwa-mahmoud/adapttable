@@ -1,10 +1,10 @@
+import type { FilterDef } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { type ChangeEvent, useState } from "react";
 import { describe, expect, it } from "vitest";
 
 import { CHECKLIST_VIRTUALIZE_AT } from "./checklist";
 import { ChecklistChrome, type ChecklistSlots } from "./ChecklistChrome";
-import type { FilterDef } from "@adapttable/core";
 
 interface Row {
   team: string;

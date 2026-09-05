@@ -1,18 +1,19 @@
-import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
 import type {
   ConfirmHandler,
   GroupedFlatEntry,
-  MobileCardRenderer,
   RowAction,
   RowActionsLayout,
   RowActionsRenderer,
   TableLabels,
   TreeEntry,
 } from "@adapttable/core";
-import type { EditableCellEditing, RowExpansionState } from "@adapttable/react";
-
+import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
+import type {
+  EditableCellEditing,
+  ReactMobileCardRenderer,
+  RowExpansionState,
+} from "@adapttable/react";
 import type { ColumnDef, UseDataTableResult } from "@adapttable/react";
-
 import {
   cellFlashAttr,
   EXTRA_ROW_PARTS,
@@ -31,6 +32,7 @@ import {
   rowIsDirty,
   rowReorderSignature,
   type RowReorderState,
+  type RowStyle,
   rowStyleSignature,
   useSummaryCells,
   type VirtualTableRow,
@@ -86,7 +88,7 @@ function SummaryCard<TRow>({
 /** Per-card inputs for the memoized {@link CardItemBase}. */
 interface CardItemProps<TRow> {
   /** Replace the card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** This card's place in the tree, when the table is one. */
   treeEntry?: TreeEntry<TRow>;
   /** Open or close this node. */
@@ -232,7 +234,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         key={column.key}
         editing={editing}
         row={row}
-        column={column as ColumnDef<TRow>}
+        column={column}
         rowId={id}
         rowIndex={rowIndex}
         rows={rows}
@@ -444,7 +446,7 @@ export function MobileCards<TRow>({
    */
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
-  rowStyle?: (row: TRow, index: number) => CSSProperties | undefined;
+  rowStyle?: RowStyle<TRow>;
   /** Per-row height — see `BaseDataTableProps.rowHeight`. */
   rowHeight?: number | ((row: TRow, index: number) => number);
   tableLabel?: string;
@@ -455,7 +457,7 @@ export function MobileCards<TRow>({
   /** Detail-panel renderer — see `BaseDataTableProps.renderRowDetail`. */
   renderRowDetail?: (row: TRow) => ReactNode;
   /** Replace each card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** Footer summary builder — see `BaseDataTableProps.summaryRow`. */
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
   /** Opt-in editing bundle — omit and cells stay display-only. */
@@ -617,7 +619,9 @@ export function MobileCards<TRow>({
       entry.leafIds.length,
     leafIds: entry.leafIds,
     aggregateCells:
-      entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+      entry.kind === "groupMore"
+        ? undefined
+        : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
     collapsed: entry.kind === "group" && entry.collapsed,
   });
 
@@ -680,7 +684,7 @@ export function MobileCards<TRow>({
                         ? Object.entries(entry.aggregateCells).map(
                             ([colKey, node]) => (
                               <span key={colKey} data-column={colKey}>
-                                {node}
+                                {node as ReactNode}
                               </span>
                             )
                           )

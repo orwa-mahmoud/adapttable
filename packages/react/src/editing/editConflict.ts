@@ -5,14 +5,14 @@
  * reader typed, take the incoming value, or ask. Silently discarding a draft
  * is the one outcome nobody forgives, so the default is to ask.
  */
-import { useCallback, useMemo, useRef, useState } from "react";
-
-import { useEventCallback } from "../hooks/useEventCallback";
 import { devWarn } from "@adapttable/core";
 import {
   type EditableColumnLike,
   readEditableCellValue,
 } from "@adapttable/core";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import { useEventCallback } from "../hooks/useEventCallback";
 
 /**
  * How an unhandled conflict is resolved.

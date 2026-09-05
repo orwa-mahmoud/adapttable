@@ -6,7 +6,6 @@ import {
   BATCH_EDIT_BAR,
   BULK_BAR,
   COLUMN_MENU,
-  type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
@@ -157,28 +156,26 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
         const columnMenu = props.enableColumnMenu && !c.isMobile && (
           <FeatureSlot
             slot={COLUMN_MENU}
-            props={
-              {
-                allColumns: c.allColumns,
-                onAutoSize: view.autoSizeColumns,
-                onAutoSizeColumn: view.autoSizeColumn,
-                onSortColumn: (key, dir) => viewSource.setSort(key, dir),
-                onFilterColumn: () => setFiltersOpen(true),
-                onRenameColumn: props.onColumnRename
-                  ? c.columnLayout.setName
-                  : undefined,
-                sortBy: viewSource.sortBy,
-                sortDir: viewSource.sortDir,
-                layout: c.columnLayout,
-                labels,
-                hasRowActions: view.hasRowActions,
-                hasRowReorder: view.hasRowReorder,
-                groupingPanel: c.groupingPanel,
-                dir: props.dir,
-                // The slot key erases the row; ColumnDef is invariant, so the
-                // table's TRow cannot be proven to be `never`.
-              } as ColumnMenuSlotProps<never>
-            }
+            props={{
+              allColumns: c.allColumns,
+              onAutoSize: view.autoSizeColumns,
+              onAutoSizeColumn: view.autoSizeColumn,
+              onSortColumn: (key, dir) => viewSource.setSort(key, dir),
+              onFilterColumn: () => setFiltersOpen(true),
+              onRenameColumn: props.onColumnRename
+                ? c.columnLayout.setName
+                : undefined,
+              sortBy: viewSource.sortBy,
+              sortDir: viewSource.sortDir,
+              layout: c.columnLayout,
+              labels,
+              hasRowActions: view.hasRowActions,
+              hasRowReorder: view.hasRowReorder,
+              groupingPanel: c.groupingPanel,
+              dir: props.dir,
+              // The slot key erases the row; ColumnDef is invariant, so the
+              // table's TRow cannot be proven to be `never`.
+            }}
           />
         );
         let body: React.ReactNode;

@@ -1,10 +1,10 @@
 /** Row count and the windowed pager. */
-import { pageSizeOptions } from "@adapttable/core";
 import type {
   PaginationInfo,
   TableLabels,
   TableSource,
 } from "@adapttable/core";
+import { pageSizeOptions } from "@adapttable/core";
 import { paginationSlots } from "@adapttable/react/adapter";
 
 import type { DataTableClassNames } from "../types";

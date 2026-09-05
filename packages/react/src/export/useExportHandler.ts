@@ -13,13 +13,12 @@
  * silent, and a failed one is silent in exactly the same way. Every adapter
  * goes through this, so none of it can differ between kits.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-
-import { capabilityReason } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
+import type { ExportAllControls, ExportAllResult } from "@adapttable/core";
+import { capabilityReason } from "@adapttable/core";
 import { devWarn } from "@adapttable/core";
 import { exportButtonLabel } from "@adapttable/core";
-import type { ExportAllControls, ExportAllResult } from "@adapttable/core";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Where an export is in its life.

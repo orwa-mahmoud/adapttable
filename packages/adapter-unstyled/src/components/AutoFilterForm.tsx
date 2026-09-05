@@ -1,3 +1,10 @@
+import type {
+  FilterDef,
+  FilterTypeRegistry,
+  FilterValue,
+  TableLabels,
+  TableSource,
+} from "@adapttable/core";
 import {
   defaultFilterRegistry,
   filterLabel,
@@ -9,19 +16,11 @@ import {
   resolveLabels,
   splitRelativeToken,
 } from "@adapttable/core";
-import type {
-  FilterDef,
-  FilterTypeRegistry,
-  FilterValue,
-  TableLabels,
-  TableSource,
-} from "@adapttable/core";
 import {
   CHECKLIST_LIST_HEIGHT,
   filterOpLabel,
   useFilterOptions,
 } from "@adapttable/react";
-
 import {
   useBooleanFilterWidget,
   useRangeFilterWidget,

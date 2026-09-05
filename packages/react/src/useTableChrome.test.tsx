@@ -1,8 +1,10 @@
+import { buildTableCsv } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { buildTableCsv } from "@adapttable/core";
+import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { dirtyIndicators } from "./features/editing";
 import { bulkActions, pinnedSummaryRows } from "./features/factories";
@@ -16,7 +18,6 @@ import { rowReorder } from "./features/row-reorder";
 import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
-import type { ColumnDef } from "./columnDef";
 import { createMemoryAdapter } from "./url/adapter";
 import {
   printToolbar,
@@ -24,7 +25,6 @@ import {
   undoRedoToolbar,
   useTableChrome,
 } from "./useTableChrome";
-import { resetDevWarnings } from "@adapttable/core";
 
 interface Row {
   id: string;

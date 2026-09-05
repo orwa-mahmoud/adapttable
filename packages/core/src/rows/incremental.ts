@@ -11,17 +11,18 @@
  * `applyRowPatches` can pass {@link rowPatchLog} into
  * {@link applyRowPatchLogToView} so the same patches are not applied twice.
  */
+import {
+  aggregate,
+  type AggregateOptions,
+  type AggregateSpec,
+} from "../aggregate/aggregate";
 import type {
   ColumnMetadata,
   ExtraFilters,
   SortableValue,
   SortDirection,
 } from "../columnModel";
-import {
-  aggregate,
-  type AggregateOptions,
-  type AggregateSpec,
-} from "../aggregate/aggregate";
+import type { DisplayValue } from "../display";
 import { cellSortValue } from "../engine/cellValue";
 import {
   type BuildGroupedFlatModelOptions,
@@ -132,7 +133,7 @@ export interface IncrementalViewConfig<TRow> {
   /** How many extra groups / rows are currently revealed. */
   paging?: GroupPaging;
   /** Grand-total mapper over the sorted (filtered) set. */
-  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, unknown>>;
+  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
   /**
    * Built-in aggregate spec for incremental totals. Used for the grand
    * total when `summaryRow` is omitted, and for group cells when
@@ -160,7 +161,7 @@ export interface IncrementalView<TRow> {
   /** Grouped flat model, when grouping is configured. */
   readonly groups: readonly GroupedFlatEntry<TRow>[] | undefined;
   /** Grand-total cells over `sorted`. */
-  readonly aggregates: Partial<Record<string, unknown>> | undefined;
+  readonly aggregates: Partial<Record<string, DisplayValue>> | undefined;
 }
 
 interface ViewState<TRow> {
@@ -175,7 +176,7 @@ interface ViewState<TRow> {
   tree: IncrementalGroupTree<TRow> | undefined;
   summary: IncrementalAggregate<TRow> | undefined;
   summaryDirty: boolean;
-  groupCells: Map<string, Partial<Record<string, unknown>>>;
+  groupCells: Map<string, Partial<Record<string, DisplayValue>>>;
   dirtyGroups: Set<string>;
 }
 
@@ -308,7 +309,7 @@ export function createIncrementalView<TRow>(
     : [...rows];
   const sorted = hasSort(config) ? fullSort(filtered, config) : filtered;
   const keys = groupingKeys(config.groupBy ?? []);
-  const columns = (config.columns ?? []) as readonly ColumnMetadata<TRow>[];
+  const columns = config.columns ?? [];
   const partitions =
     keys.length > 0 ? partitionGroupedRows(sorted, keys, columns) : [];
   const tree =
@@ -446,7 +447,7 @@ function publish<TRow>(
   filtered: readonly TRow[],
   sorted: readonly TRow[],
   groups: readonly GroupedFlatEntry<TRow>[] | undefined,
-  aggregates: Partial<Record<string, unknown>> | undefined,
+  aggregates: Partial<Record<string, DisplayValue>> | undefined,
   state: ViewState<TRow>
 ): IncrementalView<TRow> {
   const view: IncrementalView<TRow> = {
@@ -469,7 +470,7 @@ function republishDerived<TRow>(
   config: IncrementalViewConfig<TRow>
 ): IncrementalView<TRow> {
   const keys = groupingKeys(config.groupBy ?? []);
-  const columns = (config.columns ?? []) as readonly ColumnMetadata<TRow>[];
+  const columns = config.columns ?? [];
   const partitions =
     keys.length > 0 ? partitionGroupedRows(state.sorted, keys, columns) : [];
   state.tree =
@@ -954,7 +955,7 @@ function readSummary<TRow>(
   rows: readonly TRow[],
   config: IncrementalViewConfig<TRow>,
   summary: IncrementalAggregate<TRow> | undefined
-): Partial<Record<string, unknown>> | undefined {
+): Partial<Record<string, DisplayValue>> | undefined {
   if (config.summaryRow) return config.summaryRow(rows);
   if (summary) return readIncrementalAggregate(summary, rows);
   return undefined;
@@ -966,7 +967,7 @@ function groupFlattenOptions<TRow>(
 ): Omit<BuildGroupedFlatModelOptions<TRow>, "rows"> {
   return {
     groupBy: config.groupBy ?? [],
-    columns: (config.columns ?? []) as readonly ColumnMetadata<TRow>[],
+    columns: config.columns ?? [],
     getRowId: config.getRowId,
     collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
     aggregates: skipAggregates ? undefined : config.groupAggregates,
@@ -1005,7 +1006,7 @@ function cellsForGroup<TRow>(
   state: ViewState<TRow>,
   config: IncrementalViewConfig<TRow>,
   entry: Extract<GroupedFlatEntry<TRow>, { kind: "group" }>
-): Partial<Record<string, unknown>> | undefined {
+): Partial<Record<string, DisplayValue>> | undefined {
   if (!state.dirtyGroups.has(entry.key) && state.groupCells.has(entry.key)) {
     return state.groupCells.get(entry.key);
   }
@@ -1017,7 +1018,7 @@ function cellsForGroup<TRow>(
 function groupCellsFrom<TRow>(
   config: IncrementalViewConfig<TRow>,
   rows: readonly TRow[]
-): Partial<Record<string, unknown>> | undefined {
+): Partial<Record<string, DisplayValue>> | undefined {
   if (config.groupAggregates) return config.groupAggregates(rows);
   if (config.aggregateSpec) {
     return aggregate(config.aggregateSpec, config.aggregateOptions)(rows);

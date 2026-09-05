@@ -14,10 +14,9 @@ export function buildFormulaColumns<TRow extends object>(specs: readonly Formula
 export type ColumnGroupShow = "open" | "closed" | "always";
 
 // @public
-export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter" | "editor"> & {
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter"> & {
     header?: unknown;
     filter?: unknown;
-    editor?: unknown;
 };
 
 // @public

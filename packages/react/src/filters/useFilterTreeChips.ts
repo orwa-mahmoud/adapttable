@@ -1,12 +1,9 @@
 /**
  * Removable chips for every leaf in the AND/OR filter tree.
  */
-import { useMemo } from "react";
-
 import type { QueryCondition, QueryFilterGroup } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
 import { type FilterDef, filterLabel } from "@adapttable/core";
-import { filterOpLabel } from "./filterForm";
 import {
   removeFilterTreeNode,
   walkFilterTreeConditions,
@@ -21,6 +18,9 @@ import {
   type TextOp,
 } from "@adapttable/core";
 import { relativeTokenLabel } from "@adapttable/core";
+import { useMemo } from "react";
+
+import { filterOpLabel } from "./filterForm";
 import type { ActiveFilterChip } from "./useActiveFilterChips";
 
 function conditionValueText(

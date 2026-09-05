@@ -3,9 +3,9 @@
  * comparison against the full rebuild, plus the edges a happy-path patch
  * never walks (empty totals, a miss in the group tree, a primitive search).
  */
-import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { partitionGroupedRows } from "../grouping/groupRows";
 import {
   applyRowPatchesToView,

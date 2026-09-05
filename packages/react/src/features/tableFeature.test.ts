@@ -1,6 +1,6 @@
+import { resetDevWarnings } from "@adapttable/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { resetDevWarnings } from "@adapttable/core";
 import { feature } from "./factories";
 import { grouping } from "./grouping";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";

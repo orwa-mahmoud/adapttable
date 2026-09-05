@@ -1,9 +1,9 @@
+import { resetDevWarnings } from "@adapttable/core";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { createMemoryAdapter } from "../url/adapter";
-import { resetDevWarnings } from "@adapttable/core";
 import { useFrontendData } from "./useFrontendData";
 import { type TableQuery, useServerData } from "./useServerData";
 import { type DataModeProps, useTableData } from "./useTableData";

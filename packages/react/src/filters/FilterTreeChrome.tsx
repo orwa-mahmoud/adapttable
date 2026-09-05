@@ -2,16 +2,13 @@
  * AND/OR filter-tree layout. Structure only — adapters pass the Select,
  * Input and Button the end user clicks. Core does not draw form controls.
  */
-import { type CSSProperties, type ReactNode, useState } from "react";
-
-import { resolveLabels } from "@adapttable/core";
 import type { QueryCondition, QueryFilterGroup } from "@adapttable/core";
-import { isFilterGroup } from "@adapttable/core";
 import type { TableSource } from "@adapttable/core";
 import type { TableLabels } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
+import { isFilterGroup } from "@adapttable/core";
 import { defaultFilterRegistry } from "@adapttable/core";
 import { type FilterDef, filterLabel } from "@adapttable/core";
-import { filterOpLabel } from "./filterForm";
 import {
   filterTypeDefaultOp,
   filterTypeOps,
@@ -41,6 +38,9 @@ import {
   type RelativePreset,
   splitRelativeToken,
 } from "@adapttable/core";
+import { type CSSProperties, type ReactNode, useState } from "react";
+
+import { filterOpLabel } from "./filterForm";
 
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.

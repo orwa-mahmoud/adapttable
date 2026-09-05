@@ -5,8 +5,8 @@
  * caller who mixes two row types has to be told which entry is wrong, not
  * handed a mismatch on the whole array.
  */
-import type { TableFeature } from "@adapttable/core";
-import { editing } from "@adapttable/core/features";
+import type { TableFeature } from "@adapttable/react";
+import { editing } from "@adapttable/react/features";
 
 interface Person {
   id: string;

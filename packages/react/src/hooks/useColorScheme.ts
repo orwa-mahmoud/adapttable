@@ -1,4 +1,5 @@
 import type { ColorScheme } from "@adapttable/core";
+
 import { useMediaQuery } from "./useMediaQuery";
 
 /** The media query that matches when the OS prefers a dark color scheme. */

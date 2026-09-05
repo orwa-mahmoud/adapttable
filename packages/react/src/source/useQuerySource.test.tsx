@@ -1,7 +1,7 @@
+import type { PaginatedResponse, TableQueryParams } from "@adapttable/core";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { PaginatedResponse, TableQueryParams } from "@adapttable/core";
 import { createMemoryAdapter } from "../url/adapter";
 import { type InfiniteQueryLike, useQuerySource } from "./useQuerySource";
 

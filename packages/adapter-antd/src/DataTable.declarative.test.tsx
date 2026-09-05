@@ -1,5 +1,5 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
-import { flattenColumnTree } from "@adapttable/react/adapter";
+import { flattenReactColumnTree } from "@adapttable/react/adapter";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,7 +33,7 @@ function Harness(props: {
   const source = useFrontendData<Row>({
     data: ROWS,
     urlAdapter: adapter,
-    columns: flattenColumnTree(columns).leaves,
+    columns: flattenReactColumnTree(columns).leaves,
     paginationMode: "paged",
   });
   return (

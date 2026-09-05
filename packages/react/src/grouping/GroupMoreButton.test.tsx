@@ -1,11 +1,11 @@
 /**
  * The offer at the end of a page of groups, or of a group's rows.
  */
+import { resolveLabels } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { groupMoreTestSlots } from "../internal/chromeTestSlots";
-import { resolveLabels } from "@adapttable/core";
 import { GroupMoreButtonChrome } from "./GroupMoreButton";
 
 const LABELS = resolveLabels(undefined);

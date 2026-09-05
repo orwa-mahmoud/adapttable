@@ -11,7 +11,6 @@
  */
 import type { ColumnMetadata } from "../columnModel";
 import type { CssProperties } from "../style/cssProperties";
-
 import { columnGroupStubStyle, isColumnGroupStubKey } from "./headerGroups";
 
 /**

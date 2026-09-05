@@ -5,9 +5,9 @@
  * pulled that writer into every table. The compute mounts in-tree through
  * {@link SELECTION_STATS_LIVE}.
  */
+import { selectionStats as compute } from "@adapttable/core";
 import type { ReactNode } from "react";
 
-import { selectionStats as compute } from "@adapttable/core";
 import { slotRender } from "./providers";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
 import {

@@ -10,10 +10,10 @@
  * that closes and drops focus to the document leaves someone at the top of
  * the page having lost the row they were on, and nothing on screen says so.
  */
+import type { ContextMenuTarget } from "@adapttable/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ContextMenuTarget } from "@adapttable/core";
 import { useContextMenu } from "./useContextMenu";
 
 interface Row {

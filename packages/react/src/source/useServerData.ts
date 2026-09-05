@@ -1,24 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-
 import type { FacetMap } from "@adapttable/core";
+import type { PaginationMode, TableQuery } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
 import { withQueryAggregateOverrides } from "@adapttable/core";
 import { parseGroupBy } from "@adapttable/core";
-import { useEventCallback } from "../hooks/useEventCallback";
-import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
-import type { PaginationMode, TableQuery } from "@adapttable/core";
-import {
-  useTableUrlState,
-  type UseTableUrlStateOptions,
-} from "../url/useTableUrlState";
 import { devWarn } from "@adapttable/core";
 import { stableKey } from "@adapttable/core";
 import {
   applyQuerySupport,
   type QueryAggregate,
-  type QueryExtensions,
   type QuerySupport,
 } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useEventCallback } from "../hooks/useEventCallback";
+import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
+import {
+  useTableUrlState,
+  type UseTableUrlStateOptions,
+} from "../url/useTableUrlState";
 
 /**
  * One consolidated snapshot of everything a server query needs.

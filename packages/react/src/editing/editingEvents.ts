@@ -6,10 +6,10 @@
  * able to change whether a commit lands: the table already decided, and the
  * events only report what happened.
  */
+import { devWarn } from "@adapttable/core";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import { devWarn } from "@adapttable/core";
 
 /**
  * Which commit unit produced an event.

@@ -259,6 +259,34 @@ hook records it as an empty-valued param (`q=`, `f_status=`) so the default
 does not instantly resurrect — a missing param means "default applies", an
 empty one means "explicitly cleared".
 
+## Reading and writing the params yourself
+
+The codecs the table uses are published, so a route handler, a saved-view
+store, or a test can read and write the same URL without mounting a table.
+
+`parseTableUrlState(search)` reads a whole query string into table state;
+`updateTableUrlState(search, patch)` returns the next query string;
+`applyTableUrlState` and `captureTableUrlState` move that state on and off a
+live table.
+
+Each param has a named constant and, where the value is not a plain string, a
+reader and a writer:
+
+| Constant                                        | Reader / writer                                                        |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `PARAM_PAGE`, `PARAM_LIMIT`                     | `readPage`, `readLimit`                                                |
+| `PARAM_SEARCH`, `PARAM_FIND`                    | plain strings                                                          |
+| `PARAM_SORT_BY`, `PARAM_SORT_DIR`               | `readSortDir`; the chain is `readSortLevels` / `writeSortLevels`       |
+| `PARAM_GROUP_BY`, `PARAM_GROUP_AGGREGATES`      | ordered keys and the per-column overrides                              |
+| `PARAM_COL_HIDDEN`                              | `readColumnLayout` / `writeColumnLayout` cover the whole column layout |
+| `PARAM_DENSITY`, `PARAM_FORMULA`, `PARAM_PIVOT` | the density, formula-column and pivot codecs                           |
+| `f_<key>`                                       | `readExtra` / `writeExtra`                                             |
+| `ft`                                            | `readFilterTreeParam` / `writeFilterTreeParam`                         |
+| row pins                                        | `readRowPins` / `writeRowPins`                                         |
+
+Writing a value that equals the default deletes the param instead of spelling
+it out, which is what keeps a shared link short.
+
 ## SSR
 
 The default History-API adapter hydrates from an empty query string (the

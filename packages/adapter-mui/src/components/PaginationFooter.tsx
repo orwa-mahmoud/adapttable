@@ -1,6 +1,6 @@
 /** Row count and the windowed pager. */
-import { pageSizeOptions } from "@adapttable/core";
 import type { PaginationInfo, TableLabels } from "@adapttable/core";
+import { pageSizeOptions } from "@adapttable/core";
 import {
   MenuItem,
   Pagination,

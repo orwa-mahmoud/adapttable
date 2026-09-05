@@ -52,7 +52,7 @@ const slots: GroupingPanelSlots = {
         color: "var(--mantine-color-dimmed)",
         transition: "background-color 120ms ease, border-color 120ms ease",
       }}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       {empty ? (
@@ -159,7 +159,7 @@ const slots: GroupingPanelSlots = {
           ? "var(--mantine-color-red-filled)"
           : "var(--mantine-color-dimmed)",
       }}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       <Text size="xs" fw={600}>

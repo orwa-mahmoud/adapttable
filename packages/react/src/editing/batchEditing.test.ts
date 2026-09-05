@@ -5,11 +5,11 @@
  * saves, and what arrives then is every pending row at once. So the rules that
  * matter are about what counts as pending, and what the one call contains.
  */
+import type { EditableColumnLike } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useBatchEditing } from "./batchEditing";
-import type { EditableColumnLike } from "@adapttable/core";
 
 interface Task {
   id: string;

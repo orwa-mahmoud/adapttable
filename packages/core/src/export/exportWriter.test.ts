@@ -7,9 +7,9 @@
  * including that a format never has to reimplement `onBeforeExport`, the
  * filename, or the scope it was given.
  */
-import type { ColumnModel } from "../columnModel";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import type { TableSource } from "../source/TableSource";
 import * as env from "../utils/env";
 import {

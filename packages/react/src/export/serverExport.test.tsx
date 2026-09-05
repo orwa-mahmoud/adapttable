@@ -7,6 +7,17 @@
  * be started twice by an impatient second click, and the outcome is announced —
  * a download is silent, and so is a failed one.
  */
+import type { TableSourceCapabilities } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
+import { resetDevWarnings } from "@adapttable/core";
+import {
+  type ExportAllControls,
+  type ExportAllQuery,
+  type ExportAllResult,
+  type ExportRequest,
+  fetchAllExportRows,
+  makeExportCsvHandler,
+} from "@adapttable/core";
 import {
   act,
   fireEvent,
@@ -16,19 +27,8 @@ import {
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { TableSourceCapabilities } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
 import type { ColumnDef } from "../columnDef";
-import { resetDevWarnings } from "@adapttable/core";
 import { ExportAnnouncer } from "./ExportAnnouncer";
-import {
-  type ExportAllControls,
-  type ExportAllQuery,
-  type ExportAllResult,
-  type ExportRequest,
-  fetchAllExportRows,
-  makeExportCsvHandler,
-} from "@adapttable/core";
 import { useExportHandler } from "./useExportHandler";
 
 interface Row {

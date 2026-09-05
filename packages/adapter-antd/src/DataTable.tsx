@@ -1,21 +1,3 @@
-import {
-  autoSizeColumns as autoSizeAllColumns,
-  isDeclarativeFilters,
-  pageSizeOptions,
-  partitionPinnedRows,
-  pinnedSummaryPart,
-  pinnedSummaryRowId,
-  resolveFilterMode,
-  resolveLabels,
-  showSimpleFilterFields,
-  tableMinWidth,
-  toolbarShowsFilters,
-  windowGroupedEntries,
-  type FilterRuntime,
-  type GroupByInput,
-  type TableErrorState,
-  type VirtualTableRow,
-} from "@adapttable/core";
 import type {
   ConfirmHandler,
   GroupedFlatEntry,
@@ -24,21 +6,39 @@ import type {
   TreeEntry,
 } from "@adapttable/core";
 import {
-  columnsHaveFooter,
-  HeaderFilterOpenProvider,
+  autoSizeColumns as autoSizeAllColumns,
+  type FilterRuntime,
+  type GroupByInput,
+  isDeclarativeFilters,
+  pageSizeOptions,
+  partitionPinnedRows,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  resolveFilterMode,
+  resolveLabels,
+  showSimpleFilterFields,
+  type TableErrorState,
+  tableMinWidth,
+  toolbarShowsFilters,
+  type VirtualTableRow,
+  windowGroupedEntries,
+} from "@adapttable/core";
+import type { RowExpansionState, SelectionState } from "@adapttable/react";
+import {
   type ColumnDef,
+  columnsHaveFooter,
   type EditHistoryState,
+  HeaderFilterOpenProvider,
   resolveColumnFooter,
   type UrlStateAdapter,
-  type UseDataTableResult,
-  type UseSavedViewsOptions,
   useChromeScrollReset,
+  type UseDataTableResult,
   useFilterTriggerToggle,
   useInfiniteScroll,
+  type UseSavedViewsOptions,
   useTableChrome,
   useTableData,
 } from "@adapttable/react";
-import type { RowExpansionState, SelectionState } from "@adapttable/react";
 import type {
   GridFocusState,
   GroupCollapseState,
@@ -57,7 +57,6 @@ import {
   ChromeExtrasGate,
   COLUMN_HEADER_RENAME,
   COLUMN_MENU,
-  type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
@@ -74,7 +73,7 @@ import {
   FILTERS_FORM,
   type FiltersFormSlotProps,
   FIND_BAR,
-  flattenColumnTree,
+  flattenReactColumnTree,
   ForcedColorsStyle,
   GRID_FOCUS_ANNOUNCER,
   GROUPING_PANEL,
@@ -531,7 +530,10 @@ function resolveAntdDataSource<TRow>(
           [ADAPTTABLE_EXTRA]: true as const,
           key: slot.key,
           extraKind: slot.kind,
-          render: slot.kind === "fullWidth" ? slot.render : undefined,
+          render:
+            slot.kind === "fullWidth"
+              ? (slot.render as () => ReactNode)
+              : undefined,
         }
       : slot.row
   );
@@ -730,24 +732,22 @@ function ColumnMenuSlot<TRow>({
   return (
     <FeatureSlot
       slot={COLUMN_MENU}
-      props={
-        {
-          allColumns,
-          onAutoSize,
-          onAutoSizeColumn,
-          onSortColumn,
-          onFilterColumn,
-          onRenameColumn,
-          sortBy,
-          sortDir,
-          layout,
-          labels,
-          hasRowActions,
-          hasRowReorder,
-          dir,
-          groupingPanel,
-        } as ColumnMenuSlotProps<never>
-      }
+      props={{
+        allColumns,
+        onAutoSize,
+        onAutoSizeColumn,
+        onSortColumn,
+        onFilterColumn,
+        onRenameColumn,
+        sortBy,
+        sortDir,
+        layout,
+        labels,
+        hasRowActions,
+        hasRowReorder,
+        dir,
+        groupingPanel,
+      }}
     />
   );
 }
@@ -977,13 +977,11 @@ function resolveFiltersNode<TRow>(
   header: boolean,
   filterFields?: boolean
 ): ReactNode {
-  let node: ReactNode;
-  if (isDeclarativeFilters(filters) || filters === undefined) {
-    node = autoFilterForm(runtime, source, labels, header, filterFields);
-  } else {
-    node = filters;
-  }
-  return node;
+  return (
+    isDeclarativeFilters(filters) || filters === undefined
+      ? autoFilterForm(runtime, source, labels, header, filterFields)
+      : filters
+  ) as ReactNode;
 }
 
 /** antd `<Table>` size tokens. */
@@ -1743,7 +1741,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     props.urlSync !== false
   );
   const dataColumns = useMemo(
-    () => flattenColumnTree(props.columns).leaves,
+    () => flattenReactColumnTree(props.columns).leaves,
     [props.columns]
   );
   const { source: resolvedSource, runtime } = useTableData<TRow>({

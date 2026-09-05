@@ -8,7 +8,6 @@
  */
 import type { UseColumnLayoutResult } from "@adapttable/core";
 import type { ColumnDef } from "@adapttable/react";
-
 import { usePrefersReducedMotion } from "@adapttable/react";
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";

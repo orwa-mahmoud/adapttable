@@ -10,10 +10,6 @@
  * plus the page offset (`windowStart`), so a virtual window or a paged slice
  * does not lie to the host about where the row sits.
  */
-import type { CSSProperties, DragEvent, KeyboardEvent } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { useEventCallback } from "../hooks/useEventCallback";
 import { isRtlElement } from "@adapttable/core";
 import {
   type RowDropPosition,
@@ -24,6 +20,10 @@ import {
   type RowMoveRequest,
   type RowMoveTarget,
 } from "@adapttable/core";
+import type { CSSProperties, DragEvent, KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { useEventCallback } from "../hooks/useEventCallback";
 
 /**
  * MIME type carrying the dragged row id during a reorder drag.

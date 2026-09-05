@@ -1,18 +1,18 @@
 /** The card list rendered in place of the table on narrow screens. */
-import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
 import type {
   ConfirmHandler,
-  MobileCardRenderer,
   RowAction,
   RowActionsLayout,
   RowActionsRenderer,
   TableLabels,
   TreeEntry,
 } from "@adapttable/core";
-import type { EditableCellEditing } from "@adapttable/react";
-
+import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
+import type {
+  EditableCellEditing,
+  ReactMobileCardRenderer,
+} from "@adapttable/react";
 import type { ColumnDef } from "@adapttable/react";
-
 import {
   cellFlashAttr,
   EXTRA_ROW_PARTS,
@@ -74,7 +74,7 @@ function unlessPinnedMatch(
 /** Per-card inputs for the memoized {@link MobileCardBase}. */
 interface MobileCardProps<TRow> {
   /** Replace the card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** This card's place in the tree, when the table is one. */
   treeEntry?: TreeEntry<TRow>;
   /** Open or close this node. */
@@ -238,7 +238,7 @@ function MobileCardBase<TRow>({
         key={column.key}
         editing={editing}
         row={row}
-        column={column as ColumnDef<TRow>}
+        column={column}
         rowId={id}
         rowIndex={index}
         rows={rows}
@@ -298,12 +298,12 @@ function MobileCardBase<TRow>({
           />
         )}
         {renderCard
-          ? (renderCard(row, {
+          ? renderCard(row, {
               index,
               fields,
               selected,
               expanded,
-            }) as ReactNode)
+            })
           : fields.map(({ column, label, value }) => (
               <Box key={column.key} sx={{ mb: compact ? 0.5 : 1 }}>
                 {label && (

@@ -5,10 +5,10 @@
  * imports it never walks the tree. The hook mounts in-tree through
  * {@link FILTER_CHIPS_LIVE}.
  */
-import { type ReactNode, useMemo } from "react";
-
 import type { FilterDef } from "@adapttable/core";
 import { FILTER_ENGINE_IMPL } from "@adapttable/core";
+import { type ReactNode, useMemo } from "react";
+
 import {
   mergeFilterChips,
   resolveActiveFilterCount,

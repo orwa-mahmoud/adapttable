@@ -7,14 +7,12 @@ import {
   isSelectEditor,
   readMultiDraft,
 } from "@adapttable/core";
-import { EditableCellGate } from "@adapttable/react";
 import type {
   EditableCellEditing,
   EditableCellEditorCtrl,
 } from "@adapttable/react";
-
 import type { ColumnDef } from "@adapttable/react";
-
+import { EditableCellGate } from "@adapttable/react";
 import {
   commitBooleanDraft,
   editorValidationProps,

@@ -5,10 +5,10 @@
  * table that never imports it never carries export. The hook mounts in-tree
  * through {@link EXPORT_LIVE}.
  */
-import type { ReactNode } from "react";
-
 import type { ExportCsvOptions } from "@adapttable/core";
 import { makeExportCsvHandler, resolveExportCsv } from "@adapttable/core";
+import type { ReactNode } from "react";
+
 import { useExportHandler } from "../export/useExportHandler";
 import { slotRender } from "./providers";
 import { EXPORT_LIVE, type ExportLiveSlotProps } from "./slotKeys";

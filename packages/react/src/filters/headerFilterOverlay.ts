@@ -3,6 +3,12 @@
  * ignore nested kit dropdowns as "outside", and optionally dismiss once
  * a complete value is written (`closeOnSelect`).
  */
+import type { ExtraFilters } from "@adapttable/core";
+import { defaultFilterRegistry } from "@adapttable/core";
+import { type FilterDef, RANGE_SUFFIXES } from "@adapttable/core";
+import { type FilterTypeRegistry, filterWidgetKind } from "@adapttable/core";
+import { filterOpKey, isValuelessFilterOp } from "@adapttable/core";
+import { readRangeWidget } from "@adapttable/core";
 import {
   createContext,
   createElement,
@@ -15,13 +21,7 @@ import {
   useState,
 } from "react";
 
-import type { ExtraFilters } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import { type FilterDef, RANGE_SUFFIXES } from "@adapttable/core";
 import { type FilterFormSource, scalarFilterText } from "./filterForm";
-import { type FilterTypeRegistry, filterWidgetKind } from "@adapttable/core";
-import { filterOpKey, isValuelessFilterOp } from "@adapttable/core";
-import { readRangeWidget } from "@adapttable/core";
 
 /**
  * Attribute tying a header filter's trigger to its overlay, so one editing

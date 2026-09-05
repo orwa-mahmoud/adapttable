@@ -6,9 +6,8 @@
  * keyboard handling or its announcements. Nothing in the base graph reaches
  * this module.
  */
-import type { ReactNode } from "react";
-
 import type { GroupedFlatEntry } from "@adapttable/core";
+import type { TreeEntry } from "@adapttable/core";
 import {
   type RowDropPosition,
   type RowMoveMenuModel,
@@ -17,13 +16,14 @@ import {
   type RowTreeParentRef,
   treeMoveCreatesCycle,
 } from "@adapttable/core";
+import type { ReactNode } from "react";
+
 import {
   type RowReorderDecision,
   type RowReorderHandler,
   type RowReorderLabels,
   useRowReorder,
 } from "../rows/rowReorder";
-import type { TreeEntry } from "@adapttable/core";
 import {
   type FeatureProviderProps,
   FeatureStateScope,
@@ -559,6 +559,12 @@ export function rowReorder<TRow>(
   } as RowReorderFeature<TRow>;
 }
 
+export type {
+  RowReorderDecision,
+  RowReorderHandler,
+  RowReorderState,
+} from "../rows/rowReorder";
+export { ROW_REORDER } from "./rowReorderKey";
 export type { RowGroupLevel, RowGroupRef } from "@adapttable/core";
 export type {
   RowGroupMoveHandler,
@@ -572,9 +578,3 @@ export type {
   RowTreeParentRef,
 } from "@adapttable/core";
 export { rowDropPosition, treeMoveCreatesCycle } from "@adapttable/core";
-export type {
-  RowReorderDecision,
-  RowReorderHandler,
-  RowReorderState,
-} from "../rows/rowReorder";
-export { ROW_REORDER } from "./rowReorderKey";

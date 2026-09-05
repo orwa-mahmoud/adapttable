@@ -1,7 +1,3 @@
-import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { resolveColumns } from "../columns/resolveColumns";
 import type { FeatureHostState } from "@adapttable/core";
 import type { FacetMap } from "@adapttable/core";
 import type { FilterDef, FilterRuntime } from "@adapttable/core";
@@ -12,13 +8,17 @@ import type {
   PaginationMode,
   SortableValue,
 } from "@adapttable/core";
-import type { ColumnDef } from "../columnDef";
-import type { UseTableUrlStateOptions } from "../url/useTableUrlState";
+import type { QuerySupport } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
 import { devWarn } from "@adapttable/core";
 import { stableKey } from "@adapttable/core";
 import { isDeclarativeFilters } from "@adapttable/core";
-import type { QuerySupport } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import type { ColumnDef } from "../columnDef";
+import { resolveColumns } from "../columns/resolveColumns";
+import type { UseTableUrlStateOptions } from "../url/useTableUrlState";
 import { useFrontendData } from "./useFrontendData";
 import {
   type TableQuery,

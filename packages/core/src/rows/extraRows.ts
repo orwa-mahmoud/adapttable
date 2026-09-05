@@ -13,10 +13,9 @@
  * Extras are content, not table state — nothing goes in the URL. Mobile
  * cards keep the same slots: a rule between cards, or a full-width note.
  */
-import type { CssProperties } from "../style/cssProperties";
-import type { DisplayValue } from "../display";
-
 import { PIN_Z } from "../columns/columnLayoutModel";
+import type { DisplayValue } from "../display";
+import type { CssProperties } from "../style/cssProperties";
 
 export { extraHostFillStyle } from "./rowPresentation";
 

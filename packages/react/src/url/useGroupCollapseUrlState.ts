@@ -10,15 +10,15 @@
  * Pair it with `<DataTable collapsedGroupIds onCollapsedGroupIdsChange>` and
  * grouping's state travels with the link.
  */
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-
-import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 import {
   PARAM_GROUP_CLOSED,
   readCollapsedGroups,
   writeCollapsedGroups,
 } from "@adapttable/core";
 import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+
+import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
 
 /**
  * What {@link useGroupCollapseUrlState} needs.

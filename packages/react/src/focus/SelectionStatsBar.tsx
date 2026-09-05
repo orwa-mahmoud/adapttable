@@ -1,8 +1,7 @@
 /** Headless selection-stat formatting; adapters own the visible status bar. */
-import type { ReactNode } from "react";
-
 import type { TableLabels } from "@adapttable/core";
 import type { SelectionStats } from "@adapttable/core";
+import type { ReactNode } from "react";
 
 export type { SelectionStats };
 

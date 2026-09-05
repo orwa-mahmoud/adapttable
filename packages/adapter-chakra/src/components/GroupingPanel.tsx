@@ -48,7 +48,7 @@ const slots: GroupingPanelSlots = {
       bg={active ? "colorPalette.subtle" : "transparent"}
       color="fg.muted"
       transition="background-color 120ms ease, border-color 120ms ease"
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       {empty ? (
@@ -144,7 +144,7 @@ const slots: GroupingPanelSlots = {
       borderColor={active ? "red.500" : "border"}
       bg={active ? "red.subtle" : undefined}
       color={active ? "red.fg" : "fg.muted"}
-      {...(dropProps as Record<string, unknown>)}
+      {...dropProps}
       {...rest}
     >
       <Text fontSize="xs" fontWeight="semibold">

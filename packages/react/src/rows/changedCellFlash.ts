@@ -11,10 +11,10 @@
  * already works. And it never animates against
  * `prefers-reduced-motion` — a flash nobody asked for is a bug, not a feature.
  */
+import type { RowPatchEvent } from "@adapttable/core";
 import { useCallback, useDebugValue, useEffect, useRef, useState } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
-import type { RowPatchEvent } from "@adapttable/core";
 
 export type { RowPatchEvent };
 
