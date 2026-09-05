@@ -5,7 +5,9 @@
  * are for people; execution is locale-independent.
  */
 
-/** Manifest and describe/execute schema family. @public */
+/** Manifest and describe/execute schema family. Custom capabilities are additive
+ * within this version; hosts reject unknown `schemaVersion` values at the
+ * transport boundary rather than coercing them. @public */
 export const AGENT_SCHEMA_VERSION = "adapttable.agent.v1";
 
 /**
@@ -51,8 +53,9 @@ export type WritePolicy = "deny" | "allow";
 /**
  * When a write must be confirmed before it is staged or applied.
  *
- * - `writes` — every mutating key (default)
- * - `destructive` — only `rows.delete` (and future destructive keys)
+ * - `writes` — every data-write capability (`edit.cells`, `rows.add`, `rows.delete`,
+ *   `rows.reorder`, and custom capabilities with `kind: "write"` or `"destructive"`)
+ * - `destructive` — only `rows.delete` (and custom `kind: "destructive"`)
  * - `never` — skip chrome and `onApprove`; still validate and honour commit
  *
  * @public

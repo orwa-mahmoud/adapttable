@@ -1,18 +1,20 @@
 import { errorMessage } from "./errorMessage";
-import { guideOf, summaryOf } from "./guides";
+import {
+  createCapabilityRegistry,
+  type CapabilityRegistry,
+} from "./capabilities/registry";
+import { summaryOf } from "./guides";
 import {
   type ApprovalPolicy,
-  CAPABILITY_KEYS,
   type CapabilityKey,
   type CommitPolicy,
-  DESTRUCTIVE_KEYS,
   type RowAddressScope,
-  WRITE_KEYS,
-  type WriteKey,
 } from "./keys";
-import { buildManifest, enabledKeys } from "./manifest";
+import { buildManifest } from "./manifest";
 import type {
   AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
   AgentColumn,
   AgentObservation,
   AgentSession,
@@ -45,15 +47,13 @@ export interface CreateAgentSessionOptions {
    * When omitted and approval is required, execute returns `approval: "pending"`.
    */
   onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+  /** Custom governed capabilities registered on this table session. */
+  capabilities?: readonly AgentCapabilityDefinition[];
 }
 
-function isCapabilityKey(key: string): key is CapabilityKey {
-  return (CAPABILITY_KEYS as readonly string[]).includes(key);
-}
-
-function isWriteKey(key: CapabilityKey): key is WriteKey {
-  return (WRITE_KEYS as readonly string[]).includes(key);
-}
+const sessionRegistryRef: { current: CapabilityRegistry | undefined } = {
+  current: undefined,
+};
 
 function approvalOf(observation: AgentObservation): ApprovalPolicy {
   return observation.approval ?? "writes";
@@ -67,12 +67,31 @@ function readMaxOf(observation: AgentObservation): number {
   return observation.readMax ?? 50;
 }
 
-function needsApproval(key: CapabilityKey, policy: ApprovalPolicy): boolean {
+function isWriteCapability(
+  registry: ReturnType<typeof createCapabilityRegistry>,
+  key: string
+): boolean {
+  const kind = registry.get(key)?.kind;
+  return kind === "write" || kind === "destructive";
+}
+
+function isDestructiveCapability(
+  registry: ReturnType<typeof createCapabilityRegistry>,
+  key: string
+): boolean {
+  return registry.get(key)?.kind === "destructive";
+}
+
+function needsApproval(
+  key: string,
+  policy: ApprovalPolicy,
+  registry: ReturnType<typeof createCapabilityRegistry>
+): boolean {
   if (policy === "never") return false;
   if (policy === "destructive") {
-    return (DESTRUCTIVE_KEYS as readonly string[]).includes(key);
+    return isDestructiveCapability(registry, key);
   }
-  return isWriteKey(key);
+  return isWriteCapability(registry, key);
 }
 
 class ApplyError extends Error {
@@ -84,7 +103,7 @@ class ApplyError extends Error {
 }
 
 interface ReplayRecord {
-  readonly capabilityKey: CapabilityKey;
+  readonly capabilityKey: string;
   readonly fingerprint: string;
   readonly result: ExecuteResult;
 }
@@ -100,7 +119,6 @@ function storeReplay(
   args: unknown,
   result: ExecuteResult
 ): void {
-  if (!isCapabilityKey(key)) return;
   replay.set(idempotencyKey, {
     capabilityKey: key,
     fingerprint: executeFingerprint(key, args),
@@ -186,24 +204,29 @@ export function createAgentSession(
 ): AgentSession {
   const replay = new Map<string, ReplayRecord>();
   const inflight = new Map<string, Promise<ExecuteResult>>();
+  const registry = createCapabilityRegistry(
+    options.capabilities ?? [],
+    dispatchBuiltIn
+  );
+  sessionRegistryRef.current = registry;
 
   const catalog = (): CatalogEntry[] => {
     const observation = options.observe();
-    return enabledKeys(observation).map((key) => ({
+    return registry.enabledKeys(observation).map((key) => ({
       key,
-      summary: summaryOf(key),
+      summary: registry.get(key)?.summary ?? summaryOf(key as CapabilityKey),
     }));
   };
 
   const describe = (key: string): CapabilityGuide => {
-    if (!isCapabilityKey(key)) {
+    if (!registry.has(key)) {
       throw new Error(`unknown capability "${key}"`);
     }
-    const enabled = enabledKeys(options.observe());
+    const enabled = registry.enabledKeys(options.observe());
     if (!enabled.includes(key)) {
       throw new Error(`capability "${key}" is not wired on this table`);
     }
-    return guideOf(key);
+    return registry.describe(key);
   };
 
   const runExecute = async (
@@ -226,12 +249,12 @@ export function createAgentSession(
       return result;
     };
 
-    if (!isCapabilityKey(key)) {
+    if (!registry.has(key)) {
       return fail("unknown-capability", `unknown capability "${key}"`);
     }
 
     const observation = options.observe();
-    if (!enabledKeys(observation).includes(key)) {
+    if (!registry.enabledKeys(observation).includes(key)) {
       return fail(
         "not-wired",
         `capability "${key}" is not wired on this table`
@@ -244,19 +267,22 @@ export function createAgentSession(
       );
     }
 
-    const guide = guideOf(key);
+    const guide = registry.describe(key);
     const invalid = validateSchema(guide.input, args ?? {});
     if (invalid) return fail("invalid-arguments", invalid);
 
     try {
-      const payload = await dispatch(
-        key,
-        args ?? {},
+      const definition = registry.get(key);
+      if (!definition) {
+        return fail("unknown-capability", `unknown capability "${key}"`);
+      }
+      const context: AgentCapabilityContext = {
         observation,
-        options.apply,
-        options.observe,
-        bindApprove(options.onApprove, signal)
-      );
+        apply: options.apply,
+        observe: options.observe,
+        onApprove: bindApprove(options.onApprove, signal),
+      };
+      const payload = await definition.execute(context, args ?? {});
       if (
         isWriteResult(payload) &&
         (payload.approval === "pending" || payload.approval === "cancelled") &&
@@ -350,7 +376,10 @@ export function createAgentSession(
     catalog,
     describe,
     execute,
-    manifest: () => buildManifest(options.observe()),
+    manifest: () => {
+      const observation = options.observe();
+      return buildManifest(observation, registry.enabledKeys(observation));
+    },
   };
 }
 
@@ -373,14 +402,12 @@ function assertApply<K extends keyof AgentApply>(
   }
 }
 
-async function dispatch(
+async function dispatchBuiltIn(
   key: CapabilityKey,
-  args: unknown,
-  observation: AgentObservation,
-  apply: AgentApply,
-  observe: () => AgentObservation,
-  onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>
+  context: AgentCapabilityContext,
+  args: unknown
 ): Promise<unknown> {
+  const { observation, apply, observe, onApprove } = context;
   const body = args as Record<string, unknown>;
   switch (key) {
     case "columns.describe":
@@ -596,12 +623,15 @@ async function resolveRowArg(
 }
 
 async function decideApproval(
-  key: CapabilityKey,
+  key: string,
   observation: AgentObservation,
   proposal: unknown,
-  onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>
+  onApprove: ((proposal: unknown) => Promise<boolean>) | undefined,
+  registry: ReturnType<typeof createCapabilityRegistry>
 ): Promise<ApprovalOutcome> {
-  if (!needsApproval(key, approvalOf(observation))) return "not-required";
+  if (!needsApproval(key, approvalOf(observation), registry)) {
+    return "not-required";
+  }
   if (!onApprove) return "pending";
   const allowed = await onApprove(proposal);
   return allowed ? "approved" : "rejected";
@@ -835,7 +865,13 @@ async function finishWrite(
     results?: readonly WriteRowResult[];
   }>
 ): Promise<WriteExecuteResult> {
-  const approval = await decideApproval(key, observation, proposals, onApprove);
+  const approval = await decideApproval(
+    key,
+    observation,
+    proposals,
+    onApprove,
+    sessionRegistryRef.current!
+  );
   if (approval === "pending" || approval === "rejected") {
     return writePayload(proposals, false, approval);
   }

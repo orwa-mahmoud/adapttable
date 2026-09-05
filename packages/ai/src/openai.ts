@@ -1,5 +1,5 @@
 import { errorMessage } from "./errorMessage";
-import { CAPABILITY_KEYS, type CapabilityKey } from "./keys";
+import { CAPABILITY_KEYS } from "./keys";
 import type { AgentSession, ExecuteResult, JsonSchema } from "./types";
 
 export {
@@ -126,9 +126,7 @@ const PORTABLE_TRIO: readonly {
   },
 ];
 
-const FROM_OPENAI_TOOL_NAME = new Map<string, CapabilityKey>(
-  CAPABILITY_KEYS.map((key) => [key.replaceAll(".", "_"), key])
-);
+import { openAiToolNameMap } from "./capabilities/registry";
 
 /**
  * OpenAI function names may only use `[a-zA-Z0-9_-]`. Catalog keys keep
@@ -146,8 +144,19 @@ export function toOpenAIToolName(key: string): string {
  *
  * @public
  */
-export function fromOpenAIToolName(name: string): string {
-  return FROM_OPENAI_TOOL_NAME.get(name) ?? name;
+export function fromOpenAIToolName(
+  name: string,
+  catalogKeys?: readonly string[]
+): string {
+  if (name === "catalog" || name === "describe" || name === "execute") {
+    return name;
+  }
+  if (catalogKeys) {
+    return openAiToolNameMap(catalogKeys).get(name) ?? name;
+  }
+  return CAPABILITY_KEYS.map((key) => key.replaceAll(".", "_")).includes(name)
+    ? (CAPABILITY_KEYS.find((key) => key.replaceAll(".", "_") === name) ?? name)
+    : name;
 }
 
 function typeList(schema: JsonSchema): string[] {
@@ -425,7 +434,8 @@ export async function executeOpenAITool(
     );
   }
 
-  const name = fromOpenAIToolName(call.function.name);
+  const catalogKeys = session.catalog().map((entry) => entry.key);
+  const name = fromOpenAIToolName(call.function.name, catalogKeys);
   if (name === "catalog") {
     return ok(session, idempotencyKey, session.catalog());
   }

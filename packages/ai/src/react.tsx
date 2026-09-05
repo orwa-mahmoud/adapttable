@@ -39,6 +39,7 @@ import type {
 import { createAgentSession } from "./session";
 import type {
   AgentApply,
+  AgentCapabilityDefinition,
   AgentColumn,
   AgentObservation,
   AgentSession,
@@ -122,6 +123,8 @@ export interface TableAgentOptions {
   readonly observe?: () => AgentObservation;
   /** Extra apply callbacks the live table does not already expose. */
   readonly apply?: AgentApply;
+  /** Custom governed capabilities for this table. */
+  readonly capabilities?: readonly AgentCapabilityDefinition[];
 }
 
 interface TableAgentFeature extends TableFeature {
@@ -614,7 +617,12 @@ function bindLiveSession(
     if (options.approval === "never") return Promise.resolve(true);
     return waitForChrome.current(proposal, signal);
   };
-  const inner = createAgentSession({ observe, apply, onApprove });
+  const inner = createAgentSession({
+    observe,
+    apply,
+    onApprove,
+    capabilities: optionsRef.current.capabilities,
+  });
   return {
     catalog: () => inner.catalog(),
     describe: (key: string) => inner.describe(key),

@@ -2,7 +2,6 @@ import type { TableSourceCapabilities } from "@adapttable/core";
 
 import type {
   ApprovalPolicy,
-  CapabilityKey,
   CommitPolicy,
   RowAddressScope,
   WritePolicy,
@@ -111,7 +110,7 @@ export interface AgentManifest {
   /** Monotonic view revision the next execute must match. */
   readonly viewRevision: number;
   /** Capability keys actually wired right now. */
-  readonly capabilities: readonly CapabilityKey[];
+  readonly capabilities: readonly string[];
   /** Columns the agent may mention. */
   readonly columns: readonly AgentColumn[];
   /** How row keys and positions resolve. */
@@ -125,13 +124,55 @@ export interface AgentManifest {
 }
 
 /**
+ * Governed capability extension registered on one table session.
+ *
+ * @public
+ */
+export interface AgentCapabilityDefinition {
+  /** Stable capability key. Use a namespace prefix for custom keys. */
+  readonly key: string;
+  /** One-line English summary for catalog(). */
+  readonly summary: string;
+  /** Describe guide without schemaVersion — the session adds it. */
+  readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
+    readonly guide: string;
+    readonly input: JsonSchema;
+    readonly output: JsonSchema;
+  };
+  /** Effect class used for approval defaults on custom writes. */
+  readonly kind?: "read" | "view" | "write" | "destructive";
+  /** Whether this capability is wired for the current observation. */
+  isEnabled(observation: AgentObservation): boolean;
+  /** Execute after schema validation and revision checks. */
+  execute(
+    context: AgentCapabilityContext,
+    args: unknown
+  ): Promise<unknown> | unknown;
+}
+
+/**
+ * Execution context passed to built-in and custom capability handlers.
+ *
+ * @public
+ */
+export interface AgentCapabilityContext {
+  readonly observation: AgentObservation;
+  readonly apply: AgentApply;
+  readonly observe: () => AgentObservation;
+  readonly onApprove?: (
+    proposal: unknown,
+    signal?: AbortSignal
+  ) => Promise<boolean>;
+}
+
+/**
  * Catalog row — key plus a short English summary.
  *
  * @public
  */
 export interface CatalogEntry {
   /** Capability key. */
-  readonly key: CapabilityKey;
+  readonly key: string;
   /** One-line English summary. */
   readonly summary: string;
 }
@@ -143,7 +184,7 @@ export interface CatalogEntry {
  */
 export interface CapabilityGuide {
   /** Capability this guide describes. */
-  readonly key: CapabilityKey;
+  readonly key: string;
   /** Schema family the guide belongs to. */
   readonly schemaVersion: string;
   /** English instructions for a model or host. */

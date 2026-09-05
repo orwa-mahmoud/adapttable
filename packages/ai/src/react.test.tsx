@@ -565,7 +565,7 @@ describe("tableAgent", () => {
     await waitFor(() => expect(session).toBe(first));
     const replayed = await first.execute(
       "view.setPage",
-      { page: 9 },
+      { page: 1 },
       first.manifest().viewRevision,
       "page-once"
     );
@@ -634,5 +634,60 @@ describe("tableAgent", () => {
     expect(editCells).not.toHaveBeenCalled();
     unmount();
     await first;
+  });
+
+  it("registers a custom capability through tableAgent", async () => {
+    let session: AgentSession | undefined;
+    render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "custom",
+            capabilities: [
+              {
+                key: "demo.echo",
+                summary: "Echo a label.",
+                kind: "read",
+                guide: {
+                  guide: "Return the label unchanged.",
+                  input: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: { label: { type: "string" } },
+                    required: ["label"],
+                  },
+                  output: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: { echo: { type: "string" } },
+                    required: ["echo"],
+                  },
+                },
+                isEnabled: () => true,
+                execute: (_context, args) => ({
+                  echo: (args as { label: string }).label,
+                }),
+              },
+            ],
+            bridge: { attach: (next) => (session = next) },
+          }),
+        ]}
+        view={{
+          rows: [{ id: "1" }],
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: () => "1",
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).toContain("demo.echo");
+    const result = await session!.execute(
+      "demo.echo",
+      { label: "live" },
+      session!.manifest().viewRevision,
+      "echo-live"
+    );
+    expect(result.ok).toBe(true);
+    expect(result.result).toEqual({ echo: "live" });
   });
 });

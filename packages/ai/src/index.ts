@@ -18,10 +18,13 @@ export {
   type RowAddressScope,
   type WritePolicy,
 } from "./keys";
+export { openAiToolNameMap } from "./capabilities/registry";
 export { buildManifest, enabledKeys } from "./manifest";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
 export type {
   AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
   AgentCellEdit,
   AgentColumn,
   AgentLimits,
