@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useRef } from "react";
 
+import {
+  createTableEngine,
+  type TableEngine,
+} from "../engine/createTableEngine";
 import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
 import {
-  applyRowPatchLogToView,
   attachIncrementalView,
-  createIncrementalView,
   incrementalSearchText,
   type IncrementalView,
   type IncrementalViewConfig,
@@ -237,18 +239,54 @@ export function useFrontendData<TRow>(
     groupBy,
   };
 
-  const viewRef = useRef<IncrementalView<TRow> | undefined>(undefined);
+  const engineRef = useRef<TableEngine<TRow> | undefined>(undefined);
   const dataRef = useRef(data);
+  const modeRef = useRef(resolvedMode);
   const fingerprintRef = useRef<string | undefined>(undefined);
-  const view = syncFrontendView({
-    data,
-    hookConfig,
-    fingerprint: hookViewFingerprint(fingerprint),
-    viewRef,
-    dataRef,
-    fingerprintRef,
-    searchCache: searchCacheRef.current,
-  });
+  if (modeRef.current !== resolvedMode && engineRef.current) {
+    engineRef.current.dispose();
+    engineRef.current = undefined;
+  }
+  modeRef.current = resolvedMode;
+  if (!engineRef.current) {
+    engineRef.current = createTableEngine({
+      data,
+      columns: columns ?? [],
+      rowKey: getRowId,
+      paginationMode: paged ? "paged" : "infinite",
+      defaults: {
+        page,
+        limit,
+        search,
+        sortBy,
+        sortDir,
+        extra: state.extra,
+        groupBy,
+      },
+      filterFn,
+      getSearchText: projectSearchText,
+    });
+    dataRef.current = data;
+    fingerprintRef.current = undefined;
+  }
+  const engine = engineRef.current;
+  if (data !== dataRef.current) {
+    const log = rowPatchLog(data);
+    if (log) forgetPatchedSearch(searchCacheRef.current, log);
+    else searchCacheRef.current.clear();
+    engine.invalidate(["data"], { data }, { silent: true });
+    dataRef.current = data;
+  }
+  const nextFingerprint = hookViewFingerprint(fingerprint);
+  if (fingerprintRef.current !== nextFingerprint) {
+    engine.configure(hookConfig, { silent: true });
+    fingerprintRef.current = nextFingerprint;
+  }
+  const view = incrementalViewOf(engine.rows("full"));
+  if (!view) {
+    throw new Error("TableEngine is missing its incremental snapshot");
+  }
+  adoptHookRefs(view, hookConfig);
 
   if (sortLevels.length === 0 && sortBy && sortDir) {
     warnUnresolvableSort(
@@ -371,65 +409,6 @@ function hookViewFingerprint<TRow>(
   });
 }
 
-function syncFrontendView<TRow>(args: {
-  data: readonly TRow[];
-  hookConfig: IncrementalViewConfig<TRow>;
-  fingerprint: string;
-  viewRef: { current: IncrementalView<TRow> | undefined };
-  dataRef: { current: readonly TRow[] };
-  fingerprintRef: { current: string | undefined };
-  searchCache: Map<string, string>;
-}): IncrementalView<TRow> {
-  // Only follow a chrome reconfigure of THIS hook's snapshot. Looking
-  // up `data` on first mount would steal another table's view — hosts
-  // (and tests) reuse the same source array.
-  if (args.viewRef.current) {
-    const latest = incrementalViewOf(args.data);
-    if (latest) args.viewRef.current = latest;
-  }
-
-  const previousData = args.dataRef.current;
-  const previousFingerprint = args.fingerprintRef.current;
-  const configChanged =
-    previousFingerprint !== undefined &&
-    previousFingerprint !== args.fingerprint;
-
-  const log = args.data === previousData ? undefined : rowPatchLog(args.data);
-  const canPatch =
-    !configChanged &&
-    args.viewRef.current !== undefined &&
-    log !== undefined &&
-    args.viewRef.current.rows === previousData &&
-    logBelongsToPrevious(log, previousData);
-
-  if (canPatch && log) {
-    forgetPatchedSearch(args.searchCache, log);
-    adoptHookRefs(args.viewRef.current!, args.hookConfig);
-    const next = applyRowPatchLogToView(args.viewRef.current!, log);
-    args.viewRef.current = next;
-    args.dataRef.current = args.data;
-    args.fingerprintRef.current = args.fingerprint;
-    return next;
-  }
-
-  const dataChanged = args.data !== previousData;
-  const first = args.viewRef.current === undefined;
-  if (!first && !configChanged && !dataChanged) {
-    adoptHookRefs(args.viewRef.current!, args.hookConfig);
-    return args.viewRef.current!;
-  }
-
-  if (dataChanged && !canPatch) args.searchCache.clear();
-  const created = createIncrementalView(
-    args.data,
-    mergeHookConfig(args.hookConfig, args.viewRef.current)
-  );
-  args.viewRef.current = created;
-  args.dataRef.current = args.data;
-  args.fingerprintRef.current = args.fingerprint;
-  return created;
-}
-
 function adoptHookRefs<TRow>(
   view: IncrementalView<TRow>,
   hookConfig: IncrementalViewConfig<TRow>
@@ -444,30 +423,6 @@ function adoptHookRefs<TRow>(
   current.getSortValue = hookConfig.getSortValue;
 }
 
-function mergeHookConfig<TRow>(
-  hookConfig: IncrementalViewConfig<TRow>,
-  current: IncrementalView<TRow> | undefined
-): IncrementalViewConfig<TRow> {
-  const previous = current ? incrementalViewConfig(current) : undefined;
-  if (!previous) return hookConfig;
-  return {
-    ...hookConfig,
-    groupAggregates: previous.groupAggregates,
-    groupSort: previous.groupSort,
-    groupFilter: previous.groupFilter,
-    groupFooters: previous.groupFooters,
-    collapsedGroupIds: previous.collapsedGroupIds,
-    blankLabel: previous.blankLabel,
-    groupPageSize: previous.groupPageSize,
-    rowPageSize: previous.rowPageSize,
-    paging: previous.paging,
-    summaryRow: previous.summaryRow,
-    aggregateSpec: previous.aggregateSpec,
-    aggregateOptions: previous.aggregateOptions,
-    groupBy: hookConfig.groupBy ?? previous.groupBy,
-  };
-}
-
 function forgetPatchedSearch<TRow>(
   cache: Map<string, string>,
   log: RowPatchLog<TRow>
@@ -475,31 +430,4 @@ function forgetPatchedSearch<TRow>(
   for (const event of log.events) {
     if (event.type !== "insert") cache.delete(event.id);
   }
-}
-
-/**
- * Did this log come from applying patches to `previous`? A copied array
- * (`[...applyRowPatches(...)]`) has no log; a log from a different source
- * fails the replay.
- */
-function logBelongsToPrevious<TRow>(
-  log: RowPatchLog<TRow>,
-  previous: readonly TRow[]
-): boolean {
-  if (log.events.length === 0) return false;
-  const working = previous.slice();
-  for (const event of log.events) {
-    if (event.type === "insert") {
-      if (event.index < 0 || event.index > working.length) return false;
-      working.splice(event.index, 0, event.row);
-    } else if (event.type === "remove") {
-      if (working[event.index] !== event.row) return false;
-      working.splice(event.index, 1);
-    } else if (working[event.index] !== event.prev) {
-      return false;
-    } else {
-      working[event.index] = event.next;
-    }
-  }
-  return working.length === log.rows.length;
 }

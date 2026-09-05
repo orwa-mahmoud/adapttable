@@ -27,6 +27,10 @@ import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
+import type {
+  FeatureRegistration,
+  NeutralFeatureHost,
+} from "./featureRegistration";
 import type { FeatureProviderContribution, FeatureRender } from "./providers";
 
 export type { Command } from "../actions/commandRegistry";
@@ -89,7 +93,9 @@ export type FeatureApplyInput<TRow = unknown> = object & {
  *
  * @public
  */
-export interface TableFeature<TRow = unknown> {
+export interface TableFeature<
+  TRow = unknown,
+> extends FeatureRegistration<TRow> {
   /** Stable id (`"row-reorder"`, `"grouping"`, a host plugin's name). */
   readonly id: string;
   /** Merge this feature's configuration into the table. Later features win. */
@@ -170,7 +176,9 @@ export interface StaticTableFeature {
  *
  * @public
  */
-export interface TableFeatureHost<TRow = unknown> {
+export interface TableFeatureHost<
+  TRow = unknown,
+> extends NeutralFeatureHost<TRow> {
   /** Forget a registration when the table unmounts or features change. */
   onDispose(cleanup: () => void): void;
   /** Register a filter type for this table. */

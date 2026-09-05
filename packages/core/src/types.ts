@@ -10,16 +10,19 @@
 
 import type { ComponentType, ReactNode } from "react";
 
+import type { ColumnModel, ExtraFilters, SortDirection } from "./columnModel";
 import type { CellEditor } from "./editing/cellEditing";
 import type { FacetMap } from "./filters/facets";
 import type { ColumnFilter } from "./filters/filterDefs";
 
-/**
- * Sort direction for a column.
- *
- * @public
- */
-export type SortDirection = "asc" | "desc";
+export type {
+  ColumnGroupShow,
+  ColumnModel,
+  ExtraFilters,
+  FilterValue,
+  SortableValue,
+  SortDirection,
+} from "./columnModel";
 
 /**
  * Text direction. Adapters apply it; logical CSS does the rest.
@@ -51,35 +54,6 @@ export type PaginationMode = "infinite" | "paged" | "auto";
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 /**
- * Comparable primitive returned by a sort-value extractor.
- *
- * @public
- */
-export type SortableValue = string | number | boolean | null | undefined;
-
-/**
- * When a leaf under a collapsible column group is visible.
- * `"open"` — expanded group only; `"closed"` — collapsed only; `"always"` — both.
- *
- * @public
- */
-export type ColumnGroupShow = "open" | "closed" | "always";
-
-/**
- * A single extra-filter value as it round-trips through URL state.
- *
- * @public
- */
-export type FilterValue = string | string[] | number | undefined;
-
-/**
- * The bag of extra (caller-defined) filter values keyed by filter name.
- *
- * @public
- */
-export type ExtraFilters = Record<string, FilterValue>;
-
-/**
  * Props every `ColumnDef.Cell` component receives.
  *
  * @public
@@ -92,21 +66,16 @@ export interface CellProps<TRow> {
 }
 
 /**
- * Definition of a single column. `TRow` is the row item type.
- *
- * Provide either a `ColumnDef.Cell` component (stable identity →
- * memoisable sub-trees, preferred for statically-known columns) or the
- * lighter `ColumnDef.accessor` function.
+ * React column. Today's `ColumnDef` keeps this name. Renderers stay
+ * React nodes — the engine never stringifies them into labels.
  *
  * @public
  */
-export interface ColumnDef<TRow> {
-  /**
-   * Unique within the table. Also the value sent to a backend as `sortBy`,
-   * and — when no `accessor`/`Cell` is given — the row's data path for the
-   * cell value (dot paths reach nested values: `"department.name"`).
-   */
-  key: string;
+export interface ColumnDef<TRow> extends ColumnModel<TRow> {
+  /** Declarative filter — narrowed from the neutral column model. */
+  filter?: ColumnFilter<TRow>;
+  /** Editor widget — narrowed from the neutral column model. */
+  editor?: CellEditor;
   /**
    * Header content. Pre-translated by the caller. Omit it and the header is
    * auto-derived from `key` (`"hiredAt"` → `"Hired At"`).
@@ -123,105 +92,8 @@ export interface ColumnDef<TRow> {
    * produced for this key (or `undefined` when only this renderer is set).
    */
   renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-  /** Native tooltip on the header caption. */
-  headerTooltip?: string;
-  /**
-   * Allow the user to change this column's display name from the Columns
-   * menu. The table keeps the stable `key`; renaming is offered only when
-   * `onColumnRename` is also present.
-   */
-  renameable?: boolean;
-  /**
-   * How readily this column is given up when the table is too narrow for all
-   * of them. Priority 1 is kept longest, in the ordinary sense of the word.
-   *
-   * A column that omits it is never dropped, so the columns carrying the
-   * row's identity stay by saying nothing — and a table where nobody sets it
-   * behaves exactly as it did before.
-   */
-  responsivePriority?: number;
   /** Host-provided controls after the caption, before the resize handle. */
   headerActions?: ReactNode;
-  /**
-   * Presentational header group: contiguous columns sharing a `group`
-   * render under one spanning header cell. A string is one level; a
-   * path (`["Finance", "Q1"]`) stacks rows. Reordering columns apart
-   * splits the group (adjacency-based, never lies about layout).
-   *
-   * Prefer a `ColumnGroupDef` with `children` when the group has
-   * collapse options (`collapsedKey`, `collapsedRender`) — `group` is
-   * the shortcut for a spanning label only.
-   */
-  group?: string | readonly string[];
-  /**
-   * When this leaf sits under a collapsible group: shown only while the
-   * group is expanded (`open`), only while collapsed (`closed`), or in
-   * both states (`always`). Omit and the group decides — `collapsedKey`,
-   * `collapsedRender`, or an arrow stub when neither is set.
-   */
-  groupShow?: ColumnGroupShow;
-  /**
-   * Per-locale data paths for this column's VALUE. The active table
-   * `locale` picks the path (exact tag first, then its primary subtag, then
-   * `key`): `{ key: "nameEn", i18n: { ar: "nameAr" } }` for flat fields, or
-   * `{ key: "name.en", i18n: { ar: "name.ar" } }` for nested objects. The
-   * cell, client-side sort and the column's declarative filter all follow
-   * the resolved path. Header TEXT stays whatever you pass in `header`.
-   */
-  i18n?: Readonly<Record<string, string>>;
-  /**
-   * Declarative filter for this column: a bare type (`"dateRange"`) or a
-   * definition without `key`/`label` (inherited from the column). Merged
-   * with the table-level `filters` array; a `filters` entry with the same
-   * key wins.
-   */
-  filter?: ColumnFilter<TRow>;
-  /**
-   * Opt this column into inline cell editing. `true` for every row, or a
-   * predicate for per-row control. Editing stays fully dormant unless the
-   * table also receives `onCellEdit` — omit both and nothing changes.
-   */
-  editable?: boolean | ((row: TRow) => boolean);
-  /**
-   * Editor widget when `ColumnDef.editable` is set. Defaults to
-   * `"text"`. A registered plugin name (`host.registerEditor`) is a string
-   * that is not a built-in. Select options may be `{ value, label }` or
-   * plain strings.
-   */
-  editor?: CellEditor;
-  /**
-   * Override the draft seed for the editor (raw value). Defaults to
-   * `sortValue` then the column key path — use this when the displayed
-   * cell is formatted but editing needs the underlying value.
-   */
-  editValue?: (row: TRow) => string;
-  /**
-   * Turn the edited text back into the value to commit.
-   *
-   * A column can show one thing, seed the editor with another, and commit a
-   * third: `accessor` renders `"$1,240.00"`, `ColumnDef.editValue` seeds
-   * the editor with `"1240"`, and this parses what the user typed back into a
-   * number. Without it, a `number` editor commits `number | null` and every
-   * other editor commits the raw string.
-   *
-   * Receives the draft exactly as typed, plus the row being edited. Return
-   * whatever `onCellEdit` should receive — a number, a `Date`, a parsed unit.
-   */
-  parseValue?: (draft: string, row: TRow) => unknown;
-  /**
-   * Gate a commit on this column's own rule. Receives the value
-   * `ColumnDef.parseValue` produced, plus the row being edited; return a
-   * message to reject it, nothing to allow it.
-   *
-   * May be async — "is this SKU real" is a request — and the editor stays open
-   * and marked busy while it runs. A rejected value keeps the editor open with
-   * the message on it, so the reader fixes what they typed rather than losing it.
-   * Validation gates `onCellEdit` and nothing else: the host still owns saving.
-   */
-  validate?: (
-    value: unknown,
-    row: TRow
-  ) => string | undefined | Promise<string | undefined>;
   /**
    * Component rendered per row. Define at module level (or memoise) so
    * its identity is stable across renders.
@@ -229,90 +101,6 @@ export interface ColumnDef<TRow> {
   Cell?: ComponentType<CellProps<TRow>>;
   /** Lightweight alternative to `ColumnDef.Cell`; returns cell content. */
   accessor?: (row: TRow) => ReactNode;
-  /**
-   * Primitive extractor used by the client-side sort comparator
-   * (`useFrontendData`). Unused for server-sorted data.
-   */
-  sortValue?: (row: TRow) => SortableValue;
-  /**
-   * The value this column contributes to an export, when the file should not
-   * carry what the screen shows.
-   *
-   * A cell formatted for reading — `"$1,240.00"`, `"3 days ago"`, a status
-   * badge — is worse than useless in a spreadsheet, because it cannot be
-   * summed or sorted. Return the underlying value here and the export writes
-   * it while the table keeps rendering the friendly version.
-   *
-   * Without it an export falls back to the display value, so this is only
-   * needed where the two genuinely differ.
-   */
-  exportValue?: (row: TRow) => unknown;
-  /**
-   * The cell as plain text, for every context that cannot render JSX.
-   *
-   * `ColumnDef.accessor` returns a `ReactNode`, so a screen-reader
-   * announcement, an `aria-label`, a tooltip or the clipboard have nothing to
-   * read: a badge or an avatar is a React element, not a word. Return the text
-   * those places should use.
-   *
-   * Resolution order when this is absent — text is always available, this only
-   * makes it accurate: `ColumnDef.formatValue`, then
-   * `ColumnDef.exportValue`, then `accessor` when it happens to yield a
-   * primitive, then the key's data path. So only columns whose rendered cell is
-   * not already its own text need one.
-   */
-  formatValue?: (row: TRow) => string;
-  /** Enable sorting for this column. Off by default. */
-  sortable?: boolean;
-  /** Column width passed through to the rendered header/cell. */
-  width?: number | string;
-  /**
-   * Floor for this column's width, in pixels. A resize will not go below it,
-   * and neither will the container-fitting mode — a column of dates has a
-   * width below which it is simply unreadable.
-   */
-  minWidth?: number;
-  /** Ceiling for this column's width, in pixels. */
-  maxWidth?: number;
-  /**
-   * This column's share of the leftover width when the table fits its
-   * container: `flex: 2` takes twice the space of `flex: 1`. Columns without
-   * it keep their own width and are not stretched.
-   */
-  flex?: number;
-  /** Text alignment within the cell. Defaults to `"start"`. */
-  align?: "start" | "center" | "end";
-  /**
-   * How many columns this cell covers, or a per-row callback. Covered
-   * neighbours are omitted from the row's cell list. Clipped at a pin
-   * boundary and at the column window. Default 1.
-   */
-  colSpan?: number | ((row: TRow) => number);
-  /**
-   * How many rows this cell covers, or a per-row callback. Covered cells
-   * in later rows are omitted. Stays inside one tbody (pin sections do
-   * not share a span). Default 1.
-   */
-  rowSpan?: number | ((row: TRow) => number);
-  /** Label used on mobile card layouts; falls back to `header` when a string. */
-  mobileLabel?: string;
-  /**
-   * Hide this column entirely on mobile layouts. Explicit and absolute:
-   * it always wins, including over the `mobileIdentityColumns` default.
-   */
-  hideOnMobile?: boolean;
-  /** Hide this column entirely on desktop layouts. */
-  hideOnDesktop?: boolean;
-  /** Gray out the menu's reorder grip — the column stays where it is. */
-  lockPosition?: boolean;
-  /** Gray out the menu's show/hide control. */
-  lockVisibility?: boolean;
-  /** Gray out resize and per-column auto-size. */
-  lockWidth?: boolean;
-  /** Gray out the menu's pin control. */
-  lockPin?: boolean;
-  /** Arbitrary metadata adapters may read (e.g. a custom renderer flag). */
-  meta?: Record<string, unknown>;
 }
 
 /**

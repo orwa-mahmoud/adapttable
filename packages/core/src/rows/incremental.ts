@@ -11,13 +11,18 @@
  * `applyRowPatches` can pass {@link rowPatchLog} into
  * {@link applyRowPatchLogToView} so the same patches are not applied twice.
  */
-import type { ReactNode } from "react";
-
 import {
   aggregate,
   type AggregateOptions,
   type AggregateSpec,
 } from "../aggregate/aggregate";
+import type {
+  ColumnModel,
+  ExtraFilters,
+  SortableValue,
+  SortDirection,
+} from "../columnModel";
+import { cellSortValue } from "../engine/cellValue";
 import {
   type BuildGroupedFlatModelOptions,
   flattenGroupPartitions,
@@ -39,12 +44,7 @@ import {
   sortRowsMulti,
 } from "../sort/compare";
 import type { QueryFilterGroup } from "../source/queryContract";
-import type {
-  ColumnDef,
-  ExtraFilters,
-  SortableValue,
-  SortDirection,
-} from "../types";
+import type { ColumnDef } from "../types";
 import { stableKey } from "../utils/stableKey";
 import {
   addAggregateRow,
@@ -103,7 +103,7 @@ export interface IncrementalViewConfig<TRow> {
   /** The active filter tree, when there is one. */
   filterTree?: QueryFilterGroup;
   /** Columns — sort and group values resolve through these. */
-  columns?: readonly ColumnDef<TRow>[];
+  columns?: readonly ColumnModel<TRow>[];
   /** Override a column's sort value. */
   getSortValue?: (row: TRow, columnKey: string) => SortableValue;
   /** Single-column sort. Ignored when `sortLevels` is non-empty. */
@@ -133,7 +133,7 @@ export interface IncrementalViewConfig<TRow> {
   /** How many extra groups / rows are currently revealed. */
   paging?: GroupPaging;
   /** Grand-total mapper over the sorted (filtered) set. */
-  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, unknown>>;
   /**
    * Built-in aggregate spec for incremental totals. Used for the grand
    * total when `summaryRow` is omitted, and for group cells when
@@ -161,7 +161,7 @@ export interface IncrementalView<TRow> {
   /** Grouped flat model, when grouping is configured. */
   readonly groups: readonly GroupedFlatEntry<TRow>[] | undefined;
   /** Grand-total cells over `sorted`. */
-  readonly aggregates: Partial<Record<string, ReactNode>> | undefined;
+  readonly aggregates: Partial<Record<string, unknown>> | undefined;
 }
 
 interface ViewState<TRow> {
@@ -176,7 +176,7 @@ interface ViewState<TRow> {
   tree: IncrementalGroupTree<TRow> | undefined;
   summary: IncrementalAggregate<TRow> | undefined;
   summaryDirty: boolean;
-  groupCells: Map<string, Partial<Record<string, ReactNode>>>;
+  groupCells: Map<string, Partial<Record<string, unknown>>>;
   dirtyGroups: Set<string>;
 }
 
@@ -309,7 +309,7 @@ export function createIncrementalView<TRow>(
     : [...rows];
   const sorted = hasSort(config) ? fullSort(filtered, config) : filtered;
   const keys = groupingKeys(config.groupBy ?? []);
-  const columns = config.columns ?? [];
+  const columns = (config.columns ?? []) as readonly ColumnDef<TRow>[];
   const partitions =
     keys.length > 0 ? partitionGroupedRows(sorted, keys, columns) : [];
   const tree =
@@ -447,7 +447,7 @@ function publish<TRow>(
   filtered: readonly TRow[],
   sorted: readonly TRow[],
   groups: readonly GroupedFlatEntry<TRow>[] | undefined,
-  aggregates: Partial<Record<string, ReactNode>> | undefined,
+  aggregates: Partial<Record<string, unknown>> | undefined,
   state: ViewState<TRow>
 ): IncrementalView<TRow> {
   const view: IncrementalView<TRow> = {
@@ -470,7 +470,7 @@ function republishDerived<TRow>(
   config: IncrementalViewConfig<TRow>
 ): IncrementalView<TRow> {
   const keys = groupingKeys(config.groupBy ?? []);
-  const columns = config.columns ?? [];
+  const columns = (config.columns ?? []) as readonly ColumnDef<TRow>[];
   const partitions =
     keys.length > 0 ? partitionGroupedRows(state.sorted, keys, columns) : [];
   state.tree =
@@ -637,16 +637,8 @@ function resolveSortValue<TRow>(
   // accessor for those rows instead would order one column by two different
   // extractors at once: some rows by their value, the rest by their rendered
   // text, with nothing on screen to say which row got which.
-  if (column?.sortValue) return column.sortValue(row);
-  return toSortable(column?.accessor?.(row));
-}
-
-function toSortable(value: unknown): SortableValue {
-  return typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-    ? value
-    : null;
+  if (column) return cellSortValue(row, column);
+  return null;
 }
 
 function warmCaches<TRow>(
@@ -963,7 +955,7 @@ function readSummary<TRow>(
   rows: readonly TRow[],
   config: IncrementalViewConfig<TRow>,
   summary: IncrementalAggregate<TRow> | undefined
-): Partial<Record<string, ReactNode>> | undefined {
+): Partial<Record<string, unknown>> | undefined {
   if (config.summaryRow) return config.summaryRow(rows);
   if (summary) return readIncrementalAggregate(summary, rows);
   return undefined;
@@ -975,7 +967,7 @@ function groupFlattenOptions<TRow>(
 ): Omit<BuildGroupedFlatModelOptions<TRow>, "rows"> {
   return {
     groupBy: config.groupBy ?? [],
-    columns: config.columns ?? [],
+    columns: (config.columns ?? []) as readonly ColumnDef<TRow>[],
     getRowId: config.getRowId,
     collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
     aggregates: skipAggregates ? undefined : config.groupAggregates,
@@ -1014,7 +1006,7 @@ function cellsForGroup<TRow>(
   state: ViewState<TRow>,
   config: IncrementalViewConfig<TRow>,
   entry: Extract<GroupedFlatEntry<TRow>, { kind: "group" }>
-): Partial<Record<string, ReactNode>> | undefined {
+): Partial<Record<string, unknown>> | undefined {
   if (!state.dirtyGroups.has(entry.key) && state.groupCells.has(entry.key)) {
     return state.groupCells.get(entry.key);
   }
@@ -1026,7 +1018,7 @@ function cellsForGroup<TRow>(
 function groupCellsFrom<TRow>(
   config: IncrementalViewConfig<TRow>,
   rows: readonly TRow[]
-): Partial<Record<string, ReactNode>> | undefined {
+): Partial<Record<string, unknown>> | undefined {
   if (config.groupAggregates) return config.groupAggregates(rows);
   if (config.aggregateSpec) {
     return aggregate(config.aggregateSpec, config.aggregateOptions)(rows);

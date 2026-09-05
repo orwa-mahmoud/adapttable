@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import {
   aggregate,
   AGGREGATE_NAMES,
@@ -105,7 +103,7 @@ export function withGroupAggregateOverrides<TRow>(
   }
   const calculate = aggregate<TRow>(spec, { columns });
   return (rows) => {
-    const result: Partial<Record<string, ReactNode>> = { ...base?.(rows) };
+    const result: Partial<Record<string, unknown>> = { ...base?.(rows) };
     const calculated = calculate(rows);
     for (const [key, fn] of entries) {
       if (fn === "none") delete result[key];

@@ -7,7 +7,6 @@
  * fall back to a rescan of the rows the total describes. That is still
  * the group or the filtered set, not the unfiltered source.
  */
-import type { ReactNode } from "react";
 
 import {
   aggregate,
@@ -154,14 +153,14 @@ export function replaceAggregateRow<TRow>(
 export function readIncrementalAggregate<TRow>(
   state: IncrementalAggregate<TRow>,
   rows: readonly TRow[]
-): Partial<Record<string, ReactNode>> {
+): Partial<Record<string, unknown>> {
   if (state.bindings.some((binding) => binding.acc.kind === "custom")) {
     return aggregate(state.spec, state.options)(rows);
   }
   if (state.bindings.some((binding) => binding.acc.dirty)) {
     rescan(state, rows);
   }
-  const out: Partial<Record<string, ReactNode>> = {};
+  const out: Partial<Record<string, unknown>> = {};
   const format = state.options.format;
   for (const { key, acc } of state.bindings) {
     const result = cellOf(acc);

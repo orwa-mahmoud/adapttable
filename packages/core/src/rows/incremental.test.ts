@@ -165,7 +165,7 @@ function oracle(
     ? buildGroupedFlatModel({
         rows: sorted,
         groupBy: config.groupBy,
-        columns: config.columns ?? [],
+        columns: (config.columns ?? []) as readonly ColumnDef<Person>[],
         getRowId: config.getRowId,
         collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
         aggregates: config.groupAggregates,

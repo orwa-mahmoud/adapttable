@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import type { ExtraEntry } from "../rows/extraRows";
 import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
@@ -75,7 +73,7 @@ export type GroupedFlatEntry<TRow> =
        */
       serverCount?: number;
       /** Present when the host passed `groupAggregates`. */
-      aggregateCells?: Partial<Record<string, ReactNode>>;
+      aggregateCells?: Partial<Record<string, unknown>>;
       collapsed: boolean;
     }
   | {
@@ -98,7 +96,7 @@ export type GroupedFlatEntry<TRow> =
       label: string;
       leafRows: readonly TRow[];
       leafIds: readonly string[];
-      aggregateCells?: Partial<Record<string, ReactNode>>;
+      aggregateCells?: Partial<Record<string, unknown>>;
     }
   | {
       /**
@@ -182,7 +180,7 @@ export type GroupSort<TRow> =
  */
 export type GroupAggregatesFn<TRow> = (
   rows: readonly TRow[]
-) => Partial<Record<string, ReactNode>>;
+) => Partial<Record<string, unknown>>;
 
 /**
  * What `buildGroupedFlatModel` needs to flatten grouped rows into the single

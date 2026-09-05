@@ -10,6 +10,24 @@
  */
 
 /* ── Types ─────────────────────────────────────────────────────────── */
+export {
+  cellSortValue,
+  cellValue,
+  resolveColumnPath,
+} from "./engine/cellValue";
+export {
+  createTableEngine,
+  type CreateTableEngineOptions,
+  type TableEngine,
+  type TableOperation,
+  type TableRevisionAxis,
+  type TableRevisions,
+  type TableRowScope,
+  type TableSnapshot,
+} from "./engine/createTableEngine";
+export { createNeutralTable, type NeutralTable } from "./engine/neutralTable";
+export { engineSearchText } from "./engine/searchText";
+export { useTableEngine } from "./engine/useTableEngine";
 export type {
   ActionConfirm,
   BulkAction,
@@ -21,6 +39,7 @@ export type {
   ColumnGroupShow,
   ColumnHeaderContext,
   ColumnHeaderController,
+  ColumnModel,
   Direction,
   ExtraFilters,
   FilterValue,
@@ -76,6 +95,10 @@ export {
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
 export { localizedColumnPath, resolveColumns } from "./columns/resolveColumns";
+export type {
+  FeatureRegistration,
+  NeutralFeatureHost,
+} from "./features/featureRegistration";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
