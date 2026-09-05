@@ -1,30 +1,34 @@
 import type {
-  EditEventHandler,
+  ColumnLayoutState,
   GroupNode,
+  QueryFilterGroup,
   RowGroupRef,
+  RowPatch,
   RowReorderOptions,
+  Slot,
+  TableErrorState,
+  TableSource,
 } from "@adapttable/core";
 import {
   applyRowPatchesWithLog,
-  applyRowReorder,
-  type ColumnDef,
-  type ColumnLayoutState,
   evaluateFilterTree,
   insertRow,
-  type MobileCardModel,
-  type MobileCardRenderer,
-  type QueryFilterGroup,
   removeRow,
-  type RowPatch,
-  type Slot,
-  type TableErrorState,
-  type TableSource,
   updateRow,
+} from "@adapttable/core";
+import type {
+  EditEventHandler,
+  ReactMobileCardModel,
+  ReactMobileCardRenderer,
+} from "@adapttable/react";
+import {
+  applyRowReorder,
+  type ColumnDef,
   useColumnLayoutUrlState,
   useFrontendData,
   useHighlight,
   useQuerySource,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import {
   cellSpan,
   extraRows,
@@ -35,7 +39,7 @@ import {
   rowPinning,
   type TableFeature,
   virtualize,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -148,7 +152,7 @@ const REPLACED_ERROR_SLOT = {
  * compact grid. It reuses `card.fields`, so every value — cell renderers and
  * editors included — is the one the built-in card would have shown.
  */
-function demoCard(row: Person, card: MobileCardModel<Person>): ReactNode {
+function demoCard(row: Person, card: ReactMobileCardModel<Person>): ReactNode {
   const [identity, ...rest] = card.fields;
   return (
     <div className="demo-person-card">
@@ -168,7 +172,7 @@ function demoCard(row: Person, card: MobileCardModel<Person>): ReactNode {
 /** The demo's own card layout, when that toggle is on. */
 function cardRenderer(
   customCard: boolean | undefined
-): MobileCardRenderer<Person> | undefined {
+): ReactMobileCardRenderer<Person> | undefined {
   return customCard ? demoCard : undefined;
 }
 
@@ -301,7 +305,7 @@ export interface DemoColumnProps {
   /** The host's own error state, when the lab is showing a replacement. */
   slots?: { error?: Slot<TableErrorState> };
   /** The demo's own mobile card layout, when that toggle is on. */
-  renderCard?: MobileCardRenderer<Person>;
+  renderCard?: ReactMobileCardRenderer<Person>;
   /** Footer grand total, when the aggregation page asks for one. */
   summaryRow?: typeof DEMO_GROUP_AGGREGATES;
 }

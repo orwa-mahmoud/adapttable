@@ -3,6 +3,20 @@
  *
  * @packageDocumentation
  */
+export {
+  type BulkActionOutcome,
+  type BulkActionRunner,
+  useBulkActionRunner,
+  type UseBulkActionRunnerOptions,
+} from "./actions/useBulkActionRunner";
+export type { CommandPaletteOptions } from "./actions/useCommandPalette";
+export {
+  DEFAULT_SHORTCUTS,
+  type Shortcut,
+  useShortcuts,
+} from "./actions/useShortcuts";
+export type { ContextMenuOptions } from "./actions/useTableContextMenu";
+export { aggregate } from "./aggregate/aggregate";
 export type {
   CellProps,
   ColumnDef,
@@ -17,24 +31,12 @@ export {
   resolveColumnFooter,
   resolveColumnHeader,
 } from "./columns/columnHeader";
+export { computed, type ReactComputedColumnSpec } from "./columns/computed";
 export {
   resolveColumns,
   resolveNeutralColumnHeaders,
 } from "./columns/resolveColumns";
 export { useTableEngine } from "./engine/useTableEngine";
-export {
-  type BulkActionOutcome,
-  type BulkActionRunner,
-  useBulkActionRunner,
-  type UseBulkActionRunnerOptions,
-} from "./actions/useBulkActionRunner";
-export type { CommandPaletteOptions } from "./actions/useCommandPalette";
-export {
-  DEFAULT_SHORTCUTS,
-  type Shortcut,
-  useShortcuts,
-} from "./actions/useShortcuts";
-export type { ContextMenuOptions } from "./actions/useTableContextMenu";
 export type {
   FeatureProviderContribution,
   FeatureProviderProps,
@@ -120,8 +122,14 @@ export type {
   ComposedTableProps,
   FeatureProps,
   SidePanelOptions,
+  SummaryRowFn,
   ToolbarSlots,
 } from "./props";
+export type {
+  ReactMobileCardField,
+  ReactMobileCardModel,
+  ReactMobileCardRenderer,
+} from "./rows/mobileCard";
 export {
   type HighlightedCell,
   type HighlightState,
@@ -158,6 +166,28 @@ export { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {
+  type ActiveFilterChip,
+  type ChipLabelResolver,
+  useActiveFilterChips,
+  type UseActiveFilterChipsOptions,
+} from "./filters/useActiveFilterChips";
+export {
+  useExtraChips,
+  type UseExtraChipsOptions,
+} from "./filters/useExtraChips";
+export {
+  defaultFrontendRowId,
+  defaultSearchText,
+  useFrontendData,
+  type UseFrontendDataOptions,
+} from "./source/useFrontendData";
+export {
+  type InfiniteQueryLike,
+  type PageSelector,
+  useQuerySource,
+  type UseQuerySourceOptions,
+} from "./source/useQuerySource";
+export {
   createHistoryAdapter,
   createMemoryAdapter,
   getHistoryAdapter,
@@ -183,36 +213,7 @@ export {
   type UseTableUrlStateOptions,
   type UseTableUrlStateResult,
 } from "./url/useTableUrlState";
-export {
-  defaultFrontendRowId,
-  defaultSearchText,
-  useFrontendData,
-  type UseFrontendDataOptions,
-} from "./source/useFrontendData";
-export {
-  type InfiniteQueryLike,
-  type PageSelector,
-  useQuerySource,
-  type UseQuerySourceOptions,
-} from "./source/useQuerySource";
-export {
-  type ActiveFilterChip,
-  type ChipLabelResolver,
-  useActiveFilterChips,
-  type UseActiveFilterChipsOptions,
-} from "./filters/useActiveFilterChips";
-export {
-  useExtraChips,
-  type UseExtraChipsOptions,
-} from "./filters/useExtraChips";
 /* ── Selection ─────────────────────────────────────────────────────── */
-export {
-  type HeaderSelectionState,
-  offersAllMatching,
-  type SelectionState,
-  useSelection,
-  type UseSelectionOptions,
-} from "./selection/useSelection";
 export {
   columnDropProps,
   columnReorderKeyProps,
@@ -236,6 +237,13 @@ export {
   type UseColumnLayoutStorageStateResult,
 } from "./columns/useColumnLayoutStorageState";
 export { useHorizontalOverflow } from "./layout/useHorizontalOverflow";
+export {
+  type HeaderSelectionState,
+  offersAllMatching,
+  type SelectionState,
+  useSelection,
+  type UseSelectionOptions,
+} from "./selection/useSelection";
 /* ── Hooks ─────────────────────────────────────────────────────────── */
 export { useColorScheme } from "./hooks/useColorScheme";
 export { useDebounce } from "./hooks/useDebounce";
@@ -281,7 +289,6 @@ export type {
   EditableCellButtonProps as EditableCellConflictButtonProps,
   EditableCellSlots as EditableCellControls,
 } from "./editing/EditableCellGate";
-export type { RowReorderState as TableRowReorderState } from "./rows/rowReorder";
 export {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
@@ -303,6 +310,7 @@ export {
   UNPIN_ROW_ACTION_KEY,
   useRowPinning,
 } from "./rows/rowPinning";
+export type { RowReorderState as TableRowReorderState } from "./rows/rowReorder";
 export {
   applyRowReorder,
   datasetIndex,
@@ -331,6 +339,19 @@ export {
   useTreeExpansion,
 } from "./tree/useTreeExpansion";
 /* ── Inline cell editing ───────────────────────────────────────────── */
+export type { UseShortcutsOptions } from "./actions/useShortcuts";
+export type {
+  ColumnDragState,
+  ColumnDropProps,
+  ColumnReorderKeyProps,
+  ColumnRowDragProps,
+} from "./columns/columnReorder";
+export type { ColumnDragRowAttrs } from "./columns/columnReorder";
+export type {
+  PinLeads,
+  PinnedCellStyle,
+  PinOffset,
+} from "./columns/useColumnLayout";
 export {
   type BatchEditingState,
   type BatchRowEdit,
@@ -407,6 +428,13 @@ export {
   useCellEditing,
   type UseCellEditingOptions,
 } from "./editing/useCellEditing";
+export type { EditValidationState, RowValidator } from "./editing/validation";
+export type {
+  CellValidator,
+  ValidationCheckResult,
+  ValidationTarget,
+} from "./editing/validation";
+export { SESSION_ATTR } from "./filters/headerFilterOverlay";
 export {
   type GroupCollapseState,
   useGroupCollapse,
@@ -415,6 +443,7 @@ export {
   type GroupPagingState,
   useGroupPaging,
 } from "./grouping/useGroupPaging";
+export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
 export {
   useGroupCollapseUrlState,
   type UseGroupCollapseUrlStateOptions,
@@ -425,27 +454,6 @@ export {
   type UseRowPinningUrlStateOptions,
   type UseRowPinningUrlStateResult,
 } from "./url/useRowPinningUrlState";
-export type { UseShortcutsOptions } from "./actions/useShortcuts";
-export type {
-  ColumnDragState,
-  ColumnDropProps,
-  ColumnReorderKeyProps,
-  ColumnRowDragProps,
-} from "./columns/columnReorder";
-export type { ColumnDragRowAttrs } from "./columns/columnReorder";
-export type {
-  PinLeads,
-  PinnedCellStyle,
-  PinOffset,
-} from "./columns/useColumnLayout";
-export type { EditValidationState, RowValidator } from "./editing/validation";
-export type {
-  CellValidator,
-  ValidationCheckResult,
-  ValidationTarget,
-} from "./editing/validation";
-export { SESSION_ATTR } from "./filters/headerFilterOverlay";
-export type { HorizontalOverflow } from "./layout/useHorizontalOverflow";
 export type { SearchInputState } from "./useDataTable/useSearchInput";
 export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";

@@ -1,6 +1,28 @@
+import type { ConfirmHandler } from "@adapttable/core";
+import type { ExportCsvOptions } from "@adapttable/core";
+import type { FilterDef } from "@adapttable/core";
+import type { FilterTypeSpec } from "@adapttable/core";
+import type { CellEdit } from "@adapttable/core";
+import type { CellRange } from "@adapttable/core";
+import type { GroupNode, GroupSort } from "@adapttable/core";
+import type { CellSpanAppearance, GetCellSpan } from "@adapttable/core";
+import type { ExtraRow } from "@adapttable/core";
+import type { PinnedRows } from "@adapttable/core";
+import type { RowActionsLayout, RowActionsRenderer } from "@adapttable/core";
+import type { RowHeight, RowStyle } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
+import type {
+  BulkAction,
+  Direction,
+  ExtraFilters,
+  PaginationMode,
+  RowAction,
+  SortByOption,
+  TableLabels,
+  TableQueryParams,
+} from "@adapttable/core";
 import type { ReactNode } from "react";
 
-import type { ConfirmHandler } from "@adapttable/core";
 import type { CommandPaletteOptions } from "./actions/useCommandPalette";
 import type { ContextMenuOptions } from "./actions/useTableContextMenu";
 import type { ColumnInput } from "./columnDef";
@@ -12,38 +34,29 @@ import type {
 } from "./editing/editConflict";
 import type { EditEventHandler } from "./editing/editingEvents";
 import type { RowValidator } from "./editing/validation";
-import type { ExportCsvOptions } from "@adapttable/core";
 import type { TableFeature } from "./features/tableFeature";
-import type { FilterDef } from "@adapttable/core";
-import type { FilterTypeSpec } from "@adapttable/core";
 import type {
   ActiveFilterChip,
   ChipLabelResolver,
 } from "./filters/useActiveFilterChips";
-import type { CellEdit } from "@adapttable/core";
-import type { CellRange } from "@adapttable/core";
-import type { GroupNode, GroupSort } from "@adapttable/core";
 import type { SidePanelEntry } from "./layout/SidePanelChrome";
-import type { CellSpanAppearance, GetCellSpan } from "@adapttable/core";
-import type { ExtraRow } from "@adapttable/core";
-import type { MobileCardRenderer } from "@adapttable/core";
-import type { PinnedRows } from "@adapttable/core";
-import type { RowActionsLayout, RowActionsRenderer } from "@adapttable/core";
+import type { ReactMobileCardRenderer } from "./rows/mobileCard";
 import type { RowPinState } from "./rows/rowPinning";
-import type { RowHeight, RowStyle } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
 import type { NestedTableFor } from "./tree/nestedTable";
-import type {
-  BulkAction,
-  Direction,
-  ExtraFilters,
-  PaginationMode,
-  RowAction,
-  SortByOption,
-  TableLabels,
-  TableQueryParams,
-} from "@adapttable/core";
 import type { UseSavedViewsOptions } from "./url/useSavedViews";
+
+/**
+ * Map a set of rows to per-column summary cells.
+ *
+ * One shape for the footer summary and for group-header aggregates. It is the
+ * React face of `@adapttable/core`'s neutral `GroupAggregatesFn`: these cells
+ * are rendered, so their values are `ReactNode` rather than `unknown`.
+ *
+ * @public
+ */
+export type SummaryRowFn<TRow> = (
+  rows: readonly TRow[]
+) => Partial<Record<string, ReactNode>>;
 
 /**
  * Where a host's own toolbar controls go.
@@ -659,7 +672,7 @@ export interface BaseDataTableProps<TRow> {
    *
    * Omit it and the built-in card renders, byte for byte.
    */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** Force the mobile layout (otherwise resolved from the viewport). */
   forceMobile?: boolean;
   /**
@@ -811,7 +824,7 @@ export interface BaseDataTableProps<TRow> {
    * (`{ budget: <b>{total}</b> }`). Rendered as a table footer row aligned
    * under its columns; keys absent from the result render empty cells.
    */
-  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+  summaryRow?: SummaryRowFn<TRow>;
   /**
    * Free slot under the table (above the pager). Not the column-aligned
    * summary row — that is `BaseDataTableProps.summaryRow`.
@@ -883,9 +896,7 @@ export interface BaseDataTableProps<TRow> {
    */
   groupFilter?: (group: GroupNode<TRow>) => boolean;
   /** Aggregates shown on each group header. */
-  groupAggregates?: (
-    rows: readonly TRow[]
-  ) => Partial<Record<string, ReactNode>>;
+  groupAggregates?: SummaryRowFn<TRow>;
   /**
    * Controlled collapsed group keys (ephemeral — not URL-synced).
    * Uncontrolled: internal `useGroupCollapse`.

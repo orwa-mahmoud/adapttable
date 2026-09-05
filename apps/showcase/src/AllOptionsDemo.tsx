@@ -1,14 +1,14 @@
-import type { FeatureProps } from "@adapttable/core";
-import type { ColumnDef, SidePanelEntry } from "@adapttable/core";
-import { usePrefersReducedMotion, useSavedViews } from "@adapttable/core";
-import { buildFormulaColumns } from "@adapttable/core/formula";
-import {
-  isPivotReady,
-  type PivotConfig,
-  usePivotUrlState,
-} from "@adapttable/core/pivot";
+import { isPivotReady, type PivotConfig } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
 import { FilterDrawer } from "@adapttable/mantine";
+import type {
+  ColumnDef,
+  FeatureProps,
+  SidePanelEntry,
+} from "@adapttable/react";
+import { usePrefersReducedMotion, useSavedViews } from "@adapttable/react";
+import { buildFormulaColumns } from "@adapttable/react/formula";
+import { usePivotUrlState } from "@adapttable/react/pivot";
 import { MantineProvider } from "@mantine/core";
 import {
   type ReactNode,

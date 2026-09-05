@@ -1,21 +1,21 @@
 import { sidePanel as antdSidePanel } from "@adapttable/antd/side-panel";
 import { sidePanel as baseUiSidePanel } from "@adapttable/base-ui/side-panel";
 import { sidePanel as chakraSidePanel } from "@adapttable/chakra/side-panel";
-import type { FeatureProps, TableFeature } from "@adapttable/core";
-import type { SidePanelOptions } from "@adapttable/core";
-import { rowAppearance } from "@adapttable/core/features";
 import {
   pivot,
   type PivotConfig,
   type PivotField,
   type PivotRow,
-  pivotTableModel,
 } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
 import type {} from "@adapttable/mantine";
 import { sidePanel as mantineSidePanel } from "@adapttable/mantine/side-panel";
 import { sidePanel as muiSidePanel } from "@adapttable/mui/side-panel";
 import { sidePanel as radixSidePanel } from "@adapttable/radix/side-panel";
+import type { FeatureProps, SidePanelOptions } from "@adapttable/react";
+import type { TableFeature } from "@adapttable/react/features";
+import { rowAppearance } from "@adapttable/react/features";
+import { pivotTableModel } from "@adapttable/react/pivot";
 import { sidePanel as shadcnSidePanel } from "@adapttable/shadcn/side-panel";
 import { sidePanel as unstyledSidePanel } from "@adapttable/unstyled/side-panel";
 import { Suspense, useMemo } from "react";

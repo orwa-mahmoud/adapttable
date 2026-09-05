@@ -1,18 +1,20 @@
 import type {
   BulkAction,
-  CommandPaletteOptions,
-  ContextMenuOptions,
   ExportCsvOptions,
   FilterDef,
   FilterTypeSpec,
-  NestedTableFor,
   RowAction,
-  SidePanelOptions,
 } from "@adapttable/core";
+import type {
+  CommandPaletteOptions,
+  ContextMenuOptions,
+  NestedTableFor,
+  SidePanelOptions,
+} from "@adapttable/react";
 import type {
   StaticTableFeature,
   TableFeature,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { demoSavedViews, type Person } from "../data";
 import type { KitFeatureRequests } from "../Demo";

@@ -2,7 +2,7 @@ import {
   buildFormulaColumns,
   type FormulaColumnSpec,
   useFormulaUrlState,
-} from "@adapttable/core/formula";
+} from "@adapttable/react/formula";
 import { Suspense, useMemo, useState } from "react";
 
 import type { Person } from "./data";

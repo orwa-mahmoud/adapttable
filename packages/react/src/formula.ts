@@ -6,13 +6,26 @@
  * and none of this code reaches the bundle.
  *
  * ```tsx
- * import { buildFormulaColumns } from "@adapttable/core/formula";
+ * import { buildFormulaColumns } from "@adapttable/react/formula";
  *
  * const { columns: computed } = buildFormulaColumns<Row>([
  *   { key: "total", header: "Total", formula: "=[Unit Price] * Quantity" },
  * ]);
  * ```
  */
+export type { ColumnDef } from "./columnDef";
+export {
+  buildFormulaColumns,
+  type ReactFormulaColumnsResult,
+} from "./formula/formulaColumns";
+export {
+  FORMULA_URL_WRITE_DEBOUNCE_MS,
+  useFormulaUrlState,
+  type UseFormulaUrlStateOptions,
+  type UseFormulaUrlStateResult,
+} from "./formula/useFormulaUrlState";
+export type { UrlStateAdapter } from "./url/adapter";
+export type { SortableValue } from "@adapttable/core";
 export {
   evaluateFormula,
   FORMULA_BLANK,
@@ -30,11 +43,7 @@ export {
   isFormulaError,
   toFormulaValue,
 } from "@adapttable/core";
-export {
-  buildFormulaColumns,
-  type FormulaColumnSpec,
-  type FormulaColumnsResult,
-} from "@adapttable/core";
+export { type FormulaColumnSpec } from "@adapttable/core";
 export {
   deserializeFormulaColumns,
   serializeFormulaColumns,
@@ -46,15 +55,6 @@ export {
   parseFormula,
   type ParseResult,
 } from "@adapttable/core";
-export {
-  FORMULA_URL_WRITE_DEBOUNCE_MS,
-  useFormulaUrlState,
-  type UseFormulaUrlStateOptions,
-  type UseFormulaUrlStateResult,
-} from "./formula/useFormulaUrlState";
-export type { ColumnDef } from "./columnDef";
-export type { SortableValue } from "@adapttable/core";
-export type { UrlStateAdapter } from "./url/adapter";
 
 /**
  * The member types the signatures above hand back.

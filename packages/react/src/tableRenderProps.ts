@@ -12,57 +12,56 @@
  *
  * @typeParam TRow - The row type.
  */
-import { type ReactNode, useMemo, useRef } from "react";
-
 import type { ConfirmHandler } from "@adapttable/core";
 import type { ColumnGroupRecord } from "@adapttable/core";
-import type { PinOffset } from "./columns/useColumnLayout";
-import type { EditableCellEditing } from "./editing/editableCellController";
 import type { FilterDef } from "@adapttable/core";
 import type { FilterTypeRegistry } from "@adapttable/core";
-import type { GridFocusState } from "./focus/useGridFocus";
 import type { GroupingPanelState } from "@adapttable/core";
 import type { GroupByInput } from "@adapttable/core";
 import type { GroupedFlatEntry } from "@adapttable/core";
-import type { GroupCollapseState } from "./grouping/useGroupCollapse";
-import {
-  type AssemblyFns,
-  bodyRowEntries,
-  resolveAssembly,
-} from "@adapttable/core";
 import type {
   BodyCell,
   CellSpanAppearance,
   GetCellSpan,
 } from "@adapttable/core";
 import type { ExtraRow } from "@adapttable/core";
-import { incrementalViewOf } from "@adapttable/core";
-import type { MobileCardRenderer } from "@adapttable/core";
-import { pinnedSummaryEntries } from "@adapttable/core";
 import type { RowActionsLayout, RowActionsRenderer } from "@adapttable/core";
-import type { RowPinningState } from "./rows/rowPinning";
-import type { RowReorderState } from "./rows/rowReorder";
 import type { RowHeight, RowStyle } from "@adapttable/core";
-import type { RowExpansionState } from "./rows/useRowExpansion";
-import type { SelectionState } from "./selection/useSelection";
 import type { TreeEntry } from "@adapttable/core";
-import type { TreeExpansionState } from "./tree/useTreeExpansion";
 import type { RowAction, TableLabels } from "@adapttable/core";
-import type { ColumnDef } from "./columnDef";
-import type { UseDataTableResult } from "./useDataTable/useDataTable";
-import type { RowPairMeasurer } from "./virtual/measureRowPair";
-import type { ColumnWindow } from "./virtual/useColumnWindow";
+import {
+  type AssemblyFns,
+  bodyRowEntries,
+  resolveAssembly,
+} from "@adapttable/core";
+import { incrementalViewOf } from "@adapttable/core";
+import { pinnedSummaryEntries } from "@adapttable/core";
 import {
   resolveVirtualRows,
   virtualColumnSpan,
   type VirtualTableRow,
 } from "@adapttable/core";
+import { type ReactNode, useMemo, useRef } from "react";
+
+import type { ColumnDef } from "./columnDef";
+import type { PinOffset } from "./columns/useColumnLayout";
+import type { EditableCellEditing } from "./editing/editableCellController";
+import type { GridFocusState } from "./focus/useGridFocus";
+import type { GroupCollapseState } from "./grouping/useGroupCollapse";
+import type { ReactMobileCardRenderer } from "./rows/mobileCard";
+import type { RowPinningState } from "./rows/rowPinning";
+import type { RowReorderState } from "./rows/rowReorder";
+import type { RowExpansionState } from "./rows/useRowExpansion";
+import type { SelectionState } from "./selection/useSelection";
+import type { TreeExpansionState } from "./tree/useTreeExpansion";
+import type { UseDataTableResult } from "./useDataTable/useDataTable";
+import type { RowPairMeasurer } from "./virtual/measureRowPair";
+import type { ColumnWindow } from "./virtual/useColumnWindow";
 
 export type {
   GetCellSpan,
   GroupByInput,
   GroupCollapseState,
-  MobileCardRenderer,
   RowAction,
   RowActionsLayout,
   RowActionsRenderer,
@@ -129,7 +128,7 @@ export interface SharedTableRenderProps<TRow> {
   /** Detail-panel renderer — see `ComposedTableProps.renderRowDetail`. */
   renderRowDetail?: (row: TRow) => ReactNode;
   /** Custom mobile-card body — see `ComposedTableProps.renderCard`. */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** Footer summary builder — see `ComposedTableProps.summaryRow`. */
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
   /**
@@ -552,10 +551,7 @@ export function useSummaryCells<TRow>(
   builderRef.current = summaryRow;
   const enabled = summaryRow !== undefined && fromView === undefined;
   return useMemo(
-    () =>
-      enabled
-        ? builderRef.current?.(rows)
-        : (fromView as Partial<Record<string, ReactNode>> | undefined),
+    () => (enabled ? builderRef.current?.(rows) : fromView),
     [enabled, rows, fromView]
   );
 }

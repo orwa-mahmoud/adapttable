@@ -1,26 +1,27 @@
 import type {
   BulkAction,
-  ColumnDef,
-  ColumnInput,
   ColumnLayoutState,
   ConfirmHandler,
   ConfirmRequest,
   FilterDef,
   FilterTypeSpec,
-  GroupAggregatesFn,
   RowAction,
-  UseSavedViewsOptions,
 } from "@adapttable/core";
 import {
-  aggregate,
   buildFilterRuntime,
-  computed,
   defaultFilterRegistry,
   formatMultiDraft,
   resolveFilterDefs,
   resolveFilterRegistry,
 } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import type {
+  ColumnDef,
+  ColumnInput,
+  SummaryRowFn,
+  UseSavedViewsOptions,
+} from "@adapttable/react";
+import { aggregate, computed } from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import type { CSSProperties, ReactNode } from "react";
 
 import { EditIcon, TrashIcon } from "./icons";
@@ -1435,17 +1436,16 @@ export const matchesDemoFilters = DEMO_FILTER_RUNTIME.filterFn;
  * Shares the `summaryRow` mapper shape — one function type for footer totals
  * and group headers.
  */
-export const DEMO_GROUP_AGGREGATES: GroupAggregatesFn<Person> =
-  aggregate<Person>(
-    { budget: "sum" },
-    {
-      // The same columns the table sorts by, so the subtotal reads the number
-      // behind the formatted cell rather than parsing "$1,240".
-      columns: BASE_COLUMNS,
-      format: (value) => (
-        <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
-          {formatMoney(typeof value === "number" ? value : 0, "en")}
-        </span>
-      ),
-    }
-  );
+export const DEMO_GROUP_AGGREGATES: SummaryRowFn<Person> = aggregate<Person>(
+  { budget: "sum" },
+  {
+    // The same columns the table sorts by, so the subtotal reads the number
+    // behind the formatted cell rather than parsing "$1,240".
+    columns: BASE_COLUMNS,
+    format: (value) => (
+      <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+        {formatMoney(typeof value === "number" ? value : 0, "en")}
+      </span>
+    ),
+  }
+);
