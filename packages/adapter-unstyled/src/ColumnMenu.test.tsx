@@ -1,10 +1,12 @@
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
 import {
   COLUMN_DND_MIME,
   FeatureHostProvider,
   type FeatureHostState,
   type GroupingPanelState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

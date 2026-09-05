@@ -5,7 +5,7 @@ import {
   type SidePanelFrameProps,
   type SidePanelSlots,
   type SidePanelTabProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import type { DataTableClassNames } from "../types";
 import { ClassNamesProvider, useClassNames } from "./classNamesContext";

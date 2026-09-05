@@ -5,15 +5,11 @@
  * predicate. Definitions come from two places — a column's `filter` shorthand
  * and the table-level `filters` array — merged by {@link resolveFilterDefs}.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { localizedColumnPath } from "../columns/resolveColumns";
 import { defaultLabels } from "../labels";
 import type { QueryCondition } from "../source/queryContract";
-import type {
-  ColumnDef,
-  ExtraFilters,
-  FilterValue,
-  TableLabels,
-} from "../types";
+import type { ExtraFilters, FilterValue, TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { humanizeKey } from "../utils/humanizeKey";
 import { getPath } from "../utils/path";
@@ -36,7 +32,13 @@ import {
   TEXT_OPS,
 } from "./operators";
 import { relativeTokenLabel, resolveRelativeRange } from "./relativeDates";
-import type { ChipLabelResolver } from "./useActiveFilterChips";
+
+/**
+ * Resolve a chip's visible label from its raw extra-filter value.
+ *
+ * @public
+ */
+export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 /**
  * Every built-in filter shape, exported so consumers never hand-type them.
@@ -188,7 +190,7 @@ function booleanChoiceOn(value: FilterValue): boolean {
  * @public
  */
 export function resolveFilterDefs<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   filters: readonly FilterDef<TRow>[] | undefined,
   locale?: string
 ): FilterDef<TRow>[] {
@@ -210,16 +212,23 @@ export function resolveFilterDefs<TRow>(
     // A localized column's filter matches against the same locale-resolved
     // path the cell shows (unless the shorthand brings its own getValue).
     const path = localizedColumnPath(column, locale);
+    const declaredLabel =
+      typeof base === "object" &&
+      base !== null &&
+      "label" in base &&
+      typeof base.label === "string"
+        ? base.label
+        : undefined;
     fromColumns.push({
       key: column.key,
       label:
-        base.label ??
+        declaredLabel ??
         (typeof column.header === "string" ? column.header : undefined),
       ...(path === column.key
         ? {}
         : { getValue: (row: TRow) => getPath(row, path) }),
       ...base,
-    });
+    } as FilterDef<TRow>);
   }
   return [...fromColumns, ...standalone];
 }

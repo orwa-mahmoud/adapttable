@@ -3,7 +3,7 @@ import {
   type StatusBarChromeProps,
   type StatusBarSlotProps,
   type StatusBarSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Typography } from "antd";
 
 import { statsSlots } from "./SelectionStatsBar";

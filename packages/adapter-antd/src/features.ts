@@ -3,4 +3,4 @@
  *
  * @packageDocumentation
  */
-export * from "@adapttable/core/features";
+export * from "@adapttable/react/features";

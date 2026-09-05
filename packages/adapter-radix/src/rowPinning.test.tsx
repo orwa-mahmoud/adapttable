@@ -1,4 +1,4 @@
-import type { RowPinState } from "@adapttable/core";
+import type { RowPinState } from "@adapttable/react/adapter";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

@@ -1,5 +1,7 @@
 /** Removable chips for the active filters. */
-import { type ActiveFilterChip, type TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import type { ActiveFilterChip } from "@adapttable/react";
+
 import { Badge, Button, Flex, IconButton } from "@radix-ui/themes";
 
 /** Removable Radix badge chips. */

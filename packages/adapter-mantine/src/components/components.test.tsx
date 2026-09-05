@@ -1,4 +1,5 @@
-import type { SelectionState } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
+
 import { act, fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";

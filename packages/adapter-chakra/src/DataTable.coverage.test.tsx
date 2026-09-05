@@ -1,5 +1,5 @@
 /** Coverage-fill: column management, resize, footer limit, drawer close. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {
   fireEvent,

@@ -22,7 +22,7 @@ export interface V3MigrationResult {
   code: string;
   /** Whether `code` differs from the input. */
   changed: boolean;
-  /** Number of named imports moved to `@adapttable/core/adapter`. */
+  /** Number of named imports moved to `@adapttable/react/adapter`. */
   movedImports: number;
   /** Ambiguous v2 usages left untouched. */
   issues: readonly V3MigrationIssue[];
@@ -254,7 +254,7 @@ function rewriteCoreImports(source: string): {
       );
     }
     declarations.push(
-      formatImport(typeOnly, moved, quote, "@adapttable/core/adapter")
+      formatImport(typeOnly, moved, quote, "@adapttable/react/adapter")
     );
     code += declarations.join("\n");
     movedImports += moved.length;
@@ -364,7 +364,7 @@ function reportAmbiguousUsages(
  * Apply only v3 migrations that preserve meaning mechanically.
  *
  * Named adapter-contract imports move from `@adapttable/core` to
- * `@adapttable/core/adapter`. Enabling props and behavior-dependent APIs are
+ * `@adapttable/react/adapter`. Enabling props and behavior-dependent APIs are
  * reported for manual migration and left byte-for-byte unchanged.
  *
  * @public

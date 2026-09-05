@@ -1,12 +1,12 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import { visibleColumns } from "./visibleColumns";
 
 interface Row {
   id: string;
 }
-const cols: ColumnDef<Row>[] = [
+const cols: ColumnModel<Row>[] = [
   { key: "a", header: "A" },
   { key: "b", header: "B", hideOnMobile: true },
   { key: "c", header: "C" },
@@ -45,7 +45,7 @@ describe("visibleColumns", () => {
   });
 
   it("renders a mobile-only column (hideOnDesktop) on mobile but not desktop", () => {
-    const mobileOnly: ColumnDef<Row>[] = [
+    const mobileOnly: ColumnModel<Row>[] = [
       { key: "name", header: "Name" },
       { key: "summary", header: "Summary", hideOnDesktop: true },
     ];

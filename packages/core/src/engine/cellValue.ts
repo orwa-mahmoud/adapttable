@@ -1,7 +1,7 @@
 /**
  * Resolve a cell value from a neutral column. Never reads React renderers.
  */
-import type { ColumnModel, SortableValue } from "../columnModel";
+import type { SortableValue, ColumnMetadata } from "../columnModel";
 import { getPath } from "../utils/path";
 
 function asSortable(value: unknown): SortableValue {
@@ -26,7 +26,7 @@ function asSortable(value: unknown): SortableValue {
  */
 export function cellValue<TRow>(
   row: TRow,
-  column: ColumnModel<TRow>,
+  column: ColumnMetadata<TRow>,
   locale?: string
 ): unknown {
   if (column.formatValue) return column.formatValue(row);
@@ -43,7 +43,7 @@ export function cellValue<TRow>(
  */
 export function cellSortValue<TRow>(
   row: TRow,
-  column: ColumnModel<TRow>,
+  column: ColumnMetadata<TRow>,
   locale?: string
 ): SortableValue {
   if (column.sortValue) return column.sortValue(row);
@@ -57,7 +57,7 @@ export function cellSortValue<TRow>(
  * @public
  */
 export function resolveColumnPath<TRow>(
-  column: ColumnModel<TRow>,
+  column: ColumnMetadata<TRow>,
   locale?: string
 ): string {
   if (!locale || !column.i18n) return column.key;

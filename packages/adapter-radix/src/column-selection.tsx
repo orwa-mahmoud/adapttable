@@ -3,8 +3,8 @@ import {
   extendFeature,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
-import { columnSelectionCheckbox as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { columnSelectionCheckbox as core } from "@adapttable/react/features";
 
 import { ColumnSelectCheckbox } from "./components/ColumnSelectCheckbox";
 

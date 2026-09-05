@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import { declaredColumnLayout } from "./declaredColumnLayout";
 
 /**
@@ -19,14 +19,14 @@ interface Row {
 }
 
 const columns = [
-  { key: "name", header: "Name", accessor: (r: Row) => r.name },
+  { key: "name", header: "Name", exportValue: (r: Row) => r.name },
   {
     key: "secret",
     header: "Secret",
-    accessor: (r: Row) => r.secret,
+    exportValue: (r: Row) => r.secret,
     hidden: true,
   },
-] as ColumnDef<Row>[];
+] as ColumnModel<Row>[];
 
 describe("declaredColumnLayout", () => {
   it("honours the hidden flag the host declared", () => {

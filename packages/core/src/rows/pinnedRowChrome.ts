@@ -9,9 +9,8 @@
 import type { VirtualTableRow } from "../virtual/virtualTableModel";
 import { resolveVirtualRows } from "../virtual/virtualTableModel";
 import { pinnedSummaryRowId } from "./pinnedSummaryRows";
-import type { RowPinSide } from "./rowPinning";
+import type { RowPinSide } from "./rowPinModel";
 
-export { useOffsetHeight } from "../layout/useOffsetHeight";
 export {
   pinnedRowCellStyle,
   pinnedRowSticky,

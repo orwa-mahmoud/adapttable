@@ -55,7 +55,7 @@ const problems = [];
 /* 1. The factories core exports are exactly the factories listed. ---------- */
 
 const featuresEntry = readFileSync(
-  join(PACKAGES, "core", "src", "features.ts"),
+  join(PACKAGES, "react", "src", "features.ts"),
   "utf8"
 );
 /**
@@ -86,14 +86,14 @@ for (const name of ["feature", "applyTableFeatures", "useTableFeatures"]) {
 for (const name of exported) {
   if (!(name in listed)) {
     problems.push(
-      `${name} is exported from @adapttable/core/features but is not classified in feature-classification.json`
+      `${name} is exported from @adapttable/react/features but is not classified in feature-classification.json`
     );
   }
 }
 for (const name of Object.keys(listed)) {
   if (!exported.has(name)) {
     problems.push(
-      `${name} is classified but is not exported from @adapttable/core/features`
+      `${name} is classified but is not exported from @adapttable/react/features`
     );
   }
 }
@@ -131,7 +131,7 @@ for (const [name, feature] of Object.entries(listed)) {
  * declaration on the public `BaseDataTableProps`, which is the only shape a
  * host can write.
  */
-const props = readFileSync(join(PACKAGES, "core", "src", "props.ts"), "utf8");
+const props = readFileSync(join(PACKAGES, "react", "src", "props.ts"), "utf8");
 const publicSurface = props.slice(
   props.indexOf("export interface BaseDataTableProps<TRow> {")
 );
@@ -165,10 +165,10 @@ for (const [name, feature] of Object.entries(listed)) {
 /* 4. `standardFeatures()` names only factories that work with no options. -- */
 
 /** Every module that defines a factory, shared or feature-owned. */
-const factoryModules = readdirSync(join(PACKAGES, "core", "src", "features"))
+const factoryModules = readdirSync(join(PACKAGES, "react", "src", "features"))
   .filter((name) => /\.tsx?$/.test(name) && !name.includes(".test."))
   .map((name) =>
-    readFileSync(join(PACKAGES, "core", "src", "features", name), "utf8")
+    readFileSync(join(PACKAGES, "react", "src", "features", name), "utf8")
   );
 const factories = factoryModules.join("\n");
 

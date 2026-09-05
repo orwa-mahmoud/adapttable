@@ -1,17 +1,18 @@
 /** The card list rendered in place of the table on narrow screens. */
-import {
-  bodyRowEntries,
-  type ColumnDef,
-  type ConfirmHandler,
-  type EditableCellEditing,
-  type MobileCardRenderer,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
+import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
+import type {
+  ConfirmHandler,
+  MobileCardRenderer,
+  RowAction,
+  RowActionsLayout,
+  RowActionsRenderer,
+  TableLabels,
+  TreeEntry,
 } from "@adapttable/core";
+import type { EditableCellEditing } from "@adapttable/react";
+
+import type { ColumnDef } from "@adapttable/react";
+
 import {
   cellFlashAttr,
   EXTRA_ROW_PARTS,
@@ -31,7 +32,7 @@ import {
   rowReorderSignature,
   rowStyleSignature,
   useSummaryCells,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Box, Card, Stack, Text } from "@chakra-ui/react";
 import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
@@ -241,7 +242,7 @@ function MobileCardBase<TRow>({
         key={column.key}
         editing={editing}
         row={row}
-        column={column}
+        column={column as ColumnDef<TRow>}
         rowId={id}
         rowIndex={index}
         rows={rows}
@@ -302,7 +303,12 @@ function MobileCardBase<TRow>({
           </Box>
         )}
         {renderCard
-          ? renderCard(row, { index, fields, selected, expanded })
+          ? (renderCard(row, {
+              index,
+              fields,
+              selected,
+              expanded,
+            }) as ReactNode)
           : fields.map(({ column, label, value }) => (
               <Box key={column.key} mb={compact ? 1 : 2}>
                 {label && (
@@ -505,7 +511,9 @@ export function MobileCards<TRow>({
                   <Card.Body
                     data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
                   >
-                    {entry.kind === "fullWidth" ? entry.render?.() : null}
+                    {entry.kind === "fullWidth"
+                      ? (entry.render?.() as ReactNode)
+                      : null}
                   </Card.Body>
                 </Card.Root>
               );
@@ -548,7 +556,9 @@ export function MobileCards<TRow>({
                 <Card.Body
                   data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}
                 >
-                  {slot.kind === "fullWidth" ? slot.render?.() : null}
+                  {slot.kind === "fullWidth"
+                    ? (slot.render?.() as ReactNode)
+                    : null}
                 </Card.Body>
               </Card.Root>
             ) : (

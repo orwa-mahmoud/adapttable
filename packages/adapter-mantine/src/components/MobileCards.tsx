@@ -1,16 +1,17 @@
-import {
-  bodyRowEntries,
-  type ColumnDef,
-  type ConfirmHandler,
-  type EditableCellEditing,
-  type MobileCardRenderer,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
+import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
+import type {
+  ConfirmHandler,
+  MobileCardRenderer,
+  RowAction,
+  RowActionsLayout,
+  RowActionsRenderer,
+  TableLabels,
+  TreeEntry,
 } from "@adapttable/core";
+import type { EditableCellEditing } from "@adapttable/react";
+
+import type { ColumnDef } from "@adapttable/react";
+
 import {
   bindMobileCardList,
   cellFlashAttr,
@@ -32,7 +33,7 @@ import {
   rowStyleSignature,
   type SharedTableRenderProps,
   useSummaryCells,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Card, Checkbox, Group, Stack, Text } from "@mantine/core";
 import {
   type CSSProperties,
@@ -282,7 +283,7 @@ function MobileCardBase<TRow>({
         key={column.key}
         editing={editing}
         row={row}
-        column={column}
+        column={column as ColumnDef<TRow>}
         rowId={id}
         rowIndex={index}
         rows={rows}
@@ -343,7 +344,12 @@ function MobileCardBase<TRow>({
           </Group>
         )}
         {renderCard
-          ? renderCard(row, { index, fields, selected, expanded })
+          ? (renderCard(row, {
+              index,
+              fields,
+              selected,
+              expanded,
+            }) as ReactNode)
           : fields.map(({ column, label, value }) => (
               <div key={column.key}>
                 {label && (
@@ -551,7 +557,9 @@ export function MobileCards<TRow>({
                   }
                 >
                   <div data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-                    {entry.kind === "fullWidth" ? entry.render?.() : null}
+                    {entry.kind === "fullWidth"
+                      ? (entry.render?.() as ReactNode)
+                      : null}
                   </div>
                 </Card>
               );
@@ -594,7 +602,9 @@ export function MobileCards<TRow>({
                 }
               >
                 <div data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
-                  {slot.kind === "fullWidth" ? slot.render?.() : null}
+                  {slot.kind === "fullWidth"
+                    ? (slot.render?.() as ReactNode)
+                    : null}
                 </div>
               </Card>
             ) : (

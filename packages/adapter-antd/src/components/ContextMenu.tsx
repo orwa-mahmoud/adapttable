@@ -4,7 +4,7 @@ import {
   type ContextMenuItemProps,
   type ContextMenuSlots,
   type ContextMenuSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Divider, Popover } from "antd";
 
 /**

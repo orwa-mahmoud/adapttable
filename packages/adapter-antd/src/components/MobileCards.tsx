@@ -1,19 +1,18 @@
-import {
-  bodyRowEntries,
-  type ColumnDef,
-  type ConfirmHandler,
-  type EditableCellEditing,
-  type GroupedFlatEntry,
-  type MobileCardRenderer,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type RowExpansionState,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
-  type UseDataTableResult,
+import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
+import type {
+  ConfirmHandler,
+  GroupedFlatEntry,
+  MobileCardRenderer,
+  RowAction,
+  RowActionsLayout,
+  RowActionsRenderer,
+  TableLabels,
+  TreeEntry,
 } from "@adapttable/core";
+import type { EditableCellEditing, RowExpansionState } from "@adapttable/react";
+
+import type { ColumnDef, UseDataTableResult } from "@adapttable/react";
+
 import {
   cellFlashAttr,
   EXTRA_ROW_PARTS,
@@ -35,7 +34,7 @@ import {
   rowStyleSignature,
   useSummaryCells,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Card, Checkbox, Descriptions, Space } from "antd";
 import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
@@ -233,7 +232,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         key={column.key}
         editing={editing}
         row={row}
-        column={column}
+        column={column as ColumnDef<TRow>}
         rowId={id}
         rowIndex={rowIndex}
         rows={rows}
@@ -656,7 +655,9 @@ export function MobileCards<TRow>({
                   }
                 >
                   <div data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-                    {entry.kind === "fullWidth" ? entry.render?.() : null}
+                    {entry.kind === "fullWidth"
+                      ? (entry.render?.() as ReactNode)
+                      : null}
                   </div>
                 </li>
               );
@@ -706,7 +707,9 @@ export function MobileCards<TRow>({
                 }
               >
                 <div data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
-                  {slot.kind === "fullWidth" ? slot.render?.() : null}
+                  {slot.kind === "fullWidth"
+                    ? (slot.render?.() as ReactNode)
+                    : null}
                 </div>
               </li>
             ) : (

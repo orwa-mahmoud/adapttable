@@ -6,11 +6,10 @@
  * Chakra portals its popover and keeps closed content visibility-hidden in
  * jsdom, so internals are queried by label/placeholder, not by role.
  */
-import {
-  createMemoryAdapter,
-  defaultLabels,
-  type LayoutStorage,
-} from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
+import type { LayoutStorage } from "@adapttable/react";
+
+import { createMemoryAdapter } from "@adapttable/react";
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

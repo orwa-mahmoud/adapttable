@@ -4,7 +4,7 @@
  * The hooks that call TanStack live in {@link ./useTableVirtualization}; this
  * module is what the base table graph is allowed to import.
  */
-import type { RowPairMeasurer } from "./measureRowPair";
+import type { RowPairMeasurer } from "./rowPairModel";
 
 /**
  * Virtualizer item metadata on a rendered row.

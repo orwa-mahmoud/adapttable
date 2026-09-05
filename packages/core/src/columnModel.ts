@@ -38,14 +38,14 @@ export type FilterValue = string | string[] | number | undefined;
 export type ExtraFilters = Record<string, FilterValue>;
 
 /**
- * Neutral filter metadata. React `ColumnDef` narrows this to `ColumnFilter`.
+ * Neutral filter metadata. React `ColumnModel` narrows this to `ColumnFilter`.
  *
  * @public
  */
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 /**
- * Neutral editor metadata. React `ColumnDef` narrows this to `CellEditor`.
+ * Neutral editor metadata. React `ColumnModel` narrows this to `CellEditor`.
  *
  * @public
  */
@@ -59,9 +59,11 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export interface ColumnModel<TRow = unknown> {
   /**
    * Unique within the table. Also the value sent to a backend as `sortBy`,
-   * and — when no accessor is given — the row's data path for the cell value.
+   * and the default row data path for the cell value.
    */
   key: string;
+  /** Plain-text header caption. Bindings may store richer nodes separately. */
+  header?: string;
   /** Native tooltip on the header caption. */
   headerTooltip?: string;
   /**
@@ -158,3 +160,19 @@ export interface ColumnModel<TRow = unknown> {
   /** Arbitrary metadata adapters may read. */
   meta?: Record<string, unknown>;
 }
+
+/**
+ * Column shape neutral helpers and the engine read. Bindings may attach
+ * richer header nodes and React filter/editor specs; neutral code never
+ * interprets those as renderers.
+ *
+ * @public
+ */
+export type ColumnMetadata<TRow = unknown> = Omit<
+  ColumnModel<TRow>,
+  "header" | "filter" | "editor"
+> & {
+  header?: unknown;
+  filter?: unknown;
+  editor?: unknown;
+};

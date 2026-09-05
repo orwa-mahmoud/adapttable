@@ -10,7 +10,7 @@ import {
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Box, Button, Progress, Spinner, Stack, Text } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 

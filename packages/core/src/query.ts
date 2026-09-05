@@ -34,6 +34,7 @@
  *
  * @packageDocumentation
  */
+
 export type { AggregateName, Aggregator } from "./aggregate/aggregate";
 export {
   FILTER_TREE_PARAM,
@@ -67,7 +68,7 @@ export type { SortDirection } from "./types";
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
@@ -78,7 +79,7 @@ export type { SortableValue } from "./types";
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.

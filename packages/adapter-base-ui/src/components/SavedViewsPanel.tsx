@@ -7,7 +7,7 @@ import {
   type SavedViewsPanelRowProps,
   type SavedViewsPanelSlots,
   type SavedViewsPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { Badge, Button, Card, Flex, IconButton, Text, TextField } from "../ui";
 

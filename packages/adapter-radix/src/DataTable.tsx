@@ -34,7 +34,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Box, Button, Flex, Progress, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 

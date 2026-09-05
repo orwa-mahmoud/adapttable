@@ -49,7 +49,7 @@ npx @adapttable/cli migrate-v3 src --check
 ```
 
 The command moves the 72 adapter-contract imports to
-`@adapttable/core/adapter`. Changes that need a behavior choice are reported
+`@adapttable/react/adapter`. Changes that need a behavior choice are reported
 with their source locations and left untouched. A second run is a no-op.
 
 ## Programmatic use
@@ -72,7 +72,7 @@ detectKit({ "@mui/material": "^6" }).kit; // "mui"
   of the box, with the full AdaptTable feature set (filtering, selection, editing,
   grouping, saved views, CSV export, virtualization, …) each one import away.
 - **Migrates v2 source safely** — `migrate-v3` moves adapter-contract imports
-  to `@adapttable/core/adapter` and reports every behavior-dependent change
+  to `@adapttable/react/adapter` and reports every behavior-dependent change
   for manual review.
 - **Programmatic API** — call it from your own scripts, not only the terminal.
 

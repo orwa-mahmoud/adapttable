@@ -5,7 +5,7 @@
  * per adapter is the wiring: an adapter that forgets to render the region is
  * silent, and nothing else in its suite would notice.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

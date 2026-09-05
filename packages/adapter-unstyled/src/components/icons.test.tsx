@@ -4,7 +4,7 @@ import {
   PIN_BOTTOM_ACTION_KEY,
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

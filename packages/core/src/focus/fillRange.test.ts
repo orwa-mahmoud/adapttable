@@ -4,9 +4,9 @@
  * What matters here is what a spreadsheet user expects: which way a drag is
  * going, which cells it covers, and whether the values count on or repeat.
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import { fillDirection, fillRangeEdits, fillTargetRange } from "./fillRange";
 
 interface Row {
@@ -21,7 +21,7 @@ const ROWS: Row[] = [
   { id: "4", name: "Alan", score: 9 },
   { id: "5", name: "Edsger", score: 9 },
 ];
-const COLUMNS: ColumnDef<Row>[] = [
+const COLUMNS: ColumnModel<Row>[] = [
   { key: "name", header: "Name", editable: true },
   {
     key: "score",

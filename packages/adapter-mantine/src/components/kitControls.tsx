@@ -2,11 +2,9 @@
  * Mantine kit controls — TextInput / NativeSelect / Button / ActionIcon / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import {
-  filterLabel,
-  type TableSource,
-  useHeaderFilterOverlay,
-} from "@adapttable/core";
+import { filterLabel } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
+import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
   AgentApprovalChrome,
   type AgentApprovalListProps,
@@ -54,7 +52,7 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   ActionIcon,
   Button,

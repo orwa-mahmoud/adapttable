@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
 import * as env from "../utils/env";
 import { downloadCsv, matrixToCsv, rowsToCsv } from "./csv";
 
@@ -15,9 +15,9 @@ const ROWS: Row[] = [
   { id: "b", name: 'Bob "the builder", Jr.', amount: 7 },
 ];
 
-const COLS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (r) => r.name },
-  { key: "amount", header: "Amount", accessor: (r) => r.amount },
+const COLS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (r) => r.name },
+  { key: "amount", header: "Amount", exportValue: (r) => r.amount },
 ];
 
 describe("rowsToCsv", () => {
@@ -39,11 +39,11 @@ describe("rowsToCsv", () => {
   });
 
   it("falls back to sortValue for JSX cells, else empty", () => {
-    const cols: ColumnDef<Row>[] = [
+    const cols: ColumnModel<Row>[] = [
       {
         key: "rich",
         header: "Rich",
-        accessor: (r) => ({ jsx: r.name }) as unknown as string,
+        exportValue: (r) => ({ jsx: r.name }) as unknown as string,
         sortValue: (r) => r.amount,
       },
       { key: "cellOnly", header: "Cell only" },
@@ -53,8 +53,8 @@ describe("rowsToCsv", () => {
   });
 
   it("neutralises every dangerous formula prefix by default", () => {
-    const cols: ColumnDef<{ v: string }>[] = [
-      { key: "v", header: "V", accessor: (r) => r.v },
+    const cols: ColumnModel<{ v: string }>[] = [
+      { key: "v", header: "V", exportValue: (r) => r.v },
     ];
     for (const payload of [
       "=1+2",
@@ -75,8 +75,8 @@ describe("rowsToCsv", () => {
   });
 
   it("a HYPERLINK formula round-trips as text, not a formula", () => {
-    const cols: ColumnDef<{ v: string }>[] = [
-      { key: "v", header: "V", accessor: (r) => r.v },
+    const cols: ColumnModel<{ v: string }>[] = [
+      { key: "v", header: "V", exportValue: (r) => r.v },
     ];
     const payload = '=HYPERLINK("http://evil.test","click")';
     const line = rowsToCsv([{ v: payload }], cols).split("\r\n")[1]!;
@@ -84,23 +84,23 @@ describe("rowsToCsv", () => {
   });
 
   it("never touches numeric cells (negative numbers stay numbers)", () => {
-    const cols: ColumnDef<Row>[] = [
-      { key: "amount", header: "Amount", accessor: (r) => -r.amount },
+    const cols: ColumnModel<Row>[] = [
+      { key: "amount", header: "Amount", exportValue: (r) => -r.amount },
     ];
     const csv = rowsToCsv([ROWS[0]!], cols);
     expect(csv.split("\r\n")[1]).toBe("-1200");
   });
 
   it("escapeFormulas: false emits raw cells for machine consumers", () => {
-    const cols: ColumnDef<{ v: string }>[] = [
-      { key: "v", header: "V", accessor: (r) => r.v },
+    const cols: ColumnModel<{ v: string }>[] = [
+      { key: "v", header: "V", exportValue: (r) => r.v },
     ];
     const csv = rowsToCsv([{ v: "=1+2" }], cols, { escapeFormulas: false });
     expect(csv.split("\r\n")[1]).toBe("=1+2");
   });
 
   it("uses non-string headers' keys and a custom delimiter/getValue", () => {
-    const cols: ColumnDef<Row>[] = [{ key: "k", header: 1 as never }];
+    const cols: ColumnModel<Row>[] = [{ key: "k", header: 1 as never }];
     const csv = rowsToCsv([ROWS[0]!], cols, {
       delimiter: ";",
       getValue: (row) => row.id,
@@ -137,7 +137,7 @@ describe("cell value edge cases", () => {
   });
 
   it("stringifies booleans and blanks objects (never [object Object])", () => {
-    const cols: ColumnDef<Row>[] = [{ key: "k", header: "K" }];
+    const cols: ColumnModel<Row>[] = [{ key: "k", header: "K" }];
     const csv = rowsToCsv([ROWS[0]!], cols, {
       getValue: () => true,
     });

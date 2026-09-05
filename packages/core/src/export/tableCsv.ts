@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
 import {
   ACTIONS_COLUMN_KEY,
@@ -17,7 +18,7 @@ import {
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableSource } from "../source/TableSource";
 import type { TreeEntry } from "../tree/treeRows";
-import type { ColumnDef, ExtraFilters, SortDirection } from "../types";
+import type { ExtraFilters, SortDirection } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   exportViewFromChrome,
@@ -272,7 +273,7 @@ export interface ExportRequest<TRow> extends ExportInfo<TRow> {
  * A server-built all-rows export's page-free view.
  *
  * Every field is plain transport data. In particular, columns are keys rather
- * than `ColumnDef` objects, because definitions may contain React nodes and
+ * than `ColumnMetadata` objects, because definitions may contain React nodes and
  * functions that cannot cross a network boundary.
  *
  * @public
@@ -360,7 +361,7 @@ export interface ExportInfo<TRow> {
   /** The rows the chosen scope resolved to, in table order. */
   rows: readonly TRow[];
   /** The columns the chosen scope resolved to, in file order. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** The filename as it stands, before any override this hook returns. */
   filename: string;
 }
@@ -429,8 +430,8 @@ export function exportAllFallsBackToPage<TRow = unknown>(
  * @public
  */
 export function exportableColumns<TRow>(
-  columns: readonly ColumnDef<TRow>[]
-): ColumnDef<TRow>[] {
+  columns: readonly ColumnMetadata<TRow>[]
+): ColumnMetadata<TRow>[] {
   return columns.filter(
     (column) =>
       column.key !== ACTIONS_COLUMN_KEY && column.key !== REORDER_COLUMN_KEY
@@ -452,7 +453,7 @@ export interface ExportContext<TRow> {
   /** How a row's id is derived — the table's own `getRowId`. */
   getRowId?: (row: TRow) => string;
   /** Every defined column, including any hidden through the column menu. */
-  allColumns?: readonly ColumnDef<TRow>[];
+  allColumns?: readonly ColumnMetadata<TRow>[];
   /** The highlighted cell rectangle, for `scope: "range"`. */
   range?: CellRange | null;
   /**
@@ -492,7 +493,7 @@ export interface ExportContext<TRow> {
    * The table's `summaryRow` mapper. Called on the scoped rows so a grand
    * total in the file matches the rows that actually left.
    */
-  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 }
 
 /**
@@ -502,9 +503,9 @@ export interface ExportContext<TRow> {
  */
 export function resolveExportColumns<TRow>(
   scope: ExportColumnScope | undefined,
-  visible: readonly ColumnDef<TRow>[],
-  all: readonly ColumnDef<TRow>[] | undefined
-): ColumnDef<TRow>[] {
+  visible: readonly ColumnMetadata<TRow>[],
+  all: readonly ColumnMetadata<TRow>[] | undefined
+): ColumnMetadata<TRow>[] {
   const keys: readonly string[] | undefined =
     typeof scope === "string" || scope === undefined ? undefined : scope;
   const pool = exportableColumns(
@@ -591,11 +592,11 @@ function resolveExportRows<TRow>(
  */
 function resolveExport<TRow>(options: {
   source: TableSource<TRow>;
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
   context?: ExportContext<TRow>;
-}): { rows: readonly TRow[]; columns: ColumnDef<TRow>[] } {
+}): { rows: readonly TRow[]; columns: ColumnMetadata<TRow>[] } {
   const scope = options.scope ?? "page";
   const range = options.context?.range;
   return {
@@ -620,8 +621,8 @@ function resolveExport<TRow>(options: {
  */
 function columnsInRange<TRow>(
   range: CellRange,
-  columns: readonly ColumnDef<TRow>[]
-): ColumnDef<TRow>[] {
+  columns: readonly ColumnMetadata<TRow>[]
+): ColumnMetadata<TRow>[] {
   return exportableColumns(
     cellRangeIndices(range).cols.flatMap((index) => {
       const column = columns[index];
@@ -673,7 +674,7 @@ function exportTableOptions<TRow>(
  */
 export function buildTableCsv<TRow>(options: {
   source: TableSource<TRow>;
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
   escapeFormulas?: boolean;
@@ -701,7 +702,7 @@ export function buildTableCsv<TRow>(options: {
  */
 export function downloadTableCsv<TRow>(options: {
   source: TableSource<TRow>;
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   filename?: string;
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
@@ -748,7 +749,7 @@ export function downloadTableCsv<TRow>(options: {
 export function makeExportCsvHandler<TRow>(
   exportCsv: boolean | ExportCsvOptions<TRow> | undefined,
   source: TableSource<TRow>,
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   context?: ExportContext<TRow>,
   host?: FeatureHostState
 ):
@@ -843,7 +844,7 @@ export function makeExportCsvHandler<TRow>(
 /** Build the serializable, page-free view for `onExportAll`. */
 function exportAllQueryOf<TRow>(
   source: TableSource<TRow>,
-  visibleColumns: readonly ColumnDef<TRow>[],
+  visibleColumns: readonly ColumnMetadata<TRow>[],
   options: ExportCsvOptions<TRow>,
   context: ExportContext<TRow> | undefined,
   writer: ExportWriter

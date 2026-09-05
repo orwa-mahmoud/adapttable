@@ -1,1 +1,1 @@
-export { rowActions } from "@adapttable/core/features";
+export { rowActions } from "@adapttable/react/features";

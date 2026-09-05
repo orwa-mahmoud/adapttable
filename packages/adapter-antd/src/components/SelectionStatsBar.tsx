@@ -3,7 +3,7 @@ import {
   type SelectionStatsChromeProps,
   type SelectionStatsSlotProps,
   type SelectionStatsSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Typography } from "antd";
 
 function Stats({ parts, className }: SelectionStatsSlotProps) {

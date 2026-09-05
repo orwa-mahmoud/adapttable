@@ -3,7 +3,7 @@ import {
   type StatusBarChromeProps,
   type StatusBarSlotProps,
   type StatusBarSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Group, Text } from "@mantine/core";
 
 import { statsSlots } from "./SelectionStatsBar";

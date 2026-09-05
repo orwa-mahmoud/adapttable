@@ -5,6 +5,7 @@
  * engine. Nothing here hard-wires grouping to the browser in a way a
  * source-provided strategy cannot replace.
  */
+import type { ColumnMetadata } from "../columnModel";
 import {
   configureIncrementalView,
   incrementalViewOf,
@@ -15,7 +16,6 @@ import {
 } from "../source/capabilities";
 import type { QueryGroupRow } from "../source/queryGroups";
 import { serverGroupEntries } from "../source/queryGroups";
-import type { ColumnDef } from "../types";
 import {
   buildGroupedFlatModel,
   type GroupAggregatesFn,
@@ -71,7 +71,7 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
   groupByKeys: readonly string[];
   sourceGroups?: readonly QueryGroupRow<TRow>[];
   allFilteredRows?: readonly TRow[];
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   getRowId: (row: TRow) => string;
   collapsedGroupIds: ReadonlySet<string>;
   aggregates?: (rows: readonly TRow[]) => unknown;

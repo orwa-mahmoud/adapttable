@@ -6,9 +6,10 @@
  * checkbox, the row actions or the detail panel, because those belong to the
  * shell and a custom card has no way to put them back.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -77,7 +78,7 @@ describe("renderCard", () => {
     render(
       <Harness
         renderCard={(_row, card) => (
-          <p>{card.fields.map((field) => field.value)}</p>
+          <p>{card.fields.map((field) => field.value as ReactNode)}</p>
         )}
       />
     );

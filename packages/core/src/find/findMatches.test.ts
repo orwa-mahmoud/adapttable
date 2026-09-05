@@ -1,9 +1,9 @@
 /**
  * Where the query appears — and what a find refuses to claim.
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import { findMatches, matchKey, matchKeySet, stepMatch } from "./findMatches";
 
 interface Row {
@@ -16,9 +16,9 @@ const ROWS: Row[] = [
   { id: "2", name: "Grace", team: "Web" },
   { id: "3", name: "Alan", team: "core" },
 ];
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "team", header: "Team", accessor: (row) => row.team },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
+  { key: "team", header: "Team", exportValue: (row) => row.team },
 ];
 const find = (query: string, firstRowIndex = 0) =>
   findMatches({ query, rows: ROWS, columns: COLUMNS, firstRowIndex });
@@ -51,7 +51,7 @@ describe("findMatches", () => {
   it("reads what the cell SHOWS, not what the row holds underneath", () => {
     // A column that formats its value is searched by the formatted text: it is
     // the only thing on screen to search.
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       { key: "name", header: "Name", formatValue: (row) => `${row.name}!` },
     ];
     expect(findMatches({ query: "ada!", rows: ROWS, columns })).toEqual([

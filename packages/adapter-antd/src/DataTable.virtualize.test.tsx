@@ -1,11 +1,11 @@
 /** Mobile-card windowing: the card list renders only the virtual slice. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import {
   KEYED_WINDOW,
   type KeyedWindowSlotProps,
   slotRender,
   type TableFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { render, within } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import { describe, expect, it, vi } from "vitest";

@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   buildGroupedFlatModel,
   formatGroupLabel,
@@ -23,7 +23,7 @@ const ROWS: Person[] = [
   { id: "4", name: "Katherine", team: "Platform", budget: 40 },
 ];
 
-const COLS: ColumnDef<Person>[] = [
+const COLS: ColumnModel<Person>[] = [
   { key: "name" },
   { key: "team" },
   { key: "budget", sortValue: (r) => r.budget },
@@ -386,7 +386,7 @@ describe("buildGroupedFlatModel — ordering and filtering groups", () => {
 
   it("orders by an aggregate through the rows it is computed from", () => {
     // "Sort by total" is a comparator over the same leaves the aggregate
-    // reads — never over the rendered aggregate cell, which is a ReactNode.
+    // reads — never over the rendered aggregate cell, which is a DisplayValue.
     const byTotal = build({
       sort: (a, b) => total(b.leafRows) - total(a.leafRows),
     });

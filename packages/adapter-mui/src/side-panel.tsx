@@ -3,11 +3,11 @@ import {
   SIDE_PANEL,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   sidePanel as core,
   type SidePanelOptions,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { SidePanel } from "./components/SidePanel";
 

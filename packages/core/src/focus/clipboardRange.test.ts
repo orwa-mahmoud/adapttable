@@ -8,7 +8,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../types";
 import { clipboardRangeText, writeClipboardText } from "./clipboardRange";
 
 interface Row {
@@ -21,10 +21,10 @@ const ROWS: Row[] = [
   { name: "Linus", team: "Web", budget: 90 },
   { name: "Grace", team: "Core", budget: 500 },
 ];
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (r) => r.name },
-  { key: "team", header: "Team", accessor: (r) => r.team },
-  { key: "budget", header: "Budget", accessor: (r) => r.budget },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (r) => r.name },
+  { key: "team", header: "Team", exportValue: (r) => r.team },
+  { key: "budget", header: "Budget", exportValue: (r) => r.budget },
 ];
 const range = (a: [number, number], h: [number, number]) => ({
   anchor: { row: a[0], col: a[1] },
@@ -64,9 +64,9 @@ describe("clipboardRangeText", () => {
     // Unquoted, each of these would end the field or the row and shift every
     // cell after it into the wrong column.
     const rows: Row[] = [{ name: "a\tb", team: "c\nd", budget: 0 }];
-    const columns: ColumnDef<Row>[] = [
-      { key: "name", header: "Name", accessor: (r) => r.name },
-      { key: "team", header: "Team", accessor: (r) => r.team },
+    const columns: ColumnModel<Row>[] = [
+      { key: "name", header: "Name", exportValue: (r) => r.name },
+      { key: "team", header: "Team", exportValue: (r) => r.team },
     ];
     const text = clipboardRangeText({
       range: range([0, 0], [0, 1]),
@@ -98,12 +98,12 @@ describe("clipboardRangeText", () => {
   });
 
   it("prefers a column's exportValue, so a copy matches the file", () => {
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       {
         key: "budget",
         header: "Budget",
-        accessor: (r) => `$${r.budget}`,
-        exportValue: (r) => r.budget,
+        formatValue: (r: (typeof ROWS)[number]) => `$${r.budget}`,
+        exportValue: (r: (typeof ROWS)[number]) => r.budget,
       },
     ];
     const text = clipboardRangeText({
@@ -122,7 +122,7 @@ describe("clipboardRangeText", () => {
         {
           key: "name",
           header: "Name",
-          accessor: (row) => row.name,
+          formatValue: (row: (typeof ROWS)[number]) => row.name,
           exportValue: () => ({ nested: 1 }),
         },
       ],

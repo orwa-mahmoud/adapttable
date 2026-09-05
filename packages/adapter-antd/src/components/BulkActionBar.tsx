@@ -1,10 +1,10 @@
 /** Selection bar with the bulk actions and cross-page banner. */
-import { useBulkActionRunner } from "@adapttable/core";
+import { useBulkActionRunner } from "@adapttable/react";
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
   offersAllMatching,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Alert, Button, Space, Typography } from "antd";
 import type { ReactNode } from "react";
 

@@ -1,8 +1,5 @@
-import {
-  resolveLabels,
-  showSimpleFilterFields,
-  type TableSource,
-} from "@adapttable/core";
+import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
+import type { TableSource } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
@@ -39,7 +36,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactElement, ReactNode, RefObject } from "react";
 
 import { ClassNamesProvider } from "./components/classNamesContext";

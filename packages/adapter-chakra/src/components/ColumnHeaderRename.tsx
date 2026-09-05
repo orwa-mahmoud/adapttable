@@ -3,7 +3,7 @@ import {
   type ColumnRenameEditorState,
   LiveRegion,
   useColumnRenameEditor,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Field, Input, Text } from "@chakra-ui/react";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 

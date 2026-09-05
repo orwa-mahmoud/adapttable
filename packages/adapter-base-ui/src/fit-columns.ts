@@ -1,1 +1,1 @@
-export { fitColumns } from "@adapttable/core/features";
+export { fitColumns } from "@adapttable/react/features";

@@ -48,7 +48,7 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Button,
   Checkbox,

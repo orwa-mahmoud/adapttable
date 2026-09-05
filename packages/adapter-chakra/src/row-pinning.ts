@@ -1,1 +1,1 @@
-export { rowPinning } from "@adapttable/core/features";
+export { rowPinning } from "@adapttable/react/features";

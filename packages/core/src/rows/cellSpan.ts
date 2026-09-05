@@ -10,8 +10,8 @@
  * Mobile cards ignore geometry — a card is a list of fields, not a grid.
  * Spans are derived from data, so there is nothing to put in the URL.
  */
-import type { PinOffset } from "../columns/useColumnLayout";
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { PinOffset } from "../columns/columnLayoutModel";
 
 export {
   bodyCellsHaveRowSpan,
@@ -40,7 +40,7 @@ export interface GetCellSpanArgs<TRow> {
   /** The row being measured. */
   row: TRow;
   /** The column being measured. */
-  column: ColumnDef<TRow>;
+  column: ColumnMetadata<TRow>;
   /** Dataset-relative row index (page offset included). */
   rowIndex: number;
   /** Index in the full visible column list. */
@@ -94,7 +94,7 @@ export function cellSpanMark(
  */
 export interface BodyCell<TRow> {
   /** The column being measured. */
-  column: ColumnDef<TRow>;
+  column: ColumnMetadata<TRow>;
   /** Index in the full visible column list — what focus addresses. */
   columnIndex: number;
   /** Columns this cell covers. */
@@ -109,7 +109,7 @@ export interface BodyCell<TRow> {
  * @public
  */
 export function spanningArmed<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   getCellSpan: GetCellSpan<TRow> | undefined
 ): boolean {
   if (getCellSpan) return true;
@@ -124,7 +124,7 @@ function clampSpan(value: number | undefined, remaining: number): number {
 }
 
 function columnSpanOf<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   row: TRow
 ): number | undefined {
   return typeof column.colSpan === "function"
@@ -133,7 +133,7 @@ function columnSpanOf<TRow>(
 }
 
 function rowSpanOf<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   row: TRow
 ): number | undefined {
   return typeof column.rowSpan === "function"
@@ -163,7 +163,7 @@ export function resolveCellSpan<TRow>(
 
 /** Clip a column span so it does not cross a pin boundary. */
 export function clipColSpanAtPin<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   start: number,
   colSpan: number,
   pinOffset?: (key: string) => PinOffset | undefined
@@ -237,7 +237,7 @@ function windowedColSpan(
 
 function originSpan<TRow>(options: {
   row: TRow;
-  column: ColumnDef<TRow>;
+  column: ColumnMetadata<TRow>;
   localRow: number;
   col: number;
   firstRowIndex: number;
@@ -277,7 +277,7 @@ function originSpan<TRow>(options: {
 
 function collectOrigins<TRow>(options: {
   rows: readonly TRow[];
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   getCellSpan?: GetCellSpan<TRow>;
   firstRowIndex: number;
   pinOffset?: (key: string) => PinOffset | undefined;
@@ -315,7 +315,7 @@ function collectOrigins<TRow>(options: {
 
 function windowedOriginCell<TRow>(
   origin: Origin,
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   windowKeys: ReadonlySet<string> | undefined
 ): BodyCell<TRow> | undefined {
   const startCol = windowKeys
@@ -337,7 +337,7 @@ function rowSpanContinuation<TRow>(
   cover: Origin | undefined,
   localRow: number,
   col: number,
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   windowKeys: ReadonlySet<string> | undefined
 ): BodyCell<TRow> | undefined {
   if (!cover || !windowKeys || cover.row === localRow) return undefined;
@@ -353,7 +353,7 @@ function rowSpanContinuation<TRow>(
 
 function emitRowCells<TRow>(
   localRow: number,
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   origins: Map<string, Origin>,
   covered: Map<string, Origin>,
   windowKeys: ReadonlySet<string> | undefined
@@ -388,7 +388,7 @@ function emitRowCells<TRow>(
  */
 export function buildBodyCells<TRow>(options: {
   rows: readonly TRow[];
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   getRowId: (row: TRow) => string;
   getCellSpan?: GetCellSpan<TRow>;
   firstRowIndex?: number;
@@ -443,7 +443,7 @@ function markCoveredRectangle(
  */
 export function coveredAddressSet<TRow>(options: {
   rows: readonly TRow[];
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   getCellSpan?: GetCellSpan<TRow>;
   firstRowIndex?: number;
   pinOffset?: (key: string) => PinOffset | undefined;

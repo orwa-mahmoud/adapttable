@@ -4,11 +4,11 @@ import {
   type SidePanelChromeProps,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   sidePanel as core,
   type SidePanelOptions,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { useClassNames } from "./components/classNamesContext";
 import { SidePanel } from "./components/SidePanel";

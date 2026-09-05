@@ -1,4 +1,5 @@
-import type { ColumnDef } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
 import { resolveLabels } from "@adapttable/core";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";

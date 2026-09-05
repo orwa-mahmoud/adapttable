@@ -1,11 +1,13 @@
+import type { TableErrorState } from "@adapttable/core";
+import type { UrlStateAdapter } from "@adapttable/react";
+
 import type {
   BaseDataTableProps,
   Slot,
-  TableErrorState,
-  UrlStateAdapter,
   UseTableDataOptions,
-} from "@adapttable/core";
-import type { DataModeProps } from "@adapttable/core/adapter";
+} from "@adapttable/react";
+
+import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /**

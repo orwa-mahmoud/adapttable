@@ -1,5 +1,5 @@
+import type { ColumnMetadata } from "../columnModel";
 import type { ExtraEntry } from "../rows/extraRows";
-import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
 
 /**
@@ -197,7 +197,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
    */
   groupBy: string | readonly string[];
   /** Visible columns, in order. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Row identity function. */
   getRowId: (row: TRow) => string;
   /** Collapsed group keys (from `useGroupCollapse`). */
@@ -251,7 +251,7 @@ export interface GroupPaging {
 export function resolveGroupValue<TRow>(
   row: TRow,
   groupBy: string,
-  column: ColumnDef<TRow> | undefined
+  column: ColumnMetadata<TRow> | undefined
 ): unknown {
   if (column?.sortValue) return column.sortValue(row);
   const path = column?.key ?? groupBy;
@@ -371,7 +371,7 @@ export function groupingKeys(groupBy: string | readonly string[]): string[] {
 export function partitionGroupedRows<TRow>(
   rows: readonly TRow[],
   groupBy: string | readonly string[],
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): GroupPartition<TRow>[] {
   const keys = groupingKeys(groupBy);
   if (keys.length === 0) return [];
@@ -382,7 +382,7 @@ function partitionLevel<TRow>(
   rows: readonly TRow[],
   keys: readonly string[],
   level: number,
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): GroupPartition<TRow>[] {
   const { order, buckets } = bucketBy(rows, keys[level]!, columns);
   return order.map((valueKey) => {
@@ -674,7 +674,7 @@ function pageLimit(
 function bucketBy<TRow>(
   rows: readonly TRow[],
   key: string,
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): {
   order: string[];
   buckets: Map<string, { value: unknown; rows: TRow[] }>;

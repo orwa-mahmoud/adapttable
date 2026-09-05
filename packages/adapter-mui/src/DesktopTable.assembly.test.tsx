@@ -3,11 +3,11 @@
  * expansion/reorder/selection leads, and the exported muiColor / ExpandChevron
  * helpers. `useStableToggle` is already covered in DataTable.expansion.test.
  */
+import { defaultLabels } from "@adapttable/core";
 import {
-  defaultLabels,
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
   fireEvent,

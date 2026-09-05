@@ -3,8 +3,8 @@ import {
   slotRender,
   type StaticTableFeature,
   TOOLBAR_EXTRAS,
-} from "@adapttable/core/adapter";
-import { densityChooser as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { densityChooser as core } from "@adapttable/react/features";
 import type { MantineSpacing } from "@mantine/core";
 
 import { DensityButton } from "./components/toolbarExtras";

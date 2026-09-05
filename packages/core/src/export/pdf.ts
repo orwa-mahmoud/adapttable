@@ -23,7 +23,7 @@
  * honoured here because a PDF that ignores them is a screenshot of the
  * wrong table.
  */
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import {
   buildExportTable,
   type ExportTable,
@@ -46,7 +46,7 @@ import {
 } from "./printLayout";
 import { parseSfnt } from "./sfnt";
 
-export type { ColumnDef, ExportWriter, PrintPageBreak };
+export type { ExportWriter, PrintPageBreak };
 
 /**
  * Options the writer and {@link buildTablePdf} share.
@@ -609,7 +609,7 @@ function titleFromFilename(filename: string): string {
 export function buildTablePdf<TRow>(
   options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     view?: readonly ExportViewEntry<TRow>[];
     summary?: Readonly<Partial<Record<string, unknown>>>;
   } & PdfWriterOptions

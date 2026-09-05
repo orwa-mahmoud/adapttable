@@ -11,8 +11,8 @@
  * equivalent to retyping the source cell into each target cell — never a
  * separate notion of what a cell contains.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { isCellEditable, readEditableCellValue } from "../editing/cellEditing";
-import type { ColumnDef } from "../types";
 import type { CellEdit } from "./cellEdits";
 import { type CellRange, cellRangeBounds } from "./cellRange";
 import type { GridCell } from "./gridFocus";
@@ -95,7 +95,7 @@ export interface FillRangeOptions<TRow> {
   /** The rows the browser holds, in table order. */
   rows: readonly TRow[];
   /** The columns as rendered — a range's column indices address these. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Where the rendered window starts in the dataset. Zero unless paged. */
   firstRowIndex?: number;
 }

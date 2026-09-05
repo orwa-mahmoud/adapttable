@@ -10,12 +10,12 @@
  * - Default values are omitted to keep the URL clean.
  */
 import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
-import type { ColumnLayoutState } from "../columns/useColumnLayout";
+import type { ColumnLayoutState } from "../columns/columnLayoutModel";
 import {
   parseFilterTree,
   serializeFilterTree,
 } from "../filters/filterTreeCodec";
-import { type RowPinSide, type RowPinState } from "../rows/rowPinning";
+import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { ExtraFilters, FilterValue, SortDirection } from "../types";
 

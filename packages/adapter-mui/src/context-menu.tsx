@@ -1,4 +1,4 @@
-import { createAdapterContextMenuFeature } from "@adapttable/core/adapter";
+import { createAdapterContextMenuFeature } from "@adapttable/react/adapter";
 
 import { ContextMenu } from "./components/ContextMenu";
 

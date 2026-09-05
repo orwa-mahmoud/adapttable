@@ -25,6 +25,7 @@ overrides:
   "@adapttable/base-ui": "workspace:*"
   "@adapttable/chakra": "workspace:*"
   "@adapttable/core": "workspace:*"
+  "@adapttable/react": "workspace:*"
   "@adapttable/mantine": "workspace:*"
   "@adapttable/mui": "workspace:*"
   "@adapttable/radix": "workspace:*"

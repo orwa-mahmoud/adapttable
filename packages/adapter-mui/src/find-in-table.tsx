@@ -3,8 +3,8 @@ import {
   FIND_BAR,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
-import { findInTable as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { findInTable as core } from "@adapttable/react/features";
 
 import { FindBar } from "./components/kitControls";
 

@@ -31,7 +31,8 @@
  * {@link PIVOT_BLANK}, rather than being dropped. Rows that fall in no column
  * silently disappearing is how a pivot table lies about a total.
  */
-import type { ReactNode } from "react";
+import type { ColumnModel, ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
 import {
   type AggregateName,
@@ -39,9 +40,9 @@ import {
   resolveAggregateValue,
 } from "../aggregate/aggregate";
 import { compareValues } from "../sort/compare";
-import type { ColumnDef, SortableValue } from "../types";
+import type { SortableValue } from "../types";
 
-export type { AggregateName, Aggregator, ColumnDef, SortableValue };
+export type { AggregateName, Aggregator, SortableValue };
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,
@@ -153,7 +154,7 @@ export interface PivotRow {
   /** The dimension value this line is labelled with. */
   label: string;
   /** One value per entry of {@link PivotResult.columnLeaves}, in order. */
-  cells: readonly ReactNode[];
+  cells: readonly DisplayValue[];
   /** How many source rows it covers — for "12 rows" affordances. */
   count: number;
 }
@@ -184,9 +185,9 @@ export interface PivotOptions<TRow> {
    * Columns, so dimension and measure values resolve through `sortValue`
    * exactly as sorting and grouping do.
    */
-  columns?: readonly ColumnDef<TRow>[];
+  columns?: readonly ColumnModel<TRow>[];
   /** Format a computed cell. Receives the raw result and the measure. */
-  format?: (value: ReactNode, measure: PivotMeasure) => ReactNode;
+  format?: (value: DisplayValue, measure: PivotMeasure) => DisplayValue;
   /**
    * Subtotal keys the user has collapsed. A collapsed line keeps its own
    * totals and drops everything beneath it.
@@ -211,7 +212,7 @@ function dimensionLabel(value: SortableValue): string {
 function dimensionOf<TRow>(
   row: TRow,
   key: string,
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): string {
   return dimensionLabel(resolveAggregateValue(row, key, byKey.get(key)));
 }
@@ -223,7 +224,7 @@ function dimensionOf<TRow>(
 function distinctPaths<TRow>(
   rows: readonly TRow[],
   dimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): string[][] {
   if (dimensions.length === 0) return [[]];
   let paths: string[][] = [[]];
@@ -323,10 +324,10 @@ function cellsOf<TRow>(
   covered: readonly TRow[],
   leaves: readonly PivotColumnLeaf[],
   columnDimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>,
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>,
   aggregate: (leaf: PivotColumnLeaf) => Aggregator,
   format: PivotOptions<TRow>["format"]
-): ReactNode[] {
+): DisplayValue[] {
   return leaves.map((leaf) => {
     const matching = leaf.total
       ? covered
@@ -447,10 +448,10 @@ interface BodyInput<TRow> {
   rows: readonly TRow[];
   dimensions: readonly string[];
   paths: readonly (readonly string[])[];
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>;
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>;
   subtotals: boolean;
   collapsed: ReadonlySet<string>;
-  cells: (covered: readonly TRow[]) => ReactNode[];
+  cells: (covered: readonly TRow[]) => DisplayValue[];
 }
 
 /**
@@ -512,7 +513,7 @@ function rowsUnder<TRow>(
   rows: readonly TRow[],
   prefix: readonly string[],
   dimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): TRow[] {
   return rows.filter((row) =>
     prefix.every(

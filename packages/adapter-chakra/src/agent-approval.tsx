@@ -1,4 +1,4 @@
-import { createAdapterAgentApprovalFeature } from "@adapttable/core/adapter";
+import { createAdapterAgentApprovalFeature } from "@adapttable/react/adapter";
 
 import { AgentApproval } from "./components/kitControls";
 

@@ -1,11 +1,12 @@
 /** Selection bar with the bulk actions and cross-page banner. */
-import { useBulkActionRunner } from "@adapttable/core";
+import { useBulkActionRunner } from "@adapttable/react";
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
   offersAllMatching,
   resolveDisabledReason,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
+import type { ReactNode } from "react";
 
 import type { DataTableClassNames } from "../types";
 
@@ -87,7 +88,7 @@ export function BulkBar({
             className={classNames.bulkButton}
             onClick={() => run(action, ids, scope)}
           >
-            {action.icon}
+            {action.icon as ReactNode}
             {action.label}
           </button>
         );

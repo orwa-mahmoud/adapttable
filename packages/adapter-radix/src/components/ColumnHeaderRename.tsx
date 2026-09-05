@@ -2,7 +2,7 @@ import {
   type ColumnHeaderRenameSlotProps,
   LiveRegion,
   useColumnRenameEditor,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Flex, Text, TextField } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 

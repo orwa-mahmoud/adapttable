@@ -1,1 +1,1 @@
-export { multiSort } from "@adapttable/core/features";
+export { multiSort } from "@adapttable/react/features";

@@ -6,7 +6,7 @@
  * This file is the shared model: which actions are visible, and the context
  * a custom renderer receives.
  */
-import type { ReactNode } from "react";
+import type { DisplayValue } from "../display";
 
 import type { ConfirmHandler } from "../actions/confirm";
 import type { RowAction, TableLabels } from "../types";
@@ -43,7 +43,7 @@ export interface RowActionsRenderContext<TRow> {
  */
 export type RowActionsRenderer<TRow> = (
   ctx: RowActionsRenderContext<TRow>
-) => ReactNode;
+) => DisplayValue;
 
 /**
  * Actions that should render for this row. `isHidden` returning true drops

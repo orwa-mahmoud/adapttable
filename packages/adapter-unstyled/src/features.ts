@@ -1,6 +1,6 @@
 /**
  * `@adapttable/<kit>/features` — the feature factories and every type they
- * hand back, forwarded from `@adapttable/core/features`.
+ * hand back, forwarded from `@adapttable/react/features`.
  *
  * The explicit manifest keeps shadcn's second-level forwarding surface exact;
  * a nested wildcard can expose core's private bundle symbols.
@@ -82,4 +82,4 @@ export {
   type UseSavedViewsOptions,
   useTableFeatures,
   virtualize,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";

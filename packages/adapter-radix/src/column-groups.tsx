@@ -3,8 +3,8 @@ import {
   extendFeature,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
-import { collapsibleColumnGroups as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { collapsibleColumnGroups as core } from "@adapttable/react/features";
 
 import { ColumnGroupToggle } from "./components/kitControls";
 

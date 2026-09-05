@@ -11,7 +11,7 @@
  * fixed; pass a function when the replacement needs the error it is reporting
  * or the retry it should offer.
  */
-import type { ReactNode } from "react";
+import type { DisplayValue } from "../display";
 
 import type { TableSource } from "../source/TableSource";
 
@@ -41,7 +41,7 @@ export interface TableErrorState {
  *
  * @public
  */
-export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
+export type Slot<TState> = DisplayValue | ((state: TState) => DisplayValue);
 
 /**
  * Resolve a slot the host may have replaced.
@@ -55,7 +55,7 @@ export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 export function fillSlot<TState>(
   slot: Slot<TState> | undefined,
   state: TState
-): ReactNode {
+): DisplayValue {
   return typeof slot === "function" ? slot(state) : slot;
 }
 

@@ -451,7 +451,8 @@
   },
   "dependencies": {
     "@adapttable/core": "workspace:^",
-    "react-compiler-runtime": "^1.0.0"
+    "react-compiler-runtime": "^1.0.0",
+    "@adapttable/react": "workspace:^"
   },
   "peerDependencies": {
     "@radix-ui/themes": "^3.0.0",

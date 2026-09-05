@@ -22,13 +22,7 @@ export * from "@adapttable/unstyled";
    without ever depending on @adapttable/core directly. */
 export {
   type BaseDataTableProps,
-  type BulkActionContext,
-  type CellEditor,
-  type ChipLabelResolver,
-  type ColumnFilter,
   type ColumnLayoutState,
-  type CustomCellEditorCtrl,
-  type CustomCellEditorRender,
   type EditConflict,
   type EditConflictChoice,
   type EditConflictHandler,
@@ -38,16 +32,24 @@ export {
   type EditEventHandler,
   type EditLifecycle,
   type EditUnit,
+  type ToolbarSlots,
+  type UseServerDataOptions,
+  type UseTableDataOptions,
+} from "@adapttable/react";
+export {
+  type BulkActionContext,
+  type CellEditor,
+  type ChipLabelResolver,
+  type ColumnFilter,
+  type CustomCellEditorCtrl,
+  type CustomCellEditorRender,
   type ExportCsvOptions,
   FILTER_TYPES,
   type MobileCardRenderer,
   type RowActionsRenderer,
   type TableQuery,
-  type ToolbarSlots,
-  type UseServerDataOptions,
-  type UseTableDataOptions,
 } from "@adapttable/core";
 export {
   type DataModeProps,
   type TableQueryHandler,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";

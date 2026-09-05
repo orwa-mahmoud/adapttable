@@ -3,6 +3,7 @@
  * membership, sort position, group bucket or total fails these tests —
  * they compare against the same primitives the table already uses.
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
 import { aggregate } from "../aggregate/aggregate";
@@ -14,7 +15,6 @@ import {
 } from "../grouping/groupRows";
 import { sortRows, sortRowsMulti } from "../sort/compare";
 import type { QueryFilterGroup } from "../source/queryContract";
-import type { ColumnDef } from "../types";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
@@ -76,7 +76,7 @@ const KATE: Person = {
 
 const ROWS: readonly Person[] = [ADA, ALAN, GRACE, KATE];
 const byId = (row: Person) => row.id;
-const COLS: ColumnDef<Person>[] = [
+const COLS: ColumnModel<Person>[] = [
   { key: "name", sortValue: (row) => row.name },
   { key: "team", sortValue: (row) => row.team },
   { key: "budget", sortValue: (row) => row.budget },
@@ -165,7 +165,7 @@ function oracle(
     ? buildGroupedFlatModel({
         rows: sorted,
         groupBy: config.groupBy,
-        columns: (config.columns ?? []) as readonly ColumnDef<Person>[],
+        columns: (config.columns ?? []) as readonly ColumnModel<Person>[],
         getRowId: config.getRowId,
         collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
         aggregates: config.groupAggregates,

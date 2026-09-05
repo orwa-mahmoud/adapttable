@@ -3,10 +3,10 @@
  * comparison against the full rebuild, plus the edges a happy-path patch
  * never walks (empty totals, a miss in the group tree, a primitive search).
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
 import { partitionGroupedRows } from "../grouping/groupRows";
-import type { ColumnDef } from "../types";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
@@ -48,10 +48,10 @@ const ROWS: Person[] = [
   { id: "3", name: "Grace", team: "Core", budget: 80, status: "active" },
 ];
 const byId = (row: Person) => row.id;
-const COLS: ColumnDef<Person>[] = [
+const COLS: ColumnModel<Person>[] = [
   { key: "team" },
-  { key: "budget", accessor: (row) => row.budget },
-  { key: "name", accessor: (row) => row.name },
+  { key: "budget", exportValue: (row) => row.budget },
+  { key: "name", exportValue: (row) => row.name },
 ];
 
 describe("incrementalSearchText", () => {

@@ -2,7 +2,7 @@ import {
   type ColumnDef,
   createMemoryAdapter,
   useFrontendData,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useMemo } from "react";
 import { describe, expect, it } from "vitest";

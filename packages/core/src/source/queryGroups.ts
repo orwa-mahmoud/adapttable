@@ -11,7 +11,7 @@
  * server-side grouping is not a second rendering path with its own bugs: it is
  * the same rows, filled from a different source of truth.
  */
-import type { ReactNode } from "react";
+import type { DisplayValue } from "../display";
 
 import {
   formatGroupLabel,
@@ -186,9 +186,9 @@ export function serverGroupEntries<TRow>(
  */
 function renderableAggregates(
   aggregates: Readonly<Record<string, unknown>> | undefined
-): Partial<Record<string, ReactNode>> | undefined {
+): Partial<Record<string, DisplayValue>> | undefined {
   if (!aggregates) return undefined;
-  const cells: Partial<Record<string, ReactNode>> = {};
+  const cells: Partial<Record<string, DisplayValue>> = {};
   for (const [key, value] of Object.entries(aggregates)) {
     if (value === null || value === undefined) continue;
     cells[key] =

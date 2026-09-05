@@ -9,6 +9,7 @@ overrides:
   '@adapttable/base-ui': workspace:*
   '@adapttable/chakra': workspace:*
   '@adapttable/core': workspace:*
+  '@adapttable/react': workspace:*
   '@adapttable/mantine': workspace:*
   '@adapttable/mui': workspace:*
   '@adapttable/radix': workspace:*
@@ -333,6 +334,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -367,6 +371,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -441,6 +448,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -484,6 +494,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -530,6 +543,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -570,6 +586,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -601,6 +620,9 @@ importers:
 
   packages/adapter-shadcn:
     dependencies:
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       '@adapttable/unstyled':
         specifier: workspace:*
         version: link:../adapter-unstyled
@@ -638,6 +660,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -669,6 +694,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
@@ -686,13 +714,6 @@ importers:
   packages/cli: {}
 
   packages/core:
-    dependencies:
-      '@tanstack/react-virtual':
-        specifier: ^3.14.10
-        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react-compiler-runtime:
-        specifier: ^1.0.0
-        version: 1.0.0(react@19.2.8)
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^9.6.1
@@ -728,6 +749,34 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+
+  packages/react:
+    dependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../core
+      '@tanstack/react-virtual':
+        specifier: ^3.14.10
+        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react-compiler-runtime:
+        specifier: ^1.0.0
+        version: 1.0.0(react@19.2.8)
+    devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.1
+        version: 10.4.1
+      '@testing-library/jest-dom':
+        specifier: ^7.0.1
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8

@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   COLUMN_GROUP_RENDER_PREFIX,
   COLUMN_GROUP_STUB_PREFIX,
@@ -24,7 +24,7 @@ interface Row {
 const col = (
   key: string,
   group?: string | readonly string[]
-): ColumnDef<Row> => ({
+): ColumnModel<Row> => ({
   key,
   header: key,
   group,
@@ -134,7 +134,7 @@ describe("headerGroupRows", () => {
 describe("headerGroupRows hideLabel", () => {
   it("hides the caption on a collapsed stub and keeps the name on the cell", () => {
     const id = columnGroupId(["People"]);
-    const stub: ColumnDef<Row> = {
+    const stub: ColumnModel<Row> = {
       key: `${COLUMN_GROUP_STUB_PREFIX}${id}:0`,
       header: "",
       group: "People",

@@ -6,7 +6,7 @@
  * get subtly wrong in a way only a browser shows: a column rendered under two
  * parents appears twice in every row.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

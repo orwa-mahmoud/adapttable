@@ -5,8 +5,8 @@ import {
   extendFeature,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
-import { columnMenu as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { columnMenu as core } from "@adapttable/react/features";
 
 import { useClassNames } from "./components/classNamesContext";
 import { ColumnHeaderRename } from "./components/ColumnHeaderRename";

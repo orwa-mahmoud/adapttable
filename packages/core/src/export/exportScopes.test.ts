@@ -5,10 +5,10 @@
  * moments — what I can see, everything that matched, or just the rows I
  * ticked — and picking one should never require rebuilding the data by hand.
  */
+import type { ColumnModel } from "../columnModel";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { TableSource } from "../source/TableSource";
-import type { ColumnDef } from "../types";
 import { resetDevWarnings } from "../utils/devWarn";
 import { buildTableCsv, resolveExportColumns } from "./tableCsv";
 
@@ -27,13 +27,13 @@ const ALL_ROWS: Row[] = [
 
 // Accessors are present because `resolveColumns` fills them in from the key
 // path before any column reaches an export.
-const VISIBLE: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "team", header: "Team", accessor: (row) => row.team },
+const VISIBLE: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
+  { key: "team", header: "Team", exportValue: (row) => row.team },
 ];
-const ALL_COLUMNS: ColumnDef<Row>[] = [
+const ALL_COLUMNS: ColumnModel<Row>[] = [
   ...VISIBLE,
-  { key: "secret", header: "Secret", accessor: (row) => row.secret },
+  { key: "secret", header: "Secret", exportValue: (row) => row.secret },
 ];
 
 /** A complete source showing page 2 (one row) of a filtered set of three. */

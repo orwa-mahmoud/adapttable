@@ -1,7 +1,5 @@
-import {
-  type TableSourceCapabilities,
-  useFrontendData,
-} from "@adapttable/core";
+import type { TableSourceCapabilities } from "@adapttable/core";
+import { useFrontendData } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";

@@ -1,1 +1,1 @@
-export { rowAppearance } from "@adapttable/core/features";
+export { rowAppearance } from "@adapttable/react/features";

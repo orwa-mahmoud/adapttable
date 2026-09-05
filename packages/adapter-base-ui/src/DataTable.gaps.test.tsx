@@ -1,10 +1,10 @@
 /** Gap-fill: footer prev, clear-all link, bulk clear, icon actions, virtualization. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
 import {
   useDataTableShell,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,7 +23,7 @@ const columns: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
 ];
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return {
     ...actual,
@@ -32,7 +32,7 @@ vi.mock("@adapttable/core/adapter", async (importOriginal) => {
 });
 
 const actualCore = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 let adapter: ReturnType<typeof createMemoryAdapter>;

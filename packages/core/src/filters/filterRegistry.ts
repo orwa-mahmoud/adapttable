@@ -3,14 +3,14 @@
  * predicate, chips and tree serialization. Built-ins are the first consumers —
  * every former `switch (def.type)` looks up a spec instead.
  */
-import type { ReactElement } from "react";
+import type { DisplayValue } from "../display";
 
 import type { QueryCondition } from "../source/queryContract";
 import type { ExtraFilters, TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import type { FilterDef, FilterType } from "./filterDefs";
-import type { FilterFormSource } from "./filterForm";
-import type { ChipLabelResolver } from "./useActiveFilterChips";
+import type { FilterFormSource } from "./filterFormModel";
+import type { ChipLabelResolver } from "./filterDefs";
 
 /**
  * Built-in widget a kit AutoFilterForm / header row already knows how to draw.
@@ -69,7 +69,7 @@ export interface FilterTypeSpec {
     condition: QueryCondition
   ): ExtraFilters;
   /** Native renderer — header row and AutoFilterForm use this when set. */
-  render?<TRow>(props: FilterWidgetRenderProps<TRow>): ReactElement;
+  render?<TRow>(props: FilterWidgetRenderProps<TRow>): DisplayValue;
 }
 
 /**
@@ -220,6 +220,6 @@ export function renderRegisteredFilter<TRow>(
   labels: Required<TableLabels>,
   registry: FilterTypeRegistry,
   className?: string
-): ReactElement | undefined {
+): DisplayValue | undefined {
   return registry.get(def.type)?.render?.({ def, source, labels, className });
 }

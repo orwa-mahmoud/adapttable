@@ -6,7 +6,7 @@ import {
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
   type FilterTreeSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Collapse, Input, InputNumber, Select } from "antd";
 
 export type { FilterTreeBuilderProps };

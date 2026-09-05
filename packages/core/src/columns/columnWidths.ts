@@ -1,11 +1,10 @@
-import type { ColumnDef } from "../types";
-
+import type { ColumnMetadata, ColumnModel } from "../columnModel";
 /**
  * A column identity for width resolution — just its key and declared width.
  *
  * @public
  */
-export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
+export type WidthColumn = Pick<ColumnModel<unknown>, "key" | "width">;
 
 /** Fallback width (px) for a pinned column with no resolvable declared width. */
 export const FALLBACK_PIN_WIDTH = 150;
@@ -62,7 +61,7 @@ export function resolveColumnWidth(
  * @public
  */
 export function tableMinWidth<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   options: { widths?: Readonly<Record<string, number>>; extra?: number } = {}
 ): number {
   const total = columns.reduce(

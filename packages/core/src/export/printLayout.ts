@@ -11,7 +11,7 @@
  * {@link ExportTable} — so three formats of the same table cannot disagree
  * about what a cell contains.
  */
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import { isBrowser } from "../utils/env";
 import {
   buildExportTable,
@@ -430,7 +430,7 @@ export function openPrintLayout(
 export function printTable<TRow>(
   options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     view?: readonly ExportViewEntry<TRow>[];
     summary?: Readonly<Partial<Record<string, unknown>>>;
   } & PrintLayoutOptions

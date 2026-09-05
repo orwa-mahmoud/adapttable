@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { DisplayValue } from "../display";
 
 import type { FilterDef } from "../filters/filterDefs";
 
@@ -8,7 +8,7 @@ import type { FilterDef } from "../filters/filterDefs";
  * @public
  */
 export function isDeclarativeFilters<TRow>(
-  filters: readonly FilterDef<TRow>[] | ReactNode
+  filters: readonly FilterDef<TRow>[] | DisplayValue
 ): filters is readonly FilterDef<TRow>[] {
   return Array.isArray(filters);
 }

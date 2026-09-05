@@ -7,7 +7,7 @@ import {
   type SavedViewsPanelRowProps,
   type SavedViewsPanelSlots,
   type SavedViewsPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Card, Flex, Input, Tag, Typography } from "antd";
 
 const slots: SavedViewsPanelSlots = {

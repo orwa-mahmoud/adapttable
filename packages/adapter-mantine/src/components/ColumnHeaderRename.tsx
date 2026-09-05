@@ -3,7 +3,7 @@ import {
   type ColumnRenameEditorState,
   LiveRegion,
   useColumnRenameEditor,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { ActionIcon, Box, Button, Group, TextInput } from "@mantine/core";
 import type { ReactElement } from "react";
 import { useEffect, useRef } from "react";

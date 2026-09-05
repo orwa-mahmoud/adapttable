@@ -448,7 +448,8 @@
   },
   "dependencies": {
     "@adapttable/core": "workspace:^",
-    "react-compiler-runtime": "^1.0.0"
+    "react-compiler-runtime": "^1.0.0",
+    "@adapttable/react": "workspace:^"
   },
   "peerDependencies": {
     "antd": "^6.0.0",

@@ -1,5 +1,5 @@
 /** Loading skeleton for the table and the card list. */
-import { type TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";

@@ -4,7 +4,7 @@ import {
   PIN_BOTTOM_ACTION_KEY,
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import type { ReactNode } from "react";
 
 /**
@@ -134,10 +134,10 @@ export const UnpinRowIcon = (p: Readonly<IconProps>) => (
  * glyph so core can stay a key + label.
  */
 export function iconForRowAction(
-  action: Readonly<{ key: string; icon?: ReactNode }>
+  action: Readonly<{ key: string; icon?: unknown }>
 ): ReactNode | undefined {
   return (
-    action.icon ??
+    (action.icon as ReactNode | undefined) ??
     {
       [DUPLICATE_ROW_ACTION_KEY]: <DuplicateRowIcon />,
       [DELETE_ROW_ACTION_KEY]: <DeleteRowIcon />,

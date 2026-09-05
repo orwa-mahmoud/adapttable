@@ -1,10 +1,10 @@
+import type { ColumnMetadata } from "../columnModel";
 import {
   aggregate,
   AGGREGATE_NAMES,
   type AggregateName,
 } from "../aggregate/aggregate";
 import type { QueryAggregate } from "../source/queryContract";
-import type { ColumnDef } from "../types";
 import type { GroupAggregatesFn } from "./groupRows";
 
 /** A session-level aggregation choice for one grouped-table column. @public */
@@ -90,7 +90,7 @@ export function parseGroupAggregateOverrides(
 export function withGroupAggregateOverrides<TRow>(
   base: GroupAggregatesFn<TRow> | undefined,
   overrides: GroupAggregateOverrides,
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): GroupAggregatesFn<TRow> | undefined {
   const entries = Object.entries(overrides).filter(
     (entry): entry is [string, GroupAggregateOverride] => entry[1] !== undefined

@@ -2,8 +2,8 @@ import {
   createAdapterFiltersFeature,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
-} from "@adapttable/core/adapter";
-export { filterTypes } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+export { filterTypes } from "@adapttable/react/features";
 
 import { Chips } from "./components/ActiveFilterChips";
 import { AutoFilterForm } from "./components/AutoFilterForm";

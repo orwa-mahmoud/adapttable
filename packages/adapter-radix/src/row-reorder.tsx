@@ -1,4 +1,4 @@
-import { createAdapterRowReorderFeature } from "@adapttable/core/adapter";
+import { createAdapterRowReorderFeature } from "@adapttable/react/adapter";
 
 import { RowReorderButtons, RowReorderHandle } from "./components/kitControls";
 

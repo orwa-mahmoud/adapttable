@@ -4,7 +4,9 @@
  * DesktopTable and MobileCards import this file instead of the kit
  * implementations, so omitting a feature omits those components.
  */
-import type { SelectionState, TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
+
 import {
   COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,
@@ -36,7 +38,7 @@ import {
   type TreeCellProps,
   type TreeToggleProps,
   useFeatureSlotFilled,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 import { cellDisplay } from "./DisplayCell";

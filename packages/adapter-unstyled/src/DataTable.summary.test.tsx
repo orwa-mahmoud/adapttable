@@ -1,9 +1,6 @@
-import {
-  createMemoryAdapter,
-  type TableSource,
-  useFrontendData,
-} from "@adapttable/core";
-import { flattenColumnTree } from "@adapttable/core/adapter";
+import type { TableSource } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import { flattenReactColumnTree } from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -40,7 +37,7 @@ function Harness(props: {
   const source = useFrontendData<Row>({
     data: ROWS,
     urlAdapter: adapter,
-    columns: flattenColumnTree(cols).leaves,
+    columns: flattenReactColumnTree(cols).leaves,
   });
   lastSource = source;
   return (

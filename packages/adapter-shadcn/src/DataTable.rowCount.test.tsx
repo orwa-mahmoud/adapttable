@@ -3,7 +3,7 @@
  * only a page of rows is in the DOM, so assistive tech cannot count the rest.
  * Core decides; this proves the shadcn table element carries it.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

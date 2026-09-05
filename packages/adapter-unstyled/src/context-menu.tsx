@@ -1,7 +1,7 @@
 import {
   type AdapterContextMenuProps,
   createAdapterContextMenuFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
 import { ContextMenu } from "./components/ContextMenu";

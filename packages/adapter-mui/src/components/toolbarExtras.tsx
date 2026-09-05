@@ -3,7 +3,7 @@ import {
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Button,
   CircularProgress,

@@ -5,7 +5,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSearchProps,
   type ChecklistSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Checkbox, TextInput } from "@mantine/core";
 
 export type { ChecklistFilterProps };

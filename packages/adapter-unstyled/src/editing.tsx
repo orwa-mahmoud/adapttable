@@ -1,7 +1,7 @@
 import {
   createAdapterEditingFeatures,
   type EditableCellSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
 import { EditableDataCell } from "./components/EditableCell";

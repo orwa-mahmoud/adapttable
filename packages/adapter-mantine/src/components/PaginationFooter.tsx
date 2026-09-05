@@ -1,4 +1,5 @@
-import { pageSizeOptions, type TableLabels } from "@adapttable/core";
+import { pageSizeOptions } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
 import { Group, Pagination, Select, Text } from "@mantine/core";
 
 /**

@@ -12,8 +12,8 @@
  * tab-separated fields, newline-separated rows, and RFC-4180 quoting when a
  * field carries a tab, a newline or a quote.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { isCellEditable } from "../editing/cellEditing";
-import type { ColumnDef } from "../types";
 import { batchEditHandler, type CellEdit } from "./cellEdits";
 import { type CellRange, cellRangeBounds } from "./cellRange";
 
@@ -105,7 +105,7 @@ export interface PasteRangeOptions<TRow> {
   /** The rows the browser holds, in table order. */
   rows: readonly TRow[];
   /** The columns as rendered — a range's column indices address these. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Where the rendered window starts in the dataset. Zero unless paged. */
   firstRowIndex?: number;
 }

@@ -9,8 +9,9 @@
  *   - Toolbar: clearing the sort-by select (null → undefined).
  *   - DataTable: explicit skeletonRows count while loading.
  */
-import type { ColumnDef } from "@adapttable/core";
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

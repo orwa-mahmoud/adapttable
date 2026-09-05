@@ -8,7 +8,7 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Card, Flex, Select, Tag, Typography } from "antd";
 
 const TOUCH_TARGET = 40;
@@ -50,7 +50,7 @@ const slots: GroupingPanelSlots = {
       size="small"
       role="group"
       aria-label={label}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
       styles={{ body: { padding: empty ? "6px 10px" : "6px 8px" } }}
       style={{
@@ -161,7 +161,7 @@ const slots: GroupingPanelSlots = {
       size="small"
       role="group"
       aria-label={label}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
       styles={{ body: { padding: "6px 10px" } }}
       style={{

@@ -1,10 +1,10 @@
 /** Gap-fill: MUI select onChange handlers and chip delete. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
 import {
   useDataTableShell,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -27,13 +27,13 @@ const columns: ColumnDef<Row>[] = [
 ];
 const theme = createTheme();
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**

@@ -8,7 +8,7 @@ import {
   type PivotPanelSlots,
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Group, Select, Stack, Text } from "@mantine/core";
 
 const slots: PivotPanelSlots = {

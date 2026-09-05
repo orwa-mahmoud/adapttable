@@ -5,13 +5,13 @@
  * Flattening still goes through {@link flattenGroupPartitions} so collapse,
  * paging, group sort and group filter stay one implementation.
  */
+import type { ColumnMetadata } from "../columnModel";
 import {
   groupingKeys,
   type GroupPartition,
   groupValueKey,
   resolveGroupValue,
 } from "../grouping/groupRows";
-import type { ColumnDef } from "../types";
 
 /** One mutable bucket; `childMap` is the same nodes as `children`. */
 export interface MutablePartition<TRow> {
@@ -32,7 +32,7 @@ export interface IncrementalGroupTree<TRow> {
   /** Columns the tree groups on, outermost first. */
   keys: readonly string[];
   /** Visible columns, in order. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Top-level partitions. */
   roots: MutablePartition<TRow>[];
   /** Those roots, by value key. */
@@ -50,7 +50,7 @@ export interface IncrementalGroupTree<TRow> {
 export function rowGroupPath<TRow>(
   row: TRow,
   keys: readonly string[],
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): { value: unknown; valueKey: string }[] {
   return keys.map((key) => {
     const column = columns.find((item) => item.key === key);
@@ -70,7 +70,7 @@ export function rowGroupPath<TRow>(
 export function incrementalGroupTree<TRow>(
   partitions: readonly GroupPartition<TRow>[],
   groupBy: string | readonly string[],
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): IncrementalGroupTree<TRow> {
   const roots = partitions.map(toMutable);
   return {

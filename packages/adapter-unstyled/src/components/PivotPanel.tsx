@@ -8,7 +8,7 @@ import {
   type PivotPanelSlots,
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 /**
  * Native controls, because native IS this adapter's kit. The `<fieldset>` and

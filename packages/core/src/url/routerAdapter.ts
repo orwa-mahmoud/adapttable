@@ -20,7 +20,7 @@
  * update and the table will look frozen; that is the one way to hold it
  * wrong, and it is why `search` is a value rather than a getter.
  */
-import type { UrlStateAdapter } from "./adapter";
+import type { UrlStateAdapter } from "./urlStateAdapter";
 
 /**
  * What {@link routerUrlAdapter} needs from the router.

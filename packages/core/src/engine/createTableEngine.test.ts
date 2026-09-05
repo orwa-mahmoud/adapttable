@@ -1,7 +1,7 @@
 /** @vitest-environment node */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
 import { createTableEngine } from "./createTableEngine";
 import { createNeutralTable } from "./neutralTable";
 
@@ -121,5 +121,48 @@ describe("createTableEngine", () => {
     expect(table.rows("full").map((row) => row.id)).toEqual(["2"]);
     left.dispose();
     right.dispose();
+  });
+
+  it("bumps revisions on silent invalidate without notifying listeners", () => {
+    const engine = createTableEngine({
+      data: people,
+      columns,
+      rowKey: (row) => row.id,
+    });
+    const seen: string[] = [];
+    engine.subscribe(["data"], () => {
+      seen.push("data");
+    });
+    const before = engine.snapshot().revisions.data;
+    engine.invalidate(["data"], { data: [...people] }, { silent: true });
+    expect(engine.snapshot().revisions.data).toBe(before + 1);
+    expect(seen).toEqual([]);
+    engine.dispose();
+  });
+
+  it("uses dispatch search after configure and clears sort with undefined", () => {
+    const engine = createTableEngine({
+      data: people,
+      columns,
+      rowKey: (row) => row.id,
+      defaults: { sortBy: "name", sortDir: "asc" },
+    });
+    engine.configure({ search: "Ada" });
+    expect(engine.snapshot().search).toBe("Ada");
+    expect(engine.rows("full").map((row) => row.id)).toEqual(["1"]);
+
+    engine.dispatch({ type: "setSearch", search: "Grace" });
+    expect(engine.snapshot().search).toBe("Grace");
+    expect(engine.rows("full").map((row) => row.id)).toEqual(["3"]);
+
+    engine.configure({ sortBy: undefined, sortDir: undefined });
+    expect(engine.snapshot().sortBy).toBeUndefined();
+    expect(engine.snapshot().sortDir).toBeUndefined();
+
+    engine.configure({ groupBy: "team" });
+    expect(engine.snapshot().groupBy).toBe("team");
+    engine.configure({ groupBy: undefined });
+    expect(engine.snapshot().groupBy).toBeUndefined();
+    engine.dispose();
   });
 });

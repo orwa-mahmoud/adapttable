@@ -6,7 +6,7 @@
  * and stick above or below the scroll window, including on grouped and tree
  * tables where lift-a-data-row pinning stays refused.
  */
-import type { RowPinSide } from "./rowPinning";
+import type { RowPinSide } from "./rowPinModel";
 
 /**
  * Prefix for every generated summary-row identity.

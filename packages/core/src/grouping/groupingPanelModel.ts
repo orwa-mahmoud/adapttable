@@ -1,10 +1,4 @@
 import type {
-  DragEventHandler,
-  HTMLAttributes,
-  KeyboardEventHandler,
-} from "react";
-
-import type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
 } from "./groupAggregateOverrides";
@@ -29,19 +23,27 @@ export interface GroupingDragState {
 }
 
 /** Drag props spread onto a desktop column header or a grouping chip. @public */
-export interface GroupingDragProps extends Pick<
-  HTMLAttributes<HTMLElement>,
-  "draggable" | "onDragStart" | "onDragEnd"
-> {
+export interface GroupingDragProps {
+  /** Native HTML drag handle. */
+  draggable?: boolean;
+  /** Starts the grouping-field drag. */
+  onDragStart?: (event: DragEvent) => void;
+  /** Ends the grouping-field drag. */
+  onDragEnd?: (event: DragEvent) => void;
   /** Marks the element whose native drag is active. */
   "data-grouping-dragging"?: boolean;
 }
 
 /** Props spread onto one insertion target in the grouping strip. @public */
-export interface GroupingDropProps extends Pick<
-  HTMLAttributes<HTMLElement>,
-  "onDragEnter" | "onDragOver" | "onDragLeave" | "onDrop"
-> {
+export interface GroupingDropProps {
+  /** Enters an insertion target. */
+  onDragEnter?: (event: DragEvent) => void;
+  /** Moves over an insertion target. */
+  onDragOver?: (event: DragEvent) => void;
+  /** Leaves an insertion target. */
+  onDragLeave?: (event: DragEvent) => void;
+  /** Drops onto an insertion target. */
+  onDrop?: (event: DragEvent) => void;
   /** Marks the insertion target currently under the dragged field. */
   "data-drop-active"?: boolean;
 }
@@ -55,7 +57,7 @@ export interface GroupingChipKeyboardProps {
   /** Localized move instruction for the field. */
   "aria-label": string;
   /** Handle logical arrow movement and removal keys. */
-  onKeyDown: KeyboardEventHandler<HTMLElement>;
+  onKeyDown: (event: KeyboardEvent) => void;
 }
 
 /** Interaction engine published by the optional feature provider. @public */
@@ -156,4 +158,4 @@ export function groupingDragKey(
 }
 
 /** Shared native drop handler type for tests and adapters. */
-export type GroupingDropHandler = DragEventHandler<HTMLElement>;
+export type GroupingDropHandler = (event: DragEvent) => void;

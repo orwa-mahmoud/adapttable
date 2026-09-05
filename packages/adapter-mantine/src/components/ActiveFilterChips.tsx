@@ -1,4 +1,5 @@
-import type { ActiveFilterChip } from "@adapttable/core";
+import type { ActiveFilterChip } from "@adapttable/react";
+
 import { Anchor, Group, Pill } from "@mantine/core";
 
 /**

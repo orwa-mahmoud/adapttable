@@ -1,27 +1,34 @@
 import {
-  CHECKLIST_LIST_HEIGHT,
   defaultFilterRegistry,
-  type Direction,
-  type FilterDef,
-  type FilterFormSource,
   filterLabel,
-  filterOpLabel,
-  type FilterTypeRegistry,
   filterWidgetKind,
   joinRelativeToken,
-  listFilterValues,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
   resolveLabels,
-  scalarFilterText,
   splitRelativeToken,
-  type TableLabels,
-  useBooleanFilterWidget,
+} from "@adapttable/core";
+import type {
+  Direction,
+  FilterDef,
+  FilterTypeRegistry,
+  TableLabels,
+} from "@adapttable/core";
+import {
+  CHECKLIST_LIST_HEIGHT,
+  filterOpLabel,
+  listFilterValues,
+  scalarFilterText,
   useFilterOptions,
+} from "@adapttable/react";
+import type { FilterFormSource } from "@adapttable/react/adapter";
+
+import {
+  useBooleanFilterWidget,
   useRangeFilterWidget,
   useTextFilterWidget,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { Flex, Spinner, Text, TextField } from "@radix-ui/themes";
 import { type ReactNode, useId } from "react";
 
@@ -310,7 +317,7 @@ function AutoFilterField<TRow>({
   // `loading` so the select/checkbox controls can show a native affordance.
   const { options, loading } = useFilterOptions(def);
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom;
+  if (custom) return custom as ReactNode;
   switch (filterWidgetKind(def, registry)) {
     case "text":
       return <TextFilterField def={def} source={source} labels={labels} />;

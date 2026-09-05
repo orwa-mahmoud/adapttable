@@ -12,8 +12,7 @@
  * data, or `getParentId(row)` for a flat table with a parent column — and the
  * model flattens it to the same list of entries adapters render.
  */
-import type { ColumnDef } from "../types";
-
+import type { ColumnMetadata } from "../columnModel";
 /**
  * One visual row of a tree: the row itself, plus where it sits.
  *
@@ -260,7 +259,7 @@ export function treeCardStyle(level: number): {
  * @public
  */
 export function treeColumnKey<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   declared?: string
 ): string | undefined {
   if (declared !== undefined) return declared;

@@ -1,7 +1,5 @@
-import {
-  type TableSourceCapabilities,
-  useFrontendData,
-} from "@adapttable/core";
+import type { TableSourceCapabilities } from "@adapttable/core";
+import { useFrontendData } from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";

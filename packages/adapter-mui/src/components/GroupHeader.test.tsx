@@ -1,8 +1,8 @@
-import {
-  type ColumnDef,
-  type GroupedFlatEntry,
-  type SelectionState,
-} from "@adapttable/core";
+import type { GroupedFlatEntry } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
+
+import type { ColumnDef } from "@adapttable/react";
+
 import { Table, TableBody } from "@mui/material";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

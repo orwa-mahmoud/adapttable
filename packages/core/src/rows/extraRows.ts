@@ -13,9 +13,10 @@
  * Extras are content, not table state — nothing goes in the URL. Mobile
  * cards keep the same slots: a rule between cards, or a full-width note.
  */
-import type { CSSProperties, ReactNode } from "react";
+import type { CssProperties } from "../style/cssProperties";
+import type { DisplayValue } from "../display";
 
-import { PIN_Z } from "../columns/useColumnLayout";
+import { PIN_Z } from "../columns/columnLayoutModel";
 
 export { extraHostFillStyle } from "./rowPresentation";
 
@@ -42,7 +43,7 @@ export interface ExtraRow {
    */
   beforeRowId?: string;
   /** Full-width body. Ignored on a separator. */
-  render?: () => ReactNode;
+  render?: () => DisplayValue;
 }
 
 /**
@@ -52,7 +53,7 @@ export interface ExtraRow {
  */
 export type ExtraEntry =
   | { kind: "separator"; key: string }
-  | { kind: "fullWidth"; key: string; render?: () => ReactNode };
+  | { kind: "fullWidth"; key: string; render?: () => DisplayValue };
 
 /**
  * Narrow a body slot to a host-injected extra.
@@ -168,7 +169,7 @@ export function insertExtrasBeforeRows<TRow>(
  *
  * @public
  */
-export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties = {
+export const EXTRA_OVER_SPAN_ROW_STYLE: CssProperties = {
   position: "relative",
   zIndex: PIN_Z.rowPinned,
 };
@@ -178,7 +179,7 @@ export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties = {
  *
  * @public
  */
-export const EXTRA_OVER_SPAN_STYLE: CSSProperties = {
+export const EXTRA_OVER_SPAN_STYLE: CssProperties = {
   textAlign: "start",
   paddingBlock: "0.75rem",
   paddingInline: "0.75rem",

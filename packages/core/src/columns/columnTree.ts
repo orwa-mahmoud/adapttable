@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import type { ColumnModel, ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
-import type { ColumnDef, ColumnGroupShow } from "../types";
+import type { ColumnGroupShow } from "../types";
 import {
   COLUMN_GROUP_ID_SEP,
   COLUMN_GROUP_RENDER_PREFIX,
@@ -13,7 +14,7 @@ import {
   isColumnGroupStubKey,
 } from "./headerGroups";
 
-export type { ColumnDef, GroupedHeaderAlign };
+export type { GroupedHeaderAlign };
 /**
  * A parent header with its own children. Collapse options live here, not
  * on the table: each group decides whether a collapsed state is an arrow
@@ -35,7 +36,7 @@ export interface ColumnGroupDef<TRow> {
    * Cell shown for every row while this group is collapsed. Takes
    * precedence over {@link ColumnGroupDef.collapsedKey}.
    */
-  readonly collapsedRender?: (row: TRow) => ReactNode;
+  readonly collapsedRender?: (row: TRow) => DisplayValue;
   /**
    * Keep these children adjacent through reorder. Default `true` for a
    * tree group; the flat `column.group` shortcut still splits on drag.
@@ -52,11 +53,11 @@ export interface ColumnGroupDef<TRow> {
 }
 
 /**
- * A leaf `ColumnDef` or a {@link ColumnGroupDef} parent.
+ * A leaf `ColumnModel` or a {@link ColumnGroupDef} parent.
  *
  * @public
  */
-export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
+export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 /**
  * Collapse policy recorded for one parent while flattening a tree.
@@ -71,7 +72,7 @@ export interface ColumnGroupRecord<TRow> {
   /** Column shown as the summary while the group is collapsed. */
   readonly collapsedKey?: string;
   /** Renders a synthetic summary cell while collapsed. */
-  readonly collapsedRender?: (row: TRow) => ReactNode;
+  readonly collapsedRender?: (row: TRow) => DisplayValue;
   /** Keeps the group's columns together when columns are reordered. */
   readonly marryChildren: boolean;
   /** Tooltip on the group header. */
@@ -102,7 +103,7 @@ export function isColumnGroup<TRow>(
 export function flattenColumnTree<TRow>(
   columns: readonly ColumnInput<TRow>[]
 ): FlattenedColumns<TRow> {
-  const leaves: ColumnDef<TRow>[] = [];
+  const leaves: ColumnMetadata<TRow>[] = [];
   const groups = new Map<string, MutableGroup<TRow>>();
   walk(columns, [], leaves, groups);
   for (const leaf of leaves) {
@@ -126,7 +127,7 @@ export function flattenColumnTree<TRow>(
  */
 export interface FlattenedColumns<TRow> {
   /** The columns themselves, in render order. */
-  readonly leaves: ColumnDef<TRow>[];
+  readonly leaves: ColumnMetadata<TRow>[];
   /** The header rows above them. */
   readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 }
@@ -140,17 +141,17 @@ export interface FlattenedColumns<TRow> {
  * @public
  */
 export function applyCollapsedColumnGroups<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   collapsedIds: readonly string[],
   groups: ReadonlyMap<string, ColumnGroupRecord<TRow>> = new Map()
-): readonly ColumnDef<TRow>[] {
+): readonly ColumnMetadata<TRow>[] {
   if (collapsedIds.length === 0) return columns;
   const collapsed = new Set(collapsedIds);
   const keep = columns.map((column) =>
     shouldKeepLeaf(column, collapsed, groups)
   );
   const inserted = new Set<string>();
-  const out: ColumnDef<TRow>[] = [];
+  const out: ColumnMetadata<TRow>[] = [];
   for (let index = 0; index < columns.length; index += 1) {
     const column = columns[index]!;
     if (keep[index] === true) {
@@ -201,7 +202,7 @@ interface MutableGroup<TRow> {
   id: string;
   label: string;
   collapsedKey?: string;
-  collapsedRender?: (row: TRow) => ReactNode;
+  collapsedRender?: (row: TRow) => DisplayValue;
   marryChildren: boolean;
   headerTooltip?: string;
   align?: GroupedHeaderAlign;
@@ -211,7 +212,7 @@ interface MutableGroup<TRow> {
 function walk<TRow>(
   nodes: readonly ColumnInput<TRow>[],
   path: readonly string[],
-  leaves: ColumnDef<TRow>[],
+  leaves: ColumnMetadata<TRow>[],
   groups: Map<string, MutableGroup<TRow>>
 ): void {
   for (const node of nodes) {
@@ -239,10 +240,10 @@ function walk<TRow>(
 }
 
 function inheritedGroup<TRow>(
-  node: ColumnDef<TRow>,
+  node: ColumnMetadata<TRow>,
   path: readonly string[]
-): ColumnDef<TRow>["group"] {
-  let group: ColumnDef<TRow>["group"] = node.group;
+): ColumnMetadata<TRow>["group"] {
+  let group: ColumnMetadata<TRow>["group"] = node.group;
   if (path.length === 1) {
     group = path[0];
   } else if (path.length > 1) {
@@ -252,15 +253,15 @@ function inheritedGroup<TRow>(
 }
 
 function appendCollapsedChrome<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   index: number,
   pass: {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     keep: readonly boolean[];
     collapsed: ReadonlySet<string>;
     groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     inserted: Set<string>;
-    out: ColumnDef<TRow>[];
+    out: ColumnMetadata<TRow>[];
   }
 ): void {
   for (const id of collapsedAncestors(column, pass.collapsed)) {
@@ -282,7 +283,7 @@ function appendCollapsedChrome<TRow>(
 }
 
 function collapsedAncestors<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   collapsed: ReadonlySet<string>
 ): string[] {
   const path = columnGroupPath(column);
@@ -295,7 +296,7 @@ function collapsedAncestors<TRow>(
 }
 
 function shouldKeepLeaf<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   collapsed: ReadonlySet<string>,
   groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>
 ): boolean {
@@ -314,7 +315,7 @@ function shouldKeepLeaf<TRow>(
 }
 
 function resolveGroupShow<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   record: ColumnGroupRecord<TRow> | undefined
 ): ColumnGroupShow {
   if (column.groupShow !== undefined) return column.groupShow;
@@ -325,7 +326,7 @@ function resolveGroupShow<TRow>(
 
 function groupHasKeptLeaf<TRow>(
   id: string,
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   keep: readonly boolean[]
 ): boolean {
   return columns.some((column, index) => {
@@ -339,7 +340,7 @@ function stubColumn<TRow>(
   path: readonly string[],
   record: ColumnGroupRecord<TRow> | undefined,
   index: number
-): ColumnDef<TRow> {
+): ColumnMetadata<TRow> {
   return {
     key: `${COLUMN_GROUP_STUB_PREFIX}${id}:${String(index)}`,
     header: "",
@@ -347,7 +348,7 @@ function stubColumn<TRow>(
     width: COLUMN_GROUP_STUB_WIDTH,
     minWidth: COLUMN_GROUP_STUB_WIDTH,
     maxWidth: COLUMN_GROUP_STUB_WIDTH,
-    accessor: () => null,
+    formatValue: () => "",
     group: path.length === 1 ? path[0] : path,
     hideOnMobile: true,
     sortable: false,
@@ -359,15 +360,22 @@ function renderColumn<TRow>(
   id: string,
   path: readonly string[],
   index: number,
-  render: (row: TRow) => ReactNode,
+  render: (row: TRow) => DisplayValue,
   headerTooltip: string | undefined
-): ColumnDef<TRow> {
+): ColumnMetadata<TRow> {
   return {
     key: `${COLUMN_GROUP_RENDER_PREFIX}${id}:${String(index)}`,
     header: "",
     headerTooltip,
     width: 180,
-    accessor: (row) => render(row),
+    formatValue: (row) => {
+      const value = render(row);
+      return typeof value === "string"
+        ? value
+        : typeof value === "number" || typeof value === "boolean"
+          ? String(value)
+          : "";
+    },
     group: path.length === 1 ? path[0] : path,
     sortable: false,
   };

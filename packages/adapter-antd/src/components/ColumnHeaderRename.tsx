@@ -3,7 +3,7 @@ import {
   type ColumnRenameEditorState,
   LiveRegion,
   useColumnRenameEditor,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Flex, Input, theme } from "antd";
 import type { ComponentRef, ReactElement } from "react";
 import { useEffect, useRef } from "react";

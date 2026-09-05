@@ -9,9 +9,9 @@
  * layout with percentage widths shares space proportionally, and `min-width` /
  * `max-width` clamp it.
  */
-import type { CSSProperties } from "react";
+import type { ColumnMetadata } from "../columnModel";
+import type { CssProperties } from "../style/cssProperties";
 
-import type { ColumnDef } from "../types";
 import { columnGroupStubStyle, isColumnGroupStubKey } from "./headerGroups";
 
 /**
@@ -21,7 +21,7 @@ import { columnGroupStubStyle, isColumnGroupStubKey } from "./headerGroups";
  */
 export interface ColumnSizingOptions<TRow> {
   /** The columns as rendered. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Whether the table fits its container rather than overflowing it. */
   fitColumns?: boolean;
   /** User widths from the layout state, which always win. */
@@ -76,10 +76,10 @@ export function columnFlexShares<TRow>(
  * @public
  */
 export function columnSizeStyle<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   shares: Readonly<Record<string, number>> = {},
   userWidth?: number
-): CSSProperties | undefined {
+): CssProperties | undefined {
   if (isColumnGroupStubKey(column.key)) {
     return columnGroupStubStyle();
   }
@@ -116,7 +116,7 @@ export function columnSizeStyle<TRow>(
  */
 export function fittedTableStyle(
   fitColumns?: boolean
-): CSSProperties | undefined {
+): CssProperties | undefined {
   return fitColumns === true
     ? { tableLayout: "fixed", width: "100%" }
     : undefined;

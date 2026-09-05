@@ -4,4 +4,4 @@
  * Headless: the pin state machine lives on the core factory. This
  * entry exists so the kit subpath matches the classification table.
  */
-export { rowPinning } from "@adapttable/core/features";
+export { rowPinning } from "@adapttable/react/features";

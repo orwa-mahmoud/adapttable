@@ -1,4 +1,4 @@
-import type { SavedViewsPanelChromeProps } from "@adapttable/core/adapter";
+import type { SavedViewsPanelChromeProps } from "@adapttable/react/adapter";
 import type { DataTableClassNames, SavedView } from "@adapttable/unstyled";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

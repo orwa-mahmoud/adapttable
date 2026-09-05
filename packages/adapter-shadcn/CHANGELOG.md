@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- f8ba086: `<kit>/features` now re-exports every type `@adapttable/core/features` publishes,
+- f8ba086: `<kit>/features` now re-exports every type `@adapttable/react/features` publishes,
   not just the feature factories. Writing a `TableFeature` of your own means naming
   `Aggregator`, `Command`, `CustomCellEditorRender`, `ExportWriter`,
   `FilterTypeSpec` or `SidePanelEntry` to register anything on the host, and those
@@ -187,7 +187,7 @@
   `printButton` classNames key in unstyled and shadcn.
 
   `printToolbar(wanted, onPrint, labels)` is the one rule that resolves the pair,
-  exported from `@adapttable/core/adapter` beside `undoRedoToolbar`.
+  exported from `@adapttable/react/adapter` beside `undoRedoToolbar`.
 
 - 241f9d4: `renderCard` replaces a mobile card's body with your own layout, in every
   adapter.
@@ -292,7 +292,7 @@
 
 ### Minor Changes
 
-- 6065cb5: User-facing controls no longer ship on `@adapttable/core`. Import `FilterTreeBuilder`, `ChecklistFilter`, `FilterHeaderRow`, `FilterHeaderControl`, `FindBar`, `RowEditActions`, `BatchEditBar`, `TreeToggle`, `TreeCell`, `ColumnGroupToggle`, `GroupMoreButton`, `RowReorderHandle`, `RowReorderButtons`, `FillHandle`, and `SelectionStatsBar` from the adapter you use. The filter-tree disclosure is adapter-owned too. Core keeps the headless hooks, state machines, and `*Chrome` slot layouts on `@adapttable/core/adapter`. Days-old public exports, no v3.
+- 6065cb5: User-facing controls no longer ship on `@adapttable/core`. Import `FilterTreeBuilder`, `ChecklistFilter`, `FilterHeaderRow`, `FilterHeaderControl`, `FindBar`, `RowEditActions`, `BatchEditBar`, `TreeToggle`, `TreeCell`, `ColumnGroupToggle`, `GroupMoreButton`, `RowReorderHandle`, `RowReorderButtons`, `FillHandle`, and `SelectionStatsBar` from the adapter you use. The filter-tree disclosure is adapter-owned too. Core keeps the headless hooks, state machines, and `*Chrome` slot layouts on `@adapttable/react/adapter`. Days-old public exports, no v3.
 
   Adapter-generated filter forms now use their kit-native select, multiselect, disclosure, and popover controls. Long filter overlays remain viewport-bound and scroll internally, including nested kit menus.
 
@@ -354,7 +354,7 @@
 
   Labels `pendingRows`, `saveAll` and `cancelAll` are translated in all seventeen
   locales. Headless: `useBatchEditing`, with `BatchEditCell` and `BatchEditBar`
-  from `@adapttable/core/adapter`.
+  from `@adapttable/react/adapter`.
 
 - ec12556: Boolean filter type
 
@@ -414,7 +414,7 @@
   guessing. Not available in the Ant Design adapter, which renders through antd's
   own `<Table>`.
 
-  Headless: `useColumnWindow` and `ColumnSpacer` from `@adapttable/core/adapter`.
+  Headless: `useColumnWindow` and `ColumnSpacer` from `@adapttable/react/adapter`.
 
 - c20c888: Bring your own cell editor
 
@@ -457,7 +457,7 @@
   "unsaved changes" line.
 
   Headless: `useDirtyCells`, `DirtyCellState`, and `rowIsDirty(editing, rowId)`
-  from `@adapttable/core/adapter`.
+  from `@adapttable/react/adapter`.
 
 - 2c97e75: Edit conflict handling under live updates
 
@@ -498,7 +498,7 @@
 
   Headless: `useEditValidation`, `CellValidator` / `RowValidator`,
   `resolveCommitValue`, and `editorValidationProps` / `editorBusyProps` from
-  `@adapttable/core/adapter`. The unstyled and shadcn kits add an `editCellError`
+  `@adapttable/react/adapter`. The unstyled and shadcn kits add an `editCellError`
   class hook.
 
 - f06b849: Five more cell editors: boolean, date, datetime, time, multi-select
@@ -515,7 +515,7 @@
   Headless: `editorInputType`, `isBooleanEditor` / `isSelectEditor` /
   `isMultiSelectEditor`, `booleanDraft` / `isDraftChecked`, `formatMultiDraft` /
   `readMultiDraft`, and `NativeBooleanEditor` / `NativeMultiSelectEditor` with
-  `commitBooleanDraft` / `multiDraftFromSelect` from `@adapttable/core/adapter`.
+  `commitBooleanDraft` / `multiDraftFromSelect` from `@adapttable/react/adapter`.
 
 - 9ac9635: Full-width and separator rows via `extraRows`
 
@@ -543,7 +543,7 @@
   eight adapters, RTL included.
 
   Headless: `fillDirection`, `fillTargetRange`, `fillRangeEdits`,
-  `cellFillHandler`, and `FillHandle` from `@adapttable/core/adapter`.
+  `cellFillHandler`, and `FillHandle` from `@adapttable/react/adapter`.
 
 - e6d5d28: The filter popover stops at the viewport edge
 
@@ -580,7 +580,7 @@
   fills in).
 
   Every word is localizable in all seventeen locales. Headless: `findMatches`,
-  `useFindInTable` and `FindBar` from `@adapttable/core/adapter`.
+  `useFindInTable` and `FindBar` from `@adapttable/react/adapter`.
 
 - b166133: Flex columns, bounds, and filling the container
 
@@ -655,7 +655,7 @@
   reports the keys as a list.
 
   Headless: `parseGroupBy`, `formatGroupBy`, and `groupIndentStyle` from
-  `@adapttable/core/adapter`.
+  `@adapttable/react/adapter`.
 
 - e990107: Range selection reaches the pointer and whole columns. Drag across cells to
   select a block; click a column header to select that column — Ctrl/Cmd+click
@@ -700,7 +700,7 @@
   `row-edit-begin`, `row-edit-actions`, `row-edit-save`, `row-edit-cancel`.
 
   Headless: `useRowEditing`, with `RowEditCell`, `RowEditActions` and
-  `rowEditControls` from `@adapttable/core/adapter`. Every kit's editor now takes
+  `rowEditControls` from `@adapttable/react/adapter`. Every kit's editor now takes
   its focus ref from the controller (`ctrl.focusRef`), so the table decides which
   field takes focus.
 
@@ -765,7 +765,7 @@
   seventeen locales. Number formatting follows the table's `locale`.
 
   Headless: `selectionStats` and `SelectionStatsBar` from
-  `@adapttable/core/adapter`.
+  `@adapttable/react/adapter`.
 
 - 2ab6c3a: Grouping on the server
 
@@ -802,7 +802,7 @@
 
   Headless: `buildTreeEntries`, `useTreeExpansion`, `filterTreeRows`,
   `treeColumnKey`, `treeIndentStyle`, `treeCardStyle`, `bodyRowEntries`, and
-  `TreeCell` / `TreeToggle` from `@adapttable/core/adapter`. The unstyled and
+  `TreeCell` / `TreeToggle` from `@adapttable/react/adapter`. The unstyled and
   shadcn kits add `treeCell`, `treeToggle` and `treeSpacer` class hooks.
 
 - 8cc2690: Row detail works under virtualization
@@ -815,7 +815,7 @@
   The window now measures the pair. An open panel reports its real height, one
   that grows later corrects itself, and the warning is gone.
 
-  Headless: `useRowPairMeasurer` from `@adapttable/core/adapter`.
+  Headless: `useRowPairMeasurer` from `@adapttable/react/adapter`.
 
 - Updated dependencies [a9992c9]
 - Updated dependencies [ac998d0]
@@ -894,7 +894,7 @@
   `groupRowLayout` and `groupAggregateEntries` place them, for a custom group
   header that should match.
 
-- 4b0e572: `resolveMobileLabel` from `@adapttable/core/adapter` resolves a mobile card
+- 4b0e572: `resolveMobileLabel` from `@adapttable/react/adapter` resolves a mobile card
   field's caption — an explicit `mobileLabel`, then a text `header`, then the
   column's key, with `mobileLabel: ""` meaning no caption at all. Every adapter's
   card layout now reads it from there, so a custom card can match them exactly.
@@ -1073,7 +1073,7 @@
   - **~30 internal plumbing exports were removed from `@adapttable/core`**
     (editing/grouping keyboard micro-steps, internal constants, layout math
     helpers). Everything the adapters use remains public and documented.
-  - **The adapter-builder tier ships from `@adapttable/core/adapter`.**
+  - **The adapter-builder tier ships from `@adapttable/react/adapter`.**
     `useDataTableShell`, the render prelude, chrome prop bundles, pinning
     and pager math, keyed virtualization and the inline icons moved to the
     new entry point; `@adapttable/core` keeps the app-facing API. Same
@@ -1206,7 +1206,7 @@
   - **~30 internal plumbing exports were removed from `@adapttable/core`**
     (editing/grouping keyboard micro-steps, internal constants, layout math
     helpers). Everything the adapters use remains public and documented.
-  - **The adapter-builder tier ships from `@adapttable/core/adapter`.**
+  - **The adapter-builder tier ships from `@adapttable/react/adapter`.**
     `useDataTableShell`, the render prelude, chrome prop bundles, pinning
     and pager math, keyed virtualization and the inline icons moved to the
     new entry point; `@adapttable/core` keeps the app-facing API. Same

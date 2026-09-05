@@ -3,8 +3,8 @@ import {
   slotRender,
   type StaticTableFeature,
   TOOLBAR_EXTRAS,
-} from "@adapttable/core/adapter";
-import { fullscreen as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { fullscreen as core } from "@adapttable/react/features";
 
 import { FullscreenButton } from "./components/toolbarExtras";
 

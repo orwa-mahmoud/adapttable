@@ -11,9 +11,9 @@
  * is searched by that date rather than by the ISO string underneath. Nothing
  * else would match what a person can see on screen.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { columnText } from "../columns/columnText";
 import type { GridCell } from "../focus/gridFocus";
-import type { ColumnDef } from "../types";
 
 /**
  * What a find needs to know.
@@ -26,7 +26,7 @@ export interface FindMatchesOptions<TRow> {
   /** The rows the browser holds, in table order. */
   rows: readonly TRow[];
   /** The columns as rendered — matches are addressed by their index. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Where the rendered window starts in the dataset. Zero unless paged. */
   firstRowIndex?: number;
 }

@@ -5,9 +5,9 @@
  * its own column's cell, not at the end of a spanning row where a wide table
  * puts it past the visible edge.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   groupAggregateEntries,
   groupLeafCount,
@@ -17,7 +17,7 @@ import {
 interface Row {
   name: string;
 }
-const COLUMNS: ColumnDef<Row>[] = [
+const COLUMNS: ColumnMetadata<Row>[] = [
   { key: "name", header: "Name" },
   { key: "email", header: "Email" },
   { key: "status", header: "Status" },
@@ -25,11 +25,12 @@ const COLUMNS: ColumnDef<Row>[] = [
   { key: "load", header: "Load" },
 ];
 
-const keys = (columns: readonly ColumnDef<Row>[]) => columns.map((c) => c.key);
+const keys = (columns: readonly ColumnMetadata<Row>[]) =>
+  columns.map((c) => c.key);
 
 describe("groupRowLayout", () => {
   it("stays one spanning cell when there is nothing to align", () => {
-    const layout = groupRowLayout(COLUMNS, undefined);
+    const layout = groupRowLayout<Row>(COLUMNS, undefined);
     expect(keys(layout.labelColumns)).toEqual([
       "name",
       "email",
@@ -43,7 +44,7 @@ describe("groupRowLayout", () => {
   it("gives every column after the label its own cell", () => {
     // The label spans up to the first aggregate; from there each column gets a
     // cell so the number sits under the column it totals.
-    const layout = groupRowLayout(COLUMNS, { budget: "$414,300" });
+    const layout = groupRowLayout<Row>(COLUMNS, { budget: "$414,300" });
     expect(keys(layout.labelColumns)).toEqual(["name", "email", "status"]);
     expect(layout.cells.map((cell) => [cell.column.key, cell.node])).toEqual([
       ["budget", "$414,300"],
@@ -52,7 +53,7 @@ describe("groupRowLayout", () => {
   });
 
   it("keeps a cell empty for a column with no aggregate", () => {
-    const layout = groupRowLayout(COLUMNS, { load: "78%" });
+    const layout = groupRowLayout<Row>(COLUMNS, { load: "78%" });
     expect(keys(layout.labelColumns)).toEqual([
       "name",
       "email",
@@ -63,7 +64,7 @@ describe("groupRowLayout", () => {
   });
 
   it("places several aggregates each under its own column", () => {
-    const layout = groupRowLayout(COLUMNS, {
+    const layout = groupRowLayout<Row>(COLUMNS, {
       status: "6",
       budget: "$1",
       load: "9%",
@@ -79,7 +80,7 @@ describe("groupRowLayout", () => {
   it("shares the first cell when the first column is the one with a number", () => {
     // The label has to live somewhere, so it keeps the first column and the
     // aggregate joins it there rather than being dropped.
-    const layout = groupRowLayout(COLUMNS, { name: "6 people" });
+    const layout = groupRowLayout<Row>(COLUMNS, { name: "6 people" });
     expect(keys(layout.labelColumns)).toEqual(["name"]);
     expect(layout.labelAggregates.map((cell) => cell.node)).toEqual([
       "6 people",
@@ -95,7 +96,7 @@ describe("groupRowLayout", () => {
   it("ignores an aggregate for a column that is not rendered", () => {
     // A hidden column's number has nowhere to go, and inventing a cell for it
     // would shift every other cell out from under its column.
-    const layout = groupRowLayout(COLUMNS, { secret: "hidden" });
+    const layout = groupRowLayout<Row>(COLUMNS, { secret: "hidden" });
     expect(layout.cells).toEqual([]);
     expect(keys(layout.labelColumns)).toHaveLength(5);
   });
@@ -104,7 +105,7 @@ describe("groupRowLayout", () => {
 describe("groupAggregateEntries", () => {
   it("lists only the columns that have a number, in column order", () => {
     // A card has no columns to align to, so empty cells would be noise.
-    const entries = groupAggregateEntries(COLUMNS, {
+    const entries = groupAggregateEntries<Row>(COLUMNS, {
       load: "78%",
       budget: "$1",
     });
@@ -115,7 +116,7 @@ describe("groupAggregateEntries", () => {
   });
 
   it("is empty when the group has no aggregates", () => {
-    expect(groupAggregateEntries(COLUMNS, undefined)).toEqual([]);
+    expect(groupAggregateEntries<Row>(COLUMNS, undefined)).toEqual([]);
   });
 });
 

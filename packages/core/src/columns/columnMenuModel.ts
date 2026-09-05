@@ -1,9 +1,13 @@
+import type { ColumnMetadata } from "../columnModel";
 import type { FeatureHostState } from "../features/currentHost";
 import type { GroupAggregateOverride } from "../grouping/groupAggregateOverrides";
 import type { GroupingPanelState } from "../grouping/groupingPanelModel";
-import type { ColumnDef, Direction } from "../types";
-import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
-import { applyColumnOrder } from "./useColumnLayout";
+import type { Direction } from "../types";
+import {
+  applyColumnOrder,
+  type PinSide,
+  type UseColumnLayoutResult,
+} from "./columnLayoutModel";
 
 export type { UseColumnLayoutResult };
 
@@ -12,7 +16,7 @@ export type { UseColumnLayoutResult };
  *
  * @public
  */
-export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string {
+export function columnMenuLabel<TRow>(column: ColumnMetadata<TRow>): string {
   if (typeof column.header === "string") return column.header;
   return column.mobileLabel ?? column.key;
 }
@@ -31,7 +35,7 @@ export type PinnedSide = PinSide | undefined;
  */
 export interface ColumnMenuRow<TRow> {
   /** The column this row controls. */
-  column: ColumnDef<TRow>;
+  column: ColumnMetadata<TRow>;
   /** The column's key. */
   key: string;
   /** The column's name in prose, for the row's label. */
@@ -94,7 +98,7 @@ export function pinActionLabel(
  */
 /**
  * Reserved layout key for the injected row-actions column. It is not a
- * `ColumnDef`, but the layout state treats keys opaquely, so the actions
+ * `ColumnModel`, but the layout state treats keys opaquely, so the actions
  * column hides (`hidden: ["actions"]`) and end-pins
  * (`pinned: { actions: "end" }`) like any data column — adapters list it
  * in the Columns menu with a visibility toggle and an end-pin toggle (no
@@ -106,7 +110,7 @@ export const ACTIONS_COLUMN_KEY = "actions";
 
 /**
  * Reserved layout key for the injected row-reorder column. Same deal as
- * {@link ACTIONS_COLUMN_KEY}: not a `ColumnDef`, but hideable and
+ * {@link ACTIONS_COLUMN_KEY}: not a `ColumnModel`, but hideable and
  * start-pinnable through the layout because the key is just a string.
  *
  * @public
@@ -119,7 +123,7 @@ export const REORDER_COLUMN_KEY = "reorder";
  * @public
  */
 export function columnMenuRows<TRow>(
-  allColumns: readonly ColumnDef<TRow>[],
+  allColumns: readonly ColumnMetadata<TRow>[],
   layout: UseColumnLayoutResult<TRow>
 ): ColumnMenuRow<TRow>[] {
   return applyColumnOrder(allColumns, layout.state.order).map(
@@ -556,7 +560,7 @@ export interface ColumnMenuLabels {
  */
 export interface ColumnMenuChromeProps<TRow> {
   /** All declared columns (pre layout filtering). */
-  allColumns: ColumnDef<TRow>[];
+  allColumns: ColumnMetadata<TRow>[];
   /** The user column-layout state + mutators. */
   layout: UseColumnLayoutResult<TRow>;
   /** Resolved labels. */

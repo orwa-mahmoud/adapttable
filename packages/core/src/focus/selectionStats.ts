@@ -12,8 +12,8 @@
  * meaningful sum, and refusing to give one because a string is in the way is
  * the behaviour nobody wants.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { buildExportTable } from "../export/exportWriter";
-import type { ColumnDef } from "../types";
 import { type CellRange, cellRangeIndices, cellRangeSize } from "./cellRange";
 
 /**
@@ -52,7 +52,7 @@ export interface SelectionStatsOptions<TRow> {
   /** The rows the browser holds, in table order. */
   rows: readonly TRow[];
   /** The columns as rendered — a range's column indices address these. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Where the rendered window starts in the dataset. Zero unless paged. */
   firstRowIndex?: number;
 }

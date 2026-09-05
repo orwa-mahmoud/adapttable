@@ -1,6 +1,5 @@
-import type { CSSProperties } from "react";
-
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { CssProperties } from "../style/cssProperties";
 
 /**
  * Pixel lock for a collapsed arrow stub — chevron only, no leftover strip.
@@ -126,7 +125,7 @@ export type GroupedHeaderAlign = "start" | "center" | "end";
  *
  * @public
  */
-export function columnGroupStubStyle(): CSSProperties {
+export function columnGroupStubStyle(): CssProperties {
   return {
     width: COLUMN_GROUP_STUB_WIDTH,
     minWidth: COLUMN_GROUP_STUB_WIDTH,
@@ -157,7 +156,7 @@ export function groupedHeaderAlign(
  *
  * @public
  */
-export function groupedHeaderLabelStyle(): CSSProperties {
+export function groupedHeaderLabelStyle(): CssProperties {
   return {
     display: "inline-flex",
     alignItems: "center",
@@ -177,7 +176,7 @@ export function groupedHeaderLabelStyle(): CSSProperties {
 export function groupedHeaderCellStyle(
   cell: Readonly<{ rowSpan: number; cell: HeaderGroupCell }>,
   hairline: string
-): CSSProperties {
+): CssProperties {
   return {
     textAlign: groupedHeaderAlign(cell.cell.align),
     whiteSpace: "nowrap",
@@ -194,7 +193,7 @@ export function groupedHeaderCellStyle(
  * @public
  */
 export function columnGroupPath<TRow>(
-  column: Pick<ColumnDef<TRow>, "group">
+  column: Pick<ColumnMetadata<TRow>, "group">
 ): readonly string[] {
   if (column.group === undefined) return [];
   return typeof column.group === "string" ? [column.group] : column.group;
@@ -231,7 +230,7 @@ export function toggleCollapsedColumnGroup(
  * @public
  */
 export function headerGroupRows<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   collapsedIds: readonly string[] = [],
   collapsible = false,
   groups?: ReadonlyMap<string, { readonly align?: GroupedHeaderAlign }>
@@ -250,7 +249,7 @@ export function headerGroupRows<TRow>(
 }
 
 function headerGroupRowAt<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   paths: readonly (readonly string[])[],
   collapsed: ReadonlySet<string>,
   collapsible: boolean,
@@ -292,7 +291,7 @@ function headerGroupRowAt<TRow>(
  * @public
  */
 export function headerGroupRow<TRow>(
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): HeaderGroupCell[] | null {
   return headerGroupRows(columns)?.[0] ?? null;
 }
@@ -340,7 +339,7 @@ export type HtmlGroupedHeaderCell =
  * @public
  */
 export function htmlGroupedHeaderPlan<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   collapsedIds: readonly string[] = [],
   collapsible = false,
   groups?: ReadonlyMap<string, { readonly align?: GroupedHeaderAlign }>
@@ -361,7 +360,7 @@ export function htmlGroupedHeaderPlan<TRow>(
 }
 
 function needsChildHeaderRow<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   paths: readonly (readonly string[])[],
   depth: number
 ): boolean {
@@ -374,7 +373,7 @@ function needsChildHeaderRow<TRow>(
 function fillGroupLevels<TRow>(
   plan: HtmlGroupedHeaderCell[][],
   groupRows: HeaderGroupCell[][],
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   paths: readonly (readonly string[])[],
   totalRows: number,
   depth: number
@@ -409,7 +408,7 @@ function fillGroupLevels<TRow>(
 
 function fillGapLeaves<TRow>(
   plan: HtmlGroupedHeaderCell[][],
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   paths: readonly (readonly string[])[],
   start: number,
   span: number,
@@ -435,7 +434,7 @@ function fillGapLeaves<TRow>(
 
 function fillChildHeaderRow<TRow>(
   plan: HtmlGroupedHeaderCell[][],
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   paths: readonly (readonly string[])[],
   depth: number
 ): void {
@@ -454,7 +453,7 @@ function fillChildHeaderRow<TRow>(
 }
 
 function spanIsSummaryOnly<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   start: number,
   span: number
 ): boolean {

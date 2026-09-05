@@ -1,4 +1,4 @@
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 
 /**
  * Which layout a table is rendering in.
@@ -25,11 +25,11 @@ export type TableLayout = "desktop" | "mobile";
  *
  * @public
  */
-export function visibleColumns<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+export function visibleColumns<TCol extends ColumnMetadata<any>>(
+  columns: readonly TCol[],
   layout: TableLayout,
   mobileIdentityColumns = 3
-): ColumnDef<TRow>[] {
+): TCol[] {
   if (layout === "desktop") return columns.filter((c) => !c.hideOnDesktop);
   // Identity anchors come from the desktop view (the columns a user knows),
   // but mobile filters the FULL declared set so mobile-only columns survive.

@@ -6,15 +6,17 @@
  * slots and the inert stubs, never the hooks, so the adapter root graph
  * matches the other kits.
  */
-import {
-  asBatchGesture,
-  type BatchRowEdit,
-  type EditHistoryState,
-  type FindInTableState,
-  type GridFocusState,
-  type SelectionStats,
-  type TableLabels,
-  type TableSource,
+import { asBatchGesture } from "@adapttable/react";
+import type {
+  BatchRowEdit,
+  EditHistoryState,
+  FindInTableState,
+} from "@adapttable/react";
+import type { GridFocusState } from "@adapttable/react/adapter";
+import type {
+  SelectionStats,
+  TableLabels,
+  TableSource,
 } from "@adapttable/core";
 import {
   CELL_NAV_LIVE,
@@ -38,7 +40,7 @@ import {
   useFeatureSlotFilled,
   type UseGridFocusOptions,
   windowedTableAria,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 import type { DataTableProps } from "./types";

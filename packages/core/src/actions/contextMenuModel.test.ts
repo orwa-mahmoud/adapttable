@@ -6,10 +6,10 @@
  * "Hide column" over a column locked against hiding is worse than one that
  * lists nothing — the user reads it as broken rather than as forbidden.
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
 import { defaultLabels } from "../labels";
-import type { ColumnDef } from "../types";
 import { contextMenuItems, type ContextMenuTarget } from "./contextMenuModel";
 
 interface Row {
@@ -17,13 +17,13 @@ interface Row {
   name: string;
 }
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
-  { key: "plain", header: "Plain", accessor: (r) => r.id },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (r) => r.name, sortable: true },
+  { key: "plain", header: "Plain", exportValue: (r) => r.id },
   {
     key: "locked",
     header: "Locked",
-    accessor: (r) => r.id,
+    exportValue: (r) => r.id,
     lockVisibility: true,
     lockPin: true,
   },
@@ -142,8 +142,8 @@ describe("contextMenuItems", () => {
   });
 
   it("offers to filter only a column that has a filter", () => {
-    const filterable: ColumnDef<Row>[] = [
-      { key: "name", header: "N", accessor: (r) => r.name, filter: "text" },
+    const filterable: ColumnModel<Row>[] = [
+      { key: "name", header: "N", exportValue: (r) => r.name, filter: "text" },
     ];
     const items = contextMenuItems<Row>({
       target: HEADER,
@@ -164,11 +164,11 @@ describe("contextMenuItems", () => {
       onHide: vi.fn(),
       onFilter: vi.fn(),
     };
-    const filterable: ColumnDef<Row>[] = [
+    const filterable: ColumnModel<Row>[] = [
       {
         key: "name",
         header: "N",
-        accessor: (r) => r.name,
+        exportValue: (r) => r.name,
         sortable: true,
         filter: "text",
       },

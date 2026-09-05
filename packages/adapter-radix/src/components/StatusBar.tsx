@@ -3,7 +3,7 @@ import {
   type StatusBarChromeProps,
   type StatusBarSlotProps,
   type StatusBarSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Flex, Text } from "@radix-ui/themes";
 
 import { statsSlots } from "./SelectionStatsBar";

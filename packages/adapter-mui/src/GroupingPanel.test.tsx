@@ -1,9 +1,8 @@
-import {
-  type ColumnDef,
-  type GroupAggregateOverrides,
-  resolveLabels,
-} from "@adapttable/core";
-import type { GroupingPanelState } from "@adapttable/core/adapter";
+import { resolveLabels } from "@adapttable/core";
+import type { GroupAggregateOverrides } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
+import type { GroupingPanelState } from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";

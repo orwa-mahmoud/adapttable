@@ -3,7 +3,9 @@
  * them on demand, delete views — mounted by the composed feature and wired to
  * the table's own URL backend.
  */
-import { createMemoryAdapter, type LayoutStorage } from "@adapttable/core";
+import type { LayoutStorage } from "@adapttable/react";
+
+import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

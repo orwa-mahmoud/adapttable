@@ -2,7 +2,8 @@
  * Base UI kit controls — TextField / Button / IconButton / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel, useHeaderFilterOverlay } from "@adapttable/core";
+import { filterLabel } from "@adapttable/core";
+import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
   AgentApprovalChrome,
   type AgentApprovalListProps,
@@ -50,7 +51,7 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Menu } from "@base-ui/react/menu";
 import { Popover } from "@base-ui/react/popover";
 import { useEffect, useRef, useState } from "react";

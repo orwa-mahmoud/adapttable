@@ -5,7 +5,7 @@ import {
   FILTER_POPOVER,
   TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Badge, Button, Flex, Input, Select, Spin } from "antd";
 import type { ReactNode } from "react";
 

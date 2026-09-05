@@ -5,7 +5,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSearchProps,
   type ChecklistSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 
 export type { ChecklistFilterProps };

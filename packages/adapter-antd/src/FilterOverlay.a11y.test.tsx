@@ -18,7 +18,7 @@
  *    `aria-expanded` off the trigger (the trigger only sets it in popover
  *    mode), so drawer closure is asserted by the dialog unmounting.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import {
   cleanup,
   fireEvent,

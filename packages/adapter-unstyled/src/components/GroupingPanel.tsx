@@ -8,7 +8,7 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Children,
   cloneElement,
@@ -88,7 +88,7 @@ function DropZone({
       data-active={active || undefined}
       className={classNames.groupingDropZone}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
     >
       {empty ? label : <span aria-hidden="true">│</span>}
@@ -181,7 +181,7 @@ function RemoveZone({
       data-active={active || undefined}
       className={classNames.groupingRemoveZone}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
     >
       {label}

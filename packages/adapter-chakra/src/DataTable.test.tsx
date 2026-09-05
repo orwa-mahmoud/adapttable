@@ -1,5 +1,5 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {
   act,
@@ -278,7 +278,7 @@ describe("<DataTable> (Chakra)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: { error: Error; retry: () => void }) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

@@ -1,1 +1,1 @@
-export { resizableColumns } from "@adapttable/core/features";
+export { resizableColumns } from "@adapttable/react/features";

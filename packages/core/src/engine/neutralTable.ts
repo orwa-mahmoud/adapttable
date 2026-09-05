@@ -1,8 +1,7 @@
 /**
  * Live handle AI and future bindings read. No React.
  */
-
-import type { ColumnModel } from "../columnModel";
+import type { ColumnMetadata } from "../columnModel";
 import type { TableSourceCapabilities } from "../source/capabilities";
 import type {
   TableEngine,
@@ -19,7 +18,7 @@ import type {
 export interface NeutralTable<TRow = unknown> {
   readonly tableId: string;
   readonly revisions: TableRevisions;
-  readonly columns: readonly ColumnModel<TRow>[];
+  readonly columns: readonly ColumnMetadata<TRow>[];
   readonly cellValue: (row: TRow, columnKey: string) => unknown;
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   readonly rowByKey: (rowKey: string) => TRow | undefined;

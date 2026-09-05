@@ -3,11 +3,11 @@ import {
   slotRender,
   type StaticTableFeature,
   STATUS_BAR,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   selectionStats as coreSelectionStats,
   statusBar as coreStatusBar,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { StatusBar } from "./components/StatusBar";
 

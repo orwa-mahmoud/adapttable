@@ -1,5 +1,7 @@
-import { type ColumnDef, defaultLabels } from "@adapttable/core";
-import type { GroupingPanelState } from "@adapttable/core/adapter";
+import { defaultLabels } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
+import type { GroupingPanelState } from "@adapttable/react/adapter";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

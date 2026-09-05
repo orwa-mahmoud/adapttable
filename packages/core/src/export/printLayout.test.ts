@@ -6,9 +6,9 @@
  * become a vehicle for markup that was meant to be a cell. A header of
  * `<b>Name</b>` that lands unescaped is an XSS bug, not a formatting one.
  */
+import type { ColumnModel } from "../columnModel";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
 import * as env from "../utils/env";
 import { buildExportTable } from "./exportWriter";
 import {
@@ -33,14 +33,14 @@ const ROWS: Row[] = [
   { name: "Grace <&>", age: 45, zip: "02139", active: false },
 ];
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "age", header: "Age", accessor: (row) => row.age },
-  { key: "zip", header: "Zip", accessor: (row) => row.zip },
-  { key: "active", header: "Active", accessor: (row) => row.active },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
+  { key: "age", header: "Age", exportValue: (row) => row.age },
+  { key: "zip", header: "Zip", exportValue: (row) => row.zip },
+  { key: "active", header: "Active", exportValue: (row) => row.active },
 ];
 
-const tableOf = (rows: Row[] = ROWS, columns: ColumnDef<Row>[] = COLUMNS) =>
+const tableOf = (rows: Row[] = ROWS, columns: ColumnModel<Row>[] = COLUMNS) =>
   buildExportTable(rows, columns);
 
 afterEach(() => {
@@ -160,10 +160,10 @@ describe("buildPrintTableHtml", () => {
         {
           key: "name",
           header: "Name",
-          accessor: (row) => row.name,
+          exportValue: (row) => row.name,
           width: 160,
         },
-        { key: "age", header: "Age", accessor: (row) => row.age, width: 80 },
+        { key: "age", header: "Age", exportValue: (row) => row.age, width: 80 },
       ])
     );
     expect(html).toContain('data-ch="20"');
@@ -261,7 +261,7 @@ describe("buildPrintTableHtml", () => {
   it("falls back to a column key when the header is not text", () => {
     const html = buildPrintTableHtml(
       buildExportTable(ROWS, [
-        { key: "name", header: 1 as never, accessor: (row) => row.name },
+        { key: "name", header: 1 as never, exportValue: (row) => row.name },
       ])
     );
     expect(html).toContain(">name</th>");

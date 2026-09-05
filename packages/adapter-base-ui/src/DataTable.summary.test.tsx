@@ -4,7 +4,7 @@
  * of the `<tbody>` (and a final summary card on mobile), so it is queried by
  * that marker, not by a footer section.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

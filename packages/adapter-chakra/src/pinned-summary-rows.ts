@@ -1,1 +1,1 @@
-export { pinnedSummaryRows } from "@adapttable/core/features";
+export { pinnedSummaryRows } from "@adapttable/react/features";

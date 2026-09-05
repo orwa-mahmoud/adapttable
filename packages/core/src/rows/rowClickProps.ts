@@ -1,5 +1,3 @@
-import type { KeyboardEvent, MouseEvent } from "react";
-
 /**
  * Handlers + affordance for an activatable (clickable) row.
  *
@@ -7,9 +5,9 @@ import type { KeyboardEvent, MouseEvent } from "react";
  */
 export interface RowClickProps {
   /** Called when pressed. */
-  onClick: (event: MouseEvent<HTMLElement>) => void;
+  onClick: (event: MouseEvent & { currentTarget: HTMLElement }) => void;
   /** Handles the keys this control owns. */
-  onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+  onKeyDown: (event: KeyboardEvent & { currentTarget: HTMLElement }) => void;
   /**
    * Roving tab stop: the first row is the list's single Tab entry point;
    * the rest are reached with ArrowUp/ArrowDown (which move the stop

@@ -29,7 +29,12 @@ import {
   withExtendedFilterType,
   withFilterType,
 } from "../filters/filterRegistry";
-import type { SidePanelEntry } from "../layout/SidePanelChrome";
+
+/** Neutral panel tab identity. React chrome adds the rest. */
+export interface SidePanelEntry {
+  /** Stable identity, used for the open-panel state and the URL. */
+  key: string;
+}
 
 /**
  * Extra column-menu actions a plugin appends after the built-ins.

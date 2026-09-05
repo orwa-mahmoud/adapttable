@@ -5,7 +5,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSearchProps,
   type ChecklistSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ChangeEvent } from "react";
 
 export type { ChecklistFilterProps };

@@ -3,7 +3,7 @@ import {
   type StatusBarChromeProps,
   type StatusBarSlotProps,
   type StatusBarSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import type { DataTableClassNames } from "../types";
 import { ClassNamesProvider, useClassNames } from "./classNamesContext";

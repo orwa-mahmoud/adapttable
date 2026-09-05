@@ -3,9 +3,9 @@
  * filtered set with this facet's own filter removed (#281).
  */
 import type { ExtraFilters } from "../types";
-import { type ChecklistValue, collectChecklistValues } from "./checklist";
+import { type ChecklistValue, collectChecklistValues } from "./checklistValues";
 import type { FilterDef } from "./filterDefs";
-import { listFilterValues } from "./filterForm";
+import { listFilterValues } from "./filterFormModel";
 import type { FilterTypeRegistry } from "./filterRegistry";
 
 /**

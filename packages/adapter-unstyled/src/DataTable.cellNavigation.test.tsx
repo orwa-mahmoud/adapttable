@@ -6,7 +6,7 @@
  * tab stop and their ABSOLUTE column index, that a row carries its absolute
  * row index, and that omitting the prop leaves all of it absent.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

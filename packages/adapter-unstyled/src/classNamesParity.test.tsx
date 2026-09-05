@@ -3,13 +3,10 @@
  * class of its camelCased key, and every key's class shows up in at least
  * one rendered state — the two surfaces can never drift apart again.
  */
-import {
-  createMemoryAdapter,
-  type FilterDef,
-  useFrontendData,
-} from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
-import { useDataTableShell } from "@adapttable/core/adapter";
+import type { FilterDef } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
+import { useDataTableShell } from "@adapttable/react/adapter";
 import { act, fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,13 +20,13 @@ import {
 } from "./index";
 import { rowReorder } from "./row-reorder";
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**

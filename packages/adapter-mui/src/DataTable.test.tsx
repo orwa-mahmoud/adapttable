@@ -1,6 +1,7 @@
-import type { ColumnLayoutState } from "@adapttable/core";
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import type { ColumnLayoutState } from "@adapttable/react";
+
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -346,7 +347,7 @@ describe("<DataTable> (MUI)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: { error: Error; retry: () => void }) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

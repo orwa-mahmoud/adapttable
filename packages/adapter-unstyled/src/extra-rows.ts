@@ -1,1 +1,1 @@
-export { extraRows } from "@adapttable/core/features";
+export { extraRows } from "@adapttable/react/features";

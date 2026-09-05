@@ -1,19 +1,20 @@
 import {
-  type ColumnDef,
   groupAggregateEntries,
-  type GroupedFlatEntry,
   groupLeafCount,
   groupRowLayout,
   groupSelectionState,
-  type SelectionState,
-  type TableLabels,
 } from "@adapttable/core";
+import type { GroupedFlatEntry, TableLabels } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
+
+import type { ColumnDef } from "@adapttable/react";
+
 import {
   groupIndentStyle,
   groupRowParts,
   GroupToggleSpacer,
   resolveMobileLabel,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { ActionIcon, Card, Checkbox, Group, Table, Text } from "@mantine/core";
 import type { ReactElement, ReactNode } from "react";
 
@@ -112,7 +113,7 @@ export function GroupHeaderRow<TRow>({
       : "none";
   // One cell per column from the first aggregate onward: a subtotal only reads
   // as one when it sits under the column it totals.
-  const layout = groupRowLayout(
+  const layout = groupRowLayout<TRow, ColumnDef<TRow>>(
     columns,
     entry.kind === "groupMore" ? undefined : entry.aggregateCells
   );
@@ -169,7 +170,7 @@ export function GroupHeaderRow<TRow>({
               data-column={column.key}
               ms="auto"
             >
-              {node}
+              {node as ReactNode}
             </Text>
           ))}
         </Group>
@@ -183,7 +184,7 @@ export function GroupHeaderRow<TRow>({
           }
           data-column={node === undefined ? undefined : column.key}
         >
-          {node}
+          {node as ReactNode}
         </Table.Td>
       ))}
       {showActions && <Table.Td />}
@@ -290,7 +291,7 @@ export function GroupHeaderCard<TRow>({
       {/* A card is a list of label/value pairs, not a row of columns, so a
           subtotal is captioned rather than aligned — the same resolver the data
           cards use, so the caption reads identically. */}
-      {groupAggregateEntries(
+      {groupAggregateEntries<TRow, ColumnDef<TRow>>(
         columns,
         entry.kind === "groupMore" ? undefined : entry.aggregateCells
       ).map(({ column, node }) => (
@@ -304,7 +305,7 @@ export function GroupHeaderCard<TRow>({
             data-column={column.key}
             ms="auto"
           >
-            {node}
+            {node as ReactNode}
           </Text>
         </Group>
       ))}

@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   applyCollapsedColumnGroups,
   type ColumnGroupDef,
@@ -24,7 +24,7 @@ interface Row {
 const leaf = (
   key: string,
   group?: string | readonly string[]
-): ColumnDef<Row> => ({
+): ColumnModel<Row> => ({
   key,
   header: key,
   group,
@@ -155,7 +155,7 @@ describe("applyCollapsedColumnGroups", () => {
     );
     expect(next).toHaveLength(1);
     expect(next[0]!.key.startsWith(COLUMN_GROUP_RENDER_PREFIX)).toBe(true);
-    expect(next[0]!.accessor?.({ id: "1", email: "a@b.c" })).toBe("a@b.c");
+    expect(next[0]!.formatValue?.({ id: "1", email: "a@b.c" })).toBe("a@b.c");
   });
 
   it("honours groupShow always and closed", () => {
@@ -184,7 +184,7 @@ describe("applyCollapsedColumnGroups", () => {
     expect(next).toHaveLength(1);
     // The stub holds the group's place in the row so the header above it has
     // something to sit on; it has no value of its own to show.
-    expect(next[0]!.accessor?.({ id: "1", email: "a@b.c" })).toBeNull();
+    expect(next[0]!.formatValue?.({ id: "1", email: "a@b.c" })).toBe("");
   });
 
   it("puts a stub on each split run of a flat group", () => {

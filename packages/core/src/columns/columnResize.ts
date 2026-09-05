@@ -1,5 +1,3 @@
-import type { KeyboardEvent, MouseEvent, PointerEvent } from "react";
-
 import { isRtlElement } from "../layout/writingDirection";
 import { measureColumnWidth } from "./autoSizeColumns";
 
@@ -30,11 +28,11 @@ export interface ColumnResizeHandleProps {
   /** The handle's accessible name, naming the column it resizes. */
   "aria-label": string;
   /** Starts the drag. */
-  onPointerDown: (event: PointerEvent<HTMLElement>) => void;
+  onPointerDown: (event: PointerEvent & { currentTarget: HTMLElement }) => void;
   /** Handles the keys this control owns. */
-  onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+  onKeyDown: (event: KeyboardEvent & { currentTarget: HTMLElement }) => void;
   /** Double-click sizes the column to its content, as every grid does. */
-  onDoubleClick: (event: MouseEvent<HTMLElement>) => void;
+  onDoubleClick: (event: MouseEvent & { currentTarget: HTMLElement }) => void;
 }
 
 /** Current rendered width of the resize handle's owning header cell. */

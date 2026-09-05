@@ -35,7 +35,7 @@ import {
   type TreeCellProps,
   type TreeToggleProps,
   useFeatureSlotFilled,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { PropsWithChildren, ReactNode } from "react";
 
 import { cellDisplay } from "./DisplayCell";

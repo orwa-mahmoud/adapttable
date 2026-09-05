@@ -2,7 +2,7 @@ import {
   type ColumnHeaderRenameSlotProps,
   LiveRegion,
   useColumnRenameEditor,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./classNamesContext";
 

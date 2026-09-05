@@ -1,1 +1,1 @@
-export { virtualize } from "@adapttable/core/features";
+export { virtualize } from "@adapttable/react/features";

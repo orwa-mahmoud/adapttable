@@ -7,7 +7,7 @@
  * value. No adapter code takes part in this, which is the point: it works
  * the same in every kit because none of them is involved.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

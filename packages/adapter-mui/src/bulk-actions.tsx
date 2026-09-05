@@ -3,9 +3,9 @@ import {
   extendFeature,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
-import type { BulkAction } from "@adapttable/core/features";
-import { bulkActions as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import type { BulkAction } from "@adapttable/react/features";
+import { bulkActions as core } from "@adapttable/react/features";
 
 import { BulkBar } from "./components/BulkActionBar";
 

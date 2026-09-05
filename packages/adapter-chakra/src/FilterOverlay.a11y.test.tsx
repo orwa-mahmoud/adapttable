@@ -12,7 +12,7 @@
  * is off because its focus restore only works through `Popover.Trigger`), so
  * both the close and the focus hand-back ARE asserted here.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {
   cleanup,

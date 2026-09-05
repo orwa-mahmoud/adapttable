@@ -12,7 +12,7 @@
  * (the popover listens for `click`) and Escape-restores-focus-to-the-trigger,
  * which Chakra's suite has to skip.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import {
   cleanup,
   fireEvent,

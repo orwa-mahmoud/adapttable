@@ -3,7 +3,7 @@
  * only a page of rows is in the DOM, so assistive tech cannot count the rest.
  * Core decides; this proves the radix table element carries it — Radix Themes' Table.Root spreads props onto its scroll wrapper.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

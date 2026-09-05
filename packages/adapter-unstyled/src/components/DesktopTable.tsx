@@ -1,10 +1,7 @@
 /** The desktop table: header, pinned columns, rows and summary. */
-import {
-  edgePinStyle,
-  PIN_Z,
-  resolveColumnFooter,
-  type TableLabels,
-} from "@adapttable/core";
+import { edgePinStyle, PIN_Z } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import { resolveColumnFooter, type ColumnDef } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellSpanMark,
@@ -25,7 +22,7 @@ import {
   mergedCellStyle,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { useMemo } from "react";
 
@@ -258,7 +255,7 @@ function DesktopRowBase<TRow>(
               colSpan={colSpan > 1 ? colSpan : undefined}
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
-              {...table.getCellProps(column, {
+              {...table.getCellProps(column as ColumnDef<TRow>, {
                 style: {
                   ...pinStyle,
                   ...mergedCellStyle(
@@ -299,7 +296,7 @@ function DesktopRowBase<TRow>(
                 <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
                   rowIndex={focusIndex}
                   rows={rows}

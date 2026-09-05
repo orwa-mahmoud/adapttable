@@ -4,11 +4,11 @@ import {
   type StaticTableFeature,
   STATUS_BAR,
   type StatusBarChromeProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   selectionStats as coreSelectionStats,
   statusBar as coreStatusBar,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { useClassNames } from "./components/classNamesContext";
 import { StatusBar } from "./components/StatusBar";

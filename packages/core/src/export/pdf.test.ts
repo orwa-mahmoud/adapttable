@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../types";
 import { buildExportTable } from "./exportWriter";
 import { buildTablePdf, pdfWriter } from "./pdf";
 import { fontCovering } from "./testFont";
@@ -28,11 +28,11 @@ const ROWS: Row[] = [
   { name: "Grace (x) \\ &", age: 45, zip: "02139", active: false },
 ];
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "age", header: "Age", accessor: (row) => row.age },
-  { key: "zip", header: "Zip", accessor: (row) => row.zip },
-  { key: "active", header: "Active", accessor: (row) => row.active },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
+  { key: "age", header: "Age", exportValue: (row) => row.age },
+  { key: "zip", header: "Zip", exportValue: (row) => row.zip },
+  { key: "active", header: "Active", exportValue: (row) => row.active },
 ];
 
 afterEach(() => {
@@ -135,8 +135,9 @@ describe("buildTablePdf", () => {
           {
             key: "name",
             header: "Name",
-            accessor: (row) => row.name,
-            exportValue: (row) => `${row.name} (exported)`,
+            formatValue: (row: (typeof ROWS)[number]) => row.name,
+            exportValue: (row: (typeof ROWS)[number]) =>
+              `${row.name} (exported)`,
           },
         ],
       })
@@ -149,7 +150,7 @@ describe("buildTablePdf", () => {
       buildTablePdf({
         rows: ROWS,
         columns: [
-          { key: "name", header: 1 as never, accessor: (row) => row.name },
+          { key: "name", header: 1 as never, exportValue: (row) => row.name },
         ],
       })
     );
@@ -362,10 +363,15 @@ describe("buildTablePdf", () => {
           {
             key: "name",
             header: "Name",
-            accessor: (row) => row.name,
+            exportValue: (row) => row.name,
             width: 80,
           },
-          { key: "age", header: "Age", accessor: (row) => row.age, width: 80 },
+          {
+            key: "age",
+            header: "Age",
+            exportValue: (row) => row.age,
+            width: 80,
+          },
         ],
       })
     );
@@ -376,10 +382,15 @@ describe("buildTablePdf", () => {
           {
             key: "name",
             header: "Name",
-            accessor: (row) => row.name,
+            exportValue: (row) => row.name,
             width: 320,
           },
-          { key: "age", header: "Age", accessor: (row) => row.age, width: 80 },
+          {
+            key: "age",
+            header: "Age",
+            exportValue: (row) => row.age,
+            width: 80,
+          },
         ],
       })
     );
@@ -408,10 +419,15 @@ describe("buildTablePdf", () => {
           {
             key: "name",
             header: "Name",
-            accessor: (row) => row.name,
+            exportValue: (row) => row.name,
             width: 64,
           },
-          { key: "age", header: "Age", accessor: (row) => row.age, width: 320 },
+          {
+            key: "age",
+            header: "Age",
+            exportValue: (row) => row.age,
+            width: 320,
+          },
         ],
       })
     );
@@ -573,9 +589,9 @@ describe("buildTablePdf with an embedded font", () => {
     note: string;
   }
 
-  const ARABIC_COLUMNS: ColumnDef<ArabicRow>[] = [
-    { key: "label", header: "Label", accessor: (row) => row.label },
-    { key: "note", header: "Note", accessor: (row) => row.note },
+  const ARABIC_COLUMNS: ColumnModel<ArabicRow>[] = [
+    { key: "label", header: "Label", exportValue: (row) => row.label },
+    { key: "note", header: "Note", exportValue: (row) => row.note },
   ];
 
   const arabicPdf = (rows: ArabicRow[], direction?: "ltr" | "rtl") =>

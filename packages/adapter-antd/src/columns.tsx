@@ -1,29 +1,30 @@
 import {
   ACTIONS_COLUMN_KEY,
-  type CellElementProps,
-  type CellSpanAppearance,
-  type ColumnDef,
-  columnHeaderController,
-  columnResizeHandleProps,
-  type ConfirmHandler,
-  type EditableCellEditing,
-  type FilterDef,
-  filterDefForColumn,
-  type FilterFormSource,
-  type FilterTypeRegistry,
-  type GridFocusState,
-  type GroupCollapseState,
-  type PinSide,
   REORDER_COLUMN_KEY,
-  resolveColumnHeader,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type SortDirection,
-  type SortLevel,
-  type TableLabels,
-  type TreeEntry,
+  columnResizeHandleProps,
 } from "@adapttable/core";
+import type {
+  ConfirmHandler,
+  FilterDef,
+  FilterTypeRegistry,
+  RowAction,
+  RowActionsLayout,
+  RowActionsRenderer,
+  SortDirection,
+  TableLabels,
+  TreeEntry,
+} from "@adapttable/core";
+import type { CellSpanAppearance, SortLevel } from "@adapttable/core";
+import { columnHeaderController, filterDefForColumn } from "@adapttable/react";
+import type { CellElementProps, EditableCellEditing } from "@adapttable/react";
+import type {
+  FilterFormSource,
+  GridFocusState,
+  GroupCollapseState,
+  PinSide,
+} from "@adapttable/react/adapter";
+
+import { type ColumnDef, resolveColumnHeader } from "@adapttable/react";
 import {
   type BodyCell,
   cellFlashAttr,
@@ -47,7 +48,7 @@ import {
   pinnedSummaryRowId,
   REORDER_COLUMN_WIDTH,
   type RowReorderState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { type TableColumnsType, Typography } from "antd";
 import type {
   CSSProperties,
@@ -615,7 +616,7 @@ function renderLeafDataCell<TRow>(
         <OptionalEditableCell
           editing={options.editing}
           row={record}
-          column={column}
+          column={column as ColumnDef<TRow>}
           rowId={options.getRowId(record)}
           rowIndex={index}
           rows={options.rows}
@@ -792,11 +793,11 @@ export function buildColumns<TRow>({
             <SortIndexBadge index={sortIndex} />
             {setWidth && (
               <span
-                {...columnResizeHandleProps(
+                {...(columnResizeHandleProps(
                   column.key,
                   setWidth,
                   `${resizeLabel}: ${columnLabel(column)}`
-                )}
+                ) as unknown as HTMLAttributes<HTMLSpanElement>)}
                 style={RESIZE_HANDLE_STYLE}
               />
             )}

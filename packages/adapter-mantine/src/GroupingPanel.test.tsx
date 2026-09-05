@@ -1,5 +1,5 @@
 import { resolveLabels } from "@adapttable/core";
-import type { GroupingPanelState } from "@adapttable/core/adapter";
+import type { GroupingPanelState } from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

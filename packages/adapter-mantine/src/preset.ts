@@ -23,8 +23,8 @@
  * counting every byte imports the individual features instead — see
  * `docs/features.md` for the measured difference.
  */
-import { createAdapterStandardFeatures } from "@adapttable/core/adapter";
-export type { StandardFeatureOptions } from "@adapttable/core/adapter";
+import { createAdapterStandardFeatures } from "@adapttable/react/adapter";
+export type { StandardFeatureOptions } from "@adapttable/react/adapter";
 
 import { bulkActions } from "./bulk-actions";
 import { columnMenu } from "./column-menu";

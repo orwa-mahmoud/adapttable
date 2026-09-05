@@ -1,4 +1,4 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { render } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import { describe, expect, it } from "vitest";

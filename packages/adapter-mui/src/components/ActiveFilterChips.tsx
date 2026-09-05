@@ -1,5 +1,5 @@
 /** Removable chips for the active filters. */
-import type { ActiveFilterChipsSlotProps } from "@adapttable/core/adapter";
+import type { ActiveFilterChipsSlotProps } from "@adapttable/react/adapter";
 import {
   alpha,
   Button,

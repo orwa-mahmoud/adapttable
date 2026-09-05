@@ -8,7 +8,7 @@ import {
   type PivotPanelSlots,
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, HStack, Stack, Text } from "@chakra-ui/react";
 
 import { subtleText } from "../styles";

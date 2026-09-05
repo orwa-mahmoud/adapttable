@@ -5,7 +5,7 @@
  * and exports on the underlying value rather than the formatted string, and
  * recomputes only when a declared dependency changes. A formula column is a
  * second front end onto that — the user types the derivation instead of a
- * developer writing it — so this builds the same `ColumnDef` rather than a
+ * developer writing it — so this builds the same `ColumnMetadata` rather than a
  * parallel mechanism with its own cache and its own bugs.
  *
  * What formulas add that hand-written derivations cannot have is **cycles**.
@@ -14,7 +14,7 @@
  * the cycle is found in the dependency graph before anything is evaluated,
  * and every column in it renders `#CYCLE!` — a report rather than a hang.
  */
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import {
   evaluateFormula,
   FORMULA_BLANK,
@@ -28,7 +28,7 @@ import {
 } from "./evaluate";
 import { formulaRefs, parseFormula, type ParseResult } from "./parse";
 
-export type { ColumnDef, FormulaValue };
+export type { FormulaValue };
 
 /**
  * One user-typed formula column.
@@ -53,7 +53,7 @@ export interface FormulaColumnSpec {
  */
 export interface FormulaColumnsResult<TRow> {
   /** The columns, ready to concatenate with the declared ones. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Formulas that would not parse, by key, with the parser's message. */
   errors: Readonly<Record<string, string>>;
   /** Keys that take part in a dependency cycle, if any. */
@@ -217,13 +217,13 @@ export function buildFormulaColumns<TRow extends object>(
     return value;
   };
 
-  const columns: ColumnDef<TRow>[] = specs.map((spec) => ({
+  const columns: ColumnMetadata<TRow>[] = specs.map((spec) => ({
     key: spec.key,
     header: spec.header ?? spec.key,
     // The cell shows text; the comparator gets the value underneath it, so
     // "$1,240.00" never sorts before "$90.00"; the export gets the text a
     // spreadsheet cell should hold.
-    accessor: (row: TRow) => formatValue(cached(row, spec.key), spec.format),
+    formatValue: (row: TRow) => formatValue(cached(row, spec.key), spec.format),
     // Sorts on the VALUE, never on the cell text: a number orders numerically
     // however it is formatted, and text orders as text.
     sortValue: (row: TRow) => formulaSortValue(cached(row, spec.key)),
@@ -236,11 +236,5 @@ export function buildFormulaColumns<TRow extends object>(
 
 export type { CellEditor } from "../editing/cellEditing";
 export type { ColumnFilter } from "../filters/filterDefs";
-export type {
-  CellProps,
-  ColumnFooterContext,
-  ColumnGroupShow,
-  ColumnHeaderContext,
-  SortableValue,
-} from "../types";
+export type { ColumnGroupShow, SortableValue } from "../types";
 export type { FormulaErrorCode } from "./evaluate";

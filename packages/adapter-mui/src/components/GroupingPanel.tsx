@@ -9,7 +9,7 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Box,
   IconButton,
@@ -73,7 +73,7 @@ const slots: GroupingPanelSlots = {
     <Box
       role="group"
       aria-label={label}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
       sx={
         empty
@@ -222,7 +222,7 @@ const slots: GroupingPanelSlots = {
       variant="outlined"
       role="region"
       aria-label={label}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
       sx={{
         display: "inline-flex",

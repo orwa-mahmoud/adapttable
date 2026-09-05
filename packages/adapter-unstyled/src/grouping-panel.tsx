@@ -3,7 +3,7 @@ import {
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
   type GroupingPanelSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
@@ -42,4 +42,4 @@ export type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
   GroupSort,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";

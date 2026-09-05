@@ -4,7 +4,7 @@
  * The hook that *changes* hide/order/pin/resize lives in
  * {@link useColumnLayout}. This module is safe on the three-prop path.
  */
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 
 /**
  * Edge a column can be pinned to — logical, so it follows the writing
@@ -64,7 +64,7 @@ export interface UseColumnLayoutResult<TRow> {
   /** The current layout state (controlled value or internal). */
   state: ColumnLayoutState;
   /** Declared columns reordered then filtered by the user's hidden set. */
-  visibleColumns: ColumnDef<TRow>[];
+  visibleColumns: ColumnMetadata<TRow>[];
   /** Whether a column key is currently hidden. */
   isHidden: (key: string) => boolean;
   /** Show/hide a single column. */
@@ -173,12 +173,12 @@ export function edgePinStyle(
 
 /** Order `columns` by an explicit key order, appending any unlisted columns. */
 export function applyColumnOrder<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   order: readonly string[]
-): ColumnDef<TRow>[] {
+): ColumnMetadata<TRow>[] {
   if (order.length === 0) return [...columns];
   const byKey = new Map(columns.map((c) => [c.key, c]));
-  const ordered: ColumnDef<TRow>[] = [];
+  const ordered: ColumnMetadata<TRow>[] = [];
   for (const key of order) {
     const col = byKey.get(key);
     if (col) {

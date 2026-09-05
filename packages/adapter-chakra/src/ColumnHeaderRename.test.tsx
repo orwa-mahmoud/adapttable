@@ -1,4 +1,4 @@
-import type { ColumnMenuLabels } from "@adapttable/core/adapter";
+import type { ColumnMenuLabels } from "@adapttable/react/adapter";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

@@ -1,9 +1,8 @@
 {
   "name": "@adapttable/core",
   "version": "2.9.0",
-  "description": "Headless, UI-agnostic React data table engine — state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
+  "description": "Framework-neutral AdaptTable engine — models, state, URL sync, and a unified client/server TableSource. Zero UI-kit or React imports.",
   "keywords": [
-    "react",
     "data-table",
     "table",
     "headless",
@@ -48,16 +47,6 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./adapter": {
-      "import": {
-        "types": "./dist/adapter.d.ts",
-        "default": "./dist/adapter.js"
-      },
-      "require": {
-        "types": "./dist/adapter.d.cts",
-        "default": "./dist/adapter.cjs"
-      }
-    },
     "./xlsx": {
       "import": {
         "types": "./dist/xlsx.d.ts",
@@ -86,16 +75,6 @@
       "require": {
         "types": "./dist/formula.d.cts",
         "default": "./dist/formula.cjs"
-      }
-    },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
       }
     },
     "./pivot": {
@@ -128,16 +107,6 @@
         "default": "./dist/stream.cjs"
       }
     },
-    "./sparkline": {
-      "import": {
-        "types": "./dist/sparkline.d.ts",
-        "default": "./dist/sparkline.js"
-      },
-      "require": {
-        "types": "./dist/sparkline.d.cts",
-        "default": "./dist/sparkline.cjs"
-      }
-    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -149,14 +118,6 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist coverage .turbo"
-  },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": false
-    }
   },
   "devDependencies": {
     "@stryker-mutator/core": "^9.6.1",
@@ -175,8 +136,5 @@
   "engines": {
     "node": ">=22.12.0"
   },
-  "dependencies": {
-    "@tanstack/react-virtual": "^3.14.10",
-    "react-compiler-runtime": "^1.0.0"
-  }
+  "dependencies": {}
 }

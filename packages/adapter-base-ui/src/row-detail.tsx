@@ -1,7 +1,7 @@
 import {
   createAdapterRowDetailFeatures,
   type ExpandToggleSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { ExpandToggle } from "./components/ExpandToggle";
 

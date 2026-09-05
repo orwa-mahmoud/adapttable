@@ -3,11 +3,11 @@ import {
   slotRender,
   type TableFeature,
   TOOLBAR_EXTRAS,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   exportCsv as core,
   type ExportCsvOptions,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { ExportCsvButton } from "./components/toolbarExtras";
 

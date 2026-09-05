@@ -1,23 +1,27 @@
 import {
   defaultFilterRegistry,
-  type FilterDef,
   filterLabel,
-  filterOpLabel,
-  type FilterTypeRegistry,
-  type FilterValue,
   filterWidgetKind,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
   splitRelativeToken,
-  type TableLabels,
-  type TableSource,
+} from "@adapttable/core";
+import type {
+  FilterDef,
+  FilterTypeRegistry,
+  FilterValue,
+  TableLabels,
+  TableSource,
+} from "@adapttable/core";
+import { filterOpLabel, useFilterOptions } from "@adapttable/react";
+
+import {
   useBooleanFilterWidget,
-  useFilterOptions,
   useRangeFilterWidget,
   useTextFilterWidget,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import {
   Group,
   Input,
@@ -361,7 +365,7 @@ function FilterControl<TRow>({
   registry: FilterTypeRegistry;
 }>) {
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom;
+  if (custom) return custom as ReactNode;
   switch (filterWidgetKind(def, registry)) {
     case "text":
       return <TextFilterField def={def} source={source} labels={labels} />;

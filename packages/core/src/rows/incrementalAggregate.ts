@@ -7,7 +7,7 @@
  * fall back to a rescan of the rows the total describes. That is still
  * the group or the filtered set, not the unfiltered source.
  */
-
+import type { ColumnMetadata } from "../columnModel";
 import {
   aggregate,
   type AggregateName,
@@ -16,7 +16,7 @@ import {
   resolveAggregateValue,
   toAggregateNumber,
 } from "../aggregate/aggregate";
-import type { ColumnDef, SortableValue } from "../types";
+import type { SortableValue } from "../types";
 
 interface ColumnAcc {
   kind: AggregateName | "custom";
@@ -45,7 +45,7 @@ export interface IncrementalAggregate<TRow> {
   /** Options the aggregate was built with. */
   options: AggregateOptions<TRow>;
   /** Columns by key. */
-  columns: ReadonlyMap<string, ColumnDef<TRow>>;
+  columns: ReadonlyMap<string, ColumnMetadata<TRow>>;
   /** Per-column bindings for the aggregate. */
   bindings: ColumnBinding[];
 }

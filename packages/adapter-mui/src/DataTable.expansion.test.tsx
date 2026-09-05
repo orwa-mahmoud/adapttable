@@ -3,13 +3,14 @@
  * memoized desktop row: a search keystroke must not re-run cell accessors,
  * and toggling one row's checkbox must re-render only that row.
  */
+import { defaultConfirm } from "@adapttable/core";
+import type { RowExpansionState } from "@adapttable/react";
+
 import {
   createMemoryAdapter,
-  defaultConfirm,
-  type RowExpansionState,
   useDataTable,
   useFrontendData,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
   act,

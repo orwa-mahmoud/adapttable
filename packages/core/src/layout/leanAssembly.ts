@@ -5,18 +5,19 @@
  * extra-row splicing, column-resize drag) are injected through
  * {@link resolveAssembly} when the owning feature is composed.
  */
-import type { CSSProperties, ReactNode } from "react";
+import type { ColumnMetadata } from "../columnModel";
+import type { CssProperties } from "../style/cssProperties";
+import type { DisplayValue } from "../display";
 
 import type { PinOffset } from "../columns/columnLayoutModel";
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
 import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraEntry, ExtraRow } from "../rows/extraRows";
-import type { RowPinSide } from "../rows/rowPinning";
+import type { RowPinSide } from "../rows/rowPinModel";
 import { extraHostFillStyle } from "../rows/rowPresentation";
 import type { RowStyle } from "../rows/rowStyle";
 import type { TreeEntry } from "../tree/treeRows";
-import type { ColumnDef } from "../types";
 
 export {
   bodyCellsHaveRowSpan,
@@ -46,7 +47,7 @@ export interface AssemblyFns<TRow = unknown> {
   /** Build per-row body cells, optionally merging spans. */
   buildBodyCells: (options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     getRowId: (row: TRow) => string;
     getCellSpan?: GetCellSpan<TRow>;
     firstRowIndex?: number;
@@ -72,7 +73,7 @@ export interface AssemblyFns<TRow = unknown> {
     rows: readonly TRow[],
     getRowId: (row: TRow) => string,
     rowStyle: RowStyle<TRow> | undefined
-  ) => CSSProperties | undefined;
+  ) => CssProperties | undefined;
   /** Inflate row spans where extra rows cover body cells. */
   inflateBodyCellRowSpans: (
     cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>,
@@ -102,7 +103,7 @@ export interface AssemblyFns<TRow = unknown> {
 
 function leanBuildBodyCells<TRow>(options: {
   rows: readonly TRow[];
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   getRowId: (row: TRow) => string;
   windowKeys?: ReadonlySet<string>;
 }): ReadonlyMap<string, readonly BodyCell<TRow>[]> {
@@ -179,7 +180,7 @@ export function filterDefForColumn<TRow>(
 /** Accessible name for a column-selection checkbox. */
 export function columnSelectLabel(
   label: string | undefined,
-  column: { header?: ReactNode; key: string }
+  column: { header?: DisplayValue; key: string }
 ): string {
   const name = typeof column.header === "string" ? column.header : column.key;
   return `${label ?? "Select column"}: ${name}`;
@@ -223,7 +224,7 @@ export function rowReorderDropStyle(
         "data-drop"?: "before" | "inside" | "after";
       }
     | undefined
-): CSSProperties {
+): CssProperties {
   if (attrs === undefined) return {};
   const edge = attrs["data-drop"];
   const offset = edge === "before" ? "2px" : "-2px";
@@ -236,7 +237,7 @@ export function rowReorderDropStyle(
   };
 }
 
-export { rowReorderSignature } from "../rows/rowReorder";
+export { rowReorderSignature } from "../rows/rowReorderModel";
 
 /** Rows a body renders: tree entries when armed, otherwise the flat list. */
 export function bodyRowEntries<TRow>(

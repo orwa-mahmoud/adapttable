@@ -92,7 +92,7 @@ describe("round trip", () => {
       restored
     );
     expect(errors).toEqual({});
-    expect(columns[0]?.accessor?.({ quantity: 3 })).toBe("6");
+    expect(columns[0]?.formatValue?.({ quantity: 3 })).toBe("6");
   });
 });
 

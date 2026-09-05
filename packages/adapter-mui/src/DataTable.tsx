@@ -34,7 +34,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Box,
   Button,

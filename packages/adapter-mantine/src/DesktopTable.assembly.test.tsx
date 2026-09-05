@@ -4,11 +4,11 @@
  * expansion/reorder/selection leads against a start pin. Density tokens are
  * already covered in DataTable.test.
  */
+import { defaultLabels } from "@adapttable/core";
 import {
-  defaultLabels,
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import {
   fireEvent,

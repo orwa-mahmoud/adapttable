@@ -4,7 +4,7 @@ import {
   type TableRuntimeView,
   useFeatureState,
   usePublishTableRuntime,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

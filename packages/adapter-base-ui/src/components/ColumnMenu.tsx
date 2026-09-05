@@ -1,11 +1,10 @@
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
-  columnReorderKeyProps,
   REORDER_COLUMN_KEY,
-  useColumnDragState,
-  type UseColumnLayoutResult,
 } from "@adapttable/core";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
   columnMenuActions,
   type ColumnMenuChoice,
@@ -26,7 +25,7 @@ import {
   unpinAllColumns,
   useColumnRenameEditor,
   useFeatureHost,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Popover } from "@base-ui/react/popover";
 import { useState } from "react";
 

@@ -6,7 +6,7 @@ import {
   SearchIcon,
   TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Badge, Box, Button, Flex, TextField } from "@radix-ui/themes";
 import { type ReactNode } from "react";
 

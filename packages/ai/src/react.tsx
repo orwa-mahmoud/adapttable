@@ -12,7 +12,7 @@ import {
   type TableFeature,
   type TableRuntimeView,
   useTableRuntime,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   type ReactNode,
   useEffect,

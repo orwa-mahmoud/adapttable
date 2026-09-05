@@ -1,9 +1,7 @@
-import {
-  resolveLabels,
-  showSimpleFilterFields,
-  type TableLabels,
-  type UseSavedViewsOptions,
-} from "@adapttable/core";
+import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import type { UseSavedViewsOptions } from "@adapttable/react";
+
 import {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
@@ -37,7 +35,7 @@ import {
   useFeatureState,
   useStickyToolbarLayout,
   useTableFeatures,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Box, Button, Group, Paper, Progress, Stack } from "@mantine/core";
 import { useRef } from "react";
 

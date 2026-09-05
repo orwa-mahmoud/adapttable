@@ -17,7 +17,7 @@
  *    scan the inner declarative form, which proves the controls themselves are
  *    fully accessible, and report the wrapper gap.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import {
   cleanup,
   fireEvent,

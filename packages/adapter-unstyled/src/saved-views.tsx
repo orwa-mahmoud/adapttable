@@ -4,11 +4,11 @@ import {
   type SavedViewsSlotProps,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   savedViews as core,
   type UseSavedViewsOptions,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { useClassNames } from "./components/classNamesContext";
 import { SavedViewsMenu } from "./components/SavedViewsMenu";

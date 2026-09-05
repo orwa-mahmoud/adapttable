@@ -2,7 +2,7 @@ import type { TableLabels } from "@adapttable/core";
 import {
   createAdapterRowDetailFeatures,
   type ExpandToggleSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
 import { ExpandButton } from "./components/ExpandToggle";

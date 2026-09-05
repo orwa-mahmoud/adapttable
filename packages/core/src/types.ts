@@ -7,16 +7,14 @@
  *
  * @packageDocumentation
  */
+import type { ExtraFilters, SortDirection, ColumnModel } from "./columnModel";
+import type { DisplayValue } from "./display";
 
-import type { ComponentType, ReactNode } from "react";
-
-import type { ColumnModel, ExtraFilters, SortDirection } from "./columnModel";
-import type { CellEditor } from "./editing/cellEditing";
 import type { FacetMap } from "./filters/facets";
-import type { ColumnFilter } from "./filters/filterDefs";
 
 export type {
   ColumnGroupShow,
+  ColumnMetadata,
   ColumnModel,
   ExtraFilters,
   FilterValue,
@@ -54,7 +52,7 @@ export type PaginationMode = "infinite" | "paged" | "auto";
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 /**
- * Props every `ColumnDef.Cell` component receives.
+ * Props every cell renderer receives. Bindings may wrap this in a component.
  *
  * @public
  */
@@ -66,51 +64,13 @@ export interface CellProps<TRow> {
 }
 
 /**
- * React column. Today's `ColumnDef` keeps this name. Renderers stay
- * React nodes — the engine never stringifies them into labels.
- *
- * @public
- */
-export interface ColumnDef<TRow> extends ColumnModel<TRow> {
-  /** Declarative filter — narrowed from the neutral column model. */
-  filter?: ColumnFilter<TRow>;
-  /** Editor widget — narrowed from the neutral column model. */
-  editor?: CellEditor;
-  /**
-   * Header content. Pre-translated by the caller. Omit it and the header is
-   * auto-derived from `key` (`"hiredAt"` → `"Hired At"`).
-   */
-  header?: ReactNode;
-  /**
-   * Replace the header caption. The surrounding cell still owns sort,
-   * resize and the menu — this callback receives that controller so a
-   * custom caption can stay wired.
-   */
-  renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
-  /**
-   * Replace one summary-row cell. `value` is whatever `summaryRow`
-   * produced for this key (or `undefined` when only this renderer is set).
-   */
-  renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-  /** Host-provided controls after the caption, before the resize handle. */
-  headerActions?: ReactNode;
-  /**
-   * Component rendered per row. Define at module level (or memoise) so
-   * its identity is stable across renders.
-   */
-  Cell?: ComponentType<CellProps<TRow>>;
-  /** Lightweight alternative to `ColumnDef.Cell`; returns cell content. */
-  accessor?: (row: TRow) => ReactNode;
-}
-
-/**
  * Sort/resize state a custom header caption can read.
  *
  * @public
  */
 export interface ColumnHeaderController {
   /** Default caption (`header`, else the humanized key). */
-  label: ReactNode;
+  label: DisplayValue;
   /** This column's sort direction, absent when it is not sorted. */
   sortDir?: "asc" | "desc";
   /** 1-based position in a multi-column sort, absent when unsorted. */
@@ -120,27 +80,27 @@ export interface ColumnHeaderController {
 }
 
 /**
- * Arguments for `ColumnDef.renderHeader`.
+ * Arguments for a custom header caption.
  *
  * @public
  */
 export interface ColumnHeaderContext<TRow> {
   /** The column being rendered. */
-  column: ColumnDef<TRow>;
+  column: ColumnModel<TRow>;
   /** Caption and sort state for this header. */
   controller: ColumnHeaderController;
 }
 
 /**
- * Arguments for `ColumnDef.renderFooter`.
+ * Arguments for a custom summary-row cell.
  *
  * @public
  */
 export interface ColumnFooterContext<TRow> {
   /** The column being rendered. */
-  column: ColumnDef<TRow>;
+  column: ColumnModel<TRow>;
   /** The aggregate this column resolved to, already formatted. */
-  value: ReactNode;
+  value: DisplayValue;
 }
 
 /**
@@ -174,7 +134,7 @@ export interface RowAction<TRow> {
    * Built-in duplicate / delete / pin keys get each kit's own glyph when this
    * is omitted.
    */
-  icon?: ReactNode;
+  icon?: DisplayValue;
   /** Click handler; fires after confirmation when `confirm` is set. */
   onClick: (row: TRow) => void;
   /** Adapter-defined colour token (e.g. `"red"` for destructive). */
@@ -203,7 +163,7 @@ export interface BulkAction {
   /** Pre-translated button label. */
   label: string;
   /** Optional leading icon. */
-  icon?: ReactNode;
+  icon?: DisplayValue;
   /** Adapter-defined colour token. */
   color?: string;
   /**

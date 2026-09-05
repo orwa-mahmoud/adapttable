@@ -25,7 +25,7 @@
  * pass, gives the same answer every time, and is the same number the table's
  * own `min-width` is built from.
  */
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import { resolveColumnWidth } from "./columnWidths";
 
 /**
@@ -36,9 +36,11 @@ import { resolveColumnWidth } from "./columnWidths";
 export const ASSUMED_COLUMN_WIDTH = 150;
 
 /** What {@link responsiveColumns} needs to know about the container. */
-export interface ResponsiveFit<TRow> {
+export interface ResponsiveFit<
+  TCol extends ColumnMetadata<any> = ColumnMetadata<any>,
+> {
   /** The columns in render order, after the user's own hiding. */
-  columns: ColumnDef<TRow>[];
+  columns: TCol[];
   /** The width available, in pixels. `undefined` before the first measure. */
   available: number | undefined;
   /** Resize overrides from the column layout. */
@@ -48,19 +50,21 @@ export interface ResponsiveFit<TRow> {
 }
 
 /** The result of fitting columns to a container. */
-export interface ResponsiveColumns<TRow> {
+export interface ResponsiveColumns<
+  TCol extends ColumnMetadata<any> = ColumnMetadata<any>,
+> {
   /**
    * The columns that fit, in their original order — and the very same array
    * when nothing was dropped, so the rows this feeds keep their memoization.
    */
-  columns: ColumnDef<TRow>[];
+  columns: TCol[];
   /** Keys dropped to make them fit, in the order they were dropped. */
   dropped: readonly string[];
 }
 
 /** A column's width for budgeting: declared, resized, or assumed. */
 function budgetWidth<TRow>(
-  column: ColumnDef<TRow>,
+  column: ColumnMetadata<TRow>,
   widths: Readonly<Record<string, number>> | undefined
 ): number {
   return resolveColumnWidth(column, widths) ?? ASSUMED_COLUMN_WIDTH;
@@ -72,8 +76,8 @@ function budgetWidth<TRow>(
  * of the word — priority 1 is the one you keep longest.
  */
 function dropOrder<TRow>(
-  columns: readonly ColumnDef<TRow>[]
-): readonly ColumnDef<TRow>[] {
+  columns: readonly ColumnMetadata<TRow>[]
+): readonly ColumnMetadata<TRow>[] {
   return columns
     .map((column, index) => ({ column, index }))
     .filter((entry) => entry.column.responsivePriority !== undefined)
@@ -93,12 +97,12 @@ function dropOrder<TRow>(
  * @param fit - The columns, the width to fit them in, and the widths to use.
  * @returns The columns that fit and the keys dropped to get there.
  */
-export function responsiveColumns<TRow>({
+export function responsiveColumns<TCol extends ColumnMetadata<any>>({
   columns,
   available,
   widths,
   extra = 0,
-}: ResponsiveFit<TRow>): ResponsiveColumns<TRow> {
+}: ResponsiveFit<TCol>): ResponsiveColumns<TCol> {
   const droppable = dropOrder(columns);
   // Nothing declared, or nothing measured yet: never guess at a narrower
   // table than the one that was asked for.

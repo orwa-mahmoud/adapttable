@@ -1,4 +1,4 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

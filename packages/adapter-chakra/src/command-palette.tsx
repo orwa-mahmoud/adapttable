@@ -1,4 +1,4 @@
-import { createAdapterCommandPaletteFeature } from "@adapttable/core/adapter";
+import { createAdapterCommandPaletteFeature } from "@adapttable/react/adapter";
 
 import { CommandPalette } from "./components/CommandPalette";
 

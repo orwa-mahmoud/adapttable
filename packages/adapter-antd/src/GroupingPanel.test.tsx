@@ -1,8 +1,11 @@
-import { type ColumnDef, defaultLabels } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
 import type {
+  GroupingPanelChipProps,
   GroupingPanelSlotProps,
   GroupingPanelState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -30,14 +33,15 @@ function panelState() {
     announcement: "",
     headerDragProps: () => ({ draggable: true }),
     chipDragProps: () => ({ draggable: true }),
-    chipKeyboardProps: (key, label) => ({
-      tabIndex: 0,
-      role: "button",
-      "aria-label": defaultLabels.moveGroupingColumn(label),
-      onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => {
-        if (event.key === "ArrowRight") moveBy(key, 1);
-      },
-    }),
+    chipKeyboardProps: (key, label) =>
+      ({
+        tabIndex: 0,
+        role: "button",
+        "aria-label": defaultLabels.moveGroupingColumn(label),
+        onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => {
+          if (event.key === "ArrowRight") moveBy(key, 1);
+        },
+      }) as GroupingPanelChipProps["keyboardProps"],
     dropProps: () => ({}),
     removeDropProps: () => ({ "data-drop-active": true }),
     add: vi.fn(),

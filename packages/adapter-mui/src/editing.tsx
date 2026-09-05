@@ -1,4 +1,4 @@
-import { createAdapterEditingFeatures } from "@adapttable/core/adapter";
+import { createAdapterEditingFeatures } from "@adapttable/react/adapter";
 
 import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";

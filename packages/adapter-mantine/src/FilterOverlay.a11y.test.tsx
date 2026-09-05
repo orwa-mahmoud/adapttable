@@ -19,7 +19,7 @@
  *    carries no `aria-expanded`; drawer closure is asserted by the dialog
  *    unmounting.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import {
   cleanup,

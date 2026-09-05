@@ -4,8 +4,8 @@ import {
   type TableFeature,
   TREE_CELL,
   TREE_TOGGLE,
-} from "@adapttable/core/adapter";
-import { tree as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { tree as core } from "@adapttable/react/features";
 
 import { TreeCell, TreeToggle } from "./components/kitControls";
 

@@ -10,7 +10,7 @@ import {
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 import type { BaseUiAccentColor } from "../types";

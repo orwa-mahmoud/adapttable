@@ -1,10 +1,11 @@
-import type { CSSProperties } from "react";
+import type { CssProperties } from "../style/cssProperties";
 
 import { PIN_Z } from "../columns/columnLayoutModel";
-import type { EditableCellEditing } from "../editing/editableCellController";
+import type { EditableCellEditing } from "./rowEditingDigest";
 import type { BodyCell } from "./cellSpan";
 import type { ExtraRow } from "./extraRows";
-import type { RowPinningState, RowPinSide, RowPinState } from "./rowPinning";
+import type { RowPinSide, RowPinState } from "./rowPinModel";
+import type { RowPinLookup } from "./rowPinModel";
 import type { RowHeight, RowStyle } from "./rowStyle";
 
 /**
@@ -31,7 +32,7 @@ export function resolveRowStyle<TRow>(
   rowHeight: RowHeight<TRow> | undefined,
   row: TRow,
   index: number
-): CSSProperties | undefined {
+): CssProperties | undefined {
   const style = rowStyle?.(row, index);
   const height = resolveRowHeight(rowHeight, row, index);
   if (style === undefined && height === undefined) return undefined;
@@ -44,7 +45,7 @@ export function resolveRowStyle<TRow>(
  *
  * @public
  */
-export function rowStyleSignature(style: CSSProperties | undefined): string {
+export function rowStyleSignature(style: CssProperties | undefined): string {
   if (style === undefined) return "";
   return JSON.stringify(style);
 }
@@ -79,14 +80,14 @@ export function extraHostFillStyle<TRow>(
   rows: readonly TRow[],
   getRowId: (row: TRow) => string,
   rowStyle: RowStyle<TRow> | undefined
-): CSSProperties | undefined {
+): CssProperties | undefined {
   const extra = extraRows?.find((item) => item.key === extraKey);
   if (!extra?.beforeRowId) return undefined;
   const index = rows.findIndex((row) => getRowId(row) === extra.beforeRowId);
   if (index < 0) return undefined;
   const visual = resolveRowStyle(rowStyle, undefined, rows[index]!, index);
   if (!visual) return undefined;
-  const fill: CSSProperties = {};
+  const fill: CssProperties = {};
   if (visual.backgroundColor !== undefined) {
     fill.backgroundColor = visual.backgroundColor;
   }
@@ -236,7 +237,7 @@ export function partitionPinnedRows<TRow>(
  * @public
  */
 export function rowPinSignature(
-  pinning: Pick<RowPinningState<unknown>, "sideOf"> | undefined,
+  pinning: RowPinLookup | undefined,
   rowId: string
 ): string | null {
   if (!pinning) return null;

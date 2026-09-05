@@ -1,16 +1,16 @@
 /**
  * Kit-owned DesktopTable paint that stayed in this adapter after pin/header
- * assembly moved to `@adapttable/core/adapter`. Existing suites already cover
+ * assembly moved to `@adapttable/react/adapter`. Existing suites already cover
  * expand, reorder, selection, summary, fit, and page-stick on their own;
  * what they never combine is the leading-chrome leads (expansion + reorder +
  * selection) against a start pin, the selected-row fill, and the scroll-box
  * path (maxHeight) that turns page-stick off.
  */
+import { resolveLabels } from "@adapttable/core";
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
-  resolveLabels,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

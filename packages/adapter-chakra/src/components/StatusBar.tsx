@@ -3,7 +3,7 @@ import {
   type StatusBarChromeProps,
   type StatusBarSlotProps,
   type StatusBarSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { HStack, Text } from "@chakra-ui/react";
 
 import { statsSlots } from "./SelectionStatsBar";

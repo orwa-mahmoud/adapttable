@@ -6,9 +6,9 @@
  * conflict handling — applies to a paste without paste knowing. These check the
  * parsing a spreadsheet actually writes, and the limits a paste must respect.
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   cellPasteHandler,
   parseClipboardTable,
@@ -25,7 +25,7 @@ const ROWS: Row[] = [
   { id: "2", name: "Linus", budget: 20 },
   { id: "3", name: "Grace", budget: 30 },
 ];
-const COLUMNS: ColumnDef<Row>[] = [
+const COLUMNS: ColumnModel<Row>[] = [
   { key: "name", header: "Name", editable: true },
   {
     key: "budget",
@@ -137,7 +137,7 @@ describe("pasteRangeEdits", () => {
   });
 
   it("skips a column that is not editable — a paste is still an edit", () => {
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       { key: "name", header: "Name" },
       { key: "budget", header: "Budget", editable: true },
     ];
@@ -151,7 +151,7 @@ describe("pasteRangeEdits", () => {
   });
 
   it("respects a per-row editable predicate", () => {
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       { key: "name", header: "Name", editable: (row) => row.id !== "2" },
     ];
     const edits = pasteRangeEdits({

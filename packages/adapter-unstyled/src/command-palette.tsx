@@ -1,7 +1,7 @@
 import {
   type AdapterCommandPaletteProps,
   createAdapterCommandPaletteFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
 import { CommandPalette } from "./components/CommandPalette";

@@ -6,7 +6,7 @@ import {
   SearchIcon,
   TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Badge, Button, HStack, Input, InputGroup } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 

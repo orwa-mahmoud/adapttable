@@ -1,11 +1,13 @@
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
 import {
   featureHostOf,
   FeatureHostProvider,
   type GroupingPanelState,
   useTableFeatures,
-} from "@adapttable/core/adapter";
-import type { TableFeature } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import type { TableFeature } from "@adapttable/react/features";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

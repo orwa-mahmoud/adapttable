@@ -15,20 +15,22 @@
  * before the first aggregate, which keeps the label's roomy look without
  * displacing a single number.
  */
-import type { ReactNode } from "react";
-
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
 /**
  * One cell of a group header row, after the leading label cell.
  *
  * @public
  */
-export interface GroupRowCell<TRow> {
+export interface GroupRowCell<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+> {
   /** The column this cell sits under. */
-  column: ColumnDef<TRow>;
+  column: TCol;
   /** That column's aggregate, or `undefined` for an empty cell. */
-  node: ReactNode;
+  node: DisplayValue;
 }
 
 /**
@@ -36,20 +38,23 @@ export interface GroupRowCell<TRow> {
  *
  * @public
  */
-export interface GroupRowLayout<TRow> {
+export interface GroupRowLayout<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+> {
   /**
    * Columns the leading label cell covers. Its `colSpan` is this length plus
    * however many edge cells (expand chevron, selection checkbox) precede it.
    */
-  labelColumns: readonly ColumnDef<TRow>[];
+  labelColumns: readonly TCol[];
   /**
    * Aggregates belonging to a column inside the label cell — only possible when
    * the very first column carries one, since the label has to live somewhere.
    * Rendered after the count.
    */
-  labelAggregates: readonly GroupRowCell<TRow>[];
+  labelAggregates: readonly GroupRowCell<TRow, TCol>[];
   /** One cell per remaining column, in render order. */
-  cells: readonly GroupRowCell<TRow>[];
+  cells: readonly GroupRowCell<TRow, TCol>[];
 }
 
 /**
@@ -65,12 +70,14 @@ export interface GroupRowLayout<TRow> {
  *
  * @public
  */
-export function groupRowLayout<TRow>(
-  columns: readonly ColumnDef<TRow>[],
-  aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined
-): GroupRowLayout<TRow> {
-  const has = (column: ColumnDef<TRow>) =>
-    aggregateCells?.[column.key] !== undefined;
+export function groupRowLayout<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+>(
+  columns: readonly TCol[],
+  aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined
+): GroupRowLayout<TRow, TCol> {
+  const has = (column: TCol) => aggregateCells?.[column.key] !== undefined;
   const firstAggregate = columns.findIndex(has);
   if (firstAggregate === -1) {
     return { labelColumns: columns, labelAggregates: [], cells: [] };
@@ -107,10 +114,13 @@ export function groupRowLayout<TRow>(
  *
  * @public
  */
-export function groupAggregateEntries<TRow>(
-  columns: readonly ColumnDef<TRow>[],
-  aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined
-): GroupRowCell<TRow>[] {
+export function groupAggregateEntries<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+>(
+  columns: readonly TCol[],
+  aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined
+): GroupRowCell<TRow, TCol>[] {
   if (!aggregateCells) return [];
   return columns.flatMap((column) => {
     const node = aggregateCells[column.key];

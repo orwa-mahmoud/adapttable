@@ -3,7 +3,7 @@
  * (their accessors must not be re-invoked) when unrelated table state
  * changes — a search keystroke, a hover, or another row's selection.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

@@ -1,4 +1,4 @@
-import { createAdapterRowDetailFeatures } from "@adapttable/core/adapter";
+import { createAdapterRowDetailFeatures } from "@adapttable/react/adapter";
 
 import { ExpandToggle } from "./components/ExpandToggle";
 

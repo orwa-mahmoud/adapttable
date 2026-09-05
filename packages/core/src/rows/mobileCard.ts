@@ -18,9 +18,8 @@
  * cell renderers included. So a custom card is a layout decision, not a
  * re-implementation: reuse the values, arrange them differently.
  */
-import type { ReactNode } from "react";
-
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
 /**
  * One field on a mobile card.
@@ -29,7 +28,7 @@ import type { ColumnDef } from "../types";
  */
 export interface MobileCardField<TRow> {
   /** The column it came from. */
-  column: ColumnDef<TRow>;
+  column: ColumnMetadata<TRow>;
   /**
    * The label the built-in card would show — the column's `mobileLabel`, its
    * string header, or its key. `undefined` when the column asked for none
@@ -41,7 +40,7 @@ export interface MobileCardField<TRow> {
    * The value, rendered exactly as the built-in card renders it: the column's
    * `Cell` or accessor, wrapped in the cell editor when editing is armed.
    */
-  value: ReactNode;
+  value: DisplayValue;
 }
 
 /**
@@ -71,4 +70,4 @@ export interface MobileCardModel<TRow> {
 export type MobileCardRenderer<TRow> = (
   row: TRow,
   card: MobileCardModel<TRow>
-) => ReactNode;
+) => DisplayValue;

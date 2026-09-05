@@ -2,7 +2,7 @@ import {
   createAdapterGroupingFeature,
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
@@ -26,4 +26,4 @@ export const grouping = createAdapterGroupingFeature({
   GroupHeaderCard: GroupCardSlot,
 });
 
-export type { GroupSort } from "@adapttable/core/features";
+export type { GroupSort } from "@adapttable/react/features";

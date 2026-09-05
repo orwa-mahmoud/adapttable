@@ -1,16 +1,15 @@
-import {
-  type BulkAction,
-  type SelectionState,
-  type TableLabels,
-  useBulkActionRunner,
-} from "@adapttable/core";
+import type { BulkAction, TableLabels } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
+
+import { useBulkActionRunner } from "@adapttable/react";
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
   offersAllMatching,
   resolveDisabledReason,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Group, Stack, Text, Tooltip } from "@mantine/core";
+import type { ReactNode } from "react";
 
 /** Selection toolbar: count, clear, and the configured bulk-action buttons. */
 export function BulkActionBar({
@@ -146,7 +145,7 @@ function BulkButton({
       data-adapttable-part="bulk-button"
       size="xs"
       color={action.color}
-      leftSection={action.icon}
+      leftSection={action.icon as ReactNode}
       onClick={() => onRun(action)}
       loading={pending === action.key}
       disabled={ineligible || (pending !== null && pending !== action.key)}

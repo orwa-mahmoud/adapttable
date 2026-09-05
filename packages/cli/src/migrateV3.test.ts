@@ -21,7 +21,7 @@ export { DataTable, rows };
       'import { DataTable } from "@adapttable/core";'
     );
     expect(first.code).toContain(
-      'import { type HeaderGroupCell, headerGroupRows as rows } from "@adapttable/core/adapter";'
+      'import { type HeaderGroupCell, headerGroupRows as rows } from "@adapttable/react/adapter";'
     );
 
     const second = migrateV3Source(first.code);
@@ -38,7 +38,7 @@ export { DataTable, rows };
       "import type { BodyCell as Cell, RowReorderState } from '@adapttable/core'\n"
     );
     expect(result.code).toBe(
-      "import type { BodyCell as Cell, RowReorderState } from '@adapttable/core/adapter';\n"
+      "import type { BodyCell as Cell, RowReorderState } from '@adapttable/react/adapter';\n"
     );
     expect(result.movedImports).toBe(2);
   });

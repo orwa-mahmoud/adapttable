@@ -453,7 +453,8 @@
   },
   "dependencies": {
     "@adapttable/core": "workspace:^",
-    "react-compiler-runtime": "^1.0.0"
+    "react-compiler-runtime": "^1.0.0",
+    "@adapttable/react": "workspace:^"
   },
   "peerDependencies": {
     "@base-ui/react": "^1.6.0",

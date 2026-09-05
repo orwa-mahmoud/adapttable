@@ -1,11 +1,7 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
-import {
-  type Direction,
-  PIN_Z,
-  type PinSide,
-  resolveColumnFooter,
-  type TableLabels,
-} from "@adapttable/core";
+import { PIN_Z } from "@adapttable/core";
+import type { Direction, PinSide, TableLabels } from "@adapttable/core";
+import { resolveColumnFooter, type ColumnDef } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellHighlightStyle,
@@ -31,7 +27,7 @@ import {
   type SharedTableRenderProps,
   sortArrow,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Box, Table, Text } from "@radix-ui/themes";
 import {
   type CSSProperties,
@@ -378,7 +374,7 @@ function DesktopRowBase<TRow>(
                 <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
                   rowIndex={focusIndex}
                   rows={rows}

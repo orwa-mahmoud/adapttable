@@ -1,10 +1,11 @@
+import { defaultLabels } from "@adapttable/core";
+import type { LayoutStorage } from "@adapttable/react";
+
 import {
   type ColumnDef,
   createMemoryAdapter,
-  defaultLabels,
-  type LayoutStorage,
   type UrlStateAdapter,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

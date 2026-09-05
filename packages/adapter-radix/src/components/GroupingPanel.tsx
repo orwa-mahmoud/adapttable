@@ -9,7 +9,7 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Box, Card, Flex, IconButton, Text } from "@radix-ui/themes";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
@@ -81,7 +81,7 @@ const slots: GroupingPanelSlots = {
       role="group"
       aria-label={label}
       data-active={active || undefined}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
       style={{
         alignSelf: "stretch",
@@ -214,7 +214,7 @@ const slots: GroupingPanelSlots = {
       role="group"
       aria-label={label}
       data-active={active || undefined}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
       style={{
         alignSelf: "stretch",

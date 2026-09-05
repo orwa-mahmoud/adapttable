@@ -5,9 +5,9 @@
  * share-the-container for a small one. These check who wins when several
  * answers are available at once.
  */
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   columnFlexShares,
   columnSizeStyle,
@@ -18,7 +18,7 @@ import { COLUMN_GROUP_STUB_PREFIX, columnGroupStubStyle } from "./headerGroups";
 interface Row {
   id: string;
 }
-const cols = (...defs: Partial<ColumnDef<Row>>[]): ColumnDef<Row>[] =>
+const cols = (...defs: Partial<ColumnModel<Row>>[]): ColumnModel<Row>[] =>
   defs.map((def, i) => ({ key: `c${i}`, header: `C${i}`, ...def }));
 
 describe("columnFlexShares", () => {

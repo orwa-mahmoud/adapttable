@@ -18,11 +18,12 @@
  * `sortValue` if it has one, else the key's data path — so a formatted cell
  * (`accessor: r => money.format(r.budget)`) still aggregates on its number.
  */
-import type { ReactNode } from "react";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
 import type { FeatureHostState } from "../features/currentHost";
 import { currentFeatureHost } from "../features/currentHost";
-import type { ColumnDef, SortableValue } from "../types";
+import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
 /**
@@ -39,14 +40,14 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
  * Return whatever the cell should show — a number, a formatted string, a
  * node. Return `undefined` for "no cell here".
  *
- * The return type is `ReactNode` so the built mapper is directly assignable
+ * The return type is `DisplayValue` so the built mapper is directly assignable
  * to `summaryRow` and `groupAggregates`, which is the whole point of it.
  *
  * @public
  */
 export type Aggregator<TValue = SortableValue> = (
   values: readonly TValue[]
-) => ReactNode;
+) => DisplayValue;
 
 /**
  * What to compute per column: a built-in name, or your own function.
@@ -65,12 +66,12 @@ export interface AggregateOptions<TRow> {
    * Columns, so values resolve through `sortValue` exactly as sorting and
    * grouping do. Without them, values come from the key's data path.
    */
-  columns?: readonly ColumnDef<TRow>[];
+  columns?: readonly ColumnMetadata<TRow>[];
   /**
    * Format a computed value for display. Receives the raw result and the
    * column key: `format: (v, key) => key === "budget" ? money.format(v) : v`.
    */
-  format?: (value: ReactNode, key: string) => ReactNode;
+  format?: (value: DisplayValue, key: string) => DisplayValue;
   /**
    * The host of the table this mapper will run in. Omit it when the
    * table binds the call with `runWithFeatureHost`.
@@ -151,7 +152,7 @@ export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
 export function resolveAggregateValue<TRow>(
   row: TRow,
   key: string,
-  column: ColumnDef<TRow> | undefined
+  column: ColumnMetadata<TRow> | undefined
 ): SortableValue {
   if (column?.sortValue) return column.sortValue(row);
   return getPath(row, key) as SortableValue;
@@ -173,13 +174,13 @@ export function resolveAggregateValue<TRow>(
 export function aggregate<TRow>(
   spec: AggregateSpec,
   options: AggregateOptions<TRow> = {}
-): (rows: readonly TRow[]) => Partial<Record<string, ReactNode>> {
+): (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>> {
   const { columns, format, host: boundHost } = options;
   const byKey = new Map(columns?.map((c) => [c.key, c]));
   const entries = Object.entries(spec);
 
   return (rows) => {
-    const out: Partial<Record<string, ReactNode>> = {};
+    const out: Partial<Record<string, DisplayValue>> = {};
     for (const [key, fn] of entries) {
       if (!fn) continue;
       const aggregator =

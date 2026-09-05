@@ -3,7 +3,7 @@ import {
   type ColumnSelectCheckboxChromeProps,
   type ColumnSelectCheckboxProps,
   type ColumnSelectSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Checkbox } from "antd";
 
 function ColumnSelectBox({

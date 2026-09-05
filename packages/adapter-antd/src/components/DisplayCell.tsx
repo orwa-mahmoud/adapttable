@@ -1,4 +1,5 @@
-import type { ColumnDef } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+
 import type { ReactNode } from "react";
 
 /**

@@ -4,7 +4,7 @@ import {
   GroupingPanelChrome,
   type GroupingPanelChromeProps,
   type GroupingPanelSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { ActionIcon, Box, Group, Paper, Select, Text } from "@mantine/core";
 
 const TOUCH_SIZE = 44;
@@ -52,7 +52,7 @@ const slots: GroupingPanelSlots = {
         color: "var(--mantine-color-dimmed)",
         transition: "background-color 120ms ease, border-color 120ms ease",
       }}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
     >
       {empty ? (
@@ -159,7 +159,7 @@ const slots: GroupingPanelSlots = {
           ? "var(--mantine-color-red-filled)"
           : "var(--mantine-color-dimmed)",
       }}
-      {...dropProps}
+      {...(dropProps as Record<string, unknown>)}
       {...rest}
     >
       <Text size="xs" fw={600}>

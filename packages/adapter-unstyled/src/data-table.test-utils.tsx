@@ -1,8 +1,8 @@
 import {
   type FeatureProps,
-  flattenColumnTree,
+  flattenReactColumnTree,
   type TableFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   cellSpan,
   extraRows,
@@ -11,7 +11,7 @@ import {
   resizableColumns,
   rowActions,
   rowAppearance,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";
 
 import { bulkActions } from "./bulk-actions";
 import { cellNavigation } from "./cell-navigation";
@@ -78,7 +78,9 @@ function bridgeFilterProps<TRow>(
       Boolean(props.filterLabels) ||
       Boolean(props.extraChips) ||
       props.onClearFilters != null ||
-      flattenColumnTree(props.columns).leaves.some((column) => column.filter)
+      flattenReactColumnTree(props.columns).leaves.some(
+        (column) => column.filter
+      )
     ) {
       next.push({ ...filters([]), apply: () => ({}) });
     }

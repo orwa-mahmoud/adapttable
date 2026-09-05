@@ -10,7 +10,7 @@ import {
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Card, Flex, Progress, Spinner, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 

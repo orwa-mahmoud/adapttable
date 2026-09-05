@@ -1,4 +1,4 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

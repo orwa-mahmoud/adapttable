@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
 import {
   aggregate,
   AGGREGATE_NAMES,
@@ -78,11 +78,11 @@ describe("aggregate", () => {
   });
 
   it("resolves values through a column's sortValue, like sorting does", () => {
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       // the cell is formatted; the aggregate must see the number
       {
         key: "budget",
-        accessor: (r) => `$${r.budget}`,
+        exportValue: (r) => `$${r.budget}`,
         sortValue: (r) => r.budget,
       },
     ];

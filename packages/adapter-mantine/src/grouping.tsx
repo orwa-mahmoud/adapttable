@@ -1,4 +1,4 @@
-import { createAdapterGroupingFeature } from "@adapttable/core/adapter";
+import { createAdapterGroupingFeature } from "@adapttable/react/adapter";
 
 import { GroupHeaderCard, GroupHeaderRow } from "./components/GroupHeader";
 
@@ -8,4 +8,4 @@ export const grouping = createAdapterGroupingFeature({
   GroupHeaderCard,
 });
 
-export type { GroupSort } from "@adapttable/core/features";
+export type { GroupSort } from "@adapttable/react/features";

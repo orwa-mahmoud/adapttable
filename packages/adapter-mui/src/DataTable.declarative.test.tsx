@@ -3,7 +3,7 @@
  * (`data`, `data` + `onQueryChange`), auto headers, dot-path cells, and the
  * auto-built filter form writing every filter type's state keys.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

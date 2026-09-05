@@ -12,7 +12,7 @@
  * both fire under `fireEvent`, and the popover's Escape handler hands focus
  * back to the trigger itself — so this file asserts that restoration too.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
   cleanup,

@@ -3,7 +3,7 @@
  * hooks subscribe. Host callbacks remain the persistence boundary.
  */
 import {
-  type ColumnModel,
+  type ColumnMetadata,
   type ExtraFilters,
   type SortDirection,
 } from "../columnModel";
@@ -80,7 +80,7 @@ export type TableRowScope = "visible" | "page" | "full";
  */
 export interface TableSnapshot<TRow = unknown> {
   readonly revisions: TableRevisions;
-  readonly columns: readonly ColumnModel<TRow>[];
+  readonly columns: readonly ColumnMetadata<TRow>[];
   readonly capabilities: TableSourceCapabilities;
   readonly page: number;
   readonly limit: number;
@@ -102,7 +102,7 @@ export interface CreateTableEngineOptions<TRow> {
   /** Source rows. The host still owns this array. */
   readonly data: readonly TRow[];
   /** Neutral columns. */
-  readonly columns: readonly ColumnModel<TRow>[];
+  readonly columns: readonly ColumnMetadata<TRow>[];
   /** Stable row identity. */
   readonly rowKey: (row: TRow) => string;
   /** `"paged"` slices one page; `"infinite"` grows the window. */
@@ -135,7 +135,7 @@ export interface CreateTableEngineOptions<TRow> {
 export interface TableEngine<TRow = unknown> {
   readonly tableId: string;
   readonly snapshot: () => TableSnapshot<TRow>;
-  readonly getColumn: (key: string) => ColumnModel<TRow> | undefined;
+  readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
   readonly cellValue: (row: TRow, columnKey: string) => unknown;
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   readonly rowByKey: (rowKey: string) => TRow | undefined;
@@ -156,7 +156,7 @@ export interface TableEngine<TRow = unknown> {
     axes: readonly TableRevisionAxis[],
     next?: {
       readonly data?: readonly TRow[];
-      readonly columns?: readonly ColumnModel<TRow>[];
+      readonly columns?: readonly ColumnMetadata<TRow>[];
     },
     options?: { silent?: boolean }
   ) => void;
@@ -173,7 +173,25 @@ interface EngineView<TRow> {
   groupBy: string | undefined;
   selectedIds: readonly string[];
   data: readonly TRow[];
-  columns: readonly ColumnModel<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
+  filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+  getSearchText?: (row: TRow) => string;
+  filterTree?: IncrementalViewConfig<TRow>["filterTree"];
+  filterTreeFn?: IncrementalViewConfig<TRow>["filterTreeFn"];
+  sortLevels?: IncrementalViewConfig<TRow>["sortLevels"];
+  getSortValue?: IncrementalViewConfig<TRow>["getSortValue"];
+  groupAggregates?: IncrementalViewConfig<TRow>["groupAggregates"];
+  groupSort?: IncrementalViewConfig<TRow>["groupSort"];
+  groupFilter?: IncrementalViewConfig<TRow>["groupFilter"];
+  groupFooters?: IncrementalViewConfig<TRow>["groupFooters"];
+  collapsedGroupIds?: IncrementalViewConfig<TRow>["collapsedGroupIds"];
+  blankLabel?: IncrementalViewConfig<TRow>["blankLabel"];
+  groupPageSize?: IncrementalViewConfig<TRow>["groupPageSize"];
+  rowPageSize?: IncrementalViewConfig<TRow>["rowPageSize"];
+  paging?: IncrementalViewConfig<TRow>["paging"];
+  summaryRow?: IncrementalViewConfig<TRow>["summaryRow"];
+  aggregateSpec?: IncrementalViewConfig<TRow>["aggregateSpec"];
+  aggregateOptions?: IncrementalViewConfig<TRow>["aggregateOptions"];
 }
 
 const EMPTY_EXTRA: ExtraFilters = {};
@@ -186,6 +204,13 @@ function bump(
   const next = { ...revisions };
   for (const axis of axes) next[axis] += 1;
   return next;
+}
+
+function normalizeGroupBy(
+  groupBy: string | readonly string[] | undefined
+): string | undefined {
+  if (groupBy === undefined) return undefined;
+  return typeof groupBy === "string" ? groupBy : groupBy[0];
 }
 
 function defaultSearchText<TRow>(row: TRow): string {
@@ -218,6 +243,8 @@ export function createTableEngine<TRow>(
     selectedIds: [],
     data: options.data,
     columns: options.columns,
+    filterFn: options.filterFn,
+    getSearchText,
   };
   let revisions: TableRevisions = { data: 1, view: 1, schema: 1, policy: 1 };
   let disposed = false;
@@ -226,24 +253,37 @@ export function createTableEngine<TRow>(
     listener: (next: TableRevisions) => void;
   }>();
 
-  function columnMap(): Map<string, ColumnModel<TRow>> {
+  function columnMap(): Map<string, ColumnMetadata<TRow>> {
     return new Map(view.columns.map((column) => [column.key, column]));
   }
-
-  let extraConfig: Partial<IncrementalViewConfig<TRow>> = {};
 
   function viewConfig(): IncrementalViewConfig<TRow> {
     return {
       getRowId: options.rowKey,
-      getSearchText,
-      filterFn,
+      getSearchText: view.getSearchText ?? getSearchText,
+      filterFn: view.filterFn ?? filterFn,
       extra: view.extra,
       columns: view.columns,
       sortBy: view.sortBy,
       sortDir: view.sortDir,
       search: view.search,
       groupBy: view.groupBy,
-      ...extraConfig,
+      filterTree: view.filterTree,
+      filterTreeFn: view.filterTreeFn,
+      sortLevels: view.sortLevels,
+      getSortValue: view.getSortValue,
+      groupAggregates: view.groupAggregates,
+      groupSort: view.groupSort,
+      groupFilter: view.groupFilter,
+      groupFooters: view.groupFooters,
+      collapsedGroupIds: view.collapsedGroupIds,
+      blankLabel: view.blankLabel,
+      groupPageSize: view.groupPageSize,
+      rowPageSize: view.rowPageSize,
+      paging: view.paging,
+      summaryRow: view.summaryRow,
+      aggregateSpec: view.aggregateSpec,
+      aggregateOptions: view.aggregateOptions,
     };
   }
 
@@ -284,8 +324,12 @@ export function createTableEngine<TRow>(
     return slice;
   }
 
-  function notify(changed: readonly TableRevisionAxis[]): void {
+  function publish(
+    changed: readonly TableRevisionAxis[],
+    silent?: boolean
+  ): void {
     revisions = bump(revisions, changed);
+    if (silent) return;
     for (const entry of listeners) {
       const axes = entry.axes;
       if (axes === "all") {
@@ -296,6 +340,65 @@ export function createTableEngine<TRow>(
         entry.listener(revisions);
       }
     }
+  }
+
+  function applyConfigurePatch(
+    patch: Partial<IncrementalViewConfig<TRow>>
+  ): readonly TableRevisionAxis[] {
+    const next: EngineView<TRow> = { ...view };
+    let viewChanged = false;
+    let schemaChanged = false;
+
+    const assign = <K extends keyof EngineView<TRow>>(
+      key: K,
+      value: EngineView<TRow>[K]
+    ): void => {
+      if (!Object.is(view[key], value)) {
+        next[key] = value;
+        if (key === "columns") schemaChanged = true;
+        else viewChanged = true;
+      }
+    };
+
+    if ("search" in patch) assign("search", patch.search ?? "");
+    if ("sortBy" in patch) assign("sortBy", patch.sortBy);
+    if ("sortDir" in patch) assign("sortDir", patch.sortDir);
+    if ("groupBy" in patch) assign("groupBy", normalizeGroupBy(patch.groupBy));
+    if ("extra" in patch) assign("extra", patch.extra ?? EMPTY_EXTRA);
+    if ("columns" in patch && patch.columns) assign("columns", patch.columns);
+    if ("filterFn" in patch) assign("filterFn", patch.filterFn);
+    if ("getSearchText" in patch) assign("getSearchText", patch.getSearchText);
+    if ("filterTree" in patch) assign("filterTree", patch.filterTree);
+    if ("filterTreeFn" in patch) assign("filterTreeFn", patch.filterTreeFn);
+    if ("sortLevels" in patch) assign("sortLevels", patch.sortLevels);
+    if ("getSortValue" in patch) assign("getSortValue", patch.getSortValue);
+    if ("groupAggregates" in patch)
+      assign("groupAggregates", patch.groupAggregates);
+    if ("groupSort" in patch) assign("groupSort", patch.groupSort);
+    if ("groupFilter" in patch) assign("groupFilter", patch.groupFilter);
+    if ("groupFooters" in patch) assign("groupFooters", patch.groupFooters);
+    if ("collapsedGroupIds" in patch)
+      assign("collapsedGroupIds", patch.collapsedGroupIds);
+    if ("blankLabel" in patch) assign("blankLabel", patch.blankLabel);
+    if ("groupPageSize" in patch) assign("groupPageSize", patch.groupPageSize);
+    if ("rowPageSize" in patch) assign("rowPageSize", patch.rowPageSize);
+    if ("paging" in patch) assign("paging", patch.paging);
+    if ("summaryRow" in patch) assign("summaryRow", patch.summaryRow);
+    if ("aggregateSpec" in patch) assign("aggregateSpec", patch.aggregateSpec);
+    if ("aggregateOptions" in patch)
+      assign("aggregateOptions", patch.aggregateOptions);
+
+    if (!viewChanged && !schemaChanged) return [];
+    view = next;
+    syncDerived();
+    const axes: TableRevisionAxis[] = [];
+    if (viewChanged) axes.push("view");
+    if (schemaChanged) axes.push("schema");
+    return axes;
+  }
+
+  function notify(changed: readonly TableRevisionAxis[]): void {
+    publish(changed);
   }
 
   function assertLive(): void {
@@ -407,33 +510,22 @@ export function createTableEngine<TRow>(
     },
     configure(patch, options) {
       assertLive();
-      extraConfig = { ...extraConfig, ...patch };
-      if (patch.extra) view = { ...view, extra: patch.extra };
-      if (patch.search !== undefined) view = { ...view, search: patch.search };
-      if (patch.sortBy !== undefined) view = { ...view, sortBy: patch.sortBy };
-      if (patch.sortDir !== undefined)
-        view = { ...view, sortDir: patch.sortDir };
-      if (patch.groupBy !== undefined) {
-        view = {
-          ...view,
-          groupBy:
-            typeof patch.groupBy === "string"
-              ? patch.groupBy
-              : patch.groupBy[0],
-        };
-      }
-      if (patch.columns) view = { ...view, columns: patch.columns };
-      syncDerived();
-      if (!options?.silent) notify(["view"]);
+      const changed = applyConfigurePatch(patch);
+      if (changed.length > 0) publish(changed, options?.silent);
     },
     invalidate(axes, next, options) {
       assertLive();
-      if (next?.data) replaceData(next.data);
+      let changed = [...axes];
+      if (next?.data) {
+        replaceData(next.data);
+        if (!changed.includes("data")) changed = [...changed, "data"];
+      }
       if (next?.columns) {
         view = { ...view, columns: next.columns };
         syncDerived();
+        if (!changed.includes("schema")) changed = [...changed, "schema"];
       }
-      if (!options?.silent) notify(axes);
+      if (changed.length > 0) publish(changed, options?.silent);
     },
     dispose() {
       disposed = true;

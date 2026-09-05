@@ -11,17 +11,17 @@
  * `applyRowPatches` can pass {@link rowPatchLog} into
  * {@link applyRowPatchLogToView} so the same patches are not applied twice.
  */
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortableValue,
+  SortDirection,
+} from "../columnModel";
 import {
   aggregate,
   type AggregateOptions,
   type AggregateSpec,
 } from "../aggregate/aggregate";
-import type {
-  ColumnModel,
-  ExtraFilters,
-  SortableValue,
-  SortDirection,
-} from "../columnModel";
 import { cellSortValue } from "../engine/cellValue";
 import {
   type BuildGroupedFlatModelOptions,
@@ -44,7 +44,6 @@ import {
   sortRowsMulti,
 } from "../sort/compare";
 import type { QueryFilterGroup } from "../source/queryContract";
-import type { ColumnDef } from "../types";
 import { stableKey } from "../utils/stableKey";
 import {
   addAggregateRow,
@@ -103,7 +102,7 @@ export interface IncrementalViewConfig<TRow> {
   /** The active filter tree, when there is one. */
   filterTree?: QueryFilterGroup;
   /** Columns — sort and group values resolve through these. */
-  columns?: readonly ColumnModel<TRow>[];
+  columns?: readonly ColumnMetadata<TRow>[];
   /** Override a column's sort value. */
   getSortValue?: (row: TRow, columnKey: string) => SortableValue;
   /** Single-column sort. Ignored when `sortLevels` is non-empty. */
@@ -309,7 +308,7 @@ export function createIncrementalView<TRow>(
     : [...rows];
   const sorted = hasSort(config) ? fullSort(filtered, config) : filtered;
   const keys = groupingKeys(config.groupBy ?? []);
-  const columns = (config.columns ?? []) as readonly ColumnDef<TRow>[];
+  const columns = (config.columns ?? []) as readonly ColumnMetadata<TRow>[];
   const partitions =
     keys.length > 0 ? partitionGroupedRows(sorted, keys, columns) : [];
   const tree =
@@ -470,7 +469,7 @@ function republishDerived<TRow>(
   config: IncrementalViewConfig<TRow>
 ): IncrementalView<TRow> {
   const keys = groupingKeys(config.groupBy ?? []);
-  const columns = (config.columns ?? []) as readonly ColumnDef<TRow>[];
+  const columns = (config.columns ?? []) as readonly ColumnMetadata<TRow>[];
   const partitions =
     keys.length > 0 ? partitionGroupedRows(state.sorted, keys, columns) : [];
   state.tree =
@@ -967,7 +966,7 @@ function groupFlattenOptions<TRow>(
 ): Omit<BuildGroupedFlatModelOptions<TRow>, "rows"> {
   return {
     groupBy: config.groupBy ?? [],
-    columns: (config.columns ?? []) as readonly ColumnDef<TRow>[],
+    columns: (config.columns ?? []) as readonly ColumnMetadata<TRow>[],
     getRowId: config.getRowId,
     collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
     aggregates: skipAggregates ? undefined : config.groupAggregates,

@@ -9,7 +9,7 @@
  *
  * These are functions of the row, not table state — nothing goes in the URL.
  */
-import type { CSSProperties } from "react";
+import type { CssProperties } from "../style/cssProperties";
 
 export {
   estimateFromRowHeight,
@@ -33,7 +33,7 @@ export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
 export type RowStyle<TRow> = (
   row: TRow,
   index: number
-) => CSSProperties | undefined;
+) => CssProperties | undefined;
 
 /**
  * True when the host asked for a style or a height.

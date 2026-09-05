@@ -1,10 +1,6 @@
-import {
-  edgePinStyle,
-  PIN_Z,
-  pinnedCellStyle,
-  resolveColumnFooter,
-  type TableLabels,
-} from "@adapttable/core";
+import { edgePinStyle, PIN_Z, pinnedCellStyle } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import { resolveColumnFooter, type ColumnDef } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellHighlightStyle,
@@ -25,7 +21,7 @@ import {
   REORDER_COLUMN_WIDTH,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Badge, Checkbox, Group, Table, VisuallyHidden } from "@mantine/core";
 import type { CSSProperties, ReactElement, ReactNode, RefObject } from "react";
 import { Fragment, useMemo } from "react";
@@ -415,7 +411,7 @@ function DesktopRowBase<TRow>(
               data-adapttable-part="cell"
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
-              {...table.getCellProps(column)}
+              {...table.getCellProps(column as ColumnDef<TRow>)}
               {...focusProps}
               style={cellHighlightStyle(
                 focusProps,
@@ -441,7 +437,7 @@ function DesktopRowBase<TRow>(
                 <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
                   rowIndex={focusIndex}
                   rows={rows}
@@ -803,7 +799,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
               {columns.map((column) => (
                 <Table.Td
                   key={column.key}
-                  {...props.table.getCellProps(column)}
+                  {...props.table.getCellProps(column as ColumnDef<TRow>)}
                   fw={600}
                   c="dimmed"
                 >

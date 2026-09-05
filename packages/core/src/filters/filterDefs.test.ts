@@ -1,6 +1,6 @@
+import type { ColumnModel } from "../columnModel";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
 import { resetDevWarnings } from "../utils/devWarn";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import {
@@ -88,7 +88,7 @@ describe("filterStateKeys", () => {
 describe("resolveFilterDefs", () => {
   beforeEach(() => resetDevWarnings());
 
-  const columns: ColumnDef<Row>[] = [
+  const columns: ColumnModel<Row>[] = [
     { key: "name", header: "Name" },
     { key: "status", header: "Status", filter: "select" },
     {
@@ -124,7 +124,7 @@ describe("resolveFilterDefs", () => {
   });
 
   it("filters-only usage (no column declares a filter) is first-class", () => {
-    const bare: ColumnDef<Row>[] = [{ key: "name", header: "Name" }];
+    const bare: ColumnModel<Row>[] = [{ key: "name", header: "Name" }];
     const defs = resolveFilterDefs(bare, [{ key: "status", type: "select" }]);
     expect(defs).toHaveLength(1);
   });

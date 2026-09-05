@@ -106,13 +106,18 @@ export interface ColumnModel<TRow = unknown> {
  * React column. Today's `ColumnDef` keeps this name on `@adapttable/react`.
  * Renderers stay React nodes — the engine never stringifies them into labels.
  */
-export interface ColumnDef<TRow = unknown> extends ColumnModel<TRow> {
+export interface ColumnDef<TRow = unknown> extends Omit<
+  ColumnModel<TRow>,
+  "header" | "filter" | "editor"
+> {
   header?: ReactNode;
   headerActions?: ReactNode;
   renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
   renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
   Cell?: ComponentType<CellProps<TRow>>;
   accessor?: (row: TRow) => ReactNode;
+  filter?: ColumnFilter<TRow>;
+  editor?: CellEditor;
 }
 ```
 

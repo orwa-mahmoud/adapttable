@@ -6,7 +6,7 @@
  * the list itself — otherwise element-mode virtualization has a null scroller
  * and, before this module existed, fell back to mounting every card.
  */
-import type { CSSProperties, Ref, RefCallback } from "react";
+import type { CssProperties } from "../style/cssProperties";
 
 /**
  * Clip the card list to `maxHeight` so it becomes the scroll element the
@@ -16,10 +16,18 @@ import type { CSSProperties, Ref, RefCallback } from "react";
  */
 export function mobileCardListStyle(
   maxHeight: number | undefined
-): CSSProperties | undefined {
+): CssProperties | undefined {
   if (maxHeight == null) return undefined;
   return { maxHeight, overflowY: "auto" };
 }
+
+/**
+ * A callback or object ref, without importing React.
+ *
+ * @public
+ */
+export type ElementRef<T> =
+  ((node: T | null) => void) | { current: T | null } | null | undefined;
 
 /**
  * Attach the virtualizer to the card list, composing an extra ref (Mantine
@@ -30,8 +38,8 @@ export function mobileCardListStyle(
  */
 export function bindMobileCardList(
   virtualScrollRef: ((node: HTMLElement | null) => void) | undefined,
-  extra?: Ref<HTMLElement | null>
-): RefCallback<HTMLElement> {
+  extra?: ElementRef<HTMLElement>
+): (node: HTMLElement | null) => void {
   return (node) => {
     virtualScrollRef?.(node);
     if (extra == null) return;

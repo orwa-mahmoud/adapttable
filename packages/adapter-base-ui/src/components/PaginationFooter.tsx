@@ -1,6 +1,6 @@
 /** Row count and the windowed pager. */
-import { type PaginationInfo, type TableLabels } from "@adapttable/core";
-import { paginationSlots } from "@adapttable/core/adapter";
+import type { PaginationInfo, TableLabels } from "@adapttable/core";
+import { paginationSlots } from "@adapttable/react/adapter";
 
 import { subtleText } from "../styles";
 import { Button, Flex, Text } from "../ui";

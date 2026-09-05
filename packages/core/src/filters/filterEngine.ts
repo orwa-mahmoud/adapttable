@@ -4,10 +4,11 @@
  * Lives on `@adapttable/<kit>/filters`. The DataTable root never imports
  * this module — only the filters feature's provider does.
  */
+import type { ColumnMetadata } from "../columnModel";
 import type { FeatureHostState } from "../features/currentHost";
 import { applyFilterExtends } from "../features/currentHost";
 import type { QueryFilterGroup } from "../source/queryContract";
-import type { ColumnDef, ExtraFilters } from "../types";
+import type { ExtraFilters } from "../types";
 import { computeFilterFacets, type FacetMap } from "./facets";
 import { resolveFilterRegistry } from "./filterBuiltins";
 import {
@@ -27,7 +28,7 @@ import { evaluateFilterTree } from "./filterTree";
  */
 export interface FilterEngine {
   buildRuntime<TRow>(input: {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     declaredFilters: readonly FilterDef<TRow>[] | undefined;
     locale: string | undefined;
     data: readonly TRow[];

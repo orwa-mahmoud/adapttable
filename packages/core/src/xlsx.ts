@@ -13,12 +13,12 @@
  */
 export type { ExportViewEntry, ExportWriter } from "./export/exportWriter";
 export { buildTableXlsx, xlsxWriter } from "./export/xlsx";
-export type { ColumnDef } from "./types";
+export type { ColumnModel } from "./types";
 
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
@@ -37,7 +37,7 @@ export type {
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
@@ -53,7 +53,7 @@ export type { ColumnHeaderController } from "./types";
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
@@ -65,7 +65,7 @@ export type { FilterOptionsSource } from "./filters/filterDefs";
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.

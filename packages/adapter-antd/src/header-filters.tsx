@@ -3,8 +3,8 @@ import {
   FILTER_HEADER,
   slotRender,
   type StaticTableFeature,
-} from "@adapttable/core/adapter";
-import { headerFilters as core } from "@adapttable/core/features";
+} from "@adapttable/react/adapter";
+import { headerFilters as core } from "@adapttable/react/features";
 
 import { FilterHeaderTrigger } from "./components/kitControls";
 

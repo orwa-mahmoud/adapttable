@@ -1,1 +1,1 @@
-export { cellSpan } from "@adapttable/core/features";
+export { cellSpan } from "@adapttable/react/features";

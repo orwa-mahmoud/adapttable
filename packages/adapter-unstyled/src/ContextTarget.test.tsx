@@ -1,4 +1,4 @@
-import { resolveContextTarget } from "@adapttable/core/adapter";
+import { resolveContextTarget } from "@adapttable/react/adapter";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
