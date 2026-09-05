@@ -4,14 +4,10 @@
 
 ```ts
 
-import { ComponentType } from 'react';
-import { ReactElement } from 'react';
-import { ReactNode } from 'react';
-
 // @public
 export function buildTableXlsx<TRow>(options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     sheetName?: string;
     view?: readonly ExportViewEntry<TRow>[];
     summary?: Readonly<Partial<Record<string, unknown>>>;
@@ -50,22 +46,57 @@ export interface CellProps<TRow> {
 }
 
 // @public
-export interface ColumnDef<TRow> {
-    accessor?: (row: TRow) => ReactNode;
+export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
+    label?: string;
+});
+
+// @public
+export interface ColumnFooterContext<TRow> {
+    column: ColumnModel<TRow>;
+    value: DisplayValue;
+}
+
+// @public
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export interface ColumnHeaderContext<TRow> {
+    column: ColumnModel<TRow>;
+    controller: ColumnHeaderController;
+}
+
+// @public
+export interface ColumnHeaderController {
+    label: DisplayValue;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
+
+// @public
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter" | "editor"> & {
+    header?: unknown;
+    filter?: unknown;
+    editor?: unknown;
+};
+
+// @public
+export interface ColumnModel<TRow = unknown> {
+    accessor?: (row: TRow) => unknown;
     align?: "start" | "center" | "end";
-    Cell?: ComponentType<CellProps<TRow>>;
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
-    editor?: CellEditor;
+    editor?: ColumnModelEditor;
     editValue?: (row: TRow) => string;
     exportValue?: (row: TRow) => unknown;
-    filter?: ColumnFilter<TRow>;
+    filter?: ColumnModelFilter;
     flex?: number;
     formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
     groupShow?: ColumnGroupShow;
-    header?: ReactNode;
-    headerActions?: ReactNode;
+    header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
     hideOnMobile?: boolean;
@@ -81,8 +112,6 @@ export interface ColumnDef<TRow> {
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
     renameable?: boolean;
-    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
     responsivePriority?: number;
     rowSpan?: number | ((row: TRow) => number);
     sortable?: boolean;
@@ -92,34 +121,10 @@ export interface ColumnDef<TRow> {
 }
 
 // @public
-export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
-    label?: string;
-});
+export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 
 // @public
-export interface ColumnFooterContext<TRow> {
-    column: ColumnDef<TRow>;
-    value: ReactNode;
-}
-
-// @public
-export type ColumnGroupShow = "open" | "closed" | "always";
-
-// @public
-export interface ColumnHeaderContext<TRow> {
-    column: ColumnDef<TRow>;
-    controller: ColumnHeaderController;
-}
-
-// @public
-export interface ColumnHeaderController {
-    label: ReactNode;
-    sortDir?: "asc" | "desc";
-    sortIndex?: number;
-    toggleSort: (event?: {
-        shiftKey?: boolean;
-    }) => void;
-}
+export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
 export interface CustomCellEditorCtrl {
@@ -143,7 +148,10 @@ export interface CustomCellEditorCtrl {
 }
 
 // @public
-export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
+
+// @public
+export type DisplayValue = unknown;
 
 // @public
 export interface ExportPayload {

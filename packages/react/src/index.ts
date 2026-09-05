@@ -24,6 +24,7 @@ export type {
   ColumnHeaderContext,
   ColumnHeaderController,
   ColumnInput,
+  ReactColumnGroupDef,
 } from "./columnDef";
 export {
   columnHeaderController,
@@ -226,6 +227,7 @@ export {
   PIN_Z,
   pinnedCellStyle,
   type PinSide,
+  type ReactUseColumnLayoutResult,
   useColumnLayout,
   type UseColumnLayoutOptions,
   type UseColumnLayoutResult,

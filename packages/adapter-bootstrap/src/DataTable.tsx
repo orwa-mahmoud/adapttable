@@ -9,7 +9,7 @@ import {
   useDataTableShell,
   useMountStagger,
   useTableFeatures,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 import { ColumnMenu } from "./components/ColumnMenu";

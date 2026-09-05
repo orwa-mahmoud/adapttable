@@ -18,13 +18,19 @@ export class FakeSocket implements StreamSocket {
     this.protocols = protocols;
   }
 
-  addEventListener(type: string, listener: Listener): void {
+  addEventListener(
+    type: string,
+    listener: (event: StreamSocketEvent) => void
+  ): void {
     const set = this.listeners.get(type) ?? new Set<Listener>();
     set.add(listener);
     this.listeners.set(type, set);
   }
 
-  removeEventListener(type: string, listener: Listener): void {
+  removeEventListener(
+    type: string,
+    listener: (event: StreamSocketEvent) => void
+  ): void {
     this.listeners.get(type)?.delete(listener);
   }
 

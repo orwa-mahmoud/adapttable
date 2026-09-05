@@ -40,3 +40,15 @@ export {
   parseFormula,
   type ParseResult,
 } from "./formula/parse";
+
+/**
+ * Member types the signatures above hand back, reachable from the entry that
+ * returns them.
+ */
+export type { ColumnMetadata, SortableValue } from "./columnModel";
+export type { ColumnModel } from "./columnModel";
+export type {
+  ColumnGroupShow,
+  ColumnModelEditor,
+  ColumnModelFilter,
+} from "./columnModel";

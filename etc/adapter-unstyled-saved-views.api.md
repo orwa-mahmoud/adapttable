@@ -4,8 +4,8 @@
 
 ```ts
 
-import { StaticTableFeature } from '@adapttable/core/adapter';
-import { UseSavedViewsOptions } from '@adapttable/core/features';
+import { StaticTableFeature } from '@adapttable/react/adapter';
+import { UseSavedViewsOptions } from '@adapttable/react/features';
 
 // @public
 export function savedViews(options: UseSavedViewsOptions): StaticTableFeature;

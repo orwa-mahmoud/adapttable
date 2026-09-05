@@ -27,6 +27,36 @@ export interface AgentApply {
 }
 
 // @public
+export interface AgentCapabilityContext {
+    // (undocumented)
+    readonly apply: AgentApply;
+    readonly commit?: CommitPolicy;
+    // (undocumented)
+    readonly observation: AgentObservation;
+    // (undocumented)
+    readonly observe: () => AgentObservation;
+    // (undocumented)
+    readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    readonly plan?: CapabilityPlan;
+}
+
+// @public
+export interface AgentCapabilityDefinition {
+    execute(context: AgentCapabilityContext, args: unknown): unknown;
+    readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
+        readonly guide: string;
+        readonly input: JsonSchema;
+        readonly output: JsonSchema;
+    };
+    isEnabled(observation: AgentObservation): boolean;
+    readonly key: string;
+    readonly kind?: "read" | "view" | "write" | "destructive";
+    plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
+    readonly staging?: CapabilityStaging;
+    readonly summary: string;
+}
+
+// @public
 export interface AgentCellEdit {
     readonly column: string;
     readonly rowKey: string;
@@ -51,7 +81,7 @@ export interface AgentLimits {
 
 // @public
 export interface AgentManifest {
-    readonly capabilities: readonly CapabilityKey[];
+    readonly capabilities: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly limits: AgentLimits;
     readonly policy: AgentPolicy;
@@ -112,12 +142,12 @@ export interface AgentRowAddressing {
 export interface AgentSession {
     catalog(): readonly CatalogEntry[];
     describe(key: string): CapabilityGuide;
-    execute(key: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
+    execute(key: string, args: unknown, expectedRevision: number, idempotencyKey: string, signal?: AbortSignal): Promise<ExecuteResult>;
     manifest(): AgentManifest;
 }
 
 // @public
-export type ApprovalOutcome = "pending" | "approved" | "rejected" | "not-required";
+export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" | "not-required";
 
 // @public
 export type ApprovalPolicy = "writes" | "destructive" | "never";
@@ -129,7 +159,7 @@ export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "vi
 export interface CapabilityGuide {
     readonly guide: string;
     readonly input: JsonSchema;
-    readonly key: CapabilityKey;
+    readonly key: string;
     readonly output: JsonSchema;
     readonly schemaVersion: string;
 }
@@ -138,8 +168,17 @@ export interface CapabilityGuide {
 export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
+export interface CapabilityPlan {
+    readonly payload?: unknown;
+    readonly proposals: readonly WriteProposal[];
+}
+
+// @public
+export type CapabilityStaging = "supported" | "unsupported";
+
+// @public
 export interface CatalogEntry {
-    readonly key: CapabilityKey;
+    readonly key: string;
     readonly summary: string;
 }
 
@@ -163,6 +202,9 @@ export interface ExecuteResult {
     readonly result?: unknown;
     readonly revision: number;
 }
+
+// @public
+export function fromOpenAIToolName(name: string, catalogKeys?: readonly string[]): string;
 
 // @public
 export interface JsonSchema {
@@ -264,6 +306,9 @@ export interface TableAgentBridge {
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }
+
+// @public
+export function toOpenAIToolName(key: string): string;
 
 // @public
 export function toOpenAITools(session: AgentSession, options?: OpenAIToolsOptions): readonly OpenAIFunctionTool[];

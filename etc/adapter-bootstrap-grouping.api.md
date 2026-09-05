@@ -4,7 +4,7 @@
 
 ```ts
 
-import { grouping } from '@adapttable/core/features';
+import { grouping } from '@adapttable/react/features';
 
 export { grouping }
 

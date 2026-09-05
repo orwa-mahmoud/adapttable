@@ -4,7 +4,7 @@
 
 ```ts
 
-import { multiSort } from '@adapttable/core/features';
+import { multiSort } from '@adapttable/react/features';
 
 export { multiSort }
 

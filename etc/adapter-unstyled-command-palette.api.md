@@ -4,7 +4,7 @@
 
 ```ts
 
-import { AdapterCommandPaletteFeature } from '@adapttable/core/adapter';
+import { AdapterCommandPaletteFeature } from '@adapttable/react/adapter';
 
 // @public
 export const commandPalette: AdapterCommandPaletteFeature;

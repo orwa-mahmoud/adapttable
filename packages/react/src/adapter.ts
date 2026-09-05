@@ -1,5 +1,5 @@
 /**
- * `@adapttable/core/adapter` — the builder tier.
+ * `@adapttable/react/adapter` — the builder tier.
  *
  * Everything the eight built-in adapters are made of, published for anyone
  * wiring a ninth: the shared `<DataTable>` orchestration
@@ -34,9 +34,6 @@ export {
   type CommandPaletteSlots,
   type CommandPaletteSurfaceProps,
 } from "./actions/CommandPaletteChrome";
-export type { Command } from "@adapttable/core";
-export type { ConfirmHandler } from "@adapttable/core";
-export { resolveDisabledReason } from "@adapttable/core";
 export {
   ContextMenuChrome,
   type ContextMenuChromeProps,
@@ -44,12 +41,6 @@ export {
   type ContextMenuSlots,
   type ContextMenuSurfaceProps,
 } from "./actions/ContextMenuChrome";
-export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
-export {
-  resolveContextTarget,
-  type ResolvedContextTarget,
-  ROW_ID_ATTRIBUTE,
-} from "@adapttable/core";
 export { bulkActionErrorMessage } from "./actions/useBulkActionRunner";
 export {
   type BulkBarState,
@@ -119,7 +110,7 @@ export {
   type StandardFeatureOptions,
   type StandardFeaturesFactory,
 } from "./adapterFeatures/standardPreset";
-export type { AggregateName, Aggregator } from "@adapttable/core";
+export type { ColumnDef } from "./columnDef";
 export {
   type ColumnGroupToggleButtonProps,
   ColumnGroupToggleChrome,
@@ -128,26 +119,6 @@ export {
   type ColumnGroupToggleSlots,
 } from "./columns/ColumnGroupToggle";
 export {
-  type ColumnMenuAction,
-  type ColumnMenuActionContext,
-  columnMenuActions,
-  type ColumnMenuChoice,
-  type ColumnMenuChoiceOption,
-  type ColumnMenuChromeProps,
-  type ColumnMenuItem,
-  type ColumnMenuLabels,
-  type ColumnMenuRow,
-  type ColumnMenuSlotProps,
-  filterColumnMenuRows,
-  hideAllColumns,
-  nextPinSide,
-  pinActionLabel,
-  type PinnedSide,
-  resetColumnLayout,
-  showAllColumns,
-  unpinAllColumns,
-} from "@adapttable/core";
-export {
   COLUMN_DND_MIME,
   type ColumnDragRowAttrs,
   type ColumnDragState,
@@ -155,48 +126,14 @@ export {
   type ColumnReorderKeyProps,
   type ColumnRowDragProps,
 } from "./columns/columnReorder";
-export { type ColumnResizeHandleProps } from "@adapttable/core";
-export {
-  columnFlexShares,
-  columnSizeStyle,
-  type ColumnSizingOptions,
-  fittedTableStyle,
-} from "@adapttable/core";
-export type { ColumnGroupRecord, FlattenedColumns } from "@adapttable/core";
-export {
-  applyCollapsedColumnGroups,
-  type ColumnGroupDef,
-  type ColumnInput,
-  flattenColumnTree,
-} from "@adapttable/core";
-export type { WidthColumn } from "@adapttable/core";
-export { pinnedColumnWidth } from "@adapttable/core";
-export type { GroupedHeaderAlign } from "@adapttable/core";
-export {
-  COLUMN_GROUP_ID_SEP,
-  COLUMN_GROUP_RENDER_PREFIX,
-  COLUMN_GROUP_STUB_PREFIX,
-  COLUMN_GROUP_STUB_WIDTH,
-  columnGroupHeaderCaption,
-  columnGroupId,
-  columnGroupPath,
-  columnGroupStubStyle,
-  groupedHeaderAlign,
-  groupedHeaderCellStyle,
-  groupedHeaderChildRule,
-  groupedHeaderLabelStyle,
-  type HeaderGroupCell,
-  headerGroupRow,
-  headerGroupRows,
-  type HtmlGroupedHeaderCell,
-  htmlGroupedHeaderPlan,
-  isColumnGroupRenderKey,
-  isColumnGroupStubKey,
-  isColumnGroupSummaryKey,
-  toggleCollapsedColumnGroup,
-} from "@adapttable/core";
+export { flattenReactColumnTree } from "./columns/flattenColumnTree";
 export { EyeIcon, GripIcon, PinIcon } from "./columns/icons";
+export {
+  type ReactColumnResizeHandleProps,
+  toReactColumnResizeHandleProps,
+} from "./columns/reactColumnResize";
 export type { PinSide, UseColumnLayoutResult } from "./columns/useColumnLayout";
+export type { ReactUseColumnLayoutResult } from "./columns/useColumnLayout";
 export {
   type PinLeads,
   type PinnedCellStyle,
@@ -207,7 +144,6 @@ export {
   useColumnRenameEditor,
   type UseColumnRenameEditorOptions,
 } from "./columns/useColumnRenameEditor";
-export { DEFAULT_CARD_SIZE_PX } from "@adapttable/core";
 export {
   cellHighlightStyle,
   groupIndentStyle,
@@ -237,10 +173,6 @@ export {
   type AgentApprovalSlots,
 } from "./editing/AgentApprovalChrome";
 export type { BatchEditingState } from "./editing/batchEditing";
-export type {
-  CustomCellEditorRender,
-  EditableColumnLike,
-} from "@adapttable/core";
 export type { EditableCellEditing } from "./editing/editableCellController";
 export {
   focusEditorOnMount,
@@ -283,7 +215,6 @@ export {
   ExportAnnouncer,
   type ExportAnnouncerProps,
 } from "./export/ExportAnnouncer";
-export { exportButtonLabel } from "@adapttable/core";
 export {
   type ExportProgressAction,
   ExportProgressChrome,
@@ -292,7 +223,6 @@ export {
   type ExportProgressSlots,
   type ExportProgressSurfaceSlotProps,
 } from "./export/ExportProgressChrome";
-export type { ExportWriter } from "@adapttable/core";
 export {
   type ExportHandlerState,
   type ExportProgressState,
@@ -301,8 +231,6 @@ export {
 } from "./export/useExportHandler";
 export { ChromeBodyGate, DataTableShellView } from "./features/chromeBodyGate";
 export { ChromeExtrasGate } from "./features/chromeExtrasGate";
-export type { FeatureHostState } from "@adapttable/core";
-export { bindFeatureHostFn } from "@adapttable/core";
 export type { ResolvedDensity } from "./features/densityStateKey";
 export { useResolvedDensity } from "./features/densityStateKey";
 export type { RowOf } from "./features/featureHost";
@@ -434,8 +362,6 @@ export {
   type ChecklistSearchProps,
   type ChecklistSlots,
 } from "./filters/ChecklistChrome";
-export type { FacetMap } from "@adapttable/core";
-export type { FilterDef, FilterRuntime } from "@adapttable/core";
 export type {
   FilterFormSource,
   FiltersFormSlotProps,
@@ -456,7 +382,6 @@ export {
   type FilterHeaderSlots,
   hasActiveHeaderFilter,
 } from "./filters/FilterHeaderRow";
-export type { FilterTypeRegistry, FilterTypeSpec } from "@adapttable/core";
 export {
   type FilterTreeBuilderProps,
   type FilterTreeButtonProps,
@@ -500,7 +425,6 @@ export {
   GridFocusAnnouncer,
   type GridFocusAnnouncerProps,
 } from "./focus/GridFocusAnnouncer";
-export type { SelectionStats } from "@adapttable/core";
 export {
   type SelectionStatPart,
   SelectionStatsChrome,
@@ -518,7 +442,6 @@ export {
   type StatusBarSlots,
 } from "./focus/StatusBarChrome";
 export type { GridFocusState, UseGridFocusOptions } from "./focus/useGridFocus";
-export type { GroupByInput } from "@adapttable/core";
 export {
   GroupMoreButtonChrome,
   type GroupMoreButtonChromeProps,
@@ -526,8 +449,6 @@ export {
   type GroupMoreButtonSlotProps,
   type GroupMoreButtonSlots,
 } from "./grouping/GroupMoreButton";
-export type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
-export type { RowGroupLevel, RowGroupRef } from "@adapttable/core";
 export { GroupToggleSpacer } from "./grouping/GroupToggleSpacer";
 export type { GroupCollapseState } from "./grouping/useGroupCollapse";
 export {
@@ -560,7 +481,6 @@ export {
   type DesktopVirtualPadSlot,
   useDesktopTableAssembly,
 } from "./layout/desktopTableAssembly";
-export type { AssemblyFns } from "@adapttable/core";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export {
   SidePanelChrome,
@@ -573,18 +493,11 @@ export {
   type SidePanelTabProps,
 } from "./layout/SidePanelChrome";
 export { type FullscreenState, useFullscreen } from "./layout/useFullscreen";
+export { useOffsetHeight } from "./layout/useOffsetHeight";
 export {
   resolveStickyToolbar,
   useStickyToolbarLayout,
 } from "./layout/useStickyToolbarLayout";
-export {
-  type PaginationItem,
-  paginationItems,
-  type PaginationSlot,
-  paginationSlots,
-} from "@adapttable/core";
-export type { PivotField, PivotZone } from "@adapttable/core";
-export type { PivotConfig } from "@adapttable/core";
 export {
   type PivotAddProps,
   type PivotAggProps,
@@ -595,77 +508,19 @@ export {
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
 } from "./pivot/PivotPanelChrome";
+export type { SummaryRowFn } from "./props";
 export type {
   BaseDataTableProps,
   ComposedTableProps,
   FeatureProps,
   ToolbarSlots,
 } from "./props";
-export { cellFlashAttr, rowFlashSignature } from "@adapttable/core";
-export type { GetCellSpan } from "@adapttable/core";
-export {
-  buildBodyCells,
-  bodyCellsHaveRowSpan,
-  cellsForRow,
-  type CellSpanAppearance,
-  cellSpanMark,
-  rowSpanSignature,
-  type TableBodyCell as BodyCell,
-} from "@adapttable/core";
 export type {
-  ExtraRowKind,
-  TableExtraEntry as ExtraEntry,
-} from "@adapttable/core";
-export {
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
-  extraCountBeforeRowIds,
-  extraCoveredTableSlots,
-  extraHostFillStyle,
-  type ExtraRow,
-  extraRowsForSection,
-  extraUncoveredColSpans,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-  isExtraEntry,
-} from "@adapttable/core";
-export type { MobileCardRenderer } from "@adapttable/core";
-export {
-  orderedCardEntries,
-  PINNED_BOTTOM_PART,
-  PINNED_TOP_PART,
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
-  pinnedRowStickyStyle,
-} from "@adapttable/core";
-export { useOffsetHeight } from "./layout/useOffsetHeight";
-export type { PinnedRows, PinnedSummaryEntry } from "@adapttable/core";
-export {
-  isPinnedSummaryRowId,
-  PINNED_SUMMARY_BOTTOM_PART,
-  PINNED_SUMMARY_TOP_PART,
-  pinnedSummaryPart,
-  pinnedSummaryRowId,
-  pinnedSummarySideFromId,
-} from "@adapttable/core";
-export type { RowActionsLayout, RowActionsRenderer } from "@adapttable/core";
+  ReactMobileCardField,
+  ReactMobileCardModel,
+  ReactMobileCardRenderer,
+} from "./rows/mobileCard";
 export { type RowClickProps, rowClickProps } from "./rows/rowClickProps";
-export { flattenReactColumnTree } from "./columns/flattenColumnTree";
-export type {
-  RowDropPosition,
-  RowGroupMoveHandler,
-  RowMoveConfirmHandler,
-  RowMoveMenuModel,
-  RowMovePolicy,
-  RowMoveRequest,
-  RowMoveTarget,
-  RowReorderOptions,
-  RowTreeMoveHandler,
-  RowTreeParentRef,
-} from "@adapttable/core";
 export type { RowPinningState, RowPinSide } from "./rows/rowPinning";
 export { rowPinSignature } from "./rows/rowPinning";
 export type { RowReorderHandler, RowReorderLabels } from "./rows/rowReorder";
@@ -692,33 +547,14 @@ export {
   type RowReorderHandleSlots,
   type RowReorderMoveButtonProps,
 } from "./rows/RowReorderHandle";
-export {
-  resolveRowHeight,
-  resolveRowStyle,
-  type RowHeight,
-  type RowStyle,
-  rowStyleSignature,
-} from "@adapttable/core";
 export type { RowExpansionState } from "./rows/useRowExpansion";
 export type { SelectionState } from "./selection/useSelection";
 export { offersAllMatching } from "./selection/useSelection";
-export { deriveSortByOptions } from "@adapttable/core";
-export type {
-  ExportScopeCapability,
-  GroupingCapability,
-  TableSourceCapabilities,
-  TotalCountCapability,
-} from "@adapttable/core";
-export type { QuerySupport } from "@adapttable/core";
-export type { TableSource } from "@adapttable/core";
 export type { UseServerDataOptions } from "./source/useServerData";
 export {
   type DataModeProps,
   type TableQueryHandler,
 } from "./source/useTableData";
-export type { Slot, TableErrorState } from "@adapttable/core";
-export { fillSlot, tableErrorState } from "@adapttable/core";
-export type { FeatureNoticeAppearance } from "@adapttable/core";
 export {
   type SharedTableRenderProps,
   type TableRenderModel,
@@ -736,7 +572,6 @@ export {
   type TreeCellChromeProps,
   type TreeCellProps,
 } from "./tree/TreeCell";
-export type { TreeEntry } from "@adapttable/core";
 export {
   type TreeToggleButtonProps,
   TreeToggleChrome,
@@ -745,16 +580,6 @@ export {
   type TreeToggleSlots,
 } from "./tree/TreeToggle";
 export type { TreeExpansionState } from "./tree/useTreeExpansion";
-export type {
-  BulkAction,
-  BulkActionContext,
-  Direction,
-  RowAction,
-  SortByOption,
-  SortDirection,
-  TableLabels,
-} from "@adapttable/core";
-export type { ColumnDef } from "./columnDef";
 export type { UrlStateAdapter } from "./url/adapter";
 export { useResolvedAdapter } from "./url/adapter";
 export {
@@ -796,7 +621,6 @@ export {
   type ViewControlsToolbar,
   viewControlsToolbar,
 } from "./useTableChrome";
-export type { Props } from "@adapttable/core";
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { ColumnSpacer, type ColumnSpacerProps } from "./virtual/ColumnSpacer";
 export {
@@ -804,7 +628,6 @@ export {
   type RowPairMeasurer,
   useRowPairMeasurer,
 } from "./virtual/measureRowPair";
-export { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 export {
   type ColumnWindow,
   useColumnWindow,
@@ -816,6 +639,194 @@ export {
   useTableVirtualization,
   type UseTableVirtualizationOptions,
 } from "./virtual/useTableVirtualization";
+export type { Command } from "@adapttable/core";
+export type { ConfirmHandler } from "@adapttable/core";
+export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
+export type { AggregateName, Aggregator } from "@adapttable/core";
+export type { ColumnGroupRecord, FlattenedColumns } from "@adapttable/core";
+export type { WidthColumn } from "@adapttable/core";
+export type { GroupedHeaderAlign } from "@adapttable/core";
+export type {
+  CustomCellEditorRender,
+  EditableColumnLike,
+} from "@adapttable/core";
+export type { ExportWriter } from "@adapttable/core";
+export type { FeatureHostState } from "@adapttable/core";
+export type { FacetMap } from "@adapttable/core";
+export type { FilterDef, FilterRuntime } from "@adapttable/core";
+export type { FilterTypeRegistry, FilterTypeSpec } from "@adapttable/core";
+export type { SelectionStats } from "@adapttable/core";
+export type { GroupByInput } from "@adapttable/core";
+export type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
+export type { RowGroupLevel, RowGroupRef } from "@adapttable/core";
+export type { AssemblyFns } from "@adapttable/core";
+export type { PivotField, PivotZone } from "@adapttable/core";
+export type { PivotConfig } from "@adapttable/core";
+export type { GetCellSpan } from "@adapttable/core";
+export type {
+  TableExtraEntry as ExtraEntry,
+  ExtraRowKind,
+} from "@adapttable/core";
+export type { MobileCardRenderer } from "@adapttable/core";
+export type { PinnedRows, PinnedSummaryEntry } from "@adapttable/core";
+export type { RowActionsLayout, RowActionsRenderer } from "@adapttable/core";
+export type {
+  RowDropPosition,
+  RowGroupMoveHandler,
+  RowMoveConfirmHandler,
+  RowMoveMenuModel,
+  RowMovePolicy,
+  RowMoveRequest,
+  RowMoveTarget,
+  RowReorderOptions,
+  RowTreeMoveHandler,
+  RowTreeParentRef,
+} from "@adapttable/core";
+export type {
+  ExportScopeCapability,
+  GroupingCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "@adapttable/core";
+export type { QuerySupport } from "@adapttable/core";
+export type { TableSource } from "@adapttable/core";
+export type { Slot, TableErrorState } from "@adapttable/core";
+export type { FeatureNoticeAppearance } from "@adapttable/core";
+export type { TreeEntry } from "@adapttable/core";
+export type {
+  BulkAction,
+  BulkActionContext,
+  Direction,
+  RowAction,
+  SortByOption,
+  SortDirection,
+  TableLabels,
+} from "@adapttable/core";
+export type { Props } from "@adapttable/core";
+export { resolveDisabledReason } from "@adapttable/core";
+export {
+  resolveContextTarget,
+  type ResolvedContextTarget,
+  ROW_ID_ATTRIBUTE,
+} from "@adapttable/core";
+export {
+  type ColumnMenuAction,
+  type ColumnMenuActionContext,
+  columnMenuActions,
+  type ColumnMenuChoice,
+  type ColumnMenuChoiceOption,
+  type ColumnMenuChromeProps,
+  type ColumnMenuItem,
+  type ColumnMenuLabels,
+  type ColumnMenuRow,
+  type ColumnMenuSlotProps,
+  filterColumnMenuRows,
+  hideAllColumns,
+  nextPinSide,
+  pinActionLabel,
+  type PinnedSide,
+  resetColumnLayout,
+  showAllColumns,
+  unpinAllColumns,
+} from "@adapttable/core";
+export { type ColumnResizeHandleProps } from "@adapttable/core";
+export {
+  columnFlexShares,
+  columnSizeStyle,
+  type ColumnSizingOptions,
+  fittedTableStyle,
+} from "@adapttable/core";
+export {
+  applyCollapsedColumnGroups,
+  type ColumnGroupDef,
+  type ColumnInput,
+  flattenColumnTree,
+} from "@adapttable/core";
+export { pinnedColumnWidth } from "@adapttable/core";
+export {
+  COLUMN_GROUP_ID_SEP,
+  COLUMN_GROUP_RENDER_PREFIX,
+  COLUMN_GROUP_STUB_PREFIX,
+  COLUMN_GROUP_STUB_WIDTH,
+  columnGroupHeaderCaption,
+  columnGroupId,
+  columnGroupPath,
+  columnGroupStubStyle,
+  groupedHeaderAlign,
+  groupedHeaderCellStyle,
+  groupedHeaderChildRule,
+  groupedHeaderLabelStyle,
+  type HeaderGroupCell,
+  headerGroupRow,
+  headerGroupRows,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
+  isColumnGroupRenderKey,
+  isColumnGroupStubKey,
+  isColumnGroupSummaryKey,
+  toggleCollapsedColumnGroup,
+} from "@adapttable/core";
+export { DEFAULT_CARD_SIZE_PX } from "@adapttable/core";
+export { exportButtonLabel } from "@adapttable/core";
+export { bindFeatureHostFn } from "@adapttable/core";
+export {
+  type PaginationItem,
+  paginationItems,
+  type PaginationSlot,
+  paginationSlots,
+} from "@adapttable/core";
+export { cellFlashAttr, rowFlashSignature } from "@adapttable/core";
+export {
+  type TableBodyCell as BodyCell,
+  bodyCellsHaveRowSpan,
+  buildBodyCells,
+  cellsForRow,
+  type CellSpanAppearance,
+  cellSpanMark,
+  rowSpanSignature,
+} from "@adapttable/core";
+export {
+  EXTRA_OVER_SPAN_ROW_STYLE,
+  EXTRA_OVER_SPAN_STYLE,
+  EXTRA_ROW_PARTS,
+  extraCountBeforeRowIds,
+  extraCoveredTableSlots,
+  extraHostFillStyle,
+  type ExtraRow,
+  extraRowsForSection,
+  extraUncoveredColSpans,
+  inflateBodyCellRowSpans,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+  isExtraEntry,
+} from "@adapttable/core";
+export {
+  orderedCardEntries,
+  PINNED_BOTTOM_PART,
+  PINNED_TOP_PART,
+  pinnedRowCellStyle,
+  pinnedRowPart,
+  pinnedRowSticky,
+  pinnedRowStickyStyle,
+} from "@adapttable/core";
+export {
+  isPinnedSummaryRowId,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
+} from "@adapttable/core";
+export {
+  resolveRowHeight,
+  resolveRowStyle,
+  type RowHeight,
+  type RowStyle,
+  rowStyleSignature,
+} from "@adapttable/core";
+export { deriveSortByOptions } from "@adapttable/core";
+export { fillSlot, tableErrorState } from "@adapttable/core";
+export { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 export {
   type KeyedVirtualization,
   resolveVirtualRows,
@@ -835,14 +846,10 @@ export {
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
-export type { TableCommandOptions } from "@adapttable/core";
-export type { ConfirmRequest } from "@adapttable/core";
-export type { ContextMenuActions } from "@adapttable/core";
 export type { CommandPaletteOptions } from "./actions/useCommandPalette";
 export type { ContextMenuOptions } from "./actions/useTableContextMenu";
 export type { ColumnLayoutState } from "./columns/useColumnLayout";
 export type { BatchRowEdit } from "./editing/batchEditing";
-export type { CellEditor, CustomCellEditorCtrl } from "@adapttable/core";
 export type { DirtyCellState } from "./editing/dirtyCells";
 export type {
   EditConflictHandler,
@@ -854,6 +861,48 @@ export type { RowEditDrafts } from "./editing/rowEditing";
 export type { CellSaveState } from "./editing/saveState";
 export type { CellEditingState } from "./editing/useCellEditing";
 export type { EditValidationState, RowValidator } from "./editing/validation";
+export type {
+  ActiveFilterChip,
+  ActiveFilterChipsSlotProps,
+  ChipLabelResolver,
+} from "./filters/useActiveFilterChips";
+export type {
+  GroupingChipKeyboardProps,
+  GroupingDragProps,
+  GroupingDropProps,
+} from "./grouping/GroupingPanelChrome";
+export {
+  type GroupingPanelChipProps,
+  GroupingPanelChrome,
+  type GroupingPanelChromeProps,
+  type GroupingPanelDropZoneProps,
+  type GroupingPanelOption,
+  type GroupingPanelRemoveZoneProps,
+  type GroupingPanelSelectProps,
+  type GroupingPanelSlotProps,
+  type GroupingPanelSlots,
+  type GroupingPanelSurfaceProps,
+} from "./grouping/GroupingPanelChrome";
+export type { SidePanelOptions } from "./props";
+export type { RowMutationsState } from "./rows/rowMutations";
+export type { RowPinState } from "./rows/rowPinning";
+export type { HeaderSelectionState } from "./selection/useSelection";
+export type { TableQuery } from "./source/useServerData";
+export type { NestedTable } from "./tree/nestedTable";
+export type {
+  SavedViewVisibility,
+  UseSavedViewsOptions,
+} from "./url/useSavedViews";
+export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
+export type {
+  RowElementProps,
+  SearchInputElementProps,
+  TableElementProps,
+} from "./useDataTable/useDataTable";
+export type { TableCommandOptions } from "@adapttable/core";
+export type { ConfirmRequest } from "@adapttable/core";
+export type { ContextMenuActions } from "@adapttable/core";
+export type { CellEditor, CustomCellEditorCtrl } from "@adapttable/core";
 export type { ExportPayload, ExportWriteContext } from "@adapttable/core";
 export type {
   ExportAllControls,
@@ -873,11 +922,6 @@ export type {
   FilterWidgetKind,
   FilterWidgetRenderProps,
 } from "@adapttable/core";
-export type {
-  ActiveFilterChip,
-  ActiveFilterChipsSlotProps,
-  ChipLabelResolver,
-} from "./filters/useActiveFilterChips";
 export type { CellEdit } from "@adapttable/core";
 export type { CellRange } from "@adapttable/core";
 export type { GridCell } from "@adapttable/core";
@@ -885,23 +929,6 @@ export type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
 } from "@adapttable/core";
-export {
-  type GroupingPanelChipProps,
-  GroupingPanelChrome,
-  type GroupingPanelChromeProps,
-  type GroupingPanelDropZoneProps,
-  type GroupingPanelOption,
-  type GroupingPanelRemoveZoneProps,
-  type GroupingPanelSelectProps,
-  type GroupingPanelSlotProps,
-  type GroupingPanelSlots,
-  type GroupingPanelSurfaceProps,
-} from "./grouping/GroupingPanelChrome";
-export type {
-  GroupingChipKeyboardProps,
-  GroupingDragProps,
-  GroupingDropProps,
-} from "./grouping/GroupingPanelChrome";
 export type {
   GroupingDragSource,
   GroupingDragState,
@@ -911,18 +938,12 @@ export type {
 export type { GroupNode, GroupSort } from "@adapttable/core";
 export type { PaginationInfo } from "@adapttable/core";
 export type { PivotMeasure } from "@adapttable/core";
-export type { SidePanelOptions } from "./props";
 export type { CellSpanRequest, GetCellSpanArgs } from "@adapttable/core";
 export type { MobileCardModel } from "@adapttable/core";
 export type { RowActionsRenderContext } from "@adapttable/core";
-export type { RowMutationsState } from "./rows/rowMutations";
-export type { RowPinState } from "./rows/rowPinning";
-export type { HeaderSelectionState } from "./selection/useSelection";
 export type { QueryCondition, QueryFilterGroup } from "@adapttable/core";
 export type { QueryGroupRow } from "@adapttable/core";
-export type { TableQuery } from "./source/useServerData";
 export type { TableStateMutators } from "@adapttable/core";
-export type { NestedTable } from "./tree/nestedTable";
 export type {
   ActionConfirm,
   CellProps,
@@ -935,16 +956,6 @@ export type {
   SortableValue,
   TableQueryParams,
 } from "@adapttable/core";
-export type {
-  SavedViewVisibility,
-  UseSavedViewsOptions,
-} from "./url/useSavedViews";
-export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
-export type {
-  RowElementProps,
-  SearchInputElementProps,
-  TableElementProps,
-} from "./useDataTable/useDataTable";
 
 /**
  * The member types the signatures above hand back.
@@ -956,11 +967,6 @@ export type {
  */
 export type { Shortcut } from "./actions/useShortcuts";
 export type { LayoutStorage } from "./columns/useColumnLayoutStorageState";
-export type {
-  CellEditCommit,
-  CellEditorOption,
-  CellEditTarget,
-} from "@adapttable/core";
 export type { EditableCellController } from "./editing/editableCellController";
 export type {
   EditConflict,
@@ -978,6 +984,13 @@ export type {
   ValidationCheckResult,
   ValidationTarget,
 } from "./editing/validation";
+export type { ChecklistValue } from "./filters/checklist";
+export type { SavedViewMigration, SavedViewsStore } from "./url/useSavedViews";
+export type {
+  CellEditCommit,
+  CellEditorOption,
+  CellEditTarget,
+} from "@adapttable/core";
 export type { ExportTable } from "@adapttable/core";
 export type {
   ExportColumnScope,
@@ -986,13 +999,11 @@ export type {
   ExportRowScope,
   FetchAllExport,
 } from "@adapttable/core";
-export type { ChecklistValue } from "./filters/checklist";
 export type { FilterOption, FilterType } from "@adapttable/core";
 export type { MobileCardField } from "@adapttable/core";
 export type { SortLevel } from "@adapttable/core";
 export type { QueryExtensions } from "@adapttable/core";
 export type { ColumnHeaderController, FilterValue } from "@adapttable/core";
-export type { SavedViewMigration, SavedViewsStore } from "./url/useSavedViews";
 
 /**
  * The member types the signatures above hand back.
@@ -1017,7 +1028,7 @@ export type { QueryAggregate } from "@adapttable/core";
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
-export { normalizeEditorOptions } from "@adapttable/core";
 export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
+export { normalizeEditorOptions } from "@adapttable/core";

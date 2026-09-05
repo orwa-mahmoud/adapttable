@@ -4,8 +4,8 @@
 
 ```ts
 
-import { AdapterFiltersFeature } from '@adapttable/core/adapter';
-import { filterTypes } from '@adapttable/core/features';
+import { AdapterFiltersFeature } from '@adapttable/react/adapter';
+import { filterTypes } from '@adapttable/react/features';
 
 // @public
 export const filters: AdapterFiltersFeature;

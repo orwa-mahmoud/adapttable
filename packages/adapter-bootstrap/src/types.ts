@@ -1,9 +1,6 @@
-import type {
-  BaseDataTableProps,
-  TableSource,
-  UrlStateAdapter,
-} from "@adapttable/core";
-import type { DataModeProps } from "@adapttable/core/adapter";
+import type { TableSource, UrlStateAdapter } from "@adapttable/core";
+import type { BaseDataTableProps } from "@adapttable/react";
+import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /**

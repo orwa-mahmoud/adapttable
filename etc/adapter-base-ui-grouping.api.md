@@ -4,8 +4,8 @@
 
 ```ts
 
-import { AdapterGroupingFeature } from '@adapttable/core/adapter';
-import { GroupSort } from '@adapttable/core/features';
+import { AdapterGroupingFeature } from '@adapttable/react/adapter';
+import { GroupSort } from '@adapttable/react/features';
 
 // @public
 export const grouping: AdapterGroupingFeature;

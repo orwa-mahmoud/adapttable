@@ -1,1 +1,1 @@
-export { columnMenu } from "@adapttable/core/features";
+export { columnMenu } from "@adapttable/react/features";

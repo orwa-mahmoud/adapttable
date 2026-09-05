@@ -1,1 +1,1 @@
-export { savedViews } from "@adapttable/core/features";
+export { savedViews } from "@adapttable/react/features";

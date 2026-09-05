@@ -1,1 +1,1 @@
-export { grouping } from "@adapttable/core/features";
+export { grouping } from "@adapttable/react/features";

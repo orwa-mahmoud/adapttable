@@ -4,8 +4,8 @@
 
 ```ts
 
-import { BulkAction } from '@adapttable/core/features';
-import { StaticTableFeature } from '@adapttable/core/adapter';
+import { BulkAction } from '@adapttable/react/features';
+import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
 export function bulkActions(actions: readonly BulkAction[]): StaticTableFeature;

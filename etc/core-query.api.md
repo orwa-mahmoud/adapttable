@@ -4,13 +4,11 @@
 
 ```ts
 
-import { ReactNode } from 'react';
-
 // @public
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue;
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
@@ -20,6 +18,9 @@ export function deserializePivot(raw: string | null): PivotConfig;
 
 // @public
 export function deserializePivotState(raw: string | null): PivotUrlState;
+
+// @public
+export type DisplayValue = unknown;
 
 // @public
 export const FILTER_TREE_PARAM = "ft";

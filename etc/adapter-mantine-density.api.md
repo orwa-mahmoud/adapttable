@@ -5,7 +5,7 @@
 ```ts
 
 import { MantineSpacing } from '@mantine/core';
-import { StaticTableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
 export type Density = "comfortable" | "compact";

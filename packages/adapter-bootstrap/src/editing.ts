@@ -1,1 +1,1 @@
-export { editing } from "@adapttable/core/features";
+export { editing } from "@adapttable/react/features";

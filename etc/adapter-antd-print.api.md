@@ -4,7 +4,7 @@
 
 ```ts
 
-import { StaticTableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
 function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature;

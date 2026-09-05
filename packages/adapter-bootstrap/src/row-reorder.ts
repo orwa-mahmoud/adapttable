@@ -1,1 +1,1 @@
-export { rowReorder } from "@adapttable/core/features";
+export { rowReorder } from "@adapttable/react/features";

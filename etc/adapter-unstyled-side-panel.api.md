@@ -4,8 +4,8 @@
 
 ```ts
 
-import { SidePanelOptions } from '@adapttable/core/features';
-import { StaticTableFeature } from '@adapttable/core/adapter';
+import { SidePanelOptions } from '@adapttable/react/features';
+import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
 export function sidePanel(options: SidePanelOptions): StaticTableFeature;

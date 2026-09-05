@@ -4,17 +4,17 @@
 
 ```ts
 
-import { ActiveFilterChip } from '@adapttable/core';
-import { BaseDataTableProps } from '@adapttable/core';
+import { ActiveFilterChip } from '@adapttable/react';
+import { BaseDataTableProps } from '@adapttable/react';
 import { BulkAction } from '@adapttable/core';
 import { CellProps } from '@adapttable/core';
 import { ColorScheme } from '@adapttable/core';
-import { ColumnDef } from '@adapttable/core';
+import { ColumnDef } from '@adapttable/react';
 import { ColumnFilter } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/core';
 import { ConfirmRequest } from '@adapttable/core';
 import { createFilterRegistry } from '@adapttable/core';
-import { DataModeProps } from '@adapttable/core/adapter';
+import { DataModeProps } from '@adapttable/react/adapter';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { defaultLabels } from '@adapttable/core';
@@ -34,26 +34,26 @@ import { ReactNode } from 'react';
 import { resolveFilterRegistry } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsRenderer } from '@adapttable/core';
-import { SavedView } from '@adapttable/core';
+import { SavedView } from '@adapttable/react';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
-import { ToolbarSlots } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/react';
 import { UrlStateAdapter } from '@adapttable/core';
-import { useDataTable } from '@adapttable/core';
-import { UseDataTableResult } from '@adapttable/core';
-import { useFrontendData } from '@adapttable/core';
-import { UseFrontendDataOptions } from '@adapttable/core';
-import { useQuerySource } from '@adapttable/core';
-import { UseQuerySourceOptions } from '@adapttable/core';
-import { useSavedViews } from '@adapttable/core';
-import { UseSavedViewsOptions } from '@adapttable/core';
-import { UseSavedViewsResult } from '@adapttable/core';
-import { useServerData } from '@adapttable/core';
-import { UseServerDataOptions } from '@adapttable/core';
-import { useTableUrlState } from '@adapttable/core';
+import { useDataTable } from '@adapttable/react';
+import { UseDataTableResult } from '@adapttable/react';
+import { useFrontendData } from '@adapttable/react';
+import { UseFrontendDataOptions } from '@adapttable/react';
+import { useQuerySource } from '@adapttable/react';
+import { UseQuerySourceOptions } from '@adapttable/react';
+import { useSavedViews } from '@adapttable/react';
+import { UseSavedViewsOptions } from '@adapttable/react';
+import { UseSavedViewsResult } from '@adapttable/react';
+import { useServerData } from '@adapttable/react';
+import { UseServerDataOptions } from '@adapttable/react';
+import { useTableUrlState } from '@adapttable/react';
 
 export { ActiveFilterChip }
 

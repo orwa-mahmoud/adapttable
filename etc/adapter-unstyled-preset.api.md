@@ -4,8 +4,8 @@
 
 ```ts
 
-import { StandardFeatureOptions } from '@adapttable/core/adapter';
-import { StandardFeaturesFactory } from '@adapttable/core/adapter';
+import { StandardFeatureOptions } from '@adapttable/react/adapter';
+import { StandardFeaturesFactory } from '@adapttable/react/adapter';
 
 export { StandardFeatureOptions }
 

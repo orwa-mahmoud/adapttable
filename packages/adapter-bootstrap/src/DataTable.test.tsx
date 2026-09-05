@@ -33,8 +33,8 @@ vi.mock("./components/ColumnMenu", () => ({
   ),
 }));
 
-vi.mock("@adapttable/core/adapter", async () => {
-  const actual = await vi.importActual("@adapttable/core/adapter");
+vi.mock("@adapttable/react/adapter", async () => {
+  const actual = await vi.importActual("@adapttable/react/adapter");
   return {
     ...actual,
     useMountStagger: vi.fn(),

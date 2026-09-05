@@ -4,7 +4,7 @@
 
 ```ts
 
-import { rowActions } from '@adapttable/core/features';
+import { rowActions } from '@adapttable/react/features';
 
 export { rowActions }
 

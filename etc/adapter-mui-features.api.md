@@ -5,7 +5,7 @@
 ```ts
 
 
-export * from "@adapttable/core/features";
+export * from "@adapttable/react/features";
 
 // (No @packageDocumentation comment for this package)
 

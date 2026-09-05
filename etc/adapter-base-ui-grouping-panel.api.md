@@ -4,11 +4,11 @@
 
 ```ts
 
-import { AdapterGroupingPanelFeature } from '@adapttable/core/adapter';
-import { GroupAggregateOverride } from '@adapttable/core/features';
-import { GroupAggregateOverrides } from '@adapttable/core/features';
-import { GroupingPanelChromeProps } from '@adapttable/core/adapter';
-import { GroupSort } from '@adapttable/core/features';
+import { AdapterGroupingPanelFeature } from '@adapttable/react/adapter';
+import { GroupAggregateOverride } from '@adapttable/react/features';
+import { GroupAggregateOverrides } from '@adapttable/react/features';
+import { GroupingPanelChromeProps } from '@adapttable/react/adapter';
+import { GroupSort } from '@adapttable/react/features';
 import { JSX } from 'react';
 
 export { GroupAggregateOverride }

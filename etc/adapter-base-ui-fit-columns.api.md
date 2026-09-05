@@ -4,7 +4,7 @@
 
 ```ts
 
-import { fitColumns } from '@adapttable/core/features';
+import { fitColumns } from '@adapttable/react/features';
 
 export { fitColumns }
 

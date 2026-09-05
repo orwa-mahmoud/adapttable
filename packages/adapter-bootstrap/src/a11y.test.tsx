@@ -1,5 +1,5 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { rowActions } from "@adapttable/core/features";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import { rowActions } from "@adapttable/react/features";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";

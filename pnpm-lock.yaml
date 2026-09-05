@@ -417,6 +417,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core
+      '@adapttable/react':
+        specifier: workspace:*
+        version: link:../react
       react-compiler-runtime:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)

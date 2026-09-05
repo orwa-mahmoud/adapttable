@@ -4,7 +4,7 @@
 
 ```ts
 
-import { rowPinning } from '@adapttable/core/features';
+import { rowPinning } from '@adapttable/react/features';
 
 export { rowPinning }
 

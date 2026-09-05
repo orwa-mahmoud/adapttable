@@ -4,10 +4,6 @@
 
 ```ts
 
-import { ComponentType } from 'react';
-import { ReactElement } from 'react';
-import { ReactNode } from 'react';
-
 // @public
 export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
 
@@ -15,54 +11,30 @@ export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | "
 export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): FormulaColumnsResult<TRow>;
 
 // @public
-export type CellEditor = "text" | "number" |
-/** A checkbox. Commits `true` / `false`, never a string. */
-"boolean" |
-/** A date. Commits `YYYY-MM-DD`, the value a date input holds. */
-"date" |
-/** A date and a time. Commits `YYYY-MM-DDTHH:mm`. */
-"datetime" |
-/** A time of day. Commits `HH:mm`. */
-"time" | {
-    type: "select";
-    options: readonly CellEditorOption[] | readonly string[];
-} | {
-    type: "multi-select";
-    options: readonly CellEditorOption[] | readonly string[];
-} | {
-    type: "custom";
-    render: CustomCellEditorRender;
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter" | "editor"> & {
+    header?: unknown;
+    filter?: unknown;
+    editor?: unknown;
 };
 
 // @public
-export interface CellEditorOption {
-    label: string;
-    value: string;
-}
-
-// @public
-export interface CellProps<TRow> {
-    readonly row: TRow;
-    readonly rowIndex: number;
-}
-
-// @public
-export interface ColumnDef<TRow> {
-    accessor?: (row: TRow) => ReactNode;
+export interface ColumnModel<TRow = unknown> {
+    accessor?: (row: TRow) => unknown;
     align?: "start" | "center" | "end";
-    Cell?: ComponentType<CellProps<TRow>>;
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
-    editor?: CellEditor;
+    editor?: ColumnModelEditor;
     editValue?: (row: TRow) => string;
     exportValue?: (row: TRow) => unknown;
-    filter?: ColumnFilter<TRow>;
+    filter?: ColumnModelFilter;
     flex?: number;
     formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
     groupShow?: ColumnGroupShow;
-    header?: ReactNode;
-    headerActions?: ReactNode;
+    header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
     hideOnMobile?: boolean;
@@ -78,8 +50,6 @@ export interface ColumnDef<TRow> {
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
     renameable?: boolean;
-    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
     responsivePriority?: number;
     rowSpan?: number | ((row: TRow) => number);
     sortable?: boolean;
@@ -89,87 +59,16 @@ export interface ColumnDef<TRow> {
 }
 
 // @public
-export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
-    label?: string;
-});
+export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 
 // @public
-export interface ColumnFooterContext<TRow> {
-    column: ColumnDef<TRow>;
-    value: ReactNode;
-}
-
-// @public
-export type ColumnGroupShow = "open" | "closed" | "always";
-
-// @public
-export interface ColumnHeaderContext<TRow> {
-    column: ColumnDef<TRow>;
-    controller: ColumnHeaderController;
-}
-
-// @public
-export interface ColumnHeaderController {
-    label: ReactNode;
-    sortDir?: "asc" | "desc";
-    sortIndex?: number;
-    toggleSort: (event?: {
-        shiftKey?: boolean;
-    }) => void;
-}
-
-// @public
-export interface CustomCellEditorCtrl {
-    cancel: () => void;
-    commit: () => void;
-    draft: string;
-    error?: string;
-    errorId: string;
-    focusRef: (node: {
-        focus: () => void;
-    } | null) => void;
-    label: string;
-    onBlur: () => void;
-    onKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    setDraft: (value: string) => void;
-    validating: boolean;
-}
-
-// @public
-export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
+export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
 export function evaluateFormula(node: FormulaNode, scope: FormulaScope): FormulaValue;
-
-// @public
-export interface FilterDef<TRow = unknown> {
-    column?: string;
-    getValue?: (row: TRow) => unknown;
-    key: string;
-    label?: string;
-    options?: FilterOptionsSource;
-    placeholder?: string;
-    type: string;
-}
-
-// @public
-export interface FilterOption {
-    label: string;
-    value: string;
-}
-
-// @public
-export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
-
-// @public
-export type FilterType = (typeof FILTER_TYPES)[number];
 
 // @public
 export const FORMULA_BLANK: FormulaValue;
@@ -187,9 +86,6 @@ export const FORMULA_ERRORS: {
 export const FORMULA_FUNCTIONS: readonly string[];
 
 // @public
-export const FORMULA_URL_WRITE_DEBOUNCE_MS = 150;
-
-// @public
 export function formulaBoolean(value: boolean): FormulaValue;
 
 // @public
@@ -202,7 +98,7 @@ export interface FormulaColumnSpec {
 
 // @public
 export interface FormulaColumnsResult<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     cycles: readonly string[];
     errors: Readonly<Record<string, string>>;
 }
@@ -293,32 +189,6 @@ export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
 export function toFormulaValue(raw: unknown): FormulaValue;
-
-// @public
-export interface UrlStateAdapter {
-    getSearch(): string;
-    setSearch(search: string, options?: {
-        push?: boolean;
-    }): void;
-    subscribe(onChange: () => void): () => void;
-}
-
-// @public
-export function useFormulaUrlState(options?: UseFormulaUrlStateOptions): UseFormulaUrlStateResult;
-
-// @public
-export interface UseFormulaUrlStateOptions {
-    defaultFormulas?: readonly FormulaColumnSpec[];
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export interface UseFormulaUrlStateResult {
-    formulas: readonly FormulaColumnSpec[];
-    onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;
-}
 
 // (No @packageDocumentation comment for this package)
 

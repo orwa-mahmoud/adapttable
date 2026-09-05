@@ -4,7 +4,7 @@
 
 ```ts
 
-import { AdapterRowReorderFeature } from '@adapttable/core/adapter';
+import { AdapterRowReorderFeature } from '@adapttable/react/adapter';
 
 // @public
 export const rowReorder: AdapterRowReorderFeature;

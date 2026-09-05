@@ -72,3 +72,14 @@ export type { FilterOptionsSource } from "./filters/filterDefs";
  */
 export type { ExportRowRole } from "./export/exportWriter";
 export type { FilterOption } from "./filters/filterDefs";
+
+/**
+ * Member types the signatures above hand back, reachable from the entry that
+ * returns them.
+ */
+export type {
+  ColumnMetadata,
+  ColumnModelEditor,
+  ColumnModelFilter,
+} from "./columnModel";
+export type { DisplayValue } from "./display";

@@ -4,7 +4,7 @@
 
 ```ts
 
-import { rowReorder } from '@adapttable/core/features';
+import { rowReorder } from '@adapttable/react/features';
 
 export { rowReorder }
 

@@ -4,8 +4,8 @@
 
 ```ts
 
-import { TableFeature } from '@adapttable/core/adapter';
-import { tree as tree_2 } from '@adapttable/core/features';
+import { TableFeature } from '@adapttable/react/adapter';
+import { tree as tree_2 } from '@adapttable/react/features';
 
 // @public
 export function tree<TRow>(options: Parameters<typeof tree_2<TRow>>[0]): TableFeature<TRow>;

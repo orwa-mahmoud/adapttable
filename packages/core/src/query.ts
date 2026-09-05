@@ -84,3 +84,9 @@ export type { SortableValue } from "./types";
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
+
+/**
+ * Member types the signatures above hand back, reachable from the entry that
+ * returns them.
+ */
+export type { DisplayValue } from "./display";

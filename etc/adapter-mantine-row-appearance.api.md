@@ -4,7 +4,7 @@
 
 ```ts
 
-import { rowAppearance } from '@adapttable/core/features';
+import { rowAppearance } from '@adapttable/react/features';
 
 export { rowAppearance }
 

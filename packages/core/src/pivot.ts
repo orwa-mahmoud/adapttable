@@ -47,3 +47,15 @@ export {
   type ServerPivotOptions,
   serverPivotResult,
 } from "./pivot/serverPivot";
+
+/**
+ * Member types the signatures above hand back, reachable from the entry that
+ * returns them.
+ */
+export type { ColumnModel, SortableValue } from "./columnModel";
+export type {
+  ColumnGroupShow,
+  ColumnModelEditor,
+  ColumnModelFilter,
+} from "./columnModel";
+export type { DisplayValue } from "./display";

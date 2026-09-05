@@ -4,7 +4,7 @@
 
 ```ts
 
-import { extraRows } from '@adapttable/core/features';
+import { extraRows } from '@adapttable/react/features';
 
 export { extraRows }
 

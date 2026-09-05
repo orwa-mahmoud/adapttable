@@ -4,7 +4,7 @@
 
 ```ts
 
-import { cellNavigation } from '@adapttable/core/features';
+import { cellNavigation } from '@adapttable/react/features';
 
 export { cellNavigation }
 

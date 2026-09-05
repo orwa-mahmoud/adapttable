@@ -4,8 +4,8 @@
 
 ```ts
 
-import { NestedTableFor } from '@adapttable/core';
-import { TableFeature } from '@adapttable/core';
+import { NestedTableFor } from '@adapttable/react';
+import { TableFeature } from '@adapttable/react';
 
 // @public
 export const nestedTable: <TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]) => TableFeature<TRow>;

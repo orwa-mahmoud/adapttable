@@ -2,7 +2,7 @@ import { pageSizeOptions } from "@adapttable/core";
 import {
   ExportAnnouncer,
   type ToolbarChromeProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { type ReactNode } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";

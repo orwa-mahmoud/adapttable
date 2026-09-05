@@ -7,22 +7,22 @@ export { resolveDisabledReason } from "./actions/confirm";
 export { contextMenuItems } from "./actions/contextMenuModel";
 export type { ResolvedContextTarget } from "./actions/contextMenuRegion";
 export {
-  ROW_ID_ATTRIBUTE,
   resolveContextTarget,
+  ROW_ID_ATTRIBUTE,
 } from "./actions/contextMenuRegion";
 export type {
-  UseColumnLayoutResult,
   ColumnLayoutState,
-  PinSide,
-  PinOffset,
-  PinnedCellStyle,
   PinLeads,
+  PinnedCellStyle,
+  PinOffset,
+  PinSide,
+  UseColumnLayoutResult,
 } from "./columns/columnLayoutModel";
 export {
-  EMPTY_COLUMN_LAYOUT,
   applyColumnOrder,
-  PIN_Z,
   edgePinStyle,
+  EMPTY_COLUMN_LAYOUT,
+  PIN_Z,
   pinnedCellStyle,
 } from "./columns/columnLayoutModel";
 export type {
@@ -30,12 +30,12 @@ export type {
   ColumnMenuSlotProps,
 } from "./columns/columnMenuModel";
 export {
-  REORDER_COLUMN_KEY,
   columnMenuActions,
   filterColumnMenuRows,
   hideAllColumns,
   nextPinSide,
   pinActionLabel,
+  REORDER_COLUMN_KEY,
   resetColumnLayout,
   showAllColumns,
   unpinAllColumns,
@@ -93,6 +93,7 @@ export {
 } from "./editing/cellEditing";
 export { exportButtonLabel } from "./export/exportLabel";
 export { columnLetter, safeSheetName } from "./export/xlsx";
+export type { FeatureHostState } from "./features/currentHost";
 export {
   appendByKey,
   applyFilterExtends,
@@ -100,39 +101,37 @@ export {
   currentFeatureHost,
   runWithFeatureHost,
 } from "./features/currentHost";
-export type { FeatureHostState } from "./features/currentHost";
 export type { FilterEngine } from "./filters/filterEngine";
 export { FILTER_ENGINE_IMPL } from "./filters/filterEngine";
-export type { DateOp, NumberOp, TextOp } from "./filters/operators";
 export { withFilterType } from "./filters/filterRegistry";
+export type { DateOp, NumberOp, TextOp } from "./filters/operators";
 export {
   type BinaryOp,
-  FORMULA_BLANK,
-  FORMULA_ERRORS,
-  FORMULA_FUNCTIONS,
-  type FormulaColumnSpec,
-  type FormulaColumnsResult,
-  type FormulaErrorCode,
-  type FormulaNode,
-  type FormulaScope,
-  type FormulaValue,
-  type ParseResult,
   buildFormulaColumns,
   deserializeFormulaColumns,
   evaluateFormula,
+  FORMULA_BLANK,
+  FORMULA_ERRORS,
+  FORMULA_FUNCTIONS,
   formulaBoolean,
+  type FormulaColumnSpec,
+  type FormulaColumnsResult,
   formulaDisplay,
   formulaError,
+  type FormulaErrorCode,
+  type FormulaNode,
   formulaNumber,
   formulaRefs,
+  type FormulaScope,
   formulaSortValue,
   formulaText,
+  type FormulaValue,
   isFormulaError,
   parseFormula,
+  type ParseResult,
   serializeFormulaColumns,
   toFormulaValue,
 } from "./formula";
-export { applyGroupLeafSelection } from "./grouping/groupSelection";
 export {
   GROUPING_COLUMN_DND_MIME,
   groupingDragKey,
@@ -145,9 +144,9 @@ export {
   groupedEntriesForStrategy,
   groupingComputationKind,
 } from "./grouping/groupingStrategy";
+export { applyGroupLeafSelection } from "./grouping/groupSelection";
 export type { AssemblyFns } from "./layout/leanAssembly";
 export {
-  REORDER_COLUMN_WIDTH,
   bodyCellsHaveRowSpan,
   cellsForRow,
   columnSelectLabel,
@@ -157,6 +156,7 @@ export {
   pinnedRowCellStyle,
   pinnedRowPart,
   pinnedRowSticky,
+  REORDER_COLUMN_WIDTH,
   resolveAssembly,
   resolveRowStyle,
   rowEditingSignature,
@@ -175,7 +175,15 @@ export type {
 } from "./pagination/paginationMath";
 export { paginationItems, paginationSlots } from "./pagination/paginationMath";
 export {
+  assignField,
+  availableFields,
+  deserializePivot,
+  deserializePivotState,
   EMPTY_PIVOT_CONFIG,
+  isPivotReady,
+  measureLabel,
+  moveField,
+  pivot,
   PIVOT_BLANK,
   PIVOT_GRAND_TOTAL_KEY,
   PIVOT_ZONES,
@@ -192,18 +200,10 @@ export {
   type PivotZone,
   type QueryPivotPage,
   type QueryPivotRow,
-  type ServerPivotOptions,
-  assignField,
-  availableFields,
-  deserializePivot,
-  deserializePivotState,
-  isPivotReady,
-  measureLabel,
-  moveField,
-  pivot,
   removeField,
   serializePivot,
   serializePivotState,
+  type ServerPivotOptions,
   serverPivotResult,
   setMeasureAgg,
 } from "./pivot";
@@ -222,36 +222,40 @@ export {
   insertExtrasBeforeRows,
 } from "./rows/extraRows";
 export {
+  orderedCardEntries,
   PINNED_BOTTOM_PART,
   PINNED_TOP_PART,
-  orderedCardEntries,
   pinnedRowStickyStyle,
 } from "./rows/pinnedRowChrome";
 export type { RowClickProps } from "./rows/rowClickProps";
 export { rowClickProps } from "./rows/rowClickProps";
 export { partitionPinnedRows, resolveRowHeight } from "./rows/rowPresentation";
 export { deriveSortByOptions } from "./sort/sortByOptions";
-export type { TableQuery } from "./source/tableQuery";
 export { isDeclarativeFilters } from "./source/isDeclarativeFilters";
 export { applyQuerySupport } from "./source/queryContract";
+export type { TableQuery } from "./source/tableQuery";
 export { fillSlot, tableErrorState } from "./state/errorState";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
-export { collectFeatureNotices } from "./state/featureNotices";
 export {
+  collectFeatureNotices,
+  type CollectFeatureNoticesInput,
+} from "./state/featureNotices";
+export {
+  isStreamLive,
+  isStreamSettled,
+  openRowPatchStream,
   type OpenRowPatchStreamOptions,
+  parseRowPatchFrame,
   type RowPatchStreamHandle,
   type RowPatchStreamReconnect,
   type RowPatchStreamStatus,
   type StreamSocket,
   type StreamSocketEvent,
-  isStreamLive,
-  isStreamSettled,
-  openRowPatchStream,
-  parseRowPatchFrame,
 } from "./stream";
 export { FakeSocket } from "./stream/fakes";
 export {
   FILTER_PREFIX,
+  isEmptyFilterValue,
   MAX_LIMIT,
   PARAM_COL_HIDDEN,
   PARAM_DENSITY,
@@ -266,7 +270,6 @@ export {
   PARAM_SEARCH,
   PARAM_SORT_BY,
   PARAM_SORT_DIR,
-  isEmptyFilterValue,
   readCollapsedGroups,
   readColumnLayout,
   readExtra,
@@ -293,8 +296,10 @@ export { devWarn, resetDevWarnings } from "./utils/devWarn";
 export { safeLocalStorage } from "./utils/env";
 export {
   bindMobileCardList,
+  type ElementRef,
   mobileCardListStyle,
 } from "./virtual/mobileCardList";
+export type { RowPairMeasurer } from "./virtual/rowPairModel";
 export type { KeyedVirtualization } from "./virtual/virtualTableModel";
 export {
   resolveVirtualRows,
@@ -302,3 +307,23 @@ export {
   virtualColumnSpan,
 } from "./virtual/virtualTableModel";
 export { buildTableXlsx, xlsxWriter } from "./xlsx";
+
+/**
+ * Member types the exported signatures above hand back. A consumer that can
+ * call the function can now name every part of what it returns.
+ */
+export type { ContextMenuModelOptions } from "./actions/contextMenuModel";
+export type { ColumnModelEditor, ColumnModelFilter } from "./columnModel";
+export type {
+  ResponsiveColumns,
+  ResponsiveFit,
+} from "./columns/responsiveColumns";
+export type { SidePanelEntry } from "./features/currentHost";
+export type {
+  GroupedEntriesForStrategyOptions,
+  GroupingComputationKind,
+} from "./grouping/groupingStrategy";
+export type { EditableCellEditing } from "./rows/rowEditingDigest";
+export type { RowPinLookup, RowPinSide, RowPinState } from "./rows/rowPinModel";
+export type { RowReorderDigest } from "./rows/rowReorderModel";
+export type { HeaderSelectionState } from "./selection/selectionState";

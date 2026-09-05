@@ -4,11 +4,9 @@ export type { DataTablePropsBase } from "./types";
 export type { DataTableClassNames } from "./types";
 export type { DataTableSlots } from "./types";
 export {
-  type ActiveFilterChip,
   type BulkAction,
   type CellProps,
   type ColorScheme,
-  type ColumnDef,
   type ColumnFilter,
   type ConfirmHandler,
   type ConfirmRequest,
@@ -31,12 +29,17 @@ export {
   resolveFilterRegistry,
   type RowAction,
   type RowActionsRenderer,
-  type SavedView,
   type SortByOption,
   type SortDirection,
   type TableLabels,
   type TableQuery,
   type TableSource,
+} from "@adapttable/core";
+export { useTableUrlState } from "@adapttable/react";
+export {
+  type ActiveFilterChip,
+  type ColumnDef,
+  type SavedView,
   type ToolbarSlots,
   useDataTable,
   type UseDataTableResult,
@@ -49,5 +52,4 @@ export {
   type UseSavedViewsResult,
   useServerData,
   type UseServerDataOptions,
-  useTableUrlState,
-} from "@adapttable/core";
+} from "@adapttable/react";

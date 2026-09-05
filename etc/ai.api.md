@@ -30,6 +30,36 @@ export interface AgentApply {
 }
 
 // @public
+export interface AgentCapabilityContext {
+    // (undocumented)
+    readonly apply: AgentApply;
+    readonly commit?: CommitPolicy;
+    // (undocumented)
+    readonly observation: AgentObservation;
+    // (undocumented)
+    readonly observe: () => AgentObservation;
+    // (undocumented)
+    readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    readonly plan?: CapabilityPlan;
+}
+
+// @public
+export interface AgentCapabilityDefinition {
+    execute(context: AgentCapabilityContext, args: unknown): unknown;
+    readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
+        readonly guide: string;
+        readonly input: JsonSchema;
+        readonly output: JsonSchema;
+    };
+    isEnabled(observation: AgentObservation): boolean;
+    readonly key: string;
+    readonly kind?: "read" | "view" | "write" | "destructive";
+    plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
+    readonly staging?: CapabilityStaging;
+    readonly summary: string;
+}
+
+// @public
 export interface AgentCellEdit {
     readonly column: string;
     readonly rowKey: string;
@@ -54,7 +84,7 @@ export interface AgentLimits {
 
 // @public
 export interface AgentManifest {
-    readonly capabilities: readonly CapabilityKey[];
+    readonly capabilities: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly limits: AgentLimits;
     readonly policy: AgentPolicy;
@@ -115,18 +145,18 @@ export interface AgentRowAddressing {
 export interface AgentSession {
     catalog(): readonly CatalogEntry[];
     describe(key: string): CapabilityGuide;
-    execute(key: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
+    execute(key: string, args: unknown, expectedRevision: number, idempotencyKey: string, signal?: AbortSignal): Promise<ExecuteResult>;
     manifest(): AgentManifest;
 }
 
 // @public
-export type ApprovalOutcome = "pending" | "approved" | "rejected" | "not-required";
+export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" | "not-required";
 
 // @public
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
-export function buildManifest(observation: AgentObservation): AgentManifest;
+export function buildManifest(observation: AgentObservation, capabilities?: readonly string[]): AgentManifest;
 
 // @public
 export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
@@ -135,7 +165,7 @@ export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "vi
 export interface CapabilityGuide {
     readonly guide: string;
     readonly input: JsonSchema;
-    readonly key: CapabilityKey;
+    readonly key: string;
     readonly output: JsonSchema;
     readonly schemaVersion: string;
 }
@@ -144,8 +174,17 @@ export interface CapabilityGuide {
 export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
+export interface CapabilityPlan {
+    readonly payload?: unknown;
+    readonly proposals: readonly WriteProposal[];
+}
+
+// @public
+export type CapabilityStaging = "supported" | "unsupported";
+
+// @public
 export interface CatalogEntry {
-    readonly key: CapabilityKey;
+    readonly key: string;
     readonly summary: string;
 }
 
@@ -158,8 +197,10 @@ export function createAgentSession(options: CreateAgentSessionOptions): AgentSes
 // @public
 export interface CreateAgentSessionOptions {
     apply: AgentApply;
+    capabilities?: readonly AgentCapabilityDefinition[];
     observe: () => AgentObservation;
-    onApprove?: (proposal: unknown) => Promise<boolean>;
+    onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    replayCacheSize?: number;
 }
 
 // @public
@@ -198,6 +239,9 @@ export interface JsonSchema {
     readonly required?: readonly string[];
     readonly type?: string | readonly string[];
 }
+
+// @public
+export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
 
 // @public
 export interface ResolvedRow {

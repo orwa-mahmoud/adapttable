@@ -4,7 +4,7 @@
 
 ```ts
 
-import { AdapterContextMenuFeature } from '@adapttable/core/adapter';
+import { AdapterContextMenuFeature } from '@adapttable/react/adapter';
 
 // @public
 export const contextMenu: AdapterContextMenuFeature;

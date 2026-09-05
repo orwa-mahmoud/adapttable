@@ -4,10 +4,10 @@
 
 ```ts
 
-import { BatchRowEdit } from '@adapttable/core';
-import { FeaturePatch } from '@adapttable/core';
-import { StaticTableFeature } from '@adapttable/core';
-import { TableFeature } from '@adapttable/core';
+import { BatchRowEdit } from '@adapttable/react';
+import { FeaturePatch } from '@adapttable/react';
+import { StaticTableFeature } from '@adapttable/react';
+import { TableFeature } from '@adapttable/react';
 
 // @public
 export const batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;

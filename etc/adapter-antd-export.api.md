@@ -4,8 +4,8 @@
 
 ```ts
 
-import { ExportCsvOptions } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/adapter';
+import { ExportCsvOptions } from '@adapttable/react/features';
+import { TableFeature } from '@adapttable/react/adapter';
 
 // @public
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;

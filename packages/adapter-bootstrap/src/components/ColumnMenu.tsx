@@ -1,11 +1,10 @@
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
-  columnReorderKeyProps,
   REORDER_COLUMN_KEY,
-  useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
   columnMenuActions,
   type ColumnMenuLabels,
@@ -18,7 +17,7 @@ import {
   showAllColumns,
   unpinAllColumns,
   useFeatureHost,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { useState } from "react";
 import { Button, Dropdown, Form } from "react-bootstrap";
 

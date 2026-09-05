@@ -4,20 +4,6 @@
 
 ```ts
 
-import { ComponentType } from 'react';
-import { Context } from 'react';
-import { CSSProperties } from 'react';
-import { DragEvent as DragEvent_2 } from 'react';
-import { HTMLAttributes } from 'react';
-import { KeyboardEvent as KeyboardEvent_2 } from 'react';
-import { KeyboardEventHandler } from 'react';
-import { MouseEvent as MouseEvent_2 } from 'react';
-import { PointerEvent as PointerEvent_2 } from 'react';
-import { ReactElement } from 'react';
-import { ReactNode } from 'react';
-import { RefCallback } from 'react';
-import { RefObject } from 'react';
-
 // @public
 export interface ActionConfirm<TArg> {
     confirmLabel: string;
@@ -30,20 +16,13 @@ export interface ActionConfirm<TArg> {
 export const ACTIONS_COLUMN_KEY = "actions";
 
 // @public
-export interface ActiveFilterChip {
-    key: string;
-    label: string;
-    onRemove: () => void;
-}
-
-// @public
 export function addFilterTreeCondition(tree: QueryFilterGroup | undefined, path: readonly number[], condition: QueryCondition): QueryFilterGroup;
 
 // @public
 export function addFilterTreeGroup(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
 
 // @public
-export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 
 // @public
 export const AGGREGATE_NAMES: AggregateName[];
@@ -56,8 +35,8 @@ export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
 export interface AggregateOptions<TRow> {
-    columns?: readonly ColumnDef<TRow>[];
-    format?: (value: ReactNode, key: string) => ReactNode;
+    columns?: readonly ColumnMetadata<TRow>[];
+    format?: (value: DisplayValue, key: string) => DisplayValue;
     host?: FeatureHostState;
 }
 
@@ -65,10 +44,33 @@ export interface AggregateOptions<TRow> {
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => ReactNode;
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue;
 
 // @public
 export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
+
+// @public
+export function appendByKey<T>(first: readonly T[], second: readonly T[], keyOf: (item: T) => string): T[];
+
+// @public
+export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnMetadata<TRow>[];
+
+// @public
+export function applyColumnNames<TCol extends ColumnMetadata<any>>(columns: readonly TCol[], names: Readonly<Record<string, string>> | undefined): TCol[];
+
+// @public
+export function applyColumnOrder<TRow>(columns: readonly ColumnMetadata<TRow>[], order: readonly string[]): ColumnMetadata<TRow>[];
+
+// @public
+export function applyFilterExtends(registry: FilterTypeRegistry, host: FeatureHostState | undefined): FilterTypeRegistry;
+
+// @public
+export function applyGroupLeafSelection(leafIds: readonly string[], selectedIds: ReadonlySet<string>): Set<string>;
+
+// @public
+export function applyQuerySupport(extensions: QueryExtensions, support: QuerySupport | undefined, input?: {
+    warn?: boolean;
+}): QueryExtensions;
 
 // @public
 export function applyRowPatches<TRow>(rows: readonly TRow[], patches: readonly RowPatch<TRow>[], getRowId: (row: TRow) => string): readonly TRow[];
@@ -83,16 +85,43 @@ export function applyRowPatchesWithLog<TRow>(rows: readonly TRow[], patches: rea
 export function applyRowPatchLogToView<TRow>(view: IncrementalView<TRow>, log: RowPatchLog<TRow>): IncrementalView<TRow>;
 
 // @public
-export function applyRowPin(state: RowPinState, rowId: string, side: RowPinSide | undefined): RowPinState;
+export function applyTableUrlState(search: string, savedSearch: string, namespace: string): string;
 
 // @public
-export function applyRowReorder<T>(rows: readonly T[], from: number, to: number): T[];
+export interface AssemblyFns<TRow = unknown> {
+    buildBodyCells: (options: {
+        rows: readonly TRow[];
+        columns: readonly ColumnMetadata<TRow>[];
+        getRowId: (row: TRow) => string;
+        getCellSpan?: GetCellSpan<TRow>;
+        firstRowIndex?: number;
+        pinOffset?: (key: string) => PinOffset | undefined;
+        windowKeys?: ReadonlySet<string>;
+    }) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+    columnResizeHandleProps: (key: string, setWidth: (key: string, width: number) => void, label: string) => ColumnResizeHandleProps | undefined;
+    extraCoveredTableSlots: (beforeRowId: string, options: {
+        visualIds: readonly string[];
+        cellsByRow: ReadonlyMap<string, readonly {
+            columnIndex: number;
+            colSpan: number;
+            rowSpan: number;
+        }[]>;
+        extraRows?: readonly ExtraRow[];
+        leadingCells: number;
+    }) => ReadonlySet<number>;
+    extraHostFillStyle: (extraKey: string, extraRows: readonly ExtraRow[] | undefined, rows: readonly TRow[], getRowId: (row: TRow) => string, rowStyle: RowStyle<TRow> | undefined) => CssProperties | undefined;
+    inflateBodyCellRowSpans: (cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+    insertExtraRows: <T extends {
+        key: string;
+    }>(entries: readonly T[], extraRows: readonly ExtraRow[] | undefined, dataKey: (entry: T) => string | undefined) => readonly (T | TableExtraEntry)[];
+    insertExtrasBeforeRows: (rows: readonly TRow[], extraRows: readonly ExtraRow[] | undefined, getRowId: (row: TRow) => string) => readonly ({
+        key: string;
+        row: TRow;
+    } | TableExtraEntry)[];
+}
 
 // @public
-export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
-
-// @public
-export function asGesture<TRow>(apply: ((edits: CellEdit<TRow>[]) => void) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: CellEdit<TRow>[]) => void) | undefined;
+export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
 
 // @public
 export function attachIncrementalView<TRow>(rows: readonly TRow[], view: IncrementalView<TRow>): void;
@@ -104,128 +133,34 @@ export const AUTO_OPTIONS_LIMIT = 50;
 export function autoSizeColumns(root: Element | null, keys: readonly string[], setWidth: (key: string, width: number) => void): number;
 
 // @public
-export interface BaseDataTableProps<TRow> {
-    activeFilterCount?: number;
-    applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
-    closeHeaderFilterOnSelect?: boolean;
-    collapsedGroupIds?: readonly string[];
-    columnLayout?: ColumnLayoutState;
-    columns: ColumnInput<TRow>[];
-    confirm?: ConfirmHandler;
-    defaultColumnLayout?: Partial<ColumnLayoutState>;
-    defaults?: Partial<TableQueryParams> & {
-        extra?: ExtraFilters;
-    };
-    density?: "comfortable" | "compact";
-    dir?: Direction;
-    editConflictPolicy?: EditConflictPolicy;
-    estimateCardSize?: number;
-    estimateRowSize?: number;
-    expandedIds?: readonly string[];
-    extraChips?: readonly ActiveFilterChip[];
-    features?: readonly TableFeature<NoInfer<TRow>>[];
-    filterDefs?: readonly FilterDef<TRow>[];
-    filterFields?: boolean;
-    filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
-    filtersMode?: "popover" | "drawer" | "header";
-    forceMobile?: boolean;
-    formatEditError?: (error: unknown) => string;
-    groupAggregates?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
-    groupFilter?: (group: GroupNode<TRow>) => boolean;
-    groupFooters?: boolean;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupSort?: GroupSort<TRow>;
-    hasChildren?: (row: TRow) => boolean;
-    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-    labels?: TableLabels;
-    locale?: string;
-    maxHeight?: number;
-    mobileBreakpoint?: number;
-    mobileIdentityColumns?: number;
-    onCellCut?: (range: CellRange) => void;
-    onCellFill?: (edits: CellEdit<TRow>[]) => void;
-    onCellPaste?: (edits: CellEdit<TRow>[]) => void;
-    onClearFilters?: () => void;
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onColumnLayoutChange?: (next: ColumnLayoutState) => void;
-    onColumnRename?: (key: string, name: string) => void;
-    onDensityChange?: (next: "comfortable" | "compact") => void;
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditConflict?: EditConflictHandler<TRow>;
-    onEditError?: EditEventHandler<TRow>;
-    onEditRollback?: (previous: TRow, columnKey: string) => void;
-    onEditStart?: EditEventHandler<TRow>;
-    onExpandedIdsChange?: (ids: string[]) => void;
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-    onRowClick?: (row: TRow) => void;
-    onRowsChange?: (rows: readonly TRow[]) => void;
-    onSelectionChange?: (selectedIds: string[]) => void;
-    onValidationFail?: EditEventHandler<TRow>;
-    paginationMode?: PaginationMode;
-    prefetch?: (row: TRow) => void;
-    renderCard?: MobileCardRenderer<TRow>;
-    renderRowActions?: RowActionsRenderer<TRow>;
-    rowActionsLayout?: RowActionsLayout;
-    rowKey: (row: TRow) => string;
-    rowVersion?: (row: TRow) => string | number;
-    scrollTopGap?: number;
-    scrollToTopOnChange?: boolean;
-    searchable?: boolean;
-    searchDebounceMs?: number;
-    searchPlaceholder?: string;
-    selectedIds?: readonly string[];
-    selectionGetId?: (row: TRow) => string;
-    skeletonRows?: number;
-    sortByOptions?: SortByOption[];
-    source: TableSource<TRow>;
-    stickyHeader?: boolean;
-    stickyToolbar?: boolean;
-    stickyTop?: number;
-    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
-    tableFooter?: ReactNode;
-    tableLabel?: string;
-    toolbar?: ReactNode;
-    toolbarSlots?: ToolbarSlots;
-    validateRow?: RowValidator<TRow>;
-    virtualOverscan?: number;
-    virtualScrollMargin?: number;
-}
+export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
 // @public
 export function batchEditHandler<TRow>(batch: ((edits: CellEdit<TRow>[]) => void) | undefined, onCellEdit: ((row: TRow, key: string, nextValue: unknown) => void) | undefined): ((edits: CellEdit<TRow>[]) => void) | undefined;
 
 // @public
-export interface BatchEditingState<TRow> {
-    cancelAll: () => void;
-    cancelRow: (rowId: string) => void;
-    count: number;
-    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
-    featureHost?: FeatureHostState;
-    isChanged: (rowId: string, columnKey: string) => boolean;
-    isPending: (rowId: string) => boolean;
-    pending: boolean;
-    saveAll: () => void;
-    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
-    signature: string;
-}
+export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
 
 // @public
-export interface BatchRowEdit<TRow> {
-    patch: Readonly<Record<string, unknown>>;
-    row: TRow;
-    rowId: string;
-}
+export function bindFeatureHostFn<Args extends unknown[], R>(host: FeatureHostState | undefined, fn: ((...args: Args) => R) | undefined): ((...args: Args) => R) | undefined;
 
 // @public
-export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, options: {
-    def: FilterDef<TRow>;
-    closeOnSelect?: boolean;
-    dismiss: () => void;
-    registry?: FilterTypeRegistry;
-}): FilterFormSource<TRow>;
+export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: ElementRef<HTMLElement>): (node: HTMLElement | null) => void;
+
+// @public
+interface BodyCell<TRow> {
+    colSpan: number;
+    column: ColumnMetadata<TRow>;
+    columnIndex: number;
+    rowSpan: number;
+}
+export { BodyCell }
+export { BodyCell as TableBodyCell }
+
+// @public
+export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
+    rowSpan: number;
+}[]>): boolean;
 
 // @public
 export function bodyRowEntries<TRow>(rows: readonly {
@@ -247,31 +182,21 @@ export interface BodyRowEntry<TRow> {
 }
 
 // @public
-export type BooleanChoice = "" | "true" | "false";
-
-// @public
 export function booleanDraft(checked: boolean): string;
-
-// @public
-export interface BooleanFieldWidget {
-    choice: BooleanChoice;
-    label: string;
-    write: (next: BooleanChoice) => void;
-}
 
 // @public
 export function buildBodyCells<TRow>(options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     getRowId: (row: TRow) => string;
     getCellSpan?: GetCellSpan<TRow>;
     firstRowIndex?: number;
     pinOffset?: (key: string) => PinOffset | undefined;
     windowKeys?: ReadonlySet<string>;
-}): ReadonlyMap<string, readonly TableBodyCell<TRow>[]>;
+}): ReadonlyMap<string, readonly BodyCell<TRow>[]>;
 
 // @public
-export function buildExportTable<TRow>(rows: readonly TRow[], columns: readonly ColumnDef<TRow>[], span?: {
+export function buildExportTable<TRow>(rows: readonly TRow[], columns: readonly ColumnMetadata<TRow>[], span?: {
     getCellSpan?: GetCellSpan<TRow>;
     firstRowIndex?: number;
     view?: readonly ExportViewEntry<TRow>[];
@@ -282,6 +207,9 @@ export function buildExportTable<TRow>(rows: readonly TRow[], columns: readonly 
 export function buildFilterRuntime<TRow>(defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry): FilterRuntime<TRow>;
 
 // @public
+export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): FormulaColumnsResult<TRow>;
+
+// @public
 export function buildGroupedFlatModel<TRow>(options: BuildGroupedFlatModelOptions<TRow>): GroupedFlatEntry<TRow>[];
 
 // @public
@@ -289,7 +217,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
     aggregates?: GroupAggregatesFn<TRow>;
     blankLabel?: string;
     collapsedGroupIds: ReadonlySet<string>;
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     filter?: (group: GroupNode<TRow>) => boolean;
     footers?: boolean;
     getRowId: (row: TRow) => string;
@@ -304,12 +232,21 @@ export interface BuildGroupedFlatModelOptions<TRow> {
 // @public
 export function buildTableCsv<TRow>(options: {
     source: TableSource<TRow>;
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     scope?: ExportRowScope;
     columnScope?: ExportColumnScope;
     escapeFormulas?: boolean;
     context?: ExportContext<TRow>;
 }): string;
+
+// @public
+export function buildTableXlsx<TRow>(options: {
+    rows: readonly TRow[];
+    columns: readonly ColumnMetadata<TRow>[];
+    sheetName?: string;
+    view?: readonly ExportViewEntry<TRow>[];
+    summary?: Readonly<Partial<Record<string, unknown>>>;
+}): Uint8Array<ArrayBuffer>;
 
 // @public
 export function buildTreeEntries<TRow>(options: BuildTreeEntriesOptions<TRow>): TreeEntry<TRow>[];
@@ -330,7 +267,7 @@ export interface BulkAction {
     color?: string;
     confirm?: ActionConfirm<number>;
     disabledReason?: (ids: string[]) => string | undefined;
-    icon?: ReactNode;
+    icon?: DisplayValue;
     key: string;
     label: string;
     onClick: (ids: string[], context: BulkActionContext) => void | Promise<unknown>;
@@ -340,21 +277,6 @@ export interface BulkAction {
 export interface BulkActionContext {
     allMatching: boolean;
     total: number;
-}
-
-// @public
-export type BulkActionOutcome = {
-    status: "success";
-} | {
-    status: "error";
-    error: unknown;
-};
-
-// @public
-export interface BulkActionRunner {
-    error: unknown;
-    pending: string | null;
-    run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
 }
 
 // @public
@@ -369,6 +291,9 @@ export interface CapabilitySource {
 }
 
 // @public
+export function captureTableUrlState(search: string, namespace: string): string;
+
+// @public
 export interface CellEdit<TRow> {
     columnKey: string;
     row: TRow;
@@ -380,44 +305,6 @@ export interface CellEditCommit {
     columnKey: string;
     draft: string;
     rowId: string;
-}
-
-// @public
-export interface CellEditingState {
-    active: CellEditTarget | null;
-    begin: (rowId: string, columnKey: string, initialValue: string, row?: unknown) => void;
-    cancel: () => void;
-    close: () => void;
-    commit: () => CellEditCommit | null;
-    discardIfRowMissing: (rows: readonly unknown[], rowKey: (row: unknown) => string) => void;
-    draft: string;
-    handleKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }, navigation?: CellEditNavigation) => CellEditKeyOutcome | null;
-    isActive: (rowId: string, columnKey: string) => boolean;
-    keepLive: (row: unknown) => void;
-    openedRow: () => unknown;
-    setDraft: (value: string) => void;
-    takeLive: (row: unknown, value: string) => void;
-}
-
-// @public
-export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
-
-// @public
-export interface CellEditKeyOutcome {
-    action: CellEditKeyAction;
-    advanceTarget: CellEditTarget | null;
-    commit: CellEditCommit | null;
-}
-
-// @public
-export interface CellEditNavigation {
-    columns: readonly EditableColumnLike[];
-    rowKey: (row: unknown) => string;
-    rows: readonly unknown[];
 }
 
 // @public
@@ -453,13 +340,6 @@ export interface CellEditTarget {
 }
 
 // @public
-export interface CellElementProps extends Props {
-    "data-sort-index"?: number;
-    role: string;
-    style?: CSSProperties;
-}
-
-// @public
 export function cellFillHandler<TRow>(options: CellFillHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => void) | undefined;
 
 // @public
@@ -467,6 +347,9 @@ export interface CellFillHandlerOptions<TRow> {
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => void;
     onCellFill?: (edits: CellEdit<TRow>[]) => void;
 }
+
+// @public
+export function cellFlashAttr(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
 
 // @public
 export function cellPasteHandler<TRow>(options: CellPasteHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => void) | undefined;
@@ -510,28 +393,16 @@ export function cellRangeIndices(range: CellRange): {
 export function cellRangeSize(range: CellRange | null): number;
 
 // @public
-export interface CellSaveState<TRow> {
-    canRollback: boolean;
-    clear: (rowId: string, columnKey: string) => void;
-    failureFor: (rowId: string, columnKey: string) => FailedCellSave<TRow> | undefined;
-    rollback: (rowId: string, columnKey: string) => void;
-    signature: string;
-    statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
-    track: (options: {
-        rowId: string;
-        columnKey: string;
-        previous: TRow;
-        attempted: unknown;
-        previousValue?: unknown;
-        result: unknown;
-    }) => Promise<boolean>;
-}
+export function cellsForRow<TRow>(cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined, rowKey: string): readonly BodyCell<TRow>[];
 
 // @public
-export type CellSaveStatus = "saving" | "failed";
+export function cellSortValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): SortableValue;
 
 // @public
 export type CellSpanAppearance = "merged" | "plain";
+
+// @public
+export function cellSpanMark(colSpan: number, rowSpan: number): string | undefined;
 
 // @public
 export interface CellSpanRequest {
@@ -540,30 +411,7 @@ export interface CellSpanRequest {
 }
 
 // @public
-export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
-
-// @public
-export const CHECKLIST_ITEM_HEIGHT = 28;
-
-// @public
-export const CHECKLIST_LIST_HEIGHT = 240;
-
-// @public
-export const CHECKLIST_VIRTUALIZE_AT = 40;
-
-// @public
-export interface ChecklistFilterState {
-    available: boolean;
-    clear: () => void;
-    items: readonly ChecklistValue[];
-    query: string;
-    selectAllVisible: () => void;
-    selected: readonly string[];
-    setQuery: (next: string) => void;
-    toggle: (value: string, on: boolean) => void;
-    virtualize: boolean;
-    visible: readonly ChecklistValue[];
-}
+export function cellValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): unknown;
 
 // @public
 export interface ChecklistValue {
@@ -576,21 +424,6 @@ export interface ChecklistValue {
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 // @public
-export interface ChromeBodyData<TRow> {
-    canLoadMore: boolean;
-    columnWindow?: ColumnWindow<TRow>;
-    groupingEntries?: readonly GroupedFlatEntry<TRow>[];
-    loadMoreRef: RefObject<HTMLDivElement | null>;
-    pinnedBottomRows: readonly TRow[];
-    pinnedSummaryBottom: readonly TRow[];
-    pinnedSummaryTop: readonly TRow[];
-    pinnedTopRows: readonly TRow[];
-    treeEntries?: readonly TreeEntry<TRow>[];
-    virtualization: TableVirtualization<TRow>;
-    virtualScrollRef: RefCallback<HTMLElement>;
-}
-
-// @public
 export function clearCountFilterExtra(bucket: string): ExtraFilters;
 
 // @public
@@ -598,7 +431,7 @@ export function clearedFilterExtras<TRow>(defs: readonly FilterDef<TRow>[], regi
 
 // @public
 export interface ClipboardRangeOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     firstRowIndex?: number;
     headers?: boolean;
     range: CellRange;
@@ -615,75 +448,44 @@ export function coerceBooleanValue(value: unknown): boolean | undefined;
 export function collectChecklistValues<TRow>(def: FilterDef<TRow>, rows: readonly TRow[], selected?: readonly string[]): ChecklistValue[];
 
 // @public
+export function collectFeatureNotices<TRow>(input: CollectFeatureNoticesInput<TRow>): readonly FeatureNotice[];
+
+// @public
+export interface CollectFeatureNoticesInput<TRow = unknown> {
+    allFilteredRows?: readonly TRow[];
+    batchEditing?: boolean;
+    capabilities?: TableSourceCapabilities;
+    exportCsv?: boolean | ExportCsvOptions<TRow>;
+    groupByKeys: readonly string[];
+    hasEditableColumn: boolean;
+    labels: TableLabels;
+    nestedArmed: boolean;
+    onBatchEdit?: unknown;
+    onCellEdit?: unknown;
+    onRowEdit?: unknown;
+    paginationMode?: TableSource<TRow>["paginationMode"];
+    rowEditing?: boolean;
+    rowPinningRequested: boolean;
+    rowReorderRequested: boolean;
+    serverGroups?: unknown;
+    total?: number;
+    virtualize?: boolean;
+}
+
+// @public
 export type ColorScheme = "light" | "dark" | "auto";
 
 // @public
-export interface ColumnDef<TRow> {
-    accessor?: (row: TRow) => ReactNode;
-    align?: "start" | "center" | "end";
-    Cell?: ComponentType<CellProps<TRow>>;
-    colSpan?: number | ((row: TRow) => number);
-    editable?: boolean | ((row: TRow) => boolean);
-    editor?: CellEditor;
-    editValue?: (row: TRow) => string;
-    exportValue?: (row: TRow) => unknown;
-    filter?: ColumnFilter<TRow>;
-    flex?: number;
-    formatValue?: (row: TRow) => string;
-    group?: string | readonly string[];
-    groupShow?: ColumnGroupShow;
-    header?: ReactNode;
-    headerActions?: ReactNode;
-    headerTooltip?: string;
-    hideOnDesktop?: boolean;
-    hideOnMobile?: boolean;
-    i18n?: Readonly<Record<string, string>>;
-    key: string;
-    lockPin?: boolean;
-    lockPosition?: boolean;
-    lockVisibility?: boolean;
-    lockWidth?: boolean;
-    maxWidth?: number;
-    meta?: Record<string, unknown>;
-    minWidth?: number;
-    mobileLabel?: string;
-    parseValue?: (draft: string, row: TRow) => unknown;
-    renameable?: boolean;
-    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
-    responsivePriority?: number;
-    rowSpan?: number | ((row: TRow) => number);
-    sortable?: boolean;
-    sortValue?: (row: TRow) => SortableValue;
-    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
-    width?: number | string;
-}
+export const COLUMN_GROUP_ID_SEP = "";
 
 // @public
-export interface ColumnDragRowAttrs {
-    "data-dragging"?: "";
-    "data-drop"?: "before" | "after";
-}
+export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
 
 // @public
-export interface ColumnDragState {
-    draggingKey: string | null;
-    dropProps: (index: number, move: (key: string, toIndex: number) => void) => ColumnDropProps;
-    overIndex: number | null;
-    rowAttrs: (key: string, index: number) => ColumnDragRowAttrs;
-    rowDragProps: (key: string, index: number) => ColumnRowDragProps & {
-        onDragEnd: () => void;
-    };
-}
+export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 
 // @public
-export interface ColumnDropProps {
-    onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-    onDrop: (event: DragEvent_2<HTMLElement>) => void;
-}
-
-// @public
-export function columnDropProps(index: number, move: (key: string, toIndex: number) => void): ColumnDropProps;
+export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
 export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
@@ -691,9 +493,12 @@ export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "
 });
 
 // @public
+export function columnFlexShares<TRow>(options: ColumnSizingOptions<TRow>): Readonly<Record<string, number>>;
+
+// @public
 export interface ColumnFooterContext<TRow> {
-    column: ColumnDef<TRow>;
-    value: ReactNode;
+    column: ColumnModel<TRow>;
+    value: DisplayValue;
 }
 
 // @public
@@ -701,18 +506,27 @@ export interface ColumnGroupDef<TRow> {
     readonly align?: GroupedHeaderAlign;
     readonly children: readonly ColumnInput<TRow>[];
     readonly collapsedKey?: string;
-    readonly collapsedRender?: (row: TRow) => ReactNode;
+    readonly collapsedRender?: (row: TRow) => DisplayValue;
     readonly header: string;
     readonly headerTooltip?: string;
     readonly marryChildren?: boolean;
 }
 
 // @public
+export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null;
+
+// @public
+export function columnGroupId(path: readonly string[]): string;
+
+// @public
+export function columnGroupPath<TRow>(column: Pick<ColumnMetadata<TRow>, "group">): readonly string[];
+
+// @public
 export interface ColumnGroupRecord<TRow> {
     readonly align?: GroupedHeaderAlign;
     readonly childKeys: readonly string[];
     readonly collapsedKey?: string;
-    readonly collapsedRender?: (row: TRow) => ReactNode;
+    readonly collapsedRender?: (row: TRow) => DisplayValue;
     readonly headerTooltip?: string;
     readonly id: string;
     readonly label: string;
@@ -723,14 +537,17 @@ export interface ColumnGroupRecord<TRow> {
 export type ColumnGroupShow = "open" | "closed" | "always";
 
 // @public
+export function columnGroupStubStyle(): CssProperties;
+
+// @public
 export interface ColumnHeaderContext<TRow> {
-    column: ColumnDef<TRow>;
+    column: ColumnModel<TRow>;
     controller: ColumnHeaderController;
 }
 
 // @public
 export interface ColumnHeaderController {
-    label: ReactNode;
+    label: DisplayValue;
     sortDir?: "asc" | "desc";
     sortIndex?: number;
     toggleSort: (event?: {
@@ -739,19 +556,10 @@ export interface ColumnHeaderController {
 }
 
 // @public
-export function columnHeaderController<TRow>(column: ColumnDef<TRow>, extras?: {
-    sortDir?: "asc" | "desc";
-    sortIndex?: number;
-    toggleSort?: (event?: {
-        shiftKey?: boolean;
-    }) => void;
-}): ColumnHeaderController;
+export function columnHeaderLabel<TRow>(column: ColumnMetadata<TRow>): string;
 
 // @public
-export function columnHeaderLabel<TRow>(column: ColumnDef<TRow>): ReactNode;
-
-// @public
-export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroupDef<TRow>;
+export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 // @public
 export interface ColumnLayoutState {
@@ -762,6 +570,9 @@ export interface ColumnLayoutState {
     pinned: Readonly<Record<string, PinSide>>;
     widths: Readonly<Record<string, number>>;
 }
+
+// @public
+export function columnLetter(index: number): string;
 
 // @public
 export interface ColumnMenuAction {
@@ -789,6 +600,9 @@ export interface ColumnMenuActionContext<TRow = unknown> {
 export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined;
 
 // @public
+export function columnMenuActions<TRow>(row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>): ColumnMenuItem[];
+
+// @public
 export interface ColumnMenuChoice {
     disabled: boolean;
     id: string;
@@ -806,10 +620,17 @@ export interface ColumnMenuChoiceOption {
 }
 
 // @public
+export interface ColumnMenuChromeProps<TRow> {
+    allColumns: ColumnMetadata<TRow>[];
+    labels: ColumnMenuLabels;
+    layout: UseColumnLayoutResult<TRow>;
+}
+
+// @public
 export type ColumnMenuItem = ColumnMenuAction | ColumnMenuChoice;
 
 // @public
-export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string;
+export function columnMenuLabel<TRow>(column: ColumnMetadata<TRow>): string;
 
 // @public
 export interface ColumnMenuLabels {
@@ -863,7 +684,7 @@ export interface ColumnMenuRow<TRow> {
     canRename?: boolean;
     canResize: boolean;
     canSort: boolean;
-    column: ColumnDef<TRow>;
+    column: ColumnMetadata<TRow>;
     hidden: boolean;
     index: number;
     key: string;
@@ -872,26 +693,90 @@ export interface ColumnMenuRow<TRow> {
 }
 
 // @public
-export function columnMenuRows<TRow>(allColumns: readonly ColumnDef<TRow>[], layout: UseColumnLayoutResult<TRow>): ColumnMenuRow<TRow>[];
+export function columnMenuRows<TRow>(allColumns: readonly ColumnMetadata<TRow>[], layout: UseColumnLayoutResult<TRow>): ColumnMenuRow<TRow>[];
 
 // @public
-export interface ColumnReorderKeyProps {
-    "aria-label": string;
-    "data-adapttable-grip": "";
-    onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    role: "button";
-    tabIndex: 0;
+export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
+    dir?: Direction;
+    groupingPanel?: GroupingPanelState;
+    hasRowActions?: boolean;
+    hasRowReorder?: boolean;
+    labels: ColumnMenuLabels & {
+        actions: string;
+        reorderRow: string;
+    };
+    onAutoSize: () => void;
+    onAutoSizeColumn?: (key: string) => void;
+    onFilterColumn?: (key: string) => void;
+    onRenameColumn?: (key: string, name: string) => void;
+    onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+    sortBy?: string;
+    sortDir?: "asc" | "desc";
 }
 
 // @public
-export function columnReorderKeyProps(key: string, index: number, move: (key: string, toIndex: number) => void, label: string): ColumnReorderKeyProps;
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter" | "editor"> & {
+    header?: unknown;
+    filter?: unknown;
+    editor?: unknown;
+};
+
+// @public
+export interface ColumnModel<TRow = unknown> {
+    accessor?: (row: TRow) => unknown;
+    align?: "start" | "center" | "end";
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
+    editor?: ColumnModelEditor;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
+    filter?: ColumnModelFilter;
+    flex?: number;
+    formatValue?: (row: TRow) => string;
+    group?: string | readonly string[];
+    groupShow?: ColumnGroupShow;
+    header?: string;
+    headerTooltip?: string;
+    hideOnDesktop?: boolean;
+    hideOnMobile?: boolean;
+    i18n?: Readonly<Record<string, string>>;
+    key: string;
+    lockPin?: boolean;
+    lockPosition?: boolean;
+    lockVisibility?: boolean;
+    lockWidth?: boolean;
+    maxWidth?: number;
+    meta?: Record<string, unknown>;
+    minWidth?: number;
+    mobileLabel?: string;
+    parseValue?: (draft: string, row: TRow) => unknown;
+    renameable?: boolean;
+    responsivePriority?: number;
+    rowSpan?: number | ((row: TRow) => number);
+    sortable?: boolean;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    width?: number | string;
+}
+
+// @public
+export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
+
+// @public
+export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
 export interface ColumnResizeHandleProps {
     "aria-label": string;
-    onDoubleClick: (event: MouseEvent_2<HTMLElement>) => void;
-    onKeyDown: (event: KeyboardEvent_2<HTMLElement>) => void;
-    onPointerDown: (event: PointerEvent_2<HTMLElement>) => void;
+    onDoubleClick: (event: MouseEvent & {
+        currentTarget: HTMLElement;
+    }) => void;
+    onKeyDown: (event: KeyboardEvent & {
+        currentTarget: HTMLElement;
+    }) => void;
+    onPointerDown: (event: PointerEvent & {
+        currentTarget: HTMLElement;
+    }) => void;
     role: "button";
     tabIndex: 0;
 }
@@ -900,52 +785,39 @@ export interface ColumnResizeHandleProps {
 export function columnResizeHandleProps(key: string, setWidth: (key: string, width: number) => void, label: string): ColumnResizeHandleProps;
 
 // @public
-export interface ColumnRowDragProps {
-    draggable: true;
-    onDragStart: (event: DragEvent_2<HTMLElement>) => void;
+export function columnSelectLabel(label: string | undefined, column: {
+    header?: DisplayValue;
+    key: string;
+}): string;
+
+// @public
+export function columnSizeStyle<TRow>(column: ColumnMetadata<TRow>, shares?: Readonly<Record<string, number>>, userWidth?: number): CssProperties | undefined;
+
+// @public
+export interface ColumnSizingOptions<TRow> {
+    columns: readonly ColumnMetadata<TRow>[];
+    fitColumns?: boolean;
+    widths?: Readonly<Record<string, number>>;
 }
 
 // @public
-export function columnRowDragProps(key: string): ColumnRowDragProps;
-
-// @public
-export function columnsHaveFooter<TRow>(columns: readonly ColumnDef<TRow>[]): boolean;
-
-// @public
-export function columnText<TRow>(column: ColumnDef<TRow>, row: TRow): string;
-
-// @public
-export interface ColumnWindow<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    enabled: boolean;
-    paddingEnd: number;
-    paddingStart: number;
-}
+export function columnText<TRow>(column: ColumnMetadata<TRow>, row: TRow): string;
 
 // @public
 export type Command = ContextMenuItem;
 
 // @public
-export interface CommandPaletteOptions {
-    commands?: readonly Command[];
-    shortcuts?: readonly Shortcut[];
-}
-
-// @public
 export function compareValues(a: SortableValue, b: SortableValue): number;
 
 // @public
-export type ComposedTableProps<TRow> = BaseDataTableProps<TRow> & FeatureProps<TRow>;
-
-// @public
-export function computed<TRow extends object, TValue = SortableValue>(spec: ComputedColumnSpec<TRow, TValue>): ColumnDef<TRow>;
+export function computed<TRow extends object, TValue = SortableValue>(spec: ComputedColumnSpec<TRow, TValue>): ColumnModel<TRow>;
 
 // @public
 export interface ComputedColumnSpec<TRow, TValue> {
-    column?: Omit<ColumnDef<TRow>, "key" | "header" | "accessor" | "sortValue" | "exportValue">;
+    column?: Omit<ColumnModel<TRow>, "key" | "header" | "sortValue" | "exportValue" | "formatValue">;
     deps: (row: TRow) => readonly unknown[];
-    format?: (value: TValue, row: TRow) => ReactNode;
-    header?: ReactNode;
+    format?: (value: TValue, row: TRow) => string;
+    header?: string;
     key: string;
     value: (row: TRow) => TValue;
 }
@@ -1000,11 +872,21 @@ export interface ContextMenuItem {
 }
 
 // @public
+export function contextMenuItems<TRow>(options: ContextMenuModelOptions<TRow>): ContextMenuItem[];
+
+// @public
 export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 
 // @public
-export interface ContextMenuOptions<TRow> {
-    items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+export interface ContextMenuModelOptions<TRow> {
+    actions: ContextMenuActions<TRow>;
+    columns: readonly ColumnMetadata<TRow>[];
+    extra?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+    isPinned?: (columnKey: string) => boolean;
+    labels: TableLabels;
+    sortBy?: string;
+    sortDir?: "asc" | "desc";
+    target: ContextMenuTarget<TRow>;
 }
 
 // @public
@@ -1054,7 +936,7 @@ export type CountOperator = (typeof COUNT_OPERATORS)[number];
 // @public
 export function coveredAddressSet<TRow>(options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     getCellSpan?: GetCellSpan<TRow>;
     firstRowIndex?: number;
     pinOffset?: (key: string) => PinOffset | undefined;
@@ -1064,16 +946,45 @@ export function coveredAddressSet<TRow>(options: {
 export function createFilterRegistry(specs: readonly FilterTypeSpec[]): FilterTypeRegistry;
 
 // @public
-export function createHistoryAdapter(): UrlStateAdapter;
-
-// @public
 export function createIncrementalView<TRow>(rows: readonly TRow[], config: IncrementalViewConfig<TRow>): IncrementalView<TRow>;
 
 // @public
-export function createMemoryAdapter(initialSearch?: string): UrlStateAdapter;
+export function createNeutralTable<TRow>(engine: TableEngine<TRow>, tableId: string, binding?: NeutralTableBinding<TRow>): NeutralTable<TRow>;
+
+// @public
+export function createTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
+
+// @public
+export interface CreateTableEngineOptions<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly data: readonly TRow[];
+    readonly defaults?: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly search?: string;
+        readonly sortBy?: string;
+        readonly sortDir?: SortDirection;
+        readonly extra?: ExtraFilters;
+        readonly groupBy?: string;
+    };
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly getSearchText?: (row: TRow) => string;
+    readonly locale?: string;
+    readonly paginationMode?: "paged" | "infinite";
+    readonly rowKey: (row: TRow) => string;
+    readonly tableId?: string;
+}
+
+// @public
+export type CssProperties = {
+    [key: string]: string | number | undefined;
+};
 
 // @public
 export const csvWriter: ExportWriter;
+
+// @public
+export function currentFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
 // @public
 export interface CustomCellEditorCtrl {
@@ -1097,10 +1008,7 @@ export interface CustomCellEditorCtrl {
 }
 
 // @public
-export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
-
-// @public
-export function datasetIndex(localIndex: number, windowStart: number): number;
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
 
 // @public
 export const DATE_OP_LABEL_KEYS: {
@@ -1120,11 +1028,22 @@ export const DATE_OPS: readonly ["before", "after", "on", "gte", "lte", "between
 // @public
 export type DateOp = (typeof DATE_OPS)[number];
 
+// @public (undocumented)
+export function declaredColumnLayout<TCol extends ColumnMetadata<any>>(columns: readonly TCol[]): Omit<UseColumnLayoutResult<any>, "visibleColumns"> & {
+    visibleColumns: TCol[];
+};
+
+// @public
+export function declaredColumnName<TRow>(column: ColumnMetadata<TRow>): string;
+
+// @public
+export const DEFAULT_CARD_SIZE_PX = 132;
+
 // @public
 export const DEFAULT_LIMIT = 25;
 
 // @public
-export const DEFAULT_SHORTCUTS: readonly Shortcut[];
+export const DEFAULT_ROW_SIZE_PX = 56;
 
 // @public
 export const defaultConfirm: ConfirmHandler;
@@ -1133,34 +1052,28 @@ export const defaultConfirm: ConfirmHandler;
 export const defaultFilterRegistry: FilterTypeRegistry;
 
 // @public
-export function defaultFrontendRowId<TRow>(row: TRow): string;
-
-// @public
 export const defaultLabels: Required<TableLabels>;
 
 // @public
-export function defaultSearchText<TRow>(row: TRow): string;
+export function deriveSortByOptions<TRow>(columns: readonly ColumnMetadata<TRow>[]): SortByOption[];
 
 // @public
-export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
+export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
 
 // @public
-export type Density = "comfortable" | "compact";
+export function deserializePivot(raw: string | null): PivotConfig;
+
+// @public
+export function deserializePivotState(raw: string | null): PivotUrlState;
+
+// @public
+export function devWarn(message: string): void;
 
 // @public
 export type Direction = "ltr" | "rtl";
 
 // @public
-export interface DirtyCellState {
-    confirm: (rowId: string, columnKey: string) => void;
-    confirmAll: () => void;
-    confirmRow: (rowId: string) => void;
-    count: number;
-    isDirty: (rowId: string, columnKey: string) => boolean;
-    isRowDirty: (rowId: string) => boolean;
-    mark: (rowId: string, columnKey: string) => void;
-    signature: string;
-}
+export type DisplayValue = unknown;
 
 // @public
 export function downloadCsv(filename: string, csv: string): void;
@@ -1171,7 +1084,7 @@ export function downloadExportFile(filename: string, payload: ExportPayload): vo
 // @public
 export function downloadTableCsv<TRow>(options: {
     source: TableSource<TRow>;
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     filename?: string;
     scope?: ExportRowScope;
     columnScope?: ExportColumnScope;
@@ -1183,172 +1096,58 @@ export function downloadTableCsv<TRow>(options: {
 }): void;
 
 // @public
-export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
-
-// @public
 export function edgePinStyle(side: PinSide, active: boolean, zIndex?: number): PinnedCellStyle | undefined;
 
 // @public
-export interface EditableCellActivateControlProps {
-    readonly activateRef: (node: HTMLButtonElement | null) => void;
-    readonly className?: string;
-    readonly dirty: boolean;
-    readonly display: ReactNode;
-    readonly onClick: (event: {
-        stopPropagation: () => void;
-    }) => void;
-    readonly onDoubleClick: (event: {
-        preventDefault: () => void;
-        stopPropagation: () => void;
-    }) => void;
-    readonly onKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        stopPropagation: () => void;
-    }) => void;
-    readonly saveStatus: string | undefined;
-    readonly title: string;
-}
-
-// @public
-export interface EditableCellConflictButtonProps {
-    readonly className?: string;
-    readonly label: string;
-    readonly onClick: (event: {
-        stopPropagation: () => void;
-    }) => void;
-    readonly onMouseDown?: (event: {
-        preventDefault: () => void;
-    }) => void;
-    readonly part: string;
-}
-
-// @public
-export interface EditableCellController<TRow = unknown> {
-    begin: () => void;
-    cancel: () => void;
-    canRollback: boolean;
-    commit: () => void;
-    commitOnBlur: () => void;
-    conflict?: EditConflict<TRow>;
-    conflictLabels?: {
-        message: string;
-        keepMine: string;
-        takeTheirs: string;
-        theirsValue: (value: string) => string;
+export interface EditableCellEditing<_TRow = unknown> {
+    // (undocumented)
+    batch?: {
+        signature?: string;
     };
-    dismissFailure: () => void;
-    draft: string;
-    editor: CellEditor | null;
-    error?: string;
-    isDirty: boolean;
-    keepConflict: () => void;
-    mode: EditableCellMode;
-    onEditorKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    rollback: () => void;
-    saveFailure?: FailedCellSave<TRow>;
-    saveStatus?: CellSaveStatus;
-    selectOptions: ReturnType<typeof normalizeEditorOptions>;
-    setDraft: (value: string) => void;
-    takeConflict: () => void;
-    validating: boolean;
-}
-
-// @public
-export function editableCellController<TRow>(options: {
-    editing: EditableCellEditing<TRow> | undefined;
-    row: TRow;
-    column: ColumnDef<TRow>;
-    rowId: string;
-    rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
-    rowKey: (row: TRow) => string;
-}): EditableCellController;
-
-// @public
-export interface EditableCellControls {
-    readonly Activate: (props: EditableCellActivateControlProps) => ReactNode;
-    readonly Button: (props: EditableCellConflictButtonProps) => ReactNode;
-}
-
-// @public
-export interface EditableCellEditing<TRow> {
-    batch?: BatchEditingState<TRow>;
-    conflict?: EditConflictState<TRow>;
-    conflictLabels?: {
-        message: string;
-        keepMine: string;
-        takeTheirs: string;
-        theirsValue: (value: string) => string;
+    // (undocumented)
+    conflict?: {
+        current?: {
+            rowId: string;
+            columnKey: string;
+            incomingValue: unknown;
+        };
     };
-    dirty?: DirtyCellState;
-    featureHost?: FeatureHostState;
-    lifecycle?: EditLifecycle<TRow>;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-    rowEditing?: RowEditingState<TRow>;
-    saving?: CellSaveState<TRow>;
-    state: CellEditingState;
-    validation?: EditValidationState<TRow>;
+    // (undocumented)
+    dirty?: {
+        isRowDirty(rowId: string): boolean;
+        signature?: string;
+    };
+    // (undocumented)
+    rowEditing?: {
+        activeRowId?: string;
+        signature?: string;
+    };
+    // (undocumented)
+    saving?: {
+        signature?: string;
+    };
+    // (undocumented)
+    state: {
+        active?: {
+            rowId: string;
+            columnKey: string;
+        } | null;
+        draft?: unknown;
+    };
+    // (undocumented)
+    validation?: {
+        rowHasError(rowId: string): boolean;
+        isValidating(rowId: string, columnKey: string): boolean | undefined;
+        errorFor(rowId: string, columnKey: string): string | undefined;
+    };
 }
-
-// @public
-export interface EditableCellEditorCtrl {
-    commitOnBlur: () => void;
-    conflict?: boolean;
-    draft: string;
-    editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
-    error?: string;
-    errorId: string;
-    focusRef: (node: {
-        focus: () => void;
-    } | null) => void;
-    onEditorKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-    setDraft: (value: string) => void;
-    validating: boolean;
-}
-
-// @public
-export function EditableCellGate<TRow>(props: EditableCellGateProps<TRow>): ReactElement;
-
-// @public
-export interface EditableCellGateProps<TRow> {
-    readonly activateClassName?: string;
-    readonly column: ColumnDef<TRow>;
-    readonly columns: readonly ColumnDef<TRow>[];
-    readonly display: ReactNode;
-    readonly editing: EditableCellEditing<TRow> | undefined;
-    readonly editLabel: string;
-    readonly errorClassName?: string;
-    readonly kitRendersError?: boolean;
-    readonly renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
-    readonly rollbackClassName?: string;
-    readonly row: TRow;
-    readonly rowId: string;
-    readonly rowKey: (row: TRow) => string;
-    readonly rows: readonly TRow[];
-    readonly saveErrorClassName?: string;
-    readonly slots: EditableCellControls;
-    readonly undoLabel?: string;
-}
-
-// @public
-export type EditableCellMode = "display" | "activatable" | "editing";
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
     editable?: boolean | {
         bivarianceHack(row: TRow): boolean;
     }["bivarianceHack"];
-    editor?: CellEditor;
+    editor?: CellEditor | ColumnModelEditor | unknown;
     editValue?: {
         bivarianceHack(row: TRow): string;
     }["bivarianceHack"];
@@ -1365,110 +1164,30 @@ export interface EditableColumnLike<TRow = unknown> {
 }
 
 // @public
-export interface EditConflict<TRow> {
-    columnKey: string;
-    draft: string;
-    incomingValue: string;
-    previous: TRow;
-    previousValue: string;
-    row: TRow;
-    rowId: string;
-}
-
-// @public
-export type EditConflictChoice = "keep" | "take";
-
-// @public
-export type EditConflictHandler<TRow> = (conflict: EditConflict<TRow>) => EditConflictChoice | void;
-
-// @public
-export type EditConflictPolicy = "keep" | "take" | "ask";
-
-// @public
-export interface EditConflictState<TRow> {
-    clear: () => void;
-    current: EditConflict<TRow> | null;
-    isConflict: (rowId: string, columnKey: string) => boolean;
-    keep: () => void;
-    reconcile: (input: ReconcileLiveEdit<TRow>) => void;
-    take: () => void;
-}
-
-// @public
-export interface EditEvent<TRow> {
-    columnKey: string;
-    error?: string;
-    previousValue: unknown;
-    row: TRow;
-    rowId: string;
-    unit: EditUnit;
-    value: unknown;
-}
-
-// @public
-export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
-
-// @public
-export interface EditHistoryEntry<TRow> {
-    redo: readonly CellEdit<TRow>[];
-    undo: readonly CellEdit<TRow>[];
-}
-
-// @public
-export interface EditHistoryState<TRow> {
-    canRedo: boolean;
-    canUndo: boolean;
-    clear: () => void;
-    enabled: boolean;
-    record: (edits: readonly CellEdit<TRow>[]) => void;
-    redo: () => number;
-    undo: () => number;
-}
-
-// @public
-export interface EditLifecycle<TRow> {
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditError?: EditEventHandler<TRow>;
-    onEditStart?: EditEventHandler<TRow>;
-    onValidationFail?: EditEventHandler<TRow>;
-}
-
-// @public
 export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
 
 // @public
-export type EditUnit = "cell" | "row" | "batch";
+export type ElementRef<T> = ((node: T | null) => void) | {
+    current: T | null;
+} | null | undefined;
 
 // @public
-export interface EditValidationState<TRow> {
-    check: (options: {
-        target: ValidationTarget;
-        value: unknown;
-        row: TRow;
-        validateCell?: CellValidator<TRow>;
-    }) => Promise<ValidationCheckResult>;
-    clear: (rowId: string, columnKey: string) => void;
-    clearAll: () => void;
-    errorFor: (rowId: string, columnKey: string) => string | undefined;
-    hasRowValidator: boolean;
-    isValidating: (rowId: string, columnKey: string) => boolean;
-    rowErrorFor: (rowId: string) => string | undefined;
-    rowHasError: (rowId: string) => boolean;
-    signature: string;
-}
+export const EMPTY_COLUMN_LAYOUT: ColumnLayoutState;
 
 // @public
 export const EMPTY_PINNED_ROWS: PinnedRows<never>;
 
 // @public
-export const EMPTY_ROW_PIN_STATE: RowPinState;
+export const EMPTY_PIVOT_CONFIG: PivotConfig;
 
 // @public
 export function emptyFilterRegistry(): FilterTypeRegistry;
 
 // @public
 export function emptyFilterTree(): QueryFilterGroup;
+
+// @public
+export function engineSearchText<TRow>(row: TRow): string;
 
 // @public
 export function estimateFromRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, fallback: number, rowAt: (index: number) => {
@@ -1480,10 +1199,13 @@ export function estimateFromRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefin
 export function evaluateFilterTree<TRow>(tree: QueryFilterGroup | undefined, row: TRow, defs: readonly FilterDef<TRow>[], registry?: FilterTypeRegistry): boolean;
 
 // @public
+export function evaluateFormula(node: FormulaNode, scope: FormulaScope): FormulaValue;
+
+// @public
 export const EXPORT_FETCH_ALL_MAX_ROWS = 50000;
 
 // @public
-export function exportableColumns<TRow>(columns: readonly ColumnDef<TRow>[]): ColumnDef<TRow>[];
+export function exportableColumns<TRow>(columns: readonly ColumnMetadata<TRow>[]): ColumnMetadata<TRow>[];
 
 // @public
 export interface ExportAllControls {
@@ -1513,11 +1235,14 @@ export type ExportAllResult = {
 } | void;
 
 // @public
+export function exportButtonLabel(labels: TableLabels | undefined, format: string): string;
+
+// @public
 export type ExportColumnScope = "visible" | "all" | readonly string[];
 
 // @public
 export interface ExportContext<TRow> {
-    allColumns?: readonly ColumnDef<TRow>[];
+    allColumns?: readonly ColumnMetadata<TRow>[];
     firstRowIndex?: number;
     getCellSpan?: GetCellSpan<TRow>;
     getRowId?: (row: TRow) => string;
@@ -1528,7 +1253,7 @@ export interface ExportContext<TRow> {
     groupTotal?: (label: string) => string;
     range?: CellRange | null;
     selectedIds?: ReadonlySet<string>;
-    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
@@ -1559,7 +1284,7 @@ export type ExportCsvProp<TRow = unknown> = boolean | ExportCsvOptions<TRow> | u
 
 // @public
 export interface ExportInfo<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     filename: string;
     rows: readonly TRow[];
 }
@@ -1656,14 +1381,50 @@ export interface ExportWriter {
 export function extendCellRange(range: CellRange | null, head: GridCell, fallbackAnchor: GridCell): CellRange;
 
 // @public
+export const EXTRA_OVER_SPAN_ROW_STYLE: CssProperties;
+
+// @public
+export const EXTRA_OVER_SPAN_STYLE: CssProperties;
+
+// @public
+export const EXTRA_ROW_PARTS: {
+    readonly separator: {
+        readonly row: "separator-row";
+        readonly cell: "separator-cell";
+    };
+    readonly fullWidth: {
+        readonly row: "full-width-row";
+        readonly cell: "full-width-cell";
+    };
+};
+
+// @public
+export function extraCountBeforeRowIds(extraRows: readonly ExtraRow[] | undefined, ids: ReadonlySet<string>): number;
+
+// @public
+export function extraCoveredTableSlots(beforeRowId: string, options: {
+    visualIds: readonly string[];
+    cellsByRow: ReadonlyMap<string, readonly {
+        columnIndex: number;
+        colSpan: number;
+        rowSpan: number;
+    }[]>;
+    extraRows?: readonly ExtraRow[];
+    leadingCells: number;
+}): ReadonlySet<number>;
+
+// @public
 export type ExtraFilters = Record<string, FilterValue>;
+
+// @public
+export function extraHostFillStyle<TRow>(extraKey: string, extraRows: readonly ExtraRow[] | undefined, rows: readonly TRow[], getRowId: (row: TRow) => string, rowStyle: RowStyle<TRow> | undefined): CssProperties | undefined;
 
 // @public
 export interface ExtraRow {
     beforeRowId?: string;
     key: string;
     kind: ExtraRowKind;
-    render?: () => ReactNode;
+    render?: () => DisplayValue;
 }
 
 // @public
@@ -1673,22 +1434,42 @@ export type ExtraRowKind = "separator" | "fullWidth";
 export function extraRowsArmed(extraRows: readonly ExtraRow[] | undefined): boolean;
 
 // @public
+export function extraRowsForSection(extraRows: readonly ExtraRow[] | undefined, rowIds: ReadonlySet<string>, appendUntargeted?: boolean): readonly ExtraRow[] | undefined;
+
+// @public
+export function extraUncoveredColSpans(columnSpan: number, coveredSlots: ReadonlySet<number> | undefined): readonly number[];
+
+// @public
 export type FacetCounts = readonly ChecklistValue[];
 
 // @public
 export type FacetMap = Readonly<Record<string, FacetCounts>>;
 
 // @public
-export interface FailedCellSave<TRow> {
-    attempted: unknown;
-    message: string;
-    previous: TRow;
+export class FakeSocket implements StreamSocket {
+    constructor(url: string, protocols?: string | string[]);
+    // (undocumented)
+    addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
+    // (undocumented)
+    close(): void;
+    drop(): void;
+    fail(): void;
+    open(): void;
+    // (undocumented)
+    readonly protocols?: string | string[];
+    push(data: string, type?: string): void;
+    // (undocumented)
+    readyState: number;
+    // (undocumented)
+    removeEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
+    sseClosed(): void;
+    sseConnecting(): void;
+    // (undocumented)
+    readonly url: string;
 }
 
 // @public
-export type FeatureApplyInput<TRow = unknown> = object & {
-    readonly __row?: TRow;
-};
+export const FALLBACK_PIN_WIDTH = 150;
 
 // @public
 export interface FeatureHostState<TRow = unknown> {
@@ -1717,94 +1498,9 @@ export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
 export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
 
 // @public
-export interface FeaturePatch<TRow = unknown> {
-    readonly [key: string]: unknown;
+export interface FeatureRegistration<TRow = unknown> {
     readonly __row?: (row: TRow) => void;
-}
-
-// @public
-export interface FeatureProps<TRow> {
-    batchEditing?: boolean;
-    bulkActions?: BulkAction[];
-    cellNavigation?: boolean;
-    cellSpanAppearance?: CellSpanAppearance;
-    collapsibleColumnGroups?: boolean;
-    columnSelectionCheckbox?: boolean;
-    commandPalette?: boolean | CommandPaletteOptions;
-    confirmDeleteRow?: boolean;
-    contextMenu?: boolean | ContextMenuOptions<TRow>;
-    defaultExpandedRowIds?: readonly string[];
-    densityChooser?: boolean;
-    dirtyIndicators?: boolean;
-    editHistory?: boolean | {
-        depth?: number;
-    };
-    enableColumnMenu?: boolean;
-    exportCsv?: boolean | ExportCsvOptions<TRow>;
-    extraRows?: readonly ExtraRow[];
-    filters?: readonly FilterDef<TRow>[] | ReactNode;
-    filterTypes?: readonly FilterTypeSpec[];
-    findInTable?: boolean;
-    fitColumns?: boolean;
-    fullscreen?: boolean;
-    getCellSpan?: GetCellSpan<TRow>;
-    getChildren?: (row: TRow) => readonly TRow[] | undefined;
-    getParentId?: (row: TRow) => string | undefined;
-    groupBy?: string | readonly string[] | null;
-    headerFilters?: boolean;
-    multiSort?: boolean;
-    nestedTable?: NestedTableFor<TRow>;
-    onAddRow?: () => unknown;
-    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-    onDeleteRow?: (row: TRow) => unknown;
-    onDuplicateRow?: (row: TRow) => unknown;
-    onLoadChildren?: (row: TRow) => void | Promise<void>;
-    onPinnedRowIdsChange?: (next: RowPinState) => void;
-    onPrint?: () => void;
-    onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
-    pinnedRowIds?: RowPinState;
-    pinnedRows?: PinnedRows<TRow>;
-    printButton?: boolean;
-    renderRowDetail?: (row: TRow) => ReactNode;
-    resizableColumns?: boolean;
-    rowActions?: RowAction<TRow>[];
-    rowClassName?: (row: TRow, index: number) => string | undefined;
-    rowEditing?: boolean;
-    rowHeight?: RowHeight<TRow>;
-    rowStyle?: RowStyle<TRow>;
-    savedViews?: UseSavedViewsOptions;
-    selectionStats?: boolean;
-    sidePanel?: SidePanelOptions;
-    statusBar?: boolean;
-    treeColumn?: string;
-    undoRedoButtons?: boolean;
-    virtualize?: boolean;
-    virtualizeColumns?: boolean;
-}
-
-// @public
-export interface FeatureProviderContribution {
-    readonly Provider: ComponentType<FeatureProviderProps>;
-}
-
-// @public
-export interface FeatureProviderProps<TRow = unknown> {
-    readonly children: ReactNode;
-    readonly feature: TableFeature<TRow>;
-}
-
-// @public
-export interface FeatureRender<TProps> {
-    readonly render: (props: TProps) => ReactNode;
-    readonly slot: FeatureSlotKey<TProps>;
-}
-
-// @public
-export interface FeatureSlotKey<TProps> {
-    readonly __props?: (value: TProps) => void;
     readonly id: string;
-    readonly single?: boolean;
 }
 
 // @public
@@ -1832,7 +1528,7 @@ export function fillRangeEdits<TRow>(options: FillRangeOptions<TRow>): CellEdit<
 
 // @public
 export interface FillRangeOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     firstRowIndex?: number;
     rows: readonly TRow[];
     source: CellRange;
@@ -1840,10 +1536,19 @@ export interface FillRangeOptions<TRow> {
 }
 
 // @public
+export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): DisplayValue;
+
+// @public
 export function fillTargetRange(source: CellRange, to: GridCell): CellRange;
 
 // @public
+export const FILTER_ENGINE_IMPL: FilterEngine;
+
+// @public
 export const FILTER_OP_SUFFIX = "Op";
+
+// @public
+export const FILTER_PREFIX = "f_";
 
 // @public
 export const FILTER_TREE_PARAM = "ft";
@@ -1856,6 +1561,9 @@ export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist
 
 // @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
+
+// @public
+export function filterColumnMenuRows<TRow>(rows: readonly ColumnMenuRow<TRow>[], query: string): ColumnMenuRow<TRow>[];
 
 // @public
 export function filterCommands(commands: readonly Command[], query: string): Command[];
@@ -1875,6 +1583,31 @@ export interface FilterDef<TRow = unknown> {
 export function filterDefForColumn<TRow>(defs: readonly FilterDef<TRow>[], key: string): FilterDef<TRow> | undefined;
 
 // @public
+export interface FilterEngine {
+    // (undocumented)
+    buildRuntime<TRow>(input: {
+        columns: readonly ColumnMetadata<TRow>[];
+        declaredFilters: readonly FilterDef<TRow>[] | undefined;
+        locale: string | undefined;
+        data: readonly TRow[];
+        loadedOptions: Record<string, readonly {
+            value: string;
+            label: string;
+        }[]>;
+        filterTypes: readonly FilterTypeSpec[] | undefined;
+        featureHost: FeatureHostState | undefined;
+        optionCache: Map<string, () => Promise<readonly {
+            value: string;
+            label: string;
+        }[]>>;
+    }): FilterRuntime<TRow>;
+    // (undocumented)
+    computeFacets<TRow>(defs: readonly FilterDef<TRow>[], rows: readonly TRow[], extra: ExtraFilters, keep: (row: TRow, extra: ExtraFilters) => boolean, registry: FilterTypeRegistry): FacetMap;
+    // (undocumented)
+    evaluateTree<TRow>(tree: QueryFilterGroup, row: TRow, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry): boolean;
+}
+
+// @public
 export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], scopedIds: ReadonlySet<string>, getRowId: (row: TRow) => string): ExportViewEntry<TRow>[];
 
 // @public
@@ -1888,9 +1621,6 @@ export type FilterOp = TextOp | NumberOp | DateOp;
 
 // @public
 export function filterOpKey(key: string): string;
-
-// @public
-export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
 
 // @public
 export interface FilterOption {
@@ -1918,9 +1648,6 @@ export interface FilterRuntime<TRow> {
 export function filterStateKeys(def: Pick<FilterDef, "key" | "type">, registry?: FilterTypeRegistry): string[];
 
 // @public
-export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>): string;
-
-// @public
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
 
 // @public
@@ -1930,12 +1657,6 @@ export function filterTreeRows<TRow>(options: {
     withChildren: (row: TRow, children: readonly TRow[]) => TRow;
     match: (row: TRow) => boolean;
 }): TRow[];
-
-// @public
-export interface FilterTriggerToggle {
-    onClick: () => void;
-    onPointerDown: () => void;
-}
 
 // @public
 export type FilterType = (typeof FILTER_TYPES)[number];
@@ -1966,7 +1687,7 @@ export interface FilterTypeSpec {
     readonly defaultOp: string;
     match<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, row: TRow): boolean;
     readonly ops: readonly string[];
-    render?<TRow>(props: FilterWidgetRenderProps<TRow>): ReactElement;
+    render?<TRow>(props: FilterWidgetRenderProps<TRow>): DisplayValue;
     stateKeys(def: Pick<FilterDef, "key" | "type">): string[];
     readonly type: string;
     readonly urlArray?: boolean;
@@ -1995,38 +1716,26 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
 }
 
 // @public
-export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
-
-// @public
-export interface FindInTableState {
-    current: GridCell | null;
-    index: number;
-    matches: readonly GridCell[];
-    matchKeys: ReadonlySet<string>;
-    next: () => void;
-    open: boolean;
-    openBar?: () => void;
-    previous: () => void;
-    query: string;
-    setOpen: (open: boolean) => void;
-    setQuery: (query: string) => void;
-}
-
-// @public
 export function findMatches<TRow>(options: FindMatchesOptions<TRow>): GridCell[];
 
 // @public
 export interface FindMatchesOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     firstRowIndex?: number;
     query: string;
     rows: readonly TRow[];
 }
 
 // @public
+export function fittedTableStyle(fitColumns?: boolean): CssProperties | undefined;
+
+// @public
+export function flattenColumnTree<TRow>(columns: readonly ColumnInput<TRow>[]): FlattenedColumns<TRow>;
+
+// @public
 export interface FlattenedColumns<TRow> {
     readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-    readonly leaves: ColumnDef<TRow>[];
+    readonly leaves: ColumnMetadata<TRow>[];
 }
 
 // @public
@@ -2042,11 +1751,109 @@ export function formatGroupLabel(value: unknown, blankLabel?: string): string;
 export function formatMultiDraft(values: readonly string[]): string;
 
 // @public
+export const FORMULA_BLANK: FormulaValue;
+
+// @public
+export const FORMULA_ERRORS: {
+    readonly name: "#NAME?";
+    readonly value: "#VALUE!";
+    readonly divideByZero: "#DIV/0!";
+    readonly cycle: "#CYCLE!";
+    readonly syntax: "#ERROR!";
+};
+
+// @public
+export const FORMULA_FUNCTIONS: readonly string[];
+
+// @public
+export function formulaBoolean(value: boolean): FormulaValue;
+
+// @public
+export interface FormulaColumnSpec {
+    format?: (value: FormulaValue) => string;
+    formula: string;
+    header?: string;
+    key: string;
+}
+
+// @public
+export interface FormulaColumnsResult<TRow> {
+    columns: readonly ColumnMetadata<TRow>[];
+    cycles: readonly string[];
+    errors: Readonly<Record<string, string>>;
+}
+
+// @public
+export function formulaDisplay(value: FormulaValue): string;
+
+// @public
+export function formulaError(code: FormulaErrorCode): FormulaValue;
+
+// @public
+export type FormulaErrorCode = (typeof FORMULA_ERRORS)[keyof typeof FORMULA_ERRORS];
+
+// @public
+export type FormulaNode = {
+    readonly kind: "number";
+    readonly value: number;
+} | {
+    readonly kind: "string";
+    readonly value: string;
+} | {
+    readonly kind: "ref";
+    readonly key: string;
+} | {
+    readonly kind: "unary";
+    readonly operand: FormulaNode;
+} | {
+    readonly kind: "binary";
+    readonly op: BinaryOp;
+    readonly left: FormulaNode;
+    readonly right: FormulaNode;
+} | {
+    readonly kind: "call";
+    readonly name: string;
+    readonly args: readonly FormulaNode[];
+};
+
+// @public
+export function formulaNumber(value: number): FormulaValue;
+
+// @public
+export function formulaRefs(node: FormulaNode): string[];
+
+// @public
+export type FormulaScope = (key: string) => FormulaValue | undefined;
+
+// @public
+export function formulaSortValue(value: FormulaValue): SortableValue;
+
+// @public
+export function formulaText(value: string): FormulaValue;
+
+// @public
+export type FormulaValue = {
+    readonly kind: "number";
+    readonly value: number;
+} | {
+    readonly kind: "text";
+    readonly value: string;
+} | {
+    readonly kind: "boolean";
+    readonly value: boolean;
+} | {
+    readonly kind: "blank";
+} | {
+    readonly kind: "error";
+    readonly code: FormulaErrorCode;
+};
+
+// @public
 export type GetCellSpan<TRow> = (args: GetCellSpanArgs<TRow>) => CellSpanRequest | undefined;
 
 // @public
 export interface GetCellSpanArgs<TRow> {
-    column: ColumnDef<TRow>;
+    column: ColumnMetadata<TRow>;
     columnIndex: number;
     row: TRow;
     rowIndex: number;
@@ -2055,13 +1862,7 @@ export interface GetCellSpanArgs<TRow> {
 }
 
 // @public
-export function getHistoryAdapter(): UrlStateAdapter;
-
-// @public
 export function getPath(value: unknown, path: string): unknown;
-
-// @public
-export const GRID_CELL_ATTR = "data-grid-cell";
 
 // @public
 export interface GridBounds {
@@ -2077,40 +1878,10 @@ export interface GridCell {
 }
 
 // @public
-export function gridCellAttr(cell: GridCell): string;
-
-// @public
 export type GridFocusMove = "up" | "down" | "left" | "right" | "rowStart" | "rowEnd" | "gridStart" | "gridEnd" | "pageUp" | "pageDown";
 
 // @public
 export function gridFocusMoveForKey(press: GridKeyPress, dir?: Direction): GridFocusMove | null;
-
-// @public
-export interface GridFocusState {
-    active: GridCell | null;
-    announcement: string;
-    columnCheckbox: boolean;
-    copyCells: (cell?: GridCell, cut?: boolean) => void;
-    enabled: boolean;
-    fillHandleCell: GridCell | null;
-    fillHandleLabel: string;
-    fillPreview: CellRange | null;
-    focusCell: (cell: GridCell) => void;
-    getCellProps: (cell: GridCell) => Record<string, unknown>;
-    getCellPropsAt: (windowIndex: number, col: number) => Record<string, unknown>;
-    getColumnHeaderProps: (col: number, options?: {
-        sortable?: boolean;
-    }) => Record<string, unknown>;
-    getFillHandleProps: () => Record<string, unknown>;
-    getGridProps: () => Record<string, unknown>;
-    getRowProps: (rowIndex: number) => Record<string, unknown>;
-    getRowPropsAt: (windowIndex: number) => Record<string, unknown>;
-    isColumnSelected: (col: number) => boolean;
-    range: CellRange | null;
-    selectColumn: (col: number, extend?: boolean) => void;
-    selectRange: (range: CellRange | null) => void;
-    toggleColumn: (col: number) => void;
-}
 
 // @public
 export interface GridKeyPress {
@@ -2120,7 +1891,7 @@ export interface GridKeyPress {
 }
 
 // @public
-export function groupAggregateEntries<TRow>(columns: readonly ColumnDef<TRow>[], aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined): GroupRowCell<TRow>[];
+export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined): GroupRowCell<TRow, TCol>[];
 
 // @public
 export type GroupAggregateOverride = AggregateName | "none";
@@ -2129,22 +1900,44 @@ export type GroupAggregateOverride = AggregateName | "none";
 export type GroupAggregateOverrides = Readonly<Partial<Record<string, GroupAggregateOverride>>>;
 
 // @public
-export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, unknown>>;
 
 // @public
 export type GroupByInput = string | readonly string[] | null | undefined;
 
 // @public
-export interface GroupCollapseState {
-    collapseAll: (groupKeys: readonly string[]) => void;
+export function groupedEntriesForStrategy<TRow>(options: GroupedEntriesForStrategyOptions<TRow>): GroupedFlatEntry<TRow>[];
+
+// @public
+export interface GroupedEntriesForStrategyOptions<TRow> {
+    // (undocumented)
+    aggregates?: (rows: readonly TRow[]) => unknown;
+    // (undocumented)
+    allFilteredRows?: readonly TRow[];
+    // (undocumented)
     collapsedGroupIds: ReadonlySet<string>;
-    collapseToDepth: (depth: number, groups: readonly {
-        key: string;
-        level: number;
-    }[]) => void;
-    expandAll: () => void;
-    isCollapsed: (groupKey: string) => boolean;
-    toggle: (groupKey: string) => void;
+    // (undocumented)
+    columns: readonly ColumnMetadata<TRow>[];
+    // (undocumented)
+    filter?: (group: GroupNode<TRow>) => boolean;
+    // (undocumented)
+    footers?: boolean;
+    // (undocumented)
+    getRowId: (row: TRow) => string;
+    // (undocumented)
+    groupByKeys: readonly string[];
+    // (undocumented)
+    groupPageSize?: number;
+    // (undocumented)
+    kind: GroupingComputationKind;
+    // (undocumented)
+    paging?: GroupPaging;
+    // (undocumented)
+    rowPageSize?: number;
+    // (undocumented)
+    sort?: GroupSort<TRow>;
+    // (undocumented)
+    sourceGroups?: readonly QueryGroupRow<TRow>[];
 }
 
 // @public
@@ -2160,7 +1953,7 @@ export type GroupedFlatEntry<TRow> = {
     leafRows: readonly TRow[];
     leafIds: readonly string[];
     serverCount?: number;
-    aggregateCells?: Partial<Record<string, ReactNode>>;
+    aggregateCells?: Partial<Record<string, unknown>>;
     collapsed: boolean;
 } | {
     kind: "groupFooter";
@@ -2171,7 +1964,7 @@ export type GroupedFlatEntry<TRow> = {
     label: string;
     leafRows: readonly TRow[];
     leafIds: readonly string[];
-    aggregateCells?: Partial<Record<string, ReactNode>>;
+    aggregateCells?: Partial<Record<string, unknown>>;
 } | {
     kind: "groupMore";
     key: string;
@@ -2196,19 +1989,60 @@ export type GroupedFlatEntry<TRow> = {
 export type GroupedHeaderAlign = "start" | "center" | "end";
 
 // @public
+export function groupedHeaderAlign(align?: GroupedHeaderAlign): GroupedHeaderAlign;
+
+// @public
+export function groupedHeaderCellStyle(cell: Readonly<{
+    rowSpan: number;
+    cell: HeaderGroupCell;
+}>, hairline: string): CssProperties;
+
+// @public
+export function groupedHeaderChildRule(hairline: string): {
+    readonly borderBottom: string;
+    readonly backgroundImage: string;
+    readonly backgroundPosition: string;
+    readonly backgroundRepeat: string;
+    readonly backgroundSize: string;
+};
+
+// @public
+export function groupedHeaderLabelStyle(): CssProperties;
+
+// @public
+export const GROUPING_COLUMN_DND_MIME = "application/x-adapttable-grouping-column";
+
+// @public
 export type GroupingCapability = "client" | "server" | false;
 
 // @public
 export interface GroupingChipKeyboardProps {
     "aria-label": string;
-    onKeyDown: KeyboardEventHandler<HTMLElement>;
+    onKeyDown: (event: KeyboardEvent) => void;
     role: "button";
     tabIndex: 0;
 }
 
 // @public
-export interface GroupingDragProps extends Pick<HTMLAttributes<HTMLElement>, "draggable" | "onDragStart" | "onDragEnd"> {
+export type GroupingComputationKind = "source" | "client" | "none";
+
+// @public
+export function groupingComputationKind(input: {
+    groupByKeys: readonly string[];
+    sourceGroups?: readonly QueryGroupRow[];
+    allFilteredRows?: readonly unknown[];
+    capabilities?: TableSourceCapabilities;
+}): GroupingComputationKind;
+
+// @public
+export function groupingDragKey(event: Pick<DragEvent, "dataTransfer">): string | undefined;
+
+// @public
+export interface GroupingDragProps {
     "data-grouping-dragging"?: boolean;
+    draggable?: boolean;
+    onDragEnd?: (event: DragEvent) => void;
+    onDragStart?: (event: DragEvent) => void;
 }
 
 // @public
@@ -2223,8 +2057,12 @@ export interface GroupingDragState {
 }
 
 // @public
-export interface GroupingDropProps extends Pick<HTMLAttributes<HTMLElement>, "onDragEnter" | "onDragOver" | "onDragLeave" | "onDrop"> {
+export interface GroupingDropProps {
     "data-drop-active"?: boolean;
+    onDragEnter?: (event: DragEvent) => void;
+    onDragLeave?: (event: DragEvent) => void;
+    onDragOver?: (event: DragEvent) => void;
+    onDrop?: (event: DragEvent) => void;
 }
 
 // @public
@@ -2271,27 +2109,20 @@ export interface GroupPaging {
 }
 
 // @public
-export interface GroupPagingState {
-    paging: GroupPaging;
-    reset: () => void;
-    showMore: (pageSize: number, groupKey?: string) => void;
+export interface GroupRowCell<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    column: TCol;
+    node: DisplayValue;
 }
 
 // @public
-export interface GroupRowCell<TRow> {
-    column: ColumnDef<TRow>;
-    node: ReactNode;
+export interface GroupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    cells: readonly GroupRowCell<TRow, TCol>[];
+    labelAggregates: readonly GroupRowCell<TRow, TCol>[];
+    labelColumns: readonly TCol[];
 }
 
 // @public
-export interface GroupRowLayout<TRow> {
-    cells: readonly GroupRowCell<TRow>[];
-    labelAggregates: readonly GroupRowCell<TRow>[];
-    labelColumns: readonly ColumnDef<TRow>[];
-}
-
-// @public
-export function groupRowLayout<TRow>(columns: readonly ColumnDef<TRow>[], aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined): GroupRowLayout<TRow>;
+export function groupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined): GroupRowLayout<TRow, TCol>;
 
 // @public
 export function groupSelectionState(leafIds: readonly string[], selectedIds: ReadonlySet<string>): HeaderSelectionState;
@@ -2306,54 +2137,52 @@ export function groupValueKey(value: unknown): string;
 export function hasEditableColumns(columns: readonly EditableColumnLike[]): boolean;
 
 // @public
-export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
+export function hasGroupingColumnDrag(event: Pick<DragEvent, "dataTransfer">): boolean;
 
 // @public
-export const HeaderFilterOpenContext: Context<HeaderFilterOpenHost | null>;
-
-// @public
-export interface HeaderFilterOpenHost {
-    readonly openKey: string | null;
-    readonly setOpenKey: (key: string | null) => void;
+export interface HeaderGroupCell {
+    align?: GroupedHeaderAlign;
+    collapsed: boolean;
+    collapsible: boolean;
+    hideLabel: boolean;
+    id: string | null;
+    key: string;
+    label: string | null;
+    span: number;
 }
 
 // @public
-export function HeaderFilterOpenProvider(input: {
-    readonly children: ReactNode;
-}): ReactNode;
+export function headerGroupRow<TRow>(columns: readonly ColumnMetadata<TRow>[]): HeaderGroupCell[] | null;
 
 // @public
-export interface HeaderFilterSessionProps {
-    readonly [SESSION_ATTR]: string;
-}
-
-// @public
-export function headerFilterStickTop(sticky: boolean, base: CSSProperties | undefined, top: number, stickyExtras?: CSSProperties): CSSProperties | undefined;
+export function headerGroupRows<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
+    readonly align?: GroupedHeaderAlign;
+}>): HeaderGroupCell[][] | null;
 
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
 
 // @public
-export interface HighlightedCell {
-    columnKey: string;
-    rowId: string;
-}
+export function hideAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
 // @public
-export interface HighlightState {
-    animated: boolean;
-    clear: () => void;
-    flashCell: (cell: HighlightedCell) => void;
-    flashRow: (rowId: string) => void;
-    isCellHighlighted: (rowId: string, columnKey: string) => boolean;
-    isRowHighlighted: (rowId: string) => boolean;
-}
+export type HtmlGroupedHeaderCell = {
+    readonly kind: "group";
+    readonly key: string;
+    readonly colSpan: number;
+    readonly rowSpan: number;
+    readonly cell: HeaderGroupCell;
+} | {
+    readonly kind: "leaf";
+    readonly key: string;
+    readonly columnIndex: number;
+    readonly rowSpan: number;
+};
 
 // @public
-export interface HorizontalOverflow<E extends HTMLElement> {
-    overflowing: boolean;
-    ref: (node: E | null) => void;
-}
+export function htmlGroupedHeaderPlan<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
+    readonly align?: GroupedHeaderAlign;
+}>): HtmlGroupedHeaderCell[][] | null;
 
 // @public
 export function humanizeKey(key: string): string;
@@ -2363,7 +2192,7 @@ export function incrementalSearchText<TRow>(row: TRow): string;
 
 // @public
 export interface IncrementalView<TRow> {
-    readonly aggregates: Partial<Record<string, ReactNode>> | undefined;
+    readonly aggregates: Partial<Record<string, unknown>> | undefined;
     readonly filtered: readonly TRow[];
     readonly groups: readonly GroupedFlatEntry<TRow>[] | undefined;
     readonly rows: readonly TRow[];
@@ -2376,7 +2205,7 @@ export interface IncrementalViewConfig<TRow> {
     aggregateSpec?: AggregateSpec;
     blankLabel?: string;
     collapsedGroupIds?: ReadonlySet<string>;
-    columns?: readonly ColumnDef<TRow>[];
+    columns?: readonly ColumnMetadata<TRow>[];
     extra?: ExtraFilters;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     filterTree?: QueryFilterGroup;
@@ -2396,7 +2225,7 @@ export interface IncrementalViewConfig<TRow> {
     sortBy?: string;
     sortDir?: SortDirection;
     sortLevels?: readonly SortLevel[];
-    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, unknown>>;
 }
 
 // @public
@@ -2406,19 +2235,22 @@ export function incrementalViewConfig<TRow>(view: IncrementalView<TRow>): Increm
 export function incrementalViewOf<TRow>(rows: readonly TRow[]): IncrementalView<TRow> | undefined;
 
 // @public
-export interface InfiniteQueryLike<TPage> {
-    data: {
-        pages: TPage[];
-        pageParams: unknown[];
-    } | undefined;
-    error: Error | null;
-    fetchNextPage: () => Promise<unknown> | void;
-    hasNextPage: boolean;
-    isFetching: boolean;
-    isFetchingNextPage: boolean;
-    isLoading: boolean;
-    refetch: () => Promise<unknown> | void;
-}
+export function inflateBodyCellRowSpans<TCell extends {
+    columnIndex: number;
+    colSpan: number;
+    rowSpan: number;
+}>(cellsByRow: ReadonlyMap<string, readonly TCell[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined): ReadonlyMap<string, readonly TCell[]>;
+
+// @public
+export function insertExtraRows<T extends {
+    key: string;
+}>(entries: readonly T[], extraRows: readonly ExtraRow[] | undefined, dataKey: (entry: T) => string | undefined): readonly (T | TableExtraEntry)[];
+
+// @public
+export function insertExtrasBeforeRows<TRow>(rows: readonly TRow[], extraRows: readonly ExtraRow[] | undefined, getRowId: (row: TRow) => string): readonly ({
+    key: string;
+    row: TRow;
+} | TableExtraEntry)[];
 
 // @public
 export interface InsertPatch<TRow> {
@@ -2440,10 +2272,22 @@ export function isBetweenFilterOp(op: string): boolean;
 export function isBooleanEditor(editor: CellEditor | null): boolean;
 
 // @public
+export function isBrowser(): boolean;
+
+// @public
 export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow): boolean;
 
 // @public
 export function isColumnGroup<TRow>(column: ColumnInput<TRow>): column is ColumnGroupDef<TRow>;
+
+// @public
+export function isColumnGroupRenderKey(key: string): boolean;
+
+// @public
+export function isColumnGroupStubKey(key: string): boolean;
+
+// @public
+export function isColumnGroupSummaryKey(key: string): boolean;
 
 // @public
 export function isCountFilterComplete(state: CountFilterState): boolean;
@@ -2455,19 +2299,28 @@ export function isCustomEditor(editor: CellEditor | null): editor is {
 };
 
 // @public
-export function isDeclarativeFilters<TRow>(filters: readonly FilterDef<TRow>[] | ReactNode): filters is readonly FilterDef<TRow>[];
+export function isDeclarativeFilters<TRow>(filters: readonly FilterDef<TRow>[] | DisplayValue): filters is readonly FilterDef<TRow>[];
 
 // @public
 export function isDraftChecked(draft: string): boolean;
 
 // @public
+export function isEmptyFilterValue(value: FilterValue): boolean;
+
+// @public
 export function isEmptyRowValue(value: unknown): boolean;
+
+// @public
+export function isExtraEntry(entry: object): entry is TableExtraEntry;
 
 // @public
 export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is QueryFilterGroup;
 
 // @public
 export function isFilterOpKey(key: string): boolean;
+
+// @public
+export function isFormulaError(value: FormulaValue): boolean;
 
 // @public
 export function isInCellRange(range: CellRange | null, cell: GridCell): boolean;
@@ -2485,7 +2338,13 @@ export function isMultiSelectEditor(editor: CellEditor | null): editor is {
 export function isPinnedSummaryRowId(id: string): boolean;
 
 // @public
+export function isPivotReady(config: PivotConfig): boolean;
+
+// @public
 export function isRelativeDateToken(raw: string | undefined): boolean;
+
+// @public
+export function isRtlElement(element: HTMLElement | null): boolean;
 
 // @public
 export function isSelectEditor(editor: CellEditor | null): editor is {
@@ -2497,37 +2356,34 @@ export function isSelectEditor(editor: CellEditor | null): editor is {
 export function isSingleCell(range: CellRange | null): boolean;
 
 // @public
+export function isStreamLive(status: RowPatchStreamStatus): boolean;
+
+// @public
+export function isStreamSettled(status: RowPatchStreamStatus): boolean;
+
+// @public
 export function isValuelessFilterOp(op: string): boolean;
 
 // @public
 export function joinRelativeToken(preset: RelativePreset, n: number): RelativeDateToken;
 
 // @public
-export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
-
-// @public
-export interface LazyChildrenState<TRow> {
-    failedIds: ReadonlySet<string>;
-    loadIfNeeded: (row: TRow) => void;
-    loadingIds: ReadonlySet<string>;
+export interface KeyedVirtualization {
+    enabled: boolean;
+    indices: readonly number[];
+    measureElement?: (node: Element | null) => void;
+    paddingBottom: number;
+    paddingTop: number;
 }
 
 // @public
 export function listFilterValues(value: FilterValue): string[];
 
 // @public
-export function liveRowChanged<TRow>(input: {
-    opened: TRow;
-    current: TRow;
-    column: EditableColumnLike<TRow>;
-    rowVersion?: (row: TRow) => string | number;
-}): boolean;
+export function localizedColumnPath(column: Pick<ColumnModel<unknown>, "key" | "i18n">, locale: string | undefined): string;
 
 // @public
-export function localizedColumnPath(column: Pick<ColumnDef<unknown>, "key" | "i18n">, locale: string | undefined): string;
-
-// @public
-export function makeExportCsvHandler<TRow>(exportCsv: boolean | ExportCsvOptions<TRow> | undefined, source: TableSource<TRow>, columns: readonly ColumnDef<TRow>[], context?: ExportContext<TRow>, host?: FeatureHostState): ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined;
+export function makeExportCsvHandler<TRow>(exportCsv: boolean | ExportCsvOptions<TRow> | undefined, source: TableSource<TRow>, columns: readonly ColumnMetadata<TRow>[], context?: ExportContext<TRow>, host?: FeatureHostState): ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined;
 
 // @public
 export function marriedOrderHolds<TRow>(nextOrder: readonly string[], groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>): boolean;
@@ -2551,17 +2407,35 @@ export function matrixToCsv(table: {
 }): string;
 
 // @public
+export const MAX_COLUMN_WIDTH = 4000;
+
+// @public
+export const MAX_LIMIT = 500;
+
+// @public
 export function measureColumnWidth(root: Element | null, key: string): number | null;
+
+// @public
+export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[]): string;
 
 // @internal
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
 
 // @public
+export const MIN_COLUMN_WIDTH = 60;
+
+// @public
+export const MOBILE_BREAKPOINT_PX = 768;
+
+// @public
 export interface MobileCardField<TRow> {
-    column: ColumnDef<TRow>;
+    column: ColumnMetadata<TRow>;
     label: string | undefined;
-    value: ReactNode;
+    value: DisplayValue;
 }
+
+// @public
+export function mobileCardListStyle(maxHeight: number | undefined): CssProperties | undefined;
 
 // @public
 export interface MobileCardModel<TRow> {
@@ -2572,59 +2446,63 @@ export interface MobileCardModel<TRow> {
 }
 
 // @public
-export type MobileCardRenderer<TRow> = (row: TRow, card: MobileCardModel<TRow>) => ReactNode;
+export type MobileCardRenderer<TRow> = (row: TRow, card: MobileCardModel<TRow>) => DisplayValue;
+
+// @public
+export function moveField(config: PivotConfig, zone: PivotZone, index: number, delta: -1 | 1): PivotConfig;
 
 // @public
 export function moveGridFocus(from: GridCell, move: GridFocusMove, bounds: GridBounds, covered?: (cell: GridCell) => boolean): GridCell;
 
 // @public
+export function moveGroupingKey(keys: readonly string[], key: string, insertionIndex: number): string[];
+
+// @public
+export function moveGroupingKeyBy(keys: readonly string[], key: string, delta: -1 | 1): string[];
+
+// @public
 export const MULTI_SEPARATOR = "";
 
 // @public
-export interface MultiSelectEditorCheckboxProps {
-    readonly checked: boolean;
-    readonly focusRef?: (node: {
-        focus: () => void;
-    } | null) => void;
-    readonly label: ReactNode;
-    readonly onKeyDown: (event: KeyboardEvent_2) => void;
-    readonly onToggle: () => void;
-    readonly value: string;
+export interface NeutralFeatureHost<TRow = unknown> {
+    readonly __row?: (row: TRow) => void;
+    onDispose(cleanup: () => void): void;
 }
 
 // @public
-export function MultiSelectEditorChrome(input: Readonly<MultiSelectEditorChromeProps>): ReactNode;
-
-// @public
-export interface MultiSelectEditorChromeProps {
-    readonly ctrl: EditableCellEditorCtrl;
-    readonly label: string;
-    readonly onKeyDown: (event: KeyboardEvent_2) => void;
-    readonly slots: MultiSelectEditorSlots;
+export interface NeutralTable<TRow = unknown> {
+    // (undocumented)
+    readonly capabilities: TableSourceCapabilities;
+    // (undocumented)
+    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    // (undocumented)
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    // (undocumented)
+    readonly dispose: () => void;
+    // (undocumented)
+    readonly operations: Readonly<Record<string, boolean>>;
+    // (undocumented)
+    readonly revisions: TableRevisions;
+    // (undocumented)
+    readonly rowByKey: (rowKey: string) => TRow | undefined;
+    // (undocumented)
+    readonly rowKey: (row: TRow) => string;
+    // (undocumented)
+    readonly rows: (scope: TableRowScope) => readonly TRow[];
+    // (undocumented)
+    readonly subscribe: TableEngine<TRow>["subscribe"];
+    // (undocumented)
+    readonly tableId: string;
 }
 
 // @public
-export interface MultiSelectEditorSlots {
-    readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
+export interface NeutralTableBinding<TRow = unknown> {
+    readonly operations?: () => Readonly<Record<string, boolean>>;
+    readonly visibleRows?: () => readonly TRow[];
 }
 
 // @public
-export interface NestedTable {
-    label?: string;
-    table: (defaults: NestedTableDefaults) => ReactNode;
-}
-
-// @public
-export interface NestedTableDefaults {
-    density: Density | undefined;
-    labels: TableLabels | undefined;
-    searchable: boolean;
-    tableLabel: string;
-    urlSync: false;
-}
-
-// @public
-export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
+export function nextPinSide(current: PinnedSide): PinnedSide;
 
 // @public
 export function nextSort(current: Partial<SortLevel>, key: string): Partial<SortLevel>;
@@ -2655,17 +2533,26 @@ export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "betwe
 export type NumberOp = (typeof NUMBER_OPS)[number];
 
 // @public
-export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
+export function openRowPatchStream(options: OpenRowPatchStreamOptions): RowPatchStreamHandle;
+
+// @public
+export interface OpenRowPatchStreamOptions {
+    createEventSource?: (url: string) => StreamSocket | undefined;
+    createWebSocket?: (url: string, protocols?: string | string[]) => StreamSocket | undefined;
+    event?: string;
+    eventSource?: string;
+    onMessage: (frame: string) => void;
+    onStatus: (status: RowPatchStreamStatus, error: Error | null) => void;
+    protocols?: string | string[];
+    reconnect?: RowPatchStreamReconnect;
+    websocket?: string;
+}
+
+// @public
+export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
 
 // @public
 export const PAGE_SIZE_OPTIONS: readonly [10, 25, 50, 100];
-
-// @public
-export type PageSelector<TRow, TPage> = (page: TPage) => {
-    rows: readonly TRow[];
-    total?: number;
-    facets?: FacetMap;
-};
 
 // @public
 export function pageSizeOptions(limit: number | readonly number[], sizes?: readonly number[]): readonly number[];
@@ -2689,10 +2576,61 @@ export interface PaginationInfo {
 }
 
 // @public
+export type PaginationItem = number | "ellipsis";
+
+// @public
+export function paginationItems(page: number, totalPages: number, siblings?: number): PaginationItem[];
+
+// @public
 export type PaginationMode = "infinite" | "paged" | "auto";
 
 // @public
-export function parseBooleanChoice(value: FilterValue): BooleanChoice;
+export interface PaginationSlot {
+    item: PaginationItem;
+    key: string;
+}
+
+// @public
+export function paginationSlots(page: number, totalPages: number, siblings?: number): PaginationSlot[];
+
+// @public (undocumented)
+export const PARAM_COL_HIDDEN = "colHide";
+
+// @public
+export const PARAM_DENSITY = "density";
+
+// @public
+export const PARAM_FIND = "find";
+
+// @public
+export const PARAM_FORMULA = "formula";
+
+// @public
+export const PARAM_GROUP_AGGREGATES = "groupAgg";
+
+// @public
+export const PARAM_GROUP_BY = "groupBy";
+
+// @public
+export const PARAM_GROUP_CLOSED = "groupClosed";
+
+// @public (undocumented)
+export const PARAM_LIMIT = "limit";
+
+// @public (undocumented)
+export const PARAM_PAGE = "page";
+
+// @public
+export const PARAM_PIVOT = "pivot";
+
+// @public (undocumented)
+export const PARAM_SEARCH = "q";
+
+// @public (undocumented)
+export const PARAM_SORT_BY = "sortBy";
+
+// @public (undocumented)
+export const PARAM_SORT_DIR = "sortDir";
 
 // @public
 export function parseCellEditValue(editor: CellEditor, draft: string): unknown;
@@ -2705,6 +2643,9 @@ export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined;
 
 // @public
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
+
+// @public
+export function parseFormula(text: string): ParseResult;
 
 // @public
 export function parseGroupAggregateOverrides(value: string | null | undefined): GroupAggregateOverrides;
@@ -2728,6 +2669,19 @@ export function parsePxWidth(width: number | string | undefined): number | undef
 export function parseRelativeToken(raw: string | undefined): RelativeDateToken | undefined;
 
 // @public
+export interface ParseResult {
+    readonly message?: string;
+    readonly node?: FormulaNode;
+    readonly ok: boolean;
+}
+
+// @public
+export function parseRowPatchFrame<TRow>(frame: string): readonly RowPatch<TRow>[];
+
+// @public
+export function parseTableUrlState(search: string, namespace: string): URLSearchParams;
+
+// @public
 export function parseTextOp(raw: FilterValue | undefined): TextOp;
 
 // @public
@@ -2742,18 +2696,12 @@ export function pasteRangeEdits<TRow>(options: PasteRangeOptions<TRow>): CellEdi
 
 // @public
 export interface PasteRangeOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     firstRowIndex?: number;
     range: CellRange;
     rows: readonly TRow[];
     text: string;
 }
-
-// @public
-export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
-
-// @public
-export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
 
 // @public
 export const PIN_Z: {
@@ -2765,10 +2713,19 @@ export const PIN_Z: {
 };
 
 // @public
+export function pinActionLabel(current: PinnedSide, labels: {
+    pinStart: string;
+    unpin: string;
+}): string;
+
+// @public
 export interface PinLeads {
     end?: number;
     start?: number;
 }
+
+// @public
+export const PINNED_BOTTOM_PART = "pinned-bottom";
 
 // @public
 export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
@@ -2778,6 +2735,9 @@ export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
 
 // @public
 export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
+
+// @public
+export const PINNED_TOP_PART = "pinned-top";
 
 // @public
 export interface PinnedCellStyle {
@@ -2791,10 +2751,35 @@ export interface PinnedCellStyle {
 export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, leads?: PinLeads): PinnedCellStyle | undefined;
 
 // @public
+export function pinnedColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number;
+
+// @public
+export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx: number, columnPinned: boolean): {
+    position?: "sticky";
+    top?: number;
+    bottom?: number;
+    zIndex?: number;
+};
+
+// @public
+export function pinnedRowPart(side: RowPinSide | undefined): "pinned-top" | "pinned-bottom" | undefined;
+
+// @public
 export interface PinnedRows<TRow = unknown> {
     readonly bottom?: readonly TRow[];
     readonly top?: readonly TRow[];
 }
+
+// @public
+export function pinnedRowSticky(side: RowPinSide | undefined, sticky: boolean, headerOffsetPx: number): ReturnType<typeof pinnedRowStickyStyle> | undefined;
+
+// @public
+export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): {
+    position: "sticky";
+    top?: number;
+    bottom?: number;
+    zIndex: number;
+};
 
 // @public
 export type PinnedSide = PinSide | undefined;
@@ -2827,6 +2812,95 @@ export interface PinOffset {
 
 // @public
 export type PinSide = "start" | "end";
+
+// @public
+export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
+
+// @public
+export const PIVOT_BLANK = "—";
+
+// @public
+export const PIVOT_GRAND_TOTAL_KEY = "grand";
+
+// @public
+export const PIVOT_ZONES: readonly PivotZone[];
+
+// @public
+export interface PivotColumnLeaf {
+    key: string;
+    measure: PivotMeasure;
+    path: readonly string[];
+    total: boolean;
+}
+
+// @public
+export interface PivotColumnNode {
+    children: readonly PivotColumnNode[];
+    label: string;
+    path: readonly string[];
+    span: number;
+}
+
+// @public
+export interface PivotConfig {
+    columns: readonly string[];
+    grandTotals?: boolean;
+    measures: readonly PivotMeasure[];
+    rows: readonly string[];
+    subtotals?: boolean;
+}
+
+// @public
+export interface PivotField {
+    key: string;
+    label: string;
+}
+
+// @public
+export interface PivotMeasure {
+    agg: AggregateName | (string & {}) | Aggregator;
+    key: string;
+    label?: string;
+}
+
+// @public
+export interface PivotOptions<TRow> {
+    aggregators?: ReadonlyMap<string, Aggregator>;
+    collapsed?: ReadonlySet<string>;
+    columns?: readonly ColumnModel<TRow>[];
+    format?: (value: DisplayValue, measure: PivotMeasure) => DisplayValue;
+}
+
+// @public
+export interface PivotResult {
+    columnLeaves: readonly PivotColumnLeaf[];
+    columnTree: readonly PivotColumnNode[];
+    rowDepth: number;
+    rows: readonly PivotRow[];
+}
+
+// @public
+export interface PivotRow {
+    cells: readonly DisplayValue[];
+    count: number;
+    depth: number;
+    key: string;
+    kind: PivotRowKind;
+    label: string;
+    path: readonly string[];
+}
+
+// @public
+export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
+
+// @public
+export interface PivotUrlState {
+    collapsed: readonly string[];
+    config: PivotConfig;
+}
+
+// @public
+export type PivotZone = "rows" | "columns" | "measures";
 
 // @public
 export type Props = Record<string, unknown>;
@@ -2873,6 +2947,22 @@ export interface QueryGroupRow<TRow = unknown> {
 export interface QueryGroupsPage<TRow = unknown> {
     groups: readonly QueryGroupRow<TRow>[];
     total?: number;
+}
+
+// @public
+export interface QueryPivotPage {
+    columns: readonly (readonly string[])[];
+    rows: readonly QueryPivotRow[];
+    total?: QueryPivotRow;
+}
+
+// @public
+export interface QueryPivotRow {
+    cells: readonly unknown[];
+    count?: number;
+    path: readonly string[];
+    subtotal?: boolean;
+    totals?: readonly unknown[];
 }
 
 // @public
@@ -2927,29 +3017,7 @@ export const RANGE_SUFFIXES: {
 };
 
 // @public
-export interface RangeFieldWidget {
-    a: string;
-    arity: RangeOpArity;
-    b: string;
-    inputType: "date" | "number" | "text";
-    label: string;
-    op: RangeOp | undefined;
-    opLabelKeys: RangeOpLabelKeys;
-    ops: readonly RangeOp[];
-    setOp: (op: RangeOp | undefined) => void;
-    write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
-}
-
-// @public
 export type RangeOp = NumberOp | DateOp;
-
-// @public
-export type RangeOpArity = "none" | "one" | "two" | "list";
-
-// @public
-export type RangeOpLabelKeys = typeof NUMBER_OP_LABEL_KEYS | (typeof DATE_OP_LABEL_KEYS & {
-    readonly eq: "opOn";
-});
 
 // @public
 export interface RangeWidgetState {
@@ -2959,37 +3027,49 @@ export interface RangeWidgetState {
 }
 
 // @public
-export function readCellValue<TRow>(row: TRow, column: ColumnDef<TRow>): unknown;
+export function readClipboardText(): Promise<string | null>;
 
 // @public
-export function readClipboardText(): Promise<string | null>;
+export function readCollapsedGroups(params: URLSearchParams, prefix?: string): string[] | undefined;
+
+// @public
+export function readColumnLayout(params: URLSearchParams, prefix?: string): ColumnLayoutState | undefined;
+
+// @public
+export function readEditableCellValue<TRow>(row: TRow, column: EditableColumnLike<TRow>, host?: FeatureHostState): string;
+
+// @public
+export function readExtra(params: URLSearchParams, numberKeys: readonly string[], arrayKeys: readonly string[], prefix?: string): ExtraFilters;
 
 // @public
 export function readFilterOp(extra: ExtraFilters, key: string): FilterValue | undefined;
 
 // @public
+export function readFilterTreeParam(params: URLSearchParams, prefix?: string): QueryFilterGroup | undefined;
+
+// @public
+export function readLimit(params: URLSearchParams, fallback: number, prefix?: string): number;
+
+// @public
 export function readMultiDraft(draft: string): string[];
+
+// @public
+export function readPage(params: URLSearchParams, fallback: number, prefix?: string): number;
 
 // @public
 export function readRangeWidget(extra: ExtraFilters, lowKey: string, highKey: string, opKey?: string, listKey?: string, flavour?: "number" | "date"): RangeWidgetState;
 
 // @public
-export interface ReconcileLiveEdit<TRow> {
-    active: {
-        rowId: string;
-        columnKey: string;
-    } | null;
-    columns: readonly EditableColumnLike<TRow>[];
-    draft: string;
-    keep: (row: TRow) => void;
-    onEditConflict?: EditConflictHandler<TRow>;
-    openedRow: TRow | undefined;
-    policy: EditConflictPolicy;
-    rowKey: (row: TRow) => string;
-    rows: readonly TRow[];
-    rowVersion?: (row: TRow) => string | number;
-    take: (row: TRow, incomingValue: string) => void;
-}
+export function readRowPins(params: URLSearchParams, prefix?: string): RowPinState | undefined;
+
+// @public
+export function readSortDir(params: URLSearchParams, prefix?: string): SortDirection | undefined;
+
+// @public
+export function readSortLevels(params: URLSearchParams, prefix?: string): {
+    key: string;
+    dir: SortDirection;
+}[];
 
 // @public
 export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
@@ -3034,7 +3114,13 @@ export function relativeTokenLabel(raw: string, labels: {
 }): string;
 
 // @public
+export function removeField(config: PivotConfig, zone: PivotZone, index: number): PivotConfig;
+
+// @public
 export function removeFilterTreeNode(tree: QueryFilterGroup, path: readonly number[]): QueryFilterGroup | undefined;
+
+// @public
+export function removeGroupingKey(keys: readonly string[], key: string): string[];
 
 // @public
 export interface RemovePatch {
@@ -3046,46 +3132,71 @@ export interface RemovePatch {
 export function removeRow(id: string): RemovePatch;
 
 // @public
-export function renderRegisteredFilter<TRow>(def: FilterDef<TRow>, source: FilterFormSource<TRow>, labels: Required<TableLabels>, registry: FilterTypeRegistry, className?: string): ReactElement | undefined;
+export function renderRegisteredFilter<TRow>(def: FilterDef<TRow>, source: FilterFormSource<TRow>, labels: Required<TableLabels>, registry: FilterTypeRegistry, className?: string): DisplayValue | undefined;
 
 // @public
 export const REORDER_COLUMN_KEY = "reorder";
 
 // @public
+export const REORDER_COLUMN_WIDTH = 64;
+
+// @public
 export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode): QueryFilterGroup;
+
+// @public
+export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseColumnLayoutResult<TRow>): void;
+
+// @public
+export function resetDevWarnings(): void;
+
+// @public
+export function resolveAssembly<TRow>(partial?: Partial<AssemblyFns<TRow>>): AssemblyFns<TRow>;
 
 // @public
 export function resolveCellEditor(column: EditableColumnLike, host?: FeatureHostState): CellEditor | null;
 
 // @public
-export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
-
-// @public
-export function resolveColumnHeader<TRow>(column: ColumnDef<TRow>, controller: ColumnHeaderController): ReactNode;
-
-// @public
-export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
+export function resolveColumnPath<TRow>(column: ColumnMetadata<TRow>, locale?: string): string;
 
 // @public
 export function resolveColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number | undefined;
 
 // @public
-export interface ResolvedFilterOptions {
-    loading: boolean;
-    options: readonly FilterOption[];
+export function resolveCommitValue<TRow>(options: {
+    commit: CellEditCommit;
+    rows: readonly TRow[];
+    columns: readonly EditableColumnLike<TRow>[];
+    rowKey: (row: TRow) => string;
+    featureHost?: FeatureHostState;
+}): {
+    row: TRow;
+    column: EditableColumnLike<TRow>;
+    value: unknown;
+} | null;
+
+// @public
+export function resolveContextTarget<TRow>(from: Element, rowFor: (rowId: string) => TRow | undefined): ResolvedContextTarget<TRow> | null;
+
+// @public
+export interface ResolvedContextTarget<TRow> {
+    element: HTMLElement;
+    target: ContextMenuTarget<TRow>;
 }
+
+// @public
+export function resolveDisabledReason(reason: string | undefined): string | undefined;
 
 // @public
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 // @public
-export function resolveExportColumns<TRow>(scope: ExportColumnScope | undefined, visible: readonly ColumnDef<TRow>[], all: readonly ColumnDef<TRow>[] | undefined): ColumnDef<TRow>[];
+export function resolveExportColumns<TRow>(scope: ExportColumnScope | undefined, visible: readonly ColumnMetadata<TRow>[], all: readonly ColumnMetadata<TRow>[] | undefined): ColumnMetadata<TRow>[];
 
 // @public
 export function resolveExportCsv<TRow = unknown>(value: ExportCsvProp<TRow>, host?: FeatureHostState): ExportCsvOptions<TRow> | null;
 
 // @public
-export function resolveFilterDefs<TRow>(columns: readonly ColumnDef<TRow>[], filters: readonly FilterDef<TRow>[] | undefined, locale?: string): FilterDef<TRow>[];
+export function resolveFilterDefs<TRow>(columns: readonly ColumnMetadata<TRow>[], filters: readonly FilterDef<TRow>[] | undefined, locale?: string): FilterDef<TRow>[];
 
 // @public
 export function resolveFilterMode(mode?: FilterChromeMode, headerFilters?: boolean): FilterChromeMode;
@@ -3109,6 +3220,35 @@ export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
 
 // @public
+export function resolveRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): number | undefined;
+
+// @public
+export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CssProperties | undefined;
+
+// @public
+export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
+
+// @public
+export interface ResponsiveColumns<TCol extends ColumnMetadata<any> = ColumnMetadata<any>> {
+    columns: TCol[];
+    dropped: readonly string[];
+}
+
+// @public
+export function responsiveColumns<TCol extends ColumnMetadata<any>>(input: ResponsiveFit<TCol>): ResponsiveColumns<TCol>;
+
+// @public
+export interface ResponsiveFit<TCol extends ColumnMetadata<any> = ColumnMetadata<any>> {
+    available: number | undefined;
+    columns: TCol[];
+    extra?: number;
+    widths?: Readonly<Record<string, number>>;
+}
+
+// @public
+export function revisionToken(revisions: TableRevisions): string;
+
+// @public
 export function routerUrlAdapter(input: RouterUrlAdapterOptions): UrlStateAdapter;
 
 // @public
@@ -3120,11 +3260,14 @@ export interface RouterUrlAdapterOptions {
 }
 
 // @public
+export const ROW_ID_ATTRIBUTE = "data-row-id";
+
+// @public
 export interface RowAction<TRow> {
     color?: string;
     confirm?: ActionConfirm<TRow>;
     disabledReason?: (row: TRow) => string | undefined;
-    icon?: ReactNode;
+    icon?: DisplayValue;
     isDisabled?: (row: TRow) => boolean;
     isHidden?: (row: TRow) => boolean;
     key: string;
@@ -3144,7 +3287,25 @@ export interface RowActionsRenderContext<TRow> {
 }
 
 // @public
-export type RowActionsRenderer<TRow> = (ctx: RowActionsRenderContext<TRow>) => ReactNode;
+export type RowActionsRenderer<TRow> = (ctx: RowActionsRenderContext<TRow>) => DisplayValue;
+
+// @public
+export interface RowClickProps {
+    "data-adapttable-row": "";
+    onClick: (event: MouseEvent & {
+        currentTarget: HTMLElement;
+    }) => void;
+    onKeyDown: (event: KeyboardEvent & {
+        currentTarget: HTMLElement;
+    }) => void;
+    style: {
+        cursor: "pointer";
+    };
+    tabIndex: 0 | -1;
+}
+
+// @public
+export function rowClickProps<TRow>(row: TRow, onRowClick: ((row: TRow) => void) | undefined, index?: number): RowClickProps | undefined;
 
 // @public
 export type RowDropPosition = "before" | "inside" | "after";
@@ -3153,38 +3314,12 @@ export type RowDropPosition = "before" | "inside" | "after";
 export function rowDropPosition(clientY: number, bounds: Pick<DOMRect, "top" | "height">): RowDropPosition;
 
 // @public
-export type RowEditDrafts = Readonly<Record<string, string>>;
+export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
 // @public
-export interface RowEditingState<TRow> {
-    activeRowId: string | null;
-    begin: (row: TRow, rowId: string) => void;
-    cancel: () => void;
-    draftFor: (columnKey: string) => string;
-    drafts: RowEditDrafts;
-    featureHost?: FeatureHostState;
-    isDirty: boolean;
-    isEditing: (rowId: string) => boolean;
-    save: () => void;
-    setDraft: (columnKey: string, value: string) => void;
-    signature: string;
-}
-
-// @public
-export interface RowElementProps extends Props {
-    "aria-selected"?: boolean;
-    "data-adapttable-part": "row";
-    "data-index": number;
-    "data-row-id": string;
-    role: string;
-}
-
-// @public
-export interface RowExpansionState {
-    expandedIds: ReadonlySet<string>;
-    isExpanded: (id: string) => boolean;
-    toggle: (id: string) => void;
-}
+export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
+    readonly key: string;
+}[]): string;
 
 // @public
 export interface RowGroupLevel {
@@ -3205,6 +3340,9 @@ export interface RowGroupRef {
 
 // @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
+
+// @public
+export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
 
 // @public
 export type RowMoveConfirmHandler<TRow> = (request: RowMoveRequest<TRow>) => Promise<boolean>;
@@ -3245,21 +3383,6 @@ export interface RowMoveTarget<TRow> {
 }
 
 // @public
-export interface RowMutationHandlers<TRow> {
-    confirmDeleteRow?: boolean;
-    onAddRow?: () => unknown;
-    onDeleteRow?: (row: TRow) => unknown;
-    onDuplicateRow?: (row: TRow) => unknown;
-}
-
-// @public
-export interface RowMutationsState<TRow> {
-    actions: readonly RowAction<TRow>[];
-    addRow: () => void;
-    canAdd: boolean;
-}
-
-// @public
 export interface RowPairMeasurer {
     detail: (index: number) => (node: Element | null) => void;
     row: (index: number) => (node: Element | null) => void;
@@ -3297,23 +3420,42 @@ export interface RowPatchLog<TRow> {
 export function rowPatchLog<TRow>(rows: readonly TRow[]): RowPatchLog<TRow> | undefined;
 
 // @public
-export interface RowPinLabels {
-    pinToBottom: string;
-    pinToTop: string;
-    unpinRow: string;
+export interface RowPatchStreamHandle {
+    close: () => void;
+    readonly status: RowPatchStreamStatus;
 }
 
 // @public
-export interface RowPinningState<TRow> {
-    actions: readonly RowAction<TRow>[];
-    pin: (rowId: string, side: RowPinSide) => void;
+export interface RowPatchStreamReconnect {
+    delayMs?: number;
+    maxAttempts?: number;
+}
+
+// @public
+export type RowPatchStreamStatus =
+/** No url wired, or `enabled: false`. Nothing is open and nothing will be. */
+"idle" |
+/** A socket is being opened for the first time. */
+"connecting" |
+/** Open and receiving. */
+"open" |
+/** Dropped, and a retry is scheduled. */
+"reconnecting" |
+/** Given up — the retry budget is spent, or the environment has no socket. */
+"error" |
+/** The host closed it. Final: nothing reopens on its own. */
+"closed";
+
+// @public
+export interface RowPinLookup {
     sideOf: (rowId: string) => RowPinSide | undefined;
-    state: RowPinState;
-    unpin: (rowId: string) => void;
 }
 
 // @public
 export type RowPinSide = "top" | "bottom";
+
+// @public
+export function rowPinSignature(pinning: RowPinLookup | undefined, rowId: string): string | null;
 
 // @public
 export interface RowPinState {
@@ -3322,44 +3464,20 @@ export interface RowPinState {
 }
 
 // @public
-export type RowReorderDecision<TRow> = {
-    readonly kind: "reorder";
-    readonly from: number;
-    readonly to: number;
-    readonly row: TRow;
-} | {
-    readonly kind: "move";
-    readonly request: RowMoveRequest<TRow>;
-} | {
-    readonly kind: "reject";
-    readonly message: string;
-};
-
-// @public
-export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
-
-// @public
-export interface RowReorderLabels {
-    cancel?: string;
-    confirmRowMove?: string;
-    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
-    confirmRowMoveTitle?: string;
-    moveRejectedCycle?: string;
-    moveRejectedPolicyNever?: string;
-    moveRejectedSorted?: string;
-    moveRowDown: string;
-    moveRowUp: string;
-    moveToGroup?: string;
-    moveUnavailable?: string;
-    moveUnder?: string;
-    reorderRow: string;
-    rootLevel?: string;
-    rowLifted: (position: number) => string;
-    rowMoved: (from: number, to: number) => string;
-    rowMovedToGroup?: (group: string) => string;
-    rowMovedUnder?: (parent: string) => string;
-    rowReorderCancelled: string;
+export interface RowReorderDigest {
+    hostConfirmPending?: boolean;
+    isLifted: (rowId: string) => boolean;
+    lifted: unknown;
+    overIndex: number | null;
+    overPosition?: string | null;
+    pendingMove: unknown;
 }
+
+// @public
+export function rowReorderDropStyle(attrs: {
+    "data-dragging"?: "";
+    "data-drop"?: "before" | "inside" | "after";
+} | undefined): CssProperties;
 
 // @public
 export interface RowReorderOptions<TRow> {
@@ -3370,23 +3488,35 @@ export interface RowReorderOptions<TRow> {
 }
 
 // @public
+export function rowReorderSignature(reorder: RowReorderDigest | undefined, rowId: string, localIndex: number): string | null;
+
+// @public
 export function rowsExcludingFilter<TRow>(rows: readonly TRow[], extra: ExtraFilters, key: string, filterFn: (row: TRow, extra: ExtraFilters) => boolean): readonly TRow[];
 
 // @public
-export function rowsToCsv<TRow>(rows: readonly TRow[], columns: readonly ColumnDef<TRow>[], options?: RowsToCsvOptions<TRow>): string;
+export function rowSourceIndex(entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">): number;
+
+// @public
+export function rowSpanSignature<TRow>(cells: readonly BodyCell<TRow>[] | undefined): string;
+
+// @public
+export function rowsToCsv<TRow>(rows: readonly TRow[], columns: readonly ColumnMetadata<TRow>[], options?: RowsToCsvOptions<TRow>): string;
 
 // @public
 export interface RowsToCsvOptions<TRow> {
     delimiter?: string;
     escapeFormulas?: boolean;
-    getValue?: (row: TRow, column: ColumnDef<TRow>) => unknown;
+    getValue?: (row: TRow, column: ColumnMetadata<TRow>) => unknown;
 }
 
 // @public
-export type RowStyle<TRow> = (row: TRow, index: number) => CSSProperties | undefined;
+export type RowStyle<TRow> = (row: TRow, index: number) => CssProperties | undefined;
 
 // @public
 export function rowStyleArmed(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
+
+// @public
+export function rowStyleSignature(style: CssProperties | undefined): string;
 
 // @public
 export type RowTreeMoveHandler<TRow> = (row: TRow, fromParent: RowTreeParentRef<TRow>, toParent: RowTreeParentRef<TRow>, position: number) => unknown;
@@ -3399,10 +3529,16 @@ export interface RowTreeParentRef<TRow> {
 }
 
 // @public
-export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
+export function runRowAction<TRow>(action: RowAction<TRow>, row: TRow, confirm: ConfirmHandler, cancelLabel: string): void;
 
 // @public
-export function runRowAction<TRow>(action: RowAction<TRow>, row: TRow, confirm: ConfirmHandler, cancelLabel: string): void;
+export function runWithFeatureHost<T>(host: FeatureHostState | undefined, fn: () => T): T;
+
+// @public
+export function safeLocalStorage(): Pick<Storage, "getItem" | "setItem" | "removeItem"> | undefined;
+
+// @public
+export function safeSheetName(name: string): string;
 
 // @public
 export function sameGridCell(a: GridCell | null, b: GridCell | null): boolean;
@@ -3411,74 +3547,7 @@ export function sameGridCell(a: GridCell | null, b: GridCell | null): boolean;
 export function sanitizeCountFilterParams<P extends Record<string, unknown>>(params: P, buckets: readonly string[]): P;
 
 // @public
-export const SAVED_VIEW_VERSION = 2;
-
-// @public
-export interface SavedView {
-    isDefault?: boolean;
-    name: string;
-    readOnly?: boolean;
-    search: string;
-    version?: number;
-    visibility?: SavedViewVisibility;
-}
-
-// @public
-export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
-
-// @public
-export interface SavedViewsStore {
-    list: () => Promise<readonly SavedView[]>;
-    remove: (name: string) => Promise<void>;
-    reorder?: (names: readonly string[]) => Promise<void>;
-    save: (view: SavedView) => Promise<void>;
-}
-
-// @public
-export type SavedViewVisibility = "private" | "team";
-
-// @public
-export function scalarFilterText(value: FilterValue): string;
-
-// @public
 export const SEARCH_DEBOUNCE_MS = 300;
-
-// @public
-export interface SearchInputElementProps extends Props {
-    "aria-label": string;
-    onChange: (event: {
-        currentTarget: {
-            value: string;
-        };
-    }) => void;
-    placeholder: string;
-    role: string;
-    type: string;
-    value: string;
-}
-
-// @public
-export interface SearchInputState {
-    setValue: (next: string) => void;
-    value: string;
-}
-
-// @public
-export interface SelectionState {
-    acrossPages: boolean;
-    allMatching: boolean;
-    clear: () => void;
-    headerState: HeaderSelectionState;
-    isSelected: (id: string) => boolean;
-    replace: (ids: readonly string[] | undefined) => void;
-    selectAllMatching: () => void;
-    selectedCount: number;
-    selectedIds: ReadonlySet<string>;
-    toggle: (id: string) => void;
-    toggleAll: () => void;
-    toggleGroupLeaves: (leafIds: readonly string[]) => void;
-    visibleIds: string[];
-}
 
 // @public
 export interface SelectionStats {
@@ -3495,7 +3564,7 @@ export function selectionStats<TRow>(options: SelectionStatsOptions<TRow>): Sele
 
 // @public
 export interface SelectionStatsOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     enabled?: boolean;
     firstRowIndex?: number;
     range: CellRange | null;
@@ -3506,7 +3575,16 @@ export interface SelectionStatsOptions<TRow> {
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;
 
 // @public
+export function serializeFormulaColumns(specs: readonly FormulaColumnSpec[]): string;
+
+// @public
 export function serializeGroupAggregateOverrides(overrides: GroupAggregateOverrides): string | undefined;
+
+// @public
+export function serializePivot(config: PivotConfig): string;
+
+// @public
+export function serializePivotState(state: PivotUrlState): string;
 
 // @public
 export function serverGroupEntries<TRow>(options: ServerGroupEntriesOptions<TRow>): GroupedFlatEntry<TRow>[];
@@ -3522,54 +3600,39 @@ export interface ServerGroupEntriesOptions<TRow> {
 }
 
 // @public
-export const SESSION_ATTR = "data-adapttable-header-filter";
+export interface ServerPivotOptions {
+    config: PivotConfig;
+    format?: (value: DisplayValue, measure: PivotConfig["measures"][number]) => DisplayValue;
+}
+
+// @public
+export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOptions): PivotResult;
 
 // @public
 export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly number[], combinator: QueryFilterGroup["combinator"]): QueryFilterGroup;
 
 // @public
-export interface Shortcut {
-    chord: string;
-    command: string;
-}
+export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
+
+// @public
+export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
 // @public
 export function showSimpleFilterFields(headerFiltersOn: boolean, filterFields?: boolean): boolean;
 
 // @public
 export interface SidePanelEntry {
-    content: ReactNode;
     key: string;
-    label: string;
-}
-
-// @public
-export interface SidePanelOptions {
-    onOpenChange: (key: string | null) => void;
-    open: string | null;
-    panels: readonly SidePanelEntry[];
-    side?: "start" | "end";
 }
 
 // @public
 export function singleCellRange(cell: GridCell): CellRange;
 
 // @public
-export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
+export type Slot<TState> = DisplayValue | ((state: TState) => DisplayValue);
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
-
-// @public
-export interface SortButtonElementProps extends Props {
-    "aria-label": string;
-    "data-sort-index"?: number;
-    disabled: boolean;
-    onClick: (event?: {
-        shiftKey?: boolean;
-    }) => void;
-    type: "button";
-}
 
 // @public
 export interface SortByOption {
@@ -3596,7 +3659,7 @@ export function sortRowsMulti<TRow>(rows: readonly TRow[], levels: readonly Sort
 export function sourceCapabilities(source: CapabilitySource, support?: QuerySupport): TableSourceCapabilities;
 
 // @public
-export function spanningArmed<TRow>(columns: readonly ColumnDef<TRow>[], getCellSpan: GetCellSpan<TRow> | undefined): boolean;
+export function spanningArmed<TRow>(columns: readonly ColumnMetadata<TRow>[], getCellSpan: GetCellSpan<TRow> | undefined): boolean;
 
 // @public
 export function splitRelativeToken(raw: string): {
@@ -3608,95 +3671,32 @@ export function splitRelativeToken(raw: string): {
 export function stableKey(input: unknown): string;
 
 // @public
-export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMenuAction" | "registerContextMenuItems" | "__row">;
-
-// @public
-export interface StaticTableFeature {
-    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
-    readonly id: string;
-    readonly provider?: FeatureProviderContribution;
-    readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: StaticFeatureHost): void | (() => void);
-}
+export function stepEditableCell<TRow>(options: {
+    rows: readonly TRow[];
+    columns: readonly EditableColumnLike<TRow>[];
+    rowKey: (row: TRow) => string;
+    from: CellEditTarget;
+    direction?: 1 | -1;
+}): CellEditTarget | null;
 
 // @public
 export function stepMatch(index: number, total: number, step: number): number;
 
 // @public
+export interface StreamSocket {
+    addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
+    close(): void;
+    readonly readyState: number;
+    removeEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
+}
+
+// @public
+export interface StreamSocketEvent {
+    data?: unknown;
+}
+
+// @public
 export function summaryExportValues(cells: Readonly<Partial<Record<string, unknown>>> | undefined): Partial<Record<string, unknown>> | undefined;
-
-// @public
-export interface TableBodyCell<TRow> {
-    colSpan: number;
-    column: ColumnDef<TRow>;
-    columnIndex: number;
-    rowSpan: number;
-}
-
-// @public
-export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
-
-// @public
-export interface TableChrome<TRow> {
-    activeFilterCount: number;
-    allColumns: ColumnDef<TRow>[];
-    autoSizeColumn?: (key: string) => void;
-    autoSizeColumns?: () => void;
-    body: TableBodyRegion;
-    clearFilters: () => void;
-    columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-    columnLayout: UseColumnLayoutResult<TRow>;
-    confirm: ConfirmHandler;
-    detail?: {
-        render: (row: TRow) => ReactNode;
-        expansion: RowExpansionState;
-    };
-    droppedColumns: readonly string[];
-    editing?: EditableCellEditing<TRow>;
-    editingRows: readonly TRow[];
-    emptyVariant: "noData" | "noResults";
-    errorState?: TableErrorState;
-    featureNotices: readonly FeatureNotice[];
-    getRowId: (row: TRow) => string;
-    grouping?: {
-        groupBy: readonly string[];
-        collapsed: GroupCollapseState;
-        aggregates?: GroupAggregatesFn<TRow>;
-        entries: readonly GroupedFlatEntry<TRow>[];
-        setGroupBy: (key: GroupByInput) => void;
-        expandAll: () => void;
-        collapseAll: () => void;
-        collapseToDepth: (depth: number) => void;
-        showMore: (entry: {
-            scope: "groups" | "rows";
-            groupKey?: string;
-        }) => void;
-    };
-    groupingArmed: boolean;
-    groupingPanel?: GroupingPanelState;
-    hasRowActions: boolean;
-    hasRowReorder: boolean;
-    isMobile: boolean;
-    isPaged: boolean;
-    isRefreshing: boolean;
-    mergedChips: readonly ActiveFilterChip[];
-    pinnedRows?: PinnedRows<TRow>;
-    rootRef: RefObject<HTMLDivElement | null>;
-    rowActions?: RowAction<TRow>[];
-    rowMutations: RowMutationsState<TRow>;
-    rowPinning?: RowPinningState<TRow>;
-    rowReorder?: TableRowReorderState<TRow>;
-    showFooter: boolean;
-    source: TableSource<TRow>;
-    table: UseDataTableResult<TRow>;
-    tree?: {
-        entries: readonly TreeEntry<TRow>[];
-        allEntries?: readonly TreeEntry<TRow>[];
-        expansion: TreeExpansionState;
-        columnKey?: string;
-    };
-    treeShaped: boolean;
-}
 
 // @public
 export interface TableCommandOptions {
@@ -3715,19 +3715,44 @@ export interface TableCommandOptions {
 export function tableCommands(options: TableCommandOptions): Command[];
 
 // @public
-export interface TableEditHistoryProps<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    editHistory?: boolean | {
-        depth?: number;
-    };
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+export interface TableEngine<TRow = unknown> {
+    // (undocumented)
+    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
+        silent?: boolean;
+    }) => void;
+    // (undocumented)
+    readonly dispatch: (operation: TableOperation) => void;
+    // (undocumented)
+    readonly dispose: () => void;
+    // (undocumented)
+    readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
+    readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
+        readonly data?: readonly TRow[];
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+    }, options?: {
+        silent?: boolean;
+    }) => void;
+    // (undocumented)
+    readonly rowByKey: (rowKey: string) => TRow | undefined;
+    // (undocumented)
+    readonly rowKey: (row: TRow) => string;
+    // (undocumented)
+    readonly rows: (scope: TableRowScope) => readonly TRow[];
+    // (undocumented)
+    readonly snapshot: () => TableSnapshot<TRow>;
+    // (undocumented)
+    readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
+    // (undocumented)
+    readonly tableId: string;
 }
 
 // @public
-export interface TableElementProps extends Props {
-    "aria-label": string;
-    dir?: Direction;
-    role: string;
+export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewConfig<TRow>> {
+    readonly limit?: number;
+    readonly locale?: string;
+    readonly page?: number;
+    readonly paginationMode?: "paged" | "infinite";
 }
 
 // @public
@@ -3738,38 +3763,17 @@ export interface TableErrorState {
 }
 
 // @public
+export function tableErrorState<TRow>(source: TableSource<TRow>): TableErrorState | undefined;
+
+// @public
 export type TableExtraEntry = {
     kind: "separator";
     key: string;
 } | {
     kind: "fullWidth";
     key: string;
-    render?: () => ReactNode;
+    render?: () => DisplayValue;
 };
-
-// @public
-export interface TableFeature<TRow = unknown> {
-    apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
-    readonly id: string;
-    readonly provider?: FeatureProviderContribution;
-    readonly renders?: readonly FeatureRender<never>[];
-    setup?(host: TableFeatureHost<TRow>): void | (() => void);
-}
-
-// @public
-export interface TableFeatureHost<TRow = unknown> {
-    readonly __row?: (row: TRow) => void;
-    extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
-    onDispose(cleanup: () => void): void;
-    registerAggregator(name: string, aggregator: Aggregator): void;
-    registerColumnMenuAction(factory: (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined): void;
-    registerCommand(command: Command): void;
-    registerContextMenuItems(items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]): void;
-    registerEditor(type: string, render: CustomCellEditorRender): void;
-    registerFilterType(spec: FilterTypeSpec): void;
-    registerPanel(panel: SidePanelEntry): void;
-    registerWriter(writer: ExportWriter): void;
-}
 
 // @public
 export interface TableLabels {
@@ -4058,10 +4062,35 @@ export interface TableLabels {
 export type TableLayout = "desktop" | "mobile";
 
 // @public
-export function tableMinWidth<TRow>(columns: readonly ColumnDef<TRow>[], options?: {
+export function tableMinWidth<TRow>(columns: readonly ColumnMetadata<TRow>[], options?: {
     widths?: Readonly<Record<string, number>>;
     extra?: number;
 }): number;
+
+// @public
+export type TableOperation = {
+    readonly type: "setSort";
+    readonly key?: string;
+    readonly dir?: SortDirection;
+} | {
+    readonly type: "setSearch";
+    readonly search: string;
+} | {
+    readonly type: "setPage";
+    readonly page: number;
+} | {
+    readonly type: "setLimit";
+    readonly limit: number;
+} | {
+    readonly type: "setFilters";
+    readonly filters: ExtraFilters;
+} | {
+    readonly type: "setGroupBy";
+    readonly key?: string;
+} | {
+    readonly type: "setSelection";
+    readonly ids?: readonly string[];
+};
 
 // @public
 export interface TableQuery extends QueryExtensions {
@@ -4098,37 +4127,46 @@ export interface TableQueryParams {
 }
 
 // @public
-export interface TableRowReorderState<TRow> {
-    announcement: string;
-    cancelMove: () => void;
-    confirmMove: () => void;
-    dragProps: (rowId: string, localIndex: number) => {
-        draggable: true;
-        onDragStart: (event: DragEvent_2<HTMLElement>) => void;
-        onDragEnd: () => void;
-    };
-    dropProps: (localIndex: number, row: TRow, windowStart: number) => {
-        onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-        onDrop: (event: DragEvent_2<HTMLElement>) => void;
-    };
-    handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
-    hostConfirmPending: boolean;
-    isLifted: (rowId: string) => boolean;
-    isMovePending?: (row: TRow) => boolean;
-    lifted: {
-        rowId: string;
-        from: number;
-    } | null;
-    moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
-    moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
-    overIndex: number | null;
-    overPosition: RowDropPosition | null;
-    pendingMove: RowMoveRequest<TRow> | null;
-    rowAttrs: (rowId: string, localIndex: number) => {
-        "data-dragging"?: "";
-        "data-drop"?: RowDropPosition;
-    };
-    selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
+export type TableRevisionAxis = keyof TableRevisions;
+
+// @public
+export interface TableRevisions {
+    readonly data: number;
+    readonly policy: number;
+    readonly schema: number;
+    readonly view: number;
+}
+
+// @public
+export type TableRowScope = "visible" | "page" | "full";
+
+// @public
+export interface TableSnapshot<TRow = unknown> {
+    // (undocumented)
+    readonly capabilities: TableSourceCapabilities;
+    // (undocumented)
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    // (undocumented)
+    readonly extra: ExtraFilters;
+    // (undocumented)
+    readonly groupBy: string | undefined;
+    readonly lastPage: number;
+    // (undocumented)
+    readonly limit: number;
+    readonly page: number;
+    readonly requestedPage: number;
+    // (undocumented)
+    readonly revisions: TableRevisions;
+    // (undocumented)
+    readonly search: string;
+    // (undocumented)
+    readonly selectedIds: readonly string[];
+    // (undocumented)
+    readonly sortBy: string | undefined;
+    // (undocumented)
+    readonly sortDir: SortDirection | undefined;
+    // (undocumented)
+    readonly total: number;
 }
 
 // @public
@@ -4157,6 +4195,7 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly search: string;
     readonly sortBy: string | undefined;
     readonly sortDir: SortDirection | undefined;
+    readonly tableEngine?: TableEngine<TRow>;
     readonly total: number;
 }
 
@@ -4213,28 +4252,16 @@ export const TEXT_OP_LABEL_KEYS: {
 export const TEXT_OPS: readonly ["eq", "neq", "contains", "notContains", "startsWith", "endsWith", "empty", "notEmpty"];
 
 // @public
-export interface TextFieldWidget {
-    label: string;
-    needsValue: boolean;
-    op: TextOp;
-    opLabelKeys: typeof TEXT_OP_LABEL_KEYS;
-    ops: readonly TextOp[];
-    setOp: (op: TextOp) => void;
-    value: string;
-    write: (nextOp: TextOp, nextValue: string) => void;
-}
-
-// @public
 export type TextOp = (typeof TEXT_OPS)[number];
 
 // @public
-export function toolbarShowsFilters(mode: FilterChromeMode, hasForm: boolean, hasFilterTree: boolean): boolean;
+export function toFormulaValue(raw: unknown): FormulaValue;
 
 // @public
-export interface ToolbarSlots {
-    end?: ReactNode;
-    start?: ReactNode;
-}
+export function toggleCollapsedColumnGroup(collapsedIds: readonly string[], id: string): string[];
+
+// @public
+export function toolbarShowsFilters(mode: FilterChromeMode, hasForm: boolean, hasFilterTree: boolean): boolean;
 
 // @public
 export type TotalCountCapability = "exact" | "loaded";
@@ -4245,7 +4272,7 @@ export function treeCardStyle(level: number): {
 };
 
 // @public
-export function treeColumnKey<TRow>(columns: readonly ColumnDef<TRow>[], declared?: string): string | undefined;
+export function treeColumnKey<TRow>(columns: readonly ColumnMetadata<TRow>[], declared?: string): string | undefined;
 
 // @public
 export interface TreeEntry<TRow> {
@@ -4259,16 +4286,6 @@ export interface TreeEntry<TRow> {
     path: readonly string[];
     row: TRow;
     siblingIndex?: number;
-}
-
-// @public
-export interface TreeExpansionState {
-    collapseAll: () => void;
-    expand: (id: string) => void;
-    expandAll: (ids: readonly string[]) => void;
-    expandedIds: ReadonlySet<string>;
-    isExpanded: (id: string) => boolean;
-    toggle: (id: string) => void;
 }
 
 // @public
@@ -4287,7 +4304,7 @@ export interface TreeShape<TRow> {
 }
 
 // @public
-export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
+export function unpinAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
 // @public
 export interface UpdatePatch<TRow> {
@@ -4298,6 +4315,9 @@ export interface UpdatePatch<TRow> {
 
 // @public
 export function updateRow<TRow>(id: string, changes: Partial<TRow>): UpdatePatch<TRow>;
+
+// @public (undocumented)
+export function updateTableUrlState(search: string, namespace: string, mutate: (table: URLSearchParams) => void): string;
 
 // @public
 export interface UpsertPatch<TRow> {
@@ -4318,88 +4338,6 @@ export interface UrlStateAdapter {
 }
 
 // @public
-export function useActiveFilterChips(input: UseActiveFilterChipsOptions): ActiveFilterChip[];
-
-// @public
-export interface UseActiveFilterChipsOptions {
-    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
-    readonly onChange: (key: string, next: FilterValue) => void;
-    readonly values: Readonly<Record<string, FilterValue>>;
-}
-
-// @public
-export function useBatchEditing<TRow>(options: UseBatchEditingOptions<TRow>): BatchEditingState<TRow>;
-
-// @public
-export interface UseBatchEditingOptions<TRow> {
-    columns: readonly EditableColumnLike<TRow>[];
-    enabled?: boolean;
-    featureHost?: FeatureHostState;
-    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditStart?: EditEventHandler<TRow>;
-}
-
-// @public
-export function useBooleanFilterWidget<TRow>(def: FilterDef<TRow>, source: FilterFormSource<TRow>): BooleanFieldWidget;
-
-// @public
-export function useBulkActionRunner(input: UseBulkActionRunnerOptions): BulkActionRunner;
-
-// @public
-export interface UseBulkActionRunnerOptions {
-    cancelLabel: string;
-    confirm: ConfirmHandler;
-    onComplete?: (outcome: BulkActionOutcome) => void;
-}
-
-// @public
-export function useCellEditing<TRow = unknown>(options?: UseCellEditingOptions<TRow>): CellEditingState;
-
-// @public
-export interface UseCellEditingOptions<TRow = unknown> {
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditStart?: EditEventHandler<TRow>;
-}
-
-// @public
-export function useCellSaveState<TRow>(options?: UseCellSaveStateOptions<TRow>): CellSaveState<TRow>;
-
-// @public
-export interface UseCellSaveStateOptions<TRow> {
-    formatError?: (error: unknown) => string;
-    onEditError?: EditEventHandler<TRow>;
-    onRollback?: (previous: TRow, columnKey: string) => void;
-}
-
-// @public
-export function useChecklistFilter<TRow>(def: FilterDef<TRow>, source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">): ChecklistFilterState;
-
-// @public
-export function useChromeScrollReset<TRow>(ref: RefObject<HTMLElement | null>, chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): void;
-
-// @public
-export function useColorScheme(preference?: ColorScheme): "light" | "dark";
-
-// @public
-export function useColumnDragState(): ColumnDragState;
-
-// @public
-export function useColumnLayout<TRow>(input: UseColumnLayoutOptions<TRow>): UseColumnLayoutResult<TRow>;
-
-// @public
-export interface UseColumnLayoutOptions<TRow> {
-    collapsibleColumnGroups?: boolean;
-    columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-    columns: readonly ColumnDef<TRow>[];
-    defaultColumnLayout?: Partial<ColumnLayoutState>;
-    layout?: ColumnLayoutState;
-    onColumnRename?: (key: string, name: string) => void;
-    onLayoutChange?: (next: ColumnLayoutState) => void;
-}
-
-// @public
 export interface UseColumnLayoutResult<TRow> {
     isHidden: (key: string) => boolean;
     move: (key: string, toIndex: number) => void;
@@ -4413,603 +4351,7 @@ export interface UseColumnLayoutResult<TRow> {
     state: ColumnLayoutState;
     toggleColumnGroup: (id: string) => void;
     toggleVisible: (key: string) => void;
-    visibleColumns: ColumnDef<TRow>[];
-}
-
-// @public
-export function useColumnLayoutStorageState(options: UseColumnLayoutStorageStateOptions): UseColumnLayoutStorageStateResult;
-
-// @public
-export interface UseColumnLayoutStorageStateOptions {
-    defaultColumnLayout?: Partial<ColumnLayoutState>;
-    storage?: LayoutStorage;
-    storageKey: string;
-}
-
-// @public
-export interface UseColumnLayoutStorageStateResult {
-    layout: ColumnLayoutState;
-    onLayoutChange: (next: ColumnLayoutState) => void;
-}
-
-// @public
-export function useColumnLayoutUrlState(options?: UseColumnLayoutUrlStateOptions): UseColumnLayoutUrlStateResult;
-
-// @public
-export interface UseColumnLayoutUrlStateOptions {
-    defaultColumnLayout?: Partial<ColumnLayoutState>;
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export interface UseColumnLayoutUrlStateResult {
-    layout: ColumnLayoutState;
-    onLayoutChange: (next: ColumnLayoutState) => void;
-}
-
-// @public
-export function useDataTable<TRow>(options: UseDataTableOptions<TRow>): UseDataTableResult<TRow>;
-
-// @public
-export interface UseDataTableOptions<TRow> {
-    bulkActions?: BulkAction[];
-    columns: ColumnDef<TRow>[];
-    columnWidths?: Readonly<Record<string, number>>;
-    dir?: Direction;
-    filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
-    fitColumns?: boolean;
-    forceMobile?: boolean;
-    labels?: TableLabels;
-    locale?: string;
-    mobileIdentityColumns?: number;
-    multiSort?: boolean;
-    onSelectedIdsChange?: (selectedIds: string[]) => void;
-    rowKey: (row: TRow) => string;
-    searchDebounceMs?: number;
-    selectedIds?: readonly string[];
-    selectionGetId?: (row: TRow) => string;
-    source: TableSource<TRow>;
-    tableLabel?: string;
-}
-
-// @public
-export interface UseDataTableResult<TRow> {
-    activeFilterCount: number;
-    columns: ColumnDef<TRow>[];
-    dir: Direction;
-    filterChips: ActiveFilterChip[];
-    getCellContent: (column: ColumnDef<TRow>, row: TRow, rowIndex: number) => ReactNode;
-    getCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
-    getHeaderCellProps: (column: ColumnDef<TRow>, props?: Props) => CellElementProps;
-    getHeaderRowProps: (props?: Props) => Props;
-    getRowKey: (row: TRow) => string;
-    getRowProps: (row: TRow, index: number, props?: Props) => RowElementProps;
-    getSearchInputProps: (props?: Props) => SearchInputElementProps;
-    getSortButtonProps: (column: ColumnDef<TRow>, props?: Props) => SortButtonElementProps;
-    getTableProps: (props?: Props) => TableElementProps;
-    isEmpty: boolean;
-    isMobile: boolean;
-    labels: Required<TableLabels>;
-    pagination: PaginationInfo;
-    rows: readonly TRow[];
-    searchValue: string;
-    selection: SelectionState | null;
-    setSearchValue: (next: string) => void;
-    sortBy: string | undefined;
-    sortByOptions: SortByOption[];
-    sortDir: SortDirection | undefined;
-    source: TableSource<TRow>;
-    toggleSort: (key: string) => void;
-}
-
-// @public
-export function useDebounce<T>(value: T, delay?: number): T;
-
-// @public
-export function useDensityUrlState(options?: UseDensityUrlStateOptions): UseDensityUrlStateResult;
-
-// @public
-export interface UseDensityUrlStateOptions {
-    defaultDensity?: Density;
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export interface UseDensityUrlStateResult {
-    density: Density;
-    onDensityChange: (next: Density) => void;
-}
-
-// @public
-export function useDirtyCells(options?: UseDirtyCellsOptions): DirtyCellState;
-
-// @public
-export interface UseDirtyCellsOptions {
-    enabled?: boolean;
-}
-
-// @public
-export function useEditConflict<TRow>(): EditConflictState<TRow>;
-
-// @public
-export function useEditHistory<TRow>(options: UseEditHistoryOptions<TRow>): EditHistoryState<TRow>;
-
-// @public
-export interface UseEditHistoryOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    depth?: number;
-    enabled: boolean;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-}
-
-// @public
-export function useExtraChips(input: UseExtraChipsOptions): ActiveFilterChip[];
-
-// @public
-export interface UseExtraChipsOptions {
-    readonly extra: ExtraFilters;
-    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
-    readonly setExtra: (key: string, value: FilterValue) => void;
-}
-
-// @public
-export function useFilterOptions<TRow>(def: Pick<FilterDef<TRow>, "key" | "options">): ResolvedFilterOptions;
-
-// @public
-export function useFilterTreeChips<TRow>(options: UseFilterTreeChipsOptions<TRow>): readonly ActiveFilterChip[];
-
-// @public
-export interface UseFilterTreeChipsOptions<TRow> {
-    readonly defs: readonly FilterDef<TRow>[];
-    readonly labels: Required<TableLabels>;
-    readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
-    readonly tree: QueryFilterGroup | undefined;
-}
-
-// @public
-export function useFilterTriggerToggle(open: boolean, setOpen: (next: boolean | ((current: boolean) => boolean)) => void): FilterTriggerToggle;
-
-// @public
-export function useFindFocus(current: GridCell | null, focusCell: (cell: GridCell) => void, selectRange: (range: CellRange | null) => void): void;
-
-// @public
-export function useFindInTable<TRow>(options: UseFindInTableOptions<TRow>): FindInTableState;
-
-// @public
-export interface UseFindInTableOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    enabled: boolean;
-    firstRowIndex?: number;
-    rows: readonly TRow[];
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export function useFrontendData<TRow>(options: UseFrontendDataOptions<TRow>): TableSource<TRow>;
-
-// @public
-export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
-    columns?: readonly ColumnDef<TRow>[];
-    data: readonly TRow[];
-    error?: Error | null;
-    filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
-    filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
-    forceMobile?: boolean;
-    getRowId?: (row: TRow) => string;
-    getSearchText?: (row: TRow) => string;
-    getSortValue?: (row: TRow, columnKey: string) => SortableValue;
-    isFetching?: boolean;
-    isLoading?: boolean;
-    paginationMode?: PaginationMode;
-    refetch?: () => Promise<unknown> | void;
-}
-
-// @public
-export function useGridFocus<TRow>(options: UseGridFocusOptions<TRow>): GridFocusState;
-
-// @public
-export interface UseGridFocusOptions<TRow> {
-    columns: readonly ColumnDef<TRow>[];
-    columnsWindowed?: boolean;
-    currentMatch?: GridCell | null;
-    dir?: Direction;
-    enabled: boolean;
-    firstRowIndex?: number;
-    headerCheckbox?: boolean;
-    isCoveredCell?: (cell: GridCell) => boolean;
-    labels?: TableLabels;
-    matchKeys?: ReadonlySet<string>;
-    onActivate?: (cell: GridCell) => void;
-    onCut?: (range: CellRange) => void;
-    onFill?: (edits: CellEdit<TRow>[]) => void;
-    onFind?: () => void;
-    onPaste?: (edits: CellEdit<TRow>[]) => void;
-    onRangeChange?: (range: CellRange | null) => void;
-    onRedo?: () => number;
-    onUndo?: () => number;
-    pageSize?: number;
-    rowCount: number;
-    rows: readonly TRow[];
-    scrollToRow?: (rowIndex: number) => void;
-}
-
-// @public
-export function useGroupCollapse(controlled?: {
-    collapsedGroupIds?: readonly string[];
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-}): GroupCollapseState;
-
-// @public
-export function useGroupCollapseUrlState(options?: UseGroupCollapseUrlStateOptions): UseGroupCollapseUrlStateResult;
-
-// @public
-export interface UseGroupCollapseUrlStateOptions {
-    defaultCollapsedGroupIds?: readonly string[];
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export interface UseGroupCollapseUrlStateResult {
-    collapsedGroupIds: string[];
-    onCollapsedGroupIdsChange: (ids: string[]) => void;
-}
-
-// @public
-export function useGroupPaging(): GroupPagingState;
-
-// @public
-export function useHeaderFilterOverlay<TRow>(props: {
-    source: FilterFormSource<TRow>;
-    def: FilterDef<TRow>;
-    closeOnSelect?: boolean;
-    registry?: FilterTypeRegistry;
-}, options?: {
-    nestedSelector?: string;
-    pointerDismiss?: boolean;
-}): {
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    source: FilterFormSource<TRow>;
-    sessionProps: HeaderFilterSessionProps;
-    resetKey: number;
-};
-
-// @public
-export function useHighlight(enabled: boolean): HighlightState;
-
-// @public
-export function useHorizontalOverflow<E extends HTMLElement>(): HorizontalOverflow<E>;
-
-// @public
-export function useInfiniteScroll<TElement extends HTMLElement = HTMLDivElement>(options: UseInfiniteScrollOptions): RefObject<TElement | null>;
-
-// @public
-export interface UseInfiniteScrollOptions {
-    enabled?: boolean;
-    fetchNextPage: () => void;
-    hasNextPage: boolean;
-    isFetchingNextPage: boolean;
-    itemCount?: number;
-    rootMargin?: string;
-}
-
-// @public
-export function useIsMobile(px?: number): boolean;
-
-// @public
-export function useLazyChildren<TRow>(options: UseLazyChildrenOptions<TRow>): LazyChildrenState<TRow>;
-
-// @public
-export interface UseLazyChildrenOptions<TRow> {
-    getRowId: (row: TRow) => string;
-    hasLoadedChildren: (row: TRow) => boolean;
-    onLoadChildren?: (row: TRow) => void | Promise<void>;
-}
-
-// @public
-export function useMediaQuery(query: string, defaultValue?: boolean): boolean;
-
-// @public
-export function usePlainChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData<TRow>;
-
-// @public
-export function usePointerDismiss(open: boolean, dismiss: () => void, insideSelector: string): void;
-
-// @public
-export function usePrefersReducedMotion(): boolean;
-
-// @public
-export function useQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(options: UseQuerySourceOptions<TRow, TParams, TPage>): TableSource<TRow>;
-
-// @public
-export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams, TPage> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
-    aggregates?: readonly QueryAggregate[];
-    baseParams?: Partial<TParams>;
-    expandedIds?: readonly string[];
-    facetKeys?: readonly string[];
-    forceMobile?: boolean;
-    nextCursor?: (page: TPage) => string | null | undefined;
-    paginationMode?: PaginationMode;
-    sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
-    selectorKey?: string | number;
-    selectPage?: PageSelector<TRow, TPage>;
-    supports?: QuerySupport;
-    usePaginatedQuery: (params: Partial<TParams>) => InfiniteQueryLike<TPage>;
-}
-
-// @public
-export function useRangeFilterWidget<TRow>(def: FilterDef<TRow>, source: FilterFormSource<TRow>): RangeFieldWidget;
-
-// @public
-export function useRowEditing<TRow>(options: UseRowEditingOptions<TRow>): RowEditingState<TRow>;
-
-// @public
-export interface UseRowEditingOptions<TRow> {
-    columns: readonly EditableColumnLike<TRow>[];
-    enabled?: boolean;
-    featureHost?: FeatureHostState;
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditStart?: EditEventHandler<TRow>;
-    onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
-}
-
-// @public
-export function useRowExpansion(defaultExpandedIds?: readonly string[]): RowExpansionState;
-
-// @public
-export function useRowMutations<TRow>(options: UseRowMutationsOptions<TRow>): RowMutationsState<TRow>;
-
-// @public
-export interface UseRowMutationsOptions<TRow> extends RowMutationHandlers<TRow> {
-    labels: Required<TableLabels>;
-}
-
-// @public
-export function useRowPinning<TRow>(options: {
-    enabled: boolean;
-    pinnedRowIds?: RowPinState;
-    onPinnedRowIdsChange?: (next: RowPinState) => void;
-    getRowId: (row: TRow) => string;
-    labels: RowPinLabels;
-}): RowPinningState<TRow>;
-
-// @public
-export function useRowPinningUrlState(options?: UseRowPinningUrlStateOptions): UseRowPinningUrlStateResult;
-
-// @public
-export interface UseRowPinningUrlStateOptions {
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export interface UseRowPinningUrlStateResult {
-    onPinnedRowIdsChange: (next: RowPinState) => void;
-    pinnedRowIds: RowPinState;
-}
-
-// @public
-export function useRowReorder<TRow>(options: {
-    enabled: boolean;
-    onRowReorder?: RowReorderHandler<TRow>;
-    movePolicy?: RowMovePolicy;
-    confirmMove?: RowMoveConfirmHandler<TRow>;
-    onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
-    getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
-    resolveMove?: (row: TRow, target: TRow, position: RowDropPosition) => RowReorderDecision<TRow> | undefined;
-    labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled"> & Partial<Pick<RowReorderLabels, "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever">>;
-    rowAt: (localIndex: number) => TRow | undefined;
-    getRowId?: (row: TRow) => string;
-}): TableRowReorderState<TRow>;
-
-// @public
-export function useSavedViews(input: UseSavedViewsOptions): UseSavedViewsResult;
-
-// @public
-export interface UseSavedViewsOptions {
-    migrate?: SavedViewMigration;
-    storage?: LayoutStorage;
-    storageKey: string;
-    store?: SavedViewsStore;
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-    visibility?: SavedViewVisibility;
-}
-
-// @public
-export interface UseSavedViewsResult {
-    apply: (name: string) => void;
-    defaultView: SavedView | undefined;
-    move: (name: string, delta: -1 | 1) => void;
-    reload: () => void;
-    remove: (name: string) => void;
-    rename: (from: string, to: string) => void;
-    save: (name: string) => void;
-    setDefault: (name: string) => void;
-    views: readonly SavedView[];
-}
-
-// @public
-export function useScrollToTableTop(input: UseScrollToTableTopOptions): void;
-
-// @public
-export interface UseScrollToTableTopOptions {
-    behavior?: ScrollBehavior;
-    deps: readonly unknown[];
-    enabled?: boolean;
-    gap?: number;
-    offset?: number;
-    ref: RefObject<HTMLElement | null>;
-}
-
-// @public
-export function useSearchInput(search: string, setSearch: (next: string) => void, debounceMs?: number): SearchInputState;
-
-// @public
-export function useSelection<TRow>(options: UseSelectionOptions<TRow>): SelectionState;
-
-// @public
-export interface UseSelectionOptions<TRow> {
-    acrossPages?: boolean;
-    getId: (row: TRow) => string;
-    onSelectionChange?: (selectedIds: string[]) => void;
-    resetKey?: unknown;
-    rows: readonly TRow[];
-    selectedIds?: readonly string[];
-}
-
-// @public
-export function useServerData<TRow>(options: UseServerDataOptions<TRow>): TableSource<TRow>;
-
-// @public
-export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
-    aggregates?: readonly QueryAggregate[];
-    error?: Error | null;
-    expandedIds?: readonly string[];
-    facetKeys?: readonly string[];
-    facets?: FacetMap;
-    forceMobile?: boolean;
-    loading?: boolean;
-    nextCursor?: string | null;
-    onQueryChange?: (query: TableQuery, info: {
-        signal: AbortSignal;
-    }) => void | Promise<void>;
-    paginationMode?: PaginationMode;
-    rows: readonly TRow[];
-    supports?: QuerySupport;
-    total: number;
-}
-
-// @public
-export function useShortcuts(options: UseShortcutsOptions): void;
-
-// @public
-export interface UseShortcutsOptions {
-    enabled: boolean;
-    onCommand: (command: string) => void;
-    shortcuts?: readonly Shortcut[];
-    target?: () => EventTarget | null;
-}
-
-// @public
-export function useTableChrome<TRow>(props: ComposedTableProps<TRow>): TableChrome<TRow>;
-
-// @public
-export function useTableData<TRow>(options: UseTableDataOptions<TRow>): UseTableDataResult<TRow>;
-
-// @public
-export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
-    columns: readonly ColumnDef<TRow>[];
-    data?: readonly TRow[];
-    error?: Error | null;
-    facetKeys?: readonly string[];
-    facets?: FacetMap;
-    featureHost?: FeatureHostState;
-    filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
-    filters?: readonly FilterDef<TRow>[] | ReactNode;
-    filterTypes?: readonly FilterTypeSpec[];
-    getSearchText?: (row: TRow) => string;
-    getSortValue?: (row: TRow, columnKey: string) => SortableValue;
-    loading?: boolean;
-    locale?: string;
-    mode?: "frontend" | "server";
-    onQueryChange?: NonNullable<Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]>;
-    paginationMode?: PaginationMode;
-    source?: TableSource<TRow>;
-    supports?: QuerySupport;
-    total?: number;
-}
-
-// @public
-export interface UseTableDataResult<TRow> {
-    runtime: FilterRuntime<TRow>;
-    source: TableSource<TRow>;
-}
-
-// @public
-export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
-    history: EditHistoryState<TRow>;
-    onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-};
-
-// @public
-export function useTableUrlState(options?: UseTableUrlStateOptions): UseTableUrlStateResult;
-
-// @public
-export interface UseTableUrlStateOptions {
-    arrayExtraKeys?: readonly string[];
-    defaults?: Partial<TableQueryParams> & {
-        extra?: ExtraFilters;
-    };
-    numberExtraKeys?: readonly string[];
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-}
-
-// @public
-export interface UseTableUrlStateResult extends TableStateMutators {
-    defaultLimit: number;
-    extra: ExtraFilters;
-    filterTree: QueryFilterGroup | undefined;
-    groupAggregateOverrides: GroupAggregateOverrides;
-    groupBy: string | undefined;
-    limit: number;
-    page: number;
-    search: string;
-    sortBy: string | undefined;
-    sortDir: SortDirection | undefined;
-}
-
-// @public
-export function useTableVirtualization<TRow>(input: UseTableVirtualizationOptions<TRow>): TableVirtualization<TRow>;
-
-// @public
-export interface UseTableVirtualizationOptions<TRow> {
-    enabled?: boolean;
-    estimateSize?: number | ((index: number) => number);
-    expandable?: boolean;
-    getScrollElement?: () => Element | null;
-    onEndReached?: () => void;
-    overscan?: number;
-    rowKey: (row: TRow) => string;
-    rows: readonly TRow[];
-    scrollMargin?: number;
-}
-
-// @public
-export function useTextFilterWidget<TRow>(def: FilterDef<TRow>, source: FilterFormSource<TRow>): TextFieldWidget;
-
-// @public
-export function useTreeExpansion(controlled?: {
-    expandedIds?: readonly string[];
-    onExpandedIdsChange?: (ids: string[]) => void;
-}): TreeExpansionState;
-
-// @public
-export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): ChromeBodyData<TRow>;
-
-// @public
-export interface ValidationCheckResult {
-    allowed: boolean;
-    error?: string;
-}
-
-// @public
-export interface ValidationTarget {
-    columnKey: string;
-    rowId: string;
+    visibleColumns: ColumnMetadata<TRow>[];
 }
 
 // @public
@@ -5017,6 +4359,12 @@ export function viewFromGroupedEntries<TRow>(entries: readonly GroupedFlatEntry<
 
 // @public
 export function viewFromTreeEntries<TRow>(entries: readonly TreeEntry<TRow>[]): ExportViewEntry<TRow>[];
+
+// @public
+export const VIRTUAL_OVERSCAN = 8;
+
+// @public
+export function virtualColumnSpan(columnCount: number, hasSelection: boolean, hasActions: boolean, hasExpansion?: boolean, hasReorder?: boolean): number;
 
 // @public
 export interface VirtualItemMeta {
@@ -5038,7 +4386,7 @@ export interface VirtualTableRow<TRow> {
 }
 
 // @public
-export function visibleColumns<TRow>(columns: readonly ColumnDef<TRow>[], layout: TableLayout, mobileIdentityColumns?: number): ColumnDef<TRow>[];
+export function visibleColumns<TCol extends ColumnMetadata<any>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns?: number): TCol[];
 
 // @public
 export function visibleRowActions<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];
@@ -5050,13 +4398,16 @@ export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, pat
 }[];
 
 // @public
-export type WidthColumn = Pick<ColumnDef<unknown>, "key" | "width">;
+export type WidthColumn = Pick<ColumnModel<unknown>, "key" | "width">;
 
 // @public
 export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
 
 // @public
-export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnDef<TRow>[]): GroupAggregatesFn<TRow> | undefined;
+export function withFilterType(registry: FilterTypeRegistry, spec: FilterTypeSpec): FilterTypeRegistry;
+
+// @public
+export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[]): GroupAggregatesFn<TRow> | undefined;
 
 // @public
 export function withQueryAggregateOverrides(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides): readonly QueryAggregate[] | undefined;
@@ -5065,10 +4416,36 @@ export function withQueryAggregateOverrides(base: readonly QueryAggregate[] | un
 export function writeClipboardText(text: string): Promise<boolean>;
 
 // @public
+export function writeCollapsedGroups(params: URLSearchParams, keys: readonly string[], prefix?: string): void;
+
+// @public
+export function writeColumnLayout(params: URLSearchParams, layout: ColumnLayoutState, prefix?: string): void;
+
+// @public
+export function writeExtra(params: URLSearchParams, extra: ExtraFilters, prefix?: string): void;
+
+// @public
+export function writeFilterTreeParam(params: URLSearchParams, tree: QueryFilterGroup | undefined, prefix?: string): void;
+
+// @public
 export function writeRangeFilter(op: RangeOp | undefined, a: string, b: string, lowKey: string, highKey: string, key: string): ExtraFilters;
 
 // @public
 export function writeRangeWidget(op: RangeOp | undefined, a: string, b: string, lowKey: string, highKey: string): ExtraFilters;
+
+// @public
+export function writeRowPins(params: URLSearchParams, state: RowPinState, prefix?: string): void;
+
+// @public
+export function writeSortLevels(params: URLSearchParams, levels: readonly {
+    key: string;
+    dir: SortDirection;
+}[], prefix?: string): void;
+
+// @public
+export function xlsxWriter(options?: {
+    sheetName?: string;
+}): ExportWriter;
 
 // (No @packageDocumentation comment for this package)
 

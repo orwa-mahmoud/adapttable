@@ -4,7 +4,7 @@
 
 ```ts
 
-import { cellSpan } from '@adapttable/core/features';
+import { cellSpan } from '@adapttable/react/features';
 
 export { cellSpan }
 

@@ -4,7 +4,7 @@
 
 ```ts
 
-import { resizableColumns } from '@adapttable/core/features';
+import { resizableColumns } from '@adapttable/react/features';
 
 export { resizableColumns }
 

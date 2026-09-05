@@ -4,7 +4,7 @@
 
 ```ts
 
-import { StaticTableFeature } from '@adapttable/core/adapter';
+import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
 export function headerFilters(): StaticTableFeature;
