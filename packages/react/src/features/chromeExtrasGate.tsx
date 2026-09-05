@@ -6,9 +6,12 @@
  * imports those modules.
  */
 import type { ReactNode } from "react";
+import { useRef } from "react";
 
+import { createNeutralTable } from "@adapttable/core";
 import type { BaseDataTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
+import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
 import {
   FeatureSlot,
   useFeatureSlotFilled,
@@ -102,10 +105,12 @@ function RuntimePublisher<TRow>({
   } else if (chrome.tree) {
     renderedRows = chrome.tree.entries.map((entry) => entry.row);
   }
-  usePublishTableRuntime(renderedRows, chrome.table.labels, {
+  const engine = chrome.source.tableEngine;
+  const runtimeView = {
     rows: chrome.source.rows,
+    visibleRows: renderedRows,
     getRowId: chrome.getRowId,
-    rowLabel: (row) => readableRowLabel(chrome, row),
+    rowLabel: (row: TRow) => readableRowLabel(chrome, row),
     sortBy: chrome.source.sortBy,
     query: {
       page: chrome.source.page,
@@ -125,7 +130,7 @@ function RuntimePublisher<TRow>({
     groupingState: {
       groupBy: chrome.source.groupBy,
       aggregateOverrides: chrome.source.groupAggregateOverrides ?? {},
-      columnLabel: (key) => {
+      columnLabel: (key: string) => {
         const column = chrome.columnLayout.visibleColumns.find(
           (candidate) => candidate.key === key
         );
@@ -148,12 +153,35 @@ function RuntimePublisher<TRow>({
       ? {
           onCellEdit: chrome.editing.onCellEdit,
           stageCell: chrome.editing.batch
-            ? (row, rowId, columnKey, value) => {
+            ? (row: TRow, rowId: string, columnKey: string, value: string) => {
                 chrome.editing?.batch?.setDraft(row, rowId, columnKey, value);
               }
             : undefined,
         }
       : undefined,
+  };
+  const bindingRef = useRef<{
+    visibleRows?: () => readonly TRow[];
+    operations?: () => Readonly<Record<string, boolean>>;
+  }>({});
+  bindingRef.current = {
+    visibleRows: () => renderedRows,
+    operations: () => deriveRuntimeOperations(runtimeView),
+  };
+  const neutralRef = useRef<ReturnType<typeof createNeutralTable<TRow>> | null>(
+    null
+  );
+  if (engine && !neutralRef.current) {
+    neutralRef.current = createNeutralTable(
+      engine,
+      engine.tableId,
+      bindingRef.current
+    );
+  }
+  const neutralTable = engine ? (neutralRef.current ?? undefined) : undefined;
+  usePublishTableRuntime(renderedRows, chrome.table.labels, {
+    ...runtimeView,
+    neutralTable,
   });
   return children(chrome);
 }

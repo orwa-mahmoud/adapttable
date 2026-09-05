@@ -367,6 +367,7 @@ export function useFrontendData<TRow>(
     setFilterTree: state.setFilterTree,
     clearExtras: state.clearExtras,
     clearAll: state.clearAll,
+    tableEngine: engine,
   };
 }
 

@@ -39,6 +39,7 @@ import {
 } from "react";
 
 import type { GroupAggregateOverrides } from "@adapttable/core";
+import type { NeutralTable } from "@adapttable/core";
 import type { TableSourceCapabilities } from "@adapttable/core";
 import type { ExtraFilters } from "@adapttable/core";
 import { devWarn } from "@adapttable/core";
@@ -213,8 +214,15 @@ function providersOf<TRow>(
  * @public
  */
 export interface TableRuntimeView<TRow = unknown> {
-  /** Rows in the materialized source view. */
+  /** Rows in the materialized source view (page scope). */
   readonly rows: readonly TRow[];
+  /**
+   * Rendered data-row order after grouping/tree expansion. When set, differs
+   * from {@link rows} under grouping or tree chrome.
+   */
+  readonly visibleRows?: readonly TRow[];
+  /** Live neutral binding when the source published an engine. */
+  readonly neutralTable?: NeutralTable<TRow>;
   /** Stable row identity. */
   readonly getRowId: (row: TRow) => string;
   /** Best available human-readable row label. */

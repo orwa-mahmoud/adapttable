@@ -21,13 +21,21 @@ import {
   useState,
 } from "react";
 
+import {
+  agentColumnsFromNeutral,
+  monotonicRevision,
+  observationFromNeutral,
+  readRowsFromNeutral,
+  resolveRowFromNeutral,
+  revisionToken,
+} from "./liveTable";
+
 import type {
   ApprovalPolicy,
   CommitPolicy,
   RowAddressScope,
   WritePolicy,
 } from "./keys";
-import { WRITE_KEYS } from "./keys";
 import { createAgentSession } from "./session";
 import type {
   AgentApply,
@@ -145,38 +153,62 @@ function cellRecord(
   return cells;
 }
 
-function liveRows<TRow>(
-  view: TableRuntimeView<TRow> | undefined
-): readonly TRow[] {
-  return view?.rows ?? [];
+function viewRevisionStamp(
+  view: TableRuntimeView<unknown> | undefined
+): string {
+  const table = view?.neutralTable;
+  if (table) return monotonicRevision(table.revisions, undefined).token;
+  const rows = view?.rows ?? [];
+  const getRowId = view?.getRowId;
+  return JSON.stringify({
+    ids: rows.map((row) => (getRowId ? getRowId(row) : null)),
+    payloads: rows,
+    page: view?.query?.page ?? 1,
+    search: view?.query?.search ?? "",
+  });
 }
 
 function liveReadRows(
-  view: TableRuntimeView<unknown> | undefined,
+  runtime: ReturnType<typeof useTableRuntime>,
   columns: readonly AgentColumn[],
-  query: RowReadQuery
+  query: RowReadQuery,
+  readMax: number
 ): RowWindow {
-  const rows = liveRows(view);
+  const table = runtime.view()?.neutralTable;
+  if (table) return readRowsFromNeutral(table, columns, query, readMax);
+  const view = runtime.view();
+  const scope = query.scope ?? "visible";
+  const rows =
+    scope === "visible"
+      ? (view?.visibleRows ?? view?.rows ?? [])
+      : (view?.rows ?? []);
   const getRowId = view?.getRowId ?? (() => "");
   const hidden = columns.filter((column) => !column.readable).map((c) => c.id);
-  const sliced = rows.slice(query.offset, query.offset + query.limit);
+  const limit = Math.max(0, Math.min(query.limit, readMax));
+  const sliced = rows.slice(query.offset, query.offset + limit);
   return {
     rows: sliced.map((row) => ({
       rowKey: getRowId(row),
       cells: cellRecord(row, columns, query.columns),
     })),
     offset: query.offset,
-    limit: query.limit,
+    limit,
     redacted: hidden,
   };
 }
 
 function liveResolveRow(
-  view: TableRuntimeView<unknown> | undefined,
+  runtime: ReturnType<typeof useTableRuntime>,
   ref: RowRef,
   scope: RowAddressScope
 ): ResolvedRow {
-  const rows = liveRows(view);
+  const table = runtime.view()?.neutralTable;
+  if (table) return resolveRowFromNeutral(table, ref);
+  const view = runtime.view();
+  const rows =
+    scope === "visible"
+      ? (view?.visibleRows ?? view?.rows ?? [])
+      : (view?.rows ?? []);
   const getRowId = view?.getRowId ?? (() => "");
   if ("rowKey" in ref) {
     return { rowKey: ref.rowKey, scope };
@@ -190,13 +222,38 @@ function liveResolveRow(
 }
 
 function findRow(
-  view: TableRuntimeView<unknown> | undefined,
+  runtime: ReturnType<typeof useTableRuntime>,
   rowKey: string
 ): unknown {
-  const rows = liveRows(view);
+  const table = runtime.view()?.neutralTable;
+  if (table) return table.rowByKey(rowKey);
+  const view = runtime.view();
+  const rows = view?.rows ?? [];
   const getRowId = view?.getRowId;
   if (!getRowId) return undefined;
   return rows.find((row) => getRowId(row) === rowKey);
+}
+
+function columnsForRuntime(
+  options: TableAgentOptions,
+  runtime: ReturnType<typeof useTableRuntime>
+): readonly AgentColumn[] {
+  const table = runtime.view()?.neutralTable;
+  if (table) return agentColumnsFromNeutral(table, options.columns);
+  if (!options.columns) return [];
+  return Object.entries(options.columns).map(([id, extra]) =>
+    mergeColumn(
+      {
+        id,
+        label: extra.label ?? id,
+        type: extra.type ?? "unknown",
+        readable: extra.readable ?? true,
+        writable: extra.writable ?? false,
+        sortable: extra.sortable ?? false,
+      },
+      options.columns
+    )
+  );
 }
 
 function observationFromRuntime(
@@ -206,25 +263,30 @@ function observationFromRuntime(
   apply: AgentApply
 ): AgentObservation {
   const view = runtime.view();
+  const table = view?.neutralTable;
   const query = view?.query;
   const ids = runtime.featureIds();
-  const columns = (
-    options.columns
-      ? Object.entries(options.columns).map(([id, extra]) =>
-          mergeColumn(
-            {
-              id,
-              label: extra.label ?? id,
-              type: extra.type ?? "unknown",
-              readable: extra.readable ?? true,
-              writable: extra.writable ?? false,
-              sortable: extra.sortable ?? false,
-            },
-            options.columns
-          )
-        )
-      : []
-  ).map((column) => mergeColumn(column, options.columns));
+  if (table) {
+    return observationFromNeutral(
+      table,
+      options,
+      revision,
+      apply,
+      ids,
+      query
+        ? {
+            page: query.page,
+            limit: query.limit,
+            search: query.search,
+            sortBy: query.sortBy,
+            sortDir: query.sortDir,
+          }
+        : undefined
+    );
+  }
+  const columns = columnsForRuntime(options, runtime).map((column) =>
+    mergeColumn(column, options.columns)
+  );
   return {
     tableId: options.tableId,
     viewRevision: revision,
@@ -259,7 +321,7 @@ function observationFromRuntime(
     search: query?.search ?? "",
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
-    pageMax: 10_000,
+    pageMax: view?.rows?.length ?? 10,
     readMax: options.readMax ?? 50,
     rowAddressScope: "visible",
   };
@@ -277,7 +339,7 @@ function liveEditCells(
     throw new Error("editCells is not wired");
   }
   for (const edit of edits) {
-    const row = findRow(view, edit.rowKey);
+    const row = findRow(runtime, edit.rowKey);
     if (!row) {
       throw new Error(`row "${edit.rowKey}" is not in the current view`);
     }
@@ -297,7 +359,7 @@ function liveStageCells(
     throw new Error("stageCells is not wired");
   }
   for (const edit of edits) {
-    const row = findRow(view, edit.rowKey);
+    const row = findRow(runtime, edit.rowKey);
     if (!row) {
       throw new Error(`row "${edit.rowKey}" is not in the current view`);
     }
@@ -324,23 +386,24 @@ function rowScope(ref: RowRef): RowAddressScope {
 }
 
 function pickReadRows(
+  runtime: ReturnType<typeof useTableRuntime>,
   extra: AgentApply | undefined,
-  view: () => ReturnType<ReturnType<typeof useTableRuntime>["view"]>,
-  columns: readonly AgentColumn[]
+  columns: readonly AgentColumn[],
+  readMax: number
 ): NonNullable<AgentApply["readRows"]> {
   return (query) => {
     if (extra?.readRows) return extra.readRows(query);
-    return liveReadRows(view(), columns, query);
+    return liveReadRows(runtime, columns, query, readMax);
   };
 }
 
 function pickResolveRow(
-  extra: AgentApply | undefined,
-  view: () => ReturnType<ReturnType<typeof useTableRuntime>["view"]>
+  runtime: ReturnType<typeof useTableRuntime>,
+  extra: AgentApply | undefined
 ): NonNullable<AgentApply["resolveRow"]> {
   return (ref) => {
     if (extra?.resolveRow) return extra.resolveRow(ref);
-    return liveResolveRow(view(), ref, rowScope(ref));
+    return liveResolveRow(runtime, ref, rowScope(ref));
   };
 }
 
@@ -392,13 +455,15 @@ function requireQuery<
 
 function applyFromRuntime(
   runtime: ReturnType<typeof useTableRuntime>,
-  columns: readonly AgentColumn[],
+  options: TableAgentOptions,
   extra?: AgentApply
 ): AgentApply {
+  const columns = columnsForRuntime(options, runtime);
+  const readMax = options.readMax ?? 50;
   const view = () => runtime.view();
   const apply: AgentApply = {
-    readRows: pickReadRows(extra, view, columns),
-    resolveRow: pickResolveRow(extra, view),
+    readRows: pickReadRows(runtime, extra, columns, readMax),
+    resolveRow: pickResolveRow(runtime, extra),
     setPage: (page) => {
       if (extra?.setPage) extra.setPage(page);
       else requireQuery(view, "setPage")(page);
@@ -447,76 +512,6 @@ function applyFromRuntime(
   return apply;
 }
 
-function stableRow(row: unknown): unknown {
-  try {
-    return structuredClone(row);
-  } catch {
-    return String(row);
-  }
-}
-
-function viewFingerprint(
-  view: TableRuntimeView<unknown> | undefined,
-  options: TableAgentOptions,
-  featureIds: readonly string[]
-): string {
-  const query = view?.query;
-  const rows = liveRows(view);
-  const getRowId = view?.getRowId;
-  const rowPayloads = rows.map((row) => ({
-    id: getRowId ? getRowId(row) : null,
-    row: stableRow(row),
-  }));
-  const selected = view?.selection
-    ? [...view.selection.selectedIds].sort((left, right) =>
-        left.localeCompare(right)
-      )
-    : [];
-  const extras = liveQueryFilters(query);
-  return JSON.stringify({
-    page: query?.page ?? 1,
-    limit: query?.limit ?? 10,
-    search: query?.search ?? "",
-    sortBy: query?.sortBy ?? null,
-    sortDir: query?.sortDir ?? null,
-    groupBy: view?.groupingState?.groupBy ?? null,
-    extra: extras.extra ?? null,
-    rowPayloads,
-    selected,
-    tableId: options.tableId,
-    writePolicy: options.writePolicy ?? "allow",
-    approval: options.approval ?? "writes",
-    commit: options.commit ?? "stage",
-    columns: options.columns ?? null,
-    readMax: options.readMax ?? 50,
-    featureIds: [...featureIds].sort((left, right) =>
-      left.localeCompare(right)
-    ),
-    wired: {
-      setPage: present(options.apply, "setPage") || present(query, "setPage"),
-      setSearch:
-        present(options.apply, "setSearch") || present(query, "setSearch"),
-      setSort: present(options.apply, "setSort") || present(query, "setSort"),
-      setFilters:
-        present(options.apply, "setFilters") || present(extras, "setExtras"),
-      runExport: present(options.apply, "runExport"),
-      editCells:
-        present(options.apply, "editCells") ||
-        present(options.apply, "stageCells"),
-      addRows: present(options.apply, "addRows"),
-      deleteRows: present(options.apply, "deleteRows"),
-      reorderRows: present(options.apply, "reorderRows"),
-      setSelection:
-        present(options.apply, "setSelection") || view?.selection != null,
-      applyView: present(options.apply, "applyView"),
-    },
-  });
-}
-
-function present(record: object | undefined, key: string): boolean {
-  return record != null && Object.hasOwn(record, key);
-}
-
 function asCallable(
   value: unknown
 ): ((...input: unknown[]) => unknown) | undefined {
@@ -524,29 +519,45 @@ function asCallable(
   return value as (...input: unknown[]) => unknown;
 }
 
+function createRevisionCounter() {
+  let token: string | undefined;
+  let revision = 1;
+  return {
+    bumpFrom(revisions: {
+      data: number;
+      view: number;
+      schema: number;
+      policy: number;
+    }) {
+      const nextToken = revisionToken(revisions);
+      if (token === undefined) {
+        token = nextToken;
+        return revision;
+      }
+      if (token === nextToken) return revision;
+      token = nextToken;
+      revision += 1;
+      return revision;
+    },
+    current() {
+      return revision;
+    },
+  };
+}
+
 function currentApply(
   options: TableAgentOptions,
   runtime: ReturnType<typeof useTableRuntime>
 ): AgentApply {
-  const fromRuntime = applyFromRuntime(
-    runtime,
-    options.columns
-      ? Object.entries(options.columns).map(([id, extra]) => ({
-          id,
-          label: extra.label ?? id,
-          type: extra.type ?? "unknown",
-          readable: extra.readable ?? true,
-          writable: extra.writable ?? false,
-          sortable: extra.sortable ?? false,
-        }))
-      : [],
-    options.apply
-  );
+  const fromRuntime = applyFromRuntime(runtime, options, options.apply);
   const apply: AgentApply = { ...fromRuntime, ...options.apply };
   apply.setFilters = (filters) => {
-    options.apply?.setFilters?.(filters);
+    if (options.apply?.setFilters) {
+      options.apply.setFilters(filters);
+      return;
+    }
     const applied = applyLiveFilters(runtime.view()?.query, filters);
-    if (!options.apply?.setFilters && !applied) {
+    if (!applied) {
       throw new Error("setFilters is not wired");
     }
   };
@@ -556,11 +567,10 @@ function currentApply(
 function bindLiveSession(
   optionsRef: { current: TableAgentOptions },
   runtimeRef: { current: ReturnType<typeof useTableRuntime> },
-  revisionRef: { current: number },
+  revisionCounter: ReturnType<typeof createRevisionCounter>,
   waitForChrome: {
     current: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
-  },
-  bump: { current: () => void }
+  }
 ): AgentSession {
   const apply = new Proxy<AgentApply>(
     {},
@@ -587,10 +597,14 @@ function bindLiveSession(
   const observe = () => {
     const options = optionsRef.current;
     if (options.observe) return options.observe();
+    const table = runtimeRef.current.view()?.neutralTable;
+    const viewRevision = table
+      ? revisionCounter.bumpFrom(table.revisions)
+      : revisionCounter.current();
     return observationFromRuntime(
       options,
       runtimeRef.current,
-      revisionRef.current,
+      viewRevision,
       apply
     );
   };
@@ -618,19 +632,10 @@ function bindLiveSession(
         idempotencyKey,
         signal
       );
-      if (result.ok && isMutatingKey(key)) bump.current();
       return result;
     },
     manifest: () => inner.manifest(),
   };
-}
-
-function isMutatingKey(key: string): boolean {
-  return (
-    key.startsWith("view.set") ||
-    key === "views.apply" ||
-    (WRITE_KEYS as readonly string[]).includes(key)
-  );
 }
 
 function TableAgentProvider({
@@ -639,9 +644,8 @@ function TableAgentProvider({
 }: Readonly<FeatureProviderProps>): ReactNode {
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
+  const revisionCounterRef = useRef(createRevisionCounter());
   const [revision, setRevision] = useState(1);
-  const revisionRef = useRef(revision);
-  revisionRef.current = revision;
   const [pending, setPending] = useState<{
     proposals: readonly WriteProposal[];
     resolve: (ok: boolean) => void;
@@ -653,9 +657,25 @@ function TableAgentProvider({
   const bump = useRef(() => setRevision((n) => n + 1));
   bump.current = () => setRevision((n) => n + 1);
 
+  const neutralTable = runtime.view()?.neutralTable;
+  useLayoutEffect(() => {
+    if (!neutralTable) return;
+    const next = revisionCounterRef.current.bumpFrom(neutralTable.revisions);
+    if (next !== revision) setRevision(next);
+  });
+
+  useEffect(() => {
+    if (!neutralTable) return;
+    return neutralTable.subscribe("all", () => {
+      const next = revisionCounterRef.current.bumpFrom(neutralTable.revisions);
+      setRevision(next);
+    });
+  }, [neutralTable]);
+
   const stampRef = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
-    const live = viewFingerprint(runtime.view(), options, runtime.featureIds());
+    if (neutralTable) return;
+    const live = viewRevisionStamp(runtime.view());
     if (stampRef.current === undefined) {
       stampRef.current = live;
       return;
@@ -710,13 +730,18 @@ function TableAgentProvider({
   optionsRef.current = options;
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
+  const tableIdRef = useRef(options.tableId);
   const sessionRef = useRef<AgentSession | null>(null);
+  if (tableIdRef.current !== options.tableId) {
+    tableIdRef.current = options.tableId;
+    sessionRef.current = null;
+    revisionCounterRef.current = createRevisionCounter();
+  }
   sessionRef.current ??= bindLiveSession(
     optionsRef,
     runtimeRef,
-    revisionRef,
-    waitForChrome,
-    bump
+    revisionCounterRef.current,
+    waitForChrome
   );
   const session = sessionRef.current;
   const published: AgentSession = {

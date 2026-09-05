@@ -139,6 +139,7 @@ export interface TableEngine<TRow = unknown> {
   readonly cellValue: (row: TRow, columnKey: string) => unknown;
   readonly rows: (scope: TableRowScope) => readonly TRow[];
   readonly rowByKey: (rowKey: string) => TRow | undefined;
+  readonly rowKey: (row: TRow) => string;
   readonly subscribe: (
     axes: readonly TableRevisionAxis[] | "all",
     listener: (revisions: TableRevisions) => void
@@ -448,6 +449,10 @@ export function createTableEngine<TRow>(
     rowByKey(rowKey) {
       assertLive();
       return view.data.find((row) => options.rowKey(row) === rowKey);
+    },
+    rowKey(row) {
+      assertLive();
+      return options.rowKey(row);
     },
     subscribe(axes, listener) {
       assertLive();

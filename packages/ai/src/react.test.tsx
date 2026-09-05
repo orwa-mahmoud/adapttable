@@ -5,7 +5,9 @@ import {
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
+import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import { render, waitFor } from "@testing-library/react";
+import { useLayoutEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
@@ -28,7 +30,70 @@ function Harness({
 }
 
 function Publisher({ view }: { view?: TableRuntimeView }) {
-  usePublishTableRuntime([], undefined, view);
+  const engineRef = useRef<ReturnType<typeof createTableEngine> | null>(null);
+  const neutralRef = useRef<ReturnType<typeof createNeutralTable> | null>(null);
+  const bindingRef = useRef<{
+    visibleRows?: () => readonly unknown[];
+    operations?: () => Readonly<Record<string, boolean>>;
+  }>({});
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  bindingRef.current.visibleRows = () =>
+    viewRef.current?.visibleRows ?? viewRef.current?.rows ?? [];
+  bindingRef.current.operations = () => ({
+    setPage: Boolean(viewRef.current?.query?.setPage),
+    setSearch: Boolean(viewRef.current?.query?.setSearch),
+    setSort: Boolean(viewRef.current?.query?.setSort),
+    setLimit: Boolean(viewRef.current?.query?.setLimit),
+    setFilters: Boolean(
+      viewRef.current?.query?.setExtras ?? viewRef.current?.query?.clearExtras
+    ),
+    setGroupBy: Boolean(viewRef.current?.groupingState?.setGroupBy),
+    setSelection: Boolean(viewRef.current?.selection),
+  });
+  const rowsRef = useRef(view?.rows);
+  if (view?.rows?.length && !view.neutralTable) {
+    if (!engineRef.current) {
+      const engine = createTableEngine({
+        data: view.rows as { id: string; name?: string }[],
+        columns:
+          view.rows[0] && "name" in (view.rows[0] as object)
+            ? [{ key: "name", header: "Name", sortable: true }]
+            : [],
+        rowKey: (row) => (row as { id: string }).id,
+      });
+      engineRef.current = engine as ReturnType<typeof createTableEngine>;
+      neutralRef.current = createNeutralTable(
+        engineRef.current,
+        "test",
+        bindingRef.current
+      );
+    }
+  }
+  useLayoutEffect(() => {
+    if (!engineRef.current || !view?.rows || view.neutralTable) return;
+    if (rowsRef.current === view.rows) return;
+    rowsRef.current = view.rows;
+    engineRef.current.invalidate(
+      ["data"],
+      { data: view.rows as { id: string; name?: string }[] },
+      { silent: true }
+    );
+  });
+  usePublishTableRuntime(view?.visibleRows ?? view?.rows ?? [], undefined, {
+    ...view,
+    rows: view?.rows ?? [],
+    visibleRows: view?.visibleRows ?? view?.rows,
+    neutralTable: view?.neutralTable ?? neutralRef.current ?? undefined,
+    getRowId: view?.getRowId ?? ((row) => (row as { id: string }).id),
+    rowLabel:
+      view?.rowLabel ??
+      ((row) =>
+        String(
+          (row as { id: string; name?: string }).name ??
+            (row as { id: string }).id
+        )),
+  });
   return null;
 }
 
@@ -353,7 +418,7 @@ describe("tableAgent", () => {
           }),
         ]}
         view={{
-          rows: [],
+          rows: [{ id: "1", name: "Ada" }],
           getRowId: () => "1",
           rowLabel: () => "1",
           groupingState: {
@@ -378,25 +443,25 @@ describe("tableAgent", () => {
     const search = await session!.execute(
       "view.setSearch",
       { query: "ada" },
-      1,
+      session!.manifest().viewRevision,
       "s"
     );
     const sort = await session!.execute(
       "view.setSort",
       { key: "name", dir: "asc" },
-      1,
+      session!.manifest().viewRevision,
       "o"
     );
     const page = await session!.execute(
       "view.setPage",
-      { page: 2, limit: 25 },
-      1,
+      { page: 1, limit: 25 },
+      session!.manifest().viewRevision,
       "p"
     );
     expect(search.ok && sort.ok && page.ok).toBe(true);
     expect(setSearch).toHaveBeenCalledWith("ada");
     expect(setSort).toHaveBeenCalledWith("name", "asc");
-    expect(setPage).toHaveBeenCalledWith(2);
+    expect(setPage).toHaveBeenCalledWith(1);
     expect(setLimit).toHaveBeenCalledWith(25);
     expect(setGroupBy).not.toHaveBeenCalled();
   });
@@ -479,7 +544,7 @@ describe("tableAgent", () => {
     const first = session!;
     await first.execute(
       "view.setPage",
-      { page: 2 },
+      { page: 1 },
       first.manifest().viewRevision,
       "page-once"
     );
@@ -545,7 +610,7 @@ describe("tableAgent", () => {
           { id: "editing" },
         ]}
         view={{
-          rows: [{ id: "r1" }],
+          rows: [{ id: "r1", name: "Ada" }],
           getRowId: (row) => (row as { id: string }).id,
           rowLabel: () => "Ada",
         }}

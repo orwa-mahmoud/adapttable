@@ -24,7 +24,12 @@ export {
   type TableRowScope,
   type TableSnapshot,
 } from "./engine/createTableEngine";
-export { createNeutralTable, type NeutralTable } from "./engine/neutralTable";
+export {
+  createNeutralTable,
+  revisionToken,
+  type NeutralTable,
+  type NeutralTableBinding,
+} from "./engine/neutralTable";
 export { engineSearchText } from "./engine/searchText";
 export type {
   ActionConfirm,

@@ -1,3 +1,4 @@
+import type { TableEngine } from "../engine/createTableEngine";
 import type { FacetMap } from "../filters/facets";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { TableStateMutators } from "../tableStateMutators";
@@ -74,6 +75,11 @@ export interface TableSource<TRow> extends TableStateMutators {
   readonly error: Error | null;
   /** Re-run the underlying fetch. No-op for purely in-memory sources. */
   refetch?: () => Promise<unknown> | void;
+  /**
+   * Framework-neutral engine for frontend tiers. Bindings read revisions and
+   * row scopes through {@link createNeutralTable}; server sources omit this.
+   */
+  readonly tableEngine?: TableEngine<TRow>;
   /** The resolved pagination mode (after `"auto"` → device resolution). */
   readonly paginationMode: ResolvedPaginationMode;
 
