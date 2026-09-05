@@ -397,10 +397,7 @@ describe("createAgentHttpClient", () => {
     expect(setPage).toHaveBeenCalledWith(2);
     expect(editCells).not.toHaveBeenCalled();
     expect(result.results[0]?.ok).toBe(true);
-    expect(result.results[1]?.result).toMatchObject({
-      approval: "rejected",
-      applied: false,
-    });
+    expect(result.results[1]?.error?.code).toBe("cancelled");
     expect(result.results[2]?.error?.code).toBe("cancelled");
   });
 
@@ -456,7 +453,9 @@ describe("createAgentHttpClient", () => {
             {
               key: "edit.cells",
               args: {
-                edits: [{ rowKey: "r1", column: "name", value: "Other" }],
+                edits: [
+                  { rowKey: "r1", column: "name", value: "Ada Lovelace" },
+                ],
               },
               idempotencyKey: "edit-ada",
             },

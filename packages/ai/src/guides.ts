@@ -34,7 +34,7 @@ const WRITE_RESULT = objectSchema({
   applied: { type: "boolean" },
   approval: {
     type: "string",
-    enum: ["pending", "approved", "rejected", "not-required"],
+    enum: ["pending", "approved", "rejected", "cancelled", "not-required"],
   },
 });
 

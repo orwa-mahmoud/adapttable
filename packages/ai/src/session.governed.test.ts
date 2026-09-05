@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { enabledKeys } from "./manifest";
 import { createAgentSession } from "./session";
-import type { AgentApply, AgentObservation, RowWindow } from "./types";
+import type {
+  AgentApply,
+  AgentObservation,
+  RowReadQuery,
+  RowWindow,
+} from "./types";
 
 const PAGE_ONLY = {
   fullDataset: false,
@@ -355,7 +360,7 @@ describe("edit.cells", () => {
     );
     const again = await session.execute(
       "edit.cells",
-      { edits: [{ rowKey: "r1", column: "name", value: "Other" }] },
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada Lovelace" }] },
       1,
       "same"
     );
@@ -682,11 +687,8 @@ describe("selection, views, add and delete", () => {
     );
     late.abort();
     const rejected = await pending;
-    expect(rejected.ok).toBe(true);
-    expect(rejected.result).toMatchObject({
-      approval: "rejected",
-      applied: false,
-    });
+    expect(rejected.ok).toBe(false);
+    expect(rejected.error?.code).toBe("cancelled");
     expect(hooks.editCells).not.toHaveBeenCalled();
 
     const retried = await session.execute(
@@ -745,5 +747,152 @@ describe("selection, views, add and delete", () => {
       applied: false,
     });
     expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+});
+
+describe("execution lifecycle", () => {
+  it("rejects idempotency reuse when the payload changes", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: hooks,
+    });
+    await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "same-key"
+    );
+    const mismatch = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Other" }] },
+      1,
+      "same-key"
+    );
+    expect(mismatch.error?.code).toBe("idempotency-mismatch");
+    expect(hooks.editCells).toHaveBeenCalledTimes(1);
+  });
+
+  it("replays reads with current column permissions", async () => {
+    let readableSalary = true;
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          columns: COLUMNS.map((column) =>
+            column.id === "salary"
+              ? { ...column, readable: readableSalary }
+              : column
+          ),
+        }),
+      apply: apply(),
+    });
+    const first = await session.execute(
+      "rows.read",
+      { offset: 0, limit: 10 },
+      1,
+      "read-once"
+    );
+    expect((first.result as RowWindow).rows[0]?.cells.salary).toBe(100);
+    readableSalary = false;
+    const replayed = await session.execute(
+      "rows.read",
+      { offset: 0, limit: 10 },
+      1,
+      "read-once"
+    );
+    expect(
+      (replayed.result as RowWindow).rows[0]?.cells.salary
+    ).toBeUndefined();
+    expect((replayed.result as RowWindow).redacted).toContain("salary");
+  });
+
+  it("rejects add/delete/reorder under commit: stage before callbacks run", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          commit: "stage",
+          featureIds: ["editing", "row-reorder"],
+        }),
+      apply: hooks,
+    });
+    const add = await session.execute(
+      "rows.add",
+      { rows: [{ name: "New" }] },
+      1,
+      "add-stage"
+    );
+    expect(add.error?.code).toBe("commit-incompatible");
+    expect(hooks.addRows).not.toHaveBeenCalled();
+    const del = await session.execute(
+      "rows.delete",
+      { keys: ["r1"] },
+      1,
+      "del-stage"
+    );
+    expect(del.error?.code).toBe("commit-incompatible");
+    const move = await session.execute(
+      "rows.reorder",
+      { fromKey: "r1", toKey: "r2" },
+      1,
+      "move-stage"
+    );
+    expect(move.error?.code).toBe("commit-incompatible");
+  });
+
+  it("validates setLimit wiring before setPage when both are requested", async () => {
+    const setPage = vi.fn();
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: { setPage },
+    });
+    const result = await session.execute(
+      "view.setPage",
+      { page: 2, limit: 25 },
+      1,
+      "page-limit"
+    );
+    expect(result.error?.code).toBe("not-wired");
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("resolves before-values beyond the first read window by row identity", async () => {
+    const readRows = vi.fn(async (query: RowReadQuery) => {
+      const slice = WINDOW.rows.slice(query.offset, query.offset + query.limit);
+      return {
+        offset: query.offset,
+        limit: query.limit,
+        redacted: ["ssn"],
+        rows: slice.map((row) => ({
+          rowKey: row.rowKey,
+          cells: { salary: row.cells.salary },
+        })),
+      };
+    });
+    const hooks = apply({ readRows });
+    const session = createAgentSession({
+      observe: () => observation({ readMax: 2 }),
+      apply: hooks,
+    });
+    const result = await session.execute(
+      "edit.cells",
+      {
+        edits: [
+          {
+            column: "salary",
+            value: 999,
+            position: 5,
+            scope: "visible",
+          },
+        ],
+      },
+      1,
+      "far-row"
+    );
+    expect(result.ok).toBe(true);
+    expect(result.result).toMatchObject({
+      proposals: [{ rowKey: "r5", column: "salary", before: 140 }],
+    });
+    expect(readRows).toHaveBeenCalled();
   });
 });

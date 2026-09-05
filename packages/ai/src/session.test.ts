@@ -217,7 +217,12 @@ describe("createAgentSession", () => {
     expect(bad.error?.code).toBe("invalid-arguments");
     const huge = await session.execute("view.setPage", { page: 99 }, 1, "huge");
     expect(huge.error?.code).toBe("apply-failed");
-    const unwired = await session.execute("edit.cells", { edits: [] }, 1, "e");
+    const unwired = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "x" }] },
+      1,
+      "e"
+    );
     expect(unwired.error?.code).toBe("not-wired");
   });
 
@@ -233,8 +238,10 @@ describe("createAgentSession", () => {
       apply: applyB,
     });
     const first = await a.execute("view.setPage", { page: 2 }, 1, "same");
-    const again = await a.execute("view.setPage", { page: 9 }, 1, "same");
-    expect(again).toEqual(first);
+    const replay = await a.execute("view.setPage", { page: 2 }, 1, "same");
+    expect(replay).toEqual(first);
+    const mismatch = await a.execute("view.setPage", { page: 9 }, 1, "same");
+    expect(mismatch.error?.code).toBe("idempotency-mismatch");
     expect(applyA.setPage).toHaveBeenCalledTimes(1);
     expect(a.manifest().tableId).toBe("a");
     expect(b.manifest().tableId).toBe("b");

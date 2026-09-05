@@ -375,7 +375,12 @@ describe("executeOpenAITool", () => {
     const addRows = vi.fn();
     const adding = createAgentSession({
       observe: () =>
-        observation({ hasAdd: true, approval: "never", writePolicy: "allow" }),
+        observation({
+          hasAdd: true,
+          approval: "never",
+          writePolicy: "allow",
+          commit: "immediate",
+        }),
       apply: { addRows },
     });
     const added = await executeOpenAITool(

@@ -83,6 +83,96 @@ class ApplyError extends Error {
   }
 }
 
+interface ReplayRecord {
+  readonly capabilityKey: CapabilityKey;
+  readonly fingerprint: string;
+  readonly result: ExecuteResult;
+}
+
+function executeFingerprint(key: string, args: unknown): string {
+  return JSON.stringify({ key, args: args ?? {} });
+}
+
+function storeReplay(
+  replay: Map<string, ReplayRecord>,
+  idempotencyKey: string,
+  key: string,
+  args: unknown,
+  result: ExecuteResult
+): void {
+  if (!isCapabilityKey(key)) return;
+  replay.set(idempotencyKey, {
+    capabilityKey: key,
+    fingerprint: executeFingerprint(key, args),
+    result,
+  });
+}
+
+function filterRowWindow(
+  window: RowWindow,
+  observation: AgentObservation,
+  wanted?: readonly string[]
+): RowWindow {
+  const hidden = new Set(redactedIds(observation.columns));
+  const rows = window.rows.map((row) => {
+    const cells: Record<string, unknown> = {};
+    for (const [id, value] of Object.entries(row.cells)) {
+      if (hidden.has(id)) continue;
+      if (wanted && !wanted.includes(id)) continue;
+      cells[id] = value;
+    }
+    return { rowKey: row.rowKey, cells };
+  });
+  return {
+    rows,
+    offset: window.offset,
+    limit: window.limit,
+    redacted: [...hidden],
+  };
+}
+
+function refreshReplayResult(
+  record: ReplayRecord,
+  key: string,
+  observe: () => AgentObservation
+): ExecuteResult {
+  const observation = observe();
+  if (record.capabilityKey === "rows.read" && record.result.ok) {
+    const body = record.result.result as RowWindow;
+    return {
+      ...record.result,
+      revision: observation.viewRevision,
+      result: filterRowWindow(body, observation),
+    };
+  }
+  if (record.capabilityKey === "columns.describe" && record.result.ok) {
+    return {
+      ...record.result,
+      revision: observation.viewRevision,
+      result: { columns: observation.columns },
+    };
+  }
+  if (key === "rows.read" || key === "columns.describe") {
+    return {
+      ...record.result,
+      revision: observation.viewRevision,
+    };
+  }
+  return record.result;
+}
+
+function assertImmediateCommit(
+  key: CapabilityKey,
+  observation: AgentObservation
+): void {
+  if (commitOf(observation) === "stage") {
+    throw new ApplyError(
+      "commit-incompatible",
+      `${key} requires commit: immediate on this table`
+    );
+  }
+}
+
 /**
  * Provider-neutral three-stage session.
  *
@@ -94,7 +184,7 @@ class ApplyError extends Error {
 export function createAgentSession(
   options: CreateAgentSessionOptions
 ): AgentSession {
-  const replay = new Map<string, ExecuteResult>();
+  const replay = new Map<string, ReplayRecord>();
   const inflight = new Map<string, Promise<ExecuteResult>>();
 
   const catalog = (): CatalogEntry[] => {
@@ -130,7 +220,9 @@ export function createAgentSession(
         idempotencyKey,
         error: { code, message },
       };
-      replay.set(idempotencyKey, result);
+      if (code !== "cancelled" && code !== "revision-mismatch") {
+        storeReplay(replay, idempotencyKey, key, args, result);
+      }
       return result;
     };
 
@@ -167,14 +259,18 @@ export function createAgentSession(
       );
       if (
         isWriteResult(payload) &&
-        payload.approval === "pending" &&
+        (payload.approval === "pending" || payload.approval === "cancelled") &&
         !payload.applied
       ) {
         return {
-          ok: true,
+          ok: payload.approval === "pending",
           revision: options.observe().viewRevision,
           idempotencyKey,
-          result: payload,
+          result: payload.approval === "pending" ? payload : undefined,
+          error:
+            payload.approval === "cancelled"
+              ? { code: "cancelled", message: "approval cancelled" }
+              : undefined,
         };
       }
       const next = options.observe();
@@ -184,10 +280,18 @@ export function createAgentSession(
         idempotencyKey,
         result: payload,
       };
-      replay.set(idempotencyKey, result);
+      storeReplay(replay, idempotencyKey, key, args, result);
       return result;
     } catch (error) {
       if (error instanceof ApplyError) {
+        if (error.code === "cancelled") {
+          return {
+            ok: false,
+            revision: options.observe().viewRevision,
+            idempotencyKey,
+            error: { code: "cancelled", message: error.message },
+          };
+        }
         return fail(error.code, error.message);
       }
       return fail("apply-failed", errorMessage(error));
@@ -210,7 +314,22 @@ export function createAgentSession(
       });
     }
     const cached = replay.get(idempotencyKey);
-    if (cached) return Promise.resolve(cached);
+    if (cached) {
+      const fingerprint = executeFingerprint(key, args);
+      if (cached.fingerprint !== fingerprint) {
+        return Promise.resolve({
+          ok: false,
+          revision: options.observe().viewRevision,
+          idempotencyKey,
+          error: {
+            code: "idempotency-mismatch",
+            message:
+              "idempotency key was already used for a different capability or payload",
+          },
+        });
+      }
+      return Promise.resolve(refreshReplayResult(cached, key, options.observe));
+    }
     const running = inflight.get(idempotencyKey);
     if (running) return running;
 
@@ -284,11 +403,13 @@ async function dispatch(
           `page ${page} exceeds pageMax ${observation.pageMax}`
         );
       }
+      if (typeof body.limit === "number") {
+        assertApply(apply, "setLimit");
+      }
       assertApply(apply, "setPage");
       apply.setPage(page);
       if (typeof body.limit === "number") {
-        assertApply(apply, "setLimit");
-        apply.setLimit(body.limit);
+        apply.setLimit!(body.limit);
       }
       return { ok: true, revision: observation.viewRevision + 1 };
     }
@@ -492,10 +613,14 @@ function bindApprove(
 ): CreateAgentSessionOptions["onApprove"] | undefined {
   if (!onApprove) return undefined;
   return async (proposal) => {
-    if (signal?.aborted) return false;
+    if (signal?.aborted) {
+      throw new ApplyError("cancelled", "approval cancelled");
+    }
     if (!signal) return onApprove(proposal, signal);
     return new Promise<boolean>((resolve, reject) => {
-      const onAbort = () => resolve(false);
+      const onAbort = () => {
+        reject(new ApplyError("cancelled", "approval cancelled"));
+      };
       signal.addEventListener("abort", onAbort, { once: true });
       onApprove(proposal, signal).then(
         (allowed) => {
@@ -528,6 +653,9 @@ async function mutateCells(
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
   const edits = body.edits as Record<string, unknown>[];
+  if (!Array.isArray(edits) || edits.length === 0) {
+    throw new ApplyError("invalid-arguments", "at least one edit is required");
+  }
   const resolved: { rowKey: string; column: string; value: unknown }[] = [];
   const proposals: WriteProposal[] = [];
   for (const edit of edits) {
@@ -593,16 +721,23 @@ async function peekCell(
   column: string
 ): Promise<unknown> {
   if (!apply.readRows) return undefined;
-  const window = await Promise.resolve(
-    apply.readRows({
-      offset: 0,
-      limit: readMaxOf(observation),
-      columns: [column],
-      scope: observation.rowAddressScope,
-    })
-  );
-  const row = window.rows.find((entry) => entry.rowKey === rowKey);
-  return row?.cells[column];
+  const readMax = readMaxOf(observation);
+  let offset = 0;
+  for (let page = 0; page < 256; page++) {
+    const window = await Promise.resolve(
+      apply.readRows({
+        offset,
+        limit: readMax,
+        columns: [column],
+        scope: observation.rowAddressScope,
+      })
+    );
+    const row = window.rows.find((entry) => entry.rowKey === rowKey);
+    if (row) return row.cells[column];
+    if (window.rows.length < readMax) break;
+    offset += readMax;
+  }
+  return undefined;
 }
 
 async function mutateAdd(
@@ -612,6 +747,7 @@ async function mutateAdd(
   observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
+  assertImmediateCommit("rows.add", observation);
   const rows = body.rows as Record<string, unknown>[];
   const proposals: WriteProposal[] = rows.map((row, index) => ({
     rowKey:
@@ -639,6 +775,7 @@ async function mutateDelete(
   observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
+  assertImmediateCommit("rows.delete", observation);
   const keys = body.keys as string[];
   const proposals: WriteProposal[] = keys.map((rowKey) => ({ rowKey }));
   return finishWrite(
@@ -666,6 +803,7 @@ async function mutateReorder(
   observe: () => AgentObservation,
   onApprove?: (proposal: unknown) => Promise<boolean>
 ): Promise<WriteExecuteResult> {
+  assertImmediateCommit("rows.reorder", observation);
   const fromKey = String(body.fromKey);
   const toKey = String(body.toKey);
   const proposals: WriteProposal[] = [

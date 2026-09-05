@@ -295,7 +295,7 @@ export interface WriteProposal {
  * @public
  */
 export type ApprovalOutcome =
-  "pending" | "approved" | "rejected" | "not-required";
+  "pending" | "approved" | "rejected" | "cancelled" | "not-required";
 
 /**
  * Per-row outcome of a bulk write. Failures are never dropped.
