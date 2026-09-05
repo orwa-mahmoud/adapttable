@@ -28,80 +28,265 @@ export interface V3MigrationResult {
   issues: readonly V3MigrationIssue[];
 }
 
-const MOVED_CORE_EXPORTS = new Set([
-  "COLUMN_GROUP_ID_SEP",
-  "COLUMN_GROUP_RENDER_PREFIX",
-  "COLUMN_GROUP_STUB_PREFIX",
-  "COLUMN_GROUP_STUB_WIDTH",
-  "columnGroupHeaderCaption",
-  "columnGroupId",
-  "columnGroupPath",
-  "columnGroupStubStyle",
-  "groupedHeaderAlign",
-  "groupedHeaderCellStyle",
-  "groupedHeaderChildRule",
-  "groupedHeaderLabelStyle",
-  "HeaderGroupCell",
-  "headerGroupRow",
-  "headerGroupRows",
-  "HtmlGroupedHeaderCell",
-  "htmlGroupedHeaderPlan",
-  "isColumnGroupRenderKey",
-  "isColumnGroupStubKey",
-  "isColumnGroupSummaryKey",
-  "toggleCollapsedColumnGroup",
-  "EXTRA_OVER_SPAN_ROW_STYLE",
-  "EXTRA_OVER_SPAN_STYLE",
-  "EXTRA_ROW_PARTS",
-  "extraCountBeforeRowIds",
-  "extraCoveredTableSlots",
-  "ExtraEntry",
-  "extraHostFillStyle",
-  "extraRowsForSection",
-  "extraUncoveredColSpans",
-  "inflateBodyCellRowSpans",
-  "insertExtraRows",
-  "insertExtrasBeforeRows",
-  "isExtraEntry",
-  "orderedCardEntries",
-  "PINNED_BOTTOM_PART",
-  "PINNED_TOP_PART",
-  "pinnedRowCellStyle",
-  "pinnedRowPart",
-  "pinnedRowSticky",
-  "pinnedRowStickyStyle",
-  "useOffsetHeight",
-  "columnMenuActions",
-  "filterColumnMenuRows",
-  "hideAllColumns",
-  "resetColumnLayout",
-  "showAllColumns",
-  "unpinAllColumns",
-  "BodyCell",
-  "bodyCellsHaveRowSpan",
-  "cellsForRow",
-  "cellSpanMark",
-  "rowSpanSignature",
-  "REORDER_COLUMN_WIDTH",
-  "ROW_DND_MIME",
-  "rowReorderDropStyle",
-  "rowReorderSignature",
-  "RowReorderState",
-  "resolveRowHeight",
-  "resolveRowStyle",
-  "rowStyleSignature",
-  "EditableCellActivateProps",
-  "EditableCellButtonProps",
-  "EditableCellSlots",
-  "FilterHeaderClassNames",
-  "FilterHeaderRowProps",
-  "applyCollapsedColumnGroups",
-  "flattenColumnTree",
-  "FullscreenState",
-  "useFullscreen",
-  "rowPinSignature",
-  "rowSourceIndex",
-]);
+/**
+ * Where each moved export now lives, keyed by the specifier a v2 source
+ * imported it from. Generated from the repository's v3 package-split map, so
+ * the codemod and the published contract cannot drift apart.
+ */
+const MOVED_EXPORTS: Readonly<
+  Record<string, Readonly<Record<string, string>>>
+> = {
+  "@adapttable/core": {
+    AggregateOptions: "@adapttable/react",
+    Aggregator: "@adapttable/react",
+    BaseDataTableProps: "@adapttable/react",
+    BodyCell: "@adapttable/react/adapter",
+    BulkAction: "@adapttable/react",
+    COLUMN_GROUP_ID_SEP: "@adapttable/react/adapter",
+    COLUMN_GROUP_RENDER_PREFIX: "@adapttable/react/adapter",
+    COLUMN_GROUP_STUB_PREFIX: "@adapttable/react/adapter",
+    COLUMN_GROUP_STUB_WIDTH: "@adapttable/react/adapter",
+    CellElementProps: "@adapttable/react",
+    ChromeBodyData: "@adapttable/react",
+    ColumnDef: "@adapttable/react",
+    ColumnFooterContext: "@adapttable/react",
+    ColumnGroupDef: "@adapttable/react",
+    ColumnGroupRecord: "@adapttable/react",
+    ColumnHeaderController: "@adapttable/react",
+    ColumnReorderKeyProps: "@adapttable/react",
+    ColumnResizeHandleProps: "@adapttable/react",
+    ComputedColumnSpec: "@adapttable/react",
+    CustomCellEditorRender: "@adapttable/react",
+    EXTRA_OVER_SPAN_ROW_STYLE: "@adapttable/react/adapter",
+    EXTRA_OVER_SPAN_STYLE: "@adapttable/react/adapter",
+    EXTRA_ROW_PARTS: "@adapttable/react/adapter",
+    EditableCellActivateControlProps: "@adapttable/react",
+    EditableCellActivateProps: "@adapttable/react/adapter",
+    EditableCellButtonProps: "@adapttable/react/adapter",
+    EditableCellControls: "@adapttable/react",
+    EditableCellGate: "@adapttable/react",
+    EditableCellGateProps: "@adapttable/react",
+    EditableCellSlots: "@adapttable/react/adapter",
+    ExportContext: "@adapttable/react",
+    ExtraEntry: "@adapttable/react/adapter",
+    ExtraRow: "@adapttable/react",
+    FeatureProps: "@adapttable/react",
+    FeatureProviderContribution: "@adapttable/react",
+    FeatureProviderProps: "@adapttable/react",
+    FeatureRender: "@adapttable/react",
+    FilterChromeMode: "@adapttable/react",
+    FilterHeaderClassNames: "@adapttable/react/adapter",
+    FilterHeaderRowProps: "@adapttable/react/adapter",
+    FilterTypeSpec: "@adapttable/react",
+    FullscreenState: "@adapttable/react/adapter",
+    GroupAggregatesFn: "@adapttable/react",
+    GroupRowCell: "@adapttable/react",
+    GroupedFlatEntry: "@adapttable/react",
+    GroupingChipKeyboardProps: "@adapttable/react",
+    GroupingDragProps: "@adapttable/react",
+    GroupingDropProps: "@adapttable/react",
+    HeaderFilterOpenProvider: "@adapttable/react",
+    HeaderGroupCell: "@adapttable/react/adapter",
+    HtmlGroupedHeaderCell: "@adapttable/react/adapter",
+    IncrementalView: "@adapttable/react",
+    IncrementalViewConfig: "@adapttable/react",
+    MobileCardField: "@adapttable/react",
+    MobileCardRenderer: "@adapttable/react",
+    MultiSelectEditorCheckboxProps: "@adapttable/react",
+    MultiSelectEditorChrome: "@adapttable/react",
+    MultiSelectEditorChromeProps: "@adapttable/react",
+    MultiSelectEditorSlots: "@adapttable/react",
+    NestedTable: "@adapttable/react",
+    PINNED_BOTTOM_PART: "@adapttable/react/adapter",
+    PINNED_TOP_PART: "@adapttable/react/adapter",
+    REORDER_COLUMN_WIDTH: "@adapttable/react/adapter",
+    ROW_DND_MIME: "@adapttable/react/adapter",
+    RowAction: "@adapttable/react",
+    RowActionsRenderer: "@adapttable/react",
+    RowReorderState: "@adapttable/react/adapter",
+    RowStyle: "@adapttable/react",
+    SidePanelEntry: "@adapttable/react",
+    Slot: "@adapttable/react",
+    TableChrome: "@adapttable/react",
+    TableExtraEntry: "@adapttable/react",
+    TableRowReorderState: "@adapttable/react",
+    ToolbarSlots: "@adapttable/react",
+    UseDataTableResult: "@adapttable/react",
+    UseScrollToTableTopOptions: "@adapttable/react",
+    UseTableDataOptions: "@adapttable/react",
+    aggregate: "@adapttable/react",
+    applyCollapsedColumnGroups: "@adapttable/react/adapter",
+    bodyCellsHaveRowSpan: "@adapttable/react/adapter",
+    cellSpanMark: "@adapttable/react/adapter",
+    cellsForRow: "@adapttable/react/adapter",
+    columnGroupHeaderCaption: "@adapttable/react/adapter",
+    columnGroupId: "@adapttable/react/adapter",
+    columnGroupPath: "@adapttable/react/adapter",
+    columnGroupStubStyle: "@adapttable/react/adapter",
+    columnHeaderLabel: "@adapttable/react",
+    columnMenuActions: "@adapttable/react/adapter",
+    exportViewFromChrome: "@adapttable/react",
+    extraCountBeforeRowIds: "@adapttable/react/adapter",
+    extraCoveredTableSlots: "@adapttable/react/adapter",
+    extraHostFillStyle: "@adapttable/react/adapter",
+    extraRowsForSection: "@adapttable/react/adapter",
+    extraUncoveredColSpans: "@adapttable/react/adapter",
+    filterColumnMenuRows: "@adapttable/react/adapter",
+    flattenColumnTree: "@adapttable/react/adapter",
+    groupAggregateEntries: "@adapttable/react",
+    groupRowLayout: "@adapttable/react",
+    groupedHeaderAlign: "@adapttable/react/adapter",
+    groupedHeaderCellStyle: "@adapttable/react/adapter",
+    groupedHeaderChildRule: "@adapttable/react/adapter",
+    groupedHeaderLabelStyle: "@adapttable/react/adapter",
+    headerFilterStickTop: "@adapttable/react",
+    headerGroupRow: "@adapttable/react/adapter",
+    headerGroupRows: "@adapttable/react/adapter",
+    hideAllColumns: "@adapttable/react/adapter",
+    htmlGroupedHeaderPlan: "@adapttable/react/adapter",
+    inflateBodyCellRowSpans: "@adapttable/react/adapter",
+    insertExtraRows: "@adapttable/react/adapter",
+    insertExtrasBeforeRows: "@adapttable/react/adapter",
+    isColumnGroupRenderKey: "@adapttable/react/adapter",
+    isColumnGroupStubKey: "@adapttable/react/adapter",
+    isColumnGroupSummaryKey: "@adapttable/react/adapter",
+    isDeclarativeFilters: "@adapttable/react",
+    isExtraEntry: "@adapttable/react/adapter",
+    orderedCardEntries: "@adapttable/react/adapter",
+    pinnedRowCellStyle: "@adapttable/react/adapter",
+    pinnedRowPart: "@adapttable/react/adapter",
+    pinnedRowSticky: "@adapttable/react/adapter",
+    pinnedRowStickyStyle: "@adapttable/react/adapter",
+    renderRegisteredFilter: "@adapttable/react",
+    resetColumnLayout: "@adapttable/react/adapter",
+    resolveColumnFooter: "@adapttable/react",
+    resolveColumnHeader: "@adapttable/react",
+    resolveRowHeight: "@adapttable/react/adapter",
+    resolveRowStyle: "@adapttable/react/adapter",
+    rowPinSignature: "@adapttable/react/adapter",
+    rowReorderDropStyle: "@adapttable/react/adapter",
+    rowReorderSignature: "@adapttable/react/adapter",
+    rowSourceIndex: "@adapttable/react/adapter",
+    rowSpanSignature: "@adapttable/react/adapter",
+    rowStyleSignature: "@adapttable/react/adapter",
+    showAllColumns: "@adapttable/react/adapter",
+    toggleCollapsedColumnGroup: "@adapttable/react/adapter",
+    unpinAllColumns: "@adapttable/react/adapter",
+    useActiveFilterChips: "@adapttable/react",
+    useBatchEditing: "@adapttable/react",
+    useBooleanFilterWidget: "@adapttable/react",
+    useBulkActionRunner: "@adapttable/react",
+    useCellEditing: "@adapttable/react",
+    useCellSaveState: "@adapttable/react",
+    useChecklistFilter: "@adapttable/react",
+    useChromeScrollReset: "@adapttable/react",
+    useColorScheme: "@adapttable/react",
+    useColumnDragState: "@adapttable/react",
+    useColumnLayout: "@adapttable/react",
+    useColumnLayoutStorageState: "@adapttable/react",
+    useColumnLayoutUrlState: "@adapttable/react",
+    useDataTable: "@adapttable/react",
+    useDebounce: "@adapttable/react",
+    useDensityUrlState: "@adapttable/react",
+    useDirtyCells: "@adapttable/react",
+    useEditConflict: "@adapttable/react",
+    useEditHistory: "@adapttable/react",
+    useExtraChips: "@adapttable/react",
+    useFilterOptions: "@adapttable/react",
+    useFilterTreeChips: "@adapttable/react",
+    useFilterTriggerToggle: "@adapttable/react",
+    useFindFocus: "@adapttable/react",
+    useFindInTable: "@adapttable/react",
+    useFrontendData: "@adapttable/react",
+    useFullscreen: "@adapttable/react/adapter",
+    useGridFocus: "@adapttable/react",
+    useGroupCollapse: "@adapttable/react",
+    useGroupCollapseUrlState: "@adapttable/react",
+    useGroupPaging: "@adapttable/react",
+    useHeaderFilterOverlay: "@adapttable/react",
+    useHighlight: "@adapttable/react",
+    useHorizontalOverflow: "@adapttable/react",
+    useInfiniteScroll: "@adapttable/react",
+    useIsMobile: "@adapttable/react",
+    useLazyChildren: "@adapttable/react",
+    useMediaQuery: "@adapttable/react",
+    useOffsetHeight: "@adapttable/react/adapter",
+    usePlainChromeBodyData: "@adapttable/react",
+    usePointerDismiss: "@adapttable/react",
+    usePrefersReducedMotion: "@adapttable/react",
+    useQuerySource: "@adapttable/react",
+    useRangeFilterWidget: "@adapttable/react",
+    useRowEditing: "@adapttable/react",
+    useRowExpansion: "@adapttable/react",
+    useRowMutations: "@adapttable/react",
+    useRowPinning: "@adapttable/react",
+    useRowPinningUrlState: "@adapttable/react",
+    useRowReorder: "@adapttable/react",
+    useSavedViews: "@adapttable/react",
+    useScrollToTableTop: "@adapttable/react",
+    useSearchInput: "@adapttable/react",
+    useSelection: "@adapttable/react",
+    useServerData: "@adapttable/react",
+    useShortcuts: "@adapttable/react",
+    useTableChrome: "@adapttable/react",
+    useTableData: "@adapttable/react",
+    useTableEditHistory: "@adapttable/react",
+    useTableUrlState: "@adapttable/react",
+    useTableVirtualization: "@adapttable/react",
+    useTextFilterWidget: "@adapttable/react",
+    useTreeExpansion: "@adapttable/react",
+    useVirtualChromeBodyData: "@adapttable/react",
+  },
+  "@adapttable/core/formula": {
+    ColumnDef: "@adapttable/react/formula",
+    ColumnFooterContext: "@adapttable/react/formula",
+    ColumnHeaderController: "@adapttable/react/formula",
+    CustomCellEditorRender: "@adapttable/react/formula",
+    useFormulaUrlState: "@adapttable/react/formula",
+  },
+  "@adapttable/core/pdf": {
+    ColumnDef: "@adapttable/react/pdf",
+    ColumnFooterContext: "@adapttable/react/pdf",
+    ColumnHeaderController: "@adapttable/react/pdf",
+    CustomCellEditorRender: "@adapttable/react/pdf",
+  },
+  "@adapttable/core/pivot": {
+    Aggregator: "@adapttable/react/pivot",
+    ColumnDef: "@adapttable/react/pivot",
+    ColumnFooterContext: "@adapttable/react/pivot",
+    ColumnHeaderController: "@adapttable/react/pivot",
+    CustomCellEditorRender: "@adapttable/react/pivot",
+    PivotOptions: "@adapttable/react/pivot",
+    PivotRow: "@adapttable/react/pivot",
+    PivotTableModel: "@adapttable/react/pivot",
+    PivotTableModelOptions: "@adapttable/react/pivot",
+    ServerPivotOptions: "@adapttable/react/pivot",
+    usePivotUrlState: "@adapttable/react/pivot",
+  },
+  "@adapttable/core/query": {
+    Aggregator: "@adapttable/react/query",
+  },
+  "@adapttable/core/stream": {
+    useChangedCellFlash: "@adapttable/react/stream",
+    useRowPatchStream: "@adapttable/react/stream",
+  },
+  "@adapttable/core/xlsx": {
+    ColumnDef: "@adapttable/react/xlsx",
+    ColumnFooterContext: "@adapttable/react/xlsx",
+    ColumnHeaderController: "@adapttable/react/xlsx",
+    CustomCellEditorRender: "@adapttable/react/xlsx",
+  },
+};
+
+/**
+ * Core subpaths that moved wholesale. Every export went with them, so the
+ * specifier is rewritten and the named list is untouched.
+ */
+const REDIRECTED_SPECIFIERS: Readonly<Record<string, string>> = {
+  "@adapttable/core/adapter": "@adapttable/react/adapter",
+  "@adapttable/core/features": "@adapttable/react/features",
+  "@adapttable/core/sparkline": "@adapttable/react/sparkline",
+};
 
 const REMOVED_DATA_TABLE_PROPS = [
   "pinnedRowIds",
@@ -160,8 +345,8 @@ const REMOVED_DATA_TABLE_PROPS = [
   "rowActions",
 ] as const;
 
-const CORE_IMPORT =
-  /import\s+(type\s+)?\{([^{}]*)\}\s+from\s+(["'])@adapttable\/core\3[ \t]*;?/g;
+const ADAPTTABLE_IMPORT =
+  /(import|export)\s+(type\s+)?\{([^{}]*)\}\s+from\s+(["'])(@adapttable\/[a-z0-9/-]+)\4[ \t]*;?/g;
 const IMPORT_SPECIFIER =
   /^(?:type\s+)?([A-Za-z_$][\w$]*)(?:\s+as\s+[A-Za-z_$][\w$]*)?$/;
 
@@ -184,12 +369,13 @@ function issueAt(
 }
 
 function formatImport(
+  keyword: string,
   typeOnly: boolean,
   specifiers: readonly string[],
   quote: string,
   source: string
 ): string {
-  return `import${typeOnly ? " type" : ""} { ${specifiers.join(
+  return `${keyword}${typeOnly ? " type" : ""} { ${specifiers.join(
     ", "
   )} } from ${quote}${source}${quote};`;
 }
@@ -204,9 +390,26 @@ function rewriteCoreImports(source: string): {
   let movedImports = 0;
   const issues: V3MigrationIssue[] = [];
 
-  for (const match of source.matchAll(CORE_IMPORT)) {
+  for (const match of source.matchAll(ADAPTTABLE_IMPORT)) {
     const index = match.index;
-    const [declaration, typeKeyword = "", body = "", quote = '"'] = match;
+    const [
+      declaration,
+      keyword = "import",
+      typeKeyword = "",
+      body = "",
+      quote = '"',
+      from = "",
+    ] = match;
+    code += source.slice(cursor, index);
+    cursor = index + declaration.length;
+
+    const redirect = REDIRECTED_SPECIFIERS[from];
+    const routes = MOVED_EXPORTS[from];
+    if (!redirect && !routes) {
+      code += declaration;
+      continue;
+    }
+
     const specifiers = body
       .split(",")
       .map((part) => part.trim())
@@ -214,50 +417,63 @@ function rewriteCoreImports(source: string): {
     const parsed = specifiers.map((specifier) =>
       IMPORT_SPECIFIER.exec(specifier)
     );
-
-    code += source.slice(cursor, index);
-    cursor = index + declaration.length;
-
     if (specifiers.length === 0 || parsed.includes(null)) {
       code += declaration;
       issues.push(
         issueAt(
           source,
           index,
-          "Complex @adapttable/core import left unchanged; split or comment-preserving migration requires review."
+          `Complex ${from} import left unchanged; split or comment-preserving migration requires review.`
         )
       );
       continue;
     }
 
-    const moved: string[] = [];
+    const typeOnly = typeKeyword.length > 0;
+    if (redirect) {
+      // The whole subpath moved, so the names are untouched and only the
+      // specifier changes.
+      code += formatImport(keyword, typeOnly, specifiers, quote, redirect);
+      movedImports += specifiers.length;
+      continue;
+    }
+
+    // Group by destination so a mixed import becomes one declaration per
+    // package it now spans, in a stable order.
     const kept: string[] = [];
+    const byDestination = new Map<string, string[]>();
     specifiers.forEach((specifier, specifierIndex) => {
-      const importedName = parsed[specifierIndex]?.[1];
-      if (importedName && MOVED_CORE_EXPORTS.has(importedName)) {
-        moved.push(specifier);
-      } else {
+      const importedName = parsed[specifierIndex]?.[1] ?? "";
+      const destination = routes?.[importedName];
+      if (destination === undefined) {
         kept.push(specifier);
+        return;
       }
+      const bucket = byDestination.get(destination) ?? [];
+      bucket.push(specifier);
+      byDestination.set(destination, bucket);
     });
 
-    if (moved.length === 0) {
+    if (byDestination.size === 0) {
       code += declaration;
       continue;
     }
 
-    const typeOnly = typeKeyword.length > 0;
     const declarations: string[] = [];
     if (kept.length > 0) {
-      declarations.push(
-        formatImport(typeOnly, kept, quote, "@adapttable/core")
-      );
+      declarations.push(formatImport(keyword, typeOnly, kept, quote, from));
     }
-    declarations.push(
-      formatImport(typeOnly, moved, quote, "@adapttable/react/adapter")
+    const destinations = [...byDestination.keys()].sort((left, right) =>
+      left.localeCompare(right)
     );
+    for (const destination of destinations) {
+      const names = byDestination.get(destination) ?? [];
+      declarations.push(
+        formatImport(keyword, typeOnly, names, quote, destination)
+      );
+      movedImports += names.length;
+    }
     code += declarations.join("\n");
-    movedImports += moved.length;
   }
 
   code += source.slice(cursor);
