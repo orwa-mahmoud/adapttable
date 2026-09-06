@@ -15,10 +15,13 @@ import {
 } from "@adapttable/react/adapter";
 import {
   type ReactNode,
+  useCallback,
+  useDebugValue,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 import type {
@@ -652,7 +655,6 @@ function TableAgentProvider({
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
   const revisionCounterRef = useRef(createRevisionCounter());
-  const [revision, setRevision] = useState(1);
   const [pending, setPending] = useState<{
     proposals: readonly WriteProposal[];
     resolve: (ok: boolean) => void;
@@ -661,36 +663,30 @@ function TableAgentProvider({
     proposals: readonly WriteProposal[];
     resolve: (ok: boolean) => void;
   } | null>(null);
-  const bump = useRef(() => setRevision((n) => n + 1));
-  bump.current = () => setRevision((n) => n + 1);
 
+  // The table as a store: subscribe where there is one to subscribe to, and
+  // read the stamp on every render either way. React re-reads the stamp after
+  // it attaches, so a table that moved between the render and the
+  // subscription is caught rather than missed — which is what the old
+  // dependency-free effect was standing in for. The value is not rendered;
+  // re-rendering is the point, because that republishes the manifest.
   const neutralTable = runtime.view()?.neutralTable;
-  useLayoutEffect(() => {
-    if (!neutralTable) return;
-    const next = revisionCounterRef.current.bumpFrom(neutralTable.revisions);
-    if (next !== revision) setRevision(next);
-  });
-
-  useEffect(() => {
-    if (!neutralTable) return;
-    return neutralTable.subscribe("all", () => {
-      const next = revisionCounterRef.current.bumpFrom(neutralTable.revisions);
-      setRevision(next);
-    });
-  }, [neutralTable]);
-
-  const stampRef = useRef<string | undefined>(undefined);
-  useLayoutEffect(() => {
-    if (neutralTable) return;
-    const live = viewRevisionStamp(runtime.view());
-    if (stampRef.current === undefined) {
-      stampRef.current = live;
-      return;
-    }
-    if (stampRef.current === live) return;
-    stampRef.current = live;
-    bump.current();
-  });
+  const readStamp = useCallback(
+    () =>
+      neutralTable
+        ? revisionToken(neutralTable.revisions)
+        : viewRevisionStamp(runtime.view()),
+    [neutralTable, runtime]
+  );
+  const subscribeToTable = useCallback(
+    (onStoreChange: () => void) =>
+      neutralTable
+        ? neutralTable.subscribe("all", onStoreChange)
+        : () => undefined,
+    [neutralTable]
+  );
+  const stamp = useSyncExternalStore(subscribeToTable, readStamp, readStamp);
+  useDebugValue(stamp);
 
   const hostApprove = options.onApprove;
   const waitForChrome = useRef<

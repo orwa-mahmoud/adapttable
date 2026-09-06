@@ -1211,7 +1211,7 @@ class BulkFailure extends Error {
 async function applyEach<T extends { rowKey: string; column?: string }>(
   items: readonly T[],
   write: (item: T) => Promise<void>,
-  throwIfCancelled: () => void = () => undefined
+  throwIfCancelled: () => void
 ): Promise<{ applied: boolean; results: WriteRowResult[] }> {
   const results: WriteRowResult[] = [];
   for (const item of items) {

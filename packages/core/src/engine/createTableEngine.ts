@@ -293,15 +293,13 @@ function observableAxes<TRow>(
 ): TableRevisionAxis[] {
   const axes: TableRevisionAxis[] = [];
   if (!sameList(before.view.columns, after.view.columns)) axes.push("schema");
-  if (
-    !sameList(before.view.data, after.view.data) ||
-    !sameList(before.derived.sorted, after.derived.sorted)
-  ) {
-    axes.push("data");
-  }
+  // `data` is the dataset. What the query makes of it is a view change, so a
+  // search or a filter moves `view` and leaves a data-only subscriber alone.
+  if (!sameList(before.view.data, after.view.data)) axes.push("data");
   const a = before.view;
   const b = after.view;
   if (
+    !sameList(before.derived.sorted, after.derived.sorted) ||
     a.page !== b.page ||
     a.limit !== b.limit ||
     a.search !== b.search ||
