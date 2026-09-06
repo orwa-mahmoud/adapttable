@@ -440,6 +440,35 @@ describe("host callbacks in place of the live table's", () => {
     expect(applyView).not.toHaveBeenCalled();
   });
 
+  it("propagates a host callback's async failure instead of swallowing it", async () => {
+    // The simplification removed the wrappers that used to stand between the
+    // session and a host callback. A rejected promise has to travel the same
+    // distance a thrown error does — reported as the operation failing, with
+    // the host's own message intact, never reported as success.
+    const runExport = vi
+      .fn()
+      .mockRejectedValue(new Error("the export endpoint refused"));
+    mount(
+      { tableId: "async-failure", approval: "never", apply: { runExport } },
+      VIEW
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = await session().execute(
+      "export.run",
+      { format: "csv" },
+      session().manifest().viewRevision,
+      "p-export-fails"
+    );
+
+    expect(runExport).toHaveBeenCalledExactlyOnceWith("csv");
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("apply-failed");
+    expect(result.error?.message).toBe("the export endpoint refused");
+  });
+
   it("describes a capability the manifest lists", async () => {
     mount({ tableId: "describe", approval: "never" });
     await waitFor(() => {
