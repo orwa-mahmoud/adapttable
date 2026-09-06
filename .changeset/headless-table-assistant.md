@@ -16,8 +16,12 @@ nothing.
 Receipts come from results rather than an outer flag: `receiptFromResult`,
 `receiptsFromResults` and `turnStatus` report `executed`, `staged`,
 `rejected`, `awaiting-approval`, `cancelled`, `stale`, `failed` and summarize
-a turn as `applied`, `partial`, `none`, `cancelled` or `failed`. An approved
-write that has not reached the host reads as staged.
+a turn as `applied`, `partial`, `none`, `cancelled` or `failed`.
+
+Both readers take the table's commit policy, because the session cannot say on
+its own: a staging callback is a host callback, so a staged write and a saved
+one both come back applied. Under `commit: "stage"` a write reads as staged,
+and the panel tells the reader it still needs saving in the table.
 
 `AssistantTransport` is the seam a host fills, and it names nothing about HTTP
 or any model. `assistantHttpTransport` on `@adapttable/ai/http` adapts the

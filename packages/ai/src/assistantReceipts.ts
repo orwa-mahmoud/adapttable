@@ -7,6 +7,7 @@
  * a change landed that is still sitting unsaved — so the status is read off
  * the payload the session returned, not off the outer flag.
  */
+import type { CommitPolicy } from "./keys";
 import type {
   ApprovalOutcome,
   ExecuteResult,
@@ -81,15 +82,23 @@ function failureStatus(code: string | undefined): AssistantReceiptStatus {
 /**
  * Read one action's receipt from its result.
  *
+ * `commit` is what separates a write that reached the host from one that is
+ * sitting on the table's dirty path: the session reports BOTH as applied,
+ * because a staging callback is still a host callback. Without the policy,
+ * a staged change reads as done, and the reader is told a number changed
+ * while the table is showing "1 unsaved row".
+ *
  * @param result - What `AgentSession.execute` returned.
  * @param capabilityKey - The key that was executed, when known.
+ * @param commit - The table's commit policy, from its manifest.
  * @returns A status a reader can act on, and the session's own message.
  *
  * @public
  */
 export function receiptFromResult(
   result: ExecuteResult,
-  capabilityKey?: string
+  capabilityKey?: string,
+  commit?: CommitPolicy
 ): AssistantReceipt {
   const base = { capabilityKey, idempotencyKey: result.idempotencyKey };
   if (!result.ok) {
@@ -101,9 +110,12 @@ export function receiptFromResult(
   }
   const payload = result.result;
   if (!isWriteResult(payload)) return { ...base, status: "executed" };
-  // A write reports itself: applied means the host callback ran, and
-  // everything else is decided by what the approval did.
-  if (payload.applied) return { ...base, status: "executed" };
+  // A write reports itself: applied means a host callback ran, and everything
+  // else is decided by what the approval did. Under `commit: "stage"` the
+  // callback that ran was the staging one, so the change is not saved yet.
+  if (payload.applied) {
+    return { ...base, status: commit === "stage" ? "staged" : "executed" };
+  }
   return { ...base, status: fromApproval(payload.approval) };
 }
 
@@ -112,15 +124,19 @@ export function receiptFromResult(
  *
  * @param results - Results in the order the actions ran.
  * @param keys - Capability keys in the same order, when known.
+ * @param commit - The table's commit policy, from its manifest.
  * @returns One receipt per result.
  *
  * @public
  */
 export function receiptsFromResults(
   results: readonly ExecuteResult[],
-  keys: readonly string[] = []
+  keys: readonly string[] = [],
+  commit?: CommitPolicy
 ): readonly AssistantReceipt[] {
-  return results.map((result, index) => receiptFromResult(result, keys[index]));
+  return results.map((result, index) =>
+    receiptFromResult(result, keys[index], commit)
+  );
 }
 
 /**

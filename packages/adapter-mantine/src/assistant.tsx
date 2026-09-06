@@ -134,31 +134,33 @@ function AssistantSheet({
   children,
 }: Readonly<TableAssistantSheetProps>) {
   return (
-    <Drawer
-      opened={open}
-      onClose={onClose}
-      position="bottom"
-      size="90%"
-      title={label}
-      data-adapttable-part={part}
-      className={className}
-      styles={{
-        content: {
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        },
-        body: {
-          flex: 1,
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        },
-      }}
-    >
-      {children}
-    </Drawer>
+    // The compound form, because Mantine's shorthand `Drawer` puts loose
+    // props on a root element that stays in the DOM while closed — the part
+    // has to name the visible content, the way it does in every other kit.
+    <Drawer.Root opened={open} onClose={onClose} position="bottom" size="90%">
+      <Drawer.Overlay />
+      <Drawer.Content
+        data-adapttable-part={part}
+        className={className}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <Drawer.Header>
+          <Drawer.Title>{label}</Drawer.Title>
+          <Drawer.CloseButton />
+        </Drawer.Header>
+        <Drawer.Body
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          {children}
+        </Drawer.Body>
+      </Drawer.Content>
+    </Drawer.Root>
   );
 }
 

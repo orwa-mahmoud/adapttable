@@ -51,6 +51,41 @@ describe("receiptFromResult", () => {
     ).toBe("staged");
   });
 
+  it("calls a staged write staged, even though the session applied it", () => {
+    // The staging callback IS a host callback, so the session reports
+    // `applied: true` for it. Reading that as done tells the reader a number
+    // changed while the table is still showing "1 unsaved row" — the commit
+    // policy is the only thing that separates the two.
+    const staged = receiptFromResult(
+      result({
+        result: { proposals: [], applied: true, approval: "not-required" },
+      }),
+      "edit.cells",
+      "stage"
+    );
+    expect(staged.status).toBe("staged");
+
+    const saved = receiptFromResult(
+      result({
+        result: { proposals: [], applied: true, approval: "not-required" },
+      }),
+      "edit.cells",
+      "immediate"
+    );
+    expect(saved.status).toBe("executed");
+  });
+
+  it("leaves a view operation alone under a staging policy", () => {
+    // Only writes stage. A filter is not waiting for anyone to press Save.
+    expect(
+      receiptFromResult(
+        result({ result: { ok: true } }),
+        "view.setFilters",
+        "stage"
+      ).status
+    ).toBe("executed");
+  });
+
   it("distinguishes a human's refusal from a failure", () => {
     expect(
       receiptFromResult(
@@ -144,6 +179,21 @@ describe("turnStatus", () => {
 
   it("says none when a turn ran no actions", () => {
     expect(turnStatus([])).toBe("none");
+  });
+
+  it("carries the commit policy to every receipt in the turn", () => {
+    const receipts = receiptsFromResults(
+      [
+        result({
+          idempotencyKey: "a",
+          result: { proposals: [], applied: true, approval: "not-required" },
+        }),
+      ],
+      ["edit.cells"],
+      "stage"
+    );
+
+    expect(receipts[0]?.status).toBe("staged");
   });
 
   it("pairs each receipt with the key that ran", () => {

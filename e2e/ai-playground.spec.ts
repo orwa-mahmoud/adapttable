@@ -6,10 +6,14 @@ import {
 } from "../apps/showcase/matrix.mjs";
 
 /**
- * Feature 21: every published kit mounts a real table and a labelled
- * tool-call playground. Not a language model.
+ * Feature 21: every published kit mounts a real table and its own assistant
+ * panel. There is no model in the demo — a fixed script maps each example to
+ * ONE capability call, which runs through the ordinary session executor. So
+ * every assertion here is about the TABLE changing, not about the reply text.
  */
 const kits = builtAdapters().map((adapter) => adapter.key);
+
+const part = (name: string) => `[data-adapttable-part="${name}"]`;
 
 async function mountedTable(page: Page) {
   const table = page.getByRole("table");
@@ -18,14 +22,31 @@ async function mountedTable(page: Page) {
   return table.or(cards).first();
 }
 
-async function openPlayground(page: Page, kit: string): Promise<void> {
+async function openDemo(page: Page, kit: string): Promise<void> {
   await page.goto(`/${kit}/ai/`);
-  await expect(page.locator(".ai-play")).toBeVisible();
+  await expect(page.locator(".ai-demo")).toBeVisible();
   await mountedTable(page);
-  await expect.poll(async () => catalogText(page)).toContain("view.setFilters");
+  await expect(page.locator(part("assistant-surface"))).toBeVisible();
+}
+
+/** Send text the way a reader does: type it, press Enter. */
+async function ask(page: Page, text: string): Promise<void> {
+  const input = page.locator(part("assistant-input"));
+  await input.fill(text);
+  await input.press("Enter");
+}
+
+async function lastReply(page: Page): Promise<string> {
+  const texts = page.locator(part("assistant-message-text"));
+  return (await texts.last().innerText()).trim();
+}
+
+async function receipts(page: Page): Promise<string[]> {
+  return page.locator(part("assistant-receipt-summary")).allInnerTexts();
 }
 
 async function catalogText(page: Page): Promise<string> {
+  await page.locator(".ai-demo__dev summary").click();
   return (await page.getByTestId("ai-catalog").innerText()).trim();
 }
 
@@ -80,193 +101,226 @@ async function installMockAgentBackend(page: Page): Promise<void> {
 
 async function connectMockBackend(page: Page): Promise<void> {
   await installMockAgentBackend(page);
-  await page.getByTestId("ai-mode-backend").click();
-  await page.getByTestId("ai-backend-connect").click();
-  await expect(page.getByTestId("ai-backend-notice")).toContainText(
-    "Mock backend ready"
-  );
+  await page.locator(part("assistant-settings")).click();
+  await page.getByLabel("Your endpoint").fill(MOCK_BACKEND);
+  await page.getByRole("button", { name: "Connect", exact: true }).click();
 }
 
-async function jonahSalary(page: Page): Promise<string> {
-  const row = page.getByRole("row", { name: /Jonah/ });
-  const editor = row.locator('[data-adapttable-part="edit-cell-editor"]');
-  if ((await editor.count()) > 0) return (await editor.inputValue()).trim();
-  const spin = row.getByRole("spinbutton");
-  if ((await spin.count()) > 0) return (await spin.inputValue()).trim();
-  return (await row.getByRole("cell").nth(2).innerText()).trim();
+/** The rows only — reading the panel too would make the transcript count. */
+async function visibleTableText(page: Page): Promise<string> {
+  const region = page.locator(".ai-demo__stage > :not(.ai-demo__panel)").last();
+  return (await region.innerText()).replace(/\s+/g, " ");
 }
 
 for (const kit of kits) {
-  test(`${kit} AI page is a real kit table with a live catalog`, async ({
+  test(`${kit} AI page mounts a real table and its own assistant`, async ({
     page,
   }) => {
-    await openPlayground(page, kit);
+    await openDemo(page, kit);
+
+    await expect(page.locator(part("assistant-title"))).toHaveText(
+      "Table assistant"
+    );
+    // The badge names the state in words, translated — never a raw token.
+    await expect(page.locator(part("assistant-connection"))).toHaveText(
+      "Ready"
+    );
+    await expect(page.locator(part("assistant-empty-prompt"))).toContainText(
+      "What would you like to do"
+    );
+    await expect(
+      page.locator(part("assistant-suggestion")).first()
+    ).toBeVisible();
+
     const catalog = await catalogText(page);
     expect(catalog).toContain("view.setFilters");
     expect(catalog).toContain("edit.cells");
     expect(catalog).not.toMatch(/pivot/i);
-    expect(catalog).not.toContain("view.setGroupBy");
-    await expect(
-      page.locator(".ai-play").getByRole("link", { name: "AI integrations" })
-    ).toHaveAttribute("href", /ai-integrations/);
-    await expect(
-      page.getByRole("region", { name: /Tool-call playground/ })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("radiogroup", { name: "Live catalog" })
-    ).toBeVisible();
-    await expect(page.getByTestId("ai-mode-simulated")).toHaveAttribute(
-      "aria-checked",
-      "true"
-    );
-    await expect(page.getByTestId("ai-backend")).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Filter Core team" })
-    ).toBeVisible();
   });
 
-  test(`${kit} catalog drops edit.cells when editing is turned off`, async ({
+  test(`${kit} runs a scripted request against the real table`, async ({
     page,
   }) => {
-    await openPlayground(page, kit);
-    expect(await catalogText(page)).toContain("edit.cells");
-    await page.getByTestId("ai-allow-edit").click();
-    await expect
-      .poll(async () => catalogText(page))
-      .not.toContain("edit.cells");
-    expect(await catalogText(page)).toContain("view.setFilters");
-    await page.getByTestId("ai-allow-edit").click();
-    await expect.poll(async () => catalogText(page)).toContain("edit.cells");
-  });
+    await openDemo(page, kit);
+    const before = await visibleTableText(page);
+    expect(before).toContain("Jonah");
 
-  test(`${kit} filter and approved write go through the live session`, async ({
-    page,
-  }) => {
-    await openPlayground(page, kit);
-    expect(await jonahSalary(page)).toBe("155");
-    await page.getByRole("button", { name: "Propose Jonah's salary" }).click();
-    const strip = page.locator('[data-adapttable-part="agent-approval"]');
-    await expect(strip).toBeVisible();
     await page
-      .locator('[data-adapttable-part="agent-approval-approve"]')
+      .locator(part("assistant-suggestion"))
+      .filter({ hasText: "Core team" })
       .click();
-    await expect(strip).toHaveCount(0);
-    await expect(
-      page.locator('[data-adapttable-part="batch-edit-bar"]')
-    ).toBeVisible();
-    await page.locator('[data-adapttable-part="batch-edit-save"]').click();
-    await expect(
-      page.locator('[data-adapttable-part="batch-edit-bar"]')
-    ).toHaveCount(0);
-    expect(await jonahSalary(page)).toBe("20000");
 
-    await page.getByRole("button", { name: "Filter Core team" }).click();
-    await expect(page.getByText("Chioma Eze")).toBeVisible();
-    await expect(page.getByText("Jonah Okonkwo")).toHaveCount(0);
-    await expect(page.getByText("Sefa Demir")).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Propose Jonah's salary" })
-    ).toBeDisabled();
-    await page.getByRole("button", { name: "Clear filter" }).click();
-    await expect(page.getByText("Jonah Okonkwo")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Propose Jonah's salary" })
-    ).toBeEnabled();
-  });
-
-  test(`${kit} connect backend filters through mock HTTP`, async ({ page }) => {
-    await openPlayground(page, kit);
-    await connectMockBackend(page);
-    await page.getByTestId("ai-backend-message").fill("Filter Core team");
-    await page.getByTestId("ai-backend-send").click();
-    await expect(page.getByTestId("ai-backend-log")).toContainText(
-      "Assistant · Filtered to Core team."
-    );
-    await expect(page.getByText("Chioma Eze")).toBeVisible();
-    await expect(page.getByText("Jonah Okonkwo")).toHaveCount(0);
-    await page.getByTestId("ai-backend-clear-filter").click();
-    await expect(page.getByText("Jonah Okonkwo")).toBeVisible();
+    await expect
+      .poll(async () => visibleTableText(page))
+      .not.toContain("Jonah");
+    // The reply is not the evidence — the rows are.
+    expect(await visibleTableText(page)).toContain("Chioma");
+    expect(await receipts(page)).toContain("view.setFilters: done");
   });
 }
 
-test("Connect backend stays idle until Connect and returns to simulated", async ({
-  page,
-}) => {
-  await openPlayground(page, CANONICAL_AI_ADAPTER);
-  await page.getByTestId("ai-mode-backend").click();
-  await expect(page.getByTestId("ai-backend")).toBeVisible();
-  await expect(page.getByTestId("ai-backend-filter-core")).toBeVisible();
-  await expect(page.getByTestId("ai-backend-send")).toHaveCount(0);
-  await expect(page.getByTestId("ai-backend-connect")).toBeEnabled();
-  await expect(page.getByTestId("ai-backend-token")).toBeVisible();
-  await mountedTable(page);
-  await page.getByTestId("ai-mode-simulated").click();
-  await expect(page.getByTestId("ai-backend")).toHaveCount(0);
-  await expect(
-    page.getByRole("button", { name: "Filter Core team" })
-  ).toBeVisible();
-});
-
-test("AI demo nav goes to the canonical kit page", async ({ page }) => {
-  await page.goto("/");
-  const link = page.locator(".nav").getByRole("link", { name: "AI demo" });
-  await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute(
-    "href",
-    new RegExp(`${CANONICAL_AI_ADAPTER}/ai`)
-  );
-  await link.click();
-  await expect(page.locator(".ai-play")).toBeVisible();
-  await mountedTable(page);
-});
-
-test("switching kits keeps the same playground scenario", async ({ page }) => {
-  await openPlayground(page, CANONICAL_AI_ADAPTER);
-  await page.getByRole("button", { name: "Filter Core team" }).click();
-  await expect(page.getByText("Chioma Eze")).toBeVisible();
-  const other = builtAdapters().find(
-    (adapter) => adapter.key !== CANONICAL_AI_ADAPTER
-  );
-  if (!other) throw new Error("expected another published kit");
-  const switcher = page.getByRole("navigation", {
-    name: "Same playground in another adapter",
+test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
+  test.beforeEach(async ({ page }) => {
+    await openDemo(page, CANONICAL_AI_ADAPTER);
   });
-  await switcher.getByRole("link", { name: other.label, exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/${other.key}/ai/`));
-  await expect(page.locator(".ai-play")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Filter Core team" })
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Propose Jonah's salary" })
-  ).toBeVisible();
-  await mountedTable(page);
-});
 
-test("keyboard reaches catalog, actions and the table", async ({ page }) => {
-  await openPlayground(page, CANONICAL_AI_ADAPTER);
-  await page.locator(".ai-play__key").first().focus();
-  await expect(page.locator(".ai-play__key").first()).toBeFocused();
-  await page.getByRole("button", { name: "Filter Core team" }).focus();
-  await page.keyboard.press("Enter");
-  await expect(page.getByText("Chioma Eze")).toBeVisible();
-  await (await mountedTable(page)).focus();
-});
+  test("sorts, then clears the filter, and the rows follow", async ({
+    page,
+  }) => {
+    await ask(page, "Show only the Core team.");
+    await expect
+      .poll(async () => visibleTableText(page))
+      .not.toContain("Jonah");
 
-test("RTL playground keeps the catalog and table readable", async ({
-  page,
-}) => {
-  await page.goto(`/${CANONICAL_AI_ADAPTER}/ai/?dir=rtl`);
-  await expect(page.locator(".mx-demo")).toHaveAttribute("dir", "rtl");
-  await expect(page.locator(".ai-play")).toBeVisible();
-  await mountedTable(page);
-});
+    await ask(page, "Clear the filter.");
+    await expect.poll(async () => visibleTableText(page)).toContain("Jonah");
+    expect(await lastReply(page)).toBe("Filter cleared.");
+  });
 
-test("mobile playground stays usable", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await openPlayground(page, CANONICAL_AI_ADAPTER);
-  await expect(
-    page.getByRole("button", { name: "Filter Core team" })
-  ).toBeVisible();
-  await expect(page.getByTestId("ai-catalog")).toBeVisible();
+  test("says what it does not understand instead of guessing", async ({
+    page,
+  }) => {
+    const before = await visibleTableText(page);
+    await ask(page, "Delete every row and email the team about it.");
+
+    expect(await lastReply(page)).toContain(
+      "This demo understands the example requests"
+    );
+    // Nothing ran: no receipt, and the table is untouched.
+    expect(await receipts(page)).toHaveLength(0);
+    expect(await visibleTableText(page)).toBe(before);
+  });
+
+  test("parks an edit for approval and reports it as staged", async ({
+    page,
+  }) => {
+    await ask(page, "Raise Priya Nair's salary to 185.");
+
+    const approve = page.locator(part("agent-approval-approve"));
+    await expect(approve).toBeVisible();
+    await expect(page.locator(part("agent-approval"))).toContainText("185");
+    await approve.click();
+
+    // The staging callback IS a host callback, so the session calls it
+    // applied. Telling the reader "done" while the table shows an unsaved row
+    // is the lie this asserts against.
+    await expect
+      .poll(async () => receipts(page))
+      .toContain("edit.cells: staged");
+    await expect(page.locator(part("assistant-receipt-save"))).toContainText(
+      "Save in the table"
+    );
+    await expect(page.locator(part("batch-edit-bar"))).toContainText("unsaved");
+  });
+
+  test("offers only what the table currently wires", async ({ page }) => {
+    // Grouping armed makes the table a nested list, so row pinning is inert
+    // and its examples must not be offered.
+    expect(await catalogText(page)).not.toContain("view.pinRow");
+
+    await page.locator(".ai-demo__settings summary").click();
+    await page.getByTestId("ai-toggle-grouping").click();
+
+    await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
+  });
+
+  test("pins a column and a row through the assistant", async ({ page }) => {
+    await page.locator(".ai-demo__settings summary").click();
+    await page.getByTestId("ai-toggle-grouping").click();
+    await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
+
+    await ask(page, "Pin Priya Nair to the top.");
+    await expect
+      .poll(async () =>
+        (await page.getByRole("row").nth(1).innerText()).includes("Priya")
+      )
+      .toBe(true);
+
+    await ask(page, "Unpin Priya Nair.");
+    expect(await lastReply(page)).toBe("Unpinned that row.");
+  });
+
+  test("reset restores the dataset and the settings", async ({ page }) => {
+    await ask(page, "Show only the Core team.");
+    await expect
+      .poll(async () => visibleTableText(page))
+      .not.toContain("Jonah");
+
+    await page.locator(".ai-demo__settings summary").click();
+    await page.getByTestId("ai-reset").click();
+
+    await expect.poll(async () => visibleTableText(page)).toContain("Jonah");
+    // The transcript goes with it — a conversation about rows that no longer
+    // exist is worse than none.
+    await expect(page.locator(part("assistant-message-text"))).toHaveCount(0);
+  });
+
+  test("a connected backend answers the same composer", async ({ page }) => {
+    await connectMockBackend(page);
+    await expect(page.locator(part("assistant-connection"))).toHaveText(
+      "Ready"
+    );
+
+    await ask(page, "anything at all, the mock answers everything");
+
+    // The scripted resolver would have refused this; the backend did not.
+    await expect
+      .poll(async () => lastReply(page))
+      .toBe("Filtered to Core team.");
+    await expect
+      .poll(async () => visibleTableText(page))
+      .not.toContain("Jonah");
+  });
+
+  test("disconnecting returns to the scripted demo", async ({ page }) => {
+    await connectMockBackend(page);
+    await page.locator(part("assistant-settings")).click();
+    await page.getByRole("button", { name: "Disconnect" }).click();
+
+    await ask(page, "anything at all, the mock answers everything");
+    expect(await lastReply(page)).toContain(
+      "This demo understands the example requests"
+    );
+  });
+
+  test("reports a backend that cannot be reached", async ({ page }) => {
+    await page.route(MOCK_BACKEND, (route) => route.abort("failed"));
+    await page.locator(part("assistant-settings")).click();
+    await page.getByLabel("Your endpoint").fill(MOCK_BACKEND);
+    await page.getByRole("button", { name: "Connect", exact: true }).click();
+
+    await expect(page.locator(".ai-conn__error")).toBeVisible();
+    // A failed handshake leaves the demo working rather than half-connected.
+    await ask(page, "Clear the filter.");
+    expect(await lastReply(page)).toBe("Filter cleared.");
+  });
+
+  test("becomes a modal sheet on a narrow viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.reload();
+
+    const launcher = page.locator(part("assistant-launcher"));
+    await expect(launcher).toBeVisible();
+    await expect(page.locator(part("assistant-panel"))).toHaveCount(0);
+
+    await launcher.click();
+    await expect(page.locator(part("assistant-sheet"))).toBeVisible();
+    await expect(page.locator(part("assistant-back"))).toBeVisible();
+    await expect(page.locator(part("assistant-input"))).toBeVisible();
+  });
+
+  test("reads right-to-left", async ({ page }) => {
+    await page.locator(".ai-demo__settings summary").click();
+    await page
+      .locator(".ai-demo__toggles")
+      .getByRole("button", { name: "RTL" })
+      .click();
+
+    await expect(page.locator(".ai-demo")).toHaveAttribute("dir", "rtl");
+    await expect(page.locator(part("assistant-surface"))).toBeVisible();
+    await ask(page, "Show only the Core team.");
+    await expect
+      .poll(async () => visibleTableText(page))
+      .not.toContain("Jonah");
+  });
 });

@@ -281,7 +281,13 @@ export function useTableAssistant(
 
   const receive = useCallback(
     (reply: AssistantTransportReply) => {
-      const receipts = receiptsFromResults(reply.results ?? [], reply.keys);
+      // The table's own policy decides whether an applied write is saved or
+      // staged; the result cannot say on its own.
+      const receipts = receiptsFromResults(
+        reply.results ?? [],
+        reply.keys,
+        session?.manifest().policy.commit
+      );
       seq.current += 1;
       push({
         id: messageId("assistant", seq.current),
@@ -297,7 +303,7 @@ export function useTableAssistant(
           : "ready"
       );
     },
-    [push]
+    [push, session]
   );
 
   const recover = useCallback(

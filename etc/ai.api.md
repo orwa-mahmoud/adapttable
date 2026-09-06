@@ -381,10 +381,10 @@ export interface JsonSchema {
 export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
 
 // @public
-export function receiptFromResult(result: ExecuteResult, capabilityKey?: string): AssistantReceipt;
+export function receiptFromResult(result: ExecuteResult, capabilityKey?: string, commit?: CommitPolicy): AssistantReceipt;
 
 // @public
-export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[]): readonly AssistantReceipt[];
+export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[], commit?: CommitPolicy): readonly AssistantReceipt[];
 
 // @public
 export interface ResolvedRow {
