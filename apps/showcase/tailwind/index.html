@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
-    <meta name="description" content="A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled." />
+    <meta name="description" content="Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/tailwind/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="AdaptTable for Tailwind — a data table you style with your own classes" />
-    <meta property="og:description" content="A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled." />
+    <meta property="og:title" content="Tailwind CSS React data table examples — AdaptTable" />
+    <meta property="og:description" content="Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/tailwind/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AdaptTable for Tailwind — a data table you style with your own classes" />
-    <meta name="twitter:description" content="A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled." />
+    <meta name="twitter:title" content="Tailwind CSS React data table examples — AdaptTable" />
+    <meta name="twitter:description" content="Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled.","url":"https://orwa-mahmoud.github.io/adapttable/demo/tailwind/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing.","url":"https://orwa-mahmoud.github.io/adapttable/demo/tailwind/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>AdaptTable for Tailwind — a data table you style with your own classes</title>
+    <title>Tailwind CSS React data table examples — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -163,7 +163,7 @@
         <p class="at-fallback__kicker">@adapttable/unstyled</p>
         <h1>AdaptTable for Tailwind</h1>
         <p>Native controls and no opinions — every class is yours.</p>
-        <p>The engine is headless and shared — sorting, filtering, grouping, the pivot, URL state, saved views and export live in @adapttable/core. Every control you can see and click is a native HTML control you address by class name.</p>
+        <p>A framework-neutral @adapttable/core provides the data engine; @adapttable/react connects it to React. Add features through explicit imports. The visible controls are a native HTML control you address by class name.</p>
         <p>That is the whole trade: one model to learn, and a table that belongs in a Tailwind app rather than sitting inside one.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
@@ -180,7 +180,7 @@
           <li><a href="./aggregation/">Aggregation in Tailwind</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="./nested-tables/">Nested tables in Tailwind</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="./export/">Export and print in Tailwind</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
-          <li><a href="./scale/">Large datasets in Tailwind</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="./scale/">Row and column virtualization in Tailwind</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="./tree/">Tree data in Tailwind</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="./mobile-cards/">Mobile cards in Tailwind</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="./pivot/">Pivot tables in Tailwind</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>

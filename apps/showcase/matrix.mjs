@@ -169,8 +169,7 @@ export const SHOWCASE_ADAPTERS = [
     tagline: "A shadcn/ui data table, styled by the classes you already own.",
     surface: "semantic markup wearing shadcn's own class conventions",
     landing: {
-      title:
-        "shadcn/ui React data table examples — AdaptTable",
+      title: "shadcn/ui React data table examples — AdaptTable",
       description:
         "Explore shadcn/ui React tables with your design tokens: filtering, editing, grouping, pivot and export. Optional features and MIT licensing.",
     },
@@ -189,8 +188,7 @@ export const SHOWCASE_ADAPTERS = [
     tagline: "Native controls and no opinions — every class is yours.",
     surface: "a native HTML control you address by class name",
     landing: {
-      title:
-        "Tailwind CSS React data table examples — AdaptTable",
+      title: "Tailwind CSS React data table examples — AdaptTable",
       description:
         "Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing.",
     },

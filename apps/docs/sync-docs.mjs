@@ -34,8 +34,7 @@ export const TITLES = {
   "concepts.md": "Headless table engine and React binding",
   "features.md": "React table features — plugins and optional imports",
   "columns.md": "React table columns — ColumnDef & custom cells",
-  "column-groups.md":
-    "React table column groups — collapsible headers",
+  "column-groups.md": "React table column groups — collapsible headers",
   "sparkline.md": "React table sparkline columns — bar, line, area",
   "exporting.md": "React table exports — browser files and server jobs",
   "export-pdf.md": "React table PDF export and print layout",
@@ -58,8 +57,7 @@ export const TITLES = {
   "pivot.md": "React pivot table — rows, columns and measures",
   "formulas.md": "React table formulas — spreadsheet computed columns",
   "server-queries.md": "React table server queries — parse and validate",
-  "agent-capabilities.md":
-    "AI table capabilities — discovery and permissions",
+  "agent-capabilities.md": "AI table capabilities — discovery and permissions",
   "ai.md": "AI table API — sessions, approval and execution",
   "ai-integrations.md": "React table AI integration — OpenAI, MCP and JSON",
   "ai-http.md": "React table AI backend — HTTP and local example",
@@ -83,13 +81,13 @@ export const TITLES = {
   "migrate-from-v1.md": "Migrate from AdaptTable v1 to v2 — every rename",
   "migrate-from-mantine-datatable.md":
     "Migrate from mantine-datatable — more built-in",
-  "migrate-from-mui-x-datagrid.md":
-    "Migrate from MUI X DataGrid to AdaptTable",
+  "migrate-from-mui-x-datagrid.md": "Migrate from MUI X DataGrid to AdaptTable",
   "migrate-from-tanstack-table.md":
     "Migrate from TanStack Table — headless, UI kits",
   "migrate-from-mui-datatables.md":
     "Migrate from mui-datatables — columns, filters and events",
-  "migrate-from-material-table.md": "Migrate from material-table — React table guide",
+  "migrate-from-material-table.md":
+    "Migrate from material-table — React table guide",
   "migrate-from-ag-grid.md":
     "Migrate from AG Grid — CRUD tables, your UI kit, MIT",
   "versioning.md": "AdaptTable versioning & stability policy",

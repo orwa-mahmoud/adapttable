@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Render 100,000 rows and 40 columns in a Tailwind data table — row and column virtualization, sticky headers, pinned columns, and sorting that stays interactive." />
+    <meta name="description" content="Scroll a large Tailwind React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/tailwind/scale/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Tailwind data table at scale — AdaptTable" />
-    <meta property="og:description" content="Render 100,000 rows and 40 columns in a Tailwind data table — row and column virtualization, sticky headers, pinned columns, and sorting that stays interactive." />
+    <meta property="og:title" content="Tailwind virtualized React table — AdaptTable" />
+    <meta property="og:description" content="Scroll a large Tailwind React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/tailwind/scale/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Tailwind data table at scale — AdaptTable" />
-    <meta name="twitter:description" content="Render 100,000 rows and 40 columns in a Tailwind data table — row and column virtualization, sticky headers, pinned columns, and sorting that stays interactive." />
+    <meta name="twitter:title" content="Tailwind virtualized React table — AdaptTable" />
+    <meta name="twitter:description" content="Scroll a large Tailwind React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Render 100,000 rows and 40 columns in a Tailwind data table — row and column virtualization, sticky headers, pinned columns, and sorting that stays interactive.","url":"https://orwa-mahmoud.github.io/adapttable/demo/tailwind/scale/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Scroll a large Tailwind React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code.","url":"https://orwa-mahmoud.github.io/adapttable/demo/tailwind/scale/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Tailwind data table at scale — AdaptTable</title>
+    <title>Tailwind virtualized React table — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -161,7 +161,7 @@
     <div id="root" data-matrix-page="tailwind/scale">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Tailwind</p>
-        <h1>Large datasets in Tailwind</h1>
+        <h1>Row and column virtualization in Tailwind</h1>
         <p>Turn <code>virtualize</code> on and the table renders the rows in view plus a small overscan, whatever the dataset's size. <code>virtualizeColumns</code> does the same across, for column sets far wider than the window.</p>
         <p>The header stays pinned, pinned columns stay put, and the scroll box scrolls — never the page. Sorting, filtering and selection keep working on the whole dataset rather than on what is drawn.</p>
         <p>Nothing about the markup changes: it is the same Tailwind table, with the rows outside the window absent rather than hidden.</p>
@@ -186,13 +186,13 @@ export function Ledger({ rows, columns }) {
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
         <h2>The same feature in the other kits</h2>
         <ul>
-          <li><a href="../../mantine/scale/">Large datasets in Mantine</a> — Rounded, friendly, filled controls</li>
-          <li><a href="../../mui/scale/">Large datasets in MUI</a> — Material elevation, uppercase actions</li>
-          <li><a href="../../chakra/scale/">Large datasets in Chakra</a> — Soft teal, generous radius</li>
-          <li><a href="../../antd/scale/">Large datasets in Ant Design</a> — Compact, tinted header, crisp</li>
-          <li><a href="../../radix/scale/">Large datasets in Radix</a> — Radix Themes, iris accent</li>
-          <li><a href="../../base-ui/scale/">Large datasets in Base UI</a> — Unstyled primitives, blue accent</li>
-          <li><a href="../../shadcn/scale/">Large datasets in shadcn</a> — Monochrome, ring focus</li>
+          <li><a href="../../mantine/scale/">Row and column virtualization in Mantine</a> — Rounded, friendly, filled controls</li>
+          <li><a href="../../mui/scale/">Row and column virtualization in MUI</a> — Material elevation, uppercase actions</li>
+          <li><a href="../../chakra/scale/">Row and column virtualization in Chakra</a> — Soft teal, generous radius</li>
+          <li><a href="../../antd/scale/">Row and column virtualization in Ant Design</a> — Compact, tinted header, crisp</li>
+          <li><a href="../../radix/scale/">Row and column virtualization in Radix</a> — Radix Themes, iris accent</li>
+          <li><a href="../../base-ui/scale/">Row and column virtualization in Base UI</a> — Unstyled primitives, blue accent</li>
+          <li><a href="../../shadcn/scale/">Row and column virtualization in shadcn</a> — Monochrome, ring focus</li>
         </ul>
         <h2>More Tailwind features</h2>
         <ul>

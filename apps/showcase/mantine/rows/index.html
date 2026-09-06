@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Pin and merge cells in a Mantine data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks." />
+    <meta name="description" content="Try Mantine table row pinning, merged cells and row-action menus. Keep rows at the top or bottom and handle add/delete operations in your application." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Mantine table rows — AdaptTable" />
-    <meta property="og:description" content="Pin and merge cells in a Mantine data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks." />
+    <meta property="og:title" content="Mantine table row pinning and cell spanning — AdaptTable" />
+    <meta property="og:description" content="Try Mantine table row pinning, merged cells and row-action menus. Keep rows at the top or bottom and handle add/delete operations in your application." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Mantine table rows — AdaptTable" />
-    <meta name="twitter:description" content="Pin and merge cells in a Mantine data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks." />
+    <meta name="twitter:title" content="Mantine table row pinning and cell spanning — AdaptTable" />
+    <meta name="twitter:description" content="Try Mantine table row pinning, merged cells and row-action menus. Keep rows at the top or bottom and handle add/delete operations in your application." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Pin and merge cells in a Mantine data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks.","url":"https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Mantine table row pinning, merged cells and row-action menus. Keep rows at the top or bottom and handle add/delete operations in your application.","url":"https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Mantine table rows — AdaptTable</title>
+    <title>Mantine table row pinning and cell spanning — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -205,7 +205,7 @@ export function People({ rows, columns, setPinned, spanTeam }) {
           <li><a href="../aggregation/">Aggregation in Mantine</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in Mantine</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../export/">Export and print in Mantine</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
-          <li><a href="../scale/">Large datasets in Mantine</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="../scale/">Row and column virtualization in Mantine</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="../tree/">Tree data in Mantine</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="../mobile-cards/">Mobile cards in Mantine</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Mantine</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>

@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Rename, show, hide, reorder, pin and resize columns in a Chakra data table from a built-in menu — and persist the layout to the URL, storage or your server." />
+    <meta name="description" content="Pin, resize, reorder, rename and hide Chakra table columns. Try the column menu and persist layouts to URLs, storage or your application." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/chakra/columns/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Chakra table column management — AdaptTable" />
-    <meta property="og:description" content="Rename, show, hide, reorder, pin and resize columns in a Chakra data table from a built-in menu — and persist the layout to the URL, storage or your server." />
+    <meta property="og:title" content="Chakra table column pinning and resizing — AdaptTable" />
+    <meta property="og:description" content="Pin, resize, reorder, rename and hide Chakra table columns. Try the column menu and persist layouts to URLs, storage or your application." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/chakra/columns/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Chakra table column management — AdaptTable" />
-    <meta name="twitter:description" content="Rename, show, hide, reorder, pin and resize columns in a Chakra data table from a built-in menu — and persist the layout to the URL, storage or your server." />
+    <meta name="twitter:title" content="Chakra table column pinning and resizing — AdaptTable" />
+    <meta name="twitter:description" content="Pin, resize, reorder, rename and hide Chakra table columns. Try the column menu and persist layouts to URLs, storage or your application." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Rename, show, hide, reorder, pin and resize columns in a Chakra data table from a built-in menu — and persist the layout to the URL, storage or your server.","url":"https://orwa-mahmoud.github.io/adapttable/demo/chakra/columns/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Pin, resize, reorder, rename and hide Chakra table columns. Try the column menu and persist layouts to URLs, storage or your application.","url":"https://orwa-mahmoud.github.io/adapttable/demo/chakra/columns/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Chakra table column management — AdaptTable</title>
+    <title>Chakra table column pinning and resizing — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -206,7 +206,7 @@ export function People({ rows, columns, layout, onLayout }) {
           <li><a href="../aggregation/">Aggregation in Chakra</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in Chakra</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../export/">Export and print in Chakra</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
-          <li><a href="../scale/">Large datasets in Chakra</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="../scale/">Row and column virtualization in Chakra</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
           <li><a href="../tree/">Tree data in Chakra</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="../mobile-cards/">Mobile cards in Chakra</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Chakra</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
