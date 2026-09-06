@@ -18,7 +18,8 @@ const common: UserConfig = {
 /**
  * Two passes, because `"use client"` is a boundary.
  *
- * `@adapttable/ai/react` mounts a provider and must mark itself. The root,
+ * `@adapttable/ai/react` mounts a provider and `@adapttable/ai/assistant`
+ * runs hooks, so both must mark themselves. The root,
  * JSON, OpenAI and MCP entries are React-free and must stay unmarked — a
  * directive there would keep catalog/describe/execute out of a route handler.
  * Separate bundles keep the session helpers from sharing a chunk with hooks.
@@ -27,7 +28,7 @@ export default defineConfig([
   {
     ...common,
     banner: { js: '"use client";' },
-    entry: ["src/react.tsx"],
+    entry: ["src/react.tsx", "src/assistant.tsx"],
   },
   {
     ...common,

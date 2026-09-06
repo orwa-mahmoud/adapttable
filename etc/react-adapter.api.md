@@ -252,6 +252,7 @@ import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
+import { RowPinSide as RowPinSide_2 } from '@adapttable/core';
 import { rowPinSignature } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
 import { rowSourceIndex } from '@adapttable/core';
@@ -4599,6 +4600,15 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
     };
     readonly neutralTable?: NeutralTable<TRow>;
+    readonly pinning?: {
+        readonly columns: Readonly<Record<string, PinSide>>;
+        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+        readonly rows?: {
+            readonly top: readonly string[];
+            readonly bottom: readonly string[];
+        };
+        readonly setRowPin?: (rowKey: string, side: RowPinSide_2 | undefined) => void;
+    };
     readonly query?: {
         readonly page: number;
         readonly limit: number;

@@ -4,8 +4,6 @@
 
 ```ts
 
-import { FeatureStateKey } from '@adapttable/react/adapter';
-import { StaticTableFeature } from '@adapttable/react/adapter';
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
@@ -168,6 +166,39 @@ export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" 
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
+export interface AssistantExchange {
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export interface AssistantMessage {
+    readonly at: number;
+    readonly id: string;
+    readonly outcome?: AssistantTurnStatus;
+    readonly receipts?: readonly AssistantReceipt[];
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    readonly text: string;
+}
+
+// @public
+export interface AssistantReceipt {
+    readonly capabilityKey?: string;
+    readonly idempotencyKey: string;
+    readonly message?: string;
+    readonly status: AssistantReceiptStatus;
+}
+
+// @public
+export type AssistantReceiptStatus = "executed" | "staged" | "rejected" | "awaiting-approval" | "cancelled" | "stale" | "failed";
+
+// @public
+export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "error" | "disconnected";
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
@@ -177,7 +208,29 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export interface AssistantTransport {
+    connect?(input: {
+        readonly session: AgentSession;
+        readonly signal?: AbortSignal;
+    }): Promise<void> | void;
+    disconnect?(): void;
+    send(input: {
+        readonly session: AgentSession;
+        readonly text: string;
+        readonly conversation: readonly AssistantExchange[];
+        readonly signal?: AbortSignal;
+    }): Promise<AssistantTransportReply>;
+}
+
+// @public
+export interface AssistantTransportReply {
+    readonly keys?: readonly string[];
+    readonly results?: readonly ExecuteResult[];
+    readonly text: string;
+}
+
+// @public
+export type AssistantTurnStatus = "applied" | "partial" | "none" | "cancelled" | "failed";
 
 // @public
 export interface CapabilityGuide {
@@ -187,9 +240,6 @@ export interface CapabilityGuide {
     readonly output: JsonSchema;
     readonly schemaVersion: string;
 }
-
-// @public
-export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export interface CapabilityPlan {
@@ -295,40 +345,47 @@ export interface RowWindowRow {
 }
 
 // @public
-export const TABLE_AGENT_STATE: FeatureStateKey<AgentSession>;
-
-// @public
-export function tableAgent(options: TableAgentOptions): StaticTableFeature;
-
-// @public
 export interface TableAgentBridge {
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }
 
 // @public
-export interface TableAgentColumnPatch {
-    readonly label?: string;
-    readonly readable?: boolean;
-    readonly sortable?: boolean;
-    readonly type?: string;
-    readonly writable?: boolean;
+export interface TableAssistantOptions {
+    readonly onOpenChange?: (open: boolean) => void;
+    readonly open?: boolean;
+    readonly primarySuggestions?: number;
+    readonly session: AgentSession | undefined;
+    readonly suggestions?: readonly AssistantSuggestion[];
+    readonly transport?: AssistantTransport;
+    readonly transportKey?: string;
 }
 
 // @public
-export interface TableAgentOptions {
-    readonly apply?: AgentApply;
-    readonly approval?: ApprovalPolicy;
-    readonly bridge?: TableAgentBridge;
-    readonly capabilities?: readonly AgentCapabilityDefinition[];
-    readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
-    readonly commit?: CommitPolicy;
-    readonly observe?: () => AgentObservation;
-    readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
-    readonly readMax?: number;
-    readonly tableId: string;
-    readonly writePolicy?: WritePolicy;
+export interface TableAssistantState {
+    readonly clear: () => void;
+    // (undocumented)
+    readonly draft: string;
+    readonly error: string | undefined;
+    // (undocumented)
+    readonly messages: readonly AssistantMessage[];
+    readonly moreSuggestions: readonly AssistantSuggestion[];
+    // (undocumented)
+    readonly open: boolean;
+    readonly runSuggestion: (id: string) => Promise<void>;
+    readonly send: (text?: string) => Promise<void>;
+    // (undocumented)
+    readonly setDraft: (draft: string) => void;
+    // (undocumented)
+    readonly setOpen: (open: boolean) => void;
+    // (undocumented)
+    readonly status: AssistantStatus;
+    readonly stop: () => void;
+    readonly suggestions: readonly AssistantSuggestion[];
 }
+
+// @public
+export function useTableAssistant(options: TableAssistantOptions): TableAssistantState;
 
 // @public
 export interface WriteExecuteResult {

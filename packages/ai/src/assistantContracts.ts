@@ -14,7 +14,7 @@
  * or a fixed script. This file only fixes the shapes they hand back, so a
  * controller and a widget can be written once against them.
  */
-import type { ExecuteResult } from "./types";
+import type { AgentSession, ExecuteResult } from "./types";
 
 /**
  * A prompt a reader can run without typing it.
@@ -225,4 +225,67 @@ export function assertUniqueSuggestions(
     seen.add(suggestion.id);
   }
   return suggestions;
+}
+
+/**
+ * One prior exchange, as a transport needs it.
+ *
+ * Deliberately smaller than {@link AssistantTurn}: a transport carries
+ * history to a backend, and a backend has no use for the proposals and
+ * receipts a controller keeps. Handing it the full turn would also drag the
+ * whole conversation type closure onto every transport entry point.
+ *
+ * @public
+ */
+export interface AssistantExchange {
+  readonly role: "user" | "assistant";
+  readonly text: string;
+}
+
+/**
+ * What a transport hands back for one turn.
+ *
+ * `results` are the session's own receipts, in the order the actions ran, so
+ * the controller reports what happened rather than what a flag claimed.
+ *
+ * @public
+ */
+export interface AssistantTransportReply {
+  /** Assistant text to show. Treat as untrusted; never inject it as HTML. */
+  readonly text: string;
+  /** One `ExecuteResult` per action that ran. */
+  readonly results?: readonly ExecuteResult[];
+  /** Capability keys in the same order as `results`, when known. */
+  readonly keys?: readonly string[];
+}
+
+/**
+ * Where a turn goes.
+ *
+ * This is the seam a host fills, and it names nothing about HTTP or any
+ * model: an in-process planner, a websocket, or a fixed script are all valid
+ * transports, and none of them pulls a client into the graph.
+ *
+ * @public
+ */
+export interface AssistantTransport {
+  /** Optional handshake. Rejecting it leaves the controller disconnected. */
+  connect?(input: {
+    readonly session: AgentSession;
+    readonly signal?: AbortSignal;
+  }): Promise<void> | void;
+  /** Run one turn. Must honour `signal` and must not retry a mutation. */
+  send(input: {
+    readonly session: AgentSession;
+    readonly text: string;
+    readonly conversation: readonly AssistantExchange[];
+    readonly signal?: AbortSignal;
+  }): Promise<AssistantTransportReply>;
+  /**
+   * Release whatever `connect` acquired.
+   *
+   * Called on unmount and when the table changes. A transport holding an
+   * endpoint credential drops it here, so a late completion cannot use it.
+   */
+  disconnect?(): void;
 }

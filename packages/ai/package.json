@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/ai",
   "version": "0.1.0",
-  "description": "Provider-neutral adaptive table capability discovery — catalog, describe and execute against a live AdaptTable without shipping a model SDK.",
+  "description": "Provider-neutral adaptive table capability discovery \u2014 catalog, describe and execute against a live AdaptTable without shipping a model SDK.",
   "keywords": [
     "react",
     "data-table",
@@ -50,6 +50,16 @@
       "require": {
         "types": "./dist/react.d.cts",
         "default": "./dist/react.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
       }
     },
     "./json": {

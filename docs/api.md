@@ -1289,7 +1289,13 @@ the types `AgentApply`, `AgentCapabilityContext`, `AgentCapabilityDefinition`,
 and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
 `AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
-`AssistantTurn` and `CapabilityPresentation`.
+`AssistantTurn`, `AssistantExchange`, `AssistantTransport`,
+`AssistantTransportReply` and `CapabilityPresentation`, plus the receipt
+readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
+`AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
+`@adapttable/ai/assistant` exports `useTableAssistant`,
+`TableAssistantOptions`, `TableAssistantState`, `AssistantMessage` and
+`AssistantStatus`. `@adapttable/ai/http` adds `assistantHttpTransport`.
 `@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome

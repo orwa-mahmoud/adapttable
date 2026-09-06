@@ -17,6 +17,8 @@ export interface AgentApply {
     applyView?(viewId: string): void;
     deleteRows?(keys: readonly string[]): unknown;
     editCells?(edits: readonly AgentCellEdit[]): unknown;
+    pinColumn?(key: string, side: "start" | "end" | undefined): void;
+    pinRow?(rowKey: string, side: "top" | "bottom" | undefined): void;
     readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
     reorderRows?(fromKey: string, toKey: string): unknown;
     resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
@@ -59,6 +61,7 @@ export interface AgentCapabilityDefinition {
     readonly key: string;
     readonly kind?: "read" | "view" | "write" | "destructive";
     plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
+    readonly presentation?: CapabilityPresentation;
     readonly staging?: CapabilityStaging;
     readonly summary: string;
 }
@@ -74,6 +77,7 @@ export interface AgentCellEdit {
 export interface AgentColumn {
     readonly id: string;
     readonly label: string;
+    readonly pinnable?: boolean;
     readonly readable: boolean;
     readonly sortable: boolean;
     readonly type: string;
@@ -181,12 +185,14 @@ export interface AgentObservation {
     readonly filters?: unknown;
     readonly groupBy?: string;
     readonly hasAdd?: boolean;
+    readonly hasColumnPinning?: boolean;
     readonly hasDelete?: boolean;
     readonly hasEdit: boolean;
     readonly hasExport: boolean;
     readonly hasFilters: boolean;
     readonly hasPagination: boolean;
     readonly hasReorder: boolean;
+    readonly hasRowPinning?: boolean;
     readonly hasSavedViews?: boolean;
     readonly hasSearch: boolean;
     readonly hasSelection?: boolean;
@@ -194,6 +200,11 @@ export interface AgentObservation {
     readonly limit: number;
     readonly page: number;
     readonly pageMax: number;
+    readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
+    readonly pinnedRows?: {
+        readonly top: readonly string[];
+        readonly bottom: readonly string[];
+    };
     readonly readMax?: number;
     readonly rowAddressScope: RowAddressScope;
     readonly search: string;
@@ -233,7 +244,49 @@ export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" 
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export interface AssistantExchange {
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export function assistantHttpTransport(options: AgentHttpClientOptions): AssistantTransport;
+
+// @public
+export interface AssistantSuggestion {
+    readonly description?: string;
+    readonly id: string;
+    readonly prompt: string;
+    readonly requires?: readonly string[];
+    readonly title: string;
+}
+
+// @public
+export interface AssistantTransport {
+    connect?(input: {
+        readonly session: AgentSession;
+        readonly signal?: AbortSignal;
+    }): Promise<void> | void;
+    disconnect?(): void;
+    send(input: {
+        readonly session: AgentSession;
+        readonly text: string;
+        readonly conversation: readonly AssistantExchange[];
+        readonly signal?: AbortSignal;
+    }): Promise<AssistantTransportReply>;
+}
+
+// @public
+export interface AssistantTransportReply {
+    readonly keys?: readonly string[];
+    readonly results?: readonly ExecuteResult[];
+    readonly text: string;
+}
+
+// @public
+export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
 
 // @public
 export interface CapabilityGuide {
@@ -251,6 +304,13 @@ export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 export interface CapabilityPlan {
     readonly payload?: unknown;
     readonly proposals: readonly WriteProposal[];
+}
+
+// @public
+export interface CapabilityPresentation {
+    readonly description?: string;
+    readonly suggestions?: readonly AssistantSuggestion[];
+    readonly title: string;
 }
 
 // @public

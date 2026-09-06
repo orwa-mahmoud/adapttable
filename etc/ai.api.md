@@ -15,6 +15,8 @@ export interface AgentApply {
     applyView?(viewId: string): void;
     deleteRows?(keys: readonly string[]): unknown;
     editCells?(edits: readonly AgentCellEdit[]): unknown;
+    pinColumn?(key: string, side: "start" | "end" | undefined): void;
+    pinRow?(rowKey: string, side: "top" | "bottom" | undefined): void;
     readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
     reorderRows?(fromKey: string, toKey: string): unknown;
     resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
@@ -57,6 +59,7 @@ export interface AgentCapabilityDefinition {
     readonly key: string;
     readonly kind?: "read" | "view" | "write" | "destructive";
     plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
+    readonly presentation?: CapabilityPresentation;
     readonly staging?: CapabilityStaging;
     readonly summary: string;
 }
@@ -72,6 +75,7 @@ export interface AgentCellEdit {
 export interface AgentColumn {
     readonly id: string;
     readonly label: string;
+    readonly pinnable?: boolean;
     readonly readable: boolean;
     readonly sortable: boolean;
     readonly type: string;
@@ -106,12 +110,14 @@ export interface AgentObservation {
     readonly filters?: unknown;
     readonly groupBy?: string;
     readonly hasAdd?: boolean;
+    readonly hasColumnPinning?: boolean;
     readonly hasDelete?: boolean;
     readonly hasEdit: boolean;
     readonly hasExport: boolean;
     readonly hasFilters: boolean;
     readonly hasPagination: boolean;
     readonly hasReorder: boolean;
+    readonly hasRowPinning?: boolean;
     readonly hasSavedViews?: boolean;
     readonly hasSearch: boolean;
     readonly hasSelection?: boolean;
@@ -119,6 +125,11 @@ export interface AgentObservation {
     readonly limit: number;
     readonly page: number;
     readonly pageMax: number;
+    readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
+    readonly pinnedRows?: {
+        readonly top: readonly string[];
+        readonly bottom: readonly string[];
+    };
     readonly readMax?: number;
     readonly rowAddressScope: RowAddressScope;
     readonly search: string;
@@ -158,10 +169,124 @@ export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" 
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
+export function assertUniqueSuggestions(suggestions: readonly AssistantSuggestion[]): readonly AssistantSuggestion[];
+
+// @public
+export interface AssistantAction {
+    readonly args: unknown;
+    readonly capabilityKey: string;
+    readonly expectedRevision: number;
+    readonly idempotencyKey: string;
+}
+
+// @public
+export interface AssistantConversation {
+    readonly tableId: string;
+    readonly turns: readonly AssistantTurn[];
+}
+
+// @public
+export interface AssistantExchange {
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export interface AssistantOutcome {
+    readonly message?: string;
+    readonly proposalId: string;
+    readonly results: readonly ExecuteResult[];
+    readonly status: AssistantOutcomeStatus;
+}
+
+// @public
+export type AssistantOutcomeStatus = "applied" | "rejected" | "failed" | "cancelled";
+
+// @public
+export type AssistantPlanner = (input: {
+    readonly request: AssistantRequest;
+    readonly available: readonly string[];
+    readonly revision: number;
+    readonly signal?: AbortSignal;
+}) => Promise<AssistantProposal> | AssistantProposal;
+
+// @public
+export interface AssistantProposal {
+    readonly actions: readonly AssistantAction[];
+    readonly id: string;
+    readonly requestId: string;
+    readonly summary?: string;
+}
+
+// @public
+export interface AssistantReceipt {
+    readonly capabilityKey?: string;
+    readonly idempotencyKey: string;
+    readonly message?: string;
+    readonly status: AssistantReceiptStatus;
+}
+
+// @public
+export type AssistantReceiptStatus = "executed" | "staged" | "rejected" | "awaiting-approval" | "cancelled" | "stale" | "failed";
+
+// @public
+export interface AssistantRequest {
+    readonly id: string;
+    readonly suggestionId?: string;
+    readonly text: string;
+}
+
+// @public
+export interface AssistantSuggestion {
+    readonly description?: string;
+    readonly id: string;
+    readonly prompt: string;
+    readonly requires?: readonly string[];
+    readonly title: string;
+}
+
+// @public
+export interface AssistantTransport {
+    connect?(input: {
+        readonly session: AgentSession;
+        readonly signal?: AbortSignal;
+    }): Promise<void> | void;
+    disconnect?(): void;
+    send(input: {
+        readonly session: AgentSession;
+        readonly text: string;
+        readonly conversation: readonly AssistantExchange[];
+        readonly signal?: AbortSignal;
+    }): Promise<AssistantTransportReply>;
+}
+
+// @public
+export interface AssistantTransportReply {
+    readonly keys?: readonly string[];
+    readonly results?: readonly ExecuteResult[];
+    readonly text: string;
+}
+
+// @public
+export interface AssistantTurn {
+    // (undocumented)
+    readonly outcome?: AssistantOutcome;
+    // (undocumented)
+    readonly proposal?: AssistantProposal;
+    // (undocumented)
+    readonly request: AssistantRequest;
+}
+
+// @public
+export type AssistantTurnStatus = "applied" | "partial" | "none" | "cancelled" | "failed";
+
+// @public
 export function buildManifest(observation: AgentObservation, capabilities?: readonly string[]): AgentManifest;
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
 
 // @public
 export interface CapabilityGuide {
@@ -179,6 +304,13 @@ export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 export interface CapabilityPlan {
     readonly payload?: unknown;
     readonly proposals: readonly WriteProposal[];
+}
+
+// @public
+export interface CapabilityPresentation {
+    readonly description?: string;
+    readonly suggestions?: readonly AssistantSuggestion[];
+    readonly title: string;
 }
 
 // @public
@@ -204,6 +336,9 @@ export interface CreateAgentSessionOptions {
     onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
     replayCacheSize?: number;
 }
+
+// @public
+export function eligibleSuggestions(suggestions: readonly AssistantSuggestion[], available: readonly string[]): readonly AssistantSuggestion[];
 
 // @public
 export function enabledKeys(observation: AgentObservation): CapabilityKey[];
@@ -244,6 +379,12 @@ export interface JsonSchema {
 
 // @public
 export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
+
+// @public
+export function receiptFromResult(result: ExecuteResult, capabilityKey?: string): AssistantReceipt;
+
+// @public
+export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[]): readonly AssistantReceipt[];
 
 // @public
 export interface ResolvedRow {
@@ -300,6 +441,9 @@ export interface TableAgentBridge {
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }
+
+// @public
+export function turnStatus(receipts: readonly AssistantReceipt[]): AssistantTurnStatus;
 
 // @public
 export function validateSchema(schema: JsonSchema, value: unknown, path?: string): string | undefined;

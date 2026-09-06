@@ -9,7 +9,7 @@ import {
   type FeatureProviderProps,
   featureStateKey,
   FeatureStateScope,
-  type TableFeature,
+  type StaticTableFeature,
   type TableRuntimeView,
   useTableRuntime,
 } from "@adapttable/react/adapter";
@@ -129,7 +129,7 @@ export interface TableAgentOptions {
   readonly capabilities?: readonly AgentCapabilityDefinition[];
 }
 
-interface TableAgentFeature extends TableFeature {
+interface TableAgentFeature extends StaticTableFeature {
   readonly options: TableAgentOptions;
 }
 
@@ -798,7 +798,7 @@ function TableAgentProvider({
  *
  * @public
  */
-export function tableAgent(options: TableAgentOptions): TableFeature {
+export function tableAgent(options: TableAgentOptions): StaticTableFeature {
   const feature: TableAgentFeature = {
     id: "table-agent",
     options,

@@ -5,6 +5,7 @@
  * capability manifest to a developer-owned endpoint and executes the
  * returned actions through the existing session. No model SDK.
  */
+import type { AssistantTransport } from "./assistantContracts";
 import { errorMessage } from "./errorMessage";
 import { AGENT_SCHEMA_VERSION, type RowAddressScope } from "./keys";
 import type {
@@ -17,6 +18,13 @@ import type {
   RowWindow,
 } from "./types";
 
+// `assistantHttpTransport` hands back this interface, and its `send` names
+// these two, so the entry that publishes the function publishes them too.
+export type {
+  AssistantExchange,
+  AssistantTransport,
+  AssistantTransportReply,
+} from "./assistantContracts";
 export {
   AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,
   AGENT_SCHEMA_VERSION,
@@ -932,5 +940,40 @@ export function createAgentHttpClient(options: AgentHttpClientOptions): {
     connect: (session, signal) => connectAgentHttp(session, options, signal),
     send: (session, message, extras) =>
       runAgentHttpTurn(session, message, options, extras),
+  };
+}
+
+/**
+ * The HTTP backend as an {@link AssistantTransport}.
+ *
+ * This adapter is the only thing that couples a conversation to HTTP. It
+ * lives on `@adapttable/ai/http` on purpose: a host writing its own transport
+ * implements the neutral interface from `@adapttable/ai` and never pulls this
+ * client — or any model client — into its graph.
+ *
+ * @param options - Endpoint and credentials for the backend.
+ * @returns A transport the assistant controller can take as-is.
+ *
+ * @public
+ */
+export function assistantHttpTransport(
+  options: AgentHttpClientOptions
+): AssistantTransport {
+  const client = createAgentHttpClient(options);
+  return {
+    connect: async ({ session, signal }) => {
+      await client.connect(session, signal);
+    },
+    send: async ({ session, text, conversation, signal }) => {
+      const turn = await client.send(session, text, {
+        conversation: conversation.map((entry) => ({
+          role: entry.role,
+          text: entry.text,
+        })),
+        returnResults: true,
+        signal,
+      });
+      return { text: turn.text, results: turn.results };
+    },
   };
 }

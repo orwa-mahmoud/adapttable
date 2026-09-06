@@ -9,7 +9,7 @@ import {
   type AssistantPlanner,
   type AssistantSuggestion,
   eligibleSuggestions,
-} from "./assistant";
+} from "./assistantContracts";
 import { createAgentSession } from "./session";
 import type { AgentObservation } from "./types";
 

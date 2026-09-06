@@ -1,6 +1,14 @@
 import type { TableSourceCapabilities } from "@adapttable/core";
 
-import type { CapabilityPresentation } from "./assistant";
+import type { CapabilityPresentation } from "./assistantContracts";
+
+// `AgentCapabilityDefinition` names these, and every subpath re-exports this
+// module, so they travel with it rather than being reachable only from the
+// root entry.
+export type {
+  AssistantSuggestion,
+  CapabilityPresentation,
+} from "./assistantContracts";
 import type {
   ApprovalPolicy,
   CommitPolicy,

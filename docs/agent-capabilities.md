@@ -83,6 +83,49 @@ definition may contribute its own through `presentation`.
 
 Nothing in these contracts imports React or calls a model.
 
+## The headless assistant
+
+`@adapttable/ai/assistant` turns those contracts into a conversation, and
+still renders nothing. `useTableAssistant({ session, transport, suggestions })`
+returns `status`, `messages`, `draft`/`setDraft`, `send`, `stop`, `clear`,
+the live `suggestions` and `moreSuggestions`, `runSuggestion`, `open`/`setOpen`
+and `error`. A host renders its own panel from those; the widget each kit
+ships is written against the same values, so it is a convenience and never a
+requirement. `examples/ai-assistant-custom-ui.tsx` is a complete panel with no
+widget in it.
+
+The rules it keeps:
+
+- **One send at a time**, reserved before any await, so two clicks in one tick
+  cannot interleave two turns' actions against one table.
+- **A draft survives a failed turn.** It is cleared optimistically and put
+  back if the turn fails — unless the reader typed something else meanwhile.
+- **Stopping is not failing, and nothing is retried.** An action whose outcome
+  is unknown stays unknown; the assistant never sends it twice.
+- **A late reply is dropped.** A turn belonging to a previous table, or to a
+  panel that has unmounted, never writes into the transcript.
+- **Closing the panel discards nothing** — not the draft, not the transcript,
+  not a submitted action.
+- **A new session is a new conversation.** Switching tables aborts the turn in
+  flight and starts empty, so history never crosses between tables.
+
+`transport` may be a fresh object every render; the controller reads the
+latest one rather than reconnecting on its identity. A host that genuinely
+swaps transports — a backend for a scripted one — says so with `transportKey`,
+because a backend must never quietly become a simulated one.
+
+Receipts come from results, never from an outer flag. `receiptFromResult` and
+`receiptsFromResults` report `executed`, `staged`, `rejected`,
+`awaiting-approval`, `cancelled`, `stale` or `failed`; `turnStatus` summarizes
+a turn as `applied`, `partial`, `none`, `cancelled` or `failed`. An approved
+write that has not reached the host is `staged`, not executed — Save is still
+the reader's, on the table's own dirty path.
+
+A transport is the only thing that knows about HTTP or a model.
+`assistantHttpTransport` on `@adapttable/ai/http` adapts the existing backend
+bridge; a host writing its own implements `AssistantTransport` from
+`@adapttable/ai` and pulls in neither.
+
 ## Three portable calls
 
 Any agent runtime can speak this:

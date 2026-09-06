@@ -12,16 +12,27 @@ export {
   assertUniqueSuggestions,
   type AssistantAction,
   type AssistantConversation,
+  type AssistantExchange,
   type AssistantOutcome,
   type AssistantOutcomeStatus,
   type AssistantPlanner,
   type AssistantProposal,
   type AssistantRequest,
   type AssistantSuggestion,
+  type AssistantTransport,
+  type AssistantTransportReply,
   type AssistantTurn,
   type CapabilityPresentation,
   eligibleSuggestions,
-} from "./assistant";
+} from "./assistantContracts";
+export {
+  type AssistantReceipt,
+  type AssistantReceiptStatus,
+  type AssistantTurnStatus,
+  receiptFromResult,
+  receiptsFromResults,
+  turnStatus,
+} from "./assistantReceipts";
 export { openAiToolNameMap } from "./capabilities/registry";
 export { guideOf, summaryOf } from "./guides";
 export {
