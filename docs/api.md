@@ -996,8 +996,12 @@ and pure: `moveGridFocus(from, move, bounds)` over a `GridCell` and
 RTL swap). `sameGridCell` compares addresses. `GRID_CELL_ATTR` /
 `gridCellAttr(cell)` are the `data-grid-cell` attribute focus uses to find a
 cell in the DOM. `GridFocusAnnouncer` / `GridFocusAnnouncerProps` render the
-live region and come from `@adapttable/core/adapter`. See
-[cell navigation](./cell-navigation.md).
+live region and come from `@adapttable/core/adapter`.
+`contextMenuCopyTarget(gridFocus, target)` returns a `ContextMenuCopyTarget`
+saying what a context-menu Copy should take — the clicked cell, or the
+selection it landed inside — resolving the address through
+`gridFocus.cellAt(rowId, columnKey)` so the sort, filter, page and virtual
+window are all followed. See [cell navigation](./cell-navigation.md).
 
 **The column-selection checkbox.** `columnSelectionCheckbox` adds a checkbox to
 every column header that selects that column — the touch and screen-reader path

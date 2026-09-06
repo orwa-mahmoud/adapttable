@@ -392,6 +392,31 @@ would share.
 | `gridFocusMoveForKey` / `GridKeyPress`                    | Maps a key press to a move, applying the RTL swap.                                                                                |
 | `GridCell` / `sameGridCell`                               | A cell address, and address equality.                                                                                             |
 | `GRID_CELL_ATTR` / `gridCellAttr`                         | The `data-grid-cell` attribute focus uses to find a cell in the DOM.                                                              |
+| `contextMenuCopyTarget` / `ContextMenuCopyTarget`         | Decides what a context-menu Copy takes: the clicked cell, or the selection it landed inside.                                      |
+
+### Copying from the context menu
+
+The context menu names what was clicked by row key and column key. Copying
+needs a grid address, and a row key is not one: where a row sits on screen
+follows the sort, the filter, the page, the pinned rows and the virtual
+window. `gridFocus.cellAt(rowId, columnKey)` resolves it against the very rows
+and columns that grid was handed, so no adapter counts positions itself.
+
+`contextMenuCopyTarget(gridFocus, target)` then decides what Copy takes:
+
+```tsx
+onCopy: (target) => {
+  const copy = contextMenuCopyTarget(gridFocus, target);
+  if (!copy.available) return;
+  gridFocus.copyCells(copy.cell);
+};
+```
+
+A cell with nothing selected copies that cell. A click inside a selection
+keeps the selection — the rectangle is what the reader built. A click outside
+one copies the cell under the cursor. A target that names no cell reports
+`available: false`, and the menu greys Copy out rather than copying data
+nobody pointed at. `useGridFocus` needs `getRowId` for `cellAt` to answer.
 
 `getCellPropsAt(windowIndex, col)` and `getRowPropsAt(windowIndex)` take the
 index an adapter already has — its position in the rendered rows — and convert
