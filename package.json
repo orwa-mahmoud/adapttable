@@ -2,7 +2,7 @@
   "name": "adapttable-monorepo",
   "version": "0.0.0",
   "private": true,
-  "description": "AdaptTable — a headless, UI-agnostic React data table with batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix, and shadcn/ui, plus an unstyled path for Tailwind & your own CSS.",
+  "description": "AdaptTable \u2014 a headless, UI-agnostic React data table with batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix, and shadcn/ui, plus an unstyled path for Tailwind & your own CSS.",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -40,7 +40,7 @@
     "publint": "pnpm --filter \"./packages/*\" exec publint --strict",
     "smoke:dist": "node scripts/smoke-dist.mjs",
     "budget": "node scripts/bundle-budget.mjs && node scripts/check-adapter-feature-isolation.mjs && node scripts/ai-isolation.mjs",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:features && pnpm run check:boundary && pnpm run check:api-contract && pnpm run check:package-split && pnpm run typecheck && pnpm run test:coverage && pnpm run test:scripts && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget",
+    "check": "node scripts/run-parallel.mjs check:static test:coverage && pnpm run build && pnpm run check:packaged",
     "prepare": "husky",
     "check:kits-docs": "pnpm --filter @adapttable/cli exec vitest run src/kits-docs.test.ts",
     "check:readmes": "node scripts/check-readme-features.mjs",
@@ -57,7 +57,9 @@
     "check:features": "node scripts/check-feature-classification.mjs && node scripts/check-feature-parity.mjs && node scripts/check-feature-typing.mjs",
     "check:boundary": "node scripts/check-framework-boundary.mjs && node scripts/check-boundary-consumers.mjs && node scripts/check-package-split-destinations.mjs",
     "check:api-contract": "node scripts/check-api-contract.mjs",
-    "check:package-split": "node scripts/check-package-split-map.mjs"
+    "check:package-split": "node scripts/check-package-split-map.mjs",
+    "check:static": "node scripts/run-parallel.mjs format:check lint lint:root check:readmes check:docsurface check:parts check:features check:boundary check:api-contract check:package-split typecheck test:scripts",
+    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

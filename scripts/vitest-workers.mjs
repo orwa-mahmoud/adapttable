@@ -8,15 +8,26 @@
  */
 import { availableParallelism } from "node:os";
 
-/** @param {{ ci?: boolean, turbo?: boolean, cores?: number }} [env] */
+/**
+ * @param {{ ci?: boolean, turbo?: boolean, cores?: number, forced?: string }} [env]
+ */
 export function vitestMaxWorkers({
   ci = Boolean(process.env.CI),
   turbo = Boolean(process.env.TURBO_HASH),
   cores = availableParallelism(),
+  forced = process.env.ADAPTTABLE_TEST_WORKERS,
 } = {}) {
+  // An explicit count wins everywhere, so a machine can be measured rather
+  // than guessed at.
+  const asked = Number(forced);
+  if (Number.isInteger(asked) && asked > 0) return asked;
   if (ci) return 1;
-  if (turbo) return Math.max(2, Math.floor(cores / 6));
-  return Math.max(4, Math.floor(cores / 2));
+  // Most of a suite's wall time is module loading, not arithmetic — a full
+  // local run pins only ~6 of 10 cores at the old slice — so both paths
+  // oversubscribe on purpose. Turbo still runs packages side by side, so its
+  // slice is smaller than a suite that has the machine to itself.
+  if (turbo) return Math.max(3, Math.floor(cores / 3));
+  return Math.max(4, cores);
 }
 
 /**

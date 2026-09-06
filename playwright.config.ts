@@ -1,3 +1,5 @@
+import { availableParallelism } from "node:os";
+
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -41,7 +43,10 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   // Nine GitHub-hosted boxes (`--shard=i/9` in pr.yml) × 1 Chromium.
   // Four workers on one runner contended and stalled; one per box is enough.
-  workers: process.env.CI ? 1 : undefined,
+  // Locally the machine is not a 2-core runner: Playwright's own default is
+  // half the cores, which leaves most of a laptop idle across 1,588 browser
+  // tests. Everything but the efficiency cores runs them instead.
+  workers: process.env.CI ? 1 : Math.max(4, availableParallelism() - 2),
   reporter: process.env.CI ? "line" : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
