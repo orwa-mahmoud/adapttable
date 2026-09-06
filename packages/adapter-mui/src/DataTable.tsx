@@ -7,6 +7,7 @@ import {
   BULK_BAR,
   COLUMN_MENU,
   COMMAND_PALETTE_LIVE,
+  contextMenuCopyTarget,
   ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
   DataTableShellView,
@@ -231,8 +232,12 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
           rowFor: (rowId: string) =>
             shell.source.rows.find((row) => props.rowKey(row) === rowId),
           actions: {
-            onCopy: () => {
-              view.gridFocus.copyCells();
+            onCopy: (target) => {
+              // The cell that was right-clicked, unless it sits inside a
+              // selection — then the selection is what was asked for.
+              const copy = contextMenuCopyTarget(view.gridFocus, target);
+              if (!copy.available) return;
+              view.gridFocus.copyCells(copy.cell);
             },
             onSort: (key: string, dir: "asc" | "desc") => {
               shell.source.setSort(key, dir);

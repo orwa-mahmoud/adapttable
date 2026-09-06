@@ -1276,6 +1276,19 @@ export interface ContextMenuChromeProps {
     slots: ContextMenuSlots;
 }
 
+// @public
+export interface ContextMenuCopyTarget {
+    readonly available: boolean;
+    readonly cell?: GridCell;
+}
+
+// @public
+export function contextMenuCopyTarget(focus: Pick<GridFocusState, "cellAt" | "range">, target: {
+    kind: string;
+    rowId?: string;
+    columnKey?: string;
+}): ContextMenuCopyTarget;
+
 export { ContextMenuItem }
 
 // @public
@@ -2827,6 +2840,7 @@ export interface GridFocusAnnouncerProps {
 export interface GridFocusState {
     active: GridCell | null;
     announcement: string;
+    cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
     columnCheckbox: boolean;
     copyCells: (cell?: GridCell, cut?: boolean) => void;
     enabled: boolean;
@@ -4926,6 +4940,7 @@ export interface UseGridFocusOptions<TRow> {
     dir?: Direction;
     enabled: boolean;
     firstRowIndex?: number;
+    getRowId?: (row: TRow) => string;
     headerCheckbox?: boolean;
     isCoveredCell?: (cell: GridCell) => boolean;
     labels?: TableLabels;

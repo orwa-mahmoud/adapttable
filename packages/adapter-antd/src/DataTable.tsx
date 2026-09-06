@@ -50,6 +50,7 @@ import {
   COLUMN_HEADER_RENAME,
   COLUMN_MENU,
   COMMAND_PALETTE_LIVE,
+  contextMenuCopyTarget,
   ContextMenuLiveGate,
   type ContextMenuLiveSlotProps,
   DEFAULT_CARD_SIZE_PX,
@@ -2397,8 +2398,12 @@ function AntdTableBody<TRow>({
           rowFor: (rowId: string) =>
             source.rows.find((row) => props.rowKey(row) === rowId),
           actions: {
-            onCopy: () => {
-              gridFocus.copyCells();
+            onCopy: (target) => {
+              // The cell that was right-clicked, unless it sits inside a
+              // selection — then the selection is what was asked for.
+              const copy = contextMenuCopyTarget(gridFocus, target);
+              if (!copy.available) return;
+              gridFocus.copyCells(copy.cell);
             },
             onSort: (key: string, dir: "asc" | "desc") => {
               source.setSort(key, dir);

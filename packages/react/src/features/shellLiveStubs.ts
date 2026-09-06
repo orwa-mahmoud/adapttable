@@ -55,6 +55,7 @@ export const DISABLED_GRID_FOCUS: GridFocusState = {
   fillHandleLabel: "",
   fillPreview: null,
   copyCells: noop,
+  cellAt: () => undefined,
 };
 
 /** Grid focus when `cellNavigation` is not composed. @public */

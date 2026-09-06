@@ -111,6 +111,12 @@ export interface UseGridFocusOptions<TRow> {
   /** The rendered rows, for reading a cell's text when focus lands. */
   rows: readonly TRow[];
   /**
+   * Stable row identity, so a caller holding a row key — a context menu, an
+   * agent — can ask for the cell's grid address instead of counting rows
+   * itself. Without it {@link GridFocusState.cellAt} answers nothing.
+   */
+  getRowId?: (row: TRow) => string;
+  /**
    * Where the rendered window starts in the dataset. Zero without
    * virtualization; with it, `rows[i]` is dataset row `firstRowIndex + i`.
    */
@@ -276,6 +282,15 @@ export interface GridFocusState {
    * an explicit cell wins and the selection is the fallback.
    */
   copyCells: (cell?: GridCell, cut?: boolean) => void;
+  /**
+   * The grid address of one cell, named by row key and column key.
+   *
+   * Resolved against the rows and columns THIS grid was given, so it follows
+   * sorting, filtering, paging, pinned rows and virtualization without a
+   * caller re-deriving any of it. `undefined` when the row is not on screen,
+   * the column is not visible, or no `getRowId` was supplied.
+   */
+  cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
 }
 
 /**
@@ -295,6 +310,7 @@ export function useGridFocus<TRow>(
     columns,
     columnsWindowed = false,
     rows,
+    getRowId,
     firstRowIndex = 0,
     pageSize,
     dir = "ltr",
@@ -459,6 +475,18 @@ export function useGridFocus<TRow>(
    * copy THAT cell, so an explicit one wins and the selection is the
    * fallback rather than the requirement.
    */
+  const cellAt = useEventCallback(
+    (rowId: string, columnKey: string): GridCell | undefined => {
+      if (!getRowId) return undefined;
+      const col = columns.findIndex((column) => column.key === columnKey);
+      if (col < 0) return undefined;
+      const windowIndex = rows.findIndex((row) => getRowId(row) === rowId);
+      if (windowIndex < 0) return undefined;
+      // `rows` is the rendered window; a grid address counts from the dataset.
+      return { row: windowIndex + firstRowIndex, col };
+    }
+  );
+
   const copyCells = useEventCallback((cell?: GridCell, cut?: boolean) => {
     const selection: CellRange | null = cell
       ? { anchor: cell, head: cell }
@@ -945,6 +973,7 @@ export function useGridFocus<TRow>(
       fillHandleLabel: labels?.gridFillHandle ?? "Fill from selection",
       fillPreview: enabled ? fillPreview : null,
       copyCells,
+      cellAt,
     }),
     [
       enabled,
@@ -968,6 +997,7 @@ export function useGridFocus<TRow>(
       labels,
       fillPreview,
       copyCells,
+      cellAt,
     ]
   );
 }

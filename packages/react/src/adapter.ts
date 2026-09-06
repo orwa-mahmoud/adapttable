@@ -416,6 +416,10 @@ export {
   type ColumnSelectSlots,
 } from "./focus/ColumnSelectCheckbox";
 export {
+  type ContextMenuCopyTarget,
+  contextMenuCopyTarget,
+} from "./focus/contextMenuCopy";
+export {
   FillHandleChrome,
   type FillHandleChromeProps,
   type FillHandleSlotProps,

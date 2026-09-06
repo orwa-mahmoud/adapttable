@@ -165,6 +165,7 @@ function CellNavStage<TRow>({
       ...(chrome.pinnedRows?.bottom ?? []),
     ],
     firstRowIndex: windowStart,
+    getRowId: props.rowKey,
     dir: props.dir,
     labels: shell.labels,
     onCut: props.onCellCut,

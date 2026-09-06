@@ -171,10 +171,15 @@ function dataItems<TRow>(
 ): ContextMenuItem[] {
   const { actions, labels } = options;
   const items: ContextMenuItem[] = [];
+  // A row menu — a right-click on a pinned spacer, or anywhere in the row that
+  // is not a cell — names no column, so there is no cell to copy or cut. The
+  // entries stay, greyed, rather than acting on data nobody pointed at.
+  const addressable = target.kind === "cell";
   if (actions.onCopy) {
     items.push({
       key: "copy",
       label: labels.copyCells ?? "Copy",
+      disabled: !addressable,
       onSelect: () => {
         actions.onCopy?.(target);
       },
@@ -184,6 +189,7 @@ function dataItems<TRow>(
     items.push({
       key: "cut",
       label: labels.cutCells ?? "Cut",
+      disabled: !addressable,
       onSelect: () => {
         actions.onCut?.(target);
       },

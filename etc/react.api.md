@@ -987,6 +987,7 @@ export function gridCellAttr(cell: GridCell): string;
 export interface GridFocusState {
     active: GridCell | null;
     announcement: string;
+    cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
     columnCheckbox: boolean;
     copyCells: (cell?: GridCell, cut?: boolean) => void;
     enabled: boolean;
@@ -2001,6 +2002,7 @@ export interface UseGridFocusOptions<TRow> {
     dir?: Direction;
     enabled: boolean;
     firstRowIndex?: number;
+    getRowId?: (row: TRow) => string;
     headerCheckbox?: boolean;
     isCoveredCell?: (cell: GridCell) => boolean;
     labels?: TableLabels;

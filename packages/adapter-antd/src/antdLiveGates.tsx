@@ -161,6 +161,7 @@ export function AntdInteractionGate<TRow>({
           firstRowIndex={firstRowIndex}
           rowCount={rowCount}
           columnsWindowed={columnsWindowed}
+          getRowId={getRowId}
           history={history}
           find={find}
           labels={labels}
@@ -296,6 +297,7 @@ function NavStage<TRow>({
   firstRowIndex,
   rowCount,
   columnsWindowed,
+  getRowId,
   history,
   find,
   labels,
@@ -307,6 +309,7 @@ function NavStage<TRow>({
   readonly firstRowIndex: number;
   readonly rowCount: number;
   readonly columnsWindowed: boolean;
+  readonly getRowId: (row: TRow) => string;
   readonly history: EditHistoryState<TRow>;
   readonly find: FindInTableState;
   readonly labels: Required<TableLabels>;
@@ -322,6 +325,7 @@ function NavStage<TRow>({
     columns,
     rows,
     firstRowIndex,
+    getRowId,
     dir: props.dir,
     labels,
     columnsWindowed,
