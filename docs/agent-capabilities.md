@@ -189,6 +189,153 @@ so does a host driving the panel from its own state. `assistantIsBusy` and
 `assistantIsUsable` answer the two questions a host's own chrome usually asks
 of a status token.
 
+## Six ways to wire it
+
+Every one of these runs through the SAME governed executor. What changes is
+how much of the UI you keep.
+
+**1 — The ready widget.** The short path: a panel in your kit's own
+components, beside the table.
+
+```tsx
+import { useTableAssistant } from "@adapttable/ai/assistant";
+import { assistantHttpTransport } from "@adapttable/ai/http";
+import { TableAssistant } from "@adapttable/mantine/assistant";
+import { tableAgent } from "@adapttable/ai/react";
+
+const transport = useMemo(
+  () => assistantHttpTransport({ endpoint: "/api/table-agent" }),
+  []
+);
+const assistant = useTableAssistant({ session, transport, suggestions });
+
+<DataTable {...props} features={[tableAgent({ tableId: "orders" })]} />
+<TableAssistant
+  assistant={assistant}
+  open={assistant.open}
+  onOpenChange={assistant.setOpen}
+/>;
+```
+
+`session` comes from the table. Either read it inside the table's tree with
+`useFeatureState(TABLE_AGENT_STATE)`, or lift it out with
+`tableAgent({ tableId, bridge: { attach: setSession } })` when the panel is a
+sibling.
+
+**2 — Your own launcher.** The floating launcher and a toolbar button drive
+one panel, so turn the built-in one off and open it yourself.
+
+```tsx
+<button type="button" onClick={() => { assistant.setOpen(true); }}>
+  Ask AI
+</button>
+<TableAssistant
+  assistant={assistant}
+  open={assistant.open}
+  onOpenChange={assistant.setOpen}
+  launcher={false}
+/>;
+```
+
+**3 — A controlled panel.** Own the open state and the surface. Pass
+`presentation="sheet"` on a viewport too narrow for a table and a panel side
+by side, and the kit's own modal is used.
+
+```tsx
+const [open, setOpen] = useState(false);
+const narrow = useMediaQuery("(max-width: 900px)");
+const assistant = useTableAssistant({
+  session,
+  transport,
+  open,
+  onOpenChange: setOpen,
+});
+
+<TableAssistant
+  assistant={assistant}
+  open={open}
+  onOpenChange={setOpen}
+  presentation={narrow ? "sheet" : "panel"}
+  launcher={narrow}
+/>;
+```
+
+**4 — Your own UI, our controller.** Keep the lifecycle, render nothing of
+ours. `examples/ai-assistant-custom-ui.tsx` is a complete panel built this
+way; the widget above uses these same public values, which is what makes it
+optional rather than required.
+
+```tsx
+const a = useTableAssistant({ session, transport, suggestions });
+
+<ol>
+  {a.messages.map((m) => (
+    <li key={m.id}>
+      <strong>{m.role}</strong> {m.text}
+      {m.receipts?.map((r) => (
+        <span key={r.idempotencyKey}>
+          {r.capabilityKey}: {r.status}
+        </span>
+      ))}
+    </li>
+  ))}
+</ol>;
+```
+
+**5 — Your own transport.** The seam names nothing about HTTP or any model,
+so this pulls in neither. Anything that turns a sentence into actions is
+valid — a backend, an in-process planner, or a fixed script.
+
+```ts
+import type { AssistantTransport } from "@adapttable/ai";
+
+const transport: AssistantTransport = {
+  async send({ session, text }) {
+    const result = await session.execute(
+      "view.setFilters",
+      { filters: planFilters(text) },
+      session.manifest().viewRevision,
+      crypto.randomUUID()
+    );
+    return { text: "Filtered.", results: [result], keys: ["view.setFilters"] };
+  },
+};
+```
+
+Pass the live revision, not a remembered one: an action planned against a view
+the table has left must fail rather than apply to a different one.
+
+**6 — The HTTP backend you already run.** `assistantHttpTransport` adapts the
+existing bridge; `examples/ai-http-backend.ts` is the runnable server.
+
+```ts
+const transport = assistantHttpTransport({
+  endpoint: "/api/table-agent",
+  headers: { authorization: `Bearer ${yourEndpointToken}` },
+});
+```
+
+That token is your endpoint's, never a model provider's. Provider credentials
+belong on the backend; the browser never holds one, and this library contains
+no model client to hold it with.
+
+## What a reader is actually told
+
+- **Eligibility is live.** Suggestions and capabilities are re-checked against
+  the current manifest, so a feature the host turns off stops being offered
+  rather than failing when pressed.
+- **Descriptions are progressive.** `catalog()` is small and stays small;
+  `describe(key)` fetches a schema only when something needs it.
+- **Approval is not persistence.** Approving a write lets it reach the host.
+  Under `commit: "stage"` the host callback is the staging one, so the change
+  sits on the table's own dirty path and the panel says it still needs saving.
+  Approving and saving are two separate acts by design.
+- **Continuation is optional.** A local action receipt needs no second model
+  call; nothing forces one turn to become two.
+- **Sessions are isolated.** One session per table, one conversation per
+  session. Switching tables aborts the turn in flight and starts empty, so a
+  reply about one table can never land under another.
+
 ## Three portable calls
 
 Any agent runtime can speak this:

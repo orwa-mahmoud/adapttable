@@ -98,9 +98,17 @@ session; they do not share revision or idempotency state.
 Stable catalog order:
 
 `columns.describe`, `view.describe`, `view.setPage`, `view.setSort`,
-`view.setSearch`, `view.setFilters`, `view.setGroupBy`, `view.setSelection`,
-`views.apply`, `rows.read`, `rows.resolve`, `export.run`, `edit.cells`,
-`rows.add`, `rows.delete`, `rows.reorder`.
+`view.setSearch`, `view.setFilters`, `view.setGroupBy`, `view.pinColumn`,
+`view.pinRow`, `view.setSelection`, `views.apply`, `rows.read`,
+`rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
+`rows.reorder`.
+
+`view.pinColumn` takes `{ key, side }` where `side` is the logical `"start"`
+or `null` to unpin. `view.pinRow` takes `{ side }` — `"top"`, `"bottom"` or
+`null` — with a `rowKey`, or a `position` plus the `scope` and
+`expectedRevision` it was read at. Both are view operations, so neither takes
+the write-approval path. See
+[adaptive capabilities](./agent-capabilities.md#pinning).
 
 `edit.cells` takes `{ edits: Array<{ column, value, rowKey?, position?, scope? }> }`
 — each edit needs `rowKey` or a 1-based `position`. Positions resolve
