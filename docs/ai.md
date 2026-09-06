@@ -1,4 +1,12 @@
-# `@adapttable/ai` — catalog, describe, execute
+# AI table API — sessions, approval and governed execution
+
+`@adapttable/ai` exposes a table's available operations to an agent without
+choosing a model provider. Discover capabilities, inspect their schemas and
+execute validated actions against the current table. Applications retain
+control of permissions, approval and persistence.
+
+For connection examples, read [OpenAI, MCP and JSON integrations](./ai-integrations.md)
+or [the HTTP backend guide](./ai-http.md).
 
 ```bash
 npm install @adapttable/ai

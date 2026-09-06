@@ -170,9 +170,9 @@ export const SHOWCASE_ADAPTERS = [
     surface: "semantic markup wearing shadcn's own class conventions",
     landing: {
       title:
-        "AdaptTable for shadcn/ui — a data table in your own design tokens",
+        "shadcn/ui React data table examples — AdaptTable",
       description:
-        "A batteries-included React data table for shadcn/ui: filtering, grouping, pivot, editing, saved views and export, drawn as semantic markup wearing shadcn's own tokens. Install @adapttable/shadcn.",
+        "Explore shadcn/ui React tables with your design tokens: filtering, editing, grouping, pivot and export. Optional features and MIT licensing.",
     },
     built: true,
   },
@@ -190,9 +190,9 @@ export const SHOWCASE_ADAPTERS = [
     surface: "a native HTML control you address by class name",
     landing: {
       title:
-        "AdaptTable for Tailwind — a data table you style with your own classes",
+        "Tailwind CSS React data table examples — AdaptTable",
       description:
-        "A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled.",
+        "Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing.",
     },
     built: true,
   },
@@ -274,9 +274,9 @@ const MATRIX_FEATURES_DEFINED = [
     slug: "saved-views",
     label: "Saved views",
     h1: "Saved views in {kit}",
-    title: "{kit} saved views — AdaptTable",
+    title: "{kit} table saved views — AdaptTable",
     description:
-      "Name a table arrangement and switch between saved views in {kit} — filters, sort, columns, density and pivot in one link. Rename, reorder and set a default from the {kit} panel.",
+      "Save and restore {kit} table filters, sorting and column layouts. Try named views, default views and shareable URLs in this interactive example.",
     intro: [
       "A view is everything the table can put in a URL — search, sort, filters, grouping, the column layout, density and the pivot — saved under a name.",
       "Readers pick one from the views menu; the panel beside the table renames, reorders, sets the default and deletes. A view someone else shared arrives read-only and says so on the row.",
@@ -404,7 +404,7 @@ export function Spend({ rows, fields }) {
     h1: "Spreadsheet formulas in {kit}",
     title: "{kit} table formulas — AdaptTable",
     description:
-      "Add computed columns to a {kit} data table from spreadsheet formulas — ROUND, POWER, SQRT, IF, UPPER, string joins and aggregates, with errors reported in the cell that caused them.",
+      "Try spreadsheet formulas in a {kit} table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes React integration code.",
     intro: [
       "A formula column is a column nobody wrote code for: type `=ROUND(budget * 0.15, 0)` and the table computes it per row, sorts it, filters it and exports it like any other column.",
       "The engine covers arithmetic including POWER and SQRT, comparison, string joins, IF, and the aggregate functions a footer needs. A bad reference reports in the cell that caused it rather than blanking the table, and a circular reference reports `#CYCLE!` instead of recursing.",
@@ -460,7 +460,7 @@ export function People({ rows, columns }) {
     h1: "Inline cell editing in {kit}",
     title: "{kit} editable data table — AdaptTable",
     description:
-      "Edit cells in place in a {kit} table — text, number and select editors, Enter to commit, paste from a spreadsheet, undo in one press. Your handler owns every write.",
+      "Try inline editing in a {kit} React table with text, number and select inputs, paste and undo. Your application validates and saves each change.",
     intro: [
       "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a {kit} editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.",
       "The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.",
@@ -517,7 +517,7 @@ export function People({ rows, onSave }) {
     h1: "Tree data in {kit}",
     title: "{kit} tree table — AdaptTable",
     description:
-      "Render hierarchical rows in a {kit} data table — parent/child nesting, chevrons, keyboard traversal, expansion in the URL, and host-owned moves that stay inside a parent.",
+      "Explore a {kit} React tree table with parent-child rows, expandable branches, keyboard navigation and URL expansion state. Includes integration code.",
     intro: [
       "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Point the table at `getChildren` or `getParentId` and it renders the hierarchy.",
       "Children indent under their parent, a chevron opens and closes each branch, and arrow keys walk the tree the way a tree widget should. Expansion is part of the table's state, so it lives in the URL like everything else.",
@@ -560,7 +560,7 @@ export function Org({ people, columns }) {
     slug: "mobile-cards",
     label: "Mobile cards",
     h1: "Mobile cards in {kit}",
-    title: "{kit} table mobile cards — AdaptTable",
+    title: "{kit} responsive table and mobile cards — AdaptTable",
     description:
       "A {kit} data table that becomes cards on phones — automatic below the mobile breakpoint, same filters and URL state, infinite scroll instead of a pager.",
     intro: [
@@ -606,10 +606,10 @@ export function People({ rows, columns }) {
   {
     slug: "scale",
     label: "Scale",
-    h1: "Large datasets in {kit}",
-    title: "{kit} data table at scale — AdaptTable",
+    h1: "Row and column virtualization in {kit}",
+    title: "{kit} virtualized React table — AdaptTable",
     description:
-      "Render 100,000 rows and 40 columns in a {kit} data table — row and column virtualization, sticky headers, pinned columns, and sorting that stays interactive.",
+      "Scroll a large {kit} React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code.",
     intro: [
       "Turn `virtualize` on and the table renders the rows in view plus a small overscan, whatever the dataset's size. `virtualizeColumns` does the same across, for column sets far wider than the window.",
       "The header stays pinned, pinned columns stay put, and the scroll box scrolls — never the page. Sorting, filtering and selection keep working on the whole dataset rather than on what is drawn.",
@@ -653,9 +653,9 @@ export function Ledger({ rows, columns }) {
     slug: "columns",
     label: "Columns",
     h1: "Column management in {kit}",
-    title: "{kit} table column management — AdaptTable",
+    title: "{kit} table column pinning and resizing — AdaptTable",
     description:
-      "Rename, show, hide, reorder, pin and resize columns in a {kit} data table from a built-in menu — and persist the layout to the URL, storage or your server.",
+      "Pin, resize, reorder, rename and hide {kit} table columns. Try the column menu and persist layouts to URLs, storage or your application.",
     intro: [
       "Everything a user expects to do to a column, without writing a column-settings panel: rename, show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.",
       "Pinning is logical rather than physical, so a column pinned to the start stays on the correct side in a right-to-left layout.",
@@ -701,7 +701,7 @@ export function People({ rows, columns, layout, onLayout }) {
     h1: "Filtering in {kit}",
     title: "{kit} table filtering — AdaptTable",
     description:
-      "Filter a {kit} data table with kit-native controls — text and number operators, date ranges, a checklist of present values, an AND/OR tree, removable chips, and a find query that rides the same versioned URL.",
+      "Try {kit} table filters: text, number and date operators, checklists and nested AND/OR groups. Share filters and find-query state through the URL.",
     intro: [
       "Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.",
       "For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself. Quick find is a different control — it highlights matching cells and writes `find=` into the same URL namespace; it does not replace the filter tree.",
@@ -822,7 +822,7 @@ export function People({ source, columns, api }) {
     h1: "Row selection in {kit}",
     title: "{kit} table row selection — AdaptTable",
     description:
-      "Select rows in a {kit} data table and act on them in bulk — a set of ids that survives paging, kit-native checkboxes, and bulk actions with confirmation.",
+      "Select {kit} table rows with native checkboxes and run confirmed bulk actions. Keep selection across pages using stable row IDs.",
     intro: [
       "Tick rows one at a time or take the whole page from the header box. The selection is a set of ids rather than a slice of what is rendered, so a row chosen on page one is still chosen while page three is on screen.",
       "Bulk actions run against that set, can ask for confirmation first, and report back through your own handler — the table never performs the write.",
@@ -997,7 +997,7 @@ export function People({ rows }) {
     h1: "Right-to-left {kit} data table",
     title: "{kit} RTL data table — AdaptTable",
     description:
-      "A {kit} data table in Arabic that mirrors the whole layout — search, sort arrows, pinned columns, the pager and the filters popover, which anchors and flips from the correct edge.",
+      "Try an Arabic RTL data table in {kit}: mirrored layout, logical column pinning, translated controls and filter popovers that open on the correct side.",
     intro: [
       "An Arabic table mirrors the entire layout — search, sort arrows, pinned columns and the pager. Not just translated strings: a genuinely flipped axis.",
       "The filters popover anchors and flips from the correct edge; that is the part only a real RTL page can show.",
@@ -1041,7 +1041,7 @@ export function People({ rows, columns }) {
     h1: "Live updates in {kit}",
     title: "{kit} live-updating data table — AdaptTable",
     description:
-      "Patch rows into a {kit} data table as they arrive — websocket-style updates through the row-patch API, so sort, filters and selection survive, with a feed of every applied change.",
+      "See live row updates in a {kit} React table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed.",
     intro: [
       "Rows patch in as they arrive, the way a websocket would. This page applies one budget change at a time so the movement is followable.",
       "Patches go through the row-patch API rather than replacing the array, so search, filters and sort re-run for the touched rows only — your scroll and selection survive.",
@@ -1090,9 +1090,9 @@ export function People({ rows, columns, setRows }) {
     slug: "rows",
     label: "Rows",
     h1: "Rows in {kit}",
-    title: "{kit} table rows — AdaptTable",
+    title: "{kit} table row pinning and cell spanning — AdaptTable",
     description:
-      "Pin and merge cells in a {kit} data table — a 3-dot row-action menu, sticky top and bottom pins, Team written once down consecutive teammates, and add or delete through host callbacks.",
+      "Try {kit} table row pinning, merged cells and row-action menus. Keep rows at the top or bottom and handle add/delete operations in your application.",
     intro: [
       "A row is more than a record. Pin it under the header or to the floor of the scroll box, merge cells that share a team so the name is written once, and add or delete through the 3-dot menu.",
       '`onPinnedRowIdsChange`, `getCellSpan` and `rowActionsLayout="menu"` are the props this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.',
@@ -1135,9 +1135,9 @@ export function People({ rows, columns, setPinned, spanTeam }) {
     slug: "nested-tables",
     label: "Nested tables",
     h1: "Nested tables in {kit}",
-    title: "{kit} nested data table — AdaptTable",
+    title: "{kit} nested tables and expandable rows — AdaptTable",
     description:
-      "Open a row in a {kit} data table onto another {kit} table — nested orders with their own columns and row keys, the same engine inside the panel, not a blank detail slot to build by hand.",
+      "Expand a {kit} table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working React example.",
     intro: [
       "Open a row and the panel holds another {kit} table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.",
       "`nestedTable` mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use `renderRowDetail`.",
@@ -1190,7 +1190,7 @@ export function People({ rows, columns, orderColumns }) {
     h1: "Accessible {kit} data table",
     title: "{kit} accessible data table — AdaptTable",
     description:
-      "Use a {kit} data table from the keyboard or a screen reader — arrow-key cell focus with a visible ring, live announcements, high-contrast and forced-colors affordances, and a header checkbox that selects a column without a modifier key.",
+      "Explore keyboard navigation and screen-reader announcements in a {kit} data grid, with visible focus, column selection and forced-colors support.",
     intro: [
       "Tab into the grid and the arrows move a visible focus, one cell at a time. Home and End jump to the row's edges.",
       "Every move, sort, filter and edit is announced through a live region — the part of a table a sighted reader cannot check, so this page repeats those announcements as text as they happen.",
@@ -1283,7 +1283,7 @@ export function Tasks({ rows, setRows, columns }) {
     h1: "Aggregation in {kit}",
     title: "{kit} table aggregation — AdaptTable",
     description:
-      "Show independent summary rows, pinned top and bottom totals, grouped aggregates and a footer grand total in a {kit} data table — the same computation the source can run.",
+      "Try {kit} table aggregation with group subtotals, footer totals and independent pinned summary rows. Keep summaries outside sorting and pagination.",
     intro: [
       "A summary row is not a pinned data row and not a group footer. `summaryRow` writes a grand total in the table footer. `pinnedSummaryRows` sticks host-owned totals above or below the scroll box. `groupAggregates` plus `groupFooters` close each group.",
       "Filter the table and every total recomputes from the rows that remain — client `aggregate()` and a source that already computed the same numbers share one mapper shape. Extra full-width rows stay attached to a person, not to a total.",
@@ -1340,7 +1340,7 @@ export function Sales({ rows, columns }) {
     h1: "AI integrations in {kit}",
     title: "{kit} AI table integrations — AdaptTable",
     description:
-      "Drive a live {kit} data table through catalog, describe and execute — a local tool-call playground, no model, no credentials, and writes that still go through the host.",
+      "Explore AI tools for a {kit} React table: discover capabilities, filter and propose edits in a scripted demo, or connect your own backend.",
     intro: [
       "`@adapttable/ai` is optional and provider-neutral. Compose `tableAgent` next to {kit}'s `filters` and `agentApproval`. The session advertises only what this table has mounted: filtering and a host-owned write here, never grouping or pivoting.",
       "The panel above the grid defaults to Simulated: local scripted `session.execute` buttons, not a language model. Filter Core team, then Clear filter before proposing Jonah's salary. Approve stages it; Save commits it. Switch to Connect backend to send a real message to an endpoint you run — same table session, same kit approval chrome. Setup is on the Connect a backend docs page.",
@@ -1436,12 +1436,12 @@ export const CANONICAL_AI_ADAPTER = "mantine";
  */
 export const LANDING = {
   h1: "AdaptTable for {kit}",
-  title: "AdaptTable for {kit} — a data table built from {peer}",
+  title: "{kit} React data table examples — AdaptTable",
   description:
-    "A batteries-included React data table for {kit}: filtering, grouping, pivot, editing, saved views and export, rendered with {peer}'s own components. Install {pkg}.",
+    "Explore {kit} React table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing.",
   intro: [
     "{tagline}",
-    "The engine is headless and shared — sorting, filtering, grouping, the pivot, URL state, saved views and export live in @adapttable/core. Every control you can see and click is {surface}.",
+    "A framework-neutral @adapttable/core provides the data engine; @adapttable/react connects it to React. Add features through explicit imports. The visible controls are {surface}.",
     "That is the whole trade: one model to learn, and a table that belongs in a {kit} app rather than sitting inside one.",
   ],
   /** The heading over the feature pages — count comes from the matrix. */

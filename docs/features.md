@@ -1,4 +1,4 @@
-# Feature composition — `features={[rowReorder(fn)]}`
+# React table features — optional imports, presets and plugins
 
 ▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — every opt-in, on every kit.
 

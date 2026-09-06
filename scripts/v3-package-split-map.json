@@ -18171,6 +18171,22 @@
       "behavior": ""
     },
     {
+      "export": "contextMenuCopyTarget",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "ContextMenuCopyTarget",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ContextMenuItemProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

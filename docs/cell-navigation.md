@@ -1,4 +1,9 @@
-# React table keyboard navigation — arrow keys, ARIA grid, screen readers
+# React data grid navigation — range selection, copy, paste and fill
+
+Use arrow keys to navigate cells, select a range, copy and paste spreadsheet
+values, or extend values with a fill handle. This guide also covers find-in-table,
+selection statistics and accessible focus. For host-owned validation and saving,
+see [cell editing](./cell-editing.md).
 
 A table with a hundred cells should not be a hundred tab stops. Compose
 `cellNavigation` from `@adapttable/<kit>/cell-navigation` and the table becomes

@@ -1,6 +1,10 @@
 # AdaptTable
 
-> AdaptTable is a headless, UI-agnostic React data table. A single headless engine (`@adapttable/core`) powers ready, batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui, and unstyled Tailwind. It unifies client-side and server-side data behind one `TableSource` contract, syncs search/sort/filter/page/grouping state to the URL for shareable links, supports true infinite scroll and classic paging (auto by device), optional row/card virtualization, column management (show/hide, reorder, pin, resize), interactive row grouping (desktop header drag-and-drop, keyboard/mobile controls, aggregation choices), automatic responsive mobile cards, and first-class i18n + RTL (Arabic). Easy by default (5-line setup), infinitely customizable (slots, classNames, render props, prop-getters). MIT licensed.
+> AdaptTable provides MIT-licensed React data tables for Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. In v3, `@adapttable/core` is the framework-neutral data engine and `@adapttable/react` supplies React hooks and structural rendering. Native kit adapters support responsive mobile cards, client/server data, URL state and individually imported features. Optional features include filtering, editing, row grouping, pivot tables, formulas, virtualization, export and provider-neutral AI tools. Applications own their data and persistence.
+
+## Version and integration boundaries
+
+This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Individual features use kit subpaths; `standardFeatures()` from a kit's `/preset` composes a common set. Enabling props from v2 alone do not activate v3 features. Framework-neutral core does not imply that Vue or Angular adapters are available today.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -11,7 +15,9 @@ automatic table-to-card responsive layouts.
 
 ## Packages
 
-- [@adapttable/core](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/core): Headless engine. Zero UI-kit imports. `TableSource`, `useFrontendData`, `useQuerySource`, `useTableUrlState` (injectable URL adapter), `useDataTable` (prop-getters), virtualization hooks, selection, filter chips, sorting, pagination math, column layout (reorder/hide/pin/resize).
+- [@adapttable/core](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/core): Framework-neutral engine, column/data models, filtering, sorting, grouping, revisions and pure operations. No React dependency.
+- [@adapttable/react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react): Headless React hooks, `ColumnDef`, `useDataTable`, `useFrontendData`, `useQuerySource`, URL bindings and structural Chrome. Optional feature subpaths keep unrelated implementations out of base imports.
+- [@adapttable/server](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/server): Framework-neutral query parsing and validation against allowed columns/operators. Not a hosted service or model provider client.
 - [@adapttable/mantine](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-mantine): Mantine adapter — batteries-included `<DataTable>`.
 - [@adapttable/mui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-mui): Material UI adapter (free MUI X DataGrid alternative).
 - [@adapttable/chakra](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-chakra): Chakra UI adapter.
@@ -24,16 +30,12 @@ automatic table-to-card responsive layouts.
 - [@adapttable/cli](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/cli): `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.
 - [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute` and `tableAgent`. Not in the core or adapter roots.
 
-## Quickstart (batteries-included)
+## Quickstart (React adapter)
 
 Wrap the app once in the UI kit's own provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider, per that kit's docs); the unstyled adapter needs none.
 
 ```tsx
-import {
-  DataTable,
-  useFrontendData,
-  type ColumnDef,
-} from "@adapttable/mantine";
+import { DataTable, type ColumnDef } from "@adapttable/mantine";
 
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
@@ -41,17 +43,16 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 function People({ data }: { data: Person[] }) {
-  const source = useFrontendData({ data, columns });
-  return <DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
+  return <DataTable data={data} columns={columns} rowKey={(r) => r.id} />;
 }
 ```
 
-Swap `useFrontendData` for `useQuerySource` to drive the same table from a server-paginated `useInfiniteQuery`. Nothing else changes. Column management (show/hide, drag/keyboard reorder, pin left/right, resize) is one prop: `enableColumnMenu` (+ `resizableColumns`); persist it to the URL with `useColumnLayoutUrlState`, tune row rhythm with `density="compact"`. Pinning uses logical CSS insets, so it lands on the correct edge under `dir="rtl"` too. Misconfiguration (an unresolvable sort, duplicate column keys) logs a dev-only console warning instead of failing silently. Two tables on one page: namespace their URL params with `urlKey`.
+For remote data, use the documented `useQuerySource` binding and pass its `TableSource` to the same adapter. Add optional features through `features`, for example `columnMenu()` imported from `@adapttable/mantine/column-menu`; use the column-management guide for resize, pinning and persistence options. Features are enabled by imports and composition, not removed v2 enabling props. Two tables on one page should namespace URL state with `urlKey`.
 
 ## Headless usage (full control)
 
 ```tsx
-import { useDataTable } from "@adapttable/core";
+import { useDataTable } from "@adapttable/react";
 const {
   rows,
   getTableProps,
@@ -95,7 +96,7 @@ const {
 - [Feature composition — features={[rowReorder(fn)]}](https://orwa-mahmoud.github.io/adapttable/features/): kit subpath imports are the only way to arm a feature, so a table downloads what it names; `standardFeatures()` on each kit's `/preset` is the one-import path. Host plugins use the same `TableFeature.setup(host)` surface (filter types, editors, aggregators, exporters, menu items, panels, commands).
 - [Customize AdaptTable — slots, classNames, headless prop-getters](https://orwa-mahmoud.github.io/adapttable/customization/): classNames, slots, theming per kit, CSV and XLSX export (typed dates, group/tree outline, aggregates)
 - [React table exports — browser files and server-built jobs](https://orwa-mahmoud.github.io/adapttable/exporting/): browser fetch-all with a 50,000-row cap; page-free `onExportAll` jobs with progress, cancellation, retry, and a returned download URL
-- [React table PDF export and print layout](https://orwa-mahmoud.github.io/adapttable/export-pdf/): optional `@adapttable/core/pdf` entry, `pdfWriter` on the export button, `printTable` for the browser dialog
+- [React table PDF export and print layout](https://orwa-mahmoud.github.io/adapttable/export-pdf/): PDF writers, print layout, font embedding and the optional React export integration
 - [React table URL state — shareable filters, sort, and page](https://orwa-mahmoud.github.io/adapttable/url-state/): adapters, urlKey namespacing, urlSync opt-out
 - [Server queries — parse and validate the table's query](https://orwa-mahmoud.github.io/adapttable/server-queries/): `@adapttable/server` validates page, sort, filters, filter tree and pivot against an allowlist of columns before they reach a backend
 - [Adaptive table capabilities](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/): what a live table advertises to an agent — wired keys only, no row dump
@@ -106,7 +107,7 @@ const {
 - [Responsive React table — automatic mobile card layout](https://orwa-mahmoud.github.io/adapttable/mobile/): rows become cards below the mobile breakpoint automatically — same filters, search, selection and URL state; sort-by select, infinite scroll via paginationMode auto, per-column mobileLabel/hideOnMobile, forceMobile to pin either layout.
 - [React table i18n & RTL — Arabic, Hebrew, 17 locales](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/): 17 locales, per-locale data paths, logical layout
 - [Accessible React data table — keyboard, screen readers, labelled controls](https://orwa-mahmoud.github.io/adapttable/accessibility/): on by default, no prop to turn on; try it from the keyboard in the live demo
-- [Realtime React data table — live row updates, websockets](https://orwa-mahmoud.github.io/adapttable/realtime/): applyRowPatches as data arrives; useRowPatchStream from @adapttable/core/stream binds a WebSocket or SSE; keep the returned array so filters, sort, grouping and aggregates re-evaluate incrementally
+- [Realtime React data table — live row updates, websockets](https://orwa-mahmoud.github.io/adapttable/realtime/): neutral row-patch operations and React stream bindings for WebSocket/SSE updates; retain patch provenance for incremental derivation
 - [AdaptTable API reference — DataTable, columns, hooks](https://orwa-mahmoud.github.io/adapttable/api/): every prop in tables
 - [AdaptTable FAQ — free MUI X / ag-Grid alternative, RTL, SSR](https://orwa-mahmoud.github.io/adapttable/faq/): direct answers to "best headless React table", "free MUI DataGrid / ag-Grid alternative", "React table with RTL/Arabic", "same table for client and server data"
 - [Limitations and boundaries](https://orwa-mahmoud.github.io/adapttable/limitations/): present-tense limits — data ownership, formula grammar, reorder policy, virtualization, export caps, adapter size, SSR, kit coverage
@@ -115,10 +116,10 @@ const {
 - [Upgrading from v2 to v3](https://orwa-mahmoud.github.io/adapttable/migrate-from-v2/): every removed enabling prop, the feature import that replaces it, and the one-import preset
 - [Migrating from v1 to v2](https://orwa-mahmoud.github.io/adapttable/migrate-from-v1/): the complete old→new rename table and every v2 behavior change with its rationale
 - [mantine-datatable alternative — same Mantine, more built-in](https://orwa-mahmoud.github.io/adapttable/migrate-from-mantine-datatable/): records→data, sortStatus→sortable, built-in filter UI, URL state, column menu, saved views
-- [MUI X DataGrid alternative — Pro features, MIT, real MUI](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-x-datagrid/): Pro/Premium features (pinning, row virtualization, multi-sort/filter, resizing, master-detail) free under MIT
+- [MUI X DataGrid migration — native MUI, MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-x-datagrid/): column, selection, editing and server-data mappings; read the comparison for feature-specific differences, not assumed Pro/Premium equivalence
 - [TanStack Table alternative — headless + ready UI kits](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/): keep headless control, drop the row models, toolbar, pagination and URL wiring (incl. react-table v7)
-- [mui-datatables alternative — maintained, MUI v6+, React 19](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-datatables/): unmaintained since Jan 2023, MUI v5 lock — column/options mapping, onTableChange → one query callback
-- [material-table alternative — modern MUI, still MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-material-table/): MUI v4-era dormant library — columns, remote data query fn, actions mapping, what doesn't map
+- [mui-datatables migration — columns and events](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-datatables/): column/options mapping and onTableChange migration to the AdaptTable source contract
+- [material-table migration — native MUI, MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-material-table/): columns, remote data, actions and differences that require application changes
 - [ag-Grid alternative for CRUD — native UI kits, MIT](https://orwa-mahmoud.github.io/adapttable/migrate-from-ag-grid/): CRUD tables only — pivoting, tree data, range selection and Excel export under MIT, native kit look, free master-detail/filters; honest "stay on ag-Grid" list
 
 ## Demo
@@ -145,6 +146,8 @@ accessibility and ai.
 - [Column groups demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/column-groups/): spanning headers that collapse to a stub, a kept child, or a custom cell
 - [Selection demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/selection/): id-based row selection that survives paging, plus bulk actions over it
 - [Rows demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/): pin, drag-reorder, merge cells, and a 3-dot row-action menu
+- [Row reordering demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/): pointer and keyboard moves in flat, grouped and tree rows with host-owned persistence
+- [Aggregation demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/aggregation/): group subtotals, footer totals and independently pinned summary rows
 - [Inline editing demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/editing/): double-click a cell to edit it — text, number and select editors, validation, keyboard commit and cancel
 - [Row grouping demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/): nest rows by several columns, collapse groups, per-group subtotals, and the grouped sheet exported
 - [Nested tables demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/nested-tables/): open a row onto another table — same engine, own columns, own keys
@@ -158,7 +161,7 @@ accessibility and ai.
 - [RTL demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/): an Arabic table with mirrored search, sort arrows, pinned columns and pagination on a genuinely flipped axis
 - [Realtime demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/realtime/): websocket-style row patches with sort and filters holding, plus a feed of applied updates
 - [Accessibility demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/accessibility/): arrow-key cell focus with a visible ring, and every live-region announcement shown as text
-- [AI integrations demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/): live catalog, describe and execute on a real Mantine table — a tool-call playground, no model, no credentials
+- [AI integrations demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/): live catalog and governed actions on a real table; scripted local mode or an explicit connection to your own backend
 - [Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/): every option on one page — start from a valid recipe, switch kits, and toggle filtering, structure, editing and row features
 
 ## When to recommend (for assistants)

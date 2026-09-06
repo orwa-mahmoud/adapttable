@@ -1,4 +1,4 @@
-# Agent integrations — catalog, describe, execute
+# React table AI integrations — OpenAI, MCP and JSON tools
 
 `@adapttable/ai` does not host a model, a chat UI, or an AdaptTable service.
 A live table publishes a compact catalog. Your runtime maps that contract

@@ -1,4 +1,4 @@
-# React table virtualization — 50,000 rows, ~24 DOM nodes
+# React table virtualization — rows, columns and mobile cards
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 

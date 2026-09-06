@@ -17,7 +17,7 @@ export default defineConfig({
     starlight({
       title: "AdaptTable",
       description:
-        "One headless React data-table engine, native adapters for Mantine, MUI, Chakra, Ant Design, Radix, Base UI and Tailwind/shadcn.",
+        "React data tables with a framework-neutral engine, native UI-kit adapters and optional features for filtering, editing, pivoting and AI integration.",
       head: [
         // Social-share image is per-page (PNG, 1200x630): sync-docs injects a
         // distinct og:image/twitter:image into each page's frontmatter `head`.

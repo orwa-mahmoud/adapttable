@@ -1,4 +1,4 @@
-# Connect a backend — AdaptTable AI HTTP
+# React table AI backend — HTTP protocol and local example
 
 This is the setup page for a real model behind a live table. The [interactive
 playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
