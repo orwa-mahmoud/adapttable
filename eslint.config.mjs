@@ -6,6 +6,7 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import sonarjs from "eslint-plugin-sonarjs";
+import importX from "eslint-plugin-import-x";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
@@ -65,11 +66,19 @@ export default defineConfig(
       react,
       "react-hooks": reactHooks,
       "jsx-a11y": jsxA11y,
+      "import-x": /** @type {import("eslint").ESLint.Plugin} */ (
+        /** @type {unknown} */ (importX)
+      ),
       "simple-import-sort": simpleImportSort,
     },
     rules: {
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
+      // One statement per module. A file that imports a module's values in
+      // one statement and its types in another reads as two dependencies and
+      // is reported as duplicated by static analysis; `prefer-inline` merges
+      // them the way `consistent-type-imports` already writes new ones.
+      "import-x/no-duplicates": ["error", { "prefer-inline": true }],
       "@typescript-eslint/consistent-type-imports": [
         "error",
         { prefer: "type-imports", fixStyle: "inline-type-imports" },

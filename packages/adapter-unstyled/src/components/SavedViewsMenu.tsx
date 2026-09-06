@@ -1,8 +1,6 @@
 import type { TableLabels } from "@adapttable/core";
-import type { UseSavedViewsOptions } from "@adapttable/react";
-import { useSavedViews } from "@adapttable/react";
-import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
+import { type CSSProperties, useState } from "react";
 import { createPortal } from "react-dom";
 
 import type { DataTableClassNames } from "../types";

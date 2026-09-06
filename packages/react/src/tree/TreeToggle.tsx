@@ -2,8 +2,7 @@
  * Tree-toggle layout. The leaf spacer stays here (display only). Adapters
  * pass the chevron button the end user clicks.
  */
-import type { TableLabels } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
+import { type TableLabels, type TreeEntry } from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 
 /**

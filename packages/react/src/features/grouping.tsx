@@ -5,18 +5,20 @@
  * that never imports it never carries that math. The hooks mount in-tree
  * through {@link GROUPING_LIVE}.
  */
-import type { GroupByInput } from "@adapttable/core";
-import type { GroupSort } from "@adapttable/core";
-import { withGroupAggregateOverrides } from "@adapttable/core";
 import {
+  capabilityReason,
+  computePagination,
+  devWarn,
+  formatGroupBy,
+  type GroupByInput,
   groupedEntriesForStrategy,
   groupingComputationKind,
+  type GroupSort,
+  insertExtraRows,
+  parseGroupBy,
+  sourceCapabilities,
+  withGroupAggregateOverrides,
 } from "@adapttable/core";
-import { formatGroupBy, parseGroupBy } from "@adapttable/core";
-import { computePagination } from "@adapttable/core";
-import { insertExtraRows } from "@adapttable/core";
-import { capabilityReason, sourceCapabilities } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";

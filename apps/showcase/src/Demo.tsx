@@ -1,29 +1,25 @@
-import type {
-  ColumnLayoutState,
-  GroupNode,
-  QueryFilterGroup,
-  RowGroupRef,
-  RowPatch,
-  RowReorderOptions,
-  TableErrorState,
-  TableSource,
-} from "@adapttable/core";
 import {
   applyRowPatchesWithLog,
+  type ColumnLayoutState,
   evaluateFilterTree,
+  type GroupNode,
   insertRow,
+  type QueryFilterGroup,
   removeRow,
+  type RowGroupRef,
+  type RowPatch,
+  type RowReorderOptions,
+  type TableErrorState,
+  type TableSource,
   updateRow,
 } from "@adapttable/core";
-import type {
-  EditEventHandler,
-  ReactMobileCardModel,
-  ReactMobileCardRenderer,
-  Slot,
-} from "@adapttable/react";
 import {
   applyRowReorder,
   type ColumnDef,
+  type EditEventHandler,
+  type ReactMobileCardModel,
+  type ReactMobileCardRenderer,
+  type Slot,
   useColumnLayoutUrlState,
   useFrontendData,
   useHighlight,

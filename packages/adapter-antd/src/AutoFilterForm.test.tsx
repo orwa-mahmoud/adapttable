@@ -1,7 +1,9 @@
-import type { ExtraFilters, FilterDef, FilterOption } from "@adapttable/core";
 import {
   defaultFilterRegistry,
   defaultLabels,
+  type ExtraFilters,
+  type FilterDef,
+  type FilterOption,
   resolveFilterRegistry,
 } from "@adapttable/core";
 import { act, fireEvent, render, screen } from "@testing-library/react";

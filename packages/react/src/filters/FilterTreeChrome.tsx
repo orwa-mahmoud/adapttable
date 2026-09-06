@@ -2,41 +2,37 @@
  * AND/OR filter-tree layout. Structure only — adapters pass the Select,
  * Input and Button the end user clicks. Core does not draw form controls.
  */
-import type { QueryCondition, QueryFilterGroup } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
-import { resolveLabels } from "@adapttable/core";
-import { isFilterGroup } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import { type FilterDef, filterLabel } from "@adapttable/core";
 import {
+  addFilterTreeCondition,
+  addFilterTreeGroup,
+  DATE_OP_LABEL_KEYS,
+  defaultFilterRegistry,
+  emptyFilterTree,
+  type FilterDef,
+  filterLabel,
   filterTypeDefaultOp,
   filterTypeOps,
   type FilterTypeRegistry,
   filterWidgetKind,
-} from "@adapttable/core";
-import {
-  addFilterTreeCondition,
-  addFilterTreeGroup,
-  emptyFilterTree,
-  removeFilterTreeNode,
-  replaceFilterTreeNode,
-  setFilterTreeCombinator,
-} from "@adapttable/core";
-import {
-  DATE_OP_LABEL_KEYS,
   isBetweenFilterOp,
+  isFilterGroup,
   isListFilterOp,
   isValuelessFilterOp,
-  NUMBER_OP_LABEL_KEYS,
-  TEXT_OP_LABEL_KEYS,
-} from "@adapttable/core";
-import {
   joinRelativeToken,
+  NUMBER_OP_LABEL_KEYS,
+  type QueryCondition,
+  type QueryFilterGroup,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   type RelativePreset,
+  removeFilterTreeNode,
+  replaceFilterTreeNode,
+  resolveLabels,
+  setFilterTreeCombinator,
   splitRelativeToken,
+  type TableLabels,
+  type TableSource,
+  TEXT_OP_LABEL_KEYS,
 } from "@adapttable/core";
 import { type CSSProperties, type ReactNode, useState } from "react";
 

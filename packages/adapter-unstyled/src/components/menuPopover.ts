@@ -1,11 +1,14 @@
-import type {
-  CSSProperties,
-  Dispatch,
-  RefCallback,
-  RefObject,
-  SetStateAction,
+import {
+  type CSSProperties,
+  type Dispatch,
+  type RefCallback,
+  type RefObject,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
 

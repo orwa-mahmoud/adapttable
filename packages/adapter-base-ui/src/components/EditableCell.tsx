@@ -5,12 +5,10 @@ import {
   isMultiSelectEditor,
   isSelectEditor,
 } from "@adapttable/core";
-import type {
-  EditableCellEditing,
-  EditableCellEditorCtrl,
-} from "@adapttable/react";
-import type { ColumnDef } from "@adapttable/react";
 import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type EditableCellEditorCtrl,
   EditableCellGate,
   type MultiSelectEditorCheckboxProps,
   MultiSelectEditorChrome,

@@ -20,8 +20,10 @@
  */
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
-import type { FeatureHostState } from "../features/currentHost";
-import { currentFeatureHost } from "../features/currentHost";
+import {
+  currentFeatureHost,
+  type FeatureHostState,
+} from "../features/currentHost";
 import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 

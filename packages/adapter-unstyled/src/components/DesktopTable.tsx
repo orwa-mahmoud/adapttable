@@ -1,6 +1,5 @@
 /** The desktop table: header, pinned columns, rows and summary. */
-import type { TableLabels } from "@adapttable/core";
-import { edgePinStyle, PIN_Z } from "@adapttable/core";
+import { edgePinStyle, PIN_Z, type TableLabels } from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
@@ -23,8 +22,12 @@ import {
   type SharedTableRenderProps,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
-import { useMemo } from "react";
+import {
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  useMemo,
+} from "react";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";

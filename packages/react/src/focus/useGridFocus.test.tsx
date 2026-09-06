@@ -7,9 +7,7 @@
  * virtualization, that a cell the virtualizer has not mounted is still
  * reachable, and that omitting the prop leaves the markup untouched.
  */
-import type { CellEdit } from "@adapttable/core";
-import { cellRangeSize } from "@adapttable/core";
-import { type GridCell } from "@adapttable/core";
+import { type CellEdit, cellRangeSize, type GridCell } from "@adapttable/core";
 import {
   act,
   fireEvent,

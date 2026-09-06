@@ -1,22 +1,31 @@
-import type { TableSource } from "@adapttable/core";
-import type {
-  BulkAction,
-  Direction,
-  SortByOption,
-  SortDirection,
-  TableLabels,
+import {
+  type BulkAction,
+  columnFlexShares,
+  columnSizeStyle,
+  computePagination,
+  deriveSortByOptions,
+  devWarn,
+  type Direction,
+  mergeProps,
+  nextSort,
+  type PaginationInfo,
+  type Props,
+  resolveLabels,
+  SEARCH_DEBOUNCE_MS,
+  type SortByOption,
+  type SortDirection,
+  stableKey,
+  type TableLabels,
+  type TableSource,
 } from "@adapttable/core";
-import { columnFlexShares, columnSizeStyle } from "@adapttable/core";
-import { SEARCH_DEBOUNCE_MS } from "@adapttable/core";
-import { resolveLabels } from "@adapttable/core";
-import { computePagination, type PaginationInfo } from "@adapttable/core";
-import { nextSort } from "@adapttable/core";
-import { deriveSortByOptions } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
-import { mergeProps, type Props } from "@adapttable/core";
-import { stableKey } from "@adapttable/core";
-import type { CSSProperties, ReactNode } from "react";
-import { createElement, useCallback, useEffect, useMemo } from "react";
+import {
+  createElement,
+  type CSSProperties,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 
 import type { ColumnDef } from "../columnDef";
 import { visibleReactColumns } from "../columns/reactColumns";

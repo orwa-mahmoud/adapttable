@@ -1,14 +1,9 @@
-import type {
-  ConfirmHandler,
-  GroupedFlatEntry,
-  TableLabels,
-  TableSource,
-  TreeEntry,
-} from "@adapttable/core";
 import {
   autoSizeColumns as autoSizeAllColumns,
+  type ConfirmHandler,
   type FilterRuntime,
   type GroupByInput,
+  type GroupedFlatEntry,
   isDeclarativeFilters,
   pageSizeOptions,
   partitionPinnedRows,
@@ -18,18 +13,22 @@ import {
   resolveLabels,
   showSimpleFilterFields,
   type TableErrorState,
+  type TableLabels,
   tableMinWidth,
+  type TableSource,
   toolbarShowsFilters,
+  type TreeEntry,
   type VirtualTableRow,
   windowGroupedEntries,
 } from "@adapttable/core";
-import type { RowExpansionState, SelectionState } from "@adapttable/react";
 import {
   type ColumnDef,
   columnsHaveFooter,
   type EditHistoryState,
   HeaderFilterOpenProvider,
   resolveColumnFooter,
+  type RowExpansionState,
+  type SelectionState,
   type UrlStateAdapter,
   useChromeScrollReset,
   type UseDataTableResult,
@@ -39,13 +38,6 @@ import {
   useTableChrome,
   useTableData,
 } from "@adapttable/react";
-import type {
-  GridFocusState,
-  GroupCollapseState,
-  RowPinningState,
-  RowPinSide,
-  UseColumnLayoutResult,
-} from "@adapttable/react/adapter";
 import {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
@@ -76,6 +68,8 @@ import {
   flattenReactColumnTree,
   ForcedColorsStyle,
   GRID_FOCUS_ANNOUNCER,
+  type GridFocusState,
+  type GroupCollapseState,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
   insertExtraRows,
@@ -95,6 +89,8 @@ import {
   ROW_REORDER_ANNOUNCER,
   rowClickProps,
   rowIsDirty,
+  type RowPinningState,
+  type RowPinSide,
   rowReorderDropStyle,
   type RowReorderState,
   SAVED_VIEWS,
@@ -103,6 +99,7 @@ import {
   tableRenderModel,
   TableStatusAnnouncer,
   undoRedoToolbar,
+  type UseColumnLayoutResult,
   useFeatureSlotFilled,
   useFeatureState,
   useFullscreen,

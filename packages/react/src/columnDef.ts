@@ -1,10 +1,12 @@
 /**
  * React column and header/footer render contracts.
  */
-import type { CellEditor } from "@adapttable/core";
-import type { ColumnFilter } from "@adapttable/core";
-import type { ColumnMetadata } from "@adapttable/core";
-import type { ColumnGroupDef } from "@adapttable/core";
+import {
+  type CellEditor,
+  type ColumnFilter,
+  type ColumnGroupDef,
+  type ColumnMetadata,
+} from "@adapttable/core";
 import type { ComponentType, ReactNode } from "react";
 
 /**

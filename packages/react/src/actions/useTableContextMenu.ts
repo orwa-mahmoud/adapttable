@@ -13,15 +13,15 @@
  * element contains the headers, rows and cells. `menu` is everything the
  * chrome needs. There is no third thing to remember.
  */
-import type { FeatureHostState } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
 import {
   type ContextMenuActions,
   type ContextMenuItem,
   contextMenuItems,
   type ContextMenuTarget,
+  type FeatureHostState,
+  resolveContextTarget,
+  type TableLabels,
 } from "@adapttable/core";
-import { resolveContextTarget } from "@adapttable/core";
 import { useCallback, useMemo } from "react";
 
 import type { ColumnDef } from "../columnDef";

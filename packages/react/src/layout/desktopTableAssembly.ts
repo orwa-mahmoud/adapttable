@@ -1,33 +1,30 @@
 /** Shared desktop-table assembly — wiring, not pixels. */
-import type { ConfirmHandler } from "@adapttable/core";
-import type { HtmlGroupedHeaderCell } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
-import type { GroupedFlatEntry } from "@adapttable/core";
-import type { BodyCell } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
-import {
-  edgePinStyle,
-  PIN_Z,
-  type PinLeads,
-  pinnedCellStyle,
-  type PinOffset,
-} from "@adapttable/core";
-import { fittedTableStyle } from "@adapttable/core";
-import { pinnedColumnWidth, tableMinWidth } from "@adapttable/core";
-import { htmlGroupedHeaderPlan } from "@adapttable/core";
-import { pinnedSummaryEntries, pinnedSummaryPart } from "@adapttable/core";
 import {
   type AssemblyFns,
+  type BodyCell,
   bodyCellsHaveRowSpan,
   bodyRowEntries,
   cellsForRow,
   columnSelectLabel,
+  type ConfirmHandler,
+  edgePinStyle,
+  type FilterDef,
   filterDefForColumn,
+  fittedTableStyle,
+  type GroupedFlatEntry,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
   isExtraEntry,
+  PIN_Z,
+  type PinLeads,
+  pinnedCellStyle,
+  pinnedColumnWidth,
   pinnedRowCellStyle,
   pinnedRowPart,
   pinnedRowSticky,
+  pinnedSummaryEntries,
+  pinnedSummaryPart,
+  type PinOffset,
   REORDER_COLUMN_WIDTH,
   resolveAssembly,
   resolveRowStyle,
@@ -37,6 +34,9 @@ import {
   rowReorderSignature,
   rowSpanSignature,
   rowStyleSignature,
+  type TableLabels,
+  tableMinWidth,
+  type TreeEntry,
 } from "@adapttable/core";
 import {
   type CSSProperties,
@@ -54,10 +54,12 @@ import {
   columnsHaveFooter,
   resolveColumnHeader,
 } from "../columns/columnHeader";
-import type { ReactColumnResizeHandleProps } from "../columns/reactColumnResize";
-import { toReactColumnResizeHandleProps } from "../columns/reactColumnResize";
-import type { EditableCellEditing } from "../editing/editableCellController";
 import {
+  type ReactColumnResizeHandleProps,
+  toReactColumnResizeHandleProps,
+} from "../columns/reactColumnResize";
+import {
+  type EditableCellEditing,
   rowEditingSignature,
   rowIsDirty,
 } from "../editing/editableCellController";

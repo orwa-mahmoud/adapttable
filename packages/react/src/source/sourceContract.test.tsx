@@ -1,5 +1,4 @@
-import type { PaginatedResponse } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
+import { type PaginatedResponse, type TableSource } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";

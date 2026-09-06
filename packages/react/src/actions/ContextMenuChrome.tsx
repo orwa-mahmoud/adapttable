@@ -20,8 +20,7 @@
  * the menu is still mounted otherwise, and the menu's own focus restoration
  * then fights whatever the action just did.
  */
-import type { TableLabels } from "@adapttable/core";
-import type { ContextMenuItem } from "@adapttable/core";
+import { type ContextMenuItem, type TableLabels } from "@adapttable/core";
 import { Fragment, type ReactNode, type RefObject, useRef } from "react";
 
 import type { ContextMenuPoint } from "./useContextMenu";

@@ -1,27 +1,28 @@
-import type { TableSource } from "@adapttable/core";
-import type { FilterValue, TableLabels } from "@adapttable/core";
-import type { FilterTypeRegistry } from "@adapttable/core";
-import { type FilterDef, filterLabel, RANGE_SUFFIXES } from "@adapttable/core";
 import {
   DATE_OP_LABEL_KEYS,
   DATE_OPS,
+  type FilterDef,
+  filterLabel,
   filterOpKey,
+  type FilterTypeRegistry,
+  type FilterValue,
   isBetweenFilterOp,
   isListFilterOp,
+  isRelativeDateToken,
   isValuelessFilterOp,
   NUMBER_OP_LABEL_KEYS,
   NUMBER_OPS,
   parseTextOp,
+  RANGE_SUFFIXES,
+  type RangeOp,
+  readRangeWidget,
+  type TableLabels,
+  type TableSource,
   TEXT_OP_LABEL_KEYS,
   TEXT_OPS,
   type TextOp,
-} from "@adapttable/core";
-import {
-  type RangeOp,
-  readRangeWidget,
   writeRangeFilter,
 } from "@adapttable/core";
-import { isRelativeDateToken } from "@adapttable/core";
 import { useState } from "react";
 
 /**

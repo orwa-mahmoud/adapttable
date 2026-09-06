@@ -1,17 +1,18 @@
-import type {
-  ConfirmHandler,
-  RowAction,
-  RowActionsLayout,
-  RowActionsRenderer,
-  TableLabels,
-  TreeEntry,
+import {
+  bodyRowEntries,
+  type ConfirmHandler,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  type TableLabels,
+  treeCardStyle,
+  type TreeEntry,
 } from "@adapttable/core";
-import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
-import type {
-  EditableCellEditing,
-  ReactMobileCardRenderer,
+import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type ReactMobileCardRenderer,
 } from "@adapttable/react";
-import type { ColumnDef } from "@adapttable/react";
 import {
   bindMobileCardList,
   cellFlashAttr,

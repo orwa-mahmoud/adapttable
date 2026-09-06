@@ -1,9 +1,13 @@
-import type { Direction } from "@adapttable/core";
-import { columnResizeHandleProps, tableMinWidth } from "@adapttable/core";
-import type { ColumnDef } from "@adapttable/react";
-import { columnHeaderController } from "@adapttable/react";
-import { resolveColumnHeader } from "@adapttable/react";
-import { toReactColumnResizeHandleProps } from "@adapttable/react/adapter";
+import {
+  columnResizeHandleProps,
+  type Direction,
+  tableMinWidth,
+} from "@adapttable/core";
+import {
+  type ColumnDef,
+  columnHeaderController,
+  resolveColumnHeader,
+} from "@adapttable/react";
 import {
   cellFlashAttr,
   columnFlexShares,
@@ -14,6 +18,7 @@ import {
   type SharedTableRenderProps,
   sortArrow,
   tableRenderModel,
+  toReactColumnResizeHandleProps,
 } from "@adapttable/react/adapter";
 import type { CSSProperties, ReactNode } from "react";
 

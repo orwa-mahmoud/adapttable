@@ -11,8 +11,7 @@
 import { devWarn } from "@adapttable/core";
 import { type ReactNode, useEffect, useMemo } from "react";
 
-import type { BatchRowEdit } from "../editing/batchEditing";
-import { useBatchEditing } from "../editing/batchEditing";
+import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";
 import { useDirtyCells } from "../editing/dirtyCells";
 import { useEditConflict } from "../editing/editConflict";
 import { useEditLifecycle } from "../editing/editingEvents";

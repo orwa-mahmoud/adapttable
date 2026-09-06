@@ -7,8 +7,7 @@
  * jsdom, so internals are queried by label/placeholder, not by role.
  */
 import { defaultLabels } from "@adapttable/core";
-import type { LayoutStorage } from "@adapttable/react";
-import { createMemoryAdapter } from "@adapttable/react";
+import { createMemoryAdapter, type LayoutStorage } from "@adapttable/react";
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

@@ -4,9 +4,9 @@
  * and toggling one row's checkbox must re-render only that row.
  */
 import { defaultConfirm } from "@adapttable/core";
-import type { RowExpansionState } from "@adapttable/react";
 import {
   createMemoryAdapter,
+  type RowExpansionState,
   useDataTable,
   useFrontendData,
 } from "@adapttable/react";
@@ -22,8 +22,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bulkActions as bulkActionsFeature } from "./bulk-actions";
-import { DesktopTable } from "./components/DesktopTable";
-import { useStableToggle } from "./components/DesktopTable";
+import { DesktopTable, useStableToggle } from "./components/DesktopTable";
 import { MobileCards } from "./components/MobileCards";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";

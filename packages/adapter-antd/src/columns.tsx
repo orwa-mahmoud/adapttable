@@ -1,30 +1,27 @@
-import type {
-  ConfirmHandler,
-  FilterDef,
-  FilterTypeRegistry,
-  RowAction,
-  RowActionsLayout,
-  RowActionsRenderer,
-  SortDirection,
-  TableLabels,
-  TreeEntry,
-} from "@adapttable/core";
-import type { CellSpanAppearance, SortLevel } from "@adapttable/core";
 import {
   ACTIONS_COLUMN_KEY,
+  type CellSpanAppearance,
   columnResizeHandleProps,
+  type ConfirmHandler,
+  type FilterDef,
+  type FilterTypeRegistry,
   REORDER_COLUMN_KEY,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  type SortDirection,
+  type SortLevel,
+  type TableLabels,
+  type TreeEntry,
 } from "@adapttable/core";
-import type { CellElementProps, EditableCellEditing } from "@adapttable/react";
-import { columnHeaderController, filterDefForColumn } from "@adapttable/react";
-import { type ColumnDef, resolveColumnHeader } from "@adapttable/react";
-import type {
-  FilterFormSource,
-  GridFocusState,
-  GroupCollapseState,
-  GroupingDragProps,
-  PinSide,
-} from "@adapttable/react/adapter";
+import {
+  type CellElementProps,
+  type ColumnDef,
+  columnHeaderController,
+  type EditableCellEditing,
+  filterDefForColumn,
+  resolveColumnHeader,
+} from "@adapttable/react";
 import {
   type BodyCell,
   cellFlashAttr,
@@ -37,15 +34,20 @@ import {
   columnSizeStyle,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
+  type FilterFormSource,
+  type GridFocusState,
+  type GroupCollapseState,
   groupedHeaderAlign,
   groupedHeaderChildRule,
   groupedHeaderLabelStyle,
+  type GroupingDragProps,
   type GroupingPanelState,
   type HeaderGroupCell,
   headerGroupRows,
   isColumnGroupSummaryKey,
   mergedCellStyle,
   pinnedSummaryRowId,
+  type PinSide,
   REORDER_COLUMN_WIDTH,
   type RowReorderState,
 } from "@adapttable/react/adapter";

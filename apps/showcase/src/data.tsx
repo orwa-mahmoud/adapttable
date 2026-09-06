@@ -1,26 +1,25 @@
-import type {
-  BulkAction,
-  ColumnLayoutState,
-  ConfirmHandler,
-  ConfirmRequest,
-  FilterDef,
-  FilterTypeSpec,
-  RowAction,
-} from "@adapttable/core";
 import {
   buildFilterRuntime,
+  type BulkAction,
+  type ColumnLayoutState,
+  type ConfirmHandler,
+  type ConfirmRequest,
   defaultFilterRegistry,
+  type FilterDef,
+  type FilterTypeSpec,
   formatMultiDraft,
   resolveFilterDefs,
   resolveFilterRegistry,
+  type RowAction,
 } from "@adapttable/core";
-import type {
-  ColumnDef,
-  ColumnInput,
-  SummaryRowFn,
-  UseSavedViewsOptions,
+import {
+  aggregate,
+  type ColumnDef,
+  type ColumnInput,
+  computed,
+  type SummaryRowFn,
+  type UseSavedViewsOptions,
 } from "@adapttable/react";
-import { aggregate, computed } from "@adapttable/react";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import type { CSSProperties, ReactNode } from "react";
 

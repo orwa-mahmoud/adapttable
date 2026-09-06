@@ -4,10 +4,13 @@
  * falls back to {@link TableSource.allFilteredRows}. A server page that
  * omits both does not offer the widget.
  */
-import type { TableSource } from "@adapttable/core";
-import type { FilterValue } from "@adapttable/core";
-import type { FilterDef, FilterOption } from "@adapttable/core";
-import { getPath } from "@adapttable/core";
+import {
+  type FilterDef,
+  type FilterOption,
+  type FilterValue,
+  getPath,
+  type TableSource,
+} from "@adapttable/core";
 import { useMemo, useState } from "react";
 
 import { listFilterValues } from "./filterForm";

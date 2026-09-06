@@ -1,5 +1,8 @@
-import { safeLocalStorage } from "@adapttable/core";
-import { applyTableUrlState, captureTableUrlState } from "@adapttable/core";
+import {
+  applyTableUrlState,
+  captureTableUrlState,
+  safeLocalStorage,
+} from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { LayoutStorage } from "../columns/useColumnLayoutStorageState";

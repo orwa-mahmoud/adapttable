@@ -1,5 +1,5 @@
-import type { FilterValue } from "@adapttable/core";
 import {
+  type FilterValue,
   isEmptyFilterValue,
   readColumnLayout,
   readExtra,

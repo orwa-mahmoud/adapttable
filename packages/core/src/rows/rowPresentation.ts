@@ -3,8 +3,11 @@ import type { CssProperties } from "../style/cssProperties";
 import type { BodyCell } from "./cellSpan";
 import type { ExtraRow } from "./extraRows";
 import type { EditableCellEditing } from "./rowEditingDigest";
-import type { RowPinSide, RowPinState } from "./rowPinModel";
-import type { RowPinLookup } from "./rowPinModel";
+import {
+  type RowPinLookup,
+  type RowPinSide,
+  type RowPinState,
+} from "./rowPinModel";
 import type { RowHeight, RowStyle } from "./rowStyle";
 
 /**

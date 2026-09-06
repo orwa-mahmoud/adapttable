@@ -11,9 +11,11 @@
  * is what lets an adapter wrap its existing cell in one place rather than
  * duplicating it behind a condition.
  */
-import type { TableLabels } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
-import { treeIndentStyle } from "@adapttable/core";
+import {
+  type TableLabels,
+  type TreeEntry,
+  treeIndentStyle,
+} from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 
 import { TreeToggleChrome, type TreeToggleSlots } from "./TreeToggle";

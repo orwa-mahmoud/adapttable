@@ -1,5 +1,8 @@
-import type { BulkAction, BulkActionContext } from "@adapttable/core";
-import type { ConfirmHandler } from "@adapttable/core";
+import {
+  type BulkAction,
+  type BulkActionContext,
+  type ConfirmHandler,
+} from "@adapttable/core";
 import { useCallback, useState } from "react";
 
 /**

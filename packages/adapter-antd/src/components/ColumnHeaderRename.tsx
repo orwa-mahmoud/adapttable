@@ -5,8 +5,7 @@ import {
   useColumnRenameEditor,
 } from "@adapttable/react/adapter";
 import { Button, Flex, Input, theme } from "antd";
-import type { ComponentRef, ReactElement } from "react";
-import { useEffect, useRef } from "react";
+import { type ComponentRef, type ReactElement, useEffect, useRef } from "react";
 
 function RenameForm({
   rename,

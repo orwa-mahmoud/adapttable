@@ -5,23 +5,22 @@
  * Each factory is a {@link TableFeature}: host plugins are the same type
  * in the same `features` array.
  */
-import type { FilterTypeSpec } from "@adapttable/core";
-import type { PinnedRows } from "@adapttable/core";
-import type { RowHeight, RowStyle } from "@adapttable/core";
-import type { BulkAction } from "@adapttable/core";
-import { columnResizeHandleProps } from "@adapttable/core";
 import {
   buildBodyCells,
+  type BulkAction,
   type CellSpanAppearance,
-  type GetCellSpan,
-} from "@adapttable/core";
-import {
+  columnResizeHandleProps,
   extraCoveredTableSlots,
   extraHostFillStyle,
   type ExtraRow,
+  type FilterTypeSpec,
+  type GetCellSpan,
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
+  type PinnedRows,
+  type RowHeight,
+  type RowStyle,
 } from "@adapttable/core";
 
 import type { CommandPaletteOptions } from "../actions/useCommandPalette";

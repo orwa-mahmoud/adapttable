@@ -1,5 +1,4 @@
-import type { BulkAction } from "@adapttable/core";
-import { resetDevWarnings } from "@adapttable/core";
+import { type BulkAction, resetDevWarnings } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

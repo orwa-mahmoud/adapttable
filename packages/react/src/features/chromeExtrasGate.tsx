@@ -6,8 +6,7 @@
  * imports those modules.
  */
 import { createNeutralTable } from "@adapttable/core";
-import type { ReactNode } from "react";
-import { useRef } from "react";
+import { type ReactNode, useRef } from "react";
 
 import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
 import type { BaseDataTableProps } from "../props";

@@ -1,11 +1,10 @@
-import { resolveLabels } from "@adapttable/core";
+import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 
 type AnyColumn = ColumnDef<unknown>;
-import type { GroupingPanelState } from "@adapttable/core";
 
 import {
   type GroupingPanelChipProps,

@@ -12,9 +12,9 @@
  * also what makes the write atomic if the host wants it to be — a single request
  * with every change in it.
  */
-import type { FeatureHostState } from "@adapttable/core";
-import type { EditableColumnLike } from "@adapttable/core";
 import {
+  type EditableColumnLike,
+  type FeatureHostState,
   parseCellEditValue,
   readEditableCellValue,
   resolveCellEditor,
@@ -22,8 +22,7 @@ import {
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { EditEventHandler } from "./editingEvents";
-import { observeEdit } from "./editingEvents";
+import { type EditEventHandler, observeEdit } from "./editingEvents";
 
 /**
  * One row's pending changes.

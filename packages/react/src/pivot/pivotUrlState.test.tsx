@@ -6,8 +6,7 @@
  * back, the overlay that covers the gap until the write lands, and the SSR rule
  * it shares with the other URL hooks.
  */
-import { EMPTY_PIVOT_CONFIG } from "@adapttable/core";
-import { pivot, type PivotConfig } from "@adapttable/core";
+import { EMPTY_PIVOT_CONFIG, pivot, type PivotConfig } from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

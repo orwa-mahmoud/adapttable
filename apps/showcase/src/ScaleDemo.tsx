@@ -4,8 +4,12 @@ import {
   updateRow,
 } from "@adapttable/core";
 import { getLabels } from "@adapttable/i18n";
-import type { CellProps, ColumnDef } from "@adapttable/react";
-import { useFrontendData, useServerData } from "@adapttable/react";
+import {
+  type CellProps,
+  type ColumnDef,
+  useFrontendData,
+  useServerData,
+} from "@adapttable/react";
 import {
   editing as editing_,
   rowAppearance,

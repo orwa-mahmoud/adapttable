@@ -7,8 +7,11 @@ import type { DisplayValue } from "../display";
 import type { QueryCondition } from "../source/queryContract";
 import type { ExtraFilters, TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
-import type { FilterDef, FilterType } from "./filterDefs";
-import type { ChipLabelResolver } from "./filterDefs";
+import {
+  type ChipLabelResolver,
+  type FilterDef,
+  type FilterType,
+} from "./filterDefs";
 import type { FilterFormSource } from "./filterFormModel";
 
 /**

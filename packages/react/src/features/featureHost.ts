@@ -4,17 +4,17 @@
  * tree by {@link FeatureHostProvider}. Chrome that runs in the same render
  * receives it as an argument; it is not left on a module stack.
  */
-import type { Command } from "@adapttable/core";
-import type { Aggregator } from "@adapttable/core";
-import type { CustomCellEditorRender } from "@adapttable/core";
-import type { ExportWriter } from "@adapttable/core";
-import type { FilterTypeSpec } from "@adapttable/core";
 import {
+  type Aggregator,
   appendByKey,
   type ColumnMenuActionFactory,
+  type Command,
   type ContextMenuItemsFactory,
+  type CustomCellEditorRender,
+  type ExportWriter,
   type FeatureHostState,
   type FilterTypeExtend,
+  type FilterTypeSpec,
 } from "@adapttable/core";
 import { useLayoutEffect, useRef } from "react";
 

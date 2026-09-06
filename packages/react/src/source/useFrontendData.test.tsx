@@ -1,5 +1,9 @@
-import { applyRowPatches, rowPatchLog, updateRow } from "@adapttable/core";
-import { resetDevWarnings } from "@adapttable/core";
+import {
+  applyRowPatches,
+  resetDevWarnings,
+  rowPatchLog,
+  updateRow,
+} from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";

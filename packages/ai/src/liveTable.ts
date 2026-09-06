@@ -1,13 +1,13 @@
 /**
  * Neutral-table bridge for the React agent feature.
  */
-import type {
-  ColumnMetadata,
-  NeutralTable,
-  TableRevisions,
-  TableRowScope,
+import {
+  type ColumnMetadata,
+  type NeutralTable,
+  revisionToken,
+  type TableRevisions,
+  type TableRowScope,
 } from "@adapttable/core";
-import { revisionToken } from "@adapttable/core";
 
 import type {
   ApprovalPolicy,

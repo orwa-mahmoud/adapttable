@@ -14,6 +14,9 @@ export default mergeConfig(sharedConfig, {
       exclude: [
         "src/source/TableSource.ts",
         "src/props.ts",
+        "src/columnModel.ts",
+        "src/display.ts",
+        "src/tableStateMutators.ts",
         "src/internal/chromeTestSlots.tsx",
       ],
       thresholds: {

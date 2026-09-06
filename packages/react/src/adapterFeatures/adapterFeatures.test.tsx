@@ -11,8 +11,10 @@ import {
   slotRender,
 } from "../features/providers";
 import { COMMAND_PALETTE_LIVE, SIDE_PANEL } from "../features/slotKeys";
-import type { TableFeature } from "../features/tableFeature";
-import { applyTableFeatures } from "../features/tableFeature";
+import {
+  applyTableFeatures,
+  type TableFeature,
+} from "../features/tableFeature";
 import { createAdapterAgentApprovalFeature } from "./agentApproval";
 import { createAdapterCommandPaletteFeature } from "./commandPalette";
 import { createAdapterContextMenuFeature } from "./contextMenu";

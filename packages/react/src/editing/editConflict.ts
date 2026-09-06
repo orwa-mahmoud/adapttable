@@ -5,8 +5,8 @@
  * reader typed, take the incoming value, or ask. Silently discarding a draft
  * is the one outcome nobody forgives, so the default is to ask.
  */
-import { devWarn } from "@adapttable/core";
 import {
+  devWarn,
   type EditableColumnLike,
   readEditableCellValue,
 } from "@adapttable/core";

@@ -1,8 +1,8 @@
-import type { UseColumnLayoutResult } from "@adapttable/core";
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
   REORDER_COLUMN_KEY,
+  type UseColumnLayoutResult,
 } from "@adapttable/core";
 import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {

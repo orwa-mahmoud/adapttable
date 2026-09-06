@@ -9,8 +9,7 @@
  * for SSR/tests/URL-sync-disabled). Framework adapters (react-router,
  * Next.js) implement the same three methods.
  */
-import type { UrlStateAdapter } from "@adapttable/core";
-import { isBrowser } from "@adapttable/core";
+import { isBrowser, type UrlStateAdapter } from "@adapttable/core";
 import { useRef } from "react";
 
 export type { UrlStateAdapter } from "@adapttable/core";

@@ -1,7 +1,9 @@
-import type { ExtraFilters } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
-import { defaultLabels } from "@adapttable/core";
-import { RANGE_SUFFIXES } from "@adapttable/core";
+import {
+  defaultLabels,
+  type ExtraFilters,
+  type FilterDef,
+  RANGE_SUFFIXES,
+} from "@adapttable/core";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

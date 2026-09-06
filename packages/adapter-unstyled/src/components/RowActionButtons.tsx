@@ -1,15 +1,15 @@
 /** The trailing row-action buttons, shared by rows and cards. */
-import type {
-  ConfirmHandler,
-  RowAction,
-  RowActionsLayout,
-  RowActionsRenderer,
-  TableLabels,
+import {
+  type ConfirmHandler,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  runRowAction,
+  type TableLabels,
+  visibleRowActions,
 } from "@adapttable/core";
-import { runRowAction, visibleRowActions } from "@adapttable/core";
 import { resolveDisabledReason } from "@adapttable/react/adapter";
-import type { MouseEvent, ReactNode, RefObject } from "react";
-import { useRef } from "react";
+import { type MouseEvent, type ReactNode, type RefObject, useRef } from "react";
 
 import type { DataTableClassNames } from "../types";
 import { iconForRowAction, MoreVerticalIcon } from "./icons";

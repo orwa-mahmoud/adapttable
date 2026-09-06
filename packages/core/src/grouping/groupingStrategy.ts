@@ -14,8 +14,7 @@ import {
   sourceCapabilities,
   type TableSourceCapabilities,
 } from "../source/capabilities";
-import type { QueryGroupRow } from "../source/queryGroups";
-import { serverGroupEntries } from "../source/queryGroups";
+import { type QueryGroupRow, serverGroupEntries } from "../source/queryGroups";
 import {
   buildGroupedFlatModel,
   type GroupAggregatesFn,

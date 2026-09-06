@@ -9,9 +9,13 @@
  * both there and in the body, which is how a pivot ends up showing its total
  * twice.
  */
-import type { PivotField } from "@adapttable/core";
-import { headerGroupRows } from "@adapttable/core";
-import { pivot, type PivotConfig, type PivotRow } from "@adapttable/core";
+import {
+  headerGroupRows,
+  pivot,
+  type PivotConfig,
+  type PivotField,
+  type PivotRow,
+} from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

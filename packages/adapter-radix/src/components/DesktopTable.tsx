@@ -1,6 +1,10 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
-import type { Direction, PinSide, TableLabels } from "@adapttable/core";
-import { PIN_Z } from "@adapttable/core";
+import {
+  type Direction,
+  PIN_Z,
+  type PinSide,
+  type TableLabels,
+} from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,

@@ -1,7 +1,9 @@
-import type { ColumnMetadata } from "@adapttable/core";
-import { localizedColumnPath } from "@adapttable/core";
-import { humanizeKey } from "@adapttable/core";
-import { getPath } from "@adapttable/core";
+import {
+  type ColumnMetadata,
+  getPath,
+  humanizeKey,
+  localizedColumnPath,
+} from "@adapttable/core";
 
 import type { ColumnDef } from "../columnDef";
 

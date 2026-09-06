@@ -1,8 +1,7 @@
 /**
  * Row selection — mounts only when a selection-owning feature is composed.
  */
-import { sourceCapabilities } from "@adapttable/core";
-import { stableKey } from "@adapttable/core";
+import { sourceCapabilities, stableKey } from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import { useSelection } from "../selection/useSelection";

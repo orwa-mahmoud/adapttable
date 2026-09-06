@@ -5,8 +5,7 @@ import {
   useColumnRenameEditor,
 } from "@adapttable/react/adapter";
 import { ActionIcon, Box, Button, Group, TextInput } from "@mantine/core";
-import type { ReactElement } from "react";
-import { useEffect, useRef } from "react";
+import { type ReactElement, useEffect, useRef } from "react";
 
 function RenameForm({
   rename,

@@ -1,5 +1,4 @@
-import type { ExtraFilters } from "@adapttable/core";
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels, type ExtraFilters } from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";

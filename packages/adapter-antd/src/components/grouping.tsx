@@ -1,5 +1,8 @@
-import type { GroupedFlatEntry, TableLabels } from "@adapttable/core";
-import { groupSelectionState } from "@adapttable/core";
+import {
+  type GroupedFlatEntry,
+  groupSelectionState,
+  type TableLabels,
+} from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
 import {
   type ExtraEntry,

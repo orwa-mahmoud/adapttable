@@ -12,18 +12,20 @@
  * types, editors, aggregators, exporters, menu items, panels and commands
  * register here rather than through a parallel API.
  */
-import type { Command } from "@adapttable/core";
-import type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
-import type { Aggregator } from "@adapttable/core";
-import type {
-  ColumnMenuActionContext,
-  ColumnMenuItem,
-  ColumnMenuRow,
+import {
+  type Aggregator,
+  type ColumnMenuActionContext,
+  type ColumnMenuItem,
+  type ColumnMenuRow,
+  type Command,
+  type ContextMenuItem,
+  type ContextMenuTarget,
+  type CustomCellEditorRender,
+  type ExportWriter,
+  type FeatureRegistration,
+  type FilterTypeSpec,
+  type NeutralFeatureHost,
 } from "@adapttable/core";
-import type { CustomCellEditorRender } from "@adapttable/core";
-import type { ExportWriter } from "@adapttable/core";
-import type { FilterTypeSpec } from "@adapttable/core";
-import type { FeatureRegistration, NeutralFeatureHost } from "@adapttable/core";
 
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import type { FeatureProviderContribution, FeatureRender } from "./providers";

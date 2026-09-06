@@ -1,10 +1,10 @@
-import type { TableSource } from "@adapttable/core";
-import { resetDevWarnings } from "@adapttable/core";
 import {
   buildTableCsv,
   exportableColumns,
   makeExportCsvHandler,
+  resetDevWarnings,
   resolveExportCsv,
+  type TableSource,
 } from "@adapttable/core";
 import { createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";

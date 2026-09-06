@@ -7,12 +7,14 @@
  * search placeholder branch, and the mount-stagger null-ref guard.
  */
 import type { UseColumnLayoutResult } from "@adapttable/core";
-import type { ColumnDef } from "@adapttable/react";
-import { usePrefersReducedMotion } from "@adapttable/react";
-import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import {
+  type ColumnDef,
+  createMemoryAdapter,
+  useFrontendData,
+  usePrefersReducedMotion,
+} from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { renderHook } from "@testing-library/react";
+import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";

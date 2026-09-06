@@ -6,14 +6,14 @@
  * keyboard handling or its announcements. Nothing in the base graph reaches
  * this module.
  */
-import type { GroupedFlatEntry } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
 import {
+  type GroupedFlatEntry,
   type RowDropPosition,
   type RowMoveMenuModel,
   type RowMoveRequest,
   type RowReorderOptions,
   type RowTreeParentRef,
+  type TreeEntry,
   treeMoveCreatesCycle,
 } from "@adapttable/core";
 import type { ReactNode } from "react";

@@ -1,6 +1,4 @@
-import { humanizeKey } from "@adapttable/core";
-import { getPath } from "@adapttable/core";
-import { localizedColumnPath } from "@adapttable/core";
+import { getPath, humanizeKey, localizedColumnPath } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";

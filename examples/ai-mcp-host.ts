@@ -7,8 +7,7 @@
  * dynamic tool list keep the portable trio (`catalog` / `describe` /
  * `execute`) or use `@adapttable/ai/openai` `{ deferred: true }`.
  */
-import type { AgentObservation } from "@adapttable/ai";
-import { createAgentSession } from "@adapttable/ai";
+import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 import {
   executeMcpTool,
   mcpListChanged,

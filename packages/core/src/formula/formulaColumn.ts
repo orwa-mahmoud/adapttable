@@ -222,7 +222,10 @@ export function buildFormulaColumns<TRow extends object>(
     header: spec.header ?? spec.key,
     // The cell shows text; the comparator gets the value underneath it, so
     // "$1,240.00" never sorts before "$90.00"; the export gets the text a
-    // spreadsheet cell should hold.
+    // spreadsheet cell should hold. `accessor` and `formatValue` are the same
+    // text: a formula column has no data path to read, so without the
+    // accessor a binding would render the row key and find nothing there.
+    accessor: (row: TRow) => formatValue(cached(row, spec.key), spec.format),
     formatValue: (row: TRow) => formatValue(cached(row, spec.key), spec.format),
     // Sorts on the VALUE, never on the cell text: a number orders numerically
     // however it is formatted, and text orders as text.

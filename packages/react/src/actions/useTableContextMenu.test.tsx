@@ -188,3 +188,31 @@ describe("useTableContextMenu", () => {
     }
   });
 });
+
+describe("useTableContextMenu — the routes an adapter must not have to wire", () => {
+  it("opens on the dedicated ContextMenu key as well as Shift+F10", () => {
+    render(<Harness />);
+    fireEvent.keyDown(screen.getByTestId("in-cell"), { key: "ContextMenu" });
+    expect(screen.getByTestId("open")).toHaveTextContent("open");
+  });
+
+  it("ignores every other keystroke without walking the DOM for a target", () => {
+    render(<Harness />);
+    const cell = screen.getByTestId("in-cell");
+    fireEvent.keyDown(cell, { key: "a" });
+    fireEvent.keyDown(cell, { key: "F10" });
+    expect(screen.getByTestId("open")).toHaveTextContent("closed");
+  });
+
+  it("stays closed for a row whose id no longer resolves to a row", () => {
+    render(<Harness />);
+    const row = document.createElement("tr");
+    row.dataset.adapttablePart = "row";
+    row.dataset.rowId = "gone";
+    const cell = document.createElement("td");
+    row.append(cell);
+    screen.getByRole("table").append(row);
+    fireEvent.contextMenu(cell, { clientX: 5, clientY: 5 });
+    expect(screen.getByTestId("open")).toHaveTextContent("closed");
+  });
+});

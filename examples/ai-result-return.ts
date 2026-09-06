@@ -4,8 +4,12 @@
  * After execute, the host may send `ExecuteResult` back to its own agent
  * runtime for a final sentence. AdaptTable does not wrap that reply.
  */
-import type { AgentSession, ExecuteResult } from "@adapttable/ai";
-import { type AgentObservation, createAgentSession } from "@adapttable/ai";
+import {
+  type AgentObservation,
+  type AgentSession,
+  createAgentSession,
+  type ExecuteResult,
+} from "@adapttable/ai";
 import {
   type AgentEnvelope,
   executeEnvelope,

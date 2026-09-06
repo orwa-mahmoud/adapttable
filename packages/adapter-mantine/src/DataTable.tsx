@@ -1,5 +1,8 @@
-import type { TableLabels } from "@adapttable/core";
-import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
+import {
+  resolveLabels,
+  showSimpleFilterFields,
+  type TableLabels,
+} from "@adapttable/core";
 import type { UseSavedViewsOptions } from "@adapttable/react";
 import {
   ACTIVE_FILTER_CHIPS,

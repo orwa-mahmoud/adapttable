@@ -4,8 +4,7 @@
  * The mutation hook lives on this entry. A table that never imports it
  * never carries add / duplicate / delete.
  */
-import type { RowAction } from "@adapttable/core";
-import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
+import { ACTIONS_COLUMN_KEY, type RowAction } from "@adapttable/core";
 import { type ReactNode, useMemo } from "react";
 
 import { useRowMutations } from "../rows/rowMutations";

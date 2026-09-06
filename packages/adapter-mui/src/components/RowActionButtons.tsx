@@ -1,12 +1,13 @@
 /** The trailing row-action buttons, shared by rows and cards. */
-import type {
-  ConfirmHandler,
-  RowAction,
-  RowActionsLayout,
-  RowActionsRenderer,
-  TableLabels,
+import {
+  type ConfirmHandler,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  runRowAction,
+  type TableLabels,
+  visibleRowActions,
 } from "@adapttable/core";
-import { runRowAction, visibleRowActions } from "@adapttable/core";
 import { resolveDisabledReason } from "@adapttable/react/adapter";
 import {
   Button,
@@ -18,8 +19,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import type { MouseEvent, ReactNode } from "react";
-import { useState } from "react";
+import { type MouseEvent, type ReactNode, useState } from "react";
 
 import { iconForRowAction, MoreVerticalIcon } from "../icons";
 import { muiColor } from "./DesktopTable";

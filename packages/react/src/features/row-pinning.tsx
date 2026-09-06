@@ -5,8 +5,7 @@
  * that never imports it never carries those hooks. They mount in-tree
  * through {@link PINNING_LIVE}.
  */
-import { ACTIONS_COLUMN_KEY } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
+import { ACTIONS_COLUMN_KEY, devWarn } from "@adapttable/core";
 import { type ReactNode, useEffect } from "react";
 
 import {

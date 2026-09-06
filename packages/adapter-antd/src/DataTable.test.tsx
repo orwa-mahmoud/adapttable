@@ -1,8 +1,8 @@
 import type { TableSource } from "@adapttable/core";
-import type { TableErrorState } from "@adapttable/react";
 import {
   type ColumnLayoutState,
   createMemoryAdapter,
+  type TableErrorState,
   useFrontendData,
 } from "@adapttable/react";
 import { sparklineColumn } from "@adapttable/react/sparkline";

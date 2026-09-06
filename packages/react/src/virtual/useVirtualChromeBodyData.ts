@@ -4,8 +4,8 @@
  * Import only from the virtualize feature. The base table graph must not
  * reach this file.
  */
-import { devWarn } from "@adapttable/core";
 import {
+  devWarn,
   type TableVirtualization,
   windowGroupedEntries,
 } from "@adapttable/core";

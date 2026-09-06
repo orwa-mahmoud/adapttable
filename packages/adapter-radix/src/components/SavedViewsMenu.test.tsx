@@ -7,8 +7,7 @@
  * so they are queried by label/placeholder/text after the popover mounts.
  */
 import { defaultLabels } from "@adapttable/core";
-import type { LayoutStorage } from "@adapttable/react";
-import { createMemoryAdapter } from "@adapttable/react";
+import { createMemoryAdapter, type LayoutStorage } from "@adapttable/react";
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

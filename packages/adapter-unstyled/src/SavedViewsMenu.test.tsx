@@ -1,6 +1,9 @@
 import { defaultLabels } from "@adapttable/core";
-import { SAVED_VIEW_VERSION } from "@adapttable/react";
-import { createMemoryAdapter, type SavedView } from "@adapttable/react";
+import {
+  createMemoryAdapter,
+  SAVED_VIEW_VERSION,
+  type SavedView,
+} from "@adapttable/react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 

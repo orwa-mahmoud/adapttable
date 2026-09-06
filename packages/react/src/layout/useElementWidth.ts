@@ -7,8 +7,7 @@
  * for one frame on every load, and under SSR (no `ResizeObserver`) it would
  * stay there.
  */
-import type { RefObject } from "react";
-import { useEffect, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 
 /**
  * Track the content width of an element.

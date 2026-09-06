@@ -1,9 +1,9 @@
-import type {
-  BulkAction,
-  BulkActionContext,
-  TableLabels,
+import {
+  type BulkAction,
+  type BulkActionContext,
+  type ConfirmHandler,
+  type TableLabels,
 } from "@adapttable/core";
-import { type ConfirmHandler } from "@adapttable/core";
 
 import {
   offersAllMatching,

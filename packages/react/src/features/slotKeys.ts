@@ -6,14 +6,19 @@
  * the row-reorder state key away from the reorder hook. This module holds ids
  * and types only; nothing here has a runtime cost worth measuring.
  */
-import type { ColumnMenuLabels, ColumnMenuSlotProps } from "@adapttable/core";
-import type { ExportContext, ExportCsvOptions } from "@adapttable/core";
-import type { FeatureHostState } from "@adapttable/core";
-import type { CellRange } from "@adapttable/core";
-import type { SelectionStats } from "@adapttable/core";
-import type { GroupedFlatEntry } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import type { Direction, TableLabels } from "@adapttable/core";
+import {
+  type CellRange,
+  type ColumnMenuLabels,
+  type ColumnMenuSlotProps,
+  type Direction,
+  type ExportContext,
+  type ExportCsvOptions,
+  type FeatureHostState,
+  type GroupedFlatEntry,
+  type SelectionStats,
+  type TableLabels,
+  type TableSource,
+} from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";

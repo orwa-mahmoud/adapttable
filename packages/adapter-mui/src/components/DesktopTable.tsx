@@ -1,6 +1,5 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
-import type { TableLabels } from "@adapttable/core";
-import { PIN_Z } from "@adapttable/core";
+import { PIN_Z, type TableLabels } from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
@@ -39,8 +38,14 @@ import {
   TableSortLabel,
   type Theme,
 } from "@mui/material";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
-import { useCallback, useMemo, useRef } from "react";
+import {
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 
 import {
   OptionalColumnGroupToggle,

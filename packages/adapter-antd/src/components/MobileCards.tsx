@@ -1,19 +1,21 @@
-import type {
-  ConfirmHandler,
-  GroupedFlatEntry,
-  RowAction,
-  RowActionsLayout,
-  RowActionsRenderer,
-  TableLabels,
-  TreeEntry,
+import {
+  bodyRowEntries,
+  type ConfirmHandler,
+  type GroupedFlatEntry,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  type TableLabels,
+  treeCardStyle,
+  type TreeEntry,
 } from "@adapttable/core";
-import { bodyRowEntries, treeCardStyle } from "@adapttable/core";
-import type {
-  EditableCellEditing,
-  ReactMobileCardRenderer,
-  RowExpansionState,
+import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type ReactMobileCardRenderer,
+  type RowExpansionState,
+  type UseDataTableResult,
 } from "@adapttable/react";
-import type { ColumnDef, UseDataTableResult } from "@adapttable/react";
 import {
   cellFlashAttr,
   EXTRA_ROW_PARTS,

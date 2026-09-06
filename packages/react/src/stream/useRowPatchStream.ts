@@ -17,14 +17,15 @@
  * });
  * ```
  */
-import type { RowPatchStreamStatus } from "@adapttable/core";
-import { applyRowPatches, type RowPatch } from "@adapttable/core";
 import {
+  applyRowPatches,
   openRowPatchStream,
+  parseRowPatchFrame,
+  type RowPatch,
   type RowPatchStreamReconnect,
+  type RowPatchStreamStatus,
   type StreamSocket,
 } from "@adapttable/core";
-import { parseRowPatchFrame } from "@adapttable/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**

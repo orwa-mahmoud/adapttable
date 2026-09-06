@@ -1,12 +1,9 @@
-import type {
-  Direction,
-  FilterDef,
-  FilterTypeRegistry,
-  TableLabels,
-} from "@adapttable/core";
 import {
   defaultFilterRegistry,
+  type Direction,
+  type FilterDef,
   filterLabel,
+  type FilterTypeRegistry,
   filterWidgetKind,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
@@ -14,16 +11,15 @@ import {
   renderRegisteredFilter,
   resolveLabels,
   splitRelativeToken,
+  type TableLabels,
 } from "@adapttable/core";
 import {
   CHECKLIST_LIST_HEIGHT,
   filterOpLabel,
   listFilterValues,
   scalarFilterText,
-  useFilterOptions,
-} from "@adapttable/react";
-import {
   useBooleanFilterWidget,
+  useFilterOptions,
   useRangeFilterWidget,
   useTextFilterWidget,
 } from "@adapttable/react";

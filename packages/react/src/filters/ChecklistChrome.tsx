@@ -9,10 +9,13 @@
  * here rather than in any adapter — the slots still render whatever their
  * kit renders, there are just fewer of them at a time.
  */
-import type { TableSource } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
-import { resolveLabels } from "@adapttable/core";
-import { type FilterDef, filterLabel } from "@adapttable/core";
+import {
+  type FilterDef,
+  filterLabel,
+  resolveLabels,
+  type TableLabels,
+  type TableSource,
+} from "@adapttable/core";
 import { type CSSProperties, type ReactNode } from "react";
 
 import { CHECKLIST_LIST_HEIGHT, useChecklistFilter } from "./checklist";

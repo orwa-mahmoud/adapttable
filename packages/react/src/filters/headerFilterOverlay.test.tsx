@@ -1,5 +1,4 @@
-import type { ExtraFilters } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
+import { defaultFilterRegistry, type ExtraFilters } from "@adapttable/core";
 import {
   act,
   fireEvent,

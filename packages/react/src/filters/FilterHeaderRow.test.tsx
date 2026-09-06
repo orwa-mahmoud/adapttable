@@ -1,8 +1,10 @@
-import type { ExtraFilters } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
-import { defaultLabels } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import { withFilterType } from "@adapttable/core";
+import {
+  defaultFilterRegistry,
+  defaultLabels,
+  type ExtraFilters,
+  type FilterDef,
+  withFilterType,
+} from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";

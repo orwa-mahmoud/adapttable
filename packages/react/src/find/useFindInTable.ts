@@ -10,12 +10,17 @@
  * reopens the bar and restarts the walk at the first hit. The current-match
  * index stays ephemeral — the receiving page's data may differ.
  */
-import type { CellRange } from "@adapttable/core";
-import type { GridCell } from "@adapttable/core";
-import { singleCellRange } from "@adapttable/core";
-import { PARAM_FIND } from "@adapttable/core";
-import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
-import { findMatches, matchKeySet, stepMatch } from "@adapttable/core";
+import {
+  type CellRange,
+  findMatches,
+  type GridCell,
+  matchKeySet,
+  PARAM_FIND,
+  parseTableUrlState,
+  singleCellRange,
+  stepMatch,
+  updateTableUrlState,
+} from "@adapttable/core";
 import {
   useCallback,
   useEffect,

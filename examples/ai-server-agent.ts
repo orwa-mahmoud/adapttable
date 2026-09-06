@@ -4,8 +4,11 @@
  * A worker holds one `createAgentSession` and accepts `AgentEnvelope` JSON
  * over HTTP. `executeEnvelope` is the only dispatch.
  */
-import type { AgentApply, AgentObservation } from "@adapttable/ai";
-import { createAgentSession } from "@adapttable/ai";
+import {
+  type AgentApply,
+  type AgentObservation,
+  createAgentSession,
+} from "@adapttable/ai";
 import {
   type AgentEnvelope,
   executeEnvelope,

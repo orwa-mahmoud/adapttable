@@ -142,3 +142,60 @@ Recorded 2026-09-04 on `v3` at `b3173496` (gate tree; this receipt is the follow
 | Hotspots `TO_REVIEW`               | **0**                                                                                                                         |
 
 No new suppressions. Coverage floors and budgets were not lowered. Re-review of items 1–7 after this gate found no new boundary defects; the snag log still has no open entries. Publishing remains blocked on the parked npm trusted-publisher owner actions.
+
+## Item 17 evidence
+
+Recorded 2026-09-06 on `v3`. The tree scanned and gated is the one this
+receipt is committed with; every command below ran on Node 24.19.0 unless it
+names another runtime.
+
+| Gate                               | Result                                                                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                       | EXIT 0. 7,463 unit tests across 15 packages; every coverage floor met.                                                     |
+| `pnpm test:e2e`                    | 1,588 passed (Chromium + chromium-dev), all eight kits.                                                                    |
+| Bundle budgets                     | 74 fixtures within budget. Isolation: 72 packed graphs clean; 11 base graphs carry no AI surface.                          |
+| Contracts                          | api-contract 343 entry points / 167 surfaces / 353 policies · package-split map 3,397 symbols · doc-surface 6,053 exports. |
+| Boundary                           | 108 engine modules and 12 neutral entrypoints reach no framework; neutral and React consumers both compile.                |
+| Packed Node-support                | 14 published packages install and load on Node 24.19.0 and Node 22.12.0.                                                   |
+| `pnpm verify:release`              | EXIT 0: migrate:rehearse (8 kits × preset + minimal + refusals, idempotent), consumer:harness, peer:floors.                |
+| Two `pnpm build && pnpm api:check` | Both cycles reproduce every committed report from a cleared `dist/`.                                                       |
+| `pnpm sonar:coverage`              | EXIT 0. `fix-lcov-paths` rewrote 14 lcov files — one per package with tests.                                               |
+| sonar-scanner → `localhost:9000`   | EXECUTION SUCCESS. CE task `3a6d95e5-63ba-49ca-a3e7-4311d04445a5` → SUCCESS.                                               |
+| Open issues (`resolved=false`)     | **0**                                                                                                                      |
+| Hotspots `TO_REVIEW`               | **0**                                                                                                                      |
+| Project coverage                   | **88.6%** over 113,081 lines of code. Duplication 0.6%.                                                                    |
+
+### What the final gate found and fixed
+
+- **Formula columns rendered empty cells in every kit.** The neutral column
+  model kept `formatValue` and lost the `accessor` a binding renders from, so
+  a formula key — which names no field on the row — resolved to nothing. The
+  builder now sets both, and all four surfaces are pinned by tests.
+- **422 duplicate-import findings.** Splitting one package into two left files
+  importing a module's values and its types in separate statements.
+  `import-x/no-duplicates` with `prefer-inline` now merges them, matching the
+  inline style `consistent-type-imports` already writes, and holds the line.
+- **`@adapttable/react` and `@adapttable/ai` coverage never reached Sonar.**
+  The lcov list still named the eleven packages that existed before the split;
+  it now names all fifteen, which is what moves project coverage from 77.2% to
+  88.6%.
+- **`@adapttable/core` measured 91.7% lines against its own 99% floor**, and
+  `@adapttable/ai` 95.7% against 99%. Both are met by tests, not exclusions:
+  the column-menu model, the spreadsheet writer, the lean assembly, row
+  presentation, export routing, the feature host, the filter engine and the
+  agent transport all gained core-owned suites.
+
+### Not fixed here
+
+- `packages/ai/src/react.tsx:668` carries one `react-hooks/exhaustive-deps`
+  warning on a deliberately dependency-free `useLayoutEffect`. Both conforming
+  rewrites change behaviour; `pnpm lint` exits 0 and the snag log records it.
+- `@adapttable/react`'s coverage floors are set for the package rather than
+  inherited, because the React Compiler's generated memo cache dominates its
+  branch and statement counts. The reasoning and the evidence are in the
+  parking lot for the owner to accept or overrule.
+
+No suppression comments were added anywhere. No test was weakened, no
+threshold was lowered to pass, and no file was excluded from coverage except
+type-only modules and test scaffolding, each classified the way the same kind
+of file was already classified.

@@ -1,8 +1,8 @@
 import { defaultLabels } from "@adapttable/core";
-import type { LayoutStorage } from "@adapttable/react";
 import {
   type ColumnDef,
   createMemoryAdapter,
+  type LayoutStorage,
   type UrlStateAdapter,
 } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";

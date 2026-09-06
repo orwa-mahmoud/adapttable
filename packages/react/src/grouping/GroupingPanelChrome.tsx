@@ -4,16 +4,21 @@
  * Every visible control is a required slot. Core owns ordering, state
  * transitions, part names, and the invisible live region only.
  */
-import type { Direction, TableLabels } from "@adapttable/core";
-import type { GroupAggregateOverride } from "@adapttable/core";
-import type {
-  GroupingChipKeyboardProps as CoreGroupingChipKeyboardProps,
-  GroupingDragProps as CoreGroupingDragProps,
-  GroupingDropProps as CoreGroupingDropProps,
-  GroupingPanelState,
+import {
+  type Direction,
+  type GroupAggregateOverride,
+  type GroupingChipKeyboardProps as CoreGroupingChipKeyboardProps,
+  type GroupingDragProps as CoreGroupingDragProps,
+  type GroupingDropProps as CoreGroupingDropProps,
+  type GroupingPanelState,
+  type TableLabels,
 } from "@adapttable/core";
-import type { DragEventHandler, KeyboardEventHandler } from "react";
-import { type ReactNode, useState } from "react";
+import {
+  type DragEventHandler,
+  type KeyboardEventHandler,
+  type ReactNode,
+  useState,
+} from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { ColumnDef } from "../columnDef";

@@ -5,9 +5,12 @@
  * imports it never carries keyboard-grid state. The hook mounts in-tree
  * through {@link CELL_NAV_LIVE}.
  */
-import type { CellEdit } from "@adapttable/core";
-import { cellFillHandler, cellPasteHandler } from "@adapttable/core";
-import { coveredAddressSet } from "@adapttable/core";
+import {
+  type CellEdit,
+  cellFillHandler,
+  cellPasteHandler,
+  coveredAddressSet,
+} from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import { asGesture } from "../editing/editHistory";

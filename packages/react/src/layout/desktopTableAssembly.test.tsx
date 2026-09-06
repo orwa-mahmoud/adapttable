@@ -1,6 +1,9 @@
-import { defaultConfirm } from "@adapttable/core";
-import { columnResizeHandleProps } from "@adapttable/core";
-import { insertExtraRows, insertExtrasBeforeRows } from "@adapttable/core";
+import {
+  columnResizeHandleProps,
+  defaultConfirm,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+} from "@adapttable/core";
 import { renderHook } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";

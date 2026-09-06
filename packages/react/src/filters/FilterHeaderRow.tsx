@@ -3,12 +3,14 @@
  * adapters pass the Search, Select, range inputs and multi menu the
  * end user clicks. Same defs and extra bag the panel uses (#282).
  */
-import type { TableLabels } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import { type FilterDef, filterLabel, filterStateKeys } from "@adapttable/core";
 import {
+  defaultFilterRegistry,
+  type FilterDef,
+  filterLabel,
+  filterStateKeys,
   type FilterTypeRegistry,
   renderRegisteredFilter,
+  type TableLabels,
 } from "@adapttable/core";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 

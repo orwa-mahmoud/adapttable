@@ -1,13 +1,13 @@
-import { columnResizeHandleProps } from "@adapttable/core";
-import { buildBodyCells } from "@adapttable/core";
 import {
+  buildBodyCells,
+  columnResizeHandleProps,
+  createIncrementalView,
   extraCoveredTableSlots,
   extraHostFillStyle,
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "@adapttable/core";
-import { createIncrementalView } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";

@@ -11,8 +11,11 @@
  * controlled table's density is the host's business, and a URL that
  * silently overrode it would be a second source of truth.
  */
-import { PARAM_DENSITY } from "@adapttable/core";
-import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
+import {
+  PARAM_DENSITY,
+  parseTableUrlState,
+  updateTableUrlState,
+} from "@adapttable/core";
 import {
   useCallback,
   useEffect,

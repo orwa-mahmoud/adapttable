@@ -5,10 +5,10 @@
  * table composes {@link virtualize}. The base table graph must not reach this
  * file — types and pure helpers live in {@link ./virtualTableModel}.
  */
-import { VIRTUAL_OVERSCAN } from "@adapttable/core";
 import {
   type KeyedVirtualization,
   type TableVirtualization,
+  VIRTUAL_OVERSCAN,
   type VirtualItemMeta,
   type VirtualTableRow,
 } from "@adapttable/core";

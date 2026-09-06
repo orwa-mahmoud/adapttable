@@ -3,12 +3,17 @@
  * ignore nested kit dropdowns as "outside", and optionally dismiss once
  * a complete value is written (`closeOnSelect`).
  */
-import type { ExtraFilters } from "@adapttable/core";
-import { defaultFilterRegistry } from "@adapttable/core";
-import { type FilterDef, RANGE_SUFFIXES } from "@adapttable/core";
-import { type FilterTypeRegistry, filterWidgetKind } from "@adapttable/core";
-import { filterOpKey, isValuelessFilterOp } from "@adapttable/core";
-import { readRangeWidget } from "@adapttable/core";
+import {
+  defaultFilterRegistry,
+  type ExtraFilters,
+  type FilterDef,
+  filterOpKey,
+  type FilterTypeRegistry,
+  filterWidgetKind,
+  isValuelessFilterOp,
+  RANGE_SUFFIXES,
+  readRangeWidget,
+} from "@adapttable/core";
 import {
   createContext,
   createElement,

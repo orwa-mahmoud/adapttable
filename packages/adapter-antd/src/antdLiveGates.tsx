@@ -11,13 +11,12 @@ import type {
   TableLabels,
   TableSource,
 } from "@adapttable/core";
-import type {
-  BatchRowEdit,
-  EditHistoryState,
-  FindInTableState,
+import {
+  asBatchGesture,
+  type BatchRowEdit,
+  type EditHistoryState,
+  type FindInTableState,
 } from "@adapttable/react";
-import { asBatchGesture } from "@adapttable/react";
-import type { GridFocusState } from "@adapttable/react/adapter";
 import {
   CELL_NAV_LIVE,
   type CellNavLiveSlotProps,
@@ -35,6 +34,7 @@ import {
   FeatureSlot,
   FIND_LIVE,
   type FindLiveSlotProps,
+  type GridFocusState,
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
   useFeatureSlotFilled,

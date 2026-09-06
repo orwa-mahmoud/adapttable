@@ -1,9 +1,9 @@
 import type { QueryFilterGroup } from "@adapttable/core";
-import type {
-  BatchEditingState,
-  RowEditingState,
+import {
+  type BatchEditingState,
+  type RowEditingState,
+  type RowReorderState,
 } from "@adapttable/react/adapter";
-import type { RowReorderState } from "@adapttable/react/adapter";
 import { fireEvent, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";

@@ -5,8 +5,10 @@
  * this module — only the filters feature's provider does.
  */
 import type { ColumnMetadata } from "../columnModel";
-import type { FeatureHostState } from "../features/currentHost";
-import { applyFilterExtends } from "../features/currentHost";
+import {
+  applyFilterExtends,
+  type FeatureHostState,
+} from "../features/currentHost";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { ExtraFilters } from "../types";
 import { computeFilterFacets, type FacetMap } from "./facets";

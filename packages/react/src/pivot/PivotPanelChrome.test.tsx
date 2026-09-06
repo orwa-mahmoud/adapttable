@@ -5,8 +5,11 @@
  * decides — which zones exist, which move buttons are offered, what each
  * button does to the configuration — not what any kit's button looks like.
  */
-import type { PivotConfig } from "@adapttable/core";
-import { EMPTY_PIVOT_CONFIG, type PivotField } from "@adapttable/core";
+import {
+  EMPTY_PIVOT_CONFIG,
+  type PivotConfig,
+  type PivotField,
+} from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";

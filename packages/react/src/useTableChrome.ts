@@ -1,18 +1,35 @@
-import type { GroupingPanelState } from "@adapttable/core";
-import type { GroupByInput } from "@adapttable/core";
-import type { GroupAggregatesFn, GroupedFlatEntry } from "@adapttable/core";
-import type { PinnedRows } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import { type ConfirmHandler, defaultConfirm } from "@adapttable/core";
-import { REORDER_COLUMN_KEY } from "@adapttable/core";
-import { type ColumnGroupRecord } from "@adapttable/core";
-import { responsiveColumns } from "@adapttable/core";
-import { parseGroupBy } from "@adapttable/core";
-import { resolvePinnedRows } from "@adapttable/core";
-import { type TableErrorState, tableErrorState } from "@adapttable/core";
-import { collectFeatureNotices, type FeatureNotice } from "@adapttable/core";
-import type { ReactNode, RefObject } from "react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  type BulkAction,
+  collectFeatureNotices,
+  type ColumnGroupRecord,
+  type ConfirmHandler,
+  defaultConfirm,
+  type FeatureNotice,
+  type GroupAggregatesFn,
+  type GroupByInput,
+  type GroupedFlatEntry,
+  type GroupingPanelState,
+  parseGroupBy,
+  type PinnedRows,
+  REORDER_COLUMN_KEY,
+  resolvePinnedRows,
+  responsiveColumns,
+  type RowAction,
+  type SortByOption,
+  type TableErrorState,
+  tableErrorState,
+  type TableLabels,
+  type TableSource,
+  type TreeEntry,
+} from "@adapttable/core";
+import {
+  type ReactNode,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 import type { ColumnDef } from "./columnDef";
 import { flattenReactColumnTree } from "./columns/flattenColumnTree";
@@ -45,13 +62,6 @@ import type { RowExpansionState } from "./rows/useRowExpansion";
 import type { SelectionState } from "./selection/useSelection";
 
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
-import type {
-  BulkAction,
-  RowAction,
-  SortByOption,
-  TableLabels,
-} from "@adapttable/core";
 
 import type { TreeExpansionState } from "./tree/useTreeExpansion";
 import {

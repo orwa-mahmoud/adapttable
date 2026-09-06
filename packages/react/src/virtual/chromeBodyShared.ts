@@ -4,11 +4,15 @@
  * The plain path and the virtualize feature both assemble {@link ChromeBodyData}
  * from these. Only {@link ./useVirtualChromeBodyData} may reach TanStack.
  */
-import type { GroupedFlatEntry } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
-import type { TableVirtualization } from "@adapttable/core";
-import { DEFAULT_CARD_SIZE_PX, DEFAULT_ROW_SIZE_PX } from "@adapttable/core";
-import { estimateFromRowHeight, partitionPinnedRows } from "@adapttable/core";
+import {
+  DEFAULT_CARD_SIZE_PX,
+  DEFAULT_ROW_SIZE_PX,
+  estimateFromRowHeight,
+  type GroupedFlatEntry,
+  partitionPinnedRows,
+  type TableVirtualization,
+  type TreeEntry,
+} from "@adapttable/core";
 import { type RefCallback, type RefObject, useCallback, useMemo } from "react";
 
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";

@@ -7,9 +7,6 @@
  * be started twice by an impatient second click, and the outcome is announced —
  * a download is silent, and so is a failed one.
  */
-import type { TableSourceCapabilities } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import { resetDevWarnings } from "@adapttable/core";
 import {
   type ExportAllControls,
   type ExportAllQuery,
@@ -17,6 +14,9 @@ import {
   type ExportRequest,
   fetchAllExportRows,
   makeExportCsvHandler,
+  resetDevWarnings,
+  type TableSource,
+  type TableSourceCapabilities,
 } from "@adapttable/core";
 import {
   act,

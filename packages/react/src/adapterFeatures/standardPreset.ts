@@ -1,5 +1,4 @@
-import type { FilterDef } from "@adapttable/core";
-import type { BulkAction } from "@adapttable/core";
+import { type BulkAction, type FilterDef } from "@adapttable/core";
 
 import type {
   StaticTableFeature,

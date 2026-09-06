@@ -1,5 +1,8 @@
-import type { UseColumnLayoutResult } from "@adapttable/core";
-import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
+import {
+  ACTIONS_COLUMN_KEY,
+  REORDER_COLUMN_KEY,
+  type UseColumnLayoutResult,
+} from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

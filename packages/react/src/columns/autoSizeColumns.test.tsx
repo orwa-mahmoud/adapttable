@@ -5,8 +5,12 @@
  * wide a rendered cell is — a cell holding a badge, an avatar and a name has no
  * width the data could report.
  */
-import { autoSizeColumns, measureColumnWidth } from "@adapttable/core";
-import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "@adapttable/core";
+import {
+  autoSizeColumns,
+  MAX_COLUMN_WIDTH,
+  measureColumnWidth,
+  MIN_COLUMN_WIDTH,
+} from "@adapttable/core";
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

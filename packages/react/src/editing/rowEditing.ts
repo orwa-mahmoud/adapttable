@@ -10,9 +10,9 @@
  * host ONE patch. Cancel throws all of it away. The unit changes; nothing else
  * does — the same editors, the same validators, the same save states.
  */
-import type { FeatureHostState } from "@adapttable/core";
-import type { EditableColumnLike } from "@adapttable/core";
 import {
+  type EditableColumnLike,
+  type FeatureHostState,
   parseCellEditValue,
   readEditableCellValue,
   resolveCellEditor,
@@ -20,8 +20,7 @@ import {
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { EditEventHandler } from "./editingEvents";
-import { observeEdit } from "./editingEvents";
+import { type EditEventHandler, observeEdit } from "./editingEvents";
 
 /**
  * The drafts a row edit holds, by column key.

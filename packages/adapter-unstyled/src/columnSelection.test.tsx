@@ -1,5 +1,4 @@
-import { fireEvent } from "@testing-library/react";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";

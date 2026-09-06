@@ -1,27 +1,23 @@
-import type {
-  FilterDef,
-  FilterTypeRegistry,
-  FilterValue,
-  TableLabels,
-  TableSource,
-} from "@adapttable/core";
 import {
   defaultFilterRegistry,
+  type FilterDef,
   filterLabel,
+  type FilterTypeRegistry,
+  type FilterValue,
   filterWidgetKind,
   joinRelativeToken,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
   splitRelativeToken,
+  type TableLabels,
+  type TableSource,
 } from "@adapttable/core";
 import {
   filterOpLabel,
   listFilterValues,
-  useFilterOptions,
-} from "@adapttable/react";
-import {
   useBooleanFilterWidget,
+  useFilterOptions,
   useRangeFilterWidget,
   useTextFilterWidget,
 } from "@adapttable/react";

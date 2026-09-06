@@ -4,20 +4,21 @@
  * This entry owns its drag state, announcements, and the ordinary grouping
  * engine. Importing plain `grouping()` never reaches this module.
  */
-import type { GroupAggregateOverride } from "@adapttable/core";
 import {
+  formatGroupBy,
+  type GroupAggregateOverride,
   GROUPING_COLUMN_DND_MIME,
   groupingDragKey,
   type GroupingDragSource,
   type GroupingDragState,
   type GroupingPanelInteractions,
   hasGroupingColumnDrag,
+  isRtlElement,
   moveGroupingKey,
   moveGroupingKeyBy,
+  parseGroupBy,
   removeGroupingKey,
 } from "@adapttable/core";
-import { formatGroupBy, parseGroupBy } from "@adapttable/core";
-import { isRtlElement } from "@adapttable/core";
 import {
   type DragEvent as ReactDragEvent,
   type KeyboardEvent as ReactKeyboardEvent,

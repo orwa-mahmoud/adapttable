@@ -8,13 +8,13 @@
  * rather than in nine adapters, because a second copy of "which editor does this
  * column want" is a second place for the answer to drift.
  */
-import type { TableLabels } from "@adapttable/core";
 import {
   type CellEditor,
   type EditableColumnLike,
   isCustomEditor,
   normalizeEditorOptions,
   resolveCellEditor,
+  type TableLabels,
 } from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 

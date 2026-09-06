@@ -11,11 +11,14 @@ import { describe, expect, it, vi } from "vitest";
 import { AutoFilterForm } from "./components/AutoFilterForm";
 import { DataTable } from "./data-table.test-utils";
 import { filters as filtersFeature } from "./filters";
-import type { ColumnDef, FilterDef, FilterOption, TableQuery } from "./index";
 import {
+  type ColumnDef,
   defaultFilterRegistry,
   defaultLabels,
+  type FilterDef,
+  type FilterOption,
   resolveFilterRegistry,
+  type TableQuery,
 } from "./index";
 import { renderMui } from "./test-utils";
 

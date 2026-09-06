@@ -7,8 +7,7 @@
  * user cleared sends them looking for a filter that is not there — so each
  * shape a cleared control leaves behind is checked on its own.
  */
-import type { ExtraFilters } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
+import { type ExtraFilters, type FilterDef } from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { hasActiveHeaderFilter } from "./FilterHeaderRow";

@@ -1,12 +1,13 @@
 /** The trailing row-action buttons, shared by rows and cards. */
-import type {
-  ConfirmHandler,
-  RowAction,
-  RowActionsLayout,
-  RowActionsRenderer,
-  TableLabels,
+import {
+  type ConfirmHandler,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  runRowAction,
+  type TableLabels,
+  visibleRowActions,
 } from "@adapttable/core";
-import { runRowAction, visibleRowActions } from "@adapttable/core";
 import { resolveDisabledReason } from "@adapttable/react/adapter";
 import { Button, HStack, IconButton, Menu } from "@chakra-ui/react";
 import type { ReactNode } from "react";

@@ -12,32 +12,31 @@
  *
  * @typeParam TRow - The row type.
  */
-import type { ConfirmHandler } from "@adapttable/core";
-import type { ColumnGroupRecord } from "@adapttable/core";
-import type { FilterDef } from "@adapttable/core";
-import type { FilterTypeRegistry } from "@adapttable/core";
-import type { GroupingPanelState } from "@adapttable/core";
-import type { GroupByInput } from "@adapttable/core";
-import type { GroupedFlatEntry } from "@adapttable/core";
-import type {
-  BodyCell,
-  CellSpanAppearance,
-  GetCellSpan,
-} from "@adapttable/core";
-import type { ExtraRow } from "@adapttable/core";
-import type { RowActionsLayout, RowActionsRenderer } from "@adapttable/core";
-import type { RowHeight, RowStyle } from "@adapttable/core";
-import type { TreeEntry } from "@adapttable/core";
-import type { RowAction, TableLabels } from "@adapttable/core";
 import {
   type AssemblyFns,
+  type BodyCell,
   bodyRowEntries,
+  type CellSpanAppearance,
+  type ColumnGroupRecord,
+  type ConfirmHandler,
+  type ExtraRow,
+  type FilterDef,
+  type FilterTypeRegistry,
+  type GetCellSpan,
+  type GroupByInput,
+  type GroupedFlatEntry,
+  type GroupingPanelState,
+  incrementalViewOf,
+  pinnedSummaryEntries,
   resolveAssembly,
-} from "@adapttable/core";
-import { incrementalViewOf } from "@adapttable/core";
-import { pinnedSummaryEntries } from "@adapttable/core";
-import {
   resolveVirtualRows,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
+  type RowHeight,
+  type RowStyle,
+  type TableLabels,
+  type TreeEntry,
   virtualColumnSpan,
   type VirtualTableRow,
 } from "@adapttable/core";

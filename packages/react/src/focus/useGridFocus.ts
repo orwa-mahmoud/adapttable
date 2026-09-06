@@ -27,32 +27,30 @@
  * `data-grid-cell` attribute so the mechanism does not need a ref per cell —
  * with 100,000 rows, a ref map is a leak with extra steps.
  */
-import type { Direction, TableLabels } from "@adapttable/core";
-import type { CellEdit } from "@adapttable/core";
-import { columnText } from "@adapttable/core";
 import {
+  type CellEdit,
   type CellRange,
   cellRangeBounds,
   cellRangeSize,
-  extendCellRange,
-  isInCellRange,
-  isSingleCell,
-  singleCellRange,
-} from "@adapttable/core";
-import {
   clipboardRangeText,
-  readClipboardText,
-  writeClipboardText,
-} from "@adapttable/core";
-import { fillRangeEdits, fillTargetRange } from "@adapttable/core";
-import {
+  columnText,
+  type Direction,
+  extendCellRange,
+  fillRangeEdits,
+  fillTargetRange,
   type GridBounds,
   type GridCell,
   gridFocusMoveForKey,
+  isInCellRange,
+  isSingleCell,
   moveGridFocus,
+  pasteRangeEdits,
+  readClipboardText,
   sameGridCell,
+  singleCellRange,
+  type TableLabels,
+  writeClipboardText,
 } from "@adapttable/core";
-import { pasteRangeEdits } from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";

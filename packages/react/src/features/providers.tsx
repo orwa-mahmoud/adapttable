@@ -27,11 +27,13 @@
  *   scoped to the tree that provided it — including a table nested inside
  *   another table's row detail.
  */
-import type { GroupAggregateOverrides } from "@adapttable/core";
-import type { NeutralTable } from "@adapttable/core";
-import type { TableSourceCapabilities } from "@adapttable/core";
-import type { ExtraFilters } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
+import {
+  devWarn,
+  type ExtraFilters,
+  type GroupAggregateOverrides,
+  type NeutralTable,
+  type TableSourceCapabilities,
+} from "@adapttable/core";
 import {
   type ComponentType,
   createContext,

@@ -1,23 +1,23 @@
 /**
  * Removable chips for every leaf in the AND/OR filter tree.
  */
-import type { QueryCondition, QueryFilterGroup } from "@adapttable/core";
-import type { TableLabels } from "@adapttable/core";
-import { type FilterDef, filterLabel } from "@adapttable/core";
-import {
-  removeFilterTreeNode,
-  walkFilterTreeConditions,
-} from "@adapttable/core";
 import {
   DATE_OP_LABEL_KEYS,
   type DateOp,
+  type FilterDef,
+  filterLabel,
   formatFilterChip,
   NUMBER_OP_LABEL_KEYS,
   type NumberOp,
+  type QueryCondition,
+  type QueryFilterGroup,
+  relativeTokenLabel,
+  removeFilterTreeNode,
+  type TableLabels,
   TEXT_OP_LABEL_KEYS,
   type TextOp,
+  walkFilterTreeConditions,
 } from "@adapttable/core";
-import { relativeTokenLabel } from "@adapttable/core";
 import { useMemo } from "react";
 
 import { filterOpLabel } from "./filterForm";

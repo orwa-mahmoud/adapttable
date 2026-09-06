@@ -1,19 +1,35 @@
-import type { FacetMap } from "@adapttable/core";
-import type { FilterDef, FilterRuntime } from "@adapttable/core";
-import type { FilterTypeRegistry } from "@adapttable/core";
-import type { SelectionStats } from "@adapttable/core";
-import type { GroupingPanelState } from "@adapttable/core";
-import type { AssemblyFns } from "@adapttable/core";
-import type { QuerySupport } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import type { Direction, SortByOption, TableLabels } from "@adapttable/core";
-import type { VirtualTableRow } from "@adapttable/core";
-import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
-import { bindFeatureHostFn, type FeatureHostState } from "@adapttable/core";
-import { resolveFilterMode, toolbarShowsFilters } from "@adapttable/core";
-import { isDeclarativeFilters } from "@adapttable/core";
-import type { ReactNode, RefCallback, RefObject } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ACTIONS_COLUMN_KEY,
+  type AssemblyFns,
+  bindFeatureHostFn,
+  type Direction,
+  type FacetMap,
+  type FeatureHostState,
+  type FilterDef,
+  type FilterRuntime,
+  type FilterTypeRegistry,
+  type GroupingPanelState,
+  isDeclarativeFilters,
+  type QuerySupport,
+  REORDER_COLUMN_KEY,
+  resolveFilterMode,
+  type SelectionStats,
+  type SortByOption,
+  type TableLabels,
+  type TableSource,
+  toolbarShowsFilters,
+  type VirtualTableRow,
+} from "@adapttable/core";
+import {
+  type ReactNode,
+  type RefCallback,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { useTableStatusAnnouncement } from "./a11y/useTableStatusAnnouncement";
 import type { ColumnDef } from "./columnDef";

@@ -1,9 +1,9 @@
-import { resetDevWarnings } from "@adapttable/core";
 import {
   AUTO_OPTIONS_LIMIT,
   type FilterDef,
   type FilterOption,
   materializeAutoOptions,
+  resetDevWarnings,
 } from "@adapttable/core";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";

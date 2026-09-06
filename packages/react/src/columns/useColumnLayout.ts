@@ -1,18 +1,17 @@
 import {
+  applyCollapsedColumnGroups,
   applyColumnOrder,
+  type ColumnGroupRecord,
   type ColumnLayoutState,
+  declaredColumnName,
   EMPTY_COLUMN_LAYOUT,
+  FALLBACK_PIN_WIDTH,
+  marriedOrderHolds,
+  parsePxWidth,
   type PinSide,
+  toggleCollapsedColumnGroup,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
-import { declaredColumnName } from "@adapttable/core";
-import {
-  applyCollapsedColumnGroups,
-  type ColumnGroupRecord,
-  marriedOrderHolds,
-} from "@adapttable/core";
-import { FALLBACK_PIN_WIDTH, parsePxWidth } from "@adapttable/core";
-import { toggleCollapsedColumnGroup } from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";

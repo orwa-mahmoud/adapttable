@@ -1,9 +1,10 @@
-import type {
-  ExtraFilters,
-  FacetMap,
-  QueryFilterGroup,
+import {
+  computeFilterFacets,
+  evaluateFilterTree,
+  type ExtraFilters,
+  type FacetMap,
+  type QueryFilterGroup,
 } from "@adapttable/core";
-import { computeFilterFacets, evaluateFilterTree } from "@adapttable/core";
 
 import {
   budget,

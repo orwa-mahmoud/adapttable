@@ -1,5 +1,8 @@
-import type { FilterValue, TableLabels } from "@adapttable/core";
-import type { ChipLabelResolver } from "@adapttable/core";
+import {
+  type ChipLabelResolver,
+  type FilterValue,
+  type TableLabels,
+} from "@adapttable/core";
 import { useMemo } from "react";
 
 /**

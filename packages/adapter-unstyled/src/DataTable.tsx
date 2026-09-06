@@ -1,5 +1,8 @@
-import type { TableSource } from "@adapttable/core";
-import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
+import {
+  resolveLabels,
+  showSimpleFilterFields,
+  type TableSource,
+} from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,

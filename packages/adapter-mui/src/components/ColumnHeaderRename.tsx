@@ -5,8 +5,7 @@ import {
   useColumnRenameEditor,
 } from "@adapttable/react/adapter";
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
-import type { ReactElement } from "react";
-import { useEffect, useRef } from "react";
+import { type ReactElement, useEffect, useRef } from "react";
 
 function RenameForm({
   rename,

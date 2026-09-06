@@ -1,5 +1,4 @@
-import type { FilterDef, FilterOption } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
+import { devWarn, type FilterDef, type FilterOption } from "@adapttable/core";
 import { useEffect, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";

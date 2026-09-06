@@ -1,5 +1,8 @@
-import type { TableErrorState } from "@adapttable/react";
-import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import {
+  createMemoryAdapter,
+  type TableErrorState,
+  useFrontendData,
+} from "@adapttable/react";
 import { sparklineColumn } from "@adapttable/react/sparkline";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {

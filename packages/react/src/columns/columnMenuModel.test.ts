@@ -1,10 +1,10 @@
-import { defaultLabels } from "@adapttable/core";
 import {
   type ColumnMenuAction,
   columnMenuActions,
   type ColumnMenuItem,
   columnMenuLabel,
   columnMenuRows,
+  defaultLabels,
   filterColumnMenuRows,
   hideAllColumns,
   nextPinSide,

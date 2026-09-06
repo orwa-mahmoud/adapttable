@@ -1,6 +1,10 @@
 import { isRtlElement } from "@adapttable/core";
-import type { DragEvent, KeyboardEvent } from "react";
-import { useCallback, useState } from "react";
+import {
+  type DragEvent,
+  type KeyboardEvent,
+  useCallback,
+  useState,
+} from "react";
 
 /**
  * MIME type carrying the dragged column key during a reorder drag.

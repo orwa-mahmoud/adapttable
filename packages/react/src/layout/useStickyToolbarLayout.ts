@@ -1,5 +1,11 @@
-import type { CSSProperties, RefCallback } from "react";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type RefCallback,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * Whether the toolbar should pin with the sticky header.

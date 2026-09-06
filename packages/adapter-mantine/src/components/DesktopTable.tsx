@@ -1,5 +1,9 @@
-import type { TableLabels } from "@adapttable/core";
-import { edgePinStyle, PIN_Z, pinnedCellStyle } from "@adapttable/core";
+import {
+  edgePinStyle,
+  PIN_Z,
+  pinnedCellStyle,
+  type TableLabels,
+} from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
@@ -23,8 +27,14 @@ import {
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import { Badge, Checkbox, Group, Table, VisuallyHidden } from "@mantine/core";
-import type { CSSProperties, ReactElement, ReactNode, RefObject } from "react";
-import { Fragment, useMemo } from "react";
+import {
+  type CSSProperties,
+  Fragment,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+  useMemo,
+} from "react";
 
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";

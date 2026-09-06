@@ -16,8 +16,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import type { EditEventHandler } from "./editingEvents";
-import { observeEdit } from "./editingEvents";
+import { type EditEventHandler, observeEdit } from "./editingEvents";
 
 /**
  * What a cell's last save is doing.

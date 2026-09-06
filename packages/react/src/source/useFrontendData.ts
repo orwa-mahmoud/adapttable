@@ -1,23 +1,23 @@
-import type { SortLevel } from "@adapttable/core";
-import type {
-  ExtraFilters,
-  PaginationMode,
-  SortableValue,
-  SortDirection,
-} from "@adapttable/core";
-import type { QueryFilterGroup } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import { createTableEngine, type TableEngine } from "@adapttable/core";
 import {
+  createTableEngine,
+  devWarn,
+  type ExtraFilters,
   incrementalSearchText,
   type IncrementalView,
   type IncrementalViewConfig,
   incrementalViewConfig,
   incrementalViewOf,
+  type PaginationMode,
+  type QueryFilterGroup,
+  type RowPatchLog,
+  rowPatchLog,
+  type SortableValue,
+  type SortDirection,
+  type SortLevel,
+  stableKey,
+  type TableEngine,
+  type TableSource,
 } from "@adapttable/core";
-import { type RowPatchLog, rowPatchLog } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
-import { stableKey } from "@adapttable/core";
 import { useCallback, useMemo, useRef } from "react";
 
 import type { ColumnDef } from "../columnDef";

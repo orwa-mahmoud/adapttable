@@ -1,5 +1,8 @@
-import type { PaginationMode, ResolvedPaginationMode } from "@adapttable/core";
-import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
+import {
+  MOBILE_BREAKPOINT_PX,
+  type PaginationMode,
+  type ResolvedPaginationMode,
+} from "@adapttable/core";
 
 import { useMediaQuery } from "./useMediaQuery";
 

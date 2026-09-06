@@ -1,14 +1,15 @@
-import type { FacetMap } from "@adapttable/core";
-import type { PaginationMode, TableQuery } from "@adapttable/core";
-import type { TableSource } from "@adapttable/core";
-import { withQueryAggregateOverrides } from "@adapttable/core";
-import { parseGroupBy } from "@adapttable/core";
-import { devWarn } from "@adapttable/core";
-import { stableKey } from "@adapttable/core";
 import {
   applyQuerySupport,
+  devWarn,
+  type FacetMap,
+  type PaginationMode,
+  parseGroupBy,
   type QueryAggregate,
   type QuerySupport,
+  stableKey,
+  type TableQuery,
+  type TableSource,
+  withQueryAggregateOverrides,
 } from "@adapttable/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 

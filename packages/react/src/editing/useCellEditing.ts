@@ -16,8 +16,7 @@ import {
 } from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import type { EditEventHandler } from "./editingEvents";
-import { observeEdit } from "./editingEvents";
+import { type EditEventHandler, observeEdit } from "./editingEvents";
 
 /**
  * Keyboard outcome from {@link CellEditingState.handleKeyDown}.

@@ -12,10 +12,11 @@
  */
 import {
   PARAM_GROUP_CLOSED,
+  parseTableUrlState,
   readCollapsedGroups,
+  updateTableUrlState,
   writeCollapsedGroups,
 } from "@adapttable/core";
-import { parseTableUrlState, updateTableUrlState } from "@adapttable/core";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";

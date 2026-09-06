@@ -6,8 +6,10 @@
  * between a scrolled pinned column and the sticky header: otherwise a
  * pinned row slides under the header, or a pinned column paints over it.
  */
-import type { VirtualTableRow } from "../virtual/virtualTableModel";
-import { resolveVirtualRows } from "../virtual/virtualTableModel";
+import {
+  resolveVirtualRows,
+  type VirtualTableRow,
+} from "../virtual/virtualTableModel";
 import { pinnedSummaryRowId } from "./pinnedSummaryRows";
 import type { RowPinSide } from "./rowPinModel";
 
