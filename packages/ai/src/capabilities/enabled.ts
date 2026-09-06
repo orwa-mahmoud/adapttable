@@ -31,6 +31,16 @@ export function isBuiltInEnabled(
       return observation.hasFilters;
     case "view.setGroupBy":
       return observation.source.grouping !== false;
+    // Pinning is advertised from the wired operation, never from a feature
+    // name: a table can compose the column menu and still hand the agent no
+    // way to change the layout.
+    case "view.pinColumn":
+      return (
+        observation.hasColumnPinning === true &&
+        observation.columns.some((column) => column.pinnable !== false)
+      );
+    case "view.pinRow":
+      return observation.hasRowPinning === true;
     case "view.setSelection":
       return observation.hasSelection === true;
     case "views.apply":

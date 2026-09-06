@@ -80,6 +80,8 @@ describe("enabledKeys", () => {
         hasSavedViews: true,
         hasAdd: true,
         hasDelete: true,
+        hasColumnPinning: true,
+        hasRowPinning: true,
       })
     );
     expect(keys).toEqual([...CAPABILITY_KEYS]);

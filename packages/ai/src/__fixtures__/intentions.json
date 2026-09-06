@@ -3,41 +3,104 @@
   "intentions": [
     {
       "text": "list the columns this table can mention",
-      "expected": { "key": "columns.describe", "args": {} }
+      "expected": {
+        "key": "columns.describe",
+        "args": {}
+      }
     },
     {
       "text": "what page and sort is the table on",
-      "expected": { "key": "view.describe", "args": {} }
+      "expected": {
+        "key": "view.describe",
+        "args": {}
+      }
     },
     {
       "text": "go to page 2",
-      "expected": { "key": "view.setPage", "args": { "page": 2 } }
+      "expected": {
+        "key": "view.setPage",
+        "args": {
+          "page": 2
+        }
+      }
     },
     {
       "text": "sort by name descending",
       "expected": {
         "key": "view.setSort",
-        "args": { "key": "name", "dir": "desc" }
+        "args": {
+          "key": "name",
+          "dir": "desc"
+        }
       }
     },
     {
       "text": "search for hopper",
-      "expected": { "key": "view.setSearch", "args": { "query": "hopper" } }
+      "expected": {
+        "key": "view.setSearch",
+        "args": {
+          "query": "hopper"
+        }
+      }
     },
     {
       "text": "keep only the Core team",
       "expected": {
         "key": "view.setFilters",
-        "args": { "filters": { "team": "Core" } }
+        "args": {
+          "filters": {
+            "team": "Core"
+          }
+        }
       }
     },
     {
       "text": "group rows by team",
-      "expected": { "key": "view.setGroupBy", "args": { "key": "team" } }
+      "expected": {
+        "key": "view.setGroupBy",
+        "args": {
+          "key": "team"
+        }
+      }
+    },
+    {
+      "text": "pin the name column to the start edge",
+      "expected": {
+        "key": "view.pinColumn",
+        "args": {
+          "key": "name",
+          "side": "start"
+        }
+      }
+    },
+    {
+      "text": "unpin the name column",
+      "expected": {
+        "key": "view.pinColumn",
+        "args": {
+          "key": "name",
+          "side": null
+        }
+      }
+    },
+    {
+      "text": "pin the row with key 5 to the top",
+      "expected": {
+        "key": "view.pinRow",
+        "args": {
+          "rowKey": "5",
+          "side": "top"
+        }
+      }
     },
     {
       "text": "export this view as csv",
-      "expected": { "key": "export.run", "args": { "format": "csv" } }
+      "expected": {
+        "key": "export.run",
+        "args": {
+          "format": "csv"
+        }
+      }
     },
     {
       "text": "set the fifth visible row's salary to 20000",
@@ -55,44 +118,70 @@
       "text": "move row 1 to sit where row 2 is",
       "expected": {
         "key": "rows.reorder",
-        "args": { "fromKey": "1", "toKey": "2" }
+        "args": {
+          "fromKey": "1",
+          "toKey": "2"
+        }
       }
     },
     {
       "text": "select the visible rows named Ada and Grace",
       "expected": {
         "key": "view.setSelection",
-        "args": { "rowKeys": ["1", "3"] }
+        "args": {
+          "rowKeys": ["1", "3"]
+        }
       }
     },
     {
       "text": "apply the saved view named finance",
-      "expected": { "key": "views.apply", "args": { "viewId": "finance" } }
+      "expected": {
+        "key": "views.apply",
+        "args": {
+          "viewId": "finance"
+        }
+      }
     },
     {
       "text": "read the current page of names",
       "expected": {
         "key": "rows.read",
-        "args": { "columns": ["name"], "scope": "page" }
+        "args": {
+          "columns": ["name"],
+          "scope": "page"
+        }
       }
     },
     {
       "text": "resolve the fifth visible row to a row key",
       "expected": {
         "key": "rows.resolve",
-        "args": { "position": 5, "scope": "visible" }
+        "args": {
+          "position": 5,
+          "scope": "visible"
+        }
       }
     },
     {
       "text": "add a row for Ada with salary 20000",
       "expected": {
         "key": "rows.add",
-        "args": { "values": { "name": "Ada", "salary": 20000 } }
+        "args": {
+          "values": {
+            "name": "Ada",
+            "salary": 20000
+          }
+        }
       }
     },
     {
       "text": "delete the row with key 5",
-      "expected": { "key": "rows.delete", "args": { "rowKeys": ["5"] } }
+      "expected": {
+        "key": "rows.delete",
+        "args": {
+          "rowKeys": ["5"]
+        }
+      }
     }
   ]
 }

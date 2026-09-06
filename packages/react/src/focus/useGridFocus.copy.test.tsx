@@ -240,7 +240,7 @@ describe("contextMenuCopyTarget", () => {
     expect(written).toEqual([]);
   });
 
-  it("copies nothing for a row outside the window", async () => {
+  it("copies nothing for a row outside the window", () => {
     const { result } = windowed();
     expect(
       contextMenuCopyTarget(result.current, {
@@ -251,7 +251,7 @@ describe("contextMenuCopyTarget", () => {
     ).toEqual({ available: false });
   });
 
-  it("copies nothing for a group row or any other non-cell target", async () => {
+  it("copies nothing for a group row or any other non-cell target", () => {
     const { result } = windowed();
     for (const target of [
       { kind: "group", rowId: "g:London", columnKey: "name" },

@@ -5,7 +5,7 @@
  * Empty slots pass chrome through unchanged, so the lean table never
  * imports those modules.
  */
-import { createNeutralTable } from "@adapttable/core";
+import { createNeutralTable, type RowPinSide } from "@adapttable/core";
 import { type ReactNode, useRef } from "react";
 
 import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
@@ -13,6 +13,7 @@ import type { BaseDataTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
 import {
   FeatureSlot,
+  type TableRuntimeView,
   useFeatureSlotFilled,
   usePublishTableRuntime,
 } from "./providers";
@@ -148,6 +149,7 @@ function RuntimePublisher<TRow>({
           replace: chrome.table.selection.replace,
         }
       : undefined,
+    pinning: livePinning(chrome),
     editing: chrome.editing
       ? {
           onCellEdit: chrome.editing.onCellEdit,
@@ -195,6 +197,32 @@ function RuntimePublisher<TRow>({
     neutralTable,
   });
   return children(chrome);
+}
+
+/**
+ * What the agent may pin, read from the chrome that renders the pins.
+ *
+ * Column layout is always present; row pinning arrives only when that feature
+ * is composed, which is why the row half is optional and the column half is
+ * not.
+ */
+function livePinning<TRow>(
+  chrome: TableChrome<TRow>
+): NonNullable<TableRuntimeView<TRow>["pinning"]> {
+  const rowPinning = chrome.rowPinning;
+  return {
+    columns: chrome.columnLayout.state.pinned,
+    setColumnPin: chrome.columnLayout.setPinned,
+    rows: rowPinning?.state,
+    setRowPin: rowPinning
+      ? (rowKey: string, side: RowPinSide | undefined) => {
+          // Unpin is the inverse of pin, not a layout reset: it takes this
+          // row off whichever edge holds it and touches nothing else.
+          if (side === undefined) rowPinning.unpin(rowKey);
+          else rowPinning.pin(rowKey, side);
+        }
+      : undefined,
+  };
 }
 
 /** One link of the chain: gate on this slot, then hand the rest the result. */

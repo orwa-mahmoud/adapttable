@@ -31,5 +31,7 @@ export function deriveRuntimeOperations<TRow>(
     setGroupBy: Boolean(view?.groupingState?.setGroupBy),
     setSelection: Boolean(view?.selection),
     editCells: Boolean(view?.editing?.onCellEdit ?? view?.editing?.stageCell),
+    pinColumn: Boolean(view?.pinning?.setColumnPin),
+    pinRow: Boolean(view?.pinning?.setRowPin),
   };
 }

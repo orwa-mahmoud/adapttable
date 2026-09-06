@@ -119,6 +119,41 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
     input: objectSchema({ key: { type: ["string", "null"] } }),
     output: OK,
   },
+  "view.pinColumn": {
+    key: "view.pinColumn",
+    guide:
+      "Pin a column to the logical start edge, or unpin it with null. " +
+      'Sides are logical, so start is the right edge under dir="rtl". ' +
+      "Only columns reported pinnable may be pinned, and the end edge is " +
+      "reserved for the table's trailing actions column.",
+    input: objectSchema(
+      {
+        key: { type: "string", minLength: 1 },
+        side: { type: ["string", "null"], enum: ["start", "end", null] },
+      },
+      ["key"]
+    ),
+    output: OK,
+  },
+  "view.pinRow": {
+    key: "view.pinRow",
+    guide:
+      "Pin a row above or below the scrolled body, or unpin it with null. " +
+      "Address the row by stable rowKey, or by 1-based position with the " +
+      "scope and expectedRevision that position was read at. Summary and " +
+      "group rows are not data rows and cannot be pinned this way.",
+    input: objectSchema(
+      {
+        rowKey: { type: "string", minLength: 1 },
+        position: { type: "integer", minimum: 1 },
+        scope: { type: "string", enum: ["visible", "page", "full"] },
+        expectedRevision: { type: "integer", minimum: 1 },
+        side: { type: ["string", "null"], enum: ["top", "bottom", null] },
+      },
+      ["side"]
+    ),
+    output: OK,
+  },
   "view.setSelection": {
     key: "view.setSelection",
     guide:
@@ -262,6 +297,8 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "view.setSearch": "Change the search query.",
   "view.setFilters": "Replace the active filters.",
   "view.setGroupBy": "Change or clear grouping.",
+  "view.pinColumn": "Pin or unpin a column at a logical edge.",
+  "view.pinRow": "Pin or unpin a row above or below the body.",
   "view.setSelection": "Replace or clear the current selection.",
   "views.apply": "Apply a saved view.",
   "rows.read": "Read a bounded, redacted row window.",

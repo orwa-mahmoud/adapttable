@@ -1,5 +1,6 @@
 import type { TableSourceCapabilities } from "@adapttable/core";
 
+import type { CapabilityPresentation } from "./assistant";
 import type {
   ApprovalPolicy,
   CommitPolicy,
@@ -57,6 +58,8 @@ export interface AgentColumn {
   readonly writable: boolean;
   /** Whether the column accepts sort. */
   readonly sortable: boolean;
+  /** Whether `view.pinColumn` may pin this column to an edge. */
+  readonly pinnable?: boolean;
 }
 
 /**
@@ -166,6 +169,13 @@ export interface AgentCapabilityDefinition {
   };
   /** Effect class used for approval defaults on custom writes. */
   readonly kind?: "read" | "view" | "write" | "destructive";
+  /**
+   * Optional labels and suggestions for a reader-facing assistant.
+   *
+   * Purely additive: the key, the guide and the schemas are unchanged by it,
+   * and a host that ships none behaves exactly as before.
+   */
+  readonly presentation?: CapabilityPresentation;
   /**
    * Whether `commit: "stage"` is honoured. Defaults to `"unsupported"` for
    * `write` and `destructive` kinds — the session rejects a staged call with
@@ -490,6 +500,22 @@ export interface AgentObservation {
   readonly hasSelection?: boolean;
   /** Whether saved views are wired. */
   readonly hasSavedViews?: boolean;
+  /** Whether column pinning is wired. */
+  readonly hasColumnPinning?: boolean;
+  /** Whether row pinning is wired. */
+  readonly hasRowPinning?: boolean;
+  /**
+   * Columns currently pinned, by logical edge.
+   *
+   * Logical because `start` is the right edge under `dir="rtl"`: the same
+   * request reads correctly in both writing directions.
+   */
+  readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
+  /** Row keys currently pinned above and below the scrolled body. */
+  readonly pinnedRows?: {
+    readonly top: readonly string[];
+    readonly bottom: readonly string[];
+  };
   /** Whether add-row is wired. */
   readonly hasAdd?: boolean;
   /** Whether delete-row is wired. */
@@ -534,6 +560,10 @@ export interface AgentApply {
   setFilters?(filters: unknown): void;
   /** Group by a column id, or clear grouping. */
   setGroupBy?(key: string | undefined): void;
+  /** Pin a column to a logical edge, or unpin it with `undefined`. */
+  pinColumn?(key: string, side: "start" | "end" | undefined): void;
+  /** Pin a row above or below the scrolled body, or unpin it. */
+  pinRow?(rowKey: string, side: "top" | "bottom" | undefined): void;
   /** Replace or clear the current selection. */
   setSelection?(ids: readonly string[] | undefined): void;
   /** Apply a saved view by id. */

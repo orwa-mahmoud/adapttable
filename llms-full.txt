@@ -1,6 +1,8 @@
 # AdaptTable — full documentation
 
-> Headless, UI-agnostic React data table with ready adapters for Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn/ui, and unstyled Tailwind. Unified client/server data via TableSource, URL-synced state, column management (show/hide, reorder, pin left/right, resize, density), responsive mobile cards, optional row/card virtualization, provider-native filter popovers/drawers with chips, numeric/date/status filters, i18n + RTL (logical pinning — works in Arabic/Hebrew), dark mode. MIT.
+> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React bindings in @adapttable/react, and native table adapters for Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
+
+Start with getting-started and concepts for package ownership, then features for opt-in composition. Use the v2-to-v3 migration guide when upgrading; historical migration examples describe their named versions, not current import paths. Vue and Angular bindings are not shipped. This file is generated from the canonical guides; the linked index is at https://orwa-mahmoud.github.io/adapttable/llms.txt.
 
 
 ---
@@ -496,7 +498,7 @@ offered a capability the table can no longer perform.
 
 ---
 
-# Feature composition — `features={[rowReorder(fn)]}`
+# React table features — optional imports, presets and plugins
 
 ▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — every opt-in, on every kit.
 
@@ -3744,7 +3746,12 @@ in the URL or a saved view.
 
 ---
 
-# React table keyboard navigation — arrow keys, ARIA grid, screen readers
+# React data grid navigation — range selection, copy, paste and fill
+
+Use arrow keys to navigate cells, select a range, copy and paste spreadsheet
+values, or extend values with a fill handle. This guide also covers find-in-table,
+selection statistics and accessible focus. For host-owned validation and saving,
+see [cell editing](./cell-editing.md).
 
 A table with a hundred cells should not be a hundred tab stops. Compose
 `cellNavigation` from `@adapttable/<kit>/cell-navigation` and the table becomes
@@ -6088,7 +6095,7 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
 
 ---
 
-# React table virtualization — 50,000 rows, ~24 DOM nodes
+# React table virtualization — rows, columns and mobile cards
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -7290,6 +7297,9 @@ Capabilities come from the live table:
   feature is composed **and** the host callback (where a write needs one)
   is present.
 - `view.setSelection` appears when selection is wired (`apply.setSelection`).
+- `view.pinColumn` appears when column pinning is wired and at least one
+  column is pinnable. `view.pinRow` appears when row pinning is wired. Both
+  are view operations, so neither takes the write-approval path.
 - `views.apply` appears when `featureIds` includes `saved-views` and
   `apply.applyView` exists.
 - `rows.read` / `rows.resolve` appear when the table has columns.
@@ -7303,6 +7313,54 @@ Capabilities come from the live table:
 
 Package availability never participates. Installing `@adapttable/ai` does
 not enable grouping on a table that never imported it.
+
+## Pinning
+
+Pinning is addressing, not styling, so both capabilities take identity rather
+than a position on screen.
+
+`view.pinColumn` takes a column `key` and a **logical** `side`: `"start"` is
+the inline-start edge, which is the right edge under `dir="rtl"`. The same
+call is therefore correct in both writing directions. Pass `side: null` to
+unpin. A column the host marked `pinnable: false` refuses a pin but still
+accepts an unpin, so a column the host pinned itself is never stranded. The
+end edge belongs to the table's trailing actions column, which is chrome an
+agent never addresses.
+
+`view.pinRow` takes a `side` of `"top"` or `"bottom"` — physical, because a
+pinned row sits above or below the scrolled body in every direction — plus a
+row reference. Address the row by stable `rowKey`, or by 1-based `position`
+with the `scope` and the `expectedRevision` that position was read at; a
+position read against a view the table has since left is refused rather than
+applied to whatever row now sits there. Summary rows are chrome, not data,
+and cannot be pinned this way.
+
+`view.describe` reports the live `pinnedColumns` map and `pinnedRows` lists,
+so unpinning is an inverse of what is actually pinned rather than a reset of
+the layout.
+
+## Assistant contracts
+
+A conversational assistant is a wrapper around this same executor — there is
+no chat-specific dispatcher. `@adapttable/ai` exports the shapes a controller
+and a widget are written against: `AssistantRequest`, `AssistantAction`,
+`AssistantProposal`, `AssistantOutcome`, `AssistantTurn`,
+`AssistantConversation` and the `AssistantPlanner` seam that turns a sentence
+into actions.
+
+An `AssistantAction` is exactly the `(capabilityKey, args, expectedRevision,
+idempotencyKey)` tuple `execute` already takes, so a planned turn is governed
+identically to a scripted call, and an action planned against a stale view
+fails instead of applying to a different one.
+
+`AssistantSuggestion` is an authored prompt with a stable `id`, a localizable
+`title`, and the capability keys it `requires`. Suggestions are never derived
+from capability keys — a key is not a sentence.
+`eligibleSuggestions(suggestions, available)` hides the ones this table
+cannot run, and `assertUniqueSuggestions` catches a repeated id. A capability
+definition may contribute its own through `presentation`.
+
+Nothing in these contracts imports React or calls a model.
 
 ## Three portable calls
 
@@ -7415,7 +7473,15 @@ is what decides the retry rule:
 
 ---
 
-# `@adapttable/ai` — catalog, describe, execute
+# AI table API — sessions, approval and governed execution
+
+`@adapttable/ai` exposes a table's available operations to an agent without
+choosing a model provider. Discover capabilities, inspect their schemas and
+execute validated actions against the current table. Applications retain
+control of permissions, approval and persistence.
+
+For connection examples, read [OpenAI, MCP and JSON integrations](./ai-integrations.md)
+or [the HTTP backend guide](./ai-http.md).
 
 ```bash
 npm install @adapttable/ai
@@ -7523,7 +7589,7 @@ hand it the current observation and the apply hooks. See
 
 ---
 
-# Agent integrations — catalog, describe, execute
+# React table AI integrations — OpenAI, MCP and JSON tools
 
 `@adapttable/ai` does not host a model, a chat UI, or an AdaptTable service.
 A live table publishes a compact catalog. Your runtime maps that contract
@@ -7709,7 +7775,7 @@ Intention fixtures (no live model) live in
 
 ---
 
-# Connect a backend — AdaptTable AI HTTP
+# React table AI backend — HTTP protocol and local example
 
 This is the setup page for a real model behind a live table. The [interactive
 playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
@@ -10671,14 +10737,19 @@ Router, TanStack Router and Next.js all take two lines. See
 agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 `CapabilityKey`, `WritePolicy`, `ApprovalPolicy`, `CommitPolicy`,
 `RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
-`buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`, and
+`buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`,
+`eligibleSuggestions`, `assertUniqueSuggestions`, and
 the types `AgentApply`, `AgentCapabilityContext`, `AgentCapabilityDefinition`,
 `AgentCellEdit`, `AgentColumn`, `AgentLimits`,
 `AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
 `AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
 `ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
 `RowPositionRef`, `RowReadQuery`, `RowRef`, `RowWindow`, `RowWindowRow`,
-`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`.
+`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`,
+and the assistant contracts `AssistantAction`, `AssistantConversation`,
+`AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
+`AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
+`AssistantTurn` and `CapabilityPresentation`.
 `@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome

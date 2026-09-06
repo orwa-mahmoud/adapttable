@@ -8,6 +8,20 @@
  *
  * @packageDocumentation
  */
+export {
+  assertUniqueSuggestions,
+  type AssistantAction,
+  type AssistantConversation,
+  type AssistantOutcome,
+  type AssistantOutcomeStatus,
+  type AssistantPlanner,
+  type AssistantProposal,
+  type AssistantRequest,
+  type AssistantSuggestion,
+  type AssistantTurn,
+  type CapabilityPresentation,
+  eligibleSuggestions,
+} from "./assistant";
 export { openAiToolNameMap } from "./capabilities/registry";
 export { guideOf, summaryOf } from "./guides";
 export {

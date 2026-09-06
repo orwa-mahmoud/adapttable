@@ -1,0 +1,228 @@
+/**
+ * The contracts an assistant speaks, frozen before any controller or widget
+ * is written against them.
+ *
+ * An assistant is a conversation wrapped around the SAME governed executor
+ * every other integration uses. There is no chat-specific dispatcher here and
+ * there must never be one: a turn resolves to {@link AssistantAction}s, and
+ * each action is exactly the `(key, args, expectedRevision, idempotencyKey)`
+ * tuple `AgentSession.execute` already takes. Anything a chat can do, a
+ * script can do, and both are governed identically.
+ *
+ * Nothing in this module imports React, and nothing calls a model. Turning a
+ * sentence into actions is the host's business — a provider SDK, a backend,
+ * or a fixed script. This file only fixes the shapes they hand back, so a
+ * controller and a widget can be written once against them.
+ */
+import type { ExecuteResult } from "./types";
+
+/**
+ * A prompt a reader can run without typing it.
+ *
+ * Suggestions are authored, never derived. A capability key is not a
+ * sentence, and turning `view.setGroupBy` into "view set group by" produces
+ * a request no model asked for and no reader wrote — so a suggestion always
+ * carries its own `prompt`, and names the capabilities it needs in `requires`
+ * so it can be hidden on a table that cannot run it.
+ *
+ * @public
+ */
+export interface AssistantSuggestion {
+  /** Stable id. Survives label and prompt edits, and translation. */
+  readonly id: string;
+  /** What the reader sees. Localize this; never localize {@link id}. */
+  readonly title: string;
+  /** The request text this sends, as if the reader had typed it. */
+  readonly prompt: string;
+  /** Longer explanation, when the title cannot carry it. */
+  readonly description?: string;
+  /**
+   * Capability keys this suggestion needs.
+   *
+   * All of them must be in the live catalog for the suggestion to be
+   * eligible. Empty means it always applies.
+   */
+  readonly requires?: readonly string[];
+}
+
+/**
+ * Optional presentation for a capability.
+ *
+ * The technical key stays what it is — protocol identity never moves for a
+ * label — so this is additive: a host that ships none loses nothing.
+ *
+ * @public
+ */
+export interface CapabilityPresentation {
+  /** Localized name for a reader. */
+  readonly title: string;
+  /** Localized one-liner. */
+  readonly description?: string;
+  /** Suggestions this capability contributes. */
+  readonly suggestions?: readonly AssistantSuggestion[];
+}
+
+/**
+ * One thing the reader asked for.
+ *
+ * @public
+ */
+export interface AssistantRequest {
+  /** Stable id for this turn. */
+  readonly id: string;
+  /** What the reader typed, or the prompt of the suggestion they clicked. */
+  readonly text: string;
+  /** The suggestion this came from, when it came from one. */
+  readonly suggestionId?: string;
+}
+
+/**
+ * One executable step: exactly what `AgentSession.execute` takes.
+ *
+ * Carrying `expectedRevision` on the action rather than filling it in at
+ * execution time is the point — an action planned against a view the table
+ * has since left must fail, not quietly apply to a different one.
+ *
+ * @public
+ */
+export interface AssistantAction {
+  /** Capability key from the live catalog. */
+  readonly capabilityKey: string;
+  /** Arguments, validated against that capability's input schema. */
+  readonly args: unknown;
+  /** View revision this action was planned against. */
+  readonly expectedRevision: number;
+  /** Replay identity. The same key never runs a mutation twice. */
+  readonly idempotencyKey: string;
+}
+
+/**
+ * What a turn resolved to, before anything runs.
+ *
+ * A proposal is inert. It exists so a reader can be shown what is about to
+ * happen, and so a host can refuse it, on a table whose approval policy would
+ * otherwise let a write through unseen.
+ *
+ * @public
+ */
+export interface AssistantProposal {
+  /** Stable id, referenced by the outcome. */
+  readonly id: string;
+  /** The request that produced it. */
+  readonly requestId: string;
+  /** Steps in the order they must run. */
+  readonly actions: readonly AssistantAction[];
+  /** One line a reader can approve or reject on. */
+  readonly summary?: string;
+}
+
+/** How a proposal ended. @public */
+export type AssistantOutcomeStatus =
+  "applied" | "rejected" | "failed" | "cancelled";
+
+/**
+ * What running a proposal actually did.
+ *
+ * `results` holds the session's own `ExecuteResult` per action, in the order
+ * they ran, so a partial run is legible: three applied, the fourth refused.
+ *
+ * @public
+ */
+export interface AssistantOutcome {
+  /** The proposal this reports on. */
+  readonly proposalId: string;
+  /** Overall status. */
+  readonly status: AssistantOutcomeStatus;
+  /** One result per action that ran. Shorter than `actions` on a partial run. */
+  readonly results: readonly ExecuteResult[];
+  /** Reader-facing explanation, when there is one. */
+  readonly message?: string;
+}
+
+/**
+ * One exchange: what was asked, what it resolved to, what happened.
+ *
+ * @public
+ */
+export interface AssistantTurn {
+  readonly request: AssistantRequest;
+  readonly proposal?: AssistantProposal;
+  readonly outcome?: AssistantOutcome;
+}
+
+/**
+ * The transcript.
+ *
+ * @public
+ */
+export interface AssistantConversation {
+  /** Table this conversation belongs to. Two tables never share one. */
+  readonly tableId: string;
+  /** Turns oldest first. */
+  readonly turns: readonly AssistantTurn[];
+}
+
+/**
+ * Turn a request into actions.
+ *
+ * This is the seam a host fills — with a model, a backend, or a script. It
+ * receives the keys the table currently offers so it can never plan an
+ * operation the session would refuse.
+ *
+ * @public
+ */
+export type AssistantPlanner = (input: {
+  readonly request: AssistantRequest;
+  /** Capability keys the live session advertises right now. */
+  readonly available: readonly string[];
+  /** Revision to plan against. */
+  readonly revision: number;
+  readonly signal?: AbortSignal;
+}) => Promise<AssistantProposal> | AssistantProposal;
+
+/**
+ * The suggestions a table can actually run right now.
+ *
+ * A suggestion naming a capability the table does not offer is not shown —
+ * offering it would be a button that reports failure when pressed.
+ *
+ * @param suggestions - Everything authored, in the order it should appear.
+ * @param available - Capability keys from the live catalog.
+ * @returns The eligible subset, order preserved.
+ *
+ * @public
+ */
+export function eligibleSuggestions(
+  suggestions: readonly AssistantSuggestion[],
+  available: readonly string[]
+): readonly AssistantSuggestion[] {
+  const offered = new Set(available);
+  return suggestions.filter((suggestion) =>
+    (suggestion.requires ?? []).every((key) => offered.has(key))
+  );
+}
+
+/**
+ * Reject duplicate suggestion ids.
+ *
+ * Ids address suggestions across a reload and a translation, so two carrying
+ * the same one is a bug that only shows up as the wrong prompt running.
+ *
+ * @param suggestions - Suggestions from every contributing source.
+ * @returns The same list.
+ * @throws When an id repeats.
+ *
+ * @public
+ */
+export function assertUniqueSuggestions(
+  suggestions: readonly AssistantSuggestion[]
+): readonly AssistantSuggestion[] {
+  const seen = new Set<string>();
+  for (const suggestion of suggestions) {
+    if (seen.has(suggestion.id)) {
+      throw new Error(`duplicate suggestion "${suggestion.id}"`);
+    }
+    seen.add(suggestion.id);
+  }
+  return suggestions;
+}

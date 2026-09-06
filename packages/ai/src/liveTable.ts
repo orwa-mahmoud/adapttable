@@ -248,6 +248,17 @@ export interface NeutralQueryOverlay {
   readonly search?: string;
   readonly sortBy?: string;
   readonly sortDir?: "asc" | "desc";
+  /**
+   * Pin state the host chrome owns.
+   *
+   * The engine does not hold it — pinning is a layout decision the binding
+   * makes — so it rides the overlay the same way page and search do.
+   */
+  readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
+  readonly pinnedRows?: {
+    readonly top: readonly string[];
+    readonly bottom: readonly string[];
+  };
 }
 
 export function observationFromNeutral<TRow>(
@@ -283,6 +294,11 @@ export function observationFromNeutral<TRow>(
       options.apply?.stageCells !== undefined,
     hasReorder:
       ops.reorderRows === true || options.apply?.reorderRows !== undefined,
+    hasColumnPinning:
+      ops.pinColumn === true || options.apply?.pinColumn !== undefined,
+    hasRowPinning: ops.pinRow === true || options.apply?.pinRow !== undefined,
+    pinnedColumns: query?.pinnedColumns,
+    pinnedRows: query?.pinnedRows,
     hasSelection:
       options.apply?.setSelection !== undefined || ops.setSelection === true,
     hasSavedViews:

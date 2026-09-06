@@ -32,6 +32,8 @@ import {
   type ExtraFilters,
   type GroupAggregateOverrides,
   type NeutralTable,
+  type PinSide,
+  type RowPinSide,
   type TableSourceCapabilities,
 } from "@adapttable/core";
 import {
@@ -275,6 +277,29 @@ export interface TableRuntimeView<TRow = unknown> {
   readonly selection?: {
     readonly selectedIds: ReadonlySet<string>;
     readonly replace: (ids: readonly string[] | undefined) => void;
+  };
+  /**
+   * Live pinning, when a pin-owning feature is composed.
+   *
+   * Column sides are logical (`start`/`end`), so the same request is correct
+   * under RTL. Row sides are physical (`top`/`bottom`) because a pinned row
+   * is above or below the scrolled body in every writing direction.
+   *
+   * `columns` and `rows` are the CURRENT state, so unpinning is an inverse
+   * of what is actually pinned rather than a reset of the whole layout.
+   */
+  readonly pinning?: {
+    /** Column key to the edge it is pinned to. */
+    readonly columns: Readonly<Record<string, PinSide>>;
+    /** Pin a column to an edge, or unpin it with `undefined`. */
+    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+    /** Row keys pinned above and below the scrolled body. */
+    readonly rows?: {
+      readonly top: readonly string[];
+      readonly bottom: readonly string[];
+    };
+    /** Pin a row to an edge, or unpin it with `undefined`. */
+    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
   };
   /**
    * Live editing channels. `onCellEdit` is the host callback; `stageCell`

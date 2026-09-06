@@ -18,6 +18,9 @@ Capabilities come from the live table:
   feature is composed **and** the host callback (where a write needs one)
   is present.
 - `view.setSelection` appears when selection is wired (`apply.setSelection`).
+- `view.pinColumn` appears when column pinning is wired and at least one
+  column is pinnable. `view.pinRow` appears when row pinning is wired. Both
+  are view operations, so neither takes the write-approval path.
 - `views.apply` appears when `featureIds` includes `saved-views` and
   `apply.applyView` exists.
 - `rows.read` / `rows.resolve` appear when the table has columns.
@@ -31,6 +34,54 @@ Capabilities come from the live table:
 
 Package availability never participates. Installing `@adapttable/ai` does
 not enable grouping on a table that never imported it.
+
+## Pinning
+
+Pinning is addressing, not styling, so both capabilities take identity rather
+than a position on screen.
+
+`view.pinColumn` takes a column `key` and a **logical** `side`: `"start"` is
+the inline-start edge, which is the right edge under `dir="rtl"`. The same
+call is therefore correct in both writing directions. Pass `side: null` to
+unpin. A column the host marked `pinnable: false` refuses a pin but still
+accepts an unpin, so a column the host pinned itself is never stranded. The
+end edge belongs to the table's trailing actions column, which is chrome an
+agent never addresses.
+
+`view.pinRow` takes a `side` of `"top"` or `"bottom"` — physical, because a
+pinned row sits above or below the scrolled body in every direction — plus a
+row reference. Address the row by stable `rowKey`, or by 1-based `position`
+with the `scope` and the `expectedRevision` that position was read at; a
+position read against a view the table has since left is refused rather than
+applied to whatever row now sits there. Summary rows are chrome, not data,
+and cannot be pinned this way.
+
+`view.describe` reports the live `pinnedColumns` map and `pinnedRows` lists,
+so unpinning is an inverse of what is actually pinned rather than a reset of
+the layout.
+
+## Assistant contracts
+
+A conversational assistant is a wrapper around this same executor — there is
+no chat-specific dispatcher. `@adapttable/ai` exports the shapes a controller
+and a widget are written against: `AssistantRequest`, `AssistantAction`,
+`AssistantProposal`, `AssistantOutcome`, `AssistantTurn`,
+`AssistantConversation` and the `AssistantPlanner` seam that turns a sentence
+into actions.
+
+An `AssistantAction` is exactly the `(capabilityKey, args, expectedRevision,
+idempotencyKey)` tuple `execute` already takes, so a planned turn is governed
+identically to a scripted call, and an action planned against a stale view
+fails instead of applying to a different one.
+
+`AssistantSuggestion` is an authored prompt with a stable `id`, a localizable
+`title`, and the capability keys it `requires`. Suggestions are never derived
+from capability keys — a key is not a sentence.
+`eligibleSuggestions(suggestions, available)` hides the ones this table
+cannot run, and `assertUniqueSuggestions` catches a repeated id. A capability
+definition may contribute its own through `presentation`.
+
+Nothing in these contracts imports React or calls a model.
 
 ## Three portable calls
 

@@ -1277,14 +1277,19 @@ Router, TanStack Router and Next.js all take two lines. See
 agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 `CapabilityKey`, `WritePolicy`, `ApprovalPolicy`, `CommitPolicy`,
 `RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
-`buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`, and
+`buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`,
+`eligibleSuggestions`, `assertUniqueSuggestions`, and
 the types `AgentApply`, `AgentCapabilityContext`, `AgentCapabilityDefinition`,
 `AgentCellEdit`, `AgentColumn`, `AgentLimits`,
 `AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
 `AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
 `ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
 `RowPositionRef`, `RowReadQuery`, `RowRef`, `RowWindow`, `RowWindowRow`,
-`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`.
+`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`,
+and the assistant contracts `AssistantAction`, `AssistantConversation`,
+`AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
+`AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
+`AssistantTurn` and `CapabilityPresentation`.
 `@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome

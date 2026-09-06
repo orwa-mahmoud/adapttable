@@ -285,6 +285,8 @@ function observationFromRuntime(
             search: query.search,
             sortBy: query.sortBy,
             sortDir: query.sortDir,
+            pinnedColumns: view?.pinning?.columns,
+            pinnedRows: view?.pinning?.rows,
           }
         : undefined
     );
@@ -316,6 +318,13 @@ function observationFromRuntime(
       Boolean(view?.editing?.onCellEdit) ||
       Boolean(view?.editing?.stageCell),
     hasReorder: options.apply?.reorderRows !== undefined,
+    hasColumnPinning:
+      options.apply?.pinColumn !== undefined ||
+      Boolean(view?.pinning?.setColumnPin),
+    hasRowPinning:
+      options.apply?.pinRow !== undefined || Boolean(view?.pinning?.setRowPin),
+    pinnedColumns: view?.pinning?.columns,
+    pinnedRows: view?.pinning?.rows,
     hasSelection:
       options.apply?.setSelection !== undefined || Boolean(view?.selection),
     hasSavedViews: ids.includes("saved-views") && apply.applyView !== undefined,
@@ -496,6 +505,16 @@ function applyFromRuntime(
       const grouping = view()?.groupingState;
       if (!grouping) throw new Error("setGroupBy is not wired");
       grouping.setGroupBy(key);
+    },
+    pinColumn: (key, side) => {
+      const pinning = view()?.pinning;
+      if (!pinning?.setColumnPin) throw new Error("pinColumn is not wired");
+      pinning.setColumnPin(key, side);
+    },
+    pinRow: (rowKey, side) => {
+      const pinning = view()?.pinning;
+      if (!pinning?.setRowPin) throw new Error("pinRow is not wired");
+      pinning.setRowPin(rowKey, side);
     },
     editCells: (edits) => liveEditCells(runtime, extra, edits),
     stageCells: (edits) => liveStageCells(runtime, extra, edits),

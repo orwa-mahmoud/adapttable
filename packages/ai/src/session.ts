@@ -1,3 +1,5 @@
+import { isPinnedSummaryRowId } from "@adapttable/core";
+
 import {
   type CapabilityRegistry,
   createCapabilityRegistry,
@@ -706,6 +708,64 @@ async function planBuiltIn(
   }
 }
 
+/**
+ * Validate a column pin request against what this table actually allows.
+ *
+ * The column has to be one the agent was told about, and it has to be
+ * pinnable — a column the host marked unpinnable is not addressable here just
+ * because its key is known. The end edge belongs to the table's trailing
+ * actions column, which is chrome the agent never sees, so a data column
+ * asking for it is told why rather than silently pinned to the wrong side.
+ */
+function pinColumnArgs(
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): [string, "start" | "end" | undefined] {
+  const key = String(body.key);
+  const column = observation.columns.find((candidate) => candidate.id === key);
+  if (!column) {
+    throw new ApplyError("apply-failed", `unknown column "${key}"`);
+  }
+  const side = body.side as "start" | "end" | null | undefined;
+  if (side === undefined || side === null) return [key, undefined];
+  if (column.pinnable === false) {
+    throw new ApplyError("apply-failed", `column "${key}" is not pinnable`);
+  }
+  if (side === "end") {
+    throw new ApplyError(
+      "apply-failed",
+      `column "${key}" pins to the start edge only`
+    );
+  }
+  return [key, side];
+}
+
+/** The row-ref half of a pin request, without its `side`. */
+function rowRefBody(body: Record<string, unknown>): Record<string, unknown> {
+  const ref: Record<string, unknown> = {};
+  for (const [name, value] of Object.entries(body)) {
+    if (name !== "side") ref[name] = value;
+  }
+  return ref;
+}
+
+/**
+ * Refuse a row that is chrome rather than data.
+ *
+ * Summary rows carry a reserved id, and pinning one would ask the table to
+ * pin a total to the top of itself. `resolveRow` rejects anything that is not
+ * a real row, so this only has to name the case the host could still hand
+ * back.
+ */
+function assertPinnableRow(rowKey: string): void {
+  if (isPinnedSummaryRowId(rowKey)) {
+    throw new ApplyError(
+      "apply-failed",
+      `"${rowKey}" is a summary row, not a data row`
+    );
+  }
+}
+
 async function dispatchBuiltIn(
   key: CapabilityKey,
   context: AgentCapabilityContext,
@@ -725,6 +785,8 @@ async function dispatchBuiltIn(
         sortBy: observation.sortBy ?? null,
         sortDir: observation.sortDir ?? null,
         groupBy: observation.groupBy ?? null,
+        pinnedColumns: observation.pinnedColumns ?? {},
+        pinnedRows: observation.pinnedRows ?? { top: [], bottom: [] },
         revision: observation.viewRevision,
       };
     case "view.setPage": {
@@ -766,6 +828,41 @@ async function dispatchBuiltIn(
       const groupKey = body.key as string | null | undefined;
       assertApply(apply, "setGroupBy");
       apply.setGroupBy(groupKey ?? undefined);
+      return { ok: true, revision: observation.viewRevision + 1 };
+    }
+    case "view.pinColumn": {
+      assertApply(apply, "pinColumn");
+      apply.pinColumn(...pinColumnArgs(body, observation));
+      return { ok: true, revision: observation.viewRevision + 1 };
+    }
+    case "view.pinRow": {
+      assertApply(apply, "pinRow");
+      const side = body.side as "top" | "bottom" | null;
+      // Resolving through the same path edits use means a position is read
+      // against the revision it was seen at, and a key that names no data row
+      // fails here rather than pinning nothing.
+      const resolved = await resolveRowArg(
+        rowRefBody(body),
+        observation,
+        apply
+      );
+      // Resolving is an awaited boundary: the row that answered has to still
+      // be addressable in the view this request was authorized against.
+      const latest = guard.observe();
+      if (latest.viewRevision !== observation.viewRevision) {
+        throw new ApplyError(
+          "revision-mismatch",
+          `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+        );
+      }
+      if (!guard.isEnabled("view.pinRow", latest)) {
+        throw new ApplyError(
+          "not-wired",
+          `capability "view.pinRow" is not wired on this table`
+        );
+      }
+      assertPinnableRow(resolved.rowKey);
+      apply.pinRow(resolved.rowKey, side ?? undefined);
       return { ok: true, revision: observation.viewRevision + 1 };
     }
     case "view.setSelection": {

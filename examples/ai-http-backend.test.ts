@@ -109,6 +109,74 @@ describe("handleExampleAgentTurn", () => {
     assert.equal(reply.text, "Need a guide.");
     assert.deepEqual(reply.needs?.describe, ["edit.cells"]);
   });
+
+  it("carries grouping and pinning actions through unchanged", async () => {
+    // The example never rewrites what the model chose. It mints the action id
+    // and forwards the rest, so the session — not this backend — is what
+    // validates the arguments against the real schema.
+    const complete = () =>
+      Promise.resolve(
+        JSON.stringify({
+          text: "Grouped by city and pinned it.",
+          actions: [
+            { key: "view.setGroupBy", args: { key: "city" } },
+            { key: "view.pinColumn", args: { key: "city", side: "start" } },
+            {
+              key: "view.pinRow",
+              args: {
+                position: 3,
+                scope: "visible",
+                expectedRevision: 1,
+                side: "top",
+              },
+            },
+          ],
+        })
+      );
+    const reply = await handleExampleAgentTurn(
+      request(),
+      complete,
+      new AbortController().signal
+    );
+
+    assert.deepEqual(
+      reply.actions?.map((action) => action.key),
+      ["view.setGroupBy", "view.pinColumn", "view.pinRow"]
+    );
+    assert.deepEqual(reply.actions?.[1]?.args, {
+      key: "city",
+      side: "start",
+    });
+    assert.deepEqual(reply.actions?.[2]?.args, {
+      position: 3,
+      scope: "visible",
+      expectedRevision: 1,
+      side: "top",
+    });
+    // Every action gets its own replay identity, or a retry would run the
+    // second pin as if it were the first.
+    const ids = new Set(reply.actions?.map((action) => action.idempotencyKey));
+    assert.equal(ids.size, 3);
+  });
+
+  it("names pinning schemas in the prompt rather than an argument shape", async () => {
+    let seen = "";
+    const complete = (args: { system: string }) => {
+      seen = args.system;
+      return Promise.resolve(JSON.stringify({ text: "ok" }));
+    };
+    await handleExampleAgentTurn(
+      request(),
+      complete as Parameters<typeof handleExampleAgentTurn>[1],
+      new AbortController().signal
+    );
+
+    assert.match(seen, /needs\.describe/);
+    assert.match(seen, /pinning/i);
+    // The prompt must not teach a shape the session owns: a hand-written
+    // example would go stale the moment the schema changed.
+    assert.doesNotMatch(seen, /"side"\s*:/);
+  });
 });
 
 describe("completeForProvider", () => {
