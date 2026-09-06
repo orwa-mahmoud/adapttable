@@ -106,6 +106,9 @@ function ActionMenu<TRow>({
           };
         }),
         onClick: (info) => {
+          // The menu sits inside the row, so the choice must not read as a
+          // click on the row underneath it.
+          info.domEvent.stopPropagation();
           const action = actions.find((item) => item.key === info.key);
           if (!action) return;
           runRowAction(action, row, confirm, labels.cancel);

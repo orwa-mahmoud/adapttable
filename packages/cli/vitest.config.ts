@@ -9,10 +9,12 @@ export default mergeConfig(sharedConfig, {
       // The bin wrapper is a thin IO shell exercised via run().
       exclude: ["src/cli.ts"],
       thresholds: {
-        statements: 99,
-        lines: 99,
-        functions: 99,
-        branches: 95,
+        // Two `?? []` fallbacks guard lookups whose keys come from the map
+        // being read, so no input reaches them; every other branch is held.
+        statements: 100,
+        lines: 100,
+        functions: 100,
+        branches: 97,
       },
     },
   },

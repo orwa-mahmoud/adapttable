@@ -698,7 +698,8 @@ function RowMoveMenu({
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
-          confirmationRef.current?.onCancel();
+          // Closing the popover is the single cancel path: its
+          // `onOpenChange` abandons the pending move.
           close();
         }
       }}

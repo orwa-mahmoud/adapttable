@@ -11,7 +11,11 @@
  * So a render stages a candidate, and the candidate is published when React
  * accepts the render — and only then.
  */
-import type { TableEngine, TableRevisions } from "@adapttable/core";
+import type {
+  ExtraFilters,
+  TableEngine,
+  TableRevisions,
+} from "@adapttable/core";
 import { act, render, screen } from "@testing-library/react";
 import { StrictMode, Suspense, use } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -224,5 +228,114 @@ describe("the engine publishes with the render, not during it", () => {
     // A fresh array of the same rows is the same table.
     expect(table.snapshot().revisions).toEqual(before);
     expect(woken).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * A host that hands the hook a new `filterFn` or `getSearchText` between
+ * renders is changing what the table means, not just how it looks: the same
+ * search box now matches different rows. Those two are functions, so a
+ * comparison that only looked at the declared values would miss them.
+ */
+function LiveOptions({
+  filterFn,
+  getSearchText,
+  onEngine,
+}: {
+  filterFn?: (row: Person, extra: ExtraFilters) => boolean;
+  getSearchText?: (row: Person) => string;
+  onEngine: (engine: TableEngine<Person>) => void;
+}) {
+  "use no memo";
+  const engine = useTableEngine<Person>({
+    data: [ADA, ALAN, GRACE],
+    columns,
+    rowKey: (row) => row.id,
+    tableId: "live",
+    defaults: { search: "a" },
+    filterFn,
+    getSearchText,
+  });
+  onEngine(engine);
+  return (
+    <output data-testid="rows">
+      {engine.candidate
+        .rows("full")
+        .map((row) => row.id)
+        .join(",")}
+    </output>
+  );
+}
+
+function Identity({
+  tableId,
+  onEngine,
+}: {
+  tableId: string;
+  onEngine: (engine: TableEngine<Person>) => void;
+}) {
+  "use no memo";
+  const engine = useTableEngine<Person>({
+    data: [ADA],
+    columns,
+    rowKey: (row) => row.id,
+    tableId,
+  });
+  onEngine(engine);
+  return null;
+}
+
+describe("useTableEngine — options that stay live", () => {
+  it("re-filters when the host swaps the filter function", () => {
+    const engines: TableEngine<Person>[] = [];
+    const view = render(
+      <LiveOptions
+        filterFn={(row) => row.id === "1"}
+        onEngine={(engine) => engines.push(engine)}
+      />
+    );
+    expect(screen.getByTestId("rows").textContent).toBe("1");
+
+    view.rerender(
+      <LiveOptions
+        filterFn={(row) => row.id === "3"}
+        onEngine={(engine) => engines.push(engine)}
+      />
+    );
+    expect(screen.getByTestId("rows").textContent).toBe("3");
+  });
+
+  it("re-searches when the host swaps the searchable text", () => {
+    const engines: TableEngine<Person>[] = [];
+    const view = render(
+      <LiveOptions
+        getSearchText={(row) => row.name}
+        onEngine={(engine) => engines.push(engine)}
+      />
+    );
+    // "a" matches Ada, Alan and Grace by name.
+    expect(screen.getByTestId("rows").textContent).toBe("1,2,3");
+
+    view.rerender(
+      <LiveOptions
+        getSearchText={(row) => row.id}
+        onEngine={(engine) => engines.push(engine)}
+      />
+    );
+    // Searching the ids instead, nothing holds an "a".
+    expect(screen.getByTestId("rows").textContent).toBe("");
+  });
+
+  it("keeps the identity it was created with when the host changes tableId", () => {
+    const engines: TableEngine<Person>[] = [];
+    const record = (engine: TableEngine<Person>) => engines.push(engine);
+    const view = render(<Identity tableId="first" onEngine={record} />);
+    expect(engines[0]?.tableId).toBe("first");
+
+    view.rerender(<Identity tableId="second" onEngine={record} />);
+
+    // The id names the table an agent addresses, so it is read once. A host
+    // that changes it gets the table it created, not a silent re-identify.
+    expect(engines.at(-1)?.tableId).toBe("first");
   });
 });

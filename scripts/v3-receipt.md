@@ -261,8 +261,74 @@ handed over; everything above describes it.
 - **Five published size figures moved by a kilobyte** and were re-published
   from this run rather than having their tolerance widened.
 
-### Still to come
+### Superseded by item 21
 
-Punch-list item 21 takes every package's coverage as high as real tests can
-carry it and clears Sonar again afterwards. It changes scanned inputs, so the
-measures above are this tree's, and item 21 records its own.
+Item 21 raised coverage across every package and re-ran the whole gate, so the
+measures below describe the tree being handed over.
+
+## Item 21 evidence
+
+Recorded 2026-09-06 on `v3`. Every floor in this table is the number the
+package's own tests hold; none was lowered.
+
+| Package                 | Lines  | Branches | Functions | Floors (st / br / fn / ln) |
+| ----------------------- | ------ | -------- | --------- | -------------------------- |
+| `@adapttable/server`    | 100%   | 100%     | 100%      | 100 / 100 / 100 / 100      |
+| `@adapttable/i18n`      | 100%   | 100%     | 100%      | 100 / 100 / 100 / 100      |
+| `@adapttable/cli`       | 100%   | 97.85%   | 100%      | 100 / 97 / 100 / 100       |
+| `@adapttable/core`      | 99.16% | 92.41%   | 99.47%    | 97 / 92 / 99 / 99          |
+| `@adapttable/ai`        | 98.73% | 91.98%   | 97.00%    | 96 / 91 / 97 / 98          |
+| `@adapttable/react`     | 98.43% | 84.63%   | 97.86%    | 94 / 84 / 97 / 98          |
+| `@adapttable/mui`       | 99.04% | 79.72%   | 96.82%    | 90 / 79 / 96 / 98          |
+| `@adapttable/radix`     | 99.00% | 80.56%   | 96.51%    | 90 / 80 / 96 / 99          |
+| `@adapttable/mantine`   | 98.81% | 79.70%   | 96.90%    | 90 / 79 / 96 / 98          |
+| `@adapttable/unstyled`  | 98.75% | 79.82%   | 98.05%    | 90 / 79 / 98 / 98          |
+| `@adapttable/chakra`    | 98.51% | 80.50%   | 95.49%    | 89 / 80 / 95 / 98          |
+| `@adapttable/base-ui`   | 98.30% | 79.04%   | 95.73%    | 89 / 79 / 95 / 98          |
+| `@adapttable/antd`      | 97.95% | 79.68%   | 94.59%    | 90 / 79 / 94 / 97          |
+| `@adapttable/shadcn`    | 100%   | 65.00%   | 100%      | 78 / 65 / 100 / 100        |
+| `@adapttable/bootstrap` | 96.61% | 78.51%   | 93.18%    | 88 / 78 / 93 / 96          |
+
+`lines` and `functions` are the honest floors for hand-written code. The React
+Compiler compiles every component to a memo cache whose cache-hit arm only
+runs on a re-render with identical props, and v8 fabricates branches on JSX
+attributes and destructured defaults; both are counted as statements and
+branches, which is why those two sit lower in every package that renders. The
+three packages with no React in their graph — `server`, `i18n` and `cli` — are
+at or within two branches of 100% on all four.
+
+| Gate                               | Result                                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------------------------- |
+| `pnpm check`                       | EXIT 0. Every raised floor met.                                                        |
+| `pnpm test:e2e`                    | 1,588 passed, all eight kits.                                                          |
+| `pnpm verify:release`              | EXIT 0 on Node 24.19.0.                                                                |
+| Packed Node support                | 14 published packages install and load on Node 24.19.0 and Node 22.12.0.               |
+| Two `pnpm build && pnpm api:check` | Both cycles reproduce every committed report from a cleared `dist/`; `etc/` unchanged. |
+| sonar-scanner → `localhost:9000`   | EXECUTION SUCCESS. CE task `d89240c6-5242-4d20-ac24-0fcc8a7f7518` → SUCCESS.           |
+| Open issues (`resolved=false`)     | **0**                                                                                  |
+| Hotspots `TO_REVIEW`               | **0**                                                                                  |
+| Project coverage                   | **89.6%** over 113,279 lines of code — line 98.7%, branch 82.9%. Duplication 0.6%.     |
+
+### What this gate found and fixed
+
+- **`@adapttable/server` was measuring nothing.** Its whole parser lives in
+  `src/index.ts`, which the shared config and the Sonar exclusions both
+  dropped as a barrel: 26 passing tests over 0 instrumented files. The package
+  now owns its Vitest config, Sonar lists the barrels one by one, and five new
+  tests take the parser to 100% on all four metrics.
+- **`@adapttable/ai` excluded its React binding.** Measured, `react.tsx` was at
+  65.5% lines: every path the binding takes when the runtime view carries no
+  neutral table — the whole server tier — had no test. Reading, resolving,
+  editing, staging, selection, grouping, filters, the approval chrome and its
+  abort path are covered now, and the file is at 89.9%.
+- **Escape left a row move pending in two kits.** chakra and unstyled draw the
+  confirmation themselves rather than letting an overlay primitive dismiss it,
+  so Escape closed nothing and the move stayed parked. Both cancel now.
+- **antd cancelled the same move twice** — once from its own Escape handler and
+  again when closing the popover. Closing is the single cancel path.
+- **antd's row-actions menu leaked its click to the row underneath**, so
+  choosing an action also fired `onRowClick`. Every other kit stopped it.
+- **Six shared suites now run in every kit** — mobile grouping, the move menu
+  and approval strip, the context menu's built-in entries, the row-actions
+  menu, the command palette's search, and the two public exports nothing else
+  mounts — because a behaviour that is drawn per kit has to be proven per kit.

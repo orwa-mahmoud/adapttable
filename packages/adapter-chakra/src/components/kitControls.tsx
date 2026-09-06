@@ -648,7 +648,11 @@ export function RowMoveMenu({
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.stopPropagation();
+                      return;
                     }
+                    if (event.key !== "Escape") return;
+                    event.preventDefault();
+                    finish(confirmation.onCancel);
                   }}
                 >
                   <Text fontWeight="semibold" fontSize="sm">

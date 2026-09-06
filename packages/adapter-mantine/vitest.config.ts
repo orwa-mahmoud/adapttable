@@ -8,22 +8,18 @@ export default mergeConfig(sharedConfig, {
     coverage: {
       // CSS, the barrel, and the test harness carry no testable logic.
       exclude: ["src/**/*.css", "src/test-utils.tsx"],
-      // Line coverage stays at the strict bar; function/branch are a touch
-      // lower to reflect the many trivial inline UI callbacks.
-      //
-      // `branches` moved 78 → 77 when the context menu, side panel, status
-      // bar and command palette slots landed. Those four files are 100%
-      // lines and 100% functions and every reachable branch in them is
-      // tested; what pulled the number down is v8 fabricating branches on
-      // JSX attributes and destructured defaults — the same artifact
-      // `packages/core` documents on its own `branches` floor. A slot file
-      // is almost entirely JSX attributes, so adding four of them moves
-      // this measure without changing what is tested.
       thresholds: {
-        statements: 85,
-        lines: 95,
-        functions: 85,
-        branches: 77,
+        // `lines` and `functions` are the honest floors for hand-written
+        // code here. `statements` and `branches` sit lower because the React
+        // Compiler compiles every component to a memo cache (`_c()` slots and
+        // `if ($[i] !== x)` guards) whose cache-hit arm only runs on a
+        // re-render with identical props, and because v8 fabricates branches
+        // on JSX attributes and destructured defaults — a slot file is almost
+        // entirely both.
+        statements: 90,
+        lines: 98,
+        functions: 96,
+        branches: 79,
       },
     },
   },

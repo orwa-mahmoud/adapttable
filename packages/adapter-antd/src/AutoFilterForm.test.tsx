@@ -469,3 +469,69 @@ describe("<AutoFilterForm> operator-first range widgets (Ant Design)", () => {
     ).not.toBeNull();
   });
 });
+
+/**
+ * The relative-date operator is its own control: a preset list plus a count
+ * that only some presets carry. It is the one range widget whose value is a
+ * token rather than a date, so a kit that renders it wrongly writes a filter
+ * the table cannot read back.
+ */
+describe("<AutoFilterForm> relative dates (Ant Design)", () => {
+  it("shows the count for a last-N preset and writes a new one", () => {
+    const patches: ExtraFilters[] = [];
+    render(
+      <RangeHarness
+        defs={SHIPPED}
+        initial={{ shippedOp: "relative", shippedFrom: "last:7" }}
+        onPatch={(updates) => patches.push(updates)}
+      />
+    );
+
+    const count = screen.getByLabelText("Value");
+    expect(count).toHaveValue("7");
+
+    fireEvent.change(count, { target: { value: "14" } });
+    expect(patches.at(-1)).toMatchObject({ shippedFrom: "last:14" });
+  });
+
+  it("drops the count when a named preset is chosen", () => {
+    const patches: ExtraFilters[] = [];
+    render(
+      <RangeHarness
+        defs={SHIPPED}
+        initial={{ shippedOp: "relative", shippedFrom: "last:7" }}
+        onPatch={(updates) => patches.push(updates)}
+      />
+    );
+
+    pickSelect("Relative", "Today");
+
+    expect(patches.at(-1)).toMatchObject({ shippedFrom: "today" });
+    expect(screen.queryByLabelText("Value")).toBeNull();
+  });
+
+  it("brings the count back for a next-N preset", () => {
+    const patches: ExtraFilters[] = [];
+    render(
+      <RangeHarness
+        defs={SHIPPED}
+        initial={{ shippedOp: "relative", shippedFrom: "today" }}
+        onPatch={(updates) => patches.push(updates)}
+      />
+    );
+    expect(screen.queryByLabelText("Value")).toBeNull();
+
+    pickSelect("Relative", "Next N days");
+
+    expect(screen.getByLabelText("Value")).toBeInTheDocument();
+    expect(String(patches.at(-1)?.shippedFrom)).toMatch(/^next:/);
+  });
+
+  it("mounts the token field when Relative is chosen from the operator list", () => {
+    render(<RangeHarness defs={SHIPPED} />);
+
+    pickSelect("Shipped Operator", "Relative");
+
+    expect(screen.getByRole("combobox", { name: "Relative" })).toBeVisible();
+  });
+});

@@ -7,15 +7,17 @@ export default mergeConfig(sharedConfig, {
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       thresholds: {
-        statements: 85,
-        lines: 95,
-        functions: 85,
-        // 78 → 77 when the toolbar's density and fullscreen controls landed on
-        // top of this phase's other slot files. Those files are 100% lines and
-        // 100% functions; what pulls this measure down is v8 fabricating
-        // branches on JSX attributes, the same artifact `packages/core` and
-        // `adapter-mantine` both document on their own floors.
-        branches: 77,
+        // `lines` and `functions` are the honest floors for hand-written
+        // code here. `statements` and `branches` sit lower because the React
+        // Compiler compiles every component to a memo cache (`_c()` slots and
+        // `if ($[i] !== x)` guards) whose cache-hit arm only runs on a
+        // re-render with identical props, and because v8 fabricates branches
+        // on JSX attributes and destructured defaults — a slot file is almost
+        // entirely both.
+        statements: 89,
+        lines: 98,
+        functions: 95,
+        branches: 79,
       },
     },
   },

@@ -647,6 +647,23 @@ function RowMoveMenu({
     if (detailsRef.current) detailsRef.current.open = false;
     triggerRef.current?.focus();
   };
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+  // Escape abandons the pending move. It is bound to the document rather than
+  // to the dialog so it works wherever focus sits — the same route this kit's
+  // filter panel takes for its own dismissal.
+  useEffect(() => {
+    if (!confirmation) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      finishRef.current(confirmation.onCancel);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [confirmation]);
   return (
     <details
       ref={detailsRef}
