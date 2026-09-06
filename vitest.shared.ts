@@ -32,6 +32,11 @@ export const sharedConfig = defineConfig({
     // CI is 2-core and already shards packages across jobs — one worker.
     // Local turbo takes a slice per suite; a solo filter run uses half the
     // cores. See scripts/vitest-workers.mjs.
+    // Threads over the default forks: nearly all of a suite's wall time is
+    // module loading, and a thread pool pays that once per worker instead of
+    // once per forked process. Per-file isolation is unchanged — measured
+    // 8–15% faster on core, react and the kits, with every suite still green.
+    pool: "threads",
     fileParallelism: vitestFileParallelism(),
     maxWorkers: vitestMaxWorkers(),
     // Generous per-test budget for Ant Design's cold cssinjs first paint.

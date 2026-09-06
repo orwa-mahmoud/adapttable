@@ -270,14 +270,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: core
-          - name: react
           - name: antd
-          - name: mui
-          - name: chakra · mantine
-          - name: radix · base-ui
-          - name: shadcn · unstyled · bootstrap
-          - name: server · cli · i18n · ai
+          - name: chakra
+          - name: core · unstyled
+          - name: mui · shadcn
+          - name: react
+          - name: mantine · bootstrap
+          - name: base-ui · ai
+          - name: radix · server · cli · i18n
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -286,18 +286,20 @@ jobs:
           LANE: ${{ matrix.name }}
         run: |
           case "$LANE" in
-            core) f="--filter=@adapttable/core" ;;
-            react) f="--filter=@adapttable/react" ;;
             antd) f="--filter=@adapttable/antd" ;;
-            mui) f="--filter=@adapttable/mui" ;;
-            "chakra · mantine") f="--filter=@adapttable/chakra --filter=@adapttable/mantine" ;;
-            "radix · base-ui") f="--filter=@adapttable/radix --filter=@adapttable/base-ui" ;;
-            "shadcn · unstyled · bootstrap") f="--filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            "server · cli · i18n · ai") f="--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/ai" ;;
+            chakra) f="--filter=@adapttable/chakra" ;;
+            "core · unstyled") f="--filter=@adapttable/core --filter=@adapttable/unstyled" ;;
+            "mui · shadcn") f="--filter=@adapttable/mui --filter=@adapttable/shadcn" ;;
+            react) f="--filter=@adapttable/react" ;;
+            "mantine · bootstrap") f="--filter=@adapttable/mantine --filter=@adapttable/bootstrap" ;;
+            "base-ui · ai") f="--filter=@adapttable/base-ui --filter=@adapttable/ai" ;;
+            "radix · server · cli · i18n") f="--filter=@adapttable/radix --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          # 2-core runner + one Vitest worker per package. Pair/triple shards
-          # can run two suites at once; solo shards stay one package.
+          # Lanes are balanced by measured suite time, not package count:
+          # antd 85s, chakra 69s, mui 53s, react 52s, mantine 51s, base-ui
+          # 46s, radix 45s, unstyled 40s, core 33s, shadcn 18s, ai 8s,
+          # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
           pnpm test:coverage $f --concurrency=2
 
   unit:
