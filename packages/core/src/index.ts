@@ -19,6 +19,7 @@ export {
   type CreateTableEngineOptions,
   type TableEngine,
   type TableEngineConfigPatch,
+  type TableEngineReader,
   type TableOperation,
   type TableRevisionAxis,
   type TableRevisions,

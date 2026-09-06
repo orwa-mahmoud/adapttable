@@ -18,7 +18,7 @@ import {
   type TableEngine,
   type TableSource,
 } from "@adapttable/core";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
@@ -260,29 +260,35 @@ export function useFrontendData<TRow>(
     const log = rowPatchLog(data);
     if (log) forgetPatchedSearch(searchCacheRef.current, log);
     else searchCacheRef.current.clear();
-    engine.invalidate(["data"], { data }, { silent: true });
+    engine.stageCandidate({}, { data });
     dataRef.current = data;
   }
 
   // One transaction carries the whole controlled view — query state, the
   // pagination strategy, and the page window — so the engine this hook
   // exposes can never describe a different window than the rows it returns.
-  // Silent: the render that supplied these values reads them straight back,
-  // and no subscriber is woken from inside a render.
   const nextFingerprint = `${hookViewFingerprint(fingerprint)}|${resolvedMode}|${String(page)}|${String(limit)}`;
   if (fingerprintRef.current !== nextFingerprint) {
-    engine.configure(
-      {
-        ...hookConfig,
-        paginationMode: paged ? "paged" : "infinite",
-        page,
-        limit,
-      },
-      { silent: true }
-    );
+    engine.stageCandidate({
+      ...hookConfig,
+      paginationMode: paged ? "paged" : "infinite",
+      page,
+      limit,
+    });
     fingerprintRef.current = nextFingerprint;
   }
-  const view = incrementalViewOf(engine.rows("full"));
+
+  // Everything this render reads comes from the candidate: the rows it is
+  // about to show, the page it settled on, the totals beside them. The
+  // committed engine — the one an agent or a second component holds — stays
+  // on the table that is on screen until React accepts this render, which is
+  // where `commitCandidate` below publishes it.
+  const reader = engine.candidate;
+  useLayoutEffect(() => {
+    engine.commitCandidate();
+  });
+
+  const view = incrementalViewOf(reader.rows("full"));
   if (!view) {
     throw new Error("TableEngine is missing its incremental snapshot");
   }
@@ -311,8 +317,8 @@ export function useFrontendData<TRow>(
   }, [data, search, projectSearchText]);
 
   // The engine owns clamping, so `page` here is the page actually shown —
-  // the same one `engine.snapshot().page` reports.
-  const snapshot = engine.snapshot();
+  // the same one the committed snapshot will report once this render lands.
+  const snapshot = reader.snapshot();
   const total = snapshot.total;
   const safePage = snapshot.page;
 
@@ -320,8 +326,8 @@ export function useFrontendData<TRow>(
   // (and useTableData's filterTreeFn) every render. A new view identity
   // must not mint a new page slice or radix/base-ui findInTable loops.
   const rows = useMemo<readonly TRow[]>(
-    () => engine.rows("page"),
-    [engine, sorted, paged, safePage, limit]
+    () => reader.rows("page"),
+    [reader, sorted, paged, safePage, limit]
   );
 
   const hasNextPage = !paged && safePage * limit < total;

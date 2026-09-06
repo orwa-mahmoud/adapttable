@@ -7,11 +7,20 @@ import {
   type CreateTableEngineOptions,
   devWarn,
   type TableEngine,
+  type TableEngineReader,
 } from "@adapttable/core";
-import { useDebugValue, useEffect, useRef, useSyncExternalStore } from "react";
+import {
+  useDebugValue,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 
-function revisionToken<TRow>(engine: TableEngine<TRow>): string {
-  const revisions = engine.snapshot().revisions;
+import { sameRows } from "./sameRows";
+
+function revisionToken<TRow>(reader: TableEngineReader<TRow>): string {
+  const revisions = reader.snapshot().revisions;
   return `${revisions.data}:${revisions.view}:${revisions.schema}:${revisions.policy}`;
 }
 
@@ -50,16 +59,18 @@ function readLive<TRow>(
 }
 
 /**
- * Move the engine to the options of the render now executing.
+ * Move the engine's CANDIDATE to the options of the render now executing.
  *
- * Every write is silent: it bumps the revision without notifying, so the
- * render that supplied the options reads them back immediately and no
- * subscriber is woken mid-render. That also keeps a host who passes a fresh
- * `data` array literal on every render from driving an update loop.
+ * Nothing published happens here. The committed state, its revision tokens
+ * and every subscriber stay where they were; an agent reading the table
+ * mid-render sees the table that is on screen, not one a render is still
+ * deciding on. The candidate is published in a layout effect, which is the
+ * point React has accepted the render — a render that suspends or is thrown
+ * away never reaches it, and nothing leaked.
  *
  * The work is idempotent — a Strict Mode double render, or a render React
  * discards and replays, compares against the same recorded options and
- * performs the same assignment, never a partial one.
+ * stages the same candidate, never a partial one.
  */
 function syncEngine<TRow>(
   engine: TableEngine<TRow>,
@@ -69,18 +80,11 @@ function syncEngine<TRow>(
   // A freshly created engine already carries these options.
   if (previous?.engine !== engine) return;
 
-  const dataChanged = !Object.is(previous.data, options.data);
+  // A fresh array holding the same rows is the same data: adopting it without
+  // staging is what keeps an inline `data={[…]}` from re-deriving the whole
+  // view — and, now that a commit publishes, from re-rendering forever.
+  const dataChanged = !sameRows(previous.data, options.data);
   const columnsChanged = !Object.is(previous.columns, options.columns);
-  if (dataChanged || columnsChanged) {
-    engine.invalidate(
-      [],
-      {
-        data: dataChanged ? options.data : undefined,
-        columns: columnsChanged ? options.columns : undefined,
-      },
-      { silent: true }
-    );
-  }
 
   const patch: {
     getRowId?: CreateTableEngineOptions<TRow>["rowKey"];
@@ -112,7 +116,12 @@ function syncEngine<TRow>(
     patch.getSearchText = options.getSearchText;
     changed = true;
   }
-  if (changed) engine.configure(patch, { silent: true });
+  if (changed || dataChanged || columnsChanged) {
+    engine.stageCandidate(patch, {
+      data: dataChanged ? options.data : undefined,
+      columns: columnsChanged ? options.columns : undefined,
+    });
+  }
 
   if (previous.tableId !== options.tableId) {
     devWarn(
@@ -125,8 +134,9 @@ function syncEngine<TRow>(
  * Subscribe a React tree to one engine. Two calls create two isolated tables.
  *
  * `data`, `columns`, `rowKey`, `paginationMode`, `locale`, `filterFn` and
- * `getSearchText` stay live — a change is committed to the engine and
- * published on the next revision. `tableId` and `defaults` are read once.
+ * `getSearchText` stay live — a change is staged while the render runs and
+ * published when React commits it, which is the same moment the screen
+ * changes. `tableId` and `defaults` are read once.
  *
  * @public
  */
@@ -142,16 +152,40 @@ export function useTableEngine<TRow>(
   syncEngine(engine, options, liveRef.current);
   liveRef.current = readLive(engine, options);
 
+  // The CANDIDATE's token, not the committed one: this render already holds
+  // what it staged, and reading the committed token would report the table it
+  // is replacing. A change from anywhere else moves both together.
+  const publishingRef = useRef(false);
   const token = useSyncExternalStore(
-    (onStoreChange) => engine.subscribe("all", onStoreChange),
-    () => revisionToken(engine),
-    () => revisionToken(engine)
+    (onStoreChange) =>
+      engine.subscribe("all", () => {
+        // Our own commit is not news to us — the render that staged it is the
+        // one being committed. Waking here would re-render, and a host who
+        // builds `data` inline would hand over new rows and never settle.
+        if (publishingRef.current) return;
+        onStoreChange();
+      }),
+    () => revisionToken(engine.candidate),
+    () => revisionToken(engine.candidate)
   );
+
+  // The render was accepted: publish what it staged, before paint, so an
+  // agent or a second component reads the table that is now on screen.
+  useLayoutEffect(() => {
+    publishingRef.current = true;
+    try {
+      engine.commitCandidate();
+    } finally {
+      publishingRef.current = false;
+    }
+  });
 
   useEffect(() => {
     const generation = ++generationRef.current;
     const owned = engine;
     return () => {
+      // Anything a later render staged and never committed goes with it.
+      owned.discardCandidate();
       queueMicrotask(() => {
         if (generationRef.current !== generation) return;
         owned.dispose();

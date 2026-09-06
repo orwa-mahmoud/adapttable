@@ -165,18 +165,41 @@ export interface TableEngineConfigPatch<TRow> extends Partial<
 }
 
 /**
+ * Everything that can be read off a table without changing it.
+ *
+ * The engine itself is one of these, and so is the candidate a binding stages
+ * while it renders — which is what lets a render read the state it is about
+ * to publish without anyone outside that render seeing it.
+ *
+ * @public
+ */
+export interface TableEngineReader<TRow = unknown> {
+  /** State of the table, including its revision tokens. */
+  readonly snapshot: () => TableSnapshot<TRow>;
+  /** One declared column, by key. */
+  readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
+  /** The neutral value of one cell. */
+  readonly cellValue: (row: TRow, columnKey: string) => unknown;
+  /** The rows of a named window. */
+  readonly rows: (scope: TableRowScope) => readonly TRow[];
+  /** The row behind a key, or `undefined` when it is not loaded. */
+  readonly rowByKey: (rowKey: string) => TRow | undefined;
+}
+
+/**
  * Framework-neutral table.
  *
  * @public
  */
-export interface TableEngine<TRow = unknown> {
+export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
   readonly tableId: string;
-  readonly snapshot: () => TableSnapshot<TRow>;
-  readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
-  readonly cellValue: (row: TRow, columnKey: string) => unknown;
-  readonly rows: (scope: TableRowScope) => readonly TRow[];
-  readonly rowByKey: (rowKey: string) => TRow | undefined;
   readonly rowKey: (row: TRow) => string;
+  /**
+   * What the render in progress staged, or the committed state when nothing
+   * is pending. Read this to render the state about to be published; read the
+   * engine itself for the state everyone else can see.
+   */
+  readonly candidate: TableEngineReader<TRow>;
   readonly subscribe: (
     axes: readonly TableRevisionAxis[] | "all",
     listener: (revisions: TableRevisions) => void
@@ -203,7 +226,103 @@ export interface TableEngine<TRow = unknown> {
     },
     options?: { silent?: boolean }
   ) => void;
+  /**
+   * Apply configuration and data to a private candidate.
+   *
+   * Nothing outside the caller sees it: `snapshot`, `rows`, the revision
+   * tokens and every subscriber stay on the committed state until
+   * {@link TableEngine.commitCandidate} runs. A render that is abandoned
+   * calls {@link TableEngine.discardCandidate} — or simply never commits, and
+   * the committed state was never touched either way.
+   *
+   * Repeating the same stage is the same stage: the candidate is derived from
+   * the committed state each time, so a double render in Strict Mode and a
+   * render React replays both land on one identical candidate.
+   */
+  readonly stageCandidate: (
+    patch: TableEngineConfigPatch<TRow>,
+    next?: {
+      readonly data?: readonly TRow[];
+      readonly columns?: readonly ColumnMetadata<TRow>[];
+    }
+  ) => void;
+  /** Publish the candidate as the committed state and notify subscribers. */
+  readonly commitCandidate: () => void;
+  /** Drop the candidate; the committed state is already what it was. */
+  readonly discardCandidate: () => void;
   readonly dispose: () => void;
+}
+
+/** Two lists holding the same items, by item identity. */
+function sameList<T>(a: readonly T[], b: readonly T[]): boolean {
+  if (Object.is(a, b)) return true;
+  if (a.length !== b.length) return false;
+  for (let index = 0; index < a.length; index++) {
+    if (!Object.is(a[index], b[index])) return false;
+  }
+  return true;
+}
+
+/** Two filter bags holding the same values. */
+function sameExtra(a: ExtraFilters, b: ExtraFilters): boolean {
+  if (Object.is(a, b)) return true;
+  const keys = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) return false;
+  return keys.every((key) => {
+    const left = a[key];
+    const right = b[key];
+    if (Array.isArray(left) && Array.isArray(right)) {
+      return sameList(left, right);
+    }
+    return Object.is(left, right);
+  });
+}
+
+/**
+ * The axes on which two states differ in a way anyone can observe.
+ *
+ * Deliberately about VALUES, not about which keys were assigned. A host that
+ * writes `rowKey={(row) => row.id}` inline hands the table a new function on
+ * every render; adopting it is right, but announcing it as a change would wake
+ * every subscriber, re-render, produce another new function, and never stop.
+ * What subscribers are told about is a table that actually reads differently.
+ */
+function observableAxes<TRow>(
+  before: CommittedState<TRow>,
+  after: CommittedState<TRow>
+): TableRevisionAxis[] {
+  const axes: TableRevisionAxis[] = [];
+  if (!sameList(before.view.columns, after.view.columns)) axes.push("schema");
+  if (
+    !sameList(before.view.data, after.view.data) ||
+    !sameList(before.derived.sorted, after.derived.sorted)
+  ) {
+    axes.push("data");
+  }
+  const a = before.view;
+  const b = after.view;
+  if (
+    a.page !== b.page ||
+    a.limit !== b.limit ||
+    a.search !== b.search ||
+    a.sortBy !== b.sortBy ||
+    a.sortDir !== b.sortDir ||
+    a.groupBy !== b.groupBy ||
+    a.paginationMode !== b.paginationMode ||
+    a.locale !== b.locale ||
+    !sameList(a.selectedIds, b.selectedIds) ||
+    !sameExtra(a.extra, b.extra)
+  ) {
+    axes.push("view");
+  }
+  return axes;
+}
+
+/** The three values that together are one observable table state. */
+interface CommittedState<TRow> {
+  view: EngineView<TRow>;
+  derived: IncrementalView<TRow>;
+  revisions: TableRevisions;
 }
 
 interface EngineView<TRow> {
@@ -348,14 +467,29 @@ export function createTableEngine<TRow>(
     getSearchText,
   };
   let revisions: TableRevisions = { data: 1, view: 1, schema: 1, policy: 1 };
+  /**
+   * The committed state, held apart while a candidate is pending. Everything
+   * public reads through here; `view`, `derived` and `revisions` are the
+   * candidate the stager is building.
+   */
+  let committed: CommittedState<TRow> | undefined;
+  /** Axes the pending candidate moved, published together at commit. */
+  let pendingAxes: TableRevisionAxis[] = [];
   let disposed = false;
   const listeners = new Set<{
     axes: ReadonlySet<TableRevisionAxis> | "all";
     listener: (next: TableRevisions) => void;
   }>();
 
-  function columnMap(): Map<string, ColumnMetadata<TRow>> {
-    return new Map(view.columns.map((column) => [column.key, column]));
+  /** The state a public read answers from: committed, never a candidate. */
+  function readable(): CommittedState<TRow> {
+    return committed ?? { view, derived, revisions };
+  }
+
+  function columnMap(
+    state: CommittedState<TRow>
+  ): Map<string, ColumnMetadata<TRow>> {
+    return new Map(state.view.columns.map((column) => [column.key, column]));
   }
 
   function viewConfig(): IncrementalViewConfig<TRow> {
@@ -411,27 +545,109 @@ export function createTableEngine<TRow>(
   }
 
   /** Last page for the rows currently derived. */
-  function lastPageOf(): number {
+  function lastPageOf(state: CommittedState<TRow>): number {
     return Math.max(
       1,
-      Math.ceil(derived.sorted.length / Math.max(view.limit, 1))
+      Math.ceil(state.derived.sorted.length / Math.max(state.view.limit, 1))
     );
   }
 
   /** The page actually shown — the request clamped to what exists. */
-  function effectivePage(): number {
-    return Math.min(Math.max(view.page, 1), lastPageOf());
+  function effectivePage(state: CommittedState<TRow>): number {
+    return Math.min(Math.max(state.view.page, 1), lastPageOf(state));
   }
 
-  function pagedRows(): readonly TRow[] {
-    const sorted = derived.sorted;
-    const page = effectivePage();
+  function pagedRows(state: CommittedState<TRow>): readonly TRow[] {
+    const sorted = state.derived.sorted;
+    const page = effectivePage(state);
+    const limit = state.view.limit;
     const slice =
-      view.paginationMode === "infinite"
-        ? sorted.slice(0, page * view.limit)
-        : sorted.slice((page - 1) * view.limit, page * view.limit);
-    attachIncrementalView(slice, derived);
+      state.view.paginationMode === "infinite"
+        ? sorted.slice(0, page * limit)
+        : sorted.slice((page - 1) * limit, page * limit);
+    attachIncrementalView(slice, state.derived);
     return slice;
+  }
+
+  /** The reads of one state, as a {@link TableEngineReader}. */
+  function readerOf(
+    state: () => CommittedState<TRow>
+  ): TableEngineReader<TRow> {
+    return {
+      snapshot() {
+        assertLive();
+        return snapshotOf(state());
+      },
+      getColumn(key) {
+        assertLive();
+        return columnMap(state()).get(key);
+      },
+      cellValue(row, columnKey) {
+        assertLive();
+        const current = state();
+        const column = columnMap(current).get(columnKey);
+        if (!column) return undefined;
+        return cellValue(row, column, current.view.locale);
+      },
+      rows(scope) {
+        assertLive();
+        const current = state();
+        if (scope === "full") return current.derived.sorted;
+        return pagedRows(current);
+      },
+      rowByKey(rowKey) {
+        assertLive();
+        const current = state();
+        return current.view.data.find(
+          (row) => current.view.getRowId(row) === rowKey
+        );
+      },
+    };
+  }
+
+  function snapshotOf(state: CommittedState<TRow>): TableSnapshot<TRow> {
+    const sorted = state.derived.sorted;
+    return {
+      revisions: state.revisions,
+      columns: state.view.columns,
+      capabilities: sourceCapabilities({
+        allFilteredRows: sorted,
+        total: sorted.length,
+      }),
+      page: effectivePage(state),
+      requestedPage: state.view.page,
+      lastPage: lastPageOf(state),
+      limit: state.view.limit,
+      search: state.view.search,
+      sortBy: state.view.sortBy,
+      sortDir: state.view.sortDir,
+      extra: state.view.extra,
+      groupBy: state.view.groupBy,
+      selectedIds: state.view.selectedIds,
+      total: sorted.length,
+    };
+  }
+
+  /**
+   * Take the committed state out of the way so the writes that follow build a
+   * candidate instead. Called once per pending candidate.
+   */
+  function beginCandidate(): void {
+    committed ??= { view, derived, revisions };
+  }
+
+  /**
+   * A write that is not staged owns the table again: an event handler, a
+   * host invalidation or a dispatch replaces whatever a render was still
+   * holding, rather than landing on top of it.
+   */
+  function dropCandidate(): void {
+    if (!committed) return;
+    view = committed.view;
+    derived = committed.derived;
+    revisions = committed.revisions;
+    committed = undefined;
+    pendingAxes = [];
   }
 
   function publish(
@@ -440,6 +656,16 @@ export function createTableEngine<TRow>(
   ): void {
     revisions = bump(revisions, changed);
     if (silent) return;
+    notifyListeners(changed);
+  }
+
+  /**
+   * Wake the subscribers for axes whose tokens have ALREADY moved. A staged
+   * candidate bumped its own tokens when it was built, so publishing it is
+   * only the waking — bumping again here would hand every subscriber a token
+   * the render that made it never saw.
+   */
+  function notifyListeners(changed: readonly TableRevisionAxis[]): void {
     for (const entry of listeners) {
       const axes = entry.axes;
       if (axes === "all") {
@@ -511,50 +737,15 @@ export function createTableEngine<TRow>(
     }
   }
 
+  const committedReader = readerOf(readable);
+  // The candidate is whatever the last stage left behind, which is the
+  // committed state itself when nothing is pending.
+  const candidateReader = readerOf(() => ({ view, derived, revisions }));
+
   return {
     tableId,
-    snapshot() {
-      assertLive();
-      const sorted = derived.sorted;
-      return {
-        revisions,
-        columns: view.columns,
-        capabilities: sourceCapabilities({
-          allFilteredRows: sorted,
-          total: sorted.length,
-        }),
-        page: effectivePage(),
-        requestedPage: view.page,
-        lastPage: lastPageOf(),
-        limit: view.limit,
-        search: view.search,
-        sortBy: view.sortBy,
-        sortDir: view.sortDir,
-        extra: view.extra,
-        groupBy: view.groupBy,
-        selectedIds: view.selectedIds,
-        total: sorted.length,
-      };
-    },
-    getColumn(key) {
-      assertLive();
-      return columnMap().get(key);
-    },
-    cellValue(row, columnKey) {
-      assertLive();
-      const column = columnMap().get(columnKey);
-      if (!column) return undefined;
-      return cellValue(row, column, view.locale);
-    },
-    rows(scope) {
-      assertLive();
-      if (scope === "full") return derived.sorted;
-      return pagedRows();
-    },
-    rowByKey(rowKey) {
-      assertLive();
-      return view.data.find((row) => view.getRowId(row) === rowKey);
-    },
+    ...committedReader,
+    candidate: candidateReader,
     rowKey(row) {
       assertLive();
       return view.getRowId(row);
@@ -572,6 +763,7 @@ export function createTableEngine<TRow>(
     },
     dispatch(operation) {
       assertLive();
+      dropCandidate();
       switch (operation.type) {
         case "setSort":
           view = {
@@ -620,11 +812,43 @@ export function createTableEngine<TRow>(
     },
     configure(patch, options) {
       assertLive();
+      dropCandidate();
       const changed = applyConfigurePatch(patch);
       if (changed.length > 0) publish(changed, options?.silent);
     },
+    stageCandidate(patch, next) {
+      assertLive();
+      beginCandidate();
+      if (next?.data) replaceData(next.data);
+      if (next?.columns) {
+        view = { ...view, columns: next.columns };
+        syncDerived();
+      }
+      applyConfigurePatch(patch);
+      // The tokens follow what the candidate actually reads differently, so a
+      // render sees a coherent snapshot and an unchanged table stays still.
+      const base = committed ?? { view, derived, revisions };
+      pendingAxes = observableAxes(base, { view, derived, revisions });
+      revisions = bump(base.revisions, pendingAxes);
+    },
+    commitCandidate() {
+      assertLive();
+      if (!committed) return;
+      const changed = pendingAxes;
+      committed = undefined;
+      pendingAxes = [];
+      if (changed.length === 0) return;
+      // The revisions already moved with the candidate; publishing is what
+      // makes them, and the rows they describe, visible.
+      notifyListeners(changed);
+    },
+    discardCandidate() {
+      assertLive();
+      dropCandidate();
+    },
     invalidate(axes, next, options) {
       assertLive();
+      dropCandidate();
       let changed = [...axes];
       if (next?.data) {
         replaceData(next.data);
