@@ -559,7 +559,7 @@ function RowMoveMenuPaper(props: Readonly<PaperProps>) {
   return <Paper {...props} data-adapttable-part="row-move-menu-content" />;
 }
 
-export function RowMoveMenu({
+function RowMoveMenu({
   label,
   items,
   confirmation,

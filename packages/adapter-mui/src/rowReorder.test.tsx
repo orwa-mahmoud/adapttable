@@ -1,3 +1,10 @@
+import type {
+  RowMoveMenuModel,
+  RowMoveRequest,
+  RowMoveTarget,
+  RowReorderLabels,
+  RowReorderState,
+} from "@adapttable/react/adapter";
 import {
   createEvent,
   fireEvent,
@@ -8,7 +15,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import { columnMenu } from "./column-menu";
-import { RowMoveMenu } from "./components/kitControls";
+import { RowReorderHandle } from "./components/kitControls";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
@@ -47,6 +54,104 @@ const part = (name: string) =>
 
 function enable(onRowReorder?: (from: number, to: number, row: Task) => void) {
   return onRowReorder ? { features: [rowReorder(onRowReorder)] } : {};
+}
+
+/**
+ * The move menu is an internal slot component: a host reaches it only by
+ * composing row reorder, so the tests reach it the same way — through the
+ * public `RowReorderHandle`, with a reorder state that has a destination and,
+ * for the second half, a move waiting to be confirmed.
+ */
+const MOVE_ROW: Task = { id: "parent", title: "Parent" };
+
+const MOVE_LABELS: RowReorderLabels = {
+  reorderRow: "Reorder row",
+  moveRowUp: "Move row up",
+  moveRowDown: "Move row down",
+  rowLifted: () => "",
+  rowMoved: () => "",
+  rowReorderCancelled: "",
+  confirmRowMoveTitle: "Confirm row move",
+  confirmRowMoveDescription: (row, _from, to) => `Move ${row} to ${to}?`,
+  confirmRowMove: "Move",
+  cancel: "Cancel",
+};
+
+const MOVE_TARGET: RowMoveTarget<Task> = {
+  id: "destination",
+  label: "Destination",
+};
+
+const MOVE_MENU: RowMoveMenuModel<Task> = {
+  kind: "tree",
+  label: "Move under…",
+  targets: [MOVE_TARGET],
+};
+
+const MOVE_PENDING: RowMoveRequest<Task> = {
+  kind: "tree",
+  row: MOVE_ROW,
+  rowLabel: "Parent",
+  fromParent: { id: null, row: null, label: "Root" },
+  toParent: { id: "destination", row: MOVE_ROW, label: "Destination" },
+  position: 0,
+};
+
+interface MoveHandlers {
+  readonly onSelect: () => void;
+  readonly onConfirm: () => void;
+  readonly onCancel: () => void;
+}
+
+function moveReorder(
+  pendingMove: RowMoveRequest<Task> | null,
+  handlers: MoveHandlers
+): RowReorderState<Task> {
+  return {
+    lifted: null,
+    overIndex: null,
+    overPosition: null,
+    pendingMove,
+    hostConfirmPending: false,
+    announcement: "",
+    isLifted: () => false,
+    dragProps: () => ({
+      draggable: true,
+      onDragStart: () => undefined,
+      onDragEnd: () => undefined,
+    }),
+    dropProps: () => ({
+      onDragOver: () => undefined,
+      onDrop: () => undefined,
+    }),
+    handleKeyDown: () => undefined,
+    moveBy: () => undefined,
+    moveMenu: () => MOVE_MENU,
+    selectMoveTarget: handlers.onSelect,
+    confirmMove: handlers.onConfirm,
+    cancelMove: handlers.onCancel,
+    rowAttrs: () => ({}),
+  };
+}
+
+function MoveHandle({
+  pendingMove,
+  handlers,
+}: Readonly<{
+  pendingMove: RowMoveRequest<Task> | null;
+  handlers: MoveHandlers;
+}>) {
+  return (
+    <RowReorderHandle
+      reorder={moveReorder(pendingMove, handlers)}
+      labels={MOVE_LABELS}
+      rowId="parent"
+      localIndex={0}
+      row={MOVE_ROW}
+      windowStart={0}
+      rowCount={2}
+    />
+  );
 }
 
 describe("row reorder (mui)", () => {
@@ -175,69 +280,37 @@ describe("row reorder (mui)", () => {
     const onSelect = vi.fn();
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
-    const items = [
-      {
-        id: "destination",
-        label: "Destination",
-        disabled: false,
-        onSelect,
-      },
-    ];
+    const handlers = { onSelect, onConfirm, onCancel };
     const { rerender } = render(
-      <RowMoveMenu label="Move under…" items={items} />
+      <MoveHandle pendingMove={null} handlers={handlers} />
     );
     let trigger = screen.getByRole("button", { name: "Move under…" });
     trigger.focus();
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole("menuitem", { name: "Destination" }));
-    expect(onSelect).toHaveBeenCalledOnce();
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(MOVE_TARGET);
 
-    rerender(
-      <RowMoveMenu
-        label="Move under…"
-        items={items}
-        confirmation={{
-          title: "Confirm row move",
-          description: "Move Parent to Destination?",
-          confirmLabel: "Move",
-          cancelLabel: "Cancel",
-          onConfirm,
-          onCancel,
-        }}
-      />
-    );
+    rerender(<MoveHandle pendingMove={MOVE_PENDING} handlers={handlers} />);
     expect(
       screen.getByRole("alertdialog", { name: "Confirm row move" })
     ).toHaveAttribute("data-adapttable-part", "row-move-confirmation");
+    expect(screen.getByText("Move Parent to Destination?")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     await Promise.resolve();
     expect(onCancel).toHaveBeenCalledOnce();
     expect(onConfirm).not.toHaveBeenCalled();
-    rerender(<RowMoveMenu label="Move under…" items={items} />);
+    rerender(<MoveHandle pendingMove={null} handlers={handlers} />);
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus()
     );
 
     trigger = screen.getByRole("button", { name: "Move under…" });
     fireEvent.click(trigger);
-    rerender(
-      <RowMoveMenu
-        label="Move under…"
-        items={items}
-        confirmation={{
-          title: "Confirm row move",
-          description: "Move Parent to Destination?",
-          confirmLabel: "Move",
-          cancelLabel: "Cancel",
-          onConfirm,
-          onCancel,
-        }}
-      />
-    );
+    rerender(<MoveHandle pendingMove={MOVE_PENDING} handlers={handlers} />);
     fireEvent.click(screen.getByRole("button", { name: "Move" }));
     await Promise.resolve();
     expect(onConfirm).toHaveBeenCalledOnce();
-    rerender(<RowMoveMenu label="Move under…" items={items} />);
+    rerender(<MoveHandle pendingMove={null} handlers={handlers} />);
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus()
     );

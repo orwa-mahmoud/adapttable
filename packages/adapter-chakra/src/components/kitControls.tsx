@@ -588,7 +588,7 @@ function ReorderHandle({
   );
 }
 
-export function RowMoveMenu({
+function RowMoveMenu({
   label,
   items,
   confirmation,
