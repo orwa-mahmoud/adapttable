@@ -458,6 +458,17 @@ function requireQuery<
   return fn;
 }
 
+/**
+ * What the LIVE TABLE can do, before the host's own callbacks are laid over
+ * it.
+ *
+ * `currentApply` builds `{ ...applyFromRuntime(...), ...options.apply }`, so
+ * a callback the host supplied is the one that runs. A guard here that
+ * checked for the same callback would be shadowed by that spread and could
+ * never fire, which is why the view operations below reach straight for the
+ * live table. `extra` still travels to the row, edit, stage and selection
+ * helpers, which read it for their own reasons.
+ */
 function applyFromRuntime(
   runtime: ReturnType<typeof useTableRuntime>,
   options: TableAgentOptions,
@@ -466,55 +477,30 @@ function applyFromRuntime(
   const columns = columnsForRuntime(options, runtime);
   const readMax = options.readMax ?? 50;
   const view = () => runtime.view();
-  const apply: AgentApply = {
+  return {
     readRows: pickReadRows(runtime, extra, columns, readMax),
     resolveRow: pickResolveRow(runtime, extra),
     setPage: (page) => {
-      if (extra?.setPage) extra.setPage(page);
-      else requireQuery(view, "setPage")(page);
+      requireQuery(view, "setPage")(page);
     },
     setLimit: (limit) => {
-      if (extra?.setLimit) extra.setLimit(limit);
-      else requireQuery(view, "setLimit")(limit);
+      requireQuery(view, "setLimit")(limit);
     },
     setSearch: (search) => {
-      if (extra?.setSearch) extra.setSearch(search);
-      else requireQuery(view, "setSearch")(search);
+      requireQuery(view, "setSearch")(search);
     },
     setSort: (key, dir) => {
-      if (extra?.setSort) extra.setSort(key, dir);
-      else requireQuery(view, "setSort")(key, dir);
+      requireQuery(view, "setSort")(key, dir);
     },
     setGroupBy: (key) => {
-      if (extra?.setGroupBy) {
-        extra.setGroupBy(key);
-        return;
-      }
       const grouping = view()?.groupingState;
       if (!grouping) throw new Error("setGroupBy is not wired");
       grouping.setGroupBy(key);
     },
-    setFilters: (filters) => {
-      if (!applyLiveFilters(view()?.query, filters)) {
-        throw new Error("setFilters is not wired");
-      }
-    },
     editCells: (edits) => liveEditCells(runtime, extra, edits),
     stageCells: (edits) => liveStageCells(runtime, extra, edits),
+    setSelection: (ids) => liveSetSelection(runtime, extra, ids),
   };
-  if (extra?.applyView) {
-    apply.applyView = (viewId) => extra.applyView?.(viewId);
-  }
-  if (extra?.runExport) {
-    apply.runExport = (format) => extra.runExport?.(format);
-  }
-  if (extra?.addRows) apply.addRows = (rows) => extra.addRows?.(rows);
-  if (extra?.deleteRows) apply.deleteRows = (keys) => extra.deleteRows?.(keys);
-  if (extra?.reorderRows) {
-    apply.reorderRows = (fromKey, toKey) => extra.reorderRows?.(fromKey, toKey);
-  }
-  apply.setSelection = (ids) => liveSetSelection(runtime, extra, ids);
-  return apply;
 }
 
 function asCallable(

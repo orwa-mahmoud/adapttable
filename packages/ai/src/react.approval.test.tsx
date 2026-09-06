@@ -82,6 +82,7 @@ function mount(
         { id: "editing" },
         { id: "filters" },
         { id: "grouping" },
+        { id: "export-csv" },
       ],
     });
     return (
@@ -288,6 +289,155 @@ describe("host callbacks in place of the live table's", () => {
     );
 
     expect(apply.setGroupBy).toHaveBeenCalledWith("team");
+  });
+
+  it("runs the host's view callbacks exactly once, and not the table's", async () => {
+    const hostPage = vi.fn();
+    const hostLimit = vi.fn();
+    const hostSearch = vi.fn();
+    const hostSort = vi.fn();
+    const livePage = vi.fn();
+    const liveLimit = vi.fn();
+    const liveSearch = vi.fn();
+    const liveSort = vi.fn();
+    mount(
+      {
+        tableId: "override-once",
+        approval: "never",
+        apply: {
+          setPage: hostPage,
+          setLimit: hostLimit,
+          setSearch: hostSearch,
+          setSort: hostSort,
+        },
+      },
+      {
+        ...VIEW,
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: livePage,
+          setLimit: liveLimit,
+          setSearch: liveSearch,
+          setSort: liveSort,
+        },
+      }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const revision = session().manifest().viewRevision;
+    await session().execute(
+      "view.setPage",
+      { page: 1, limit: 25 },
+      revision,
+      "o-page"
+    );
+    await session().execute(
+      "view.setSearch",
+      { query: "ada" },
+      revision,
+      "o-q"
+    );
+    await session().execute(
+      "view.setSort",
+      { key: "name", dir: "asc" },
+      revision,
+      "o-sort"
+    );
+
+    expect(hostPage).toHaveBeenCalledExactlyOnceWith(1);
+    expect(hostLimit).toHaveBeenCalledExactlyOnceWith(25);
+    expect(hostSearch).toHaveBeenCalledExactlyOnceWith("ada");
+    expect(hostSort).toHaveBeenCalledExactlyOnceWith("name", "asc");
+    // The host is the single authority: the live table's own callbacks are
+    // not reached as well.
+    expect(livePage).not.toHaveBeenCalled();
+    expect(liveLimit).not.toHaveBeenCalled();
+    expect(liveSearch).not.toHaveBeenCalled();
+    expect(liveSort).not.toHaveBeenCalled();
+  });
+
+  it("runs the table's own view callbacks when the host overrides none", async () => {
+    const livePage = vi.fn();
+    const liveLimit = vi.fn();
+    const liveSearch = vi.fn();
+    const liveSort = vi.fn();
+    mount(
+      { tableId: "runtime-default", approval: "never" },
+      {
+        ...VIEW,
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: livePage,
+          setLimit: liveLimit,
+          setSearch: liveSearch,
+          setSort: liveSort,
+        },
+      }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const revision = session().manifest().viewRevision;
+    await session().execute(
+      "view.setPage",
+      { page: 1, limit: 25 },
+      revision,
+      "d-page"
+    );
+    await session().execute(
+      "view.setSearch",
+      { query: "ada" },
+      revision,
+      "d-q"
+    );
+    await session().execute(
+      "view.setSort",
+      { key: "name", dir: "desc" },
+      revision,
+      "d-sort"
+    );
+
+    expect(livePage).toHaveBeenCalledExactlyOnceWith(1);
+    expect(liveLimit).toHaveBeenCalledExactlyOnceWith(25);
+    expect(liveSearch).toHaveBeenCalledExactlyOnceWith("ada");
+    expect(liveSort).toHaveBeenCalledExactlyOnceWith("name", "desc");
+  });
+
+  it("hands a saved view and an export straight to the host", async () => {
+    const applyView = vi.fn();
+    const runExport = vi.fn().mockReturnValue({ rows: 5 });
+    mount(
+      {
+        tableId: "passthrough",
+        approval: "never",
+        apply: { applyView, runExport },
+      },
+      VIEW
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const revision = session().manifest().viewRevision;
+    const result = await session().execute(
+      "export.run",
+      { format: "csv" },
+      revision,
+      "p-export"
+    );
+
+    // The host's own return value survives — the wrapper that used to sit in
+    // front of it did not swallow it, and neither does its absence.
+    expect(runExport).toHaveBeenCalledExactlyOnceWith("csv");
+    expect(result.result).toEqual({ rows: 5 });
+    expect(applyView).not.toHaveBeenCalled();
   });
 
   it("describes a capability the manifest lists", async () => {
