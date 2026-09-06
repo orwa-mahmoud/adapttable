@@ -160,6 +160,44 @@ export const hi: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "टेबल सहायक",
+  assistantOpen: "AI से पूछें",
+  assistantClose: "बंद करें",
+  assistantSettings: "सहायक सेटिंग्स",
+  assistantEmpty: "आप इस टेबल के साथ क्या करना चाहेंगे?",
+  assistantPlaceholder: "इस टेबल के बारे में पूछें…",
+  assistantSend: "भेजें",
+  assistantStop: "रोकें",
+  assistantYou: "आप",
+  assistantSpeaker: "सहायक",
+  assistantNewMessages: "नए संदेश",
+  assistantUnavailable: "सहायक जुड़ा नहीं है।",
+  assistantBackToTable: "टेबल पर वापस",
+  assistantDetail: "विवरण",
+  assistantSaveInTable: "यह बदलाव रखने के लिए टेबल में सहेजें।",
+  assistantConnection: (status) =>
+    ({
+      idle: "निष्क्रिय",
+      connecting: "जुड़ रहा है…",
+      ready: "तैयार",
+      sending: "काम जारी…",
+      "awaiting-approval": "आपकी प्रतीक्षा",
+      error: "त्रुटि",
+      disconnected: "जुड़ा नहीं",
+    })[status] ?? "तैयार",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "हो गया",
+        staged: "तैयार",
+        rejected: "अस्वीकृत",
+        "awaiting-approval": "आपकी प्रतीक्षा",
+        cancelled: "रद्द",
+        stale: "पुराना",
+        failed: "विफल",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "पंक्ति जोड़ें",
   duplicateRow: "पंक्ति की प्रतिलिपि बनाएँ",
   deleteRow: "पंक्ति हटाएँ",

@@ -1,5 +1,27 @@
 import type { TableLabels } from "./types";
 
+/** Connection tokens the assistant badge shows, in English. */
+const ASSISTANT_CONNECTION: Readonly<Record<string, string>> = {
+  idle: "Idle",
+  connecting: "Connecting…",
+  ready: "Ready",
+  sending: "Working…",
+  "awaiting-approval": "Waiting for you",
+  error: "Error",
+  disconnected: "Not connected",
+};
+
+/** What became of one action, in English. */
+const ASSISTANT_RECEIPT: Readonly<Record<string, string>> = {
+  executed: "done",
+  staged: "staged",
+  rejected: "rejected",
+  "awaiting-approval": "waiting for you",
+  cancelled: "cancelled",
+  stale: "out of date",
+  failed: "failed",
+};
+
 /**
  * English default strings. Consumers override any subset via the
  * `labels` option; {@link resolveLabels} merges their overrides on top.
@@ -155,6 +177,26 @@ export const defaultLabels: Required<TableLabels> = {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "Table assistant",
+  assistantOpen: "Ask AI",
+  assistantClose: "Close",
+  assistantSettings: "Assistant settings",
+  assistantEmpty: "What would you like to do with this table?",
+  assistantPlaceholder: "Ask about this table…",
+  assistantSend: "Send",
+  assistantStop: "Stop",
+  assistantYou: "You",
+  assistantSpeaker: "Assistant",
+  assistantNewMessages: "New messages",
+  assistantUnavailable: "The assistant is not connected.",
+  assistantBackToTable: "Back to table",
+  assistantDetail: "Details",
+  assistantSaveInTable: "Save in the table to keep this change.",
+  assistantConnection: (status) => ASSISTANT_CONNECTION[status] ?? "Ready",
+  assistantReceipt: ({ capability, status }) => {
+    const what = ASSISTANT_RECEIPT[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
   },
   addRow: "Add row",
   duplicateRow: "Duplicate row",

@@ -66,6 +66,8 @@ describe("defaultLabels — every function label", () => {
       },
     ],
     columnRenamed: [{ previous: "COLUMN_OLD", name: "COLUMN_NEW" }],
+    assistantConnection: ["connecting"],
+    assistantReceipt: [{ capability: "view.setGroupBy", status: "executed" }],
     sortedBy: [{ column: "COLUMN_X", ascending: true }],
   };
 

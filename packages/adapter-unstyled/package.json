@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/unstyled",
   "version": "2.6.0",
-  "description": "Headless, unstyled AdaptTable adapter — semantic HTML with class + data-attribute hooks for Tailwind, shadcn/ui, or your own CSS.",
+  "description": "Headless, unstyled AdaptTable adapter \u2014 semantic HTML with class + data-attribute hooks for Tailwind, shadcn/ui, or your own CSS.",
   "keywords": [
     "react",
     "data-table",
@@ -43,6 +43,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
       }
     },
     "./features": {

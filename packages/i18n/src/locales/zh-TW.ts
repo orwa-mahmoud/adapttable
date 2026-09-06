@@ -155,6 +155,44 @@ export const zhTW: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "表格助理",
+  assistantOpen: "詢問 AI",
+  assistantClose: "關閉",
+  assistantSettings: "助理設定",
+  assistantEmpty: "您想對這個表格做什麼？",
+  assistantPlaceholder: "詢問關於此表格的問題…",
+  assistantSend: "傳送",
+  assistantStop: "停止",
+  assistantYou: "您",
+  assistantSpeaker: "助理",
+  assistantNewMessages: "新訊息",
+  assistantUnavailable: "助理未連線。",
+  assistantBackToTable: "返回表格",
+  assistantDetail: "詳細資料",
+  assistantSaveInTable: "在表格中儲存以保留此變更。",
+  assistantConnection: (status) =>
+    ({
+      idle: "閒置",
+      connecting: "連線中…",
+      ready: "就緒",
+      sending: "處理中…",
+      "awaiting-approval": "等待您確認",
+      error: "錯誤",
+      disconnected: "未連線",
+    })[status] ?? "就緒",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "已完成",
+        staged: "待儲存",
+        rejected: "已拒絕",
+        "awaiting-approval": "等待您確認",
+        cancelled: "已取消",
+        stale: "已過期",
+        failed: "失敗",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "新增列",
   duplicateRow: "複製列",
   deleteRow: "刪除列",

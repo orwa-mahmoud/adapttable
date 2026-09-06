@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/mui",
   "version": "2.6.0",
-  "description": "Material UI adapter for AdaptTable — a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
+  "description": "Material UI adapter for AdaptTable \u2014 a batteries-included MUI data table with sorting, filtering, URL state, selection, RTL, dark mode, and a free DataGrid-style experience.",
   "keywords": [
     "react",
     "mui",
@@ -43,6 +43,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
       }
     },
     "./features": {

@@ -4,6 +4,7 @@
  */
 import type { ChangeEvent } from "react";
 
+import type { TableAssistantSlots } from "../assistant/assistantSlots";
 import type {
   ColumnGroupToggleButtonProps,
   ColumnGroupToggleSlots,
@@ -572,4 +573,86 @@ function ReorderMove({
 export const rowReorderButtonsTestSlots: RowReorderButtonsSlots = {
   Button: ReorderMove,
   Menu: RowMoveMenu,
+};
+
+/**
+ * Plain-HTML assistant slots, for testing the chrome's own behaviour.
+ *
+ * A kit's real components are verified in that kit's own suite; what these
+ * exercise is the structure, keyboard and announcements the chrome owns.
+ */
+export const tableAssistantTestSlots: TableAssistantSlots = {
+  Panel: ({ label, part, className, children }) => (
+    <section
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+    >
+      {children}
+    </section>
+  ),
+  Sheet: ({ label, part, className, open, onClose, children }) =>
+    open ? (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        data-adapttable-part={part}
+        className={className}
+      >
+        {children}
+        <button type="button" data-testid="sheet-backdrop" onClick={onClose}>
+          {label}
+        </button>
+      </div>
+    ) : null,
+  Button: ({
+    label,
+    part,
+    className,
+    onClick,
+    disabled,
+    children,
+    expanded,
+  }) => (
+    <button
+      type="button"
+      aria-label={label}
+      aria-expanded={expanded}
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {children ?? label}
+    </button>
+  ),
+  Composer: ({
+    label,
+    placeholder,
+    part,
+    className,
+    value,
+    disabled,
+    onChange,
+    onKeyDown,
+  }) => (
+    <textarea
+      aria-label={label}
+      placeholder={placeholder}
+      data-adapttable-part={part}
+      className={className}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+      onKeyDown={onKeyDown}
+    />
+  ),
+  Badge: ({ label, part, className, tone }) => (
+    <span data-adapttable-part={part} className={className} data-tone={tone}>
+      {label}
+    </span>
+  ),
 };

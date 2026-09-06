@@ -110,6 +110,7 @@ export {
   type StandardFeatureOptions,
   type StandardFeaturesFactory,
 } from "./adapterFeatures/standardPreset";
+export { createAdapterTableAssistantFeature } from "./adapterFeatures/tableAssistant";
 export type { ColumnDef } from "./columnDef";
 export {
   type ColumnGroupToggleButtonProps,
@@ -339,6 +340,7 @@ export {
   SELECTION_STATS_LIVE,
   SIDE_PANEL,
   STATUS_BAR,
+  TABLE_ASSISTANT,
   TOOLBAR_EXTRAS,
   TREE_CELL,
   TREE_LIVE,
@@ -1034,6 +1036,28 @@ export type { QueryAggregate } from "@adapttable/core";
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
+export type {
+  TableAssistantBadgeProps,
+  TableAssistantButtonProps,
+  TableAssistantComposerProps,
+  TableAssistantPanelProps,
+  TableAssistantSheetProps,
+  TableAssistantSlots,
+} from "./assistant/assistantSlots";
+export {
+  assistantIsUsable,
+  type TableAssistantMessageView,
+  type TableAssistantReceiptView,
+  type TableAssistantSuggestionView,
+  type TableAssistantView,
+} from "./assistant/assistantView";
+export {
+  assistantIsBusy,
+  TableAssistantChrome,
+  type TableAssistantChromeProps,
+  type TableAssistantPresentation,
+  type TableAssistantProps,
+} from "./assistant/TableAssistantChrome";
 export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";

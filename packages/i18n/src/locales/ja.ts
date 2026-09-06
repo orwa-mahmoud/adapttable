@@ -155,6 +155,44 @@ export const ja: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "テーブルアシスタント",
+  assistantOpen: "AI に質問",
+  assistantClose: "閉じる",
+  assistantSettings: "アシスタントの設定",
+  assistantEmpty: "このテーブルで何をしますか？",
+  assistantPlaceholder: "このテーブルについて質問…",
+  assistantSend: "送信",
+  assistantStop: "停止",
+  assistantYou: "あなた",
+  assistantSpeaker: "アシスタント",
+  assistantNewMessages: "新しいメッセージ",
+  assistantUnavailable: "アシスタントは接続されていません。",
+  assistantBackToTable: "テーブルに戻る",
+  assistantDetail: "詳細",
+  assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",
+  assistantConnection: (status) =>
+    ({
+      idle: "待機中",
+      connecting: "接続中…",
+      ready: "準備完了",
+      sending: "処理中…",
+      "awaiting-approval": "確認待ち",
+      error: "エラー",
+      disconnected: "未接続",
+    })[status] ?? "準備完了",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "完了",
+        staged: "保存待ち",
+        rejected: "却下",
+        "awaiting-approval": "確認待ち",
+        cancelled: "取り消し",
+        stale: "古い状態",
+        failed: "失敗",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "行を追加",
   duplicateRow: "行を複製",
   deleteRow: "行を削除",

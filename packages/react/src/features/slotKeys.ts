@@ -25,6 +25,7 @@ import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome"
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
 import type { UseCommandPaletteOptions } from "../actions/useCommandPalette";
 import type { TableContextMenuOptions } from "../actions/useTableContextMenu";
+import type { TableAssistantProps } from "../assistant/TableAssistantChrome";
 import type { ColumnDef } from "../columnDef";
 import type { ColumnGroupToggleProps } from "../columns/ColumnGroupToggle";
 import type { PinOffset } from "../columns/useColumnLayout";
@@ -115,6 +116,16 @@ export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<never>>(
  */
 export const AGENT_APPROVAL = featureSlotKey<AgentApprovalProps>(
   "agent-approval",
+  { single: true }
+);
+
+/**
+ * The assistant panel that sits beside the table.
+ *
+ * @public
+ */
+export const TABLE_ASSISTANT = featureSlotKey<TableAssistantProps>(
+  "table-assistant",
   { single: true }
 );
 

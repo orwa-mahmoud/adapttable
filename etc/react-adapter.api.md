@@ -497,6 +497,12 @@ export function applyTableFeatures<P extends object>(props: P): P;
 export { AssemblyFns }
 
 // @public
+export function assistantIsBusy(status: string): boolean;
+
+// @public
+export function assistantIsUsable(status: string): boolean;
+
+// @public
 export interface BaseDataTableProps<TRow> {
     activeFilterCount?: number;
     applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
@@ -1372,6 +1378,9 @@ export function createAdapterRowReorderFeature(components: AdapterRowReorderComp
 
 // @public
 export function createAdapterStandardFeatures(factories: AdapterStandardFeatureFactories): StandardFeaturesFactory;
+
+// @public
+export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatureComponent<TableAssistantProps>): StaticTableFeature;
 
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
@@ -4411,6 +4420,161 @@ export function stopEditKeys(event: Readonly<{
 
 // @public
 export type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+
+// @public
+export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps>;
+
+// @public
+export interface TableAssistantBadgeProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly part: string;
+    readonly tone: "neutral" | "busy" | "warning" | "danger";
+}
+
+// @public
+export interface TableAssistantButtonProps {
+    readonly children?: ReactNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    readonly expanded?: boolean;
+    readonly label: string;
+    // (undocumented)
+    readonly onClick: () => void;
+    readonly part: string;
+    readonly variant?: "primary" | "secondary" | "subtle";
+}
+
+// @public
+export function TableAssistantChrome(input: Readonly<TableAssistantChromeProps>): ReactElement;
+
+// @public
+export interface TableAssistantChromeProps extends TableAssistantProps {
+    readonly slots: TableAssistantSlots;
+}
+
+// @public
+export interface TableAssistantComposerProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly onChange: (value: string) => void;
+    readonly onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
+    // (undocumented)
+    readonly part: string;
+    // (undocumented)
+    readonly placeholder: string;
+    // (undocumented)
+    readonly value: string;
+}
+
+// @public
+export interface TableAssistantMessageView {
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly receipts?: readonly TableAssistantReceiptView[];
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    readonly text: string;
+}
+
+// @public
+export interface TableAssistantPanelProps {
+    // (undocumented)
+    readonly children: ReactNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly part: string;
+}
+
+// @public
+export type TableAssistantPresentation = "panel" | "sheet";
+
+// @public
+export interface TableAssistantProps {
+    readonly assistant: TableAssistantView;
+    readonly className?: string;
+    readonly labels?: TableLabels;
+    readonly launcher?: boolean;
+    readonly onOpenChange: (open: boolean) => void;
+    readonly onSettings?: () => void;
+    readonly open: boolean;
+    readonly presentation?: TableAssistantPresentation;
+}
+
+// @public
+export interface TableAssistantReceiptView {
+    readonly capabilityKey?: string;
+    readonly idempotencyKey: string;
+    readonly message?: string;
+    readonly status: string;
+}
+
+// @public
+export interface TableAssistantSheetProps {
+    // (undocumented)
+    readonly children: ReactNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly onClose: () => void;
+    // (undocumented)
+    readonly open: boolean;
+    // (undocumented)
+    readonly part: string;
+}
+
+// @public
+export interface TableAssistantSlots {
+    readonly Badge: (props: TableAssistantBadgeProps) => ReactNode;
+    readonly Button: (props: TableAssistantButtonProps) => ReactNode;
+    readonly Composer: (props: TableAssistantComposerProps) => ReactNode;
+    readonly Panel: (props: TableAssistantPanelProps) => ReactNode;
+    readonly Sheet: (props: TableAssistantSheetProps) => ReactNode;
+}
+
+// @public
+export interface TableAssistantSuggestionView {
+    // (undocumented)
+    readonly description?: string;
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly title: string;
+}
+
+// @public
+export interface TableAssistantView {
+    // (undocumented)
+    readonly draft: string;
+    readonly error?: string;
+    // (undocumented)
+    readonly messages: readonly TableAssistantMessageView[];
+    readonly moreSuggestions?: readonly TableAssistantSuggestionView[];
+    // (undocumented)
+    readonly runSuggestion: (id: string) => void | Promise<void>;
+    readonly send: (text?: string) => void | Promise<void>;
+    // (undocumented)
+    readonly setDraft: (draft: string) => void;
+    readonly status: string;
+    readonly stop: () => void;
+    readonly suggestions: readonly TableAssistantSuggestionView[];
+}
 
 // @public
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";

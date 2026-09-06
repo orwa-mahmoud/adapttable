@@ -117,6 +117,28 @@ const INTERPOLATION_CASES: Record<
   string,
   { call: (fn: AnyLabelFn) => string; expects: readonly string[] }
 > = {
+  /**
+   * The badge turns a status token into the reader's language, so the token
+   * must NOT survive into the output — the opposite of every other case here.
+   * What is asserted instead is that each token maps to something, and that
+   * an unknown one still yields a real word rather than leaking itself.
+   */
+  assistantConnection: {
+    call: (fn) => (fn as (status: string) => string)("connecting"),
+    expects: [],
+  },
+  /**
+   * A capability key is technical identity and appears as given; the status
+   * beside it is translated, so only the key is expected here.
+   */
+  assistantReceipt: {
+    call: (fn) =>
+      (fn as (r: { capability?: string; status: string }) => string)({
+        capability: "view.pinColumn",
+        status: "staged",
+      }),
+    expects: ["view.pinColumn"],
+  },
   showing: {
     call: (fn) =>
       (fn as (a: { from: number; to: number; total: number }) => string)({
@@ -348,4 +370,78 @@ it("labels AND column i18n paths resolve locale tags identically", () => {
   // Exact regional tags still beat the primary subtag on both surfaces.
   const regional = { key: "name", i18n: { ar: "name_ar", "ar-EG": "name_eg" } };
   expect(localizedColumnPath(regional, "ar_eg")).toBe("name_eg");
+});
+
+/**
+ * The two token-mapping labels are the only ones whose job is to REMOVE their
+ * argument from the output. That makes them the only ones a lazy translation
+ * can pass by returning the token unchanged, so they get their own check.
+ *
+ * English is exempt from the "not the token" rule and only from that rule:
+ * "rejected", "cancelled" and "failed" are the natural English words as well
+ * as the protocol tokens, and inventing a synonym to make them differ would
+ * make the English UI worse to satisfy a test.
+ */
+describe("assistant token labels translate every token", () => {
+  const CONNECTION = [
+    "idle",
+    "connecting",
+    "ready",
+    "sending",
+    "awaiting-approval",
+    "error",
+    "disconnected",
+  ];
+  const RECEIPT = [
+    "executed",
+    "staged",
+    "rejected",
+    "awaiting-approval",
+    "cancelled",
+    "stale",
+    "failed",
+  ];
+
+  it("gives every connection token a word in every locale", () => {
+    for (const [tag, labels] of Object.entries(locales)) {
+      for (const token of CONNECTION) {
+        const out = labels.assistantConnection(token);
+        expect(out.length, `${tag}.${token}`).toBeGreaterThan(0);
+        if (tag !== "en") expect(out, `${tag}.${token}`).not.toBe(token);
+      }
+      // An unknown state is still a word, not a blank badge or a raw token.
+      const unknown = labels.assistantConnection("nonsense");
+      expect(unknown.length, tag).toBeGreaterThan(0);
+      expect(unknown, tag).not.toBe("nonsense");
+    }
+  });
+
+  it("gives every receipt token a word in every locale", () => {
+    for (const [tag, labels] of Object.entries(locales)) {
+      for (const token of RECEIPT) {
+        const out = labels.assistantReceipt({ status: token });
+        expect(out.length, `${tag}.${token}`).toBeGreaterThan(0);
+        if (tag !== "en") expect(out, `${tag}.${token}`).not.toBe(token);
+      }
+    }
+  });
+
+  it("shows an unknown receipt status rather than nothing", () => {
+    for (const [tag, labels] of Object.entries(locales)) {
+      // A status this version has no word for still has to say something —
+      // a blank receipt is worse than an untranslated one.
+      const out = labels.assistantReceipt({ status: "some-new-status" });
+      expect(out, tag).toContain("some-new-status");
+    }
+  });
+
+  it("keeps the capability key beside the translated status", () => {
+    for (const [tag, labels] of Object.entries(locales)) {
+      const out = labels.assistantReceipt({
+        capability: "view.setGroupBy",
+        status: "executed",
+      });
+      expect(out, tag).toContain("view.setGroupBy");
+    }
+  });
 });

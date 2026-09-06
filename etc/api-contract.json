@@ -31,6 +31,10 @@
       "TreeToggle",
       "agentApproval"
     ],
+    "adapter-antd-assistant": [
+      "TableAssistant",
+      "tableAssistant"
+    ],
     "adapter-antd-grouping-panel": [
       "GroupingPanel",
       "groupingPanel"
@@ -68,6 +72,10 @@
       "TreeCell",
       "TreeToggle",
       "agentApproval"
+    ],
+    "adapter-base-ui-assistant": [
+      "TableAssistant",
+      "tableAssistant"
     ],
     "adapter-base-ui-grouping-panel": [
       "GroupingPanel",
@@ -112,6 +120,10 @@
       "TreeCell",
       "TreeToggle",
       "agentApproval"
+    ],
+    "adapter-chakra-assistant": [
+      "TableAssistant",
+      "tableAssistant"
     ],
     "adapter-chakra-grouping-panel": [
       "GroupingPanel",
@@ -164,6 +176,10 @@
       "TreeToggle",
       "agentApproval"
     ],
+    "adapter-mantine-assistant": [
+      "TableAssistant",
+      "tableAssistant"
+    ],
     "adapter-mantine-grouping-panel": [
       "GroupingPanel",
       "groupingPanel"
@@ -200,6 +216,10 @@
       "TreeCell",
       "TreeToggle",
       "agentApproval"
+    ],
+    "adapter-mui-assistant": [
+      "TableAssistant",
+      "tableAssistant"
     ],
     "adapter-mui-batch-editing": [
       "batchEditing"
@@ -268,6 +288,10 @@
       "TreeToggle",
       "agentApproval"
     ],
+    "adapter-radix-assistant": [
+      "TableAssistant",
+      "tableAssistant"
+    ],
     "adapter-radix-grouping-panel": [
       "GroupingPanel",
       "RadixGroupingPanelProps",
@@ -281,6 +305,10 @@
       "SavedViewsPanel",
       "SavedViewsPanelProps",
       "shadcnClassNames"
+    ],
+    "adapter-shadcn-assistant": [
+      "TableAssistant",
+      "tableAssistant"
     ],
     "adapter-unstyled": [
       "AgentApproval",
@@ -320,6 +348,10 @@
       "TreeToggle",
       "agentApproval",
       "cx"
+    ],
+    "adapter-unstyled-assistant": [
+      "TableAssistant",
+      "tableAssistant"
     ],
     "adapter-unstyled-grouping-panel": [
       "GroupingPanel",
@@ -2422,6 +2454,8 @@
       "AgentApprovalProps",
       "AgentApprovalSlots",
       "applyTableFeatures",
+      "assistantIsBusy",
+      "assistantIsUsable",
       "BaseDataTableProps",
       "BATCH_EDIT_BAR",
       "BatchEditBarChrome",
@@ -2524,6 +2558,7 @@
       "createAdapterRowDetailFeatures",
       "createAdapterRowReorderFeature",
       "createAdapterStandardFeatures",
+      "createAdapterTableAssistantFeature",
       "createDesktopRow",
       "DataModeProps",
       "DataTableShellChromeProps",
@@ -2872,6 +2907,21 @@
       "StatusBarSlots",
       "stopEditKeys",
       "SummaryRowFn",
+      "TABLE_ASSISTANT",
+      "TableAssistantBadgeProps",
+      "TableAssistantButtonProps",
+      "TableAssistantChrome",
+      "TableAssistantChromeProps",
+      "TableAssistantComposerProps",
+      "TableAssistantMessageView",
+      "TableAssistantPanelProps",
+      "TableAssistantPresentation",
+      "TableAssistantProps",
+      "TableAssistantReceiptView",
+      "TableAssistantSheetProps",
+      "TableAssistantSlots",
+      "TableAssistantSuggestionView",
+      "TableAssistantView",
       "TableBodyRegion",
       "TableChrome",
       "TableCommandPalette",
@@ -3096,6 +3146,9 @@
     ]
   },
   "entrypoints": {
+    "adapter-antd-assistant.api.md": {
+      "surface": "adapter-antd-assistant"
+    },
     "adapter-antd-batch-editing.api.md": {
       "surface": "kit/batch-editing"
     },
@@ -3216,6 +3269,9 @@
     },
     "adapter-antd.api.md": {
       "surface": "adapter-antd"
+    },
+    "adapter-base-ui-assistant.api.md": {
+      "surface": "adapter-base-ui-assistant"
     },
     "adapter-base-ui-batch-editing.api.md": {
       "surface": "kit/batch-editing"
@@ -3369,6 +3425,9 @@
     "adapter-bootstrap.api.md": {
       "surface": "adapter-bootstrap"
     },
+    "adapter-chakra-assistant.api.md": {
+      "surface": "adapter-chakra-assistant"
+    },
     "adapter-chakra-batch-editing.api.md": {
       "surface": "kit/batch-editing"
     },
@@ -3489,6 +3548,9 @@
     },
     "adapter-chakra.api.md": {
       "surface": "adapter-chakra"
+    },
+    "adapter-mantine-assistant.api.md": {
+      "surface": "adapter-mantine-assistant"
     },
     "adapter-mantine-batch-editing.api.md": {
       "surface": "kit/batch-editing"
@@ -3611,6 +3673,9 @@
     "adapter-mantine.api.md": {
       "surface": "adapter-mantine"
     },
+    "adapter-mui-assistant.api.md": {
+      "surface": "adapter-mui-assistant"
+    },
     "adapter-mui-batch-editing.api.md": {
       "surface": "adapter-mui-batch-editing"
     },
@@ -3731,6 +3796,9 @@
     },
     "adapter-mui.api.md": {
       "surface": "adapter-mui"
+    },
+    "adapter-radix-assistant.api.md": {
+      "surface": "adapter-radix-assistant"
     },
     "adapter-radix-batch-editing.api.md": {
       "surface": "kit/batch-editing"
@@ -3853,6 +3921,9 @@
     "adapter-radix.api.md": {
       "surface": "adapter-radix"
     },
+    "adapter-shadcn-assistant.api.md": {
+      "surface": "adapter-shadcn-assistant"
+    },
     "adapter-shadcn-batch-editing.api.md": {
       "reexport": "forwards @adapttable/unstyled/batch-editing"
     },
@@ -3973,6 +4044,9 @@
     },
     "adapter-shadcn.api.md": {
       "surface": "adapter-shadcn"
+    },
+    "adapter-unstyled-assistant.api.md": {
+      "surface": "adapter-unstyled-assistant"
     },
     "adapter-unstyled-batch-editing.api.md": {
       "surface": "kit/batch-editing"

@@ -2787,6 +2787,22 @@
       "behavior": ""
     },
     {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/antd/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/antd/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/antd/assistant",
+      "behavior": ""
+    },
+    {
       "export": "batchEditing",
       "currentImport": "@adapttable/antd/batch-editing",
       "kind": "value",
@@ -3968,6 +3984,22 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/antd",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/base-ui/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/base-ui/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/base-ui/assistant",
       "behavior": ""
     },
     {
@@ -5160,6 +5192,22 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/base-ui",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/chakra/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/chakra/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/chakra/assistant",
       "behavior": ""
     },
     {
@@ -14195,6 +14243,22 @@
       "behavior": ""
     },
     {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/mantine/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/mantine/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mantine/assistant",
+      "behavior": ""
+    },
+    {
       "export": "batchEditing",
       "currentImport": "@adapttable/mantine/batch-editing",
       "kind": "value",
@@ -15515,6 +15579,22 @@
       "behavior": ""
     },
     {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/mui/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/mui/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/mui/assistant",
+      "behavior": ""
+    },
+    {
       "export": "batchEditing",
       "currentImport": "@adapttable/mui/batch-editing",
       "kind": "value",
@@ -16696,6 +16776,22 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/mui",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/radix/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/radix/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/radix/assistant",
       "behavior": ""
     },
     {
@@ -18163,6 +18259,22 @@
       "behavior": ""
     },
     {
+      "export": "assistantIsBusy",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "assistantIsUsable",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "BaseDataTableProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -18972,6 +19084,14 @@
     },
     {
       "export": "createAdapterStandardFeatures",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createAdapterTableAssistantFeature",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
@@ -21759,6 +21879,126 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TABLE_ASSISTANT",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantBadgeProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantButtonProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantChrome",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantChromeProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantComposerProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantMessageView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantPanelProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantPresentation",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantReceiptView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantSheetProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantSlots",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantSuggestionView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -25683,6 +25923,22 @@
       "behavior": ""
     },
     {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/shadcn/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/shadcn/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/shadcn/assistant",
+      "kind": "type",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/shadcn/assistant",
+      "behavior": ""
+    },
+    {
       "export": "@adapttable/unstyled/batch-editing",
       "currentImport": "@adapttable/shadcn/batch-editing",
       "kind": "type",
@@ -26600,6 +26856,22 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/shadcn",
+      "behavior": ""
+    },
+    {
+      "export": "tableAssistant",
+      "currentImport": "@adapttable/unstyled/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistant",
+      "currentImport": "@adapttable/unstyled/assistant",
+      "kind": "value",
+      "class": "kit-rendering",
+      "proposedImport": "@adapttable/unstyled/assistant",
       "behavior": ""
     },
     {

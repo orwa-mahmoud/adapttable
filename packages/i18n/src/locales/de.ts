@@ -160,6 +160,45 @@ export const de: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "Tabellenassistent",
+  assistantOpen: "KI fragen",
+  assistantClose: "Schließen",
+  assistantSettings: "Assistenteneinstellungen",
+  assistantEmpty: "Was möchten Sie mit dieser Tabelle tun?",
+  assistantPlaceholder: "Fragen Sie zu dieser Tabelle…",
+  assistantSend: "Senden",
+  assistantStop: "Stoppen",
+  assistantYou: "Sie",
+  assistantSpeaker: "Assistent",
+  assistantNewMessages: "Neue Nachrichten",
+  assistantUnavailable: "Der Assistent ist nicht verbunden.",
+  assistantBackToTable: "Zurück zur Tabelle",
+  assistantDetail: "Details",
+  assistantSaveInTable:
+    "In der Tabelle speichern, um diese Änderung zu behalten.",
+  assistantConnection: (status) =>
+    ({
+      idle: "Bereit",
+      connecting: "Verbinden…",
+      ready: "Bereit",
+      sending: "Arbeitet…",
+      "awaiting-approval": "Wartet auf Sie",
+      error: "Fehler",
+      disconnected: "Nicht verbunden",
+    })[status] ?? "Bereit",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "erledigt",
+        staged: "vorgemerkt",
+        rejected: "abgelehnt",
+        "awaiting-approval": "wartet auf Sie",
+        cancelled: "abgebrochen",
+        stale: "veraltet",
+        failed: "fehlgeschlagen",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "Zeile hinzufügen",
   duplicateRow: "Zeile duplizieren",
   deleteRow: "Zeile löschen",

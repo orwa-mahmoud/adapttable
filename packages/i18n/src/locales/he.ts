@@ -156,6 +156,44 @@ export const he: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "עוזר הטבלה",
+  assistantOpen: "שאל את ה-AI",
+  assistantClose: "סגירה",
+  assistantSettings: "הגדרות העוזר",
+  assistantEmpty: "מה תרצה לעשות עם הטבלה הזאת?",
+  assistantPlaceholder: "שאל על הטבלה הזאת…",
+  assistantSend: "שליחה",
+  assistantStop: "עצירה",
+  assistantYou: "אתה",
+  assistantSpeaker: "עוזר",
+  assistantNewMessages: "הודעות חדשות",
+  assistantUnavailable: "העוזר אינו מחובר.",
+  assistantBackToTable: "חזרה לטבלה",
+  assistantDetail: "פרטים",
+  assistantSaveInTable: "שמור בטבלה כדי לשמר את השינוי.",
+  assistantConnection: (status) =>
+    ({
+      idle: "ממתין",
+      connecting: "מתחבר…",
+      ready: "מוכן",
+      sending: "עובד…",
+      "awaiting-approval": "ממתין לך",
+      error: "שגיאה",
+      disconnected: "לא מחובר",
+    })[status] ?? "מוכן",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "בוצע",
+        staged: "מוכן לשמירה",
+        rejected: "נדחה",
+        "awaiting-approval": "ממתין לך",
+        cancelled: "בוטל",
+        stale: "לא עדכני",
+        failed: "נכשל",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "הוסף שורה",
   duplicateRow: "שכפל שורה",
   deleteRow: "מחק שורה",

@@ -156,6 +156,44 @@ export const fa: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "دستیار جدول",
+  assistantOpen: "از هوش مصنوعی بپرسید",
+  assistantClose: "بستن",
+  assistantSettings: "تنظیمات دستیار",
+  assistantEmpty: "با این جدول چه می‌خواهید انجام دهید؟",
+  assistantPlaceholder: "درباره این جدول بپرسید…",
+  assistantSend: "ارسال",
+  assistantStop: "توقف",
+  assistantYou: "شما",
+  assistantSpeaker: "دستیار",
+  assistantNewMessages: "پیام‌های جدید",
+  assistantUnavailable: "دستیار متصل نیست.",
+  assistantBackToTable: "بازگشت به جدول",
+  assistantDetail: "جزئیات",
+  assistantSaveInTable: "برای حفظ این تغییر در جدول ذخیره کنید.",
+  assistantConnection: (status) =>
+    ({
+      idle: "بی‌کار",
+      connecting: "در حال اتصال…",
+      ready: "آماده",
+      sending: "در حال کار…",
+      "awaiting-approval": "در انتظار شما",
+      error: "خطا",
+      disconnected: "متصل نیست",
+    })[status] ?? "آماده",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "انجام شد",
+        staged: "آماده‌سازی شد",
+        rejected: "رد شد",
+        "awaiting-approval": "در انتظار شما",
+        cancelled: "لغو شد",
+        stale: "منسوخ",
+        failed: "ناموفق",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "افزودن ردیف",
   duplicateRow: "تکثیر ردیف",
   deleteRow: "حذف ردیف",

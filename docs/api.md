@@ -1296,6 +1296,17 @@ readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `@adapttable/ai/assistant` exports `useTableAssistant`,
 `TableAssistantOptions`, `TableAssistantState`, `AssistantMessage` and
 `AssistantStatus`. `@adapttable/ai/http` adds `assistantHttpTransport`.
+Each kit ships the panel on its own `@adapttable/<kit>/assistant` entry,
+exporting `TableAssistant` and `tableAssistant`. Core chrome exports
+`TableAssistantChrome` (`TableAssistantChromeProps`, `TableAssistantProps`),
+`TABLE_ASSISTANT`, `createAdapterTableAssistantFeature`,
+`TableAssistantPresentation`, `TableAssistantSlots` with
+`TableAssistantPanelProps`, `TableAssistantSheetProps`,
+`TableAssistantButtonProps`, `TableAssistantComposerProps` and
+`TableAssistantBadgeProps`, the view types `TableAssistantView`,
+`TableAssistantMessageView`, `TableAssistantReceiptView` and
+`TableAssistantSuggestionView`, plus `assistantIsBusy` and
+`assistantIsUsable`.
 `@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome

@@ -126,6 +126,69 @@ A transport is the only thing that knows about HTTP or a model.
 bridge; a host writing its own implements `AssistantTransport` from
 `@adapttable/ai` and pulls in neither.
 
+## The optional widget
+
+Every kit ships a panel on `@adapttable/<kit>/assistant`, and it is a separate
+entry point on purpose: a table that never imports it carries none of it.
+
+```tsx
+import { TableAssistant } from "@adapttable/mantine/assistant";
+import { useTableAssistant } from "@adapttable/ai/assistant";
+
+const assistant = useTableAssistant({ session, transport, suggestions });
+
+<TableAssistant
+  assistant={assistant}
+  open={assistant.open}
+  onOpenChange={assistant.setOpen}
+/>;
+```
+
+`TableAssistant` takes `TableAssistantProps`: the `assistant` view, `open` and
+`onOpenChange`, an optional `presentation` (`TableAssistantPresentation` —
+`"panel"` beside the table, or `"sheet"` for a modal on a narrow viewport),
+`labels`, `className`, `launcher` (set `false` when the host supplies its own
+trigger — the toolbar button and the floating launcher drive ONE panel), and
+`onSettings`. `tableAssistant()` binds the same component to the
+`TABLE_ASSISTANT` slot for hosts that compose it as a feature.
+
+The panel is a sibling of the table, never a cell inside it, so it can sit
+beside the grid without covering the rows a reader is asking about.
+
+### What the panel does, in every kit
+
+Structure, keyboard and announcements live in `TableAssistantChrome`
+(`TableAssistantChromeProps`); each kit fills `TableAssistantSlots` with its
+own `Panel`, `Sheet`, `Button`, `Composer` and `Badge`
+(`TableAssistantPanelProps`, `TableAssistantSheetProps`,
+`TableAssistantButtonProps`, `TableAssistantComposerProps`,
+`TableAssistantBadgeProps`). Core draws no control, so a Mantine table's
+assistant is Mantine and an antd table's is antd —
+`createAdapterTableAssistantFeature` is what an adapter calls to bind its own.
+
+- **Empty state** asks what to do, then offers only the suggestions this table
+  can actually run.
+- **Enter sends, Shift+Enter starts a line**, and Enter mid-IME-composition
+  belongs to the IME — sending there would post a half-written word.
+- **Send becomes Stop** while a turn runs. A disabled composer always says
+  why rather than becoming a dead end.
+- **Roles are named, not coloured.** Each message shows its speaker, and each
+  receipt says in words what became of the action. A staged write says it
+  still needs saving in the table.
+- **New messages follow only when the reader is already at the bottom**;
+  otherwise the panel offers to take them there, so an earlier result stays
+  readable.
+- **Escape closes the panel**, unless something inside it already answered —
+  one key never dismisses two things. Closing returns focus to the launcher.
+- Backend text is rendered as text, never as markup.
+
+The view it reads is `TableAssistantView`, built from
+`TableAssistantMessageView`, `TableAssistantReceiptView` and
+`TableAssistantSuggestionView`. `useTableAssistant`'s return satisfies it, and
+so does a host driving the panel from its own state. `assistantIsBusy` and
+`assistantIsUsable` answer the two questions a host's own chrome usually asks
+of a status token.
+
 ## Three portable calls
 
 Any agent runtime can speak this:

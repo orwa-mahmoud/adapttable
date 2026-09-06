@@ -159,6 +159,45 @@ export const fr: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "Assistant de tableau",
+  assistantOpen: "Demander à l’IA",
+  assistantClose: "Fermer",
+  assistantSettings: "Paramètres de l’assistant",
+  assistantEmpty: "Que voulez-vous faire avec ce tableau ?",
+  assistantPlaceholder: "Posez une question sur ce tableau…",
+  assistantSend: "Envoyer",
+  assistantStop: "Arrêter",
+  assistantYou: "Vous",
+  assistantSpeaker: "Assistant",
+  assistantNewMessages: "Nouveaux messages",
+  assistantUnavailable: "L’assistant n’est pas connecté.",
+  assistantBackToTable: "Retour au tableau",
+  assistantDetail: "Détails",
+  assistantSaveInTable:
+    "Enregistrez dans le tableau pour conserver ce changement.",
+  assistantConnection: (status) =>
+    ({
+      idle: "Inactif",
+      connecting: "Connexion…",
+      ready: "Prêt",
+      sending: "En cours…",
+      "awaiting-approval": "Vous attend",
+      error: "Erreur",
+      disconnected: "Non connecté",
+    })[status] ?? "Prêt",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "effectué",
+        staged: "préparé",
+        rejected: "refusé",
+        "awaiting-approval": "vous attend",
+        cancelled: "annulé",
+        stale: "obsolète",
+        failed: "échoué",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "Ajouter une ligne",
   duplicateRow: "Dupliquer la ligne",
   deleteRow: "Supprimer la ligne",

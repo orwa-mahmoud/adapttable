@@ -3786,6 +3786,26 @@ export interface TableLabels {
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
     approveProposal?: string;
+    assistantBackToTable?: string;
+    assistantClose?: string;
+    assistantConnection?: (status: string) => string;
+    assistantDetail?: string;
+    assistantEmpty?: string;
+    assistantNewMessages?: string;
+    assistantOpen?: string;
+    assistantPlaceholder?: string;
+    assistantReceipt?: (receipt: {
+        capability?: string;
+        status: string;
+    }) => string;
+    assistantSaveInTable?: string;
+    assistantSend?: string;
+    assistantSettings?: string;
+    assistantSpeaker?: string;
+    assistantStop?: string;
+    assistantTitle?: string;
+    assistantUnavailable?: string;
+    assistantYou?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;
     boolAny?: string;

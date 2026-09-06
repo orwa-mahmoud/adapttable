@@ -9,8 +9,8 @@ import {
   type Ref,
 } from "react";
 
-/** Join class tokens, dropping falsy values. */
-function cx(...parts: (string | false | null | undefined)[]): string {
+/** Join class tokens, dropping falsy values. @internal */
+export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
 }
 

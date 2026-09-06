@@ -162,6 +162,44 @@ export const ru: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "Помощник таблицы",
+  assistantOpen: "Спросить ИИ",
+  assistantClose: "Закрыть",
+  assistantSettings: "Настройки помощника",
+  assistantEmpty: "Что вы хотите сделать с этой таблицей?",
+  assistantPlaceholder: "Спросите об этой таблице…",
+  assistantSend: "Отправить",
+  assistantStop: "Остановить",
+  assistantYou: "Вы",
+  assistantSpeaker: "Помощник",
+  assistantNewMessages: "Новые сообщения",
+  assistantUnavailable: "Помощник не подключён.",
+  assistantBackToTable: "Вернуться к таблице",
+  assistantDetail: "Подробности",
+  assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",
+  assistantConnection: (status) =>
+    ({
+      idle: "Ожидание",
+      connecting: "Подключение…",
+      ready: "Готов",
+      sending: "Выполняется…",
+      "awaiting-approval": "Ждёт вас",
+      error: "Ошибка",
+      disconnected: "Нет подключения",
+    })[status] ?? "Готов",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "выполнено",
+        staged: "подготовлено",
+        rejected: "отклонено",
+        "awaiting-approval": "ждёт вас",
+        cancelled: "отменено",
+        stale: "устарело",
+        failed: "не удалось",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "Добавить строку",
   duplicateRow: "Дублировать строку",
   deleteRow: "Удалить строку",

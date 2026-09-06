@@ -639,6 +639,53 @@ export interface TableLabels {
     before?: string;
     after?: string;
   }) => string;
+  /** Title of the assistant panel. */
+  assistantTitle?: string;
+  /** Accessible name of the control that opens the assistant. */
+  assistantOpen?: string;
+  /** Accessible name of the control that closes it. */
+  assistantClose?: string;
+  /** Accessible name of the assistant's settings control. */
+  assistantSettings?: string;
+  /** The question an empty conversation asks. */
+  assistantEmpty?: string;
+  /** Placeholder in the composer. */
+  assistantPlaceholder?: string;
+  /** The control that sends the draft. */
+  assistantSend?: string;
+  /** The control that stops a turn already running. */
+  assistantStop?: string;
+  /** How a reader's own message is named. */
+  assistantYou?: string;
+  /** How the assistant's message is named. */
+  assistantSpeaker?: string;
+  /** The affordance that jumps to a reply which arrived off-screen. */
+  assistantNewMessages?: string;
+  /** Why the composer cannot be used. */
+  assistantUnavailable?: string;
+  /** Leaves a full-screen assistant on a narrow viewport. */
+  assistantBackToTable?: string;
+  /** Expands an action's detail. */
+  assistantDetail?: string;
+  /** What a staged write still needs from the reader. */
+  assistantSaveInTable?: string;
+  /**
+   * The connection badge, from a status token.
+   *
+   * Every token maps to a translated word, so the token itself never reaches
+   * the reader — which is why this label interpolates none of its argument.
+   */
+  assistantConnection?: (status: string) => string;
+  /**
+   * One action receipt — the operation that ran and what became of it.
+   *
+   * `capability` is a stable technical key and appears as given; `status` is
+   * a token this label turns into the reader's language.
+   */
+  assistantReceipt?: (receipt: {
+    capability?: string;
+    status: string;
+  }) => string;
   /** The toolbar control that adds a row (`onAddRow`). */
   addRow?: string;
   /** The row action that copies a row (`onDuplicateRow`). */

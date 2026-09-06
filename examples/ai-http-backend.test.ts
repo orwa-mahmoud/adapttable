@@ -167,7 +167,7 @@ describe("handleExampleAgentTurn", () => {
     };
     await handleExampleAgentTurn(
       request(),
-      complete as Parameters<typeof handleExampleAgentTurn>[1],
+      complete,
       new AbortController().signal
     );
 

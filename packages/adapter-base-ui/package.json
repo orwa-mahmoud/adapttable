@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/base-ui",
   "version": "2.6.0",
-  "description": "Base UI adapter for AdaptTable — a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
+  "description": "Base UI adapter for AdaptTable \u2014 a batteries-included Base UI data table with sorting, filtering, URL state, selection, RTL, and dark mode.",
   "keywords": [
     "react",
     "base-ui",
@@ -47,6 +47,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
       }
     },
     "./features": {

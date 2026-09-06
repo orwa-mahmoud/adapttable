@@ -157,6 +157,44 @@ export const ko: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "테이블 어시스턴트",
+  assistantOpen: "AI에게 묻기",
+  assistantClose: "닫기",
+  assistantSettings: "어시스턴트 설정",
+  assistantEmpty: "이 테이블로 무엇을 하시겠어요?",
+  assistantPlaceholder: "이 테이블에 대해 질문…",
+  assistantSend: "보내기",
+  assistantStop: "중지",
+  assistantYou: "나",
+  assistantSpeaker: "어시스턴트",
+  assistantNewMessages: "새 메시지",
+  assistantUnavailable: "어시스턴트가 연결되지 않았습니다.",
+  assistantBackToTable: "테이블로 돌아가기",
+  assistantDetail: "세부 정보",
+  assistantSaveInTable: "이 변경을 유지하려면 테이블에서 저장하세요.",
+  assistantConnection: (status) =>
+    ({
+      idle: "대기",
+      connecting: "연결 중…",
+      ready: "준비됨",
+      sending: "처리 중…",
+      "awaiting-approval": "확인 대기",
+      error: "오류",
+      disconnected: "연결 안 됨",
+    })[status] ?? "준비됨",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "완료",
+        staged: "저장 대기",
+        rejected: "거부됨",
+        "awaiting-approval": "확인 대기",
+        cancelled: "취소됨",
+        stale: "오래됨",
+        failed: "실패",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "행 추가",
   duplicateRow: "행 복제",
   deleteRow: "행 삭제",

@@ -160,6 +160,44 @@ export const tr: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "Tablo asistanı",
+  assistantOpen: "Yapay zekâya sor",
+  assistantClose: "Kapat",
+  assistantSettings: "Asistan ayarları",
+  assistantEmpty: "Bu tabloyla ne yapmak istersiniz?",
+  assistantPlaceholder: "Bu tablo hakkında sorun…",
+  assistantSend: "Gönder",
+  assistantStop: "Durdur",
+  assistantYou: "Siz",
+  assistantSpeaker: "Asistan",
+  assistantNewMessages: "Yeni iletiler",
+  assistantUnavailable: "Asistan bağlı değil.",
+  assistantBackToTable: "Tabloya dön",
+  assistantDetail: "Ayrıntılar",
+  assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",
+  assistantConnection: (status) =>
+    ({
+      idle: "Boşta",
+      connecting: "Bağlanıyor…",
+      ready: "Hazır",
+      sending: "Çalışıyor…",
+      "awaiting-approval": "Sizi bekliyor",
+      error: "Hata",
+      disconnected: "Bağlı değil",
+    })[status] ?? "Hazır",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "tamamlandı",
+        staged: "hazırlandı",
+        rejected: "reddedildi",
+        "awaiting-approval": "sizi bekliyor",
+        cancelled: "iptal edildi",
+        stale: "güncel değil",
+        failed: "başarısız",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "Satır ekle",
   duplicateRow: "Satırı çoğalt",
   deleteRow: "Satırı sil",

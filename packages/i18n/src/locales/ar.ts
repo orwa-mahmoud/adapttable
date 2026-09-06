@@ -157,6 +157,44 @@ export const ar: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "مساعد الجدول",
+  assistantOpen: "اسأل الذكاء الاصطناعي",
+  assistantClose: "إغلاق",
+  assistantSettings: "إعدادات المساعد",
+  assistantEmpty: "ماذا تريد أن تفعل بهذا الجدول؟",
+  assistantPlaceholder: "اسأل عن هذا الجدول…",
+  assistantSend: "إرسال",
+  assistantStop: "إيقاف",
+  assistantYou: "أنت",
+  assistantSpeaker: "المساعد",
+  assistantNewMessages: "رسائل جديدة",
+  assistantUnavailable: "المساعد غير متصل.",
+  assistantBackToTable: "العودة إلى الجدول",
+  assistantDetail: "التفاصيل",
+  assistantSaveInTable: "احفظ في الجدول للاحتفاظ بهذا التغيير.",
+  assistantConnection: (status) =>
+    ({
+      idle: "خامل",
+      connecting: "جارٍ الاتصال…",
+      ready: "جاهز",
+      sending: "جارٍ العمل…",
+      "awaiting-approval": "بانتظارك",
+      error: "خطأ",
+      disconnected: "غير متصل",
+    })[status] ?? "جاهز",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "تم",
+        staged: "مُجهَّز",
+        rejected: "مرفوض",
+        "awaiting-approval": "بانتظارك",
+        cancelled: "أُلغي",
+        stale: "غير محدَّث",
+        failed: "فشل",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "إضافة صف",
   duplicateRow: "تكرار الصف",
   deleteRow: "حذف الصف",

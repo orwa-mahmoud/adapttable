@@ -156,6 +156,44 @@ export const it: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "Assistente tabella",
+  assistantOpen: "Chiedi all’IA",
+  assistantClose: "Chiudi",
+  assistantSettings: "Impostazioni assistente",
+  assistantEmpty: "Cosa vuoi fare con questa tabella?",
+  assistantPlaceholder: "Chiedi di questa tabella…",
+  assistantSend: "Invia",
+  assistantStop: "Ferma",
+  assistantYou: "Tu",
+  assistantSpeaker: "Assistente",
+  assistantNewMessages: "Nuovi messaggi",
+  assistantUnavailable: "L’assistente non è connesso.",
+  assistantBackToTable: "Torna alla tabella",
+  assistantDetail: "Dettagli",
+  assistantSaveInTable: "Salva nella tabella per mantenere questa modifica.",
+  assistantConnection: (status) =>
+    ({
+      idle: "Inattivo",
+      connecting: "Connessione…",
+      ready: "Pronto",
+      sending: "In corso…",
+      "awaiting-approval": "In attesa di te",
+      error: "Errore",
+      disconnected: "Non connesso",
+    })[status] ?? "Pronto",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "eseguito",
+        staged: "preparato",
+        rejected: "rifiutato",
+        "awaiting-approval": "in attesa di te",
+        cancelled: "annullato",
+        stale: "non aggiornato",
+        failed: "non riuscito",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "Aggiungi riga",
   duplicateRow: "Duplica riga",
   deleteRow: "Elimina riga",

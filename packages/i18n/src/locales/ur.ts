@@ -159,6 +159,44 @@ export const ur: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  assistantTitle: "ٹیبل معاون",
+  assistantOpen: "اے آئی سے پوچھیں",
+  assistantClose: "بند کریں",
+  assistantSettings: "معاون کی ترتیبات",
+  assistantEmpty: "آپ اس ٹیبل کے ساتھ کیا کرنا چاہتے ہیں؟",
+  assistantPlaceholder: "اس ٹیبل کے بارے میں پوچھیں…",
+  assistantSend: "بھیجیں",
+  assistantStop: "روکیں",
+  assistantYou: "آپ",
+  assistantSpeaker: "معاون",
+  assistantNewMessages: "نئے پیغامات",
+  assistantUnavailable: "معاون منسلک نہیں ہے۔",
+  assistantBackToTable: "ٹیبل پر واپس",
+  assistantDetail: "تفصیلات",
+  assistantSaveInTable: "یہ تبدیلی رکھنے کے لیے ٹیبل میں محفوظ کریں۔",
+  assistantConnection: (status) =>
+    ({
+      idle: "فارغ",
+      connecting: "منسلک ہو رہا ہے…",
+      ready: "تیار",
+      sending: "کام جاری…",
+      "awaiting-approval": "آپ کا منتظر",
+      error: "خرابی",
+      disconnected: "منسلک نہیں",
+    })[status] ?? "تیار",
+  assistantReceipt: ({ capability, status }) => {
+    const what =
+      {
+        executed: "ہو گیا",
+        staged: "تیار",
+        rejected: "مسترد",
+        "awaiting-approval": "آپ کا منتظر",
+        cancelled: "منسوخ",
+        stale: "پرانا",
+        failed: "ناکام",
+      }[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
   addRow: "قطار شامل کریں",
   duplicateRow: "قطار کی نقل بنائیں",
   deleteRow: "قطار حذف کریں",

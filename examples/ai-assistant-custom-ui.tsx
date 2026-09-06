@@ -6,6 +6,7 @@
  * call is ordinary markup this app owns, which is the point — the widget in
  * `@adapttable/<kit>/assistant` is a convenience, never a requirement.
  */
+import type { AgentSession } from "@adapttable/ai";
 import {
   type AssistantSuggestion,
   useTableAssistant,
@@ -14,8 +15,6 @@ import { assistantHttpTransport } from "@adapttable/ai/http";
 import { tableAgent } from "@adapttable/ai/react";
 import { DataTable } from "@adapttable/mantine";
 import { useMemo, useState } from "react";
-
-import type { AgentSession } from "@adapttable/ai";
 
 interface Order {
   id: string;
@@ -57,7 +56,7 @@ const SUGGESTIONS: AssistantSuggestion[] = [
   },
 ];
 
-function Panel({ session }: { session: AgentSession | undefined }) {
+function Panel({ session }: Readonly<{ session: AgentSession | undefined }>) {
   // The endpoint is this app's own backend. A host with no backend passes its
   // own transport instead; nothing here requires HTTP.
   const transport = useMemo(
