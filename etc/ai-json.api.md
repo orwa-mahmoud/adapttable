@@ -38,6 +38,8 @@ export interface AgentCapabilityContext {
     // (undocumented)
     readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
     readonly plan?: CapabilityPlan;
+    readonly signal?: AbortSignal;
+    readonly throwIfCancelled: () => void;
 }
 
 // @public

@@ -1034,6 +1034,7 @@
       "TableCommandOptions",
       "TableEngine",
       "TableEngineConfigPatch",
+      "TableEngineReader",
       "TableErrorState",
       "TableExtraEntry",
       "TableLabels",

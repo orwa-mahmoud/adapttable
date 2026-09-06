@@ -302,12 +302,17 @@ export function createAgentSession(
     state: { invokedWrite: boolean }
   ): Promise<unknown> => {
     const approve = bindApprove(options.onApprove, signal);
+    const throwIfCancelled = cancellationGuard(signal);
     const baseContext: AgentCapabilityContext = {
       observation: entry,
       apply: options.apply,
       observe: options.observe,
       onApprove: approve,
+      signal,
+      throwIfCancelled,
     };
+    // The reserved execution is starting for real.
+    throwIfCancelled();
     if (!isGoverned(definition)) {
       return definition.execute(baseContext, args);
     }
@@ -332,6 +337,8 @@ export function createAgentSession(
     const plan: CapabilityPlan = definition.plan
       ? await definition.plan(baseContext, args)
       : { proposals: [] };
+    // Planning awaited host code, which is long enough to be cancelled in.
+    throwIfCancelled();
     revalidate(key, entry, true);
 
     const subject =
@@ -342,6 +349,7 @@ export function createAgentSession(
     if (approval === "pending" || approval === "rejected") {
       return writePayload(plan.proposals, false, approval);
     }
+    throwIfCancelled();
     revalidate(key, entry, true);
 
     const context: AgentCapabilityContext = {
@@ -349,6 +357,9 @@ export function createAgentSession(
       plan,
       commit,
     };
+    // The last moment before the handler can touch the host. Nothing has been
+    // written yet, so a cancellation here leaves the key free to be retried.
+    throwIfCancelled();
     state.invokedWrite = true;
     try {
       const payload = await definition.execute(context, args);
@@ -647,6 +658,19 @@ function decorateWrite(
     proposals:
       payload.proposals.length > 0 ? payload.proposals : plan.proposals,
     approval,
+  };
+}
+
+/**
+ * The check every governed step makes before the next side effect.
+ *
+ * Cancellation is not an approval question: a table with no `onApprove` is
+ * still cancellable, and a write that has not started must not start.
+ */
+function cancellationGuard(signal: AbortSignal | undefined): () => void {
+  return () => {
+    if (signal?.aborted !== true) return;
+    throw new ApplyError("cancelled", "request cancelled");
   };
 }
 
@@ -1048,15 +1072,20 @@ async function applyCells(
         }))
       );
     }
+    context.throwIfCancelled();
     await Promise.resolve(apply.stageCells(resolved));
     return writePayload(proposals, true, "not-required");
   }
   if (!apply.editCells) {
     throw new ApplyError("not-wired", "editCells is not wired");
   }
-  const outcome = await applyEach(resolved, async (edit) => {
-    await Promise.resolve(apply.editCells?.([edit]));
-  });
+  const outcome = await applyEach(
+    resolved,
+    async (edit) => {
+      await Promise.resolve(apply.editCells?.([edit]));
+    },
+    context.throwIfCancelled
+  );
   return writePayload(
     proposals,
     outcome.applied,
@@ -1107,6 +1136,7 @@ async function applyAdd(
   const { apply, plan } = context;
   const rows = (plan?.payload ?? []) as Record<string, unknown>[];
   assertApply(apply, "addRows");
+  context.throwIfCancelled();
   await Promise.resolve(apply.addRows(rows));
   return writePayload(plan?.proposals ?? [], true, "not-required");
 }
@@ -1127,7 +1157,8 @@ async function applyDelete(
     keys.map((rowKey) => ({ rowKey })),
     async (entry) => {
       await Promise.resolve(apply.deleteRows?.([entry.rowKey]));
-    }
+    },
+    context.throwIfCancelled
   );
   return writePayload(
     plan?.proposals ?? [],
@@ -1156,6 +1187,7 @@ async function applyReorder(
     toKey: string;
   };
   assertApply(apply, "reorderRows");
+  context.throwIfCancelled();
   await Promise.resolve(apply.reorderRows(fromKey, toKey));
   return writePayload(plan?.proposals ?? [], true, "not-required");
 }
@@ -1168,13 +1200,23 @@ class BulkFailure extends Error {
   }
 }
 
+/**
+ * Write each item, in order, and stop where a cancellation lands.
+ *
+ * Rows already written stay written and stay in the results — the host was
+ * called and that cannot be taken back. The rows after them are never
+ * attempted, and the partial outcome is what the caller is told about, so a
+ * retry of the same idempotency key replays it rather than writing twice.
+ */
 async function applyEach<T extends { rowKey: string; column?: string }>(
   items: readonly T[],
-  write: (item: T) => Promise<void>
+  write: (item: T) => Promise<void>,
+  throwIfCancelled: () => void = () => undefined
 ): Promise<{ applied: boolean; results: WriteRowResult[] }> {
   const results: WriteRowResult[] = [];
   for (const item of items) {
     try {
+      throwIfCancelled();
       await write(item);
       results.push({ rowKey: item.rowKey, column: item.column, ok: true });
     } catch (error) {

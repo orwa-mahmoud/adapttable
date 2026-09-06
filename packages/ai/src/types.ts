@@ -211,6 +211,22 @@ export interface AgentCapabilityContext {
   readonly plan?: CapabilityPlan;
   /** Commit mode the session resolved for this call. */
   readonly commit?: CommitPolicy;
+  /**
+   * The caller's cancellation, when one was passed to `execute`. Pass it to
+   * anything that accepts a signal — a fetch, a nested request — so work that
+   * has started can stop.
+   */
+  readonly signal?: AbortSignal;
+  /**
+   * Throws `cancelled` when the request has been aborted.
+   *
+   * The session calls this at every seam it owns: before the handler runs,
+   * after planning, after approval, and before each row of a bulk write. Call
+   * it yourself between the steps of a multi-step handler, immediately BEFORE
+   * each side effect — a callback the host has already been given cannot be
+   * taken back, and this makes no claim to undo one.
+   */
+  readonly throwIfCancelled: () => void;
 }
 
 /**

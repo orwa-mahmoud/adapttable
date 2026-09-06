@@ -7352,11 +7352,41 @@ capability really can stage.
 
 `AgentCapabilityContext` is what `execute` receives: the `observation` it was
 authorized against, the host's `apply` callbacks, a live `observe()`, the bound
-`onApprove`, and — for a governed write — the approved `plan` and the resolved
-`commit` mode.
+`onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
+governed write — the approved `plan` and the resolved `commit` mode.
 
 A `read` or `view` capability skips all of it. Nothing about a view operation
 asks for write approval.
+
+## Cancelling
+
+Pass an `AbortSignal` to `execute` and the session stops at every seam it
+owns: before your handler runs, after planning, after approval, and before
+each row of a bulk write. Cancellation is not an approval question — a table
+with `approval: "never"` and no `onApprove` cancels exactly the same way.
+
+A multi-step handler cooperates by calling `context.throwIfCancelled()`
+immediately BEFORE each side effect, and by passing `context.signal` to
+anything that accepts one:
+
+```ts
+execute: async (context, args) => {
+  const rows = await fetchArchivable(args, { signal: context.signal });
+  context.throwIfCancelled();
+  await context.apply.deleteRows?.(rows.map((row) => row.id));
+  return { archived: rows.length };
+};
+```
+
+Nothing here claims to undo a callback the host has already been given. That
+is what decides the retry rule:
+
+- **Cancelled before any write.** Nothing ran, so the idempotency key is left
+  free and the same key may be sent again.
+- **Cancelled part way through a bulk write.** The rows already written stay
+  written and are reported in `results`; the rows after them are never
+  attempted. The key now belongs to that partial outcome, and sending it again
+  replays the outcome rather than writing the first rows twice.
 
 ---
 
@@ -9871,6 +9901,18 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 - `TableEngine` — the handle: `snapshot()`, `rows(scope)`, `dispatch(op)`,
   `configure(patch)`, `invalidate(axes, next)`, `subscribe(axes, listener)`,
   `cellValue`, `rowByKey`, `rowKey`, `getColumn`, `dispose()`.
+- `TableEngineReader` — the read half: `snapshot()`, `rows(scope)`,
+  `rowByKey`, `cellValue`, `getColumn`. The engine is one, and so is the
+  candidate below.
+- `stageCandidate(patch, next?)` / `candidate` / `commitCandidate()` /
+  `discardCandidate()` — a private candidate a binding builds while it renders.
+  `snapshot()`, `rows()`, the revision tokens and every subscriber stay on the
+  committed state until `commitCandidate()` publishes it, so a render that
+  suspends or is abandoned changes nothing anyone else can read. Tokens move
+  only where the columns, the rows or the view values actually differ: adopting
+  a fresh `data` array or a new `rowKey` closure is not news. Any other write —
+  a `dispatch`, an `invalidate` — takes the candidate with it. React hosts get
+  this through `useTableEngine` and `useFrontendData` and never call it.
 - `TableSnapshot` — query state plus `page` (the page actually shown),
   `requestedPage`, `lastPage`, `total` and `revisions`.
 - `TableOperation` — a person's action: `setSort`, `setSearch`, `setPage`,

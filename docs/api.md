@@ -532,6 +532,18 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 - `TableEngine` — the handle: `snapshot()`, `rows(scope)`, `dispatch(op)`,
   `configure(patch)`, `invalidate(axes, next)`, `subscribe(axes, listener)`,
   `cellValue`, `rowByKey`, `rowKey`, `getColumn`, `dispose()`.
+- `TableEngineReader` — the read half: `snapshot()`, `rows(scope)`,
+  `rowByKey`, `cellValue`, `getColumn`. The engine is one, and so is the
+  candidate below.
+- `stageCandidate(patch, next?)` / `candidate` / `commitCandidate()` /
+  `discardCandidate()` — a private candidate a binding builds while it renders.
+  `snapshot()`, `rows()`, the revision tokens and every subscriber stay on the
+  committed state until `commitCandidate()` publishes it, so a render that
+  suspends or is abandoned changes nothing anyone else can read. Tokens move
+  only where the columns, the rows or the view values actually differ: adopting
+  a fresh `data` array or a new `rowKey` closure is not news. Any other write —
+  a `dispatch`, an `invalidate` — takes the candidate with it. React hosts get
+  this through `useTableEngine` and `useFrontendData` and never call it.
 - `TableSnapshot` — query state plus `page` (the page actually shown),
   `requestedPage`, `lastPage`, `total` and `revisions`.
 - `TableOperation` — a person's action: `setSort`, `setSearch`, `setPage`,

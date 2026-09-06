@@ -12803,6 +12803,14 @@
       "behavior": ""
     },
     {
+      "export": "TableEngineReader",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "tableErrorState",
       "currentImport": "@adapttable/core",
       "kind": "value",

@@ -3712,18 +3712,17 @@ export interface TableCommandOptions {
 export function tableCommands(options: TableCommandOptions): Command[];
 
 // @public
-export interface TableEngine<TRow = unknown> {
-    // (undocumented)
-    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
+    readonly candidate: TableEngineReader<TRow>;
+    readonly commitCandidate: () => void;
     readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
         silent?: boolean;
     }) => void;
+    readonly discardCandidate: () => void;
     // (undocumented)
     readonly dispatch: (operation: TableOperation) => void;
     // (undocumented)
     readonly dispose: () => void;
-    // (undocumented)
-    readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
     readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
@@ -3731,13 +3730,11 @@ export interface TableEngine<TRow = unknown> {
         silent?: boolean;
     }) => void;
     // (undocumented)
-    readonly rowByKey: (rowKey: string) => TRow | undefined;
-    // (undocumented)
     readonly rowKey: (row: TRow) => string;
-    // (undocumented)
-    readonly rows: (scope: TableRowScope) => readonly TRow[];
-    // (undocumented)
-    readonly snapshot: () => TableSnapshot<TRow>;
+    readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
+        readonly data?: readonly TRow[];
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+    }) => void;
     // (undocumented)
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
     // (undocumented)
@@ -3750,6 +3747,15 @@ export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewCon
     readonly locale?: string;
     readonly page?: number;
     readonly paginationMode?: "paged" | "infinite";
+}
+
+// @public
+export interface TableEngineReader<TRow = unknown> {
+    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
+    readonly rowByKey: (rowKey: string) => TRow | undefined;
+    readonly rows: (scope: TableRowScope) => readonly TRow[];
+    readonly snapshot: () => TableSnapshot<TRow>;
 }
 
 // @public

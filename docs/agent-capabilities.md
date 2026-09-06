@@ -105,8 +105,38 @@ capability really can stage.
 
 `AgentCapabilityContext` is what `execute` receives: the `observation` it was
 authorized against, the host's `apply` callbacks, a live `observe()`, the bound
-`onApprove`, and — for a governed write — the approved `plan` and the resolved
-`commit` mode.
+`onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
+governed write — the approved `plan` and the resolved `commit` mode.
 
 A `read` or `view` capability skips all of it. Nothing about a view operation
 asks for write approval.
+
+## Cancelling
+
+Pass an `AbortSignal` to `execute` and the session stops at every seam it
+owns: before your handler runs, after planning, after approval, and before
+each row of a bulk write. Cancellation is not an approval question — a table
+with `approval: "never"` and no `onApprove` cancels exactly the same way.
+
+A multi-step handler cooperates by calling `context.throwIfCancelled()`
+immediately BEFORE each side effect, and by passing `context.signal` to
+anything that accepts one:
+
+```ts
+execute: async (context, args) => {
+  const rows = await fetchArchivable(args, { signal: context.signal });
+  context.throwIfCancelled();
+  await context.apply.deleteRows?.(rows.map((row) => row.id));
+  return { archived: rows.length };
+};
+```
+
+Nothing here claims to undo a callback the host has already been given. That
+is what decides the retry rule:
+
+- **Cancelled before any write.** Nothing ran, so the idempotency key is left
+  free and the same key may be sent again.
+- **Cancelled part way through a bulk write.** The rows already written stay
+  written and are reported in `results`; the rows after them are never
+  attempted. The key now belongs to that partial outcome, and sending it again
+  replays the outcome rather than writing the first rows twice.
