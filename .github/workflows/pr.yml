@@ -193,7 +193,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, antd, mui, kits, tools]
+        name: [core, react, antd, mui, kits, tools]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -203,6 +203,7 @@ jobs:
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
+            react) f="--filter=@adapttable/react" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
@@ -221,7 +222,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, antd, mui, kits, tools]
+        name: [core, react, antd, mui, kits, tools]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -231,6 +232,7 @@ jobs:
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
+            react) f="--filter=@adapttable/react" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
@@ -269,6 +271,7 @@ jobs:
       matrix:
         include:
           - name: core
+          - name: react
           - name: antd
           - name: mui
           - name: chakra · mantine
@@ -284,6 +287,7 @@ jobs:
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
+            react) f="--filter=@adapttable/react" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             "chakra · mantine") f="--filter=@adapttable/chakra --filter=@adapttable/mantine" ;;
