@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 
 import { checkContract, publicNames, readReport } from "./api-contract.mjs";
 import { entrypoints } from "./api-entrypoints.mjs";
+import { gateSteps } from "./gate-graph.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dir = mkdtempSync(join(tmpdir(), "api-contract-"));
@@ -396,8 +397,10 @@ describe("the real gate runs this", () => {
   const pkg = JSON.parse(readFileSync(join(REPO_ROOT, "package.json"), "utf8"));
 
   it("is a step in both pnpm check and pnpm verify:release", () => {
-    assert.match(pkg.scripts.check, /pnpm run check:api-contract/);
-    assert.match(pkg.scripts["verify:release"], /pnpm run check:api-contract/);
+    assert.ok(gateSteps(pkg.scripts, "check").has("check:api-contract"));
+    assert.ok(
+      gateSteps(pkg.scripts, "verify:release").has("check:api-contract")
+    );
   });
 
   it("passes against the committed manifest", () => {

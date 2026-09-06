@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { gateSteps } from "./gate-graph.mjs";
 import {
   buildPackageSplitMap,
   representativeExamplesAgree,
@@ -33,7 +34,9 @@ describe("v3 package-split map", () => {
 
   it("is wired into the library check", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
-    assert.match(pkg.scripts.check, /pnpm run check:package-split/);
-    assert.match(pkg.scripts["verify:release"], /pnpm run check:package-split/);
+    assert.ok(gateSteps(pkg.scripts, "check").has("check:package-split"));
+    assert.ok(
+      gateSteps(pkg.scripts, "verify:release").has("check:package-split")
+    );
   });
 });

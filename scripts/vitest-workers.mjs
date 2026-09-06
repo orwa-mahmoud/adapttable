@@ -4,7 +4,8 @@
  * CI (`ubuntu-latest`) is 2 cores and already shards packages across jobs —
  * each suite stays on one thread so cssinjs first-paint does not miss the
  * 30s budget. Local turbo already fans packages; each suite takes a slice
- * of the machine. A solo `pnpm --filter … test` takes half the cores.
+ * of the machine. A solo `pnpm --filter … test` has the machine to itself
+ * and takes a worker per core.
  */
 import { availableParallelism } from "node:os";
 
