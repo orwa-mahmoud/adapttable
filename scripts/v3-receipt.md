@@ -269,7 +269,22 @@ measures below describe the tree being handed over.
 ## Item 21 evidence
 
 Recorded 2026-09-06 on `v3`. Every floor in this table is the number the
-package's own tests hold; none was lowered.
+package's own tests hold.
+
+**One package's floors moved DOWN.** `@adapttable/ai` went from 99 / 95 / 99 /
+99 (statements / branches / functions / lines) to 96 / 91 / 97 / 98. Those two
+sets of numbers are not comparable: the old ones were measured over a package
+that excluded `src/**/*.tsx`, which is the 803-line React binding. Including
+it — the point of the change — brought 65.5%-covered code into the
+denominator, and the floors were set to what the package holds with that code
+measured. Coverage of the code that was already measured did not fall; the
+scope it is measured over grew. No exclusion was widened and no suppression
+was added to make the number work. Every other package's floors went up or
+stayed.
+
+This is a threshold adjustment made during item 21. It is a separate matter
+from `@adapttable/react`'s own reduced floors, which are parked as an open
+owner decision and are not recorded as accepted.
 
 | Package                 | Lines  | Branches | Functions | Floors (st / br / fn / ln) |
 | ----------------------- | ------ | -------- | --------- | -------------------------- |
@@ -308,6 +323,23 @@ at or within two branches of 100% on all four.
 | Open issues (`resolved=false`)     | **0**                                                                                  |
 | Hotspots `TO_REVIEW`               | **0**                                                                                  |
 | Project coverage                   | **89.6%** over 113,279 lines of code — line 98.7%, branch 82.9%. Duplication 0.6%.     |
+
+### Follow-up corrections after item 21
+
+Reviewed and corrected on the same branch, each verified with the gate below.
+
+- **`@adapttable/react` starts at 1.0.0.** The unpublished package's manifest
+  carried 2.9.0, copied from core during the split, which would have made the
+  binding's first release 3.0.0. Starting from 0.0.0 makes the three pending
+  major changesets produce `@adapttable/react@1.0.0`, verified against a
+  `changeset version` dry run and the packed tarballs — the binding depending
+  on `@adapttable/core@^3.0.0`, and every consumer declaring
+  `@adapttable/react@^1.0.0`. AdaptTable v3 introduces React binding 1.0.0.
+- **Context-menu Copy acts on the cell it was opened over**, in all eight kits.
+- **The AI apply layer keeps one authority.** The host's `apply` is the only
+  override; the branches that duplicated that rule and could never run are
+  gone.
+- **Row move menus are internal in every kit.**
 
 ### What this gate found and fixed
 
