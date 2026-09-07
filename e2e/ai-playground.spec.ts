@@ -342,3 +342,34 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
       .not.toContain("Jonah");
   });
 });
+
+/**
+ * The star prompt is a centered modal on a twenty-second timer, and it knows
+ * nothing about the assistant. Landing it over an open conversation covers
+ * the one workflow this page exists to show, so it waits — and because it
+ * waits rather than cancels, it still gets asked once the reader is done.
+ *
+ * It hides itself from automation, so the test says it is not automation.
+ */
+test.describe("the star prompt and an open conversation", () => {
+  test("waits while the assistant is open, then asks", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "webdriver", { get: () => false });
+      // Its timer has already elapsed for this tab.
+      sessionStorage.setItem(
+        "adapttable-star-the-repo-since",
+        String(Date.now() - 60_000)
+      );
+    });
+    await page.goto(`/${CANONICAL_AI_ADAPTER}/ai/`);
+    await expect(page.locator(part("assistant-window"))).toBeVisible();
+
+    const star = page.locator(".star-the-repo");
+    await expect(star).toHaveCount(0);
+
+    await page.locator(part("assistant-close")).click();
+
+    // Deferred, not cancelled.
+    await expect(star).toBeVisible();
+  });
+});

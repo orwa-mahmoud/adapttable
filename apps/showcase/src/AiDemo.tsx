@@ -24,12 +24,21 @@ import {
   type RowPinState,
 } from "@adapttable/core";
 import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
+import { assistantIsBusy } from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { type AiConnection, AiConnectionSettings } from "./AiBackendConnect";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import { DEMO_SCENARIOS, demoTransport } from "./aiScenario";
+import { setAssistantActive } from "./assistantActivity";
 import { DemoFallback } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
 import { DOCS_URL, SHOWCASE_ADAPTERS } from "./matrix/content";
@@ -343,6 +352,20 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     open: panelOpen,
     onOpenChange: setPanelOpen,
   });
+
+  // The star prompt is a centered modal on a timer, and landing it over an
+  // open conversation — or mid-turn, or over a pending approval — interrupts
+  // the one workflow this page exists to show. It waits instead.
+  const conversationBusy =
+    assistant.open ||
+    assistantIsBusy(assistant.status) ||
+    assistant.status === "awaiting-approval";
+  useEffect(() => {
+    setAssistantActive(conversationBusy);
+    return () => {
+      setAssistantActive(false);
+    };
+  }, [conversationBusy]);
 
   // The table never owns the data, so a filter the agent asks for is applied
   // here to the rows the table is given. Memoised because a fresh array on

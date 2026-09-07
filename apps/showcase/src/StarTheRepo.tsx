@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+import { assistantActive, subscribeAssistantActive } from "./assistantActivity";
 
 const DISMISS_KEY = "adapttable-star-the-repo";
 const START_KEY = "adapttable-star-the-repo-since";
@@ -63,6 +65,14 @@ const readStart = (): number => {
  */
 export function StarTheRepo() {
   const [open, setOpen] = useState(false);
+  // An open conversation, a turn in flight or a pending approval outranks
+  // this. The prompt is not cancelled — the timer keeps its place and it
+  // appears once the reader is done.
+  const busy = useSyncExternalStore(
+    subscribeAssistantActive,
+    assistantActive,
+    () => false
+  );
 
   useEffect(() => {
     if (readDismissed() || readClosed()) return;
@@ -88,7 +98,7 @@ export function StarTheRepo() {
     setOpen(false);
   };
 
-  if (!open) return null;
+  if (!open || busy) return null;
 
   return (
     <section
