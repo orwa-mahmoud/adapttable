@@ -62,3 +62,58 @@ describe("useColumnRenameEditor", () => {
     expect(onRename).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * Reopening the editor while the previous close is still handing focus back.
+ *
+ * The restore runs a frame late, so a reader who cancels and immediately
+ * reopens is typing into an input that a queued frame is about to abandon.
+ * If that frame still runs, focus leaves mid-word, the draft keeps the old
+ * name, and Enter commits it as if nothing was typed — a rename that
+ * silently does nothing.
+ */
+describe("reopening before focus has been handed back", () => {
+  it("cancels the pending focus restore", () => {
+    const cancel = vi.spyOn(globalThis, "cancelAnimationFrame");
+    const { result } = setup();
+
+    act(() => {
+      result.current.begin();
+    });
+    act(() => {
+      result.current.cancel();
+    });
+    expect(cancel).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.begin();
+    });
+
+    // The frame queued by the close above must never reach the input.
+    expect(cancel).toHaveBeenCalledTimes(1);
+    cancel.mockRestore();
+  });
+
+  it("commits what was typed after an immediate reopen", () => {
+    const { result, onRename } = setup();
+
+    act(() => {
+      result.current.begin();
+    });
+    act(() => {
+      result.current.cancel();
+    });
+    act(() => {
+      result.current.begin();
+    });
+    act(() => {
+      result.current.setDraft("Account owner");
+    });
+
+    expect(result.current.draft).toBe("Account owner");
+    act(() => {
+      result.current.submit();
+    });
+    expect(onRename).toHaveBeenCalledWith("person", "Account owner");
+  });
+});

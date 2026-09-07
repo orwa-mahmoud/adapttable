@@ -56,13 +56,30 @@ export interface ColumnRenameEditorState {
   onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-function restoreFocus(element: HTMLElement | null): void {
-  if (!element) return;
+/**
+ * Hand focus back to the control that opened the editor, one frame later.
+ *
+ * The delay is what makes it work at all: the input is still mounted when
+ * close runs, and focusing the trigger synchronously fights React's own
+ * commit. It is also what makes it dangerous — a reader who reopens the
+ * editor before that frame arrives would have focus pulled out of the input
+ * they are already typing into, so the caller is handed a way to cancel it.
+ *
+ * @param element - The control to focus.
+ * @returns A cancel function for the pending restore.
+ */
+function restoreFocus(element: HTMLElement | null): () => void {
+  if (!element) return () => undefined;
   if (typeof requestAnimationFrame === "function") {
-    requestAnimationFrame(() => element.focus());
-  } else {
-    setTimeout(() => element.focus(), 0);
+    const frame = requestAnimationFrame(() => element.focus());
+    return () => {
+      cancelAnimationFrame(frame);
+    };
   }
+  const timer = setTimeout(() => element.focus(), 0);
+  return () => {
+    clearTimeout(timer);
+  };
 }
 
 /**
@@ -85,8 +102,15 @@ export function useColumnRenameEditor({
   const [error, setError] = useState<string | undefined>(undefined);
   const [announcement, setAnnouncement] = useState("");
   const returnFocus = useRef<HTMLElement | null>(null);
+  /** Cancels a focus restore that has not run yet. */
+  const cancelRestore = useRef<() => void>(() => undefined);
 
   const begin = useCallback(() => {
+    // Reopening beats a close that has not finished handing focus back.
+    // Without this, the queued restore lands after the new input has taken
+    // focus and the reader's next keystrokes go to the trigger instead —
+    // the draft never changes, and Enter quietly commits the old name.
+    cancelRestore.current();
     returnFocus.current =
       typeof document !== "undefined" &&
       document.activeElement instanceof HTMLElement
@@ -109,7 +133,7 @@ export function useColumnRenameEditor({
   const close = useCallback(() => {
     setEditing(false);
     setError(undefined);
-    restoreFocus(returnFocus.current);
+    cancelRestore.current = restoreFocus(returnFocus.current);
   }, []);
 
   const cancel = useCallback(() => {
