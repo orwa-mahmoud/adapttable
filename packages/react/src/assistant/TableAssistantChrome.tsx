@@ -19,10 +19,17 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
   useSyncExternalStore,
 } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
+import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
+import { type ApprovalReview, approvalReview } from "../editing/approvalReview";
+import {
+  ApprovalReviewChrome,
+  type ApprovalReviewSlots,
+} from "../editing/ApprovalReviewChrome";
 import { AssistantComposer } from "./AssistantComposer";
 import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
 import {
@@ -111,6 +118,16 @@ export interface TableAssistantProps {
   readonly messageAction?: (
     message: TableAssistantMessageView
   ) => { readonly label: string; readonly onRun: () => void } | undefined;
+  /**
+   * A write waiting on the reader.
+   *
+   * The panel reviews it here when the approval's presentation names the
+   * widget — which is the default, because the conversation is where the
+   * write was asked for. Any other presentation reviews it elsewhere and the
+   * panel only says so, rather than growing a second set of controls for one
+   * decision.
+   */
+  readonly approval?: AgentApprovalPending | null;
 }
 
 /** Props for {@link TableAssistantChrome}. @public */
@@ -251,20 +268,188 @@ function Header({
   );
 }
 
+/**
+ * The assistant's own button, wearing the approval chrome's shape.
+ *
+ * The review needs four controls and the panel already has a button slot
+ * with a variant vocabulary, so no adapter grows four more slots to review a
+ * write in the window it already draws.
+ */
+function approvalSlots(slots: TableAssistantSlots): ApprovalReviewSlots {
+  const Button = slots.Button;
+  return {
+    Approve: (props) => <Button {...props} variant="primary" />,
+    Reject: (props) => <Button {...props} variant="secondary" />,
+    Action: (props) => <Button {...props} variant="subtle" />,
+    List: ({ part, label, className, children }) => (
+      <div
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        role="list"
+      >
+        {children}
+      </div>
+    ),
+  };
+}
+
+/** The control that opens the conversation, and says when one is parked. */
+function Launcher({
+  labels,
+  waiting,
+  slots,
+  onOpen,
+}: {
+  readonly labels: TableLabels | undefined;
+  readonly waiting: boolean;
+  readonly slots: TableAssistantSlots;
+  readonly onOpen: () => void;
+}): ReactElement {
+  const Button = slots.Button;
+  return (
+    <Button
+      label={launcherName(labels, waiting)}
+      part="assistant-launcher"
+      variant="primary"
+      icon={<AssistantIcon />}
+      onClick={onOpen}
+    >
+      <span data-adapttable-part="assistant-launcher-label">
+        {labels?.assistantOpen ?? "Ask AI"}
+      </span>
+      {waiting ? (
+        <span
+          data-adapttable-part="assistant-launcher-waiting"
+          aria-hidden="true"
+        >
+          {" •"}
+        </span>
+      ) : null}
+    </Button>
+  );
+}
+
+/**
+ * What the launcher is called, and whether it says a write is parked.
+ *
+ * The dot beside it is decoration; this is the part a screen reader gets,
+ * so the waiting write has to be in the name rather than only in the glyph.
+ */
+function launcherName(
+  labels: TableLabels | undefined,
+  waiting: boolean
+): string {
+  const open = labels?.assistantOpen ?? "Ask AI";
+  if (!waiting) return open;
+  const note =
+    labels?.approvalWaitingElsewhere ??
+    "A change is waiting for your decision.";
+  return `${open} — ${note}`;
+}
+
+/**
+ * Modal mode: the review in the kit's own dialog.
+ *
+ * Every kit already supplies one for the narrow-viewport sheet, so no
+ * adapter grows a second modal to review a write. It is drawn whether or not
+ * the conversation is open — the decision is what is waiting — and it is the
+ * only place the controls appear in this mode.
+ */
+function ApprovalModal({
+  approval,
+  labels,
+  slots,
+}: {
+  readonly approval: AgentApprovalPending | null;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+}): ReactElement | null {
+  const mine = approval?.presentation === "modal" ? approval : null;
+  const review = approvalReview(mine, labels);
+  if (!review || !mine) return null;
+  const Sheet = slots.Sheet;
+  return (
+    <Sheet
+      label={review.summary}
+      part="assistant-approval-modal"
+      open
+      onClose={mine.reject}
+    >
+      <AssistantApproval
+        review={review}
+        pending={mine}
+        labels={labels}
+        slots={slots}
+        expanded
+      />
+    </Sheet>
+  );
+}
+
+/**
+ * The review, wired to the panel's own controls.
+ *
+ * A component rather than a bundle of props assembled in the middle of the
+ * conversation's markup: the panel then only decides WHERE the review goes,
+ * not what it is given.
+ */
+function AssistantApproval({
+  review,
+  pending,
+  labels,
+  slots,
+  expanded,
+  onExpand,
+  onBack,
+}: {
+  readonly review: ApprovalReview;
+  readonly pending: AgentApprovalPending;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly expanded?: boolean;
+  readonly onExpand?: () => void;
+  readonly onBack?: () => void;
+}): ReactElement {
+  return (
+    <ApprovalReviewChrome
+      review={review}
+      {...(labels ? { labels } : {})}
+      slots={approvalSlots(slots)}
+      {...(expanded ? { expanded } : {})}
+      {...(onExpand ? { onExpand } : {})}
+      {...(onBack ? { onBack } : {})}
+      onApprove={pending.approve}
+      onReject={pending.reject}
+      {...(pending.decideAt ? { onDecide: pending.decideAt } : {})}
+    />
+  );
+}
+
 function Body({
   assistant,
   labels,
   slots,
   note,
   messageAction,
+  approval,
 }: {
   readonly assistant: TableAssistantView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly note?: string;
   readonly messageAction: TableAssistantProps["messageAction"];
+  readonly approval?: AgentApprovalPending | null;
 }): ReactElement {
   const scroll = useConversationScroll(assistant.messages.length);
+  const [expanded, setExpanded] = useState(false);
+  // Only writes this surface owns. A write reviewed above the table or in a
+  // modal is named here, never given a second set of controls.
+  const mine = approval?.presentation === "widget" ? approval : null;
+  const review = approvalReview(mine, labels);
+  useEffect(() => {
+    if (!review) setExpanded(false);
+  }, [review]);
   const Button = slots.Button;
   const run = (id: string): void => {
     void assistant.runSuggestion(id);
@@ -272,12 +457,34 @@ function Body({
   return (
     <div
       data-adapttable-part="assistant-conversation-region"
-      style={{ position: "relative", flex: 1, minHeight: 0 }}
+      style={{
+        position: "relative",
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
+      {review && expanded && mine ? (
+        <div
+          data-adapttable-part="assistant-approval-full"
+          style={{ height: "100%", overflowY: "auto" }}
+        >
+          <AssistantApproval
+            review={review}
+            pending={mine}
+            labels={labels}
+            slots={slots}
+            expanded
+            onBack={() => setExpanded(false)}
+          />
+        </div>
+      ) : null}
       <div
         ref={scroll.ref}
         onScroll={scroll.onScroll}
         data-adapttable-part="assistant-conversation"
+        hidden={Boolean(review && expanded)}
         style={{ height: "100%", overflowY: "auto" }}
       >
         {assistant.messages.length === 0 ? (
@@ -330,6 +537,35 @@ function Body({
           </details>
         ) : null}
       </div>
+      {review && !expanded && mine ? (
+        <div
+          data-adapttable-part="assistant-approval"
+          style={{
+            flex: "0 0 auto",
+            borderBlockStart: "1px solid",
+            borderColor: "inherit",
+            padding: "0.5em 0",
+          }}
+        >
+          <AssistantApproval
+            review={review}
+            pending={mine}
+            labels={labels}
+            slots={slots}
+            onExpand={() => setExpanded(true)}
+          />
+        </div>
+      ) : null}
+      {approval && !mine ? (
+        // Reviewed somewhere else. Say so; do not offer the decision twice.
+        <p
+          data-adapttable-part="assistant-approval-elsewhere"
+          style={{ margin: 0 }}
+        >
+          {labels?.approvalWaitingElsewhere ??
+            "A change is waiting for your decision."}
+        </p>
+      ) : null}
       {scroll.hasUnseen ? (
         <span
           style={{
@@ -370,6 +606,7 @@ export function TableAssistantChrome({
   boundary = "viewport",
   note,
   messageAction,
+  approval,
   slots,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
   const wide = useFloatingFits();
@@ -452,6 +689,7 @@ export function TableAssistantChrome({
         slots={slots}
         note={note}
         messageAction={messageAction}
+        approval={approval}
       />
       {assistant.error ? (
         <p data-adapttable-part="assistant-error" role="alert">
@@ -516,8 +754,16 @@ export function TableAssistantChrome({
     );
   }
 
+  // Something is parked on this reader, wherever it is being reviewed.
+  const waiting = approval !== null && approval !== undefined;
+
   return (
     <>
+      <ApprovalModal
+        approval={approval ?? null}
+        labels={labels}
+        slots={slots}
+      />
       <span
         ref={launcherRef}
         data-adapttable-part="assistant-launcher-anchor"
@@ -528,12 +774,14 @@ export function TableAssistantChrome({
         }
       >
         {launcher && !open ? (
-          <Button
-            label={labels?.assistantOpen ?? "Ask AI"}
-            part="assistant-launcher"
-            variant="primary"
-            icon={<AssistantIcon />}
-            onClick={() => {
+          // A write parked behind a closed panel is invisible otherwise: the
+          // reader closed the conversation and the turn is still waiting on
+          // them. The launcher says so rather than letting it sit.
+          <Launcher
+            labels={labels}
+            waiting={waiting}
+            slots={slots}
+            onOpen={() => {
               onOpenChange(true);
             }}
           />

@@ -161,6 +161,27 @@ export const he: Required<TableLabels> = {
   approveProposal: "אשר",
   rejectProposal: "דחה",
   proposalValueUnavailable: "לא זמין",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "שינוי מוצע אחד"
+        : "{c} שינויים מוצעים".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"ב-{r} שורות".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "סקירת כל {c} השינויים".replace("{c}", String(count)),
+  backToConversation: "חזרה לשיחה",
+  approveAllProposals: "אישור הכול",
+  approveRemainingProposals: "אישור השאר",
+  rejectAllProposals: "דחיית הכול",
+  rejectRemainingProposals: "דחיית השאר",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} אושרו · {j} נדחו · {p} נותרו"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "שינוי ממתין להחלטתך.",
   pendingProposals: (count) =>
     count === 1 ? "שינוי מוצע אחד" : `${String(count)} שינויים מוצעים`,
   proposalChange: ({ row, column, before, after }) => {

@@ -335,6 +335,7 @@ export const agentApprovalTestSlots: AgentApprovalSlots = {
   Approve: BatchButton,
   Reject: BatchButton,
   List: ApprovalList,
+  Action: BatchButton,
 };
 
 function ActivateCell({

@@ -161,6 +161,27 @@ export const es: Required<TableLabels> = {
   approveProposal: "Aprobar",
   rejectProposal: "Rechazar",
   proposalValueUnavailable: "No disponible",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 cambio propuesto"
+        : "{c} cambios propuestos".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"en {r} filas".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "Revisar los {c} cambios".replace("{c}", String(count)),
+  backToConversation: "Volver a la conversación",
+  approveAllProposals: "Aprobar todo",
+  approveRemainingProposals: "Aprobar el resto",
+  rejectAllProposals: "Rechazar todo",
+  rejectRemainingProposals: "Rechazar el resto",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} aprobados · {j} rechazados · {p} pendientes"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Un cambio espera tu decisión.",
   pendingProposals: (count) =>
     count === 1 ? "1 cambio propuesto" : `${String(count)} cambios propuestos`,
   proposalChange: ({ row, column, before, after }) => {

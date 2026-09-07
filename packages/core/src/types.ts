@@ -705,6 +705,28 @@ export interface TableLabels {
    * not that it is empty.
    */
   proposalValueUnavailable?: string;
+  /** Headline over a review: how many changes, across how many rows. */
+  proposalSummary?: (counts: { changes: number; rows: number }) => string;
+  /** Opens the full list when a review shows only the first few. */
+  reviewAllProposals?: (count: number) => string;
+  /** Leaves the full list and returns to the conversation. */
+  backToConversation?: string;
+  /** Approves everything, before any row has been decided on its own. */
+  approveAllProposals?: string;
+  /** Approves what is still undecided, once some rows have been decided. */
+  approveRemainingProposals?: string;
+  /** Rejects everything, before any row has been decided on its own. */
+  rejectAllProposals?: string;
+  /** Rejects what is still undecided, once some rows have been decided. */
+  rejectRemainingProposals?: string;
+  /** Live tally under a review in progress. */
+  proposalTally?: (counts: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  }) => string;
+  /** Says a write is waiting, where the decision is made somewhere else. */
+  approvalWaitingElsewhere?: string;
   /** Title of the assistant panel. */
   assistantTitle?: string;
   /** Accessible name of the control that opens the assistant. */

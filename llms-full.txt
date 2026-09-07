@@ -7707,6 +7707,48 @@ authorized against, the host's `apply` callbacks, a live `observe()`, the bound
 `onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
 governed write — the approved `plan` and the resolved `commit` mode.
 
+### Where a waiting write is reviewed
+
+Three surfaces can review an approval, and exactly one of them draws the
+controls: whichever the resolved `presentation` names.
+
+| `presentation`     | Where                                   |
+| ------------------ | --------------------------------------- |
+| `widget` (default) | In the conversation, under the messages |
+| `table`            | A strip above the rows it changes       |
+| `modal`            | The kit's own dialog, over the page     |
+
+The others do not repeat the buttons. The assistant says a change is waiting
+when the decision is being made elsewhere; that is all.
+
+Every surface draws the same review, because they all read one model:
+
+```ts
+import { approvalReview } from "@adapttable/react/adapter";
+
+const review = approvalReview(pending, labels);
+review.changes; // 12
+review.rows; //  8 — three edits to one row are three changes and one row
+review.preview; // the first three
+review.approveLabel; // "Approve all", or "Approve remaining" after a decision
+```
+
+A long write opens with a summary — _12 proposed changes across 8 rows_ — and
+the first three changes. **Review all 12 changes** opens the rest inside the
+same surface: in widget mode the conversation gives way and **Back to
+conversation** returns, rather than a second overlay opening over the first.
+
+`Approve all` becomes `Approve remaining` the moment any single change is
+decided, because a row already refused stays refused and the first label
+would be a promise the control cannot keep. A running tally sits beside it.
+
+A write that enumerates no rows — an opaque server operation — is shown by
+name and arguments. It gets no invented row count and no per-row checkboxes,
+and it is answered whole.
+
+Closing the assistant does not answer anything. The write stays parked and
+the launcher still says so; reopening brings the review back.
+
 ### The reader and the model are told different things
 
 A proposal has two before-values, and they are not the same value.
@@ -11193,6 +11235,9 @@ ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
 exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE`, `AgentApprovalPending`,
+`approvalReview`, `ApprovalReview`, `ApprovalReviewItem`,
+`APPROVAL_PREVIEW_LIMIT`, `ApprovalReviewChrome`,
+`ApprovalReviewChromeProps`, `ApprovalReviewSlots`,
 `AgentApprovalDecision`, `AgentApprovalOperation`,
 `AgentApprovalProposal`, `AgentApprovalButtonProps`,
 `AgentApprovalListProps` and `AgentApprovalSlots`. Portable adapters live

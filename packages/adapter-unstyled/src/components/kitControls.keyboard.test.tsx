@@ -248,11 +248,15 @@ describe("agent approval strip (unstyled)", () => {
     const onReject = vi.fn();
     renderKit(
       <AgentApproval
-        proposals={[
-          { rowKey: "1", column: "title", before: "Ship", after: "Shipped" },
-        ]}
-        onApprove={onApprove}
-        onReject={onReject}
+        pending={{
+          proposals: [
+            { rowKey: "1", column: "title", before: "Ship", after: "Shipped" },
+          ],
+          decisions: ["pending"],
+          presentation: "table",
+          approve: onApprove,
+          reject: onReject,
+        }}
       />
     );
     const list = part("agent-approval-list");
@@ -267,7 +271,7 @@ describe("agent approval strip (unstyled)", () => {
   });
 
   it("shows nothing while no write is proposed", () => {
-    renderKit(<AgentApproval onApprove={vi.fn()} onReject={vi.fn()} />);
+    renderKit(<AgentApproval />);
     expect(part("agent-approval")).toBeNull();
   });
 });

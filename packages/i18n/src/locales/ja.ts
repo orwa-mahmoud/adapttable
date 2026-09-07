@@ -160,6 +160,27 @@ export const ja: Required<TableLabels> = {
   approveProposal: "承認",
   rejectProposal: "却下",
   proposalValueUnavailable: "取得できません",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "提案された変更 1 件"
+        : "提案された変更 {c} 件".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} 行にわたって".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "{c} 件すべてを確認".replace("{c}", String(count)),
+  backToConversation: "会話に戻る",
+  approveAllProposals: "すべて承認",
+  approveRemainingProposals: "残りを承認",
+  rejectAllProposals: "すべて却下",
+  rejectRemainingProposals: "残りを却下",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "承認 {a} · 却下 {j} · 残り {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "判断を待っている変更があります。",
   pendingProposals: (count) =>
     count === 1 ? "提案 1 件" : `${String(count)} 件の提案`,
   proposalChange: ({ row, column, before, after }) => {

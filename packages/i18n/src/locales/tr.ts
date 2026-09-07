@@ -163,6 +163,27 @@ export const tr: Required<TableLabels> = {
   approveProposal: "Onayla",
   rejectProposal: "Reddet",
   proposalValueUnavailable: "Kullanılamıyor",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 önerilen değişiklik"
+        : "{c} önerilen değişiklik".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} satırda".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "{c} değişikliğin tümünü incele".replace("{c}", String(count)),
+  backToConversation: "Sohbete dön",
+  approveAllProposals: "Tümünü onayla",
+  approveRemainingProposals: "Kalanları onayla",
+  rejectAllProposals: "Tümünü reddet",
+  rejectRemainingProposals: "Kalanları reddet",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} onaylandı · {j} reddedildi · {p} kaldı"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Bir değişiklik kararınızı bekliyor.",
   pendingProposals: (count) =>
     count === 1
       ? "1 önerilen değişiklik"

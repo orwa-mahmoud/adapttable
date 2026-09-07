@@ -1320,6 +1320,9 @@ ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
 exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE`, `AgentApprovalPending`,
+`approvalReview`, `ApprovalReview`, `ApprovalReviewItem`,
+`APPROVAL_PREVIEW_LIMIT`, `ApprovalReviewChrome`,
+`ApprovalReviewChromeProps`, `ApprovalReviewSlots`,
 `AgentApprovalDecision`, `AgentApprovalOperation`,
 `AgentApprovalProposal`, `AgentApprovalButtonProps`,
 `AgentApprovalListProps` and `AgentApprovalSlots`. Portable adapters live

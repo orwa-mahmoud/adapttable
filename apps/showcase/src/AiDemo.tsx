@@ -18,12 +18,20 @@ import type {
 } from "@adapttable/ai";
 import { useTableAssistant } from "@adapttable/ai/assistant";
 import { tableAgent } from "@adapttable/ai/react";
-import { type FilterDef, type RowPinState } from "@adapttable/core";
+import {
+  type ApprovalPresentation,
+  type FilterDef,
+  type RowPinState,
+} from "@adapttable/core";
 import { getLabels } from "@adapttable/i18n";
 import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
-import { assistantIsBusy } from "@adapttable/react/adapter";
+import {
+  type AgentApprovalPending,
+  assistantIsBusy,
+} from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";
 import {
+  type ReactNode,
   Suspense,
   useCallback,
   useEffect,
@@ -31,8 +39,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { AiConnectDialog, type AiConnection } from "./AiBackendConnect";
+import { AiDemoOptions, type DemoActionApproval } from "./AiDemoOptions";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import { DEMO_SCENARIOS, demoTransport, UNSUPPORTED_REPLY } from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
@@ -129,6 +139,54 @@ const SEED: readonly StaffRow[] = [
  * does: a mirrored table still labelled in English shows the layout but not
  * what a reader in Arabic actually sees.
  */
+/** The capabilities that write, and therefore have an approval to set. */
+const WRITE_CAPABILITIES = new Set([
+  "edit.cells",
+  "rows.add",
+  "rows.delete",
+  "rows.reorder",
+]);
+
+/** Reader-facing names for the built-in writes. */
+const CAPABILITY_LABELS: Record<string, string> = {
+  "edit.cells": "Edit a cell",
+  "rows.add": "Add rows",
+  "rows.delete": "Delete rows",
+  "rows.reorder": "Move a row",
+};
+
+/** Set or clear one action's approval override. */
+function overrideFor(
+  key: string,
+  next: "required" | "automatic" | "inherit"
+): (
+  current: Readonly<Record<string, "required" | "automatic">>
+) => Readonly<Record<string, "required" | "automatic">> {
+  return (current) => {
+    if (next !== "inherit") return { ...current, [key]: next };
+    const rest = { ...current };
+    delete rest[key];
+    return rest;
+  };
+}
+
+/**
+ * Put the inspector in the documentation column, where a reader looking at
+ * the integration example will find it.
+ *
+ * It is rendered by the demo because that is where the live session is, and
+ * portaled rather than duplicated: a second inspector would be a second
+ * subscription reporting a slightly different moment. When the page has no
+ * slot — a standalone mount — it stays where it was rendered.
+ */
+function InspectorPortal({ children }: Readonly<{ children: ReactNode }>) {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setSlot(document.getElementById("mx-inspector-slot"));
+  }, []);
+  return slot ? createPortal(children, slot) : <>{children}</>;
+}
+
 const COLUMN_HEADERS: Record<Locale, Record<string, string>> = {
   en: {
     person: "Person",
@@ -176,7 +234,6 @@ const TEAM_FILTER: FilterDef<StaffRow> = {
 };
 
 /** The row and column the scripted examples name. */
-const DEMO_CONTEXT = { namedRowKey: "p1", pinnedColumnKey: "person" };
 
 /**
  * The suggestions, built from the scenarios so a chip can never offer a
@@ -298,12 +355,39 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const locale: Locale = rtl ? "ar" : "en";
   const labels = useMemo(() => getLabels(locale), [locale]);
   const columns = useMemo(() => columnsFor(locale), [locale]);
-  const [awaitingApproval, setAwaitingApproval] = useState(false);
+  // The live approval, handed over by the bridge. The panel sits beside the
+  // table rather than inside it, so this is how it reaches the conversation.
+  const [pendingApproval, setPendingApproval] =
+    useState<AgentApprovalPending | null>(null);
+  const awaitingApproval = pendingApproval !== null;
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
+  // Where a waiting change is reviewed, and whether an approved one is
+  // staged or saved. Both are the reader's to change on camera, which is why
+  // they are state here rather than constants in the agent options.
+  const [presentation, setPresentation] =
+    useState<ApprovalPresentation>("widget");
+  const [commit, setCommit] = useState<"stage" | "immediate">("stage");
+  // Per-action overrides, keyed by capability. Absent means inherited.
+  const [actionPolicy, setActionPolicy] = useState<
+    Readonly<Record<string, "required" | "automatic">>
+  >({});
   const [selectedKey, setSelectedKey] = useState("view.setFilters");
-  const contextRef = useRef(DEMO_CONTEXT);
+  // Rebuilt from the live rows every render, so the bulk example proposes
+  // the salaries actually on screen rather than the ones it was written
+  // against.
+  const contextRef = useRef({
+    namedRowKey: "p1",
+    pinnedColumnKey: "person",
+    coreTeam: [] as { rowKey: string; salary: number }[],
+  });
+  contextRef.current = {
+    namedRowKey: "p1",
+    pinnedColumnKey: "person",
+    coreTeam: rows
+      .filter((row) => row.team === "Core")
+      .map((row) => ({ rowKey: row.id, salary: row.salary })),
+  };
 
   const scripted = useMemo(() => demoTransport(() => contextRef.current), []);
   const [connection, setConnection] = useState<AiConnection>(() => ({
@@ -323,8 +407,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       tableAgent({
         tableId: "ai-assistant-demo",
         writePolicy: "allow",
-        approval: toggles.editing ? "writes" : "never",
-        commit: "stage",
+        // Policy and presentation are separate questions, and the drawer
+        // asks them separately. Turning cell editing off removes the action
+        // rather than the approval, so the policy stays as the reader set it.
+        approval: { policy: "writes", presentation },
+        commit,
         columns: {
           person: { type: "string", writable: false },
           team: { type: "string", writable: false },
@@ -341,7 +428,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           // `execute` does not return while the approval sits above the
           // table, so without this the panel would show "Working…" at a
           // turn that is actually waiting on the reader.
-          approvals: setAwaitingApproval,
+          approvals: setPendingApproval,
         },
       }),
     ];
@@ -370,7 +457,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       factories.undo(),
       ...next,
     ];
-  }, [factories, pinnedRowIds, toggles]);
+  }, [factories, pinnedRowIds, toggles, presentation, commit]);
 
   const assistant = useTableAssistant({
     session: session ?? undefined,
@@ -424,17 +511,40 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     ? JSON.stringify(session?.describe(selected).input, null, 2)
     : "";
 
+  // Generated from what the table actually wires right now, so turning a
+  // feature off removes its row rather than leaving a dead switch behind.
+  // Labels come from each capability's own presentation; the key is never
+  // shown to a reader.
+  const actionApprovals: readonly DemoActionApproval[] = useMemo(() => {
+    const writes = (manifest?.capabilities ?? []).filter((key) =>
+      WRITE_CAPABILITIES.has(key)
+    );
+    return writes.map((key) => {
+      const override = Object.hasOwn(actionPolicy, key)
+        ? actionPolicy[key]
+        : undefined;
+      return {
+        key,
+        label: CAPABILITY_LABELS[key] ?? key,
+        policy: override ?? ("required" as const),
+        inherited: override === undefined,
+        onChange: (next: "required" | "automatic" | "inherit") =>
+          setActionPolicy(overrideFor(key, next)),
+      };
+    });
+  }, [manifest, actionPolicy]);
+
   const toggle = (key: keyof DemoToggles) => () => {
     setToggles((current) => ({ ...current, [key]: !current[key] }));
   };
 
   return (
-    <div className="ai-demo" dir={rtl ? "rtl" : "ltr"} data-adapter={adapter}>
+    <div className="ai-demo" data-adapter={adapter}>
       {/* The demo's own controls stay in the page's language: they are
           scaffolding around the table, not part of it, and flipping English
           prose leaves its punctuation on the wrong side. Only the table and
           the assistant follow the RTL switch. */}
-      <header className="ai-demo__hero" dir="ltr">
+      <header className="ai-demo__hero">
         <p className="ai-demo__lede">
           The application decides what the assistant may do and what it may save
           — the table asks, your code answers.
@@ -488,62 +598,57 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             Demo options
           </button>
         </div>
-        {demoOpen ? (
-          <div
-            className="ai-demo__options"
-            role="group"
-            aria-label="Demo options"
-          >
-            <div className="ai-demo__toggles">
-              {(
-                [
-                  ["editing", "Allow editing"],
-                  ["grouping", "Grouping"],
-                  ["rowPinning", "Row pinning"],
-                  ["columnPinning", "Column pinning"],
-                ] as const
-              ).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`seg__btn${toggles[key] ? " is-on" : ""}`}
-                  aria-pressed={toggles[key]}
-                  data-testid={`ai-toggle-${key}`}
-                  onClick={toggle(key)}
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                type="button"
-                className={`seg__btn${rtl ? " is-on" : ""}`}
-                aria-pressed={rtl}
-                onClick={() => {
-                  setRtl((current) => !current);
-                }}
-              >
-                RTL
-              </button>
-              <button
-                type="button"
-                className="seg__btn"
-                data-testid="ai-reset"
-                onClick={reset}
-              >
-                Reset demo
-              </button>
-            </div>
-            <p className="ai-demo__note">
-              Turn a feature off and the assistant offers less: it only ever
-              suggests what this table currently wires. Grouping is the clearest
-              case — a grouped table is a nested list, so the row pinning
-              examples leave while it is on.
-            </p>
-          </div>
-        ) : null}
+        <AiDemoOptions
+          open={demoOpen}
+          onClose={() => {
+            setDemoOpen(false);
+          }}
+          features={[
+            {
+              key: "editing",
+              label: "Cell editing",
+              help: "Whether the table accepts edits at all. With this off, no edit action exists to approve.",
+              on: toggles.editing,
+              onChange: toggle("editing"),
+            },
+            {
+              key: "grouping",
+              label: "Grouping",
+              help: "A grouped table is a nested list, so the row pinning examples leave while it is on.",
+              on: toggles.grouping,
+              onChange: toggle("grouping"),
+            },
+            {
+              key: "rowPinning",
+              label: "Row pinning",
+              help: "Lets the assistant pin a row above the scrolled body.",
+              on: toggles.rowPinning,
+              onChange: toggle("rowPinning"),
+            },
+            {
+              key: "columnPinning",
+              label: "Column pinning",
+              help: "Lets the assistant pin a column to either edge.",
+              on: toggles.columnPinning,
+              onChange: toggle("columnPinning"),
+            },
+          ]}
+          actions={actionApprovals}
+          presentation={presentation}
+          onPresentation={setPresentation}
+          commit={commit}
+          onCommit={setCommit}
+          rtl={rtl}
+          onRtl={setRtl}
+          onReset={reset}
+        />
       </header>
 
-      <div className="ai-demo__stage">
+      {/* The direction lives here, on the table and the overlays it owns.
+          The documentation around it, the integration code, the reference and
+          the developer inspector are the page's, not the table's, and a
+          mirrored code block is unreadable. */}
+      <div className="ai-demo__stage" dir={rtl ? "rtl" : "ltr"}>
         <KitProvider kit={adapter} dark={dark} dir={rtl ? "rtl" : "ltr"}>
           <Suspense fallback={<DemoFallback />}>
             <Table
@@ -568,6 +673,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   ? "These examples are scripted. Connect a backend to ask anything."
                   : undefined
               }
+              approval={pendingApproval}
               onSettings={() => {
                 setSettingsOpen(true);
               }}
@@ -596,46 +702,62 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         </KitProvider>
       </div>
 
-      <details
-        className="ai-demo__dev"
-        open={detailsOpen}
-        onToggle={(event) => {
-          setDetailsOpen(event.currentTarget.open);
-        }}
-      >
-        <summary>Developer inspector</summary>
-        <p className="ai-demo__revision">
-          Revision {manifest?.viewRevision ?? "—"} · {catalog.length}{" "}
-          capabilities wired
-        </p>
-        <div className="ai-demo__keys" data-testid="ai-catalog">
-          {catalog.map((entry) => (
-            <button
-              key={entry.key}
-              type="button"
-              className={`ai-demo__key${entry.key === selected ? " is-on" : ""}`}
-              aria-pressed={entry.key === selected}
-              onClick={() => {
-                setSelectedKey(entry.key);
+      {/* One inspector, rendered here where the live session is, shown in the
+          documentation column beside the integration example. A portal rather
+          than a second copy: two would mean two subscriptions to one session. */}
+      <InspectorPortal>
+        <section className="ai-demo__dev" data-testid="ai-inspector">
+          <h3 className="ai-demo__dev-title">Developer inspector</h3>
+          <p className="ai-demo__revision">
+            Revision {manifest?.viewRevision ?? "—"} · {catalog.length}{" "}
+            capabilities wired
+          </p>
+          <label className="ai-demo__pick">
+            <span>Capability</span>
+            <select
+              data-testid="ai-catalog"
+              value={selected}
+              onChange={(event) => {
+                setSelectedKey(event.target.value);
               }}
             >
-              View schema: {entry.key}
+              {catalog.length === 0 ? (
+                <option value="">No capabilities wired</option>
+              ) : null}
+              {catalog.map((entry) => (
+                <option key={entry.key} value={entry.key}>
+                  {entry.key}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="ai-demo__schema-wrap">
+            <button
+              type="button"
+              className="ai-demo__copy"
+              data-testid="ai-schema-copy"
+              onClick={() => {
+                void navigator.clipboard?.writeText(schema);
+              }}
+            >
+              Copy
             </button>
-          ))}
-        </div>
-        <pre
-          className="ai-demo__schema"
-          data-testid="ai-schema"
-          aria-label={`Schema for ${selected || "no capability"}`}
-        >
-          {schema || "Attach a session to inspect a capability."}
-        </pre>
-        <p className="ai-demo__refs">
-          <a href={`${DOCS_URL}ai-http/`}>Connect a backend</a>
-          <a href={`${DOCS_URL}ai-integrations/`}>AI integrations</a>
-          <a href={`${DOCS_URL}agent-capabilities/`}>Capabilities</a>
-        </p>
-      </details>
+            <pre
+              className="ai-demo__schema"
+              data-testid="ai-schema"
+              dir="ltr"
+              aria-label={`Schema for ${selected || "no capability"}`}
+            >
+              {schema || "Attach a session to inspect a capability."}
+            </pre>
+          </div>
+          <p className="ai-demo__refs">
+            <a href={`${DOCS_URL}ai-http/`}>Connect a backend</a>
+            <a href={`${DOCS_URL}ai-integrations/`}>AI integrations</a>
+            <a href={`${DOCS_URL}agent-capabilities/`}>Capabilities</a>
+          </p>
+        </section>
+      </InspectorPortal>
     </div>
   );
 }

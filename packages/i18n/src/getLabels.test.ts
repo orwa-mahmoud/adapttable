@@ -314,6 +314,27 @@ const INTERPOLATION_CASES: Record<
       }),
     expects: ["ROW_X", "COLUMN_X", "BEFORE_X", "AFTER_X"],
   },
+  proposalSummary: {
+    call: (fn) =>
+      (fn as (counts: { changes: number; rows: number }) => string)({
+        changes: 42,
+        rows: 7,
+      }),
+    // Distinct numbers, so a translation that prints the change count where
+    // the row count belongs is caught rather than passing on symmetry.
+    expects: ["42", "7"],
+  },
+  proposalTally: {
+    call: (fn) =>
+      (
+        fn as (counts: {
+          pending: number;
+          approved: number;
+          rejected: number;
+        }) => string
+      )({ pending: 42, approved: 7, rejected: 13 }),
+    expects: ["42", "7", "13"],
+  },
 };
 
 const NUMERIC_CASE = {

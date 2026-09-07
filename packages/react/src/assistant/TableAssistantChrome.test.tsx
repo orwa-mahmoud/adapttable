@@ -8,6 +8,7 @@ import { defaultLabels } from "@adapttable/core";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
 import { tableAssistantTestSlots } from "../internal/chromeTestSlots";
 import type { TableAssistantView } from "./assistantView";
 import { TableAssistantChrome } from "./TableAssistantChrome";
@@ -667,5 +668,217 @@ describe("without labels", () => {
     });
 
     expect(part("assistant-receipt-detail")).toHaveTextContent("Details");
+  });
+});
+
+describe("reviewing a write inside the conversation", () => {
+  const pending = (
+    patch: Partial<AgentApprovalPending> = {}
+  ): AgentApprovalPending => ({
+    proposals: [
+      {
+        rowKey: "r1",
+        rowLabel: "Ada",
+        column: "salary",
+        before: 100,
+        after: 200,
+      },
+      {
+        rowKey: "r2",
+        rowLabel: "Grace",
+        column: "salary",
+        before: 110,
+        after: 210,
+      },
+      {
+        rowKey: "r3",
+        rowLabel: "Alan",
+        column: "salary",
+        before: 120,
+        after: 220,
+      },
+      {
+        rowKey: "r4",
+        rowLabel: "Jean",
+        column: "salary",
+        before: 130,
+        after: 230,
+      },
+    ],
+    decisions: ["pending", "pending", "pending", "pending"],
+    presentation: "widget",
+    approve: () => undefined,
+    reject: () => undefined,
+    decideAt: () => undefined,
+    ...patch,
+  });
+
+  it("draws the review in the panel, not somewhere the reader has to find", () => {
+    mount({ approval: pending() });
+    expect(part("assistant-approval")).not.toBeNull();
+    expect(part("approval-review-summary")).toHaveTextContent(
+      "4 proposed changes across 4 rows"
+    );
+    expect(part("agent-approval-approve")).toHaveTextContent("Approve all");
+  });
+
+  it("draws nothing but a notice for a write reviewed elsewhere", () => {
+    mount({ approval: pending({ presentation: "table" }) });
+    expect(part("assistant-approval")).toBeNull();
+    expect(parts("agent-approval-approve")).toHaveLength(0);
+    expect(part("assistant-approval-elsewhere")).toHaveTextContent(
+      "waiting for your decision"
+    );
+  });
+
+  it("previews three changes and opens the rest in the window itself", () => {
+    mount({ approval: pending() });
+    expect(parts("agent-approval-row")).toHaveLength(3);
+
+    fireEvent.click(part("approval-review-expand")!);
+    // In place: the conversation gives way, no second overlay opens.
+    expect(part("assistant-approval-full")).not.toBeNull();
+    expect(parts("agent-approval-row")).toHaveLength(4);
+    expect(part("assistant-conversation")).toHaveAttribute("hidden");
+
+    fireEvent.click(part("approval-review-back")!);
+    expect(part("assistant-approval-full")).toBeNull();
+    expect(part("assistant-conversation")).not.toHaveAttribute("hidden");
+  });
+
+  it("routes a per-row decision to the position it belongs to", () => {
+    const decideAt = vi.fn();
+    mount({ approval: pending({ decideAt }) });
+    fireEvent.click(parts("approval-review-row-reject")[1]!);
+    expect(decideAt).toHaveBeenCalledWith(1, false);
+  });
+
+  it("promises only the rest once a row has been decided", () => {
+    mount({
+      approval: pending({
+        decisions: ["rejected", "pending", "pending", "pending"],
+      }),
+    });
+    expect(part("agent-approval-approve")).toHaveTextContent(
+      "Approve remaining"
+    );
+    expect(part("approval-review-tally")).toHaveTextContent(
+      "0 approved · 1 rejected · 3 left"
+    );
+  });
+
+  it("names an opaque operation and offers no per-row controls", () => {
+    mount({
+      approval: pending({
+        proposals: [],
+        decisions: [],
+        decideAt: undefined,
+        operation: {
+          capability: "staff.activateAll",
+          title: "Activate everyone",
+          arguments: { status: "Active" },
+        },
+      }),
+    });
+    expect(part("approval-review-operation-name")).toHaveTextContent(
+      "Activate everyone"
+    );
+    expect(parts("approval-review-row-approve")).toHaveLength(0);
+    expect(part("approval-review-expand")).toBeNull();
+  });
+});
+
+describe("reviewing in a modal instead", () => {
+  const modal = (): AgentApprovalPending => ({
+    proposals: [
+      {
+        rowKey: "r1",
+        rowLabel: "Ada",
+        column: "salary",
+        before: 100,
+        after: 200,
+      },
+    ],
+    decisions: ["pending"],
+    presentation: "modal",
+    approve: () => undefined,
+    reject: () => undefined,
+  });
+
+  it("draws the review in the kit's own dialog, and nowhere else", () => {
+    mount({ approval: modal() });
+    expect(part("assistant-approval-modal")).not.toBeNull();
+    expect(part("assistant-approval")).toBeNull();
+    // One set of controls for one decision.
+    expect(parts("agent-approval-approve")).toHaveLength(1);
+  });
+
+  it("draws it whether or not the conversation is open", () => {
+    mount({ approval: modal(), open: false });
+    expect(part("assistant-approval-modal")).not.toBeNull();
+  });
+
+  it("shows every change, since a dialog has room for them", () => {
+    const many = Array.from({ length: 5 }, (_, index) => ({
+      rowKey: `r${String(index)}`,
+      column: "salary",
+      after: index,
+    }));
+    mount({
+      approval: {
+        ...modal(),
+        proposals: many,
+        decisions: many.map(() => "pending" as const),
+      },
+    });
+    expect(parts("agent-approval-row")).toHaveLength(5);
+    expect(part("approval-review-expand")).toBeNull();
+  });
+
+  it("treats dismissing the dialog as a refusal, never as consent", () => {
+    const reject = vi.fn();
+    const approve = vi.fn();
+    mount({ approval: { ...modal(), reject, approve } });
+
+    // The kit's own dismissal — its backdrop or close control — routes to
+    // reject. Walking away from a question is not answering yes.
+    const dialog = part("assistant-approval-modal")!;
+    fireEvent.click(
+      dialog.querySelector<HTMLElement>('[data-testid="sheet-backdrop"]')!
+    );
+    expect(reject).toHaveBeenCalledTimes(1);
+    expect(approve).not.toHaveBeenCalled();
+  });
+});
+
+describe("a write parked behind a closed panel", () => {
+  const pending = (): AgentApprovalPending => ({
+    proposals: [{ rowKey: "r1", column: "salary", before: 100, after: 200 }],
+    decisions: ["pending"],
+    presentation: "widget",
+    approve: () => undefined,
+    reject: () => undefined,
+  });
+
+  it("says so on the launcher, so it is not left sitting unseen", () => {
+    mount({ open: false, approval: pending() });
+    const launcher = part("assistant-launcher")!;
+    expect(part("assistant-launcher-waiting")).not.toBeNull();
+    expect(launcher).toHaveAccessibleName(/waiting for your decision/i);
+  });
+
+  it("says nothing when nothing is waiting", () => {
+    mount({ open: false });
+    expect(part("assistant-launcher-waiting")).toBeNull();
+    expect(part("assistant-launcher")).toHaveAccessibleName("Ask AI");
+  });
+
+  it("neither approves nor discards when the panel closes", () => {
+    const approve = vi.fn();
+    const reject = vi.fn();
+    mount({ open: false, approval: { ...pending(), approve, reject } });
+    // Closing is not an answer. The write is still parked.
+    expect(approve).not.toHaveBeenCalled();
+    expect(reject).not.toHaveBeenCalled();
   });
 });

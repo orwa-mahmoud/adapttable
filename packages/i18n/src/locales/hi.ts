@@ -163,6 +163,27 @@ export const hi: Required<TableLabels> = {
   approveProposal: "स्वीकृत करें",
   rejectProposal: "अस्वीकार करें",
   proposalValueUnavailable: "अनुपलब्ध",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 प्रस्तावित बदलाव"
+        : "{c} प्रस्तावित बदलाव".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} पंक्तियों में".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "सभी {c} बदलाव देखें".replace("{c}", String(count)),
+  backToConversation: "बातचीत पर लौटें",
+  approveAllProposals: "सभी स्वीकारें",
+  approveRemainingProposals: "शेष स्वीकारें",
+  rejectAllProposals: "सभी अस्वीकारें",
+  rejectRemainingProposals: "शेष अस्वीकारें",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} स्वीकृत · {j} अस्वीकृत · {p} शेष"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "एक बदलाव आपके निर्णय की प्रतीक्षा में है।",
   pendingProposals: (count) =>
     count === 1
       ? "1 प्रस्तावित परिवर्तन"

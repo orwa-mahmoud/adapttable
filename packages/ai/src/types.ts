@@ -2,6 +2,7 @@ import type {
   ActionAiOptions,
   TableSourceCapabilities,
 } from "@adapttable/core";
+import type { AgentApprovalPending } from "@adapttable/react/adapter";
 
 import type { CapabilityPresentation } from "./assistantContracts";
 
@@ -758,8 +759,10 @@ export interface TableAgentBridge {
    *
    * `execute` does not return while an approval is open, so a panel outside
    * the table has no other way to know the turn is parked rather than
-   * thinking. Only the chrome-mediated path reports here: with `onApprove`
-   * set the host is already the one being asked.
+   * thinking. It receives the approval itself, not just the fact of one, so
+   * a panel mounted beside the table can review it rather than only report
+   * that something is waiting elsewhere. Only the chrome-mediated path
+   * reports here: with `onApprove` set the host is already the one asked.
    */
-  readonly approvals?: (pending: boolean) => void;
+  readonly approvals?: (pending: AgentApprovalPending | null) => void;
 }

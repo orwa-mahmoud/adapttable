@@ -160,6 +160,27 @@ export const zhTW: Required<TableLabels> = {
   approveProposal: "核准",
   rejectProposal: "拒絕",
   proposalValueUnavailable: "無法取得",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 項提議的變更"
+        : "{c} 項提議的變更".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"涉及 {r} 列".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "檢視全部 {c} 項變更".replace("{c}", String(count)),
+  backToConversation: "返回對話",
+  approveAllProposals: "全部核准",
+  approveRemainingProposals: "核准其餘",
+  rejectAllProposals: "全部拒絕",
+  rejectRemainingProposals: "拒絕其餘",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "已核准 {a} · 已拒絕 {j} · 剩餘 {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "有一項變更正在等待你的決定。",
   pendingProposals: (count) =>
     count === 1 ? "1 項提議變更" : `${String(count)} 項提議變更`,
   proposalChange: ({ row, column, before, after }) => {

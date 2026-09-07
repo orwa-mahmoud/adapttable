@@ -54,6 +54,13 @@ export interface DemoContext {
   readonly namedRowKey: string;
   /** Column the pin examples name. */
   readonly pinnedColumnKey: string;
+  /**
+   * The Core team as it stands right now, for the bulk example.
+   *
+   * Read from the live rows rather than hardcoded, so the proposal always
+   * describes the salaries actually on screen.
+   */
+  readonly coreTeam: readonly { rowKey: string; salary: number }[];
 }
 
 /** What the demo says when it does not know a request. @internal */
@@ -108,10 +115,34 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
     }),
     title: "Propose an edit",
     kind: "edit",
-    reply: "Proposed the change — approve it above the table.",
+    reply: "Proposed the change — approve it to apply it.",
     capabilityKey: "edit.cells",
     args: (context) => ({
       edits: [{ rowKey: context.namedRowKey, column: "salary", value: 185 }],
+    }),
+    requires: ["edit.cells"],
+  },
+  {
+    prompt: "Give the Core team a 5% raise.",
+    subject: () => ({
+      kind: "edit",
+      row: "Core team",
+      column: "Salary",
+      before: "3 people",
+      after: "+5%",
+    }),
+    title: "Propose several edits",
+    kind: "edit",
+    // Several rows in one write, so a reader can approve some and refuse the
+    // rest — the case a single-row example never reaches.
+    reply: "Proposed three raises — approve the ones you want.",
+    capabilityKey: "edit.cells",
+    args: (context) => ({
+      edits: context.coreTeam.map((row) => ({
+        rowKey: row.rowKey,
+        column: "salary",
+        value: Math.round(row.salary * 1.05),
+      })),
     }),
     requires: ["edit.cells"],
   },

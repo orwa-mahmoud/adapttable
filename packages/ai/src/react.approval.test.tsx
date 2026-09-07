@@ -8,6 +8,7 @@
  */
 import {
   AGENT_APPROVAL_STATE,
+  type AgentApprovalPending,
   applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
@@ -509,7 +510,7 @@ describe("host callbacks in place of the live table's", () => {
  */
 describe("telling the host a write is waiting", () => {
   it("announces the open and the close, once each", async () => {
-    const approvals = vi.fn<(pending: boolean) => void>();
+    const approvals = vi.fn<(pending: AgentApprovalPending | null) => void>();
     mount({ tableId: "announce", approval: "writes", bridge: { approvals } });
     await waitFor(() => {
       expect(handles.current.session).toBeDefined();
@@ -518,7 +519,9 @@ describe("telling the host a write is waiting", () => {
 
     const result = edit("announce-1");
     await waitFor(() => {
-      expect(approvals).toHaveBeenCalledWith(true);
+      expect(approvals).toHaveBeenCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
     expect(approvals).toHaveBeenCalledTimes(1);
 
@@ -527,14 +530,14 @@ describe("telling the host a write is waiting", () => {
     });
     await result;
     await waitFor(() => {
-      expect(approvals).toHaveBeenLastCalledWith(false);
+      expect(approvals).toHaveBeenLastCalledWith(null);
     });
     expect(approvals).toHaveBeenCalledTimes(2);
   });
 
   it("retracts when the write is rejected", async () => {
     const onCellEdit = vi.fn();
-    const approvals = vi.fn<(pending: boolean) => void>();
+    const approvals = vi.fn<(pending: AgentApprovalPending | null) => void>();
     mount(
       { tableId: "reject", approval: "writes", bridge: { approvals } },
       { ...VIEW, editing: { onCellEdit } }
@@ -545,7 +548,9 @@ describe("telling the host a write is waiting", () => {
 
     const result = edit("reject-1");
     await waitFor(() => {
-      expect(approvals).toHaveBeenCalledWith(true);
+      expect(approvals).toHaveBeenCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
 
     act(() => {
@@ -554,7 +559,7 @@ describe("telling the host a write is waiting", () => {
     const settled = await result;
 
     await waitFor(() => {
-      expect(approvals).toHaveBeenLastCalledWith(false);
+      expect(approvals).toHaveBeenLastCalledWith(null);
     });
     // Refused means refused: nothing reached the host's editor.
     expect(onCellEdit).not.toHaveBeenCalled();
@@ -563,7 +568,7 @@ describe("telling the host a write is waiting", () => {
 
   it("retracts when the turn is stopped, and writes nothing", async () => {
     const onCellEdit = vi.fn();
-    const approvals = vi.fn<(pending: boolean) => void>();
+    const approvals = vi.fn<(pending: AgentApprovalPending | null) => void>();
     mount(
       { tableId: "stop", approval: "writes", bridge: { approvals } },
       { ...VIEW, editing: { onCellEdit } }
@@ -583,7 +588,9 @@ describe("telling the host a write is waiting", () => {
       controller.signal
     );
     await waitFor(() => {
-      expect(approvals).toHaveBeenCalledWith(true);
+      expect(approvals).toHaveBeenCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
 
     act(() => {
@@ -592,14 +599,14 @@ describe("telling the host a write is waiting", () => {
     await result;
 
     await waitFor(() => {
-      expect(approvals).toHaveBeenLastCalledWith(false);
+      expect(approvals).toHaveBeenLastCalledWith(null);
     });
     expect(onCellEdit).not.toHaveBeenCalled();
     expect(handles.current.pending).toBeNull();
   });
 
   it("clears the host's pending state when the table goes away", async () => {
-    const approvals = vi.fn<(pending: boolean) => void>();
+    const approvals = vi.fn<(pending: AgentApprovalPending | null) => void>();
     const view = { ...VIEW };
     const props = applyTableFeatures({
       features: [
@@ -625,19 +632,21 @@ describe("telling the host a write is waiting", () => {
 
     void edit("unmount-1");
     await waitFor(() => {
-      expect(approvals).toHaveBeenCalledWith(true);
+      expect(approvals).toHaveBeenCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
 
     // Nothing runs an effect after an unmount, so the retraction has to come
     // from the cleanup — otherwise the host is left waiting on a table that
     // no longer exists.
     view_.unmount();
-    expect(approvals).toHaveBeenLastCalledWith(false);
+    expect(approvals).toHaveBeenLastCalledWith(null);
   });
 
   it("hands a replacement subscriber the current state", async () => {
-    const first = vi.fn<(pending: boolean) => void>();
-    const second = vi.fn<(pending: boolean) => void>();
+    const first = vi.fn<(pending: AgentApprovalPending | null) => void>();
+    const second = vi.fn<(pending: AgentApprovalPending | null) => void>();
     const { rerender } = mount({
       tableId: "swap",
       approval: "writes",
@@ -649,7 +658,9 @@ describe("telling the host a write is waiting", () => {
 
     void edit("swap-1");
     await waitFor(() => {
-      expect(first).toHaveBeenCalledWith(true);
+      expect(first).toHaveBeenCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
 
     rerender({
@@ -661,13 +672,15 @@ describe("telling the host a write is waiting", () => {
     await waitFor(() => {
       // The one leaving must not be left believing an approval is still open,
       // and the one arriving has never been told anything.
-      expect(first).toHaveBeenLastCalledWith(false);
-      expect(second).toHaveBeenLastCalledWith(true);
+      expect(first).toHaveBeenLastCalledWith(null);
+      expect(second).toHaveBeenLastCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
   });
 
   it("says nothing extra when only the bridge object is new", async () => {
-    const approvals = vi.fn<(pending: boolean) => void>();
+    const approvals = vi.fn<(pending: AgentApprovalPending | null) => void>();
     const { rerender } = mount({
       tableId: "inline",
       approval: "writes",
@@ -679,7 +692,9 @@ describe("telling the host a write is waiting", () => {
 
     void edit("inline-1");
     await waitFor(() => {
-      expect(approvals).toHaveBeenCalledWith(true);
+      expect(approvals).toHaveBeenCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
     const announced = approvals.mock.calls.length;
 
@@ -707,7 +722,7 @@ describe("telling the host a write is waiting", () => {
  */
 describe("under Strict Mode's double effects", () => {
   it("still reports an approval that is genuinely open", async () => {
-    const approvals = vi.fn<(pending: boolean) => void>();
+    const approvals = vi.fn<(pending: AgentApprovalPending | null) => void>();
     const props = applyTableFeatures({
       features: [
         tableAgent({
@@ -740,7 +755,9 @@ describe("under Strict Mode's double effects", () => {
     // Whatever the double invocation did on the way, the last thing the host
     // heard has to match the write that is actually waiting.
     await waitFor(() => {
-      expect(approvals).toHaveBeenLastCalledWith(true);
+      expect(approvals).toHaveBeenLastCalledWith(
+        expect.objectContaining({ proposals: expect.anything() })
+      );
     });
   });
 

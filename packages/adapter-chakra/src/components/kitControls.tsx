@@ -5,6 +5,7 @@
 import { filterLabel } from "@adapttable/core";
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
+  type AgentApprovalButtonProps,
   AgentApprovalChrome,
   type AgentApprovalListProps,
   type AgentApprovalProps,
@@ -435,6 +436,26 @@ function ApprovalList({
  *
  * @public
  */
+function ApprovalAction({
+  label,
+  part,
+  className,
+  onClick,
+}: Readonly<AgentApprovalButtonProps>) {
+  return (
+    <Button
+      type="button"
+      size="xs"
+      variant="ghost"
+      data-adapttable-part={part}
+      className={className}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
+
 export function AgentApproval(props: Readonly<AgentApprovalProps>) {
   return (
     <AgentApprovalChrome
@@ -443,6 +464,7 @@ export function AgentApproval(props: Readonly<AgentApprovalProps>) {
         Approve: BatchButton,
         Reject: BatchButton,
         List: ApprovalList,
+        Action: ApprovalAction,
       }}
     />
   );

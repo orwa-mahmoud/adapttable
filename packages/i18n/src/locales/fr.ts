@@ -162,6 +162,27 @@ export const fr: Required<TableLabels> = {
   approveProposal: "Approuver",
   rejectProposal: "Rejeter",
   proposalValueUnavailable: "Indisponible",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 modification proposée"
+        : "{c} modifications proposées".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"sur {r} lignes".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "Examiner les {c} modifications".replace("{c}", String(count)),
+  backToConversation: "Retour à la conversation",
+  approveAllProposals: "Tout approuver",
+  approveRemainingProposals: "Approuver le reste",
+  rejectAllProposals: "Tout refuser",
+  rejectRemainingProposals: "Refuser le reste",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} approuvées · {j} refusées · {p} restantes"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Une modification attend votre décision.",
   pendingProposals: (count) =>
     count === 1
       ? "1 modification proposée"

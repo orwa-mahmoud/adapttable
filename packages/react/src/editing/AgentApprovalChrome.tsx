@@ -6,10 +6,18 @@
  * announcements are the one thing this chrome owns itself.
  */
 import type { ApprovalPresentation, TableLabels } from "@adapttable/core";
-import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
+import {
+  type ReactElement,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import { featureStateKey } from "../features/providers";
+import { approvalReview } from "./approvalReview";
+import { ApprovalReviewChrome } from "./ApprovalReviewChrome";
 
 /**
  * Live pending-approval state published by the optional agent feature.
@@ -158,6 +166,12 @@ export interface AgentApprovalSlots {
   readonly Reject: (props: AgentApprovalButtonProps) => ReactNode;
   /** Renders the proposal list region. */
   readonly List: (props: AgentApprovalListProps) => ReactNode;
+  /**
+   * Renders a quiet control that decides nothing — opening the full list of
+   * changes, or leaving it. A link or tertiary button, never a third
+   * decision beside Approve and Reject.
+   */
+  readonly Action: (props: AgentApprovalButtonProps) => ReactNode;
 }
 
 /**
@@ -166,18 +180,20 @@ export interface AgentApprovalSlots {
  * @public
  */
 export interface AgentApprovalProps {
-  /** Proposed writes waiting for a decision. Empty or omitted hides the chrome. */
-  readonly proposals?: readonly AgentApprovalProposal[];
+  /**
+   * The live approval, or nothing.
+   *
+   * The strip draws only when this is set AND the approval's presentation
+   * names the table. Exactly one surface owns a decision: the others may say
+   * a write is waiting, but must not offer a second set of buttons for it.
+   */
+  readonly pending?: AgentApprovalPending | null;
   /** Labels; falls back to the built-in English. */
   readonly labels?: TableLabels;
   /** Class for the strip. */
   readonly className?: string;
   /** Class for each button. */
   readonly buttonClassName?: string;
-  /** Approve the pending proposal. */
-  readonly onApprove: () => void;
-  /** Reject the pending proposal. */
-  readonly onReject: () => void;
 }
 
 /**
@@ -188,33 +204,6 @@ export interface AgentApprovalProps {
 export interface AgentApprovalChromeProps extends AgentApprovalProps {
   /** The kit's components for each part. */
   readonly slots: AgentApprovalSlots;
-}
-
-function displayValue(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return "—";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
-function defaultPending(count: number): string {
-  return count === 1
-    ? "1 proposed change"
-    : `${String(count)} proposed changes`;
-}
-
-function defaultChange(change: {
-  row: string;
-  column?: string;
-  before?: string;
-  after?: string;
-}): string {
-  const field = change.column ? `${change.row} · ${change.column}` : change.row;
-  if (change.before === undefined && change.after === undefined) return field;
-  return `${field}: ${change.before ?? "—"} → ${change.after ?? "—"}`;
 }
 
 /**
@@ -230,20 +219,28 @@ function defaultChange(change: {
  * @public
  */
 export function AgentApprovalChrome({
-  proposals,
+  pending,
   labels,
   className,
   buttonClassName,
-  onApprove,
-  onReject,
   slots,
 }: Readonly<AgentApprovalChromeProps>): ReactElement | null {
   const regionRef = useRef<HTMLElement>(null);
-  const pending = proposals ?? [];
-  const count = pending.length;
+  const [expanded, setExpanded] = useState(false);
+  // Only this surface's approvals. A write reviewed in the assistant window
+  // must not also grow a set of buttons above the table.
+  const mine = pending?.presentation === "table" ? pending : null;
+  const review = approvalReview(mine, labels);
+  const count = review?.changes ?? 0;
+  const hasOperation = review?.operation !== undefined;
+  const open = review !== null;
+  const reject = mine?.reject;
 
   useEffect(() => {
-    if (count === 0) return;
+    if (!open) {
+      setExpanded(false);
+      return;
+    }
     const root = regionRef.current;
     if (!root) return;
     const first = root.querySelector<HTMLElement>(
@@ -253,63 +250,38 @@ export function AgentApprovalChrome({
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        onReject();
+        reject?.();
       }
     };
     root.addEventListener("keydown", onKey);
     return () => root.removeEventListener("keydown", onKey);
-  }, [count, onReject]);
+  }, [open, count, hasOperation, reject]);
 
-  if (count === 0) return null;
-
-  const heading = (labels?.pendingProposals ?? defaultPending)(count);
-  const describe = labels?.proposalChange ?? defaultChange;
-  const Approve = slots.Approve;
-  const Reject = slots.Reject;
-  const List = slots.List;
+  if (!review || !mine) return null;
 
   return (
     <section
       ref={regionRef}
       data-adapttable-part="agent-approval"
       className={className}
-      aria-label={heading}
+      aria-label={review.summary}
       tabIndex={-1}
-      style={{ display: "flex", alignItems: "flex-start", gap: "0.5em" }}
     >
       <LiveRegion part="agent-approval-status" statusRole={false}>
-        {heading}
+        {review.summary}
       </LiveRegion>
-      <List part="agent-approval-list" label={heading}>
-        {pending.map((proposal, index) => (
-          <div
-            key={`${proposal.rowKey}:${proposal.column ?? ""}:${String(index)}`}
-            data-adapttable-part="agent-approval-row"
-          >
-            {describe({
-              row: proposal.rowLabel ?? proposal.rowKey,
-              column: proposal.column,
-              // "Unavailable" and "—" say different things: nobody could
-              // look the value up, versus the cell is empty.
-              before: proposal.beforeUnavailable
-                ? (labels?.proposalValueUnavailable ?? "Unavailable")
-                : displayValue(proposal.before),
-              after: displayValue(proposal.after),
-            })}
-          </div>
-        ))}
-      </List>
-      <Reject
-        label={labels?.rejectProposal ?? "Reject"}
-        part="agent-approval-reject"
-        className={buttonClassName}
-        onClick={onReject}
-      />
-      <Approve
-        label={labels?.approveProposal ?? "Approve"}
-        part="agent-approval-approve"
-        className={buttonClassName}
-        onClick={onApprove}
+      <ApprovalReviewChrome
+        review={review}
+        {...(labels ? { labels } : {})}
+        slots={slots}
+        expanded={expanded}
+        onExpand={() => setExpanded(true)}
+        onBack={() => setExpanded(false)}
+        onApprove={mine.approve}
+        onReject={mine.reject}
+        {...(mine.decideAt ? { onDecide: mine.decideAt } : {})}
+        {...(className ? { className } : {})}
+        {...(buttonClassName ? { buttonClassName } : {})}
       />
     </section>
   );

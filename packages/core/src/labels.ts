@@ -198,6 +198,23 @@ export const defaultLabels: Required<TableLabels> = {
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
   proposalValueUnavailable: "Unavailable",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 proposed change"
+        : `${String(changes)} proposed changes`;
+    if (rows <= 1) return left;
+    return `${left} across ${String(rows)} rows`;
+  },
+  reviewAllProposals: (count) => `Review all ${String(count)} changes`,
+  backToConversation: "Back to conversation",
+  approveAllProposals: "Approve all",
+  approveRemainingProposals: "Approve remaining",
+  rejectAllProposals: "Reject all",
+  rejectRemainingProposals: "Reject remaining",
+  proposalTally: ({ pending, approved, rejected }) =>
+    `${String(approved)} approved · ${String(rejected)} rejected · ${String(pending)} left`,
+  approvalWaitingElsewhere: "A change is waiting for your decision.",
   assistantTitle: "Table assistant",
   assistantOpen: "Ask AI",
   assistantClose: "Close",

@@ -419,6 +419,11 @@ function FeaturePage({
             ))}
           </div>
         </div>
+        {/* Where the AI page's developer inspector lands — directly below
+            Reference, beside the integration example. Rendered by the demo,
+            which owns the live session, and portaled here so there is one
+            inspector rather than a copy of one. */}
+        <div id="mx-inspector-slot" />
       </div>
     </div>
   );

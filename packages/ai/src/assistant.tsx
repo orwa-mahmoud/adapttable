@@ -21,6 +21,11 @@
  */
 "use client";
 
+import {
+  AGENT_APPROVAL_STATE,
+  type AgentApprovalPending,
+  useFeatureState,
+} from "@adapttable/react/adapter";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -154,6 +159,15 @@ export interface TableAssistantState {
   readonly stop: () => void;
   /** Drop the transcript. Refuses while a turn is in flight. */
   readonly clear: () => void;
+  /**
+   * A write waiting on the reader, or nothing.
+   *
+   * Hand it to the panel as `approval` and the conversation reviews it —
+   * which is where a write asked for in the conversation belongs. The panel
+   * draws it only when the approval's presentation names the widget, so
+   * passing it costs nothing on a table reviewing elsewhere.
+   */
+  readonly approval: AgentApprovalPending | null;
   /** The suggestions this table can run right now, re-checked every render. */
   readonly suggestions: readonly AssistantSuggestion[];
   /** Eligible suggestions past `primarySuggestions`. */
@@ -199,6 +213,9 @@ export function useTableAssistant(
   const [status, setStatus] = useState<AssistantStatus>("idle");
   const [error, setError] = useState<string | undefined>(undefined);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  // The live approval, so a host wires the panel with one prop rather than
+  // reaching for feature state itself.
+  const approval = useFeatureState(AGENT_APPROVAL_STATE);
 
   // Sending is reserved synchronously, before the first await. A state flag
   // would not be: two clicks in one tick would both read "not sending".
@@ -481,6 +498,7 @@ export function useTableAssistant(
     // Whether a turn can still be stopped. An approval parks the turn; it
     // does not end it, so Stop stays on the composer.
     busy: status === "sending",
+    approval: approval ?? null,
     suggestions: eligible.slice(0, primary),
     moreSuggestions: eligible.slice(primary),
     runSuggestion,

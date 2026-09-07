@@ -1,106 +1,225 @@
+/**
+ * The approval strip above the table.
+ *
+ * It draws only for approvals the table owns, and what it draws comes from
+ * the shared review model — so these tests cover the framing and the
+ * exclusivity, and `approvalReview.test.ts` covers the counting.
+ */
 import { defaultLabels } from "@adapttable/core";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { agentApprovalTestSlots } from "../internal/chromeTestSlots";
-import { AgentApprovalChrome } from "./AgentApprovalChrome";
+import {
+  AgentApprovalChrome,
+  type AgentApprovalPending,
+} from "./AgentApprovalChrome";
 
 function part(name: string) {
   return document.querySelector(`[data-adapttable-part="${name}"]`);
 }
 
-describe("AgentApprovalChrome", () => {
-  it("renders nothing without a pending proposal", () => {
+function parts(name: string) {
+  return [...document.querySelectorAll(`[data-adapttable-part="${name}"]`)];
+}
+
+function pending(
+  patch: Partial<AgentApprovalPending> = {}
+): AgentApprovalPending {
+  return {
+    proposals: [{ rowKey: "r1", column: "salary", before: 100, after: 200 }],
+    decisions: ["pending"],
+    presentation: "table",
+    approve: () => undefined,
+    reject: () => undefined,
+    ...patch,
+  };
+}
+
+describe("when the strip draws at all", () => {
+  it("draws nothing with no pending approval", () => {
+    const { container } = render(
+      <AgentApprovalChrome slots={agentApprovalTestSlots} />
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("draws nothing for an approval another surface owns", () => {
+    // The assistant window is reviewing this one. A second set of buttons
+    // above the table would be a second answer to one question.
     const { container } = render(
       <AgentApprovalChrome
         slots={agentApprovalTestSlots}
-        onApprove={() => undefined}
-        onReject={() => undefined}
+        pending={pending({ presentation: "widget" })}
       />
     );
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders kit buttons and the proposal list when pending", () => {
-    const onApprove = vi.fn();
-    const onReject = vi.fn();
+  it("draws the review when the table owns it", () => {
     render(
       <AgentApprovalChrome
         slots={agentApprovalTestSlots}
         labels={defaultLabels}
-        proposals={[
-          { rowKey: "5", column: "salary", before: 10, after: 20_000 },
-        ]}
-        onApprove={onApprove}
-        onReject={onReject}
+        pending={pending()}
       />
     );
-    expect(part("agent-approval")).toBeTruthy();
-    expect(part("agent-approval-list")).toBeTruthy();
-    expect(part("agent-approval-row")).toHaveTextContent("salary");
-    expect(part("agent-approval-approve")).toHaveTextContent("Approve");
-    expect(part("agent-approval-reject")).toHaveTextContent("Reject");
-    fireEvent.click(part("agent-approval-approve")!);
-    expect(onApprove).toHaveBeenCalledTimes(1);
-    fireEvent.click(part("agent-approval-reject")!);
-    expect(onReject).toHaveBeenCalledTimes(1);
+    expect(part("agent-approval")).not.toBeNull();
+    expect(part("approval-review-summary")).toHaveTextContent(
+      "1 proposed change"
+    );
+    expect(part("agent-approval-approve")).toHaveTextContent("Approve all");
+    expect(part("agent-approval-reject")).toHaveTextContent("Reject all");
+  });
+});
+
+describe("what the reader can act on", () => {
+  it("names the row and shows the change", () => {
+    render(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending({
+          proposals: [
+            {
+              rowKey: "r1",
+              rowLabel: "Ada Lovelace",
+              column: "salary",
+              before: 100,
+              after: 200,
+            },
+          ],
+        })}
+      />
+    );
+    expect(part("approval-review-change")).toHaveTextContent(
+      "Ada Lovelace · salary: 100 → 200"
+    );
   });
 
+  it("says Unavailable rather than drawing an empty cell", () => {
+    render(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending({
+          proposals: [
+            {
+              rowKey: "r1",
+              column: "ssn",
+              beforeUnavailable: true,
+              after: "x",
+            },
+          ],
+        })}
+      />
+    );
+    expect(part("approval-review-change")).toHaveTextContent("Unavailable → x");
+  });
+
+  it("offers per-row controls only when the write can be split", () => {
+    const decideAt = vi.fn();
+    const { rerender } = render(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending()}
+      />
+    );
+    expect(parts("approval-review-row-approve")).toHaveLength(0);
+
+    rerender(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending({ decideAt })}
+      />
+    );
+    fireEvent.click(part("approval-review-row-approve")!);
+    expect(decideAt).toHaveBeenCalledWith(0, true);
+  });
+
+  it("shows three changes, then opens the rest in place", () => {
+    const many = Array.from({ length: 6 }, (_, index) => ({
+      rowKey: `r${String(index)}`,
+      column: "salary",
+      after: index,
+    }));
+    render(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending({
+          proposals: many,
+          decisions: many.map(() => "pending" as const),
+        })}
+      />
+    );
+    expect(parts("agent-approval-row")).toHaveLength(3);
+    expect(part("approval-review-expand")).toHaveTextContent(
+      "Review all 6 changes"
+    );
+
+    fireEvent.click(part("approval-review-expand")!);
+    expect(parts("agent-approval-row")).toHaveLength(6);
+    // And back, without a second overlay opening anywhere.
+    fireEvent.click(part("approval-review-back")!);
+    expect(parts("agent-approval-row")).toHaveLength(3);
+  });
+
+  it("describes an operation by name and arguments, inventing no rows", () => {
+    render(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending({
+          proposals: [],
+          decisions: [],
+          operation: {
+            capability: "staff.activateAll",
+            title: "Activate everyone",
+            arguments: { status: "Active" },
+          },
+        })}
+      />
+    );
+    expect(part("approval-review-operation-name")).toHaveTextContent(
+      "Activate everyone"
+    );
+    expect(part("approval-review-operation-arguments")).toHaveTextContent(
+      '{"status":"Active"}'
+    );
+    expect(parts("agent-approval-row")).toHaveLength(0);
+    expect(parts("approval-review-row-approve")).toHaveLength(0);
+  });
+});
+
+describe("keyboard and focus", () => {
   it("moves focus into the reject control and Escape rejects", () => {
-    const onReject = vi.fn();
+    const reject = vi.fn();
     render(
       <AgentApprovalChrome
         slots={agentApprovalTestSlots}
-        proposals={[{ rowKey: "1", column: "name", after: "Ada" }]}
-        onApprove={() => undefined}
-        onReject={onReject}
+        labels={defaultLabels}
+        pending={pending({ reject })}
       />
     );
-    expect(part("agent-approval-reject")).toHaveFocus();
-    fireEvent.keyDown(part("agent-approval")!, { key: "Escape" });
-    expect(onReject).toHaveBeenCalledTimes(1);
-  });
+    expect(document.activeElement).toBe(part("agent-approval-reject"));
 
-  it("stringifies object proposal values and uses built-in copy without labels", () => {
-    render(
-      <AgentApprovalChrome
-        slots={agentApprovalTestSlots}
-        proposals={[
-          { rowKey: "1", before: { n: 1 }, after: true },
-          { rowKey: "2", column: "name", before: null },
-        ]}
-        onApprove={() => undefined}
-        onReject={() => undefined}
-      />
-    );
-    const rows = document.querySelectorAll(
-      '[data-adapttable-part="agent-approval-row"]'
-    );
-    expect(rows[0]).toHaveTextContent('{"n":1}');
-    expect(rows[0]).toHaveTextContent("true");
-    expect(rows[1]).toHaveTextContent("name");
-    expect(rows[1]).toHaveTextContent("—");
-    expect(part("agent-approval")).toHaveAttribute(
-      "aria-label",
-      "2 proposed changes"
-    );
+    fireEvent.keyDown(part("agent-approval")!, { key: "Escape" });
+    expect(reject).toHaveBeenCalledTimes(1);
   });
 
   it("does not treat Enter as a silent confirm", () => {
-    const onApprove = vi.fn();
+    const approve = vi.fn();
     render(
       <AgentApprovalChrome
         slots={agentApprovalTestSlots}
-        proposals={[{ rowKey: "1" }]}
-        onApprove={onApprove}
-        onReject={() => undefined}
+        labels={defaultLabels}
+        pending={pending({ approve })}
       />
     );
     fireEvent.keyDown(part("agent-approval")!, { key: "Enter" });
-    expect(onApprove).not.toHaveBeenCalled();
-    expect(part("agent-approval")).toHaveAttribute(
-      "aria-label",
-      "1 proposed change"
-    );
+    expect(approve).not.toHaveBeenCalled();
   });
 });

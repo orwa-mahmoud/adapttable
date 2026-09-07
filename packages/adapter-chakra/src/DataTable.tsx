@@ -335,12 +335,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                     )}
                     <FeatureSlot
                       slot={AGENT_APPROVAL}
-                      props={{
-                        proposals: approval?.proposals,
-                        onApprove: approval?.approve ?? (() => undefined),
-                        onReject: approval?.reject ?? (() => undefined),
-                        labels,
-                      }}
+                      props={{ pending: approval, labels }}
                     />
 
                     {table.selection && props.bulkActions && (

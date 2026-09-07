@@ -175,6 +175,17 @@ export {
   type AgentApprovalProps,
   type AgentApprovalSlots,
 } from "./editing/AgentApprovalChrome";
+export {
+  APPROVAL_PREVIEW_LIMIT,
+  type ApprovalReview,
+  approvalReview,
+  type ApprovalReviewItem,
+} from "./editing/approvalReview";
+export {
+  ApprovalReviewChrome,
+  type ApprovalReviewChromeProps,
+  type ApprovalReviewSlots,
+} from "./editing/ApprovalReviewChrome";
 export type { BatchEditingState } from "./editing/batchEditing";
 export type { EditableCellEditing } from "./editing/editableCellController";
 export {

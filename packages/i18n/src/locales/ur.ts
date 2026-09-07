@@ -162,6 +162,27 @@ export const ur: Required<TableLabels> = {
   approveProposal: "منظور کریں",
   rejectProposal: "مسترد کریں",
   proposalValueUnavailable: "دستیاب نہیں",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 تجویز کردہ تبدیلی"
+        : "{c} تجویز کردہ تبدیلیاں".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} قطاروں میں".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "تمام {c} تبدیلیاں دیکھیں".replace("{c}", String(count)),
+  backToConversation: "گفتگو پر واپس",
+  approveAllProposals: "سب منظور کریں",
+  approveRemainingProposals: "باقی منظور کریں",
+  rejectAllProposals: "سب مسترد کریں",
+  rejectRemainingProposals: "باقی مسترد کریں",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} منظور · {j} مسترد · {p} باقی"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "ایک تبدیلی آپ کے فیصلے کی منتظر ہے۔",
   pendingProposals: (count) =>
     count === 1
       ? "1 تجویز کردہ تبدیلی"

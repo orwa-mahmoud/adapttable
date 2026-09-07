@@ -9,6 +9,7 @@ import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalDecision,
   type AgentApprovalOperation,
+  type AgentApprovalPending,
   type AgentApprovalProposal,
   type FeatureProviderProps,
   featureStateKey,
@@ -950,7 +951,15 @@ function TableAgentProvider({
   // state on every render is noise a host cannot filter.
   const approvals = options.bridge?.approvals;
   const approvalsRef = useRef(approvals);
-  const announcedRef = useRef(false);
+  // The transaction last announced, not merely whether one was. A decision
+  // taken inside an open approval changes what a subscriber should be
+  // holding, and announcing only open-versus-closed left a panel outside the
+  // table rendering the state from before the reader touched it.
+  const announcedRef = useRef<ApprovalTransaction | null>(null);
+  // What a subscriber would be handed right now. Held in a ref because the
+  // published value is built below, and the announcement must not care about
+  // declaration order.
+  const publishedRef = useRef<AgentApprovalPending | null>(null);
 
   useEffect(() => {
     const previous = approvalsRef.current;
@@ -958,14 +967,15 @@ function TableAgentProvider({
       // A genuinely different subscriber. The one being replaced must not be
       // left believing an approval is still open, and the one arriving has
       // never been told anything.
-      if (announcedRef.current) previous?.(false);
+      if (announcedRef.current) previous?.(null);
       approvalsRef.current = approvals;
-      announcedRef.current = false;
+      announcedRef.current = null;
     }
-    if (announcedRef.current === chromePending) return;
-    announcedRef.current = chromePending;
-    approvals?.(chromePending);
-  }, [approvals, chromePending]);
+    const next = chromePending ? transaction : null;
+    if (announcedRef.current === next) return;
+    announcedRef.current = next;
+    approvals?.(next ? publishedRef.current : null);
+  }, [approvals, chromePending, transaction]);
 
   // Going away is a close. Without this the host is left showing "waiting for
   // you" for an approval whose provider no longer exists — and resolving the
@@ -975,8 +985,8 @@ function TableAgentProvider({
   useEffect(
     () => () => {
       if (!announcedRef.current) return;
-      announcedRef.current = false;
-      approvalsRef.current?.(false);
+      announcedRef.current = null;
+      approvalsRef.current?.(null);
     },
     []
   );
@@ -1035,6 +1045,8 @@ function TableAgentProvider({
             ? { decideAt: decideAt(transaction.id) }
             : {}),
         };
+
+  publishedRef.current = approvalValue;
 
   return (
     <FeatureStateScope stateKey={TABLE_AGENT_STATE} value={published}>

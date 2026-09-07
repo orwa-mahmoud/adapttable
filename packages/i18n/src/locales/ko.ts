@@ -162,6 +162,27 @@ export const ko: Required<TableLabels> = {
   approveProposal: "승인",
   rejectProposal: "거부",
   proposalValueUnavailable: "확인할 수 없음",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "제안된 변경 1건"
+        : "제안된 변경 {c}건".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r}개 행에 걸쳐".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "{c}건 모두 검토".replace("{c}", String(count)),
+  backToConversation: "대화로 돌아가기",
+  approveAllProposals: "모두 승인",
+  approveRemainingProposals: "나머지 승인",
+  rejectAllProposals: "모두 거부",
+  rejectRemainingProposals: "나머지 거부",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "승인 {a} · 거부 {j} · 남음 {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "결정을 기다리는 변경이 있습니다.",
   pendingProposals: (count) =>
     count === 1 ? "제안된 변경 1개" : `제안된 변경 ${String(count)}개`,
   proposalChange: ({ row, column, before, after }) => {

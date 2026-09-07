@@ -165,6 +165,27 @@ export const ru: Required<TableLabels> = {
   approveProposal: "Одобрить",
   rejectProposal: "Отклонить",
   proposalValueUnavailable: "Недоступно",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 предложенное изменение"
+        : "Предложено изменений: {c}".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"в {r} строках".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "Просмотреть все изменения ({c})".replace("{c}", String(count)),
+  backToConversation: "Вернуться к разговору",
+  approveAllProposals: "Одобрить все",
+  approveRemainingProposals: "Одобрить остальные",
+  rejectAllProposals: "Отклонить все",
+  rejectRemainingProposals: "Отклонить остальные",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "одобрено {a} · отклонено {j} · осталось {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Изменение ждёт вашего решения.",
   pendingProposals: (count) =>
     count === 1
       ? "1 предложенное изменение"
