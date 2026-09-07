@@ -3533,6 +3533,9 @@ export function resolveStickyToolbar(stickyHeader?: boolean, stickyToolbar?: boo
 export { resolveVirtualRows }
 
 // @public
+export function restoreFocusSoon(element: HTMLElement | null): () => void;
+
+// @public
 export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
 // @public

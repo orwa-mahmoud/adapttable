@@ -21035,6 +21035,14 @@
       "behavior": ""
     },
     {
+      "export": "restoreFocusSoon",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ROW_ACTIONS_LIVE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",

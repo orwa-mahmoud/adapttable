@@ -11650,7 +11650,10 @@ Radix drawers share),
 `useEscapeClose` / `EscapeCloseOptions` (close an overlay on Escape wherever
 focus is, since kits disagree about when they do it themselves — pass
 `ignoreWithin` a selector for controls inside that answer the key first, so
-one Escape closes one layer), and the inline icon set
+one Escape closes one layer),
+`restoreFocusSoon` (hand focus back to the control an overlay was opened
+from, reclaiming it once if the kit's own focus handling drops it, and
+leaving focus a reader moved elsewhere alone), and the inline icon set
 (`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
 `ExpandChevron`, `sortArrow`). Row reorder chrome (on each adapter):
 `RowReorderHandle`, `RowReorderHandleProps`, `RowReorderButtons`,

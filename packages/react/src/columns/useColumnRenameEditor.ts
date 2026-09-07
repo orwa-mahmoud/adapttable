@@ -6,6 +6,8 @@ import {
   useState,
 } from "react";
 
+import { restoreFocusSoon } from "../overlays/restoreFocus";
+
 /**
  * Options for the kit-owned inline column-name editor.
  *
@@ -69,64 +71,6 @@ export interface ColumnRenameEditorState {
  * @returns A cancel function for the pending restore.
  */
 /**
- * Whether focus ended up somewhere that means "nobody claimed it".
- *
- * A kit's focus scope reacts to the input unmounting by parking focus on the
- * overlay's own root — a container that still holds the trigger — or letting
- * it fall to the document. Neither is a decision; both are the gap this
- * restores from.
- *
- * Focus sitting on some *other* control is a decision: a Tab, a click, an
- * overlay that opened and took it. Those are left alone, because arguing
- * with them is how a rename editor ends up stealing focus from whatever the
- * reader moved to next.
- */
-function focusWasDropped(trigger: HTMLElement): boolean {
-  const active = document.activeElement;
-  if (active === null || active === document.body) return true;
-  // An ancestor of the trigger: a container holding it, not a peer chosen
-  // over it.
-  return active !== trigger && active.contains(trigger);
-}
-
-function restoreFocus(element: HTMLElement | null): () => void {
-  if (!element) return () => undefined;
-  const frame =
-    typeof requestAnimationFrame === "function"
-      ? requestAnimationFrame
-      : (fn: () => void) => setTimeout(fn, 0) as unknown as number;
-  const cancel =
-    typeof cancelAnimationFrame === "function"
-      ? cancelAnimationFrame
-      : (id: number) => {
-          clearTimeout(id);
-        };
-
-  // Focusing a node the kit has already removed does nothing and silently
-  // drops focus to the document, which is worse than not trying.
-  const focusIfPresent = (): void => {
-    if (element.isConnected) element.focus();
-  };
-
-  let second: number | undefined;
-  const first = frame(() => {
-    focusIfPresent();
-    // Some kits move focus to the overlay root a tick after the input
-    // unmounts, undoing the line above. One verification frame reclaims it —
-    // and only when nothing else has deliberately taken it.
-    second = frame(() => {
-      if (document.activeElement === element) return;
-      if (!focusWasDropped(element)) return;
-      focusIfPresent();
-    });
-  });
-  return () => {
-    cancel(first);
-    if (second !== undefined) cancel(second);
-  };
-}
-
-/**
  * Keep rename behavior identical while every adapter renders its own native
  * label, input and buttons. Core owns no form markup.
  *
@@ -177,7 +121,7 @@ export function useColumnRenameEditor({
   const close = useCallback(() => {
     setEditing(false);
     setError(undefined);
-    cancelRestore.current = restoreFocus(returnFocus.current);
+    cancelRestore.current = restoreFocusSoon(returnFocus.current);
   }, []);
 
   const cancel = useCallback(() => {

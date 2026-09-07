@@ -2965,6 +2965,7 @@
       "rememberFeatureHost",
       "resolveMobileLabel",
       "resolveStickyToolbar",
+      "restoreFocusSoon",
       "rowClickProps",
       "rowEditControls",
       "rowEditingSignature",

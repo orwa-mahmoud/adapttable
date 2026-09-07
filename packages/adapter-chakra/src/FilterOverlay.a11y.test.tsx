@@ -183,6 +183,20 @@ describe("filter overlay a11y (axe) — Chakra", () => {
     });
   });
 
+  it("reclaims focus the closing panel dropped to the document", async () => {
+    renderTable();
+    await openFilterForm();
+
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    // What Ark does a step later in this anchored layout: it has no trigger
+    // of its own to restore to, so focus lands nowhere.
+    (document.activeElement as HTMLElement | null)?.blur();
+
+    await waitFor(() => {
+      expect(trigger()).toHaveFocus();
+    });
+  });
+
   it("opening the drawer moves focus into the dialog behind a backdrop", async () => {
     renderTable({ filtersMode: "drawer" });
     fireEvent.click(trigger());

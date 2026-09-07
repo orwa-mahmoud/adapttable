@@ -583,15 +583,15 @@ export const rowReorderButtonsTestSlots: RowReorderButtonsSlots = {
  */
 export const tableAssistantTestSlots: TableAssistantSlots = {
   Window: ({ label, part, className, style, children }) => (
-    <section
-      role="dialog"
+    <dialog
+      open
       aria-label={label}
       data-adapttable-part={part}
       className={className}
       style={style}
     >
       {children}
-    </section>
+    </dialog>
   ),
   Suggestion: ({ title, description, icon, part, className, onClick }) => (
     <button

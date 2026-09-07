@@ -383,7 +383,11 @@ describe("the floating window", () => {
 
     const window_ = part("assistant-window");
     expect(window_).not.toBeNull();
-    expect(window_).toHaveAttribute("role", "dialog");
+    // Either the native element or the role — both announce a dialog.
+    expect(
+      window_!.tagName === "DIALOG" ||
+        window_!.getAttribute("role") === "dialog"
+    ).toBe(true);
     // Out of the document flow, so the table keeps its width behind it.
     expect(window_!.style.position).toBe("fixed");
     // The in-flow panel is not what a floating request gets.

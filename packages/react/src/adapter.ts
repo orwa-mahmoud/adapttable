@@ -504,6 +504,7 @@ export {
   resolveStickyToolbar,
   useStickyToolbarLayout,
 } from "./layout/useStickyToolbarLayout";
+export { restoreFocusSoon } from "./overlays/restoreFocus";
 export {
   type EscapeCloseOptions,
   useEscapeClose,

@@ -151,15 +151,19 @@ function AssistantWindow({
   children,
 }: Readonly<TableAssistantWindowProps>) {
   return (
-    <section
-      role="dialog"
+    // The native element rather than `role="dialog"`: it is nonmodal here —
+    // `open` rather than `showModal()` — so the table behind it stays
+    // operable, and the UA's own margin is cleared because the chrome
+    // positions this itself.
+    <dialog
+      open
       aria-label={label}
       data-adapttable-part={part}
       className={className}
-      style={style}
+      style={{ margin: 0, padding: 0, border: 0, ...style }}
     >
       {children}
-    </section>
+    </dialog>
   );
 }
 
