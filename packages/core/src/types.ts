@@ -686,6 +686,28 @@ export interface TableLabels {
     capability?: string;
     status: string;
   }) => string;
+  /** Reopens the examples once a conversation has started. */
+  assistantExamples?: string;
+  /** Opens the eligible examples a first screen did not have room for. */
+  assistantMoreExamples?: string;
+  /** One receipt status on its own, when the action's kind is unknown. */
+  assistantReceiptStatus?: (status: string) => string;
+  /**
+   * A receipt's headline, from what changed and what became of it.
+   *
+   * Returns `undefined` for a pair this language has no sentence for, and
+   * the panel falls back to {@link TableLabels.assistantReceiptStatus} —
+   * a technical capability key never reaches the reader either way.
+   */
+  assistantReceiptAction?: (action: {
+    kind?: string;
+    status: string;
+  }) => string | undefined;
+  /** An edit's before/after pair, spoken for assistive technology. */
+  assistantReceiptChange?: (change: {
+    before: string;
+    after: string;
+  }) => string;
   /** The toolbar control that adds a row (`onAddRow`). */
   addRow?: string;
   /** The row action that copies a row (`onDuplicateRow`). */

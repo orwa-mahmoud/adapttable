@@ -184,7 +184,7 @@ describe("the empty state", () => {
     });
 
     expect(part("assistant-empty-prompt")).toHaveTextContent(
-      "What would you like to do with this table?"
+      "What would you like to do?"
     );
     expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
   });
@@ -273,6 +273,7 @@ describe("the transcript", () => {
                 capabilityKey: "view.setGroupBy",
                 status: "executed",
                 idempotencyKey: "k1",
+                subject: { kind: "group", detail: "Team" },
               },
             ],
           },
@@ -280,8 +281,12 @@ describe("the transcript", () => {
       }),
     });
 
-    expect(part("assistant-receipt-summary")).toHaveTextContent(
-      "view.setGroupBy: done"
+    // The card names what changed, in the reader's terms.
+    expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
+    expect(part("assistant-receipt-summary")).toHaveTextContent("Team");
+    // A technical capability key never reaches the ordinary conversation.
+    expect(part("assistant-receipt-summary")).not.toHaveTextContent(
+      "view.setGroupBy"
     );
     expect(part("assistant-receipt")).toHaveAttribute(
       "data-status",
@@ -504,15 +509,17 @@ describe("without labels", () => {
     // No labels means no translation table either, so the raw token is
     // softened rather than shown with its hyphen.
     expect(part("assistant-connection")).toHaveTextContent("awaiting approval");
-    expect(part("assistant-send")).toHaveTextContent("Send");
-    expect(part("assistant-close")).toHaveTextContent("Close");
+    // Send and Close are icon controls: the English reaches the reader as
+    // their accessible name, which is what a screen reader announces.
+    expect(part("assistant-send")).toHaveAccessibleName("Send");
+    expect(part("assistant-close")).toHaveAccessibleName("Close");
   });
 
   it("asks its question and offers its placeholder", () => {
     bare();
 
     expect(part("assistant-empty-prompt")).toHaveTextContent(
-      "What would you like to do with this table?"
+      "What would you like to do?"
     );
     expect(part("assistant-input")).toHaveAttribute(
       "placeholder",
@@ -544,8 +551,11 @@ describe("without labels", () => {
     expect(
       parts("assistant-message-speaker").map((el) => el.textContent)
     ).toEqual(["You", "Assistant"]);
-    expect(part("assistant-receipt-summary")).toHaveTextContent(
-      "edit.cells: staged"
+    // Without a subject the card still reports the status honestly, and
+    // still keeps the capability key out of the summary.
+    expect(part("assistant-receipt-summary")).toHaveTextContent("staged");
+    expect(part("assistant-receipt-summary")).not.toHaveTextContent(
+      "edit.cells"
     );
     expect(part("assistant-receipt-save")).toHaveTextContent(
       "Save in the table"
@@ -557,7 +567,7 @@ describe("without labels", () => {
     expect(part("assistant-launcher")).toHaveTextContent("Ask AI");
 
     bare({ assistant: view({ status: "sending" }) });
-    expect(part("assistant-stop")).toHaveTextContent("Stop");
+    expect(part("assistant-stop")).toHaveAccessibleName("Stop");
 
     bare({ presentation: "sheet" });
     expect(part("assistant-back")).toHaveTextContent("Back to table");

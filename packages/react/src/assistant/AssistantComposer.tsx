@@ -10,6 +10,7 @@
 import type { TableLabels } from "@adapttable/core";
 import type { KeyboardEvent, ReactElement } from "react";
 
+import { SendIcon, StopIcon } from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
 import { assistantIsBusy, assistantIsUsable } from "./assistantView";
 
@@ -55,31 +56,48 @@ export function AssistantComposer({
         display: "flex",
         alignItems: "flex-end",
         gap: "0.35em",
+        padding: "0.35em 0.35em 0.35em 0.6em",
+        borderRadius: "1.1em",
+        border: "1px solid currentColor",
+        borderColor: "color-mix(in srgb, currentColor 22%, transparent)",
+        background: "color-mix(in srgb, currentColor 3%, transparent)",
         position: "sticky",
         insetBlockEnd: 0,
+        flexShrink: 0,
       }}
     >
-      <Composer
-        label={labels?.assistantPlaceholder ?? "Ask about this table…"}
-        placeholder={labels?.assistantPlaceholder ?? "Ask about this table…"}
-        part="assistant-input"
-        value={draft}
-        disabled={!usable}
-        onChange={setDraft}
-        onKeyDown={onKeyDown}
-      />
+      {/* The input takes the room that is left. Without `minWidth: 0` a
+          textarea's intrinsic width wins the flex negotiation and pushes Send
+          off the end of a 400px window. */}
+      <span style={{ flex: "1 1 auto", minWidth: 0, display: "flex" }}>
+        <Composer
+          label={labels?.assistantPlaceholder ?? "Ask about this table…"}
+          placeholder={labels?.assistantPlaceholder ?? "Ask about this table…"}
+          part="assistant-input"
+          value={draft}
+          disabled={!usable}
+          onChange={setDraft}
+          onKeyDown={onKeyDown}
+        />
+      </span>
       {busy ? (
         <Button
           label={labels?.assistantStop ?? "Stop"}
+          tooltip={labels?.assistantStop ?? "Stop"}
           part="assistant-stop"
           variant="secondary"
+          icon={<StopIcon />}
+          iconOnly
           onClick={onStop}
         />
       ) : (
         <Button
           label={labels?.assistantSend ?? "Send"}
+          tooltip={labels?.assistantSend ?? "Send"}
           part="assistant-send"
           variant="primary"
+          icon={<SendIcon />}
+          iconOnly
           disabled={!usable || draft.trim() === ""}
           onClick={onSend}
         />

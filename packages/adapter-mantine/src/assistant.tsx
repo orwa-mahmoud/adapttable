@@ -10,8 +10,20 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
-import { Badge, Button, Drawer, Paper, Textarea } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Drawer,
+  Paper,
+  Text,
+  Textarea,
+  Tooltip,
+  UnstyledButton,
+} from "@mantine/core";
 
 const BADGE_COLOR: Record<string, string> = {
   neutral: "gray",
@@ -35,8 +47,38 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  if (iconOnly) {
+    // Mantine's own icon control, so the header's controls are the size and
+    // shape a Mantine reader already knows.
+    const control = (
+      <ActionIcon
+        type="button"
+        size="md"
+        variant={variant === "primary" ? "filled" : "subtle"}
+        color={variant === "primary" ? undefined : "gray"}
+        aria-label={label}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {icon}
+      </ActionIcon>
+    );
+    return tooltip ? (
+      <Tooltip label={tooltip} withArrow>
+        {control}
+      </Tooltip>
+    ) : (
+      control
+    );
+  }
   return (
     <Button
       type="button"
@@ -44,6 +86,7 @@ function AssistantButton({
       variant={KIT_VARIANT[variant]}
       aria-label={label}
       aria-expanded={expanded}
+      leftSection={icon}
       data-adapttable-part={part}
       className={className}
       disabled={disabled}
@@ -51,6 +94,92 @@ function AssistantButton({
     >
       {children ?? label}
     </Button>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <UnstyledButton
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      style={{
+        display: "flex",
+        gap: "var(--mantine-spacing-xs)",
+        alignItems: "flex-start",
+        padding: "var(--mantine-spacing-xs)",
+        borderRadius: "var(--mantine-radius-md)",
+        border: "1px solid var(--mantine-color-default-border)",
+        background: "var(--mantine-color-body)",
+        textAlign: "start",
+        width: "100%",
+      }}
+    >
+      <Text
+        component="span"
+        c="dimmed"
+        style={{ display: "flex", marginTop: 2 }}
+      >
+        {icon}
+      </Text>
+      <span>
+        <Text
+          component="span"
+          fw={500}
+          size="sm"
+          display="block"
+          data-adapttable-part="assistant-suggestion-title"
+        >
+          {title}
+        </Text>
+        {description ? (
+          <Text
+            component="span"
+            c="dimmed"
+            size="xs"
+            display="block"
+            data-adapttable-part="assistant-suggestion-description"
+          >
+            {description}
+          </Text>
+        ) : null}
+      </span>
+    </UnstyledButton>
+  );
+}
+
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Paper
+      component="section"
+      withBorder
+      shadow="lg"
+      radius="md"
+      p="sm"
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={style}
+    >
+      {children}
+    </Paper>
   );
 }
 
@@ -66,9 +195,22 @@ function AssistantInput({
 }: Readonly<TableAssistantComposerProps>) {
   return (
     <Textarea
-      rows={2}
-      resize="vertical"
+      rows={1}
+      // Grows with what is typed, up to a cap, without Mantine's JS autosize:
+      // that one listens to APIs jsdom does not implement, so every test that
+      // renders the composer dies before it asserts anything.
+      // No resize grip either — the window sizes itself, and a grip that drags
+      // the input over the transcript is not a control anyone wants here.
+      resize="none"
+      variant="unstyled"
       w="100%"
+      styles={{
+        input: {
+          fieldSizing: "content",
+          maxHeight: "8lh",
+          minHeight: "1lh",
+        },
+      }}
       aria-label={label}
       placeholder={placeholder}
       data-adapttable-part={part}
@@ -140,14 +282,15 @@ function AssistantSheet({
     <Drawer.Root opened={open} onClose={onClose} position="bottom" size="90%">
       <Drawer.Overlay />
       <Drawer.Content
+        aria-label={label}
         data-adapttable-part={part}
         className={className}
         style={{ display: "flex", flexDirection: "column" }}
       >
-        <Drawer.Header>
-          <Drawer.Title>{label}</Drawer.Title>
-          <Drawer.CloseButton />
-        </Drawer.Header>
+        {/* No Drawer.Header: the chrome draws one compact header — title,
+            status, settings and close — and a kit header above it would say
+            the same thing twice and close the sheet from two places. The
+            surface is still named for assistive technology below. */}
         <Drawer.Body
           style={{
             flex: 1,
@@ -179,6 +322,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

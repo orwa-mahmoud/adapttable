@@ -56,6 +56,9 @@ describe("defaultLabels — every function label", () => {
       { fromRow: 1, toRow: 2, fromColumn: 3, toColumn: 4, cells: 8 },
     ],
     findMatchCount: [2, 7],
+    assistantReceiptStatus: ["staged"],
+    assistantReceiptAction: [{ kind: "filter", status: "executed" }],
+    assistantReceiptChange: [{ before: "BEFORE_X", after: "AFTER_X" }],
     groupTotal: ["Core"],
     proposalChange: [
       {

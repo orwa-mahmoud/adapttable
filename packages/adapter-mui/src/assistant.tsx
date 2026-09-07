@@ -10,8 +10,20 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
-import { Button, Chip, Drawer, Paper, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  ButtonBase,
+  Chip,
+  Drawer,
+  IconButton,
+  Paper,
+  TextField,
+  Tooltip,
+} from "@mui/material";
 
 const CHIP_COLOR = {
   neutral: "default",
@@ -35,11 +47,36 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  if (iconOnly) {
+    const control = (
+      <IconButton
+        type="button"
+        size="small"
+        aria-label={label}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {icon}
+      </IconButton>
+    );
+    return tooltip ? (
+      <Tooltip title={tooltip}>{<span>{control}</span>}</Tooltip>
+    ) : (
+      control
+    );
+  }
   return (
     <Button
       type="button"
+      startIcon={icon}
       size="small"
       variant={KIT_VARIANT[variant]}
       aria-label={label}
@@ -166,6 +203,89 @@ function AssistantSheet({
   );
 }
 
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Paper
+      component="section"
+      elevation={8}
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={style}
+      sx={{ p: 1.5, borderRadius: 2 }}
+    >
+      {children}
+    </Paper>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <ButtonBase
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      sx={{
+        display: "flex",
+        gap: 1,
+        alignItems: "flex-start",
+        p: 1,
+        borderRadius: 1.5,
+        border: 1,
+        borderColor: "divider",
+        textAlign: "start",
+        width: "100%",
+        justifyContent: "flex-start",
+      }}
+    >
+      <Box
+        component="span"
+        sx={{ display: "flex", mt: "2px", color: "text.secondary" }}
+      >
+        {icon}
+      </Box>
+      <Box component="span">
+        <Box
+          component="span"
+          sx={{ display: "block", fontWeight: 500, fontSize: "0.875rem" }}
+          data-adapttable-part="assistant-suggestion-title"
+        >
+          {title}
+        </Box>
+        {description ? (
+          <Box
+            component="span"
+            sx={{
+              display: "block",
+              fontSize: "0.75rem",
+              color: "text.secondary",
+            }}
+            data-adapttable-part="assistant-suggestion-description"
+          >
+            {description}
+          </Box>
+        ) : null}
+      </Box>
+    </ButtonBase>
+  );
+}
+
 /**
  * Ask this table a question, in MUI.
  *
@@ -181,6 +301,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

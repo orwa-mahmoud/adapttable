@@ -179,6 +179,7 @@ export type ApprovalPolicy = "writes" | "destructive" | "never";
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
+    readonly kind?: string;
     readonly prompt: string;
     readonly requires?: readonly string[];
     readonly title: string;

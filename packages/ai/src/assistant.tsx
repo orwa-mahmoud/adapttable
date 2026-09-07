@@ -49,6 +49,7 @@ export type {
 export type {
   AssistantReceipt,
   AssistantReceiptStatus,
+  AssistantReceiptSubject,
   AssistantTurnStatus,
 } from "./assistantReceipts";
 export type {
@@ -315,7 +316,8 @@ export function useTableAssistant(
       const receipts = receiptsFromResults(
         reply.results ?? [],
         reply.keys,
-        session?.manifest().policy.commit
+        session?.manifest().policy.commit,
+        reply.subjects
       );
       seq.current += 1;
       push({

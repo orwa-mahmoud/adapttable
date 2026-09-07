@@ -25,14 +25,7 @@ import {
 } from "@adapttable/core";
 import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
 import type { TableFeature } from "@adapttable/react/features";
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import { type AiConnection, AiConnectionSettings } from "./AiBackendConnect";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
@@ -157,33 +150,22 @@ const DEMO_CONTEXT = { namedRowKey: "p1", pinnedColumnKey: "person" };
  */
 const SUGGESTIONS: AssistantSuggestion[] = DEMO_SCENARIOS.map((scenario) => ({
   id: scenario.prompt,
-  title: scenario.prompt,
+  // The card leads with what it does; the prompt it will send reads as the
+  // supporting line, so a reader knows exactly what is about to be asked.
+  title: scenario.title,
+  description: scenario.prompt,
+  kind: scenario.kind,
   prompt: scenario.prompt,
   requires: scenario.requires,
 }));
 
 /**
- * Below this the table and a 380px panel cannot both be useful, so the panel
- * becomes the kit's own modal sheet instead of a column squeezed to nothing.
+ * Below this a floating window would sit on top of the table rather than
+ * beside it, so the demo starts closed and shows its launcher instead. The
+ * widget makes its own presentation choice; this only decides what a first
+ * paint looks like.
  */
 const NARROW = "(max-width: 900px)";
-
-function useNarrowViewport(): boolean {
-  const [narrow, setNarrow] = useState(
-    () => typeof window !== "undefined" && window.matchMedia(NARROW).matches
-  );
-  useEffect(() => {
-    const query = window.matchMedia(NARROW);
-    const onChange = (): void => {
-      setNarrow(query.matches);
-    };
-    query.addEventListener("change", onChange);
-    return () => {
-      query.removeEventListener("change", onChange);
-    };
-  }, []);
-  return narrow;
-}
 
 function readRtl(): boolean {
   if (typeof window === "undefined") return false;
@@ -267,7 +249,6 @@ const INITIAL_TOGGLES: DemoToggles = {
 };
 
 export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
-  const narrow = useNarrowViewport();
   const [rtl, setRtl] = useState(readRtl);
   const [toggles, setToggles] = useState<DemoToggles>(INITIAL_TOGGLES);
   const [rows, setRows] = useState<StaffRow[]>(() => [...SEED]);
@@ -397,24 +378,102 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   return (
     <div className="ai-demo" dir={rtl ? "rtl" : "ltr"} data-adapter={adapter}>
       <header className="ai-demo__hero">
-        <h3>Your table, controlled through conversation</h3>
-        <p>
+        <p className="ai-demo__lede">
           The application decides what the assistant may do and what it may save
           — the table asks, your code answers.
         </p>
-      </header>
-
-      <nav className="ai-demo__kits" aria-label="Same demo in another adapter">
-        {SHOWCASE_ADAPTERS.filter((kit) => kit.built).map((kit) => (
-          <a
-            key={kit.key}
-            href={`../../${kit.key}/ai/`}
-            aria-current={kit.key === adapter ? "page" : undefined}
+        <div className="ai-demo__controls">
+          <nav
+            className="ai-demo__kits"
+            aria-label="Same demo in another adapter"
           >
-            {kit.label}
-          </a>
-        ))}
-      </nav>
+            {SHOWCASE_ADAPTERS.filter((kit) => kit.built).map((kit) => (
+              <a
+                key={kit.key}
+                href={`../../${kit.key}/ai/`}
+                aria-current={kit.key === adapter ? "page" : undefined}
+              >
+                {kit.label}
+              </a>
+            ))}
+          </nav>
+          {/* Which conversation this is, without opening anything: "Ready"
+              alone would let a scripted demo read as a live model. */}
+          <span
+            className="ai-demo__mode"
+            data-mode={connection.mode}
+            data-testid="ai-demo-mode"
+          >
+            {connection.mode === "simulated"
+              ? "Simulated demo"
+              : "Connected backend"}
+          </span>
+          <button
+            type="button"
+            className="ai-demo__options-trigger"
+            data-testid="ai-demo-options"
+            aria-expanded={demoOpen}
+            onClick={() => {
+              setDemoOpen((current) => !current);
+            }}
+          >
+            Demo options
+          </button>
+        </div>
+        {demoOpen ? (
+          <div
+            className="ai-demo__options"
+            role="group"
+            aria-label="Demo options"
+          >
+            <div className="ai-demo__toggles">
+              {(
+                [
+                  ["editing", "Allow editing"],
+                  ["grouping", "Grouping"],
+                  ["rowPinning", "Row pinning"],
+                  ["columnPinning", "Column pinning"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`seg__btn${toggles[key] ? " is-on" : ""}`}
+                  aria-pressed={toggles[key]}
+                  data-testid={`ai-toggle-${key}`}
+                  onClick={toggle(key)}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`seg__btn${rtl ? " is-on" : ""}`}
+                aria-pressed={rtl}
+                onClick={() => {
+                  setRtl((current) => !current);
+                }}
+              >
+                RTL
+              </button>
+              <button
+                type="button"
+                className="seg__btn"
+                data-testid="ai-reset"
+                onClick={reset}
+              >
+                Reset demo
+              </button>
+            </div>
+            <p className="ai-demo__note">
+              Turn a feature off and the assistant offers less: it only ever
+              suggests what this table currently wires. Grouping is the clearest
+              case — a grouped table is a nested list, so the row pinning
+              examples leave while it is on.
+            </p>
+          </div>
+        ) : null}
+      </header>
 
       <div className="ai-demo__stage">
         <KitProvider kit={adapter} dark={dark} dir={rtl ? "rtl" : "ltr"}>
@@ -428,14 +487,18 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               classNames={kitClassNames(adapter)}
             />
           </Suspense>
-          <aside className="ai-demo__panel">
+          <div className="ai-demo__assistant">
             <Assistant
               assistant={assistant}
               labels={defaultLabels}
               open={assistant.open}
               onOpenChange={assistant.setOpen}
-              presentation={narrow ? "sheet" : "panel"}
-              launcher={narrow}
+              presentation="floating"
+              note={
+                connection.mode === "simulated"
+                  ? "These examples are scripted. Connect a backend to ask anything."
+                  : undefined
+              }
               onSettings={() => {
                 setSettingsOpen((current) => !current);
               }}
@@ -451,65 +514,9 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 }}
               />
             ) : null}
-          </aside>
+          </div>
         </KitProvider>
       </div>
-
-      <details
-        className="ai-demo__settings"
-        open={demoOpen}
-        onToggle={(event) => {
-          setDemoOpen(event.currentTarget.open);
-        }}
-      >
-        <summary>Demo settings</summary>
-        <div className="ai-demo__toggles">
-          {(
-            [
-              ["editing", "Enable editing"],
-              ["grouping", "Grouping"],
-              ["rowPinning", "Row pinning"],
-              ["columnPinning", "Column pinning"],
-            ] as const
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              className={`seg__btn${toggles[key] ? " is-on" : ""}`}
-              aria-pressed={toggles[key]}
-              data-testid={`ai-toggle-${key}`}
-              onClick={toggle(key)}
-            >
-              {label}
-            </button>
-          ))}
-          <button
-            type="button"
-            className={`seg__btn${rtl ? " is-on" : ""}`}
-            aria-pressed={rtl}
-            onClick={() => {
-              setRtl((current) => !current);
-            }}
-          >
-            RTL
-          </button>
-          <button
-            type="button"
-            className="seg__btn"
-            data-testid="ai-reset"
-            onClick={reset}
-          >
-            Reset demo
-          </button>
-        </div>
-        <p className="ai-demo__note">
-          Turn a feature off and watch the suggestions above change: the
-          assistant offers only what this table currently wires. Grouping is a
-          real example of that — a grouped table is a nested list, so the row
-          pinning examples disappear while it is on and come back when it is
-          off.
-        </p>
-      </details>
 
       <details
         className="ai-demo__dev"
@@ -518,7 +525,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           setDetailsOpen(event.currentTarget.open);
         }}
       >
-        <summary>Developer details</summary>
+        <summary>Developer inspector</summary>
         <p className="ai-demo__revision">
           Revision {manifest?.viewRevision ?? "—"} · {catalog.length}{" "}
           capabilities wired

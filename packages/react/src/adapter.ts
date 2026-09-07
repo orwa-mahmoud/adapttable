@@ -1043,16 +1043,20 @@ export type {
   TableAssistantPanelProps,
   TableAssistantSheetProps,
   TableAssistantSlots,
+  TableAssistantSuggestionProps,
+  TableAssistantWindowProps,
 } from "./assistant/assistantSlots";
 export {
   assistantIsUsable,
   type TableAssistantMessageView,
+  type TableAssistantReceiptSubject,
   type TableAssistantReceiptView,
   type TableAssistantSuggestionView,
   type TableAssistantView,
 } from "./assistant/assistantView";
 export {
   assistantIsBusy,
+  type TableAssistantBoundary,
   TableAssistantChrome,
   type TableAssistantChromeProps,
   type TableAssistantPresentation,

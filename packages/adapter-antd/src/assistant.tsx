@@ -10,8 +10,10 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
-import { Button, Card, Drawer, Input, Tag } from "antd";
+import { Button, Card, Drawer, Input, Tag, Tooltip, Typography } from "antd";
 
 const TAG_COLOR: Record<string, string | undefined> = {
   neutral: undefined,
@@ -35,8 +37,27 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  if (iconOnly) {
+    const control = (
+      <Button
+        type="text"
+        size="small"
+        icon={icon}
+        aria-label={label}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      />
+    );
+    return tooltip ? <Tooltip title={tooltip}>{control}</Tooltip> : control;
+  }
   return (
     <Button
       htmlType="button"
@@ -160,6 +181,94 @@ function AssistantSheet({
   );
 }
 
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Card
+      size="small"
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={{ ...style, boxShadow: "var(--ant-box-shadow-secondary)" }}
+      styles={{
+        body: {
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        },
+      }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      style={{
+        display: "flex",
+        gap: 8,
+        alignItems: "flex-start",
+        padding: 8,
+        borderRadius: "var(--ant-border-radius)",
+        border: "1px solid var(--ant-color-border)",
+        background: "var(--ant-color-bg-container)",
+        color: "inherit",
+        font: "inherit",
+        textAlign: "start",
+        width: "100%",
+        cursor: "pointer",
+      }}
+    >
+      <Typography.Text
+        type="secondary"
+        style={{ display: "flex", marginTop: 2 }}
+      >
+        {icon}
+      </Typography.Text>
+      <span>
+        <Typography.Text
+          strong
+          style={{ display: "block" }}
+          data-adapttable-part="assistant-suggestion-title"
+        >
+          {title}
+        </Typography.Text>
+        {description ? (
+          <Typography.Text
+            type="secondary"
+            style={{ display: "block", fontSize: 12 }}
+            data-adapttable-part="assistant-suggestion-description"
+          >
+            {description}
+          </Typography.Text>
+        ) : null}
+      </span>
+    </button>
+  );
+}
+
 /**
  * Ask this table a question, in Ant Design.
  *
@@ -175,6 +284,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

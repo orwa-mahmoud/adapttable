@@ -12,6 +12,25 @@ const ASSISTANT_CONNECTION: Readonly<Record<string, string>> = {
 };
 
 /** What became of one action, in English. */
+/**
+ * What a receipt's headline says, per (kind, status).
+ *
+ * Written out rather than composed from two halves because English is the
+ * only language where "filter" + "applied" reliably reads as a sentence, and
+ * a translator needs the whole phrase to work with.
+ */
+const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
+  "filter/executed": "Filter applied",
+  "filter/staged": "Filter staged",
+  "sort/executed": "Sorted",
+  "group/executed": "Grouped",
+  "pin/executed": "Column pinned",
+  "edit/executed": "Saved",
+  "edit/staged": "Edit staged — not saved",
+  "edit/awaiting-approval": "Edit awaiting approval",
+  "edit/rejected": "Edit refused",
+};
+
 const ASSISTANT_RECEIPT: Readonly<Record<string, string>> = {
   executed: "done",
   staged: "staged",
@@ -182,7 +201,7 @@ export const defaultLabels: Required<TableLabels> = {
   assistantOpen: "Ask AI",
   assistantClose: "Close",
   assistantSettings: "Assistant settings",
-  assistantEmpty: "What would you like to do with this table?",
+  assistantEmpty: "What would you like to do?",
   assistantPlaceholder: "Ask about this table…",
   assistantSend: "Send",
   assistantStop: "Stop",
@@ -198,6 +217,14 @@ export const defaultLabels: Required<TableLabels> = {
     const what = ASSISTANT_RECEIPT[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantExamples: "Examples",
+  assistantMoreExamples: "More examples",
+  assistantReceiptStatus: (status) =>
+    ASSISTANT_RECEIPT[status] ?? String(status),
+  assistantReceiptAction: ({ kind, status }) =>
+    kind ? ASSISTANT_RECEIPT_ACTION[`${kind}/${status}`] : undefined,
+  assistantReceiptChange: ({ before, after }) =>
+    `Changed from ${before} to ${after}`,
   addRow: "Add row",
   duplicateRow: "Duplicate row",
   deleteRow: "Delete row",

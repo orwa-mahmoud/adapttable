@@ -25,6 +25,7 @@ export type {
   AssistantTransport,
   AssistantTransportReply,
 } from "./assistantContracts";
+export type { AssistantReceiptSubject } from "./assistantReceipts";
 export {
   AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,
   AGENT_SCHEMA_VERSION,

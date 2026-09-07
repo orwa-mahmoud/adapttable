@@ -22,6 +22,17 @@ async function mountedTable(page: Page) {
   return table.or(cards).first();
 }
 
+/**
+ * The demo's own table controls, now a button above the table rather than a
+ * disclosure below it.
+ */
+async function openDemoOptions(page: Page): Promise<void> {
+  const trigger = page.getByTestId("ai-demo-options");
+  if ((await trigger.getAttribute("aria-expanded")) === "true") return;
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+}
+
 async function openDemo(page: Page, kit: string): Promise<void> {
   await page.goto(`/${kit}/ai/`);
   await expect(page.locator(".ai-demo")).toBeVisible();
@@ -108,7 +119,9 @@ async function connectMockBackend(page: Page): Promise<void> {
 
 /** The rows only — reading the panel too would make the transcript count. */
 async function visibleTableText(page: Page): Promise<string> {
-  const region = page.locator(".ai-demo__stage > :not(.ai-demo__panel)").last();
+  const region = page
+    .locator(".ai-demo__stage > :not(.ai-demo__assistant)")
+    .last();
   return (await region.innerText()).replace(/\s+/g, " ");
 }
 
@@ -155,7 +168,12 @@ for (const kit of kits) {
       .not.toContain("Jonah");
     // The reply is not the evidence — the rows are.
     expect(await visibleTableText(page)).toContain("Chioma");
-    expect(await receipts(page)).toContain("view.setFilters: done");
+    // The card names the change in the reader's terms, and the technical
+    // capability key stays out of the ordinary conversation.
+    const applied = await receipts(page);
+    expect(applied.join(" ")).toContain("Filter applied");
+    expect(applied.join(" ")).toContain("Team is Core");
+    expect(applied.join(" ")).not.toContain("view.setFilters");
   });
 }
 
@@ -205,8 +223,8 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     // applied. Telling the reader "done" while the table shows an unsaved row
     // is the lie this asserts against.
     await expect
-      .poll(async () => receipts(page))
-      .toContain("edit.cells: staged");
+      .poll(async () => (await receipts(page)).join(" "))
+      .toContain("Edit staged");
     await expect(page.locator(part("assistant-receipt-save"))).toContainText(
       "Save in the table"
     );
@@ -218,14 +236,14 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     // and its examples must not be offered.
     expect(await catalogText(page)).not.toContain("view.pinRow");
 
-    await page.locator(".ai-demo__settings summary").click();
+    await openDemoOptions(page);
     await page.getByTestId("ai-toggle-grouping").click();
 
     await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
   });
 
   test("pins a column and a row through the assistant", async ({ page }) => {
-    await page.locator(".ai-demo__settings summary").click();
+    await openDemoOptions(page);
     await page.getByTestId("ai-toggle-grouping").click();
     await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
 
@@ -246,7 +264,7 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
       .poll(async () => visibleTableText(page))
       .not.toContain("Jonah");
 
-    await page.locator(".ai-demo__settings summary").click();
+    await openDemoOptions(page);
     await page.getByTestId("ai-reset").click();
 
     await expect.poll(async () => visibleTableText(page)).toContain("Jonah");
@@ -310,7 +328,7 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
   });
 
   test("reads right-to-left", async ({ page }) => {
-    await page.locator(".ai-demo__settings summary").click();
+    await openDemoOptions(page);
     await page
       .locator(".ai-demo__toggles")
       .getByRole("button", { name: "RTL" })

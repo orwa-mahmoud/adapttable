@@ -226,10 +226,23 @@ export interface AssistantReceipt {
     readonly idempotencyKey: string;
     readonly message?: string;
     readonly status: AssistantReceiptStatus;
+    readonly subject?: AssistantReceiptSubject;
 }
 
 // @public
 export type AssistantReceiptStatus = "executed" | "staged" | "rejected" | "awaiting-approval" | "cancelled" | "stale" | "failed";
+
+// @public
+export interface AssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly kind?: string;
+    readonly row?: string;
+}
 
 // @public
 export interface AssistantRequest {
@@ -242,6 +255,7 @@ export interface AssistantRequest {
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
+    readonly kind?: string;
     readonly prompt: string;
     readonly requires?: readonly string[];
     readonly title: string;
@@ -266,6 +280,7 @@ export interface AssistantTransport {
 export interface AssistantTransportReply {
     readonly keys?: readonly string[];
     readonly results?: readonly ExecuteResult[];
+    readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
 }
 
@@ -381,10 +396,10 @@ export interface JsonSchema {
 export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
 
 // @public
-export function receiptFromResult(result: ExecuteResult, capabilityKey?: string, commit?: CommitPolicy): AssistantReceipt;
+export function receiptFromResult(result: ExecuteResult, capabilityKey?: string, commit?: CommitPolicy, subject?: AssistantReceiptSubject): AssistantReceipt;
 
 // @public
-export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[], commit?: CommitPolicy): readonly AssistantReceipt[];
+export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[], commit?: CommitPolicy, subjects?: readonly (AssistantReceiptSubject | undefined)[]): readonly AssistantReceipt[];
 
 // @public
 export interface ResolvedRow {

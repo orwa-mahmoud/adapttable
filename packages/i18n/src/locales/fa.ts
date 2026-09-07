@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "انجام شد",
+  staged: "آماده‌سازی شد",
+  rejected: "رد شد",
+  "awaiting-approval": "در انتظار شما",
+  cancelled: "لغو شد",
+  stale: "منسوخ",
+  failed: "ناموفق",
+};
+
 export const fa: Required<TableLabels> = {
   table: "جدول داده",
   search: "جستجو",
@@ -171,6 +182,26 @@ export const fa: Required<TableLabels> = {
   assistantBackToTable: "بازگشت به جدول",
   assistantDetail: "جزئیات",
   assistantSaveInTable: "برای حفظ این تغییر در جدول ذخیره کنید.",
+  assistantExamples: "نمونه‌ها",
+  assistantMoreExamples: "نمونه‌های بیشتر",
+  assistantReceiptChange: ({ before, after }) =>
+    `از ${before} به ${after} تغییر کرد`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "فیلتر اعمال شد",
+            "filter/staged": "فیلتر آماده شد",
+            "sort/executed": "مرتب شد",
+            "group/executed": "گروه‌بندی شد",
+            "pin/executed": "ستون سنجاق شد",
+            "edit/executed": "ذخیره شد",
+            "edit/staged": "ویرایش آماده شد — ذخیره نشده",
+            "edit/awaiting-approval": "ویرایش در انتظار تأیید",
+            "edit/rejected": "ویرایش رد شد",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "بی‌کار",
@@ -182,18 +213,10 @@ export const fa: Required<TableLabels> = {
       disconnected: "متصل نیست",
     })[status] ?? "آماده",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "انجام شد",
-        staged: "آماده‌سازی شد",
-        rejected: "رد شد",
-        "awaiting-approval": "در انتظار شما",
-        cancelled: "لغو شد",
-        stale: "منسوخ",
-        failed: "ناموفق",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "افزودن ردیف",
   duplicateRow: "تکثیر ردیف",
   deleteRow: "حذف ردیف",

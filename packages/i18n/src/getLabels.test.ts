@@ -110,7 +110,12 @@ describe("presets", () => {
   });
 });
 
-type AnyLabelFn = (...args: never[]) => string;
+/**
+ * A label function as this file calls it. The return widens to include
+ * `undefined` because a headline label may legitimately have no sentence for
+ * a pair it was not given one for, and falls back rather than inventing one.
+ */
+type AnyLabelFn = (...args: never[]) => string | undefined;
 
 /** How to invoke each function label with distinguishable arguments. */
 const INTERPOLATION_CASES: Record<
@@ -138,6 +143,32 @@ const INTERPOLATION_CASES: Record<
         status: "staged",
       }),
     expects: ["view.pinColumn"],
+  },
+  /**
+   * Like the badge above, a receipt's headline translates its tokens rather
+   * than repeating them, so neither `kind` nor `status` survives into the
+   * output. It may also decline a pair it has no sentence for, which is why
+   * the assertions below cover both the known and the unknown case.
+   */
+  assistantReceiptStatus: {
+    call: (fn) => (fn as (status: string) => string)("staged"),
+    expects: [],
+  },
+  assistantReceiptAction: {
+    call: (fn) =>
+      (fn as (a: { kind?: string; status: string }) => string | undefined)({
+        kind: "filter",
+        status: "executed",
+      }) ?? "",
+    expects: [],
+  },
+  assistantReceiptChange: {
+    call: (fn) =>
+      (fn as (c: { before: string; after: string }) => string)({
+        before: "BEFORE_X",
+        after: "AFTER_X",
+      }),
+    expects: ["BEFORE_X", "AFTER_X"],
   },
   showing: {
     call: (fn) =>
@@ -297,7 +328,7 @@ it("every function label in every locale interpolates ALL its arguments", () => 
     for (const [key, value] of Object.entries(labels)) {
       if (typeof value !== "function") continue;
       const spec = INTERPOLATION_CASES[key] ?? NUMERIC_CASE;
-      const out = spec.call(value);
+      const out = spec.call(value) ?? "";
       for (const arg of spec.expects) {
         expect(out, `${tag}.${key}`).toContain(arg);
       }
@@ -444,4 +475,48 @@ describe("assistant token labels translate every token", () => {
       expect(out, tag).toContain("view.setGroupBy");
     }
   });
+});
+
+/**
+ * A receipt headline has two answers, and both have to work in every
+ * language: a sentence for a pair this locale knows, and nothing at all for
+ * one it does not — which is what lets the panel fall back to the plain
+ * status instead of printing a half-translated phrase.
+ */
+it("every locale writes a receipt headline it knows and declines one it does not", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const known = labels.assistantReceiptAction({
+      kind: "filter",
+      status: "executed",
+    });
+    expect(known, `${tag}.assistantReceiptAction(filter/executed)`).toBeTypeOf(
+      "string"
+    );
+    expect(known?.length ?? 0, `${tag} headline is empty`).toBeGreaterThan(0);
+
+    // An unknown pair, and a receipt with no kind at all.
+    expect(
+      labels.assistantReceiptAction({ kind: "teleport", status: "executed" }),
+      `${tag} invents a headline for an unknown kind`
+    ).toBeUndefined();
+    expect(
+      labels.assistantReceiptAction({ status: "executed" }),
+      `${tag} invents a headline without a kind`
+    ).toBeUndefined();
+  }
+});
+
+it("every locale translates a receipt status on its own", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    for (const token of ["executed", "staged", "failed"]) {
+      const out = labels.assistantReceiptStatus(token);
+      expect(out, `${tag}.assistantReceiptStatus(${token})`).toBeTypeOf(
+        "string"
+      );
+      // The token itself must not survive into the reader's language.
+      if (tag !== "en") expect(out, `${tag} leaked ${token}`).not.toBe(token);
+    }
+    // An unknown status still yields a string rather than nothing.
+    expect(labels.assistantReceiptStatus("brand-new")).toBeTypeOf("string");
+  }
 });

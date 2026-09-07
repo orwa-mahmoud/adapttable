@@ -256,9 +256,22 @@ export interface AssistantExchange {
 export function assistantHttpTransport(options: AgentHttpClientOptions): AssistantTransport;
 
 // @public
+export interface AssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly kind?: string;
+    readonly row?: string;
+}
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
+    readonly kind?: string;
     readonly prompt: string;
     readonly requires?: readonly string[];
     readonly title: string;
@@ -283,6 +296,7 @@ export interface AssistantTransport {
 export interface AssistantTransportReply {
     readonly keys?: readonly string[];
     readonly results?: readonly ExecuteResult[];
+    readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
 }
 

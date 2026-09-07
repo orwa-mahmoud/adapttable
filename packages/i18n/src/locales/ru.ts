@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "выполнено",
+  staged: "подготовлено",
+  rejected: "отклонено",
+  "awaiting-approval": "ждёт вас",
+  cancelled: "отменено",
+  stale: "устарело",
+  failed: "не удалось",
+};
+
 export const ru: Required<TableLabels> = {
   table: "Таблица данных",
   search: "Поиск",
@@ -177,6 +188,26 @@ export const ru: Required<TableLabels> = {
   assistantBackToTable: "Вернуться к таблице",
   assistantDetail: "Подробности",
   assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",
+  assistantExamples: "Примеры",
+  assistantMoreExamples: "Ещё примеры",
+  assistantReceiptChange: ({ before, after }) =>
+    `Изменено с ${before} на ${after}`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "Фильтр применён",
+            "filter/staged": "Фильтр подготовлен",
+            "sort/executed": "Отсортировано",
+            "group/executed": "Сгруппировано",
+            "pin/executed": "Столбец закреплён",
+            "edit/executed": "Сохранено",
+            "edit/staged": "Изменение подготовлено — не сохранено",
+            "edit/awaiting-approval": "Изменение ждёт подтверждения",
+            "edit/rejected": "Изменение отклонено",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "Ожидание",
@@ -188,18 +219,10 @@ export const ru: Required<TableLabels> = {
       disconnected: "Нет подключения",
     })[status] ?? "Готов",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "выполнено",
-        staged: "подготовлено",
-        rejected: "отклонено",
-        "awaiting-approval": "ждёт вас",
-        cancelled: "отменено",
-        stale: "устарело",
-        failed: "не удалось",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Добавить строку",
   duplicateRow: "Дублировать строку",
   deleteRow: "Удалить строку",

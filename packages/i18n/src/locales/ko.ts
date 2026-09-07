@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "완료",
+  staged: "저장 대기",
+  rejected: "거부됨",
+  "awaiting-approval": "확인 대기",
+  cancelled: "취소됨",
+  stale: "오래됨",
+  failed: "실패",
+};
+
 export const ko: Required<TableLabels> = {
   table: "데이터 테이블",
   search: "검색",
@@ -172,6 +183,26 @@ export const ko: Required<TableLabels> = {
   assistantBackToTable: "테이블로 돌아가기",
   assistantDetail: "세부 정보",
   assistantSaveInTable: "이 변경을 유지하려면 테이블에서 저장하세요.",
+  assistantExamples: "예시",
+  assistantMoreExamples: "예시 더 보기",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before}에서 ${after}(으)로 변경했습니다`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "필터 적용됨",
+            "filter/staged": "필터 준비됨",
+            "sort/executed": "정렬됨",
+            "group/executed": "그룹화됨",
+            "pin/executed": "열 고정됨",
+            "edit/executed": "저장됨",
+            "edit/staged": "편집 준비됨 — 저장되지 않음",
+            "edit/awaiting-approval": "편집 승인 대기 중",
+            "edit/rejected": "편집 거부됨",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "대기",
@@ -183,18 +214,10 @@ export const ko: Required<TableLabels> = {
       disconnected: "연결 안 됨",
     })[status] ?? "준비됨",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "완료",
-        staged: "저장 대기",
-        rejected: "거부됨",
-        "awaiting-approval": "확인 대기",
-        cancelled: "취소됨",
-        stale: "오래됨",
-        failed: "실패",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "행 추가",
   duplicateRow: "행 복제",
   deleteRow: "행 삭제",

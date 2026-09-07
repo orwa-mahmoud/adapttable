@@ -1295,17 +1295,25 @@ readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
 `@adapttable/ai/assistant` exports `useTableAssistant`,
 `TableAssistantOptions`, `TableAssistantState`, `AssistantMessage` and
-`AssistantStatus`. `@adapttable/ai/http` adds `assistantHttpTransport`.
+`AssistantStatus`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
+`receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
+optional `AssistantReceiptSubject` names what changed so the panel can say
+"Filter applied — Team is Core" rather than a capability key.
 Each kit ships the panel on its own `@adapttable/<kit>/assistant` entry,
 exporting `TableAssistant` and `tableAssistant`. Core chrome exports
 `TableAssistantChrome` (`TableAssistantChromeProps`, `TableAssistantProps`),
 `TABLE_ASSISTANT`, `createAdapterTableAssistantFeature`,
-`TableAssistantPresentation`, `TableAssistantSlots` with
+`TableAssistantPresentation` — `"floating"` for a nonmodal window over the
+page, `"panel"` for a surface the host places, `"sheet"` for the kit's modal —
+with `TableAssistantBoundary` scoping a floating window to the viewport or to
+a container of your own. `TableAssistantSlots` collects
 `TableAssistantPanelProps`, `TableAssistantSheetProps`,
+`TableAssistantWindowProps`, `TableAssistantSuggestionProps`,
 `TableAssistantButtonProps`, `TableAssistantComposerProps` and
-`TableAssistantBadgeProps`, the view types `TableAssistantView`,
-`TableAssistantMessageView`, `TableAssistantReceiptView` and
-`TableAssistantSuggestionView`, plus `assistantIsBusy` and
+`TableAssistantBadgeProps`. The view types are `TableAssistantView`,
+`TableAssistantMessageView`, `TableAssistantReceiptView` with
+`TableAssistantReceiptSubject` — what an action changed, supplied by whoever
+ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
 `assistantIsUsable`.
 `@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports

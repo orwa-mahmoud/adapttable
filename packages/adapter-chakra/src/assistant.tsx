@@ -10,8 +10,18 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
-import { Badge, Box, Button, Drawer, Textarea } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  Button,
+  Drawer,
+  IconButton,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 
 import { KitPortal } from "./components/kitPortal";
 
@@ -37,8 +47,29 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  if (iconOnly) {
+    return (
+      <IconButton
+        type="button"
+        size="sm"
+        variant={variant === "primary" ? "solid" : "ghost"}
+        aria-label={label}
+        title={tooltip}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {icon}
+      </IconButton>
+    );
+  }
   return (
     <Button
       type="button"
@@ -172,6 +203,89 @@ function AssistantSheet({
   );
 }
 
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Box
+      as="section"
+      role="dialog"
+      borderWidth="1px"
+      borderRadius="lg"
+      boxShadow="lg"
+      bg="bg.panel"
+      p="3"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={style}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      height="auto"
+      justifyContent="flex-start"
+      textAlign="start"
+      w="100%"
+      display="flex"
+      gap="2"
+      alignItems="flex-start"
+      py="2"
+      px="2"
+      whiteSpace="normal"
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      <Text as="span" color="fg.muted" display="flex" mt="0.5">
+        {icon}
+      </Text>
+      <span>
+        <Text
+          as="span"
+          fontWeight="medium"
+          fontSize="sm"
+          display="block"
+          data-adapttable-part="assistant-suggestion-title"
+        >
+          {title}
+        </Text>
+        {description ? (
+          <Text
+            as="span"
+            color="fg.muted"
+            fontSize="xs"
+            display="block"
+            data-adapttable-part="assistant-suggestion-description"
+          >
+            {description}
+          </Text>
+        ) : null}
+      </span>
+    </Button>
+  );
+}
+
 /**
  * Ask this table a question, in Chakra UI.
  *
@@ -187,6 +301,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

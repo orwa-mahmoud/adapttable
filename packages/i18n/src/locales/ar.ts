@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "تم",
+  staged: "مُجهَّز",
+  rejected: "مرفوض",
+  "awaiting-approval": "بانتظارك",
+  cancelled: "أُلغي",
+  stale: "غير محدَّث",
+  failed: "فشل",
+};
+
 export const ar: Required<TableLabels> = {
   table: "جدول البيانات",
   search: "بحث",
@@ -172,6 +183,26 @@ export const ar: Required<TableLabels> = {
   assistantBackToTable: "العودة إلى الجدول",
   assistantDetail: "التفاصيل",
   assistantSaveInTable: "احفظ في الجدول للاحتفاظ بهذا التغيير.",
+  assistantExamples: "أمثلة",
+  assistantMoreExamples: "أمثلة أخرى",
+  assistantReceiptChange: ({ before, after }) =>
+    `تم التغيير من ${before} إلى ${after}`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "تم تطبيق التصفية",
+            "filter/staged": "تم تجهيز التصفية",
+            "sort/executed": "تم الفرز",
+            "group/executed": "تم التجميع",
+            "pin/executed": "تم تثبيت العمود",
+            "edit/executed": "تم الحفظ",
+            "edit/staged": "تم تجهيز التعديل — لم يُحفظ",
+            "edit/awaiting-approval": "التعديل بانتظار الموافقة",
+            "edit/rejected": "تم رفض التعديل",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "خامل",
@@ -183,18 +214,10 @@ export const ar: Required<TableLabels> = {
       disconnected: "غير متصل",
     })[status] ?? "جاهز",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "تم",
-        staged: "مُجهَّز",
-        rejected: "مرفوض",
-        "awaiting-approval": "بانتظارك",
-        cancelled: "أُلغي",
-        stale: "غير محدَّث",
-        failed: "فشل",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "إضافة صف",
   duplicateRow: "تكرار الصف",
   deleteRow: "حذف الصف",

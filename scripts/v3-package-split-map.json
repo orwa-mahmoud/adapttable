@@ -1,5 +1,5 @@
 {
-  "$comment": "Every published public export and the package that owns it after the v3 core/React split. Rules live in scripts/package-split-map.mjs; the symbol set comes from etc/api-contract.json. The v2-to-v3 import moves a consumer needs are in the CLI codemod (packages/cli/src/migrateV3.ts), which is what rewrites them.",
+  "$comment": "Every current public export and its destination after the v3 core/React split. Rules live in scripts/package-split-map.mjs. A blank behavior means specifier-only. @adapttable/ai/http is listed from source until etc/ai-http.api.md joins the contract.",
   "generatedFrom": "etc/api-contract.json",
   "symbols": [
     {
@@ -132,6 +132,14 @@
     },
     {
       "export": "AssistantReceiptStatus",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
       "class": "neutral-model",
@@ -574,6 +582,14 @@
       "export": "assistantHttpTransport",
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
@@ -2444,6 +2460,14 @@
     },
     {
       "export": "AssistantReceiptStatus",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -21899,6 +21923,14 @@
       "behavior": ""
     },
     {
+      "export": "TableAssistantBoundary",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TableAssistantButtonProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -21963,6 +21995,14 @@
       "behavior": ""
     },
     {
+      "export": "TableAssistantReceiptSubject",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TableAssistantReceiptView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -21987,6 +22027,14 @@
       "behavior": ""
     },
     {
+      "export": "TableAssistantSuggestionProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TableAssistantSuggestionView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -21999,6 +22047,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantWindowProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },

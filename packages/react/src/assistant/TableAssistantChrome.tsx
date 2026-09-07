@@ -19,20 +19,45 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useSyncExternalStore,
 } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import { AssistantComposer } from "./AssistantComposer";
-import { AssistantEmpty, AssistantMessage } from "./AssistantMessages";
+import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
+import {
+  AssistantEmpty,
+  AssistantMessage,
+  AssistantSuggestions,
+} from "./AssistantMessages";
+import {
+  FLOATING_MIN_WIDTH,
+  floatingFits,
+  floatingStyle,
+  launcherStyle,
+  type TableAssistantBoundary,
+} from "./assistantPlacement";
 import type { TableAssistantSlots } from "./assistantSlots";
 import type { TableAssistantView } from "./assistantView";
+
+export type { TableAssistantBoundary } from "./assistantPlacement";
 
 /** Whether the panel is mid-turn — re-exported for a host's own chrome. */
 export { assistantIsBusy } from "./assistantView";
 import { useConversationScroll } from "./useConversationScroll";
 
-/** Which surface the panel takes. @public */
-export type TableAssistantPresentation = "panel" | "sheet";
+/**
+ * Which surface the conversation takes.
+ *
+ * - `floating` — a nonmodal window over the page, anchored bottom
+ *   inline-end. The table keeps its full width and stays operable. Below the
+ *   width where that stops being true it becomes the kit's own modal sheet.
+ * - `panel` — an in-flow surface the host places itself.
+ * - `sheet` — the kit's modal sheet at every width.
+ *
+ * @public
+ */
+export type TableAssistantPresentation = "panel" | "sheet" | "floating";
 
 /**
  * Props for an adapter `TableAssistant` — no slots on the public API.
@@ -61,12 +86,60 @@ export interface TableAssistantProps {
   readonly launcher?: boolean;
   /** Opens the host's own settings. Omit and no settings control is drawn. */
   readonly onSettings?: () => void;
+  /**
+   * Where a floating window is placed: the viewport, or a container of the
+   * host's own. Ignored by the other presentations.
+   */
+  readonly boundary?: TableAssistantBoundary;
+  /**
+   * One sentence under the empty conversation's heading, for what the host
+   * alone knows — that the examples are scripted until a backend is
+   * connected, say.
+   */
+  readonly note?: string;
 }
 
 /** Props for {@link TableAssistantChrome}. @public */
 export interface TableAssistantChromeProps extends TableAssistantProps {
   /** The kit's components for each part. */
   readonly slots: TableAssistantSlots;
+}
+
+/**
+ * Whether a floating window still fits.
+ *
+ * Subscribed rather than measured once: a reader who rotates a tablet or
+ * drags a window narrower gets the sheet, and the conversation carries over
+ * because only the surface changes — the controller above it never remounts.
+ */
+function useFloatingFits(): boolean {
+  const subscribe = useCallback((notify: () => void) => {
+    if (typeof window === "undefined") return () => undefined;
+    // `matchMedia` is absent in jsdom, and the minimal stubs test setups and
+    // embedded webviews install often return nothing usable. Resize is the
+    // coarser signal but it is always there, so the window still becomes a
+    // sheet on a narrow viewport rather than throwing on the way.
+    const query =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia(`(min-width: ${String(FLOATING_MIN_WIDTH)}px)`)
+        : undefined;
+    if (typeof query?.addEventListener !== "function") {
+      window.addEventListener("resize", notify);
+      return () => {
+        window.removeEventListener("resize", notify);
+      };
+    }
+    query.addEventListener("change", notify);
+    return () => {
+      query.removeEventListener("change", notify);
+    };
+  }, []);
+  return useSyncExternalStore(
+    subscribe,
+    () =>
+      typeof window === "undefined" ? true : floatingFits(window.innerWidth),
+    () => true
+  );
 }
 
 function badgeTone(status: string): "neutral" | "busy" | "warning" | "danger" {
@@ -96,9 +169,31 @@ function Header({
   return (
     <header
       data-adapttable-part="assistant-header"
-      style={{ display: "flex", alignItems: "center", gap: "0.5em" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5em",
+        minHeight: "3.5em",
+        paddingInline: "0.25em",
+        flexShrink: 0,
+      }}
     >
-      <span data-adapttable-part="assistant-title">
+      <span
+        aria-hidden="true"
+        data-adapttable-part="assistant-mark"
+        style={{ display: "flex", fontSize: "1.15em", opacity: 0.8 }}
+      >
+        <AssistantIcon />
+      </span>
+      <span
+        data-adapttable-part="assistant-title"
+        style={{
+          fontWeight: 600,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
         {labels?.assistantTitle ?? "Table assistant"}
       </span>
       <Badge
@@ -106,19 +201,35 @@ function Header({
         part="assistant-connection"
         tone={badgeTone(status)}
       />
-      <span style={{ marginInlineStart: "auto", display: "flex" }}>
+      {/* The controls sit together at the trailing edge, as icons: the header
+          is one row at 400px wide, and a spelled-out "Assistant settings"
+          across it is what pushed the title onto a second line. */}
+      <span
+        style={{
+          marginInlineStart: "auto",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.15em",
+        }}
+      >
         {onSettings ? (
           <Button
             label={labels?.assistantSettings ?? "Assistant settings"}
+            tooltip={labels?.assistantSettings ?? "Assistant settings"}
             part="assistant-settings"
             variant="subtle"
+            icon={<SettingsIcon />}
+            iconOnly
             onClick={onSettings}
           />
         ) : null}
         <Button
           label={labels?.assistantClose ?? "Close"}
+          tooltip={labels?.assistantClose ?? "Close"}
           part="assistant-close"
           variant="subtle"
+          icon={<CloseIcon />}
+          iconOnly
           onClick={onClose}
         />
       </span>
@@ -130,10 +241,12 @@ function Body({
   assistant,
   labels,
   slots,
+  note,
 }: {
   readonly assistant: TableAssistantView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
+  readonly note?: string;
 }): ReactElement {
   const scroll = useConversationScroll(assistant.messages.length);
   const Button = slots.Button;
@@ -158,6 +271,7 @@ function Body({
             suggestions={assistant.suggestions}
             more={assistant.moreSuggestions ?? []}
             onRun={run}
+            note={note}
           />
         ) : (
           <ul
@@ -181,6 +295,23 @@ function Body({
             ))}
           </ul>
         )}
+        {/* A scripted demo is unusable if the one click that starts it also
+            hides every other example, so they stay within reach. */}
+        {assistant.messages.length > 0 && assistant.suggestions.length > 0 ? (
+          <details data-adapttable-part="assistant-examples">
+            <summary data-adapttable-part="assistant-examples-summary">
+              {labels?.assistantExamples ?? "Examples"}
+            </summary>
+            <AssistantSuggestions
+              slots={slots}
+              labels={labels}
+              suggestions={assistant.suggestions}
+              more={assistant.moreSuggestions ?? []}
+              onRun={run}
+              part="assistant-examples-list"
+            />
+          </details>
+        ) : null}
       </div>
       {scroll.hasUnseen ? (
         <span
@@ -219,13 +350,17 @@ export function TableAssistantChrome({
   className,
   launcher = true,
   onSettings,
+  boundary = "viewport",
+  note,
   slots,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
+  const wide = useFloatingFits();
   const launcherRef = useRef<HTMLElement | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const Button = slots.Button;
   const Panel = slots.Panel;
   const Sheet = slots.Sheet;
+  const Window = slots.Window;
 
   const close = useCallback(() => {
     onOpenChange(false);
@@ -258,6 +393,12 @@ export function TableAssistantChrome({
     };
   }, [open, close]);
 
+  // A floating request that cannot fit becomes the kit's own modal sheet.
+  // The switch is deliberate and only ever applies to `floating`: an explicit
+  // `panel` stays a panel, because silently modalizing what a host asked to
+  // place itself is worse than a narrow one.
+  const resolved =
+    presentation === "floating" && !wide ? "sheet" : presentation;
   const title = labels?.assistantTitle ?? "Table assistant";
   const send = (): void => {
     void assistant.send();
@@ -287,7 +428,7 @@ export function TableAssistantChrome({
       <LiveRegion part="assistant-status" statusRole>
         {labels?.assistantConnection?.(assistant.status) ?? assistant.status}
       </LiveRegion>
-      <Body assistant={assistant} labels={labels} slots={slots} />
+      <Body assistant={assistant} labels={labels} slots={slots} note={note} />
       {assistant.error ? (
         <p data-adapttable-part="assistant-error" role="alert">
           {assistant.error}
@@ -307,7 +448,7 @@ export function TableAssistantChrome({
         onSend={send}
         onStop={assistant.stop}
       />
-      {presentation === "sheet" ? (
+      {resolved === "sheet" ? (
         <Button
           label={labels?.assistantBackToTable ?? "Back to table"}
           part="assistant-back"
@@ -319,7 +460,18 @@ export function TableAssistantChrome({
   );
 
   let surface: ReactNode = null;
-  if (open && presentation === "sheet") {
+  if (open && resolved === "floating") {
+    surface = (
+      <Window
+        label={title}
+        part="assistant-window"
+        className={className}
+        style={floatingStyle(boundary)}
+      >
+        {contents}
+      </Window>
+    );
+  } else if (open && resolved === "sheet") {
     surface = (
       <Sheet
         label={title}
@@ -341,12 +493,21 @@ export function TableAssistantChrome({
 
   return (
     <>
-      <span ref={launcherRef} style={{ display: "contents" }}>
+      <span
+        ref={launcherRef}
+        data-adapttable-part="assistant-launcher-anchor"
+        style={
+          resolved === "floating" || resolved === "sheet"
+            ? launcherStyle(boundary)
+            : { display: "contents" }
+        }
+      >
         {launcher && !open ? (
           <Button
             label={labels?.assistantOpen ?? "Ask AI"}
             part="assistant-launcher"
             variant="primary"
+            icon={<AssistantIcon />}
             onClick={() => {
               onOpenChange(true);
             }}

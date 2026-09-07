@@ -17,6 +17,7 @@
  */
 import type {
   AgentSession,
+  AssistantReceiptSubject,
   AssistantTransport,
   AssistantTransportReply,
   ExecuteResult,
@@ -26,6 +27,10 @@ import type {
 export interface DemoScenario {
   /** The exact text a suggestion sends, and the only text this matches. */
   readonly prompt: string;
+  /** The card's own short name, above the prompt it will send. */
+  readonly title: string;
+  /** Which glyph the card carries. */
+  readonly kind?: string;
   /** What the reader is told once it has run. */
   readonly reply: string;
   /** The capability to run, and the arguments to run it with. */
@@ -34,6 +39,13 @@ export interface DemoScenario {
   readonly args: (context: DemoContext) => unknown;
   /** Capabilities the table must advertise for this to be offered. */
   readonly requires: readonly string[];
+  /**
+   * What the receipt card says this changed.
+   *
+   * Built from the same context the arguments are, so the card can never
+   * describe something other than what ran.
+   */
+  readonly subject?: (context: DemoContext) => AssistantReceiptSubject;
 }
 
 /** What the page knows when a scenario runs. @internal */
@@ -57,6 +69,9 @@ export const UNSUPPORTED_REPLY =
 export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   {
     prompt: "Show only the Core team.",
+    subject: () => ({ kind: "filter", detail: "Team is Core" }),
+    title: "Filter rows",
+    kind: "filter",
     reply: "Filtered to the Core team.",
     capabilityKey: "view.setFilters",
     args: () => ({ filters: { team: ["Core"] } }),
@@ -64,6 +79,9 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Sort by salary, highest first.",
+    subject: () => ({ kind: "sort", detail: "Salary, highest first" }),
+    title: "Sort salaries",
+    kind: "sort",
     reply: "Sorted by salary, descending.",
     capabilityKey: "view.setSort",
     args: () => ({ key: "salary", dir: "desc" }),
@@ -71,6 +89,9 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Group the rows by team.",
+    subject: () => ({ kind: "group", detail: "Team" }),
+    title: "Group by team",
+    kind: "group",
     reply: "Grouped by team.",
     capabilityKey: "view.setGroupBy",
     args: () => ({ key: "team" }),
@@ -78,6 +99,15 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Raise Priya Nair's salary to 185.",
+    subject: () => ({
+      kind: "edit",
+      row: "Priya Nair",
+      column: "Salary",
+      before: "170",
+      after: "185",
+    }),
+    title: "Propose an edit",
+    kind: "edit",
     reply: "Proposed the change — approve it above the table.",
     capabilityKey: "edit.cells",
     args: (context) => ({
@@ -87,6 +117,8 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Pin the person column to the start.",
+    subject: () => ({ kind: "pin", detail: "Person, start" }),
+    title: "Pin a column",
     reply: "Pinned the person column.",
     capabilityKey: "view.pinColumn",
     args: (context) => ({ key: context.pinnedColumnKey, side: "start" }),
@@ -94,6 +126,8 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Unpin the person column.",
+    subject: () => ({ kind: "pin", detail: "Person, unpinned" }),
+    title: "Unpin the column",
     reply: "Unpinned the person column.",
     capabilityKey: "view.pinColumn",
     args: (context) => ({ key: context.pinnedColumnKey, side: null }),
@@ -101,6 +135,7 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Pin Priya Nair to the top.",
+    title: "Pin a row",
     reply: "Pinned that row to the top.",
     capabilityKey: "view.pinRow",
     args: (context) => ({ rowKey: context.namedRowKey, side: "top" }),
@@ -108,6 +143,7 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Unpin Priya Nair.",
+    title: "Unpin the row",
     reply: "Unpinned that row.",
     capabilityKey: "view.pinRow",
     args: (context) => ({ rowKey: context.namedRowKey, side: null }),
@@ -115,6 +151,9 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Clear the grouping.",
+    subject: () => ({ kind: "group", detail: "Grouping cleared" }),
+    title: "Clear grouping",
+    kind: "group",
     reply: "Grouping cleared.",
     capabilityKey: "view.setGroupBy",
     args: () => ({ key: null }),
@@ -122,6 +161,9 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Clear the filter.",
+    subject: () => ({ kind: "filter", detail: "Filters cleared" }),
+    title: "Clear filters",
+    kind: "filter",
     reply: "Filter cleared.",
     capabilityKey: "view.setFilters",
     args: () => ({ filters: {} }),
@@ -129,6 +171,7 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Go to the next page.",
+    title: "Next page",
     reply: "Moved to page 2.",
     capabilityKey: "view.setPage",
     args: () => ({ page: 2 }),
@@ -136,6 +179,7 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "What can you do with this table?",
+    title: "What can you do?",
     reply: "",
     capabilityKey: "",
     args: () => ({}),
@@ -195,6 +239,9 @@ export function demoTransport(context: () => DemoContext): AssistantTransport {
         text: result.ok ? scenario.reply : "That did not work.",
         results: [result],
         keys: [scenario.capabilityKey],
+        // Described from the arguments this scenario ran, never from the
+        // reply text above it.
+        subjects: [scenario.subject?.(context())],
       };
     },
   };

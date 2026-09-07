@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "hecho",
+  staged: "preparado",
+  rejected: "rechazado",
+  "awaiting-approval": "esperándote",
+  cancelled: "cancelado",
+  stale: "desactualizado",
+  failed: "falló",
+};
+
 export const es: Required<TableLabels> = {
   table: "Tabla de datos",
   search: "Buscar",
@@ -171,6 +182,26 @@ export const es: Required<TableLabels> = {
   assistantBackToTable: "Volver a la tabla",
   assistantDetail: "Detalles",
   assistantSaveInTable: "Guarda en la tabla para conservar este cambio.",
+  assistantExamples: "Ejemplos",
+  assistantMoreExamples: "Más ejemplos",
+  assistantReceiptChange: ({ before, after }) =>
+    `Cambiado de ${before} a ${after}`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "Filtro aplicado",
+            "filter/staged": "Filtro preparado",
+            "sort/executed": "Ordenado",
+            "group/executed": "Agrupado",
+            "pin/executed": "Columna fijada",
+            "edit/executed": "Guardado",
+            "edit/staged": "Edición preparada — sin guardar",
+            "edit/awaiting-approval": "Edición pendiente de aprobación",
+            "edit/rejected": "Edición rechazada",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "Inactivo",
@@ -182,18 +213,10 @@ export const es: Required<TableLabels> = {
       disconnected: "Sin conexión",
     })[status] ?? "Listo",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "hecho",
-        staged: "preparado",
-        rejected: "rechazado",
-        "awaiting-approval": "esperándote",
-        cancelled: "cancelado",
-        stale: "desactualizado",
-        failed: "falló",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Añadir fila",
   duplicateRow: "Duplicar fila",
   deleteRow: "Eliminar fila",

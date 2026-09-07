@@ -3791,6 +3791,8 @@ export interface TableLabels {
     assistantConnection?: (status: string) => string;
     assistantDetail?: string;
     assistantEmpty?: string;
+    assistantExamples?: string;
+    assistantMoreExamples?: string;
     assistantNewMessages?: string;
     assistantOpen?: string;
     assistantPlaceholder?: string;
@@ -3798,6 +3800,15 @@ export interface TableLabels {
         capability?: string;
         status: string;
     }) => string;
+    assistantReceiptAction?: (action: {
+        kind?: string;
+        status: string;
+    }) => string | undefined;
+    assistantReceiptChange?: (change: {
+        before: string;
+        after: string;
+    }) => string;
+    assistantReceiptStatus?: (status: string) => string;
     assistantSaveInTable?: string;
     assistantSend?: string;
     assistantSettings?: string;

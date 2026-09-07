@@ -28,6 +28,7 @@ export {
 export {
   type AssistantReceipt,
   type AssistantReceiptStatus,
+  type AssistantReceiptSubject,
   type AssistantTurnStatus,
   receiptFromResult,
   receiptsFromResults,

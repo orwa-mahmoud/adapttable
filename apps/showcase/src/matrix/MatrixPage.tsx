@@ -391,6 +391,42 @@ function FeaturePage({
     throw new Error(`No demo body for feature "${feature.slug}"`);
   }
   const note = feature.notes[adapter.key];
+  // On a page whose demo is the point, the implementation tutorial follows
+  // the experience instead of standing in front of it. The content is the
+  // same and stays in the rendered HTML — only its place on the page moves.
+  const demoFirst = feature.slug === "ai";
+  const brief = (
+    <div className="mx-brief">
+      <CodeBlock
+        title={`${feature.label} · ${adapter.label}`}
+        code={fill(feature.snippet)}
+      />
+      <div className="mx-brief__side">
+        {note ? (
+          <div className="mx-note">
+            <span className="mx-note__key">In {adapter.label}</span>
+            <p>{note}</p>
+          </div>
+        ) : null}
+        <div className="mx-refs">
+          <span className="mx-refs__key">Reference</span>
+          <div className="mx-refs__list">
+            {feature.docs.map((slug) => (
+              <a
+                key={slug}
+                href={`${DOCS_URL}${slug}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {slug.replaceAll("-", " ")}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <header className="mx-hero mx-hero--solo">
@@ -409,41 +445,20 @@ function FeaturePage({
         </div>
       </header>
 
-      <div className="mx-brief">
-        <CodeBlock
-          title={`${feature.label} · ${adapter.label}`}
-          code={fill(feature.snippet)}
-        />
-        <div className="mx-brief__side">
-          {note ? (
-            <div className="mx-note">
-              <span className="mx-note__key">In {adapter.label}</span>
-              <p>{note}</p>
-            </div>
-          ) : null}
-          <div className="mx-refs">
-            <span className="mx-refs__key">Reference</span>
-            <div className="mx-refs__list">
-              {feature.docs.map((slug) => (
-                <a
-                  key={slug}
-                  href={`${DOCS_URL}${slug}/`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {slug.replaceAll("-", " ")}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {demoFirst ? null : brief}
 
       <Seam pkg={adapter.pkg} />
       {Body ? (
         <Suspense fallback={<DemoFallback />}>
           <Body dark={dark} adapter={adapter.key} />
         </Suspense>
+      ) : null}
+
+      {demoFirst ? (
+        <details className="mx-brief-fold">
+          <summary>Integration example</summary>
+          {brief}
+        </details>
       ) : null}
 
       <section className="mx-section">

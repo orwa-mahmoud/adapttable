@@ -38,6 +38,30 @@ export type AssistantReceiptStatus =
   | "failed";
 
 /**
+ * What an action changed, in the reader's own terms.
+ *
+ * Supplied by whoever ran the action, from the arguments that actually ran.
+ * It is never parsed back out of the model's reply: an assistant that says
+ * "I filtered to Core" while the call filtered to Data would otherwise write
+ * its own receipt. Every field is optional, and an absent one is simply not
+ * shown rather than guessed.
+ *
+ * @public
+ */
+export interface AssistantReceiptSubject {
+  /** The kind of change: `filter`, `sort`, `group`, `pin`, `edit`. */
+  readonly kind?: string;
+  /** What it acted on, already readable — "Team is Core". */
+  readonly detail?: string;
+  /** For an edit: which row and column, when the host may show them. */
+  readonly row?: string;
+  readonly column?: string;
+  /** For an edit: the values either side, formatted as the table formats. */
+  readonly before?: string;
+  readonly after?: string;
+}
+
+/**
  * One line a reader can trust about one action.
  *
  * @public
@@ -51,6 +75,8 @@ export interface AssistantReceipt {
   readonly message?: string;
   /** Replay key, so a receipt can be matched back to its action. */
   readonly idempotencyKey: string;
+  /** What changed, for a card a reader can act on. */
+  readonly subject?: AssistantReceiptSubject;
 }
 
 /** How a whole turn ended. @public */
@@ -98,9 +124,14 @@ function failureStatus(code: string | undefined): AssistantReceiptStatus {
 export function receiptFromResult(
   result: ExecuteResult,
   capabilityKey?: string,
-  commit?: CommitPolicy
+  commit?: CommitPolicy,
+  subject?: AssistantReceiptSubject
 ): AssistantReceipt {
-  const base = { capabilityKey, idempotencyKey: result.idempotencyKey };
+  const base = {
+    capabilityKey,
+    idempotencyKey: result.idempotencyKey,
+    subject,
+  };
   if (!result.ok) {
     return {
       ...base,
@@ -132,10 +163,11 @@ export function receiptFromResult(
 export function receiptsFromResults(
   results: readonly ExecuteResult[],
   keys: readonly string[] = [],
-  commit?: CommitPolicy
+  commit?: CommitPolicy,
+  subjects: readonly (AssistantReceiptSubject | undefined)[] = []
 ): readonly AssistantReceipt[] {
   return results.map((result, index) =>
-    receiptFromResult(result, keys[index], commit)
+    receiptFromResult(result, keys[index], commit, subjects[index])
   );
 }
 

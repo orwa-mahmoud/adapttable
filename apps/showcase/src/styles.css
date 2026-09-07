@@ -1086,14 +1086,53 @@ a {
 
 /* The conversational demo: table and assistant side by side, and the panel
    drops below the table once there is no longer room for both. */
-.ai-demo__hero h3 {
-  margin: 0 0 4px;
-  font-size: 18px;
-}
-.ai-demo__hero p {
-  margin: 0 0 12px;
+.ai-demo__lede {
+  margin: 0 0 10px;
   color: var(--ink-2);
   font-size: 13px;
+  max-width: 62ch;
+}
+.ai-demo__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ai-demo__controls .ai-demo__kits {
+  margin-bottom: 0;
+}
+/* Which conversation this is, readable before anything is opened. */
+.ai-demo__mode {
+  margin-inline-start: auto;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+}
+.ai-demo__mode[data-mode="backend"] {
+  border-color: currentColor;
+  color: var(--accent, inherit);
+}
+.ai-demo__options-trigger {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.ai-demo__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
 }
 .ai-demo__kits {
   display: flex;
@@ -1111,10 +1150,14 @@ a {
   text-decoration: none;
 }
 .ai-demo__stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  align-items: start;
-  gap: 16px;
+  /* One column: the table keeps the full width, and the assistant floats
+     over the page rather than taking a column away from it. */
+  display: block;
+}
+.ai-demo__assistant {
+  /* The launcher and the window are both fixed to the viewport, so this
+     wrapper only has to stay out of the table's way. */
+  display: contents;
 }
 .ai-demo__panel {
   position: sticky;
@@ -1828,4 +1871,20 @@ a {
   .star-the-repo__star:hover {
     transform: none;
   }
+}
+
+/* The integration tutorial, folded under the demo it explains. */
+.mx-brief-fold {
+  margin-block: 16px;
+}
+.mx-brief-fold > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.mx-brief-fold[open] > summary {
+  margin-bottom: 12px;
 }

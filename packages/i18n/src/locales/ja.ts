@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "完了",
+  staged: "保存待ち",
+  rejected: "却下",
+  "awaiting-approval": "確認待ち",
+  cancelled: "取り消し",
+  stale: "古い状態",
+  failed: "失敗",
+};
+
 export const ja: Required<TableLabels> = {
   table: "データテーブル",
   search: "検索",
@@ -170,6 +181,26 @@ export const ja: Required<TableLabels> = {
   assistantBackToTable: "テーブルに戻る",
   assistantDetail: "詳細",
   assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",
+  assistantExamples: "例",
+  assistantMoreExamples: "他の例",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} から ${after} に変更しました`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "フィルターを適用しました",
+            "filter/staged": "フィルターを準備しました",
+            "sort/executed": "並べ替えました",
+            "group/executed": "グループ化しました",
+            "pin/executed": "列を固定しました",
+            "edit/executed": "保存しました",
+            "edit/staged": "編集を準備しました — 未保存",
+            "edit/awaiting-approval": "編集は承認待ちです",
+            "edit/rejected": "編集は拒否されました",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "待機中",
@@ -181,18 +212,10 @@ export const ja: Required<TableLabels> = {
       disconnected: "未接続",
     })[status] ?? "準備完了",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "完了",
-        staged: "保存待ち",
-        rejected: "却下",
-        "awaiting-approval": "確認待ち",
-        cancelled: "取り消し",
-        stale: "古い状態",
-        failed: "失敗",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "行を追加",
   duplicateRow: "行を複製",
   deleteRow: "行を削除",

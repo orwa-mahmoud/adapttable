@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "已完成",
+  staged: "待保存",
+  rejected: "已拒绝",
+  "awaiting-approval": "等待您确认",
+  cancelled: "已取消",
+  stale: "已过期",
+  failed: "失败",
+};
+
 export const zh: Required<TableLabels> = {
   table: "数据表",
   search: "搜索",
@@ -169,6 +180,25 @@ export const zh: Required<TableLabels> = {
   assistantBackToTable: "返回表格",
   assistantDetail: "详情",
   assistantSaveInTable: "在表格中保存以保留此更改。",
+  assistantExamples: "示例",
+  assistantMoreExamples: "更多示例",
+  assistantReceiptChange: ({ before, after }) => `已从 ${before} 改为 ${after}`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "已应用筛选",
+            "filter/staged": "已准备筛选",
+            "sort/executed": "已排序",
+            "group/executed": "已分组",
+            "pin/executed": "已固定列",
+            "edit/executed": "已保存",
+            "edit/staged": "编辑已准备 — 未保存",
+            "edit/awaiting-approval": "编辑等待审批",
+            "edit/rejected": "编辑已拒绝",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "空闲",
@@ -180,18 +210,10 @@ export const zh: Required<TableLabels> = {
       disconnected: "未连接",
     })[status] ?? "就绪",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "已完成",
-        staged: "待保存",
-        rejected: "已拒绝",
-        "awaiting-approval": "等待您确认",
-        cancelled: "已取消",
-        stale: "已过期",
-        failed: "失败",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "添加行",
   duplicateRow: "复制行",
   deleteRow: "删除行",

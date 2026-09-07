@@ -24,6 +24,53 @@ export interface TableAssistantButtonProps {
   readonly children?: ReactNode;
   /** Set when the control owns an expandable region. */
   readonly expanded?: boolean;
+  /**
+   * A leading glyph. With {@link TableAssistantButtonProps.iconOnly} it is
+   * the whole visible control and `label` becomes the accessible name only.
+   */
+  readonly icon?: ReactNode;
+  /** Draw the icon alone. The kit still exposes `label` to assistive tech. */
+  readonly iconOnly?: boolean;
+  /** Hover/focus description, when the kit has a tooltip of its own. */
+  readonly tooltip?: string;
+}
+
+/**
+ * One suggested prompt, drawn as the kit's own compact card or chip.
+ *
+ * Deliberately not a {@link TableAssistantSlots.Button}: a column of
+ * full-width submit buttons reads as a form, and the empty conversation is
+ * the first thing anyone sees.
+ *
+ * @public
+ */
+export interface TableAssistantSuggestionProps {
+  readonly title: string;
+  readonly description?: string;
+  readonly icon?: ReactNode;
+  readonly part: string;
+  readonly className?: string;
+  readonly onClick: () => void;
+  readonly disabled?: boolean;
+}
+
+/**
+ * The floating conversation window.
+ *
+ * Nonmodal and out of the document flow: opening it must not resize, squeeze
+ * or move the table behind it, and the reader can still operate that table
+ * while it is open. The kit supplies the surface — its own elevation, radius
+ * and border — and the chrome positions it.
+ *
+ * @public
+ */
+export interface TableAssistantWindowProps {
+  readonly label: string;
+  readonly part: string;
+  readonly className?: string;
+  /** Inline styles the chrome computes for placement and size. */
+  readonly style?: React.CSSProperties;
+  readonly children: ReactNode;
 }
 
 /** The kit's own multiline input. @public */
@@ -85,4 +132,8 @@ export interface TableAssistantSlots {
   readonly Composer: (props: TableAssistantComposerProps) => ReactNode;
   /** The connection badge. */
   readonly Badge: (props: TableAssistantBadgeProps) => ReactNode;
+  /** The nonmodal floating surface. */
+  readonly Window: (props: TableAssistantWindowProps) => ReactNode;
+  /** One suggested prompt, as a compact card or chip. */
+  readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
 }

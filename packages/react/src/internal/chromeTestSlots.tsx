@@ -582,6 +582,29 @@ export const rowReorderButtonsTestSlots: RowReorderButtonsSlots = {
  * exercise is the structure, keyboard and announcements the chrome owns.
  */
 export const tableAssistantTestSlots: TableAssistantSlots = {
+  Window: ({ label, part, className, style, children }) => (
+    <section
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={style}
+    >
+      {children}
+    </section>
+  ),
+  Suggestion: ({ title, description, icon, part, className, onClick }) => (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{title}</span>
+      {description ? <span>{description}</span> : null}
+    </button>
+  ),
   Panel: ({ label, part, className, children }) => (
     <section
       aria-label={label}
@@ -614,6 +637,8 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
     disabled,
     children,
     expanded,
+    icon,
+    iconOnly,
   }) => (
     <button
       type="button"
@@ -624,7 +649,8 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
       disabled={disabled}
       onClick={onClick}
     >
-      {children ?? label}
+      {icon}
+      {iconOnly ? null : (children ?? label)}
     </button>
   ),
   Composer: ({

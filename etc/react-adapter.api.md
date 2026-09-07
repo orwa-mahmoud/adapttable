@@ -4436,6 +4436,9 @@ export interface TableAssistantBadgeProps {
 }
 
 // @public
+export type TableAssistantBoundary = "viewport" | RefObject<HTMLElement | null>;
+
+// @public
 export interface TableAssistantButtonProps {
     readonly children?: ReactNode;
     // (undocumented)
@@ -4443,10 +4446,13 @@ export interface TableAssistantButtonProps {
     // (undocumented)
     readonly disabled?: boolean;
     readonly expanded?: boolean;
+    readonly icon?: ReactNode;
+    readonly iconOnly?: boolean;
     readonly label: string;
     // (undocumented)
     readonly onClick: () => void;
     readonly part: string;
+    readonly tooltip?: string;
     readonly variant?: "primary" | "secondary" | "subtle";
 }
 
@@ -4501,18 +4507,32 @@ export interface TableAssistantPanelProps {
 }
 
 // @public
-export type TableAssistantPresentation = "panel" | "sheet";
+export type TableAssistantPresentation = "panel" | "sheet" | "floating";
 
 // @public
 export interface TableAssistantProps {
     readonly assistant: TableAssistantView;
+    readonly boundary?: TableAssistantBoundary;
     readonly className?: string;
     readonly labels?: TableLabels;
     readonly launcher?: boolean;
+    readonly note?: string;
     readonly onOpenChange: (open: boolean) => void;
     readonly onSettings?: () => void;
     readonly open: boolean;
     readonly presentation?: TableAssistantPresentation;
+}
+
+// @public
+export interface TableAssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly kind?: string;
+    readonly row?: string;
 }
 
 // @public
@@ -4521,6 +4541,7 @@ export interface TableAssistantReceiptView {
     readonly idempotencyKey: string;
     readonly message?: string;
     readonly status: string;
+    readonly subject?: TableAssistantReceiptSubject;
 }
 
 // @public
@@ -4546,6 +4567,26 @@ export interface TableAssistantSlots {
     readonly Composer: (props: TableAssistantComposerProps) => ReactNode;
     readonly Panel: (props: TableAssistantPanelProps) => ReactNode;
     readonly Sheet: (props: TableAssistantSheetProps) => ReactNode;
+    readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
+    readonly Window: (props: TableAssistantWindowProps) => ReactNode;
+}
+
+// @public
+export interface TableAssistantSuggestionProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly description?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    // (undocumented)
+    readonly icon?: ReactNode;
+    // (undocumented)
+    readonly onClick: () => void;
+    // (undocumented)
+    readonly part: string;
+    // (undocumented)
+    readonly title: string;
 }
 
 // @public
@@ -4554,6 +4595,7 @@ export interface TableAssistantSuggestionView {
     readonly description?: string;
     // (undocumented)
     readonly id: string;
+    readonly kind?: string;
     // (undocumented)
     readonly title: string;
 }
@@ -4574,6 +4616,19 @@ export interface TableAssistantView {
     readonly status: string;
     readonly stop: () => void;
     readonly suggestions: readonly TableAssistantSuggestionView[];
+}
+
+// @public
+export interface TableAssistantWindowProps {
+    // (undocumented)
+    readonly children: ReactNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly part: string;
+    readonly style?: React.CSSProperties;
 }
 
 // @public

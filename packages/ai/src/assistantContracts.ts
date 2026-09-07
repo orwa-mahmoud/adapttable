@@ -14,6 +14,7 @@
  * or a fixed script. This file only fixes the shapes they hand back, so a
  * controller and a widget can be written once against them.
  */
+import type { AssistantReceiptSubject } from "./assistantReceipts";
 import type { AgentSession, ExecuteResult } from "./types";
 
 /**
@@ -36,6 +37,13 @@ export interface AssistantSuggestion {
   readonly prompt: string;
   /** Longer explanation, when the title cannot carry it. */
   readonly description?: string;
+  /**
+   * Which glyph the card carries: `filter`, `sort`, `group`, `edit`.
+   *
+   * Presentation only — it never decides what the suggestion may run, which
+   * stays with {@link AssistantSuggestion.requires}.
+   */
+  readonly kind?: string;
   /**
    * Capability keys this suggestion needs.
    *
@@ -257,6 +265,13 @@ export interface AssistantTransportReply {
   readonly results?: readonly ExecuteResult[];
   /** Capability keys in the same order as `results`, when known. */
   readonly keys?: readonly string[];
+  /**
+   * What each action changed, in the same order as `results`.
+   *
+   * Optional: without it a receipt still reports its status truthfully, just
+   * without the sentence naming what moved.
+   */
+  readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
 }
 
 /**

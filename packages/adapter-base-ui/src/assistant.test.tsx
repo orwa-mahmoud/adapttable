@@ -24,6 +24,7 @@ interface View {
       capabilityKey?: string;
       status: string;
       idempotencyKey: string;
+      subject?: { kind?: string; detail?: string };
     }[];
   }[];
   draft: string;
@@ -136,6 +137,7 @@ describe("TableAssistant", () => {
                   capabilityKey: "view.setGroupBy",
                   status: "executed",
                   idempotencyKey: "k1",
+                  subject: { kind: "group", detail: "Team" },
                 },
               ],
             },
@@ -147,9 +149,7 @@ describe("TableAssistant", () => {
       />
     );
 
-    expect(part("assistant-receipt-summary")).toHaveTextContent(
-      "view.setGroupBy"
-    );
+    expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
   });
 
   it("becomes a modal sheet on a narrow viewport", () => {
@@ -242,7 +242,7 @@ describe("TableAssistant", () => {
 
     // A raw <button> here would mean this kit is borrowing another kit's
     // look, which is the same defect as drawing the control in core.
-    expect(part("assistant-send")!.className).toContain("adapttable-btn");
+    expect(part("assistant-send")!.className).toContain("adapttable-icon-btn");
   });
 });
 
@@ -381,5 +381,36 @@ describe("the kit's own controls", () => {
       expect(part("assistant-connection")).toHaveAttribute("data-tone", tone);
       unmount();
     }
+  });
+});
+
+/**
+ * The floating window is the presentation the flagship demo uses, so every
+ * kit has to supply a surface for it — and that surface must not be the
+ * in-flow panel, which would put the table back in a column beside it.
+ */
+describe("the floating window", () => {
+  it("draws the kit's own nonmodal surface", () => {
+    mount(
+      <TableAssistant
+        assistant={view()}
+        labels={defaultLabels}
+        presentation="floating"
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    const window_ = part("assistant-window");
+    expect(window_).not.toBeNull();
+    expect(window_).toHaveAttribute("role", "dialog");
+    // Out of the document flow, so the table keeps its width behind it.
+    expect(window_!.style.position).toBe("fixed");
+    // The in-flow panel is not what a floating request gets.
+    expect(part("assistant-panel")).toBeNull();
+    // The conversation is inside it, not somewhere else on the page.
+    expect(
+      window_!.querySelector('[data-adapttable-part="assistant-composer"]')
+    ).not.toBeNull();
   });
 });

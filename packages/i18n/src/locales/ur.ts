@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "ہو گیا",
+  staged: "تیار",
+  rejected: "مسترد",
+  "awaiting-approval": "آپ کا منتظر",
+  cancelled: "منسوخ",
+  stale: "پرانا",
+  failed: "ناکام",
+};
+
 export const ur: Required<TableLabels> = {
   table: "ڈیٹا ٹیبل",
   search: "تلاش",
@@ -174,6 +185,26 @@ export const ur: Required<TableLabels> = {
   assistantBackToTable: "ٹیبل پر واپس",
   assistantDetail: "تفصیلات",
   assistantSaveInTable: "یہ تبدیلی رکھنے کے لیے ٹیبل میں محفوظ کریں۔",
+  assistantExamples: "مثالیں",
+  assistantMoreExamples: "مزید مثالیں",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} سے ${after} کر دیا گیا`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "فلٹر لاگو ہو گیا",
+            "filter/staged": "فلٹر تیار ہے",
+            "sort/executed": "ترتیب دے دیا گیا",
+            "group/executed": "گروپ بندی ہو گئی",
+            "pin/executed": "کالم پن ہو گیا",
+            "edit/executed": "محفوظ ہو گیا",
+            "edit/staged": "ترمیم تیار — محفوظ نہیں",
+            "edit/awaiting-approval": "ترمیم منظوری کی منتظر",
+            "edit/rejected": "ترمیم مسترد",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "فارغ",
@@ -185,18 +216,10 @@ export const ur: Required<TableLabels> = {
       disconnected: "منسلک نہیں",
     })[status] ?? "تیار",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "ہو گیا",
-        staged: "تیار",
-        rejected: "مسترد",
-        "awaiting-approval": "آپ کا منتظر",
-        cancelled: "منسوخ",
-        stale: "پرانا",
-        failed: "ناکام",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "قطار شامل کریں",
   duplicateRow: "قطار کی نقل بنائیں",
   deleteRow: "قطار حذف کریں",

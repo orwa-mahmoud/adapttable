@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "בוצע",
+  staged: "מוכן לשמירה",
+  rejected: "נדחה",
+  "awaiting-approval": "ממתין לך",
+  cancelled: "בוטל",
+  stale: "לא עדכני",
+  failed: "נכשל",
+};
+
 export const he: Required<TableLabels> = {
   table: "טבלת נתונים",
   search: "חיפוש",
@@ -171,6 +182,25 @@ export const he: Required<TableLabels> = {
   assistantBackToTable: "חזרה לטבלה",
   assistantDetail: "פרטים",
   assistantSaveInTable: "שמור בטבלה כדי לשמר את השינוי.",
+  assistantExamples: "דוגמאות",
+  assistantMoreExamples: "עוד דוגמאות",
+  assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "הסינון הוחל",
+            "filter/staged": "הסינון הוכן",
+            "sort/executed": "מוין",
+            "group/executed": "קובץ",
+            "pin/executed": "העמודה ננעצה",
+            "edit/executed": "נשמר",
+            "edit/staged": "העריכה הוכנה — לא נשמרה",
+            "edit/awaiting-approval": "העריכה ממתינה לאישור",
+            "edit/rejected": "העריכה נדחתה",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "ממתין",
@@ -182,18 +212,10 @@ export const he: Required<TableLabels> = {
       disconnected: "לא מחובר",
     })[status] ?? "מוכן",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "בוצע",
-        staged: "מוכן לשמירה",
-        rejected: "נדחה",
-        "awaiting-approval": "ממתין לך",
-        cancelled: "בוטל",
-        stale: "לא עדכני",
-        failed: "נכשל",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "הוסף שורה",
   duplicateRow: "שכפל שורה",
   deleteRow: "מחק שורה",

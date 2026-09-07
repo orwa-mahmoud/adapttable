@@ -14,6 +14,8 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import { useEffect, useRef } from "react";
 
@@ -25,10 +27,14 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
 }: Readonly<TableAssistantButtonProps>) {
   return (
     <button
       type="button"
+      title={tooltip}
       aria-label={label}
       aria-expanded={expanded}
       data-adapttable-part={part}
@@ -36,7 +42,8 @@ function AssistantButton({
       disabled={disabled}
       onClick={onClick}
     >
-      {children ?? label}
+      {icon}
+      {iconOnly ? null : (children ?? label)}
     </button>
   );
 }
@@ -136,6 +143,54 @@ function AssistantSheet({
   );
 }
 
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <section
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={style}
+    >
+      {children}
+    </section>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {icon}
+      <span data-adapttable-part="assistant-suggestion-title">{title}</span>
+      {description ? (
+        <span data-adapttable-part="assistant-suggestion-description">
+          {description}
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
 /**
  * Ask this table a question, in native HTML.
  *
@@ -151,6 +206,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

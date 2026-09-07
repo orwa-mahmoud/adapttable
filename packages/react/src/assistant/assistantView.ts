@@ -7,9 +7,34 @@
  * driving the panel from its own state satisfies it by writing it.
  */
 
+/**
+ * What one action changed, in the reader's terms.
+ *
+ * Supplied by whoever executed the action, from the arguments that actually
+ * ran — never parsed back out of the model's reply. Absent fields are simply
+ * not shown; the panel never invents a value it was not given.
+ *
+ * @public
+ */
+export interface TableAssistantReceiptSubject {
+  /**
+   * The kind of change, for the card's headline: `filter`, `sort`, `group`,
+   * `pin`, `edit`, or a kind a host defines. Labels turn it into a sentence.
+   */
+  readonly kind?: string;
+  /** What it acted on, already readable — "Team is Core", "Salary". */
+  readonly detail?: string;
+  /** For an edit: which row and column, when the host may show them. */
+  readonly row?: string;
+  readonly column?: string;
+  /** For an edit: the values either side, already formatted by the table. */
+  readonly before?: string;
+  readonly after?: string;
+}
+
 /** One action's outcome, as the panel shows it. @public */
 export interface TableAssistantReceiptView {
-  /** Stable technical key of the capability that ran. */
+  /** Stable technical key of the capability that ran. Developer detail. */
   readonly capabilityKey?: string;
   /** Status token — the labels turn it into the reader's language. */
   readonly status: string;
@@ -17,6 +42,8 @@ export interface TableAssistantReceiptView {
   readonly message?: string;
   /** Replay identity, unique within a turn. */
   readonly idempotencyKey: string;
+  /** What changed, for the card's headline and body. */
+  readonly subject?: TableAssistantReceiptSubject;
 }
 
 /** One record in the transcript. @public */
@@ -33,6 +60,8 @@ export interface TableAssistantSuggestionView {
   readonly id: string;
   readonly title: string;
   readonly description?: string;
+  /** Which glyph the card carries: `filter`, `sort`, `group`, `edit`. */
+  readonly kind?: string;
 }
 
 /**

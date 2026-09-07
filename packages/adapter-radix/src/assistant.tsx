@@ -13,8 +13,18 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
-import { Badge, Button, Card, Dialog, TextArea } from "@radix-ui/themes";
+import {
+  Badge,
+  Button,
+  Card,
+  Dialog,
+  IconButton,
+  Text,
+  TextArea,
+} from "@radix-ui/themes";
 
 const BADGE_COLOR = {
   neutral: "gray",
@@ -38,8 +48,34 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  if (iconOnly) {
+    const control = (
+      <IconButton
+        type="button"
+        size="1"
+        variant={variant === "primary" ? "solid" : "ghost"}
+        color={variant === "primary" ? undefined : "gray"}
+        aria-label={label}
+        title={tooltip}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {icon}
+      </IconButton>
+    );
+    // Radix's Tooltip mounts its own dismissable layer. Inside the sheet that
+    // layer becomes the topmost one and swallows Escape, so the dialog stops
+    // closing. `title` gives the same hint without another layer.
+    return control;
+  }
   return (
     <Button
       type="button"
@@ -163,6 +199,87 @@ function AssistantSheet({
   );
 }
 
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Card
+      size="2"
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={{ ...style, boxShadow: "var(--shadow-5)" }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      style={{
+        display: "flex",
+        gap: "var(--space-2)",
+        alignItems: "flex-start",
+        padding: "var(--space-2)",
+        borderRadius: "var(--radius-3)",
+        border: "1px solid var(--gray-a6)",
+        background: "var(--color-panel-solid)",
+        color: "inherit",
+        font: "inherit",
+        textAlign: "start",
+        width: "100%",
+        cursor: "pointer",
+      }}
+    >
+      <Text as="span" color="gray" style={{ display: "flex", marginTop: 2 }}>
+        {icon}
+      </Text>
+      <span>
+        <Text
+          as="span"
+          size="2"
+          weight="medium"
+          style={{ display: "block" }}
+          data-adapttable-part="assistant-suggestion-title"
+        >
+          {title}
+        </Text>
+        {description ? (
+          <Text
+            as="span"
+            size="1"
+            color="gray"
+            style={{ display: "block" }}
+            data-adapttable-part="assistant-suggestion-description"
+          >
+            {description}
+          </Text>
+        ) : null}
+      </span>
+    </button>
+  );
+}
+
 /**
  * Ask this table a question, in Radix Themes.
  *
@@ -178,6 +295,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

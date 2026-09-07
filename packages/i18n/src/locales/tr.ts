@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "tamamlandı",
+  staged: "hazırlandı",
+  rejected: "reddedildi",
+  "awaiting-approval": "sizi bekliyor",
+  cancelled: "iptal edildi",
+  stale: "güncel değil",
+  failed: "başarısız",
+};
+
 export const tr: Required<TableLabels> = {
   table: "Veri tablosu",
   search: "Ara",
@@ -175,6 +186,26 @@ export const tr: Required<TableLabels> = {
   assistantBackToTable: "Tabloya dön",
   assistantDetail: "Ayrıntılar",
   assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",
+  assistantExamples: "Örnekler",
+  assistantMoreExamples: "Daha fazla örnek",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} değerinden ${after} değerine değiştirildi`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "Filtre uygulandı",
+            "filter/staged": "Filtre hazırlandı",
+            "sort/executed": "Sıralandı",
+            "group/executed": "Gruplandı",
+            "pin/executed": "Sütun sabitlendi",
+            "edit/executed": "Kaydedildi",
+            "edit/staged": "Düzenleme hazırlandı — kaydedilmedi",
+            "edit/awaiting-approval": "Düzenleme onay bekliyor",
+            "edit/rejected": "Düzenleme reddedildi",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "Boşta",
@@ -186,18 +217,10 @@ export const tr: Required<TableLabels> = {
       disconnected: "Bağlı değil",
     })[status] ?? "Hazır",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "tamamlandı",
-        staged: "hazırlandı",
-        rejected: "reddedildi",
-        "awaiting-approval": "sizi bekliyor",
-        cancelled: "iptal edildi",
-        stale: "güncel değil",
-        failed: "başarısız",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Satır ekle",
   duplicateRow: "Satırı çoğalt",
   deleteRow: "Satırı sil",

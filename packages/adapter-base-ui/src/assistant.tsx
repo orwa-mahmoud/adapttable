@@ -10,10 +10,12 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
+  type TableAssistantSuggestionProps,
+  type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import { Drawer } from "@base-ui/react/drawer";
 
-import { Badge, Button, Card, cx } from "./ui";
+import { Badge, Button, Card, cx, IconButton } from "./ui";
 
 const BADGE_COLOR: Record<string, string> = {
   neutral: "gray",
@@ -37,8 +39,27 @@ function AssistantButton({
   disabled,
   children,
   expanded,
+  icon,
+  iconOnly,
+  tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  if (iconOnly) {
+    return (
+      <IconButton
+        type="button"
+        title={tooltip}
+        aria-label={label}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {icon}
+      </IconButton>
+    );
+  }
   return (
     <Button
       type="button"
@@ -51,7 +72,8 @@ function AssistantButton({
       disabled={disabled}
       onClick={onClick}
     >
-      {children ?? label}
+      {icon}
+      {iconOnly ? null : (children ?? label)}
     </Button>
   );
 }
@@ -170,6 +192,83 @@ function AssistantSheet({
   );
 }
 
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Card
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={{
+        ...style,
+        boxShadow: "var(--shadow-4, 0 10px 30px rgb(0 0 0 / 18%))",
+      }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+function AssistantSuggestion({
+  title,
+  description,
+  icon,
+  part,
+  className,
+  onClick,
+  disabled,
+}: Readonly<TableAssistantSuggestionProps>) {
+  return (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      style={{
+        display: "flex",
+        gap: "0.5rem",
+        alignItems: "flex-start",
+        padding: "0.5rem",
+        borderRadius: "0.5rem",
+        border: "1px solid",
+        textAlign: "start",
+        width: "100%",
+        cursor: "pointer",
+        background: "transparent",
+        color: "inherit",
+        font: "inherit",
+      }}
+    >
+      <span style={{ display: "flex", marginTop: 2, opacity: 0.7 }}>
+        {icon}
+      </span>
+      <span>
+        <span
+          style={{ display: "block", fontWeight: 500 }}
+          data-adapttable-part="assistant-suggestion-title"
+        >
+          {title}
+        </span>
+        {description ? (
+          <span
+            style={{ display: "block", opacity: 0.7, fontSize: "0.85em" }}
+            data-adapttable-part="assistant-suggestion-description"
+          >
+            {description}
+          </span>
+        ) : null}
+      </span>
+    </button>
+  );
+}
+
 /**
  * Ask this table a question, in Base UI.
  *
@@ -185,6 +284,8 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Button: AssistantButton,
         Composer: AssistantInput,
         Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Suggestion: AssistantSuggestion,
       }}
     />
   );

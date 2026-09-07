@@ -5,6 +5,17 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "हो गया",
+  staged: "तैयार",
+  rejected: "अस्वीकृत",
+  "awaiting-approval": "आपकी प्रतीक्षा",
+  cancelled: "रद्द",
+  stale: "पुराना",
+  failed: "विफल",
+};
+
 export const hi: Required<TableLabels> = {
   table: "डेटा तालिका",
   search: "खोजें",
@@ -175,6 +186,26 @@ export const hi: Required<TableLabels> = {
   assistantBackToTable: "टेबल पर वापस",
   assistantDetail: "विवरण",
   assistantSaveInTable: "यह बदलाव रखने के लिए टेबल में सहेजें।",
+  assistantExamples: "उदाहरण",
+  assistantMoreExamples: "और उदाहरण",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} से ${after} किया गया`,
+  assistantReceiptAction: ({ kind, status }) =>
+    kind
+      ? (
+          {
+            "filter/executed": "फ़िल्टर लागू किया गया",
+            "filter/staged": "फ़िल्टर तैयार किया गया",
+            "sort/executed": "क्रमबद्ध किया गया",
+            "group/executed": "समूहीकृत किया गया",
+            "pin/executed": "कॉलम पिन किया गया",
+            "edit/executed": "सहेजा गया",
+            "edit/staged": "संपादन तैयार — सहेजा नहीं गया",
+            "edit/awaiting-approval": "संपादन अनुमोदन की प्रतीक्षा में",
+            "edit/rejected": "संपादन अस्वीकृत",
+          } as Record<string, string>
+        )[`${kind}/${status}`]
+      : undefined,
   assistantConnection: (status) =>
     ({
       idle: "निष्क्रिय",
@@ -186,18 +217,10 @@ export const hi: Required<TableLabels> = {
       disconnected: "जुड़ा नहीं",
     })[status] ?? "तैयार",
   assistantReceipt: ({ capability, status }) => {
-    const what =
-      {
-        executed: "हो गया",
-        staged: "तैयार",
-        rejected: "अस्वीकृत",
-        "awaiting-approval": "आपकी प्रतीक्षा",
-        cancelled: "रद्द",
-        stale: "पुराना",
-        failed: "विफल",
-      }[status] ?? status;
+    const what = RECEIPT_STATUS[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "पंक्ति जोड़ें",
   duplicateRow: "पंक्ति की प्रतिलिपि बनाएँ",
   deleteRow: "पंक्ति हटाएँ",
