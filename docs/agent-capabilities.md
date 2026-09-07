@@ -310,6 +310,17 @@ const transport: AssistantTransport = {
 Pass the live revision, not a remembered one: an action planned against a view
 the table has left must fail rather than apply to a different one.
 
+**What a transport owes the panel.** `signal` is a request, and a transport is
+your code: honour it if you can, by passing it to `fetch` or to whatever does
+the waiting. The panel does not depend on that. If a stopped turn answers
+anyway, its reply is dropped rather than appended, and Stop frees the composer
+immediately rather than waiting for a transport that may never settle.
+
+What a transport must NOT do is retry. Stopping cancels the panel's interest
+in an answer; it does not undo a write that already reached the host, and it
+cannot cancel work a backend has already started. An action whose outcome is
+unknown stays unknown — sending it again is how one stopped edit becomes two.
+
 **6 — The HTTP backend you already run.** `assistantHttpTransport` adapts the
 existing bridge; `examples/ai-http-backend.ts` is the runnable server.
 

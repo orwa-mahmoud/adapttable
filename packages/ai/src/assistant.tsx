@@ -21,7 +21,7 @@
  */
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   type AssistantExchange,
@@ -188,7 +188,17 @@ export function useTableAssistant(
   // The latest transport, so an inline object does not read as a new one.
   const transportRef = useRef(transport);
   transportRef.current = transport;
+  // The session and the authored list as they are NOW, so a click reads the
+  // current table rather than the one the last render saw.
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const suggestionsRef = useRef<readonly AssistantSuggestion[]>([]);
+  suggestionsRef.current = options.suggestions ?? [];
   const abort = useRef<AbortController | undefined>(undefined);
+  // Identity for ONE send. A late turn must not have its reservation cleared
+  // by an earlier turn's finally block, and a reply must not land after the
+  // turn that asked for it was abandoned.
+  const turnId = useRef(0);
   const seq = useRef(0);
   // Identifies the conversation a reply belongs to. A reply that arrives
   // after the table changed carries the old generation and is discarded.
@@ -208,6 +218,11 @@ export function useTableAssistant(
     alive.current = true;
     return () => {
       alive.current = false;
+      // Abort the send in flight. Without this a transport keeps working — and
+      // keeps a request open — for a panel that no longer exists.
+      abort.current?.abort();
+      abort.current = undefined;
+      sending.current = false;
     };
   }, []);
 
@@ -252,16 +267,13 @@ export function useTableAssistant(
     };
   }, [session, transportKey]);
 
-  const available = useMemo(
-    () => session?.catalog().map((entry) => entry.key) ?? [],
-    [session]
-  );
-  // Eligibility is recomputed from the live catalog on every render, so a
-  // chip rendered a second ago is re-checked before its prompt is sent.
-  const eligible = useMemo(
-    () => eligibleSuggestions(options.suggestions ?? [], available),
-    [options.suggestions, available]
-  );
+  // Read on EVERY render, never memoized on the session object. A table
+  // keeps one session and changes its capabilities in place, so caching by
+  // object identity is caching by the one thing that does not move: turn a
+  // feature off and the chip for it would sit there until something unrelated
+  // happened to rerender.
+  const available = session?.catalog().map((entry) => entry.key) ?? [];
+  const eligible = eligibleSuggestions(options.suggestions ?? [], available);
   const primary = options.primarySuggestions ?? DEFAULT_PRIMARY;
 
   /**
@@ -272,6 +284,23 @@ export function useTableAssistant(
    */
   const current = useCallback(
     (mine: number) => alive.current && generation.current === mine,
+    []
+  );
+
+  /**
+   * Whether a reply may still be shown.
+   *
+   * Three ways it may not: the panel is gone, the table changed, or this turn
+   * was stopped. The last one is the reason `stop()` can be trusted with a
+   * transport that ignores its signal — a late reply is dropped rather than
+   * appended as if nothing had happened.
+   */
+  const deliverable = useCallback(
+    (mine: number, turn: number, controller: AbortController) =>
+      alive.current &&
+      generation.current === mine &&
+      turnId.current === turn &&
+      !controller.signal.aborted,
     []
   );
 
@@ -332,6 +361,8 @@ export function useTableAssistant(
       }
       sending.current = true;
       const mine = generation.current;
+      turnId.current += 1;
+      const turn = turnId.current;
       const controller = new AbortController();
       abort.current = controller;
       seq.current += 1;
@@ -354,23 +385,36 @@ export function useTableAssistant(
           conversation: exchanges([...messages, userMessage]),
           signal: controller.signal,
         });
-        if (current(mine)) receive(reply);
+        // A transport is asked to honour `signal`, but it is host code and
+        // may not. Stop has to hold either way, so delivery is gated on the
+        // signal as well as on the turn still being the current one.
+        if (deliverable(mine, turn, controller)) receive(reply);
       } catch (cause) {
-        if (current(mine)) {
+        if (current(mine) && turnId.current === turn) {
           recover(cause, controller.signal.aborted, previousDraft);
         }
       } finally {
-        if (generation.current === mine) {
+        // Only this turn's reservation, never a later turn's.
+        if (generation.current === mine && turnId.current === turn) {
           sending.current = false;
           abort.current = undefined;
         }
       }
     },
-    [current, draft, messages, push, receive, recover, session]
+    [current, deliverable, draft, messages, push, receive, recover, session]
   );
 
   const stop = useCallback(() => {
+    if (!sending.current) return;
     abort.current?.abort();
+    abort.current = undefined;
+    // Release the lane here rather than waiting for the transport. A
+    // transport that never settles would otherwise hold the panel busy
+    // forever; its eventual reply is already undeliverable, because the turn
+    // it belonged to is no longer the current one.
+    turnId.current += 1;
+    sending.current = false;
+    setStatus("ready");
   }, []);
 
   const clear = useCallback(() => {
@@ -383,14 +427,22 @@ export function useTableAssistant(
 
   const runSuggestion = useCallback(
     async (id: string): Promise<void> => {
-      // Re-checked here, not when the chip rendered: a capability can go away
-      // between the two.
-      const suggestion = eligible.find((candidate) => candidate.id === id);
-      if (!suggestion) return;
-      // The reader sees this prompt, so this is the text that gets sent.
-      await send(suggestion.prompt);
+      const authored = suggestionsRef.current.find(
+        (candidate) => candidate.id === id
+      );
+      if (!authored) return;
+      // Re-read the catalog HERE, not from the list this render closed over.
+      // A capability can go away between a chip being drawn and being
+      // clicked, and the reader would otherwise send a prompt the table can
+      // no longer serve. The executor would refuse it anyway — this is so the
+      // refusal is not what the reader finds out from.
+      const live =
+        sessionRef.current?.catalog().map((entry) => entry.key) ?? [];
+      const [runnable] = eligibleSuggestions([authored], live);
+      if (!runnable) return;
+      await send(runnable.prompt);
     },
-    [eligible, send]
+    [send]
   );
 
   return {

@@ -432,6 +432,170 @@ describe("stopping", () => {
   });
 });
 
+/**
+ * Stop has to hold against a transport that does not cooperate.
+ *
+ * `signal` is a request, and a transport is host code: it may ignore it, or
+ * be a fetch to something that never answers. What the panel controls is what
+ * it DOES with a late reply, and what it lets the reader do next.
+ */
+describe("stopping a transport that does not cooperate", () => {
+  /**
+   * Resolves only when the test says so, never watches its signal, and keeps
+   * a resolver PER call so a specific turn can be answered late.
+   */
+  function stubborn(): {
+    transport: AssistantTransport;
+    settleTurn: (index: number, reply: AssistantTransportReply) => void;
+    settle: (reply: AssistantTransportReply) => void;
+    sends: number;
+  } {
+    const resolvers: ((reply: AssistantTransportReply) => void)[] = [];
+    const state = {
+      transport: {
+        send: () => {
+          state.sends += 1;
+          return new Promise<AssistantTransportReply>((res) => {
+            resolvers.push(res);
+          });
+        },
+      } as AssistantTransport,
+      settleTurn: (index: number, reply: AssistantTransportReply) =>
+        resolvers[index]?.(reply),
+      settle: (reply: AssistantTransportReply) =>
+        resolvers[resolvers.length - 1]?.(reply),
+      sends: 0,
+    };
+    return state;
+  }
+
+  it("drops a reply that arrives after Stop", async () => {
+    const stub = stubborn();
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        transport: stub.transport,
+      })
+    );
+
+    act(() => {
+      void result.current.send("something slow");
+    });
+    act(() => {
+      result.current.stop();
+    });
+    await act(async () => {
+      stub.settle({ text: "here it is anyway" });
+      await Promise.resolve();
+    });
+
+    // The reader stopped it. Appending the reply as though nothing happened
+    // is the one thing Stop must not do.
+    expect(result.current.messages.map((m) => m.text)).toEqual([
+      "something slow",
+    ]);
+    expect(result.current.status).toBe("ready");
+  });
+
+  it("frees the panel even though the transport never settles", async () => {
+    const stub = stubborn();
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        transport: stub.transport,
+      })
+    );
+
+    act(() => {
+      void result.current.send("first");
+    });
+    act(() => {
+      result.current.stop();
+    });
+
+    // Waiting for a transport that never answers would hold the panel busy
+    // forever.
+    expect(result.current.status).toBe("ready");
+    act(() => {
+      void result.current.send("second");
+    });
+    expect(stub.sends).toBe(2);
+  });
+
+  it("lets the stopped turn's reply not disturb the next one", async () => {
+    const first = stubborn();
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        transport: first.transport,
+      })
+    );
+
+    act(() => {
+      void result.current.send("first");
+    });
+    act(() => {
+      result.current.stop();
+    });
+    act(() => {
+      void result.current.send("second");
+    });
+
+    // The abandoned turn answers late, while a newer one is open.
+    await act(async () => {
+      first.settleTurn(0, { text: "answer to the first" });
+      await Promise.resolve();
+    });
+
+    expect(result.current.messages.map((m) => m.text)).toEqual([
+      "first",
+      "second",
+    ]);
+    // The later turn is still open — an earlier turn's completion must not
+    // release the lane the current one is holding.
+    expect(result.current.status).toBe("sending");
+  });
+
+  it("does nothing when Stop is pressed with nothing running", () => {
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        transport: { send: () => Promise.resolve({ text: "" }) },
+      })
+    );
+
+    act(() => {
+      result.current.stop();
+    });
+
+    expect(result.current.status).toBe("ready");
+  });
+
+  it("never resends after a stop", async () => {
+    const stub = stubborn();
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        transport: stub.transport,
+      })
+    );
+
+    act(() => {
+      void result.current.send("a write, perhaps");
+    });
+    act(() => {
+      result.current.stop();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // An action whose outcome is unknown stays unknown. Retrying it is how a
+    // stopped edit becomes two edits.
+    expect(stub.sends).toBe(1);
+  });
+});
+
 describe("late replies", () => {
   it("drops a reply that arrives after the table changed", async () => {
     const deferred = deferredTransport();
@@ -471,12 +635,14 @@ describe("late replies", () => {
     });
     unmount();
 
+    // Unmount aborts the send: a transport left running keeps a request open
+    // for a panel that no longer exists.
+    expect(deferred.aborted()).toBe(true);
+
     await act(async () => {
       deferred.settle({ text: "too late" });
       await Promise.resolve();
     });
-    // No state update after unmount, and nothing left subscribed.
-    expect(deferred.aborted()).toBe(false);
   });
 });
 
@@ -665,6 +831,144 @@ describe("suggestions", () => {
 
     // A chip is not the draft — what the reader was typing survives it.
     expect(result.current.draft).toBe("half-typed question");
+  });
+});
+
+/**
+ * A table keeps ONE session and changes its capabilities in place, so
+ * eligibility that is cached by session identity is cached by the one thing
+ * that never moves.
+ */
+describe("suggestions follow a session that changes in place", () => {
+  const SUGGESTIONS: AssistantSuggestion[] = [
+    {
+      id: "group",
+      title: "Group",
+      prompt: "group by city",
+      requires: ["view.setGroupBy"],
+    },
+    {
+      id: "page",
+      title: "Page 2",
+      prompt: "go to page 2",
+      requires: ["view.setPage"],
+    },
+  ];
+
+  /** One session whose observation the test mutates, as a real table does. */
+  function mutableSession(): {
+    session: AgentSession;
+    setGrouping: (on: boolean) => void;
+  } {
+    let grouping = false;
+    return {
+      session: createAgentSession({
+        observe: () =>
+          observation({
+            featureIds: grouping ? ["grouping"] : [],
+            source: {
+              fullDataset: false,
+              grouping: grouping ? "client" : false,
+              selectAcrossPages: false,
+              exportScope: "page",
+              totalCount: "loaded",
+            },
+          }),
+        apply: { setGroupBy: () => undefined, setPage: () => undefined },
+      }),
+      setGrouping: (on) => {
+        grouping = on;
+      },
+    };
+  }
+
+  it("shows a suggestion once its capability is wired, on the SAME session", () => {
+    const { session, setGrouping } = mutableSession();
+    const { result, rerender } = renderHook(() =>
+      useTableAssistant({
+        session,
+        transport: { send: () => Promise.resolve({ text: "ok" }) },
+        suggestions: SUGGESTIONS,
+      })
+    );
+
+    expect(result.current.suggestions.map((s) => s.id)).toEqual(["page"]);
+
+    setGrouping(true);
+    // An unrelated rerender — the session object never changed.
+    rerender();
+
+    expect(result.current.suggestions.map((s) => s.id)).toEqual([
+      "group",
+      "page",
+    ]);
+  });
+
+  it("drops a suggestion once its capability goes away", () => {
+    const { session, setGrouping } = mutableSession();
+    setGrouping(true);
+    const { result, rerender } = renderHook(() =>
+      useTableAssistant({
+        session,
+        transport: { send: () => Promise.resolve({ text: "ok" }) },
+        suggestions: SUGGESTIONS,
+      })
+    );
+    expect(result.current.suggestions.map((s) => s.id)).toContain("group");
+
+    setGrouping(false);
+    rerender();
+
+    expect(result.current.suggestions.map((s) => s.id)).not.toContain("group");
+  });
+
+  it("refuses a chip whose capability vanished between render and click", async () => {
+    const send = vi.fn<AssistantTransport["send"]>(() =>
+      Promise.resolve({ text: "ok" })
+    );
+    const { session, setGrouping } = mutableSession();
+    setGrouping(true);
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session,
+        transport: { send },
+        suggestions: SUGGESTIONS,
+      })
+    );
+    expect(result.current.suggestions.map((s) => s.id)).toContain("group");
+
+    // The table turns grouping off. React has not rerendered, so the chip the
+    // reader is about to click is still on screen.
+    setGrouping(false);
+    await act(async () => {
+      await result.current.runSuggestion("group");
+    });
+
+    // Sending it would have the executor refuse a prompt the reader was
+    // invited to press.
+    expect(send).not.toHaveBeenCalled();
+    expect(result.current.messages).toEqual([]);
+  });
+
+  it("still runs a chip whose capability is still there", async () => {
+    const send = vi.fn<AssistantTransport["send"]>(() =>
+      Promise.resolve({ text: "ok" })
+    );
+    const { session } = mutableSession();
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session,
+        transport: { send },
+        suggestions: SUGGESTIONS,
+      })
+    );
+
+    await act(async () => {
+      await result.current.runSuggestion("page");
+    });
+
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0]?.[0].text).toBe("go to page 2");
   });
 });
 
