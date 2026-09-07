@@ -1,7 +1,7 @@
 import babel from "@rolldown/plugin-babel";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { createInstrumenter } from "istanbul-lib-instrument";
-import { defineConfig } from "vitest/config";
+import { defineConfig, type Plugin } from "vitest/config";
 
 import {
   vitestFileParallelism,
@@ -50,6 +50,54 @@ const istanbulPluginOptions = {
 };
 
 /**
+ * Whether this run is collecting coverage.
+ *
+ * Instrumenting rewrites the code under test, so it is installed only when
+ * coverage was asked for: a plain `vitest run` executes the compiler's own
+ * output, byte for byte what the build ships. Vitest exposes no environment
+ * flag for this, so the request is read from the command line and
+ * {@link coverageGate} fails the run if that reading is ever wrong.
+ */
+function coverageRequested(argv: readonly string[]): boolean {
+  let requested = false;
+  for (const arg of argv) {
+    if (arg === "--coverage" || arg === "--coverage.enabled") requested = true;
+    else if (arg.startsWith("--coverage.enabled="))
+      requested = !arg.endsWith("=false");
+  }
+  return requested;
+}
+
+const collectingCoverage = coverageRequested(process.argv);
+
+/**
+ * Stops the two halves of the decision above drifting apart.
+ *
+ * A run that collects coverage without the counters reports zero and reads
+ * as a broken suite; a run that installs them without collecting measures
+ * nothing and tests something other than the shipped output. Both are
+ * silent, so both stop the run here instead.
+ */
+function coverageGate(): Plugin {
+  return {
+    name: "adapttable:coverage-gate",
+    // Vite's resolved config still holds the file's own `test` block, so the
+    // comparison is made against Vitest's, which has the command line in it.
+    configureVitest({ project }) {
+      const enabled = project.config.coverage.enabled;
+      if (enabled === collectingCoverage) return;
+      throw new Error(
+        enabled
+          ? "Coverage is enabled but the instrumentation is not installed. " +
+              "Ask for it on the command line: `vitest run --coverage`."
+          : "Coverage instrumentation is installed but coverage is off. " +
+              "Drop `--coverage` from the command, or enable coverage with it."
+      );
+    },
+  };
+}
+
+/**
  * Vitest instruments in a `post` Vite plugin, which would read the React
  * Compiler's output rather than the source. The Babel pass below has already
  * attached the counters, so this hands the code back untouched and stays the
@@ -84,13 +132,15 @@ export const sharedConfig = defineConfig({
   // Run the React Compiler in the test build too (matching the shipped prod
   // build), so the memoization tests exercise the real compiled output.
   plugins: [
+    coverageGate(),
     react(),
     babel({
-      // Babel runs plugins before presets, so the coverage counters are
-      // attached to the source constructs and the React Compiler then
-      // memoizes the instrumented code. Tests therefore execute the same
-      // compiled output the build ships, while coverage counts the source.
-      plugins: [["istanbul", istanbulPluginOptions]],
+      // Babel runs plugins before presets, so on a coverage run the counters
+      // are attached to the source constructs and the React Compiler then
+      // memoizes the instrumented code: the percentages read the source
+      // while the tests still exercise compiled output. Without `--coverage`
+      // the array is empty and the compiler is the only pass.
+      plugins: collectingCoverage ? [["istanbul", istanbulPluginOptions]] : [],
       presets: [reactCompilerPreset({ target: "18" })],
     }),
   ],
