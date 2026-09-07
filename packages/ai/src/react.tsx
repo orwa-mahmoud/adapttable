@@ -6,6 +6,8 @@
  */
 import {
   AGENT_APPROVAL_STATE,
+  type AgentApprovalDecision,
+  type AgentApprovalOperation,
   type FeatureProviderProps,
   featureStateKey,
   FeatureStateScope,
@@ -45,6 +47,8 @@ import type {
   AgentColumn,
   AgentObservation,
   AgentSession,
+  ApprovalResult,
+  ApprovalSubject,
   ResolvedRow,
   RowReadQuery,
   RowRef,
@@ -114,7 +118,7 @@ export interface TableAgentOptions {
   readonly onApprove?: (
     proposal: unknown,
     signal?: AbortSignal
-  ) => Promise<boolean>;
+  ) => Promise<ApprovalResult>;
   /** Per-column readability, writability, and labels. */
   readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
   /** Largest `rows.read` window. */
@@ -579,7 +583,10 @@ function bindLiveSession(
   runtimeRef: { current: ReturnType<typeof useTableRuntime> },
   revisionCounter: ReturnType<typeof createRevisionCounter>,
   waitForChrome: {
-    current: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    current: (
+      proposal: unknown,
+      signal?: AbortSignal
+    ) => Promise<ApprovalResult>;
   }
 ): AgentSession {
   const apply = new Proxy<AgentApply>(
@@ -653,6 +660,35 @@ function bindLiveSession(
   };
 }
 
+/** One open approval, whichever shape the write took. */
+interface PendingApproval {
+  readonly proposals: readonly WriteProposal[];
+  readonly operation?: AgentApprovalOperation;
+  /** Whether the reader may decide the rows one at a time. */
+  readonly perItem: boolean;
+  readonly resolve: (result: ApprovalResult) => void;
+}
+
+/**
+ * Settle an approval from what the reader decided.
+ *
+ * Undecided rows take the fallback, so "Approve" means the ones nobody has
+ * answered yet and a row already refused stays refused. The result is always
+ * the position list: whether that reads as approved, partial or rejected is
+ * the session's judgement, made in one place rather than two.
+ */
+function settle(
+  decisions: readonly AgentApprovalDecision[],
+  fallback: AgentApprovalDecision
+): ApprovalResult {
+  const approved: number[] = [];
+  decisions.forEach((decision, index) => {
+    const settled = decision === "pending" ? fallback : decision;
+    if (settled === "approved") approved.push(index);
+  });
+  return { approved };
+}
+
 function TableAgentProvider({
   feature,
   children,
@@ -660,14 +696,16 @@ function TableAgentProvider({
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
   const revisionCounterRef = useRef(createRevisionCounter());
-  const [pending, setPending] = useState<{
-    proposals: readonly WriteProposal[];
-    resolve: (ok: boolean) => void;
-  } | null>(null);
-  const pendingRef = useRef<{
-    proposals: readonly WriteProposal[];
-    resolve: (ok: boolean) => void;
-  } | null>(null);
+  const [pending, setPending] = useState<PendingApproval | null>(null);
+  const pendingRef = useRef<PendingApproval | null>(null);
+  // One entry per proposal, rebuilt whenever a new approval opens so a
+  // decision can never carry over onto the next write's rows.
+  const [decisions, setDecisions] = useState<readonly AgentApprovalDecision[]>(
+    []
+  );
+  useEffect(() => {
+    setDecisions(pending ? pending.proposals.map(() => "pending") : []);
+  }, [pending]);
 
   // The table as a store: subscribe where there is one to subscribe to, and
   // read the stamp on every render either way. React re-reads the stamp after
@@ -695,25 +733,37 @@ function TableAgentProvider({
 
   const hostApprove = options.onApprove;
   const waitForChrome = useRef<
-    (proposal: unknown, signal?: AbortSignal) => Promise<boolean>
+    (proposal: unknown, signal?: AbortSignal) => Promise<ApprovalResult>
   >(() => Promise.resolve(false));
   waitForChrome.current = (proposal, signal) => {
     if (pendingRef.current) {
       return Promise.reject(new Error("an approval is already pending"));
     }
-    return new Promise<boolean>((resolve) => {
-      const list = Array.isArray(proposal) ? (proposal as WriteProposal[]) : [];
-      const entry: {
-        proposals: readonly WriteProposal[];
-        resolve: (ok: boolean) => void;
-      } = {
-        proposals: list,
-        resolve: (ok: boolean) => {
+    return new Promise<ApprovalResult>((resolve) => {
+      // A write is either rows the reader can decide one at a time, or one
+      // operation a backend performs whole — "set every status to Active"
+      // names no rows at all. The session says which; nothing here guesses
+      // from the runtime shape of a value.
+      const subject = proposal as ApprovalSubject;
+      const rows = subject.kind === "rows";
+      const entry: PendingApproval = {
+        proposals: rows ? subject.proposals : [],
+        perItem: rows && subject.perItem,
+        ...(rows
+          ? {}
+          : {
+              operation: {
+                capability: subject.capability,
+                ...(subject.title ? { title: subject.title } : {}),
+                arguments: subject.arguments,
+              },
+            }),
+        resolve: (result: ApprovalResult) => {
           if (pendingRef.current !== entry) return;
           pendingRef.current = null;
           setPending(null);
           signal?.removeEventListener("abort", onAbort);
-          resolve(ok);
+          resolve(result);
         },
       };
       const onAbort = () => entry.resolve(false);
@@ -816,13 +866,32 @@ function TableAgentProvider({
     []
   );
 
+  const decideAt = (index: number, approved: boolean) => {
+    setDecisions((current) => {
+      const next = [...current];
+      next[index] = approved ? "approved" : "rejected";
+      // The last undecided row settles the whole write. Asking for a separate
+      // confirm once every row has been answered is asking twice.
+      if (!next.includes("pending")) {
+        pendingRef.current?.resolve(settle(next, "rejected"));
+      }
+      return next;
+    });
+  };
+  // Rebuilt every render on purpose: the published value is what subscribers
+  // compare, and memoizing it hides a decision that changed inside it.
   const approvalValue =
     hostApprove || !pending
       ? null
       : {
           proposals: pending.proposals,
-          approve: () => pending.resolve(true),
-          reject: () => pending.resolve(false),
+          ...(pending.operation ? { operation: pending.operation } : {}),
+          decisions,
+          // "Approve" covers what is still undecided; a row already refused
+          // stays refused, or the button undoes the reader's own work.
+          approve: () => pending.resolve(settle(decisions, "approved")),
+          reject: () => pending.resolve(settle(decisions, "rejected")),
+          ...(pending.perItem ? { decideAt } : {}),
         };
 
   return (

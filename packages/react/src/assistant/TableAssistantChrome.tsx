@@ -262,7 +262,7 @@ function Body({
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly note?: string;
-  readonly messageAction?: TableAssistantProps["messageAction"];
+  readonly messageAction: TableAssistantProps["messageAction"];
 }): ReactElement {
   const scroll = useConversationScroll(assistant.messages.length);
   const Button = slots.Button;

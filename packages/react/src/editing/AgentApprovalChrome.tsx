@@ -20,12 +20,51 @@ import { featureStateKey } from "../features/providers";
  * @public
  */
 export interface AgentApprovalPending {
-  /** Proposed writes waiting for a human decision. */
+  /**
+   * Proposed writes waiting for a human decision.
+   *
+   * Empty when the write names no rows — see {@link operation}.
+   */
   readonly proposals: readonly AgentApprovalProposal[];
-  /** Confirm the proposals and continue the host write path. */
+  /**
+   * The write, when it is one operation rather than a set of rows.
+   *
+   * A backend that updates every matching row server-side proposes nothing
+   * per row: there is one thing to agree to, and per-row controls would be
+   * asking about rows nobody enumerated.
+   */
+  readonly operation?: AgentApprovalOperation;
+  /** What the reader has decided so far, one entry per proposal. */
+  readonly decisions: readonly AgentApprovalDecision[];
+  /** Confirm everything still undecided and continue the host write path. */
   readonly approve: () => void;
-  /** Dismiss the proposals without writing. */
+  /** Refuse everything still undecided. */
   readonly reject: () => void;
+  /**
+   * Decide one proposal by its position.
+   *
+   * Absent when the write cannot be split — a row move is two lines
+   * describing one indivisible change. Surfaces that offer per-row controls
+   * must hide them when this is missing rather than draw dead buttons.
+   */
+  readonly decideAt?: (index: number, approved: boolean) => void;
+}
+
+/** What a reader has decided about one proposal. @public */
+export type AgentApprovalDecision = "pending" | "approved" | "rejected";
+
+/**
+ * A write that acts on the table as a whole rather than on named rows.
+ *
+ * @public
+ */
+export interface AgentApprovalOperation {
+  /** Capability key the write runs. */
+  readonly capability: string;
+  /** Reader-facing name, when the capability declared one. */
+  readonly title?: string;
+  /** Arguments the capability was called with. */
+  readonly arguments: unknown;
 }
 
 /** Feature-state key for a pending agent approval. @public */

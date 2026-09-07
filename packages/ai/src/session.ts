@@ -21,6 +21,8 @@ import type {
   AgentObservation,
   AgentSession,
   ApprovalOutcome,
+  ApprovalResult,
+  ApprovalSubject,
   CapabilityGuide,
   CapabilityPlan,
   CatalogEntry,
@@ -52,7 +54,10 @@ export interface CreateAgentSessionOptions {
    * Host confirmation. When set, chrome is skipped.
    * When omitted and approval is required, execute returns `approval: "pending"`.
    */
-  onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+  onApprove?: (
+    proposal: unknown,
+    signal?: AbortSignal
+  ) => Promise<ApprovalResult>;
   /** Custom governed capabilities registered on this table session. */
   capabilities?: readonly AgentCapabilityDefinition[];
   /**
@@ -343,21 +348,45 @@ export function createAgentSession(
     throwIfCancelled();
     revalidate(key, entry, true);
 
-    const subject =
+    const subject: ApprovalSubject =
       plan.proposals.length > 0
-        ? plan.proposals
-        : { capability: key, arguments: args ?? {} };
-    const approval = await decideApproval(definition, entry, subject, approve);
+        ? {
+            kind: "rows",
+            proposals: plan.proposals,
+            perItem: plan.perItem === true,
+          }
+        : {
+            kind: "operation",
+            capability: key,
+            ...(definition.presentation?.title
+              ? { title: definition.presentation.title }
+              : {}),
+            arguments: args ?? {},
+          };
+    const decision = await decideApproval(
+      definition,
+      entry,
+      subject,
+      approve,
+      plan.proposals.length
+    );
+    const approval = decision.outcome;
     if (approval === "pending" || approval === "rejected") {
       return writePayload(plan.proposals, false, approval);
     }
     throwIfCancelled();
     revalidate(key, entry, true);
 
+    // What the handler sees is what the reader agreed to, never the whole
+    // plan with a note attached.
+    const approvedPlan = decision.approved
+      ? narrowPlan(plan, decision.approved)
+      : plan;
     const context: AgentCapabilityContext = {
       ...baseContext,
-      plan,
+      plan: approvedPlan,
       commit,
+      ...(decision.approved ? { approvedIndexes: decision.approved } : {}),
     };
     // The last moment before the handler can touch the host. Nothing has been
     // written yet, so a cancellation here leaves the key free to be retried.
@@ -365,10 +394,15 @@ export function createAgentSession(
     state.invokedWrite = true;
     try {
       const payload = await definition.execute(context, args);
-      return decorateWrite(payload, plan, approval);
+      return decorateWrite(payload, approvedPlan, approval);
     } catch (error) {
       if (error instanceof BulkFailure) {
-        return writePayload(plan.proposals, false, approval, error.results);
+        return writePayload(
+          approvedPlan.proposals,
+          false,
+          approval,
+          error.results
+        );
       }
       throw error;
     }
@@ -1043,18 +1077,62 @@ async function resolveRowArg(
   return apply.resolveRow(ref);
 }
 
+/** A decision, and which rows it covered when it did not cover all of them. */
+interface ApprovalDecision {
+  readonly outcome: ApprovalOutcome;
+  /** Approved positions in the plan, when the reader decided row by row. */
+  readonly approved?: readonly number[];
+}
+
 async function decideApproval(
   definition: AgentCapabilityDefinition,
   observation: AgentObservation,
   proposal: unknown,
-  onApprove: ((proposal: unknown) => Promise<boolean>) | undefined
-): Promise<ApprovalOutcome> {
+  onApprove: ((proposal: unknown) => Promise<ApprovalResult>) | undefined,
+  total: number
+): Promise<ApprovalDecision> {
   if (!needsApproval(definition, approvalOf(observation))) {
-    return "not-required";
+    return { outcome: "not-required" };
   }
-  if (!onApprove) return "pending";
-  const allowed = await onApprove(proposal);
-  return allowed ? "approved" : "rejected";
+  if (!onApprove) return { outcome: "pending" };
+  const decision = await onApprove(proposal);
+  if (typeof decision === "boolean") {
+    return { outcome: decision ? "approved" : "rejected" };
+  }
+  // A row-by-row answer. Positions are validated against the plan rather
+  // than trusted: an out-of-range index would otherwise silently shift which
+  // row a later filter keeps.
+  const approved = [
+    ...new Set(
+      decision.approved.filter(
+        (index) => Number.isInteger(index) && index >= 0 && index < total
+      )
+    ),
+  ].sort((left, right) => left - right);
+  if (approved.length === 0) return { outcome: "rejected" };
+  if (approved.length === total) return { outcome: "approved" };
+  return { outcome: "partial", approved };
+}
+
+/**
+ * Narrow a plan to the rows a reader approved.
+ *
+ * Only a plan that declared itself divisible is ever split, and only when
+ * its payload is an array the proposals line up with — anything else keeps
+ * every row, because dropping half of a payload the session cannot read is
+ * how a bulk write silently writes the wrong thing.
+ */
+function narrowPlan(
+  plan: CapabilityPlan,
+  approved: readonly number[]
+): CapabilityPlan {
+  const proposals = approved.map((index) => plan.proposals[index]!);
+  if (!plan.perItem || !Array.isArray(plan.payload)) {
+    return { ...plan, proposals };
+  }
+  const payload = plan.payload as readonly unknown[];
+  if (payload.length !== plan.proposals.length) return { ...plan, proposals };
+  return { ...plan, proposals, payload: approved.map((i) => payload[i]) };
 }
 
 function bindApprove(
@@ -1067,7 +1145,7 @@ function bindApprove(
       throw new ApplyError("cancelled", "approval cancelled");
     }
     if (!signal) return onApprove(proposal, signal);
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<ApprovalResult>((resolve, reject) => {
       const onAbort = () => {
         reject(new ApplyError("cancelled", "approval cancelled"));
       };
@@ -1146,7 +1224,7 @@ async function planCells(
       after: edit.value,
     });
   }
-  return { proposals, payload: resolved };
+  return { proposals, payload: resolved, perItem: true };
 }
 
 async function applyCells(
@@ -1191,6 +1269,27 @@ async function applyCells(
   );
 }
 
+/**
+ * A bound `readRows`, as a plain function rather than a method reference.
+ *
+ * Reading it off the apply object as a method would leave `this` implicit at
+ * the call site, which the linter is right to refuse.
+ */
+type ReadRowWindow = (query: RowReadQuery) => Promise<RowWindow> | RowWindow;
+
+/**
+ * The value a write is about to replace, for the human who approves it.
+ *
+ * This is not a disclosure to the model — it is the line a reader sees
+ * beside Approve, and a reader who owns the table may see their own cell.
+ * So the search widens past the agent's addressing scope when it has to: a
+ * row hidden by the current filter is still a row this write will change,
+ * and printing an empty before-value would say the cell was blank when it
+ * holds 170.
+ *
+ * Widening stops at what the table itself permits. `full` requires a source
+ * that declared the whole dataset, exactly as `rows.read` requires it.
+ */
 async function peekCell(
   apply: AgentApply,
   observation: AgentObservation,
@@ -1198,15 +1297,42 @@ async function peekCell(
   column: string
 ): Promise<unknown> {
   if (!apply.readRows) return undefined;
+  const scopes: RowAddressScope[] = [observation.rowAddressScope];
+  for (const wider of ["page", "full"] as const) {
+    if (wider === "full" && observation.source.fullDataset !== true) continue;
+    if (!scopes.includes(wider)) scopes.push(wider);
+  }
+  const read: ReadRowWindow = (query) =>
+    apply.readRows?.(query) ?? { offset: 0, limit: 0, redacted: [], rows: [] };
+  for (const scope of scopes) {
+    const found = await peekCellInScope(
+      read,
+      observation,
+      rowKey,
+      column,
+      scope
+    );
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
+async function peekCellInScope(
+  read: ReadRowWindow,
+  observation: AgentObservation,
+  rowKey: string,
+  column: string,
+  scope: RowAddressScope
+): Promise<unknown> {
   const readMax = readMaxOf(observation);
   let offset = 0;
   for (let page = 0; page < 256; page++) {
     const window = await Promise.resolve(
-      apply.readRows({
+      read({
         offset,
         limit: readMax,
         columns: [column],
-        scope: observation.rowAddressScope,
+        scope,
       })
     );
     const row = window.rows.find((entry) => entry.rowKey === rowKey);
@@ -1224,7 +1350,7 @@ function planAdd(body: Record<string, unknown>): CapabilityPlan {
       typeof row.rowKey === "string" ? row.rowKey : `new:${String(index + 1)}`,
     after: row,
   }));
-  return { proposals, payload: rows };
+  return { proposals, payload: rows, perItem: true };
 }
 
 async function applyAdd(
@@ -1241,7 +1367,7 @@ async function applyAdd(
 function planDelete(body: Record<string, unknown>): CapabilityPlan {
   const keys = body.keys as string[];
   const proposals: WriteProposal[] = keys.map((rowKey) => ({ rowKey }));
-  return { proposals, payload: keys };
+  return { proposals, payload: keys, perItem: true };
 }
 
 async function applyDelete(

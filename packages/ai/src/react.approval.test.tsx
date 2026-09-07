@@ -30,8 +30,11 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
 
 type Pending = {
   readonly proposals: readonly unknown[];
+  readonly operation?: { readonly capability: string; readonly title?: string };
+  readonly decisions: readonly string[];
   readonly approve: () => void;
   readonly reject: () => void;
+  readonly decideAt?: (index: number, approved: boolean) => void;
 } | null;
 
 const VIEW: TableRuntimeView<Row> = {
@@ -739,5 +742,201 @@ describe("under Strict Mode's double effects", () => {
     await waitFor(() => {
       expect(approvals).toHaveBeenLastCalledWith(true);
     });
+  });
+});
+
+describe("deciding a bulk write row by row", () => {
+  const ROWS_3: Row[] = [
+    { id: "1", name: "Ada" },
+    { id: "2", name: "Grace" },
+    { id: "3", name: "Alan" },
+  ];
+  const VIEW_3 = { ...VIEW, rows: ROWS_3 };
+
+  const editThree = (key: string): Promise<ExecuteResult> =>
+    session().execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "1", column: "name", value: "A." },
+          { rowKey: "2", column: "name", value: "G." },
+          { rowKey: "3", column: "name", value: "Al." },
+        ],
+      },
+      session().manifest().viewRevision,
+      key
+    );
+
+  async function openThree(key: string, onCellEdit: ReturnType<typeof vi.fn>) {
+    // `handles` is module state the last test left behind. Clearing it is
+    // what makes the wait below wait for THIS tree rather than pass on a
+    // session that is already unmounted.
+    handles.current = { session: undefined, pending: null };
+    mount(
+      { tableId: key, approval: "writes" },
+      { ...VIEW_3, editing: { onCellEdit } }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = editThree(key);
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    // Boxed: awaiting this helper must not await the undecided write.
+    return { result };
+  }
+
+  it("starts with every row undecided", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openThree("per-item-start", onCellEdit);
+
+    expect(handles.current.pending?.decisions).toEqual([
+      "pending",
+      "pending",
+      "pending",
+    ]);
+    expect(handles.current.pending?.decideAt).toBeTypeOf("function");
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await result;
+  });
+
+  it("settles the write once the last row is answered, writing only those approved", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openThree("per-item-mixed", onCellEdit);
+
+    act(() => {
+      handles.current.pending?.decideAt?.(0, true);
+    });
+    // Two rows still undecided, so nothing has been written yet.
+    expect(handles.current.pending).not.toBeNull();
+    expect(onCellEdit).not.toHaveBeenCalled();
+
+    act(() => {
+      handles.current.pending?.decideAt?.(1, false);
+    });
+    act(() => {
+      handles.current.pending?.decideAt?.(2, true);
+    });
+
+    const settled = await result;
+    expect(settled.ok).toBe(true);
+    expect((settled.result as { approval: string }).approval).toBe("partial");
+    const rows = onCellEdit.mock.calls.map((call) => (call[0] as Row).id);
+    expect(rows).toEqual(["1", "3"]);
+  });
+
+  it("keeps a refused row refused when the reader then approves the rest", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openThree("per-item-approve-rest", onCellEdit);
+
+    act(() => {
+      handles.current.pending?.decideAt?.(1, false);
+    });
+    act(() => {
+      handles.current.pending?.approve();
+    });
+
+    const settled = await result;
+    expect((settled.result as { approval: string }).approval).toBe("partial");
+    const rows = onCellEdit.mock.calls.map((call) => (call[0] as Row).id);
+    expect(rows).toEqual(["1", "3"]);
+  });
+
+  it("keeps an approved row when the reader then refuses the rest", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openThree("per-item-reject-rest", onCellEdit);
+
+    act(() => {
+      handles.current.pending?.decideAt?.(2, true);
+    });
+    act(() => {
+      handles.current.pending?.reject();
+    });
+
+    const settled = await result;
+    expect((settled.result as { approval: string }).approval).toBe("partial");
+    const rows = onCellEdit.mock.calls.map((call) => (call[0] as Row).id);
+    expect(rows).toEqual(["3"]);
+  });
+
+  it("does not carry a decision onto the next write", async () => {
+    const onCellEdit = vi.fn();
+    const { result: first } = await openThree("per-item-reset", onCellEdit);
+    act(() => {
+      handles.current.pending?.decideAt?.(0, false);
+    });
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    await first;
+
+    const second = editThree("per-item-reset-2");
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    expect(handles.current.pending?.decisions).toEqual([
+      "pending",
+      "pending",
+      "pending",
+    ]);
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await second;
+  });
+});
+
+describe("a write that names no rows", () => {
+  it("hands the reader the capability instead of an empty list", async () => {
+    handles.current = { session: undefined, pending: null };
+    mount({
+      tableId: "operation",
+      approval: "writes",
+      capabilities: [
+        {
+          key: "staff.activateAll",
+          summary: "Activate every matching row",
+          kind: "write",
+          presentation: { title: "Activate everyone" },
+          guide: {
+            guide: "Activate every row the filter matches.",
+            input: { type: "object" },
+            output: { type: "object" },
+          },
+          isEnabled: () => true,
+          execute: () => ({ ok: true }),
+        },
+      ],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = session().execute(
+      "staff.activateAll",
+      { status: "Active" },
+      session().manifest().viewRevision,
+      "operation-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    expect(handles.current.pending?.proposals).toHaveLength(0);
+    expect(handles.current.pending?.operation).toMatchObject({
+      capability: "staff.activateAll",
+      title: "Activate everyone",
+    });
+    // One thing to agree to means no per-row controls to draw.
+    expect(handles.current.pending?.decideAt).toBeUndefined();
+
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    expect((await result).ok).toBe(true);
   });
 });

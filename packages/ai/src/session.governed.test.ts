@@ -4,6 +4,7 @@ import { enabledKeys } from "./manifest";
 import { createAgentSession } from "./session";
 import type {
   AgentApply,
+  AgentCapabilityDefinition,
   AgentObservation,
   RowReadQuery,
   RowWindow,
@@ -954,5 +955,243 @@ describe("execution lifecycle", () => {
       proposals: [{ rowKey: "r5", column: "salary", before: 140 }],
     });
     expect(readRows).toHaveBeenCalled();
+  });
+});
+
+describe("what a reader is asked to approve", () => {
+  it("describes a row write as rows, in plan order, and says it can be split", async () => {
+    let seen: unknown;
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: apply(),
+      onApprove: (subject) => {
+        seen = subject;
+        return Promise.resolve(true);
+      },
+    });
+    await session.execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "r1", column: "salary", value: 200 },
+          { rowKey: "r2", column: "salary", value: 210 },
+        ],
+      },
+      1,
+      "rows-subject"
+    );
+
+    expect(seen).toEqual({
+      kind: "rows",
+      perItem: true,
+      proposals: [
+        { rowKey: "r1", column: "salary", before: 100, after: 200 },
+        { rowKey: "r2", column: "salary", before: 110, after: 210 },
+      ],
+    });
+  });
+
+  it("describes a row move as one indivisible change", async () => {
+    let seen: { perItem?: boolean } | undefined;
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          approval: "writes",
+          featureIds: ["editing", "row-reorder"],
+        }),
+      apply: apply(),
+      onApprove: (subject) => {
+        seen = subject as { perItem?: boolean };
+        return Promise.resolve(true);
+      },
+    });
+    await session.execute(
+      "rows.reorder",
+      { fromKey: "r1", toKey: "r3" },
+      1,
+      "move-subject"
+    );
+
+    // Two proposals describe one move. Approving half of it is not a thing.
+    expect(seen?.perItem).toBe(false);
+  });
+
+  it("names the capability when a write enumerates no rows", async () => {
+    let seen: unknown;
+    const bulk: AgentCapabilityDefinition = {
+      key: "staff.activateAll",
+      summary: "Set every matching row to Active",
+      kind: "write",
+      presentation: { title: "Activate everyone" },
+      guide: {
+        guide: "Activate every row the filter matches.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: () => ({ ok: true }),
+    };
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes", commit: "immediate" }),
+      apply: apply(),
+      capabilities: [bulk],
+      onApprove: (subject) => {
+        seen = subject;
+        return Promise.resolve(true);
+      },
+    });
+    await session.execute(
+      "staff.activateAll",
+      { status: "Active" },
+      1,
+      "operation-subject"
+    );
+
+    // The reader gets something to read, not an empty list.
+    expect(seen).toEqual({
+      kind: "operation",
+      capability: "staff.activateAll",
+      title: "Activate everyone",
+      arguments: { status: "Active" },
+    });
+  });
+});
+
+describe("approving part of a bulk write", () => {
+  const threeEdits = {
+    edits: [
+      { rowKey: "r1", column: "salary", value: 200 },
+      { rowKey: "r2", column: "salary", value: 210 },
+      { rowKey: "r3", column: "salary", value: 220 },
+    ],
+  };
+
+  it("writes only the approved rows and never the refused ones", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve({ approved: [0, 2] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "partial-write"
+    );
+
+    expect(result.ok).toBe(true);
+    const written = (hooks.editCells as ReturnType<typeof vi.fn>).mock.calls
+      .flatMap((call) => call[0] as { rowKey: string }[])
+      .map((edit) => edit.rowKey);
+    expect(written).toEqual(["r1", "r3"]);
+  });
+
+  it("reports the outcome as partial and returns only what ran", async () => {
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: apply(),
+      onApprove: () => Promise.resolve({ approved: [1] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "partial-receipt"
+    );
+
+    const payload = result.result as {
+      approval: string;
+      proposals: { rowKey: string }[];
+    };
+    expect(payload.approval).toBe("partial");
+    expect(payload.proposals.map((entry) => entry.rowKey)).toEqual(["r2"]);
+  });
+
+  it("treats approving every row as a plain approval", async () => {
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: apply(),
+      onApprove: () => Promise.resolve({ approved: [0, 1, 2] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "all-approved"
+    );
+
+    expect((result.result as { approval: string }).approval).toBe("approved");
+  });
+
+  it("treats approving none as a refusal, and writes nothing", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve({ approved: [] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "none-approved"
+    );
+
+    expect((result.result as { approval: string }).approval).toBe("rejected");
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+
+  it("ignores positions that are not in the plan", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      // 7 is past the end and -1 is nonsense; neither may shift the rest.
+      onApprove: () => Promise.resolve({ approved: [2, 7, -1, 2] }),
+    });
+    await session.execute("edit.cells", threeEdits, 1, "bad-positions");
+
+    const written = (hooks.editCells as ReturnType<typeof vi.fn>).mock.calls
+      .flatMap((call) => call[0] as { rowKey: string }[])
+      .map((edit) => edit.rowKey);
+    expect(written).toEqual(["r3"]);
+  });
+});
+
+describe("the value a write is about to replace", () => {
+  it("reads a row the current filter hides", async () => {
+    // What the agent may address, and what the approver may read, are not
+    // the same question: the reader owns the table.
+    const hooks = apply({
+      readRows: vi.fn((query: RowReadQuery) =>
+        Promise.resolve(
+          query.scope === "visible"
+            ? { offset: 0, limit: 10, redacted: [], rows: [WINDOW.rows[1]!] }
+            : WINDOW
+        )
+      ),
+    });
+    let seen: { proposals: { before?: unknown }[] } | undefined;
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          approval: "writes",
+          source: { ...PAGE_ONLY, fullDataset: true },
+        }),
+      apply: hooks,
+      onApprove: (subject) => {
+        seen = subject as { proposals: { before?: unknown }[] };
+        return Promise.resolve(true);
+      },
+    });
+    await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "salary", value: 185 }] },
+      1,
+      "hidden-before"
+    );
+
+    expect(seen?.proposals[0]?.before).toBe(100);
   });
 });

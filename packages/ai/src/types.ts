@@ -147,6 +147,17 @@ export interface CapabilityPlan {
   readonly proposals: readonly WriteProposal[];
   /** Opaque handback — the session returns it on {@link AgentCapabilityContext.plan}. */
   readonly payload?: unknown;
+  /**
+   * Whether a reader may decide each proposal on its own.
+   *
+   * True only when the proposals stand alone AND `payload` is an array
+   * aligned with them index for index, because that is what lets the session
+   * drop a refused row from the payload before the handler sees it. A row
+   * move is the counter-example: two proposals describe one indivisible
+   * change, so it stays all-or-nothing. Defaults to false — a plan that has
+   * not thought about it is never split.
+   */
+  readonly perItem?: boolean;
 }
 
 /**
@@ -221,12 +232,24 @@ export interface AgentCapabilityContext {
   readonly onApprove?: (
     proposal: unknown,
     signal?: AbortSignal
-  ) => Promise<boolean>;
+  ) => Promise<ApprovalResult>;
   /**
    * The approved plan, on the `execute` call of a governed write. Absent
    * during `plan` itself and for read/view capabilities.
+   *
+   * Its `proposals` and array `payload` are already narrowed to what the
+   * reader approved, so a handler that reads them applies the right rows
+   * without knowing an approval happened.
    */
   readonly plan?: CapabilityPlan;
+  /**
+   * Positions in the ORIGINAL plan the reader approved, when they decided a
+   * bulk write row by row. Absent when the whole write was approved.
+   *
+   * A custom handler that ignores `plan.payload` and works from its own
+   * arguments must consult this, or it will apply rows that were refused.
+   */
+  readonly approvedIndexes?: readonly number[];
   /** Commit mode the session resolved for this call. */
   readonly commit?: CommitPolicy;
   /**
@@ -418,7 +441,53 @@ export interface WriteProposal {
  * @public
  */
 export type ApprovalOutcome =
-  "pending" | "approved" | "rejected" | "cancelled" | "not-required";
+  | "pending"
+  | "approved"
+  | "partial"
+  | "rejected"
+  | "cancelled"
+  | "not-required";
+
+/**
+ * What a reader is being asked to confirm.
+ *
+ * Every write arrives as one of these two shapes, so an approver never has
+ * to guess from the runtime type of a value what it was handed. A write that
+ * enumerates rows is `rows`; a write a backend performs whole — "set every
+ * matching row to Active" — is `operation`, and names no rows because none
+ * were enumerated.
+ *
+ * @public
+ */
+export type ApprovalSubject =
+  | {
+      readonly kind: "rows";
+      /** The rows, in plan order. */
+      readonly proposals: readonly WriteProposal[];
+      /** Whether each row may be decided on its own. */
+      readonly perItem: boolean;
+    }
+  | {
+      readonly kind: "operation";
+      /** Capability key the write runs. */
+      readonly capability: string;
+      /** Reader-facing name, when the capability declared one. */
+      readonly title?: string;
+      /** Arguments the capability was called with. */
+      readonly arguments: unknown;
+    };
+
+/**
+ * What a reader decided about a write they were asked to confirm.
+ *
+ * `true` and `false` decide the whole write. An index list decides a bulk
+ * write row by row: those positions in {@link CapabilityPlan.proposals} ran
+ * and the rest never did. An empty list is a refusal of everything, which is
+ * why it is reported as `rejected` rather than `partial`.
+ *
+ * @public
+ */
+export type ApprovalResult = boolean | { readonly approved: readonly number[] };
 
 /**
  * Per-row outcome of a bulk write. Failures are never dropped.
