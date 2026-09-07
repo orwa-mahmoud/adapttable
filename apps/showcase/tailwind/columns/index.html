@@ -168,6 +168,8 @@
         <p>The button, panel, grip, pin and resize handle all carry the map's classes, with an indigo active state; the search box, bulk buttons and overflow submenu are not in the map, so those read as browser defaults.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/unstyled&quot;;
+import { columnMenu } from &quot;@adapttable/unstyled/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/unstyled/resizable-columns&quot;;
 
 export function People({ rows, columns, layout, onLayout }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns, layout, onLayout }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      enableColumnMenu
-      resizableColumns
+      features={[columnMenu(), resizableColumns()]}
       columnLayout={layout}
       onColumnLayoutChange={onLayout}
     /&gt;

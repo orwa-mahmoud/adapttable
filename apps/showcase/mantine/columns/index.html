@@ -168,6 +168,8 @@
         <p>The column menu is a Mantine Popover — a Popover rather than a Menu, because the panel holds drag handles and arrow keys have to reorder rather than move a highlight — and every control in it is an ActionIcon.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mantine&quot;;
+import { columnMenu } from &quot;@adapttable/mantine/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/mantine/resizable-columns&quot;;
 
 export function People({ rows, columns, layout, onLayout }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns, layout, onLayout }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      enableColumnMenu
-      resizableColumns
+      features={[columnMenu(), resizableColumns()]}
       columnLayout={layout}
       onColumnLayoutChange={onLayout}
     /&gt;

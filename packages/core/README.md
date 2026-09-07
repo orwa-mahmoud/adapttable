@@ -56,7 +56,7 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
   groups, from the optional `@adapttable/core/pivot` entry.
 - **Tree data** — `getChildren` / `getParentId`, hierarchical rows with their own expansion state.
 - **Column management** — show/hide, reorder, pin (sticky) and resize state, plus collapsible column groups.
-- **Sparkline columns** — `@adapttable/core/sparkline`; bar, line and area as inline SVG.
+- **Sparkline columns** — `@adapttable/react/sparkline`; bar, line and area as inline SVG.
 - **PDF export and print layout** (`@adapttable/core/pdf`) — optional entry; `pdfWriter()` on `exportCsv`, `printTable` for the browser dialog.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
 - **Live row patches** (`@adapttable/core/stream`) — `useRowPatchStream` binds a WebSocket or SSE to the rows you already own.

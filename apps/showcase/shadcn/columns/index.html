@@ -168,6 +168,8 @@
         <p>The menu is a native disclosure — a positioned panel that closes on outside pointer-down and Escape — over bg-card, with hidden columns struck through in text-muted-foreground rather than merely dimmed.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/shadcn&quot;;
+import { columnMenu } from &quot;@adapttable/shadcn/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/shadcn/resizable-columns&quot;;
 
 export function People({ rows, columns, layout, onLayout }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns, layout, onLayout }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      enableColumnMenu
-      resizableColumns
+      features={[columnMenu(), resizableColumns()]}
       columnLayout={layout}
       onColumnLayoutChange={onLayout}
     /&gt;

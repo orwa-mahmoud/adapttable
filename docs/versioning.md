@@ -89,15 +89,15 @@ behind it.
 
 Each is a published, supported entry — not an implementation detail:
 
-| Entry                        | What it is                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core/formula`   | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
-| `@adapttable/core/pdf`       | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
-| `@adapttable/core/pivot`     | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
-| `@adapttable/core/query`     | The query model without React — codecs a backend can load                  |
-| `@adapttable/core/sparkline` | Sparkline column helper                                                    |
-| `@adapttable/core/stream`    | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
-| `@adapttable/core/xlsx`      | Spreadsheet export writer                                                  |
+| Entry                         | What it is                                                                 |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/core/formula`    | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
+| `@adapttable/core/pdf`        | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
+| `@adapttable/core/pivot`      | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
+| `@adapttable/core/query`      | The query model without React — codecs a backend can load                  |
+| `@adapttable/react/sparkline` | Sparkline column helper                                                    |
+| `@adapttable/core/stream`     | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
+| `@adapttable/core/xlsx`       | Spreadsheet export writer                                                  |
 
 ### Adapter main entries
 

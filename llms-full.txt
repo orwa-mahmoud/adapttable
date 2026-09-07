@@ -1655,16 +1655,16 @@ See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine
 
 # React table sparkline columns
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — import `@adapttable/core/sparkline`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — import `@adapttable/react/sparkline`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [turn on the sparkline column in the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — switch kits with it on and the chart is drawn by each one.
 
 A sparkline is a mini chart in a cell: bar, line or area, drawn as inline
-SVG. It ships as `@adapttable/core/sparkline` so a table that never
+SVG. It ships as `@adapttable/react/sparkline` so a table that never
 imports it never pays for it. No chart library.
 
 ```tsx
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { DataTable } from "@adapttable/mantine";
 
 const columns = [
@@ -7589,6 +7589,17 @@ const transport: AssistantTransport = {
 Pass the live revision, not a remembered one: an action planned against a view
 the table has left must fail rather than apply to a different one.
 
+**What a transport owes the panel.** `signal` is a request, and a transport is
+your code: honour it if you can, by passing it to `fetch` or to whatever does
+the waiting. The panel does not depend on that. If a stopped turn answers
+anyway, its reply is dropped rather than appended, and Stop frees the composer
+immediately rather than waiting for a transport that may never settle.
+
+What a transport must NOT do is retry. Stopping cancels the panel's interest
+in an answer; it does not undo a write that already reached the host, and it
+cannot cancel work a backend has already started. An action whose outcome is
+unknown stays unknown — sending it again is how one stopped edit becomes two.
+
 **6 — The HTTP backend you already run.** `assistantHttpTransport` adapts the
 existing bridge; `examples/ai-http-backend.ts` is the runnable server.
 
@@ -7862,10 +7873,21 @@ A live table publishes a compact catalog. Your runtime maps that contract
 onto the tools it already speaks, then calls `session.execute`.
 
 [Try the interactive demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
-— a labelled tool-call playground on a real Mantine table. No credentials.
-No network model call.
+— a real Mantine table you talk to. The demo answers a fixed set of example
+requests with no model behind them; connect your own backend from the
+assistant's settings for free-form conversation.
 
-See [adaptive capabilities](./agent-capabilities.md) and
+Nothing on this page is required to put a conversation in front of a reader.
+If that is what you want, start with
+[the optional widget](./agent-capabilities.md#the-optional-widget) — one panel
+per kit — or
+[the headless controller](./agent-capabilities.md#the-headless-assistant) if
+you would rather draw it yourself.
+[Six ways to wire it](./agent-capabilities.md#six-ways-to-wire-it) lays them
+side by side, from the ready widget to a transport of your own.
+
+This page is the layer underneath: how any agent runtime reaches the same
+governed executor. See [adaptive capabilities](./agent-capabilities.md) and
 [`@adapttable/ai`](./ai.md) for the session itself.
 
 ```ts
@@ -8035,6 +8057,7 @@ the same session. Setup, protocol and the runnable example live on
 - [ai-mcp-host.ts](../examples/ai-mcp-host.ts) — tools, resources, list-changed
 - [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools
 - [ai-http-backend.ts](../examples/ai-http-backend.ts) — runnable OpenAI/Anthropic/Gemini/DeepSeek server
+- [ai-assistant-custom-ui.tsx](../examples/ai-assistant-custom-ui.tsx) — a complete conversation panel with none of the shipped widget in it
 
 Intention fixtures (no live model) live in
 `packages/ai/src/__fixtures__/intentions.json`.
@@ -10564,7 +10587,7 @@ download draws Arabic, CJK or any script the built-in face cannot; Arabic
 is shaped into its contextual forms and reordered right to left. See
 [PDF export and print layout](./export-pdf.md).
 
-**Sparkline columns.** `@adapttable/core/sparkline` adds `Sparkline` /
+**Sparkline columns.** `@adapttable/react/sparkline` adds `Sparkline` /
 `sparklineColumn` so a cell can draw a bar, line or area chart without a
 chart library and without pulling the mark into the base bundle.
 `SparklineProps` / `SparklineKind` / `SparklineColumnSpec` type the
@@ -14204,15 +14227,15 @@ behind it.
 
 Each is a published, supported entry — not an implementation detail:
 
-| Entry                        | What it is                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core/formula`   | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
-| `@adapttable/core/pdf`       | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
-| `@adapttable/core/pivot`     | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
-| `@adapttable/core/query`     | The query model without React — codecs a backend can load                  |
-| `@adapttable/core/sparkline` | Sparkline column helper                                                    |
-| `@adapttable/core/stream`    | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
-| `@adapttable/core/xlsx`      | Spreadsheet export writer                                                  |
+| Entry                         | What it is                                                                 |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/core/formula`    | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
+| `@adapttable/core/pdf`        | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
+| `@adapttable/core/pivot`      | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
+| `@adapttable/core/query`      | The query model without React — codecs a backend can load                  |
+| `@adapttable/react/sparkline` | Sparkline column helper                                                    |
+| `@adapttable/core/stream`     | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
+| `@adapttable/core/xlsx`       | Spreadsheet export writer                                                  |
 
 ### Adapter main entries
 

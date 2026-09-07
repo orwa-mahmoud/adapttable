@@ -172,6 +172,7 @@
   SavedViewsPanel,
   useSavedViews,
 } from &quot;@adapttable/chakra&quot;;
+import { savedViews } from &quot;@adapttable/chakra/saved-views&quot;;
 
 export function People({ rows, columns }) {
   const views = useSavedViews({
@@ -193,7 +194,7 @@ export function People({ rows, columns }) {
         columns={columns}
         rowKey={(row) =&gt; row.id}
         urlKey=&quot;v&quot;
-        savedViews={{ storageKey: &quot;people-views&quot; }}
+        features={[savedViews({ storageKey: &quot;people-views&quot; })]}
       /&gt;
     &lt;/&gt;
   );

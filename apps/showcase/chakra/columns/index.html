@@ -168,6 +168,8 @@
         <p>The menu is a Chakra Popover portalled out of the table, visibility is an eye IconButton with aria-pressed, and a pinned column's button turns solid — the sortable header itself is Chakra's styled button factory rather than a Button.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/chakra&quot;;
+import { columnMenu } from &quot;@adapttable/chakra/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/chakra/resizable-columns&quot;;
 
 export function People({ rows, columns, layout, onLayout }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns, layout, onLayout }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      enableColumnMenu
-      resizableColumns
+      features={[columnMenu(), resizableColumns()]}
       columnLayout={layout}
       onColumnLayoutChange={onLayout}
     /&gt;

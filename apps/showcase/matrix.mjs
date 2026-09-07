@@ -286,6 +286,7 @@ const MATRIX_FEATURES_DEFINED = [
   SavedViewsPanel,
   useSavedViews,
 } from "{pkg}";
+import { savedViews } from "{pkg}/saved-views";
 
 export function People({ rows, columns }) {
   const views = useSavedViews({
@@ -307,7 +308,7 @@ export function People({ rows, columns }) {
         columns={columns}
         rowKey={(row) => row.id}
         urlKey="v"
-        savedViews={{ storageKey: "people-views" }}
+        features={[savedViews({ storageKey: "people-views" })]}
       />
     </>
   );
@@ -356,7 +357,7 @@ export function People({ rows, columns }) {
     ],
     card: "Rows down the side, dimensions across the top, subtotals at every level.",
     snippet: `import { DataTable, PivotPanel } from "{pkg}";
-import { usePivotUrlState } from "@adapttable/core/pivot";
+import { usePivotUrlState } from "@adapttable/react/pivot";
 
 export function Spend({ rows, fields }) {
   const pivot = usePivotUrlState({
@@ -410,7 +411,7 @@ export function Spend({ rows, fields }) {
     ],
     card: "ROUND, POWER, SQRT, IF — computed columns, errors in the cell.",
     snippet: `import { DataTable } from "{pkg}";
-import { buildFormulaColumns } from "@adapttable/core/formula";
+import { buildFormulaColumns } from "@adapttable/react/formula";
 
 const derived = buildFormulaColumns([
   {
@@ -661,6 +662,8 @@ export function Ledger({ rows, columns }) {
     ],
     card: "Show, hide, reorder, pin and resize — from a menu you did not write.",
     snippet: `import { DataTable } from "{pkg}";
+import { columnMenu } from "{pkg}/column-menu";
+import { resizableColumns } from "{pkg}/resizable-columns";
 
 export function People({ rows, columns, layout, onLayout }) {
   return (
@@ -668,8 +671,7 @@ export function People({ rows, columns, layout, onLayout }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      enableColumnMenu
-      resizableColumns
+      features={[columnMenu(), resizableColumns()]}
       columnLayout={layout}
       onColumnLayoutChange={onLayout}
     />
@@ -1342,33 +1344,52 @@ export function Sales({ rows, columns }) {
     intro: [
       "`@adapttable/ai` is optional and provider-neutral. This {kit} demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.",
       "Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and {kit} controls in both modes.",
-      "Three integration levels share that session: a custom bridge that maps any agent format onto `execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.",
+      "Three integration levels share that session: a custom bridge that maps any agent format onto `session.execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.",
     ],
     card: "Native assistant, feature-aware prompts and governed action receipts.",
-    snippet: `import { tableAgent } from "@adapttable/ai/react";
+    snippet: `import { useTableAssistant } from "@adapttable/ai/assistant";
+import { assistantHttpTransport } from "@adapttable/ai/http";
+import { tableAgent } from "@adapttable/ai/react";
 import { DataTable, agentApproval } from "{pkg}";
+import { TableAssistant } from "{pkg}/assistant";
 import { editing } from "{pkg}/editing";
 import { filters } from "{pkg}/filters";
+import { useMemo, useState } from "react";
 
 export function Orders({ rows, columns, onEdit }) {
+  const [session, setSession] = useState();
+  const transport = useMemo(
+    () => assistantHttpTransport({ endpoint: "/api/table-agent" }),
+    []
+  );
+  const assistant = useTableAssistant({ session, transport, suggestions });
+
   return (
-    <DataTable
-      data={rows}
-      columns={columns}
-      rowKey={(row) => row.id}
-      features={[
-        filters([{ key: "team", type: "multiSelect", getValue: (row) => row.team }]),
-        agentApproval(),
-        editing(onEdit),
-        tableAgent({
-          tableId: "orders",
-          writePolicy: "allow",
-          approval: "writes",
-          commit: "stage",
-          columns: { salary: { type: "number", writable: true } },
-        }),
-      ]}
-    />
+    <>
+      <DataTable
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        features={[
+          filters([{ key: "team", type: "multiSelect", getValue: (row) => row.team }]),
+          agentApproval(),
+          editing(onEdit),
+          tableAgent({
+            tableId: "orders",
+            writePolicy: "allow",
+            approval: "writes",
+            commit: "stage",
+            columns: { salary: { type: "number", writable: true } },
+            bridge: { attach: setSession },
+          }),
+        ]}
+      />
+      <TableAssistant
+        assistant={assistant}
+        open={assistant.open}
+        onOpenChange={assistant.setOpen}
+      />
+    </>
   );
 }`,
     notes: {

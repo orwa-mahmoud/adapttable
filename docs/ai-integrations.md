@@ -5,10 +5,21 @@ A live table publishes a compact catalog. Your runtime maps that contract
 onto the tools it already speaks, then calls `session.execute`.
 
 [Try the interactive demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
-— a labelled tool-call playground on a real Mantine table. No credentials.
-No network model call.
+— a real Mantine table you talk to. The demo answers a fixed set of example
+requests with no model behind them; connect your own backend from the
+assistant's settings for free-form conversation.
 
-See [adaptive capabilities](./agent-capabilities.md) and
+Nothing on this page is required to put a conversation in front of a reader.
+If that is what you want, start with
+[the optional widget](./agent-capabilities.md#the-optional-widget) — one panel
+per kit — or
+[the headless controller](./agent-capabilities.md#the-headless-assistant) if
+you would rather draw it yourself.
+[Six ways to wire it](./agent-capabilities.md#six-ways-to-wire-it) lays them
+side by side, from the ready widget to a transport of your own.
+
+This page is the layer underneath: how any agent runtime reaches the same
+governed executor. See [adaptive capabilities](./agent-capabilities.md) and
 [`@adapttable/ai`](./ai.md) for the session itself.
 
 ```ts
@@ -178,6 +189,7 @@ the same session. Setup, protocol and the runnable example live on
 - [ai-mcp-host.ts](../examples/ai-mcp-host.ts) — tools, resources, list-changed
 - [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools
 - [ai-http-backend.ts](../examples/ai-http-backend.ts) — runnable OpenAI/Anthropic/Gemini/DeepSeek server
+- [ai-assistant-custom-ui.tsx](../examples/ai-assistant-custom-ui.tsx) — a complete conversation panel with none of the shipped widget in it
 
 Intention fixtures (no live model) live in
 `packages/ai/src/__fixtures__/intentions.json`.

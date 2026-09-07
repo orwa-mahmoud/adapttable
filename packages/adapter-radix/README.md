@@ -67,7 +67,7 @@ pass `accentColor` to tint the table's own accents. Swap `useFrontendData` for
   `@adapttable/core/pivot` entry.
 - **Tree data** (`getChildren` / `getParentId`) — hierarchical rows with expand/collapse, on desktop and on cards.
 - **Column management** — show/hide, reorder, pin (sticky) and resize, plus collapsible column groups.
-- **Sparkline columns** (`@adapttable/core/sparkline`) — bar, line and area as inline SVG. The base bundle never pays for it.
+- **Sparkline columns** (`@adapttable/react/sparkline`) — bar, line and area as inline SVG. The base bundle never pays for it.
 - **PDF export and print layout** (`@adapttable/core/pdf`) — optional entry; `pdfWriter()` on `exportCsv`, `printTable` for the browser dialog.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
 - **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/radix/row-reorder`-style subpaths — the import is the switch, and `standardFeatures()` on the `/preset` entry is the one-import path. Host plugins share the same `setup(host)` surface.

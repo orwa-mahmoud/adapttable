@@ -838,7 +838,7 @@ download draws Arabic, CJK or any script the built-in face cannot; Arabic
 is shaped into its contextual forms and reordered right to left. See
 [PDF export and print layout](./export-pdf.md).
 
-**Sparkline columns.** `@adapttable/core/sparkline` adds `Sparkline` /
+**Sparkline columns.** `@adapttable/react/sparkline` adds `Sparkline` /
 `sparklineColumn` so a cell can draw a bar, line or area chart without a
 chart library and without pulling the mark into the base bundle.
 `SparklineProps` / `SparklineKind` / `SparklineColumnSpec` type the

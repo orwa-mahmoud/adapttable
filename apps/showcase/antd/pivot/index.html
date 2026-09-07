@@ -168,7 +168,7 @@
         <p>The zones are plain fieldsets rather than Cards, and both Selects set getPopupContainer so their dropdowns stay with the trigger instead of portalling to the body away from the panel they belong to.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, PivotPanel } from &quot;@adapttable/antd&quot;;
-import { usePivotUrlState } from &quot;@adapttable/core/pivot&quot;;
+import { usePivotUrlState } from &quot;@adapttable/react/pivot&quot;;
 
 export function Spend({ rows, fields }) {
   const pivot = usePivotUrlState({

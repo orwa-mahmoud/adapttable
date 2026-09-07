@@ -168,6 +168,8 @@
         <p>The menu is a Base UI Popover mounted through its own portal and positioner, with an eye button per column and a grip that reorders from the keyboard as well as by drag.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
+import { columnMenu } from &quot;@adapttable/base-ui/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/base-ui/resizable-columns&quot;;
 
 export function People({ rows, columns, layout, onLayout }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns, layout, onLayout }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      enableColumnMenu
-      resizableColumns
+      features={[columnMenu(), resizableColumns()]}
       columnLayout={layout}
       onColumnLayoutChange={onLayout}
     /&gt;

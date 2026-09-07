@@ -1,5 +1,5 @@
 /**
- * Inline sparkline charts — `@adapttable/core/sparkline`.
+ * Inline sparkline charts — `@adapttable/react/sparkline`.
  *
  * Bar, line and area, drawn as SVG so a cell never downloads a chart
  * library. The entry is a separate package path: a table that does not
