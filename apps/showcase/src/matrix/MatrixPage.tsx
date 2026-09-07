@@ -391,10 +391,6 @@ function FeaturePage({
     throw new Error(`No demo body for feature "${feature.slug}"`);
   }
   const note = feature.notes[adapter.key];
-  // On a page whose demo is the point, the implementation tutorial follows
-  // the experience instead of standing in front of it. The content is the
-  // same and stays in the rendered HTML — only its place on the page moves.
-  const demoFirst = feature.slug === "ai";
   const brief = (
     <div className="mx-brief">
       <CodeBlock
@@ -445,20 +441,13 @@ function FeaturePage({
         </div>
       </header>
 
-      {demoFirst ? null : brief}
+      {brief}
 
       <Seam pkg={adapter.pkg} />
       {Body ? (
         <Suspense fallback={<DemoFallback />}>
           <Body dark={dark} adapter={adapter.key} />
         </Suspense>
-      ) : null}
-
-      {demoFirst ? (
-        <details className="mx-brief-fold">
-          <summary>Integration example</summary>
-          {brief}
-        </details>
       ) : null}
 
       <section className="mx-section">

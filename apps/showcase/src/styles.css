@@ -1872,19 +1872,3 @@ a {
     transform: none;
   }
 }
-
-/* The integration tutorial, folded under the demo it explains. */
-.mx-brief-fold {
-  margin-block: 16px;
-}
-.mx-brief-fold > summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-.mx-brief-fold[open] > summary {
-  margin-bottom: 12px;
-}

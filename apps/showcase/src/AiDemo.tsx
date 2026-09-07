@@ -18,11 +18,8 @@ import type {
 } from "@adapttable/ai";
 import { useTableAssistant } from "@adapttable/ai/assistant";
 import { tableAgent } from "@adapttable/ai/react";
-import {
-  defaultLabels,
-  type FilterDef,
-  type RowPinState,
-} from "@adapttable/core";
+import { type FilterDef, type RowPinState } from "@adapttable/core";
+import { getLabels } from "@adapttable/i18n";
 import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
 import { assistantIsBusy } from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";
@@ -39,6 +36,7 @@ import { type AiConnection, AiConnectionSettings } from "./AiBackendConnect";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import { DEMO_SCENARIOS, demoTransport } from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
+import type { Locale } from "./data";
 import { DemoFallback } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
 import { DOCS_URL, SHOWCASE_ADAPTERS } from "./matrix/content";
@@ -124,20 +122,47 @@ const SEED: readonly StaffRow[] = [
   },
 ];
 
-const COLUMNS: ColumnDef<StaffRow>[] = [
-  { key: "person", header: "Person", accessor: (row) => row.person },
-  { key: "team", header: "Team", accessor: (row) => row.team },
-  { key: "status", header: "Status", accessor: (row) => row.status },
-  {
-    key: "salary",
-    header: "Salary",
-    accessor: (row) => row.salary,
-    editable: true,
-    editor: "number",
-    editValue: (row) => String(row.salary),
+/**
+ * The column headings, in the demo's two languages.
+ *
+ * Switching to RTL switches the language with it, the way the Feature Lab
+ * does: a mirrored table still labelled in English shows the layout but not
+ * what a reader in Arabic actually sees.
+ */
+const COLUMN_HEADERS: Record<Locale, Record<string, string>> = {
+  en: {
+    person: "Person",
+    team: "Team",
+    status: "Status",
+    salary: "Salary",
+    started: "Started",
   },
-  { key: "started", header: "Started", accessor: (row) => row.started },
-];
+  ar: {
+    person: "الشخص",
+    team: "الفريق",
+    status: "الحالة",
+    salary: "الراتب",
+    started: "تاريخ البدء",
+  },
+};
+
+function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
+  const header = COLUMN_HEADERS[locale];
+  return [
+    { key: "person", header: header.person, accessor: (row) => row.person },
+    { key: "team", header: header.team, accessor: (row) => row.team },
+    { key: "status", header: header.status, accessor: (row) => row.status },
+    {
+      key: "salary",
+      header: header.salary,
+      accessor: (row) => row.salary,
+      editable: true,
+      editor: "number",
+      editValue: (row) => String(row.salary),
+    },
+    { key: "started", header: header.started, accessor: (row) => row.started },
+  ];
+}
 
 const TEAM_FILTER: FilterDef<StaffRow> = {
   key: "team",
@@ -167,14 +192,6 @@ const SUGGESTIONS: AssistantSuggestion[] = DEMO_SCENARIOS.map((scenario) => ({
   prompt: scenario.prompt,
   requires: scenario.requires,
 }));
-
-/**
- * Below this a floating window would sit on top of the table rather than
- * beside it, so the demo starts closed and shows its launcher instead. The
- * widget makes its own presentation choice; this only decides what a first
- * paint looks like.
- */
-const NARROW = "(max-width: 900px)";
 
 function readRtl(): boolean {
   if (typeof window === "undefined") return false;
@@ -274,9 +291,13 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   // An app defaults the panel closed; this demo IS the panel, so it opens —
   // except on a narrow viewport, where opening a modal sheet over the table
   // before the reader asks for it would hide the thing they came to see.
-  const [panelOpen, setPanelOpen] = useState(
-    () => !(typeof window !== "undefined" && window.matchMedia(NARROW).matches)
-  );
+  // Closed on arrival, at every width. The window is nonmodal and floats over
+  // the page, so opening it on load drops it on top of the introduction the
+  // reader is still reading. The launcher says what it is; they open it.
+  const [panelOpen, setPanelOpen] = useState(false);
+  const locale: Locale = rtl ? "ar" : "en";
+  const labels = useMemo(() => getLabels(locale), [locale]);
+  const columns = useMemo(() => columnsFor(locale), [locale]);
   const [awaitingApproval, setAwaitingApproval] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -409,7 +430,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
 
   return (
     <div className="ai-demo" dir={rtl ? "rtl" : "ltr"} data-adapter={adapter}>
-      <header className="ai-demo__hero">
+      {/* The demo's own controls stay in the page's language: they are
+          scaffolding around the table, not part of it, and flipping English
+          prose leaves its punctuation on the wrong side. Only the table and
+          the assistant follow the RTL switch. */}
+      <header className="ai-demo__hero" dir="ltr">
         <p className="ai-demo__lede">
           The application decides what the assistant may do and what it may save
           — the table asks, your code answers.
@@ -512,7 +537,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           <Suspense fallback={<DemoFallback />}>
             <Table
               data={visibleRows}
-              columns={COLUMNS}
+              columns={columns}
+              labels={labels}
               rowKey={(row: StaffRow) => row.id}
               urlSync={false}
               features={features}
@@ -522,7 +548,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           <div className="ai-demo__assistant">
             <Assistant
               assistant={assistant}
-              labels={defaultLabels}
+              labels={labels}
               open={assistant.open}
               onOpenChange={assistant.setOpen}
               presentation="floating"
