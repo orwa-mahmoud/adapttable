@@ -137,7 +137,10 @@ export const tailwindClassNames: DataTableClassNames = {
   viewsSave:
     "h-8 shrink-0 rounded-md bg-indigo-600 px-3 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600",
   resizeHandle: "hover:bg-indigo-300",
-  card: "list-none rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900",
+  // min-w-0: a grid item sizes to its content unless told otherwise, and a
+  // card with a long value would otherwise be wider than the list holding
+  // it, pushing the page sideways on a phone.
+  card: "min-w-0 list-none rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900",
   cardRow:
     "flex items-start justify-between gap-3 py-1 text-sm first-of-type:mb-1 first-of-type:border-b first-of-type:border-gray-100 first-of-type:pb-2 dark:first-of-type:border-zinc-800",
   cardLabel:

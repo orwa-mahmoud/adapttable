@@ -62,7 +62,7 @@ export function SavedViewsMenu({
     <div
       style={{
         padding: 8,
-        minWidth: 240,
+        minWidth: "min(240px, calc(100vw - 48px))",
         maxHeight: "min(70vh, 360px)",
         overflowY: "auto",
       }}

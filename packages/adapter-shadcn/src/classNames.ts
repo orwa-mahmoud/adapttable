@@ -232,7 +232,10 @@ export const shadcnClassNames = {
   headerActions: "ms-1 inline-flex items-center gap-0.5",
   tableFooter: "px-3 py-2 text-sm text-muted-foreground",
   resizeHandle: "hover:bg-border",
-  card: "list-none rounded-xl border border-border bg-card p-3 shadow-sm [[data-density=compact]_&]:p-2",
+  // min-w-0: a grid item sizes to its content unless told otherwise, and a
+  // card with a long value would otherwise be wider than the list holding
+  // it, pushing the page sideways on a phone.
+  card: "min-w-0 list-none rounded-xl border border-border bg-card p-3 shadow-sm [[data-density=compact]_&]:p-2",
   cardRow:
     "flex items-start justify-between gap-3 py-1 text-sm first-of-type:mb-1 first-of-type:border-b first-of-type:border-border first-of-type:pb-2",
   cardLabel:

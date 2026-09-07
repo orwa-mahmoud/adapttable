@@ -480,7 +480,7 @@ export function ColumnMenu<TRow>({
       // alone when something inside has already handled it.
       closeOnEscape={false}
       zIndex={10050}
-      middlewares={{ flip: false, shift: { padding: 8, mainAxis: false } }}
+      middlewares={{ flip: false, shift: { padding: 8 } }}
     >
       <Popover.Target>
         <Button

@@ -94,7 +94,7 @@ export function SavedViewsMenu({
           <Popover.Popup
             className="adapttable-popup"
             style={{
-              minWidth: 240,
+              minWidth: "min(240px, calc(100vw - 48px))",
               maxHeight: "min(70vh, 360px)",
               overflowY: "auto",
             }}

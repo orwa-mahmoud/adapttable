@@ -426,7 +426,9 @@ export function ColumnMenu<TRow>({
         aria-label={labels.columns}
         align="end"
         side="bottom"
-        avoidCollisions={false}
+        // Collision handling stays on: a panel wider than the space
+        // beside its trigger otherwise runs off the edge on a narrow
+        // viewport and clips its own labels.
         minWidth="260px"
         dir={dir}
         maxHeight="min(70vh, 480px)"

@@ -82,8 +82,11 @@ export function FilterPopover({
     <div
       dir={dir}
       style={{
-        minWidth: 280,
-        maxWidth: "min(380px, calc(100vw - 48px))",
+        // antd draws its own padding OUTSIDE this box, so the budget has to
+        // cover that too — a card sized to the bare viewport ends up wider
+        // than the window once the kit has finished with it.
+        minWidth: "min(280px, calc(100vw - 80px))",
+        maxWidth: "min(380px, calc(100vw - 80px))",
         // The form grows while open; a card taller than the window paints its
         // lower fields off-screen, so it stops at the viewport edge instead.
         maxHeight: "min(70vh, 560px)",
@@ -116,7 +119,11 @@ export function FilterPopover({
       placement={dir === "rtl" ? "bottomRight" : "bottomLeft"}
       arrow={false}
       autoAdjustOverflow={{ adjustX: 1, adjustY: 0 }}
-      align={{ offset: [0, 4] }}
+      // No `align` of our own: antd computes one from the placement, and an
+      // override REPLACES it wholesale — including the overflow handling
+      // that keeps the panel inside the window. A four-pixel offset is not
+      // worth a panel that hangs off the edge on a phone.
+      align={{ overflow: { adjustX: 1, adjustY: 1, shiftX: true } }}
       content={content}
       styles={{ content: { padding: 12 } }}
     >

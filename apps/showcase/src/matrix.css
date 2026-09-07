@@ -527,6 +527,16 @@
   gap: var(--sp-3);
   min-width: 0;
 }
+/* Where the AI page portals its developer inspector. A grid child sizes to
+   its content unless told otherwise, and this one holds a JSON schema — so
+   without this the whole column grows to the longest line and the page
+   scrolls sideways on a narrow viewport. */
+#mx-inspector-slot {
+  min-width: 0;
+}
+#mx-inspector-slot > * {
+  min-width: 0;
+}
 .mx-refs {
   display: grid;
   gap: var(--sp-2);

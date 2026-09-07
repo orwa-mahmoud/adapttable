@@ -56,7 +56,9 @@ export function FilterPopover({
         aria-label={labels.filters}
         align={dir === "rtl" ? "start" : "end"}
         side="bottom"
-        avoidCollisions={false}
+        // Collision handling stays on: a panel wider than the space
+        // beside its trigger otherwise runs off the edge on a narrow
+        // viewport and clips its own labels.
         width="380px"
         maxWidth="90vw"
         dir={dir}

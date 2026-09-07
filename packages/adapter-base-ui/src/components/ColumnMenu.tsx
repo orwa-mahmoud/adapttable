@@ -412,7 +412,7 @@ export function ColumnMenu<TRow>({
             className="adapttable-popup"
             dir={dir}
             style={{
-              minWidth: 260,
+              minWidth: "min(260px, calc(100vw - 48px))",
               maxHeight: "min(70vh, 480px)",
               overflowY: "auto",
             }}

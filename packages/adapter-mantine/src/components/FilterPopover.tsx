@@ -80,7 +80,9 @@ export function FilterPopover({
         returnFocus
         position={dir === "rtl" ? "bottom-start" : "bottom-end"}
         middlewares={{
-          shift: { padding: 8, mainAxis: false },
+          // Both axes. Without the main one a panel wider than the space
+          // beside its trigger runs off the edge and clips its own labels.
+          shift: { padding: 8 },
           flip: false,
           size: {
             padding: 8,

@@ -2108,6 +2108,10 @@ a {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* A grid child sizes to its content unless told otherwise, and this one
+     holds a JSON schema. Without it the whole column widens to the longest
+     line and the page scrolls sideways. */
+  min-width: 0;
   padding: 12px 14px;
   background: var(--page-surface);
   border: 1px solid var(--page-border);
@@ -2146,6 +2150,7 @@ a {
 }
 .ai-demo__schema-wrap {
   position: relative;
+  min-width: 0;
 }
 .ai-demo__copy {
   position: absolute;
@@ -2164,6 +2169,7 @@ a {
    sidebar or push the page sideways. */
 .ai-demo__schema {
   margin: 0;
+  min-width: 0;
   max-height: 260px;
   overflow: auto;
   padding: 10px;

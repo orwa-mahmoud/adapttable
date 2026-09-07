@@ -268,7 +268,10 @@ export function ColumnMenu<TRow>({
         {labels.columns}
       </Dropdown.Toggle>
 
-      <Dropdown.Menu className="p-2" style={{ minWidth: 260 }}>
+      <Dropdown.Menu
+        className="p-2"
+        style={{ minWidth: "min(260px, calc(100vw - 48px))" }}
+      >
         <div className="small fw-semibold text-uppercase text-muted px-1 pb-1">
           {labels.columns}
         </div>

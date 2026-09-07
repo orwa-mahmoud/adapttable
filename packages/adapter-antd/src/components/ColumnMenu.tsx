@@ -537,7 +537,7 @@ export function ColumnMenu<TRow>({
         // Without it a fieldset sizes to min-content and ignores minWidth.
         minInlineSize: 0,
         padding: 8,
-        minWidth: 260,
+        minWidth: "min(260px, calc(100vw - 48px))",
         maxHeight: "min(70vh, 480px)",
         overflowY: "auto",
       }}

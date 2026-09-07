@@ -88,7 +88,9 @@ export function FilterPopover({
       modifiers={[
         { name: "offset", options: { offset: [0, 4] } },
         { name: "flip", enabled: false },
-        { name: "preventOverflow", options: { padding: 8, mainAxis: false } },
+        // Both axes: a panel that cannot shift horizontally runs off the
+        // edge on a narrow viewport and clips its own labels.
+        { name: "preventOverflow", options: { padding: 8 } },
       ]}
       style={{ zIndex: 10050 }}
     >
