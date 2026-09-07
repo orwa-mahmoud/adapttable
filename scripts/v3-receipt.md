@@ -468,23 +468,48 @@ Four of these exist only because a real model was pointed at the real page.
 `pnpm check` fails on `test:coverage`, and it is left failing rather than
 hidden.
 
-Six themed kits are short of their floors by a fraction of a percent:
-`base-ui` 78.16% vs 79 branches; `radix` 79.62% vs 80 branches and 89.97% vs
-90 statements; `chakra` 79.65% vs 80; `antd` 78.99% vs 79 and 89.96% vs 90;
-`mantine` 78.82% vs 79 and 89.75% vs 90; `mui` 78.93% vs 79.
+Adding the assistant panels put six themed kits under their floors. Rather
+than treat that as a threshold question, the genuinely untested behaviour
+behind it was covered — 19 new test files across the kits:
 
-Every one of the new `assistant.tsx` files is at **100% lines and 100%
-functions**. The shortfall is in _branches_ and _statements_, which every
-package inflates through `reactCompilerPreset` in `vitest.shared.ts`: the
-compiler's memoization guards are counted as branches, so adding a large,
-fully-tested `.tsx` lowers a package's aggregate even when the file itself is
-completely covered. Sonar's own project coverage, which is what the release
-bar names, is **89.3%** against a bar of 87%.
+- **Column rename** in `mantine`, `mui`, `radix` and `base-ui`, which had no
+  test for it. `antd` and `chakra` already did.
+- **Base UI's own primitives** (`ui.tsx`), where `asChild`, a loading button,
+  a field with an adornment, the spacing scale and the table head were
+  reachable only through a table.
+- **The relative-date filter widget** in five kits. It is the one range
+  control whose value is a token rather than a date, and only `antd` proved
+  it.
+- **"Omitting a prop renders nothing"** for the toolbar extras in six kits —
+  a stated product rule, and the toolbar is where it is easiest to break.
+- **The per-column header filter controls** in three kits.
 
-No threshold was lowered, no exclusion widened and no test weakened. The
-choice between lowering those six floors, covering unrelated real gaps
-elsewhere in each kit, or measuring coverage with the compiler off is the
-owner's, and it is written up in the shift's parking lot.
+That fixed three of the six honestly: **`antd`, `radix` and `chakra` now pass
+their floors.** Three remain, and they are close:
+
+| Package               | Measure    | Now    | Floor |
+| --------------------- | ---------- | ------ | ----- |
+| `@adapttable/mui`     | branches   | 78.93% | 79    |
+| `@adapttable/mantine` | statements | 89.91% | 90    |
+| `@adapttable/base-ui` | branches   | 78.77% | 79    |
+
+The last fraction does not come, and the reason is measurable. Every package
+is compiled through `reactCompilerPreset` in `vitest.shared.ts`, and the
+compiler's memoization guards are counted as branches. In `base-ui`, **289 of
+3,614 branches cannot be reached by any test** — 8% of the denominator is
+noise, and each new test file adds more of it through the components it
+renders, so the gains partly cancel themselves. Every new `assistant.tsx`
+measures 100% lines and 100% functions.
+
+Going further means choosing tests for their branch yield rather than for what
+they prove. Sonar's own project coverage, which is the figure the release bar
+names, is **89.3%** against a bar of 87%.
+
+No threshold was lowered, no exclusion widened and no test weakened. This is
+recorded as a measurement-policy exception for the owner, with no approval
+invented: the choice between lowering those three floors, covering unrelated
+files until the arithmetic works, or measuring coverage with the compiler off
+is his.
 
 ### Still the owner's
 
