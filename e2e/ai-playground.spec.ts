@@ -33,11 +33,25 @@ async function openDemoOptions(page: Page): Promise<void> {
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
 }
 
+/**
+ * Land on a kit's AI page with the conversation open. The page loads with the
+ * assistant closed — the table is what the reader came for — so the launcher
+ * is the way in, exactly as a reader takes it.
+ */
 async function openDemo(page: Page, kit: string): Promise<void> {
   await page.goto(`/${kit}/ai/`);
   await expect(page.locator(".ai-demo")).toBeVisible();
   await mountedTable(page);
-  await expect(page.locator(part("assistant-surface"))).toBeVisible();
+  await openAssistant(page);
+}
+
+/** Open the conversation through its launcher, or leave an open one alone. */
+async function openAssistant(page: Page): Promise<void> {
+  const surface = page.locator(part("assistant-surface"));
+  if ((await surface.count()) === 0) {
+    await page.locator(part("assistant-launcher")).click();
+  }
+  await expect(surface).toBeVisible();
 }
 
 /** Send text the way a reader does: type it, press Enter. */
@@ -309,6 +323,8 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
 
     await expect(page.locator(".ai-conn__error")).toBeVisible();
     // A failed handshake leaves the demo working rather than half-connected.
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(page.locator("dialog.ai-conn-dialog")).toBeHidden();
     await ask(page, "Clear the filter.");
     expect(await lastReply(page)).toBe("Filter cleared.");
   });
@@ -335,7 +351,7 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
       .click();
 
     await expect(page.locator(".ai-demo")).toHaveAttribute("dir", "rtl");
-    await expect(page.locator(part("assistant-surface"))).toBeVisible();
+    await openAssistant(page);
     await ask(page, "Show only the Core team.");
     await expect
       .poll(async () => visibleTableText(page))
@@ -355,16 +371,21 @@ test.describe("the star prompt and an open conversation", () => {
   test("waits while the assistant is open, then asks", async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "webdriver", { get: () => false });
-      // Its timer has already elapsed for this tab.
+      // Five seconds left on its timer — enough to open the conversation
+      // first, so the prompt comes due with a reader mid-question.
       sessionStorage.setItem(
         "adapttable-star-the-repo-since",
-        String(Date.now() - 60_000)
+        String(Date.now() - 15_000)
       );
     });
     await page.goto(`/${CANONICAL_AI_ADAPTER}/ai/`);
+    await mountedTable(page);
+    await openAssistant(page);
     await expect(page.locator(part("assistant-window"))).toBeVisible();
 
     const star = page.locator(".star-the-repo");
+    // Past the moment it was due, and still not on screen.
+    await page.waitForTimeout(6000);
     await expect(star).toHaveCount(0);
 
     await page.locator(part("assistant-close")).click();

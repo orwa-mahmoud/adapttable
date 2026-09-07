@@ -191,10 +191,13 @@ export function AssistantMessage({
   message,
   labels,
   slots,
+  action,
 }: {
   readonly message: TableAssistantMessageView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
+  /** An offer the host attached to this reply. */
+  readonly action?: { readonly label: string; readonly onRun: () => void };
 }): ReactElement {
   const mine = message.role === "user";
   const speaker = mine
@@ -265,6 +268,16 @@ export function AssistantMessage({
           {message.text}
         </span>
       </span>
+      {action ? (
+        <span data-adapttable-part="assistant-message-action">
+          <slots.Button
+            label={action.label}
+            part="assistant-message-action-button"
+            variant="secondary"
+            onClick={action.onRun}
+          />
+        </span>
+      ) : null}
       {message.receipts && message.receipts.length > 0 ? (
         <ul
           data-adapttable-part="assistant-receipts"

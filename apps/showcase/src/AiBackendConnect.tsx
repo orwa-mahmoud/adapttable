@@ -8,7 +8,7 @@
  */
 import type { AgentSession, AssistantTransport } from "@adapttable/ai";
 import { assistantHttpTransport, connectAgentHttp } from "@adapttable/ai/http";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { DOCS_URL } from "./matrix/content";
 
@@ -95,14 +95,14 @@ export function AiConnectionSettings({
   };
 
   return (
-    <section className="ai-conn" aria-label="Assistant connection">
+    <div className="ai-conn" aria-label="Assistant connection">
       <p className="ai-conn__now">
         {connection.mode === "simulated" ? (
           <>
             <strong>Scripted demo · no model connected</strong>
             <span>
-              The example requests below run real table operations. Nothing is
-              sent anywhere.
+              The examples run real table operations against this page. Nothing
+              is sent anywhere until you connect something.
             </span>
           </>
         ) : (
@@ -112,6 +112,31 @@ export function AiConnectionSettings({
           </>
         )}
       </p>
+
+      {connection.mode === "simulated" ? (
+        <ol className="ai-conn__steps">
+          <li>
+            <strong>Run an endpoint of your own.</strong> The repository ships a
+            working one — <code>examples/ai-http-backend.ts</code>. Copy{" "}
+            <code>examples/ai-http-backend.env.example</code> to{" "}
+            <code>examples/.env.ai-http</code>, put your provider key in it,
+            then start it with{" "}
+            <code>pnpm --filter @adapttable/examples ai-http</code>. It listens
+            on <code>http://127.0.0.1:8787</code>.
+          </li>
+          <li>
+            <strong>Your key never leaves that process.</strong> The page holds
+            no provider credentials and never asks for one. Your endpoint talks
+            to OpenAI, Anthropic, Gemini or DeepSeek; this table talks only to
+            your endpoint.
+          </li>
+          <li>
+            <strong>Point this at it and connect.</strong> One handshake runs
+            now, so a wrong address is reported here rather than on your first
+            question.
+          </li>
+        </ol>
+      ) : null}
 
       {connection.mode === "backend" ? (
         <button type="button" className="ai-conn__btn" onClick={disconnect}>
@@ -166,6 +191,58 @@ export function AiConnectionSettings({
           </span>
         </form>
       )}
-    </section>
+    </div>
+  );
+}
+
+/**
+ * The connection settings as a modal.
+ *
+ * One dialog, reached from three places — the "Try it for real" button beside
+ * the mode pill, the assistant's own settings control, and the reply a
+ * scripted demo gives when it does not understand a question. A reader who
+ * hits the limit of the demo should not have to go hunting for the way past
+ * it.
+ *
+ * @internal
+ */
+export function AiConnectDialog({
+  open,
+  ...props
+}: Readonly<AiConnectionSettingsProps & { open: boolean }>) {
+  const ref = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+
+  return (
+    <dialog
+      ref={ref}
+      className="ai-conn-dialog"
+      aria-label="Connect a backend"
+      // Escape dismisses it; the host owns the state, so the close has to
+      // travel back rather than be swallowed by the element.
+      onCancel={(event) => {
+        event.preventDefault();
+        props.onClose();
+      }}
+    >
+      <header className="ai-conn-dialog__head">
+        <h3>Use your own model</h3>
+        <button
+          type="button"
+          className="ai-conn-dialog__close"
+          aria-label="Close"
+          onClick={props.onClose}
+        >
+          ✕
+        </button>
+      </header>
+      <AiConnectionSettings {...props} />
+    </dialog>
   );
 }

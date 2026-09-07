@@ -32,9 +32,9 @@ import {
   useState,
 } from "react";
 
-import { type AiConnection, AiConnectionSettings } from "./AiBackendConnect";
+import { AiConnectDialog, type AiConnection } from "./AiBackendConnect";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
-import { DEMO_SCENARIOS, demoTransport } from "./aiScenario";
+import { DEMO_SCENARIOS, demoTransport, UNSUPPORTED_REPLY } from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
 import type { Locale } from "./data";
 import { DemoFallback } from "./kitDemos";
@@ -465,6 +465,17 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               ? "Simulated demo"
               : "Connected backend"}
           </span>
+          {/* The way out of the script, offered where the script is named. */}
+          <button
+            type="button"
+            className="ai-demo__real"
+            data-testid="ai-demo-try-real"
+            onClick={() => {
+              setSettingsOpen(true);
+            }}
+          >
+            Try it for real
+          </button>
           <button
             type="button"
             className="ai-demo__options-trigger"
@@ -558,20 +569,29 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   : undefined
               }
               onSettings={() => {
-                setSettingsOpen((current) => !current);
+                setSettingsOpen(true);
+              }}
+              messageAction={(message) =>
+                message.text === UNSUPPORTED_REPLY
+                  ? {
+                      label: "Connect a backend",
+                      onRun: () => {
+                        setSettingsOpen(true);
+                      },
+                    }
+                  : undefined
+              }
+            />
+            <AiConnectDialog
+              open={settingsOpen}
+              session={session}
+              connection={connection}
+              demoTransport={scripted}
+              onChange={setConnection}
+              onClose={() => {
+                setSettingsOpen(false);
               }}
             />
-            {settingsOpen ? (
-              <AiConnectionSettings
-                session={session}
-                connection={connection}
-                demoTransport={scripted}
-                onChange={setConnection}
-                onClose={() => {
-                  setSettingsOpen(false);
-                }}
-              />
-            ) : null}
           </div>
         </KitProvider>
       </div>

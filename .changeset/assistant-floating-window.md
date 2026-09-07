@@ -35,6 +35,10 @@ one opening and closing, `useTableAssistant` takes it as `awaitingApproval`,
 and the panel carries `busy` separately from the status it shows — so Stop
 stays available on a turn that is waiting rather than working.
 
+`messageAction` puts one offer at the end of a reply the host recognises —
+a demo that cannot answer a question can hand back the way past it rather
+than leaving the reader to find it.
+
 `useEscapeClose` closes an overlay on Escape wherever focus sits, and takes
 `ignoreWithin` for controls inside that answer the key first. Cancelling a
 column rename closes the editor; the Escape after it closes the menu.

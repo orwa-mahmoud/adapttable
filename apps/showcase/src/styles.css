@@ -1115,6 +1115,25 @@ a {
   border-color: currentColor;
   color: var(--accent, inherit);
 }
+/* The way out of the script. Quiet next to the pill, plain to find. */
+.ai-demo__real {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: var(--brand);
+  cursor: pointer;
+}
+.ai-demo__real:hover {
+  background: color-mix(in srgb, var(--brand) 10%, transparent);
+}
+.ai-demo__real:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
 .ai-demo__options-trigger {
   font: inherit;
   font-size: 12px;
@@ -1303,6 +1322,77 @@ a {
 .ai-conn__btn:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+/* What to run, where the key stays, what Connect does — the three things
+   someone needs before pointing this at their own machine. */
+.ai-conn__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-inline-start: 20px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.ai-conn__steps code {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--page-bg);
+  border: 1px solid var(--page-border);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.ai-conn-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 0;
+  color: inherit;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 28%);
+}
+.ai-conn-dialog::backdrop {
+  background: rgb(0 0 0 / 42%);
+}
+.ai-conn-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--page-border);
+}
+.ai-conn-dialog__head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.ai-conn-dialog__close {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.ai-conn-dialog__close:hover {
+  color: var(--ink);
+  background: var(--page-bg);
+}
+.ai-conn-dialog__close:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+/* Inside the dialog the card chrome is the dialog's own. */
+.ai-conn-dialog .ai-conn {
+  gap: 12px;
+  padding: 16px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 .demo-live-update {
   display: flex;

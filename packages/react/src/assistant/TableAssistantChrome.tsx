@@ -38,7 +38,10 @@ import {
   type TableAssistantBoundary,
 } from "./assistantPlacement";
 import type { TableAssistantSlots } from "./assistantSlots";
-import type { TableAssistantView } from "./assistantView";
+import type {
+  TableAssistantMessageView,
+  TableAssistantView,
+} from "./assistantView";
 
 export type { TableAssistantBoundary } from "./assistantPlacement";
 
@@ -97,6 +100,17 @@ export interface TableAssistantProps {
    * connected, say.
    */
   readonly note?: string;
+  /**
+   * An offer to put at the end of one reply.
+   *
+   * The panel knows a message arrived; only the host knows whether it was an
+   * answer or a wall. A scripted demo that cannot understand a question can
+   * hand back the way past it — "connect a backend" — instead of leaving the
+   * reader to find it. Return nothing for messages that need no offer.
+   */
+  readonly messageAction?: (
+    message: TableAssistantMessageView
+  ) => { readonly label: string; readonly onRun: () => void } | undefined;
 }
 
 /** Props for {@link TableAssistantChrome}. @public */
@@ -242,11 +256,13 @@ function Body({
   labels,
   slots,
   note,
+  messageAction,
 }: {
   readonly assistant: TableAssistantView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly note?: string;
+  readonly messageAction?: TableAssistantProps["messageAction"];
 }): ReactElement {
   const scroll = useConversationScroll(assistant.messages.length);
   const Button = slots.Button;
@@ -291,6 +307,7 @@ function Body({
                 message={message}
                 labels={labels}
                 slots={slots}
+                action={messageAction?.(message)}
               />
             ))}
           </ul>
@@ -352,6 +369,7 @@ export function TableAssistantChrome({
   onSettings,
   boundary = "viewport",
   note,
+  messageAction,
   slots,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
   const wide = useFloatingFits();
@@ -428,7 +446,13 @@ export function TableAssistantChrome({
       <LiveRegion part="assistant-status" statusRole>
         {labels?.assistantConnection?.(assistant.status) ?? assistant.status}
       </LiveRegion>
-      <Body assistant={assistant} labels={labels} slots={slots} note={note} />
+      <Body
+        assistant={assistant}
+        labels={labels}
+        slots={slots}
+        note={note}
+        messageAction={messageAction}
+      />
       {assistant.error ? (
         <p data-adapttable-part="assistant-error" role="alert">
           {assistant.error}

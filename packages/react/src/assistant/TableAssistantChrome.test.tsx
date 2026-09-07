@@ -260,6 +260,41 @@ describe("the transcript", () => {
     expect(text).toHaveTextContent("<img src=x onerror=alert(1)>");
   });
 
+  it("carries the host's offer at the end of the reply it belongs to", () => {
+    const onRun = vi.fn();
+    mount({
+      assistant: view({
+        messages: [
+          { id: "m1", role: "user", text: "what is the weather" },
+          { id: "m2", role: "assistant", text: "I cannot answer that." },
+        ],
+      }),
+      messageAction: (message) =>
+        message.text === "I cannot answer that."
+          ? { label: "Connect a backend", onRun }
+          : undefined,
+    });
+
+    const offers = parts("assistant-message-action");
+    expect(offers).toHaveLength(1);
+    const button = offers[0]!.querySelector("button")!;
+    expect(button).toHaveTextContent("Connect a backend");
+
+    fireEvent.click(button);
+    expect(onRun).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves messages the host declined to answer for untouched", () => {
+    mount({
+      assistant: view({
+        messages: [{ id: "m1", role: "assistant", text: "Filter applied." }],
+      }),
+      messageAction: () => undefined,
+    });
+
+    expect(parts("assistant-message-action")).toHaveLength(0);
+  });
+
   it("names each action and what became of it", () => {
     mount({
       assistant: view({
