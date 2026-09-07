@@ -9,6 +9,7 @@ import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalDecision,
   type AgentApprovalOperation,
+  type AgentApprovalProposal,
   type FeatureProviderProps,
   featureStateKey,
   FeatureStateScope,
@@ -661,7 +662,7 @@ function bindLiveSession(
 
 /** One open approval, whichever shape the write took. */
 interface PendingApproval {
-  readonly proposals: readonly WriteProposal[];
+  readonly proposals: readonly AgentApprovalProposal[];
   readonly operation?: AgentApprovalOperation;
   /** Whether the reader may decide the rows one at a time. */
   readonly perItem: boolean;
@@ -687,6 +688,52 @@ interface ApprovalTransaction {
   readonly decisions: readonly AgentApprovalDecision[];
   /** Where this write is reviewed, frozen with the transaction. */
   readonly presentation: ApprovalPresentation;
+}
+
+/**
+ * What the reader sees beside Approve, resolved from THEIR table.
+ *
+ * Deliberately not the model's `before`. That value is read at the agent's
+ * addressing scope and travels back to the backend, so widening it to make
+ * the approval strip read nicely would be a disclosure. This one never
+ * leaves the browser: it is looked up in the table already on screen, which
+ * is why a row the current filter hides still shows its real value.
+ *
+ * Viewing the table is not entitlement to every cell in it, so a column the
+ * host marked unreadable resolves to nothing here too — and "nothing" is
+ * reported as unavailable rather than drawn as an empty cell, because a
+ * blank value and a value nobody could look up are different facts.
+ */
+function displayProposals(
+  proposals: readonly WriteProposal[],
+  runtime: ReturnType<typeof useTableRuntime>,
+  columns: Readonly<Record<string, TableAgentColumnPatch>> | undefined
+): readonly AgentApprovalProposal[] {
+  const view = runtime.view();
+  return proposals.map((proposal) => {
+    const row = findRow(runtime, proposal.rowKey);
+    const label =
+      row !== undefined && view?.rowLabel ? view.rowLabel(row) : undefined;
+    const readable =
+      proposal.column === undefined ||
+      columns?.[proposal.column]?.readable !== false;
+    const record =
+      readable && row && typeof row === "object"
+        ? (row as Record<string, unknown>)
+        : undefined;
+    const before =
+      proposal.column !== undefined && record
+        ? record[proposal.column]
+        : undefined;
+    const known = before !== undefined;
+    return {
+      rowKey: proposal.rowKey,
+      ...(label ? { rowLabel: label } : {}),
+      ...(proposal.column ? { column: proposal.column } : {}),
+      ...(known ? { before } : { beforeUnavailable: true }),
+      ...(proposal.after !== undefined ? { after: proposal.after } : {}),
+    };
+  });
 }
 
 /** Clear the open transaction, but only if it is still this one. */
@@ -794,7 +841,16 @@ function TableAgentProvider({
       const rows = subject.kind === "rows";
       let settled = false;
       const entry: PendingApproval = {
-        proposals: rows ? subject.proposals : [],
+        // What the reader is shown, resolved from their own table. The
+        // model's own `before` values stay in the session and never reach
+        // this side.
+        proposals: rows
+          ? displayProposals(
+              subject.proposals,
+              runtimeRef.current,
+              optionsRef.current.columns
+            )
+          : [],
         perItem: rows && subject.perItem,
         ...(rows
           ? {}

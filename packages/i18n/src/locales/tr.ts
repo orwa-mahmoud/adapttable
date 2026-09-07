@@ -162,6 +162,7 @@ export const tr: Required<TableLabels> = {
   cancelAll: "Tümünü iptal et",
   approveProposal: "Onayla",
   rejectProposal: "Reddet",
+  proposalValueUnavailable: "Kullanılamıyor",
   pendingProposals: (count) =>
     count === 1
       ? "1 önerilen değişiklik"

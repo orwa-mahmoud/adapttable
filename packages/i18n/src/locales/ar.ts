@@ -161,6 +161,7 @@ export const ar: Required<TableLabels> = {
   cancelAll: "إلغاء الكل",
   approveProposal: "موافقة",
   rejectProposal: "رفض",
+  proposalValueUnavailable: "غير متاح",
   pendingProposals: (count) =>
     count === 1 ? "تغيير مقترح واحد" : `${String(count)} تغييرات مقترحة`,
   proposalChange: ({ row, column, before, after }) => {

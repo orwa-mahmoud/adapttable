@@ -161,6 +161,7 @@ export const fr: Required<TableLabels> = {
   cancelAll: "Tout annuler",
   approveProposal: "Approuver",
   rejectProposal: "Rejeter",
+  proposalValueUnavailable: "Indisponible",
   pendingProposals: (count) =>
     count === 1
       ? "1 modification proposée"

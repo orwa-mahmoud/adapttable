@@ -698,6 +698,13 @@ export interface TableLabels {
     before?: string;
     after?: string;
   }) => string;
+  /**
+   * Shown in place of a before-value the reader's own view cannot supply.
+   *
+   * Distinct from a blank cell: this says nobody could look the value up,
+   * not that it is empty.
+   */
+  proposalValueUnavailable?: string;
   /** Title of the assistant panel. */
   assistantTitle?: string;
   /** Accessible name of the control that opens the assistant. */

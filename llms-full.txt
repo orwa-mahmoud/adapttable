@@ -7707,6 +7707,34 @@ authorized against, the host's `apply` callbacks, a live `observe()`, the bound
 `onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
 governed write — the approved `plan` and the resolved `commit` mode.
 
+### The reader and the model are told different things
+
+A proposal has two before-values, and they are not the same value.
+
+`WriteProposal.before` is what the MODEL is told. It is read at the agent's
+own addressing scope, through the same readable-column allowlist as
+`rows.read`, because it travels: the session returns it, and an HTTP or MCP
+continuation sends it back to the backend. A row outside that scope therefore
+has no before-value here, and a column marked `readable: false` never appears
+in one.
+
+What the person approving sees is resolved separately, in the React binding,
+from the table already on their screen. That value never enters a proposal, a
+result, or any transport — so a row the current filter hides still reads
+correctly for them without widening what the model was given.
+
+Being able to see the table is not entitlement to every cell in it. A column
+the host marked unreadable resolves to nothing on that side too, and nothing
+is reported as **Unavailable** rather than drawn as an empty cell:
+
+```
+Ada · ssn: Unavailable → redacted     // nobody could look it up
+Ada · notes: — → "call back"          // the cell is genuinely empty
+```
+
+`beforeUnavailable` on the approval proposal is that distinction. A value is
+never invented to fill the gap.
+
 ### Whether a human is asked, and where
 
 Two questions, answered separately.

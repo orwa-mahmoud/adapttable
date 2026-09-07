@@ -159,6 +159,7 @@ export const zhTW: Required<TableLabels> = {
   cancelAll: "全部取消",
   approveProposal: "核准",
   rejectProposal: "拒絕",
+  proposalValueUnavailable: "無法取得",
   pendingProposals: (count) =>
     count === 1 ? "1 項提議變更" : `${String(count)} 項提議變更`,
   proposalChange: ({ row, column, before, after }) => {

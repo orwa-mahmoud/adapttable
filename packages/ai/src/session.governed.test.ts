@@ -1203,11 +1203,10 @@ describe("approving part of a bulk write", () => {
   });
 });
 
-describe("the value a write is about to replace", () => {
-  it("reads a row the current filter hides", async () => {
-    // What the agent may address, and what the approver may read, are not
-    // the same question: the reader owns the table.
-    const hooks = apply({
+describe("the value a write is about to replace, as the model sees it", () => {
+  /** A table whose visible scope holds r2 and nothing else. */
+  function narrowed() {
+    return apply({
       readRows: vi.fn((query: RowReadQuery) =>
         Promise.resolve(
           query.scope === "visible"
@@ -1216,6 +1215,9 @@ describe("the value a write is about to replace", () => {
         )
       ),
     });
+  }
+
+  async function proposalFor(rowKey: string) {
     let seen: { proposals: { before?: unknown }[] } | undefined;
     const session = createAgentSession({
       observe: () =>
@@ -1223,7 +1225,7 @@ describe("the value a write is about to replace", () => {
           approval: "writes",
           source: { ...PAGE_ONLY, fullDataset: true },
         }),
-      apply: hooks,
+      apply: narrowed(),
       onApprove: (subject) => {
         seen = subject as { proposals: { before?: unknown }[] };
         return Promise.resolve(true);
@@ -1231,12 +1233,47 @@ describe("the value a write is about to replace", () => {
     });
     await session.execute(
       "edit.cells",
+      { edits: [{ rowKey, column: "salary", value: 185 }] },
+      1,
+      `peek-${rowKey}`
+    );
+    return seen?.proposals[0];
+  }
+
+  it("reads a row the agent can address", async () => {
+    expect((await proposalFor("r2"))?.before).toBe(110);
+  });
+
+  it("does not widen its scope to read one the agent cannot", async () => {
+    // r1 is outside the visible scope. This value travels: it lands in
+    // WriteProposal.before, which an HTTP or MCP continuation sends back to
+    // the backend. Reading it here would be a disclosure with a comment on
+    // it. What the HUMAN approving sees is resolved separately, in the React
+    // binding, from the table they are already looking at.
+    expect((await proposalFor("r1"))?.before).toBeUndefined();
+  });
+
+  it("does not scan the whole dataset for every edit", async () => {
+    const hooks = narrowed();
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          approval: "never",
+          source: { ...PAGE_ONLY, fullDataset: true },
+        }),
+      apply: hooks,
+    });
+    await session.execute(
+      "edit.cells",
       { edits: [{ rowKey: "r1", column: "salary", value: 185 }] },
       1,
-      "hidden-before"
+      "bounded-peek"
     );
 
-    expect(seen?.proposals[0]?.before).toBe(100);
+    const scopes = (hooks.readRows as ReturnType<typeof vi.fn>).mock.calls.map(
+      (call) => (call[0] as RowReadQuery).scope
+    );
+    expect(scopes.every((scope) => scope === "visible")).toBe(true);
   });
 });
 

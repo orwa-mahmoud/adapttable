@@ -159,6 +159,7 @@ export const ja: Required<TableLabels> = {
   cancelAll: "すべて取り消し",
   approveProposal: "承認",
   rejectProposal: "却下",
+  proposalValueUnavailable: "取得できません",
   pendingProposals: (count) =>
     count === 1 ? "提案 1 件" : `${String(count)} 件の提案`,
   proposalChange: ({ row, column, before, after }) => {

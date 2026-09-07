@@ -160,6 +160,7 @@ export const it: Required<TableLabels> = {
   cancelAll: "Annulla tutto",
   approveProposal: "Approva",
   rejectProposal: "Rifiuta",
+  proposalValueUnavailable: "Non disponibile",
   pendingProposals: (count) =>
     count === 1 ? "1 modifica proposta" : `${String(count)} modifiche proposte`,
   proposalChange: ({ row, column, before, after }) => {

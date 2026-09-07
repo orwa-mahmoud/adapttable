@@ -1373,17 +1373,18 @@ async function applyCells(
 type ReadRowWindow = (query: RowReadQuery) => Promise<RowWindow> | RowWindow;
 
 /**
- * The value a write is about to replace, for the human who approves it.
+ * The value a write is about to replace, as the MODEL is allowed to see it.
  *
- * This is not a disclosure to the model — it is the line a reader sees
- * beside Approve, and a reader who owns the table may see their own cell.
- * So the search widens past the agent's addressing scope when it has to: a
- * row hidden by the current filter is still a row this write will change,
- * and printing an empty before-value would say the cell was blank when it
- * holds 170.
+ * Read at the agent's own addressing scope and through the same readable
+ * column allowlist as `rows.read`, because this value travels: it lands in
+ * `WriteProposal.before`, which the session returns and an HTTP or MCP
+ * continuation sends back to the backend. A wider read here would be a
+ * disclosure with a comment on it.
  *
- * Widening stops at what the table itself permits. `full` requires a source
- * that declared the whole dataset, exactly as `rows.read` requires it.
+ * A row the current scope does not reach therefore has no before-value here,
+ * and that is correct. What the human approving the write sees is resolved
+ * separately, from the table they are already looking at — see
+ * `@adapttable/ai/react`.
  */
 async function peekCell(
   apply: AgentApply,
@@ -1392,33 +1393,13 @@ async function peekCell(
   column: string
 ): Promise<unknown> {
   if (!apply.readRows) return undefined;
-  const scopes: RowAddressScope[] = [observation.rowAddressScope];
-  for (const wider of ["page", "full"] as const) {
-    if (wider === "full" && observation.source.fullDataset !== true) continue;
-    if (!scopes.includes(wider)) scopes.push(wider);
-  }
   const read: ReadRowWindow = (query) =>
-    apply.readRows?.(query) ?? { offset: 0, limit: 0, redacted: [], rows: [] };
-  for (const scope of scopes) {
-    const found = await peekCellInScope(
-      read,
-      observation,
-      rowKey,
-      column,
-      scope
-    );
-    if (found !== undefined) return found;
-  }
-  return undefined;
-}
-
-async function peekCellInScope(
-  read: ReadRowWindow,
-  observation: AgentObservation,
-  rowKey: string,
-  column: string,
-  scope: RowAddressScope
-): Promise<unknown> {
+    apply.readRows?.(query) ?? {
+      offset: 0,
+      limit: 0,
+      redacted: [],
+      rows: [],
+    };
   const readMax = readMaxOf(observation);
   let offset = 0;
   for (let page = 0; page < 256; page++) {
@@ -1427,7 +1408,7 @@ async function peekCellInScope(
         offset,
         limit: readMax,
         columns: [column],
-        scope,
+        scope: observation.rowAddressScope,
       })
     );
     const row = window.rows.find((entry) => entry.rowKey === rowKey);

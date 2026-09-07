@@ -90,10 +90,28 @@ export interface AgentApprovalProposal {
   readonly rowKey: string;
   /** Column being written, when the proposal is a cell edit. */
   readonly column?: string;
-  /** Value before the write. */
+  /**
+   * Value before the write, as the reader's own view can show it.
+   *
+   * Resolved from the table on screen rather than from anything the model
+   * was given, so a row the current filter hides still reads correctly for
+   * the person approving it. Absent when the table cannot show one — see
+   * {@link beforeUnavailable}, which is how a value nobody could look up is
+   * told apart from a cell that is genuinely empty.
+   */
   readonly before?: unknown;
+  /**
+   * True when no before-value could be resolved at all.
+   *
+   * A blank cell and a cell nobody can read are different facts, and a
+   * reader deciding whether to approve a write deserves to know which one
+   * they are looking at. Never guess a value to fill this in.
+   */
+  readonly beforeUnavailable?: boolean;
   /** Value after the write. */
   readonly after?: unknown;
+  /** Reader-facing name for the row, when the table can supply one. */
+  readonly rowLabel?: string;
 }
 
 /**
@@ -269,9 +287,13 @@ export function AgentApprovalChrome({
             data-adapttable-part="agent-approval-row"
           >
             {describe({
-              row: proposal.rowKey,
+              row: proposal.rowLabel ?? proposal.rowKey,
               column: proposal.column,
-              before: displayValue(proposal.before),
+              // "Unavailable" and "—" say different things: nobody could
+              // look the value up, versus the cell is empty.
+              before: proposal.beforeUnavailable
+                ? (labels?.proposalValueUnavailable ?? "Unavailable")
+                : displayValue(proposal.before),
               after: displayValue(proposal.after),
             })}
           </div>

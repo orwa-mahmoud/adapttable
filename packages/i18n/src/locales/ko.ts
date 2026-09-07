@@ -161,6 +161,7 @@ export const ko: Required<TableLabels> = {
   cancelAll: "모두 취소",
   approveProposal: "승인",
   rejectProposal: "거부",
+  proposalValueUnavailable: "확인할 수 없음",
   pendingProposals: (count) =>
     count === 1 ? "제안된 변경 1개" : `제안된 변경 ${String(count)}개`,
   proposalChange: ({ row, column, before, after }) => {

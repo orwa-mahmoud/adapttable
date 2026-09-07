@@ -158,6 +158,7 @@ export const zh: Required<TableLabels> = {
   cancelAll: "全部取消",
   approveProposal: "批准",
   rejectProposal: "拒绝",
+  proposalValueUnavailable: "无法获取",
   pendingProposals: (count) =>
     count === 1 ? "1 项提议更改" : `${String(count)} 项提议更改`,
   proposalChange: ({ row, column, before, after }) => {

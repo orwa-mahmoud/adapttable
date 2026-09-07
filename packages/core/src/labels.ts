@@ -197,6 +197,7 @@ export const defaultLabels: Required<TableLabels> = {
     if (before === undefined && after === undefined) return field;
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
+  proposalValueUnavailable: "Unavailable",
   assistantTitle: "Table assistant",
   assistantOpen: "Ask AI",
   assistantClose: "Close",

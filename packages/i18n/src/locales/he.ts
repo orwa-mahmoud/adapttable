@@ -160,6 +160,7 @@ export const he: Required<TableLabels> = {
   cancelAll: "בטל הכול",
   approveProposal: "אשר",
   rejectProposal: "דחה",
+  proposalValueUnavailable: "לא זמין",
   pendingProposals: (count) =>
     count === 1 ? "שינוי מוצע אחד" : `${String(count)} שינויים מוצעים`,
   proposalChange: ({ row, column, before, after }) => {

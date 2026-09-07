@@ -164,6 +164,7 @@ export const ru: Required<TableLabels> = {
   cancelAll: "Отменить всё",
   approveProposal: "Одобрить",
   rejectProposal: "Отклонить",
+  proposalValueUnavailable: "Недоступно",
   pendingProposals: (count) =>
     count === 1
       ? "1 предложенное изменение"

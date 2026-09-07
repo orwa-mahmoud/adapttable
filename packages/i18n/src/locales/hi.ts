@@ -162,6 +162,7 @@ export const hi: Required<TableLabels> = {
   cancelAll: "सभी रद्द करें",
   approveProposal: "स्वीकृत करें",
   rejectProposal: "अस्वीकार करें",
+  proposalValueUnavailable: "अनुपलब्ध",
   pendingProposals: (count) =>
     count === 1
       ? "1 प्रस्तावित परिवर्तन"

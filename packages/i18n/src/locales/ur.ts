@@ -161,6 +161,7 @@ export const ur: Required<TableLabels> = {
   cancelAll: "سب منسوخ کریں",
   approveProposal: "منظور کریں",
   rejectProposal: "مسترد کریں",
+  proposalValueUnavailable: "دستیاب نہیں",
   pendingProposals: (count) =>
     count === 1
       ? "1 تجویز کردہ تبدیلی"

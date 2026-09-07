@@ -1237,3 +1237,170 @@ describe("one transaction at a time", () => {
     expect(onCellEdit).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * The reader approving a write and the model that proposed it are not owed
+ * the same data. These tests use one recognizable value — SECRET — and check
+ * both directions at once: what the approval view may show, and what the
+ * session hands back for a backend to receive.
+ */
+describe("what the reader sees is not what the model is told", () => {
+  const SECRET = "SECRET-do-not-disclose";
+
+  interface Staff {
+    id: string;
+    name: string;
+    ssn: string;
+  }
+
+  const STAFF: Staff[] = [
+    { id: "1", name: "Ada", ssn: SECRET },
+    { id: "2", name: "Grace", ssn: SECRET },
+  ];
+
+  const STAFF_VIEW = {
+    rows: STAFF,
+    getRowId: (row: Staff) => row.id,
+    rowLabel: (row: Staff) => row.name,
+    editing: { onCellEdit: () => undefined },
+  };
+
+  function mountStaff(key: string, visible: Staff[] = STAFF) {
+    handles.current = { session: undefined, pending: null };
+    const props = applyTableFeatures({
+      features: [
+        tableAgent({
+          tableId: key,
+          approval: "writes",
+          commit: "immediate",
+          columns: {
+            name: { type: "string", readable: true, writable: true },
+            // Writable, deliberately not readable: the agent may set it and
+            // may never be told what it holds.
+            ssn: { type: "string", readable: false, writable: true },
+          },
+        }),
+        { id: "editing" },
+      ],
+    });
+    return render(
+      <FeatureProviders props={props}>
+        <Publisher view={{ ...STAFF_VIEW, rows: visible } as never} />
+        <Reader onReady={() => undefined} />
+      </FeatureProviders>
+    );
+  }
+
+  it("names the row for the reader instead of showing its key", async () => {
+    mountStaff("secret-label");
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Ada L." }] },
+      session().manifest().viewRevision,
+      "secret-label-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    const proposal = handles.current.pending?.proposals[0] as {
+      rowLabel?: string;
+      before?: unknown;
+    };
+    expect(proposal.rowLabel).toBe("Ada");
+    expect(proposal.before).toBe("Ada");
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await result;
+  });
+
+  it("never puts an unreadable value in front of the reader either", async () => {
+    mountStaff("secret-column");
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "ssn", value: "redacted" }] },
+      session().manifest().viewRevision,
+      "secret-column-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    // Viewing the table is not entitlement to every cell in it.
+    const proposal = handles.current.pending?.proposals[0] as {
+      before?: unknown;
+      beforeUnavailable?: boolean;
+    };
+    expect(proposal.before).toBeUndefined();
+    expect(proposal.beforeUnavailable).toBe(true);
+    expect(JSON.stringify(handles.current.pending?.proposals)).not.toContain(
+      SECRET
+    );
+
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    const settled = await result;
+    // And the value never reached the model's result either.
+    expect(JSON.stringify(settled)).not.toContain(SECRET);
+  });
+
+  it("says unavailable, not blank, for a row the table has not loaded", async () => {
+    // A server-tier table holding only page one. Row 2 was addressed by key.
+    mountStaff("secret-unloaded", [STAFF[0]!]);
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "2", column: "name", value: "G." }] },
+      session().manifest().viewRevision,
+      "secret-unloaded-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    const proposal = handles.current.pending?.proposals[0] as {
+      before?: unknown;
+      beforeUnavailable?: boolean;
+      rowLabel?: string;
+    };
+    expect(proposal.beforeUnavailable).toBe(true);
+    expect(proposal.rowLabel).toBeUndefined();
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await result;
+  });
+
+  it("keeps a rejected write's details out of the result as well", async () => {
+    mountStaff("secret-rejected");
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "ssn", value: "redacted" }] },
+      session().manifest().viewRevision,
+      "secret-rejected-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    act(() => {
+      handles.current.pending?.reject();
+    });
+
+    expect(JSON.stringify(await result)).not.toContain(SECRET);
+  });
+});

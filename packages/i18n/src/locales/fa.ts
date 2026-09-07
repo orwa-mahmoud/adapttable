@@ -160,6 +160,7 @@ export const fa: Required<TableLabels> = {
   cancelAll: "لغو همه",
   approveProposal: "تأیید",
   rejectProposal: "رد",
+  proposalValueUnavailable: "در دسترس نیست",
   pendingProposals: (count) =>
     count === 1 ? "۱ تغییر پیشنهادی" : `${String(count)} تغییر پیشنهادی`,
   proposalChange: ({ row, column, before, after }) => {
