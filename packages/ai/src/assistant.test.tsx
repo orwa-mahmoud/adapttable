@@ -497,7 +497,7 @@ describe("stopping a transport that does not cooperate", () => {
     expect(result.current.status).toBe("ready");
   });
 
-  it("frees the panel even though the transport never settles", async () => {
+  it("frees the panel even though the transport never settles", () => {
     const stub = stubborn();
     const { result } = renderHook(() =>
       useTableAssistant({

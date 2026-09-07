@@ -535,3 +535,73 @@ Both are worth writing down, because both cost time and neither was real.
 - The AI page's SEO copy in `apps/showcase/matrix.mjs` still describes the
   playground this branch replaced.
 - The final re-run and the video recording.
+
+## Item 35 evidence
+
+The follow-up review's items (32–34) landed first; this is the gate run after
+them, on the tree being handed over.
+
+| Command                                                  | Result                                                   |
+| -------------------------------------------------------- | -------------------------------------------------------- |
+| `pnpm check`                                             | Green except `test:coverage` — the three floors below.   |
+| `pnpm run lint`                                          | 29/29.                                                   |
+| `pnpm test:e2e`                                          | **1577 passed**, 4m48s, zero failures.                   |
+| `pnpm run test:scripts`                                  | **210/210**, with the assistant-copy assertions intact.  |
+| `sonar-scanner`                                          | CE task `9b30a363-d8f9-4783-a3eb-7119a6fc545a`, SUCCESS. |
+| `check:api-contract`                                     | 352 entry points, 176 surfaces.                          |
+| doc surface / package split / boundary / parts / readmes | all green.                                               |
+
+### Sonar measures
+
+| Measure                           | Value     |
+| --------------------------------- | --------- |
+| Unresolved issues, all severities | **0**     |
+| Hotspots awaiting review          | **0**     |
+| Coverage                          | **89.4%** |
+| Lines of code                     | 116,757   |
+
+### The coverage decision, still open
+
+The regression tests added for items 32–34 did NOT close the gap. Three
+packages remain under their floors, unchanged:
+
+| Package               | Measure    | Now    | Floor |
+| --------------------- | ---------- | ------ | ----- |
+| `@adapttable/mui`     | branches   | 78.93% | 79    |
+| `@adapttable/mantine` | statements | 89.91% | 90    |
+| `@adapttable/base-ui` | branches   | 78.74% | 79    |
+
+Nothing was done to make them pass: no floor lowered, no exclusion added, no
+ignore comment, no test written for branch yield, and no approval invented. A
+floor reduction is the owner's to grant.
+
+The measurement itself is the problem, and it is measurable: every package
+compiles through `reactCompilerPreset` in `vitest.shared.ts`, and the
+compiler's memoization guards are counted as branches. In `base-ui`, **289 of
+3,614 branches cannot be reached by any test**. Each new test file adds more of
+them through the components it renders, so gains partly cancel — which is why
+nineteen genuinely useful test files moved three kits over their floors and
+left these three short.
+
+A truthful policy would measure the source rather than the compiler's output,
+without giving up running the tests against compiled behaviour. That is a
+change to how coverage is collected, not a number to adjust, and it is
+recorded here for the owner rather than taken.
+
+**This release is not "completely verified".** Sonar is clean and its project
+coverage is 89.4% against a bar of 87%; three per-package vitest floors are
+red, for the reason above.
+
+### What was found fixing items 32–34
+
+- **Suggestion eligibility was cached by session identity.** A table keeps one
+  session and mutates its capabilities in place, so a chip for a feature the
+  host turned off stayed on screen until an unrelated rerender.
+- **Stop only asked.** A transport that ignored its signal could append a reply
+  to a turn the reader had stopped, and unmount left the send running.
+- **Four snippets taught v2**, and `@adapttable/core/sparkline` — named by the
+  docs, nine kit READMEs and two JSDoc blocks — is not an export map entry at
+  all.
+- **`scripts/showcase-html.test.mjs` had been failing since `cff08fd8`**, which
+  added an assertion the generated HTML did not satisfy. Proven pre-existing by
+  stashing this work and re-running.
