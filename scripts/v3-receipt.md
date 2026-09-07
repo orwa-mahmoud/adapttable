@@ -503,13 +503,27 @@ measures 100% lines and 100% functions.
 
 Going further means choosing tests for their branch yield rather than for what
 they prove. Sonar's own project coverage, which is the figure the release bar
-names, is **89.3%** against a bar of 87%.
+names, is **89.4%** against a bar of 87%.
 
 No threshold was lowered, no exclusion widened and no test weakened. This is
 recorded as a measurement-policy exception for the owner, with no approval
 invented: the choice between lowering those three floors, covering unrelated
 files until the arithmetic works, or measuring coverage with the compiler off
 is his.
+
+### Two things that looked like regressions and were not
+
+Both are worth writing down, because both cost time and neither was real.
+
+- `column-rename.spec.ts` and `grouping.spec.ts` failed once against a build
+  made while `pnpm install` was still relinking `node_modules`. A clean
+  rebuild passes both, and the full suite is 1577/1577. The lockfile bump was
+  suspected and cleared by reverting it, rebuilding, and finding the same
+  result either way.
+- One Mantine unit test timed out at 6.1s inside a full parallel
+  `turbo run test:coverage`. It passes standalone, and the whole Mantine suite
+  is 579/579. It is the same load-dependent Testing Library timeout this repo
+  has seen before, not a defect.
 
 ### Still the owner's
 
