@@ -472,6 +472,12 @@ export function ColumnMenu<TRow>({
       position="bottom-end"
       withinPortal
       returnFocus
+      // One owner for Escape. Mantine's own dismiss fires as soon as focus
+      // is inside the dropdown, which is exactly where the rename editor
+      // puts it — so a cancelled edit took the whole menu down with it.
+      // `useEscapeClose` closes the menu from anywhere and leaves the key
+      // alone when something inside has already handled it.
+      closeOnEscape={false}
       zIndex={10050}
       middlewares={{ flip: false, shift: { padding: 8, mainAxis: false } }}
     >

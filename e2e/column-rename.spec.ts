@@ -191,3 +191,34 @@ test("semantic header control renames without entering the Columns menu", async 
   ).toHaveAttribute("data-column-key", "person");
   await expect(trigger).toBeFocused();
 });
+
+/**
+ * One Escape, one layer.
+ *
+ * The rename editor sits inside a submenu inside the Columns menu. A kit
+ * whose overlay answers Escape as well took all three down at once: the edit
+ * was cancelled, the menu vanished, and the control that had focus went with
+ * it — so the next key went nowhere and the reader was back at the table.
+ */
+for (const kit of KITS) {
+  test(`${kit} closes only the rename editor on Escape`, async ({ page }) => {
+    await openDemo(page, kit);
+    const { rename } = await openRenameEditor(page, "Rename column");
+    const menu = page.locator('[data-adapttable-part="column-menu-search"]');
+    const editor = page.locator('[data-adapttable-part="column-rename-input"]');
+    await expect(menu).toBeVisible();
+
+    await page.keyboard.press("Escape");
+
+    await expect(editor).toHaveCount(0);
+    // The menu it was opened from is still there, and so is the control that
+    // opened it — which is what makes reopening keyboard-only.
+    await expect(menu).toBeVisible();
+    await expect(rename).toBeFocused();
+
+    // Focus survived, so the editor reopens from the keyboard alone — the
+    // thing that was impossible when the menu went down with it.
+    await page.keyboard.press("Enter");
+    await expect(editor).toBeFocused();
+  });
+}

@@ -34,7 +34,7 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { NativeSelect } from "./primitives";
 
@@ -402,6 +402,10 @@ export function ColumnMenu<TRow>({
   const [query, setQuery] = useState("");
   const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
   const actionsHidden = layout.isHidden(ACTIONS_COLUMN_KEY);
+  // Rows own their own editor state. Rather than lift it through every row,
+  // the menu asks its own content whether an editor is mounted — the part
+  // name is the same public contract every kit renders.
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const actionsPinned = layout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
   const reorderHidden = layout.isHidden(REORDER_COLUMN_KEY);
   const reorderPinned = layout.state.pinned[REORDER_COLUMN_KEY] !== undefined;
@@ -417,6 +421,7 @@ export function ColumnMenu<TRow>({
         </Button>
       </Popover.Trigger>
       <Popover.Content
+        ref={contentRef}
         container={container}
         aria-label={labels.columns}
         align="end"
@@ -426,6 +431,17 @@ export function ColumnMenu<TRow>({
         dir={dir}
         maxHeight="min(70vh, 480px)"
         style={{ overflowY: "auto", zIndex: 10050 }}
+        // Radix dismisses on a capture-phase document listener, so it sees
+        // Escape before the rename editor can mark it handled — one key
+        // cancelled the edit and closed the whole menu with it. While an
+        // editor is open the innermost control answers, and the menu does
+        // not; the next Escape closes the menu as usual.
+        onEscapeKeyDown={(event) => {
+          const editing = contentRef.current?.querySelector(
+            '[data-adapttable-part="column-rename-input"]'
+          );
+          if (editing) event.preventDefault();
+        }}
       >
         <Flex direction="column" gap="1">
           <Text

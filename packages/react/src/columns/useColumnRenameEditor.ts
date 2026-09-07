@@ -70,15 +70,32 @@ export interface ColumnRenameEditorState {
  */
 function restoreFocus(element: HTMLElement | null): () => void {
   if (!element) return () => undefined;
-  if (typeof requestAnimationFrame === "function") {
-    const frame = requestAnimationFrame(() => element.focus());
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }
-  const timer = setTimeout(() => element.focus(), 0);
+  const frame =
+    typeof requestAnimationFrame === "function"
+      ? requestAnimationFrame
+      : (fn: () => void) => setTimeout(fn, 0) as unknown as number;
+  const cancel =
+    typeof cancelAnimationFrame === "function"
+      ? cancelAnimationFrame
+      : (id: number) => {
+          clearTimeout(id);
+        };
+
+  let second: number | undefined;
+  const first = frame(() => {
+    element.focus();
+    // Some kits run their own focus scope when the input unmounts and move
+    // focus to the overlay's root a tick later, which would silently undo
+    // this. One verification frame is enough to win that without becoming a
+    // loop: if focus is still elsewhere after it, something took it
+    // deliberately and this stops arguing.
+    second = frame(() => {
+      if (document.activeElement !== element) element.focus();
+    });
+  });
   return () => {
-    clearTimeout(timer);
+    cancel(first);
+    if (second !== undefined) cancel(second);
   };
 }
 

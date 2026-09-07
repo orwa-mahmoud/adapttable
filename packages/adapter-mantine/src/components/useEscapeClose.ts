@@ -7,6 +7,12 @@ import { useEffect, useRef } from "react";
  * the dropdown. The filter popover moves focus in, so it is covered; the
  * Columns and Saved-views menus leave focus on their trigger, where the key
  * would otherwise do nothing — every other adapter's kit closes both.
+ *
+ * Only the innermost thing answers Escape. A control inside the menu that
+ * has already handled the key — the column rename editor cancelling an edit
+ * — marks the event handled, and this listener leaves it alone. Without
+ * that, one Escape closed the editor, the submenu and the whole menu at
+ * once, and the reader lost the row they were working on.
  */
 export function useEscapeClose(open: boolean, close: () => void): void {
   // Held in a ref so an inline arrow at the call site does not resubscribe
@@ -17,7 +23,8 @@ export function useEscapeClose(open: boolean, close: () => void): void {
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeRef.current();
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      closeRef.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
