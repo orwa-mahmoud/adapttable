@@ -89,10 +89,15 @@ describe("the generated showcase pages", () => {
       assert.match(file.html, /tableAgent/);
       assert.match(file.html, /session\.execute|catalog/);
       assert.match(file.html, /agentApproval/);
-      // The panel's own heading is "Tool-call playground"; the page copy
-      // names it more loosely. What this guards is that the static HTML
-      // names the panel at all, not which of the two spellings it uses.
-      assert.match(file.html, /playground/i);
+      // Crawlers see the current conversational interface, with an honest
+      // distinction between scripted scenarios and a connected model.
+      assert.match(file.html, /AI table assistant/);
+      assert.match(
+        file.html,
+        /deterministic local scenarios, not a language model/
+      );
+      assert.match(file.html, /Connect backend/);
+      assert.doesNotMatch(file.html, /never grouping or pivoting/);
     }
   });
 

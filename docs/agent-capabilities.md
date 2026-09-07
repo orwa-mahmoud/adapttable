@@ -1,7 +1,12 @@
-# Adaptive table capabilities — what an agent may do
+# React table AI assistant — native widgets and active capabilities
 
 A table can tell an agent what it can do **right now**, without sending every
 row or every feature guide up front.
+
+Use the [optional native assistant](#the-optional-widget) or the headless
+`useTableAssistant` controller to build a conversation around that contract.
+Your application supplies the transport; table operations still pass through
+the same permissions, validation and approval path.
 
 That contract lives in `@adapttable/ai`. It is optional. `@adapttable/core`,
 every adapter root, and `@adapttable/server` import none of it. Compose

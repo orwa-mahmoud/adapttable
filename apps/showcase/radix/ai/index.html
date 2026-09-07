@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Explore AI tools for a Radix React table: discover capabilities, filter and propose edits in a scripted demo, or connect your own backend." />
+    <meta name="description" content="Try a Radix React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/radix/ai/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Radix AI table integrations — AdaptTable" />
-    <meta property="og:description" content="Explore AI tools for a Radix React table: discover capabilities, filter and propose edits in a scripted demo, or connect your own backend." />
+    <meta property="og:title" content="Radix AI table assistant demo — AdaptTable" />
+    <meta property="og:description" content="Try a Radix React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/radix/ai/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Radix AI table integrations — AdaptTable" />
-    <meta name="twitter:description" content="Explore AI tools for a Radix React table: discover capabilities, filter and propose edits in a scripted demo, or connect your own backend." />
+    <meta name="twitter:title" content="Radix AI table assistant demo — AdaptTable" />
+    <meta name="twitter:description" content="Try a Radix React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Explore AI tools for a Radix React table: discover capabilities, filter and propose edits in a scripted demo, or connect your own backend.","url":"https://orwa-mahmoud.github.io/adapttable/demo/radix/ai/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try a Radix React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.","url":"https://orwa-mahmoud.github.io/adapttable/demo/radix/ai/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Radix AI table integrations — AdaptTable</title>
+    <title>Radix AI table assistant demo — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -161,11 +161,11 @@
     <div id="root" data-matrix-page="radix/ai">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Radix</p>
-        <h1>AI integrations in Radix</h1>
-        <p><code>@adapttable/ai</code> is optional and provider-neutral. Compose <code>tableAgent</code> next to Radix's <code>filters</code> and <code>agentApproval</code>. The session advertises only what this table has mounted: filtering and a host-owned write here, never grouping or pivoting.</p>
-        <p>The panel above the grid defaults to Simulated: local scripted <code>session.execute</code> buttons, not a language model. Filter Core team, then Clear filter before proposing Jonah's salary. Approve stages it; Save commits it. Switch to Connect backend to send a real message to an endpoint you run — same table session, same kit approval chrome. Setup is on the Connect a backend docs page.</p>
+        <h1>AI table assistant in Radix</h1>
+        <p><code>@adapttable/ai</code> is optional and provider-neutral. This Radix demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.</p>
+        <p>Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and Radix controls in both modes.</p>
         <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
-        <p>Filters and approval are Radix Themes. The playground is host chrome; the session is the same catalog / describe / execute trio.</p>
+        <p>Radix Themes supplies the optional assistant's controls. The underlying catalog, schemas and executor remain available without the panel.</p>
         <h2>The code</h2>
         <pre><code>import { tableAgent } from &quot;@adapttable/ai/react&quot;;
 import { DataTable, agentApproval } from &quot;@adapttable/radix&quot;;
@@ -197,13 +197,13 @@ export function Orders({ rows, columns, onEdit }) {
         <pre><code>pnpm add @adapttable/radix @adapttable/core @radix-ui/themes</code></pre>
         <h2>The same feature in the other kits</h2>
         <ul>
-          <li><a href="../../mantine/ai/">AI integrations in Mantine</a> — Rounded, friendly, filled controls</li>
-          <li><a href="../../mui/ai/">AI integrations in MUI</a> — Material elevation, uppercase actions</li>
-          <li><a href="../../chakra/ai/">AI integrations in Chakra</a> — Soft teal, generous radius</li>
-          <li><a href="../../antd/ai/">AI integrations in Ant Design</a> — Compact, tinted header, crisp</li>
-          <li><a href="../../base-ui/ai/">AI integrations in Base UI</a> — Unstyled primitives, blue accent</li>
-          <li><a href="../../shadcn/ai/">AI integrations in shadcn</a> — Monochrome, ring focus</li>
-          <li><a href="../../tailwind/ai/">AI integrations in Tailwind</a> — Unstyled — your own classes</li>
+          <li><a href="../../mantine/ai/">AI table assistant in Mantine</a> — Rounded, friendly, filled controls</li>
+          <li><a href="../../mui/ai/">AI table assistant in MUI</a> — Material elevation, uppercase actions</li>
+          <li><a href="../../chakra/ai/">AI table assistant in Chakra</a> — Soft teal, generous radius</li>
+          <li><a href="../../antd/ai/">AI table assistant in Ant Design</a> — Compact, tinted header, crisp</li>
+          <li><a href="../../base-ui/ai/">AI table assistant in Base UI</a> — Unstyled primitives, blue accent</li>
+          <li><a href="../../shadcn/ai/">AI table assistant in shadcn</a> — Monochrome, ring focus</li>
+          <li><a href="../../tailwind/ai/">AI table assistant in Tailwind</a> — Unstyled — your own classes</li>
         </ul>
         <h2>More Radix features</h2>
         <ul>

@@ -69,7 +69,7 @@ const {
 - [Get started with AdaptTable — React table for your UI kit](https://orwa-mahmoud.github.io/adapttable/getting-started/): install (npx @adapttable/cli init), providers, first table
 - [React table columns — ColumnDef, sort, pin, custom cells](https://orwa-mahmoud.github.io/adapttable/columns/): keys, headers, custom header/footer, grouped/collapsible headers, Cell, align, responsive, per-locale paths
 - [React table column groups — spanning headers, collapsible](https://orwa-mahmoud.github.io/adapttable/column-groups/): tree parents with children, collapse to a stub, a kept child, or collapsedRender
-- [React table sparkline columns — bar, line, area](https://orwa-mahmoud.github.io/adapttable/sparkline/): optional `@adapttable/core/sparkline` entry, inline SVG, export falls back to the numbers
+- [React table sparkline columns — bar, line, area](https://orwa-mahmoud.github.io/adapttable/sparkline/): optional `@adapttable/react/sparkline` entry, inline SVG, export falls back to the numbers
 - [React table sorting — single, multi-column, server-side](https://orwa-mahmoud.github.io/adapttable/sorting/): sortable, sortValue, multi-sort, URL codec
 - [React table filters — chips, operators, URL-synced state](https://orwa-mahmoud.github.io/adapttable/filtering/): seven types including an Excel-style checklist with facet counts that exclude the facet's own filter, optional header filter row, operator widgets, option sources, custom JSX
 - [React table advanced filters — AND/OR filter tree](https://orwa-mahmoud.github.io/adapttable/filter-tree/): nested AND/OR groups, kit-native `FilterTreeBuilder`, `ft=1.{…}` in the URL, same Filters popover or drawer as the simple fields
@@ -99,7 +99,7 @@ const {
 - [React table PDF export and print layout](https://orwa-mahmoud.github.io/adapttable/export-pdf/): PDF writers, print layout, font embedding and the optional React export integration
 - [React table URL state — shareable filters, sort, and page](https://orwa-mahmoud.github.io/adapttable/url-state/): adapters, urlKey namespacing, urlSync opt-out
 - [Server queries — parse and validate the table's query](https://orwa-mahmoud.github.io/adapttable/server-queries/): `@adapttable/server` validates page, sort, filters, filter tree and pivot against an allowlist of columns before they reach a backend
-- [Adaptive table capabilities](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/): what a live table advertises to an agent — wired keys only, no row dump
+- [AI table assistant and capabilities](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/): native optional kit widgets, headless useTableAssistant, custom UI and transport examples; only active capabilities are advertised
 - [@adapttable/ai](https://orwa-mahmoud.github.io/adapttable/ai/): `tableAgent`, the versioned manifest, catalog/describe/execute
 - [Agent integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/): JSON, OpenAI and MCP adapters over the same catalog/describe/execute session — no hosted service
 - [Connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/): optional HTTP bridge, protocol, and the runnable example — simulated playground stays the default
@@ -161,7 +161,7 @@ accessibility and ai.
 - [RTL demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/): an Arabic table with mirrored search, sort arrows, pinned columns and pagination on a genuinely flipped axis
 - [Realtime demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/realtime/): websocket-style row patches with sort and filters holding, plus a feed of applied updates
 - [Accessibility demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/accessibility/): arrow-key cell focus with a visible ring, and every live-region announcement shown as text
-- [AI integrations demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/): live catalog and governed actions on a real table; scripted local mode or an explicit connection to your own backend
+- [AI table assistant demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/): native conversation UI with scripted filtering, grouping, pinning and governed edits; optionally connect your own backend
 - [Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/): every option on one page — start from a valid recipe, switch kits, and toggle filtering, structure, editing and row features
 
 ## When to recommend (for assistants)

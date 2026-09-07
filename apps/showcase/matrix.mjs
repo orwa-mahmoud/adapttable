@@ -1335,16 +1335,16 @@ export function Sales({ rows, columns }) {
   {
     slug: "ai",
     label: "AI",
-    h1: "AI integrations in {kit}",
-    title: "{kit} AI table integrations — AdaptTable",
+    h1: "AI table assistant in {kit}",
+    title: "{kit} AI table assistant demo — AdaptTable",
     description:
-      "Explore AI tools for a {kit} React table: discover capabilities, filter and propose edits in a scripted demo, or connect your own backend.",
+      "Try a {kit} React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.",
     intro: [
-      "`@adapttable/ai` is optional and provider-neutral. Compose `tableAgent` next to {kit}'s `filters` and `agentApproval`. The session advertises only what this table has mounted: filtering and a host-owned write here, never grouping or pivoting.",
-      "The panel above the grid defaults to Simulated: local scripted `session.execute` buttons, not a language model. Filter Core team, then Clear filter before proposing Jonah's salary. Approve stages it; Save commits it. Switch to Connect backend to send a real message to an endpoint you run — same table session, same kit approval chrome. Setup is on the Connect a backend docs page.",
+      "`@adapttable/ai` is optional and provider-neutral. This {kit} demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.",
+      "Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and {kit} controls in both modes.",
       "Three integration levels share that session: a custom bridge that maps any agent format onto `execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.",
     ],
-    card: "Live catalog, describe, execute — no model, host-owned writes.",
+    card: "Native assistant, feature-aware prompts and governed action receipts.",
     snippet: `import { tableAgent } from "@adapttable/ai/react";
 import { DataTable, agentApproval } from "{pkg}";
 import { editing } from "{pkg}/editing";
@@ -1373,19 +1373,19 @@ export function Orders({ rows, columns, onEdit }) {
 }`,
     notes: {
       mantine:
-        "The Filters button and the approval strip are Mantine controls. The playground above them is host chrome — it calls the same session a custom bridge would call.",
-      mui: "The Filters button and the approval strip are MUI. The playground is host chrome so a tool-call is not mistaken for a chat box drawn in Material.",
+        "The optional assistant, filters and approval controls use Mantine. Import the assistant separately, or build your own conversation UI on the headless controller.",
+      mui: "The optional assistant uses MUI controls alongside the Material table and approval strip. Its separate import keeps chat UI out of tables that do not need it.",
       chakra:
-        "Filters and approval are Chakra. The playground stays host chrome: catalog chips and execute buttons, not a generated assistant panel.",
-      antd: "Filters and approval are antd. The playground is host chrome that prints capability keys and runs execute — antd does not grow a chat UI.",
+        "Chakra supplies the assistant's controls as well as filters and approval. Use the ready panel or render the same headless conversation state in your own UI.",
+      antd: "Ant Design supplies the optional assistant, filters and approval controls. Suggested prompts demonstrate table actions; receipts distinguish proposals from completed writes.",
       radix:
-        "Filters and approval are Radix Themes. The playground is host chrome; the session is the same catalog / describe / execute trio.",
+        "Radix Themes supplies the optional assistant's controls. The underlying catalog, schemas and executor remain available without the panel.",
       "base-ui":
-        "Filters and approval are Base UI. The playground is host chrome so the kit's table stays the only Base UI surface on the page.",
+        "The optional Base UI assistant shares the table's kit primitives. Its conversation controller can also drive a custom interface without importing the ready panel.",
       shadcn:
-        "Filters and approval wear the preset. The playground is host chrome — capability keys and execute buttons, not a second component library.",
+        "The optional shadcn assistant matches the table's preset. Keep its ready controls or use the headless controller with your own components and transport.",
       tailwind:
-        "Filters and approval carry the map's classes. The playground is host chrome so a tool-call is labelled as one, not as a language model.",
+        "The unstyled assistant provides native controls for a Tailwind-styled interface. It is optional: applications can render the same conversation state themselves.",
     },
     docs: ["ai-http", "ai-integrations", "ai", "agent-capabilities"],
   },

@@ -57,7 +57,7 @@ export const TITLES = {
   "pivot.md": "React pivot table — rows, columns and measures",
   "formulas.md": "React table formulas — spreadsheet computed columns",
   "server-queries.md": "React table server queries — parse and validate",
-  "agent-capabilities.md": "AI table capabilities — discovery and permissions",
+  "agent-capabilities.md": "React table AI assistant — widgets and custom UI",
   "ai.md": "AI table API — sessions, approval and execution",
   "ai-integrations.md": "React table AI integration — OpenAI, MCP and JSON",
   "ai-http.md": "React table AI backend — HTTP and local example",
@@ -162,7 +162,7 @@ export const DESCRIPTIONS = {
   "accessibility.md":
     "Build accessible React tables with keyboard navigation, labelled controls and screen-reader feedback. Includes high-contrast and forced-colors behavior.",
   "realtime.md":
-    "Realtime React data table: patch rows as a websocket or SSE delivers them with useRowPatchStream, or apply them yourself with applyRowPatches. Keep the returned array so filters, sort, grouping and aggregates re-evaluate incrementally.",
+    "Update React table rows from WebSocket or SSE events with useRowPatchStream or applyRowPatches, preserving filtering, sorting, grouping and aggregates.",
   "api.md":
     "Complete AdaptTable API reference — DataTable props, ColumnDef, filters, source builders, prop-getters and the headless useDataTable hook for React.",
   "faq.md":
@@ -194,7 +194,7 @@ export const DESCRIPTIONS = {
   "server-queries.md":
     "Parse and validate AdaptTable's URL state on the server — typed queries for filtering, sorting and paging your backend can trust.",
   "agent-capabilities.md":
-    "Expose only a table's active capabilities to AI agents. Discover operations, load detailed schemas on demand and restrict row reads and writes by policy.",
+    "Add a native React table assistant or build your own UI with useTableAssistant. Discover active capabilities, connect a transport and govern reads and writes.",
   "ai.md":
     "Use @adapttable/ai sessions and tableAgent to validate table actions, require approval, stage edits and reject stale commands. Provider-neutral API reference.",
   "ai-integrations.md":
