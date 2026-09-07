@@ -24,6 +24,7 @@ import {
   showAllColumns,
   unpinAllColumns,
   useColumnRenameEditor,
+  useEscapeClose,
   useFeatureHost,
 } from "@adapttable/react/adapter";
 import {
@@ -38,8 +39,6 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
-
-import { useEscapeClose } from "./useEscapeClose";
 
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
@@ -460,7 +459,9 @@ export function ColumnMenu<TRow>({
   const [opened, setOpened] = useState(false);
   const [query, setQuery] = useState("");
   const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
-  useEscapeClose(opened, () => setOpened(false));
+  useEscapeClose(opened, () => setOpened(false), {
+    ignoreWithin: '[data-adapttable-part="column-rename-input"]',
+  });
   // A Popover, not a Menu: the panel holds checkboxes, drag handles and
   // buttons, so `role="menu"` semantics (menuitem children) would be a lie.
   return (

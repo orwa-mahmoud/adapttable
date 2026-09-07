@@ -175,8 +175,12 @@ describe("filter overlay a11y (axe) — Chakra", () => {
     });
     // Escape also hands focus back to the trigger — the popover's own
     // document-level listener does it (Ark's restore only works through
-    // `Popover.Trigger`, which this anchored layout doesn't use).
-    expect(trigger()).toHaveFocus();
+    // `Popover.Trigger`, which this anchored layout doesn't use). That
+    // happens a frame later, so it is waited for rather than asserted on the
+    // spot: reading it synchronously passes only while the machine is idle.
+    await waitFor(() => {
+      expect(trigger()).toHaveFocus();
+    });
   });
 
   it("opening the drawer moves focus into the dialog behind a backdrop", async () => {

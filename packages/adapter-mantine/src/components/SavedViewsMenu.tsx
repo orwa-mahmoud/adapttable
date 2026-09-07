@@ -1,5 +1,6 @@
 import type { TableLabels } from "@adapttable/core";
 import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
+import { useEscapeClose } from "@adapttable/react/adapter";
 import {
   ActionIcon,
   Box,
@@ -12,7 +13,6 @@ import {
 import { useState } from "react";
 
 import { CloseIcon } from "../icons";
-import { useEscapeClose } from "./useEscapeClose";
 
 /**
  * The label strings the saved-views menu renders.

@@ -29,3 +29,12 @@ The panel's header is one compact row of icon controls, suggested prompts
 are cards with a title and the request they send, and the composer is a
 single surface with Send inside it. Every string is translated in all 17
 locales.
+
+A write parked on a human approval now says so. `bridge.approvals` reports
+one opening and closing, `useTableAssistant` takes it as `awaitingApproval`,
+and the panel carries `busy` separately from the status it shows — so Stop
+stays available on a turn that is waiting rather than working.
+
+`useEscapeClose` closes an overlay on Escape wherever focus sits, and takes
+`ignoreWithin` for controls inside that answer the key first. Cancelling a
+column rename closes the editor; the Escape after it closes the menu.

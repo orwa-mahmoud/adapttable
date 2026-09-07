@@ -210,7 +210,7 @@ for (const kit of KITS) {
 
     await page.keyboard.press("Escape");
 
-    await expect(editor).toHaveCount(0);
+    await expect(editor).toBeHidden();
     // The menu it was opened from is still there, and so is the control that
     // opened it — which is what makes reopening keyboard-only.
     await expect(menu).toBeVisible();
@@ -220,5 +220,14 @@ for (const kit of KITS) {
     // thing that was impossible when the menu went down with it.
     await page.keyboard.press("Enter");
     await expect(editor).toBeFocused();
+
+    // Cancel it again, then let Escape carry on outwards: with no inner
+    // layer left claiming the key, the menu itself is what closes.
+    await page.keyboard.press("Escape");
+    await expect(editor).toBeHidden();
+    await page.keyboard.press("Escape");
+    // Hidden rather than absent: some kits keep popover content mounted once
+    // it has been opened, so counting elements would call a closed menu open.
+    await expect(menu).toBeHidden();
   });
 }

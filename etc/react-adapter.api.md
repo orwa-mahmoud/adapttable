@@ -2052,6 +2052,11 @@ export interface EditValidationState<TRow> {
 export function ensureForcedColorsStyles(): void;
 
 // @public
+export interface EscapeCloseOptions {
+    readonly ignoreWithin?: string;
+}
+
+// @public
 export const EXPAND_TOGGLE: FeatureSlotKey<ExpandToggleSlotProps>;
 
 // @public
@@ -5133,6 +5138,9 @@ export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, ren
 
 // @public
 export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;
+
+// @public
+export function useEscapeClose(open: boolean, close: () => void, options?: EscapeCloseOptions): void;
 
 // @public
 export function useExportHandler(handler: ((controls?: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>) | undefined, labels?: TableLabels, format?: string, pageOnly?: boolean, serverBuilt?: boolean): ExportHandlerState;

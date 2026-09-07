@@ -25,6 +25,7 @@ import {
   showAllColumns,
   unpinAllColumns,
   useColumnRenameEditor,
+  useEscapeClose,
   useFeatureHost,
 } from "@adapttable/react/adapter";
 import {
@@ -412,10 +413,29 @@ export function ColumnMenu<TRow>({
   const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
   const actionsHidden = layout.isHidden(ACTIONS_COLUMN_KEY);
   const actionsPinned = layout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
+  // Controlled so Escape can close it: the kit's own dismissal does not
+  // fire for every place focus can be inside this menu.
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEscapeClose(
+    menuOpen,
+    () => {
+      setMenuOpen(false);
+    },
+    { ignoreWithin: '[data-adapttable-part="column-rename-input"]' }
+  );
   const reorderHidden = layout.isHidden(REORDER_COLUMN_KEY);
   const reorderPinned = layout.state.pinned[REORDER_COLUMN_KEY] !== undefined;
   return (
     <Popover.Root
+      open={menuOpen}
+      onOpenChange={(event) => {
+        setMenuOpen(event.open);
+      }}
+      // One owner for Escape. Ark's own dismissal fires wherever focus sits
+      // inside the panel — including the rename editor — so cancelling an
+      // edit took the whole menu with it. `useEscapeClose` closes the menu
+      // and leaves the key alone inside a control that owns it.
+      closeOnEscape={false}
       positioning={{ placement: "bottom-end", flip: false }}
       lazyMount
     >

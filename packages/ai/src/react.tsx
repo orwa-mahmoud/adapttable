@@ -776,13 +776,45 @@ function TableAgentProvider({
   // The chrome path is the only one that parks: with `onApprove` the host
   // answers directly and nothing is ever left open here.
   const chromePending = !hostApprove && pending !== null;
-  // Held in a ref so a host passing an inline bridge object does not make
-  // this fire on every render, and so the call keeps its receiver.
-  const bridgeRef = useRef(options.bridge);
-  bridgeRef.current = options.bridge;
+
+  // Who is listening, and what they were last told.
+  //
+  // The subscriber is compared by its own identity rather than the bridge's:
+  // a host that rebuilds `bridge={{ ... }}` inline on every render still
+  // passes the same `approvals` function, and re-announcing an unchanged
+  // state on every render is noise a host cannot filter.
+  const approvals = options.bridge?.approvals;
+  const approvalsRef = useRef(approvals);
+  const announcedRef = useRef(false);
+
   useEffect(() => {
-    bridgeRef.current?.approvals?.(chromePending);
-  }, [chromePending]);
+    const previous = approvalsRef.current;
+    if (previous !== approvals) {
+      // A genuinely different subscriber. The one being replaced must not be
+      // left believing an approval is still open, and the one arriving has
+      // never been told anything.
+      if (announcedRef.current) previous?.(false);
+      approvalsRef.current = approvals;
+      announcedRef.current = false;
+    }
+    if (announcedRef.current === chromePending) return;
+    announcedRef.current = chromePending;
+    approvals?.(chromePending);
+  }, [approvals, chromePending]);
+
+  // Going away is a close. Without this the host is left showing "waiting for
+  // you" for an approval whose provider no longer exists — and resolving the
+  // promise below cannot help, because no effect runs after an unmount to
+  // announce it. Strict Mode's setup/cleanup/setup lands here too: the
+  // cleanup retracts, and the effect above re-announces on the second setup.
+  useEffect(
+    () => () => {
+      if (!announcedRef.current) return;
+      announcedRef.current = false;
+      approvalsRef.current?.(false);
+    },
+    []
+  );
 
   const approvalValue =
     hostApprove || !pending

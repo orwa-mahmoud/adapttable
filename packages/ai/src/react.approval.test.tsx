@@ -15,7 +15,7 @@ import {
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
 import { act, render, waitFor } from "@testing-library/react";
-import { useEffect } from "react";
+import { StrictMode, useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
@@ -492,5 +492,252 @@ describe("host callbacks in place of the live table's", () => {
     });
 
     expect(session()).not.toBe(before);
+  });
+});
+
+/**
+ * What the host is told while a write waits, and when it stops being told.
+ *
+ * `execute` does not resolve while an approval is open, so a panel outside
+ * the table has nothing to go on: without this channel it shows "working" at
+ * a turn that is waiting on a person, and keeps showing it after the table
+ * has gone. Everything here drives the real feature — the bridge callback the
+ * provider calls, not a state value handed to a widget.
+ */
+describe("telling the host a write is waiting", () => {
+  it("announces the open and the close, once each", async () => {
+    const approvals = vi.fn<(pending: boolean) => void>();
+    mount({ tableId: "announce", approval: "writes", bridge: { approvals } });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    approvals.mockClear();
+
+    const result = edit("announce-1");
+    await waitFor(() => {
+      expect(approvals).toHaveBeenCalledWith(true);
+    });
+    expect(approvals).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    await result;
+    await waitFor(() => {
+      expect(approvals).toHaveBeenLastCalledWith(false);
+    });
+    expect(approvals).toHaveBeenCalledTimes(2);
+  });
+
+  it("retracts when the write is rejected", async () => {
+    const onCellEdit = vi.fn();
+    const approvals = vi.fn<(pending: boolean) => void>();
+    mount(
+      { tableId: "reject", approval: "writes", bridge: { approvals } },
+      { ...VIEW, editing: { onCellEdit } }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = edit("reject-1");
+    await waitFor(() => {
+      expect(approvals).toHaveBeenCalledWith(true);
+    });
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    const settled = await result;
+
+    await waitFor(() => {
+      expect(approvals).toHaveBeenLastCalledWith(false);
+    });
+    // Refused means refused: nothing reached the host's editor.
+    expect(onCellEdit).not.toHaveBeenCalled();
+    expect(settled.ok).toBe(true);
+  });
+
+  it("retracts when the turn is stopped, and writes nothing", async () => {
+    const onCellEdit = vi.fn();
+    const approvals = vi.fn<(pending: boolean) => void>();
+    mount(
+      { tableId: "stop", approval: "writes", bridge: { approvals } },
+      { ...VIEW, editing: { onCellEdit } }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    // Stop is an abort on the turn's own signal — the same one the assistant
+    // controller passes when the reader presses it.
+    const controller = new AbortController();
+    const result = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Ada L." }] },
+      session().manifest().viewRevision,
+      "stop-1",
+      controller.signal
+    );
+    await waitFor(() => {
+      expect(approvals).toHaveBeenCalledWith(true);
+    });
+
+    act(() => {
+      controller.abort();
+    });
+    await result;
+
+    await waitFor(() => {
+      expect(approvals).toHaveBeenLastCalledWith(false);
+    });
+    expect(onCellEdit).not.toHaveBeenCalled();
+    expect(handles.current.pending).toBeNull();
+  });
+
+  it("clears the host's pending state when the table goes away", async () => {
+    const approvals = vi.fn<(pending: boolean) => void>();
+    const view = { ...VIEW };
+    const props = applyTableFeatures({
+      features: [
+        tableAgent({
+          tableId: "unmount",
+          approval: "writes",
+          commit: "immediate",
+          columns: { name: { type: "string", writable: true } },
+          bridge: { approvals },
+        }),
+        { id: "editing" },
+      ],
+    });
+    const view_ = render(
+      <FeatureProviders props={props}>
+        <Publisher view={view} />
+        <Reader onReady={() => undefined} />
+      </FeatureProviders>
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    void edit("unmount-1");
+    await waitFor(() => {
+      expect(approvals).toHaveBeenCalledWith(true);
+    });
+
+    // Nothing runs an effect after an unmount, so the retraction has to come
+    // from the cleanup — otherwise the host is left waiting on a table that
+    // no longer exists.
+    view_.unmount();
+    expect(approvals).toHaveBeenLastCalledWith(false);
+  });
+
+  it("hands a replacement subscriber the current state", async () => {
+    const first = vi.fn<(pending: boolean) => void>();
+    const second = vi.fn<(pending: boolean) => void>();
+    const { rerender } = mount({
+      tableId: "swap",
+      approval: "writes",
+      bridge: { approvals: first },
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    void edit("swap-1");
+    await waitFor(() => {
+      expect(first).toHaveBeenCalledWith(true);
+    });
+
+    rerender({
+      tableId: "swap",
+      approval: "writes",
+      bridge: { approvals: second },
+    });
+
+    await waitFor(() => {
+      // The one leaving must not be left believing an approval is still open,
+      // and the one arriving has never been told anything.
+      expect(first).toHaveBeenLastCalledWith(false);
+      expect(second).toHaveBeenLastCalledWith(true);
+    });
+  });
+
+  it("says nothing extra when only the bridge object is new", async () => {
+    const approvals = vi.fn<(pending: boolean) => void>();
+    const { rerender } = mount({
+      tableId: "inline",
+      approval: "writes",
+      bridge: { approvals },
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    void edit("inline-1");
+    await waitFor(() => {
+      expect(approvals).toHaveBeenCalledWith(true);
+    });
+    const announced = approvals.mock.calls.length;
+
+    // A host rebuilding `bridge={{ ... }}` inline every render is the normal
+    // case; the same function inside it is the same subscriber.
+    rerender({
+      tableId: "inline",
+      approval: "writes",
+      bridge: { approvals },
+    });
+    rerender({
+      tableId: "inline",
+      approval: "writes",
+      bridge: { approvals },
+    });
+
+    expect(approvals.mock.calls).toHaveLength(announced);
+  });
+});
+
+/**
+ * Strict Mode runs every effect setup, cleanup, setup. A retraction that
+ * fires in that cleanup and never comes back would leave the host showing
+ * nothing while a write is still parked.
+ */
+describe("under Strict Mode's double effects", () => {
+  it("still reports an approval that is genuinely open", async () => {
+    const approvals = vi.fn<(pending: boolean) => void>();
+    const props = applyTableFeatures({
+      features: [
+        tableAgent({
+          tableId: "strict",
+          approval: "writes",
+          commit: "immediate",
+          columns: { name: { type: "string", writable: true } },
+          bridge: { approvals },
+        }),
+        { id: "editing" },
+      ],
+    });
+    render(
+      <StrictMode>
+        <FeatureProviders props={props}>
+          <Publisher view={VIEW} />
+          <Reader onReady={() => undefined} />
+        </FeatureProviders>
+      </StrictMode>
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    void edit("strict-1");
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    // Whatever the double invocation did on the way, the last thing the host
+    // heard has to match the write that is actually waiting.
+    await waitFor(() => {
+      expect(approvals).toHaveBeenLastCalledWith(true);
+    });
   });
 });

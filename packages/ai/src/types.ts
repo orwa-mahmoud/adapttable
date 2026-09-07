@@ -644,5 +644,5 @@ export interface TableAgentBridge {
    * thinking. Only the chrome-mediated path reports here: with `onApprove`
    * set the host is already the one being asked.
    */
-  approvals?(pending: boolean): void;
+  readonly approvals?: (pending: boolean) => void;
 }

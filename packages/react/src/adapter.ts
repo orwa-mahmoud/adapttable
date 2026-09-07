@@ -505,6 +505,10 @@ export {
   useStickyToolbarLayout,
 } from "./layout/useStickyToolbarLayout";
 export {
+  type EscapeCloseOptions,
+  useEscapeClose,
+} from "./overlays/useEscapeClose";
+export {
   type PivotAddProps,
   type PivotAggProps,
   type PivotFieldProps,

@@ -19579,6 +19579,14 @@
       "behavior": ""
     },
     {
+      "export": "EscapeCloseOptions",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "EXPAND_TOGGLE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -22412,6 +22420,14 @@
     },
     {
       "export": "useDesktopTableAssembly",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "useEscapeClose",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "react-binding",

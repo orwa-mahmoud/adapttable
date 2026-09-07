@@ -1897,7 +1897,11 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
 has something to animate on the way out, and reduced motion skips both edges),
 `OVERLAY_MOTION` (the durations and curves the unstyled, shadcn, Base UI and
-Radix drawers share), and the inline icon set
+Radix drawers share),
+`useEscapeClose` / `EscapeCloseOptions` (close an overlay on Escape wherever
+focus is, since kits disagree about when they do it themselves — pass
+`ignoreWithin` a selector for controls inside that answer the key first, so
+one Escape closes one layer), and the inline icon set
 (`FiltersIcon`, `SearchIcon`, `EyeIcon`, `GripIcon`, `PinIcon`,
 `ExpandChevron`, `sortArrow`). Row reorder chrome (on each adapter):
 `RowReorderHandle`, `RowReorderHandleProps`, `RowReorderButtons`,

@@ -117,3 +117,105 @@ describe("reopening before focus has been handed back", () => {
     expect(onRename).toHaveBeenCalledWith("person", "Account owner");
   });
 });
+
+/**
+ * Restoration has to tell two things apart that look identical one frame
+ * later: a kit's focus scope parking focus on its overlay root because the
+ * input vanished, and a reader deliberately moving to another control.
+ * Correcting the first is the whole point; overriding the second would take
+ * focus away from wherever they just went.
+ */
+describe("what restoration will and will not reclaim", () => {
+  function scene() {
+    const shell = document.createElement("div");
+    const trigger = document.createElement("button");
+    const elsewhere = document.createElement("button");
+    shell.tabIndex = -1;
+    shell.append(trigger);
+    document.body.append(shell, elsewhere);
+    return { shell, trigger, elsewhere };
+  }
+
+  function editorFor(trigger: HTMLElement) {
+    trigger.focus();
+    const { result } = renderHook(() =>
+      useColumnRenameEditor({
+        key: "person",
+        name: "Person",
+        onRename: vi.fn(),
+        requiredMessage: "Enter a column name.",
+        renamedMessage: ({ name }) => `renamed to ${name}`,
+      })
+    );
+    act(() => {
+      result.current.begin();
+    });
+    return result;
+  }
+
+  const frames = async () => {
+    for (let i = 0; i < 3; i++) {
+      await act(async () => {
+        await new Promise((resolve) =>
+          requestAnimationFrame(() => resolve(null))
+        );
+      });
+    }
+  };
+
+  it("reclaims focus a kit parked on the overlay root", async () => {
+    const { shell, trigger } = scene();
+    const result = editorFor(trigger);
+    act(() => {
+      result.current.cancel();
+    });
+    // What a focus scope does when the thing it was holding disappears.
+    shell.focus();
+
+    await frames();
+
+    expect(document.activeElement).toBe(trigger);
+    shell.remove();
+  });
+
+  it("leaves focus where the reader deliberately put it", async () => {
+    const { shell, trigger, elsewhere } = scene();
+    const result = editorFor(trigger);
+    act(() => {
+      result.current.cancel();
+    });
+
+    // Cancelling restores to the trigger — that much is the point. What must
+    // not happen is the correction frame afterwards dragging focus back from
+    // wherever the reader went next.
+    await act(async () => {
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => resolve(null))
+      );
+    });
+    expect(document.activeElement).toBe(trigger);
+
+    // A Tab, a click — a control that is not holding the trigger.
+    elsewhere.focus();
+    await frames();
+
+    expect(document.activeElement).toBe(elsewhere);
+    shell.remove();
+    elsewhere.remove();
+  });
+
+  it("does not focus a trigger the kit has already removed", async () => {
+    const { shell, trigger } = scene();
+    const result = editorFor(trigger);
+    act(() => {
+      result.current.cancel();
+    });
+    trigger.remove();
+
+    await frames();
+
+    // Nothing to focus, and nothing thrown on the way to finding that out.
+    expect(document.activeElement).not.toBe(trigger);
+    shell.remove();
+  });
+});
