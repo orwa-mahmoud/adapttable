@@ -46,6 +46,20 @@ export interface DemoScenario {
    * describe something other than what ran.
    */
   readonly subject?: (context: DemoContext) => AssistantReceiptSubject;
+  /**
+   * The same example in Arabic.
+   *
+   * A deliberate mapping, not a guess: the Arabic chip sends Arabic text and
+   * this is what makes that text run the SAME structured scenario. Without
+   * it a translated chip would send a prompt nothing recognises, which is
+   * worse than an untranslated one — and fuzzy intent matching would be
+   * worse than both.
+   */
+  readonly ar?: {
+    readonly prompt: string;
+    readonly title: string;
+    readonly reply: string;
+  };
 }
 
 /** What the page knows when a scenario runs. @internal */
@@ -76,6 +90,11 @@ export const UNSUPPORTED_REPLY =
 export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   {
     prompt: "Show only the Core team.",
+    ar: {
+      prompt: "أظهر فريق Core فقط.",
+      title: "تصفية الصفوف",
+      reply: "تمت التصفية على فريق Core.",
+    },
     subject: () => ({ kind: "filter", detail: "Team is Core" }),
     title: "Filter rows",
     kind: "filter",
@@ -86,6 +105,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Sort by salary, highest first.",
+    ar: {
+      prompt: "رتّب حسب الراتب تنازليًا.",
+      title: "ترتيب الرواتب",
+      reply: "تم الترتيب حسب الراتب تنازليًا.",
+    },
     subject: () => ({ kind: "sort", detail: "Salary, highest first" }),
     title: "Sort salaries",
     kind: "sort",
@@ -96,6 +120,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Group the rows by team.",
+    ar: {
+      prompt: "جمّع الصفوف حسب الفريق.",
+      title: "التجميع حسب الفريق",
+      reply: "تم التجميع حسب الفريق.",
+    },
     subject: () => ({ kind: "group", detail: "Team" }),
     title: "Group by team",
     kind: "group",
@@ -106,6 +135,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Raise Priya Nair's salary to 185.",
+    ar: {
+      prompt: "ارفع راتب Priya Nair إلى 185.",
+      title: "اقتراح تعديل",
+      reply: "تم اقتراح التغيير — وافق عليه لتطبيقه.",
+    },
     subject: () => ({
       kind: "edit",
       row: "Priya Nair",
@@ -124,6 +158,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Give the Core team a 5% raise.",
+    ar: {
+      prompt: "امنح فريق Core زيادة 5%.",
+      title: "اقتراح عدة تعديلات",
+      reply: "تم اقتراح ثلاث زيادات — وافق على ما تريد.",
+    },
     subject: () => ({
       kind: "edit",
       row: "Core team",
@@ -148,6 +187,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Pin the person column to the start.",
+    ar: {
+      prompt: "ثبّت عمود الشخص في البداية.",
+      title: "تثبيت عمود",
+      reply: "تم تثبيت عمود الشخص في البداية.",
+    },
     subject: () => ({ kind: "pin", detail: "Person, start" }),
     title: "Pin a column",
     reply: "Pinned the person column.",
@@ -157,6 +201,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Unpin the person column.",
+    ar: {
+      prompt: "ألغِ تثبيت عمود الشخص.",
+      title: "إلغاء تثبيت العمود",
+      reply: "تم إلغاء تثبيت عمود الشخص.",
+    },
     subject: () => ({ kind: "pin", detail: "Person, unpinned" }),
     title: "Unpin the column",
     reply: "Unpinned the person column.",
@@ -166,6 +215,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Pin Priya Nair to the top.",
+    ar: {
+      prompt: "ثبّت Priya Nair في الأعلى.",
+      title: "تثبيت صف",
+      reply: "تم تثبيت Priya Nair في الأعلى.",
+    },
     title: "Pin a row",
     reply: "Pinned that row to the top.",
     capabilityKey: "view.pinRow",
@@ -174,6 +228,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Unpin Priya Nair.",
+    ar: {
+      prompt: "ألغِ تثبيت Priya Nair.",
+      title: "إلغاء تثبيت الصف",
+      reply: "تم إلغاء تثبيت Priya Nair.",
+    },
     title: "Unpin the row",
     reply: "Unpinned that row.",
     capabilityKey: "view.pinRow",
@@ -182,6 +241,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Clear the grouping.",
+    ar: {
+      prompt: "أزل التجميع.",
+      title: "إزالة التجميع",
+      reply: "تمت إزالة التجميع.",
+    },
     subject: () => ({ kind: "group", detail: "Grouping cleared" }),
     title: "Clear grouping",
     kind: "group",
@@ -192,6 +256,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Clear the filter.",
+    ar: {
+      prompt: "أزل التصفية.",
+      title: "إزالة التصفية",
+      reply: "تمت إزالة التصفية.",
+    },
     subject: () => ({ kind: "filter", detail: "Filters cleared" }),
     title: "Clear filters",
     kind: "filter",
@@ -202,6 +271,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "Go to the next page.",
+    ar: {
+      prompt: "انتقل إلى الصفحة التالية.",
+      title: "الصفحة التالية",
+      reply: "تم الانتقال إلى الصفحة التالية.",
+    },
     title: "Next page",
     reply: "Moved to page 2.",
     capabilityKey: "view.setPage",
@@ -210,6 +284,11 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
   },
   {
     prompt: "What can you do with this table?",
+    ar: {
+      prompt: "ما الذي يمكنك فعله بهذا الجدول؟",
+      title: "ما المتاح",
+      reply: "إليك ما يتيحه هذا الجدول الآن.",
+    },
     title: "What can you do?",
     reply: "",
     capabilityKey: "",
@@ -219,11 +298,32 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
 ];
 
 /** Find the scenario for an exact request, ignoring only surrounding space. */
-export function scenarioFor(text: string): DemoScenario | undefined {
+export function scenarioFor(
+  text: string
+): { scenario: DemoScenario; arabic: boolean } | undefined {
   const asked = text.trim().toLocaleLowerCase();
-  return DEMO_SCENARIOS.find(
-    (scenario) => scenario.prompt.toLocaleLowerCase() === asked
-  );
+  for (const scenario of DEMO_SCENARIOS) {
+    if (scenario.prompt.toLocaleLowerCase() === asked) {
+      return { scenario, arabic: false };
+    }
+    // The Arabic chip sends Arabic, and runs the same structured scenario.
+    // Exact text either way: nothing here guesses at intent.
+    if (scenario.ar?.prompt.toLocaleLowerCase() === asked) {
+      return { scenario, arabic: true };
+    }
+  }
+  return undefined;
+}
+
+/** What the reader is told, in the language they asked in. */
+function replyFor(
+  scenario: DemoScenario,
+  arabic: boolean,
+  ok: boolean
+): string {
+  if (!ok) return arabic ? "لم ينجح ذلك." : "That did not work.";
+  if (arabic && scenario.ar) return scenario.ar.reply;
+  return scenario.reply;
 }
 
 /** The catalog, in a sentence, for the "what can you do" example. */
@@ -244,8 +344,9 @@ function describeCatalog(session: AgentSession): string {
 export function demoTransport(context: () => DemoContext): AssistantTransport {
   return {
     send: async ({ session, text }): Promise<AssistantTransportReply> => {
-      const scenario = scenarioFor(text);
-      if (!scenario) return { text: UNSUPPORTED_REPLY };
+      const found = scenarioFor(text);
+      if (!found) return { text: UNSUPPORTED_REPLY };
+      const { scenario, arabic } = found;
       if (scenario.capabilityKey === "") {
         return { text: describeCatalog(session) };
       }
@@ -267,7 +368,7 @@ export function demoTransport(context: () => DemoContext): AssistantTransport {
       );
 
       return {
-        text: result.ok ? scenario.reply : "That did not work.",
+        text: replyFor(scenario, arabic, result.ok),
         results: [result],
         keys: [scenario.capabilityKey],
         // Described from the arguments this scenario ran, never from the

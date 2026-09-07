@@ -1002,7 +1002,7 @@ describe("what a reader is asked to approve", () => {
         }),
       apply: apply(),
       onApprove: (subject) => {
-        seen = subject as { perItem?: boolean };
+        seen = subject.kind === "rows" ? { perItem: subject.perItem } : {};
         return Promise.resolve(true);
       },
     });
@@ -1227,7 +1227,10 @@ describe("the value a write is about to replace, as the model sees it", () => {
         }),
       apply: narrowed(),
       onApprove: (subject) => {
-        seen = subject as { proposals: { before?: unknown }[] };
+        seen =
+          subject.kind === "rows"
+            ? { proposals: [...subject.proposals] }
+            : undefined;
         return Promise.resolve(true);
       },
     });
@@ -1316,7 +1319,7 @@ describe("what may be split, and what may not", () => {
       apply: apply(),
       capabilities: [definition],
       onApprove: (subject) => {
-        seen = subject as { perItem?: boolean };
+        seen = subject.kind === "rows" ? { perItem: subject.perItem } : {};
         return Promise.resolve(true);
       },
     });

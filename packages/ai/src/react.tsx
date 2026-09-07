@@ -115,7 +115,7 @@ export interface TableAgentOptions {
   readonly commit?: CommitPolicy;
   /** Host confirmation. When set, chrome is skipped. */
   readonly onApprove?: (
-    proposal: unknown,
+    subject: ApprovalSubject,
     signal?: AbortSignal
   ) => Promise<ApprovalResult>;
   /** Per-column readability, writability, and labels. */
@@ -583,7 +583,7 @@ function bindLiveSession(
   revisionCounter: ReturnType<typeof createRevisionCounter>,
   waitForChrome: {
     current: (
-      proposal: unknown,
+      subject: ApprovalSubject,
       signal?: AbortSignal
     ) => Promise<ApprovalResult>;
   }
@@ -624,13 +624,13 @@ function bindLiveSession(
       apply
     );
   };
-  const onApprove = (proposal: unknown, signal?: AbortSignal) => {
+  const onApprove = (subject: ApprovalSubject, signal?: AbortSignal) => {
     const options = optionsRef.current;
-    if (options.onApprove) return options.onApprove(proposal, signal);
+    if (options.onApprove) return options.onApprove(subject, signal);
     if (sharedApproval(options.approval).policy === "never") {
       return Promise.resolve(true);
     }
-    return waitForChrome.current(proposal, signal);
+    return waitForChrome.current(subject, signal);
   };
   const inner = createAgentSession({
     observe,
@@ -727,10 +727,14 @@ function displayProposals(
         ? record[proposal.column]
         : undefined;
     const known = before !== undefined;
+    const columnLabel = proposal.column
+      ? columns?.[proposal.column]?.label
+      : undefined;
     return {
       rowKey: proposal.rowKey,
       ...(label ? { rowLabel: label } : {}),
       ...(proposal.column ? { column: proposal.column } : {}),
+      ...(columnLabel ? { columnLabel } : {}),
       ...(known ? { before } : { beforeUnavailable: true }),
       ...(proposal.after !== undefined ? { after: proposal.after } : {}),
     };
@@ -827,9 +831,9 @@ function TableAgentProvider({
 
   const hostApprove = options.onApprove;
   const waitForChrome = useRef<
-    (proposal: unknown, signal?: AbortSignal) => Promise<ApprovalResult>
+    (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
   >(() => Promise.resolve(false));
-  waitForChrome.current = (proposal, signal) => {
+  waitForChrome.current = (subject, signal) => {
     if (pendingRef.current) {
       return Promise.reject(new Error("an approval is already pending"));
     }
@@ -838,7 +842,6 @@ function TableAgentProvider({
       // operation a backend performs whole — "set every status to Active"
       // names no rows at all. The session says which; nothing here guesses
       // from the runtime shape of a value.
-      const subject = proposal as ApprovalSubject;
       const rows = subject.kind === "rows";
       let settled = false;
       const entry: PendingApproval = {

@@ -275,7 +275,7 @@ export interface AgentCapabilityContext {
   readonly apply: AgentApply;
   readonly observe: () => AgentObservation;
   readonly onApprove?: (
-    proposal: unknown,
+    subject: ApprovalSubject,
     signal?: AbortSignal
   ) => Promise<ApprovalResult>;
   /**

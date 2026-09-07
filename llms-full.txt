@@ -7707,6 +7707,83 @@ authorized against, the host's `apply` callbacks, a live `observe()`, the bound
 `onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
 governed write — the approved `plan` and the resolved `commit` mode.
 
+### Wiring the review
+
+The ready-made path is two props. The assistant hands you the write; the
+panel draws it:
+
+```tsx
+import { useTableAssistant } from "@adapttable/ai/assistant";
+import { TableAssistant } from "@adapttable/mantine/assistant";
+
+const assistant = useTableAssistant({ session, transport });
+
+<TableAssistant
+  assistant={assistant}
+  open={assistant.open}
+  onOpenChange={assistant.setOpen}
+  approval={assistant.approval}
+/>;
+```
+
+`approval` is safe to pass always: the panel draws it only when the resolved
+presentation names the widget.
+
+A panel mounted outside the table cannot read its feature state, so the bridge
+hands the same value over:
+
+```tsx
+const [approval, setApproval] = useState<AgentApprovalPending | null>(null);
+
+tableAgent({ bridge: { approvals: setApproval } });
+```
+
+To draw the review yourself, read the model and render whatever you like. The
+counting, the labels and the preview are all in it, so a custom surface says
+the same things the built-in ones do:
+
+```tsx
+import { approvalReview } from "@adapttable/react/adapter";
+
+function MyApproval({ pending }: { pending: AgentApprovalPending }) {
+  const review = approvalReview(pending, labels);
+  if (!review) return null;
+  return (
+    <aside>
+      <p>{review.summary}</p>
+      {review.items.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => pending.decideAt?.(item.index, true)}
+        >
+          {item.proposal.rowLabel ?? item.proposal.rowKey}
+        </button>
+      ))}
+      <button onClick={pending.approve}>{review.approveLabel}</button>
+      <button onClick={pending.reject}>{review.rejectLabel}</button>
+    </aside>
+  );
+}
+```
+
+`decideAt` is absent when the write cannot be split — hide per-row controls
+rather than drawing dead ones.
+
+### One write at a time
+
+An approval is one transaction, and a second write while one is open is
+refused rather than queued behind it. Every decision control belongs to the
+transaction it was made for: a control left over from an approval that has
+settled does nothing, so a stale click cannot answer the next write. The
+write settles exactly once, whichever comes first — the reader deciding, the
+turn being aborted, or the last row being answered.
+
+Approving is not saving. `commit: "stage"` puts an approved change on the
+table's own dirty path, where the reader still presses Save; `commit:
+"immediate"` calls the host save path and reports what it returned. Rejecting
+stops a write that has not run. It does not undo one that already has —
+cancellation after the host callback is the host's own concern.
+
 ### Where a waiting write is reviewed
 
 Three surfaces can review an approval, and exactly one of them draws the

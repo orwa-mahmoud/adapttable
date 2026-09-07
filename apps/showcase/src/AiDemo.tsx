@@ -239,16 +239,32 @@ const TEAM_FILTER: FilterDef<StaffRow> = {
  * The suggestions, built from the scenarios so a chip can never offer a
  * prompt the resolver does not know.
  */
-const SUGGESTIONS: AssistantSuggestion[] = DEMO_SCENARIOS.map((scenario) => ({
-  id: scenario.prompt,
-  // The card leads with what it does; the prompt it will send reads as the
-  // supporting line, so a reader knows exactly what is about to be asked.
-  title: scenario.title,
-  description: scenario.prompt,
-  kind: scenario.kind,
-  prompt: scenario.prompt,
-  requires: scenario.requires,
-}));
+/**
+ * The example cards, in the reader's language.
+ *
+ * The id stays the English prompt so a card keeps its identity across a
+ * language change, while the text it shows and the text it SENDS are both
+ * the locale's — and the scenario matcher recognises either, deliberately.
+ */
+function suggestionsFor(locale: Locale): AssistantSuggestion[] {
+  return DEMO_SCENARIOS.map((scenario) => {
+    const text =
+      locale === "ar" && scenario.ar
+        ? { title: scenario.ar.title, prompt: scenario.ar.prompt }
+        : { title: scenario.title, prompt: scenario.prompt };
+    return {
+      id: scenario.prompt,
+      // The card leads with what it does; the prompt it will send reads as
+      // the supporting line, so a reader knows exactly what is about to be
+      // asked.
+      title: text.title,
+      description: text.prompt,
+      kind: scenario.kind,
+      prompt: text.prompt,
+      requires: scenario.requires,
+    };
+  });
+}
 
 function readRtl(): boolean {
   if (typeof window === "undefined") return false;
@@ -355,6 +371,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const locale: Locale = rtl ? "ar" : "en";
   const labels = useMemo(() => getLabels(locale), [locale]);
   const columns = useMemo(() => columnsFor(locale), [locale]);
+  const suggestions = useMemo(() => suggestionsFor(locale), [locale]);
   // The live approval, handed over by the bridge. The panel sits beside the
   // table rather than inside it, so this is how it reaches the conversation.
   const [pendingApproval, setPendingApproval] =
@@ -412,12 +429,34 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         // rather than the approval, so the policy stays as the reader set it.
         approval: { policy: "writes", presentation },
         commit,
+        // Labels in the reader's language: a column id is a developer key,
+        // and the approval review shows this name rather than that key.
         columns: {
-          person: { type: "string", writable: false },
-          team: { type: "string", writable: false },
-          status: { type: "string", writable: false },
-          salary: { type: "number", writable: toggles.editing },
-          started: { type: "string", writable: false },
+          person: {
+            type: "string",
+            writable: false,
+            label: COLUMN_HEADERS[locale].person,
+          },
+          team: {
+            type: "string",
+            writable: false,
+            label: COLUMN_HEADERS[locale].team,
+          },
+          status: {
+            type: "string",
+            writable: false,
+            label: COLUMN_HEADERS[locale].status,
+          },
+          salary: {
+            type: "number",
+            writable: toggles.editing,
+            label: COLUMN_HEADERS[locale].salary,
+          },
+          started: {
+            type: "string",
+            writable: false,
+            label: COLUMN_HEADERS[locale].started,
+          },
         },
         apply: {
           setFilters: (filters) => setTeamFilter(teamFromFilters(filters)),
@@ -457,14 +496,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       factories.undo(),
       ...next,
     ];
-  }, [factories, pinnedRowIds, toggles, presentation, commit]);
+  }, [factories, pinnedRowIds, toggles, presentation, commit, locale]);
 
   const assistant = useTableAssistant({
     session: session ?? undefined,
     transport: connection.transport,
     // Only a genuine transport swap re-establishes the conversation.
     transportKey: connection.key,
-    suggestions: SUGGESTIONS,
+    suggestions,
     awaitingApproval,
     open: panelOpen,
     onOpenChange: setPanelOpen,

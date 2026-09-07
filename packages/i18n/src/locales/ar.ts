@@ -191,7 +191,7 @@ export const ar: Required<TableLabels> = {
     return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
   },
   assistantTitle: "مساعد الجدول",
-  assistantOpen: "اسأل الذكاء الاصطناعي",
+  assistantOpen: "اسأل المساعد",
   assistantClose: "إغلاق",
   assistantSettings: "إعدادات المساعد",
   assistantEmpty: "ماذا تريد أن تفعل بهذا الجدول؟",

@@ -120,6 +120,13 @@ export interface AgentApprovalProposal {
   readonly after?: unknown;
   /** Reader-facing name for the row, when the table can supply one. */
   readonly rowLabel?: string;
+  /**
+   * Reader-facing name for the column, when the table can supply one.
+   *
+   * A column id is a developer key. Printing it in a sentence the reader is
+   * asked to agree to leaks the wrong vocabulary — and never translates.
+   */
+  readonly columnLabel?: string;
 }
 
 /**

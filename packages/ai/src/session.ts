@@ -56,7 +56,7 @@ export interface CreateAgentSessionOptions {
    * When omitted and approval is required, execute returns `approval: "pending"`.
    */
   onApprove?: (
-    proposal: unknown,
+    subject: ApprovalSubject,
     signal?: AbortSignal
   ) => Promise<ApprovalResult>;
   /** Custom governed capabilities registered on this table session. */
@@ -1190,8 +1190,9 @@ function readPositions(
 async function decideApproval(
   definition: AgentCapabilityDefinition,
   observation: AgentObservation,
-  proposal: unknown,
-  onApprove: ((proposal: unknown) => Promise<ApprovalResult>) | undefined,
+  subject: ApprovalSubject,
+  onApprove:
+    ((subject: ApprovalSubject) => Promise<ApprovalResult>) | undefined,
   total: number,
   decomposable: boolean
 ): Promise<ApprovalDecision> {
@@ -1199,7 +1200,7 @@ async function decideApproval(
     return { outcome: "not-required" };
   }
   if (!onApprove) return { outcome: "pending" };
-  const decision = await onApprove(proposal);
+  const decision = await onApprove(subject);
   if (typeof decision === "boolean") {
     return { outcome: decision ? "approved" : "rejected" };
   }

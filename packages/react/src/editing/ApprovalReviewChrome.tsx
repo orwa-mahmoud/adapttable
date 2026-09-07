@@ -80,7 +80,9 @@ function describeItem(
     });
   return describe({
     row: proposal.rowLabel ?? proposal.rowKey,
-    ...(proposal.column === undefined ? {} : { column: proposal.column }),
+    ...(proposal.column === undefined
+      ? {}
+      : { column: proposal.columnLabel ?? proposal.column }),
     before: proposal.beforeUnavailable
       ? (labels?.proposalValueUnavailable ?? "Unavailable")
       : display(proposal.before),
