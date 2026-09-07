@@ -428,6 +428,49 @@ authorized against, the host's `apply` callbacks, a live `observe()`, the bound
 `onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
 governed write — the approved `plan` and the resolved `commit` mode.
 
+### Deciding a bulk write row by row
+
+A reader can approve some of a bulk write and refuse the rest, and the session
+then narrows `context.plan`: `proposals` and `payload` both describe exactly
+the approved rows, in plan order.
+
+`args` is not narrowed. It is what the model asked for, and rewriting it would
+misreport the request. So a handler that works from `args` rather than from
+`plan.payload` would apply rows the reader refused — and the session cannot
+read your handler to find out which kind it is.
+
+So you say. `partial: "supported"` is a promise that `execute` applies
+`plan.payload`:
+
+```ts
+{
+  key: "staff.raise",
+  kind: "write",
+  partial: "supported",
+  plan: (context, args) => ({
+    proposals: rows.map((row) => ({ rowKey: row.id, column: "salary", after: row.next })),
+    payload: rows,
+    perItem: true,
+  }),
+  execute: (context) => save(context.plan?.payload as Row[]),
+}
+```
+
+The default is `"unsupported"`. An undeclared capability is offered to the
+reader whole, and a row-by-row answer for it is refused with
+`approval-not-decomposable` rather than quietly widened to "approve all" — so
+`args` and `plan` always agree for handlers that never opted in.
+
+Three things must all hold before a write is offered per item: the plan sets
+`perItem: true`, the capability declares `partial: "supported"`, and `payload`
+is an array lined up with `proposals` index for index. `rows.reorder` is the
+counter-example among the built-ins — two proposals describe one indivisible
+move, so it is always offered whole.
+
+A malformed decision fails the call without writing anything: a position
+outside the plan, a repeated position, or a non-integer returns
+`approval-invalid`. Nothing is filtered and run anyway.
+
 A `read` or `view` capability skips all of it. Nothing about a view operation
 asks for write approval.
 

@@ -767,7 +767,10 @@ describe("deciding a bulk write row by row", () => {
       key
     );
 
-  async function openThree(key: string, onCellEdit: ReturnType<typeof vi.fn>) {
+  async function openThree(
+    key: string,
+    onCellEdit: (row: Row, column: string, next: unknown) => unknown
+  ) {
     // `handles` is module state the last test left behind. Clearing it is
     // what makes the wait below wait for THIS tree rather than pass on a
     // session that is already unmounted.

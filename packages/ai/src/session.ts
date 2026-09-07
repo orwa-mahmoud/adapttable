@@ -348,12 +348,15 @@ export function createAgentSession(
     throwIfCancelled();
     revalidate(key, entry, true);
 
+    // One fact, read from the captured plan, used for both the offer the
+    // reader is given and the answer they are allowed to give back.
+    const decomposable = isDecomposable(plan, definition);
     const subject: ApprovalSubject =
       plan.proposals.length > 0
         ? {
             kind: "rows",
             proposals: plan.proposals,
-            perItem: plan.perItem === true,
+            perItem: decomposable,
           }
         : {
             kind: "operation",
@@ -368,7 +371,8 @@ export function createAgentSession(
       entry,
       subject,
       approve,
-      plan.proposals.length
+      plan.proposals.length,
+      decomposable
     );
     const approval = decision.outcome;
     if (approval === "pending" || approval === "rejected") {
@@ -1077,6 +1081,32 @@ async function resolveRowArg(
   return apply.resolveRow(ref);
 }
 
+/**
+ * Whether this exact plan may be decided row by row.
+ *
+ * Computed ONCE, from the captured plan, before the reader is asked — so the
+ * offer they are given and the answer they are allowed to give are the same
+ * fact. Every condition has to hold:
+ *
+ * - the plan says its proposals stand alone;
+ * - the capability declares that `execute` applies `plan.payload` rather than
+ *   its own arguments, because narrowing the plan cannot narrow the arguments;
+ * - the payload is an array lined up with the proposals index for index, which
+ *   is what lets a refused row be dropped from it.
+ *
+ * Anything short of all three means the write is offered whole. It is never
+ * offered per item and then silently widened back.
+ */
+function isDecomposable(
+  plan: CapabilityPlan,
+  definition: AgentCapabilityDefinition
+): boolean {
+  if (plan.perItem !== true) return false;
+  if ((definition.partial ?? "unsupported") !== "supported") return false;
+  if (!Array.isArray(plan.payload)) return false;
+  return (plan.payload as readonly unknown[]).length === plan.proposals.length;
+}
+
 /** A decision, and which rows it covered when it did not cover all of them. */
 interface ApprovalDecision {
   readonly outcome: ApprovalOutcome;
@@ -1084,12 +1114,70 @@ interface ApprovalDecision {
   readonly approved?: readonly number[];
 }
 
+/**
+ * Read a row-by-row answer, or refuse it.
+ *
+ * Fails closed on every count. A malformed list is an error, not a filtered
+ * list: dropping a bad index and running the rest would apply a set nobody
+ * chose. Duplicates are malformed too — a reader decides a row once, and a
+ * repeated position means the caller lost track of which rows it was
+ * answering about. The surviving positions keep plan order.
+ */
+function readPositions(
+  decision: unknown,
+  total: number,
+  decomposable: boolean
+): readonly number[] {
+  if (!decomposable) {
+    throw new ApplyError(
+      "approval-not-decomposable",
+      "this write cannot be approved row by row; answer it whole"
+    );
+  }
+  // The value crossed the host boundary, so its declared type is a claim
+  // rather than a fact. Everything below re-establishes it.
+  const approved =
+    typeof decision === "object" && decision !== null && "approved" in decision
+      ? (decision as { readonly approved: unknown }).approved
+      : undefined;
+  if (!Array.isArray(approved)) {
+    throw new ApplyError(
+      "approval-invalid",
+      "an approval must be a boolean or a list of approved positions"
+    );
+  }
+  const positions: readonly unknown[] = approved;
+  const seen = new Set<number>();
+  for (const position of positions) {
+    if (
+      typeof position !== "number" ||
+      !Number.isInteger(position) ||
+      position < 0 ||
+      position >= total
+    ) {
+      throw new ApplyError(
+        "approval-invalid",
+        `approved position ${String(position)} is not a row of this plan`
+      );
+    }
+    if (seen.has(position)) {
+      throw new ApplyError(
+        "approval-invalid",
+        `approved position ${String(position)} appears more than once`
+      );
+    }
+    seen.add(position);
+  }
+  return [...seen].sort((left, right) => left - right);
+}
+
 async function decideApproval(
   definition: AgentCapabilityDefinition,
   observation: AgentObservation,
   proposal: unknown,
   onApprove: ((proposal: unknown) => Promise<ApprovalResult>) | undefined,
-  total: number
+  total: number,
+  decomposable: boolean
 ): Promise<ApprovalDecision> {
   if (!needsApproval(definition, approvalOf(observation))) {
     return { outcome: "not-required" };
@@ -1099,16 +1187,7 @@ async function decideApproval(
   if (typeof decision === "boolean") {
     return { outcome: decision ? "approved" : "rejected" };
   }
-  // A row-by-row answer. Positions are validated against the plan rather
-  // than trusted: an out-of-range index would otherwise silently shift which
-  // row a later filter keeps.
-  const approved = [
-    ...new Set(
-      decision.approved.filter(
-        (index) => Number.isInteger(index) && index >= 0 && index < total
-      )
-    ),
-  ].sort((left, right) => left - right);
+  const approved = readPositions(decision, total, decomposable);
   if (approved.length === 0) return { outcome: "rejected" };
   if (approved.length === total) return { outcome: "approved" };
   return { outcome: "partial", approved };
@@ -1117,22 +1196,22 @@ async function decideApproval(
 /**
  * Narrow a plan to the rows a reader approved.
  *
- * Only a plan that declared itself divisible is ever split, and only when
- * its payload is an array the proposals line up with — anything else keeps
- * every row, because dropping half of a payload the session cannot read is
- * how a bulk write silently writes the wrong thing.
+ * Only ever called for a plan {@link isDecomposable} already accepted, so the
+ * payload is known to be an aligned array and both halves can be reduced
+ * together. There is no branch here that keeps a payload wider than the
+ * proposals: that is the shape which let a receipt say `partial` while the
+ * handler received work nobody agreed to.
  */
 function narrowPlan(
   plan: CapabilityPlan,
   approved: readonly number[]
 ): CapabilityPlan {
-  const proposals = approved.map((index) => plan.proposals[index]!);
-  if (!plan.perItem || !Array.isArray(plan.payload)) {
-    return { ...plan, proposals };
-  }
   const payload = plan.payload as readonly unknown[];
-  if (payload.length !== plan.proposals.length) return { ...plan, proposals };
-  return { ...plan, proposals, payload: approved.map((i) => payload[i]) };
+  return {
+    ...plan,
+    proposals: approved.map((index) => plan.proposals[index]!),
+    payload: approved.map((index) => payload[index]),
+  };
 }
 
 function bindApprove(

@@ -102,6 +102,13 @@ export function createCapabilityRegistry(
       kind,
       // edit.cells is the only built-in with a staging path (stageCells).
       staging: key === "edit.cells" ? "supported" : "unsupported",
+      // These three apply plan.payload row by row, so a reader may decide
+      // them one at a time. A row move reads its own two keys and is one
+      // indivisible change; every other built-in writes nothing.
+      partial:
+        key === "edit.cells" || key === "rows.add" || key === "rows.delete"
+          ? "supported"
+          : "unsupported",
       isEnabled: (observation) => isBuiltInEnabled(key, observation),
       plan: governed
         ? (context, args) => builtIn.plan(key, context, args)

@@ -680,7 +680,7 @@ interface PendingApproval {
 function settle(
   decisions: readonly AgentApprovalDecision[],
   fallback: AgentApprovalDecision
-): ApprovalResult {
+): { readonly approved: readonly number[] } {
   const approved: number[] = [];
   decisions.forEach((decision, index) => {
     const settled = decision === "pending" ? fallback : decision;
@@ -880,6 +880,7 @@ function TableAgentProvider({
   };
   // Rebuilt every render on purpose: the published value is what subscribers
   // compare, and memoizing it hides a decision that changed inside it.
+  const whole = pending?.proposals.length === 0;
   const approvalValue =
     hostApprove || !pending
       ? null
@@ -889,8 +890,14 @@ function TableAgentProvider({
           decisions,
           // "Approve" covers what is still undecided; a row already refused
           // stays refused, or the button undoes the reader's own work.
-          approve: () => pending.resolve(settle(decisions, "approved")),
-          reject: () => pending.resolve(settle(decisions, "rejected")),
+          // A write that named no rows has nothing to enumerate: the reader
+          // agreed to the operation or refused it. An empty position list
+          // would reach the session as "approved none of the rows" — a
+          // refusal — and the operation would never run.
+          approve: () =>
+            pending.resolve(whole ? true : settle(decisions, "approved")),
+          reject: () =>
+            pending.resolve(whole ? false : settle(decisions, "rejected")),
           ...(pending.perItem ? { decideAt } : {}),
         };
 

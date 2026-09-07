@@ -171,6 +171,24 @@ export interface CapabilityPlan {
 export type CapabilityStaging = "supported" | "unsupported";
 
 /**
+ * Whether a capability's handler applies exactly the plan it is given.
+ *
+ * Partial approval narrows `plan.proposals` and `plan.payload` to the rows a
+ * reader agreed to — but `execute` still receives the ORIGINAL arguments,
+ * because they are what the model asked for and rewriting them would be a
+ * lie about the request. A handler that works from those arguments rather
+ * than from the narrowed plan would therefore apply rows nobody approved.
+ *
+ * The session cannot inspect arbitrary host code to find out which kind of
+ * handler it has, so a capability says so. `"unsupported"` is the default:
+ * an undeclared capability is offered to the reader whole, and a row-by-row
+ * answer for it is refused rather than quietly widened to "approve all".
+ *
+ * @public
+ */
+export type CapabilityPartial = "supported" | "unsupported";
+
+/**
  * Governed capability extension registered on one table session.
  *
  * @public
@@ -201,6 +219,12 @@ export interface AgentCapabilityDefinition {
    * `commit-incompatible` before `execute` runs.
    */
   readonly staging?: CapabilityStaging;
+  /**
+   * Whether `execute` applies `plan.payload` rather than its own arguments,
+   * and may therefore be offered for row-by-row approval. Defaults to
+   * `"unsupported"`. See {@link CapabilityPartial}.
+   */
+  readonly partial?: CapabilityPartial;
   /** Whether this capability is wired for the current observation. */
   isEnabled(observation: AgentObservation): boolean;
   /**
@@ -216,6 +240,17 @@ export interface AgentCapabilityDefinition {
    * Apply the capability. For a governed write this runs only after the
    * session has enforced write policy, commit mode and approval, and has
    * revalidated the revision.
+   *
+   * **`args` is what the model asked for, not what the reader agreed to.**
+   * The session never rewrites it — the request is a record of the request.
+   * When a reader approves part of a bulk write, the narrowing appears in
+   * `context.plan`: both its `proposals` and its `payload` describe exactly
+   * the approved rows, in plan order. A handler that reads `args` instead
+   * would apply rows that were refused, which is why declaring
+   * {@link AgentCapabilityDefinition.partial} `"supported"` is the promise
+   * that this one reads `plan.payload`. Undeclared capabilities are never
+   * offered for a row-by-row decision, so their `args` and `plan` always
+   * agree.
    */
   execute(context: AgentCapabilityContext, args: unknown): unknown;
 }
@@ -246,8 +281,12 @@ export interface AgentCapabilityContext {
    * Positions in the ORIGINAL plan the reader approved, when they decided a
    * bulk write row by row. Absent when the whole write was approved.
    *
-   * A custom handler that ignores `plan.payload` and works from its own
-   * arguments must consult this, or it will apply rows that were refused.
+   * Informational. `plan` is already narrowed, and the session only offers a
+   * row-by-row decision to a capability that declared
+   * `partial: "supported"` — which is a promise that `execute` applies
+   * `plan.payload`. This is here for a handler that wants to report which
+   * positions ran, not as the thing standing between a refused row and the
+   * host.
    */
   readonly approvedIndexes?: readonly number[];
   /** Commit mode the session resolved for this call. */

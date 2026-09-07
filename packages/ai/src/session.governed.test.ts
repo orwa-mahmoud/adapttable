@@ -6,6 +6,7 @@ import type {
   AgentApply,
   AgentCapabilityDefinition,
   AgentObservation,
+  CapabilityPlan,
   RowReadQuery,
   RowWindow,
 } from "./types";
@@ -1142,20 +1143,63 @@ describe("approving part of a bulk write", () => {
     expect(hooks.editCells).not.toHaveBeenCalled();
   });
 
-  it("ignores positions that are not in the plan", async () => {
+  it("refuses a position that is not a row of the plan, and writes nothing", async () => {
     const hooks = apply();
     const session = createAgentSession({
       observe: () => observation({ approval: "writes" }),
       apply: hooks,
-      // 7 is past the end and -1 is nonsense; neither may shift the rest.
-      onApprove: () => Promise.resolve({ approved: [2, 7, -1, 2] }),
+      // 7 is past the end. Dropping it and running the rest would apply a set
+      // the reader never chose.
+      onApprove: () => Promise.resolve({ approved: [2, 7] }),
     });
-    await session.execute("edit.cells", threeEdits, 1, "bad-positions");
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "bad-positions"
+    );
 
-    const written = (hooks.editCells as ReturnType<typeof vi.fn>).mock.calls
-      .flatMap((call) => call[0] as { rowKey: string }[])
-      .map((edit) => edit.rowKey);
-    expect(written).toEqual(["r3"]);
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("approval-invalid");
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+
+  it("refuses a repeated position rather than guessing what it meant", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve({ approved: [1, 1] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "duplicate-position"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("approval-invalid");
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+
+  it("refuses a non-integer position", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve({ approved: [1.5] as number[] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      threeEdits,
+      1,
+      "fractional-position"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("approval-invalid");
+    expect(hooks.editCells).not.toHaveBeenCalled();
   });
 });
 
@@ -1193,5 +1237,202 @@ describe("the value a write is about to replace", () => {
     );
 
     expect(seen?.proposals[0]?.before).toBe(100);
+  });
+});
+
+describe("what may be split, and what may not", () => {
+  /** A custom write whose plan enumerates rows, parameterised by its contract. */
+  function bulkCapability(
+    patch: Partial<AgentCapabilityDefinition> = {},
+    plan?: Partial<CapabilityPlan>
+  ): AgentCapabilityDefinition {
+    return {
+      key: "staff.raise",
+      summary: "Raise several salaries",
+      kind: "write",
+      guide: {
+        guide: "Raise salaries.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      plan: () => ({
+        proposals: [
+          { rowKey: "r1", column: "salary", after: 200 },
+          { rowKey: "r2", column: "salary", after: 210 },
+        ],
+        payload: ["r1", "r2"],
+        perItem: true,
+        ...plan,
+      }),
+      execute: () => ({ ok: true }),
+      ...patch,
+    };
+  }
+
+  async function offer(
+    definition: AgentCapabilityDefinition
+  ): Promise<{ perItem?: boolean }> {
+    let seen: { perItem?: boolean } = {};
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes", commit: "immediate" }),
+      apply: apply(),
+      capabilities: [definition],
+      onApprove: (subject) => {
+        seen = subject as { perItem?: boolean };
+        return Promise.resolve(true);
+      },
+    });
+    await session.execute(definition.key, {}, 1, `offer-${definition.key}`);
+    return seen;
+  }
+
+  it("offers per-item only when the capability says it applies the plan", async () => {
+    // Narrowing the plan cannot narrow the arguments, and `execute` still
+    // receives the original ones. An undeclared handler is offered whole.
+    expect((await offer(bulkCapability())).perItem).toBe(false);
+    expect(
+      (await offer(bulkCapability({ partial: "supported" }))).perItem
+    ).toBe(true);
+  });
+
+  it("does not offer per-item for a payload it cannot cut", async () => {
+    const opaque = bulkCapability(
+      { partial: "supported" },
+      {
+        payload: { sql: "UPDATE staff SET salary = salary * 1.1" },
+      }
+    );
+    expect((await offer(opaque)).perItem).toBe(false);
+  });
+
+  it("does not offer per-item when the payload and proposals disagree in length", async () => {
+    const ragged = bulkCapability(
+      { partial: "supported" },
+      {
+        payload: ["r1"],
+      }
+    );
+    expect((await offer(ragged)).perItem).toBe(false);
+  });
+
+  it("refuses a subset for a write it never offered per item", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes", commit: "immediate" }),
+      apply: hooks,
+      capabilities: [bulkCapability()],
+      onApprove: () => Promise.resolve({ approved: [0] }),
+    });
+    const result = await session.execute(
+      "staff.raise",
+      {},
+      1,
+      "subset-refused"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("approval-not-decomposable");
+  });
+
+  it("refuses a subset of a row move, which is one change described twice", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          approval: "writes",
+          featureIds: ["editing", "row-reorder"],
+        }),
+      apply: hooks,
+      onApprove: () => Promise.resolve({ approved: [0] }),
+    });
+    const result = await session.execute(
+      "rows.reorder",
+      { fromKey: "r1", toKey: "r3" },
+      1,
+      "half-a-move"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("approval-not-decomposable");
+    expect(hooks.reorderRows).not.toHaveBeenCalled();
+  });
+
+  it("splits two edits to the same row independently", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve({ approved: [1] }),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "r1", column: "name", value: "Ada L." },
+          { rowKey: "r1", column: "salary", value: 250 },
+        ],
+      },
+      1,
+      "same-row-twice"
+    );
+
+    expect((result.result as { approval: string }).approval).toBe("partial");
+    const written = (hooks.editCells as ReturnType<typeof vi.fn>).mock.calls
+      .flatMap((call) => call[0] as { column: string }[])
+      .map((edit) => edit.column);
+    expect(written).toEqual(["salary"]);
+  });
+
+  it("hands the handler a plan describing exactly the approved rows", async () => {
+    let seen: CapabilityPlan | undefined;
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes", commit: "immediate" }),
+      apply: apply(),
+      capabilities: [
+        bulkCapability({
+          partial: "supported",
+          execute: (context) => {
+            seen = context.plan;
+            return { ok: true };
+          },
+        }),
+      ],
+      onApprove: () => Promise.resolve({ approved: [1] }),
+    });
+    await session.execute("staff.raise", {}, 1, "narrowed-plan");
+
+    expect(seen?.proposals.map((entry) => entry.rowKey)).toEqual(["r2"]);
+    expect(seen?.payload).toEqual(["r2"]);
+  });
+
+  it("still refuses a stale revision after the reader decides", async () => {
+    let revision = 1;
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () =>
+        observation({ approval: "writes", viewRevision: revision }),
+      apply: hooks,
+      onApprove: () => {
+        // The table moved while the reader was reading.
+        revision = 2;
+        return Promise.resolve({ approved: [0] });
+      },
+    });
+    const result = await session.execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "r1", column: "salary", value: 200 },
+          { rowKey: "r2", column: "salary", value: 210 },
+        ],
+      },
+      1,
+      "stale-after-partial"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("revision-mismatch");
+    expect(hooks.editCells).not.toHaveBeenCalled();
   });
 });
