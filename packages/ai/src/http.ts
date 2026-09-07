@@ -170,6 +170,14 @@ export interface AgentHttpTurnResult {
   readonly text: string;
   /** `session.execute` receipts, in action order. */
   readonly results: readonly ExecuteResult[];
+  /**
+   * The capability key each result came from, in the same order.
+   *
+   * Without it a receipt can only say "done" — the reader is told something
+   * happened but not what, which is the difference between a report and a
+   * shrug.
+   */
+  readonly keys: readonly string[];
   /** How many describe / read needs this turn fulfilled. */
   readonly needsFulfilled: { readonly describe: number; readonly read: number };
 }
@@ -683,14 +691,26 @@ async function fulfillNeeds(
   snapshot: TurnSnapshot
 ): Promise<{
   descriptions: CapabilityGuide[];
+  /** Keys the backend asked about that this table does not offer. */
+  unknown: string[];
   rows: RowWindow[];
   describe: number;
   read: number;
 }> {
   assertTurnContext(session, snapshot);
   const descriptions: CapabilityGuide[] = [];
+  const unknown: string[] = [];
   const rows: RowWindow[] = [];
   for (const key of needs?.describe ?? []) {
+    // A backend asking about a capability this table does not offer is an
+    // ordinary mistake — a small model guessing a key, or a table that turned
+    // a feature off since the catalog was sent. Answering "no such thing" and
+    // carrying on is what a conversation does; throwing here ended the whole
+    // turn over one bad name, with nothing run and nothing explained.
+    if (!session.catalog().some((entry) => entry.key === key)) {
+      unknown.push(key);
+      continue;
+    }
     descriptions.push(session.describe(key));
   }
   for (const [index, query] of (needs?.read ?? []).entries()) {
@@ -708,8 +728,11 @@ async function fulfillNeeds(
   }
   return {
     descriptions,
+    unknown,
     rows,
-    describe: descriptions.length,
+    // Count what was ASKED, not what came back: a round that produced only
+    // unknown names still used a round, and must not loop forever.
+    describe: descriptions.length + unknown.length,
     read: rows.length,
   };
 }
@@ -762,6 +785,77 @@ export async function connectAgentHttp(
 }
 
 /**
+ * Talk to the backend until it stops asking for discovery.
+ *
+ * Actions a backend sent are its decision, whatever else the same response
+ * asked for. Collecting them per round is the difference between running what
+ * it chose and throwing all of it away because it also wanted a row window —
+ * which is exactly what a small model does, every round, until the discovery
+ * budget runs out with nothing done.
+ */
+async function exchangeRounds(
+  session: AgentSession,
+  options: AgentHttpClientOptions,
+  snapshot: TurnSnapshot,
+  input: {
+    readonly message: string;
+    readonly conversation?: readonly AgentHttpMessage[];
+    readonly signal?: AbortSignal;
+  }
+): Promise<{
+  readonly last: AgentHttpResponse | undefined;
+  readonly actions: readonly AgentHttpAction[];
+  /** The last thing the backend actually SAID, across every round. */
+  readonly text: string;
+  readonly fulfilled: { describe: number; read: number };
+}> {
+  let descriptions: CapabilityGuide[] | undefined;
+  let rows: RowWindow[] | undefined;
+  let last: AgentHttpResponse | undefined;
+  let actions: AgentHttpAction[] = [];
+  let text = "";
+  const fulfilled = { describe: 0, read: 0 };
+
+  for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
+    assertTurnContext(session, snapshot);
+    last = await exchange(
+      options,
+      compactRequest(session, "turn", {
+        message: input.message,
+        conversation: input.conversation,
+        descriptions,
+        rows,
+      }),
+      input.signal
+    );
+    if (last.actions?.length) actions = [...actions, ...last.actions];
+    // A backend that explained itself on one round and only acted on the next
+    // still said something; reading only the final round loses it.
+    if (last.text) text = last.text;
+    const needs = last.needs;
+    const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
+    if (asked === 0) break;
+    if (round === MAX_NEED_ROUNDS) {
+      // Only a backend that produced NOTHING has really failed. One that kept
+      // asking while also choosing actions did its job badly, not not at all,
+      // so its work still runs.
+      if (actions.length === 0) {
+        throw new Error("agent HTTP asked for discovery too many times");
+      }
+      break;
+    }
+    const next = await fulfillNeeds(session, needs, snapshot);
+    descriptions = mergeGuides(descriptions, next.descriptions);
+    rows = [...(rows ?? []), ...next.rows];
+    assertContextSize(descriptions, rows);
+    fulfilled.describe += next.describe;
+    fulfilled.read += next.read;
+  }
+
+  return { last, actions, text, fulfilled };
+}
+
+/**
  * Send one user message, answer describe/read needs, then execute actions
  * through the live session. Failed mutations are not retried.
  *
@@ -782,45 +876,27 @@ export async function runAgentHttpTurn(
 
   const turnId = newHttpTurnId();
   const snapshot = turnSnapshot(session, turnId);
-  let descriptions: CapabilityGuide[] | undefined;
-  let rows: RowWindow[] | undefined;
-  let fulfilled = { describe: 0, read: 0 };
-  let last: AgentHttpResponse | undefined;
-
-  for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
-    assertTurnContext(session, snapshot);
-    const request = compactRequest(session, "turn", {
-      message: trimmed,
-      conversation: extras.conversation,
-      descriptions,
-      rows,
-    });
-    last = await exchange(options, request, extras.signal);
-    const needs = last.needs;
-    const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
-    if (asked === 0) break;
-    if (round === MAX_NEED_ROUNDS) {
-      throw new Error("agent HTTP asked for discovery too many times");
-    }
-    const next = await fulfillNeeds(session, needs, snapshot);
-    descriptions = mergeGuides(descriptions, next.descriptions);
-    rows = [...(rows ?? []), ...next.rows];
-    assertContextSize(descriptions, rows);
-    fulfilled = {
-      describe: fulfilled.describe + next.describe,
-      read: fulfilled.read + next.read,
-    };
-  }
+  const exchanged = await exchangeRounds(session, options, snapshot, {
+    message: trimmed,
+    conversation: extras.conversation,
+    signal: extras.signal,
+  });
+  const last = exchanged.last;
+  let fulfilled = exchanged.fulfilled;
 
   if (!last) throw new Error("agent HTTP returned no response");
   assertTurnContext(session, snapshot);
+  // The keys, not the actions: what a receipt needs is which capability ran.
+  let ranKeys: readonly string[] = exchanged.actions.map(
+    (action) => action.key
+  );
   let results: readonly ExecuteResult[] = await executeActions(
     session,
-    last.actions ?? [],
+    exchanged.actions,
     snapshot.revision,
     extras.signal
   );
-  let text = last.text ?? "";
+  let text = exchanged.text;
   if (extras.returnResults && last.continueWithResults) {
     const continuation = await continueTurn(session, options, {
       message: trimmed,
@@ -830,6 +906,7 @@ export async function runAgentHttpTurn(
       results,
     });
     results = continuation.results;
+    ranKeys = [...ranKeys, ...continuation.keys];
     if (continuation.text) text = continuation.text;
     fulfilled = {
       describe: fulfilled.describe + continuation.fulfilled.describe,
@@ -839,6 +916,7 @@ export async function runAgentHttpTurn(
   return {
     text,
     results,
+    keys: ranKeys,
     needsFulfilled: fulfilled,
   };
 }
@@ -862,6 +940,8 @@ async function continueTurn(
   }
 ): Promise<{
   readonly results: readonly ExecuteResult[];
+  /** Capability keys for the actions THIS continuation ran, in order. */
+  readonly keys: readonly string[];
   readonly text: string;
   readonly fulfilled: { describe: number; read: number };
 }> {
@@ -869,6 +949,7 @@ async function continueTurn(
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let results = input.results;
+  let keys: readonly string[] = [];
   let text = "";
   const fulfilled = { describe: 0, read: 0 };
 
@@ -895,6 +976,7 @@ async function continueTurn(
           input.signal
         )),
       ];
+      keys = [...keys, ...continued.actions.map((action) => action.key)];
     }
     const needs = continued.needs;
     const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
@@ -910,7 +992,7 @@ async function continueTurn(
     if (continued.text) text = continued.text;
     if (!continued.continueWithResults || !continued.actions?.length) break;
   }
-  return { results, text, fulfilled };
+  return { results, keys, text, fulfilled };
 }
 
 /**
@@ -973,7 +1055,7 @@ export function assistantHttpTransport(
         returnResults: true,
         signal,
       });
-      return { text: turn.text, results: turn.results };
+      return { text: turn.text, results: turn.results, keys: turn.keys };
     },
   };
 }

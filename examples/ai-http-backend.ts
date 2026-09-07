@@ -194,7 +194,8 @@ function catalogPrompt(request: AgentHttpRequest): string {
     ...columns,
     'Return JSON only: {"text":"...","actions":[{"key":"view.setPage","args":{"page":2},"idempotencyKey":"unique"}],"needs":{"describe":["edit.cells"],"read":[{"offset":0,"limit":5}]}}.',
     "Use needs.describe when you need a capability schema. Use needs.read for a bounded window. Never ask for the whole dataset.",
-    "Never guess an argument shape. Grouping, pinning and every row-addressing capability have real schemas — ask for them with needs.describe first.",
+    "Never guess an argument shape. Grouping, pinning and every row-addressing capability have real schemas.",
+    "If you need schemas, ask ONCE: put every key you need in a single needs.describe, then act on the guides you get back. Repeating discovery instead of acting ends the turn with nothing done.",
     "Address a row by its stable rowKey, or by a 1-based position together with the scope and the expectedRevision that position was read at.",
     "actions may be omitted. A text-only answer is complete. Do not call a second model turn just to say done.",
   ].join("\n");

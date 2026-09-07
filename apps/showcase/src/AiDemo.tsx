@@ -216,13 +216,39 @@ function applyBatch(
   });
 }
 
+/**
+ * Read a team out of whatever filter model the caller sent.
+ *
+ * `view.setFilters` takes `{ filters: unknown }` on purpose — the filter model
+ * belongs to the application, so the capability cannot describe it and a model
+ * has nothing to aim at. A real one sends what looks reasonable: this page has
+ * seen both `{ team: ["Core"] }` from its own scripted transport and
+ * `[{ column: "team", operator: "equals", value: "Core" }]` from gpt-5.4-nano.
+ * A host that understands only its own spelling reports the filter as applied
+ * and then shows every row, which is worse than refusing it.
+ */
 function teamFromFilters(filters: unknown): string | undefined {
-  if (!filters || typeof filters !== "object") return undefined;
-  const team = (filters as Record<string, unknown>).team;
-  if (Array.isArray(team)) {
-    return typeof team[0] === "string" ? team[0] : undefined;
+  const asString = (value: unknown): string | undefined => {
+    if (typeof value === "string") return value;
+    if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+    return undefined;
+  };
+  if (Array.isArray(filters)) {
+    for (const entry of filters) {
+      if (!entry || typeof entry !== "object") continue;
+      const record = entry as Record<string, unknown>;
+      const column = record.column ?? record.key ?? record.field;
+      if (column !== "team") continue;
+      const value = asString(record.value);
+      if (value !== undefined) return value;
+    }
+    return undefined;
   }
-  return typeof team === "string" ? team : undefined;
+  if (!filters || typeof filters !== "object") return undefined;
+  const record = filters as Record<string, unknown>;
+  // A model that wrapped the model in another `filters` key.
+  if (record.filters !== undefined) return teamFromFilters(record.filters);
+  return asString(record.team);
 }
 
 /** Which optional capabilities the reader has turned on. */

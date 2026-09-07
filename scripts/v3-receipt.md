@@ -364,3 +364,135 @@ Reviewed and corrected on the same branch, each verified with the gate below.
   and approval strip, the context menu's built-in entries, the row-actions
   menu, the command palette's search, and the two public exports nothing else
   mounts — because a behaviour that is drawn per kit has to be proven per kit.
+
+## Item 31 evidence
+
+Tested revision: the tree at this commit, on `v3`, unpushed.
+
+### Commands
+
+| Command                                                | Result                                                                                                                                                                                                                                   |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                                           | 4m20s. Every gate green EXCEPT `test:coverage` — see the coverage note below. 38 typecheck, 29 lint, format, readmes, doc surface, parts, features, boundary, API contract, package split, scripts tests, build, publint, smoke, budget. |
+| `pnpm test:e2e`                                        | 1577 passed, 5m0s.                                                                                                                                                                                                                       |
+| `pnpm exec turbo run test:coverage --force --continue` | all 15 lcov files written, `fix-lcov-paths` rewrote all 15.                                                                                                                                                                              |
+| `sonar-scanner`                                        | CE task `e06590f0-21b7-4ad5-ba9a-c87caf307e60`, SUCCESS.                                                                                                                                                                                 |
+| Version plan, isolated `git worktree`                  | `@adapttable/react@1.0.0`, `@adapttable/core@3.0.0`, `@adapttable/ai@0.2.0`, kits and `@adapttable/i18n` at 3.0.0, `@adapttable/server@1.0.0`.                                                                                           |
+| Packed ranges                                          | `react@1.0.0` depends on `core@^3.0.0`; `ai` and every kit declare `react@^1.0.0`; shadcn declares `unstyled@^3.0.0`. No range asks for binding 2 or 3.                                                                                  |
+
+### Sonar measures
+
+Read from the API after the CE task reported SUCCESS, not from the gate badge.
+
+| Measure                           | Value     |
+| --------------------------------- | --------- |
+| Unresolved issues, all severities | **0**     |
+| Hotspots awaiting review          | **0**     |
+| Coverage                          | **89.3%** |
+| Lines of code                     | 116,734   |
+
+Two issues were found by the first scan of this gate and fixed at the root,
+not resolved away: a test slot used `role="dialog"` instead of a real
+`<dialog>`, and the chrome imported `assistantIsBusy` only to export it again.
+
+### Optional widget isolation, measured
+
+| Graph                                       | Bytes   |
+| ------------------------------------------- | ------- |
+| `@adapttable/mantine` root `dist/index.js`  | 98,303  |
+| `@adapttable/mantine/assistant`             | 6,191   |
+| `@adapttable/unstyled` root `dist/index.js` | 105,333 |
+| `@adapttable/unstyled/assistant`            | 4,917   |
+| `@adapttable/ai` root                       | 38,185  |
+| `@adapttable/ai/assistant`                  | 10,365  |
+
+No kit root bundle contains an assistant part name, `useTableAssistant`, or
+the HTTP client. `packages/core/dist/index.js` contains no widget code, no
+model client and no `fetch` (its only matches are `refetch` and a comment);
+`packages/ai/dist/index.js` contains no `fetch`, no React and no
+`assistantHttpTransport`.
+
+### Real-model run
+
+Scripted demo mode was completed first, across all eight kits, before any
+model was connected. Then the runnable backend in `examples/ai-http-backend.ts`
+was pointed at two providers in turn and driven from the real showcase page.
+
+**OpenAI, `gpt-5.4-nano`.** "Please show only the Core team." — replied
+"Sure—I'll filter the view to show only rows where Team = Core.", ran
+`view.setFilters`, and the table went to _Showing 1–3 of 3_ with Jonah gone
+and Chioma present. Receipt: `view.setFilters: done`.
+
+**DeepSeek, `deepseek-chat`.** Connected and answered, but never produced a
+call the schema accepted: it asked repeatedly for `view.setFilters`'s schema,
+then sent `{sort: …}` for `view.setSort`. Every malformed call was REFUSED and
+the table was untouched — which is the property that matters. Its wording was
+correct throughout ("Sorting by salary, highest first."); its argument names
+were not.
+
+Both models independently guessed `column` where the schema says `key`.
+
+### What this gate found and fixed
+
+Four of these exist only because a real model was pointed at the real page.
+
+- **The HTTP bridge threw away a backend's actions.** A response carrying both
+  actions and `needs` was treated purely as a discovery round: the actions
+  were discarded, the round was spent, and after three rounds the turn failed
+  with nothing done. Both models do this on every round. Actions are now
+  collected per round and run; only a backend that produced nothing at all
+  still fails.
+- **One bad capability name ended the whole turn.** A backend asking to
+  describe a key the table does not offer threw. It now gets "no such
+  capability" and the turn continues, while a round that produced only unknown
+  names still counts against the discovery budget so nothing loops.
+- **Receipts could not name what ran.** The HTTP turn result now carries the
+  capability key beside each result, so a receipt reads
+  `view.setFilters: done` instead of `done`.
+- **A staged write was reported as done.** The session calls the staging
+  callback applied, because a staging callback IS a host callback. The receipt
+  readers now take the table's commit policy, so under `commit: "stage"` the
+  panel says staged and tells the reader it still needs saving — matching the
+  table's own "1 unsaved row".
+- **`view.setSort` and `view.setGroupBy` guides now name the parameter.** Both
+  models reached for `column`; the schema says `key`, and the guide now says
+  so too. `view.setFilters` says plainly that the filter model belongs to the
+  application and is not described, so a model stops asking for a schema that
+  does not exist.
+- **Mantine's shorthand Drawer hid the part name.** The sheet is built from
+  the compound Drawer so `data-adapttable-part` names the visible content, as
+  in every other kit.
+
+### Coverage: the one gate that is not green
+
+`pnpm check` fails on `test:coverage`, and it is left failing rather than
+hidden.
+
+Six themed kits are short of their floors by a fraction of a percent:
+`base-ui` 78.16% vs 79 branches; `radix` 79.62% vs 80 branches and 89.97% vs
+90 statements; `chakra` 79.65% vs 80; `antd` 78.99% vs 79 and 89.96% vs 90;
+`mantine` 78.82% vs 79 and 89.75% vs 90; `mui` 78.93% vs 79.
+
+Every one of the new `assistant.tsx` files is at **100% lines and 100%
+functions**. The shortfall is in _branches_ and _statements_, which every
+package inflates through `reactCompilerPreset` in `vitest.shared.ts`: the
+compiler's memoization guards are counted as branches, so adding a large,
+fully-tested `.tsx` lowers a package's aggregate even when the file itself is
+completely covered. Sonar's own project coverage, which is what the release
+bar names, is **89.3%** against a bar of 87%.
+
+No threshold was lowered, no exclusion widened and no test weakened. The
+choice between lowering those six floors, covering unrelated real gaps
+elsewhere in each kit, or measuring coverage with the compiler off is the
+owner's, and it is written up in the shift's parking lot.
+
+### Still the owner's
+
+- The `browserslist` Dependabot alert. `pnpm update browserslist --recursive
+--latest` is a no-op — nothing declares it, so `--latest` never reaches it,
+  and `pnpm dedupe` leaves 4.28.2 because it already satisfies the range. The
+  fixes that work are a root `pnpm.overrides` entry or a full lockfile
+  re-resolution; both were left undone.
+- The AI page's SEO copy in `apps/showcase/matrix.mjs` still describes the
+  playground this branch replaced.
+- The final re-run and the video recording.

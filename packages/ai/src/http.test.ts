@@ -222,8 +222,121 @@ describe("createAgentHttpClient", () => {
     });
     expect(result.text).toBe("Showing page 2.");
     expect(result.results[0]?.ok).toBe(true);
+    // The key travels beside the result: without it a receipt can only say
+    // "done", which tells the reader something happened but not what.
+    expect(result.keys).toEqual(["view.setPage"]);
     expect(setPage).toHaveBeenCalledWith(2);
     expect(posts).toEqual(["turn"]);
+  });
+
+  it("runs the actions a backend chose even when it also asked to read", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+    let rounds = 0;
+    const result = await runAgentHttpTurn(live, "Page 2 please", {
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        rounds += 1;
+        // What a small model actually sends: a decision AND a row window, in
+        // the same breath, every round. Discarding the actions leaves the
+        // reader with a burnt discovery budget and an untouched table.
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Page 2 it is.",
+          actions:
+            rounds === 1
+              ? [
+                  {
+                    key: "view.setPage",
+                    args: { page: 2 },
+                    idempotencyKey: "p",
+                  },
+                ]
+              : [],
+          needs: { read: [{ offset: 0, limit: 5 }] },
+        });
+      },
+    });
+
+    expect(setPage).toHaveBeenCalledWith(2);
+    expect(result.keys).toEqual(["view.setPage"]);
+    expect(result.results[0]?.ok).toBe(true);
+  });
+
+  it("answers a describe for a capability that does not exist", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+    let round = 0;
+    const result = await runAgentHttpTurn(live, "Filter it", {
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        round += 1;
+        if (round === 1) {
+          // A small model guessing a key. Ending the turn over one bad name
+          // leaves nothing run and nothing explained.
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            needs: { describe: ["view", "view.setPage"] },
+          });
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Page 2 it is.",
+          actions: [
+            { key: "view.setPage", args: { page: 2 }, idempotencyKey: "p" },
+          ],
+        });
+      },
+    });
+
+    expect(result.text).toBe("Page 2 it is.");
+    expect(setPage).toHaveBeenCalledWith(2);
+  });
+
+  it("still fails a backend that produced nothing at all", async () => {
+    const live = session();
+    let rounds = 0;
+    await expect(
+      runAgentHttpTurn(live, "Filter it", {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          rounds += 1;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            needs: { describe: ["nope"] },
+          });
+        },
+      })
+    ).rejects.toThrow(/discovery too many times/);
+
+    // A round that produced only unknown names still counts as a round, or
+    // this loops forever.
+    expect(rounds).toBeLessThanOrEqual(5);
+  });
+
+  it("names every action it ran, in order, including a failure", async () => {
+    const live = session({ setPage: vi.fn() });
+    const result = await runAgentHttpTurn(live, "Two things", {
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Tried two.",
+          actions: [
+            { key: "view.setPage", args: { page: 2 }, idempotencyKey: "a" },
+            // A shape the schema refuses — the receipt still has to name it.
+            {
+              key: "view.setSort",
+              args: { column: "salary" },
+              idempotencyKey: "b",
+            },
+          ],
+        }),
+    });
+
+    expect(result.keys).toEqual(["view.setPage", "view.setSort"]);
+    expect(result.results).toHaveLength(2);
+    expect(result.results[1]?.ok).toBe(false);
   });
 
   it("answers describe and read needs without sending the whole dataset", async () => {

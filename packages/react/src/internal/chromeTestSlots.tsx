@@ -593,8 +593,8 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
   ),
   Sheet: ({ label, part, className, open, onClose, children }) =>
     open ? (
-      <div
-        role="dialog"
+      <dialog
+        open
         aria-modal="true"
         aria-label={label}
         data-adapttable-part={part}
@@ -604,7 +604,7 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
         <button type="button" data-testid="sheet-backdrop" onClick={onClose}>
           {label}
         </button>
-      </div>
+      </dialog>
     ) : null,
   Button: ({
     label,

@@ -93,7 +93,10 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   },
   "view.setSort": {
     key: "view.setSort",
-    guide: "Sort by a column id, or clear sort with a null key.",
+    guide:
+      "Sort by a column id. The parameter is named `key`, NOT `column` — " +
+      'pass the column\'s id as `key`, with `dir` of "asc" or "desc". ' +
+      "Pass a null key to clear the sort.",
     input: objectSchema({
       key: { type: ["string", "null"] },
       dir: { type: "string", enum: ["asc", "desc"] },
@@ -109,13 +112,20 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "view.setFilters": {
     key: "view.setFilters",
     guide:
-      "Replace the active filter model. Shape is the table's own filter value.",
+      "Replace the active filter model. The shape is the APPLICATION'S own " +
+      "filter value and is deliberately not described here — there is no " +
+      "schema for it to fetch, so asking again returns this same text. " +
+      "Send `{}` to clear filters. To set one, use the shape the application " +
+      "documented; if you do not know it, say so rather than guessing, and " +
+      "prefer view.setSearch, which takes a plain string.",
     input: objectSchema({ filters: {} }, ["filters"]),
     output: OK,
   },
   "view.setGroupBy": {
     key: "view.setGroupBy",
-    guide: "Group rows by a column id, or clear grouping with null.",
+    guide:
+      "Group rows by a column id. The parameter is named `key`, NOT " +
+      "`column`. Pass null to clear grouping.",
     input: objectSchema({ key: { type: ["string", "null"] } }),
     output: OK,
   },

@@ -25,7 +25,10 @@ import { LiveRegion } from "../a11y/LiveRegion";
 import { AssistantComposer } from "./AssistantComposer";
 import { AssistantEmpty, AssistantMessage } from "./AssistantMessages";
 import type { TableAssistantSlots } from "./assistantSlots";
-import { assistantIsBusy, type TableAssistantView } from "./assistantView";
+import type { TableAssistantView } from "./assistantView";
+
+/** Whether the panel is mid-turn — re-exported for a host's own chrome. */
+export { assistantIsBusy } from "./assistantView";
 import { useConversationScroll } from "./useConversationScroll";
 
 /** Which surface the panel takes. @public */
@@ -354,6 +357,3 @@ export function TableAssistantChrome({
     </>
   );
 }
-
-/** Whether the panel is mid-turn — exported for a host's own chrome. @public */
-export { assistantIsBusy };

@@ -149,6 +149,7 @@ export interface AgentHttpResponse {
 
 // @public
 export interface AgentHttpTurnResult {
+    readonly keys: readonly string[];
     readonly needsFulfilled: {
         readonly describe: number;
         readonly read: number;
