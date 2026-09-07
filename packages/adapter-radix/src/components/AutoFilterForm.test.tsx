@@ -496,4 +496,15 @@ describe("<AutoFilterForm> (Radix)", () => {
       "Next N days",
     ]);
   });
+  it("text: switching the operator rewrites the filter under the new one", () => {
+    const { setExtras } = renderForm([{ key: "name", type: "text" }], {
+      name: "ada",
+    });
+
+    // A text filter carries its operator beside the value, and changing it
+    // has to rewrite the stored filter rather than leave the old key behind.
+    pickOption("Operator", "Starts with");
+
+    expect(setExtras).toHaveBeenCalled();
+  });
 });

@@ -5,11 +5,12 @@
  * host-inserted extra rows, and pinned summaries — has to be proven to reach
  * the cards too. Losing one of them there is invisible on a desktop run.
  */
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import { grouping } from "./grouping";
+import { groupingPanel } from "./grouping-panel";
 import type { ColumnDef } from "./index";
 import { pinnedSummaryRows } from "./pinned-summary-rows";
 
@@ -85,5 +86,35 @@ describe("grouped card list (unstyled)", () => {
     const text = [...(list?.children ?? [])].map((el) => el.textContent ?? "");
     expect(text[0]).toContain("Team total");
     expect(text.at(-1)).toContain("Grand total");
+  });
+  it("collapses a group from its header card", () => {
+    mount();
+    expect(screen.getByText("Ship")).toBeInTheDocument();
+
+    // The first group card is Core; collapsing it folds its leaf cards away.
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Collapse group" })[0]!
+    );
+
+    expect(screen.queryByText("Ship")).not.toBeInTheDocument();
+    expect(screen.getByText("Write guide")).toBeInTheDocument();
+  });
+  it("renders group cards through the interactive grouping panel too", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile
+        features={[groupingPanel(["team"])]}
+      />
+    );
+
+    // The panel feature supplies its own card slot; on a phone that slot is
+    // the only thing standing between a grouped table and a flat list.
+    const headers = parts("group-card").map((el) => el.textContent ?? "");
+    expect(headers.some((text) => text.includes("Core"))).toBe(true);
+    expect(headers.some((text) => text.includes("Docs"))).toBe(true);
   });
 });

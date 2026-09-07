@@ -1,5 +1,6 @@
 import babel from "@rolldown/plugin-babel";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import { createInstrumenter } from "istanbul-lib-instrument";
 import { defineConfig } from "vitest/config";
 
 import {
@@ -12,16 +13,86 @@ import {
  * `mergeConfig(sharedConfig, { ... })`. Centralises the jsdom
  * environment, React plugin, and the coverage thresholds the whole
  * monorepo holds itself to (near-100%, enforced in CI).
+ *
+ * Coverage counts the source. The counters are attached by Babel before the
+ * React Compiler transforms the file, so a percentage here is a statement or
+ * branch someone wrote, and the tests still run against the compiled output
+ * the build ships.
  */
+
+/** The product sources coverage measures, shared by the instrumenter. */
+const coverageInclude = ["src/**/*.{ts,tsx}"];
+
+/**
+ * Files that are never product code: the tests themselves, their helpers, and
+ * declaration-only modules that compile to nothing.
+ */
+const coverageExclude = [
+  "src/**/*.{test,spec}.{ts,tsx}",
+  "src/**/*.gaps.test.{ts,tsx}",
+  "src/**/*.test-utils.tsx",
+  "src/**/index.ts",
+  "src/**/*.d.ts",
+  "src/**/types.ts",
+];
+
+/**
+ * Counters are written straight into Vitest's own coverage store, so the
+ * istanbul provider collects them without instrumenting a second time.
+ */
+const istanbulPluginOptions = {
+  coverageVariable: "__VITEST_COVERAGE__",
+  coverageGlobalScope: "globalThis",
+  coverageGlobalScopeFunc: false,
+  extension: [".ts", ".tsx"],
+  include: coverageInclude,
+  exclude: coverageExclude,
+};
+
+/**
+ * Vitest instruments in a `post` Vite plugin, which would read the React
+ * Compiler's output rather than the source. The Babel pass below has already
+ * attached the counters, so this hands the code back untouched and stays the
+ * only instrumenter.
+ *
+ * The delegate exists for files no test imports: Vitest asks the instrumenter
+ * for their shape so they land in the report at zero rather than vanishing.
+ */
+function passthroughInstrumenter(options: {
+  coverageVariable: string;
+  coverageGlobalScope: string;
+  coverageGlobalScopeFunc: boolean;
+  ignoreClassMethods?: string[];
+}) {
+  const shapeOnly = createInstrumenter({
+    ...options,
+    produceSourceMap: false,
+    autoWrap: false,
+    esModules: true,
+  });
+  return {
+    instrumentSync(code: string, filename: string) {
+      shapeOnly.instrumentSync(code, filename);
+      return code;
+    },
+    lastSourceMap: () => undefined,
+    lastFileCoverage: () => shapeOnly.lastFileCoverage(),
+  };
+}
+
 export const sharedConfig = defineConfig({
   // Run the React Compiler in the test build too (matching the shipped prod
-  // build), so the memoization tests exercise the real compiled output. The
-  // compiler's generated cache code (`_c()` slots, `if ($[i] !== x)`) reads as
-  // "uncovered" branches/statements — that's machinery, not product logic, so
-  // the thresholds below reflect logic coverage, not that generated code.
+  // build), so the memoization tests exercise the real compiled output.
   plugins: [
     react(),
-    babel({ presets: [reactCompilerPreset({ target: "18" })] }),
+    babel({
+      // Babel runs plugins before presets, so the coverage counters are
+      // attached to the source constructs and the React Compiler then
+      // memoizes the instrumented code. Tests therefore execute the same
+      // compiled output the build ships, while coverage counts the source.
+      plugins: [["istanbul", istanbulPluginOptions]],
+      presets: [reactCompilerPreset({ target: "18" })],
+    }),
   ],
   test: {
     globals: true,
@@ -43,20 +114,14 @@ export const sharedConfig = defineConfig({
     // This only widens the time limit — assertions are unchanged.
     testTimeout: 30000,
     coverage: {
-      provider: "v8",
+      provider: "istanbul",
+      instrumenter: passthroughInstrumenter,
       reporter: ["text", "lcov", "html"],
-      include: ["src/**/*.{ts,tsx}"],
-      exclude: [
-        "src/**/*.{test,spec}.{ts,tsx}",
-        "src/**/*.gaps.test.{ts,tsx}",
-        // Test scaffolding, not product code. Nothing exports these helpers,
-        // nothing ships them, and measuring a harness measures the tests
-        // rather than the kit.
-        "src/**/*.test-utils.tsx",
-        "src/**/index.ts",
-        "src/**/*.d.ts",
-        "src/**/types.ts",
-      ],
+      include: coverageInclude,
+      // Test scaffolding is not product code. Nothing exports these helpers,
+      // nothing ships them, and measuring a harness measures the tests
+      // rather than the kit.
+      exclude: coverageExclude,
       thresholds: {
         statements: 95,
         branches: 90,

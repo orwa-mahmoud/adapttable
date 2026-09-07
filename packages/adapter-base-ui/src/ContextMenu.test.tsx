@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -121,5 +121,20 @@ describe("context menu (base-ui)", () => {
 
     expect(screen.getByText("Delete")).toBeInTheDocument();
     expect(screen.getByText("Locked")).toBeInTheDocument();
+  });
+  it("closes when the surface is dismissed", async () => {
+    table();
+    fireEvent.contextMenu(screen.getByText("Ada"));
+    expect(menu()).not.toBeNull();
+
+    // Escape is the overlay's own dismissal, and it has to reach the table's
+    // close callback or the menu stays open over a table it no longer tracks.
+    fireEvent.keyDown(document.activeElement ?? document.body, {
+      key: "Escape",
+    });
+
+    await waitFor(() => {
+      expect(menu()).toBeNull();
+    });
   });
 });

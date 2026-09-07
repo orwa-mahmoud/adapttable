@@ -5,7 +5,7 @@
  * host-inserted extra rows, and pinned summaries — has to be proven to reach
  * the cards too. Losing one of them there is invisible on a desktop run.
  */
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -86,5 +86,39 @@ describe("grouped card list (chakra)", () => {
     const text = [...(list?.children ?? [])].map((el) => el.textContent ?? "");
     expect(text[0]).toContain("Team total");
     expect(text.at(-1)).toContain("Grand total");
+  });
+  it("collapses a group from its header card", () => {
+    mount();
+    expect(screen.getByText("Ship")).toBeInTheDocument();
+
+    // The first group card is Core; collapsing it folds its leaf cards away.
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Collapse group" })[0]!
+    );
+
+    expect(screen.queryByText("Ship")).not.toBeInTheDocument();
+    expect(screen.getByText("Write guide")).toBeInTheDocument();
+  });
+  it("carries extra rows into an ungrouped card list", () => {
+    renderChakra(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile
+        extraRows={[
+          { key: "s", kind: "separator", beforeRowId: "3" },
+          { key: "n", kind: "fullWidth", render: () => "Team note" },
+        ]}
+      />
+    );
+
+    // Ungrouped is its own assembly path — the cards are built straight from
+    // the row entries, so the host's inserted rows have to be woven in there
+    // as well as in the grouped one.
+    expect(screen.getByText("Team note")).toBeInTheDocument();
+    expect(parts("separator-row")).toHaveLength(1);
+    expect(screen.getByText("Ship")).toBeInTheDocument();
   });
 });

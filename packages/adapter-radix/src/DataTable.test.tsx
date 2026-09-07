@@ -1019,6 +1019,34 @@ describe("header filter trigger", () => {
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
     ).toBeNull();
   });
+  it("keeps the header filter open when the pointer lands outside it", async () => {
+    renderHarness({
+      override: {
+        headerFilters: true,
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    const trigger = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filter-header-trigger"]'
+    )!;
+    fireEvent.click(trigger);
+    const panel = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>(
+        '[data-adapttable-part="filter-header-cell"]'
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+
+    // Typing in a filter often moves focus or the pointer outside the small
+    // anchored card; dismissing on that would close the panel mid-edit.
+    fireEvent.pointerDown(document.body);
+    fireEvent.focusOut(panel);
+
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+  });
 });
 
 describe("sparkline column", () => {

@@ -5,7 +5,7 @@
  * host-inserted extra rows, and pinned summaries — has to be proven to reach
  * the cards too. Losing one of them there is invisible on a desktop run.
  */
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -86,5 +86,17 @@ describe("grouped card list (mantine)", () => {
     const text = [...(list?.children ?? [])].map((el) => el.textContent ?? "");
     expect(text[0]).toContain("Team total");
     expect(text.at(-1)).toContain("Grand total");
+  });
+  it("collapses a group from its header card", () => {
+    mount();
+    expect(screen.getByText("Ship")).toBeInTheDocument();
+
+    // The first group card is Core; collapsing it folds its leaf cards away.
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Collapse group" })[0]!
+    );
+
+    expect(screen.queryByText("Ship")).not.toBeInTheDocument();
+    expect(screen.getByText("Write guide")).toBeInTheDocument();
   });
 });

@@ -956,6 +956,26 @@ describe("header filter trigger", () => {
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
     ).toBeNull();
   });
+  it("opens the header filter panel from its trigger", async () => {
+    renderHarness({
+      override: {
+        headerFilters: true,
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    const trigger = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filter-header-trigger"]'
+    )!;
+    const panel = () =>
+      document.querySelector('[data-adapttable-part="filter-header-cell"]');
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(panel()).not.toBeNull();
+    });
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+  });
 });
 
 describe("sparkline column", () => {

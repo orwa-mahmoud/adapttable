@@ -147,14 +147,18 @@ describe("row reorder (antd)", () => {
     };
 
     let confirmation = await selectWeb();
-    fireEvent.click(
-      within(confirmation).getByRole("button", { name: "Cancel" })
-    );
+    // A real pointer presses before it clicks, and the dialog's buttons stop
+    // that press reaching the row beneath them.
+    const cancel = within(confirmation).getByRole("button", { name: "Cancel" });
+    fireEvent.pointerDown(cancel);
+    fireEvent.click(cancel);
     await waitFor(() => expect(trigger).toHaveFocus());
     expect(onGroupMove).not.toHaveBeenCalled();
 
     confirmation = await selectWeb();
-    fireEvent.click(within(confirmation).getByRole("button", { name: "Move" }));
+    const move = within(confirmation).getByRole("button", { name: "Move" });
+    fireEvent.pointerDown(move);
+    fireEvent.click(move);
     await waitFor(() => expect(trigger).toHaveFocus());
     expect(onGroupMove).toHaveBeenCalledTimes(1);
     expect(onGroupMove.mock.calls[0]?.[0]).toBe(ROWS[0]);
