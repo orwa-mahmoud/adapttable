@@ -34,7 +34,10 @@ export {
 } from "./engine/neutralTable";
 export { engineSearchText } from "./engine/searchText";
 export type {
+  ActionAiOptions,
+  ActionApprovalPolicy,
   ActionConfirm,
+  ApprovalPresentation,
   BulkAction,
   BulkActionContext,
   CellProps,

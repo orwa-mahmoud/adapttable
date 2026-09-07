@@ -1,4 +1,7 @@
-import type { TableSourceCapabilities } from "@adapttable/core";
+import type {
+  ActionAiOptions,
+  TableSourceCapabilities,
+} from "@adapttable/core";
 
 import type { CapabilityPresentation } from "./assistantContracts";
 
@@ -225,6 +228,12 @@ export interface AgentCapabilityDefinition {
    * `"unsupported"`. See {@link CapabilityPartial}.
    */
   readonly partial?: CapabilityPartial;
+  /**
+   * Agent-invocation overrides for this capability, inheriting field by
+   * field from the table's shared assistant configuration. The same shape an
+   * ordinary row or bulk action carries. See `ActionAiOptions`.
+   */
+  readonly ai?: ActionAiOptions;
   /** Whether this capability is wired for the current observation. */
   isEnabled(observation: AgentObservation): boolean;
   /**

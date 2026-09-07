@@ -1436,3 +1436,81 @@ describe("what may be split, and what may not", () => {
     expect(hooks.editCells).not.toHaveBeenCalled();
   });
 });
+
+describe("an action that overrides the table's approval policy", () => {
+  function custom(
+    ai: AgentCapabilityDefinition["ai"]
+  ): AgentCapabilityDefinition {
+    return {
+      key: "staff.archive",
+      summary: "Archive a person",
+      kind: "write",
+      ...(ai ? { ai } : {}),
+      guide: {
+        guide: "Archive.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: () => ({ ok: true }),
+    };
+  }
+
+  let keyCounter = 0;
+
+  async function asked(
+    definition: AgentCapabilityDefinition,
+    policy: "writes" | "never"
+  ): Promise<boolean> {
+    let called = false;
+    keyCounter += 1;
+    const session = createAgentSession({
+      observe: () => observation({ approval: policy, commit: "immediate" }),
+      apply: apply(),
+      capabilities: [definition],
+      onApprove: () => {
+        called = true;
+        return Promise.resolve(true);
+      },
+    });
+    await session.execute(definition.key, {}, 1, `ask-${String(keyCounter)}`);
+    return called;
+  }
+
+  it("asks for a required action on a table that asks for nothing", async () => {
+    expect(await asked(custom(undefined), "never")).toBe(false);
+    expect(
+      await asked(custom({ approval: { policy: "required" } }), "never")
+    ).toBe(true);
+  });
+
+  it("skips the human for an automatic action on a table that asks for writes", async () => {
+    expect(await asked(custom(undefined), "writes")).toBe(true);
+    expect(
+      await asked(custom({ approval: { policy: "automatic" } }), "writes")
+    ).toBe(false);
+  });
+
+  it("still validates and still runs the host path when approval is automatic", async () => {
+    // Automatic skips the human confirmation and nothing else.
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: hooks,
+      onApprove: () => Promise.resolve(true),
+    });
+    const bad = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "ssn", value: "x" }] },
+      1,
+      "automatic-still-validates"
+    );
+    expect(bad.error?.code).toBe("column-not-writable");
+  });
+
+  it("changing only the presentation leaves the policy asking", async () => {
+    expect(
+      await asked(custom({ approval: { presentation: "modal" } }), "writes")
+    ).toBe(true);
+  });
+});

@@ -9,12 +9,8 @@ import {
   type TableRowScope,
 } from "@adapttable/core";
 
-import type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";
+import { type SharedApproval, sharedApproval } from "./approvalConfig";
+import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
 import type {
   AgentApply,
   AgentColumn,
@@ -38,7 +34,7 @@ export interface TableAgentColumnPatch {
 export interface LiveObservationOptions {
   readonly tableId: string;
   readonly writePolicy?: WritePolicy;
-  readonly approval?: ApprovalPolicy;
+  readonly approval?: SharedApproval;
   readonly commit?: CommitPolicy;
   readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
   readonly readMax?: number;
@@ -280,7 +276,7 @@ export function observationFromNeutral<TRow>(
     columns,
     source: table.capabilities,
     writePolicy: options.writePolicy ?? "allow",
-    approval: options.approval ?? "writes",
+    approval: sharedApproval(options.approval).policy,
     commit: options.commit ?? "stage",
     hasPagination: ops.setPage === true || options.apply?.setPage !== undefined,
     hasSearch: ops.setSearch === true || options.apply?.setSearch !== undefined,

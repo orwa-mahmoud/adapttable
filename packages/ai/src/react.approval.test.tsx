@@ -743,6 +743,71 @@ describe("under Strict Mode's double effects", () => {
       expect(approvals).toHaveBeenLastCalledWith(true);
     });
   });
+
+  it("does not execute a decision because a render was replayed", async () => {
+    const onCellEdit = vi.fn();
+    handles.current = { session: undefined, pending: null };
+    const props = applyTableFeatures({
+      features: [
+        tableAgent({
+          tableId: "strict-decide",
+          approval: "writes",
+          commit: "immediate",
+          columns: { name: { type: "string", writable: true } },
+        }),
+        { id: "editing" },
+      ],
+    });
+    render(
+      <StrictMode>
+        <FeatureProviders props={props}>
+          <Publisher
+            view={{
+              ...VIEW,
+              rows: [
+                { id: "1", name: "Ada" },
+                { id: "2", name: "Grace" },
+              ],
+              editing: { onCellEdit },
+            }}
+          />
+          <Reader onReady={() => undefined} />
+        </FeatureProviders>
+      </StrictMode>
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = session().execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "1", column: "name", value: "A." },
+          { rowKey: "2", column: "name", value: "G." },
+        ],
+      },
+      session().manifest().viewRevision,
+      "strict-decide-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    // Strict Mode invokes a state updater twice. A decision recorded in one
+    // must not be a write performed twice, which is why answering the last
+    // row settles in an effect rather than inside the updater.
+    act(() => {
+      handles.current.pending?.decideAt?.(0, true);
+    });
+    act(() => {
+      handles.current.pending?.decideAt?.(1, true);
+    });
+
+    const settled = await result;
+    expect(settled.ok).toBe(true);
+    expect(onCellEdit).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("deciding a bulk write row by row", () => {
@@ -894,10 +959,12 @@ describe("deciding a bulk write row by row", () => {
 });
 
 describe("a write that names no rows", () => {
-  it("hands the reader the capability instead of an empty list", async () => {
+  /** Open one opaque bulk operation and hand back what it recorded. */
+  async function openOperation(key: string) {
     handles.current = { session: undefined, pending: null };
+    const ran: unknown[] = [];
     mount({
-      tableId: "operation",
+      tableId: key,
       approval: "writes",
       capabilities: [
         {
@@ -911,23 +978,32 @@ describe("a write that names no rows", () => {
             output: { type: "object" },
           },
           isEnabled: () => true,
-          execute: () => ({ ok: true }),
+          // A real bulk capability returns a write result, which is what
+          // carries the approval outcome back to the caller.
+          execute: (_context, args) => {
+            ran.push(args);
+            return { proposals: [], applied: true, approval: "not-required" };
+          },
         },
       ],
     });
     await waitFor(() => {
       expect(handles.current.session).toBeDefined();
     });
-
     const result = session().execute(
       "staff.activateAll",
       { status: "Active" },
       session().manifest().viewRevision,
-      "operation-1"
+      key
     );
     await waitFor(() => {
       expect(handles.current.pending).not.toBeNull();
     });
+    return { ran, result };
+  }
+
+  it("hands the reader the capability instead of an empty list", async () => {
+    const { ran, result } = await openOperation("operation-1");
 
     expect(handles.current.pending?.proposals).toHaveLength(0);
     expect(handles.current.pending?.operation).toMatchObject({
@@ -936,10 +1012,228 @@ describe("a write that names no rows", () => {
     });
     // One thing to agree to means no per-row controls to draw.
     expect(handles.current.pending?.decideAt).toBeUndefined();
+    // And it waits. An empty decision list is not "everything is decided".
+    expect(ran).toHaveLength(0);
 
     act(() => {
       handles.current.pending?.approve();
     });
-    expect((await result).ok).toBe(true);
+    const settled = await result;
+
+    expect(settled.ok).toBe(true);
+    expect((settled.result as { approval: string }).approval).toBe("approved");
+    expect((settled.result as { applied: boolean }).applied).toBe(true);
+    // Ran exactly once, with the arguments the model sent.
+    expect(ran).toEqual([{ status: "Active" }]);
+  });
+
+  it("does not run the operation when the reader refuses it", async () => {
+    const { ran, result } = await openOperation("operation-reject");
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    const settled = await result;
+
+    expect((settled.result as { approval: string }).approval).toBe("rejected");
+    expect(ran).toHaveLength(0);
+  });
+
+  it("runs it once however many times Approve is clicked", async () => {
+    const { ran, result } = await openOperation("operation-double-click");
+    act(() => {
+      handles.current.pending?.approve();
+      handles.current.pending?.approve();
+      handles.current.pending?.approve();
+    });
+    await result;
+
+    expect(ran).toHaveLength(1);
+  });
+});
+
+describe("one transaction at a time", () => {
+  const ROWS_2: Row[] = [
+    { id: "1", name: "Ada" },
+    { id: "2", name: "Grace" },
+  ];
+
+  async function openTwo(key: string, onCellEdit: (row: Row) => unknown) {
+    handles.current = { session: undefined, pending: null };
+    mount(
+      { tableId: key, approval: "writes" },
+      { ...VIEW, rows: ROWS_2, editing: { onCellEdit } }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = session().execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "1", column: "name", value: "A." },
+          { rowKey: "2", column: "name", value: "G." },
+        ],
+      },
+      session().manifest().viewRevision,
+      key
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    return { result };
+  }
+
+  it("shows a new write's rows with its own decisions, never the last one's", async () => {
+    const onCellEdit = vi.fn();
+    const first = await openTwo("txn-fresh", onCellEdit);
+    act(() => {
+      handles.current.pending?.decideAt?.(0, false);
+    });
+    expect(handles.current.pending?.decisions).toEqual(["rejected", "pending"]);
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    await first.result;
+
+    // The next write opens with its rows and its own blank slate, in the
+    // same commit — never one frame of new rows beside old answers.
+    const second = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Ada L." }] },
+      session().manifest().viewRevision,
+      "txn-fresh-2"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    expect(handles.current.pending?.proposals).toHaveLength(1);
+    expect(handles.current.pending?.decisions).toEqual(["pending"]);
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await second;
+  });
+
+  it("ignores a control left over from an approval that already settled", async () => {
+    const onCellEdit = vi.fn();
+    const first = await openTwo("txn-stale", onCellEdit);
+    // A control captured while the first approval was open.
+    const staleDecide = handles.current.pending?.decideAt;
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await first.result;
+
+    const second = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Ada L." }] },
+      session().manifest().viewRevision,
+      "txn-stale-2"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    // Clicking it now must not answer the write that is open.
+    act(() => {
+      staleDecide?.(0, true);
+    });
+    expect(handles.current.pending?.decisions).toEqual(["pending"]);
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await second;
+  });
+
+  it("ignores a position that is not a row of the open plan", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openTwo("txn-range", onCellEdit);
+
+    act(() => {
+      handles.current.pending?.decideAt?.(9, true);
+      handles.current.pending?.decideAt?.(-1, true);
+      handles.current.pending?.decideAt?.(1.5, true);
+    });
+    expect(handles.current.pending?.decisions).toEqual(["pending", "pending"]);
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await result;
+  });
+
+  it("settles once when the same decision is clicked repeatedly", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openTwo("txn-repeat", onCellEdit);
+
+    act(() => {
+      handles.current.pending?.decideAt?.(0, true);
+      handles.current.pending?.decideAt?.(1, true);
+      // Two more clicks after the write has already settled.
+      handles.current.pending?.decideAt?.(1, true);
+      handles.current.pending?.decideAt?.(0, true);
+    });
+
+    const settled = await result;
+    expect(settled.ok).toBe(true);
+    expect(onCellEdit).toHaveBeenCalledTimes(2);
+  });
+
+  it("settles once when Approve and Reject land in the same tick", async () => {
+    const onCellEdit = vi.fn();
+    const { result } = await openTwo("txn-race", onCellEdit);
+
+    act(() => {
+      handles.current.pending?.approve();
+      handles.current.pending?.reject();
+    });
+
+    const settled = await result;
+    // The first answer wins; the second is not a second answer.
+    expect((settled.result as { approval: string }).approval).toBe("approved");
+    expect(onCellEdit).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses the write when the provider goes away undecided", async () => {
+    const onCellEdit = vi.fn();
+    handles.current = { session: undefined, pending: null };
+    const tree = render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [
+            tableAgent({
+              tableId: "txn-unmount",
+              approval: "writes",
+              columns: { name: { type: "string", writable: true } },
+              commit: "immediate",
+            }),
+            { id: "editing" },
+          ],
+        })}
+      >
+        <Publisher view={{ ...VIEW, rows: ROWS_2, editing: { onCellEdit } }} />
+        <Reader onReady={() => undefined} />
+      </FeatureProviders>
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+    const result = session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "A." }] },
+      session().manifest().viewRevision,
+      "txn-unmount"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    tree.unmount();
+
+    const settled = await result;
+    expect((settled.result as { applied: boolean }).applied).toBe(false);
+    expect(onCellEdit).not.toHaveBeenCalled();
   });
 });

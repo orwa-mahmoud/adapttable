@@ -4,6 +4,7 @@
  * The root `@adapttable/ai` entry stays React-free. This subpath mounts a
  * provider that observes the live table and publishes a versioned manifest.
  */
+import type { ApprovalPresentation } from "@adapttable/core";
 import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalDecision,
@@ -26,12 +27,8 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";
+import { type SharedApproval, sharedApproval } from "./approvalConfig";
+import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
 import {
   agentColumnsFromNeutral,
   monotonicRevision,
@@ -111,7 +108,7 @@ export interface TableAgentOptions {
   /** Whether host callbacks already authorize writes. */
   readonly writePolicy?: WritePolicy;
   /** When a write must be confirmed. */
-  readonly approval?: ApprovalPolicy;
+  readonly approval?: SharedApproval;
   /** Whether an approved write stages or persists. */
   readonly commit?: CommitPolicy;
   /** Host confirmation. When set, chrome is skipped. */
@@ -305,7 +302,7 @@ function observationFromRuntime(
     columns,
     source: view?.sourceCapabilities ?? PAGE_ONLY_SOURCE,
     writePolicy: options.writePolicy ?? "allow",
-    approval: options.approval ?? "writes",
+    approval: sharedApproval(options.approval).policy,
     commit: options.commit ?? "stage",
     hasPagination:
       options.apply?.setPage !== undefined || Boolean(query?.setPage),
@@ -628,7 +625,9 @@ function bindLiveSession(
   const onApprove = (proposal: unknown, signal?: AbortSignal) => {
     const options = optionsRef.current;
     if (options.onApprove) return options.onApprove(proposal, signal);
-    if (options.approval === "never") return Promise.resolve(true);
+    if (sharedApproval(options.approval).policy === "never") {
+      return Promise.resolve(true);
+    }
     return waitForChrome.current(proposal, signal);
   };
   const inner = createAgentSession({
@@ -666,7 +665,59 @@ interface PendingApproval {
   readonly operation?: AgentApprovalOperation;
   /** Whether the reader may decide the rows one at a time. */
   readonly perItem: boolean;
+  /** Settles the waiting `execute`. Later calls are ignored. */
   readonly resolve: (result: ApprovalResult) => void;
+}
+
+/**
+ * One approval and what the reader has decided about it, as a single value.
+ *
+ * The two are born together and die together. Holding the decisions in their
+ * own state and filling them from an effect left a frame where a new write's
+ * proposals were on screen beside the previous write's decisions — and a
+ * click landing in that frame decided the wrong rows.
+ *
+ * `id` is why a control can be trusted. Every decision handler closes over
+ * the id it was made for and does nothing if the open transaction has moved
+ * on, so a button rendered for approval A cannot answer approval B.
+ */
+interface ApprovalTransaction {
+  readonly id: number;
+  readonly pending: PendingApproval;
+  readonly decisions: readonly AgentApprovalDecision[];
+  /** Where this write is reviewed, frozen with the transaction. */
+  readonly presentation: ApprovalPresentation;
+}
+
+/** Clear the open transaction, but only if it is still this one. */
+function closeTransaction(
+  entry: PendingApproval
+): (current: ApprovalTransaction | null) => ApprovalTransaction | null {
+  return (current) => (current?.pending === entry ? null : current);
+}
+
+/**
+ * Record one decision, or refuse to.
+ *
+ * Pure, so a replayed render cannot turn one click into two answers. Three
+ * things make it a no-op: the open transaction is not the one this control
+ * was made for, the position is not a row of that plan, or the decision is
+ * already what it would set.
+ */
+function recordDecision(
+  current: ApprovalTransaction | null,
+  id: number,
+  index: number,
+  approved: boolean
+): ApprovalTransaction | null {
+  if (current?.id !== id) return current ?? null;
+  if (!Number.isInteger(index)) return current;
+  if (index < 0 || index >= current.decisions.length) return current;
+  const next: AgentApprovalDecision = approved ? "approved" : "rejected";
+  if (current.decisions[index] === next) return current;
+  const decisions = [...current.decisions];
+  decisions[index] = next;
+  return { ...current, decisions };
 }
 
 /**
@@ -696,16 +747,11 @@ function TableAgentProvider({
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
   const revisionCounterRef = useRef(createRevisionCounter());
-  const [pending, setPending] = useState<PendingApproval | null>(null);
-  const pendingRef = useRef<PendingApproval | null>(null);
-  // One entry per proposal, rebuilt whenever a new approval opens so a
-  // decision can never carry over onto the next write's rows.
-  const [decisions, setDecisions] = useState<readonly AgentApprovalDecision[]>(
-    []
+  const [transaction, setTransaction] = useState<ApprovalTransaction | null>(
+    null
   );
-  useEffect(() => {
-    setDecisions(pending ? pending.proposals.map(() => "pending") : []);
-  }, [pending]);
+  const pendingRef = useRef<PendingApproval | null>(null);
+  const transactionId = useRef(0);
 
   // The table as a store: subscribe where there is one to subscribe to, and
   // read the stamp on every render either way. React re-reads the stamp after
@@ -746,6 +792,7 @@ function TableAgentProvider({
       // from the runtime shape of a value.
       const subject = proposal as ApprovalSubject;
       const rows = subject.kind === "rows";
+      let settled = false;
       const entry: PendingApproval = {
         proposals: rows ? subject.proposals : [],
         perItem: rows && subject.perItem,
@@ -758,17 +805,29 @@ function TableAgentProvider({
                 arguments: subject.arguments,
               },
             }),
+        // Settled once, whoever gets there first: the reader, an abort, an
+        // unmount, or the last row being answered. A second call is a no-op
+        // rather than a second answer to one question.
         resolve: (result: ApprovalResult) => {
-          if (pendingRef.current !== entry) return;
-          pendingRef.current = null;
-          setPending(null);
+          if (settled) return;
+          settled = true;
+          if (pendingRef.current === entry) pendingRef.current = null;
+          setTransaction(closeTransaction(entry));
           signal?.removeEventListener("abort", onAbort);
           resolve(result);
         },
       };
       const onAbort = () => entry.resolve(false);
       pendingRef.current = entry;
-      setPending(entry);
+      // Identity and decisions in one write, so no render ever shows this
+      // write's rows beside the last write's answers.
+      transactionId.current += 1;
+      setTransaction({
+        id: transactionId.current,
+        pending: entry,
+        decisions: entry.proposals.map(() => "pending"),
+        presentation: sharedApproval(optionsRef.current.approval).presentation,
+      });
       if (signal?.aborted) {
         entry.resolve(false);
         return;
@@ -825,7 +884,7 @@ function TableAgentProvider({
 
   // The chrome path is the only one that parks: with `onApprove` the host
   // answers directly and nothing is ever left open here.
-  const chromePending = !hostApprove && pending !== null;
+  const chromePending = !hostApprove && transaction !== null;
 
   // Who is listening, and what they were last told.
   //
@@ -866,39 +925,59 @@ function TableAgentProvider({
     []
   );
 
-  const decideAt = (index: number, approved: boolean) => {
-    setDecisions((current) => {
-      const next = [...current];
-      next[index] = approved ? "approved" : "rejected";
-      // The last undecided row settles the whole write. Asking for a separate
-      // confirm once every row has been answered is asking twice.
-      if (!next.includes("pending")) {
-        pendingRef.current?.resolve(settle(next, "rejected"));
-      }
-      return next;
-    });
+  // A pure state update, bound to the transaction it was made for. A control
+  // left over from a settled approval finds a different id and does nothing;
+  // a position that is not a row of THIS plan changes nothing either.
+  const decideAt = (id: number) => (index: number, approved: boolean) => {
+    setTransaction((current) => recordDecision(current, id, index, approved));
   };
+
+  // Answering the last row settles the write. This belongs in an effect and
+  // not in the updater that produced the decisions: a state updater may be
+  // replayed, and replaying one that resolves a promise would answer the
+  // session twice.
+  useEffect(() => {
+    if (!transaction) return;
+    // A write that named no rows has no last row to answer. It waits for an
+    // explicit whole decision — an empty decision list is not "everything is
+    // decided", it is "there was never anything to enumerate".
+    if (transaction.pending.proposals.length === 0) return;
+    if (transaction.decisions.includes("pending")) return;
+    transaction.pending.resolve(settle(transaction.decisions, "rejected"));
+  }, [transaction]);
+
   // Rebuilt every render on purpose: the published value is what subscribers
   // compare, and memoizing it hides a decision that changed inside it.
-  const whole = pending?.proposals.length === 0;
   const approvalValue =
-    hostApprove || !pending
+    hostApprove || !transaction
       ? null
       : {
-          proposals: pending.proposals,
-          ...(pending.operation ? { operation: pending.operation } : {}),
-          decisions,
-          // "Approve" covers what is still undecided; a row already refused
-          // stays refused, or the button undoes the reader's own work.
-          // A write that named no rows has nothing to enumerate: the reader
-          // agreed to the operation or refused it. An empty position list
-          // would reach the session as "approved none of the rows" — a
-          // refusal — and the operation would never run.
+          proposals: transaction.pending.proposals,
+          ...(transaction.pending.operation
+            ? { operation: transaction.pending.operation }
+            : {}),
+          decisions: transaction.decisions,
+          presentation: transaction.presentation,
+          // "Approve remaining" is what these mean: a row already refused
+          // stays refused, or the control undoes the reader's own work. A
+          // write that named no rows has nothing to enumerate, so it is
+          // answered whole — an empty position list would reach the session
+          // as "approved none of the rows", which is a refusal.
           approve: () =>
-            pending.resolve(whole ? true : settle(decisions, "approved")),
+            transaction.pending.resolve(
+              transaction.pending.proposals.length === 0
+                ? true
+                : settle(transaction.decisions, "approved")
+            ),
           reject: () =>
-            pending.resolve(whole ? false : settle(decisions, "rejected")),
-          ...(pending.perItem ? { decideAt } : {}),
+            transaction.pending.resolve(
+              transaction.pending.proposals.length === 0
+                ? false
+                : settle(transaction.decisions, "rejected")
+            ),
+          ...(transaction.pending.perItem
+            ? { decideAt: decideAt(transaction.id) }
+            : {}),
         };
 
   return (

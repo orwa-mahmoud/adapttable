@@ -1,5 +1,6 @@
 import { isPinnedSummaryRowId } from "@adapttable/core";
 
+import { resolveApproval } from "./approvalConfig";
 import {
   type CapabilityRegistry,
   createCapabilityRegistry,
@@ -71,6 +72,21 @@ export interface CreateAgentSessionOptions {
 
 function approvalOf(observation: AgentObservation): ApprovalPolicy {
   return observation.approval ?? "writes";
+}
+
+/**
+ * The policy for one capability: the table's, unless the capability itself
+ * overrides it. Presentation is resolved the same way but is the surface's
+ * business, not the session's — the session only decides whether to ask.
+ */
+function policyFor(
+  definition: AgentCapabilityDefinition,
+  observation: AgentObservation
+): ApprovalPolicy {
+  return resolveApproval(
+    { policy: approvalOf(observation), presentation: "widget" },
+    definition.ai
+  ).policy;
 }
 
 function commitOf(observation: AgentObservation): CommitPolicy {
@@ -1179,7 +1195,7 @@ async function decideApproval(
   total: number,
   decomposable: boolean
 ): Promise<ApprovalDecision> {
-  if (!needsApproval(definition, approvalOf(observation))) {
+  if (!needsApproval(definition, policyFor(definition, observation))) {
     return { outcome: "not-required" };
   }
   if (!onApprove) return { outcome: "pending" };

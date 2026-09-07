@@ -5,7 +5,7 @@
  * required kit slot — core never draws a button. Invisible live-region
  * announcements are the one thing this chrome owns itself.
  */
-import type { TableLabels } from "@adapttable/core";
+import type { ApprovalPresentation, TableLabels } from "@adapttable/core";
 import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
@@ -36,6 +36,15 @@ export interface AgentApprovalPending {
   readonly operation?: AgentApprovalOperation;
   /** What the reader has decided so far, one entry per proposal. */
   readonly decisions: readonly AgentApprovalDecision[];
+  /**
+   * Where this approval is meant to be reviewed, resolved from the table's
+   * shared configuration and the action's own override.
+   *
+   * Exactly one surface draws the decision controls. The others may say an
+   * approval is waiting and where, but must not offer a second set of
+   * buttons for one decision.
+   */
+  readonly presentation: ApprovalPresentation;
   /** Confirm everything still undecided and continue the host write path. */
   readonly approve: () => void;
   /** Refuse everything still undecided. */

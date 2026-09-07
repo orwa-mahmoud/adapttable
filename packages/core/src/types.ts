@@ -103,6 +103,55 @@ export interface ColumnFooterContext<TRow> {
 }
 
 /**
+ * Where a write an agent proposed is reviewed.
+ *
+ * One surface is active at a time. `widget` reviews inside the assistant
+ * conversation, `table` above the table it changes, `modal` in a dialog of
+ * the kit's own. This is presentation only — it never decides WHETHER a
+ * human is asked, which is {@link ActionApprovalPolicy}.
+ *
+ * @public
+ */
+export type ApprovalPresentation = "widget" | "table" | "modal";
+
+/**
+ * Whether an agent invoking this action has to wait for a human.
+ *
+ * `automatic` skips the human confirmation and nothing else: permissions,
+ * validation, staging and save rules all still run. There is no value here
+ * that means "authorized" — an action with no policy inherits the shared
+ * default, which asks for writes.
+ *
+ * @public
+ */
+export type ActionApprovalPolicy = "required" | "automatic";
+
+/**
+ * What an ordinary action says about being invoked by an agent.
+ *
+ * Plain data, so an action definition stays framework-neutral and a table
+ * with no assistant carries no agent code because one of its actions
+ * mentions this. Every field is optional and inherits INDIVIDUALLY from the
+ * shared configuration: overriding the policy alone leaves the presentation
+ * as the shared one.
+ *
+ * This is not {@link ActionConfirm}. That describes a person clicking the
+ * action themselves and being asked to confirm; this describes an agent
+ * asking to run it on their behalf. One agent execution raises one prompt.
+ *
+ * @public
+ */
+export interface ActionAiOptions {
+  /** Approval overrides for agent invocation. */
+  readonly approval?: {
+    /** Whether a human is asked. Inherits when omitted. */
+    readonly policy?: ActionApprovalPolicy;
+    /** Where they are asked. Inherits when omitted. */
+    readonly presentation?: ApprovalPresentation;
+  };
+}
+
+/**
  * Confirmation wiring shared by row and bulk actions.
  *
  * @public
@@ -149,6 +198,11 @@ export interface RowAction<TRow> {
   isHidden?: (row: TRow) => boolean;
   /** Optional confirmation dialog wiring. */
   confirm?: ActionConfirm<TRow>;
+  /**
+   * Agent-invocation overrides. Omit and the shared assistant configuration
+   * applies. See {@link ActionAiOptions}.
+   */
+  ai?: ActionAiOptions;
 }
 
 /**
@@ -183,6 +237,11 @@ export interface BulkAction {
   ) => void | Promise<unknown>;
   /** Optional confirmation dialog wiring (receives the selection count). */
   confirm?: ActionConfirm<number>;
+  /**
+   * Agent-invocation overrides. Omit and the shared assistant configuration
+   * applies. See {@link ActionAiOptions}.
+   */
+  ai?: ActionAiOptions;
 }
 
 /**

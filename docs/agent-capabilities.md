@@ -428,6 +428,59 @@ authorized against, the host's `apply` callbacks, a live `observe()`, the bound
 `onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
 governed write — the approved `plan` and the resolved `commit` mode.
 
+### Whether a human is asked, and where
+
+Two questions, answered separately.
+
+**Policy** is whether an agent has to wait for a person. **Presentation** is
+where that person is asked. Turning approval off does not move a surface, and
+choosing a surface authorizes nothing.
+
+The table sets both once:
+
+```ts
+useTableAssistant({
+  approval: { policy: "writes", presentation: "widget" },
+});
+```
+
+`approval: "writes"` still works and means the policy alone. The defaults are
+`writes` and `widget`.
+
+An action overrides either field on its own:
+
+```ts
+const actions: RowAction<Person>[] = [
+  { key: "email", label: "Email", onClick: email },
+  {
+    key: "delete",
+    label: "Delete",
+    onClick: remove,
+    // Always ask for this one, wherever the table reviews approvals.
+    ai: { approval: { policy: "required" } },
+  },
+];
+```
+
+Inheritance is per FIELD. Overriding the policy leaves the presentation as the
+shared one, and vice versa — so a table can say "review in the widget" once and
+then mark two sensitive actions as always-ask without repeating itself. An
+absent `ai` object changes nothing: there is no key whose absence means
+authorized.
+
+`policy: "automatic"` skips the human confirmation and nothing else.
+Permissions, schema validation, and the staging and save rules all still run,
+and a column the table marked unwritable is still refused.
+
+**`ai.approval` is not `confirm`.** `confirm` describes a person clicking the
+action themselves and being asked whether they meant it. `ai.approval`
+describes an agent asking to run it on their behalf. One agent execution
+raises one prompt — the approval — not both.
+
+The `ai` object carries overrides only. The action's key, label, handler and
+disabled rules stay where they are; it is plain data, so a table with no
+assistant carries no agent code because one of its actions mentions it.
+
 ### Deciding a bulk write row by row
 
 A reader can approve some of a bulk write and refuse the rest, and the session
