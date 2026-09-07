@@ -176,6 +176,15 @@ import { editing } from &quot;@adapttable/mantine/editing&quot;;
 import { filters } from &quot;@adapttable/mantine/filters&quot;;
 import { useMemo, useState } from &quot;react&quot;;
 
+const suggestions = [
+  {
+    id: &quot;core-team&quot;,
+    title: &quot;Show only the Core team&quot;,
+    prompt: &quot;Show only the Core team.&quot;,
+    requires: [&quot;view.setFilters&quot;],
+  },
+];
+
 export function Orders({ rows, columns, onEdit }) {
   const [session, setSession] = useState();
   const transport = useMemo(

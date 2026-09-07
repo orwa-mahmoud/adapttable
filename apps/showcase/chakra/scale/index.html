@@ -168,6 +168,7 @@
         <p>The scroll box is a Box rather than a Table.ScrollArea, so the sticky header keeps working; each header cell carries the sticky rule, and pinned cells take an explicit opaque background so scrolled content cannot show through.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/chakra&quot;;
+import { virtualize } from &quot;@adapttable/chakra/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;

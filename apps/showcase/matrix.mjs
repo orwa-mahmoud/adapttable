@@ -616,6 +616,7 @@ export function People({ rows, columns }) {
     ],
     card: "100k rows, 40 columns, virtualized rows and columns, sticky chrome.",
     snippet: `import { DataTable } from "{pkg}";
+import { virtualize } from "{pkg}/virtualize";
 
 export function Ledger({ rows, columns }) {
   return (
@@ -623,8 +624,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: "start" } }}
     />
@@ -1355,6 +1355,15 @@ import { TableAssistant } from "{pkg}/assistant";
 import { editing } from "{pkg}/editing";
 import { filters } from "{pkg}/filters";
 import { useMemo, useState } from "react";
+
+const suggestions = [
+  {
+    id: "core-team",
+    title: "Show only the Core team",
+    prompt: "Show only the Core team.",
+    requires: ["view.setFilters"],
+  },
+];
 
 export function Orders({ rows, columns, onEdit }) {
   const [session, setSession] = useState();

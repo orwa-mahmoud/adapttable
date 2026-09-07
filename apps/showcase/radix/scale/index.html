@@ -168,6 +168,7 @@
         <p>Radix's Table.Root brings its own ScrollArea, so the adapter restores overflow on the inner table and hands it the min-width — without that the table shrinks to the viewport and a pinned column has nothing to stick against. Columns virtualize here as well as rows.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/radix&quot;;
+import { virtualize } from &quot;@adapttable/radix/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;

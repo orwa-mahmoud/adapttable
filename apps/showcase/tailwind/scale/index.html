@@ -168,6 +168,7 @@
         <p>The map paints the header and pinned cells opaque per element rather than through a token, which is what stops scrolled rows showing through them, and the scroll box contains its own overscroll.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/unstyled&quot;;
+import { virtualize } from &quot;@adapttable/unstyled/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;

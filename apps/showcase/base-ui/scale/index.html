@@ -168,6 +168,7 @@
         <p>The scroll box is the adapter's own element with an injected rule that lets the inner table exceed it, the header sticks by inline rule, and pinned cells take their opaque background from the adapter's surface token.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
+import { virtualize } from &quot;@adapttable/base-ui/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;

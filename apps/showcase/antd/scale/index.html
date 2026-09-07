@@ -168,6 +168,7 @@
         <p>This is antd's own virtual table, not a second virtualizer over it: antd owns the scroller, so the adapter feeds it an explicit scroll size, drives infinite paging off antd's internal scroll position, and pins columns through antd's native fixed API.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
+import { virtualize } from &quot;@adapttable/antd/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;

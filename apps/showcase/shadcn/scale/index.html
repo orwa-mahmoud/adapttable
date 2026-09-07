@@ -168,6 +168,7 @@
         <p>Sticky and pinned cells stay opaque because the preset paints them bg-card — a transparent pinned cell would show the rows sliding under it — and a windowed-out row is a real table row with a height and nothing in it.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/shadcn&quot;;
+import { virtualize } from &quot;@adapttable/shadcn/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;

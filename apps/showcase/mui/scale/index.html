@@ -168,6 +168,7 @@
         <p>The scroll box is a plain Box rather than MUI's TableContainer, whose own horizontal overflow would trap the sticky header; the header sticks per TableCell against the paper background, and the rows outside the window are spacer TableRows.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mui&quot;;
+import { virtualize } from &quot;@adapttable/mui/virtualize&quot;;
 
 export function Ledger({ rows, columns }) {
   return (
@@ -175,8 +176,7 @@ export function Ledger({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      virtualize
-      virtualizeColumns
+      features={[virtualize({ virtualizeColumns: true })]}
       maxHeight={600}
       defaultColumnLayout={{ pinned: { name: &quot;start&quot; } }}
     /&gt;
