@@ -72,6 +72,16 @@ export interface TableAssistantSuggestionView {
 export interface TableAssistantView {
   /** Connection/turn state token, translated by `assistantConnection`. */
   readonly status: string;
+  /**
+   * Whether a turn is in flight and can still be stopped.
+   *
+   * A write parked on a human approval reports `awaiting-approval` — it is
+   * not "working", but it has not finished either, and Stop still ends it.
+   * Omit it and the panel falls back to reading {@link
+   * TableAssistantView.status}, which is what a host writing its own view
+   * did before this existed.
+   */
+  readonly busy?: boolean;
   readonly messages: readonly TableAssistantMessageView[];
   readonly draft: string;
   readonly setDraft: (draft: string) => void;

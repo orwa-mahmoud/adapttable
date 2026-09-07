@@ -443,6 +443,7 @@ export function TableAssistantChrome({
         slots={slots}
         labels={labels}
         status={assistant.status}
+        busy={assistant.busy}
         draft={assistant.draft}
         setDraft={assistant.setDraft}
         onSend={send}

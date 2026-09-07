@@ -636,4 +636,13 @@ export interface TableAgentBridge {
   publish?(manifest: AgentManifest): void;
   /** Called with the live session after mount. */
   attach?(session: AgentSession): void;
+  /**
+   * Called when a write starts or stops waiting on a human.
+   *
+   * `execute` does not return while an approval is open, so a panel outside
+   * the table has no other way to know the turn is parked rather than
+   * thinking. Only the chrome-mediated path reports here: with `onApprove`
+   * set the host is already the one being asked.
+   */
+  approvals?(pending: boolean): void;
 }

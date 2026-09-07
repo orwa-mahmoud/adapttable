@@ -4602,6 +4602,7 @@ export interface TableAssistantSuggestionView {
 
 // @public
 export interface TableAssistantView {
+    readonly busy?: boolean;
     // (undocumented)
     readonly draft: string;
     readonly error?: string;

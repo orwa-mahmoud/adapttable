@@ -19,6 +19,8 @@ export interface AssistantComposerProps {
   readonly slots: TableAssistantSlots;
   readonly labels: TableLabels | undefined;
   readonly status: string;
+  /** Whether a turn is in flight. Falls back to the status when absent. */
+  readonly busy?: boolean;
   readonly draft: string;
   readonly setDraft: (draft: string) => void;
   readonly onSend: () => void;
@@ -30,12 +32,15 @@ export function AssistantComposer({
   slots,
   labels,
   status,
+  busy: busyProp,
   draft,
   setDraft,
   onSend,
   onStop,
 }: AssistantComposerProps): ReactElement {
-  const busy = assistantIsBusy(status);
+  // A parked approval is still a turn: the host says so with `busy`, and
+  // without it the status is the only signal there is.
+  const busy = busyProp ?? assistantIsBusy(status);
   const usable = assistantIsUsable(status);
   const Composer = slots.Composer;
   const Button = slots.Button;

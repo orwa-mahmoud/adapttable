@@ -329,6 +329,7 @@ export interface RowWindowRow {
 
 // @public
 export interface TableAgentBridge {
+    approvals?(pending: boolean): void;
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }

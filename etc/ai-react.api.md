@@ -303,6 +303,7 @@ export function tableAgent(options: TableAgentOptions): StaticTableFeature;
 
 // @public
 export interface TableAgentBridge {
+    approvals?(pending: boolean): void;
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }

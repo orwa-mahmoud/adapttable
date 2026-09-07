@@ -773,6 +773,17 @@ function TableAgentProvider({
     options.bridge?.publish?.(published);
   });
 
+  // The chrome path is the only one that parks: with `onApprove` the host
+  // answers directly and nothing is ever left open here.
+  const chromePending = !hostApprove && pending !== null;
+  // Held in a ref so a host passing an inline bridge object does not make
+  // this fire on every render, and so the call keeps its receiver.
+  const bridgeRef = useRef(options.bridge);
+  bridgeRef.current = options.bridge;
+  useEffect(() => {
+    bridgeRef.current?.approvals?.(chromePending);
+  }, [chromePending]);
+
   const approvalValue =
     hostApprove || !pending
       ? null

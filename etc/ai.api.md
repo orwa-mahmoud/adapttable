@@ -453,6 +453,7 @@ export function summaryOf(key: CapabilityKey): string;
 
 // @public
 export interface TableAgentBridge {
+    approvals?(pending: boolean): void;
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }

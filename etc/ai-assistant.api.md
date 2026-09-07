@@ -361,12 +361,14 @@ export interface RowWindowRow {
 
 // @public
 export interface TableAgentBridge {
+    approvals?(pending: boolean): void;
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }
 
 // @public
 export interface TableAssistantOptions {
+    readonly awaitingApproval?: boolean;
     readonly onOpenChange?: (open: boolean) => void;
     readonly open?: boolean;
     readonly primarySuggestions?: number;
@@ -378,6 +380,7 @@ export interface TableAssistantOptions {
 
 // @public
 export interface TableAssistantState {
+    readonly busy: boolean;
     readonly clear: () => void;
     // (undocumented)
     readonly draft: string;

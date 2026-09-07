@@ -121,6 +121,15 @@ export interface TableAssistantOptions {
   readonly open?: boolean;
   /** Called on every open/close request, controlled or not. */
   readonly onOpenChange?: (open: boolean) => void;
+  /**
+   * Whether a write from this conversation is waiting on a human.
+   *
+   * `execute` does not return while an approval is open, so the turn looks
+   * like thinking from in here. A host that renders the approval — or wires
+   * `bridge.approvals` — passes it back so the panel can say what is
+   * actually happening. The turn is still in flight and still stoppable.
+   */
+  readonly awaitingApproval?: boolean;
   /** How many primary suggestions to surface. The rest are `more`. */
   readonly primarySuggestions?: number;
 }
@@ -128,6 +137,14 @@ export interface TableAssistantOptions {
 /** What a host renders from. @public */
 export interface TableAssistantState {
   readonly status: AssistantStatus;
+  /**
+   * Whether a turn is in flight and can still be stopped.
+   *
+   * Separate from {@link TableAssistantState.status}: a write parked on a
+   * human approval reports `awaiting-approval` but is still running, and
+   * Stop still ends it.
+   */
+  readonly busy: boolean;
   readonly messages: readonly AssistantMessage[];
   readonly draft: string;
   readonly setDraft: (draft: string) => void;
@@ -448,13 +465,22 @@ export function useTableAssistant(
   );
 
   return {
-    status,
     messages,
     draft,
     setDraft,
     send,
     stop,
     clear,
+    // What the badge says. A parked write is not "working", and a reader
+    // watching a spinner that will never resolve on its own is the reason
+    // this is separate from `busy`.
+    status:
+      status === "sending" && options.awaitingApproval
+        ? "awaiting-approval"
+        : status,
+    // Whether a turn can still be stopped. An approval parks the turn; it
+    // does not end it, so Stop stays on the composer.
+    busy: status === "sending",
     suggestions: eligible.slice(0, primary),
     moreSuggestions: eligible.slice(primary),
     runSuggestion,

@@ -423,6 +423,40 @@ describe("the composer", () => {
     expect(stop).toHaveBeenCalled();
   });
 
+  it("keeps Stop while a write waits on a human", () => {
+    const stop = vi.fn();
+    // `execute` has not returned: the turn is parked on an approval, not
+    // finished. Reporting it as ready would strand the reader with a Send
+    // button and no way to abandon the write.
+    mount({
+      assistant: view({
+        status: "awaiting-approval",
+        busy: true,
+        draft: "hello",
+        stop,
+      }),
+    });
+
+    expect(part("assistant-send")).toBeNull();
+    fireEvent.click(part("assistant-stop")!);
+    expect(stop).toHaveBeenCalled();
+  });
+
+  it("shows Send again once an approval has been decided", () => {
+    // Same status, but the turn is over — the receipt is in the transcript
+    // and there is nothing left to stop.
+    mount({
+      assistant: view({
+        status: "awaiting-approval",
+        busy: false,
+        draft: "hello",
+      }),
+    });
+
+    expect(part("assistant-stop")).toBeNull();
+    expect(part("assistant-send")).not.toBeNull();
+  });
+
   it("does not send on Enter while a turn runs", () => {
     const send = vi.fn();
     mount({ assistant: view({ status: "sending", draft: "hello", send }) });

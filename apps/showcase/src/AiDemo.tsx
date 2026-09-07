@@ -277,6 +277,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [panelOpen, setPanelOpen] = useState(
     () => !(typeof window !== "undefined" && window.matchMedia(NARROW).matches)
   );
+  const [awaitingApproval, setAwaitingApproval] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
@@ -313,7 +314,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         apply: {
           setFilters: (filters) => setTeamFilter(teamFromFilters(filters)),
         },
-        bridge: { attach: setSession, publish: setManifest },
+        bridge: {
+          attach: setSession,
+          publish: setManifest,
+          // `execute` does not return while the approval sits above the
+          // table, so without this the panel would show "Working…" at a
+          // turn that is actually waiting on the reader.
+          approvals: setAwaitingApproval,
+        },
       }),
     ];
     // Grouping is composed with the column the agent groups by; the agent
@@ -349,6 +357,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     // Only a genuine transport swap re-establishes the conversation.
     transportKey: connection.key,
     suggestions: SUGGESTIONS,
+    awaitingApproval,
     open: panelOpen,
     onOpenChange: setPanelOpen,
   });
