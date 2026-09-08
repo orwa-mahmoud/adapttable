@@ -31,6 +31,7 @@ import { cellsForRow } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { cellSpanMark } from '@adapttable/core';
 import { CellSpanRequest } from '@adapttable/core';
+import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { COLUMN_GROUP_ID_SEP } from '@adapttable/core';
 import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core';
@@ -978,12 +979,7 @@ export interface ChecklistSlots {
     readonly Search: (props: ChecklistSearchProps) => ReactNode;
 }
 
-// @public
-export interface ChecklistValue {
-    count: number;
-    label: string;
-    value: string;
-}
+export { ChecklistValue }
 
 export { ChipLabelResolver }
 
@@ -3991,7 +3987,7 @@ export function rowReorderDropStyle(attrs: {
     "data-drop"?: RowDropPosition;
 } | undefined): CSSProperties;
 
-// @public
+// @public (undocumented)
 export function RowReorderHandleChrome<TRow>(input: Readonly<RowReorderHandleChromeProps<TRow>>): ReactElement;
 
 // @public

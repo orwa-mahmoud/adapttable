@@ -18854,7 +18854,7 @@
       "export": "ChecklistValue",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "neutral-operation",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -23094,7 +23094,7 @@
       "export": "ChecklistValue",
       "currentImport": "@adapttable/react/features",
       "kind": "type",
-      "class": "neutral-model",
+      "class": "react-binding",
       "proposedImport": "@adapttable/react/features",
       "behavior": ""
     },
@@ -24150,7 +24150,7 @@
       "export": "ChecklistValue",
       "currentImport": "@adapttable/react",
       "kind": "type",
-      "class": "neutral-model",
+      "class": "react-binding",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },
@@ -24166,7 +24166,7 @@
       "export": "collectChecklistValues",
       "currentImport": "@adapttable/react",
       "kind": "value",
-      "class": "neutral-operation",
+      "class": "react-binding",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },

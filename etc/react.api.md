@@ -15,7 +15,9 @@ import { CellEditor } from '@adapttable/core';
 import { CellEditTarget } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
+import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
+import { collectChecklistValues } from '@adapttable/core';
 import { ColorScheme } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
@@ -397,12 +399,7 @@ export interface ChecklistFilterState {
     visible: readonly ChecklistValue[];
 }
 
-// @public
-export interface ChecklistValue {
-    count: number;
-    label: string;
-    value: string;
-}
+export { ChecklistValue }
 
 export { ChipLabelResolver }
 
@@ -421,8 +418,7 @@ export interface ChromeBodyData<TRow> {
     virtualScrollRef: RefCallback<HTMLElement>;
 }
 
-// @public
-export function collectChecklistValues<TRow>(def: FilterDef<TRow>, rows: readonly TRow[], selected?: readonly string[]): ChecklistValue[];
+export { collectChecklistValues }
 
 // @public
 export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {

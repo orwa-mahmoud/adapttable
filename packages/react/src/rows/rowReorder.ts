@@ -19,6 +19,7 @@ import {
   type RowMovePolicy,
   type RowMoveRequest,
   type RowMoveTarget,
+  rowReorderSignature as coreRowReorderSignature,
 } from "@adapttable/core";
 import {
   type CSSProperties,
@@ -284,16 +285,9 @@ export function rowReorderSignature<TRow>(
   rowId: string,
   localIndex: number
 ): string | null {
-  if (!reorder) return null;
-  const inFlight = reorder.lifted !== null ? "L" : "";
-  const confirming =
-    (reorder.pendingMove !== null ? "P" : "") +
-    (reorder.hostConfirmPending ? "H" : "");
-  const lifted = reorder.isLifted(rowId) ? "d" : "";
-  const targeted =
-    reorder.overIndex === localIndex && reorder.lifted !== null ? "t" : "";
-  const position = targeted ? (reorder.overPosition ?? "") : "";
-  return `${inFlight}${confirming}${lifted}${targeted}${position}`;
+  // One digest, defined by the engine: a binding that wrote its own would
+  // drift from the one the memo comparator on the other side reads.
+  return coreRowReorderSignature(reorder, rowId, localIndex);
 }
 
 /** Whether the grip sits in a right-to-left context. */

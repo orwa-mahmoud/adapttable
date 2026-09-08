@@ -14,6 +14,7 @@ import { CellEditorOption } from '@adapttable/core';
 import { CellProps } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { CellSpanRequest } from '@adapttable/core';
+import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnFooterContext } from '@adapttable/core';
@@ -162,12 +163,7 @@ export { CellSpanAppearance }
 
 export { CellSpanRequest }
 
-// @public
-export interface ChecklistValue {
-    count: number;
-    label: string;
-    value: string;
-}
+export { ChecklistValue }
 
 export { ChipLabelResolver }
 
