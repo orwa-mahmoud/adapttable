@@ -16,6 +16,7 @@ import {
   type GroupSort,
   insertExtraRows,
   parseGroupBy,
+  serializeGroupAggregateOverrides,
   sourceCapabilities,
   withGroupAggregateOverrides,
 } from "@adapttable/core";
@@ -78,6 +79,12 @@ function LiveGrouping({
     onGroupLoadMore,
     extraRows,
   } = props;
+  // The reader's aggregation choices, as a value. The mapper below is a new
+  // closure every render, so nothing downstream can tell one choice from
+  // another by identity — this is what says the answer changed.
+  const aggregateOverrideKey = serializeGroupAggregateOverrides(
+    source.groupAggregateOverrides ?? {}
+  );
   const effectiveGroupAggregates = useMemo(
     () =>
       withGroupAggregateOverrides(
@@ -112,6 +119,7 @@ function LiveGrouping({
       groupPageSize,
       rowPageSize: groupRowPageSize,
       paging: groupPaging.paging,
+      derivedKey: aggregateOverrideKey,
     });
     const openGroups = entries.flatMap((entry) =>
       entry.kind === "group" ? [{ key: entry.key, level: entry.level }] : []
@@ -151,6 +159,7 @@ function LiveGrouping({
     chrome.columnLayout.visibleColumns,
     getRowId,
     groupCollapse,
+    aggregateOverrideKey,
     effectiveGroupAggregates,
     groupFooters,
     groupSort,

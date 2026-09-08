@@ -116,6 +116,16 @@ export interface IncrementalViewConfig<TRow> {
   groupBy?: string | readonly string[];
   /** Per-group cells — same signature as `summaryRow`. */
   groupAggregates?: GroupAggregatesFn<TRow>;
+  /**
+   * What the derived callbacks would answer, as a value.
+   *
+   * A host rebuilds `groupAggregates`, `groupSort` and `groupFilter` on every
+   * render, so their identity says nothing and is deliberately ignored — but
+   * their BEHAVIOUR does change, when a reader picks a different aggregation.
+   * Set this to something that changes with the choice (the serialized
+   * overrides, say) and the groups are rebuilt exactly then.
+   */
+  derivedKey?: string;
   /** Order groups within their parent. */
   groupSort?: GroupSort<TRow>;
   /** Keep only the groups this answers true for. */
@@ -549,6 +559,7 @@ function derivedConfigFingerprint<TRow>(
     paging: config.paging ?? null,
     blankLabel: config.blankLabel ?? null,
     hasGroupAggregates: config.groupAggregates !== undefined,
+    derivedKey: config.derivedKey ?? null,
     hasGroupSort: config.groupSort !== undefined,
     hasGroupFilter: config.groupFilter !== undefined,
     hasSummaryRow: config.summaryRow !== undefined,

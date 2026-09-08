@@ -80,6 +80,12 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
   groupPageSize?: number;
   rowPageSize?: number;
   paging?: GroupPaging;
+  /**
+   * What `aggregates`, `sort` and `filter` would answer, as a value — see
+   * `IncrementalViewConfig.derivedKey`. Without it a reader's aggregation
+   * choice is stored and never shown: the cached groups look unchanged.
+   */
+  derivedKey?: string;
 }
 
 /**
@@ -116,6 +122,7 @@ export function groupedEntriesForStrategy<TRow>(
         groupPageSize: options.groupPageSize,
         rowPageSize: options.rowPageSize,
         paging: options.paging,
+        derivedKey: options.derivedKey,
       })
     : undefined;
   return [
