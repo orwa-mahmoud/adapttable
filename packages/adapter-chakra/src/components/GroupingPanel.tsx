@@ -11,7 +11,9 @@ import { NativeSelect } from "./primitives";
 
 const TOUCH_SIZE = "44px";
 /** A caret between chips, grown into something aimable mid-drag. */
-const DRAG_TARGET = "28px";
+// One width, dragging or not: a caret that grows on dragstart moves the chips
+// after it out from under the reader's cursor.
+const CARET = "10px";
 
 /**
  * How wide one insertion boundary is.
@@ -19,9 +21,8 @@ const DRAG_TARGET = "28px";
  * A caret between chips at rest, an aimable target while a drag is in
  * flight, and the full placeholder when the strip has nothing in it.
  */
-function dropZoneWidth(empty: boolean, dragging: boolean): string {
-  if (empty) return "132px";
-  return dragging ? DRAG_TARGET : "10px";
+function dropZoneWidth(empty: boolean): string {
+  return empty ? "132px" : CARET;
 }
 
 const slots: GroupingPanelSlots = {
@@ -49,7 +50,7 @@ const slots: GroupingPanelSlots = {
     <Box
       aria-label={label}
       minH={empty ? TOUCH_SIZE : "28px"}
-      minW={dropZoneWidth(empty, dragging)}
+      minW={dropZoneWidth(empty)}
       px={empty ? 2 : 0.5}
       alignSelf="center"
       display="grid"
@@ -63,6 +64,7 @@ const slots: GroupingPanelSlots = {
       transition="background-color 120ms ease, border-color 120ms ease"
       {...dropProps}
       {...rest}
+      data-dragging={dragging || undefined}
     >
       {empty ? (
         <Text fontSize="xs" textAlign="center">

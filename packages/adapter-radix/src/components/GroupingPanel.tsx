@@ -32,14 +32,10 @@ const PANEL_CSS =
   `.${PANEL_CLASS}[data-mobile] [data-adapttable-part^="grouping-a"]` +
   `{flex:1 1 160px}`;
 
-function dropZoneWidth(
-  empty: boolean,
-  active: boolean,
-  dragging: boolean
-): number {
-  if (empty) return 168;
-  if (active) return 28;
-  return dragging ? 24 : 12;
+function dropZoneWidth(empty: boolean): number {
+  // One width, whatever is happening: a caret that grows mid-drag moves the
+  // chips after it out from under the reader's cursor.
+  return empty ? 168 : 12;
 }
 
 const slots: GroupingPanelSlots = {
@@ -87,6 +83,7 @@ const slots: GroupingPanelSlots = {
       role="group"
       aria-label={label}
       data-active={active || undefined}
+      data-dragging={dragging || undefined}
       {...dropProps}
       {...rest}
       style={{
@@ -95,7 +92,7 @@ const slots: GroupingPanelSlots = {
         alignItems: "center",
         justifyContent: "center",
         minBlockSize: TOUCH_TARGET,
-        minInlineSize: dropZoneWidth(empty, active, dragging),
+        minInlineSize: dropZoneWidth(empty),
         paddingInline: empty ? "var(--space-3)" : undefined,
         border: "1px dashed",
         borderColor: active ? "var(--accent-9)" : "var(--gray-a7)",

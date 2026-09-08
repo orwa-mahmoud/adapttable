@@ -775,14 +775,14 @@ button.adapttable-btn:has([data-slot="select-value"]) {
   border-color: var(--adapttable-border);
 }
 
+/* One width, dragging or not: a caret that grows mid-drag moves the chips
+   after it out from under the reader's cursor. */
 .adapttable-grouping-drop-zone[data-dragging="true"] {
-  min-width: 1.5rem;
   border-color: var(--adapttable-border);
 }
 
 .adapttable-grouping-drop-zone[data-active="true"],
 .adapttable-grouping-drop-zone[data-drop-active="true"] {
-  min-width: 2rem;
   border-color: var(--adapttable-accent);
   background: color-mix(in srgb, var(--adapttable-accent) 14%, transparent);
 }

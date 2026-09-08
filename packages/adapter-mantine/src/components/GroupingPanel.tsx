@@ -9,7 +9,10 @@ import { ActionIcon, Box, Group, Paper, Select, Text } from "@mantine/core";
 
 const TOUCH_SIZE = 44;
 /** A caret between chips, grown into something aimable mid-drag. */
-const DRAG_TARGET = 28;
+// One width, dragging or not. A caret that grows when a drag starts shoves
+// every chip after it sideways, and the reader is then aiming at a chip that
+// has moved — which is why the drop is taken by the chip and the strip too.
+const CARET = 10;
 
 /**
  * How wide one insertion boundary is.
@@ -17,9 +20,8 @@ const DRAG_TARGET = 28;
  * A caret between chips at rest, an aimable target while a drag is in
  * flight, and the full placeholder when the strip has nothing in it.
  */
-function dropZoneWidth(empty: boolean, dragging: boolean): number {
-  if (empty) return 132;
-  return dragging ? DRAG_TARGET : 10;
+function dropZoneWidth(empty: boolean): number {
+  return empty ? 132 : CARET;
 }
 
 const slots: GroupingPanelSlots = {
@@ -47,7 +49,7 @@ const slots: GroupingPanelSlots = {
     <Box
       aria-label={label}
       mih={empty ? TOUCH_SIZE : 28}
-      miw={dropZoneWidth(empty, dragging)}
+      miw={dropZoneWidth(empty)}
       px={empty ? "xs" : 2}
       style={{
         alignSelf: "center",
@@ -67,6 +69,7 @@ const slots: GroupingPanelSlots = {
       }}
       {...dropProps}
       {...rest}
+      data-dragging={dragging || undefined}
     >
       {empty ? (
         <Text size="xs" ta="center">

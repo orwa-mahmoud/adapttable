@@ -23,12 +23,12 @@ import {
 const TOUCH_TARGET = 44;
 
 /**
- * How wide one insertion boundary is: a caret at rest, an aimable target
- * while a drag is in flight, wider still once the pointer is on it.
+ * How wide one insertion boundary is — one width, whatever is happening.
+ * A caret that grows when a drag starts, or when the pointer reaches it,
+ * moves every chip after it sideways mid-drag.
  */
-function dropZoneWidth(active: boolean, dragging: boolean): number {
-  if (active) return 28;
-  return dragging ? 24 : 12;
+function dropZoneWidth(): number {
+  return 12;
 }
 
 const slots: GroupingPanelSlots = {
@@ -85,6 +85,7 @@ const slots: GroupingPanelSlots = {
       aria-label={label}
       {...dropProps}
       {...rest}
+      data-dragging={dragging || undefined}
       sx={
         empty
           ? {
@@ -105,7 +106,7 @@ const slots: GroupingPanelSlots = {
             }
           : {
               alignSelf: "stretch",
-              minWidth: dropZoneWidth(active, dragging),
+              minWidth: dropZoneWidth(),
               minHeight: TOUCH_TARGET,
               borderInlineStart: 2,
               borderColor: active ? "primary.main" : "divider",

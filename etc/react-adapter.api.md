@@ -3195,6 +3195,10 @@ export interface GroupingPanelSurfaceProps {
     dir?: Direction;
     label: string;
     mobile: boolean;
+    onDragEnter?: DragEventHandler;
+    onDragLeave?: DragEventHandler;
+    onDragOver?: DragEventHandler;
+    onDrop?: DragEventHandler;
 }
 
 // @public

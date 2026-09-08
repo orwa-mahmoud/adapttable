@@ -58,20 +58,49 @@ function reactGroupingDragProps(
 }
 
 /**
- * Drop handlers that refuse: nothing calls `preventDefault`, so the browser
- * shows the reader this is not a place to let go.
+ * Drop handlers that refuse.
+ *
+ * Nothing calls `preventDefault`, so the browser shows the reader this is not
+ * a place to let go — and the event stops here rather than reaching the chip
+ * or the strip around it, both of which would have taken it. A refusal that
+ * bubbles is not a refusal.
  */
 const INERT_DROP_PROPS: GroupingDropProps = {
-  onDragEnter: () => undefined,
-  onDragOver: () => undefined,
-  onDragLeave: () => undefined,
-  onDrop: () => undefined,
+  onDragEnter: (event) => event.stopPropagation(),
+  onDragOver: (event) => event.stopPropagation(),
+  onDragLeave: (event) => event.stopPropagation(),
+  onDrop: (event) => event.stopPropagation(),
 };
 
 function reactGroupingDropProps(
   props: CoreGroupingDropProps
 ): GroupingDropProps {
   return props as unknown as GroupingDropProps;
+}
+
+/**
+ * Drop handlers that stand down for whatever inside them already answered.
+ *
+ * The strip nests targets — a caret inside a chip, a chip inside the panel —
+ * and the innermost one is always the more precise answer. It says so by
+ * calling `preventDefault`, which is how the browser is told a drop is
+ * accepted here; anything wrapping it reads that and keeps out of the way.
+ */
+function deferToInner(props: CoreGroupingDropProps): CoreGroupingDropProps {
+  const passUp =
+    <TEvent extends { defaultPrevented: boolean }>(
+      handler: ((event: TEvent) => void) | undefined
+    ) =>
+    (event: TEvent) => {
+      if (event.defaultPrevented) return;
+      handler?.(event);
+    };
+  return {
+    onDragEnter: passUp(props.onDragEnter),
+    onDragOver: passUp(props.onDragOver),
+    onDragLeave: props.onDragLeave,
+    onDrop: passUp(props.onDrop),
+  };
 }
 
 function reactGroupingChipKeyboardProps(
@@ -98,6 +127,19 @@ export interface GroupingPanelSurfaceProps {
   mobile: boolean;
   /** Logical text direction. */
   dir?: Direction;
+  /**
+   * A dragged field arriving over the strip. The panel is mostly free space
+   * once a few chips are in it, and that space is where a reader aims: a drop
+   * anywhere on it that no caret or chip already answered adds the field at
+   * the end. Spread all four onto the same element as the part name.
+   */
+  onDragEnter?: DragEventHandler;
+  /** The field still over the strip — what accepts the drop. */
+  onDragOver?: DragEventHandler;
+  /** The field leaving the strip. */
+  onDragLeave?: DragEventHandler;
+  /** The field let go over the strip. */
+  onDrop?: DragEventHandler;
   /** Stable styling and test part name. */
   "data-adapttable-part": "grouping-panel";
 }
@@ -273,26 +315,21 @@ export function GroupingPanelChrome<TRow>({
   // meaningful target a chip's width away from where the drag began — pick up
   // the last field and the only places that would move it are back at the head
   // of the strip.
-  const ontoChip = (index: number) => {
+  const ontoChip = (index: number): CoreGroupingDropProps => {
     const target = lifted >= 0 && lifted < index ? index + 1 : index;
-    if (lifted >= 0 && target === lifted) return {};
-    const props = state.dropProps(target);
-    const passUp =
-      <TEvent extends { defaultPrevented: boolean }>(
-        handler: ((event: TEvent) => void) | undefined
-      ) =>
-      (event: TEvent) => {
-        // A boundary inside this chip answered first; it meant something more
-        // precise than "here".
-        if (event.defaultPrevented) return;
-        handler?.(event);
-      };
-    return {
-      onDragEnter: passUp(props.onDragEnter),
-      onDragOver: passUp(props.onDragOver),
-      onDragLeave: props.onDragLeave,
-      onDrop: passUp(props.onDrop),
-    };
+    // The chip being dragged is not a place to drop it.
+    if (lifted >= 0 && target === lifted) {
+      return INERT_DROP_PROPS as unknown as CoreGroupingDropProps;
+    }
+    return deferToInner(state.dropProps(target));
+  };
+  // The strip is mostly free space, and free space is where a hand carrying a
+  // header lets go. A drop there lands at the end — unless a caret or a chip
+  // inside it already answered something more precise.
+  const ontoPanel = (): CoreGroupingDropProps => {
+    const target = state.groupBy.length;
+    if (inert(target)) return {};
+    return deferToInner(state.dropProps(target));
   };
 
   const boundary = (index: number) =>
@@ -313,6 +350,7 @@ export function GroupingPanelChrome<TRow>({
       label={labels.groupingPanel}
       mobile={mobile}
       dir={dir}
+      {...(mobile ? {} : reactGroupingDropProps(ontoPanel()))}
       data-adapttable-part="grouping-panel"
     >
       {state.groupBy.map((key, index) => {
