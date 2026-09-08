@@ -21299,6 +21299,14 @@
       "behavior": ""
     },
     {
+      "export": "resolveRowEditTrigger",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "resolveStickyToolbar",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -21476,6 +21484,14 @@
     },
     {
       "export": "RowEditingState",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditTrigger",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",

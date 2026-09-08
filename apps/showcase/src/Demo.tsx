@@ -66,7 +66,6 @@ import {
   isRemote,
   LIVE_DEFAULT_LAYOUT,
   makeLargeDirectory,
-  nextStatus,
   orderPeopleByTeam,
   PEOPLE,
   type Person,
@@ -753,16 +752,9 @@ function frontendColumnProps(
     isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
-    // Edit moves the row's status on and flashes it; Delete removes it.
-    // Both are real: an action that only announces what it would have done
-    // teaches the wrong thing about what the table can do.
-    demoRowHandlers: {
-      onEdit: (row: Person) => {
-        flags.onCellEdit(row, "status", nextStatus(row));
-        flags.flashRow(row.id);
-      },
-      onDelete: flags.onDeleteRow,
-    },
+    // Delete removes the row. The pencil is a row-edit trigger and needs no
+    // handler: it opens the row's own fields, which save through `onRowEdit`.
+    demoRowHandlers: { onDelete: flags.onDeleteRow },
   };
   const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
     flags.writePatches([updateRow(row.id, columnChanges(patch))]);

@@ -3600,6 +3600,9 @@ export { ResolvedPaginationMode }
 // @public
 export function resolveMobileLabel<TRow>(column: ColumnDef<TRow>): string | undefined;
 
+// @public
+export function resolveRowEditTrigger<TRow>(actions: readonly RowAction<TRow>[] | undefined, rowEditing: RowEditingState<TRow> | undefined, row: TRow, rowId: string): RowEditTrigger<TRow>;
+
 export { resolveRowHeight }
 
 export { resolveRowStyle }
@@ -3653,7 +3656,7 @@ export function rowClickProps<TRow>(row: TRow, onRowClick: ((row: TRow) => void)
 export { RowDropPosition }
 
 // @public
-export function RowEditActionsChrome<TRow>(input: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement;
+export function RowEditActionsChrome<TRow>(input: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement | null;
 
 // @public
 export interface RowEditActionsChromeProps<TRow> extends RowEditActionsProps<TRow> {
@@ -3664,6 +3667,7 @@ export interface RowEditActionsChromeProps<TRow> extends RowEditActionsProps<TRo
 export interface RowEditActionsProps<TRow> extends RowEditControlsOptions<TRow> {
     buttonClassName?: string;
     className?: string;
+    showBegin?: boolean;
 }
 
 // @public
@@ -3736,6 +3740,12 @@ export interface RowEditingState<TRow> {
     save: () => void;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
+}
+
+// @public
+export interface RowEditTrigger<TRow> {
+    readonly actions: readonly RowAction<TRow>[];
+    readonly showBegin: boolean;
 }
 
 // @public

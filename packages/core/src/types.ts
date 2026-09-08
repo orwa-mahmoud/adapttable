@@ -183,8 +183,23 @@ export interface RowAction<TRow> {
    * is omitted.
    */
   icon?: DisplayValue;
-  /** Click handler; fires after confirmation when `confirm` is set. */
-  onClick: (row: TRow) => void;
+  /**
+   * Click handler; fires after confirmation when `confirm` is set. Omit it
+   * only on an `editsRow` action, where the row's own form does the writing.
+   */
+  onClick?: (row: TRow) => void;
+  /**
+   * This action opens the row's fields as one form instead of writing
+   * anything itself. Row-mode editing hands it the trigger and the table's
+   * own "Edit row" control stands down, so a row has one way in rather than
+   * two controls that do the same thing. Save and cancel come from the open
+   * row, as they do for every row edit.
+   *
+   * It renders only where there is a form to open: a table without row-mode
+   * editing drops the action, because a control that cannot do what it says
+   * is worse than no control.
+   */
+  editsRow?: boolean;
   /** Adapter-defined colour token (e.g. `"red"` for destructive). */
   color?: string;
   /** Disable conditionally — e.g. delete when the row is referenced. */

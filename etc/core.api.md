@@ -3280,12 +3280,13 @@ export interface RowAction<TRow> {
     color?: string;
     confirm?: ActionConfirm<TRow>;
     disabledReason?: (row: TRow) => string | undefined;
+    editsRow?: boolean;
     icon?: DisplayValue;
     isDisabled?: (row: TRow) => boolean;
     isHidden?: (row: TRow) => boolean;
     key: string;
     label: string;
-    onClick: (row: TRow) => void;
+    onClick?: (row: TRow) => void;
 }
 
 // @public

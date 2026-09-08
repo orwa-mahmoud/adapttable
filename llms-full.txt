@@ -2998,6 +2998,25 @@ Both are one factory: `rowEditing(onRowEdit)` arms the mode and wires the patch
 channel. `editing()` is not required — a table that only wants row-level commits
 leaves it out, and its cells stay display-only until a row is opened.
 
+### Opening the row from your own pencil
+
+A table that already has a pencil in its actions column does not want a second
+control beside it saying the same thing. Mark that action `editsRow` and it
+becomes the way in — the built-in **Edit** control stands down, and save and
+cancel still come from the open row:
+
+```tsx
+const actions = [
+  { key: "edit", label: "Edit", icon: <PencilIcon />, editsRow: true },
+  { key: "delete", label: "Delete", onClick: remove },
+];
+```
+
+Such an action writes nothing itself, so it carries no `onClick`, and it renders
+only where there is a form to open: a table without `rowEditing` drops it rather
+than showing a control that cannot do what it says. While its own row is open it
+steps aside, because that row is already showing save and cancel.
+
 Parts: `row-edit-begin`, `row-edit-actions`, `row-edit-save`, `row-edit-cancel`.
 Labels: `labels.editRow`, `labels.saveRow`, `labels.cancel`, all localized in
 every locale.
@@ -3006,7 +3025,10 @@ Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `UseRowEditingOptions`), with `RowEditCell` (`RowEditCellProps`),
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
 from `@adapttable/core/adapter`. Each adapter mounts `RowEditActions`
-(`RowEditActionsProps`) over `RowEditActionsChrome`.
+(`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's
+actions against its edit state with `resolveRowEditTrigger` (`RowEditTrigger`
+out) — which rewires an `editsRow` action to the form and reports whether the
+built-in control still draws itself.
 
 ## Changing many rows, saving once
 
@@ -10657,7 +10679,10 @@ together and hands the host one patch of what changed. `RowEditCell` (`RowEditCe
 `@adapttable/core/adapter`. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome` /
 `RowEditActionsChromeProps` / `RowEditActionsSlots` / `RowEditButtonProps`;
-`labels.editRow` and `labels.saveRow` name them.
+`labels.editRow` and `labels.saveRow` name them. A row action marked `editsRow`
+becomes that trigger instead: `resolveRowEditTrigger(actions, rowEditing, row, rowId)`
+(`RowEditTrigger` out) wires it to the row's form and reports whether the
+built-in control still draws itself.
 
 **Changing many rows at once.** `batchEditing` + `onBatchEdit` hold every change
 until one save: `useBatchEditing(options)` (`UseBatchEditingOptions` in,

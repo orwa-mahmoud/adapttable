@@ -221,6 +221,13 @@ export interface RowEditActionsProps<
   className?: string;
   /** Class for each button. */
   buttonClassName?: string;
+  /**
+   * Whether to draw the control that opens the row. `false` when a host row
+   * action carries `editsRow` and owns that trigger — see
+   * `resolveRowEditTrigger`. Save and cancel are unaffected: they belong to
+   * the open row, not to whatever opened it.
+   */
+  showBegin?: boolean;
 }
 
 /**
@@ -270,19 +277,24 @@ export interface RowEditActionsChromeProps<
  *
  * @typeParam TRow - The row type.
  * @param props - See {@link RowEditActionsChromeProps}.
- * @returns The controls for this row.
+ * @returns The controls for this row, or nothing when a host action owns the
+ *   trigger and the row is not open.
  *
  * @public
  */
 export function RowEditActionsChrome<TRow>({
   className,
   buttonClassName,
+  showBegin,
   slots,
   ...options
-}: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement {
+}: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement | null {
   const controls = rowEditControls(options);
   const Button = slots.Button;
   if (!controls.editing) {
+    // A host action already opens this row, so drawing the built-in control
+    // would put two identical triggers side by side.
+    if (showBegin === false) return null;
     return (
       <Button
         label={controls.editLabel}

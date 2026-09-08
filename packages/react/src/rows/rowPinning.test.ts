@@ -135,18 +135,23 @@ describe("useRowPinning", () => {
         labels: LABELS,
       })
     );
-    const byKey = (key: string) =>
-      result.current.actions.find((action) => action.key === key);
+    const click = (key: string) => {
+      const onClick = result.current.actions.find(
+        (action) => action.key === key
+      )?.onClick;
+      if (!onClick) throw new Error(`${key} has no handler`);
+      onClick(ROWS[0]!);
+    };
     act(() => {
-      byKey(PIN_TOP_ACTION_KEY)?.onClick(ROWS[0]!);
+      click(PIN_TOP_ACTION_KEY);
     });
     expect(result.current.sideOf("a")).toBe("top");
     act(() => {
-      byKey(PIN_BOTTOM_ACTION_KEY)?.onClick(ROWS[0]!);
+      click(PIN_BOTTOM_ACTION_KEY);
     });
     expect(result.current.sideOf("a")).toBe("bottom");
     act(() => {
-      byKey(UNPIN_ROW_ACTION_KEY)?.onClick(ROWS[0]!);
+      click(UNPIN_ROW_ACTION_KEY);
     });
     expect(result.current.sideOf("a")).toBeUndefined();
     act(() => {

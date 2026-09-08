@@ -49,6 +49,7 @@ import {
   pinnedSummaryRowId,
   type PinSide,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
   type RowReorderState,
 } from "@adapttable/react/adapter";
 import { type TableColumnsType, Typography } from "antd";
@@ -1024,20 +1025,23 @@ export function buildColumns<TRow>({
           return null;
         }
         const row = record;
+        const rowId = getRowId(row);
+        const rowEdit = resolveRowEditTrigger(rowActions, rowMode, row, rowId);
         return (
           <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
             {rowMode && (
               <OptionalRowEditActions
                 rowEditing={rowMode}
                 row={row}
-                rowId={getRowId(row)}
+                rowId={rowId}
+                showBegin={rowEdit.showBegin}
                 labels={labels}
               />
             )}
-            {(rowActions ?? []).length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions ?? []}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}

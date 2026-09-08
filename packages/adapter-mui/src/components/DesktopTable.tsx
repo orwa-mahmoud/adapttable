@@ -22,6 +22,7 @@ import {
   mergedCellStyle,
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
@@ -233,6 +234,12 @@ function DesktopRowBase<TRow>(
     expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
   const edge = (active: boolean, lead = 0) =>
     pinnedEdgeCellStyle("start", active, PIN_Z.body, PIN_BG, lead);
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
   return (
     <>
       <TableRow
@@ -377,6 +384,7 @@ function DesktopRowBase<TRow>(
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
                 labels={{
                   editRow: labels.editRow,
                   saveRow: labels.saveRow,
@@ -384,10 +392,10 @@ function DesktopRowBase<TRow>(
                 }}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}

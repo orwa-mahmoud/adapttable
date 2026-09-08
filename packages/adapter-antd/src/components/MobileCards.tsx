@@ -27,6 +27,7 @@ import {
   pinnedSummaryRowId,
   pinnedSummarySideFromId,
   resolveMobileLabel,
+  resolveRowEditTrigger,
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
@@ -223,7 +224,13 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     rowCount,
     renderCard,
   } = props;
-  const actions = rowActions && rowActions.length > 0 ? rowActions : null;
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
+  const actions = rowEdit.actions.length > 0 ? rowEdit.actions : null;
   // Built once and used by both paths, so a custom card shows the very same
   // value node the built-in would have — cell renderers and editors included.
   const fields = columns.map((column) => ({
@@ -294,6 +301,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
                 labels={labels}
               />
             )}

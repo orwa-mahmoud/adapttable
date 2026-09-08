@@ -1006,8 +1006,6 @@ export function makeWideColumns(
  * the table.
  */
 export interface DemoRowHandlers {
-  /** Change something real about the row, visibly. */
-  readonly onEdit: (row: Person) => void;
   /** Remove the row from the data. */
   readonly onDelete: (row: Person) => void;
 }
@@ -1022,16 +1020,11 @@ export function makeActions(
       key: "edit",
       label: s.edit,
       icon: <EditIcon />,
-      onClick: (row) => {
-        if (!handlers) {
-          notifyDemo({ message: `${s.edit}: ${row.name}` });
-          return;
-        }
-        handlers.onEdit(row);
-      },
-      // Agent invocation is a different question from a person clicking it:
-      // this one changes a cell, so it asks first.
-      ai: { approval: { policy: "required" } },
+      // The pencil opens the row's own fields rather than writing anything of
+      // its own, so the table's built-in "Edit row" control stands down and
+      // save and cancel come from the open row. Where a table has no row form
+      // the action does not render at all.
+      editsRow: true,
     },
     {
       key: "delete",
@@ -1055,13 +1048,6 @@ export function makeActions(
       ai: { approval: { policy: "required" } },
     },
   ];
-}
-
-/** The next status in the cycle — what the demo's Edit action changes. */
-export function nextStatus(row: Person): DemoStatus {
-  const current = personStatus(row);
-  const at = STATUSES.indexOf(current);
-  return STATUSES[(at + 1) % STATUSES.length];
 }
 
 /** Bulk actions — passing these turns on row selection + the bulk bar. */

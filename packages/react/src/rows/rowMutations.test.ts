@@ -23,6 +23,13 @@ function actionAt(
   return action;
 }
 
+/** An action's handler — only an `editsRow` action is allowed to lack one. */
+function clickOf(action: RowAction<Row>): (row: Row) => void {
+  const onClick = action.onClick;
+  if (!onClick) throw new Error(`${action.key} has no handler`);
+  return onClick;
+}
+
 /** Arm the hook with whatever handlers a case needs. */
 function arm(options: Parameters<typeof useRowMutations<Row>>[0]) {
   return renderHook((props: typeof options) => useRowMutations<Row>(props), {
@@ -65,7 +72,7 @@ describe("useRowMutations", () => {
     const action = actionAt(result.current.actions, 0);
     expect(action.label).toBe(defaultLabels.duplicateRow);
     expect(action.confirm).toBeUndefined();
-    action.onClick(ROW);
+    clickOf(action)(ROW);
     expect(onDuplicateRow).toHaveBeenCalledWith(ROW);
   });
 
@@ -77,7 +84,7 @@ describe("useRowMutations", () => {
     expect(action.color).toBe("red");
     expect(action.confirm?.danger).toBe(true);
     expect(action.confirm?.message(ROW)).toBe(defaultLabels.deleteRowConfirm);
-    action.onClick(ROW);
+    clickOf(action)(ROW);
     expect(onDeleteRow).toHaveBeenCalledWith(ROW);
   });
 
@@ -147,7 +154,7 @@ describe("useRowMutations", () => {
     });
     const action = actionAt(result.current.actions, 0);
     rerender({ labels: defaultLabels, onDeleteRow: second });
-    action.onClick(ROW);
+    clickOf(action)(ROW);
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledWith(ROW);
   });

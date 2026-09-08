@@ -28,6 +28,7 @@ import {
   mergedCellStyle,
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
   type SharedTableRenderProps,
   sortArrow,
   useDesktopTableAssembly,
@@ -213,6 +214,12 @@ function DesktopRowBase<TRow>(
     if (!pin) return undefined;
     return { ...pin, background: pin.background ?? PIN_BG };
   };
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
   return (
     <>
       <Table.Row
@@ -362,13 +369,14 @@ function DesktopRowBase<TRow>(
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
                 labels={labels}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}

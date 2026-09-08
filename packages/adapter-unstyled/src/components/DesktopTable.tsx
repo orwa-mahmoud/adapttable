@@ -19,6 +19,7 @@ import {
   isMatchedCell,
   isSelectedCell,
   mergedCellStyle,
+  resolveRowEditTrigger,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
@@ -172,6 +173,12 @@ function DesktopRowBase<TRow>(
     bodyPinStyle,
   } = props;
   const expandable = expanded !== undefined;
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
   return (
     <>
       <tr
@@ -333,13 +340,14 @@ function DesktopRowBase<TRow>(
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
                 labels={labels}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 classNames={classNames}

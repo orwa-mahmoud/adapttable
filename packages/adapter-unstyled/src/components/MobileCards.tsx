@@ -25,6 +25,7 @@ import {
   pinnedSummaryRowId,
   pinnedSummarySideFromId,
   resolveMobileLabel,
+  resolveRowEditTrigger,
   resolveRowStyle,
   rowClickProps,
   rowEditingSignature,
@@ -248,6 +249,12 @@ function MobileCardBase<TRow>({
     ),
   }));
 
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
   return (
     <li
       {...rowClickProps(row, onRowClick, index)}
@@ -338,17 +345,18 @@ function MobileCardBase<TRow>({
           rowEditing={editing.rowEditing}
           row={row}
           rowId={id}
+          showBegin={rowEdit.showBegin}
           labels={labels}
         />
       )}
-      {rowActions && rowActions.length > 0 && (
+      {rowEdit.actions.length > 0 && (
         <div
           data-adapttable-part="card-actions"
           className={classNames.cardActions}
         >
           <RowActionButtons
             row={row}
-            actions={rowActions}
+            actions={rowEdit.actions}
             confirm={confirm}
             labels={labels}
             classNames={classNames}

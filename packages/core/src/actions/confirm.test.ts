@@ -81,6 +81,21 @@ describe("runRowAction", () => {
     expect(confirm).not.toHaveBeenCalled();
   });
 
+  it("does nothing for an action whose handler is the row's own form", () => {
+    const confirm = vi.fn();
+    // An `editsRow` action is rewired to the row form before the cell renders
+    // it, so reaching here with no handler is the normal case, not a fault.
+    expect(() => {
+      runRowAction(
+        { key: "edit", label: "Edit", editsRow: true },
+        ROW,
+        confirm,
+        "Cancel"
+      );
+    }).not.toThrow();
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
   it("asks first when the action declares a confirmation, and runs on yes", () => {
     const onClick = vi.fn();
     const confirm: ConfirmHandler = vi.fn(({ onConfirm }) => {

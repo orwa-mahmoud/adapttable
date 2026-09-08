@@ -322,6 +322,38 @@ describe("RowEditActions", () => {
     expect(part("row-edit-save")).toBeNull();
   });
 
+  it("draws nothing when a host action owns the trigger", () => {
+    const result = mountRowEditing();
+    render(
+      <RowEditActionsChrome
+        slots={rowEditTestSlots}
+        rowEditing={result.current}
+        row={TASK}
+        rowId="1"
+        showBegin={false}
+      />
+    );
+    // The pencil in the actions column is the way in; a second control beside
+    // it would open the same row.
+    expect(part("row-edit-begin")).toBeNull();
+  });
+
+  it("still ends the row it did not open", () => {
+    const onRowEdit = vi.fn();
+    const result = openRow(onRowEdit);
+    render(
+      <RowEditActionsChrome
+        slots={rowEditTestSlots}
+        rowEditing={result.current}
+        row={TASK}
+        rowId="1"
+        showBegin={false}
+      />
+    );
+    expect(part("row-edit-save")).not.toBeNull();
+    expect(part("row-edit-cancel")).not.toBeNull();
+  });
+
   it("swaps to save and cancel once the row is open", () => {
     const onRowEdit = vi.fn();
     const result = openRow(onRowEdit);

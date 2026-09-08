@@ -226,6 +226,10 @@ export {
 } from "./editing/RowEditGate";
 export type { RowEditingState } from "./editing/rowEditing";
 export {
+  resolveRowEditTrigger,
+  type RowEditTrigger,
+} from "./editing/rowEditTrigger";
+export {
   ExportAnnouncer,
   type ExportAnnouncerProps,
 } from "./export/ExportAnnouncer";

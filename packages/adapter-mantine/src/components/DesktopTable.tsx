@@ -23,6 +23,7 @@ import {
   type HtmlGroupedHeaderCell,
   mergedCellStyle,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
@@ -353,6 +354,12 @@ function DesktopRowBase<TRow>(
   const paintedActions = paintPin(
     edgePinStyle("end", hasEndPin || actionsPinned, PIN_Z.body)
   );
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
   return (
     <>
       <Table.Tr
@@ -473,6 +480,7 @@ function DesktopRowBase<TRow>(
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
                 labels={{
                   editRow: labels.editRow,
                   saveRow: labels.saveRow,
@@ -480,10 +488,10 @@ function DesktopRowBase<TRow>(
                 }}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}
