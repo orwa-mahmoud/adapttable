@@ -37,7 +37,9 @@ deliberately fixes grouping in code. See [feature composition](./features.md).
 ## The grouping panel
 
 On desktop, the feature adds a dedicated strip above the table. Drag any data
-header into it to group, drag the chips to change nesting order — onto another
+header into it to group — set `groupable: false` on a column and its header
+offers no drag and the panel does not list it, the same opt-out shape as
+`sortable` — drag the chips to change nesting order — onto another
 chip to take its place, or onto the caret between two to land there — or drag a
 chip to the remove target to ungroup it. A chip's focusable move control also
 supports Arrow Up/Down and logical Arrow Left/Right; the latter reverse in RTL

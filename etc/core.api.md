@@ -748,6 +748,7 @@ export interface ColumnModel<TRow = unknown> {
     flex?: number;
     formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
+    groupable?: boolean;
     groupShow?: ColumnGroupShow;
     header?: string;
     headerTooltip?: string;

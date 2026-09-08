@@ -140,6 +140,14 @@ export interface ColumnModel<TRow = unknown> {
   formatValue?: (row: TRow) => string;
   /** Enable sorting for this column. Off by default. */
   sortable?: boolean;
+  /**
+   * Whether a reader may group by this column. On by default, because any
+   * column can be grouped by; set `false` for one that would only make
+   * nonsense of the strip — a unique id, a free-text note, a running total.
+   * The header stops offering itself to the grouping panel, and the panel
+   * stops offering the column.
+   */
+  groupable?: boolean;
   /** Column width passed through to the rendered header/cell. */
   width?: number | string;
   /** Floor for this column's width, in pixels. */

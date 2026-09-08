@@ -215,6 +215,30 @@ describe("GroupingPanelChrome", () => {
     ).toBeInTheDocument();
   });
 
+  it("leaves a column the host closed to grouping out of the panel", () => {
+    const closed = [
+      { key: "team", header: "Team" },
+      { key: "budget", header: "Budget", groupable: false },
+    ] as unknown as AnyColumn[];
+    render(
+      <GroupingPanelChrome
+        state={panelState({ groupBy: [] })}
+        columns={closed}
+        labels={resolveLabels(undefined)}
+        mobile={false}
+        slots={slots}
+      />
+    );
+
+    const options = [
+      ...screen
+        .getByRole("combobox", { name: "Add grouping column" })
+        .querySelectorAll("option"),
+    ].map((option) => option.textContent);
+    expect(options).toContain("Team");
+    expect(options).not.toContain("Budget");
+  });
+
   it("offers only the boundaries that would actually move the dragged chip", () => {
     // Dropping a chip either side of itself lands it where it already is, so
     // those two boundaries do nothing — and they are the two nearest the

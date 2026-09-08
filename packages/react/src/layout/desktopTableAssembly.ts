@@ -1677,7 +1677,11 @@ export function useDesktopTableAssembly<TRow>(
     );
     const headerProps = {
       ...baseHeaderProps,
-      ...groupingPanel?.headerDragProps(column.key),
+      // A column the host closed to grouping offers no drag: the reader is
+      // never handed a gesture the panel would refuse.
+      ...(column.groupable === false
+        ? {}
+        : groupingPanel?.headerDragProps(column.key)),
     };
     const chainDir = table.source.sortLevels.find(
       (level) => level.key === column.key

@@ -245,7 +245,10 @@ export function GroupingPanelChrome<TRow>({
   const [aggregateColumn, setAggregateColumn] = useState("");
   const byKey = new Map(columns.map((column) => [column.key, column]));
   const available = columns
-    .filter((column) => !state.groupBy.includes(column.key))
+    .filter(
+      (column) =>
+        column.groupable !== false && !state.groupBy.includes(column.key)
+    )
     .map((column) => ({ value: column.key, label: columnName(column) }));
   const aggregateColumns = columns
     .filter((column) => !state.groupBy.includes(column.key))
