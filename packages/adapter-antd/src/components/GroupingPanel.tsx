@@ -167,6 +167,9 @@ const slots: GroupingPanelSlots = {
       {...rest}
       styles={{ body: { padding: "6px 10px" } }}
       style={{
+        // The way out of a grouping owns its row: a reader with a chip in the
+        // air has one obvious place to let go of it.
+        flex: "1 1 auto",
         minBlockSize: TOUCH_TARGET,
         minInlineSize: 180,
         display: "inline-flex",

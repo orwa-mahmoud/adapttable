@@ -236,6 +236,9 @@ const slots: GroupingPanelSlots = {
       {...dropProps}
       {...rest}
       sx={{
+        // The way out of a grouping owns its row: a reader with a chip in the
+        // air has one obvious place to let go of it.
+        flex: "1 1 auto",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",

@@ -164,16 +164,18 @@ const slots: GroupingPanelSlots = {
       mih={TOUCH_SIZE}
       px="sm"
       style={{
-        alignSelf: "flex-end",
+        // The way out of a grouping owns its row: a reader with a chip in the
+        // air has one obvious place to let go of it.
+        flex: "1 1 auto",
+        alignSelf: "stretch",
         display: "grid",
         placeItems: "center",
-        borderColor: active
-          ? "var(--mantine-color-red-filled)"
-          : "var(--mantine-color-default-border)",
+        // Dashed and in the danger colour before the pointer arrives: this
+        // target only exists mid-drag, and it has to say what it does.
+        borderStyle: "dashed",
+        borderColor: "var(--mantine-color-red-filled)",
         background: active ? "var(--mantine-color-red-light)" : undefined,
-        color: active
-          ? "var(--mantine-color-red-filled)"
-          : "var(--mantine-color-dimmed)",
+        color: "var(--mantine-color-red-filled)",
       }}
       {...dropProps}
       {...rest}

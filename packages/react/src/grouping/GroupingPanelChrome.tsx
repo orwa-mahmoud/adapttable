@@ -353,6 +353,19 @@ export function GroupingPanelChrome<TRow>({
       {...(mobile ? {} : reactGroupingDropProps(ontoPanel()))}
       data-adapttable-part="grouping-panel"
     >
+      {/* The way out of a grouping, on a line of its own above the chips: a
+          target squeezed in beside them is one a reader never finds, and it
+          only exists while a chip is in the air. */}
+      {state.drag?.source === "chip" ? (
+        <span style={{ display: "flex", flex: "1 0 100%", width: "100%" }}>
+          <RemoveZone
+            label={labels.groupingDropToRemove}
+            active={state.drag.overRemove === true}
+            dropProps={reactGroupingDropProps(state.removeDropProps())}
+            data-adapttable-part="grouping-remove-zone"
+          />
+        </span>
+      ) : null}
       {state.groupBy.map((key, index) => {
         const label = byKey.has(key) ? columnName(byKey.get(key)!) : key;
         return (
@@ -415,7 +428,15 @@ export function GroupingPanelChrome<TRow>({
         data-adapttable-part="grouping-add"
       />
       {state.groupBy.length > 0 && aggregateColumns.length > 0 ? (
-        <span data-adapttable-part="grouping-aggregate-controls">
+        <span
+          data-adapttable-part="grouping-aggregate-controls"
+          style={{
+            display: "inline-flex",
+            flexWrap: "wrap",
+            alignItems: "flex-end",
+            gap: "0.5rem",
+          }}
+        >
           <Select
             label={labels.groupingAggregateColumn}
             value={selectedAggregateColumn}
@@ -438,14 +459,6 @@ export function GroupingPanelChrome<TRow>({
             data-adapttable-part="grouping-aggregate"
           />
         </span>
-      ) : null}
-      {state.drag?.source === "chip" ? (
-        <RemoveZone
-          label={labels.groupingDropToRemove}
-          active={state.drag.overRemove === true}
-          dropProps={reactGroupingDropProps(state.removeDropProps())}
-          data-adapttable-part="grouping-remove-zone"
-        />
       ) : null}
       <LiveRegion part="grouping-announcer" statusRole={false}>
         {state.announcement}

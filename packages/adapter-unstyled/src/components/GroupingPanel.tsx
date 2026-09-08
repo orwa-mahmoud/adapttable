@@ -89,7 +89,15 @@ function DropZone({
       data-active={active || undefined}
       data-dragging={dragging || undefined}
       className={classNames.groupingDropZone}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      // The way out of a grouping owns its row: a reader with a chip in the
+      // air has one obvious place to let go of it.
+      style={{
+        border: 0,
+        margin: 0,
+        padding: 0,
+        minInlineSize: 0,
+        flex: "1 1 auto",
+      }}
       {...dropProps}
       {...rest}
     >

@@ -151,14 +151,16 @@ const slots: GroupingPanelSlots = {
       aria-label={label}
       minH={TOUCH_SIZE}
       px={3}
-      alignSelf="flex-end"
+      flex="1 1 auto"
+      alignSelf="stretch"
       display="grid"
       placeItems="center"
       borderWidth="1px"
+      borderStyle="dashed"
       borderRadius="md"
-      borderColor={active ? "red.500" : "border"}
+      borderColor="red.500"
       bg={active ? "red.subtle" : undefined}
-      color={active ? "red.fg" : "fg.muted"}
+      color="red.fg"
       {...dropProps}
       {...rest}
     >
