@@ -32,9 +32,14 @@ const PANEL_CSS =
   `.${PANEL_CLASS}[data-mobile] [data-adapttable-part^="grouping-a"]` +
   `{flex:1 1 160px}`;
 
-function dropZoneWidth(empty: boolean, active: boolean): number {
+function dropZoneWidth(
+  empty: boolean,
+  active: boolean,
+  dragging: boolean
+): number {
   if (empty) return 168;
-  return active ? 28 : 12;
+  if (active) return 28;
+  return dragging ? 24 : 12;
 }
 
 const slots: GroupingPanelSlots = {
@@ -74,6 +79,7 @@ const slots: GroupingPanelSlots = {
     label,
     empty,
     active,
+    dragging,
     dropProps,
     ...rest
   }: GroupingPanelDropZoneProps) => (
@@ -89,7 +95,7 @@ const slots: GroupingPanelSlots = {
         alignItems: "center",
         justifyContent: "center",
         minBlockSize: TOUCH_TARGET,
-        minInlineSize: dropZoneWidth(empty, active),
+        minInlineSize: dropZoneWidth(empty, active, dragging),
         paddingInline: empty ? "var(--space-3)" : undefined,
         border: "1px dashed",
         borderColor: active ? "var(--accent-9)" : "var(--gray-a7)",

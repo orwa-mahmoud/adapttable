@@ -671,7 +671,11 @@ glyph with your own node, or `false` to show the label as text. A row action
 marked `editsRow`
 becomes that trigger instead: `resolveRowEditTrigger(actions, rowEditing, row, rowId)`
 (`RowEditTrigger` out) wires it to the row's form and reports whether the
-built-in control still draws itself.
+built-in control still draws itself. An incoming row under an open form is one
+question for the whole form: `useEditConflict` answers it through
+`reconcileRow` (`ReconcileLiveRowEdit` in) and `isRowConflict`, and
+`rowEditConflict` (`RowEditConflict` out) reads it off the editing bag for one
+row's controls.
 
 **Changing many rows at once.** `batchEditing` + `onBatchEdit` hold every change
 until one save: `useBatchEditing(options)` (`UseBatchEditingOptions` in,

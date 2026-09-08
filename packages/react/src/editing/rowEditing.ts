@@ -59,6 +59,18 @@ export interface RowEditingState<TRow> {
   isDirty: boolean;
   /** A digest of the open row's drafts, for a row memo comparator. */
   signature: string;
+  /** The row the form opened against, or `undefined` when none is open. */
+  openedRow: () => TRow | undefined;
+  /**
+   * Accept an incoming row as the snapshot the form is measured against. The
+   * drafts stand: the reader chose to keep what they typed.
+   */
+  keepLive: (row: TRow) => void;
+  /**
+   * Reseed every draft from an incoming row, discarding what the reader typed
+   * — the other half of the same choice.
+   */
+  takeLive: (row: TRow) => void;
   /** The table that owns these editors — never a sibling's host. */
   featureHost?: FeatureHostState;
 }
@@ -209,6 +221,36 @@ export function useRowEditing<TRow>(
     close("silent");
   });
 
+  const openedRow = useCallback(() => opened.current?.row, []);
+
+  /** Read every editable column of a row into a fresh seed set. */
+  const seedsOf = useEventCallback((row: TRow): RowEditDrafts => {
+    const seeds: Record<string, string> = {};
+    for (const column of editableColumns(options.columns, row)) {
+      seeds[column.key] = readEditableCellValue(
+        row,
+        column,
+        options.featureHost
+      );
+    }
+    return seeds;
+  });
+
+  const keepLive = useEventCallback((row: TRow) => {
+    const open = opened.current;
+    if (!open) return;
+    opened.current = { ...open, row };
+  });
+
+  const takeLive = useEventCallback((row: TRow) => {
+    const open = opened.current;
+    if (!open) return;
+    const seeds = seedsOf(row);
+    opened.current = { row, rowId: open.rowId, seeds };
+    draftsRef.current = seeds;
+    setDrafts(seeds);
+  });
+
   const isDirty = useMemo(() => {
     const open = opened.current;
     if (!open) return false;
@@ -251,6 +293,9 @@ export function useRowEditing<TRow>(
       },
       isDirty,
       signature,
+      openedRow,
+      keepLive,
+      takeLive,
       featureHost: options.featureHost,
     }),
     [
@@ -264,6 +309,9 @@ export function useRowEditing<TRow>(
       close,
       isDirty,
       signature,
+      openedRow,
+      keepLive,
+      takeLive,
       options.featureHost,
     ]
   );

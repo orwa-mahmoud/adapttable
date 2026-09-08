@@ -418,6 +418,24 @@ only where there is a form to open: a table without `rowEditing` drops it rather
 than showing a control that cannot do what it says. While its own row is open it
 steps aside, because that row is already showing save and cancel.
 
+### An incoming row while a form is open
+
+A row form is measured against the row it opened on, so a change arriving
+underneath is the same question a cell already asks — one answer for the whole
+form. The row's controls become the question: **Keep mine** accepts the
+incoming row as the new snapshot and leaves every draft as typed, **Take
+theirs** reseeds every draft from it. Save is withheld until one is chosen,
+because writing a form built on a row that has since moved would overwrite a
+change the reader never saw.
+
+`editConflictPolicy` and `onEditConflict` decide it without asking, exactly as
+they do for a cell. Batch editing does not ask: the drafts stand and the
+incoming values land underneath them.
+
+Parts: `row-edit-conflict`, `row-edit-conflict-message`, `row-edit-keep-mine`,
+`row-edit-take-theirs`. Labels: `labels.editConflict`, `labels.keepMine`,
+`labels.takeTheirs`.
+
 ### The controls are glyphs
 
 Each kit draws its own pencil, check and cross, with `labels.editRow`,
@@ -437,8 +455,10 @@ every locale.
 Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `UseRowEditingOptions`), with `RowEditCell` (`RowEditCellProps`),
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
-from `@adapttable/core/adapter`, and `RowEditIcons` typing the glyph
-overrides. Each adapter mounts `RowEditActions`
+from `@adapttable/core/adapter`, `RowEditIcons` typing the glyph overrides,
+and `rowEditConflict` (`RowEditConflict` out) reading one row's question off
+the editing bag. `useEditConflict` grew `reconcileRow`
+(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's
 actions against its edit state with `resolveRowEditTrigger` (`RowEditTrigger`
 out) — which rewires an `editsRow` action to the form and reports whether the

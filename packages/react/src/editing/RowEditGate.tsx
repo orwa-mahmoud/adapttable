@@ -139,6 +139,26 @@ function selectOptionsFor(editor: CellEditor) {
 }
 
 /**
+ * An incoming change to the row a form has open.
+ *
+ * @public
+ */
+export interface RowEditConflict {
+  /** Whether this row is the one being asked about. */
+  readonly asking: boolean;
+  /** What the notice says the reader must choose between. */
+  readonly message: string;
+  /** Accessible name for keeping the drafts. */
+  readonly keepLabel: string;
+  /** Accessible name for taking the incoming row. */
+  readonly takeLabel: string;
+  /** Keep the drafts; accept the incoming row as the new snapshot. */
+  readonly keep: () => void;
+  /** Replace every draft with the incoming row's values. */
+  readonly take: () => void;
+}
+
+/**
  * Props for {@link rowEditControls}.
  *
  * @public
@@ -245,6 +265,12 @@ export interface RowEditActionsProps<
   /** Glyph overrides — see {@link RowEditIcons}. */
   icons?: RowEditIcons;
   /**
+   * Whether an incoming change to this row is waiting on the reader, and what
+   * happens either way. The open form is measured against the row it opened
+   * on, so a change underneath is a question only the reader can answer.
+   */
+  conflict?: RowEditConflict;
+  /**
    * Whether to draw the control that opens the row. `false` when a host row
    * action carries `editsRow` and owns that trigger — see
    * `resolveRowEditTrigger`. Save and cancel are unaffected: they belong to
@@ -316,11 +342,48 @@ export function RowEditActionsChrome<TRow>({
   buttonClassName,
   showBegin,
   icons,
+  conflict,
   slots,
   ...options
 }: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement | null {
   const controls = rowEditControls(options);
   const Button = slots.Button;
+  // The question comes first: saving a form measured against a row that has
+  // since moved would write over a change the reader never saw.
+  if (controls.editing && conflict?.asking === true) {
+    return (
+      <span
+        data-adapttable-part="row-edit-conflict"
+        role="alert"
+        className={className}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+      >
+        <span data-adapttable-part="row-edit-conflict-message">
+          {conflict.message}
+        </span>
+        <Button
+          label={conflict.keepLabel}
+          part="row-edit-keep-mine"
+          icon={false}
+          className={buttonClassName}
+          onClick={(event) => {
+            event.stopPropagation();
+            conflict.keep();
+          }}
+        />
+        <Button
+          label={conflict.takeLabel}
+          part="row-edit-take-theirs"
+          icon={false}
+          className={buttonClassName}
+          onClick={(event) => {
+            event.stopPropagation();
+            conflict.take();
+          }}
+        />
+      </span>
+    );
+  }
   if (!controls.editing) {
     // A host action already opens this row, so drawing the built-in control
     // would put two identical triggers side by side.

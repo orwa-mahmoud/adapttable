@@ -99,6 +99,12 @@ export interface GroupingPanelDropZoneProps {
   empty: boolean;
   /** Whether a dragged field is currently over this target. */
   active: boolean;
+  /**
+   * Whether a grouping drag is in flight anywhere in the strip. A boundary
+   * between two chips is a caret at rest; while something is being dragged it
+   * has to be big enough to aim at.
+   */
+  dragging: boolean;
   /** Native drag handlers supplied by core. */
   dropProps: GroupingDropProps;
   /** Stable styling and test part name. */
@@ -248,19 +254,28 @@ export function GroupingPanelChrome<TRow>({
       dir={dir}
       data-adapttable-part="grouping-panel"
     >
-      {!mobile ? (
-        <DropZone
-          label={labels.groupingDropColumns}
-          empty={state.groupBy.length === 0}
-          active={state.drag?.overIndex === 0}
-          dropProps={reactGroupingDropProps(state.dropProps(0))}
-          data-adapttable-part="grouping-drop-zone"
-        />
-      ) : null}
       {state.groupBy.map((key, index) => {
         const label = byKey.has(key) ? columnName(byKey.get(key)!) : key;
         return (
-          <span key={key} data-adapttable-part="grouping-item">
+          // Each boundary is drawn WITH the chip it sits before, inside one
+          // inline-flex row. Drawn beside the chips instead, the boundary
+          // before the first one floated off on its own — and dropping there
+          // is the only way to group by a new field FIRST.
+          <span
+            key={key}
+            data-adapttable-part="grouping-item"
+            style={{ display: "inline-flex", alignItems: "center" }}
+          >
+            {!mobile ? (
+              <DropZone
+                label={labels.groupingDropColumns}
+                empty={false}
+                dragging={state.drag !== undefined}
+                active={state.drag?.overIndex === index}
+                dropProps={reactGroupingDropProps(state.dropProps(index))}
+                data-adapttable-part="grouping-drop-zone"
+              />
+            ) : null}
             <Chip
               label={label}
               level={index + 1}
@@ -272,10 +287,11 @@ export function GroupingPanelChrome<TRow>({
               removeLabel={labels.removeGroupingColumn(label)}
               data-adapttable-part="grouping-chip"
             />
-            {!mobile ? (
+            {!mobile && index === state.groupBy.length - 1 ? (
               <DropZone
                 label={labels.groupingDropColumns}
                 empty={false}
+                dragging={state.drag !== undefined}
                 active={state.drag?.overIndex === index + 1}
                 dropProps={reactGroupingDropProps(state.dropProps(index + 1))}
                 data-adapttable-part="grouping-drop-zone"
@@ -284,6 +300,16 @@ export function GroupingPanelChrome<TRow>({
           </span>
         );
       })}
+      {!mobile && state.groupBy.length === 0 ? (
+        <DropZone
+          label={labels.groupingDropColumns}
+          empty
+          dragging={state.drag !== undefined}
+          active={state.drag?.overIndex === 0}
+          dropProps={reactGroupingDropProps(state.dropProps(0))}
+          data-adapttable-part="grouping-drop-zone"
+        />
+      ) : null}
       <Select
         label={labels.addGroupingColumn}
         value=""

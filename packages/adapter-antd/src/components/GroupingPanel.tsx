@@ -43,6 +43,7 @@ const slots: GroupingPanelSlots = {
     label,
     empty,
     active,
+    dragging,
     dropProps,
     ...rest
   }: GroupingPanelDropZoneProps) => (
@@ -52,6 +53,7 @@ const slots: GroupingPanelSlots = {
       aria-label={label}
       {...dropProps}
       {...rest}
+      data-dragging={dragging || undefined}
       styles={{ body: { padding: empty ? "6px 10px" : "6px 8px" } }}
       style={{
         minBlockSize: TOUCH_TARGET,

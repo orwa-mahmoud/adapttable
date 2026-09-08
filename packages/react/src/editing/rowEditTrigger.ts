@@ -13,6 +13,8 @@
  */
 import type { RowAction } from "@adapttable/core";
 
+import type { EditableCellEditing } from "./editableCellController";
+import type { RowEditConflict } from "./RowEditGate";
 import type { RowEditingState } from "./rowEditing";
 
 /**
@@ -80,5 +82,36 @@ export function resolveRowEditTrigger<TRow>(
       ];
     }),
     showBegin: false,
+  };
+}
+
+/**
+ * The incoming-change question for one row, built from the editing bag.
+ *
+ * The bag every cell already receives carries the conflict state and the
+ * localized wording, so each kit reads the answer for its row from the same
+ * place rather than assembling it itself.
+ *
+ * @typeParam TRow - The row type.
+ * @param editing - The editing bag, or `undefined` when nothing is armed.
+ * @param rowId - The row this control set belongs to.
+ * @returns The question, or `undefined` when nothing is being asked.
+ *
+ * @public
+ */
+export function rowEditConflict<TRow>(
+  editing: EditableCellEditing<TRow> | undefined,
+  rowId: string
+): RowEditConflict | undefined {
+  const conflict = editing?.conflict;
+  const labels = editing?.conflictLabels;
+  if (!conflict || !labels) return undefined;
+  return {
+    asking: conflict.isRowConflict(rowId),
+    message: labels.message,
+    keepLabel: labels.keepMine,
+    takeLabel: labels.takeTheirs,
+    keep: conflict.keep,
+    take: conflict.take,
   };
 }

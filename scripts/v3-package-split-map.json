@@ -21259,6 +21259,14 @@
       "behavior": ""
     },
     {
+      "export": "ReconcileLiveRowEdit",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "rememberFeatureHost",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -21436,6 +21444,22 @@
     },
     {
       "export": "RowEditCellProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditConflict",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditConflict",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
@@ -25012,6 +25036,14 @@
     },
     {
       "export": "ReconcileLiveEdit",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "ReconcileLiveRowEdit",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",

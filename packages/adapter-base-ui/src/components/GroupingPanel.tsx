@@ -43,6 +43,7 @@ const slots: GroupingPanelSlots = {
     label,
     empty,
     active,
+    dragging,
     dropProps,
     ...rest
   }: GroupingPanelDropZoneProps) => (
@@ -51,6 +52,7 @@ const slots: GroupingPanelSlots = {
       className="adapttable-grouping-drop-zone"
       data-empty={empty ? true : undefined}
       data-active={active ? true : undefined}
+      data-dragging={dragging ? true : undefined}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}

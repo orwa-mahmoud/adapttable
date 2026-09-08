@@ -176,6 +176,39 @@ function LiveEditing({
     props.onEditConflict,
   ]);
 
+  // A row edited as one unit is measured against the row it opened on, so an
+  // incoming change to that row is the same question the cell already asks.
+  useEffect(() => {
+    if (!rowModeArmed) return;
+    conflict.reconcileRow({
+      activeRowId: rowEditing.activeRowId,
+      openedRow: rowEditing.openedRow(),
+      rows: editingRows,
+      columns: chrome.allColumns,
+      rowKey: (row: unknown) => rowKey(row as never),
+      rowVersion: props.rowVersion as
+        ((row: unknown) => string | number) | undefined,
+      policy: props.editConflictPolicy ?? "ask",
+      onEditConflict: props.onEditConflict as never,
+      keep: (row) => {
+        rowEditing.keepLive(row as never);
+      },
+      take: (row) => {
+        rowEditing.takeLive(row as never);
+      },
+    });
+  }, [
+    rowModeArmed,
+    rowEditing,
+    editingRows,
+    rowKey,
+    conflict,
+    chrome.allColumns,
+    props.rowVersion,
+    props.editConflictPolicy,
+    props.onEditConflict,
+  ]);
+
   return children({ ...chrome, editing, editingRows } as never);
 }
 

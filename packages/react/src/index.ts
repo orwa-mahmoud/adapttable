@@ -384,6 +384,7 @@ export {
   type EditConflictState,
   liveRowChanged,
   type ReconcileLiveEdit,
+  type ReconcileLiveRowEdit,
   useEditConflict,
 } from "./editing/editConflict";
 export {

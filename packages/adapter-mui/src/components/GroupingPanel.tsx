@@ -22,6 +22,15 @@ import {
 
 const TOUCH_TARGET = 44;
 
+/**
+ * How wide one insertion boundary is: a caret at rest, an aimable target
+ * while a drag is in flight, wider still once the pointer is on it.
+ */
+function dropZoneWidth(active: boolean, dragging: boolean): number {
+  if (active) return 28;
+  return dragging ? 24 : 12;
+}
+
 const slots: GroupingPanelSlots = {
   Surface: ({
     children,
@@ -67,6 +76,7 @@ const slots: GroupingPanelSlots = {
     label,
     empty,
     active,
+    dragging,
     dropProps,
     ...rest
   }: GroupingPanelDropZoneProps) => (
@@ -95,7 +105,7 @@ const slots: GroupingPanelSlots = {
             }
           : {
               alignSelf: "stretch",
-              minWidth: active ? 28 : 12,
+              minWidth: dropZoneWidth(active, dragging),
               minHeight: TOUCH_TARGET,
               borderInlineStart: 2,
               borderColor: active ? "primary.main" : "divider",

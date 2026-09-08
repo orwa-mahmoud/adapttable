@@ -207,15 +207,18 @@ describe("rowEditingSignature", () => {
         previous: ROWS[0]!,
         rowId: "1",
         columnKey: "name",
+        unit: "cell" as const,
         draft: "Ada",
         incomingValue: "Arrived",
         previousValue: "Ada",
       },
       isConflict: (rowId: string, columnKey: string) =>
         rowId === "1" && columnKey === "name",
+      isRowConflict: () => false,
       keep: () => undefined,
       take: () => undefined,
       reconcile: () => undefined,
+      reconcileRow: () => undefined,
       clear: () => undefined,
     };
     expect(
@@ -350,15 +353,18 @@ describe("editableCellController — leaving an edit", () => {
         previous: ROWS[0]!,
         rowId: "1",
         columnKey: "name",
+        unit: "cell" as const,
         draft: "typed",
         incomingValue: "Arrived",
         previousValue: "Ada",
       },
       isConflict: (rowId: string, columnKey: string) =>
         rowId === "1" && columnKey === "name",
+      isRowConflict: () => false,
       keep: vi.fn(),
       take: vi.fn(),
       reconcile: () => undefined,
+      reconcileRow: () => undefined,
       clear: () => undefined,
     };
     const ctrl = () =>

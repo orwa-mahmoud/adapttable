@@ -220,6 +220,7 @@ export {
   type RowEditButtonProps,
   RowEditCell,
   type RowEditCellProps,
+  type RowEditConflict,
   type RowEditControls,
   rowEditControls,
   type RowEditControlsOptions,
@@ -228,6 +229,7 @@ export {
 export type { RowEditingState } from "./editing/rowEditing";
 export {
   resolveRowEditTrigger,
+  rowEditConflict,
   type RowEditTrigger,
 } from "./editing/rowEditTrigger";
 export {
@@ -1003,6 +1005,7 @@ export type {
   EditConflict,
   EditConflictChoice,
   ReconcileLiveEdit,
+  ReconcileLiveRowEdit,
 } from "./editing/editConflict";
 export type { EditEvent } from "./editing/editingEvents";
 export type { CellSaveStatus, FailedCellSave } from "./editing/saveState";

@@ -748,6 +748,7 @@ export interface EditConflict<TRow> {
     previousValue: string;
     row: TRow;
     rowId: string;
+    unit: "cell" | "row";
 }
 
 // @public
@@ -764,8 +765,10 @@ export interface EditConflictState<TRow> {
     clear: () => void;
     current: EditConflict<TRow> | null;
     isConflict: (rowId: string, columnKey: string) => boolean;
+    isRowConflict: (rowId: string) => boolean;
     keep: () => void;
     reconcile: (input: ReconcileLiveEdit<TRow>) => void;
+    reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
     take: () => void;
 }
 
@@ -1278,6 +1281,20 @@ export interface ReconcileLiveEdit<TRow> {
 }
 
 // @public
+export interface ReconcileLiveRowEdit<TRow> {
+    activeRowId: string | null;
+    columns: readonly EditableColumnLike<TRow>[];
+    keep: (row: TRow) => void;
+    onEditConflict?: EditConflictHandler<TRow>;
+    openedRow: TRow | undefined;
+    policy: EditConflictPolicy;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    rowVersion?: (row: TRow) => string | number;
+    take: (row: TRow) => void;
+}
+
+// @public
 export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
 
 // @public
@@ -1315,9 +1332,12 @@ export interface RowEditingState<TRow> {
     featureHost?: FeatureHostState;
     isDirty: boolean;
     isEditing: (rowId: string) => boolean;
+    keepLive: (row: TRow) => void;
+    openedRow: () => TRow | undefined;
     save: () => void;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
+    takeLive: (row: TRow) => void;
 }
 
 // @public

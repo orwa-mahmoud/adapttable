@@ -2020,6 +2020,7 @@ export interface EditConflict<TRow> {
     previousValue: string;
     row: TRow;
     rowId: string;
+    unit: "cell" | "row";
 }
 
 // @public
@@ -2036,8 +2037,10 @@ export interface EditConflictState<TRow> {
     clear: () => void;
     current: EditConflict<TRow> | null;
     isConflict: (rowId: string, columnKey: string) => boolean;
+    isRowConflict: (rowId: string) => boolean;
     keep: () => void;
     reconcile: (input: ReconcileLiveEdit<TRow>) => void;
+    reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
     take: () => void;
 }
 
@@ -3098,6 +3101,7 @@ export interface GroupingPanelChromeProps<TRow = unknown> extends GroupingPanelS
 export interface GroupingPanelDropZoneProps {
     "data-adapttable-part": "grouping-drop-zone";
     active: boolean;
+    dragging: boolean;
     dropProps: GroupingDropProps;
     empty: boolean;
     label: string;
@@ -3574,6 +3578,20 @@ export interface ReconcileLiveEdit<TRow> {
 }
 
 // @public
+export interface ReconcileLiveRowEdit<TRow> {
+    activeRowId: string | null;
+    columns: readonly EditableColumnLike<TRow>[];
+    keep: (row: TRow) => void;
+    onEditConflict?: EditConflictHandler<TRow>;
+    openedRow: TRow | undefined;
+    policy: EditConflictPolicy;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    rowVersion?: (row: TRow) => string | number;
+    take: (row: TRow) => void;
+}
+
+// @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
 
 // @public
@@ -3670,6 +3688,7 @@ export interface RowEditActionsChromeProps<TRow> extends RowEditActionsProps<TRo
 export interface RowEditActionsProps<TRow> extends RowEditControlsOptions<TRow> {
     buttonClassName?: string;
     className?: string;
+    conflict?: RowEditConflict;
     icons?: RowEditIcons;
     showBegin?: boolean;
 }
@@ -3702,6 +3721,19 @@ export interface RowEditCellProps<TRow> {
     rowEditing: RowEditingState<TRow>;
     takesFocus: boolean;
 }
+
+// @public
+export interface RowEditConflict {
+    readonly asking: boolean;
+    readonly keep: () => void;
+    readonly keepLabel: string;
+    readonly message: string;
+    readonly take: () => void;
+    readonly takeLabel: string;
+}
+
+// @public
+export function rowEditConflict<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): RowEditConflict | undefined;
 
 // @public
 export interface RowEditControls {
@@ -3749,9 +3781,12 @@ export interface RowEditingState<TRow> {
     featureHost?: FeatureHostState;
     isDirty: boolean;
     isEditing: (rowId: string) => boolean;
+    keepLive: (row: TRow) => void;
+    openedRow: () => TRow | undefined;
     save: () => void;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
+    takeLive: (row: TRow) => void;
 }
 
 // @public

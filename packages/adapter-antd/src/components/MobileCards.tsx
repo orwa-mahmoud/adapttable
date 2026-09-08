@@ -30,6 +30,7 @@ import {
   resolveRowEditTrigger,
   resolveRowStyle,
   rowClickProps,
+  rowEditConflict,
   rowEditingSignature,
   rowFlashSignature,
   rowIsDirty,
@@ -303,6 +304,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
                 rowId={id}
                 showBegin={rowEdit.showBegin}
                 icons={editing.rowEditIcons}
+                conflict={rowEditConflict(editing, id)}
                 labels={labels}
               />
             )}

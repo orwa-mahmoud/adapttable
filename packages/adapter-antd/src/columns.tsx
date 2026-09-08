@@ -50,6 +50,7 @@ import {
   type PinSide,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
+  rowEditConflict,
   type RowReorderState,
 } from "@adapttable/react/adapter";
 import { type TableColumnsType, Typography } from "antd";
@@ -1036,6 +1037,7 @@ export function buildColumns<TRow>({
                 rowId={rowId}
                 showBegin={rowEdit.showBegin}
                 icons={editing?.rowEditIcons}
+                conflict={rowEditConflict(editing, rowId)}
                 labels={labels}
               />
             )}

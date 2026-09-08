@@ -29,6 +29,7 @@ import {
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
+  rowEditConflict,
   type SharedTableRenderProps,
   sortArrow,
   useDesktopTableAssembly,
@@ -371,6 +372,7 @@ function DesktopRowBase<TRow>(
                 rowId={id}
                 showBegin={rowEdit.showBegin}
                 icons={editing.rowEditIcons}
+                conflict={rowEditConflict(editing, id)}
                 labels={labels}
               />
             )}

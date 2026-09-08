@@ -775,6 +775,11 @@ button.adapttable-btn:has([data-slot="select-value"]) {
   border-color: var(--adapttable-border);
 }
 
+.adapttable-grouping-drop-zone[data-dragging="true"] {
+  min-width: 1.5rem;
+  border-color: var(--adapttable-border);
+}
+
 .adapttable-grouping-drop-zone[data-active="true"],
 .adapttable-grouping-drop-zone[data-drop-active="true"] {
   min-width: 2rem;

@@ -391,6 +391,64 @@ describe("RowEditActions", () => {
     expect(part("row-edit-cancel")).not.toBeNull();
   });
 
+  it("asks about an incoming row before it will let the form save", () => {
+    const keep = vi.fn();
+    const take = vi.fn();
+    const result = openRow(vi.fn());
+    render(
+      <RowEditActionsChrome
+        slots={rowEditTestSlots}
+        rowEditing={result.current}
+        row={TASK}
+        rowId="1"
+        conflict={{
+          asking: true,
+          message: "This row changed",
+          keepLabel: "Keep mine",
+          takeLabel: "Take theirs",
+          keep,
+          take,
+        }}
+      />
+    );
+    // Saving a form measured against a row that has since moved would write
+    // over a change the reader never saw, so the question replaces save.
+    expect(part("row-edit-save")).toBeNull();
+    expect(part("row-edit-conflict-message")).toHaveTextContent(
+      "This row changed"
+    );
+    act(() => {
+      fireEvent.click(part("row-edit-keep-mine")!);
+    });
+    expect(keep).toHaveBeenCalledTimes(1);
+    act(() => {
+      fireEvent.click(part("row-edit-take-theirs")!);
+    });
+    expect(take).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves a row nobody is asking about alone", () => {
+    const result = openRow(vi.fn());
+    render(
+      <RowEditActionsChrome
+        slots={rowEditTestSlots}
+        rowEditing={result.current}
+        row={TASK}
+        rowId="1"
+        conflict={{
+          asking: false,
+          message: "This row changed",
+          keepLabel: "Keep mine",
+          takeLabel: "Take theirs",
+          keep: vi.fn(),
+          take: vi.fn(),
+        }}
+      />
+    );
+    expect(part("row-edit-conflict")).toBeNull();
+    expect(part("row-edit-save")).not.toBeNull();
+  });
+
   it("swaps to save and cancel once the row is open", () => {
     const onRowEdit = vi.fn();
     const result = openRow(onRowEdit);

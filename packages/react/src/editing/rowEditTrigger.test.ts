@@ -35,6 +35,9 @@ function armed(openRowId?: string) {
     cancel: () => undefined,
     isDirty: false,
     signature: "",
+    openedRow: () => undefined,
+    keepLive: () => undefined,
+    takeLive: () => undefined,
   } satisfies RowEditingState<Row>;
   return { state, begin };
 }

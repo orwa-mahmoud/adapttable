@@ -662,8 +662,13 @@ function applyRowModelFlags(
     Object.assign(next, { estimateRowSize: LARGE_ROW_ESTIMATE });
   }
   if (flags.editing) {
+    Object.assign(next, { onCellEdit: flags.onCellEdit });
+  }
+  // The lifecycle belongs to every editing mode, not just the cell: the
+  // simulated incoming update aims at whatever the reader has open, and a row
+  // or a batch is as open as a cell.
+  if (flags.editing || rowFormArmed(flags) || flags.batch) {
     Object.assign(next, {
-      onCellEdit: flags.onCellEdit,
       onEditStart: flags.onEditStart,
       onEditCancel: flags.onEditCancel,
       onEditCommit: flags.onEditCommit,
@@ -1069,7 +1074,9 @@ function Frontend({
   const onEditStart = useCallback<EditEventHandler<Person>>((event) => {
     setActiveEdit({
       rowId: event.rowId,
-      columnKey: event.columnKey || "email",
+      // A row edit opens every field at once and names none of them, so the
+      // incoming change aims at Status — a column this demo always shows.
+      columnKey: event.columnKey || "status",
     });
   }, []);
   const onEditEnd = useCallback(() => setActiveEdit(null), []);
@@ -1142,11 +1149,17 @@ function Frontend({
   });
   const tableSource = advancedFilters ? source : withoutFilterTree(source);
   const live = realtime === true && RealtimeSlot !== null;
+  // Every editing mode gets the incoming-change control: a row form and a
+  // batch have something open to disagree with, the same as a cell.
+  const editingArmed =
+    editing === true ||
+    batch === true ||
+    rowFormArmed({ rowMode, editing, rowActionsShown, batch });
   return (
     <>
-      {editing ? (
+      {editingArmed ? (
         <div className="demo-live-update">
-          <span>Edit a cell, then test an incoming server change.</span>
+          <span>Open an editor, then test an incoming server change.</span>
           <button
             type="button"
             data-adapttable-part="demo-live-update"

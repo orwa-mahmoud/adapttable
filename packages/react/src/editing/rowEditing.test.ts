@@ -305,3 +305,68 @@ describe("useRowEditing", () => {
     expect(onEditCancel).toHaveBeenCalledOnce();
   });
 });
+
+describe("an incoming row under an open form", () => {
+  const ARRIVED: Task = { ...TASK, title: "Arrived", points: 9 };
+
+  it("hands back the row the form opened against", () => {
+    const { result } = setup();
+    expect(result.current.openedRow()).toBeUndefined();
+    act(() => {
+      result.current.begin(TASK, "1");
+    });
+    expect(result.current.openedRow()).toBe(TASK);
+  });
+
+  it("keeps the drafts and measures against the incoming row", () => {
+    const onRowEdit = vi.fn();
+    const { result } = setup({ onRowEdit });
+    act(() => {
+      result.current.begin(TASK, "1");
+      result.current.setDraft("title", "Mine");
+    });
+    act(() => {
+      result.current.keepLive(ARRIVED);
+    });
+
+    expect(result.current.draftFor("title")).toBe("Mine");
+    expect(result.current.openedRow()).toBe(ARRIVED);
+    act(() => {
+      result.current.save();
+    });
+    // Points was never typed into, so taking the incoming row as the new
+    // snapshot must not turn its value into a change the reader never made.
+    expect(onRowEdit).toHaveBeenCalledWith(ARRIVED, { title: "Mine" });
+  });
+
+  it("reseeds every draft from the incoming row on take", () => {
+    const onRowEdit = vi.fn();
+    const { result } = setup({ onRowEdit });
+    act(() => {
+      result.current.begin(TASK, "1");
+      result.current.setDraft("title", "Mine");
+    });
+    act(() => {
+      result.current.takeLive(ARRIVED);
+    });
+
+    expect(result.current.draftFor("title")).toBe("Arrived");
+    expect(result.current.draftFor("points")).toBe("9");
+    expect(result.current.isDirty).toBe(false);
+    act(() => {
+      result.current.save();
+    });
+    // Nothing changed against the row that just arrived, so nothing is sent.
+    expect(onRowEdit).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when no form is open", () => {
+    const { result } = setup();
+    act(() => {
+      result.current.keepLive(ARRIVED);
+      result.current.takeLive(ARRIVED);
+    });
+    expect(result.current.activeRowId).toBeNull();
+    expect(result.current.openedRow()).toBeUndefined();
+  });
+});

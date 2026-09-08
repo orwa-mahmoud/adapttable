@@ -109,3 +109,98 @@ describe("edit conflict (unstyled)", () => {
     expect(onCellEdit).not.toHaveBeenCalled();
   });
 });
+
+/** A table whose commit unit is the row, not the cell. */
+function rowTable(
+  rows: Task[],
+  extra: {
+    onRowEdit?: (row: Task, patch: Readonly<Record<string, unknown>>) => void;
+    editConflictPolicy?: "keep" | "take" | "ask";
+  } = {}
+) {
+  return (
+    <DataTable
+      data={rows}
+      columns={COLS}
+      rowKey={(r) => r.id}
+      urlSync={false}
+      rowEditing
+      onRowEdit={extra.onRowEdit ?? vi.fn()}
+      editConflictPolicy={extra.editConflictPolicy}
+    />
+  );
+}
+
+describe("edit conflict, row mode (unstyled)", () => {
+  it("asks about the row, then keeps the drafts", () => {
+    const onRowEdit = vi.fn();
+    const { rerender } = render(
+      rowTable([{ id: "1", title: "Ship" }], { onRowEdit })
+    );
+    fireEvent.click(part("row-edit-begin")!);
+    fireEvent.change(part("edit-cell-editor")!, { target: { value: "mine" } });
+
+    rerender(rowTable([{ id: "1", title: "Arrived" }], { onRowEdit }));
+    expect(part("row-edit-conflict")).not.toBeNull();
+    // The question stands in for save: a form measured against a row that
+    // moved cannot be written back until the reader answers.
+    expect(part("row-edit-save")).toBeNull();
+
+    fireEvent.click(part("row-edit-keep-mine")!);
+    expect(part("row-edit-conflict")).toBeNull();
+    expect(part("edit-cell-editor")).toHaveValue("mine");
+    fireEvent.click(part("row-edit-save")!);
+    expect(onRowEdit).toHaveBeenCalledWith(
+      { id: "1", title: "Arrived" },
+      { title: "mine" }
+    );
+  });
+
+  it("asks about the row, then takes the incoming values", () => {
+    const onRowEdit = vi.fn();
+    const { rerender } = render(
+      rowTable([{ id: "1", title: "Ship" }], { onRowEdit })
+    );
+    fireEvent.click(part("row-edit-begin")!);
+    fireEvent.change(part("edit-cell-editor")!, { target: { value: "mine" } });
+
+    rerender(rowTable([{ id: "1", title: "Arrived" }], { onRowEdit }));
+    fireEvent.click(part("row-edit-take-theirs")!);
+    expect(part("edit-cell-editor")).toHaveValue("Arrived");
+    // Nothing differs from the row that arrived, so saving sends nothing.
+    fireEvent.click(part("row-edit-save")!);
+    expect(onRowEdit).not.toHaveBeenCalled();
+  });
+
+  it("honors a policy that answers without asking", () => {
+    const onRowEdit = vi.fn();
+    const { rerender } = render(
+      rowTable([{ id: "1", title: "Ship" }], {
+        onRowEdit,
+        editConflictPolicy: "take",
+      })
+    );
+    fireEvent.click(part("row-edit-begin")!);
+    fireEvent.change(part("edit-cell-editor")!, { target: { value: "mine" } });
+
+    rerender(
+      rowTable([{ id: "1", title: "Arrived" }], {
+        onRowEdit,
+        editConflictPolicy: "take",
+      })
+    );
+    expect(part("row-edit-conflict")).toBeNull();
+    expect(part("edit-cell-editor")).toHaveValue("Arrived");
+  });
+
+  it("leaves an untouched row alone", () => {
+    const onRowEdit = vi.fn();
+    const { rerender } = render(
+      rowTable([{ id: "1", title: "Ship" }], { onRowEdit })
+    );
+    fireEvent.click(part("row-edit-begin")!);
+    rerender(rowTable([{ id: "1", title: "Ship" }], { onRowEdit }));
+    expect(part("row-edit-conflict")).toBeNull();
+    expect(part("row-edit-save")).not.toBeNull();
+  });
+});

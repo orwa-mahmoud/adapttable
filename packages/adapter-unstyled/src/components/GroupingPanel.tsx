@@ -77,6 +77,7 @@ function DropZone({
   label,
   empty,
   active,
+  dragging,
   dropProps,
   ...rest
 }: Readonly<GroupingPanelDropZoneProps>): ReactElement {
@@ -86,6 +87,7 @@ function DropZone({
       aria-label={label}
       data-empty={empty || undefined}
       data-active={active || undefined}
+      data-dragging={dragging || undefined}
       className={classNames.groupingDropZone}
       style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}

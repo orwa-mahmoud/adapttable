@@ -20,6 +20,7 @@ import {
   isSelectedCell,
   mergedCellStyle,
   resolveRowEditTrigger,
+  rowEditConflict,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
@@ -342,6 +343,7 @@ function DesktopRowBase<TRow>(
                 rowId={id}
                 showBegin={rowEdit.showBegin}
                 icons={editing.rowEditIcons}
+                conflict={rowEditConflict(editing, id)}
                 labels={labels}
               />
             )}

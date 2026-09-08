@@ -8,6 +8,19 @@ import {
 import { ActionIcon, Box, Group, Paper, Select, Text } from "@mantine/core";
 
 const TOUCH_SIZE = 44;
+/** A caret between chips, grown into something aimable mid-drag. */
+const DRAG_TARGET = 28;
+
+/**
+ * How wide one insertion boundary is.
+ *
+ * A caret between chips at rest, an aimable target while a drag is in
+ * flight, and the full placeholder when the strip has nothing in it.
+ */
+function dropZoneWidth(empty: boolean, dragging: boolean): number {
+  if (empty) return 132;
+  return dragging ? DRAG_TARGET : 10;
+}
 
 const slots: GroupingPanelSlots = {
   Surface: ({ children, label, mobile, ...rest }) => (
@@ -30,11 +43,11 @@ const slots: GroupingPanelSlots = {
       </Group>
     </Paper>
   ),
-  DropZone: ({ label, empty, active, dropProps, ...rest }) => (
+  DropZone: ({ label, empty, active, dragging, dropProps, ...rest }) => (
     <Box
       aria-label={label}
       mih={empty ? TOUCH_SIZE : 28}
-      miw={empty ? 132 : 10}
+      miw={dropZoneWidth(empty, dragging)}
       px={empty ? "xs" : 2}
       style={{
         alignSelf: "center",

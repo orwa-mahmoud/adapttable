@@ -10,6 +10,19 @@ import { Box, Field, Flex, HStack, IconButton, Text } from "@chakra-ui/react";
 import { NativeSelect } from "./primitives";
 
 const TOUCH_SIZE = "44px";
+/** A caret between chips, grown into something aimable mid-drag. */
+const DRAG_TARGET = "28px";
+
+/**
+ * How wide one insertion boundary is.
+ *
+ * A caret between chips at rest, an aimable target while a drag is in
+ * flight, and the full placeholder when the strip has nothing in it.
+ */
+function dropZoneWidth(empty: boolean, dragging: boolean): string {
+  if (empty) return "132px";
+  return dragging ? DRAG_TARGET : "10px";
+}
 
 const slots: GroupingPanelSlots = {
   Surface: ({ children, label, mobile, ...rest }) => (
@@ -32,11 +45,11 @@ const slots: GroupingPanelSlots = {
       </Flex>
     </Box>
   ),
-  DropZone: ({ label, empty, active, dropProps, ...rest }) => (
+  DropZone: ({ label, empty, active, dragging, dropProps, ...rest }) => (
     <Box
       aria-label={label}
       minH={empty ? TOUCH_SIZE : "28px"}
-      minW={empty ? "132px" : "10px"}
+      minW={dropZoneWidth(empty, dragging)}
       px={empty ? 2 : 0.5}
       alignSelf="center"
       display="grid"
