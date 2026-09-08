@@ -35,7 +35,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 64–74 kB min+gzip (measured 2026-09-07 from
+A plain adapter `DataTable` is 65–75 kB min+gzip (measured 2026-09-07 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -614,7 +614,7 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 64 kB gzipped and the same table with
+Measured on MUI, the table alone is 65 kB gzipped and the same table with
 `standardFeatures()` composed is 116 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
@@ -3030,12 +3030,16 @@ Fields the reader never touched are not a problem to solve: a save sends a patch
 of what the reader changed, so a value they left alone is never written back
 over the one that arrived.
 
+A batch asks the same way. Every cell is a field there, so an untouched one
+already reads the row itself; a cell the reader changed marks itself and is
+answered on its own, and **Save all** waits until nothing is outstanding.
+
 `editConflictPolicy` and `onEditConflict` decide it without asking, exactly as
-they do for a cell. Batch editing does not ask: the drafts stand and the
-incoming values land underneath them.
+they do for a cell.
 
 Parts: the cell's own `edit-cell-conflict`, `edit-cell-conflict-message`,
-`edit-cell-incoming`, `edit-cell-keep-mine`, `edit-cell-take-theirs`.
+`edit-cell-incoming`, `edit-cell-keep-mine`, `edit-cell-take-theirs`, plus
+`batch-edit-conflict` where the batch bar says why it is not saving yet.
 Labels: `labels.editConflict`, `labels.keepMine`, `labels.takeTheirs`,
 `labels.theirsValue`.
 
@@ -3061,7 +3065,8 @@ Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 from `@adapttable/core/adapter`, `RowEditIcons` typing the glyph overrides,
 and `rowEditConflict` (`RowEditConflict` out) telling one row's controls that
 an answer is outstanding. `useEditConflict` grew `reconcileRow`
-(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, and
+(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, plus
+`reconcileBatch` (`ReconcileLiveBatchEdit` in) for a batch, and
 `CellConflictAsk` is what one field's notice needs, and `EditConflictChange`
 names each field that moved. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's
@@ -4240,8 +4245,9 @@ because getting it wrong is invisible on screen.
 ## Notes
 
 - Works in all eight adapters, verified by the same parity test in each.
-- Enter and F2 are handled by the editing gate on the focused cell, so the two
-  keyboard models never race for one key press.
+- Enter and F2 open the focused cell when its column is `editable`, and do
+  nothing when it is not — so arrowing to a cell and pressing Enter edits it,
+  which is the whole keyboard path.
 - A click moves focus too: state follows the DOM rather than fighting it.
 
 ---
@@ -10726,7 +10732,8 @@ becomes that trigger instead: `resolveRowEditTrigger(actions, rowEditing, row, r
 (`RowEditTrigger` out) wires it to the row's form and reports whether the
 built-in control still draws itself. An incoming row under an open form asks the
 same question a cell does, of every field that moved: `useEditConflict` finds
-them through `reconcileRow` (`ReconcileLiveRowEdit` in) and `isRowConflict`,
+them through `reconcileRow` (`ReconcileLiveRowEdit` in) and `isRowConflict` —
+and across a batch through `reconcileBatch` (`ReconcileLiveBatchEdit` in),
 `CellConflictAsk` is what one field's notice needs and `EditConflictChange`
 names each field that moved,
 and `rowEditConflict` (`RowEditConflict` out) tells the row's controls an
@@ -12229,7 +12236,7 @@ React and the UI kit external because your app already ships those):
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~22 kB    |
 | every core export                          | ~51 kB    |
-| `DataTable` from an adapter                | ~64–74 kB |
+| `DataTable` from an adapter                | ~65–75 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -12490,7 +12497,7 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 64–74 kB min+gzip (measured
+A plain AdaptTable adapter `DataTable` is 65–75 kB min+gzip (measured
 2026-09-07 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of

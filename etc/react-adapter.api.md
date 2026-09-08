@@ -687,6 +687,7 @@ export interface BatchEditBarProps<TRow> {
     batch: BatchEditingState<TRow>;
     buttonClassName?: string;
     className?: string;
+    contested?: boolean;
     labels?: TableLabels;
 }
 
@@ -708,21 +709,31 @@ export function BatchEditCell<TRow>(input: Readonly<BatchEditCellProps<TRow>>): 
 
 // @public
 export interface BatchEditCellProps<TRow> {
+    ask?: CellConflictAsk;
     batch: BatchEditingState<TRow>;
     column: EditableColumnLike<TRow>;
+    conflictLabels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
     display: ReactElement | string | number | null;
     editLabel: string;
+    errorClassName?: string;
     renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
     row: TRow;
     rowId: string;
+    slots?: EditableCellSlots;
 }
 
 // @public
 export interface BatchEditingState<TRow> {
+    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
     count: number;
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    entries: readonly {
+        readonly rowId: string;
+        readonly seeds: Readonly<Record<string, string>>;
+        readonly drafts: Readonly<Record<string, string>>;
+    }[];
     featureHost?: FeatureHostState;
     isChanged: (rowId: string, columnKey: string) => boolean;
     isPending: (rowId: string) => boolean;
@@ -730,6 +741,7 @@ export interface BatchEditingState<TRow> {
     saveAll: () => void;
     setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
     signature: string;
+    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
 }
 
 // @public
@@ -2049,16 +2061,22 @@ export type EditConflictPolicy = "keep" | "take" | "ask";
 
 // @public
 export interface EditConflictState<TRow> {
+    anyContested: boolean;
     clear: () => void;
+    contestedCell: (rowId: string, columnKey: string) => {
+        readonly incomingValue: string;
+    } | undefined;
     current: EditConflict<TRow> | null;
     isConflict: (rowId: string, columnKey: string) => boolean;
     isRowConflict: (rowId: string) => boolean;
     keep: () => void;
-    keepRowField: (columnKey: string) => void;
+    keepCell: (rowId: string, columnKey: string) => void;
     reconcile: (input: ReconcileLiveEdit<TRow>) => void;
+    reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
     reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
+    rowSignature: (rowId: string) => string;
     take: () => void;
-    takeRowField: (columnKey: string) => void;
+    takeCell: (rowId: string, columnKey: string) => void;
 }
 
 // @public
@@ -3574,6 +3592,22 @@ export type ReactMobileCardRenderer<TRow> = (row: TRow, card: ReactMobileCardMod
 export interface ReactUseColumnLayoutResult<TRow> extends Omit<UseColumnLayoutResult<TRow>, "visibleColumns"> {
     // (undocumented)
     visibleColumns: ColumnDef<TRow>[];
+}
+
+// @public
+export interface ReconcileLiveBatchEdit<TRow> {
+    accept: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    columns: readonly EditableColumnLike<TRow>[];
+    entries: readonly {
+        readonly rowId: string;
+        readonly seeds: Readonly<Record<string, string>>;
+        readonly drafts: Readonly<Record<string, string>>;
+    }[];
+    onEditConflict?: EditConflictHandler<TRow>;
+    policy: EditConflictPolicy;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    take: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
 }
 
 // @public

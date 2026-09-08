@@ -132,3 +132,69 @@ describe("unstyled cell navigation", () => {
     expect(cellAt(0, 0)).toBeNull();
   });
 });
+
+/**
+ * The keyboard has to reach the editor.
+ *
+ * Arrow keys move a focused cell, and Enter is what a reader presses next. The
+ * grid leaves those keys to whatever is inside the cell, so this is the seam
+ * where a keyboard reader either edits or walks the grid forever.
+ */
+describe("unstyled Enter opens the focused cell", () => {
+  const editable: ColumnDef<Row>[] = [
+    { key: "name", header: "Name", accessor: (r) => r.name, editable: true },
+    { key: "team", header: "Team", accessor: (r) => r.team },
+  ];
+
+  const editableTable = () =>
+    render(
+      <DataTable
+        data={ROWS}
+        columns={editable}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        cellNavigation
+        onCellEdit={() => undefined}
+      />
+    );
+
+  const editor = () =>
+    document.querySelector('[data-adapttable-part="edit-cell-editor"]');
+
+  it("opens the editor on Enter, and on F2", () => {
+    editableTable();
+    const cell = cellAt(0, 0)!;
+    cell.focus();
+    fireEvent.keyDown(cell, { key: "Enter" });
+    expect(editor()).not.toBeNull();
+
+    fireEvent.keyDown(editor()!, { key: "Escape" });
+    expect(editor()).toBeNull();
+    fireEvent.keyDown(cellAt(0, 0)!, { key: "F2" });
+    expect(editor()).not.toBeNull();
+    // Left open, the editor would still be in the DOM for the next case.
+    fireEvent.keyDown(editor()!, { key: "Escape" });
+  });
+
+  it("opens the cell the keyboard moved to, not the one it started on", () => {
+    editableTable();
+    const first = cellAt(0, 0)!;
+    first.focus();
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+    fireEvent.keyDown(cellAt(1, 0)!, { key: "Enter" });
+
+    expect(editor()).toHaveValue("Grace");
+  });
+
+  it("says nothing on a column the host never made editable", () => {
+    editableTable();
+    const first = cellAt(0, 0)!;
+    first.focus();
+    // Arrowed onto Team, which is display-only: Enter has nothing to open.
+    fireEvent.keyDown(first, { key: "ArrowRight" });
+    fireEvent.keyDown(cellAt(0, 1)!, { key: "Enter" });
+
+    expect(editor()).toBeNull();
+  });
+});

@@ -181,7 +181,7 @@ React and the UI kit external because your app already ships those):
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~22 kB    |
 | every core export                          | ~51 kB    |
-| `DataTable` from an adapter                | ~64–74 kB |
+| `DataTable` from an adapter                | ~65–75 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters

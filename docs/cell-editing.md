@@ -431,12 +431,16 @@ Fields the reader never touched are not a problem to solve: a save sends a patch
 of what the reader changed, so a value they left alone is never written back
 over the one that arrived.
 
+A batch asks the same way. Every cell is a field there, so an untouched one
+already reads the row itself; a cell the reader changed marks itself and is
+answered on its own, and **Save all** waits until nothing is outstanding.
+
 `editConflictPolicy` and `onEditConflict` decide it without asking, exactly as
-they do for a cell. Batch editing does not ask: the drafts stand and the
-incoming values land underneath them.
+they do for a cell.
 
 Parts: the cell's own `edit-cell-conflict`, `edit-cell-conflict-message`,
-`edit-cell-incoming`, `edit-cell-keep-mine`, `edit-cell-take-theirs`.
+`edit-cell-incoming`, `edit-cell-keep-mine`, `edit-cell-take-theirs`, plus
+`batch-edit-conflict` where the batch bar says why it is not saving yet.
 Labels: `labels.editConflict`, `labels.keepMine`, `labels.takeTheirs`,
 `labels.theirsValue`.
 
@@ -462,7 +466,8 @@ Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 from `@adapttable/core/adapter`, `RowEditIcons` typing the glyph overrides,
 and `rowEditConflict` (`RowEditConflict` out) telling one row's controls that
 an answer is outstanding. `useEditConflict` grew `reconcileRow`
-(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, and
+(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, plus
+`reconcileBatch` (`ReconcileLiveBatchEdit` in) for a batch, and
 `CellConflictAsk` is what one field's notice needs, and `EditConflictChange`
 names each field that moved. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's

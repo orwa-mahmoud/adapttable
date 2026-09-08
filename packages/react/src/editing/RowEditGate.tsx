@@ -452,6 +452,17 @@ export interface BatchEditCellProps<TRow> {
   editLabel: string;
   /** Render the kit's own editor from a controller. */
   renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
+  /**
+   * The incoming value waiting on this cell, when its stored value moved
+   * under a draft the reader typed.
+   */
+  ask?: CellConflictAsk;
+  /** Labels for the notice — already resolved. */
+  conflictLabels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
+  /** Class for the notice. */
+  errorClassName?: string;
+  /** The kit's components, for the notice's buttons. */
+  slots?: EditableCellSlots;
 }
 
 /**
@@ -477,6 +488,10 @@ export function BatchEditCell<TRow>({
   display,
   editLabel,
   renderEditor,
+  ask,
+  conflictLabels,
+  errorClassName,
+  slots,
 }: Readonly<BatchEditCellProps<TRow>>): ReactElement {
   const editor = resolveCellEditor(column, batch.featureHost);
   if (!editor) return <>{display}</>;
@@ -493,6 +508,7 @@ export function BatchEditCell<TRow>({
     editor,
     selectOptions: selectOptionsFor(editor),
     validating: false,
+    conflict: ask !== undefined,
     errorId: `adapttable-batch-edit-${rowId}-${column.key}`,
     // Nothing steals focus: every cell is a field, and the reader chose where
     // to start.
@@ -521,6 +537,15 @@ export function BatchEditCell<TRow>({
       data-changed={batch.isChanged(rowId, column.key) ? "" : undefined}
     >
       {renderEditor(ctrl)}
+      {slots ? (
+        <CellConflictNotice
+          ask={ask}
+          labels={conflictLabels}
+          errorId={ctrl.errorId}
+          errorClassName={errorClassName}
+          slots={slots}
+        />
+      ) : null}
     </span>
   );
 }
@@ -533,6 +558,12 @@ export function BatchEditCell<TRow>({
 export interface BatchEditBarProps<TRow> {
   /** The batch state from the chrome. */
   batch: BatchEditingState<TRow>;
+  /**
+   * Whether any cell in the batch is waiting on an answer. Saving past one
+   * would write over a value the reader has not looked at, so the bar says
+   * what is holding it up instead of offering the save.
+   */
+  contested?: boolean;
   /** Labels; falls back to the built-in English. */
   labels?: TableLabels;
   /** Class for the bar. */
@@ -591,6 +622,7 @@ export interface BatchEditBarChromeProps<TRow> extends BatchEditBarProps<TRow> {
  */
 export function BatchEditBarChrome<TRow>({
   batch,
+  contested,
   labels,
   className,
   buttonClassName,
@@ -606,12 +638,18 @@ export function BatchEditBarChrome<TRow>({
       style={{ display: "flex", alignItems: "center", gap: "0.5em" }}
     >
       <output data-adapttable-part="batch-edit-count">{count}</output>
-      <Button
-        label={labels?.saveAll ?? "Save all"}
-        part="batch-edit-save"
-        className={buttonClassName}
-        onClick={batch.saveAll}
-      />
+      {contested === true ? (
+        <output data-adapttable-part="batch-edit-conflict">
+          {labels?.editConflict ?? "This row changed while you were editing"}
+        </output>
+      ) : (
+        <Button
+          label={labels?.saveAll ?? "Save all"}
+          part="batch-edit-save"
+          className={buttonClassName}
+          onClick={batch.saveAll}
+        />
+      )}
       <Button
         label={labels?.cancelAll ?? "Cancel all"}
         part="batch-edit-cancel"

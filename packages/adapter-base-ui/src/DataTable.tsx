@@ -324,7 +324,11 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                     {chrome.editing?.batch && (
                       <FeatureSlot
                         slot={BATCH_EDIT_BAR}
-                        props={{ batch: chrome.editing.batch, labels }}
+                        props={{
+                          batch: chrome.editing.batch,
+                          contested: chrome.editing.conflict?.anyContested,
+                          labels,
+                        }}
                       />
                     )}
                     <FeatureSlot

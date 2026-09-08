@@ -384,6 +384,7 @@ export {
   type EditConflictPolicy,
   type EditConflictState,
   liveRowChanged,
+  type ReconcileLiveBatchEdit,
   type ReconcileLiveEdit,
   type ReconcileLiveRowEdit,
   useEditConflict,

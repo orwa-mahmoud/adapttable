@@ -63,6 +63,11 @@ import { useEventCallback } from "../hooks/useEventCallback";
  */
 export const GRID_CELL_ATTR = "data-grid-cell";
 
+/** Whether a key came from a cell itself, rather than a control inside one. */
+function isGridCell(target: unknown): boolean {
+  return target instanceof Element && target.hasAttribute(GRID_CELL_ATTR);
+}
+
 /**
  * `data-grid-cell` value for one address — `"row:col"`, both absolute.
  *
@@ -644,18 +649,20 @@ export function useGridFocus<TRow>(
       ctrlKey?: boolean;
       metaKey?: boolean;
       shiftKey?: boolean;
+      target?: unknown;
       preventDefault: () => void;
     }) => {
       if (!enabled) return;
       const from = active ?? { row: firstRowIndex, col: 0 };
       if (handleClipboardKey(event, from)) return;
 
-      // Enter and F2 belong to whatever is inside the cell — `EditableCellGate`
-      // handles both on the element focus just landed on. This only fires when
-      // a host asked for its own activation, and stays out of the way otherwise
-      // so the two never race for one key press.
+      // Enter and F2 open the focused cell — but only when the key came FROM
+      // that cell. This handler sits on the whole grid, so the same press also
+      // arrives from an editor, a rename box or a button inside one; those own
+      // their keys, and swallowing them here would break the control the
+      // reader is actually in.
       if (event.key === "Enter" || event.key === "F2") {
-        if (onActivate) {
+        if (onActivate && isGridCell(event.target)) {
           event.preventDefault();
           onActivate(from);
         }

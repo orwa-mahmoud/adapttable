@@ -281,33 +281,30 @@ export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
 
 /** Keep mine / Take theirs — same channel as a validation message. */
 /**
- * The incoming value waiting on one field of an open row form.
+ * The incoming value waiting on one cell the reader is working in.
  *
  * A row that changed underneath marks every field that moved, each with the
  * notice a cell already shows — the reader is choosing between two versions of
  * a value, which they cannot do without seeing the one that arrived. Answering
  * on any of them answers for the row: the row moved as a whole.
  */
-function rowFieldAsk<TRow>(
+function cellAsk<TRow>(
   editing: EditableCellEditing<TRow> | undefined,
   rowId: string,
   columnKey: string
 ): CellConflictAsk | undefined {
   const conflict = editing?.conflict;
-  if (!conflict?.isRowConflict(rowId)) return undefined;
-  const change = conflict.current?.changes.find(
-    (item) => item.columnKey === columnKey
-  );
-  if (!change) return undefined;
+  const cell = conflict?.contestedCell(rowId, columnKey);
+  if (!conflict || !cell) return undefined;
   return {
-    incomingValue: change.incoming,
-    // One field, one answer: a reader editing several columns answers each on
-    // its own, and the rest stay as they are.
+    incomingValue: cell.incomingValue,
+    // One cell, one answer: a reader working across several columns — or, in a
+    // batch, several rows — settles each on its own, and the rest stand.
     keep: () => {
-      conflict.keepRowField(columnKey);
+      conflict.keepCell(rowId, columnKey);
     },
     take: () => {
-      conflict.takeRowField(columnKey);
+      conflict.takeCell(rowId, columnKey);
     },
   };
 }
@@ -515,6 +512,10 @@ export function EditableCellGate<TRow>(
         display={<>{props.display}</>}
         editLabel={props.editLabel}
         renderEditor={props.renderEditor}
+        ask={cellAsk(props.editing, props.rowId, props.column.key)}
+        conflictLabels={props.editing?.conflictLabels}
+        errorClassName={props.errorClassName}
+        slots={props.slots}
       />
     );
   }
@@ -531,7 +532,7 @@ export function EditableCellGate<TRow>(
         editLabel={props.editLabel}
         takesFocus={isFirstEditableColumn(props.columns, props.column.key)}
         renderEditor={props.renderEditor}
-        ask={rowFieldAsk(props.editing, props.rowId, props.column.key)}
+        ask={cellAsk(props.editing, props.rowId, props.column.key)}
         conflictLabels={props.editing?.conflictLabels}
         errorClassName={props.errorClassName}
         slots={props.slots}

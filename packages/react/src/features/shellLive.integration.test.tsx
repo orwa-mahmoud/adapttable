@@ -212,6 +212,82 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     expect(onCellEdit).toHaveBeenCalledWith(ROWS[0], "budget", 10);
   });
 
+  it("asks about a batch cell the reader changed, and takes the rest", () => {
+    const onBatchEdit = vi.fn();
+    // The conflict pass only measures fields the host made editable.
+    const editableColumns: ColumnDef<Row>[] = [
+      { key: "name", header: "Name", accessor: (r) => r.name },
+      {
+        key: "budget",
+        header: "Budget",
+        accessor: (r) => r.budget,
+        editable: true,
+        editor: "number",
+      },
+    ];
+    const changed: Row[] = [
+      { id: "a", name: "Alice", budget: 99 },
+      { id: "b", name: "Bob", budget: 30 },
+    ];
+    const feature = batchEditing<Row>(onBatchEdit);
+    const withData = (data: Row[]) =>
+      applyTableFeatures({
+        features: [feature],
+        data,
+        columns: editableColumns,
+        rowKey: (r: Row) => r.id,
+        urlSync: false,
+      });
+    const before = withData(ROWS);
+    const after = withData(changed);
+    let view: DataTableShellResult<Row> | undefined;
+    function Probe({ props }: { readonly props: typeof before }) {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView<Row> shell={shell}>
+          {(next) => {
+            view = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    const { rerender } = render(
+      <FeatureProviders props={before}>
+        <Probe props={before} />
+      </FeatureProviders>
+    );
+
+    act(() => {
+      view?.chrome.editing?.batch?.setDraft(ROWS[0]!, "a", "budget", "55");
+    });
+    act(() => {
+      rerender(
+        <FeatureProviders props={after}>
+          <Probe props={after} />
+        </FeatureProviders>
+      );
+    });
+
+    // Budget is the reader's, so the batch waits for an answer on that cell.
+    const conflict = view?.chrome.editing?.conflict;
+    expect(conflict?.contestedCell("a", "budget")).toEqual({
+      incomingValue: "99",
+    });
+    expect(conflict?.anyContested).toBe(true);
+
+    act(() => {
+      conflict?.keepCell("a", "budget");
+    });
+    expect(view?.chrome.editing?.conflict?.anyContested).toBe(false);
+    act(() => {
+      view?.chrome.editing?.batch?.saveAll();
+    });
+    expect(onBatchEdit).toHaveBeenCalledWith([
+      { row: changed[0], rowId: "a", patch: { budget: 55 } },
+    ]);
+  });
+
   it("selectionStats reports figures for a selected range", () => {
     const view = mount([cellNavigation(), selectionStats()]);
 

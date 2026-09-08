@@ -241,3 +241,81 @@ describe("useBatchEditing", () => {
     expect(onEditCancel).toHaveBeenCalledOnce();
   });
 });
+
+describe("an incoming row under a pending batch", () => {
+  const ARRIVED: Task = { id: "1", title: "Arrived", points: 9 };
+
+  it("reports what each changed field was measured against", () => {
+    const { result } = setup();
+    act(() => {
+      result.current.setDraft(ROWS[0]!, "1", "title", "mine");
+    });
+
+    expect(result.current.entries).toEqual([
+      { rowId: "1", seeds: { title: "Ship" }, drafts: { title: "mine" } },
+    ]);
+  });
+
+  it("keeps the draft and measures that field against the incoming value", () => {
+    const onBatchEdit = vi.fn();
+    const { result } = setup({ onBatchEdit });
+    act(() => {
+      result.current.setDraft(ROWS[0]!, "1", "title", "mine");
+    });
+    act(() => {
+      result.current.acceptSeeds(ARRIVED, "1", ["title"]);
+    });
+
+    expect(result.current.entries[0]?.seeds).toEqual({ title: "Arrived" });
+    expect(result.current.draftFor(ARRIVED, "1", "title")).toBe("mine");
+    act(() => {
+      result.current.saveAll();
+    });
+    expect(onBatchEdit).toHaveBeenCalledWith([
+      { row: ARRIVED, rowId: "1", patch: { title: "mine" } },
+    ]);
+  });
+
+  it("drops the draft on take, so the cell reads the row again", () => {
+    const onBatchEdit = vi.fn();
+    const { result } = setup({ onBatchEdit });
+    act(() => {
+      result.current.setDraft(ROWS[0]!, "1", "title", "mine");
+    });
+    act(() => {
+      result.current.takeSeeds(ARRIVED, "1", ["title"]);
+    });
+
+    // Nothing of the reader's is left in that row, so it is not pending.
+    expect(result.current.pending).toBe(false);
+    expect(result.current.draftFor(ARRIVED, "1", "title")).toBe("Arrived");
+    act(() => {
+      result.current.saveAll();
+    });
+    expect(onBatchEdit).not.toHaveBeenCalled();
+  });
+
+  it("leaves the row's other changes alone", () => {
+    const { result } = setup();
+    act(() => {
+      result.current.setDraft(ROWS[0]!, "1", "title", "mine");
+      result.current.setDraft(ROWS[0]!, "1", "points", "7");
+    });
+    act(() => {
+      result.current.takeSeeds(ARRIVED, "1", ["title"]);
+    });
+
+    expect(result.current.isChanged("1", "title")).toBe(false);
+    expect(result.current.isChanged("1", "points")).toBe(true);
+    expect(result.current.entries[0]?.seeds).toEqual({ points: "3" });
+  });
+
+  it("does nothing for a row with no pending changes", () => {
+    const { result } = setup();
+    act(() => {
+      result.current.acceptSeeds(ARRIVED, "1", ["title"]);
+      result.current.takeSeeds(ARRIVED, "1", ["title"]);
+    });
+    expect(result.current.pending).toBe(false);
+  });
+});

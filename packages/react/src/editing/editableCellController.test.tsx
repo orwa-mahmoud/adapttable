@@ -216,12 +216,16 @@ describe("rowEditingSignature", () => {
       isConflict: (rowId: string, columnKey: string) =>
         rowId === "1" && columnKey === "name",
       isRowConflict: () => false,
-      keepRowField: () => undefined,
-      takeRowField: () => undefined,
+      keepCell: () => undefined,
+      takeCell: () => undefined,
+      contestedCell: () => undefined,
+      anyContested: false,
+      rowSignature: () => "",
       keep: () => undefined,
       take: () => undefined,
       reconcile: () => undefined,
       reconcileRow: () => undefined,
+      reconcileBatch: () => undefined,
       clear: () => undefined,
     };
     expect(
@@ -365,12 +369,16 @@ describe("editableCellController — leaving an edit", () => {
       isConflict: (rowId: string, columnKey: string) =>
         rowId === "1" && columnKey === "name",
       isRowConflict: () => false,
-      keepRowField: () => undefined,
-      takeRowField: () => undefined,
+      keepCell: () => undefined,
+      takeCell: () => undefined,
+      contestedCell: () => undefined,
+      anyContested: false,
+      rowSignature: () => "",
       keep: vi.fn(),
       take: vi.fn(),
       reconcile: () => undefined,
       reconcileRow: () => undefined,
+      reconcileBatch: () => undefined,
       clear: () => undefined,
     };
     const ctrl = () =>

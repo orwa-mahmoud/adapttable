@@ -208,6 +208,35 @@ function LiveEditing({
     props.onEditConflict,
   ]);
 
+  // A batch is the same question across several rows at once, so a cell is
+  // named by its row as well as its column.
+  useEffect(() => {
+    if (!batchArmed) return;
+    conflict.reconcileBatch({
+      entries: batch.entries,
+      rows: editingRows,
+      columns: chrome.allColumns,
+      rowKey: (row: unknown) => rowKey(row as never),
+      policy: props.editConflictPolicy ?? "ask",
+      onEditConflict: props.onEditConflict as never,
+      accept: (row: unknown, rowId: string, columnKeys: readonly string[]) => {
+        batch.acceptSeeds(row as never, rowId, columnKeys);
+      },
+      take: (row: unknown, rowId: string, columnKeys: readonly string[]) => {
+        batch.takeSeeds(row as never, rowId, columnKeys);
+      },
+    });
+  }, [
+    batchArmed,
+    batch,
+    editingRows,
+    rowKey,
+    conflict,
+    chrome.allColumns,
+    props.editConflictPolicy,
+    props.onEditConflict,
+  ]);
+
   return children({ ...chrome, editing, editingRows } as never);
 }
 

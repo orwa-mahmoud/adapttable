@@ -98,10 +98,25 @@ export interface EditConflictState<TRow> {
   isConflict: (rowId: string, columnKey: string) => boolean;
   /** Whether this row's open form is the one in conflict. */
   isRowConflict: (rowId: string) => boolean;
-  /** Keep the draft in one field of the open form. */
-  keepRowField: (columnKey: string) => void;
-  /** Take the incoming value into one field of the open form. */
-  takeRowField: (columnKey: string) => void;
+  /** Keep the draft in one cell that is being asked about. */
+  keepCell: (rowId: string, columnKey: string) => void;
+  /** Take the incoming value into one cell that is being asked about. */
+  takeCell: (rowId: string, columnKey: string) => void;
+  /** What arrived in one cell, when it is being asked about. */
+  contestedCell: (
+    rowId: string,
+    columnKey: string
+  ) => { readonly incomingValue: string } | undefined;
+  /**
+   * Whether anything at all is waiting on an answer — what a control that
+   * saves several rows at once has to check before it saves any of them.
+   */
+  anyContested: boolean;
+  /**
+   * A digest of one row's contested cells, for a row memo comparator. A
+   * memoized row that cannot see the question never redraws to show it.
+   */
+  rowSignature: (rowId: string) => string;
   /** Keep the draft; accept the incoming row as the new snapshot. */
   keep: () => void;
   /** Replace the draft with the incoming value. */
@@ -116,6 +131,11 @@ export interface EditConflictState<TRow> {
    * against the row it opened on, so any change to that row is the conflict.
    */
   reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
+  /**
+   * The same check across a batch, where several rows are open at once — so a
+   * cell is named by its row and its column, not its column alone.
+   */
+  reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
   /** Drop a conflict without choosing — the editor closed. */
   clear: () => void;
 }
@@ -251,6 +271,64 @@ export function resolveConflictChoice<TRow>(
 }
 
 /**
+ * What {@link EditConflictState.reconcileBatch} needs to judge live updates
+ * against a batch of open rows.
+ *
+ * @public
+ */
+export interface ReconcileLiveBatchEdit<TRow> {
+  /** Every row with unsaved changes, and what each field is measured against. */
+  entries: readonly {
+    readonly rowId: string;
+    readonly seeds: Readonly<Record<string, string>>;
+    readonly drafts: Readonly<Record<string, string>>;
+  }[];
+  /** The rendered row set. */
+  rows: readonly TRow[];
+  /** Columns, to read each field. */
+  columns: readonly EditableColumnLike<TRow>[];
+  /** Row identity function. */
+  rowKey: (row: TRow) => string;
+  /** How a conflicting edit is resolved. */
+  policy: EditConflictPolicy;
+  /** Called when a live edit conflicts with an incoming change. */
+  onEditConflict?: EditConflictHandler<TRow>;
+  /** Keep mine: these fields now read the incoming value; the drafts stand. */
+  accept: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+  /** Take theirs: these fields and their drafts take the incoming value. */
+  take: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+}
+
+/** Whether two stores hold the same cells. */
+function sameKeys(
+  left: ReadonlyMap<string, unknown>,
+  right: ReadonlyMap<string, unknown>
+): boolean {
+  if (left.size !== right.size) return false;
+  for (const key of left.keys()) {
+    if (!right.has(key)) return false;
+  }
+  return true;
+}
+
+/** One cell waiting on an answer. */
+interface ContestedCell<TRow> {
+  /** The row it belongs to. */
+  readonly row: TRow;
+  /** What that field reads now. */
+  readonly incoming: string;
+  /** Keep mine: this field now reads the incoming value, the draft stands. */
+  readonly accept: (row: TRow, columnKeys: readonly string[]) => void;
+  /** Take theirs: the field and its draft both take the incoming value. */
+  readonly take: (row: TRow, columnKeys: readonly string[]) => void;
+}
+
+/** One cell's place in the store — a row and a column, never a column alone. */
+function cellKey(rowId: string, columnKey: string): string {
+  return `${rowId}\u0000${columnKey}`;
+}
+
+/**
  * Headless conflict state. Inert until {@link EditConflictState.reconcile}
  * sees a live row that disagrees with the open editor.
  *
@@ -270,18 +348,24 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
     take: (row: TRow, value: string) => void;
   } | null>(null);
   const pending = useRef<EditConflict<TRow> | null>(null);
-  /** The open form's resolvers, held while its fields are being asked about. */
-  const rowAnswer = useRef<{
-    row: TRow;
-    accept: (row: TRow, columnKeys: readonly string[]) => void;
-    take: (row: TRow, columnKeys: readonly string[]) => void;
-  } | null>(null);
+  /**
+   * Every cell waiting on an answer, keyed by row and column.
+   *
+   * A row form and a batch differ only in how many rows are open at once, so
+   * they share one store: the key carries the row, and the entry carries what
+   * arrived and how to settle that one cell.
+   */
+  const [contested, setContested] = useState<
+    ReadonlyMap<string, ContestedCell<TRow>>
+  >(() => new Map());
+  const contestedRef = useRef<ReadonlyMap<string, ContestedCell<TRow>>>(
+    new Map()
+  );
 
   const clear = useCallback(() => {
     seen.current = "";
     pending.current = null;
     answer.current = null;
-    rowAnswer.current = null;
     setCurrent(null);
   }, []);
 
@@ -400,89 +484,191 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
   const reconcileRow = useEventCallback((input: ReconcileLiveRowEdit<TRow>) => {
     const { activeRowId, seeds } = input;
     if (activeRowId === null || seeds === undefined) {
-      clearUnit("row");
+      dropRow(null);
       return;
     }
     const live = input.rows.find((row) => input.rowKey(row) === activeRowId);
     if (!live) {
-      clearUnit("row");
+      dropRow(activeRowId);
       return;
     }
-    const moved = movedFields(seeds, live, input.columns);
-    if (moved.length === 0) {
-      clearUnit("row");
-      return;
-    }
-    // A field the reader never typed in has nothing of theirs to lose, so it
-    // simply takes what arrived. Only the fields they were working in are a
-    // question.
-    const untouched = moved.filter(
-      (change) => input.drafts[change.columnKey] === change.previous
-    );
-    if (untouched.length > 0) {
-      input.take(
-        live,
-        untouched.map((change) => change.columnKey)
-      );
-    }
-    const contested = moved.filter(
-      (change) => input.drafts[change.columnKey] !== change.previous
-    );
-    if (contested.length === 0) {
-      clearUnit("row");
-      return;
-    }
-    const token = `row::${activeRowId}::${contested
-      .map((change) => `${change.columnKey}=${change.incoming}`)
-      .join("|")}`;
-    if (token === seen.current) return;
-    const keys = contested.map((change) => change.columnKey);
-    const conflict: EditConflict<TRow> = {
-      unit: "row",
-      row: live,
-      previous: live,
+    settleFields({
       rowId: activeRowId,
-      // A form holds many fields; each contested one carries its own question.
-      columnKey: "",
-      draft: "",
-      incomingValue: "",
-      previousValue: "",
-      changes: contested,
-    };
-    const choice = resolveConflictChoice(
-      input.onEditConflict,
-      conflict,
-      input.policy
-    );
-    if (choice === "keep") {
-      input.accept(live, keys);
-      return;
-    }
-    if (choice === "take") {
-      input.take(live, keys);
-      return;
-    }
-    seen.current = token;
-    rowAnswer.current = { row: live, accept: input.accept, take: input.take };
-    pending.current = conflict;
-    setCurrent(conflict);
+      row: live,
+      moved: movedFields(seeds, live, input.columns),
+      drafts: input.drafts,
+      policy: input.policy,
+      onEditConflict: input.onEditConflict,
+      accept: (row, keys) => {
+        input.accept(row, keys);
+      },
+      take: (row, keys) => {
+        input.take(row, keys);
+      },
+    });
   });
 
-  const keepRowField = useEventCallback((columnKey: string) => {
-    const held = rowAnswer.current;
-    if (!held) return;
-    held.accept(held.row, [columnKey]);
-    // Cleared rather than trimmed: the next pass recomputes what is still
-    // contested, so answering one field re-asks about the rest and nothing
-    // else.
-    clear();
+  const reconcileBatch = useEventCallback(
+    (input: ReconcileLiveBatchEdit<TRow>) => {
+      const open = new Set(input.entries.map((entry) => entry.rowId));
+      for (const key of contestedRef.current.keys()) {
+        const rowId = key.slice(0, key.indexOf("\u0000"));
+        if (!open.has(rowId)) dropRow(rowId);
+      }
+      for (const entry of input.entries) {
+        const live = input.rows.find(
+          (row) => input.rowKey(row) === entry.rowId
+        );
+        if (!live) {
+          dropRow(entry.rowId);
+          continue;
+        }
+        settleFields({
+          rowId: entry.rowId,
+          row: live,
+          moved: movedFields(entry.seeds, live, input.columns),
+          drafts: entry.drafts,
+          policy: input.policy,
+          onEditConflict: input.onEditConflict,
+          accept: (row, keys) => {
+            input.accept(row, entry.rowId, keys);
+          },
+          take: (row, keys) => {
+            input.take(row, entry.rowId, keys);
+          },
+        });
+      }
+    }
+  );
+
+  /**
+   * Settle one row's moved fields: the reader's are asked about, the rest
+   * simply take what arrived.
+   */
+  const settleFields = useEventCallback(
+    (input: {
+      rowId: string;
+      row: TRow;
+      moved: readonly EditConflictChange[];
+      drafts: Readonly<Record<string, string>>;
+      policy: EditConflictPolicy;
+      onEditConflict?: EditConflictHandler<TRow>;
+      accept: (row: TRow, columnKeys: readonly string[]) => void;
+      take: (row: TRow, columnKeys: readonly string[]) => void;
+    }) => {
+      if (input.moved.length === 0) {
+        dropRow(input.rowId);
+        return;
+      }
+      // A field the reader never typed in has nothing of theirs to lose, so
+      // it simply takes what arrived. Only the fields they were working in
+      // are a question.
+      const untouched = input.moved.filter(
+        (change) => input.drafts[change.columnKey] === change.previous
+      );
+      if (untouched.length > 0) {
+        input.take(
+          input.row,
+          untouched.map((change) => change.columnKey)
+        );
+      }
+      const asking = input.moved.filter(
+        (change) => input.drafts[change.columnKey] !== change.previous
+      );
+      if (asking.length === 0) {
+        dropRow(input.rowId);
+        return;
+      }
+      const keys = asking.map((change) => change.columnKey);
+      const conflict: EditConflict<TRow> = {
+        unit: "row",
+        row: input.row,
+        previous: input.row,
+        rowId: input.rowId,
+        // Each contested field carries its own question.
+        columnKey: "",
+        draft: "",
+        incomingValue: "",
+        previousValue: "",
+        changes: asking,
+      };
+      const choice = resolveConflictChoice(
+        input.onEditConflict,
+        conflict,
+        input.policy
+      );
+      if (choice === "keep") {
+        input.accept(input.row, keys);
+        dropRow(input.rowId);
+        return;
+      }
+      if (choice === "take") {
+        input.take(input.row, keys);
+        dropRow(input.rowId);
+        return;
+      }
+      writeContested(input.rowId, asking, {
+        row: input.row,
+        accept: input.accept,
+        take: input.take,
+      });
+    }
+  );
+
+  const writeContested = useEventCallback(
+    (
+      rowId: string,
+      asking: readonly EditConflictChange[],
+      how: Omit<ContestedCell<TRow>, "incoming">
+    ) => {
+      const next = new Map(contestedRef.current);
+      // This row's entries are replaced wholesale, so a field that has since
+      // settled stops asking without a second pass to remove it.
+      for (const key of contestedRef.current.keys()) {
+        if (key.startsWith(`${rowId}\u0000`)) next.delete(key);
+      }
+      for (const change of asking) {
+        next.set(cellKey(rowId, change.columnKey), {
+          ...how,
+          incoming: change.incoming,
+        });
+      }
+      if (sameKeys(contestedRef.current, next)) return;
+      contestedRef.current = next;
+      setContested(next);
+    }
+  );
+
+  const dropRow = useEventCallback((rowId: string | null) => {
+    if (contestedRef.current.size === 0) return;
+    const next = new Map(contestedRef.current);
+    for (const key of contestedRef.current.keys()) {
+      if (rowId === null || key.startsWith(`${rowId}\u0000`)) next.delete(key);
+    }
+    if (next.size === contestedRef.current.size) return;
+    contestedRef.current = next;
+    setContested(next);
   });
 
-  const takeRowField = useEventCallback((columnKey: string) => {
-    const held = rowAnswer.current;
-    if (!held) return;
-    held.take(held.row, [columnKey]);
-    clear();
+  const dropCell = useEventCallback((rowId: string, columnKey: string) => {
+    const next = new Map(contestedRef.current);
+    if (!next.delete(cellKey(rowId, columnKey))) return;
+    contestedRef.current = next;
+    setContested(next);
+  });
+
+  const keepCell = useEventCallback((rowId: string, columnKey: string) => {
+    const cell = contestedRef.current.get(cellKey(rowId, columnKey));
+    if (!cell) return;
+    cell.accept(cell.row, [columnKey]);
+    dropCell(rowId, columnKey);
+  });
+
+  const takeCell = useEventCallback((rowId: string, columnKey: string) => {
+    const cell = contestedRef.current.get(cellKey(rowId, columnKey));
+    if (!cell) return;
+    cell.take(cell.row, [columnKey]);
+    dropCell(rowId, columnKey);
   });
 
   const isConflict = useCallback(
@@ -494,8 +680,34 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
   );
 
   const isRowConflict = useCallback(
-    (rowId: string) => current?.unit === "row" && current.rowId === rowId,
-    [current]
+    (rowId: string) => {
+      for (const key of contested.keys()) {
+        if (key.startsWith(`${rowId}\u0000`)) return true;
+      }
+      return false;
+    },
+    [contested]
+  );
+
+  const rowSignature = useCallback(
+    (rowId: string) => {
+      let digest = "";
+      for (const [key, cell] of contested) {
+        if (key.startsWith(`${rowId}\u0000`)) {
+          digest += `|${key.slice(rowId.length + 1)}=${cell.incoming}`;
+        }
+      }
+      return digest;
+    },
+    [contested]
+  );
+
+  const contestedCell = useCallback(
+    (rowId: string, columnKey: string) => {
+      const cell = contested.get(cellKey(rowId, columnKey));
+      return cell ? { incomingValue: cell.incoming } : undefined;
+    },
+    [contested]
   );
 
   return useMemo(
@@ -505,10 +717,14 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       isRowConflict,
       keep,
       take,
-      keepRowField,
-      takeRowField,
+      keepCell,
+      takeCell,
+      contestedCell,
+      anyContested: contested.size > 0,
+      rowSignature,
       reconcile,
       reconcileRow,
+      reconcileBatch,
       clear,
     }),
     [
@@ -517,10 +733,14 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       isRowConflict,
       keep,
       take,
-      keepRowField,
-      takeRowField,
+      keepCell,
+      takeCell,
+      contestedCell,
+      rowSignature,
+      contested,
       reconcile,
       reconcileRow,
+      reconcileBatch,
       clear,
     ]
   );

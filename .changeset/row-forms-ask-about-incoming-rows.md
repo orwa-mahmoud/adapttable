@@ -15,8 +15,11 @@ measured against the row it opened on, and every field that moved marks itself
 with the notice a cell shows — the value that arrived, **Keep mine** and **Take
 theirs** — while the fields that did not are left alone. Answering on any of
 them answers for the row, and the form offers nothing to save until it is
-answered. `editConflictPolicy` and `onEditConflict` decide it without asking,
-exactly as they do for a cell.
+answered. A batch asks the same way — every cell is a field there, so an
+untouched one already reads the row itself, a changed one is answered on its
+own, and **Save all** waits until nothing is outstanding.
+`editConflictPolicy` and `onEditConflict` decide it without asking, exactly as
+they do for a cell.
 
 Dropping a column at the head of the grouping strip groups by it first. Every
 insertion boundary is drawn with the chip it sits beside and widens while a

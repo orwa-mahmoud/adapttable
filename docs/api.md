@@ -673,7 +673,8 @@ becomes that trigger instead: `resolveRowEditTrigger(actions, rowEditing, row, r
 (`RowEditTrigger` out) wires it to the row's form and reports whether the
 built-in control still draws itself. An incoming row under an open form asks the
 same question a cell does, of every field that moved: `useEditConflict` finds
-them through `reconcileRow` (`ReconcileLiveRowEdit` in) and `isRowConflict`,
+them through `reconcileRow` (`ReconcileLiveRowEdit` in) and `isRowConflict` —
+and across a batch through `reconcileBatch` (`ReconcileLiveBatchEdit` in),
 `CellConflictAsk` is what one field's notice needs and `EditConflictChange`
 names each field that moved,
 and `rowEditConflict` (`RowEditConflict` out) tells the row's controls an

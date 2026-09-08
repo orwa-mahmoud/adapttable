@@ -1123,6 +1123,7 @@ export interface EditableCellEditing<_TRow = unknown> {
             columnKey: string;
             incomingValue: string;
         };
+        rowSignature?: (rowId: string) => string;
     };
     // (undocumented)
     dirty?: {

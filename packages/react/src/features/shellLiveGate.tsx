@@ -1,3 +1,4 @@
+import type { EditableColumnLike } from "@adapttable/core";
 /**
  * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
  *
@@ -7,6 +8,7 @@
 import type { ReactNode } from "react";
 
 import { asBatchGesture } from "../editing/editHistory";
+import { beginCellEdit } from "../editing/useCellEditing";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { undoRedoToolbar, viewControlsToolbar } from "../useTableChrome";
 import { rememberFeatureHost } from "./featureHost";
@@ -169,6 +171,23 @@ function CellNavStage<TRow>({
     dir: props.dir,
     labels: shell.labels,
     onCut: props.onCellCut,
+    // Enter and F2 on a focused cell open it. The grid leaves those keys to
+    // whatever is inside the cell, and the only thing that handles them is a
+    // control the reader never reaches by arrowing — so a keyboard reader
+    // could walk the grid and never edit anything.
+    onActivate: (cell: { row: number; col: number }) => {
+      const editing = chrome.editing;
+      if (!editing) return;
+      const row = options.rows[cell.row - windowStart];
+      const column = columns[cell.col];
+      if (row === undefined || column === undefined) return;
+      beginCellEdit(
+        editing.state,
+        row,
+        column as EditableColumnLike<TRow>,
+        props.rowKey
+      );
+    },
   };
   const navProps = {
     options,

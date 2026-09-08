@@ -20,5 +20,11 @@ export interface EditableCellEditing<_TRow = unknown> {
   batch?: { signature?: string };
   conflict?: {
     current?: { rowId: string; columnKey: string; incomingValue: string };
+    /**
+     * A digest of the cells of THIS row waiting on an answer. A row form and
+     * a batch mark several cells at once, and a memoized row that cannot see
+     * them never redraws to show the question.
+     */
+    rowSignature?: (rowId: string) => string;
   };
 }

@@ -282,14 +282,15 @@ export function rowEditingSignature<TRow>(
   const batchRow =
     batchAll.split(";").find((entry) => entry.startsWith(`${rowId}:`)) ?? "";
   const live = editing.conflict?.current;
+  const contested = editing.conflict?.rowSignature?.(rowId) ?? "";
   const conflictMark =
     live?.rowId === rowId
       ? `conflict:${live.columnKey}:${live.incomingValue}`
       : "";
   if (active?.rowId !== rowId) {
-    const base = `${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}`;
+    const base = `${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}${contested}`;
     return marked ? `invalid${base}` : base;
   }
   const message = editing.validation?.errorFor(rowId, active.columnKey) ?? "";
-  return `${active.columnKey}:${draft}:${message}:${busy === true ? "1" : ""}${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}`;
+  return `${active.columnKey}:${draft}:${message}:${busy === true ? "1" : ""}${rowSave}${rowMarks}${rowDrafts}${batchRow}${conflictMark}${contested}`;
 }

@@ -431,6 +431,7 @@ because getting it wrong is invisible on screen.
 ## Notes
 
 - Works in all eight adapters, verified by the same parity test in each.
-- Enter and F2 are handled by the editing gate on the focused cell, so the two
-  keyboard models never race for one key press.
+- Enter and F2 open the focused cell when its column is `editable`, and do
+  nothing when it is not — so arrowing to a cell and pressing Enter edits it,
+  which is the whole keyboard path.
 - A click moves focus too: state follows the DOM rather than fighting it.

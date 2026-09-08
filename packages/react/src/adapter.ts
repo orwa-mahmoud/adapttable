@@ -1006,6 +1006,7 @@ export type { EditableCellController } from "./editing/editableCellController";
 export type {
   EditConflict,
   EditConflictChoice,
+  ReconcileLiveBatchEdit,
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
 } from "./editing/editConflict";

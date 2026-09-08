@@ -67,6 +67,26 @@ export interface BatchEditingState<TRow> {
   cancelAll: () => void;
   /** Forget one row's changes. */
   cancelRow: (rowId: string) => void;
+  /** Every pending row, and what each changed field is measured against. */
+  entries: readonly {
+    readonly rowId: string;
+    readonly seeds: Readonly<Record<string, string>>;
+    readonly drafts: Readonly<Record<string, string>>;
+  }[];
+  /**
+   * Keep mine: these fields now read the incoming values, and the drafts
+   * stand — so the patch still carries what the reader typed.
+   */
+  acceptSeeds: (
+    row: TRow,
+    rowId: string,
+    columnKeys: readonly string[]
+  ) => void;
+  /**
+   * Take theirs: these fields stop being changes at all, so the cells fall
+   * back to what the row now reads.
+   */
+  takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
   /** A digest of the pending drafts, for a row memo comparator. */
   signature: string;
   /** The table that owns these editors — never a sibling's host. */
@@ -104,9 +124,15 @@ export interface UseBatchEditingOptions<TRow> {
 /** The drafts of one row, by column key. */
 type RowDrafts = Readonly<Record<string, string>>;
 
-/** Every pending row's drafts, by row id. */
+/**
+ * Every pending row's drafts, by row id.
+ *
+ * `seeds` is what each changed field read when the reader changed it — what an
+ * incoming update is measured against, so a field they typed in can be told
+ * apart from one they never touched.
+ */
 type PendingDrafts = Readonly<
-  Record<string, { row: unknown; drafts: RowDrafts }>
+  Record<string, { row: unknown; drafts: RowDrafts; seeds: RowDrafts }>
 >;
 
 /**
@@ -141,14 +167,18 @@ export function useBatchEditing<TRow>(
       const stored = readEditableCellValue(row, column, options.featureHost);
       const current = pendingRef.current[rowId];
       const drafts = { ...current?.drafts, [columnKey]: value };
+      const seeds = { ...current?.seeds, [columnKey]: stored };
       // A value typed back to what it was is not a change, and a row left with
       // no changes is not pending — otherwise "3 unsaved rows" counts rows the
       // reader has already put back.
-      if (value === stored) delete drafts[columnKey];
+      if (value === stored) {
+        delete drafts[columnKey];
+        delete seeds[columnKey];
+      }
       const wasPending = current !== undefined;
       const next = { ...pendingRef.current };
       if (Object.keys(drafts).length === 0) delete next[rowId];
-      else next[rowId] = { row: current?.row ?? row, drafts };
+      else next[rowId] = { row: current?.row ?? row, drafts, seeds };
       write(next);
       if (!wasPending && next[rowId]) {
         observeEdit(options.onEditStart, {
@@ -160,6 +190,67 @@ export function useBatchEditing<TRow>(
           unit: "batch",
         });
       }
+    }
+  );
+
+  const entries = useMemo(
+    () =>
+      Object.entries(pending).map(([rowId, entry]) => ({
+        rowId,
+        seeds: entry.seeds,
+        drafts: entry.drafts,
+      })),
+    [pending]
+  );
+
+  /** What an incoming row reads for these fields. */
+  const incomingOf = useEventCallback(
+    (row: TRow, columnKeys: readonly string[]): Record<string, string> => {
+      const values: Record<string, string> = {};
+      for (const columnKey of columnKeys) {
+        const column = options.columns.find((one) => one.key === columnKey);
+        if (!column) continue;
+        values[columnKey] = readEditableCellValue(
+          row,
+          column,
+          options.featureHost
+        );
+      }
+      return values;
+    }
+  );
+
+  const acceptSeeds = useEventCallback(
+    (row: TRow, rowId: string, columnKeys: readonly string[]) => {
+      const current = pendingRef.current[rowId];
+      if (!current) return;
+      write({
+        ...pendingRef.current,
+        [rowId]: {
+          ...current,
+          row,
+          seeds: { ...current.seeds, ...incomingOf(row, columnKeys) },
+        },
+      });
+    }
+  );
+
+  const takeSeeds = useEventCallback(
+    (row: TRow, rowId: string, columnKeys: readonly string[]) => {
+      const current = pendingRef.current[rowId];
+      if (!current) return;
+      // Taking what arrived leaves nothing changed in that cell, so the draft
+      // goes: an untouched cell reads the row itself.
+      const drafts = { ...current.drafts };
+      const seeds = { ...current.seeds };
+      for (const columnKey of columnKeys) {
+        delete drafts[columnKey];
+        delete seeds[columnKey];
+      }
+      const next = { ...pendingRef.current };
+      if (Object.keys(drafts).length === 0) delete next[rowId];
+      else next[rowId] = { row, drafts, seeds };
+      write(next);
     }
   );
 
@@ -273,6 +364,9 @@ export function useBatchEditing<TRow>(
       saveAll,
       cancelAll,
       cancelRow,
+      entries,
+      acceptSeeds,
+      takeSeeds,
       signature,
       featureHost: options.featureHost,
     }),
@@ -285,6 +379,9 @@ export function useBatchEditing<TRow>(
       saveAll,
       cancelAll,
       cancelRow,
+      entries,
+      acceptSeeds,
+      takeSeeds,
       signature,
       options.featureHost,
     ]

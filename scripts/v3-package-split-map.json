@@ -21267,6 +21267,14 @@
       "behavior": ""
     },
     {
+      "export": "ReconcileLiveBatchEdit",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ReconcileLiveEdit",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -25055,6 +25063,14 @@
       "currentImport": "@adapttable/react",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "ReconcileLiveBatchEdit",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },

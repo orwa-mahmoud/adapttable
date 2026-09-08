@@ -154,13 +154,14 @@ function twoFieldTable(
   );
 }
 
-describe("edit conflict, row mode (unstyled)", () => {
-  const editors = () => [
-    ...document.querySelectorAll<HTMLInputElement>(
-      '[data-adapttable-part="edit-cell-editor"]'
-    ),
-  ];
+/** Every open editor, in document order. */
+const editors = () => [
+  ...document.querySelectorAll<HTMLInputElement>(
+    '[data-adapttable-part="edit-cell-editor"]'
+  ),
+];
 
+describe("edit conflict, row mode (unstyled)", () => {
   it("marks the field that moved, with what arrived", () => {
     const onRowEdit = vi.fn();
     const { rerender } = render(
@@ -311,5 +312,105 @@ describe("edit conflict, row mode (unstyled)", () => {
     rerender(rowTable([{ id: "1", title: "Ship" }], { onRowEdit }));
     expect(part("edit-cell-conflict")).toBeNull();
     expect(part("row-edit-save")).not.toBeNull();
+  });
+});
+
+/** A batch-editing table with two editable fields. */
+function batchTable(
+  rows: Task[],
+  onBatchEdit: (edits: readonly unknown[]) => void
+) {
+  return (
+    <DataTable
+      data={rows}
+      columns={TWO_FIELDS}
+      rowKey={(r) => r.id}
+      urlSync={false}
+      batchEditing
+      onBatchEdit={onBatchEdit}
+    />
+  );
+}
+
+describe("edit conflict, batch mode (unstyled)", () => {
+  const notices = () =>
+    document.querySelectorAll('[data-adapttable-part="edit-cell-conflict"]');
+
+  const ROWS: Task[] = [
+    { id: "1", title: "Ship", note: "n1" },
+    { id: "2", title: "Test", note: "n2" },
+  ];
+
+  it("asks about a changed cell, and takes an untouched one silently", () => {
+    const onBatchEdit = vi.fn();
+    const { rerender } = render(batchTable(ROWS, onBatchEdit));
+    // Every cell is a field in batch mode: type in row 1's Title only.
+    fireEvent.change(editors()[0]!, { target: { value: "mine" } });
+
+    rerender(
+      batchTable(
+        [
+          { id: "1", title: "Arrived", note: "moved" },
+          { id: "2", title: "Test", note: "n2" },
+        ],
+        onBatchEdit
+      )
+    );
+
+    // Title is the reader's, so it asks. Note was never theirs, so it just
+    // reads what arrived.
+    expect(notices()).toHaveLength(1);
+    expect(part("edit-cell-incoming")).toHaveTextContent("Arrived");
+    expect(editors()[0]).toHaveValue("mine");
+    expect(editors()[1]).toHaveValue("moved");
+  });
+
+  it("asks per cell across rows, and each is answered on its own", () => {
+    const onBatchEdit = vi.fn();
+    const { rerender } = render(batchTable(ROWS, onBatchEdit));
+    fireEvent.change(editors()[0]!, { target: { value: "mine" } });
+    fireEvent.change(editors()[2]!, { target: { value: "myOther" } });
+
+    rerender(
+      batchTable(
+        [
+          { id: "1", title: "Arrived", note: "n1" },
+          { id: "2", title: "AlsoArrived", note: "n2" },
+        ],
+        onBatchEdit
+      )
+    );
+    // One question per row, because a cell is named by its row and column.
+    expect(notices()).toHaveLength(2);
+
+    fireEvent.click(
+      document.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="edit-cell-take-theirs"]'
+      )[0]!
+    );
+    expect(notices()).toHaveLength(1);
+    expect(editors()[0]).toHaveValue("Arrived");
+    expect(editors()[2]).toHaveValue("myOther");
+
+    fireEvent.click(part("edit-cell-keep-mine")!);
+    expect(notices()).toHaveLength(0);
+
+    fireEvent.click(part("batch-edit-save")!);
+    // Row 1 was given up, so only row 2 carries a change.
+    expect(onBatchEdit).toHaveBeenCalledWith([
+      {
+        row: { id: "2", title: "AlsoArrived", note: "n2" },
+        rowId: "2",
+        patch: { title: "myOther" },
+      },
+    ]);
+  });
+
+  it("leaves an untouched batch alone", () => {
+    const onBatchEdit = vi.fn();
+    const { rerender } = render(batchTable(ROWS, onBatchEdit));
+    fireEvent.change(editors()[0]!, { target: { value: "mine" } });
+    rerender(batchTable(ROWS, onBatchEdit));
+    expect(notices()).toHaveLength(0);
   });
 });

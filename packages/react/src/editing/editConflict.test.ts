@@ -256,10 +256,12 @@ describe("a row edited as one unit", () => {
 
     expect(result.current.isRowConflict("1")).toBe(true);
     expect(result.current.isRowConflict("2")).toBe(false);
-    expect(result.current.current?.unit).toBe("row");
-    expect(result.current.current?.changes).toEqual([
-      { columnKey: "title", previous: "Ship", incoming: "Arrived" },
-    ]);
+    expect(result.current.contestedCell("1", "title")).toEqual({
+      incomingValue: "Arrived",
+    });
+    // Only the field that moved, and only for the row it belongs to.
+    expect(result.current.contestedCell("1", "other")).toBeUndefined();
+    expect(result.current.contestedCell("2", "title")).toBeUndefined();
     // A cell-scoped reader must not mistake this for one of its own.
     expect(result.current.isConflict("1", "title")).toBe(false);
   });
@@ -285,7 +287,7 @@ describe("a row edited as one unit", () => {
     const { result } = renderHook(() => useEditConflict<Task>());
     reconcile(result.current, [LIVE], { accept, take });
     act(() => {
-      result.current.keepRowField("title");
+      result.current.keepCell("1", "title");
     });
     expect(accept).toHaveBeenCalledWith(LIVE, ["title"]);
     expect(result.current.isRowConflict("1")).toBe(false);
@@ -293,7 +295,7 @@ describe("a row edited as one unit", () => {
     const second = renderHook(() => useEditConflict<Task>());
     reconcile(second.result.current, [LIVE], { accept: vi.fn(), take });
     act(() => {
-      second.result.current.takeRowField("title");
+      second.result.current.takeCell("1", "title");
     });
     expect(take).toHaveBeenCalledWith(LIVE, ["title"]);
   });
@@ -359,19 +361,137 @@ describe("a row edited as one unit", () => {
   it("ignores an answer for a form nobody is asking about", () => {
     const { result } = renderHook(() => useEditConflict<Task>());
     act(() => {
-      result.current.keepRowField("title");
-      result.current.takeRowField("title");
+      result.current.keepCell("1", "title");
+      result.current.takeCell("1", "title");
     });
     expect(result.current.current).toBeNull();
   });
 
-  it("asks once for one incoming change", () => {
+  it("holds one question per cell, however often it is asked", () => {
     const { result } = renderHook(() => useEditConflict<Task>());
     const handlers = { accept: vi.fn(), take: vi.fn() };
     reconcile(result.current, [LIVE], handlers);
-    const first = result.current.current;
+    const first = result.current.contestedCell("1", "title");
     reconcile(result.current, [LIVE], handlers);
 
-    expect(result.current.current).toBe(first);
+    // The same cell, still asking the same thing.
+    expect(result.current.contestedCell("1", "title")).toEqual(first);
+    expect(result.current.anyContested).toBe(true);
+  });
+});
+
+describe("a batch of open rows", () => {
+  const OTHER: Task = { id: "2", title: "Test", rev: 1 };
+  const OTHER_LIVE: Task = { id: "2", title: "Moved", rev: 2 };
+
+  /** Reconcile a batch against a live row set. */
+  function reconcileBatch(
+    state: ReturnType<typeof useEditConflict<Task>>,
+    rows: readonly Task[],
+    entries: readonly {
+      rowId: string;
+      seeds: Record<string, string>;
+      drafts: Record<string, string>;
+    }[],
+    handlers: {
+      accept: (row: Task, rowId: string, keys: readonly string[]) => void;
+      take: (row: Task, rowId: string, keys: readonly string[]) => void;
+    }
+  ) {
+    act(() => {
+      state.reconcileBatch({
+        entries,
+        rows,
+        columns: [TITLE],
+        rowKey: (row) => row.id,
+        policy: "ask",
+        ...handlers,
+      });
+    });
+  }
+
+  const changed = [
+    { rowId: "1", seeds: { title: "Ship" }, drafts: { title: "mine" } },
+    { rowId: "2", seeds: { title: "Test" }, drafts: { title: "myOther" } },
+  ];
+
+  it("asks per cell, naming each by its row", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
+      accept: vi.fn(),
+      take: vi.fn(),
+    });
+
+    expect(result.current.contestedCell("1", "title")).toEqual({
+      incomingValue: "Arrived",
+    });
+    expect(result.current.contestedCell("2", "title")).toEqual({
+      incomingValue: "Moved",
+    });
+    expect(result.current.anyContested).toBe(true);
+  });
+
+  it("answers one row without disturbing the other", () => {
+    const accept = vi.fn();
+    const { result } = renderHook(() => useEditConflict<Task>());
+    reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
+      accept,
+      take: vi.fn(),
+    });
+    act(() => {
+      result.current.keepCell("1", "title");
+    });
+
+    expect(accept).toHaveBeenCalledWith(LIVE, "1", ["title"]);
+    expect(result.current.contestedCell("1", "title")).toBeUndefined();
+    expect(result.current.contestedCell("2", "title")).toBeDefined();
+  });
+
+  it("takes a cell the reader never changed, without asking", () => {
+    const take = vi.fn();
+    const { result } = renderHook(() => useEditConflict<Task>());
+    reconcileBatch(
+      result.current,
+      [LIVE],
+      [{ rowId: "1", seeds: { title: "Ship" }, drafts: { title: "Ship" } }],
+      { accept: vi.fn(), take }
+    );
+
+    expect(take).toHaveBeenCalledWith(LIVE, "1", ["title"]);
+    expect(result.current.anyContested).toBe(false);
+  });
+
+  it("forgets a row that left the batch, or the row set", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
+      accept: vi.fn(),
+      take: vi.fn(),
+    });
+    // Row 2 saved or cancelled: its question goes with it.
+    reconcileBatch(result.current, [LIVE, OTHER_LIVE], [changed[0]!], {
+      accept: vi.fn(),
+      take: vi.fn(),
+    });
+    expect(result.current.contestedCell("2", "title")).toBeUndefined();
+    expect(result.current.contestedCell("1", "title")).toBeDefined();
+
+    // Row 1 fell out of the rendered set entirely.
+    reconcileBatch(result.current, [OTHER], [changed[0]!], {
+      accept: vi.fn(),
+      take: vi.fn(),
+    });
+    expect(result.current.anyContested).toBe(false);
+  });
+
+  it("digests one row's questions for a row memo", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    expect(result.current.rowSignature("1")).toBe("");
+    reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
+      accept: vi.fn(),
+      take: vi.fn(),
+    });
+
+    expect(result.current.rowSignature("1")).toBe("|title=Arrived");
+    expect(result.current.rowSignature("2")).toBe("|title=Moved");
   });
 });

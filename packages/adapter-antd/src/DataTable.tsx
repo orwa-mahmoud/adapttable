@@ -2547,7 +2547,11 @@ function AntdTableBody<TRow>({
                     {c.editing?.batch && (
                       <FeatureSlot
                         slot={BATCH_EDIT_BAR}
-                        props={{ batch: c.editing.batch, labels }}
+                        props={{
+                          batch: c.editing.batch,
+                          contested: c.editing.conflict?.anyContested,
+                          labels,
+                        }}
                       />
                     )}
                     <FeatureSlot

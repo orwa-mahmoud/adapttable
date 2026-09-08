@@ -312,10 +312,26 @@ describe("useGridFocus", () => {
     render(<Grid onActivate={onActivate} />);
     const grid = screen.getByRole("grid");
     fireEvent.keyDown(grid, { key: "ArrowDown" });
-    fireEvent.keyDown(grid, { key: "Enter" });
+    fireEvent.keyDown(cellAt(1, 0)!, { key: "Enter" });
     expect(onActivate).toHaveBeenCalledWith({ row: 1, col: 0 });
-    fireEvent.keyDown(grid, { key: "F2" });
+    fireEvent.keyDown(cellAt(1, 0)!, { key: "F2" });
     expect(onActivate).toHaveBeenCalledTimes(2);
+  });
+
+  it("leaves Enter alone when it came from a control inside the grid", () => {
+    const onActivate = vi.fn();
+    render(<Grid onActivate={onActivate} />);
+    const grid = screen.getByRole("grid");
+    fireEvent.keyDown(grid, { key: "ArrowDown" });
+
+    // The handler sits on the whole grid, so an editor's or a rename box's
+    // Enter arrives here too. Claiming it would break the control the reader
+    // is actually typing in.
+    const inside = document.createElement("input");
+    cellAt(1, 0)!.append(inside);
+    fireEvent.keyDown(inside, { key: "Enter" });
+
+    expect(onActivate).not.toHaveBeenCalled();
   });
 
   it("stays silent until the grid is entered", () => {
