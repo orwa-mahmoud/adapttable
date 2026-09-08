@@ -378,6 +378,7 @@ export {
 } from "./editing/EditableCellGate";
 export {
   type EditConflict,
+  type EditConflictChange,
   type EditConflictChoice,
   type EditConflictHandler,
   type EditConflictPolicy,

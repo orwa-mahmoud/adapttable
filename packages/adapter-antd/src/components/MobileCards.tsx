@@ -231,6 +231,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     row,
     id
   );
+  const rowConflict = rowEditConflict(editing, id);
   const actions = rowEdit.actions.length > 0 ? rowEdit.actions : null;
   // Built once and used by both paths, so a custom card shows the very same
   // value node the built-in would have — cell renderers and editors included.
@@ -304,7 +305,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
                 rowId={id}
                 showBegin={rowEdit.showBegin}
                 icons={editing.rowEditIcons}
-                conflict={rowEditConflict(editing, id)}
+                conflict={rowConflict}
                 labels={labels}
               />
             )}

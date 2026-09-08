@@ -18699,6 +18699,14 @@
       "behavior": ""
     },
     {
+      "export": "CellConflictAsk",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "CellEditingState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -19724,6 +19732,14 @@
     },
     {
       "export": "EditConflict",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "EditConflictChange",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
@@ -24468,6 +24484,14 @@
     },
     {
       "export": "EditConflict",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "EditConflictChange",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",

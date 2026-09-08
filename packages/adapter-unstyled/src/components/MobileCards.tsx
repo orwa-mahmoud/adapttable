@@ -256,6 +256,7 @@ function MobileCardBase<TRow>({
     row,
     id
   );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <li
       {...rowClickProps(row, onRowClick, index)}
@@ -348,7 +349,7 @@ function MobileCardBase<TRow>({
           rowId={id}
           showBegin={rowEdit.showBegin}
           icons={editing.rowEditIcons}
-          conflict={rowEditConflict(editing, id)}
+          conflict={rowConflict}
           labels={labels}
         />
       )}

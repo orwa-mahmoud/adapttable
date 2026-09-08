@@ -29,6 +29,20 @@ export type EditConflictPolicy = "keep" | "take" | "ask";
 export type EditConflictChoice = "keep" | "take";
 
 /**
+ * One field that moved underneath an open editor.
+ *
+ * @public
+ */
+export interface EditConflictChange {
+  /** The column whose stored value moved. */
+  readonly columnKey: string;
+  /** What it read when the editor opened. */
+  readonly previous: string;
+  /** What it reads now. */
+  readonly incoming: string;
+}
+
+/**
  * One conflict. `row` is what just arrived; `previous` is the snapshot the
  * editor opened against (or last accepted).
  *
@@ -54,6 +68,13 @@ export interface EditConflict<TRow> {
   incomingValue: string;
   /** The cell value the editor opened against. */
   previousValue: string;
+  /**
+   * Every editable field that moved, so a notice can say what arrived rather
+   * than only that something did. A cell conflict names its one field here
+   * too; a row conflict lists them all, and is empty when `rowVersion` says
+   * the row moved without any field the reader can see changing.
+   */
+  changes: readonly EditConflictChange[];
 }
 
 /**
@@ -77,6 +98,10 @@ export interface EditConflictState<TRow> {
   isConflict: (rowId: string, columnKey: string) => boolean;
   /** Whether this row's open form is the one in conflict. */
   isRowConflict: (rowId: string) => boolean;
+  /** Keep the draft in one field of the open form. */
+  keepRowField: (columnKey: string) => void;
+  /** Take the incoming value into one field of the open form. */
+  takeRowField: (columnKey: string) => void;
   /** Keep the draft; accept the incoming row as the new snapshot. */
   keep: () => void;
   /** Replace the draft with the incoming value. */
@@ -134,51 +159,48 @@ export interface ReconcileLiveEdit<TRow> {
 export interface ReconcileLiveRowEdit<TRow> {
   /** The open row's id, or `null` when no form is open. */
   activeRowId: string | null;
-  /** The row the form opened against. */
-  openedRow: TRow | undefined;
+  /**
+   * What each field read when the form opened, or last accepted. A form is
+   * measured field by field, not row against row: the reader typed into some
+   * of these and not others, and only the ones they typed into are theirs to
+   * lose.
+   */
+  seeds: Readonly<Record<string, string>> | undefined;
+  /** What each field reads now, in the form. */
+  drafts: Readonly<Record<string, string>>;
   /** The rendered row set. */
   rows: readonly TRow[];
-  /** Columns, to compare the fields the form holds. */
+  /** Columns, to read each field. */
   columns: readonly EditableColumnLike<TRow>[];
   /** Row identity function. */
   rowKey: (row: TRow) => string;
-  /** Host version accessor — any change is a conflict. */
-  rowVersion?: (row: TRow) => string | number;
   /** How a conflicting edit is resolved. */
   policy: EditConflictPolicy;
   /** Called when a live edit conflicts with an incoming change. */
   onEditConflict?: EditConflictHandler<TRow>;
-  /** Keep: new snapshot, the drafts stand. */
-  keep: (row: TRow) => void;
-  /** Take: reseed every draft from the incoming row. */
-  take: (row: TRow) => void;
+  /** Keep mine: these fields now read the incoming value; the drafts stand. */
+  accept: (row: TRow, columnKeys: readonly string[]) => void;
+  /** Take theirs: these fields and their drafts both take the incoming value. */
+  take: (row: TRow, columnKeys: readonly string[]) => void;
 }
 
-/**
- * Whether an incoming row disagrees with the snapshot a row form opened on.
- *
- * With `rowVersion` the host has already answered. Without it, any editable
- * field whose stored value moved counts — the form holds them all.
- */
-function liveRowFormChanged<TRow>(input: {
-  opened: TRow;
-  current: TRow;
-  columns: readonly EditableColumnLike<TRow>[];
-  rowVersion?: (row: TRow) => string | number;
-}): boolean {
-  if (input.rowVersion !== undefined) {
-    return (
-      String(input.rowVersion(input.opened)) !==
-      String(input.rowVersion(input.current))
-    );
+/** Every editable field whose stored value moved away from its seed. */
+function movedFields<TRow>(
+  seeds: Readonly<Record<string, string>>,
+  current: TRow,
+  columns: readonly EditableColumnLike<TRow>[]
+): EditConflictChange[] {
+  const changes: EditConflictChange[] = [];
+  for (const column of columns) {
+    if (column.editable === undefined || column.editable === false) continue;
+    const previous = seeds[column.key];
+    if (previous === undefined) continue;
+    const incoming = readEditableCellValue(current, column);
+    if (previous !== incoming) {
+      changes.push({ columnKey: column.key, previous, incoming });
+    }
   }
-  return input.columns.some(
-    (column) =>
-      column.editable !== undefined &&
-      column.editable !== false &&
-      readEditableCellValue(input.opened, column) !==
-        readEditableCellValue(input.current, column)
-  );
+  return changes;
 }
 
 /**
@@ -248,11 +270,18 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
     take: (row: TRow, value: string) => void;
   } | null>(null);
   const pending = useRef<EditConflict<TRow> | null>(null);
+  /** The open form's resolvers, held while its fields are being asked about. */
+  const rowAnswer = useRef<{
+    row: TRow;
+    accept: (row: TRow, columnKeys: readonly string[]) => void;
+    take: (row: TRow, columnKeys: readonly string[]) => void;
+  } | null>(null);
 
   const clear = useCallback(() => {
     seen.current = "";
     pending.current = null;
     answer.current = null;
+    rowAnswer.current = null;
     setCurrent(null);
   }, []);
 
@@ -353,6 +382,13 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       draft: input.draft,
       incomingValue,
       previousValue,
+      changes: [
+        {
+          columnKey: active.columnKey,
+          previous: previousValue,
+          incoming: incomingValue,
+        },
+      ],
     };
     applyChoice(
       resolveConflictChoice(input.onEditConflict, conflict, input.policy),
@@ -362,8 +398,8 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
   });
 
   const reconcileRow = useEventCallback((input: ReconcileLiveRowEdit<TRow>) => {
-    const { activeRowId, openedRow } = input;
-    if (activeRowId === null || openedRow === undefined) {
+    const { activeRowId, seeds } = input;
+    if (activeRowId === null || seeds === undefined) {
       clearUnit("row");
       return;
     }
@@ -372,47 +408,81 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       clearUnit("row");
       return;
     }
-    if (
-      !liveRowFormChanged({
-        opened: openedRow,
-        current: live,
-        columns: input.columns,
-        rowVersion: input.rowVersion,
-      })
-    ) {
+    const moved = movedFields(seeds, live, input.columns);
+    if (moved.length === 0) {
       clearUnit("row");
       return;
     }
-    const version = input.rowVersion
-      ? String(input.rowVersion(live))
-      : input.columns
-          .map((column) => readEditableCellValue(live, column))
-          .join("\u0000");
-    const token = `row::${activeRowId}::${version}`;
+    // A field the reader never typed in has nothing of theirs to lose, so it
+    // simply takes what arrived. Only the fields they were working in are a
+    // question.
+    const untouched = moved.filter(
+      (change) => input.drafts[change.columnKey] === change.previous
+    );
+    if (untouched.length > 0) {
+      input.take(
+        live,
+        untouched.map((change) => change.columnKey)
+      );
+    }
+    const contested = moved.filter(
+      (change) => input.drafts[change.columnKey] !== change.previous
+    );
+    if (contested.length === 0) {
+      clearUnit("row");
+      return;
+    }
+    const token = `row::${activeRowId}::${contested
+      .map((change) => `${change.columnKey}=${change.incoming}`)
+      .join("|")}`;
     if (token === seen.current) return;
-    seen.current = token;
+    const keys = contested.map((change) => change.columnKey);
     const conflict: EditConflict<TRow> = {
       unit: "row",
       row: live,
-      previous: openedRow,
+      previous: live,
       rowId: activeRowId,
-      // A row form holds every field, so no single column names the clash.
+      // A form holds many fields; each contested one carries its own question.
       columnKey: "",
       draft: "",
       incomingValue: "",
       previousValue: "",
+      changes: contested,
     };
-    applyChoice(
-      resolveConflictChoice(input.onEditConflict, conflict, input.policy),
+    const choice = resolveConflictChoice(
+      input.onEditConflict,
       conflict,
-      {
-        keep: input.keep,
-        // A row form is reseeded whole; no single incoming value names it.
-        take: (row) => {
-          input.take(row);
-        },
-      }
+      input.policy
     );
+    if (choice === "keep") {
+      input.accept(live, keys);
+      return;
+    }
+    if (choice === "take") {
+      input.take(live, keys);
+      return;
+    }
+    seen.current = token;
+    rowAnswer.current = { row: live, accept: input.accept, take: input.take };
+    pending.current = conflict;
+    setCurrent(conflict);
+  });
+
+  const keepRowField = useEventCallback((columnKey: string) => {
+    const held = rowAnswer.current;
+    if (!held) return;
+    held.accept(held.row, [columnKey]);
+    // Cleared rather than trimmed: the next pass recomputes what is still
+    // contested, so answering one field re-asks about the rest and nothing
+    // else.
+    clear();
+  });
+
+  const takeRowField = useEventCallback((columnKey: string) => {
+    const held = rowAnswer.current;
+    if (!held) return;
+    held.take(held.row, [columnKey]);
+    clear();
   });
 
   const isConflict = useCallback(
@@ -435,6 +505,8 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       isRowConflict,
       keep,
       take,
+      keepRowField,
+      takeRowField,
       reconcile,
       reconcileRow,
       clear,
@@ -445,6 +517,8 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       isRowConflict,
       keep,
       take,
+      keepRowField,
+      takeRowField,
       reconcile,
       reconcileRow,
       clear,

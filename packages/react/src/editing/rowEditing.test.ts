@@ -309,16 +309,21 @@ describe("useRowEditing", () => {
 describe("an incoming row under an open form", () => {
   const ARRIVED: Task = { ...TASK, title: "Arrived", points: 9 };
 
-  it("hands back the row the form opened against", () => {
+  it("hands back what each field was measured against", () => {
     const { result } = setup();
-    expect(result.current.openedRow()).toBeUndefined();
+    expect(result.current.seeds()).toBeUndefined();
     act(() => {
       result.current.begin(TASK, "1");
+    });
+    expect(result.current.seeds()).toEqual({
+      title: "Ship",
+      points: "3",
+      done: "false",
     });
     expect(result.current.openedRow()).toBe(TASK);
   });
 
-  it("keeps the drafts and measures against the incoming row", () => {
+  it("keeps the draft and measures that field against the incoming value", () => {
     const onRowEdit = vi.fn();
     const { result } = setup({ onRowEdit });
     act(() => {
@@ -326,20 +331,21 @@ describe("an incoming row under an open form", () => {
       result.current.setDraft("title", "Mine");
     });
     act(() => {
-      result.current.keepLive(ARRIVED);
+      result.current.acceptSeeds(ARRIVED, ["title"]);
     });
 
     expect(result.current.draftFor("title")).toBe("Mine");
-    expect(result.current.openedRow()).toBe(ARRIVED);
+    expect(result.current.seeds()?.title).toBe("Arrived");
+    // Only the field the reader typed in moved, so only it is asked about
+    // again — and Points, which they never touched, stays as it was.
+    expect(result.current.seeds()?.points).toBe("3");
     act(() => {
       result.current.save();
     });
-    // Points was never typed into, so taking the incoming row as the new
-    // snapshot must not turn its value into a change the reader never made.
     expect(onRowEdit).toHaveBeenCalledWith(ARRIVED, { title: "Mine" });
   });
 
-  it("reseeds every draft from the incoming row on take", () => {
+  it("takes the incoming value into the field and its measure", () => {
     const onRowEdit = vi.fn();
     const { result } = setup({ onRowEdit });
     act(() => {
@@ -347,7 +353,7 @@ describe("an incoming row under an open form", () => {
       result.current.setDraft("title", "Mine");
     });
     act(() => {
-      result.current.takeLive(ARRIVED);
+      result.current.takeSeeds(ARRIVED, ["title", "points"]);
     });
 
     expect(result.current.draftFor("title")).toBe("Arrived");
@@ -356,17 +362,31 @@ describe("an incoming row under an open form", () => {
     act(() => {
       result.current.save();
     });
-    // Nothing changed against the row that just arrived, so nothing is sent.
+    // Nothing differs from what those fields now read, so nothing is sent.
     expect(onRowEdit).not.toHaveBeenCalled();
+  });
+
+  it("leaves the fields it was not asked about alone", () => {
+    const { result } = setup();
+    act(() => {
+      result.current.begin(TASK, "1");
+      result.current.setDraft("points", "7");
+    });
+    act(() => {
+      result.current.takeSeeds(ARRIVED, ["title"]);
+    });
+
+    expect(result.current.draftFor("title")).toBe("Arrived");
+    expect(result.current.draftFor("points")).toBe("7");
   });
 
   it("does nothing when no form is open", () => {
     const { result } = setup();
     act(() => {
-      result.current.keepLive(ARRIVED);
-      result.current.takeLive(ARRIVED);
+      result.current.acceptSeeds(ARRIVED, ["title"]);
+      result.current.takeSeeds(ARRIVED, ["title"]);
     });
     expect(result.current.activeRowId).toBeNull();
-    expect(result.current.openedRow()).toBeUndefined();
+    expect(result.current.seeds()).toBeUndefined();
   });
 });

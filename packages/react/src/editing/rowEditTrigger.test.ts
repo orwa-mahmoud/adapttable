@@ -36,8 +36,9 @@ function armed(openRowId?: string) {
     isDirty: false,
     signature: "",
     openedRow: () => undefined,
-    keepLive: () => undefined,
-    takeLive: () => undefined,
+    seeds: () => undefined,
+    acceptSeeds: () => undefined,
+    takeSeeds: () => undefined,
   } satisfies RowEditingState<Row>;
   return { state, begin };
 }

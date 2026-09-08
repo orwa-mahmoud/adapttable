@@ -11,11 +11,12 @@
 ---
 
 A row form now answers an incoming change, as a cell already did. The form is
-measured against the row it opened on, so a change arriving underneath becomes
-one question for the whole form: **Keep mine** accepts the incoming row as the
-new snapshot and leaves the drafts as typed, **Take theirs** reseeds them all.
-Save is withheld until one is chosen. `editConflictPolicy` and
-`onEditConflict` decide it without asking, exactly as they do for a cell.
+measured against the row it opened on, and every field that moved marks itself
+with the notice a cell shows — the value that arrived, **Keep mine** and **Take
+theirs** — while the fields that did not are left alone. Answering on any of
+them answers for the row, and the form offers nothing to save until it is
+answered. `editConflictPolicy` and `onEditConflict` decide it without asking,
+exactly as they do for a cell.
 
 Dropping a column at the head of the grouping strip groups by it first. Every
 insertion boundary is drawn with the chip it sits beside and widens while a

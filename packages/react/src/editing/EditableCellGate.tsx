@@ -280,20 +280,92 @@ export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
 }
 
 /** Keep mine / Take theirs — same channel as a validation message. */
-function ConflictNotice(
-  props: Readonly<{
-    ctrl: ReturnType<typeof editableCellController>;
-    errorId: string;
-    errorClassName?: string;
-    slots: EditableCellSlots;
-  }>
-): ReactElement | null {
+/**
+ * The incoming value waiting on one field of an open row form.
+ *
+ * A row that changed underneath marks every field that moved, each with the
+ * notice a cell already shows — the reader is choosing between two versions of
+ * a value, which they cannot do without seeing the one that arrived. Answering
+ * on any of them answers for the row: the row moved as a whole.
+ */
+function rowFieldAsk<TRow>(
+  editing: EditableCellEditing<TRow> | undefined,
+  rowId: string,
+  columnKey: string
+): CellConflictAsk | undefined {
+  const conflict = editing?.conflict;
+  if (!conflict?.isRowConflict(rowId)) return undefined;
+  const change = conflict.current?.changes.find(
+    (item) => item.columnKey === columnKey
+  );
+  if (!change) return undefined;
+  return {
+    incomingValue: change.incoming,
+    // One field, one answer: a reader editing several columns answers each on
+    // its own, and the rest stay as they are.
+    keep: () => {
+      conflict.keepRowField(columnKey);
+    },
+    take: () => {
+      conflict.takeRowField(columnKey);
+    },
+  };
+}
+
+/**
+ * What one cell needs to ask about an incoming value.
+ *
+ * @public
+ */
+export interface CellConflictAsk {
+  /** What that field reads now. */
+  readonly incomingValue: string;
+  /** Keep the draft; accept the incoming value as the new stored value. */
+  readonly keep: () => void;
+  /** Replace the draft with the incoming value. */
+  readonly take: () => void;
+}
+
+/**
+ * Props for {@link CellConflictNotice}.
+ *
+ * @public
+ */
+export interface CellConflictNoticeProps {
+  /** The question, or `undefined` when this cell is not being asked about. */
+  readonly ask?: CellConflictAsk;
+  /** Labels for the notice — already resolved. */
+  readonly labels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
+  /** Id the editor points at with `aria-describedby`. */
+  readonly errorId: string;
+  /** Class for the notice. */
+  readonly errorClassName?: string;
+  /** The kit's components for each part. */
+  readonly slots: EditableCellSlots;
+}
+
+/**
+ * The notice one cell shows when its stored value moved under the editor.
+ *
+ * A cell and a row form ask the same question of the same field, so they draw
+ * the same notice — a row that changed underneath marks every field that
+ * moved, rather than one strip standing in for all of them.
+ *
+ * @param props - See {@link CellConflictNoticeProps}.
+ * @returns The notice, or nothing.
+ *
+ * @public
+ */
+export function CellConflictNotice({
+  ask,
+  labels,
+  errorId,
+  errorClassName,
+  slots,
+}: Readonly<CellConflictNoticeProps>): ReactElement | null {
   "use no memo";
-  const { ctrl, errorId, errorClassName, slots } = props;
   const Button = slots.Button;
-  if (ctrl.conflict === undefined || ctrl.conflictLabels === undefined) {
-    return null;
-  }
+  if (!ask || !labels) return null;
   const holdFocus = (event: { preventDefault: () => void }) => {
     event.preventDefault();
   };
@@ -306,34 +378,63 @@ function ConflictNotice(
       className={errorClassName}
     >
       <span data-adapttable-part="edit-cell-conflict-message">
-        {ctrl.conflictLabels.message}
+        {labels.message}
       </span>
       {"\n"}
       <span
         data-adapttable-part="edit-cell-incoming"
         style={{ display: "block" }}
       >
-        {ctrl.conflictLabels.theirsValue(ctrl.conflict.incomingValue)}
+        {labels.theirsValue(ask.incomingValue)}
       </span>
       <Button
-        label={ctrl.conflictLabels.keepMine}
+        label={labels.keepMine}
         part="edit-cell-keep-mine"
         onMouseDown={holdFocus}
         onClick={(event) => {
           event.stopPropagation();
-          ctrl.keepConflict();
+          ask.keep();
         }}
       />
       <Button
-        label={ctrl.conflictLabels.takeTheirs}
+        label={labels.takeTheirs}
         part="edit-cell-take-theirs"
         onMouseDown={holdFocus}
         onClick={(event) => {
           event.stopPropagation();
-          ctrl.takeConflict();
+          ask.take();
         }}
       />
     </span>
+  );
+}
+
+function ConflictNotice(
+  props: Readonly<{
+    ctrl: ReturnType<typeof editableCellController>;
+    errorId: string;
+    errorClassName?: string;
+    slots: EditableCellSlots;
+  }>
+): ReactElement | null {
+  "use no memo";
+  const { ctrl, errorId, errorClassName, slots } = props;
+  return (
+    <CellConflictNotice
+      ask={
+        ctrl.conflict
+          ? {
+              incomingValue: ctrl.conflict.incomingValue,
+              keep: ctrl.keepConflict,
+              take: ctrl.takeConflict,
+            }
+          : undefined
+      }
+      labels={ctrl.conflictLabels}
+      errorId={errorId}
+      errorClassName={errorClassName}
+      slots={slots}
+    />
   );
 }
 
@@ -430,6 +531,10 @@ export function EditableCellGate<TRow>(
         editLabel={props.editLabel}
         takesFocus={isFirstEditableColumn(props.columns, props.column.key)}
         renderEditor={props.renderEditor}
+        ask={rowFieldAsk(props.editing, props.rowId, props.column.key)}
+        conflictLabels={props.editing?.conflictLabels}
+        errorClassName={props.errorClassName}
+        slots={props.slots}
       />
     );
   }

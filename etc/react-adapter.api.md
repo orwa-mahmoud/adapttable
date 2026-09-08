@@ -788,6 +788,13 @@ export interface BulkBarState {
 // @public
 export const CELL_NAV_LIVE: FeatureSlotKey<CellNavLiveSlotProps<never>>;
 
+// @public
+export interface CellConflictAsk {
+    readonly incomingValue: string;
+    readonly keep: () => void;
+    readonly take: () => void;
+}
+
 export { CellEdit }
 
 export { CellEditCommit }
@@ -2013,6 +2020,7 @@ export { EditableColumnLike }
 
 // @public
 export interface EditConflict<TRow> {
+    changes: readonly EditConflictChange[];
     columnKey: string;
     draft: string;
     incomingValue: string;
@@ -2021,6 +2029,13 @@ export interface EditConflict<TRow> {
     row: TRow;
     rowId: string;
     unit: "cell" | "row";
+}
+
+// @public
+export interface EditConflictChange {
+    readonly columnKey: string;
+    readonly incoming: string;
+    readonly previous: string;
 }
 
 // @public
@@ -2039,9 +2054,11 @@ export interface EditConflictState<TRow> {
     isConflict: (rowId: string, columnKey: string) => boolean;
     isRowConflict: (rowId: string) => boolean;
     keep: () => void;
+    keepRowField: (columnKey: string) => void;
     reconcile: (input: ReconcileLiveEdit<TRow>) => void;
     reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
     take: () => void;
+    takeRowField: (columnKey: string) => void;
 }
 
 // @public
@@ -3579,16 +3596,16 @@ export interface ReconcileLiveEdit<TRow> {
 
 // @public
 export interface ReconcileLiveRowEdit<TRow> {
+    accept: (row: TRow, columnKeys: readonly string[]) => void;
     activeRowId: string | null;
     columns: readonly EditableColumnLike<TRow>[];
-    keep: (row: TRow) => void;
+    drafts: Readonly<Record<string, string>>;
     onEditConflict?: EditConflictHandler<TRow>;
-    openedRow: TRow | undefined;
     policy: EditConflictPolicy;
     rowKey: (row: TRow) => string;
     rows: readonly TRow[];
-    rowVersion?: (row: TRow) => string | number;
-    take: (row: TRow) => void;
+    seeds: Readonly<Record<string, string>> | undefined;
+    take: (row: TRow, columnKeys: readonly string[]) => void;
 }
 
 // @public
@@ -3714,22 +3731,21 @@ export function RowEditCell<TRow>(input: Readonly<RowEditCellProps<TRow>>): Reac
 
 // @public
 export interface RowEditCellProps<TRow> {
+    ask?: CellConflictAsk;
     column: EditableColumnLike<TRow>;
+    conflictLabels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
     display: ReactElement | string | number | null;
     editLabel: string;
+    errorClassName?: string;
     renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
     rowEditing: RowEditingState<TRow>;
+    slots?: EditableCellSlots;
     takesFocus: boolean;
 }
 
 // @public
 export interface RowEditConflict {
     readonly asking: boolean;
-    readonly keep: () => void;
-    readonly keepLabel: string;
-    readonly message: string;
-    readonly take: () => void;
-    readonly takeLabel: string;
 }
 
 // @public
@@ -3773,6 +3789,7 @@ export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | u
 
 // @public
 export interface RowEditingState<TRow> {
+    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
     activeRowId: string | null;
     begin: (row: TRow, rowId: string) => void;
     cancel: () => void;
@@ -3781,12 +3798,12 @@ export interface RowEditingState<TRow> {
     featureHost?: FeatureHostState;
     isDirty: boolean;
     isEditing: (rowId: string) => boolean;
-    keepLive: (row: TRow) => void;
     openedRow: () => TRow | undefined;
     save: () => void;
+    seeds: () => RowEditDrafts | undefined;
     setDraft: (columnKey: string, value: string) => void;
     signature: string;
-    takeLive: (row: TRow) => void;
+    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
 }
 
 // @public

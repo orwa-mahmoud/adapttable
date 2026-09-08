@@ -195,6 +195,7 @@ export {
 } from "./editing/editableCellController";
 export type { EditableCellEditorCtrl } from "./editing/EditableCellGate";
 export {
+  type CellConflictAsk,
   commitBooleanDraft,
   type EditableCellActivateProps,
   type EditableCellButtonProps,
@@ -885,6 +886,7 @@ export type { ColumnLayoutState } from "./columns/useColumnLayout";
 export type { BatchRowEdit } from "./editing/batchEditing";
 export type { DirtyCellState } from "./editing/dirtyCells";
 export type {
+  EditConflictChange,
   EditConflictHandler,
   EditConflictPolicy,
   EditConflictState,

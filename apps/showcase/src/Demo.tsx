@@ -501,6 +501,22 @@ function columnChanges(
   return changes;
 }
 
+/** Editable columns this demo always shows, for the incoming change to aim at. */
+const INCOMING_CANDIDATES = ["status", "budget", "load", "person"] as const;
+
+/**
+ * Which columns an incoming change moves.
+ *
+ * Every field the reader has typed in, so each asks them to choose — and one
+ * they have not, which simply takes the new value. Seeing both at once is the
+ * point: a field nobody was working in is not a conflict.
+ */
+function incomingColumns(touched: readonly string[]): string[] {
+  const untouched = INCOMING_CANDIDATES.find((key) => !touched.includes(key));
+  const spare = untouched === undefined ? [] : [untouched];
+  return touched.length > 0 ? [...touched, ...spare] : spare;
+}
+
 /** Column key → row field for composite cells (person shows name; load
  * shows utilisation). Every other column key IS the field name. */
 const EDIT_FIELD: Record<string, keyof Person> = {
@@ -1069,14 +1085,18 @@ function Frontend({
   }, []);
   const [activeEdit, setActiveEdit] = useState<{
     rowId: string;
-    columnKey: string;
+    touched: readonly string[];
   } | null>(null);
   const onEditStart = useCallback<EditEventHandler<Person>>((event) => {
-    setActiveEdit({
-      rowId: event.rowId,
-      // A row edit opens every field at once and names none of them, so the
-      // incoming change aims at Status — a column this demo always shows.
-      columnKey: event.columnKey || "status",
+    setActiveEdit((current) => {
+      // Opening a row names no column; typing in one of its fields names that
+      // field. Both arrive here, so the demo learns which fields are the
+      // reader's and which are still untouched.
+      if (!event.columnKey) return { rowId: event.rowId, touched: [] };
+      const touched =
+        current?.rowId === event.rowId ? current.touched : ([] as string[]);
+      if (touched.includes(event.columnKey)) return current;
+      return { rowId: event.rowId, touched: [...touched, event.columnKey] };
     });
   }, []);
   const onEditEnd = useCallback(() => setActiveEdit(null), []);
@@ -1084,16 +1104,17 @@ function Frontend({
   // revision: Take theirs reads that cell's stored value.
   const simulateLiveUpdate = useCallback(() => {
     if (!activeEdit) return;
-    const { rowId, columnKey } = activeEdit;
-    const field = EDIT_FIELD[columnKey] ?? (columnKey as keyof Person);
+    const { rowId, touched } = activeEdit;
     const row = data.find((person) => person.id === rowId);
     if (!row) return;
-    writePatches([
-      updateRow(rowId, {
-        [field]: incomingEditValue(row, columnKey) as never,
-        revision: (row.revision ?? 0) + 1,
-      }),
-    ]);
+    const changes: Record<string, unknown> = {
+      revision: (row.revision ?? 0) + 1,
+    };
+    for (const columnKey of incomingColumns(touched)) {
+      const field = EDIT_FIELD[columnKey] ?? (columnKey as keyof Person);
+      changes[field] = incomingEditValue(row, columnKey);
+    }
+    writePatches([updateRow(rowId, changes as Partial<Person>)]);
   }, [activeEdit, data, writePatches]);
   // Two classes, not one: the mark holds steady under reduced motion, so the
   // user still learns which row changed without anything moving.

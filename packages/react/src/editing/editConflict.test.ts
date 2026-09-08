@@ -68,6 +68,7 @@ describe("resolveConflictChoice", () => {
     draft: "typed",
     incomingValue: "Arrived",
     previousValue: "Ship",
+    changes: [],
   };
 
   it("lets the host override the policy", () => {
@@ -219,17 +220,27 @@ describe("useEditConflict", () => {
 });
 
 describe("a row edited as one unit", () => {
+  const SEEDS = { title: "Ship" };
+
   /** Reconcile an open row form against a live row set. */
   function reconcile(
     state: ReturnType<typeof useEditConflict<Task>>,
     rows: readonly Task[],
-    handlers: { keep: (row: Task) => void; take: (row: Task) => void },
-    activeRowId: string | null = "1"
+    handlers: {
+      accept: (row: Task, keys: readonly string[]) => void;
+      take: (row: Task, keys: readonly string[]) => void;
+    },
+    over: {
+      drafts?: Record<string, string>;
+      activeRowId?: string | null;
+      seeds?: Record<string, string>;
+    } = {}
   ) {
     act(() => {
       state.reconcileRow({
-        activeRowId,
-        openedRow: OPENED,
+        activeRowId: over.activeRowId === undefined ? "1" : over.activeRowId,
+        seeds: over.seeds ?? SEEDS,
+        drafts: over.drafts ?? { title: "mine" },
         rows,
         columns: [TITLE],
         rowKey: (row) => row.id,
@@ -239,72 +250,128 @@ describe("a row edited as one unit", () => {
     });
   }
 
-  it("asks about the whole form, naming no column", () => {
+  it("asks about a field the reader was working in", () => {
     const { result } = renderHook(() => useEditConflict<Task>());
-    reconcile(result.current, [LIVE], { keep: vi.fn(), take: vi.fn() });
+    reconcile(result.current, [LIVE], { accept: vi.fn(), take: vi.fn() });
 
     expect(result.current.isRowConflict("1")).toBe(true);
     expect(result.current.isRowConflict("2")).toBe(false);
-    // The form holds every field, so no single cell owns the clash — and a
-    // cell-scoped reader must not mistake this for one of its own.
     expect(result.current.current?.unit).toBe("row");
+    expect(result.current.current?.changes).toEqual([
+      { columnKey: "title", previous: "Ship", incoming: "Arrived" },
+    ]);
+    // A cell-scoped reader must not mistake this for one of its own.
     expect(result.current.isConflict("1", "title")).toBe(false);
   });
 
-  it("reseeds the drafts on take, and keeps them on keep", () => {
+  it("takes a field the reader never typed in, without asking", () => {
     const take = vi.fn();
     const { result } = renderHook(() => useEditConflict<Task>());
-    reconcile(result.current, [LIVE], { keep: vi.fn(), take });
-    act(() => {
-      result.current.take();
-    });
-    expect(take).toHaveBeenCalledWith(LIVE);
-    expect(result.current.isRowConflict("1")).toBe(false);
+    // The draft still reads what the seed does: nothing of theirs is at stake.
+    reconcile(
+      result.current,
+      [LIVE],
+      { accept: vi.fn(), take },
+      { drafts: { title: "Ship" } }
+    );
 
-    const keep = vi.fn();
-    const second = renderHook(() => useEditConflict<Task>());
-    reconcile(second.result.current, [LIVE], { keep, take: vi.fn() });
-    act(() => {
-      second.result.current.keep();
-    });
-    expect(keep).toHaveBeenCalledWith(LIVE);
+    expect(take).toHaveBeenCalledWith(LIVE, ["title"]);
+    expect(result.current.isRowConflict("1")).toBe(false);
   });
 
-  it("says nothing when the row did not move, or no form is open", () => {
+  it("answers one field at a time", () => {
+    const accept = vi.fn();
+    const take = vi.fn();
     const { result } = renderHook(() => useEditConflict<Task>());
-    reconcile(result.current, [OPENED], { keep: vi.fn(), take: vi.fn() });
+    reconcile(result.current, [LIVE], { accept, take });
+    act(() => {
+      result.current.keepRowField("title");
+    });
+    expect(accept).toHaveBeenCalledWith(LIVE, ["title"]);
     expect(result.current.isRowConflict("1")).toBe(false);
 
-    reconcile(result.current, [LIVE], { keep: vi.fn(), take: vi.fn() }, null);
+    const second = renderHook(() => useEditConflict<Task>());
+    reconcile(second.result.current, [LIVE], { accept: vi.fn(), take });
+    act(() => {
+      second.result.current.takeRowField("title");
+    });
+    expect(take).toHaveBeenCalledWith(LIVE, ["title"]);
+  });
+
+  it("says nothing when no field moved, or no form is open", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    reconcile(result.current, [OPENED], { accept: vi.fn(), take: vi.fn() });
     expect(result.current.isRowConflict("1")).toBe(false);
+
+    reconcile(
+      result.current,
+      [LIVE],
+      { accept: vi.fn(), take: vi.fn() },
+      { activeRowId: null }
+    );
+    expect(result.current.isRowConflict("1")).toBe(false);
+  });
+
+  it("answers a whole form at once when a policy says how", () => {
+    const accept = vi.fn();
+    const take = vi.fn();
+    const kept = renderHook(() => useEditConflict<Task>());
+    act(() => {
+      kept.result.current.reconcileRow({
+        activeRowId: "1",
+        seeds: SEEDS,
+        drafts: { title: "mine" },
+        rows: [LIVE],
+        columns: [TITLE],
+        rowKey: (row) => row.id,
+        policy: "keep",
+        accept,
+        take: vi.fn(),
+      });
+    });
+    expect(accept).toHaveBeenCalledWith(LIVE, ["title"]);
+    expect(kept.result.current.isRowConflict("1")).toBe(false);
+
+    const taken = renderHook(() => useEditConflict<Task>());
+    act(() => {
+      taken.result.current.reconcileRow({
+        activeRowId: "1",
+        seeds: SEEDS,
+        drafts: { title: "mine" },
+        rows: [LIVE],
+        columns: [TITLE],
+        rowKey: (row) => row.id,
+        policy: "take",
+        accept: vi.fn(),
+        take,
+      });
+    });
+    expect(take).toHaveBeenCalledWith(LIVE, ["title"]);
+    expect(taken.result.current.isRowConflict("1")).toBe(false);
+  });
+
+  it("says nothing about a row that is not on screen", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    reconcile(result.current, [], { accept: vi.fn(), take: vi.fn() });
+    expect(result.current.isRowConflict("1")).toBe(false);
+  });
+
+  it("ignores an answer for a form nobody is asking about", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    act(() => {
+      result.current.keepRowField("title");
+      result.current.takeRowField("title");
+    });
+    expect(result.current.current).toBeNull();
   });
 
   it("asks once for one incoming change", () => {
     const { result } = renderHook(() => useEditConflict<Task>());
-    const handlers = { keep: vi.fn(), take: vi.fn() };
+    const handlers = { accept: vi.fn(), take: vi.fn() };
     reconcile(result.current, [LIVE], handlers);
     const first = result.current.current;
     reconcile(result.current, [LIVE], handlers);
 
     expect(result.current.current).toBe(first);
-  });
-
-  it("takes the host's version as the whole answer", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
-    act(() => {
-      result.current.reconcileRow({
-        activeRowId: "1",
-        openedRow: OPENED,
-        // Same title, new revision: the host said the row moved.
-        rows: [{ ...OPENED, rev: 7 }],
-        columns: [TITLE],
-        rowKey: (row) => row.id,
-        rowVersion: (row) => row.rev,
-        policy: "ask",
-        keep: vi.fn(),
-        take: vi.fn(),
-      });
-    });
-    expect(result.current.isRowConflict("1")).toBe(true);
   });
 });

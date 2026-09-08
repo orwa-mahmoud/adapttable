@@ -104,14 +104,6 @@ export function rowEditConflict<TRow>(
   rowId: string
 ): RowEditConflict | undefined {
   const conflict = editing?.conflict;
-  const labels = editing?.conflictLabels;
-  if (!conflict || !labels) return undefined;
-  return {
-    asking: conflict.isRowConflict(rowId),
-    message: labels.message,
-    keepLabel: labels.keepMine,
-    takeLabel: labels.takeTheirs,
-    keep: conflict.keep,
-    take: conflict.take,
-  };
+  if (!conflict) return undefined;
+  return { asking: conflict.isRowConflict(rowId) };
 }

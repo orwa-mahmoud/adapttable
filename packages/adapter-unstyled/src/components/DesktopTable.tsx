@@ -180,6 +180,7 @@ function DesktopRowBase<TRow>(
     row,
     id
   );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <>
       <tr
@@ -343,7 +344,7 @@ function DesktopRowBase<TRow>(
                 rowId={id}
                 showBegin={rowEdit.showBegin}
                 icons={editing.rowEditIcons}
-                conflict={rowEditConflict(editing, id)}
+                conflict={rowConflict}
                 labels={labels}
               />
             )}

@@ -421,20 +421,24 @@ steps aside, because that row is already showing save and cancel.
 ### An incoming row while a form is open
 
 A row form is measured against the row it opened on, so a change arriving
-underneath is the same question a cell already asks — one answer for the whole
-form. The row's controls become the question: **Keep mine** accepts the
-incoming row as the new snapshot and leaves every draft as typed, **Take
-theirs** reseeds every draft from it. Save is withheld until one is chosen,
-because writing a form built on a row that has since moved would overwrite a
-change the reader never saw.
+underneath is the same question a cell already asks — asked of every field that
+moved, and of no others. Each marks itself, shows the value that arrived, and
+offers **Keep mine** / **Take theirs**, exactly as a cell does; answering on any
+of them answers for the row, because the row moved as a whole. The form offers
+nothing to save until it is answered.
+
+Fields the reader never touched are not a problem to solve: a save sends a patch
+of what the reader changed, so a value they left alone is never written back
+over the one that arrived.
 
 `editConflictPolicy` and `onEditConflict` decide it without asking, exactly as
 they do for a cell. Batch editing does not ask: the drafts stand and the
 incoming values land underneath them.
 
-Parts: `row-edit-conflict`, `row-edit-conflict-message`, `row-edit-keep-mine`,
-`row-edit-take-theirs`. Labels: `labels.editConflict`, `labels.keepMine`,
-`labels.takeTheirs`.
+Parts: the cell's own `edit-cell-conflict`, `edit-cell-conflict-message`,
+`edit-cell-incoming`, `edit-cell-keep-mine`, `edit-cell-take-theirs`.
+Labels: `labels.editConflict`, `labels.keepMine`, `labels.takeTheirs`,
+`labels.theirsValue`.
 
 ### The controls are glyphs
 
@@ -456,9 +460,11 @@ Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `UseRowEditingOptions`), with `RowEditCell` (`RowEditCellProps`),
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
 from `@adapttable/core/adapter`, `RowEditIcons` typing the glyph overrides,
-and `rowEditConflict` (`RowEditConflict` out) reading one row's question off
-the editing bag. `useEditConflict` grew `reconcileRow`
-(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit. Each adapter mounts `RowEditActions`
+and `rowEditConflict` (`RowEditConflict` out) telling one row's controls that
+an answer is outstanding. `useEditConflict` grew `reconcileRow`
+(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, and
+`CellConflictAsk` is what one field's notice needs, and `EditConflictChange`
+names each field that moved. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's
 actions against its edit state with `resolveRowEditTrigger` (`RowEditTrigger`
 out) — which rewires an `editsRow` action to the form and reports whether the

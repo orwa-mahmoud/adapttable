@@ -263,6 +263,7 @@ function MobileCardBase<TRow>({
     row,
     id
   );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <Card.Root
       ref={measureElement}
@@ -357,7 +358,7 @@ function MobileCardBase<TRow>({
             rowId={id}
             showBegin={rowEdit.showBegin}
             icons={editing.rowEditIcons}
-            conflict={rowEditConflict(editing, id)}
+            conflict={rowConflict}
             labels={labels}
           />
         )}

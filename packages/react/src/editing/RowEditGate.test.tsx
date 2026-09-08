@@ -391,9 +391,7 @@ describe("RowEditActions", () => {
     expect(part("row-edit-cancel")).not.toBeNull();
   });
 
-  it("asks about an incoming row before it will let the form save", () => {
-    const keep = vi.fn();
-    const take = vi.fn();
+  it("offers no way to save while a field is waiting on an answer", () => {
     const result = openRow(vi.fn());
     render(
       <RowEditActionsChrome
@@ -401,30 +399,13 @@ describe("RowEditActions", () => {
         rowEditing={result.current}
         row={TASK}
         rowId="1"
-        conflict={{
-          asking: true,
-          message: "This row changed",
-          keepLabel: "Keep mine",
-          takeLabel: "Take theirs",
-          keep,
-          take,
-        }}
+        conflict={{ asking: true }}
       />
     );
-    // Saving a form measured against a row that has since moved would write
-    // over a change the reader never saw, so the question replaces save.
+    // The fields that moved carry the question, each with its own notice.
+    // Saving past it would write over a value the reader has not looked at.
     expect(part("row-edit-save")).toBeNull();
-    expect(part("row-edit-conflict-message")).toHaveTextContent(
-      "This row changed"
-    );
-    act(() => {
-      fireEvent.click(part("row-edit-keep-mine")!);
-    });
-    expect(keep).toHaveBeenCalledTimes(1);
-    act(() => {
-      fireEvent.click(part("row-edit-take-theirs")!);
-    });
-    expect(take).toHaveBeenCalledTimes(1);
+    expect(part("row-edit-cancel")).toBeNull();
   });
 
   it("leaves a row nobody is asking about alone", () => {
@@ -435,14 +416,7 @@ describe("RowEditActions", () => {
         rowEditing={result.current}
         row={TASK}
         rowId="1"
-        conflict={{
-          asking: false,
-          message: "This row changed",
-          keepLabel: "Keep mine",
-          takeLabel: "Take theirs",
-          keep: vi.fn(),
-          take: vi.fn(),
-        }}
+        conflict={{ asking: false }}
       />
     );
     expect(part("row-edit-conflict")).toBeNull();

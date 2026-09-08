@@ -62,15 +62,22 @@ export interface RowEditingState<TRow> {
   /** The row the form opened against, or `undefined` when none is open. */
   openedRow: () => TRow | undefined;
   /**
-   * Accept an incoming row as the snapshot the form is measured against. The
-   * drafts stand: the reader chose to keep what they typed.
+   * What each field read when the form opened, or last accepted. This — not
+   * the row — is what an incoming change is measured against, field by field.
    */
-  keepLive: (row: TRow) => void;
+  seeds: () => RowEditDrafts | undefined;
   /**
-   * Reseed every draft from an incoming row, discarding what the reader typed
-   * — the other half of the same choice.
+   * Accept an incoming row's values for these fields as what they now read,
+   * leaving the drafts alone: the reader keeps what they typed, and the patch
+   * still carries it.
    */
-  takeLive: (row: TRow) => void;
+  acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+  /**
+   * Take an incoming row's values for these fields, into both the drafts and
+   * what they are measured against — nothing of the reader's is lost, because
+   * these are fields they had not typed in, or chose to give up.
+   */
+  takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
   /** The table that owns these editors — never a sibling's host. */
   featureHost?: FeatureHostState;
 }
@@ -168,9 +175,25 @@ export function useRowEditing<TRow>(
   });
 
   const setDraft = useEventCallback((columnKey: string, value: string) => {
-    if (draftsRef.current[columnKey] === value) return;
+    const previous = draftsRef.current[columnKey];
+    if (previous === value) return;
+    const open = opened.current;
+    const seed = open?.seeds[columnKey];
     draftsRef.current = { ...draftsRef.current, [columnKey]: value };
     setDrafts(draftsRef.current);
+    // The first time a field leaves what it read, it is the reader's — the
+    // same event a batch fires when a row first changes. Opening the form
+    // says which row; this says which fields inside it are at stake.
+    if (open && previous === seed && value !== seed) {
+      observeEdit(options.onEditStart, {
+        row: open.row,
+        rowId: open.rowId,
+        columnKey,
+        value,
+        previousValue: seed,
+        unit: "row",
+      });
+    }
   });
 
   const close = useEventCallback((kind: "cancel" | "silent" = "silent") => {
@@ -223,33 +246,50 @@ export function useRowEditing<TRow>(
 
   const openedRow = useCallback(() => opened.current?.row, []);
 
-  /** Read every editable column of a row into a fresh seed set. */
-  const seedsOf = useEventCallback((row: TRow): RowEditDrafts => {
-    const seeds: Record<string, string> = {};
-    for (const column of editableColumns(options.columns, row)) {
-      seeds[column.key] = readEditableCellValue(
-        row,
-        column,
-        options.featureHost
-      );
+  const seeds = useCallback(() => opened.current?.seeds, []);
+
+  /** What the incoming row reads for these fields. */
+  const incomingOf = useEventCallback(
+    (row: TRow, columnKeys: readonly string[]): Record<string, string> => {
+      const values: Record<string, string> = {};
+      for (const column of editableColumns(options.columns, row)) {
+        if (!columnKeys.includes(column.key)) continue;
+        values[column.key] = readEditableCellValue(
+          row,
+          column,
+          options.featureHost
+        );
+      }
+      return values;
     }
-    return seeds;
-  });
+  );
 
-  const keepLive = useEventCallback((row: TRow) => {
-    const open = opened.current;
-    if (!open) return;
-    opened.current = { ...open, row };
-  });
+  const acceptSeeds = useEventCallback(
+    (row: TRow, columnKeys: readonly string[]) => {
+      const open = opened.current;
+      if (!open) return;
+      opened.current = {
+        row,
+        rowId: open.rowId,
+        seeds: { ...open.seeds, ...incomingOf(row, columnKeys) },
+      };
+    }
+  );
 
-  const takeLive = useEventCallback((row: TRow) => {
-    const open = opened.current;
-    if (!open) return;
-    const seeds = seedsOf(row);
-    opened.current = { row, rowId: open.rowId, seeds };
-    draftsRef.current = seeds;
-    setDrafts(seeds);
-  });
+  const takeSeeds = useEventCallback(
+    (row: TRow, columnKeys: readonly string[]) => {
+      const open = opened.current;
+      if (!open) return;
+      const incoming = incomingOf(row, columnKeys);
+      opened.current = {
+        row,
+        rowId: open.rowId,
+        seeds: { ...open.seeds, ...incoming },
+      };
+      draftsRef.current = { ...draftsRef.current, ...incoming };
+      setDrafts(draftsRef.current);
+    }
+  );
 
   const isDirty = useMemo(() => {
     const open = opened.current;
@@ -294,8 +334,9 @@ export function useRowEditing<TRow>(
       isDirty,
       signature,
       openedRow,
-      keepLive,
-      takeLive,
+      seeds,
+      acceptSeeds,
+      takeSeeds,
       featureHost: options.featureHost,
     }),
     [
@@ -310,8 +351,9 @@ export function useRowEditing<TRow>(
       isDirty,
       signature,
       openedRow,
-      keepLive,
-      takeLive,
+      seeds,
+      acceptSeeds,
+      takeSeeds,
       options.featureHost,
     ]
   );

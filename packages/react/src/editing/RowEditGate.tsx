@@ -20,8 +20,16 @@ import {
 import type { ReactElement, ReactNode } from "react";
 
 import type { BatchEditingState } from "./batchEditing";
-import { focusEditorOnMount } from "./editableCellController";
-import type { EditableCellEditorCtrl } from "./EditableCellGate";
+import {
+  type EditableCellEditing,
+  focusEditorOnMount,
+} from "./editableCellController";
+import {
+  type CellConflictAsk,
+  CellConflictNotice,
+  type EditableCellEditorCtrl,
+  type EditableCellSlots,
+} from "./EditableCellGate";
 import type { RowEditingState } from "./rowEditing";
 
 export type {
@@ -60,6 +68,17 @@ export interface RowEditCellProps<TRow> {
    * cell gate uses, so a kit writes one editor and both modes use it.
    */
   renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
+  /**
+   * The incoming value waiting on this field, when the row changed underneath
+   * the form and this is one of the fields that moved.
+   */
+  ask?: CellConflictAsk;
+  /** Labels for the notice — already resolved. */
+  conflictLabels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
+  /** Class for the notice. */
+  errorClassName?: string;
+  /** The kit's components, for the notice's buttons. */
+  slots?: EditableCellSlots;
 }
 
 /**
@@ -79,10 +98,15 @@ export function RowEditCell<TRow>({
   editLabel,
   takesFocus,
   renderEditor,
+  ask,
+  conflictLabels,
+  errorClassName,
+  slots,
 }: Readonly<RowEditCellProps<TRow>>): ReactElement {
   const editor = resolveCellEditor(column, rowEditing.featureHost);
   if (!editor) return <>{display}</>;
   const focusRef = takesFocus ? focusEditorOnMount : () => undefined;
+  const errorId = `adapttable-row-edit-${column.key}`;
 
   const ctrl: EditableCellEditorCtrl = {
     draft: rowEditing.draftFor(column.key),
@@ -91,11 +115,12 @@ export function RowEditCell<TRow>({
     },
     // Enter saves the whole row, Escape cancels it: in row mode the unit is the
     // row, so a per-cell commit would be a different feature wearing this one's
-    // keys.
+    // keys. Enter does nothing while a field is waiting on an answer — saving
+    // then would write over a value the reader has not looked at.
     onEditorKeyDown: (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
-        rowEditing.save();
+        if (!ask) rowEditing.save();
       } else if (event.key === "Escape") {
         event.preventDefault();
         rowEditing.cancel();
@@ -106,7 +131,8 @@ export function RowEditCell<TRow>({
     editor,
     selectOptions: selectOptionsFor(editor),
     validating: false,
-    errorId: `adapttable-row-edit-${column.key}`,
+    conflict: ask !== undefined,
+    errorId,
     focusRef,
   };
 
@@ -124,7 +150,20 @@ export function RowEditCell<TRow>({
       errorId: ctrl.errorId,
     }) as ReactElement;
   }
-  return renderEditor(ctrl);
+  return (
+    <>
+      {renderEditor(ctrl)}
+      {slots ? (
+        <CellConflictNotice
+          ask={ask}
+          labels={conflictLabels}
+          errorId={errorId}
+          errorClassName={errorClassName}
+          slots={slots}
+        />
+      ) : null}
+    </>
+  );
 }
 
 /** The options a chooser editor carries, normalized. */
@@ -141,21 +180,15 @@ function selectOptionsFor(editor: CellEditor) {
 /**
  * An incoming change to the row a form has open.
  *
+ * The fields that moved carry the question themselves, each with the notice a
+ * cell shows; this is what the row's own controls need to know — that an
+ * answer is outstanding, so there is nothing to save yet.
+ *
  * @public
  */
 export interface RowEditConflict {
-  /** Whether this row is the one being asked about. */
+  /** Whether this row is waiting on an answer. */
   readonly asking: boolean;
-  /** What the notice says the reader must choose between. */
-  readonly message: string;
-  /** Accessible name for keeping the drafts. */
-  readonly keepLabel: string;
-  /** Accessible name for taking the incoming row. */
-  readonly takeLabel: string;
-  /** Keep the drafts; accept the incoming row as the new snapshot. */
-  readonly keep: () => void;
-  /** Replace every draft with the incoming row's values. */
-  readonly take: () => void;
 }
 
 /**
@@ -348,42 +381,10 @@ export function RowEditActionsChrome<TRow>({
 }: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement | null {
   const controls = rowEditControls(options);
   const Button = slots.Button;
-  // The question comes first: saving a form measured against a row that has
-  // since moved would write over a change the reader never saw.
-  if (controls.editing && conflict?.asking === true) {
-    return (
-      <span
-        data-adapttable-part="row-edit-conflict"
-        role="alert"
-        className={className}
-        style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-      >
-        <span data-adapttable-part="row-edit-conflict-message">
-          {conflict.message}
-        </span>
-        <Button
-          label={conflict.keepLabel}
-          part="row-edit-keep-mine"
-          icon={false}
-          className={buttonClassName}
-          onClick={(event) => {
-            event.stopPropagation();
-            conflict.keep();
-          }}
-        />
-        <Button
-          label={conflict.takeLabel}
-          part="row-edit-take-theirs"
-          icon={false}
-          className={buttonClassName}
-          onClick={(event) => {
-            event.stopPropagation();
-            conflict.take();
-          }}
-        />
-      </span>
-    );
-  }
+  // While the notice above the row holds the question, the row offers no way
+  // to save: a form measured against a row that has since moved would write
+  // over a change the reader never saw.
+  if (controls.editing && conflict?.asking === true) return null;
   if (!controls.editing) {
     // A host action already opens this row, so drawing the built-in control
     // would put two identical triggers side by side.

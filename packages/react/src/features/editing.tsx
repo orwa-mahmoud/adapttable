@@ -176,25 +176,25 @@ function LiveEditing({
     props.onEditConflict,
   ]);
 
-  // A row edited as one unit is measured against the row it opened on, so an
-  // incoming change to that row is the same question the cell already asks.
+  // A form is measured field by field: a field the reader never typed in has
+  // nothing of theirs to lose and simply takes what arrived, and only the ones
+  // they were working in become a question.
   useEffect(() => {
     if (!rowModeArmed) return;
     conflict.reconcileRow({
       activeRowId: rowEditing.activeRowId,
-      openedRow: rowEditing.openedRow(),
+      seeds: rowEditing.seeds(),
+      drafts: rowEditing.drafts,
       rows: editingRows,
       columns: chrome.allColumns,
       rowKey: (row: unknown) => rowKey(row as never),
-      rowVersion: props.rowVersion as
-        ((row: unknown) => string | number) | undefined,
       policy: props.editConflictPolicy ?? "ask",
       onEditConflict: props.onEditConflict as never,
-      keep: (row) => {
-        rowEditing.keepLive(row as never);
+      accept: (row: unknown, columnKeys: readonly string[]) => {
+        rowEditing.acceptSeeds(row as never, columnKeys);
       },
-      take: (row) => {
-        rowEditing.takeLive(row as never);
+      take: (row: unknown, columnKeys: readonly string[]) => {
+        rowEditing.takeSeeds(row as never, columnKeys);
       },
     });
   }, [
@@ -204,7 +204,6 @@ function LiveEditing({
     rowKey,
     conflict,
     chrome.allColumns,
-    props.rowVersion,
     props.editConflictPolicy,
     props.onEditConflict,
   ]);
