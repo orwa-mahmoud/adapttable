@@ -83,13 +83,24 @@ for (const kit of KITS) {
 
     const headers = root.locator('[data-adapttable-part="group-label"]');
     await expect(headers.first()).toBeVisible();
-    const before = await root.locator("tbody tr:visible").count();
+    // One row that belongs to the first group. Collapsing has to take it away
+    // and re-opening has to bring it back — asserted for THIS row rather than
+    // for the table's row count, because an expanded page is windowed and the
+    // space a collapsed group frees is filled by the entries below it.
+    const leaf = root.locator("[data-row-id]").first();
+    await expect(leaf).toBeVisible();
+    const leafId = await leaf.getAttribute("data-row-id");
+    const namedLeaf = root.locator(`[data-row-id="${leafId}"]`);
 
-    // Collapsing a group has to remove its rows, in every kit.
-    await root.locator('[data-adapttable-part="group-toggle"]').first().click();
-    await expect
-      .poll(async () => root.locator("tbody tr:visible").count())
-      .toBeLessThan(before);
+    const toggle = root
+      .locator('[data-adapttable-part="group-toggle"]')
+      .first();
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect.poll(async () => namedLeaf.count()).toBe(0);
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect.poll(async () => namedLeaf.count()).toBeGreaterThan(0);
   });
 
   test(`${kit}: grouping panel keeps drag, keyboard, mobile, and RTL paths equal`, async ({
@@ -199,3 +210,31 @@ for (const kit of KITS) {
     );
   });
 }
+
+/**
+ * Grouping expands a page: the live demo's thirty rows walk out as a hundred
+ * and forty entries once every bucket gains a header and a footer, so the page
+ * size stops bounding what the browser draws. That page is windowed — and
+ * every group stays reachable by scrolling to it.
+ */
+test("the live demo windows an expanded page and still reaches every group", async ({
+  page,
+}) => {
+  await page.goto("/?live.groupBy=team%2Cstatus%2Ctimeline");
+  const rows = page.locator('[data-adapttable-part="row"]');
+  const groups = page.locator('[data-adapttable-part="group-row"]');
+  await expect(groups.first()).toBeVisible();
+  // A window, not the walked model: thirty rows in three levels with footers
+  // is well past a hundred entries.
+  await expect
+    .poll(async () => (await rows.count()) + (await groups.count()))
+    .toBeLessThan(60);
+
+  const firstGroup = (await groups.first().innerText()).trim();
+  await page.mouse.wheel(0, 4000);
+  await expect
+    .poll(async () => (await groups.last().innerText()).trim(), {
+      timeout: 5000,
+    })
+    .not.toBe(firstGroup);
+});

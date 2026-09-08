@@ -615,7 +615,11 @@ function composeDemoFeatures(
 ): readonly TableFeature<Person>[] {
   const { teamSpan, demoExtraRows, accentRowStyle } = parts;
   return [
-    ...(flags.large
+    // The live demo groups the whole set several levels deep, which walks a
+    // page of thirty rows out into a hundred and forty entries: the page size
+    // stops bounding what the browser draws, so window it. The feature pages
+    // group a handful of rows one level deep and need no window.
+    ...(flags.large || (flags.grouping && flags.urlKey === "live")
       ? [virtualize({ estimateRowSize: LARGE_ROW_ESTIMATE })]
       : []),
     ...(flags.rowPinning ? [rowPinning()] : []),
@@ -754,6 +758,8 @@ function frontendColumnProps(
     rowMode?: boolean;
     /** Whether this page shows the demo's own row actions — the pencil. */
     rowActionsShown?: boolean;
+    /** Which demo this is, so a page can compose for its own shape. */
+    urlKey?: string;
     grouping?: boolean;
     tree?: boolean;
     batch?: boolean;
@@ -1257,6 +1263,7 @@ function Frontend({
           onTreeMove,
           writePatches,
           flashRow: flash.flashRow,
+          urlKey,
         })
       )}
     </>

@@ -82,10 +82,19 @@ export function entryKeys(entries?: readonly { key: string }[]): string[] {
   return entries?.map((entry) => entry.key) ?? [];
 }
 
-/** Whether the body is a real row/card list the window can apply to. */
+/**
+ * Whether the body is a real row/card list the window can apply to.
+ *
+ * A paged body normally needs no window: the page size already bounds what is
+ * rendered. Grouping and trees break that bound — a page of thirty rows walks
+ * out as a hundred and forty entries once every bucket gains a header and a
+ * footer — so a page that has been expanded is eligible like any other long
+ * list.
+ */
 export function isBodyEligible<TRow>(chrome: TableChrome<TRow>): boolean {
+  const expanded = chrome.grouping !== undefined || chrome.tree !== undefined;
   return (
-    !chrome.isPaged &&
+    (!chrome.isPaged || expanded) &&
     !chrome.source.error &&
     (chrome.body === "desktop" || chrome.body === "mobile")
   );

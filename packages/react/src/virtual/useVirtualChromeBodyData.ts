@@ -43,9 +43,11 @@ export function useVirtualChromeBodyData<TRow>(
 ): ChromeBodyData<TRow> {
   const { rowKey, virtualize = false } = props;
   const { source } = chrome;
-  if (virtualize && source.paginationMode === "paged") {
+  const expandedBody =
+    chrome.grouping !== undefined || chrome.tree !== undefined;
+  if (virtualize && source.paginationMode === "paged" && !expandedBody) {
     devWarn(
-      'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it.'
+      'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
     );
   }
   const fetchNext = useFetchNextPage(chrome);
