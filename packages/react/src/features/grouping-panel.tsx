@@ -92,13 +92,24 @@ function aggregateChoiceText(
   return typeof localized === "string" ? localized : fallback;
 }
 
+/**
+ * Controls whose own gesture a drag would steal.
+ *
+ * A field, a chooser or a link each does something with a press-and-move of
+ * its own — selecting text, opening a list, dragging a URL — so a drag that
+ * starts inside one is theirs. A BUTTON is not among them: a press is a click
+ * and a press-and-move is a drag, and the browser already tells the two apart.
+ * Counting buttons here made the sort control an undraggable hole across the
+ * middle of every header, which is most of what a reader aims at.
+ */
 function isInteractiveDragTarget(event: ReactDragEvent<HTMLElement>): boolean {
   const target = event.target;
   return (
     target instanceof Element &&
     target !== event.currentTarget &&
-    target.closest("button,input,select,textarea,a,[data-no-group-drag]") !==
-      null
+    target.closest(
+      "input,select,textarea,a[href],[contenteditable='true'],[data-no-group-drag]"
+    ) !== null
   );
 }
 

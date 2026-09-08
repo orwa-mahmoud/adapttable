@@ -57,6 +57,17 @@ function reactGroupingDragProps(
   return props as unknown as GroupingDragProps;
 }
 
+/**
+ * Drop handlers that refuse: nothing calls `preventDefault`, so the browser
+ * shows the reader this is not a place to let go.
+ */
+const INERT_DROP_PROPS: GroupingDropProps = {
+  onDragEnter: () => undefined,
+  onDragOver: () => undefined,
+  onDragLeave: () => undefined,
+  onDrop: () => undefined,
+};
+
 function reactGroupingDropProps(
   props: CoreGroupingDropProps
 ): GroupingDropProps {
@@ -247,6 +258,53 @@ export function GroupingPanelChrome<TRow>({
   const aggregateValue =
     state.aggregateOverrides[selectedAggregateColumn] ?? "";
 
+  // A chip dropped either side of itself lands exactly where it already is.
+  // Those boundaries are the two nearest the reader's hand, so offering them
+  // is offering a target that does nothing — which reads as the drag failing.
+  const lifted =
+    state.drag?.source === "chip" ? state.groupBy.indexOf(state.drag.key) : -1;
+  const inert = (index: number) =>
+    lifted >= 0 && (index === lifted || index === lifted + 1);
+  // A chip is a target too, and the nearest one to the reader's hand: dropping
+  // onto a chip takes that chip's place. Insertion boundaries alone put every
+  // meaningful target a chip's width away from where the drag began — pick up
+  // the last field and the only places that would move it are back at the head
+  // of the strip.
+  const ontoChip = (index: number) => {
+    const target = lifted >= 0 && lifted < index ? index + 1 : index;
+    if (lifted >= 0 && target === lifted) return {};
+    const props = state.dropProps(target);
+    const passUp =
+      <TEvent extends { defaultPrevented: boolean }>(
+        handler: ((event: TEvent) => void) | undefined
+      ) =>
+      (event: TEvent) => {
+        // A boundary inside this chip answered first; it meant something more
+        // precise than "here".
+        if (event.defaultPrevented) return;
+        handler?.(event);
+      };
+    return {
+      onDragEnter: passUp(props.onDragEnter),
+      onDragOver: passUp(props.onDragOver),
+      onDragLeave: props.onDragLeave,
+      onDrop: passUp(props.onDrop),
+    };
+  };
+
+  const boundary = (index: number) =>
+    inert(index)
+      ? {
+          dragging: false,
+          active: false,
+          dropProps: INERT_DROP_PROPS,
+        }
+      : {
+          dragging: state.drag !== undefined,
+          active: state.drag?.overIndex === index,
+          dropProps: reactGroupingDropProps(state.dropProps(index)),
+        };
+
   return (
     <Surface
       label={labels.groupingPanel}
@@ -265,14 +323,13 @@ export function GroupingPanelChrome<TRow>({
             key={key}
             data-adapttable-part="grouping-item"
             style={{ display: "inline-flex", alignItems: "center" }}
+            {...(mobile ? {} : reactGroupingDropProps(ontoChip(index)))}
           >
             {!mobile ? (
               <DropZone
                 label={labels.groupingDropColumns}
                 empty={false}
-                dragging={state.drag !== undefined}
-                active={state.drag?.overIndex === index}
-                dropProps={reactGroupingDropProps(state.dropProps(index))}
+                {...boundary(index)}
                 data-adapttable-part="grouping-drop-zone"
               />
             ) : null}
@@ -291,9 +348,7 @@ export function GroupingPanelChrome<TRow>({
               <DropZone
                 label={labels.groupingDropColumns}
                 empty={false}
-                dragging={state.drag !== undefined}
-                active={state.drag?.overIndex === index + 1}
-                dropProps={reactGroupingDropProps(state.dropProps(index + 1))}
+                {...boundary(index + 1)}
                 data-adapttable-part="grouping-drop-zone"
               />
             ) : null}

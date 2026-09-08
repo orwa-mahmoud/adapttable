@@ -182,9 +182,9 @@ describe("GroupingPanel", () => {
   it("shows active insertion and drop-to-remove states", () => {
     render(
       <Harness
-        initial={["region"]}
+        initial={["region", "team"]}
         drag={{
-          key: "region",
+          key: "team",
           source: "chip",
           overIndex: 0,
           overRemove: true,

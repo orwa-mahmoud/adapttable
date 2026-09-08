@@ -95,9 +95,12 @@ describe("GroupingPanel (base-ui)", () => {
   });
 
   it("shows insertion feedback and the remove target during chip dragging", () => {
+    // Three fields, dragging the last: the boundaries either side of it would
+    // leave it where it is, so the ones that CAN take it are the two ahead.
     const state = panelState({
+      groupBy: ["team", "status", "budget"],
       drag: {
-        key: "team",
+        key: "budget",
         source: "chip",
         overIndex: 1,
         overRemove: true,
@@ -112,7 +115,7 @@ describe("GroupingPanel (base-ui)", () => {
     const drops = document.querySelectorAll(
       '[data-adapttable-part="grouping-drop-zone"]'
     );
-    expect(drops).toHaveLength(2);
+    expect(drops).toHaveLength(4);
     expect(drops[1]).toHaveAttribute("data-drop-active", "true");
     expect(
       screen.getByText(defaultLabels.groupingDropToRemove)

@@ -70,8 +70,9 @@ describe("Mantine GroupingPanel", () => {
 
   it("shows active insertion and drop-to-remove states", () => {
     const state = panelState({
+      groupBy: ["team", "budget"],
       drag: {
-        key: "team",
+        key: "budget",
         source: "chip",
         overIndex: 0,
         overRemove: true,

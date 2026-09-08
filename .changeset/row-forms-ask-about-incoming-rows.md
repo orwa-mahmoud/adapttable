@@ -21,6 +21,8 @@ own, and **Save all** waits until nothing is outstanding.
 `editConflictPolicy` and `onEditConflict` decide it without asking, exactly as
 they do for a cell.
 
-Dropping a column at the head of the grouping strip groups by it first. Every
-insertion boundary is drawn with the chip it sits beside and widens while a
-drag is in flight; the leading one used to be a sliver on a line of its own.
+The grouping strip takes a drop wherever one would change the order. A chip
+dropped onto another takes its place, boundaries between chips widen while a
+drag is in flight, and dropping at the head groups by that field first. A chip
+is not offered the two boundaries either side of itself, or itself: landing
+there would leave it exactly where it is.

@@ -374,6 +374,32 @@ describe("groupingPanel provider", () => {
     expect(groupingState.setGroupBy).toHaveBeenCalledWith("budget");
   });
 
+  it("starts a header drag from the sort control inside the header", () => {
+    const groupingState = mockGroupingState("team");
+    let panel: GroupingPanelInteractions | undefined;
+    mountProvider(
+      groupingPanel(),
+      undefined,
+      (next) => {
+        panel = next;
+      },
+      runtimeView(groupingState)
+    );
+    const prevent = vi.fn();
+    act(() => {
+      panel!.headerDragProps("team").onDragStart?.({
+        // Every kit's sortable header IS a button, and it covers most of the
+        // header — refusing the drag there leaves almost nowhere to grab.
+        target: document.createElement("button"),
+        currentTarget: document.createElement("th"),
+        dataTransfer: dragTransfer("team"),
+        preventDefault: prevent,
+      } as never);
+    });
+    expect(prevent).not.toHaveBeenCalled();
+    expect(panel!.drag).toEqual({ key: "team", source: "header" });
+  });
+
   it("ignores header drags that start on interactive controls", () => {
     const groupingState = mockGroupingState("team");
     let panel: GroupingPanelInteractions | undefined;
@@ -388,7 +414,7 @@ describe("groupingPanel provider", () => {
     const prevent = vi.fn();
     act(() => {
       panel!.headerDragProps("team").onDragStart?.({
-        target: document.createElement("button"),
+        target: document.createElement("input"),
         currentTarget: document.createElement("th"),
         dataTransfer: dragTransfer("team"),
         preventDefault: prevent,

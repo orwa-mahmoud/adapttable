@@ -138,6 +138,35 @@ function mount(
   );
 }
 
+function dropZones(): readonly HTMLElement[] {
+  return [
+    ...document.querySelectorAll<HTMLElement>(
+      '[data-adapttable-part="grouping-drop-zone"]'
+    ),
+  ];
+}
+
+/** Drop handlers that accept, and say which boundary answered. */
+function recordingDropProps(seen: string[]): GroupingPanelState["dropProps"] {
+  return (index: number) => ({
+    onDragEnter: (event) => {
+      seen.push(`enter:${index}`);
+      event.preventDefault();
+    },
+    onDragOver: (event) => {
+      seen.push(`over:${index}`);
+      event.preventDefault();
+    },
+    onDragLeave: () => {
+      seen.push(`leave:${index}`);
+    },
+    onDrop: (event) => {
+      seen.push(`drop:${index}`);
+      event.preventDefault();
+    },
+  });
+}
+
 describe("GroupingPanelChrome", () => {
   it("adds, reorders, and removes grouping fields through accessible controls", () => {
     const state = panelState();
@@ -184,6 +213,83 @@ describe("GroupingPanelChrome", () => {
     expect(
       screen.getByLabelText("Drop here to remove grouping")
     ).toBeInTheDocument();
+  });
+
+  it("offers only the boundaries that would actually move the dragged chip", () => {
+    // Dropping a chip either side of itself lands it where it already is, so
+    // those two boundaries do nothing — and they are the two nearest the
+    // reader's hand. With three of them dead-or-live, offering the dead ones
+    // reads as the drag failing.
+    const dropProps = vi.fn((_index: number) => ({
+      onDrop: () => undefined,
+    }));
+    mount(
+      panelState({
+        groupBy: ["team", "budget", "person"],
+        drag: { key: "budget", source: "chip" },
+        dropProps: dropProps as unknown as GroupingPanelState["dropProps"],
+      })
+    );
+
+    // Boundaries 0 and 3 move it; 1 and 2 sit either side of it and cannot.
+    // Each is offered twice — once as a caret, once as the chip beside it.
+    const asked = [...new Set(dropProps.mock.calls.map(([index]) => index))];
+    expect([...asked].sort((a, b) => a - b)).toEqual([0, 3]);
+  });
+
+  it("refuses the drop either side of the chip being dragged", () => {
+    // A refusal has to reach the browser: a handler that never calls
+    // preventDefault is what draws the "no" cursor over a dead boundary.
+    mount(
+      panelState({
+        groupBy: ["team", "budget", "person"],
+        drag: { key: "budget", source: "chip" },
+        dropProps: recordingDropProps([]),
+      })
+    );
+
+    const [, beside] = dropZones();
+    expect(fireEvent.dragEnter(beside!)).toBe(true);
+    expect(fireEvent.dragOver(beside!)).toBe(true);
+    expect(fireEvent.dragLeave(beside!)).toBe(true);
+    expect(fireEvent.drop(beside!)).toBe(true);
+  });
+
+  it("takes a drop on the chip itself, and yields to the caret inside it", () => {
+    const seen: string[] = [];
+    mount(
+      panelState({
+        groupBy: ["team", "budget"],
+        drag: { key: "person", source: "header" },
+        dropProps: recordingDropProps(seen),
+      })
+    );
+
+    // The chip is the nearest target to the reader's hand.
+    fireEvent.dragOver(screen.getByRole("button", { name: "Move Budget" }));
+    expect(seen).toEqual(["over:1"]);
+
+    // The caret inside it is the more precise answer, and it answered first.
+    seen.length = 0;
+    fireEvent.dragOver(dropZones()[1]!);
+    expect(seen).toEqual(["over:1"]);
+  });
+
+  it("offers every boundary for a field arriving from the header", () => {
+    const dropProps = vi.fn((_index: number) => ({
+      onDrop: () => undefined,
+    }));
+    mount(
+      panelState({
+        groupBy: ["team", "budget"],
+        // The field is not in the strip yet, so no boundary is a no-op.
+        drag: { key: "person", source: "header" },
+        dropProps: dropProps as unknown as GroupingPanelState["dropProps"],
+      })
+    );
+
+    const asked = [...new Set(dropProps.mock.calls.map(([index]) => index))];
+    expect([...asked].sort((a, b) => a - b)).toEqual([0, 1, 2]);
   });
 
   it("reorders chips with keyboard arrows and changes aggregate column", () => {

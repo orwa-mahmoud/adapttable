@@ -37,8 +37,9 @@ deliberately fixes grouping in code. See [feature composition](./features.md).
 ## The grouping panel
 
 On desktop, the feature adds a dedicated strip above the table. Drag any data
-header into it to group, drag the chips to change nesting order, or drag a chip
-to the remove target to ungroup it. A chip's focusable move control also
+header into it to group, drag the chips to change nesting order — onto another
+chip to take its place, or onto the caret between two to land there — or drag a
+chip to the remove target to ungroup it. A chip's focusable move control also
 supports Arrow Up/Down and logical Arrow Left/Right; the latter reverse in RTL
 so movement follows the visible order. Its remove button is the keyboard
 dismiss route. Every add, move, removal, and aggregation change is announced
