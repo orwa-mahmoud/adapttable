@@ -421,11 +421,48 @@ for (const adapter of ADAPTERS) {
       await trigger.click();
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
       await expect(form).toBeVisible();
-      // Click inert page text, not a corner coordinate. (4, 4) is the sticky
-      // `<header class="nav">`, so the gesture was landing on other interactive
-      // chrome — which some kits' overlays treat differently from ordinary
-      // outside-click, and which decided the result by timing under load.
-      await page.getByRole("heading", { level: 1 }).first().click();
+      // A point that is provably outside the card and provably not the sticky
+      // header. Naming a specific element does not work here: an anchored
+      // panel shifts to stay inside the window, so on a narrow window it can
+      // cover whichever text the test had in mind — and the corner (4, 4) is
+      // the nav, which some kits' overlays treat as chrome rather than as an
+      // ordinary outside click.
+      // Measure only once the card has stopped moving. Several kits animate
+      // an anchored panel into place, and a point computed from a box that is
+      // still travelling can land on the card itself by the time it is
+      // clicked — which reads as "outside click does not dismiss".
+      const settled = await form.evaluate(async (node) => {
+        const read = () => {
+          const r = node.getBoundingClientRect();
+          return `${String(Math.round(r.x))}:${String(Math.round(r.y))}:${String(Math.round(r.width))}:${String(Math.round(r.height))}`;
+        };
+        let last = read();
+        for (let i = 0; i < 20; i++) {
+          await new Promise((done) => requestAnimationFrame(() => done(null)));
+          const now = read();
+          if (now === last) return true;
+          last = now;
+        }
+        return false;
+      });
+      expect(settled, "the card never stopped moving").toBe(true);
+      const card = await form.boundingBox();
+      expect(card, "the open card has no box").not.toBeNull();
+      // Never ABOVE the card: that is where its own trigger sits, and
+      // clicking the trigger toggles rather than dismisses.
+      const spot = await page.evaluate((box) => {
+        const below = box.y + box.height;
+        if (window.innerHeight - below > 24) {
+          return { x: box.x + box.width / 2, y: below + 12 };
+        }
+        return box.x > 24
+          ? { x: box.x / 2, y: box.y + box.height / 2 }
+          : {
+              x: (box.x + box.width + window.innerWidth) / 2,
+              y: box.y + box.height / 2,
+            };
+      }, card!);
+      await page.mouse.click(spot.x, spot.y);
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 

@@ -211,7 +211,10 @@ export function AgentApprovalDemo({ dark }: Readonly<{ dark: boolean }>) {
       tableAgent({
         tableId: "agent-lab",
         writePolicy: "allow",
-        approval: "writes",
+        // This lab is the strip above the table: it mounts no assistant, so
+        // it names the surface it demonstrates rather than inheriting the
+        // conversation default and parking the write where nothing draws it.
+        approval: { policy: "writes", presentation: "table" },
         commit: "stage",
         columns: {
           name: { type: "string", writable: false },

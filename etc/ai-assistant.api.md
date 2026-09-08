@@ -4,6 +4,8 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
+import { AgentApprovalPending } from '@adapttable/react/adapter';
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
@@ -32,13 +34,14 @@ export interface AgentApply {
 export interface AgentCapabilityContext {
     // (undocumented)
     readonly apply: AgentApply;
+    readonly approvedIndexes?: readonly number[];
     readonly commit?: CommitPolicy;
     // (undocumented)
     readonly observation: AgentObservation;
     // (undocumented)
     readonly observe: () => AgentObservation;
     // (undocumented)
-    readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
@@ -46,6 +49,7 @@ export interface AgentCapabilityContext {
 
 // @public
 export interface AgentCapabilityDefinition {
+    readonly ai?: ActionAiOptions;
     execute(context: AgentCapabilityContext, args: unknown): unknown;
     readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
         readonly guide: string;
@@ -55,6 +59,7 @@ export interface AgentCapabilityDefinition {
     isEnabled(observation: AgentObservation): boolean;
     readonly key: string;
     readonly kind?: "read" | "view" | "write" | "destructive";
+    readonly partial?: CapabilityPartial;
     plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
     readonly presentation?: CapabilityPresentation;
     readonly staging?: CapabilityStaging;
@@ -160,10 +165,27 @@ export interface AgentSession {
 }
 
 // @public
-export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" | "not-required";
+export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | "cancelled" | "not-required";
 
 // @public
 export type ApprovalPolicy = "writes" | "destructive" | "never";
+
+// @public
+export type ApprovalResult = boolean | {
+    readonly approved: readonly number[];
+};
+
+// @public
+export type ApprovalSubject = {
+    readonly kind: "rows";
+    readonly proposals: readonly WriteProposal[];
+    readonly perItem: boolean;
+} | {
+    readonly kind: "operation";
+    readonly capability: string;
+    readonly title?: string;
+    readonly arguments: unknown;
+};
 
 // @public
 export interface AssistantExchange {
@@ -257,8 +279,12 @@ export interface CapabilityGuide {
 }
 
 // @public
+export type CapabilityPartial = "supported" | "unsupported";
+
+// @public
 export interface CapabilityPlan {
     readonly payload?: unknown;
+    readonly perItem?: boolean;
     readonly proposals: readonly WriteProposal[];
 }
 
@@ -361,7 +387,7 @@ export interface RowWindowRow {
 
 // @public
 export interface TableAgentBridge {
-    readonly approvals?: (pending: boolean) => void;
+    readonly approvals?: (pending: AgentApprovalPending | null) => void;
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }
@@ -380,6 +406,7 @@ export interface TableAssistantOptions {
 
 // @public
 export interface TableAssistantState {
+    readonly approval: AgentApprovalPending | null;
     readonly busy: boolean;
     readonly clear: () => void;
     // (undocumented)

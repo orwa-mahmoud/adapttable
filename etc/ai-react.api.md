@@ -4,6 +4,9 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
+import { AgentApprovalPending } from '@adapttable/react/adapter';
+import { ApprovalPresentation } from '@adapttable/core';
 import { FeatureStateKey } from '@adapttable/react/adapter';
 import { StaticTableFeature } from '@adapttable/react/adapter';
 import { TableSourceCapabilities } from '@adapttable/core';
@@ -34,13 +37,14 @@ export interface AgentApply {
 export interface AgentCapabilityContext {
     // (undocumented)
     readonly apply: AgentApply;
+    readonly approvedIndexes?: readonly number[];
     readonly commit?: CommitPolicy;
     // (undocumented)
     readonly observation: AgentObservation;
     // (undocumented)
     readonly observe: () => AgentObservation;
     // (undocumented)
-    readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
@@ -48,6 +52,7 @@ export interface AgentCapabilityContext {
 
 // @public
 export interface AgentCapabilityDefinition {
+    readonly ai?: ActionAiOptions;
     execute(context: AgentCapabilityContext, args: unknown): unknown;
     readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
         readonly guide: string;
@@ -57,6 +62,7 @@ export interface AgentCapabilityDefinition {
     isEnabled(observation: AgentObservation): boolean;
     readonly key: string;
     readonly kind?: "read" | "view" | "write" | "destructive";
+    readonly partial?: CapabilityPartial;
     plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
     readonly presentation?: CapabilityPresentation;
     readonly staging?: CapabilityStaging;
@@ -162,10 +168,27 @@ export interface AgentSession {
 }
 
 // @public
-export type ApprovalOutcome = "pending" | "approved" | "rejected" | "cancelled" | "not-required";
+export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | "cancelled" | "not-required";
 
 // @public
 export type ApprovalPolicy = "writes" | "destructive" | "never";
+
+// @public
+export type ApprovalResult = boolean | {
+    readonly approved: readonly number[];
+};
+
+// @public
+export type ApprovalSubject = {
+    readonly kind: "rows";
+    readonly proposals: readonly WriteProposal[];
+    readonly perItem: boolean;
+} | {
+    readonly kind: "operation";
+    readonly capability: string;
+    readonly title?: string;
+    readonly arguments: unknown;
+};
 
 // @public
 export interface AssistantSuggestion {
@@ -193,8 +216,12 @@ export interface CapabilityGuide {
 export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
+export type CapabilityPartial = "supported" | "unsupported";
+
+// @public
 export interface CapabilityPlan {
     readonly payload?: unknown;
+    readonly perItem?: boolean;
     readonly proposals: readonly WriteProposal[];
 }
 
@@ -296,6 +323,12 @@ export interface RowWindowRow {
 }
 
 // @public
+export type SharedApproval = ApprovalPolicy | {
+    readonly policy?: ApprovalPolicy;
+    readonly presentation?: ApprovalPresentation;
+};
+
+// @public
 export const TABLE_AGENT_STATE: FeatureStateKey<AgentSession>;
 
 // @public
@@ -303,7 +336,7 @@ export function tableAgent(options: TableAgentOptions): StaticTableFeature;
 
 // @public
 export interface TableAgentBridge {
-    readonly approvals?: (pending: boolean) => void;
+    readonly approvals?: (pending: AgentApprovalPending | null) => void;
     attach?(session: AgentSession): void;
     publish?(manifest: AgentManifest): void;
 }
@@ -320,13 +353,13 @@ export interface TableAgentColumnPatch {
 // @public
 export interface TableAgentOptions {
     readonly apply?: AgentApply;
-    readonly approval?: ApprovalPolicy;
+    readonly approval?: SharedApproval;
     readonly bridge?: TableAgentBridge;
     readonly capabilities?: readonly AgentCapabilityDefinition[];
     readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
     readonly commit?: CommitPolicy;
     readonly observe?: () => AgentObservation;
-    readonly onApprove?: (proposal: unknown, signal?: AbortSignal) => Promise<boolean>;
+    readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly readMax?: number;
     readonly tableId: string;
     readonly writePolicy?: WritePolicy;

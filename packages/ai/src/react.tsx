@@ -30,6 +30,8 @@ import {
 } from "react";
 
 import { type SharedApproval, sharedApproval } from "./approvalConfig";
+
+export type { SharedApproval };
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
 import {
   agentColumnsFromNeutral,

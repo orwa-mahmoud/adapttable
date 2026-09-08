@@ -428,9 +428,16 @@ function ApprovalList({
   children,
 }: Readonly<AgentApprovalListProps>) {
   return (
-    <div data-adapttable-part={part} aria-label={label} className={className}>
+    // A real list: its children are the proposed changes, one <li> each, and
+    // the element carries that everywhere rather than only where ARIA does.
+    <ul
+      data-adapttable-part={part}
+      aria-label={label}
+      className={className}
+      style={{ listStyle: "none", margin: 0, padding: 0 }}
+    >
       {children}
-    </div>
+    </ul>
   );
 }
 

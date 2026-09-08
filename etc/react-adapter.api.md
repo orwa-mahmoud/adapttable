@@ -9,6 +9,7 @@ import { AggregateFn } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core';
+import { ApprovalPresentation } from '@adapttable/core';
 import { AssemblyFns } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
 import { bindMobileCardList } from '@adapttable/core';
@@ -444,6 +445,9 @@ export interface AgentApprovalChromeProps extends AgentApprovalProps {
 }
 
 // @public
+export type AgentApprovalDecision = "pending" | "approved" | "rejected";
+
+// @public
 export interface AgentApprovalListProps {
     readonly children: ReactNode;
     readonly className?: string;
@@ -452,8 +456,19 @@ export interface AgentApprovalListProps {
 }
 
 // @public
+export interface AgentApprovalOperation {
+    readonly arguments: unknown;
+    readonly capability: string;
+    readonly title?: string;
+}
+
+// @public
 export interface AgentApprovalPending {
     readonly approve: () => void;
+    readonly decideAt?: (index: number, approved: boolean) => void;
+    readonly decisions: readonly AgentApprovalDecision[];
+    readonly operation?: AgentApprovalOperation;
+    readonly presentation: ApprovalPresentation;
     readonly proposals: readonly AgentApprovalProposal[];
     readonly reject: () => void;
 }
@@ -462,8 +477,11 @@ export interface AgentApprovalPending {
 export interface AgentApprovalProposal {
     readonly after?: unknown;
     readonly before?: unknown;
+    readonly beforeUnavailable?: boolean;
     readonly column?: string;
+    readonly columnLabel?: string;
     readonly rowKey: string;
+    readonly rowLabel?: string;
 }
 
 // @public
@@ -471,13 +489,12 @@ export interface AgentApprovalProps {
     readonly buttonClassName?: string;
     readonly className?: string;
     readonly labels?: TableLabels;
-    readonly onApprove: () => void;
-    readonly onReject: () => void;
-    readonly proposals?: readonly AgentApprovalProposal[];
+    readonly pending?: AgentApprovalPending | null;
 }
 
 // @public
 export interface AgentApprovalSlots {
+    readonly Action: (props: AgentApprovalButtonProps) => ReactNode;
     readonly Approve: (props: AgentApprovalButtonProps) => ReactNode;
     readonly List: (props: AgentApprovalListProps) => ReactNode;
     readonly Reject: (props: AgentApprovalButtonProps) => ReactNode;
@@ -493,6 +510,66 @@ export { applyCollapsedColumnGroups }
 
 // @public
 export function applyTableFeatures<P extends object>(props: P): P;
+
+// @public
+export const APPROVAL_PREVIEW_LIMIT = 3;
+
+// @public
+export interface ApprovalReview {
+    readonly approved: number;
+    readonly approveLabel: string;
+    readonly changes: number;
+    readonly items: readonly ApprovalReviewItem[];
+    readonly operation?: AgentApprovalOperation;
+    readonly pending: number;
+    readonly perItem: boolean;
+    readonly preview: readonly ApprovalReviewItem[];
+    readonly rejected: number;
+    readonly rejectLabel: string;
+    readonly reviewAllLabel: string | undefined;
+    readonly rows: number;
+    readonly started: boolean;
+    readonly summary: string;
+    readonly tally: string | undefined;
+    readonly truncated: boolean;
+}
+
+// @public
+export function approvalReview(pending: AgentApprovalPending | null | undefined, labels: TableLabels | undefined): ApprovalReview | null;
+
+// @public
+export function ApprovalReviewChrome(input: Readonly<ApprovalReviewChromeProps>): ReactElement;
+
+// @public
+export interface ApprovalReviewChromeProps {
+    readonly buttonClassName?: string;
+    readonly className?: string;
+    readonly expanded?: boolean;
+    readonly labels?: TableLabels;
+    readonly onApprove: () => void;
+    readonly onBack?: () => void;
+    readonly onDecide?: (index: number, approved: boolean) => void;
+    readonly onExpand?: () => void;
+    readonly onReject: () => void;
+    readonly review: ApprovalReview;
+    readonly slots: ApprovalReviewSlots;
+}
+
+// @public
+export interface ApprovalReviewItem {
+    readonly decision: AgentApprovalDecision;
+    readonly id: string;
+    readonly index: number;
+    readonly proposal: AgentApprovalProposal;
+}
+
+// @public
+export interface ApprovalReviewSlots {
+    readonly Action: (props: AgentApprovalButtonProps) => ReactNode;
+    readonly Approve: (props: AgentApprovalButtonProps) => ReactNode;
+    readonly List: (props: AgentApprovalListProps) => ReactNode;
+    readonly Reject: (props: AgentApprovalButtonProps) => ReactNode;
+}
 
 export { AssemblyFns }
 
@@ -4519,11 +4596,16 @@ export type TableAssistantPresentation = "panel" | "sheet" | "floating";
 
 // @public
 export interface TableAssistantProps {
+    readonly approval?: AgentApprovalPending | null;
     readonly assistant: TableAssistantView;
     readonly boundary?: TableAssistantBoundary;
     readonly className?: string;
     readonly labels?: TableLabels;
     readonly launcher?: boolean;
+    readonly messageAction?: (message: TableAssistantMessageView) => {
+        readonly label: string;
+        readonly onRun: () => void;
+    } | undefined;
     readonly note?: string;
     readonly onOpenChange: (open: boolean) => void;
     readonly onSettings?: () => void;

@@ -281,15 +281,17 @@ function approvalSlots(slots: TableAssistantSlots): ApprovalReviewSlots {
     Approve: (props) => <Button {...props} variant="primary" />,
     Reject: (props) => <Button {...props} variant="secondary" />,
     Action: (props) => <Button {...props} variant="subtle" />,
+    // A real <ul>, not a div wearing role="list": the element carries the
+    // semantics everywhere, including where ARIA support is patchy.
     List: ({ part, label, className, children }) => (
-      <div
+      <ul
         data-adapttable-part={part}
         className={className}
         aria-label={label}
-        role="list"
+        style={{ listStyle: "none", margin: 0, padding: 0 }}
       >
         {children}
-      </div>
+      </ul>
     ),
   };
 }

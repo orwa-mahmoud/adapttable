@@ -116,7 +116,7 @@ export { ActionConfirm }
 
 export { ActiveFilterChip }
 
-// @public
+// @public (undocumented)
 export function AgentApproval(props: Readonly<AgentApprovalProps>): JSX.Element;
 
 // @public

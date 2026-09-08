@@ -126,7 +126,7 @@ export interface ActiveFilterChipsProps {
     onClearAll?: () => void;
 }
 
-// @public
+// @public (undocumented)
 export function AgentApproval(props: Readonly<AgentApprovalProps>): JSX.Element;
 
 // @public

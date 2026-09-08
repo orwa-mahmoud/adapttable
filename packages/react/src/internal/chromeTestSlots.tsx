@@ -325,9 +325,14 @@ function ApprovalList({
   children,
 }: AgentApprovalListProps) {
   return (
-    <div data-adapttable-part={part} aria-label={label} className={className}>
+    <ul
+      data-adapttable-part={part}
+      aria-label={label}
+      className={className}
+      style={{ listStyle: "none", margin: 0, padding: 0 }}
+    >
       {children}
-    </div>
+    </ul>
   );
 }
 

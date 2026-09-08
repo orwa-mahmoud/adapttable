@@ -98,12 +98,14 @@ test("RTL lab still exposes labeled approve and reject", async ({ page }) => {
   await expect(
     page.locator('[data-adapttable-part="agent-approval"]')
   ).toBeVisible();
+  // The summary controls say what they will do: "all" before any single
+  // change has been decided, "remaining" after one has.
   await expect(
     page.locator('[data-adapttable-part="agent-approval-approve"]')
-  ).toHaveAccessibleName("Approve");
+  ).toHaveAccessibleName("Approve all");
   await expect(
     page.locator('[data-adapttable-part="agent-approval-reject"]')
-  ).toHaveAccessibleName("Reject");
+  ).toHaveAccessibleName("Reject all");
 });
 
 test.describe("mobile lab", () => {

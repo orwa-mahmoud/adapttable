@@ -17,6 +17,30 @@
  */
 import { useEffect, useRef } from "react";
 
+/**
+ * Whether an element is on screen, without needing layout.
+ *
+ * Deliberately not `getClientRects()`: that answers "no" for everything in a
+ * test environment with no layout engine, which would make every inner
+ * control stop owning the key there. This asks a question the DOM can always
+ * answer, and asks it once rather than once per ancestor — a key handler is
+ * not the place for a walk to the root.
+ */
+function showing(element: Element): boolean {
+  if (!element.isConnected) return false;
+  // Ancestors count: a kit hides its editor by hiding the surface AROUND it,
+  // so asking the element alone answers "visible" for something nobody can
+  // see. The walk runs only on Escape, and only when a control claimed the
+  // key in the first place.
+  let node: Element | null = element;
+  while (node) {
+    const style = getComputedStyle(node);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+    node = node.parentElement;
+  }
+  return true;
+}
+
 /** Tuning for {@link useEscapeClose}. @public */
 export interface EscapeCloseOptions {
   /**
@@ -55,12 +79,14 @@ export function useEscapeClose(
       if (event.key !== "Escape") return;
       const owner = ignoreRef.current;
       const target = event.target;
-      if (
-        owner &&
-        target instanceof Element &&
-        target.closest(owner) !== null
-      ) {
-        return;
+      if (owner && target instanceof Element) {
+        const inner = target.closest(owner);
+        // A control only owns Escape while it is actually showing. A kit that
+        // keeps its editor mounted after closing it would otherwise go on
+        // swallowing the key — with focus still inside the hidden thing, the
+        // NEXT Escape is eaten by a control the reader already dismissed, and
+        // the overlay around it never closes.
+        if (inner && showing(inner)) return;
       }
       closeRef.current();
     };

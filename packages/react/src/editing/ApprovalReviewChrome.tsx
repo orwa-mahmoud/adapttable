@@ -256,19 +256,20 @@ function ReviewRow({
     ? { className: buttonClassName }
     : {};
   return (
-    // A group named for the change, so "Approve" is announced with the row
-    // it belongs to. Putting the whole sentence on the button instead names
-    // it correctly and then prints that sentence on the control.
-    <div
+    // A list item named for the change, so "Approve" is announced with the
+    // row it belongs to. Putting the whole sentence on the button instead
+    // names it correctly and then prints that sentence on the control — and
+    // a real element carries the semantics where role= support is patchy.
+    <li
       data-adapttable-part="agent-approval-row"
       data-decision={item.decision}
-      role="group"
       aria-label={text}
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: "0.5em",
+        listStyle: "none",
         // A decision has to be visible on the row it was taken on, or the
         // reader has only a tally to go by.
         opacity: item.decision === "pending" ? 1 : 0.55,
@@ -295,6 +296,6 @@ function ReviewRow({
           />
         </span>
       ) : null}
-    </div>
+    </li>
   );
 }

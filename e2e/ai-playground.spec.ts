@@ -26,11 +26,20 @@ async function mountedTable(page: Page) {
  * The demo's own table controls, now a button above the table rather than a
  * disclosure below it.
  */
+/** The demo's settings, which open in a drawer over the page. */
 async function openDemoOptions(page: Page): Promise<void> {
-  const trigger = page.getByTestId("ai-demo-options");
-  if ((await trigger.getAttribute("aria-expanded")) === "true") return;
-  await trigger.click();
-  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  const drawer = page.getByTestId("ai-demo-options-drawer");
+  if (await drawer.isVisible()) return;
+  await page.getByTestId("ai-demo-options").click();
+  await expect(drawer).toBeVisible();
+}
+
+/** Close the drawer, so the table underneath is reachable again. */
+async function closeDemoOptions(page: Page): Promise<void> {
+  const drawer = page.getByTestId("ai-demo-options-drawer");
+  if (!(await drawer.isVisible())) return;
+  await page.keyboard.press("Escape");
+  await expect(drawer).toBeHidden();
 }
 
 /**
@@ -70,9 +79,16 @@ async function receipts(page: Page): Promise<string[]> {
   return page.locator(part("assistant-receipt-summary")).allInnerTexts();
 }
 
+/**
+ * What the inspector says this table currently wires.
+ *
+ * It sits open in the documentation column now rather than behind a
+ * disclosure, and lists capabilities in a select rather than a row of pills.
+ */
 async function catalogText(page: Page): Promise<string> {
-  await page.locator(".ai-demo__dev summary").click();
-  return (await page.getByTestId("ai-catalog").innerText()).trim();
+  const select = page.getByTestId("ai-catalog");
+  await expect(select).toBeVisible();
+  return (await select.innerText()).trim();
 }
 
 const MOCK_BACKEND = "http://127.0.0.1:8787";
@@ -230,7 +246,10 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
 
     const approve = page.locator(part("agent-approval-approve"));
     await expect(approve).toBeVisible();
-    await expect(page.locator(part("agent-approval"))).toContainText("185");
+    // Reviewed where it was asked for: inside the conversation, not in a
+    // strip above the table.
+    await expect(page.locator(part("assistant-approval"))).toContainText("185");
+    await expect(page.locator(part("agent-approval"))).toHaveCount(0);
     await approve.click();
 
     // The staging callback IS a host callback, so the session calls it
@@ -259,6 +278,7 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
   test("pins a column and a row through the assistant", async ({ page }) => {
     await openDemoOptions(page);
     await page.getByTestId("ai-toggle-grouping").click();
+    await closeDemoOptions(page);
     await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
 
     await ask(page, "Pin Priya Nair to the top.");
@@ -345,12 +365,13 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
 
   test("reads right-to-left", async ({ page }) => {
     await openDemoOptions(page);
-    await page
-      .locator(".ai-demo__toggles")
-      .getByRole("button", { name: "RTL" })
-      .click();
+    await page.getByTestId("ai-toggle-rtl").check();
+    await closeDemoOptions(page);
 
-    await expect(page.locator(".ai-demo")).toHaveAttribute("dir", "rtl");
+    // The direction belongs to the table and its overlays. The documentation
+    // around it, the integration code and the inspector stay as they are.
+    await expect(page.locator(".ai-demo__stage")).toHaveAttribute("dir", "rtl");
+    await expect(page.locator(".ai-demo")).not.toHaveAttribute("dir", "rtl");
     await openAssistant(page);
     await ask(page, "Show only the Core team.");
     await expect

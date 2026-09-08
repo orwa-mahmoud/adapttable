@@ -5,6 +5,17 @@
 ```ts
 
 // @public
+export interface ActionAiOptions {
+    readonly approval?: {
+        readonly policy?: ActionApprovalPolicy;
+        readonly presentation?: ApprovalPresentation;
+    };
+}
+
+// @public
+export type ActionApprovalPolicy = "required" | "automatic";
+
+// @public
 export interface ActionConfirm<TArg> {
     confirmLabel: string;
     danger?: boolean;
@@ -86,6 +97,9 @@ export function applyRowPatchLogToView<TRow>(view: IncrementalView<TRow>, log: R
 
 // @public
 export function applyTableUrlState(search: string, savedSearch: string, namespace: string): string;
+
+// @public
+export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
 export interface AssemblyFns<TRow = unknown> {
@@ -264,6 +278,7 @@ export const builtInFilterSpecs: readonly FilterTypeSpec[];
 
 // @public
 export interface BulkAction {
+    ai?: ActionAiOptions;
     color?: string;
     confirm?: ActionConfirm<number>;
     disabledReason?: (ids: string[]) => string | undefined;
@@ -3261,6 +3276,7 @@ export const ROW_ID_ATTRIBUTE = "data-row-id";
 
 // @public
 export interface RowAction<TRow> {
+    ai?: ActionAiOptions;
     color?: string;
     confirm?: ActionConfirm<TRow>;
     disabledReason?: (row: TRow) => string | undefined;
@@ -3785,7 +3801,10 @@ export interface TableLabels {
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
     applyView?: string;
+    approvalWaitingElsewhere?: string;
+    approveAllProposals?: string;
     approveProposal?: string;
+    approveRemainingProposals?: string;
     assistantBackToTable?: string;
     assistantClose?: string;
     assistantConnection?: (status: string) => string;
@@ -3819,6 +3838,7 @@ export interface TableLabels {
     assistantYou?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;
+    backToConversation?: string;
     boolAny?: string;
     boolFalse?: string;
     boolTrue?: string;
@@ -4014,9 +4034,21 @@ export interface TableLabels {
         before?: string;
         after?: string;
     }) => string;
+    proposalSummary?: (counts: {
+        changes: number;
+        rows: number;
+    }) => string;
+    proposalTally?: (counts: {
+        pending: number;
+        approved: number;
+        rejected: number;
+    }) => string;
+    proposalValueUnavailable?: string;
     readOnlyViewBadge?: string;
     redoEdit?: string;
+    rejectAllProposals?: string;
     rejectProposal?: string;
+    rejectRemainingProposals?: string;
     relLastN?: string;
     relNextN?: string;
     relPreviousMonth?: string;
@@ -4034,6 +4066,7 @@ export interface TableLabels {
     resetColumns?: string;
     resizeColumn?: string;
     retry?: string;
+    reviewAllProposals?: (count: number) => string;
     rootLevel?: string;
     rowActionsMenu?: string;
     rowLifted?: (position: number) => string;

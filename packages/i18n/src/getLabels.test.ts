@@ -541,3 +541,44 @@ it("every locale translates a receipt status on its own", () => {
     expect(labels.assistantReceiptStatus("brand-new")).toBeTypeOf("string");
   }
 });
+
+/**
+ * A count-shaped label has more than one shape, and only one of them is
+ * exercised by a probe that passes a single number. These walk the others,
+ * in every locale, so a translation that handles four changes but not one is
+ * caught here rather than on a reader's screen.
+ */
+it("every locale words a single change, and a single row, on its own", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const one = labels.proposalSummary({ changes: 1, rows: 1 });
+    const many = labels.proposalSummary({ changes: 4, rows: 3 });
+    const oneRow = labels.proposalSummary({ changes: 3, rows: 1 });
+
+    expect(one, `${tag}.proposalSummary(1, 1)`).toBeTruthy();
+    expect(many, `${tag}.proposalSummary(4, 3)`).toContain("4");
+    expect(many, `${tag}.proposalSummary(4, 3)`).toContain("3");
+    // One row is not "across 1 rows" in any language: the clause is dropped.
+    expect(oneRow, `${tag}.proposalSummary(3, 1)`).not.toBe(many);
+    expect(oneRow, `${tag}.proposalSummary(3, 1)`).toContain("3");
+  }
+});
+
+it("every locale reports a tally with nothing decided yet", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const fresh = labels.proposalTally({
+      pending: 3,
+      approved: 0,
+      rejected: 0,
+    });
+    expect(fresh, `${tag}.proposalTally`).toContain("3");
+    expect(fresh, `${tag}.proposalTally`).toContain("0");
+  }
+});
+
+it("every locale words a single-change review link", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    expect(labels.reviewAllProposals(1), `${tag}.reviewAllProposals`).toContain(
+      "1"
+    );
+  }
+});
