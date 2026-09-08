@@ -11,9 +11,12 @@ import { describe, expect, it } from "vitest";
 import {
   FiltersIcon,
   iconForRowAction,
+  iconForRowEditPart,
   PinBottomIcon,
   SearchIcon,
 } from "./icons";
+
+const ROW_EDIT_PARTS = ["row-edit-begin", "row-edit-save", "row-edit-cancel"];
 
 const BUILT_IN = [
   DUPLICATE_ROW_ACTION_KEY,
@@ -36,6 +39,19 @@ describe("icons", () => {
     for (const key of BUILT_IN) {
       const { container } = render(<>{iconForRowAction({ key })}</>);
       expect(container.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("keeps a host glyph, takes text on `false`, and otherwise draws its own", () => {
+    const host = <span data-testid="host" />;
+
+    expect(iconForRowEditPart("row-edit-save", host)).toBe(host);
+    expect(iconForRowEditPart("row-edit-save", false)).toBeUndefined();
+    expect(iconForRowEditPart("not-a-row-edit-part")).toBeUndefined();
+    for (const part of ROW_EDIT_PARTS) {
+      const { container } = render(<>{iconForRowEditPart(part)}</>);
+
+      expect(container.querySelector("svg"), part).not.toBeNull();
     }
   });
 

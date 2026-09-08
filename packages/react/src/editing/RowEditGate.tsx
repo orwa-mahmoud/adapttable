@@ -10,6 +10,7 @@
  */
 import {
   type CellEditor,
+  type DisplayValue,
   type EditableColumnLike,
   isCustomEditor,
   normalizeEditorOptions,
@@ -210,6 +211,26 @@ export function rowEditControls<TRow>({
 }
 
 /**
+ * Glyphs for the row-mode controls.
+ *
+ * Each kit draws its own pencil, check and cross, with `labels.editRow`,
+ * `labels.saveRow` and `labels.cancel` as both the accessible name and the
+ * hover title — an actions column is a narrow place, and three words per
+ * control crowd out the row. Pass a node to use your own glyph instead, or
+ * `false` to show the label as text.
+ *
+ * @public
+ */
+export interface RowEditIcons {
+  /** The control that opens the row. */
+  readonly begin?: DisplayValue | false;
+  /** The control that hands the host the patch. */
+  readonly save?: DisplayValue | false;
+  /** The control that throws the drafts away. */
+  readonly cancel?: DisplayValue | false;
+}
+
+/**
  * Props for an adapter `RowEditActions` — no slots on the public API.
  *
  * @public
@@ -221,6 +242,8 @@ export interface RowEditActionsProps<
   className?: string;
   /** Class for each button. */
   buttonClassName?: string;
+  /** Glyph overrides — see {@link RowEditIcons}. */
+  icons?: RowEditIcons;
   /**
    * Whether to draw the control that opens the row. `false` when a host row
    * action carries `editsRow` and owns that trigger — see
@@ -236,10 +259,16 @@ export interface RowEditActionsProps<
  * @public
  */
 export interface RowEditButtonProps {
-  /** Accessible name for the control. */
+  /** Accessible name for the control, and its hover title. */
   readonly label: string;
   /** Part name, so styling can target this element. */
   readonly part: string;
+  /**
+   * What to draw inside the button. A node is the glyph to use; `false` asks
+   * for the label as text; `undefined` leaves the choice to the kit, which
+   * draws its own glyph for this part.
+   */
+  readonly icon?: DisplayValue | false;
   /** Class for the element. */
   readonly className?: string;
   /** Called when pressed. */
@@ -286,6 +315,7 @@ export function RowEditActionsChrome<TRow>({
   className,
   buttonClassName,
   showBegin,
+  icons,
   slots,
   ...options
 }: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement | null {
@@ -299,6 +329,7 @@ export function RowEditActionsChrome<TRow>({
       <Button
         label={controls.editLabel}
         part="row-edit-begin"
+        icon={icons?.begin}
         className={buttonClassName}
         onClick={(event) => {
           event.stopPropagation();
@@ -316,6 +347,7 @@ export function RowEditActionsChrome<TRow>({
       <Button
         label={controls.saveLabel}
         part="row-edit-save"
+        icon={icons?.save}
         className={buttonClassName}
         onClick={(event) => {
           event.stopPropagation();
@@ -325,6 +357,7 @@ export function RowEditActionsChrome<TRow>({
       <Button
         label={controls.cancelLabel}
         part="row-edit-cancel"
+        icon={icons?.cancel}
         className={buttonClassName}
         onClick={(event) => {
           event.stopPropagation();

@@ -5,11 +5,18 @@
  * seam: which cell renders an editor, which field takes focus, and the three
  * controls that end the edit.
  */
-import type {
-  CustomCellEditorCtrl,
-  EditableColumnLike,
+import {
+  type CustomCellEditorCtrl,
+  defaultLabels,
+  type EditableColumnLike,
 } from "@adapttable/core";
-import { fireEvent, render, renderHook, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+} from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -320,6 +327,36 @@ describe("RowEditActions", () => {
     );
     expect(part("row-edit-begin")).not.toBeNull();
     expect(part("row-edit-save")).toBeNull();
+  });
+
+  it("hands the kit the host's own glyph, or a request for text", () => {
+    const result = mountRowEditing();
+    render(
+      <RowEditActionsChrome
+        slots={rowEditTestSlots}
+        rowEditing={result.current}
+        row={TASK}
+        rowId="1"
+        icons={{ begin: <span data-testid="host-glyph" /> }}
+      />
+    );
+    expect(
+      part("row-edit-begin")?.querySelector("[data-testid]")
+    ).not.toBeNull();
+
+    cleanup();
+    render(
+      <RowEditActionsChrome
+        slots={rowEditTestSlots}
+        rowEditing={result.current}
+        row={TASK}
+        rowId="1"
+        icons={{ begin: false }}
+      />
+    );
+    const asText = part("row-edit-begin");
+    expect(asText?.hasAttribute("data-icon")).toBe(false);
+    expect(asText?.textContent).toBe(defaultLabels.editRow);
   });
 
   it("draws nothing when a host action owns the trigger", () => {

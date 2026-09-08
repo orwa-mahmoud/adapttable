@@ -1035,6 +1035,7 @@ export function buildColumns<TRow>({
                 row={row}
                 rowId={rowId}
                 showBegin={rowEdit.showBegin}
+                icons={editing?.rowEditIcons}
                 labels={labels}
               />
             )}

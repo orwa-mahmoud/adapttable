@@ -21475,6 +21475,14 @@
       "behavior": ""
     },
     {
+      "export": "RowEditIcons",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "rowEditingSignature",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -23403,6 +23411,14 @@
       "behavior": ""
     },
     {
+      "export": "RowEditIcons",
+      "currentImport": "@adapttable/react/features",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/features",
+      "behavior": ""
+    },
+    {
       "export": "rowEditing",
       "currentImport": "@adapttable/react/features",
       "kind": "value",
@@ -25044,6 +25060,14 @@
     },
     {
       "export": "RowEditDrafts",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditIcons",
       "currentImport": "@adapttable/react",
       "kind": "type",
       "class": "neutral-model",

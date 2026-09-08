@@ -64,7 +64,7 @@ import {
 } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
 
-import { FiltersIcon } from "../icons";
+import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 import { Checkbox, NativeSelect } from "./primitives";
 
@@ -347,9 +347,27 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
+  if (glyph) {
+    return (
+      <IconButton
+        type="button"
+        size="1"
+        variant="ghost"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        title={label}
+        onClick={onClick}
+      >
+        {glyph}
+      </IconButton>
+    );
+  }
   return (
     <Button
       type="button"

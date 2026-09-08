@@ -57,7 +57,7 @@ import { type ChangeEvent, useEffect, useRef } from "react";
 
 import type { DataTableClassNames } from "../types";
 import { AutoFilterForm } from "./AutoFilterForm";
-import { FiltersIcon } from "./icons";
+import { FiltersIcon, iconForRowEditPart } from "./icons";
 
 export type {
   AgentApprovalProps,
@@ -405,18 +405,21 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
   return (
     <button
       type="button"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={glyph ? label : undefined}
       onClick={onClick}
     >
-      {label}
+      {glyph ?? label}
     </button>
   );
 }

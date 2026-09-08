@@ -10,7 +10,11 @@ import {
   FeatureSlot,
   slotRender,
 } from "../features/providers";
-import { COMMAND_PALETTE_LIVE, SIDE_PANEL } from "../features/slotKeys";
+import {
+  COMMAND_PALETTE_LIVE,
+  ROW_EDIT_ACTIONS,
+  SIDE_PANEL,
+} from "../features/slotKeys";
 import {
   applyTableFeatures,
   type TableFeature,
@@ -88,6 +92,28 @@ describe("adapter feature assembly", () => {
     ]);
     expectKitRenders(features.undoRedoButtons(), ["toolbar-extras"]);
     expectTypeOf(editing).toEqualTypeOf<TableFeature<{ id: string }>>();
+  });
+
+  it("draws one set of row controls when both editing modes are composed", () => {
+    const features = createAdapterEditingFeatures({
+      EditableCell: KitComponent,
+      RowEditActions: () => <span data-testid="row-edit">controls</span>,
+      BatchEditBar: KitComponent,
+      UndoRedoButtons: KitComponent,
+    });
+    render(
+      featureTree(
+        [
+          features.editing<{ id: string }>(() => undefined),
+          features.rowEditing<{ id: string }>(() => undefined),
+        ],
+        <FeatureSlot slot={ROW_EDIT_ACTIONS} props={{} as never} />
+      )
+    );
+    // A table that edits cells AND rows composes both features, and both
+    // carry the same kit chrome. Two save/cancel pairs on the open row is
+    // what that looked like before the slot took one renderer.
+    expect(screen.getAllByTestId("row-edit")).toHaveLength(1);
   });
 
   it("supports the one established history-with-controls kit contract", () => {

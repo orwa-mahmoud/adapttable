@@ -10,13 +10,17 @@ import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 
 import {
+  CancelRowIcon,
   DeleteRowIcon,
   DuplicateRowIcon,
+  EditRowIcon,
   FiltersIcon,
   iconForRowAction,
+  iconForRowEditPart,
   MoreVerticalIcon,
   PinBottomIcon,
   PinTopIcon,
+  SaveRowIcon,
   UnpinRowIcon,
 } from "./icons";
 
@@ -28,6 +32,8 @@ const BUILT_IN = [
   UNPIN_ROW_ACTION_KEY,
 ];
 
+const ROW_EDIT_PARTS = ["row-edit-begin", "row-edit-save", "row-edit-cancel"];
+
 const GLYPHS: readonly [string, (p: { size?: number }) => ReactNode][] = [
   ["FiltersIcon", FiltersIcon],
   ["DuplicateRowIcon", DuplicateRowIcon],
@@ -36,6 +42,9 @@ const GLYPHS: readonly [string, (p: { size?: number }) => ReactNode][] = [
   ["PinBottomIcon", PinBottomIcon],
   ["UnpinRowIcon", UnpinRowIcon],
   ["MoreVerticalIcon", MoreVerticalIcon],
+  ["EditRowIcon", EditRowIcon],
+  ["SaveRowIcon", SaveRowIcon],
+  ["CancelRowIcon", CancelRowIcon],
 ];
 
 describe("icons", () => {
@@ -51,6 +60,19 @@ describe("icons", () => {
     for (const key of BUILT_IN) {
       const { container } = render(<>{iconForRowAction({ key })}</>);
       expect(container.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("keeps a host glyph, takes text on `false`, and otherwise draws its own", () => {
+    const host = <span data-testid="host" />;
+
+    expect(iconForRowEditPart("row-edit-save", host)).toBe(host);
+    expect(iconForRowEditPart("row-edit-save", false)).toBeUndefined();
+    expect(iconForRowEditPart("not-a-row-edit-part")).toBeUndefined();
+    for (const part of ROW_EDIT_PARTS) {
+      const { container } = render(<>{iconForRowEditPart(part)}</>);
+
+      expect(container.querySelector("svg"), part).not.toBeNull();
     }
   });
 

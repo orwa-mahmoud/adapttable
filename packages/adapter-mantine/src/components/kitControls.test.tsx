@@ -475,6 +475,12 @@ describe("kit affordances (mantine)", () => {
           rowId="edit"
           buttonClassName="btn-cls"
         />
+        <RowEditActions
+          rowEditing={rowEditing}
+          row={{ name: "a" }}
+          rowId="idle"
+          icons={{ begin: false }}
+        />
         <BatchEditBar
           batch={batch}
           labels={defaultLabels}
@@ -503,7 +509,7 @@ describe("kit affordances (mantine)", () => {
     fireEvent.click(screen.getAllByLabelText("Reorder row")[0]!);
     fireEvent.click(screen.getAllByLabelText("Move row up")[0]!);
     fireEvent.click(screen.getAllByLabelText("Move row down")[0]!);
-    fireEvent.click(screen.getByLabelText("Edit row"));
+    fireEvent.click(screen.getAllByLabelText("Edit row")[0]!);
     fireEvent.click(screen.getByLabelText("Save row"));
     fireEvent.click(screen.getByLabelText("Cancel"));
     fireEvent.click(screen.getByText("Save all"));

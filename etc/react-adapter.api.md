@@ -80,6 +80,7 @@ import { DEFAULT_CARD_SIZE_PX } from '@adapttable/core';
 import { DependencyList } from 'react';
 import { deriveSortByOptions } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { DragEventHandler } from 'react';
 import { EditableColumnLike } from '@adapttable/core';
@@ -1956,6 +1957,7 @@ export interface EditableCellEditing<TRow> {
     featureHost?: FeatureHostState;
     lifecycle?: EditLifecycle<TRow>;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    rowEditIcons?: RowEditIcons;
     rowEditing?: RowEditingState<TRow>;
     saving?: CellSaveState<TRow>;
     state: CellEditingState;
@@ -2404,6 +2406,7 @@ export interface FeatureProps<TRow> {
     resizableColumns?: boolean;
     rowActions?: RowAction<TRow>[];
     rowClassName?: (row: TRow, index: number) => string | undefined;
+    rowEditIcons?: RowEditIcons;
     rowEditing?: boolean;
     rowHeight?: RowHeight<TRow>;
     rowStyle?: RowStyle<TRow>;
@@ -3667,6 +3670,7 @@ export interface RowEditActionsChromeProps<TRow> extends RowEditActionsProps<TRo
 export interface RowEditActionsProps<TRow> extends RowEditControlsOptions<TRow> {
     buttonClassName?: string;
     className?: string;
+    icons?: RowEditIcons;
     showBegin?: boolean;
 }
 
@@ -3678,6 +3682,7 @@ export interface RowEditActionsSlots {
 // @public
 export interface RowEditButtonProps {
     readonly className?: string;
+    readonly icon?: DisplayValue | false;
     readonly label: string;
     readonly onClick: (event: {
         stopPropagation: () => void;
@@ -3723,6 +3728,13 @@ export interface RowEditControlsOptions<TRow> {
 
 // @public
 export type RowEditDrafts = Readonly<Record<string, string>>;
+
+// @public
+export interface RowEditIcons {
+    readonly begin?: DisplayValue | false;
+    readonly cancel?: DisplayValue | false;
+    readonly save?: DisplayValue | false;
+}
 
 // @public (undocumented)
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;

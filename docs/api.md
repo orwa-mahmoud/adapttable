@@ -665,7 +665,10 @@ together and hands the host one patch of what changed. `RowEditCell` (`RowEditCe
 `@adapttable/core/adapter`. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome` /
 `RowEditActionsChromeProps` / `RowEditActionsSlots` / `RowEditButtonProps`;
-`labels.editRow` and `labels.saveRow` name them. A row action marked `editsRow`
+`labels.editRow` and `labels.saveRow` name them, as accessible names over each
+kit's own pencil, check and cross; `rowEditIcons` (`RowEditIcons`) replaces a
+glyph with your own node, or `false` to show the label as text. A row action
+marked `editsRow`
 becomes that trigger instead: `resolveRowEditTrigger(actions, rowEditing, row, rowId)`
 (`RowEditTrigger` out) wires it to the row's form and reports whether the
 built-in control still draws itself.

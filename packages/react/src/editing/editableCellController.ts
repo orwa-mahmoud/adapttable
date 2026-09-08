@@ -20,6 +20,7 @@ import type { BatchEditingState } from "./batchEditing";
 import type { DirtyCellState } from "./dirtyCells";
 import type { EditConflict, EditConflictState } from "./editConflict";
 import { type EditLifecycle, observeEdit } from "./editingEvents";
+import type { RowEditIcons } from "./RowEditGate";
 import type { RowEditingState } from "./rowEditing";
 import type {
   CellSaveState,
@@ -67,6 +68,8 @@ export interface EditableCellEditing<TRow> {
    * row editors instead of the per-cell activate control.
    */
   rowEditing?: RowEditingState<TRow>;
+  /** Glyph overrides for the row-mode controls, when the host set any. */
+  rowEditIcons?: RowEditIcons;
   /**
    * Batch state, when the host armed it. Every editable cell renders a field
    * and nothing reaches the host until the reader saves them all.

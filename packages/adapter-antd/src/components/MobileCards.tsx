@@ -302,6 +302,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
                 row={row}
                 rowId={id}
                 showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
                 labels={labels}
               />
             )}

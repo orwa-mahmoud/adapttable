@@ -65,10 +65,11 @@ import {
   Stack,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { useRef, useState } from "react";
 
-import { FiltersIcon } from "../icons";
+import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 
 export type {
@@ -352,21 +353,41 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
+  if (!glyph) {
+    return (
+      <Button
+        type="button"
+        size="xs"
+        variant="default"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        onClick={onClick}
+      >
+        {label}
+      </Button>
+    );
+  }
   return (
-    <Button
-      type="button"
-      size="xs"
-      variant="default"
-      data-adapttable-part={part}
-      className={className}
-      aria-label={label}
-      onClick={onClick}
-    >
-      {label}
-    </Button>
+    <Tooltip label={label} withArrow openDelay={200}>
+      <ActionIcon
+        type="button"
+        size="sm"
+        variant="subtle"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        title={label}
+        onClick={onClick}
+      >
+        {glyph}
+      </ActionIcon>
+    </Tooltip>
   );
 }
 

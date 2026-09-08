@@ -64,7 +64,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 
-import { FiltersIcon } from "../icons";
+import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 import { KitPortal } from "./kitPortal";
 import { Checkbox, NativeSelect } from "./primitives";
@@ -360,21 +360,39 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
+  if (!glyph) {
+    return (
+      <Button
+        type="button"
+        size="xs"
+        variant="outline"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        onClick={onClick}
+      >
+        {label}
+      </Button>
+    );
+  }
   return (
-    <Button
+    <IconButton
       type="button"
       size="xs"
-      variant="outline"
+      variant="ghost"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={label}
       onClick={onClick}
     >
-      {label}
-    </Button>
+      {glyph}
+    </IconButton>
   );
 }
 

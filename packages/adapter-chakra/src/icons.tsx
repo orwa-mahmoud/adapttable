@@ -109,6 +109,34 @@ export function MoreVerticalIcon({ size = 16 }: Readonly<IconProps>) {
   );
 }
 
+/** Pencil — the control that opens a row for editing. */
+export function EditRowIcon({ size = 16 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z" />
+      <path d="M13.5 6.5l4 4" />
+    </Svg>
+  );
+}
+
+/** Check mark — the row-mode save control. */
+export function SaveRowIcon({ size = 16 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </Svg>
+  );
+}
+
+/** Cross — the row-mode cancel control. */
+export function CancelRowIcon({ size = 16 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </Svg>
+  );
+}
+
 /**
  * Host `icon` wins. Built-in duplicate / delete / pin keys get this kit's
  * glyph so core can stay a key + label.
@@ -126,4 +154,22 @@ export function iconForRowAction(
       [UNPIN_ROW_ACTION_KEY]: <UnpinRowIcon />,
     }[action.key]
   );
+}
+
+/**
+ * The glyph this kit draws for a row-mode control.
+ *
+ * `icon` is the host's answer and wins: a node replaces the glyph, `false`
+ * asks for the label as text. Only when the host said nothing does the kit
+ * choose, by part.
+ */
+export function iconForRowEditPart(part: string, icon?: unknown): ReactNode {
+  return icon === false
+    ? undefined
+    : ((icon as ReactNode | undefined) ??
+        {
+          "row-edit-begin": <EditRowIcon />,
+          "row-edit-save": <SaveRowIcon />,
+          "row-edit-cancel": <CancelRowIcon />,
+        }[part]);
 }

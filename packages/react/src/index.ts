@@ -409,6 +409,7 @@ export {
   type MultiSelectEditorChromeProps,
   type MultiSelectEditorSlots,
 } from "./editing/MultiSelectEditorChrome";
+export type { RowEditIcons } from "./editing/RowEditGate";
 export {
   type RowEditDrafts,
   type RowEditingState,

@@ -71,7 +71,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { FiltersIcon } from "../icons";
+import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 
 export type {
@@ -435,19 +435,22 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
   return (
     <Button
-      type="default"
+      type="text"
       size="small"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={glyph ? label : undefined}
       onClick={onClick}
     >
-      {label}
+      {glyph ?? label}
     </Button>
   );
 }

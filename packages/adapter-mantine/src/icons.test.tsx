@@ -11,25 +11,31 @@ import { describe, expect, it } from "vitest";
 
 import {
   AlertIcon,
+  CancelRowIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   ChevronUpIcon,
   CloseIcon,
   DeleteRowIcon,
   DuplicateRowIcon,
+  EditRowIcon,
   FiltersIcon,
   iconForRowAction,
+  iconForRowEditPart,
   InboxIcon,
   MoreVerticalIcon,
   PinBottomIcon,
   PinTopIcon,
   RefreshIcon,
+  SaveRowIcon,
   SearchIcon,
   SelectorIcon,
   UnpinRowIcon,
 } from "./icons";
 
 /** Every glyph this adapter exports, so none is added without a check. */
+const ROW_EDIT_PARTS = ["row-edit-begin", "row-edit-save", "row-edit-cancel"];
+
 const GLYPHS: readonly [
   string,
   (p: {
@@ -54,6 +60,9 @@ const GLYPHS: readonly [
   ["PinBottomIcon", PinBottomIcon],
   ["UnpinRowIcon", UnpinRowIcon],
   ["MoreVerticalIcon", MoreVerticalIcon],
+  ["EditRowIcon", EditRowIcon],
+  ["SaveRowIcon", SaveRowIcon],
+  ["CancelRowIcon", CancelRowIcon],
 ];
 
 describe("icons", () => {
@@ -113,6 +122,19 @@ describe("icons", () => {
     for (const key of keys) {
       const { container } = render(<>{iconForRowAction({ key })}</>);
       expect(container.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("keeps a host glyph, takes text on `false`, and otherwise draws its own", () => {
+    const host = <span data-testid="host" />;
+
+    expect(iconForRowEditPart("row-edit-save", host)).toBe(host);
+    expect(iconForRowEditPart("row-edit-save", false)).toBeUndefined();
+    expect(iconForRowEditPart("not-a-row-edit-part")).toBeUndefined();
+    for (const part of ROW_EDIT_PARTS) {
+      const { container } = render(<>{iconForRowEditPart(part)}</>);
+
+      expect(container.querySelector("svg"), part).not.toBeNull();
     }
   });
 });

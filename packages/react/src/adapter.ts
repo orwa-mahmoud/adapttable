@@ -223,6 +223,7 @@ export {
   type RowEditControls,
   rowEditControls,
   type RowEditControlsOptions,
+  type RowEditIcons,
 } from "./editing/RowEditGate";
 export type { RowEditingState } from "./editing/rowEditing";
 export {

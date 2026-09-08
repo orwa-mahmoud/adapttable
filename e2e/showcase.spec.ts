@@ -448,21 +448,37 @@ for (const adapter of ADAPTERS) {
       expect(settled, "the card never stopped moving").toBe(true);
       const card = await form.boundingBox();
       expect(card, "the open card has no box").not.toBeNull();
-      // Never ABOVE the card: that is where its own trigger sits, and
-      // clicking the trigger toggles rather than dismisses.
-      const spot = await page.evaluate((box) => {
-        const below = box.y + box.height;
-        if (window.innerHeight - below > 24) {
-          return { x: box.x + box.width / 2, y: below + 12 };
-        }
-        return box.x > 24
-          ? { x: box.x / 2, y: box.y + box.height / 2 }
-          : {
-              x: (box.x + box.width + window.innerWidth) / 2,
-              y: box.y + box.height / 2,
-            };
-      }, card!);
-      await page.mouse.click(spot.x, spot.y);
+      const anchor = await trigger.boundingBox();
+      expect(anchor, "the trigger has no box").not.toBeNull();
+      // Somewhere genuinely inert: not the card, not the trigger — the card
+      // flips to whichever side has room, so the trigger can sit either side
+      // of it — and not another control, because clicking one of the demo's
+      // own buttons changes the page instead of dismissing the card.
+      const spot = await page.evaluate(
+        ([box, hit]) => {
+          const clear = (x: number, y: number) => {
+            const inside = (b: typeof box, pad: number) =>
+              x >= b.x - pad &&
+              x <= b.x + b.width + pad &&
+              y >= b.y - pad &&
+              y <= b.y + b.height + pad;
+            if (inside(box, 0) || inside(hit, 4)) return false;
+            const at = document.elementFromPoint(x, y);
+            return (
+              at !== null && at.closest("button, a, input, select") === null
+            );
+          };
+          for (let y = 8; y < window.innerHeight; y += 16) {
+            for (let x = 8; x < window.innerWidth; x += 16) {
+              if (clear(x, y)) return { x, y };
+            }
+          }
+          return null;
+        },
+        [card!, anchor!] as const
+      );
+      expect(spot, "nowhere on the page is outside the card").not.toBeNull();
+      await page.mouse.click(spot!.x, spot!.y);
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 

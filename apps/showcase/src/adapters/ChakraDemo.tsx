@@ -116,6 +116,7 @@ import {
   type Failure,
   type FiltersUi,
   type PageMode,
+  showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
 import {
@@ -296,12 +297,18 @@ export function ChakraDemo({
 }>) {
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);
+  const rowActionsShown = showsRowActions({
+    rowMutations,
+    focused,
+    columnGroups,
+  });
   return (
     <ChakraProvider value={defaultSystem}>
       {/* Chakra v3 resolves `_dark` tokens under a `.dark` ancestor, so forcing
           the class here tracks the page theme without next-themes/persistence. */}
       <Box className={dark ? "dark" : "light"} bg="bg" color="fg">
         <DemoBody
+          rowActionsShown={rowActionsShown}
           mode={mode}
           pageMode={pageMode}
           urlKey={urlKey}
@@ -387,10 +394,9 @@ export function ChakraDemo({
                   bulkActionList: makeBulkActions(locale),
                   collapsibleColumnGroups: columns.collapsibleColumnGroups,
                   columnMenu,
-                  rowActions:
-                    (rowMutations ?? (focused && !columnGroups))
-                      ? undefined
-                      : makeActions(locale, demoRowHandlers),
+                  rowActions: rowActionsShown
+                    ? makeActions(locale, demoRowHandlers)
+                    : undefined,
                   commandPalette,
                   contextMenu,
                   filterControls,

@@ -370,6 +370,7 @@ function DesktopRowBase<TRow>(
                 row={row}
                 rowId={id}
                 showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
                 labels={labels}
               />
             )}

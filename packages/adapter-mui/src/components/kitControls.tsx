@@ -65,6 +65,8 @@ import {
 } from "@mui/material";
 import { useId, useRef, useState } from "react";
 
+import { iconForRowEditPart } from "../icons";
+
 export type {
   AgentApprovalProps,
   BatchEditBarProps,
@@ -332,20 +334,37 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
+  if (!glyph) {
+    return (
+      <Button
+        type="button"
+        size="small"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        onClick={onClick}
+      >
+        {label}
+      </Button>
+    );
+  }
   return (
-    <Button
+    <IconButton
       type="button"
       size="small"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={label}
       onClick={onClick}
     >
-      {label}
-    </Button>
+      {glyph}
+    </IconButton>
   );
 }
 

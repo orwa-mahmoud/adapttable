@@ -38,6 +38,7 @@ import { CustomCellEditorRender } from '@adapttable/core';
 import { DATE_OP_LABEL_KEYS } from '@adapttable/core';
 import { DateOp } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { edgePinStyle } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
@@ -683,6 +684,7 @@ export interface EditableCellEditing<TRow> {
     featureHost?: FeatureHostState;
     lifecycle?: EditLifecycle<TRow>;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    rowEditIcons?: RowEditIcons;
     rowEditing?: RowEditingState<TRow>;
     saving?: CellSaveState<TRow>;
     state: CellEditingState;
@@ -901,6 +903,7 @@ export interface FeatureProps<TRow> {
     resizableColumns?: boolean;
     rowActions?: RowAction<TRow>[];
     rowClassName?: (row: TRow, index: number) => string | undefined;
+    rowEditIcons?: RowEditIcons;
     rowEditing?: boolean;
     rowHeight?: RowHeight<TRow>;
     rowStyle?: RowStyle<TRow>;
@@ -1294,6 +1297,13 @@ export function resolveNeutralColumnHeaders<TRow>(columns: readonly ColumnMetada
 
 // @public
 export type RowEditDrafts = Readonly<Record<string, string>>;
+
+// @public
+export interface RowEditIcons {
+    readonly begin?: DisplayValue | false;
+    readonly cancel?: DisplayValue | false;
+    readonly save?: DisplayValue | false;
+}
 
 // @public
 export interface RowEditingState<TRow> {

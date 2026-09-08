@@ -927,12 +927,16 @@ export const TREE_TOGGLE =
   featureSlotKey<TreeToggleProps<never>>("tree-toggle");
 
 /**
- * Save / cancel for a row being edited.
+ * Save / cancel for a row being edited. One renderer: `editing()` and
+ * `rowEditing()` contribute the same kit chrome, and a table that composes
+ * both would otherwise draw two identical sets of controls on the open row.
  *
  * @public
  */
-export const ROW_EDIT_ACTIONS =
-  featureSlotKey<RowEditActionsProps<never>>("row-edit-actions");
+export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<never>>(
+  "row-edit-actions",
+  { single: true }
+);
 
 /**
  * Desktop row-reorder grip.

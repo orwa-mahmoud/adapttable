@@ -61,7 +61,6 @@ import {
   DEMO_GROUP_AGGREGATES,
   type DemoRowHandlers,
   demoUrlSync,
-  EDITING_DEFAULT_LAYOUT,
   GROUPS_DEFAULT_LAYOUT,
   isRemote,
   LIVE_DEFAULT_LAYOUT,
@@ -364,6 +363,8 @@ interface DataProps {
   editing?: boolean;
   tree?: boolean;
   rowMode?: boolean;
+  /** Whether this page shows the demo's own row actions — the pencil. */
+  rowActionsShown?: boolean;
   batch?: boolean;
   rowMutations?: boolean;
   rowReorder?: boolean;
@@ -633,6 +634,25 @@ function composeDemoFeatures(
 }
 
 /** What each row-model flag configures, beside the feature that arms it. */
+/**
+ * Whether the table gives a row a form to open.
+ *
+ * The pencil in the actions column opens the row's fields, so it belongs to
+ * editing: where the demo offers both, the table arms row mode, and where
+ * editing is off there is no form and no pencil. Batch is the exception —
+ * every cell is already a field there, and a row form would fight it.
+ */
+function rowFormArmed(flags: {
+  readonly rowMode?: boolean;
+  readonly editing?: boolean;
+  readonly rowActionsShown?: boolean;
+  readonly batch?: boolean;
+}): boolean {
+  if (flags.rowMode === true) return true;
+  if (flags.batch === true) return false;
+  return flags.editing === true && flags.rowActionsShown === true;
+}
+
 function applyRowModelFlags(
   next: DemoColumnProps,
   flags: Parameters<typeof frontendColumnProps>[1],
@@ -650,7 +670,7 @@ function applyRowModelFlags(
       rowVersion: (row: Person) => row.revision ?? 0,
     });
   }
-  if (flags.rowMode) {
+  if (rowFormArmed(flags)) {
     Object.assign(next, { rowEditing: true, onRowEdit });
   }
   if (flags.tree) {
@@ -671,7 +691,7 @@ function kitRequests(
 ): KitFeatureRequests {
   return {
     ...(flags.editing ? { editing: flags.onCellEdit } : {}),
-    ...(flags.rowMode ? { rowEditing: onRowEdit } : {}),
+    ...(rowFormArmed(flags) ? { rowEditing: onRowEdit } : {}),
     ...(flags.batch ? { batchEditing: flags.onBatchEdit } : {}),
     ...(flags.grouping
       ? {
@@ -711,6 +731,8 @@ function frontendColumnProps(
     large?: boolean;
     editing?: boolean;
     rowMode?: boolean;
+    /** Whether this page shows the demo's own row actions — the pencil. */
+    rowActionsShown?: boolean;
     grouping?: boolean;
     tree?: boolean;
     batch?: boolean;
@@ -916,6 +938,7 @@ function Frontend({
   editing,
   tree,
   rowMode,
+  rowActionsShown,
   batch,
   rowMutations,
   rowReorder,
@@ -1154,6 +1177,7 @@ function Frontend({
           large,
           editing,
           rowMode,
+          rowActionsShown,
           grouping,
           tree,
           batch,
@@ -1244,6 +1268,25 @@ function Backend({
  * grouping, filtering, and aggregation pages, where persistence is itself
  * part of the demonstration.
  */
+/**
+ * Whether a page shows the demo's own row actions — the pencil and the trash.
+ *
+ * A page demonstrating row mutations gets the built-in add / duplicate /
+ * delete instead, and a focused feature page keeps its actions column clear
+ * unless column groups are the thing it is showing. The same answer decides
+ * whether the table arms a row form, because the pencil is what opens one.
+ */
+export function showsRowActions(flags: {
+  readonly rowMutations?: boolean;
+  readonly focused?: boolean;
+  readonly columnGroups?: boolean;
+}): boolean {
+  return !(
+    flags.rowMutations ??
+    (flags.focused === true && flags.columnGroups !== true)
+  );
+}
+
 export function DemoBody({
   mode,
   pageMode,
@@ -1254,6 +1297,7 @@ export function DemoBody({
   editing,
   tree,
   rowMode,
+  rowActionsShown,
   batch,
   rowMutations,
   rowReorder,
@@ -1281,6 +1325,8 @@ export function DemoBody({
   tree?: boolean;
   editing?: boolean;
   rowMode?: boolean;
+  /** Whether this page shows the demo's own row actions — the pencil. */
+  rowActionsShown?: boolean;
   batch?: boolean;
   rowMutations?: boolean;
   rowReorder?: boolean;
@@ -1303,15 +1349,15 @@ export function DemoBody({
 }>) {
   const advancedFilters = useAdvancedFilters();
   const scenario = useDemoScenario();
-  // Demos mounted WITH editing (the /editing page) keep email visible — it
-  // is the column the walkthrough edits. Column-groups drop Person, Email
-  // and Load so the three groups plus Actions fit; Team stays visible as
-  // Assignment's kept child. Only the shared live default is swapped;
-  // explicit layouts (the wide showcase's pins, RTL) pass through.
+  // Column-groups drop Person, Email and Load so the three groups plus
+  // Actions fit; Team stays visible as Assignment's kept child. Only the
+  // shared live default is swapped; explicit layouts (the editing page's,
+  // the wide showcase's pins, RTL) pass through. Turning editing on does not
+  // swap it: a toggle that reshuffles the columns under the reader hides the
+  // thing they turned on.
   let resolvedDefaultLayout = defaultColumnLayout;
   if (defaultColumnLayout === LIVE_DEFAULT_LAYOUT) {
-    if (editing) resolvedDefaultLayout = EDITING_DEFAULT_LAYOUT;
-    else if (columnGroups) resolvedDefaultLayout = GROUPS_DEFAULT_LAYOUT;
+    if (columnGroups) resolvedDefaultLayout = GROUPS_DEFAULT_LAYOUT;
     else if (cellSpan) resolvedDefaultLayout = SPAN_DEFAULT_LAYOUT;
     else {
       const scenarioLayout = layoutFor(scenario);
@@ -1367,6 +1413,7 @@ export function DemoBody({
       editing={editing}
       tree={tree}
       rowMode={rowMode}
+      rowActionsShown={rowActionsShown}
       batch={batch}
       rowMutations={rowMutations}
       rowReorder={rowReorder}

@@ -22,7 +22,7 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
   const [filtersUi, setFiltersUi] = useState<FiltersUi>("popover");
   const [motion, setMotion] = useState<"on" | "off">("on");
   const [grouping, setGrouping] = useState<"on" | "off">("off");
-  const [editing, setEditing] = useState<"on" | "off">("off");
+  const [editing, setEditing] = useState<"on" | "off">("on");
   const token =
     ADAPTER_TOKENS.find((a) => a.key === adapter) ?? ADAPTER_TOKENS[0];
   const accent = dark ? token.accentDark : token.accentLight;

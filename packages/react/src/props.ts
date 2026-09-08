@@ -37,6 +37,7 @@ import type {
   EditConflictPolicy,
 } from "./editing/editConflict";
 import type { EditEventHandler } from "./editing/editingEvents";
+import type { RowEditIcons } from "./editing/RowEditGate";
 import type { RowValidator } from "./editing/validation";
 import type { TableFeature } from "./features/tableFeature";
 import type {
@@ -252,6 +253,12 @@ export interface FeatureProps<TRow> {
    * does.
    */
   onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+  /**
+   * Glyphs for the row-mode controls. Omit for each kit's own pencil, check
+   * and cross, named by `labels.editRow`, `labels.saveRow` and
+   * `labels.cancel`. See {@link RowEditIcons}.
+   */
+  rowEditIcons?: RowEditIcons;
   /**
    * Change many rows and save them together: every editable cell is a field,
    * nothing is sent until the reader saves, and one Cancel puts it all back.

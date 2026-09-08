@@ -2,7 +2,7 @@
  * Native slots for chrome unit tests. Not a product widget — not exported
  * from `@adapttable/core`. Recreates the markup the tests already assert.
  */
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
 import type { TableAssistantSlots } from "../assistant/assistantSlots";
 import type {
@@ -276,18 +276,25 @@ export const findBarTestSlots: FindBarSlots = {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
 }: RowEditButtonProps) {
+  // Stands in for a kit: a node is the glyph, `false` asks for text, and
+  // nothing at all leaves the choice here — which is the label, since a test
+  // slot has no glyphs of its own.
+  const glyph = icon === false || icon === undefined ? undefined : icon;
   return (
     <button
       type="button"
       data-adapttable-part={part}
+      data-icon={glyph === undefined ? undefined : ""}
       className={className}
       aria-label={label}
+      title={label}
       onClick={onClick}
     >
-      {label}
+      {(glyph as ReactNode) ?? label}
     </button>
   );
 }

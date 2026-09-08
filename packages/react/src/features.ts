@@ -19,6 +19,7 @@
 export type { CommandPaletteOptions } from "./actions/useCommandPalette";
 export type { ContextMenuOptions } from "./actions/useTableContextMenu";
 export type { BatchRowEdit } from "./editing/batchEditing";
+export type { RowEditIcons } from "./editing/RowEditGate";
 export { cellNavigation } from "./features/cell-navigation";
 export { densityChooser } from "./features/density";
 export { editHistory } from "./features/edit-history";

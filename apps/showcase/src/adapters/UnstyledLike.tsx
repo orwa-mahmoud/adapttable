@@ -108,6 +108,7 @@ import {
   type Failure,
   type FiltersUi,
   type PageMode,
+  showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
 import {
@@ -331,8 +332,14 @@ export function UnstyledLike({
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);
   const styled = withDensity(classNames, density);
+  const rowActionsShown = showsRowActions({
+    rowMutations,
+    focused,
+    columnGroups,
+  });
   return (
     <DemoBody
+      rowActionsShown={rowActionsShown}
       mode={mode}
       pageMode={pageMode}
       urlKey={urlKey}
@@ -422,10 +429,9 @@ export function UnstyledLike({
                   bulkActionList: makeBulkActions(locale),
                   collapsibleColumnGroups: columns.collapsibleColumnGroups,
                   columnMenu,
-                  rowActions:
-                    (rowMutations ?? (focused && !columnGroups))
-                      ? undefined
-                      : makeActions(locale, demoRowHandlers),
+                  rowActions: rowActionsShown
+                    ? makeActions(locale, demoRowHandlers)
+                    : undefined,
                   commandPalette,
                   contextMenu,
                   filterControls,

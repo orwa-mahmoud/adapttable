@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { EDITING_DEFAULT_LAYOUT } from "./data";
 import { DemoScenarioProvider } from "./Demo";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
@@ -40,6 +41,7 @@ export function EditingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 locale="en"
                 dark={dark}
                 urlKey="edit"
+                defaultColumnLayout={EDITING_DEFAULT_LAYOUT}
                 editing
                 cellNavigation
                 columnSelectionCheckbox

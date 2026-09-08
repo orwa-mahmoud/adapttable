@@ -37,6 +37,7 @@ import { ContextMenuItemsFactory } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
+import { DisplayValue } from '@adapttable/core';
 import { ExportAllControls } from '@adapttable/core';
 import { ExportAllQuery } from '@adapttable/core';
 import { ExportAllResult } from '@adapttable/core';
@@ -377,6 +378,7 @@ export interface FeatureProps<TRow> {
     resizableColumns?: boolean;
     rowActions?: RowAction<TRow>[];
     rowClassName?: (row: TRow, index: number) => string | undefined;
+    rowEditIcons?: RowEditIcons;
     rowEditing?: boolean;
     rowHeight?: RowHeight<TRow>;
     rowStyle?: RowStyle<TRow>;
@@ -568,6 +570,13 @@ export function rowAppearance<TRow>(options: {
 
 // @public
 export function rowDetail<TRow>(renderRowDetail: (row: TRow) => unknown, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;
+
+// @public
+export interface RowEditIcons {
+    readonly begin?: DisplayValue | false;
+    readonly cancel?: DisplayValue | false;
+    readonly save?: DisplayValue | false;
+}
 
 // @public
 export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;

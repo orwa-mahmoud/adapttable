@@ -418,6 +418,18 @@ only where there is a form to open: a table without `rowEditing` drops it rather
 than showing a control that cannot do what it says. While its own row is open it
 steps aside, because that row is already showing save and cancel.
 
+### The controls are glyphs
+
+Each kit draws its own pencil, check and cross, with `labels.editRow`,
+`labels.saveRow` and `labels.cancel` as both the accessible name and the hover
+title — an actions column is a narrow place, and three words per control crowd
+out the row. `rowEditIcons` changes that per control: a node is your own glyph,
+`false` asks for the label as text.
+
+```tsx
+<DataTable {...props} rowEditIcons={{ save: <TickIcon />, cancel: false }} />
+```
+
 Parts: `row-edit-begin`, `row-edit-actions`, `row-edit-save`, `row-edit-cancel`.
 Labels: `labels.editRow`, `labels.saveRow`, `labels.cancel`, all localized in
 every locale.
@@ -425,7 +437,8 @@ every locale.
 Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `UseRowEditingOptions`), with `RowEditCell` (`RowEditCellProps`),
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
-from `@adapttable/core/adapter`. Each adapter mounts `RowEditActions`
+from `@adapttable/core/adapter`, and `RowEditIcons` typing the glyph
+overrides. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's
 actions against its edit state with `resolveRowEditTrigger` (`RowEditTrigger`
 out) — which rewires an `editsRow` action to the form and reports whether the
