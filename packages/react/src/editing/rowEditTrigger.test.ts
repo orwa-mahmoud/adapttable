@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { EditableCellEditing } from "./editableCellController";
 import type { RowEditingState } from "./rowEditing";
-import { resolveRowEditTrigger } from "./rowEditTrigger";
+import { resolveRowEditTrigger, rowEditConflict } from "./rowEditTrigger";
 
 interface Row {
   readonly id: string;
@@ -104,5 +105,33 @@ describe("resolveRowEditTrigger", () => {
     const resolved = resolveRowEditTrigger([pencil], state, ROW, "a");
     expect(resolved.actions[0]?.color).toBe("blue");
     expect(resolved.actions[0]?.isDisabled?.(ROW)).toBe(true);
+  });
+});
+
+/**
+ * An editing bag carrying only what the trigger reads: whether live updates
+ * are being reconciled, and the answer for one row.
+ */
+function asking(
+  isRowConflict?: (rowId: string) => boolean
+): EditableCellEditing<Row> {
+  return {
+    conflict: isRowConflict ? { isRowConflict } : undefined,
+  } as unknown as EditableCellEditing<Row>;
+}
+
+describe("rowEditConflict", () => {
+  it("asks nothing when no editing is armed", () => {
+    expect(rowEditConflict(undefined, "a")).toBeUndefined();
+  });
+
+  it("asks nothing when live updates are not being reconciled", () => {
+    expect(rowEditConflict(asking(), "a")).toBeUndefined();
+  });
+
+  it("reads the answer for this row from the shared conflict state", () => {
+    const editing = asking((rowId) => rowId === "a");
+    expect(rowEditConflict(editing, "a")).toEqual({ asking: true });
+    expect(rowEditConflict(editing, "b")).toEqual({ asking: false });
   });
 });
