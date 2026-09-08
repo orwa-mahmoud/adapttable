@@ -781,6 +781,10 @@ export function makeColumns(
       key: "timeline",
       header: s.timeline,
       sortValue: (r) => startDate(r).getTime(),
+      // Grouping by the instant a project starts gives every row a group of
+      // its own, captioned with the epoch. The month is the bucket a reader
+      // means when they group a timeline.
+      groupValue: (r) => formatMonth(startDate(r), locale),
       // A localized "Mar 8, 2026 → Apr 22, 2026" is unusable in a spreadsheet;
       // the file gets the sortable ISO start date.
       exportValue: (r) => startDate(r).toISOString().slice(0, 10),
@@ -1330,27 +1334,70 @@ function largePerson(index: number): Person {
   };
 }
 
+/**
+ * One formatter per locale, built on first use.
+ *
+ * These run per cell per render — a grouped table asks for a few hundred at
+ * a time — and building an `Intl` formatter is far more expensive than using
+ * one.
+ */
+function formatter<TFormat>(build: (tag: string) => TFormat) {
+  const made = new Map<string, TFormat>();
+  return (locale: Locale): TFormat => {
+    const tag = locale === "ar" ? "ar" : "en";
+    const existing = made.get(tag);
+    if (existing) return existing;
+    const next = build(tag);
+    made.set(tag, next);
+    return next;
+  };
+}
+
+const dateFormat = formatter(
+  (tag) =>
+    new Intl.DateTimeFormat(tag, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+);
+
+const moneyFormat = formatter(
+  (tag) =>
+    new Intl.NumberFormat(tag, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    })
+);
+
+const percentFormat = formatter(
+  (tag) =>
+    new Intl.NumberFormat(tag, {
+      style: "percent",
+      maximumFractionDigits: 0,
+    })
+);
+
+const monthFormat = formatter(
+  (tag) => new Intl.DateTimeFormat(tag, { month: "long", year: "numeric" })
+);
+
 export function formatDate(date: Date, locale: Locale = "en"): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  return dateFormat(locale).format(date);
+}
+
+/** The month a date falls in — what grouping a timeline buckets by. */
+export function formatMonth(date: Date, locale: Locale = "en"): string {
+  return monthFormat(locale).format(date);
 }
 
 export function formatMoney(value: number, locale: Locale = "en"): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar" : "en", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return moneyFormat(locale).format(value);
 }
 
 export function formatPercent(value: number, locale: Locale = "en"): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar" : "en", {
-    style: "percent",
-    maximumFractionDigits: 0,
-  }).format(value / 100);
+  return percentFormat(locale).format(value / 100);
 }
 
 /**

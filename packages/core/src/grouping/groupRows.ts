@@ -246,14 +246,15 @@ export interface GroupPaging {
 
 /**
  * Resolve the value used to bucket a row for `groupBy`. Prefers the column's
- * `sortValue` (same primitive as client sort), then a path lookup on the
- * column key — never the JSX accessor.
+ * own `groupValue`, then `sortValue` (same primitive as client sort), then a
+ * path lookup on the column key — never the JSX accessor.
  */
 export function resolveGroupValue<TRow>(
   row: TRow,
   groupBy: string,
   column: ColumnMetadata<TRow> | undefined
 ): unknown {
+  if (column?.groupValue) return column.groupValue(row);
   if (column?.sortValue) return column.sortValue(row);
   const path = column?.key ?? groupBy;
   return getPath(row, path);

@@ -4302,6 +4302,20 @@ dismiss route. Every add, move, removal, and aggregation change is announced
 through a polite live region. The captions and announcement templates ship in
 all seventeen `@adapttable/i18n` locales.
 
+A column decides what it buckets rows by. Without help a group is one distinct
+sort value, which is right for a team or a status and wrong for anything
+continuous — group by a timestamp and every row becomes its own group, headed
+by the raw number. `groupValue` returns the bucket instead, and it is also the
+group's caption:
+
+```tsx
+{
+  key: "start",
+  sortValue: (row) => row.start.getTime(),
+  groupValue: (row) => monthOf(row.start),
+}
+```
+
 Every layout also provides **Add grouping column**, **Aggregate column**, and
 **Group aggregation** selects. Mobile uses these kit-native selects rather than
 header drag-and-drop. Aggregation choices are `sum`, `avg`, `min`, `max`,

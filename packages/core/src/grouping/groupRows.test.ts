@@ -35,6 +35,38 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
     expect(resolveGroupValue(ROWS[0]!, "team", COLS[1])).toBe("Core");
   });
 
+  it("buckets by the column's own groupValue ahead of sortValue", () => {
+    // A continuous value sorts fine and groups terribly: every row is its own
+    // bucket. The band is what the reader means.
+    const banded: ColumnModel<Person> = {
+      key: "budget",
+      sortValue: (r) => r.budget,
+      groupValue: (r) => (r.budget < 25 ? "Under 25" : "25 and over"),
+    };
+    expect(resolveGroupValue(ROWS[0]!, "budget", banded)).toBe("Under 25");
+    expect(resolveGroupValue(ROWS[3]!, "budget", banded)).toBe("25 and over");
+  });
+
+  it("groups rows that share a bucket under one header", () => {
+    const model = buildGroupedFlatModel({
+      rows: ROWS,
+      groupBy: "budget",
+      columns: [
+        {
+          key: "budget",
+          sortValue: (r) => r.budget,
+          groupValue: (r) => (r.budget < 25 ? "Under 25" : "25 and over"),
+        },
+      ],
+      getRowId: (r) => r.id,
+      collapsedGroupIds: new Set<string>(),
+    });
+    const headers = model.flatMap((entry) =>
+      entry.kind === "group" ? [entry.label] : []
+    );
+    expect(headers).toEqual(["Under 25", "25 and over"]);
+  });
+
   it("uses path lookup when column has no sortValue", () => {
     expect(resolveGroupValue(ROWS[0]!, "missing", undefined)).toBeUndefined();
   });

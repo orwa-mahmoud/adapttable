@@ -750,6 +750,7 @@ export interface ColumnModel<TRow = unknown> {
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
+    groupValue?: (row: TRow) => unknown;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
@@ -1932,6 +1933,7 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
     collapsedGroupIds: ReadonlySet<string>;
     // (undocumented)
     columns: readonly ColumnMetadata<TRow>[];
+    derivedKey?: string;
     // (undocumented)
     filter?: (group: GroupNode<TRow>) => boolean;
     // (undocumented)
@@ -2220,6 +2222,7 @@ export interface IncrementalViewConfig<TRow> {
     blankLabel?: string;
     collapsedGroupIds?: ReadonlySet<string>;
     columns?: readonly ColumnMetadata<TRow>[];
+    derivedKey?: string;
     extra?: ExtraFilters;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     filterTree?: QueryFilterGroup;

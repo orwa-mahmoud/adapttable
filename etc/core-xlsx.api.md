@@ -96,6 +96,7 @@ export interface ColumnModel<TRow = unknown> {
     group?: string | readonly string[];
     groupable?: boolean;
     groupShow?: ColumnGroupShow;
+    groupValue?: (row: TRow) => unknown;
     header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;

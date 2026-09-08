@@ -131,6 +131,17 @@ export interface ColumnModel<TRow = unknown> {
    */
   sortValue?: (row: TRow) => SortableValue;
   /**
+   * What this column buckets a row by when the table groups on it, and the
+   * caption the group then carries.
+   *
+   * Without it a group is one distinct sort value, which is right for a team
+   * or a status and wrong for anything continuous: group by a timestamp and
+   * every row is its own group, captioned with the raw number. Return the
+   * bucket — the month a date falls in, the band a number sits in — and rows
+   * sharing it group together under it.
+   */
+  groupValue?: (row: TRow) => unknown;
+  /**
    * The value this column contributes to an export.
    */
   exportValue?: (row: TRow) => unknown;
