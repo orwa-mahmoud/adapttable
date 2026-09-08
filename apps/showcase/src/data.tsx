@@ -997,14 +997,41 @@ export function makeWideColumns(
   return leaves;
 }
 
-export function makeActions(locale: Locale): RowAction<Person>[] {
+/**
+ * What the demo's row actions actually do.
+ *
+ * Supplied by whoever owns the rows. Without them the actions can only say
+ * they were clicked, which is what they used to do — and a Delete that
+ * announces a deletion without performing one teaches the wrong thing about
+ * the table.
+ */
+export interface DemoRowHandlers {
+  /** Change something real about the row, visibly. */
+  readonly onEdit: (row: Person) => void;
+  /** Remove the row from the data. */
+  readonly onDelete: (row: Person) => void;
+}
+
+export function makeActions(
+  locale: Locale,
+  handlers?: DemoRowHandlers
+): RowAction<Person>[] {
   const s = STRINGS[locale];
   return [
     {
       key: "edit",
       label: s.edit,
       icon: <EditIcon />,
-      onClick: (row) => notifyDemo({ message: `${s.edit}: ${row.name}` }),
+      onClick: (row) => {
+        if (!handlers) {
+          notifyDemo({ message: `${s.edit}: ${row.name}` });
+          return;
+        }
+        handlers.onEdit(row);
+      },
+      // Agent invocation is a different question from a person clicking it:
+      // this one changes a cell, so it asks first.
+      ai: { approval: { policy: "required" } },
     },
     {
       key: "delete",
@@ -1017,10 +1044,24 @@ export function makeActions(locale: Locale): RowAction<Person>[] {
         confirmLabel: s.remove,
         danger: true,
       },
-      onClick: (row) =>
-        notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" }),
+      onClick: (row) => {
+        if (!handlers) {
+          notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" });
+          return;
+        }
+        handlers.onDelete(row);
+        notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" });
+      },
+      ai: { approval: { policy: "required" } },
     },
   ];
+}
+
+/** The next status in the cycle — what the demo's Edit action changes. */
+export function nextStatus(row: Person): DemoStatus {
+  const current = personStatus(row);
+  const at = STATUSES.indexOf(current);
+  return STATUSES[(at + 1) % STATUSES.length];
 }
 
 /** Bulk actions — passing these turns on row selection + the bulk bar. */

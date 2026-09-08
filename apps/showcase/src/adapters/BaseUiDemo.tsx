@@ -357,7 +357,10 @@ export function BaseUiDemo({
       editing={editing}
       derivedFields={derivedFields}
       formulaColumns={formulaColumns}
-      render={(source, { features: demoFeatures, ...columns }) => (
+      render={(
+        source,
+        { features: demoFeatures, demoRowHandlers, ...columns }
+      ) => (
         <DataTable
           source={source}
           columns={
@@ -408,7 +411,7 @@ export function BaseUiDemo({
               rowActions:
                 (rowMutations ?? (focused && !columnGroups))
                   ? undefined
-                  : makeActions(locale),
+                  : makeActions(locale, demoRowHandlers),
               commandPalette,
               contextMenu,
               filterControls,

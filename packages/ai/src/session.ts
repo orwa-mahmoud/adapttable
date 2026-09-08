@@ -1,6 +1,6 @@
 import { isPinnedSummaryRowId } from "@adapttable/core";
 
-import { resolveApproval } from "./approvalConfig";
+import { resolveApproval, type ResolvedApproval } from "./approvalConfig";
 import {
   type CapabilityRegistry,
   createCapabilityRegistry,
@@ -79,14 +79,17 @@ function approvalOf(observation: AgentObservation): ApprovalPolicy {
  * overrides it. Presentation is resolved the same way but is the surface's
  * business, not the session's — the session only decides whether to ask.
  */
-function policyFor(
+function approvalFor(
   definition: AgentCapabilityDefinition,
   observation: AgentObservation
-): ApprovalPolicy {
+): ResolvedApproval {
   return resolveApproval(
-    { policy: approvalOf(observation), presentation: "widget" },
+    {
+      policy: approvalOf(observation),
+      presentation: observation.presentation ?? "widget",
+    },
     definition.ai
-  ).policy;
+  );
 }
 
 function commitOf(observation: AgentObservation): CommitPolicy {
@@ -367,12 +370,14 @@ export function createAgentSession(
     // One fact, read from the captured plan, used for both the offer the
     // reader is given and the answer they are allowed to give back.
     const decomposable = isDecomposable(plan, definition);
+    const presentation = approvalFor(definition, entry).presentation;
     const subject: ApprovalSubject =
       plan.proposals.length > 0
         ? {
             kind: "rows",
             proposals: plan.proposals,
             perItem: decomposable,
+            presentation,
           }
         : {
             kind: "operation",
@@ -381,6 +386,7 @@ export function createAgentSession(
               ? { title: definition.presentation.title }
               : {}),
             arguments: args ?? {},
+            presentation,
           };
     const decision = await decideApproval(
       definition,
@@ -1196,7 +1202,7 @@ async function decideApproval(
   total: number,
   decomposable: boolean
 ): Promise<ApprovalDecision> {
-  if (!needsApproval(definition, policyFor(definition, observation))) {
+  if (!needsApproval(definition, approvalFor(definition, observation).policy)) {
     return { outcome: "not-required" };
   }
   if (!onApprove) return { outcome: "pending" };

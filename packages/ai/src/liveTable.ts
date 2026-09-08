@@ -277,6 +277,7 @@ export function observationFromNeutral<TRow>(
     source: table.capabilities,
     writePolicy: options.writePolicy ?? "allow",
     approval: sharedApproval(options.approval).policy,
+    presentation: sharedApproval(options.approval).presentation,
     commit: options.commit ?? "stage",
     hasPagination: ops.setPage === true || options.apply?.setPage !== undefined,
     hasSearch: ops.setSearch === true || options.apply?.setSearch !== undefined,

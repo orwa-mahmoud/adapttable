@@ -1,5 +1,6 @@
 import type {
   ActionAiOptions,
+  ApprovalPresentation,
   TableSourceCapabilities,
 } from "@adapttable/core";
 import type { AgentApprovalPending } from "@adapttable/react/adapter";
@@ -515,6 +516,12 @@ export type ApprovalSubject =
       readonly proposals: readonly WriteProposal[];
       /** Whether each row may be decided on its own. */
       readonly perItem: boolean;
+      /**
+       * Where this write is reviewed, already resolved: the table's shared
+       * setting with the action's own override applied. An approver reads it
+       * rather than resolving the question a second time and disagreeing.
+       */
+      readonly presentation: ApprovalPresentation;
     }
   | {
       readonly kind: "operation";
@@ -524,6 +531,8 @@ export type ApprovalSubject =
       readonly title?: string;
       /** Arguments the capability was called with. */
       readonly arguments: unknown;
+      /** Where this write is reviewed, already resolved. */
+      readonly presentation: ApprovalPresentation;
     };
 
 /**
@@ -606,6 +615,11 @@ export interface AgentObservation {
   readonly writePolicy: WritePolicy;
   /** When a write must be confirmed. */
   readonly approval?: ApprovalPolicy;
+  /**
+   * Where the table reviews an approval, before an action overrides it.
+   * Defaults to `"widget"`.
+   */
+  readonly presentation?: ApprovalPresentation;
   /** Whether an approved write stages or persists. */
   readonly commit?: CommitPolicy;
   /** Whether page navigation is wired. */

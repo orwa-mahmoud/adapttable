@@ -135,6 +135,7 @@ export interface AgentObservation {
         readonly top: readonly string[];
         readonly bottom: readonly string[];
     };
+    readonly presentation?: ApprovalPresentation;
     readonly readMax?: number;
     readonly rowAddressScope: RowAddressScope;
     readonly search: string;
@@ -183,11 +184,13 @@ export type ApprovalSubject = {
     readonly kind: "rows";
     readonly proposals: readonly WriteProposal[];
     readonly perItem: boolean;
+    readonly presentation: ApprovalPresentation;
 } | {
     readonly kind: "operation";
     readonly capability: string;
     readonly title?: string;
     readonly arguments: unknown;
+    readonly presentation: ApprovalPresentation;
 };
 
 // @public

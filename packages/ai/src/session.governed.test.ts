@@ -985,6 +985,8 @@ describe("what a reader is asked to approve", () => {
     expect(seen).toEqual({
       kind: "rows",
       perItem: true,
+      // Where it is reviewed travels with it, already resolved.
+      presentation: "widget",
       proposals: [
         { rowKey: "r1", column: "salary", before: 100, after: 200 },
         { rowKey: "r2", column: "salary", before: 110, after: 210 },
@@ -1054,6 +1056,7 @@ describe("what a reader is asked to approve", () => {
       capability: "staff.activateAll",
       title: "Activate everyone",
       arguments: { status: "Active" },
+      presentation: "widget",
     });
   });
 });

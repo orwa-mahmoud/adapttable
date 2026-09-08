@@ -59,12 +59,14 @@ import {
   consecutiveTeamSpan,
   DEMO_FILTER_RUNTIME,
   DEMO_GROUP_AGGREGATES,
+  type DemoRowHandlers,
   demoUrlSync,
   EDITING_DEFAULT_LAYOUT,
   GROUPS_DEFAULT_LAYOUT,
   isRemote,
   LIVE_DEFAULT_LAYOUT,
   makeLargeDirectory,
+  nextStatus,
   orderPeopleByTeam,
   PEOPLE,
   type Person,
@@ -274,6 +276,15 @@ export interface DemoColumnProps {
    * silently replaces the other.
    */
   features?: readonly TableFeature<Person>[];
+  /**
+   * What the demo's row actions do.
+   *
+   * This side owns the rows, so it supplies the behaviour; the adapter side
+   * owns the locale and the kit, so it builds the actions. An adapter
+   * destructures this out of the bag rather than spreading it onto the
+   * table.
+   */
+  demoRowHandlers?: DemoRowHandlers;
   /**
    * What the page asked for that only the KIT can build: grouping draws its
    * panel and headers, editing draws an editor, reorder draws a grip. This
@@ -742,6 +753,16 @@ function frontendColumnProps(
     isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
+    // Edit moves the row's status on and flashes it; Delete removes it.
+    // Both are real: an action that only announces what it would have done
+    // teaches the wrong thing about what the table can do.
+    demoRowHandlers: {
+      onEdit: (row: Person) => {
+        flags.onCellEdit(row, "status", nextStatus(row));
+        flags.flashRow(row.id);
+      },
+      onDelete: flags.onDeleteRow,
+    },
   };
   const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
     flags.writePatches([updateRow(row.id, columnChanges(patch))]);

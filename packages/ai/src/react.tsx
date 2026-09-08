@@ -307,6 +307,7 @@ function observationFromRuntime(
     source: view?.sourceCapabilities ?? PAGE_ONLY_SOURCE,
     writePolicy: options.writePolicy ?? "allow",
     approval: sharedApproval(options.approval).policy,
+    presentation: sharedApproval(options.approval).presentation,
     commit: options.commit ?? "stage",
     hasPagination:
       options.apply?.setPage !== undefined || Boolean(query?.setPage),
@@ -629,9 +630,11 @@ function bindLiveSession(
   const onApprove = (subject: ApprovalSubject, signal?: AbortSignal) => {
     const options = optionsRef.current;
     if (options.onApprove) return options.onApprove(subject, signal);
-    if (sharedApproval(options.approval).policy === "never") {
-      return Promise.resolve(true);
-    }
+    // No second policy decision here. The session already resolved whether a
+    // human is asked, for THIS capability, with the action's own override
+    // applied — so a table that asks for nothing by default can still mark
+    // one action always-ask. Answering "approved" on the shared policy alone
+    // silently overrode that.
     return waitForChrome.current(subject, signal);
   };
   const inner = createAgentSession({
@@ -888,7 +891,9 @@ function TableAgentProvider({
         id: transactionId.current,
         pending: entry,
         decisions: entry.proposals.map(() => "pending"),
-        presentation: sharedApproval(optionsRef.current.approval).presentation,
+        // Resolved by the session for THIS action, so an override of
+        // `ai.approval.presentation` reaches the surface that draws it.
+        presentation: subject.presentation,
       });
       if (signal?.aborted) {
         entry.resolve(false);
@@ -1029,22 +1034,25 @@ function TableAgentProvider({
             : {}),
           decisions: transaction.decisions,
           presentation: transaction.presentation,
-          // "Approve remaining" is what these mean: a row already refused
-          // stays refused, or the control undoes the reader's own work. A
-          // write that named no rows has nothing to enumerate, so it is
-          // answered whole — an empty position list would reach the session
-          // as "approved none of the rows", which is a refusal.
+          // "Approve remaining" is what these mean once rows have been
+          // decided: a row already refused stays refused, or the control
+          // undoes the reader's own work.
+          //
+          // A write that cannot be split is answered whole — a row move, a
+          // custom operation, or one that enumerates no rows at all. Sending
+          // positions for one of those reaches the session as a decision it
+          // is right to refuse, and an empty list reads as "approved none".
           approve: () =>
             transaction.pending.resolve(
-              transaction.pending.proposals.length === 0
-                ? true
-                : settle(transaction.decisions, "approved")
+              transaction.pending.perItem
+                ? settle(transaction.decisions, "approved")
+                : true
             ),
           reject: () =>
             transaction.pending.resolve(
-              transaction.pending.proposals.length === 0
-                ? false
-                : settle(transaction.decisions, "rejected")
+              transaction.pending.perItem
+                ? settle(transaction.decisions, "rejected")
+                : false
             ),
           ...(transaction.pending.perItem
             ? { decideAt: decideAt(transaction.id) }

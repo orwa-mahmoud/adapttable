@@ -349,7 +349,10 @@ export function AntdDemo({
         derivedFields={derivedFields}
         formulaColumns={formulaColumns}
         columnGroups={columnGroups}
-        render={(source, { features: demoFeatures, ...columns }) => (
+        render={(
+          source,
+          { features: demoFeatures, demoRowHandlers, ...columns }
+        ) => (
           <DataTable
             source={source}
             columns={
@@ -400,7 +403,7 @@ export function AntdDemo({
                 rowActions:
                   (rowMutations ?? (focused && !columnGroups))
                     ? undefined
-                    : makeActions(locale),
+                    : makeActions(locale, demoRowHandlers),
                 commandPalette,
                 contextMenu,
                 filterControls,

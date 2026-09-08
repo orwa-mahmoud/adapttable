@@ -6,6 +6,7 @@
  * the proposals, and waits. Nothing about that is visible from the session
  * alone, so it is driven here the way the approval strip drives it.
  */
+import type { ActionAiOptions } from "@adapttable/core";
 import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalPending,
@@ -30,6 +31,7 @@ interface Row {
 const ROWS: Row[] = [{ id: "1", name: "Ada" }];
 
 type Pending = {
+  readonly presentation?: string;
   readonly proposals: readonly unknown[];
   readonly operation?: { readonly capability: string; readonly title?: string };
   readonly decisions: readonly string[];
@@ -1419,5 +1421,219 @@ describe("what the reader sees is not what the model is told", () => {
     });
 
     expect(JSON.stringify(await result)).not.toContain(SECRET);
+  });
+});
+
+/**
+ * Three ways an approval could be answered by the wrong party, or in the
+ * wrong shape. Each of these failed before the fix beside it.
+ */
+describe("who decides, and how", () => {
+  /** A custom write that asks for approval on a table that asks for none. */
+  function sensitive(ai?: ActionAiOptions) {
+    const ran: unknown[] = [];
+    return {
+      ran,
+      capability: {
+        key: "staff.archive",
+        summary: "Archive a person",
+        kind: "write" as const,
+        ...(ai ? { ai } : {}),
+        guide: {
+          guide: "Archive.",
+          input: { type: "object" },
+          output: { type: "object" },
+        },
+        isEnabled: () => true,
+        execute: (_context: unknown, args: unknown) => {
+          ran.push(args);
+          return { proposals: [], applied: true, approval: "not-required" };
+        },
+      },
+    };
+  }
+
+  it("asks for an action marked required, on a table that asks for nothing", async () => {
+    // The binding used to answer "approved" from the SHARED policy alone,
+    // which quietly overrode the action's own override.
+    handles.current = { session: undefined, pending: null };
+    const { ran, capability } = sensitive({
+      approval: { policy: "required" },
+    });
+    mount({
+      tableId: "required-override",
+      approval: { policy: "never" },
+      capabilities: [capability],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "required-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    // Parked, not run.
+    expect(ran).toHaveLength(0);
+
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    await result;
+    expect(ran).toHaveLength(1);
+  });
+
+  it("still runs an ordinary action without asking on that table", async () => {
+    handles.current = { session: undefined, pending: null };
+    const { ran, capability } = sensitive();
+    mount({
+      tableId: "inherits-never",
+      approval: { policy: "never" },
+      capabilities: [capability],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const settled = await session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "never-1"
+    );
+    expect(settled.ok).toBe(true);
+    expect(ran).toHaveLength(1);
+    expect(handles.current.pending).toBeNull();
+  });
+
+  it("answers an indivisible write whole, even though it names rows", async () => {
+    // Two proposals describing one change — a row move, or any custom write
+    // that declares itself indivisible. Sending positions for one of these
+    // reached the session as a decision it is right to refuse, so the write
+    // could not be approved at all.
+    handles.current = { session: undefined, pending: null };
+    const ran: unknown[] = [];
+    mount({
+      tableId: "indivisible",
+      approval: "writes",
+      capabilities: [
+        {
+          key: "staff.swap",
+          summary: "Swap two people",
+          kind: "write",
+          guide: {
+            guide: "Swap.",
+            input: { type: "object" },
+            output: { type: "object" },
+          },
+          isEnabled: () => true,
+          plan: () => ({
+            proposals: [
+              { rowKey: "1", after: "2" },
+              { rowKey: "2", before: "1" },
+            ],
+            payload: { from: "1", to: "2" },
+            // One change, described twice.
+            perItem: false,
+          }),
+          execute: (_context, args) => {
+            ran.push(args);
+            return { proposals: [], applied: true, approval: "not-required" };
+          },
+        },
+      ],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = session().execute(
+      "staff.swap",
+      { from: "1", to: "2" },
+      session().manifest().viewRevision,
+      "swap-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    expect(handles.current.pending?.proposals).toHaveLength(2);
+    // No per-row controls, because it cannot be split.
+    expect(handles.current.pending?.decideAt).toBeUndefined();
+
+    act(() => {
+      handles.current.pending?.approve();
+    });
+    const settled = await result;
+    expect(settled.ok).toBe(true);
+    expect((settled.result as { approval: string }).approval).toBe("approved");
+    expect(ran).toHaveLength(1);
+  });
+
+  it("reviews an action where the action says, not where the table does", async () => {
+    handles.current = { session: undefined, pending: null };
+    const { capability } = sensitive({
+      approval: { policy: "required", presentation: "modal" },
+    });
+    mount({
+      tableId: "presentation-override",
+      approval: { policy: "writes", presentation: "widget" },
+      capabilities: [capability],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "presentation-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    expect(handles.current.pending?.presentation).toBe("modal");
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await result;
+  });
+
+  it("takes the table's own location when the action names none", async () => {
+    handles.current = { session: undefined, pending: null };
+    const { capability } = sensitive({ approval: { policy: "required" } });
+    mount({
+      tableId: "presentation-inherit",
+      approval: { policy: "never", presentation: "table" },
+      capabilities: [capability],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "presentation-2"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    // Policy overridden, location inherited — the fields resolve separately.
+    expect(handles.current.pending?.presentation).toBe("table");
+
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await result;
   });
 });

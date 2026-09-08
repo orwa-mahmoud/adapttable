@@ -368,7 +368,10 @@ export function UnstyledLike({
       derivedFields={derivedFields}
       formulaColumns={formulaColumns}
       columnGroups={columnGroups}
-      render={(source, { features: demoFeatures, ...columns }) => {
+      render={(
+        source,
+        { features: demoFeatures, demoRowHandlers, ...columns }
+      ) => {
         return (
           <DataTable
             source={source}
@@ -422,7 +425,7 @@ export function UnstyledLike({
                   rowActions:
                     (rowMutations ?? (focused && !columnGroups))
                       ? undefined
-                      : makeActions(locale),
+                      : makeActions(locale, demoRowHandlers),
                   commandPalette,
                   contextMenu,
                   filterControls,
