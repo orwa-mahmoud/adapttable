@@ -87,7 +87,7 @@
   - **~30 internal plumbing exports were removed from `@adapttable/core`**
     (editing/grouping keyboard micro-steps, internal constants, layout math
     helpers). Everything the adapters use remains public and documented.
-  - **The adapter-builder tier ships from `@adapttable/react/adapter`.**
+  - **The adapter-builder tier ships from `@adapttable/core/adapter`.**
     `useDataTableShell`, the render prelude, chrome prop bundles, pinning
     and pager math, keyed virtualization and the inline icons moved to the
     new entry point; `@adapttable/core` keeps the app-facing API. Same
@@ -215,7 +215,7 @@
   - **~30 internal plumbing exports were removed from `@adapttable/core`**
     (editing/grouping keyboard micro-steps, internal constants, layout math
     helpers). Everything the adapters use remains public and documented.
-  - **The adapter-builder tier ships from `@adapttable/react/adapter`.**
+  - **The adapter-builder tier ships from `@adapttable/core/adapter`.**
     `useDataTableShell`, the render prelude, chrome prop bundles, pinning
     and pager math, keyed virtualization and the inline icons moved to the
     new entry point; `@adapttable/core` keeps the app-facing API. Same

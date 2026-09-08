@@ -2,14 +2,20 @@
 "@adapttable/react": major
 ---
 
-First release of the React binding. Hooks, `ColumnDef`, structural Chrome and
-the builder tier live here; `@adapttable/core` stays framework-neutral.
-`pnpm adapttable migrate-v3` rewrites every moved import, including the
-subpaths that moved wholesale.
+First stable release of `@adapttable/react`, the headless React binding for
+the framework-neutral engine in `@adapttable/core`.
 
-React faces of the neutral helpers ship with it: `computed`, `aggregate` and
-`buildFormulaColumns` return React columns, `SummaryRowFn` types `summaryRow`
-and `groupAggregates`, and a custom mobile card receives `ReactNode` field
-values instead of `unknown`. `renderCard` is now typed
-`ReactMobileCardRenderer` — a card annotated with the neutral
-`MobileCardRenderer` needs the React type.
+The root exports React hooks and column types; `/features` provides feature
+composition and `/adapter` provides structural Chrome, slots and builder
+helpers. React-specific `computed`, `aggregate`, `buildFormulaColumns`,
+`SummaryRowFn`, `Slot`, `fillSlot` and `ReactMobileCardRenderer` support
+React-rendered values without introducing React into the neutral engine.
+
+Rendering prepares a private engine candidate and publishes it at commit.
+Abandoned or suspended renders do not publish data or revisions to subscribers.
+The binding includes `useQuerySource` with `selectorKey` for re-projecting
+unchanged fetched pages, live feature composition, and named shell contracts
+for custom adapters.
+
+This is a new package, not an upgrade from a previously published React
+binding. Existing v2 core consumers should follow the package-import migration.
