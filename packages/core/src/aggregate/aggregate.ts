@@ -35,6 +35,18 @@ import { getPath } from "../utils/path";
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 /**
+ * An operation id: a built-in name, or one a column declared itself.
+ *
+ * The open half is what carries a host's `{ id, label, calculate }` operation
+ * through state, a URL and a request; the named half is what keeps built-ins
+ * autocompleting.
+ *
+ * @public
+ */
+export type AggregateOperationId =
+  AggregateName | (string & Record<never, never>);
+
+/**
  * A custom aggregator: the values found for one column across the rows being
  * aggregated, already narrowed to those that are present.
  *
@@ -60,10 +72,11 @@ export interface AggregateFormatContext {
   readonly columnKey: string;
   /**
    * The operation that produced it, when the table knows: the reader's own
-   * choice, or the one a server was asked for. A host's `groupAggregates`
+   * choice, or the one a server was asked for — a built-in name, or the id of
+   * an operation the column declared itself. A hand-written `groupAggregates`
    * mapper declares nothing, so this is absent there.
    */
-  readonly aggregation?: AggregateName | "none";
+  readonly aggregation?: AggregateOperationId;
 }
 
 /**
@@ -201,12 +214,12 @@ export function resolveAggregateValue<TRow>(
 export function aggregate<TRow>(
   spec: AggregateSpec,
   options: AggregateOptions<TRow> = {}
-): (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>> {
+): GroupAggregatesMapper<TRow> {
   const { columns, format, host: boundHost } = options;
   const byKey = new Map(columns?.map((c) => [c.key, c]));
   const entries = Object.entries(spec);
 
-  return (rows) => {
+  const mapper = (rows: readonly TRow[]) => {
     const out: Partial<Record<string, DisplayValue>> = {};
     for (const [key, fn] of entries) {
       if (!fn) continue;
@@ -228,4 +241,83 @@ export function aggregate<TRow>(
     }
     return out;
   };
+  return withDeclaredAggregates(mapper, declaredFrom(spec));
+}
+
+/**
+ * What a mapper built by {@link aggregate} was declared to compute.
+ *
+ * Column key to operation id, and `CUSTOM_AGGREGATE` where the declaration
+ * was a function rather than a name. Ids only: a closure is not application
+ * state, so nothing here can reach a URL, a saved view or a request body.
+ *
+ * @public
+ */
+export type DeclaredAggregates = Readonly<Record<string, string>>;
+
+/**
+ * The operation id standing for "the host calculates this itself".
+ *
+ * A function says what to compute and nothing about which operation it is,
+ * so the table reports it as custom rather than inventing a name for it.
+ *
+ * @public
+ */
+export const CUSTOM_AGGREGATE = "custom";
+
+/** Where the declaration rides on the mapper, out of reach of JSON. */
+const DECLARED = Symbol.for("adapttable.declaredAggregates");
+
+/**
+ * A `groupAggregates` / `summaryRow` mapper, optionally carrying what it was
+ * declared to compute.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export interface GroupAggregatesMapper<TRow> {
+  (rows: readonly TRow[]): Partial<Record<string, DisplayValue>>;
+  /** What this mapper declares, when the table built it. */
+  readonly [DECLARED]?: DeclaredAggregates;
+}
+
+/** The spec, reduced to the ids a reader-facing surface may show. */
+function declaredFrom(spec: AggregateSpec): DeclaredAggregates {
+  const out: Record<string, string> = {};
+  for (const [key, fn] of Object.entries(spec)) {
+    if (!fn) continue;
+    out[key] = typeof fn === "string" ? fn : CUSTOM_AGGREGATE;
+  }
+  return out;
+}
+
+/** Attach a declaration to a mapper without making it enumerable state. */
+function withDeclaredAggregates<TRow>(
+  mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>,
+  declared: DeclaredAggregates
+): GroupAggregatesMapper<TRow> {
+  return Object.defineProperty(mapper, DECLARED, {
+    value: declared,
+    enumerable: false,
+  });
+}
+
+/**
+ * Read what a mapper declares, when it came from {@link aggregate}.
+ *
+ * The table asks this instead of running the mapper on invented rows: a
+ * hand-written mapper answers nothing, which is the honest answer, and a
+ * declared one names the columns and operations it owns.
+ *
+ * @param mapper - Any `groupAggregates` / `summaryRow` value.
+ * @returns The declaration, or `undefined` for a mapper the table did not build.
+ *
+ * @public
+ */
+export function declaredAggregates(
+  mapper: unknown
+): DeclaredAggregates | undefined {
+  if (typeof mapper !== "function") return undefined;
+  return (mapper as GroupAggregatesMapper<never>)[DECLARED];
 }

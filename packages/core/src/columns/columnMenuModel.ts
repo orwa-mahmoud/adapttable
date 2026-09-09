@@ -1,6 +1,6 @@
+import type { ResolvedAggregateOperation } from "../aggregate/aggregatable";
 import type { ColumnMetadata } from "../columnModel";
 import type { FeatureHostState } from "../features/currentHost";
-import type { GroupAggregateOverride } from "../grouping/groupAggregateOverrides";
 import type { GroupingPanelState } from "../grouping/groupingPanelModel";
 import type { Direction } from "../types";
 import {
@@ -422,28 +422,60 @@ function appendGroupingPanelActions<TRow>(
     disabled: false,
     run: () => (grouped ? panel.remove(row.key) : panel.add(row.key)),
   });
+  // A column the table is grouped by shows the group's own value where its
+  // aggregate would go, so it is not offered one here — exactly as the panel
+  // does not offer it. An aggregation already on it is left alone, not
+  // discarded, and stays visible in the panel.
   if (panel.groupBy.length === 0 || grouped) return;
+
+  // The same list the panel reads: same eligibility, same operations, same
+  // current value, same mutation. A column offers one answer wherever a
+  // reader meets it.
+  const candidate = panel.aggregations.candidates.find(
+    (entry) => entry.columnKey === row.key
+  );
+  if (!candidate) return;
+  const active = panel.aggregations.items.find(
+    (item) => item.columnKey === row.key && item.editable
+  );
   actions.push({
     kind: "choice",
     id: "group-aggregation",
     label: ctx.labels.groupingAggregation,
     disabled: !panel.canSetAggregates,
-    value: panel.aggregateOverrides[row.key] ?? "",
-    options: [
-      { value: "", label: ctx.labels.groupingAggregationDefault },
-      { value: "sum", label: ctx.labels.selectionSum },
-      { value: "avg", label: ctx.labels.groupingAverage },
-      { value: "min", label: ctx.labels.selectionMin },
-      { value: "max", label: ctx.labels.selectionMax },
-      { value: "count", label: ctx.labels.selectionCount },
-      { value: "none", label: ctx.labels.groupingAggregationNone },
-    ],
-    onChange: (value) =>
-      panel.setAggregate(
-        row.key,
-        (value || undefined) as GroupAggregateOverride | undefined
-      ),
+    value: active?.operationId ?? "",
+    options: candidate.operations.map((operation) => ({
+      value: operation.id,
+      label: operationLabel(operation, ctx.labels),
+    })),
+    onChange: (value) => {
+      panel.setAggregateOperation(row.key, value);
+    },
   });
+  if (active) {
+    actions.push({
+      id: "remove-aggregation",
+      label: ctx.labels.groupingRemoveAggregation(row.name),
+      disabled: !panel.canSetAggregates,
+      run: () => panel.removeAggregate(row.key),
+    });
+  }
+}
+
+/** What one operation is called: the table's own name, or the host's. */
+function operationLabel(
+  operation: ResolvedAggregateOperation,
+  labels: ColumnMenuLabels
+): string {
+  if (!operation.builtIn) return operation.label ?? operation.id;
+  const named: Partial<Record<string, string>> = {
+    sum: labels.selectionSum,
+    avg: labels.groupingAverage,
+    min: labels.selectionMin,
+    max: labels.selectionMax,
+    count: labels.selectionCount,
+  };
+  return named[operation.id] ?? operation.id;
 }
 
 function appendPluginColumnMenuActions<TRow>(
@@ -537,10 +569,8 @@ export interface ColumnMenuLabels {
   ungroupColumn: (label: string) => string;
   /** Label for the group aggregation choice. */
   groupingAggregation: string;
-  /** Preserve the developer's aggregation choice. */
-  groupingAggregationDefault: string;
-  /** Explicitly hide this column's group aggregate. */
-  groupingAggregationNone: string;
+  /** Take this column's aggregation away. */
+  groupingRemoveAggregation: (label: string) => string;
   /** Full average label used by aggregation choices. */
   groupingAverage: string;
   /** Count aggregation label. */

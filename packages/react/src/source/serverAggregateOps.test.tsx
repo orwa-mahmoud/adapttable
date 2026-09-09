@@ -39,12 +39,10 @@ describe("queryAggregateOps", () => {
     ).toEqual({ budget: "sum", load: "avg", team: "count" });
   });
 
-  it("says nothing about an aggregate only the server understands", () => {
-    // A custom function name is the server's own; the table does not pretend
-    // to know what it means.
-    expect(
-      queryAggregateOps([{ key: "budget", fn: "median" }])
-    ).toBeUndefined();
+  it("keeps a host operation id so formatAggregate is told the same request", () => {
+    expect(queryAggregateOps([{ key: "budget", fn: "median" }])).toEqual({
+      budget: "median",
+    });
   });
 
   it("says nothing when a request carries no aggregates at all", () => {

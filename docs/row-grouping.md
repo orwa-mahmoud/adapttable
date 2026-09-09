@@ -62,12 +62,51 @@ group's caption:
 }
 ```
 
-Every layout also provides **Add grouping column**, **Aggregate column**, and
-**Group aggregation** selects. Mobile uses these kit-native selects rather than
-header drag-and-drop. Aggregation choices are `sum`, `avg`, `min`, `max`,
-`count`, and `none`, plus **Default**. A choice is a session override for that
-column: Default (or no override) preserves the developer's
-`groupAggregates` result, while `none` explicitly hides it.
+Every layout also provides **Add grouping column**. Below the grouping chips,
+an **Aggregations** section lists every active aggregate as its own item —
+column name, operation selector, and remove — plus **Add columns** (a native
+checklist) and **Restore defaults**. Mobile uses these kit-native controls
+rather than header drag-and-drop.
+
+A column's `aggregatable` declaration decides what a reader may add. Developer
+defaults (`aggregatable.default`, a declared `groupAggregates` mapper, or the
+original server `aggregates` query) appear immediately. Removing a developer
+default records an explicit suppression (`none` in `groupAgg`); **Restore
+defaults** puts the original developer configuration back, not the latest
+server response.
+
+```tsx
+{
+  key: "budget",
+  aggregatable: {
+    default: "sum",
+    operations: ["sum", "avg", "min", "max", "count"],
+  },
+}
+{
+  key: "start",
+  aggregatable: { operations: ["min", "max", "count"] },
+}
+{
+  key: "score",
+  aggregatable: {
+    default: "median",
+    operations: [
+      "sum",
+      "avg",
+      { id: "median", label: "Median", calculate: median },
+    ],
+  },
+}
+```
+
+`aggregatable: true` offers the operations that suit the column's declared
+filter or editor type — numeric for `number` / `numberRange`, min/max/count
+for a date, Count otherwise. `false` or omitted refuses reader changes; a
+host mapper or server aggregate on that column still shows as read-only.
+Empty `operations` offers nothing. A custom `{ id, label, calculate }` is
+addressed by `id`; omit `calculate` for an operation only the backend can
+answer, and list that id on `supports.aggregateOperations`.
 
 A computed aggregate is a number, and a number under a money column should
 read as money. `formatAggregate` on the column says how one reads, and is
@@ -523,9 +562,11 @@ export function People() {
   `(rows) => Partial<Record<string, ReactNode>>` shape as `summaryRow`; reuse
   one function for both if the math is identical — or build both with
   `aggregate()` (below).
-- **Session aggregation overrides.** `sum`, `avg`, `min`, `max`, `count`, and
-  `none` overlay the developer mapper by column. An absent/default choice
-  preserves `groupAggregates`; the choices serialize as `groupAgg`.
+- **Session aggregation overrides.** Each active column has its own operation.
+  Reader choices overlay the developer's `aggregatable.default`, declared
+  `groupAggregates`, or original `query.aggregates`. Removing a developer
+  default writes `none`; **Restore defaults** clears the override map. The
+  choices serialize as `groupAgg`, including host-defined ids.
 - **Expand / collapse.** Groups start expanded. Collapse state can be paired
   with `useGroupCollapseUrlState`; `groupBy` and `groupAgg` use the table's
   ordinary URL state.

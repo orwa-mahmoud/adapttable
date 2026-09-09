@@ -5,7 +5,16 @@ import {
   type GroupingPanelChromeProps,
   type GroupingPanelSlots,
 } from "@adapttable/react/adapter";
-import { ActionIcon, Box, Group, Paper, Select, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Checkbox,
+  Group,
+  Paper,
+  Select,
+  Text,
+} from "@mantine/core";
 
 const TOUCH_SIZE = 44;
 /** A caret between chips, grown into something aimable mid-drag. */
@@ -184,6 +193,81 @@ const slots: GroupingPanelSlots = {
         {label}
       </Text>
     </Paper>
+  ),
+  AggregationItem: ({ label, readOnly, readOnlyLabel, children, ...rest }) => (
+    <Group
+      gap={4}
+      wrap="nowrap"
+      p={4}
+      style={{
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: "var(--mantine-radius-md)",
+      }}
+      data-read-only={readOnly || undefined}
+      {...rest}
+    >
+      <Text size="sm" fw={500}>
+        {label}
+      </Text>
+      {readOnly ? (
+        <Text size="xs" c="dimmed">
+          {readOnlyLabel}
+        </Text>
+      ) : (
+        children
+      )}
+    </Group>
+  ),
+  AggregationRemove: ({ label, onRemove, ...rest }) => (
+    <ActionIcon
+      variant="subtle"
+      color="gray"
+      w={TOUCH_SIZE}
+      h={TOUCH_SIZE}
+      aria-label={label}
+      onClick={onRemove}
+      {...rest}
+    >
+      ×
+    </ActionIcon>
+  ),
+  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => (
+    <Group
+      component="fieldset"
+      gap="xs"
+      wrap="wrap"
+      aria-label={label}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      {...rest}
+    >
+      <Text size="xs" c="dimmed">
+        {label}
+      </Text>
+      {options.map((option) => (
+        <Checkbox
+          key={option.value}
+          size="sm"
+          label={option.label}
+          aria-label={option.label}
+          checked={option.checked}
+          disabled={disabled}
+          onChange={(event) => onToggle(option.value, event.target.checked)}
+          data-adapttable-part="grouping-aggregation-option"
+        />
+      ))}
+    </Group>
+  ),
+  AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
+    <Button
+      variant="subtle"
+      size="compact-sm"
+      mih={TOUCH_SIZE}
+      disabled={disabled}
+      onClick={onRestore}
+      {...rest}
+    >
+      {label}
+    </Button>
   ),
 };
 

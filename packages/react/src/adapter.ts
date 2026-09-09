@@ -908,12 +908,17 @@ export type {
   GroupingDropProps,
 } from "./grouping/GroupingPanelChrome";
 export {
+  type GroupingPanelAggregationItemProps,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistOption,
+  type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
   GroupingPanelChrome,
   type GroupingPanelChromeProps,
   type GroupingPanelDropZoneProps,
   type GroupingPanelOption,
   type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
   type GroupingPanelSlotProps,
   type GroupingPanelSlots,

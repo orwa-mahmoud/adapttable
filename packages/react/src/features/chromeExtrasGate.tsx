@@ -5,7 +5,11 @@
  * Empty slots pass chrome through unchanged, so the lean table never
  * imports those modules.
  */
-import { createNeutralTable, type RowPinSide } from "@adapttable/core";
+import {
+  computedAggregateKeys,
+  createNeutralTable,
+  type RowPinSide,
+} from "@adapttable/core";
 import { type ReactNode, useRef } from "react";
 
 import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
@@ -130,8 +134,14 @@ function RuntimePublisher<TRow>({
     groupingState: {
       groupBy: chrome.source.groupBy,
       aggregateOverrides: chrome.source.groupAggregateOverrides ?? {},
+      columns: chrome.allColumns,
+      computedAggregateKeys: chrome.grouping
+        ? computedAggregateKeys(chrome.grouping.entries)
+        : undefined,
+      queryAggregates: chrome.source.queryAggregates,
+      aggregateOperations: chrome.source.aggregateOperations,
       columnLabel: (key: string) => {
-        const column = chrome.columnLayout.visibleColumns.find(
+        const column = chrome.allColumns.find(
           (candidate) => candidate.key === key
         );
         if (typeof column?.header === "string") return column.header;

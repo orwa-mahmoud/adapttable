@@ -33,6 +33,11 @@ function panelState(
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
+    aggregations: { items: [], candidates: [], atDefaults: true },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
     ...overrides,
   };
 }

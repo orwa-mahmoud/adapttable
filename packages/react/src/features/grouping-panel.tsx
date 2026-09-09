@@ -5,6 +5,11 @@
  * engine. Importing plain `grouping()` never reaches this module.
  */
 import {
+  addAggregation,
+  type AggregationSourceSupport,
+  allowsReaderOperation,
+  declaredAggregates,
+  declaredByDeveloper,
   formatGroupBy,
   type GroupAggregateOverride,
   GROUPING_COLUMN_DND_MIME,
@@ -13,11 +18,16 @@ import {
   type GroupingDragState,
   type GroupingPanelInteractions,
   hasGroupingColumnDrag,
+  initialOperation,
   isRtlElement,
   moveGroupingKey,
   moveGroupingKeyBy,
   parseGroupBy,
+  reconcileAggregations,
+  removeAggregation,
   removeGroupingKey,
+  resolveAggregatable,
+  restoreAggregationDefaults,
 } from "@adapttable/core";
 import {
   type DragEvent as ReactDragEvent,
@@ -45,6 +55,29 @@ type RuntimeGrouping = NonNullable<
 
 interface GroupingPanelFeature<TRow> extends TableFeature<TRow> {
   initialGroupBy?: string | readonly string[];
+  /** The extras the panel was composed with, for their declared aggregates. */
+  extras?: GroupingExtras<TRow>;
+}
+
+/**
+ * What the aggregation model is built from, as one value.
+ *
+ * The runtime view is read through a getter, so a memo over it needs
+ * something that changes when its inputs do: the reader's choices, and the
+ * columns those choices can land on.
+ */
+function aggregationInputKey(
+  runtime: ReturnType<typeof useTableRuntime>
+): string {
+  const groupingState = runtime.view()?.groupingState;
+  const overrides = Object.entries(groupingState?.aggregateOverrides ?? {})
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .sort((left, right) => left.localeCompare(right))
+    .join(",");
+  const columns = (groupingState?.columns ?? [])
+    .map((column) => column.key)
+    .join(",");
+  return `${overrides}|${columns}`;
 }
 
 function activeKeys(runtime: ReturnType<typeof useTableRuntime>): string[] {
@@ -74,22 +107,31 @@ function spoken<TArgs extends readonly unknown[]>(
     : fallback(...args);
 }
 
+const BUILT_IN_LABELS = {
+  sum: ["selectionSum", "Sum"],
+  avg: ["groupingAverage", "Average"],
+  min: ["selectionMin", "Minimum"],
+  max: ["selectionMax", "Maximum"],
+  count: ["selectionCount", "Count"],
+  none: ["groupingAggregationNone", "None"],
+} as const;
+
+/**
+ * What one operation is called.
+ *
+ * The table localizes its own operations; a host operation carries the label
+ * the host wrote, which is the only name it has.
+ */
 function aggregateChoiceText(
   runtime: ReturnType<typeof useTableRuntime>,
-  value: GroupAggregateOverride | undefined
+  value: string | undefined,
+  hostLabel?: string
 ): string {
-  const choices = {
-    default: ["groupingAggregationDefault", "Default"],
-    sum: ["selectionSum", "Sum"],
-    avg: ["groupingAverage", "Average"],
-    min: ["selectionMin", "Minimum"],
-    max: ["selectionMax", "Maximum"],
-    count: ["selectionCount", "Count"],
-    none: ["groupingAggregationNone", "None"],
-  } as const;
-  const [key, fallback] = choices[value ?? "default"];
-  const localized = runtime.labels()?.[key];
-  return typeof localized === "string" ? localized : fallback;
+  if (value === undefined) return hostLabel ?? "";
+  const entry = BUILT_IN_LABELS[value as keyof typeof BUILT_IN_LABELS];
+  if (!entry) return hostLabel ?? value;
+  const localized = runtime.labels()?.[entry[0]];
+  return typeof localized === "string" ? localized : entry[1];
 }
 
 /**
@@ -118,6 +160,8 @@ function GroupingPanelProvider({
   children,
 }: Readonly<FeatureProviderProps>): ReactNode {
   const runtime = useTableRuntime();
+  const extras: GroupingExtras<unknown> =
+    (feature as GroupingPanelFeature<unknown>).extras ?? {};
   const initialGroupBy = (feature as GroupingPanelFeature<unknown>)
     .initialGroupBy;
   const initialized = useRef(false);
@@ -364,16 +408,21 @@ function GroupingPanelProvider({
     [moveBy, runtime]
   );
 
-  const setAggregate = useCallback(
-    (key: string, value: GroupAggregateOverride | undefined) => {
-      const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
-      if (!groupingState?.setAggregateOverrides) return;
-      const next = { ...groupingState.aggregateOverrides };
-      if (value === undefined) delete next[key];
-      else next[key] = value;
-      groupingState.setAggregateOverrides(next);
+  /** Say what just happened to a column's aggregate. */
+  const announceAggregate = useCallback(
+    (key: string, operationId: string | undefined, hostLabel?: string) => {
       const column = labelText(runtime, key);
-      const choice = aggregateChoiceText(runtime, value);
+      if (operationId === undefined) {
+        setAnnouncement(
+          spoken(
+            runtime,
+            "groupingAggregateRemoved",
+            (name) => `${name} aggregate removed`,
+            column
+          )
+        );
+        return;
+      }
       setAnnouncement(
         spoken(
           runtime,
@@ -381,12 +430,164 @@ function GroupingPanelProvider({
           (name, aggregate) =>
             `${name} group aggregation changed to ${aggregate}`,
           column,
-          choice
+          aggregateChoiceText(runtime, operationId, hostLabel)
         )
       );
     },
     [runtime]
   );
+
+  // What the developer's own mapper declares. Only this feature can see it —
+  // it was handed the extras — so it publishes it, and the chrome builds the
+  // model with the live overrides beside it.
+  const declared = useMemo(
+    () => declaredAggregates(extras.groupAggregates),
+    [extras.groupAggregates]
+  );
+
+  const aggregationSource = useCallback(():
+    AggregationSourceSupport | undefined => {
+    const view = runtime.view();
+    const grouping = view?.sourceCapabilities?.grouping;
+    const listed = view?.groupingState?.aggregateOperations;
+    if (grouping === undefined && listed === undefined) return undefined;
+    return { grouping, aggregateOperations: listed };
+  }, [runtime]);
+
+  const aggregationInput = useCallback(() => {
+    const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
+    return {
+      columns: groupingState?.columns ?? [],
+      overrides: groupingState?.aggregateOverrides ?? {},
+      declared: declaredAggregates(extras.groupAggregates),
+      queryAggregates: groupingState?.queryAggregates,
+      computedKeys: groupingState?.computedAggregateKeys,
+      source: aggregationSource(),
+    };
+  }, [aggregationSource, extras.groupAggregates, runtime]);
+
+  const setAggregate = useCallback(
+    (key: string, value: GroupAggregateOverride | undefined) => {
+      const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
+      if (!groupingState?.setAggregateOverrides) return;
+      if (value !== undefined && value !== "none") {
+        const input = aggregationInput();
+        const column = input.columns.find((candidate) => candidate.key === key);
+        // Columns the runtime does not yet know stay writable so a host can
+        // seed state; a column that is known must still offer the operation.
+        if (
+          column &&
+          !allowsReaderOperation(
+            resolveAggregatable(column),
+            value,
+            input.source
+          )
+        ) {
+          return;
+        }
+      }
+      const next = { ...groupingState.aggregateOverrides };
+      if (value === undefined) delete next[key];
+      else next[key] = value;
+      groupingState.setAggregateOverrides(next);
+    },
+    [aggregationInput, runtime]
+  );
+
+  const setAggregateOperation = useCallback(
+    (key: string, operationId: string) => {
+      const input = aggregationInput();
+      const column = input.columns.find((candidate) => candidate.key === key);
+      const resolved = column ? resolveAggregatable(column) : undefined;
+      // The one gate every entry point shares. An operation the column does
+      // not offer is refused here rather than calculated, whatever asked for
+      // it — this panel, the column menu, a link, or a restored view.
+      if (
+        !resolved ||
+        !allowsReaderOperation(resolved, operationId, input.source)
+      ) {
+        return;
+      }
+      setAggregate(key, operationId);
+      announceAggregate(
+        key,
+        operationId,
+        resolved.operations.find((entry) => entry.id === operationId)?.label
+      );
+    },
+    [aggregationInput, announceAggregate, setAggregate]
+  );
+
+  const addAggregate = useCallback(
+    (key: string) => {
+      const input = aggregationInput();
+      const column = input.columns.find((candidate) => candidate.key === key);
+      const resolved = column ? resolveAggregatable(column) : undefined;
+      if (!resolved) return;
+      const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
+      if (!groupingState?.setAggregateOverrides) return;
+      const operationId = initialOperation(resolved, input.source);
+      groupingState.setAggregateOverrides(
+        addAggregation(groupingState.aggregateOverrides, key, operationId)
+      );
+      announceAggregate(
+        key,
+        operationId,
+        resolved.operations.find((entry) => entry.id === operationId)?.label
+      );
+    },
+    [aggregationInput, announceAggregate, runtime]
+  );
+
+  const removeAggregate = useCallback(
+    (key: string) => {
+      const input = aggregationInput();
+      const column = input.columns.find((candidate) => candidate.key === key);
+      const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
+      if (!column || !groupingState?.setAggregateOverrides) return;
+      // Taking away something the developer declared has to be recorded as a
+      // decision. Dropping the entry would hand the column straight back to
+      // the default the reader just removed.
+      groupingState.setAggregateOverrides(
+        removeAggregation(
+          groupingState.aggregateOverrides,
+          key,
+          declaredByDeveloper(column, input)
+        )
+      );
+      announceAggregate(key, undefined);
+    },
+    [aggregationInput, announceAggregate, runtime]
+  );
+
+  const restoreAggregateDefaults = useCallback(() => {
+    const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
+    if (!groupingState?.setAggregateOverrides) return;
+    groupingState.setAggregateOverrides(restoreAggregationDefaults());
+    setAnnouncement(
+      spoken(
+        runtime,
+        "groupingAggregatesRestored",
+        () => "Aggregations restored to defaults"
+      )
+    );
+  }, [runtime]);
+
+  // A link, a saved view or a configuration change can carry an operation a
+  // column no longer allows. Reconciling here means it is never calculated,
+  // while an explicit removal — the reader's own decision — survives.
+  const overridesKey = aggregationInputKey(runtime);
+  useEffect(() => {
+    const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
+    if (!groupingState?.setAggregateOverrides) return;
+    const current = groupingState.aggregateOverrides;
+    const next = reconcileAggregations(
+      current,
+      groupingState.columns ?? [],
+      aggregationSource()
+    );
+    if (next !== current) groupingState.setAggregateOverrides(next);
+  }, [aggregationSource, overridesKey, runtime]);
 
   const value = useMemo(
     () =>
@@ -402,10 +603,17 @@ function GroupingPanelProvider({
         remove,
         moveBy,
         setAggregate,
+        declaredAggregates: declared,
+        setAggregateOperation,
+        addAggregate,
+        removeAggregate,
+        restoreAggregateDefaults,
       }) as unknown as GroupingPanelInteractions,
     [
       add,
+      addAggregate,
       announcement,
+      declared,
       chipDragProps,
       chipKeyboardProps,
       drag,
@@ -413,8 +621,11 @@ function GroupingPanelProvider({
       headerDragProps,
       moveBy,
       remove,
+      removeAggregate,
       removeDropProps,
+      restoreAggregateDefaults,
       setAggregate,
+      setAggregateOperation,
     ]
   );
 
@@ -440,6 +651,7 @@ export function groupingPanel<TRow = unknown>(
     ...base,
     id: "grouping-panel",
     initialGroupBy: groupBy,
+    extras,
     apply(input) {
       const patch = base.apply?.(input) ?? {};
       const withoutInitialGroup = { ...patch };

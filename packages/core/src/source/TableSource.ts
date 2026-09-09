@@ -9,7 +9,7 @@ import type {
   SortDirection,
 } from "../types";
 import type { TableSourceCapabilities } from "./capabilities";
-import type { QueryFilterGroup } from "./queryContract";
+import type { QueryAggregate, QueryFilterGroup } from "./queryContract";
 import type { QueryGroupRow } from "./queryGroups";
 
 /**
@@ -139,6 +139,19 @@ export interface TableSource<TRow> extends TableStateMutators {
    * knew before.
    */
   readonly groupAggregations?: GroupAggregateOps;
+  /**
+   * The aggregates the developer asked for originally — `query.aggregates`
+   * as they wrote it, before reader overrides and before a response arrived.
+   * Restore-defaults and the initial panel read this, never the operations
+   * the rows on screen were computed with.
+   */
+  readonly queryAggregates?: readonly QueryAggregate[];
+  /**
+   * Operation ids this backend can compute, when it named them. Omit and the
+   * five standard functions are assumed on a server that declared
+   * `supports.aggregates`.
+   */
+  readonly aggregateOperations?: readonly string[];
 
   /* State (write) is the shared {@link TableStateMutators} contract. */
 }

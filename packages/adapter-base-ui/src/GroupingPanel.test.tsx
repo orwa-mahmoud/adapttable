@@ -18,7 +18,12 @@ interface Row {
 
 const columns: ColumnDef<Row>[] = [
   { key: "team", header: "Team", accessor: (row) => row.team },
-  { key: "amount", header: "Amount", accessor: (row) => row.amount },
+  {
+    key: "amount",
+    header: "Amount",
+    accessor: (row) => row.amount,
+    aggregatable: { operations: ["sum", "avg", "count"] },
+  },
 ];
 const rows: Row[] = [
   { id: "1", team: "Core", amount: 10 },
@@ -48,6 +53,11 @@ function panelState(
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
+    aggregations: { items: [], candidates: [], atDefaults: true },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
     ...overrides,
   };
 }

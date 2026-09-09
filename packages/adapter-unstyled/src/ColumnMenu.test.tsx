@@ -72,8 +72,8 @@ const labels = {
   groupByColumn: (label: string) => `Group by ${label}`,
   ungroupColumn: (label: string) => `Ungroup ${label}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",
   selectionSum: "Sum",
@@ -143,6 +143,11 @@ describe("unstyled ColumnMenu", () => {
       remove: () => undefined,
       moveBy: () => undefined,
       setAggregate: () => undefined,
+      aggregations: { items: [], candidates: [], atDefaults: true },
+      setAggregateOperation: () => undefined,
+      addAggregate: () => undefined,
+      removeAggregate: () => undefined,
+      restoreAggregateDefaults: () => undefined,
     };
     const host: FeatureHostState = {
       filterTypes: [],

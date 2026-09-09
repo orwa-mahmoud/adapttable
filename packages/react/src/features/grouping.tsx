@@ -6,7 +6,9 @@
  * through {@link GROUPING_LIVE}.
  */
 import {
+  aggregationModel,
   capabilityReason,
+  computedAggregateKeys,
   computePagination,
   devWarn,
   formatGroupBy,
@@ -85,14 +87,36 @@ function LiveGrouping({
   const aggregateOverrideKey = serializeGroupAggregateOverrides(
     source.groupAggregateOverrides ?? {}
   );
+  const aggregationSource = useMemo(
+    () => ({
+      grouping: sourceCapabilities({
+        allFilteredRows: source.allFilteredRows,
+        groups: serverGroups,
+        capabilities,
+      }).grouping,
+      aggregateOperations: source.aggregateOperations,
+    }),
+    [
+      capabilities,
+      serverGroups,
+      source.aggregateOperations,
+      source.allFilteredRows,
+    ]
+  );
   const effectiveGroupAggregates = useMemo(
     () =>
       withGroupAggregateOverrides(
         groupAggregates,
         source.groupAggregateOverrides ?? {},
-        chrome.allColumns
+        chrome.allColumns,
+        aggregationSource
       ),
-    [groupAggregates, source.groupAggregateOverrides, chrome.allColumns]
+    [
+      aggregationSource,
+      chrome.allColumns,
+      groupAggregates,
+      source.groupAggregateOverrides,
+    ]
   );
 
   const grouping = useMemo(() => {
@@ -193,12 +217,36 @@ function LiveGrouping({
         }
       : source;
   const groupingArmed = grouping !== undefined;
+  const groupingPanel = useMemo(() => {
+    if (!chrome.groupingPanel) return undefined;
+    const computedKeys = grouping
+      ? computedAggregateKeys(grouping.entries)
+      : [];
+    return {
+      ...chrome.groupingPanel,
+      groupBy: groupByKeys,
+      aggregations: aggregationModel({
+        columns: chrome.allColumns,
+        overrides: source.groupAggregateOverrides ?? {},
+        declared: chrome.groupingPanel.declaredAggregates,
+        queryAggregates: source.queryAggregates,
+        computedKeys,
+        source: aggregationSource,
+      }),
+    };
+  }, [
+    aggregationSource,
+    chrome.allColumns,
+    chrome.groupingPanel,
+    groupByKeys,
+    grouping,
+    source.groupAggregateOverrides,
+    source.queryAggregates,
+  ]);
   return children({
     ...chrome,
     grouping,
-    groupingPanel: chrome.groupingPanel
-      ? { ...chrome.groupingPanel, groupBy: groupByKeys }
-      : undefined,
+    groupingPanel,
     groupingArmed,
     source: viewSource,
     editingRows: viewSource.rows,

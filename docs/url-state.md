@@ -219,37 +219,38 @@ modals or drawers where the address bar shouldn't change.
 
 ## Param reference
 
-| Param                       | Example                        | Meaning                                                                                                                                                        |
-| --------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `atv`                       | `atv=1`                        | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                       |
-| `q`                         | `q=avery`                      | Committed search term.                                                                                                                                         |
-| `find`                      | `find=Ada`                     | Find-bar query (in-table walk). Empty or closed deletes the param; the current-match index is never stored.                                                    |
-| `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                    |
-| `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |
-| `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                            |
-| `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                 |
-| `groupBy`                   | `groupBy=team,status`          | Ordered row-grouping column keys, outermost first. Written by `groupingPanel()` and omitted when no grouping is active.                                        |
-| `groupAgg`                  | `groupAgg=budget:sum,age:none` | Per-column session aggregation overrides: `sum`, `avg`, `min`, `max`, `count`, or `none`. A missing column preserves the developer's `groupAggregates` result. |
-| `f_<key>`                   | `f_status=active`              | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                    |
-| `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`     | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day. |
-| `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`            | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                           |
-| `ft`                        | `ft=1.{"combinator":"and"}`    | Versioned AND/OR filter tree. Unknown versions are dropped, never reinterpreted.                                                                               |
-| `colHide`                   | `colHide=email,phone`          | Hidden columns (keys percent-encoded).                                                                                                                         |
-| `colPin`                    | `colPin=name:left`             | Pinned columns and their side.                                                                                                                                 |
-| `colOrder`                  | `colOrder=name,role,salary`    | Explicit column order.                                                                                                                                         |
-| `colW`                      | `colW=name:220`                | Per-column pixel widths.                                                                                                                                       |
-| `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                       |
+| Param                       | Example                        | Meaning                                                                                                                                                                                                                                |
+| --------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `atv`                       | `atv=1`                        | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                                                                                               |
+| `q`                         | `q=avery`                      | Committed search term.                                                                                                                                                                                                                 |
+| `find`                      | `find=Ada`                     | Find-bar query (in-table walk). Empty or closed deletes the param; the current-match index is never stored.                                                                                                                            |
+| `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                                                                                            |
+| `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                                                                                              |
+| `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                                                                                                    |
+| `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                                                                                         |
+| `groupBy`                   | `groupBy=team,status`          | Ordered row-grouping column keys, outermost first. Written by `groupingPanel()` and omitted when no grouping is active.                                                                                                                |
+| `groupAgg`                  | `groupAgg=budget:sum,age:none` | Per-column session aggregation overrides: a built-in name, a host operation id, or `none` (explicit suppression). A missing column preserves the developer's `groupAggregates` / `aggregatable.default` / original `query.aggregates`. |
+| `f_<key>`                   | `f_status=active`              | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                                                                                            |
+| `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`     | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day.                                                                         |
+| `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`            | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                                                                                                   |
+| `ft`                        | `ft=1.{"combinator":"and"}`    | Versioned AND/OR filter tree. Unknown versions are dropped, never reinterpreted.                                                                                                                                                       |
+| `colHide`                   | `colHide=email,phone`          | Hidden columns (keys percent-encoded).                                                                                                                                                                                                 |
+| `colPin`                    | `colPin=name:left`             | Pinned columns and their side.                                                                                                                                                                                                         |
+| `colOrder`                  | `colOrder=name,role,salary`    | Explicit column order.                                                                                                                                                                                                                 |
+| `colW`                      | `colW=name:220`                | Per-column pixel widths.                                                                                                                                                                                                               |
+| `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                                                                                               |
 
 With a `urlKey` every param is prefixed: `people.q`, `people.f_status`,
 `people.groupBy`, `people.groupAgg`, `people.colHide`, ….
 
 `groupAgg` is intentionally an override map, not a replacement aggregate
-configuration. Choosing **Default** deletes that column's entry and restores
-the result declared by the table's `groupAggregates`; choosing `none` keeps an
-explicit entry that hides the aggregate. Keys are percent-encoded, malformed
-or unknown choices are ignored independently, and equivalent maps serialize in
-stable column-key order. [Row grouping](./row-grouping.md) documents the panel,
-column-menu, mobile, and keyboard routes that write this state.
+configuration. Adding or changing an operation writes that column's id;
+removing a developer-declared aggregate writes `none` so the default does not
+come back; removing a reader-added aggregate deletes the entry. **Restore
+defaults** clears the whole map. Keys are percent-encoded, host-defined ids
+survive the round trip, and equivalent maps serialize in stable column-key
+order. [Row grouping](./row-grouping.md) documents the panel, column-menu,
+mobile, and keyboard routes that write this state.
 
 ### Defaults vs. explicit clears
 

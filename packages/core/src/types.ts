@@ -992,6 +992,22 @@ export interface TableLabels {
   groupingAggregationDefault?: string;
   /** Explicitly hide a column's group aggregate. */
   groupingAggregationNone?: string;
+  /** Heading for the list of active aggregations. */
+  groupingAggregations?: string;
+  /** Opens the picker that adds a column's aggregation. */
+  groupingAddAggregation?: string;
+  /** Puts the developer's whole aggregation setup back. */
+  groupingRestoreAggregations?: string;
+  /** Takes one column's aggregation away. */
+  groupingRemoveAggregation?: (column: string) => string;
+  /** Names the operation control of one active aggregation. */
+  groupingAggregationFor?: (column: string) => string;
+  /** Marks an aggregate the host owns and the reader cannot change. */
+  groupingAggregationReadOnly?: string;
+  /** Polite announcement after a column's aggregate is taken away. */
+  groupingAggregateRemoved?: (column: string) => string;
+  /** Polite announcement after the declared aggregations are restored. */
+  groupingAggregatesRestored?: string;
   /** Full label for the average aggregation choice. */
   groupingAverage?: string;
   /** Polite announcement after adding a grouping field. */

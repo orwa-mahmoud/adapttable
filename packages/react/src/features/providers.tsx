@@ -28,11 +28,13 @@
  *   another table's row detail.
  */
 import {
+  type ColumnMetadata,
   devWarn,
   type ExtraFilters,
   type GroupAggregateOverrides,
   type NeutralTable,
   type PinSide,
+  type QueryAggregate,
   type RowPinSide,
   type TableSourceCapabilities,
 } from "@adapttable/core";
@@ -240,6 +242,21 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly groupBy: string | undefined;
     readonly aggregateOverrides: GroupAggregateOverrides;
     readonly columnLabel: (key: string) => string;
+    /**
+     * The table's columns — the schema, not the currently visible subset.
+     * Hiding a column must not drop its aggregate; a key gone from the
+     * schema is the one that is reconciled away.
+     */
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    /** Aggregate keys the host's mapper produced in a computed group row. */
+    readonly computedAggregateKeys?: readonly string[];
+    /**
+     * The developer's original `aggregates` declaration, not the response
+     * now on screen.
+     */
+    readonly queryAggregates?: readonly QueryAggregate[];
+    /** Operation ids the backend listed, when it named them. */
+    readonly aggregateOperations?: readonly string[];
     readonly setGroupBy: (key: string | undefined) => void;
     readonly initializeGroupBy?: (key: string) => void;
     readonly setAggregateOverrides?: (

@@ -6,18 +6,19 @@
  */
 import {
   type Direction,
-  type GroupAggregateOverride,
   type GroupingChipKeyboardProps as CoreGroupingChipKeyboardProps,
   type GroupingDragProps as CoreGroupingDragProps,
   type GroupingDropProps as CoreGroupingDropProps,
   type GroupingPanelState,
+  type ResolvedAggregateOperation,
   type TableLabels,
 } from "@adapttable/core";
 import {
   type DragEventHandler,
   type KeyboardEventHandler,
   type ReactNode,
-  useState,
+  useEffect,
+  useRef,
 } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
@@ -195,8 +196,70 @@ export interface GroupingPanelSelectProps {
   /** Whether the source cannot accept this selection. */
   disabled?: boolean;
   /** Stable styling and test part name. */
-  "data-adapttable-part":
-    "grouping-add" | "grouping-aggregate-column" | "grouping-aggregate";
+  "data-adapttable-part": "grouping-add" | "grouping-aggregation-operation";
+}
+
+/** Props for one kit-owned active aggregation. @public */
+export interface GroupingPanelAggregationItemProps {
+  /** Display name of the aggregated column. */
+  label: string;
+  /**
+   * Whether the app owns this aggregate. A read-only item carries no
+   * operation list and no remove control, because neither would do anything.
+   */
+  readOnly: boolean;
+  /** Localized note naming who owns a read-only aggregate. */
+  readOnlyLabel: string;
+  /** The operation control and remove control, when the reader has them. */
+  children: ReactNode;
+  /** Stable styling and test part name. */
+  "data-adapttable-part": "grouping-aggregation-item";
+}
+
+/** Props for the kit-owned control that removes one aggregation. @public */
+export interface GroupingPanelAggregationRemoveProps {
+  /** Localized accessible name. */
+  label: string;
+  /** Take this column's aggregation away. */
+  onRemove: () => void;
+  /** Stable styling and test part name. */
+  "data-adapttable-part": "grouping-aggregation-remove";
+}
+
+/** One column offered by the aggregation picker. @public */
+export interface GroupingPanelChecklistOption {
+  /** The column key. */
+  value: string;
+  /** The column's display name. */
+  label: string;
+  /** Whether it is aggregated right now. */
+  checked: boolean;
+}
+
+/** Props for the kit-owned multi-select that adds aggregations. @public */
+export interface GroupingPanelChecklistProps {
+  /** Localized visible and accessible label. */
+  label: string;
+  /** Every eligible column, checked when it is already aggregated. */
+  options: readonly GroupingPanelChecklistOption[];
+  /** Turn one column's aggregation on or off. */
+  onToggle: (value: string, checked: boolean) => void;
+  /** Whether the source cannot accept a change. */
+  disabled?: boolean;
+  /** Stable styling and test part name. */
+  "data-adapttable-part": "grouping-aggregation-add";
+}
+
+/** Props for the kit-owned button that restores declared aggregations. @public */
+export interface GroupingPanelRestoreProps {
+  /** Localized visible and accessible label. */
+  label: string;
+  /** Whether the declared setup is already in place. */
+  disabled: boolean;
+  /** Put the declared setup back. */
+  onRestore: () => void;
+  /** Stable styling and test part name. */
+  "data-adapttable-part": "grouping-aggregations-restore";
 }
 
 /** Props for the chip-only drop target that ungroups a field. @public */
@@ -223,6 +286,14 @@ export interface GroupingPanelSlots {
   Select: (props: GroupingPanelSelectProps) => ReactNode;
   /** Chip-only drag-to-ungroup target. */
   RemoveZone: (props: GroupingPanelRemoveZoneProps) => ReactNode;
+  /** One active aggregation: a column, its operation, and its remove. */
+  AggregationItem: (props: GroupingPanelAggregationItemProps) => ReactNode;
+  /** The control that takes one aggregation away. */
+  AggregationRemove: (props: GroupingPanelAggregationRemoveProps) => ReactNode;
+  /** The multi-select that adds and removes aggregated columns. */
+  AggregationPicker: (props: GroupingPanelChecklistProps) => ReactNode;
+  /** The button that restores the app's declared aggregations. */
+  AggregationRestore: (props: GroupingPanelRestoreProps) => ReactNode;
 }
 
 /**
@@ -256,18 +327,69 @@ function columnName<TRow>(column: ColumnDef<TRow>): string {
   return column.mobileLabel ?? column.key;
 }
 
-function aggregateOptions(
+function firstFocusable(
+  root: ParentNode | null,
+  selector: string
+): HTMLElement | null {
+  const node = root?.querySelector(selector);
+  return node instanceof HTMLElement ? node : null;
+}
+
+/**
+ * After an item's remove control unmounts, put focus on the next remaining
+ * remove — or the add-columns checklist, so keyboard users are not dumped
+ * onto the document body.
+ */
+function focusAfterAggregationRemoval(
+  root: HTMLElement | null,
+  remainingKeys: readonly string[],
+  removedIndex: number
+): void {
+  const nextKey =
+    remainingKeys[removedIndex] ?? remainingKeys[removedIndex - 1];
+  if (nextKey) {
+    const next = firstFocusable(
+      root,
+      `[data-adapttable-aggregation="${CSS.escape(nextKey)}"] [data-adapttable-part="grouping-aggregation-remove"]`
+    );
+    if (next) {
+      next.focus();
+      return;
+    }
+  }
+  const option = firstFocusable(
+    root,
+    `[data-adapttable-part="grouping-aggregation-option"]`
+  );
+  if (option) {
+    option.focus();
+    return;
+  }
+  firstFocusable(
+    root,
+    `[data-adapttable-part="grouping-aggregations-restore"]`
+  )?.focus();
+}
+
+/**
+ * What one operation is called.
+ *
+ * The table localizes its own five; an operation a column declared itself
+ * carries the label the host wrote, which no locale file can know.
+ */
+function operationLabel(
+  operation: ResolvedAggregateOperation,
   labels: Required<TableLabels>
-): readonly GroupingPanelOption[] {
-  return [
-    { value: "", label: labels.groupingAggregationDefault },
-    { value: "sum", label: labels.selectionSum },
-    { value: "avg", label: labels.groupingAverage },
-    { value: "min", label: labels.selectionMin },
-    { value: "max", label: labels.selectionMax },
-    { value: "count", label: labels.selectionCount },
-    { value: "none", label: labels.groupingAggregationNone },
-  ];
+): string {
+  if (!operation.builtIn) return operation.label ?? operation.id;
+  const named: Partial<Record<string, string>> = {
+    sum: labels.selectionSum,
+    avg: labels.groupingAverage,
+    min: labels.selectionMin,
+    max: labels.selectionMax,
+    count: labels.selectionCount,
+  };
+  return named[operation.id] ?? operation.id;
 }
 
 /**
@@ -283,8 +405,17 @@ export function GroupingPanelChrome<TRow>({
   dir,
   slots,
 }: Readonly<GroupingPanelChromeProps<TRow>>): ReactNode {
-  const { Surface, DropZone, Chip, Select, RemoveZone } = slots;
-  const [aggregateColumn, setAggregateColumn] = useState("");
+  const {
+    Surface,
+    DropZone,
+    Chip,
+    Select,
+    RemoveZone,
+    AggregationItem,
+    AggregationRemove,
+    AggregationPicker,
+    AggregationRestore,
+  } = slots;
   const byKey = new Map(columns.map((column) => [column.key, column]));
   const available = columns
     .filter(
@@ -292,16 +423,31 @@ export function GroupingPanelChrome<TRow>({
         column.groupable !== false && !state.groupBy.includes(column.key)
     )
     .map((column) => ({ value: column.key, label: columnName(column) }));
-  const aggregateColumns = columns
-    .filter((column) => !state.groupBy.includes(column.key))
-    .map((column) => ({ value: column.key, label: columnName(column) }));
-  const selectedAggregateColumn = aggregateColumns.some(
-    (option) => option.value === aggregateColumn
-  )
-    ? aggregateColumn
-    : (aggregateColumns[0]?.value ?? "");
-  const aggregateValue =
-    state.aggregateOverrides[selectedAggregateColumn] ?? "";
+  /** A column's display name, or its key for a cell only the app declared. */
+  const nameOf = (key: string): string => {
+    const column = byKey.get(key);
+    return column ? columnName(column) : key;
+  };
+  const items = state.aggregations.items;
+  const aggregationsRef = useRef<HTMLSpanElement>(null);
+  const pendingRemovalIndex = useRef<number | null>(null);
+  const itemKeys = items.map((item) => item.columnKey).join("\0");
+  useEffect(() => {
+    const removedIndex = pendingRemovalIndex.current;
+    if (removedIndex === null) return;
+    pendingRemovalIndex.current = null;
+    focusAfterAggregationRemoval(
+      aggregationsRef.current,
+      items.map((item) => item.columnKey),
+      removedIndex
+    );
+  }, [itemKeys, items]);
+  // A column the table is grouped by shows the group's own value where its
+  // aggregate would go, so it is not offered as something to add. An
+  // aggregation already on it stays visible above, and removable.
+  const offered = state.aggregations.candidates.filter(
+    (candidate) => !state.groupBy.includes(candidate.columnKey)
+  );
 
   // A chip dropped either side of itself lands exactly where it already is.
   // Those boundaries are the two nearest the reader's hand, so offering them
@@ -414,36 +560,94 @@ export function GroupingPanelChrome<TRow>({
         disabled={available.length === 0}
         data-adapttable-part="grouping-add"
       />
-      {state.groupBy.length > 0 && aggregateColumns.length > 0 ? (
+      {/* Every active aggregation, on a row of its own: what is aggregated,
+          with which operation, and how to take it away. A reader never has to
+          point a picker at a column to discover what it is doing. */}
+      {state.groupBy.length > 0 && (items.length > 0 || offered.length > 0) ? (
         <span
-          data-adapttable-part="grouping-aggregate-controls"
+          ref={aggregationsRef}
+          data-adapttable-part="grouping-aggregations"
           style={{
-            display: "inline-flex",
+            display: "flex",
+            flex: "1 0 100%",
+            width: "100%",
             flexWrap: "wrap",
-            alignItems: "flex-end",
+            alignItems: "center",
             gap: "0.5rem",
           }}
         >
-          <Select
-            label={labels.groupingAggregateColumn}
-            value={selectedAggregateColumn}
-            options={aggregateColumns}
-            onChange={setAggregateColumn}
-            disabled={!state.canSetAggregates}
-            data-adapttable-part="grouping-aggregate-column"
+          <span data-adapttable-part="grouping-aggregations-label">
+            {labels.groupingAggregations}
+          </span>
+          {items.map((item) => {
+            const name = nameOf(item.columnKey);
+            return (
+              <span
+                key={item.columnKey}
+                data-adapttable-aggregation={item.columnKey}
+              >
+                <AggregationItem
+                  label={name}
+                  readOnly={!item.editable}
+                  readOnlyLabel={labels.groupingAggregationReadOnly}
+                  data-adapttable-part="grouping-aggregation-item"
+                >
+                  {item.editable ? (
+                    <>
+                      <Select
+                        label={labels.groupingAggregationFor(name)}
+                        value={item.operationId ?? ""}
+                        options={item.operations.map((operation) => ({
+                          value: operation.id,
+                          label: operationLabel(operation, labels),
+                        }))}
+                        onChange={(value) =>
+                          state.setAggregateOperation(item.columnKey, value)
+                        }
+                        disabled={!state.canSetAggregates}
+                        data-adapttable-part="grouping-aggregation-operation"
+                      />
+                      <AggregationRemove
+                        label={labels.groupingRemoveAggregation(name)}
+                        onRemove={() => {
+                          pendingRemovalIndex.current = items.findIndex(
+                            (entry) => entry.columnKey === item.columnKey
+                          );
+                          state.removeAggregate(item.columnKey);
+                        }}
+                        data-adapttable-part="grouping-aggregation-remove"
+                      />
+                    </>
+                  ) : null}
+                </AggregationItem>
+              </span>
+            );
+          })}
+          <AggregationPicker
+            label={labels.groupingAddAggregation}
+            options={offered.map((candidate) => ({
+              value: candidate.columnKey,
+              label: nameOf(candidate.columnKey),
+              checked: candidate.active,
+            }))}
+            onToggle={(value, checked) => {
+              if (checked) {
+                state.addAggregate(value);
+                return;
+              }
+              pendingRemovalIndex.current = items.findIndex(
+                (entry) => entry.columnKey === value
+              );
+              state.removeAggregate(value);
+            }}
+            disabled={!state.canSetAggregates || offered.length === 0}
+            data-adapttable-part="grouping-aggregation-add"
           />
-          <Select
-            label={labels.groupingAggregation}
-            value={aggregateValue}
-            options={aggregateOptions(labels)}
-            onChange={(value) =>
-              state.setAggregate(
-                selectedAggregateColumn,
-                (value || undefined) as GroupAggregateOverride | undefined
-              )
-            }
-            disabled={!state.canSetAggregates}
-            data-adapttable-part="grouping-aggregate"
+          <AggregationRestore
+            label={labels.groupingRestoreAggregations}
+            disabled={!state.canSetAggregates || state.aggregations.atDefaults}
+            onRestore={state.restoreAggregateDefaults}
+            data-adapttable-part="grouping-aggregations-restore"
           />
         </span>
       ) : null}

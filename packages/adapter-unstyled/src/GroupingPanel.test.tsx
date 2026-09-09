@@ -29,6 +29,10 @@ const columns: ColumnDef<Row>[] = [
     key: "qty",
     header: "Quantity",
     accessor: (row) => row.qty,
+    aggregatable: {
+      default: "sum",
+      operations: ["sum", "avg"],
+    },
   },
 ];
 
@@ -116,15 +120,18 @@ describe("unstyled GroupingPanel", () => {
   it("selects an aggregate column and aggregation", () => {
     renderTable(["team"]);
 
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Aggregate column" }),
-      { target: { value: "qty" } }
-    );
     const aggregate = screen.getByRole("combobox", {
-      name: "Group aggregation",
+      name: "Quantity aggregation",
     });
+    expect(aggregate).toHaveValue("sum");
     fireEvent.change(aggregate, { target: { value: "avg" } });
 
     expect(aggregate).toHaveValue("avg");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Quantity aggregation" })
+    );
+    expect(
+      screen.queryByRole("combobox", { name: "Quantity aggregation" })
+    ).not.toBeInTheDocument();
   });
 });

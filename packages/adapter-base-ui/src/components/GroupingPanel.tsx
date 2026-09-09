@@ -1,18 +1,22 @@
 /** The interactive row-grouping panel, in Base UI. */
 import {
   GripIcon,
+  type GroupingPanelAggregationItemProps,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
   GroupingPanelChrome,
   type GroupingPanelChromeProps,
   type GroupingPanelDropZoneProps,
   type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
 } from "@adapttable/react/adapter";
 
 import { Button, IconButton, Text } from "../ui";
-import { NativeSelect } from "./primitives";
+import { Checkbox, NativeSelect } from "./primitives";
 
 const slots: GroupingPanelSlots = {
   Surface: ({
@@ -132,6 +136,72 @@ const slots: GroupingPanelSlots = {
     >
       {label}
     </fieldset>
+  ),
+  AggregationItem: ({
+    label,
+    readOnly,
+    readOnlyLabel,
+    children,
+    ...rest
+  }: GroupingPanelAggregationItemProps) => (
+    <span
+      className="adapttable-grouping-aggregation-item"
+      data-read-only={readOnly || undefined}
+      {...rest}
+    >
+      <Text>{label}</Text>
+      {readOnly ? <Text>{readOnlyLabel}</Text> : children}
+    </span>
+  ),
+  AggregationRemove: ({
+    label,
+    onRemove,
+    ...rest
+  }: GroupingPanelAggregationRemoveProps) => (
+    <IconButton aria-label={label} onClick={onRemove} {...rest}>
+      {"\u00d7"}
+    </IconButton>
+  ),
+  AggregationPicker: ({
+    label,
+    options,
+    onToggle,
+    disabled,
+    ...rest
+  }: GroupingPanelChecklistProps) => (
+    <fieldset
+      aria-label={label}
+      className="adapttable-grouping-aggregation-add"
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      {...rest}
+    >
+      <Text>{label}</Text>
+      {options.map((option) => (
+        <label key={option.value}>
+          <Checkbox
+            checked={option.checked}
+            aria-label={option.label}
+            onToggle={
+              disabled
+                ? undefined
+                : () => onToggle(option.value, !option.checked)
+            }
+            data-adapttable-part="grouping-aggregation-option"
+          />
+          {option.label}
+        </label>
+      ))}
+    </fieldset>
+  ),
+  AggregationRestore: ({
+    label,
+    disabled,
+    onRestore,
+    ...rest
+  }: GroupingPanelRestoreProps) => (
+    <Button disabled={disabled} onClick={onRestore} {...rest}>
+      {label}
+    </Button>
   ),
 };
 

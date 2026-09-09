@@ -14,7 +14,12 @@ interface Row {
 }
 const cols: ColumnDef<Row>[] = [
   { key: "a", header: "Alpha", accessor: (r) => r.id },
-  { key: "b", header: "Bravo", accessor: (r) => r.id },
+  {
+    key: "b",
+    header: "Bravo",
+    accessor: (r) => r.id,
+    aggregatable: { operations: ["sum", "avg", "count"] },
+  },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
 
@@ -67,8 +72,8 @@ const labels = {
   groupByColumn: (name: string) => `Group by ${name}`,
   ungroupColumn: (name: string) => `Ungroup ${name}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",
   selectionSum: "Sum",

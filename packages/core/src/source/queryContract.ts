@@ -37,6 +37,14 @@ export interface QuerySupport {
   tree?: boolean;
   /** Aggregate requests reach the server, which computes the values. */
   aggregates?: boolean;
+  /**
+   * Operation ids this backend can compute.
+   *
+   * Omit it and the five standard functions are assumed when `aggregates` is
+   * true. A local `calculate` does not prove the server knows that id — list
+   * a custom operation here before the table will ask for it.
+   */
+  aggregateOperations?: readonly string[];
   /** The nested AND/OR condition tree reaches the server. */
   filterTree?: boolean;
   /** Distinct-value counts per column reach the server. */
@@ -155,6 +163,8 @@ const REMEDY: Record<keyof QuerySupport, string> = {
   grouping: "return group rows for `query.groupBy`",
   tree: "return the children of every node in `query.expandedIds`",
   aggregates: "compute `query.aggregates`",
+  aggregateOperations:
+    "list the aggregate operation ids this backend can compute",
   filterTree: "evaluate `query.filterTree`",
   facets: "return counts for `query.facets`",
   cursor: "page by `query.cursor` instead of `query.page`",

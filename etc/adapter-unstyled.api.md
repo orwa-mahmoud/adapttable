@@ -335,9 +335,12 @@ export interface DataTableClassNames {
     groupFooterCell?: string;
     groupFooterRow?: string;
     groupingAdd?: string;
-    groupingAggregate?: string;
-    groupingAggregateColumn?: string;
-    groupingAggregateControls?: string;
+    groupingAggregationAdd?: string;
+    groupingAggregationItem?: string;
+    groupingAggregationOperation?: string;
+    groupingAggregationRemove?: string;
+    groupingAggregations?: string;
+    groupingAggregationsRestore?: string;
     groupingChip?: string;
     groupingChipHandle?: string;
     groupingChipRemove?: string;

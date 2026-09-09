@@ -27,28 +27,49 @@ export interface ActionConfirm<TArg> {
 export const ACTIONS_COLUMN_KEY = "actions";
 
 // @public
+export function addAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
+
+// @public
 export function addFilterTreeCondition(tree: QueryFilterGroup | undefined, path: readonly number[], condition: QueryCondition): QueryFilterGroup;
 
 // @public
 export function addFilterTreeGroup(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
 
 // @public
-export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
+export type Aggregatable<TValue = SortableValue> = boolean | AggregatableConfig<TValue>;
+
+// @public
+export interface AggregatableConfig<TValue = SortableValue> {
+    readonly default?: string;
+    readonly operations: readonly AggregateOperation<TValue>[];
+}
+
+// @public
+export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): GroupAggregatesMapper<TRow>;
 
 // @public
 export const AGGREGATE_NAMES: AggregateName[];
+
+// @public
+export const AGGREGATE_SUPPRESSED = "none";
 
 // @public
 export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
 export interface AggregateFormatContext {
-    readonly aggregation?: AggregateName | "none";
+    readonly aggregation?: AggregateOperationId;
     readonly columnKey: string;
 }
 
 // @public
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type AggregateOperation<TValue = SortableValue> = AggregateName | CustomAggregateOperation<TValue>;
+
+// @public
+export type AggregateOperationId = AggregateName | (string & Record<never, never>);
 
 // @public
 export interface AggregateOptions<TRow> {
@@ -61,7 +82,58 @@ export interface AggregateOptions<TRow> {
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
 
 // @public
+export interface AggregationCandidate {
+    readonly active: boolean;
+    readonly columnKey: string;
+    readonly operations: readonly ResolvedAggregateOperation[];
+}
+
+// @public
+export interface AggregationItem {
+    readonly columnKey: string;
+    readonly editable: boolean;
+    readonly operationId?: string;
+    readonly operations: readonly ResolvedAggregateOperation[];
+    readonly origin: AggregationOrigin;
+}
+
+// @public
+export interface AggregationModel {
+    readonly atDefaults: boolean;
+    readonly candidates: readonly AggregationCandidate[];
+    readonly items: readonly AggregationItem[];
+}
+
+// @public
+export function aggregationModel<TRow>(input: AggregationModelInput<TRow>): AggregationModel;
+
+// @public
+export interface AggregationModelInput<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly computedKeys?: readonly string[];
+    readonly declared?: DeclaredAggregates;
+    readonly overrides: Readonly<Partial<Record<string, string>>>;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly source?: AggregationSourceSupport;
+}
+
+// @public
+export type AggregationOrigin = "reader" | "declared" | "host";
+
+// @public
+export interface AggregationSourceSupport {
+    readonly aggregateOperations?: readonly string[];
+    readonly grouping?: GroupingCapability;
+}
+
+// @public
 export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
+
+// @public
+export function allowsOperation(resolved: ResolvedAggregatable | undefined, operationId: string): boolean;
+
+// @public
+export function allowsReaderOperation(resolved: ResolvedAggregatable | undefined, operationId: string, source?: AggregationSourceSupport): boolean;
 
 // @public
 export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | undefined): readonly PinnedSummaryEntry<TRow>[];
@@ -670,9 +742,8 @@ export interface ColumnMenuLabels {
     filterColumn: string;
     groupByColumn: (label: string) => string;
     groupingAggregation: string;
-    groupingAggregationDefault: string;
-    groupingAggregationNone: string;
     groupingAverage: string;
+    groupingRemoveAggregation: (label: string) => string;
     hideAllColumns: string;
     hideColumn: string;
     moveEnd: string;
@@ -745,6 +816,7 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 // @public
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
+    aggregatable?: Aggregatable<SortableValue>;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
@@ -835,6 +907,12 @@ export function compareValues(a: SortableValue, b: SortableValue): number;
 
 // @public
 export function computed<TRow extends object, TValue = SortableValue>(spec: ComputedColumnSpec<TRow, TValue>): ColumnModel<TRow>;
+
+// @public
+export function computedAggregateKeys(entries: readonly {
+    readonly kind: string;
+    readonly aggregateCells?: Readonly<Record<string, unknown>>;
+}[]): readonly string[];
 
 // @public
 export interface ComputedColumnSpec<TRow, TValue> {
@@ -1009,6 +1087,16 @@ export const csvWriter: ExportWriter;
 export function currentFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
 // @public
+export const CUSTOM_AGGREGATE = "custom";
+
+// @public
+export interface CustomAggregateOperation<TValue = SortableValue> {
+    readonly calculate?: Aggregator<TValue>;
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
 export interface CustomCellEditorConflict {
     readonly incomingValue: string;
     readonly keep: () => void;
@@ -1057,6 +1145,15 @@ export const DATE_OPS: readonly ["before", "after", "on", "gte", "lte", "between
 
 // @public
 export type DateOp = (typeof DATE_OPS)[number];
+
+// @public
+export type DeclaredAggregates = Readonly<Record<string, string>>;
+
+// @public
+export function declaredAggregates(mapper: unknown): DeclaredAggregates | undefined;
+
+// @public
+export function declaredByDeveloper<TRow>(column: ColumnMetadata<TRow>, input: AggregationModelInput<TRow>): boolean;
 
 // @public
 export function declaredColumnLayout<TCol extends ColumnMetadata<never>>(columns: readonly TCol[]): Omit<UseColumnLayoutResult<never>, "visibleColumns"> & {
@@ -1930,16 +2027,23 @@ export function groupAggregateNode<TCol extends {
 } & Pick<ColumnMetadata<never>, "formatAggregate">>(column: TCol, node: DisplayValue | undefined, aggregation: GroupAggregateOps | undefined): DisplayValue | undefined;
 
 // @public
-export type GroupAggregateOps = Readonly<Partial<Record<string, AggregateName | "none">>>;
+export type GroupAggregateOps = Readonly<Partial<Record<string, AggregateOperationId | "none">>>;
 
 // @public
-export type GroupAggregateOverride = AggregateName | "none";
+export type GroupAggregateOverride = AggregateOperationId | "none";
 
 // @public
 export type GroupAggregateOverrides = Readonly<Partial<Record<string, GroupAggregateOverride>>>;
 
 // @public
 export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
+
+// @public
+export interface GroupAggregatesMapper<TRow> {
+    readonly [DECLARED]?: DeclaredAggregates;
+    // (undocumented)
+    (rows: readonly TRow[]): Partial<Record<string, DisplayValue>>;
+}
 
 // @public
 export type GroupByInput = string | readonly string[] | null | undefined;
@@ -2111,21 +2215,27 @@ export interface GroupingDropProps {
 // @public
 export interface GroupingPanelInteractions {
     add: (key: string) => void;
+    addAggregate: (key: string) => void;
     announcement: string;
     chipDragProps: (key: string) => GroupingDragProps;
     chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    declaredAggregates?: DeclaredAggregates;
     drag?: GroupingDragState;
     dropProps: (index: number) => GroupingDropProps;
     headerDragProps: (key: string) => GroupingDragProps;
     moveBy: (key: string, delta: -1 | 1) => void;
     remove: (key: string) => void;
+    removeAggregate: (key: string) => void;
     removeDropProps: () => GroupingDropProps;
+    restoreAggregateDefaults: () => void;
     setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
+    setAggregateOperation: (key: string, operationId: string) => void;
 }
 
 // @public
 export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregateOverrides: GroupAggregateOverrides;
+    aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
 }
@@ -2231,6 +2341,9 @@ export function htmlGroupedHeaderPlan<TRow>(columns: readonly ColumnMetadata<TRo
 export function humanizeKey(key: string): string;
 
 // @public
+export function impliedOperations<TRow>(column: ColumnMetadata<TRow>): readonly AggregateName[];
+
+// @public
 export function incrementalSearchText<TRow>(row: TRow): string;
 
 // @public
@@ -2285,6 +2398,9 @@ export function inflateBodyCellRowSpans<TCell extends {
     colSpan: number;
     rowSpan: number;
 }>(cellsByRow: ReadonlyMap<string, readonly TCell[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined): ReadonlyMap<string, readonly TCell[]>;
+
+// @public
+export function initialOperation(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
 
 // @public
 export function insertExtraRows<T extends {
@@ -2576,6 +2692,9 @@ export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "betwe
 
 // @public
 export type NumberOp = (typeof NUMBER_OPS)[number];
+
+// @public
+export function offerableOperations(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): readonly ResolvedAggregateOperation[];
 
 // @public
 export function openRowPatchStream(options: OpenRowPatchStreamOptions): RowPatchStreamHandle;
@@ -3015,6 +3134,7 @@ export interface QueryPivotRow {
 
 // @public
 export interface QuerySupport {
+    aggregateOperations?: readonly string[];
     aggregates?: boolean;
     cursor?: boolean;
     facets?: boolean;
@@ -3120,6 +3240,9 @@ export function readSortLevels(params: URLSearchParams, prefix?: string): {
 }[];
 
 // @public
+export function reconcileAggregations<TRow>(overrides: Readonly<Partial<Record<string, string>>>, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): Readonly<Partial<Record<string, string>>>;
+
+// @public
 export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
 
 // @public
@@ -3162,6 +3285,9 @@ export function relativeTokenLabel(raw: string, labels: {
 }): string;
 
 // @public
+export function removeAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, declaredByDeveloper: boolean): Readonly<Partial<Record<string, string>>>;
+
+// @public
 export function removeField(config: PivotConfig, zone: PivotZone, index: number): PivotConfig;
 
 // @public
@@ -3198,6 +3324,12 @@ export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseCol
 export function resetDevWarnings(): void;
 
 // @public
+export function resolveAggregatable<TRow>(column: ColumnMetadata<TRow>): ResolvedAggregatable | undefined;
+
+// @public
+export function resolveAggregatableColumns<TRow>(columns: readonly ColumnMetadata<TRow>[]): ReadonlyMap<string, ResolvedAggregatable>;
+
+// @public
 export function resolveAssembly<TRow>(partial?: Partial<AssemblyFns<TRow>>): AssemblyFns<TRow>;
 
 // @public
@@ -3224,6 +3356,21 @@ export function resolveCommitValue<TRow>(options: {
 
 // @public
 export function resolveContextTarget<TRow>(from: Element, rowFor: (rowId: string) => TRow | undefined): ResolvedContextTarget<TRow> | null;
+
+// @public
+export interface ResolvedAggregatable {
+    readonly columnKey: string;
+    readonly initial?: string;
+    readonly operations: readonly ResolvedAggregateOperation[];
+}
+
+// @public
+export interface ResolvedAggregateOperation {
+    readonly builtIn: boolean;
+    readonly calculate?: Aggregator;
+    readonly id: string;
+    readonly label?: string;
+}
 
 // @public
 export interface ResolvedContextTarget<TRow> {
@@ -3292,6 +3439,9 @@ export interface ResponsiveFit<TCol extends ColumnMetadata<never> = ColumnMetada
     extra?: number;
     widths?: Readonly<Record<string, number>>;
 }
+
+// @public
+export function restoreAggregationDefaults(): Readonly<Partial<Record<string, string>>>;
 
 // @public
 export function revisionToken(revisions: TableRevisions): string;
@@ -3973,18 +4123,26 @@ export interface TableLabels {
     }) => string;
     groupByColumn?: (label: string) => string;
     groupCount?: (count: number) => string;
+    groupingAddAggregation?: string;
     groupingAdded?: (label: string) => string;
     groupingAggregateChanged?: (label: string, aggregation: string) => string;
     groupingAggregateColumn?: string;
+    groupingAggregateRemoved?: (column: string) => string;
+    groupingAggregatesRestored?: string;
     groupingAggregation?: string;
     groupingAggregationDefault?: string;
+    groupingAggregationFor?: (column: string) => string;
     groupingAggregationNone?: string;
+    groupingAggregationReadOnly?: string;
+    groupingAggregations?: string;
     groupingAverage?: string;
     groupingDropColumns?: string;
     groupingDropToRemove?: string;
     groupingMoved?: (label: string, position: number) => string;
     groupingPanel?: string;
+    groupingRemoveAggregation?: (column: string) => string;
     groupingRemoved?: (label: string) => string;
+    groupingRestoreAggregations?: string;
     groupTotal?: (label: string) => string;
     headerFilters?: string;
     hideAllColumns?: string;
@@ -4276,6 +4434,7 @@ export interface TableSnapshot<TRow = unknown> {
 
 // @public
 export interface TableSource<TRow> extends TableStateMutators {
+    readonly aggregateOperations?: readonly string[];
     readonly allFilteredRows?: readonly TRow[];
     readonly allSearchedRows?: readonly TRow[];
     readonly capabilities?: TableSourceCapabilities;
@@ -4296,6 +4455,7 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly limit: number;
     readonly page: number;
     readonly paginationMode: ResolvedPaginationMode;
+    readonly queryAggregates?: readonly QueryAggregate[];
     refetch?: () => Promise<unknown> | void;
     readonly rows: readonly TRow[];
     readonly search: string;
@@ -4307,6 +4467,7 @@ export interface TableSource<TRow> extends TableStateMutators {
 
 // @public
 export interface TableSourceCapabilities {
+    readonly aggregateOperations?: readonly string[];
     readonly exportScope: ExportScopeCapability;
     readonly fullDataset: boolean;
     readonly grouping: GroupingCapability;
@@ -4513,10 +4674,10 @@ export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices
 export function withFilterType(registry: FilterTypeRegistry, spec: FilterTypeSpec): FilterTypeRegistry;
 
 // @public
-export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[]): GroupAggregatesFn<TRow> | undefined;
+export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): GroupAggregatesFn<TRow> | undefined;
 
 // @public
-export function withQueryAggregateOverrides(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides): readonly QueryAggregate[] | undefined;
+export function withQueryAggregateOverrides<TRow = unknown>(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides, columns?: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): readonly QueryAggregate[] | undefined;
 
 // @public
 export function writeClipboardText(text: string): Promise<boolean>;

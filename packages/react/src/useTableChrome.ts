@@ -1,4 +1,5 @@
 import {
+  aggregationModel,
   type BulkAction,
   collectFeatureNotices,
   type ColumnGroupRecord,
@@ -16,6 +17,7 @@ import {
   responsiveColumns,
   type RowAction,
   type SortByOption,
+  sourceCapabilities,
   type TableErrorState,
   tableErrorState,
   type TableLabels,
@@ -795,12 +797,36 @@ export function useTableChrome<TRow>(
             groupBy: groupByKeys,
             aggregateOverrides: source.groupAggregateOverrides ?? {},
             canSetAggregates: source.setGroupAggregateOverrides !== undefined,
+            // Built here, from the choices this very render carries. Built
+            // from a published view instead, the list would describe the
+            // render before the reader's click — which is exactly what a
+            // reader reads as the control doing nothing.
+            aggregations: aggregationModel({
+              columns: resolvedColumns,
+              overrides: source.groupAggregateOverrides ?? {},
+              declared: groupingPanelInteractions.declaredAggregates,
+              queryAggregates: source.queryAggregates,
+              source: {
+                grouping: sourceCapabilities({
+                  allFilteredRows: source.allFilteredRows,
+                  groups: source.groups,
+                  capabilities: source.capabilities,
+                }).grouping,
+                aggregateOperations: source.aggregateOperations,
+              },
+            }),
           }
         : undefined,
     [
+      resolvedColumns,
       groupByKeys,
       groupingPanelInteractions,
+      source.aggregateOperations,
+      source.allFilteredRows,
+      source.capabilities,
       source.groupAggregateOverrides,
+      source.groups,
+      source.queryAggregates,
       source.setGroupAggregateOverrides,
     ]
   );

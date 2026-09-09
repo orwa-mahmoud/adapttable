@@ -56,6 +56,13 @@ export {
  * Member types the signatures above hand back, reachable from the entry that
  * returns them.
  */
+export type {
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+} from "./aggregate/aggregatable";
+export type { AggregateOperationId } from "./aggregate/aggregate";
 export type { ColumnModel, SortableValue } from "./columnModel";
 export type {
   ColumnGroupShow,

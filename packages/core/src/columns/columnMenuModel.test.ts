@@ -213,6 +213,11 @@ describe("nextPinSide / pinActionLabel", () => {
   });
 });
 
+const SALARY_OPERATIONS = [
+  { id: "sum", builtIn: true },
+  { id: "avg", builtIn: true },
+] as const;
+
 describe("columnMenuActions", () => {
   function actionsFor(
     key: string,
@@ -321,6 +326,29 @@ describe("columnMenuActions", () => {
       remove: vi.fn(),
       moveBy: vi.fn(),
       setAggregate: vi.fn(),
+      aggregations: {
+        items: [
+          {
+            columnKey: "salary",
+            operationId: "sum",
+            editable: true,
+            origin: "reader" as const,
+            operations: SALARY_OPERATIONS,
+          },
+        ],
+        candidates: [
+          {
+            columnKey: "salary",
+            active: true,
+            operations: SALARY_OPERATIONS,
+          },
+        ],
+        atDefaults: false,
+      },
+      setAggregateOperation: vi.fn(),
+      addAggregate: vi.fn(),
+      removeAggregate: vi.fn(),
+      restoreAggregateDefaults: vi.fn(),
     };
     const grouped = actionsFor("team", { groupingPanel: panel }).actions;
     expect(grouped.map((a) => a.id)).toContain("ungroup-column");
@@ -335,10 +363,20 @@ describe("columnMenuActions", () => {
       (a): a is ColumnMenuChoice => a.id === "group-aggregation"
     );
     expect(choice?.value).toBe("sum");
-    choice?.onChange("");
-    expect(panel.setAggregate).toHaveBeenCalledWith("salary", undefined);
+    // Actual operations only — removal is its own action, never "None" in
+    // the selector.
+    expect(choice?.options.map((option) => option.value)).toEqual([
+      "sum",
+      "avg",
+    ]);
     choice?.onChange("avg");
-    expect(panel.setAggregate).toHaveBeenCalledWith("salary", "avg");
+    expect(panel.setAggregateOperation).toHaveBeenCalledWith("salary", "avg");
+    const remove = ungrouped.find((a) => a.id === "remove-aggregation");
+    expect(remove && "run" in remove ? remove.label : undefined).toBe(
+      "Remove Salary aggregation"
+    );
+    runOf(remove)?.();
+    expect(panel.removeAggregate).toHaveBeenCalledWith("salary");
   });
 
   it("appends what a plugin contributes, one entry or many", () => {
@@ -442,6 +480,29 @@ describe("every column-menu action actually does something", () => {
       remove: vi.fn(),
       moveBy: vi.fn(),
       setAggregate: vi.fn(),
+      aggregations: {
+        items: [
+          {
+            columnKey: "salary",
+            operationId: "sum",
+            editable: true,
+            origin: "reader" as const,
+            operations: SALARY_OPERATIONS,
+          },
+        ],
+        candidates: [
+          {
+            columnKey: "salary",
+            active: true,
+            operations: SALARY_OPERATIONS,
+          },
+        ],
+        atDefaults: false,
+      },
+      setAggregateOperation: vi.fn(),
+      addAggregate: vi.fn(),
+      removeAggregate: vi.fn(),
+      restoreAggregateDefaults: vi.fn(),
     };
     const row = columnMenuRows(COLUMNS, layout).find((r) => r.key === "team");
     const actions = columnMenuActions(row!, {

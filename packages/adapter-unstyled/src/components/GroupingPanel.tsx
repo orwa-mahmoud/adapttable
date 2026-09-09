@@ -1,10 +1,14 @@
 /** The interactive row-grouping strip, in native HTML. */
 import {
+  type GroupingPanelAggregationItemProps,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
   GroupingPanelChrome,
   type GroupingPanelChromeProps,
   type GroupingPanelDropZoneProps,
   type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
@@ -33,8 +37,8 @@ function classChromeWrapper(
   let className: string | undefined;
   if (part === "grouping-item") {
     className = classNames.groupingItem;
-  } else if (part === "grouping-aggregate-controls") {
-    className = classNames.groupingAggregateControls;
+  } else if (part === "grouping-aggregations") {
+    className = classNames.groupingAggregations;
   }
   return cloneElement(child, className ? { className } : {});
 }
@@ -156,8 +160,7 @@ function Select({
   const classNames = useClassNames();
   const className = {
     "grouping-add": classNames.groupingAdd,
-    "grouping-aggregate-column": classNames.groupingAggregateColumn,
-    "grouping-aggregate": classNames.groupingAggregate,
+    "grouping-aggregation-operation": classNames.groupingAggregationOperation,
   }[part];
   return (
     <select
@@ -199,12 +202,108 @@ function RemoveZone({
   );
 }
 
+function AggregationItem({
+  label,
+  readOnly,
+  readOnlyLabel,
+  children,
+  ...rest
+}: Readonly<GroupingPanelAggregationItemProps>): ReactElement {
+  const classNames = useClassNames();
+  return (
+    <span
+      data-read-only={readOnly || undefined}
+      className={classNames.groupingAggregationItem}
+      {...rest}
+    >
+      <span>{label}</span>
+      {readOnly ? <span>{readOnlyLabel}</span> : children}
+    </span>
+  );
+}
+
+function AggregationRemove({
+  label,
+  onRemove,
+  ...rest
+}: Readonly<GroupingPanelAggregationRemoveProps>): ReactElement {
+  const classNames = useClassNames();
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onRemove}
+      className={classNames.groupingAggregationRemove}
+      {...rest}
+    >
+      {"\u00d7"}
+    </button>
+  );
+}
+
+function AggregationPicker({
+  label,
+  options,
+  onToggle,
+  disabled,
+  ...rest
+}: Readonly<GroupingPanelChecklistProps>): ReactElement {
+  const classNames = useClassNames();
+  return (
+    <fieldset
+      aria-label={label}
+      className={classNames.groupingAggregationAdd}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      {...rest}
+    >
+      <span>{label}</span>
+      {options.map((option) => (
+        <label key={option.value}>
+          <input
+            type="checkbox"
+            checked={option.checked}
+            disabled={disabled}
+            aria-label={option.label}
+            onChange={(event) => onToggle(option.value, event.target.checked)}
+            data-adapttable-part="grouping-aggregation-option"
+          />
+          {option.label}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+function AggregationRestore({
+  label,
+  disabled,
+  onRestore,
+  ...rest
+}: Readonly<GroupingPanelRestoreProps>): ReactElement {
+  const classNames = useClassNames();
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onRestore}
+      className={classNames.groupingAggregationsRestore}
+      {...rest}
+    >
+      {label}
+    </button>
+  );
+}
+
 const slots: GroupingPanelSlots = {
   Surface,
   DropZone,
   Chip,
   Select,
   RemoveZone,
+  AggregationItem,
+  AggregationRemove,
+  AggregationPicker,
+  AggregationRestore,
 };
 
 /** Configure row grouping with native, keyboard-complete controls. @public */

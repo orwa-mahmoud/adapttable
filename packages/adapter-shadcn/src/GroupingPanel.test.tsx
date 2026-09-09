@@ -19,7 +19,12 @@ interface Row {
 
 const columns: ColumnDef<Row>[] = [
   { key: "team", header: "Team", accessor: (row) => row.team },
-  { key: "status", header: "Status", accessor: (row) => row.status },
+  {
+    key: "status",
+    header: "Status",
+    accessor: (row) => row.status,
+    aggregatable: { default: "count", operations: ["count"] },
+  },
 ];
 
 function Harness() {
@@ -52,6 +57,14 @@ describe("shadcn grouping panel", () => {
     expect(
       document.querySelector('[data-adapttable-part="grouping-add"]')
     ).toHaveClass(...shadcnClassNames.groupingAdd.split(" "));
+    expect(
+      document.querySelector('[data-adapttable-part="grouping-aggregations"]')
+    ).toHaveClass(...shadcnClassNames.groupingAggregations.split(" "));
+    expect(
+      document.querySelector(
+        '[data-adapttable-part="grouping-aggregation-operation"]'
+      )
+    ).toHaveClass(...shadcnClassNames.groupingAggregationOperation.split(" "));
 
     expect(shadcnClassNames.columnMenuChoiceSelect).toContain(
       "focus-visible:ring-ring"

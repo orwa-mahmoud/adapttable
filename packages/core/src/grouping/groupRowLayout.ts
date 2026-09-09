@@ -15,7 +15,7 @@
  * before the first aggregate, which keeps the label's roomy look without
  * displacing a single number.
  */
-import type { AggregateName } from "../aggregate/aggregate";
+import type { AggregateOperationId } from "../aggregate/aggregate";
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
 
@@ -25,7 +25,7 @@ import type { DisplayValue } from "../display";
  * @public
  */
 export type GroupAggregateOps = Readonly<
-  Partial<Record<string, AggregateName | "none">>
+  Partial<Record<string, AggregateOperationId | "none">>
 >;
 
 /**

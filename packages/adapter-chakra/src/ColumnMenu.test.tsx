@@ -74,8 +74,8 @@ const labels = {
   groupByColumn: (label: string) => `Group by ${label}`,
   ungroupColumn: (label: string) => `Ungroup ${label}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",
   selectionSum: "Sum",
@@ -106,6 +106,11 @@ function groupingState(): GroupingPanelState {
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
+    aggregations: { items: [], candidates: [], atDefaults: true },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
   };
 }
 
@@ -417,10 +422,9 @@ describe("chakra ColumnMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     await screen.findByText("Reset columns");
     fireEvent.click(byLabel("Column actions: Alpha"));
-    const [, choice] = screen.getAllByRole("combobox", {
+    const choice = screen.getByRole("combobox", {
       name: "Group aggregation",
     });
-    if (!choice) throw new Error("Expected the plugin aggregation choice");
     fireEvent.change(choice, { target: { value: "sum" } });
 
     expect(onChange).toHaveBeenCalledWith("sum");

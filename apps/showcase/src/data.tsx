@@ -323,18 +323,13 @@ export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
 }
 
 /**
- * Table query/layout hits the address bar on pages whose subject is that
- * persistence: the live demo, grouping, filtering (including find), and
- * aggregation (totals follow the same filter URL). Other feature pages stay
- * off so interacting does not rewrite the address.
+ * The live demo on the home page is the one table whose state hits the
+ * address bar — sharing and restoring a view is its subject. Every feature
+ * page keeps its state to itself, so interacting with one never rewrites the
+ * address.
  */
 export function demoUrlSync(urlKey?: string): boolean {
-  return (
-    urlKey === "live" ||
-    urlKey === "grp" ||
-    urlKey === "flt" ||
-    urlKey === "agg"
-  );
+  return urlKey === "live";
 }
 
 /**
@@ -704,6 +699,8 @@ export function makeColumns(
       editable: canEdit,
       editor: "text",
       editValue: (r) => r.name,
+      // A name adds up to nothing; counting the people in a group does.
+      aggregatable: { operations: ["count"] },
       // A rule the reader can trip on purpose: clear the name and commit.
       validate: (value) =>
         String(value).trim() === "" ? s.nameRequired : undefined,
@@ -731,6 +728,7 @@ export function makeColumns(
       key: "email",
       header: s.email,
       headerTooltip: s.email,
+      aggregatable: false,
       // Opt-in cell editing — only when this page also passes `onCellEdit`.
       editable: canEdit,
       editor: "text",
@@ -758,6 +756,7 @@ export function makeColumns(
     {
       key: "status",
       header: s.status,
+      aggregatable: { operations: ["count"] },
       accessor: (r) => (
         <Status
           status={personStatus(r)}
@@ -781,6 +780,11 @@ export function makeColumns(
     {
       key: "timeline",
       header: s.timeline,
+      // Dates compare but do not add up, and a millisecond count is not a
+      // date: min and max read back as the day they name.
+      aggregatable: { operations: ["min", "max", "count"] },
+      formatAggregate: (value, context) =>
+        formatTimelineAggregate(value, context, locale),
       sortValue: (r) => startDate(r).getTime(),
       // Grouping by the instant a project starts gives every row a group of
       // its own, captioned with the epoch. The month is the bucket a reader
@@ -811,6 +815,12 @@ export function makeColumns(
     {
       key: "budget",
       header: s.budget,
+      // The developer's own choice, visible in the panel before anyone
+      // touches it: Budget opens summed, and offers the rest.
+      aggregatable: {
+        default: "sum",
+        operations: ["sum", "avg", "min", "max", "count"],
+      },
       accessor: (r) => (
         <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
           {formatMoney(budget(r), locale)}
@@ -834,6 +844,10 @@ export function makeColumns(
     {
       key: "load",
       header: s.load,
+      // Available, and off until a reader asks for it.
+      aggregatable: { operations: ["avg", "min", "max", "count"] },
+      formatAggregate: (value, context) =>
+        formatLoadAggregate(value, context, locale),
       sortValue: (r) => utilization(r),
       sortable: true,
       editable: canEdit,
@@ -1541,6 +1555,55 @@ export function formatBudgetAggregate(
   return (
     <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
       {text}
+    </span>
+  );
+}
+
+/**
+ * A utilization aggregate, as a percentage — except a count, which counts.
+ *
+ * @param value - The computed aggregate.
+ * @param context - What the table says produced it.
+ * @param locale - The active locale.
+ * @returns The cell content.
+ */
+export function formatLoadAggregate(
+  value: unknown,
+  context: { readonly aggregation?: string },
+  locale: Locale = "en"
+): ReactNode {
+  if (typeof value !== "number") return <>{value as ReactNode}</>;
+  return (
+    <span style={{ fontVariantNumeric: "tabular-nums" }}>
+      {context.aggregation === "count"
+        ? countFormat(locale).format(value)
+        : formatPercent(value, locale)}
+    </span>
+  );
+}
+
+/**
+ * A timeline aggregate, as the day it names.
+ *
+ * The column sorts on epoch milliseconds, so min and max come back as
+ * numbers. A millisecond count is not a date to anybody reading it.
+ *
+ * @param value - The computed aggregate.
+ * @param context - What the table says produced it.
+ * @param locale - The active locale.
+ * @returns The cell content.
+ */
+export function formatTimelineAggregate(
+  value: unknown,
+  context: { readonly aggregation?: string },
+  locale: Locale = "en"
+): ReactNode {
+  if (typeof value !== "number") return <>{value as ReactNode}</>;
+  return (
+    <span>
+      {context.aggregation === "count"
+        ? countFormat(locale).format(value)
+        : formatDate(new Date(value), locale)}
     </span>
   );
 }

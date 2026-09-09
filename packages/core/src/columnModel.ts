@@ -1,6 +1,7 @@
 /**
  * Neutral column and primitive table types. This module imports no React.
  */
+import type { Aggregatable } from "./aggregate/aggregatable";
 import type { AggregateFormatContext } from "./aggregate/aggregate";
 import type { DisplayValue } from "./display";
 
@@ -178,6 +179,24 @@ export interface ColumnModel<TRow = unknown> {
    * stops offering the column.
    */
   groupable?: boolean;
+  /**
+   * Whether — and how — a reader may aggregate this column.
+   *
+   * Omitted or `false` refuses reader-controlled aggregation. `true` offers
+   * the operations that suit the column's declared value type — numeric for
+   * a number filter or editor, min/max/count for a date, Count otherwise.
+   * An object says exactly what to offer, and `default` says which operation
+   * the column starts with:
+   *
+   * ```ts
+   * aggregatable: { default: "sum", operations: ["sum", "avg", "min", "max"] }
+   * ```
+   *
+   * A host's own operation is `{ id, label, calculate }`; the id is what
+   * state and a server carry, so it stays stable while the label may be
+   * localized freely.
+   */
+  aggregatable?: Aggregatable<SortableValue>;
   /** Column width passed through to the rendered header/cell. */
   width?: number | string;
   /** Floor for this column's width, in pixels. */

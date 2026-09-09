@@ -120,6 +120,10 @@ const columns: ColumnDef<Row>[] = [
     sortValue: (r) => r.qty,
     sortable: true,
     group: "Facts",
+    aggregatable: {
+      default: "sum",
+      operations: ["sum", "avg", "count"],
+    },
   },
 ];
 
@@ -200,6 +204,8 @@ const CORE_OWNED = new Set([
   "side-panel-body",
   "context-menu-anchor",
   "command-list",
+  "grouping-aggregations-label",
+  "grouping-aggregation-option",
 ]);
 
 const STATE_CLASSES = new Set([
@@ -868,9 +874,12 @@ const KEYS = [
   "groupingChipHandle",
   "groupingChipRemove",
   "groupingAdd",
-  "groupingAggregateControls",
-  "groupingAggregateColumn",
-  "groupingAggregate",
+  "groupingAggregations",
+  "groupingAggregationItem",
+  "groupingAggregationOperation",
+  "groupingAggregationRemove",
+  "groupingAggregationAdd",
+  "groupingAggregationsRestore",
   "groupingRemoveZone",
   "editCellActivate",
   "editCellEditor",

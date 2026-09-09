@@ -69,8 +69,8 @@ const labels = {
   groupByColumn: (label: string) => `Group by ${label}`,
   ungroupColumn: (label: string) => `Ungroup ${label}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",
   selectionSum: "Sum",
@@ -329,6 +329,11 @@ describe("radix ColumnMenu", () => {
       remove: vi.fn(),
       moveBy: vi.fn(),
       setAggregate: vi.fn(),
+      aggregations: { items: [], candidates: [], atDefaults: true },
+      setAggregateOperation: vi.fn(),
+      addAggregate: vi.fn(),
+      removeAggregate: vi.fn(),
+      restoreAggregateDefaults: vi.fn(),
     } satisfies GroupingPanelState;
     const host: FeatureHostState = {
       filterTypes: [],
@@ -378,10 +383,9 @@ describe("radix ColumnMenu", () => {
       '[data-adapttable-part="column-menu-submenu"]'
     );
     expect(submenu).not.toBeNull();
-    const [, choice] = within(submenu as HTMLElement).getAllByRole("combobox", {
+    const choice = within(submenu as HTMLElement).getByRole("combobox", {
       name: "Group aggregation",
     });
-    if (!choice) throw new Error("Expected the plugin aggregation choice");
     fireEvent.click(choice);
     fireEvent.click(screen.getByRole("option", { name: "Sum" }));
 

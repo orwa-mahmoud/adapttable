@@ -363,11 +363,17 @@ export const shadcnClassNames = {
     "inline-grid size-6 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
   groupingAdd:
     "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
-  groupingAggregateControls: "inline-flex flex-wrap items-center gap-2",
-  groupingAggregateColumn:
+  groupingAggregations: "inline-flex w-full flex-wrap items-center gap-2",
+  groupingAggregationItem:
+    "inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-sm",
+  groupingAggregationOperation:
     "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
-  groupingAggregate:
-    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregationRemove:
+    "inline-grid size-6 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
+  groupingAggregationAdd:
+    "inline-flex flex-wrap items-center gap-2 text-sm text-foreground",
+  groupingAggregationsRestore:
+    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
   groupingRemoveZone:
     "inline-flex min-h-8 items-center rounded-md border border-dashed border-destructive px-2 text-xs text-destructive data-[active]:bg-destructive/10",
   // A rejected commit reads as a form error, in the destructive tone shadcn

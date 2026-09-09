@@ -12,6 +12,9 @@ import {
 } from "@adapttable/react/adapter";
 import {
   Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
   IconButton,
   MenuItem,
   Paper,
@@ -260,6 +263,80 @@ const slots: GroupingPanelSlots = {
         {label}
       </Typography>
     </Paper>
+  ),
+  AggregationItem: ({ label, readOnly, readOnlyLabel, children, ...rest }) => (
+    <Paper
+      component="span"
+      variant="outlined"
+      sx={{
+        px: 1,
+        py: 0.5,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.5,
+      }}
+      data-read-only={readOnly || undefined}
+      {...rest}
+    >
+      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+        {label}
+      </Typography>
+      {readOnly ? (
+        <Typography variant="caption" color="text.secondary">
+          {readOnlyLabel}
+        </Typography>
+      ) : (
+        children
+      )}
+    </Paper>
+  ),
+  AggregationRemove: ({ label, onRemove, ...rest }) => (
+    <IconButton size="small" aria-label={label} onClick={onRemove} {...rest}>
+      {"\u00d7"}
+    </IconButton>
+  ),
+  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => (
+    <Stack
+      component="fieldset"
+      direction="row"
+      aria-label={label}
+      sx={{
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: 1,
+        border: 0,
+        m: 0,
+        p: 0,
+        minInlineSize: 0,
+      }}
+      {...rest}
+    >
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      {options.map((option) => (
+        <FormControlLabel
+          key={option.value}
+          label={option.label}
+          slotProps={{ typography: { variant: "body2" } }}
+          control={
+            <Checkbox
+              size="small"
+              checked={option.checked}
+              disabled={disabled}
+              onChange={(event) => onToggle(option.value, event.target.checked)}
+              slotProps={{ input: { "aria-label": option.label } }}
+              data-adapttable-part="grouping-aggregation-option"
+            />
+          }
+        />
+      ))}
+    </Stack>
+  ),
+  AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
+    <Button size="small" disabled={disabled} onClick={onRestore} {...rest}>
+      {label}
+    </Button>
   ),
 };
 

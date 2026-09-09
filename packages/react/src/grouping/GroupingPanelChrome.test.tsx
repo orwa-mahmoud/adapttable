@@ -1,5 +1,6 @@
 import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
@@ -7,10 +8,14 @@ import type { ColumnDef } from "../columnDef";
 type AnyColumn = ColumnDef<unknown>;
 
 import {
+  type GroupingPanelAggregationItemProps,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
   GroupingPanelChrome,
   type GroupingPanelDropZoneProps,
   type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
@@ -80,6 +85,60 @@ const slots: GroupingPanelSlots = {
       </select>
     </label>
   ),
+  AggregationItem: ({
+    label,
+    readOnly,
+    readOnlyLabel,
+    children,
+    ...props
+  }: GroupingPanelAggregationItemProps) => (
+    <span data-read-only={readOnly || undefined} {...props}>
+      <span>{label}</span>
+      {readOnly ? <span>{readOnlyLabel}</span> : children}
+    </span>
+  ),
+  AggregationRemove: ({
+    label,
+    onRemove,
+    ...props
+  }: GroupingPanelAggregationRemoveProps) => (
+    <button type="button" aria-label={label} onClick={onRemove} {...props}>
+      {"x"}
+    </button>
+  ),
+  AggregationPicker: ({
+    label,
+    options,
+    onToggle,
+    disabled,
+    ...props
+  }: GroupingPanelChecklistProps) => (
+    <fieldset aria-label={label} {...props}>
+      {options.map((option) => (
+        <label key={option.value}>
+          <input
+            type="checkbox"
+            aria-label={option.label}
+            checked={option.checked}
+            disabled={disabled}
+            onChange={(event) => onToggle(option.value, event.target.checked)}
+            data-adapttable-part="grouping-aggregation-option"
+          />
+          {option.label}
+        </label>
+      ))}
+    </fieldset>
+  ),
+  AggregationRestore: ({
+    label,
+    disabled,
+    onRestore,
+    ...props
+  }: GroupingPanelRestoreProps) => (
+    <button type="button" disabled={disabled} onClick={onRestore} {...props}>
+      {label}
+    </button>
+  ),
   RemoveZone: ({
     label,
     dropProps,
@@ -112,6 +171,11 @@ function panelState(
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
+    aggregations: { items: [], candidates: [], atDefaults: true },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
     ...overrides,
   };
 }
@@ -188,20 +252,189 @@ describe("GroupingPanelChrome", () => {
     expect(screen.getByLabelText("Row grouping")).toBeInTheDocument();
   });
 
-  it("changes a per-column aggregation and exposes explicit none", () => {
+  it("shows every active aggregation, its operation, and its way out", () => {
     const state = panelState({
-      aggregateOverrides: { budget: "sum" },
+      aggregations: {
+        items: [
+          {
+            columnKey: "budget",
+            operationId: "sum",
+            editable: true,
+            origin: "declared",
+            operations: [
+              { id: "sum", builtIn: true },
+              { id: "avg", builtIn: true },
+              { id: "median", builtIn: false, label: "Median" },
+            ],
+          },
+          {
+            columnKey: "person",
+            editable: false,
+            origin: "host",
+            operations: [],
+          },
+        ],
+        candidates: [
+          {
+            columnKey: "budget",
+            active: true,
+            operations: [{ id: "sum", builtIn: true }],
+          },
+          {
+            columnKey: "load",
+            active: false,
+            operations: [{ id: "avg", builtIn: true }],
+          },
+        ],
+        atDefaults: true,
+      },
     });
     mount(state);
 
+    // The active aggregation names its column and its actual operation —
+    // nothing has to be discovered by pointing a picker somewhere.
+    const operation = screen.getByRole("combobox", {
+      name: "Budget aggregation",
+    });
+    expect(operation).toHaveValue("sum");
+    // Only what this column offers, the host's own operation included, and
+    // no "Default": a column is aggregated with an operation, or not at all.
     expect(
-      screen.getByRole("combobox", { name: "Group aggregation" })
-    ).toHaveValue("sum");
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Group aggregation" }),
-      { target: { value: "none" } }
+      [...operation.querySelectorAll("option")].map((option) => option.value)
+    ).toEqual(["sum", "avg", "median"]);
+    expect(screen.getByText("Median")).toBeInTheDocument();
+
+    fireEvent.change(operation, { target: { value: "avg" } });
+    expect(state.setAggregateOperation).toHaveBeenCalledWith("budget", "avg");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Budget aggregation" })
     );
-    expect(state.setAggregate).toHaveBeenCalledWith("budget", "none");
+    expect(state.removeAggregate).toHaveBeenCalledWith("budget");
+
+    // The app's own aggregate says who owns it, and offers nothing to press.
+    expect(screen.getByText("Set by the app")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove Person aggregation" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the picker and the remove control saying the same thing", () => {
+    const state = panelState({
+      aggregations: {
+        items: [
+          {
+            columnKey: "budget",
+            operationId: "sum",
+            editable: true,
+            origin: "declared",
+            operations: [{ id: "sum", builtIn: true }],
+          },
+        ],
+        candidates: [
+          {
+            columnKey: "budget",
+            active: true,
+            operations: [{ id: "sum", builtIn: true }],
+          },
+          {
+            columnKey: "load",
+            active: false,
+            operations: [{ id: "avg", builtIn: true }],
+          },
+        ],
+        atDefaults: true,
+      },
+    });
+    mount(state);
+
+    const budget = screen.getByRole("checkbox", { name: "Budget" });
+    const load = screen.getByRole("checkbox", { name: "load" });
+    expect(budget).toBeChecked();
+    expect(load).not.toBeChecked();
+
+    // Unchecking is the same act as pressing the item's own remove control.
+    fireEvent.click(budget);
+    expect(state.removeAggregate).toHaveBeenCalledWith("budget");
+    fireEvent.click(load);
+    expect(state.addAggregate).toHaveBeenCalledWith("load");
+
+    // Nothing to put back while the declared setup is what is on screen.
+    const restore = screen.getByRole("button", { name: "Restore defaults" });
+    expect(restore).toBeDisabled();
+  });
+
+  it("offers to restore the declared setup once a reader has changed it", () => {
+    const state = panelState({
+      aggregations: {
+        items: [],
+        candidates: [
+          {
+            columnKey: "budget",
+            active: false,
+            operations: [{ id: "sum", builtIn: true }],
+          },
+        ],
+        atDefaults: false,
+      },
+    });
+    mount(state);
+
+    const restore = screen.getByRole("button", { name: "Restore defaults" });
+    expect(restore).toBeEnabled();
+    fireEvent.click(restore);
+    expect(state.restoreAggregateDefaults).toHaveBeenCalled();
+  });
+
+  it("moves focus to the next remaining remove after an item is taken away", async () => {
+    function Harness() {
+      const [keys, setKeys] = useState(["budget", "load"]);
+      const items = keys.map((columnKey) => ({
+        columnKey,
+        operationId: columnKey === "budget" ? "sum" : "avg",
+        editable: true,
+        origin: "reader" as const,
+        operations: [
+          { id: columnKey === "budget" ? "sum" : "avg", builtIn: true },
+        ],
+      }));
+      return (
+        <GroupingPanelChrome
+          state={panelState({
+            aggregations: {
+              items,
+              candidates: keys.map((columnKey) => ({
+                columnKey,
+                active: true,
+                operations: [{ id: "sum", builtIn: true }],
+              })),
+              atDefaults: false,
+            },
+            removeAggregate: (key) =>
+              setKeys((current) => current.filter((entry) => entry !== key)),
+          })}
+          columns={[
+            { key: "team", header: "Team" },
+            { key: "budget", header: "Budget" },
+            { key: "load", header: "Load" },
+          ]}
+          labels={resolveLabels(undefined)}
+          mobile={false}
+          slots={slots}
+        />
+      );
+    }
+    render(<Harness />);
+    const removeBudget = screen.getByRole("button", {
+      name: "Remove Budget aggregation",
+    });
+    removeBudget.focus();
+    fireEvent.click(removeBudget);
+    await waitFor(() => {
+      expect(document.activeElement).toBe(
+        screen.getByRole("button", { name: "Remove Load aggregation" })
+      );
+    });
   });
 
   it("exposes the drag-to-ungroup target while a chip drag is active", () => {
@@ -336,7 +569,7 @@ describe("GroupingPanelChrome", () => {
     expect([...asked].sort((a, b) => a - b)).toEqual([0, 1, 2]);
   });
 
-  it("reorders chips with keyboard arrows and changes aggregate column", () => {
+  it("reorders chips with keyboard arrows", () => {
     const moveBy = vi.fn();
     const state = panelState({
       groupBy: ["team", "budget"],
@@ -356,14 +589,6 @@ describe("GroupingPanelChrome", () => {
       key: "ArrowLeft",
     });
     expect(moveBy).toHaveBeenCalledWith("budget", -1);
-
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Aggregate column" }),
-      { target: { value: "person" } }
-    );
-    expect(
-      screen.getByRole("combobox", { name: "Group aggregation" })
-    ).toHaveValue("sum");
   });
 
   it("uses select controls instead of drag targets on mobile", () => {

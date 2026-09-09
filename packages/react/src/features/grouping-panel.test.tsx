@@ -75,6 +75,24 @@ function panel(
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
+    aggregations: {
+      items: [],
+      candidates: [
+        {
+          columnKey: "budget",
+          active: false,
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+      ],
+      atDefaults: true,
+    },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
     ...overrides,
   };
 }
@@ -102,20 +120,20 @@ describe("groupingPanel feature", () => {
     if (group && !("kind" in group)) group.run();
     expect(state.add).toHaveBeenCalledWith("budget");
 
+    // The menu reads the same list the panel does: this column's own
+    // operations, no "Default", and removal as the way to take it away.
     const choice = result.current.find(
       (item): item is ColumnMenuChoice => item.id === "group-aggregation"
     );
     expect(choice?.options.map((option) => option.value)).toEqual([
-      "",
       "sum",
       "avg",
-      "min",
-      "max",
-      "count",
-      "none",
     ]);
     choice?.onChange("avg");
-    expect(state.setAggregate).toHaveBeenCalledWith("budget", "avg");
+    expect(state.setAggregateOperation).toHaveBeenCalledWith("budget", "avg");
+    expect(
+      result.current.some((item) => item.id === "remove-aggregation")
+    ).toBe(false);
   });
 
   it("offers ungroup instead of group for an active grouping field", () => {
@@ -154,9 +172,26 @@ function mockGroupingState(initialGroupBy?: string) {
     get aggregateOverrides() {
       return aggregateOverrides;
     },
+    columns: [
+      {
+        key: "budget",
+        header: "Budget",
+        aggregatable: {
+          default: "sum",
+          operations: ["sum", "avg", "min"] as const,
+        },
+      },
+      {
+        key: "load",
+        header: "Load",
+        aggregatable: { operations: ["avg", "count"] as const },
+      },
+      { key: "team", header: "Team" },
+    ],
     columnLabel: (key: string) => {
       if (key === "team") return "Team";
       if (key === "budget") return "Budget";
+      if (key === "load") return "Load";
       return key;
     },
     setGroupBy: vi.fn((next?: string) => {
@@ -442,7 +477,7 @@ describe("groupingPanel provider", () => {
     expect(groupingState.setGroupBy).toHaveBeenCalledWith("budget,team");
 
     act(() => {
-      panel!.setAggregate("budget", "avg");
+      panel!.setAggregateOperation("budget", "avg");
     });
     expect(groupingState.setAggregateOverrides).toHaveBeenCalledWith({
       budget: "avg",
@@ -543,6 +578,69 @@ describe("groupingPanel provider", () => {
       panel!.add("team");
     });
     expect(groupingState.setGroupBy).toHaveBeenCalledWith("budget,team");
+  });
+
+  it("adds, removes and restores aggregations without replacing another column", () => {
+    const groupingState = mockGroupingState("team");
+    let panel: GroupingPanelInteractions | undefined;
+    mountProvider(
+      groupingPanel(),
+      defaultLabels,
+      (next) => {
+        panel = next;
+      },
+      runtimeView(groupingState)
+    );
+
+    act(() => {
+      panel!.addAggregate("load");
+    });
+    expect(groupingState.setAggregateOverrides).toHaveBeenCalledWith({
+      load: "avg",
+    });
+
+    act(() => {
+      panel!.setAggregateOperation("budget", "avg");
+    });
+    expect(groupingState.setAggregateOverrides).toHaveBeenLastCalledWith({
+      load: "avg",
+      budget: "avg",
+    });
+
+    act(() => {
+      panel!.removeAggregate("budget");
+    });
+    expect(groupingState.setAggregateOverrides).toHaveBeenLastCalledWith({
+      load: "avg",
+      budget: "none",
+    });
+
+    act(() => {
+      panel!.restoreAggregateDefaults();
+    });
+    expect(groupingState.setAggregateOverrides).toHaveBeenLastCalledWith({});
+    expect(screen.getByTestId("announcement")).toHaveTextContent(
+      "Aggregations restored to defaults"
+    );
+  });
+
+  it("refuses a disallowed operation at the panel, not only in the picker", () => {
+    const groupingState = mockGroupingState("team");
+    let panel: GroupingPanelInteractions | undefined;
+    mountProvider(
+      groupingPanel(),
+      defaultLabels,
+      (next) => {
+        panel = next;
+      },
+      runtimeView(groupingState)
+    );
+
+    act(() => {
+      panel!.setAggregateOperation("budget", "count");
+      panel!.setAggregate("budget", "max");
+    });
+    expect(groupingState.setAggregateOverrides).not.toHaveBeenCalled();
   });
 
   it("skips aggregate writes when the source exposes no mutator", () => {

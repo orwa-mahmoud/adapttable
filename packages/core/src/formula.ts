@@ -46,8 +46,16 @@ export {
  * returns them.
  */
 export type {
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+} from "./aggregate/aggregatable";
+export type {
   AggregateFormatContext,
   AggregateName,
+  AggregateOperationId,
+  Aggregator,
 } from "./aggregate/aggregate";
 export type { ColumnMetadata, SortableValue } from "./columnModel";
 export type { ColumnModel } from "./columnModel";

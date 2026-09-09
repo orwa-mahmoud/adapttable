@@ -82,6 +82,36 @@ function Harness({
         else next[key] = value;
         return next;
       }),
+    aggregations: {
+      items: [
+        {
+          columnKey: "amount",
+          operationId: aggregateOverrides.amount ?? "sum",
+          editable: true,
+          origin: "declared",
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+      ],
+      candidates: [
+        {
+          columnKey: "amount",
+          active: true,
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+      ],
+      atDefaults: aggregateOverrides.amount === undefined,
+    },
+    setAggregateOperation: (key, value) =>
+      setAggregateOverrides((current) => ({ ...current, [key]: value })),
+    addAggregate: () => undefined,
+    removeAggregate: () => undefined,
+    restoreAggregateDefaults: () => undefined,
   };
 
   return (
@@ -155,17 +185,17 @@ describe("GroupingPanel", () => {
   it("sets an aggregate override with labelled selects", () => {
     render(<Harness initial={["team"]} />);
 
-    fireEvent.mouseDown(
-      screen.getByRole("combobox", { name: "Aggregate column" })
-    );
-    fireEvent.click(screen.getByRole("option", { name: "Amount" }));
     const aggregation = screen.getByRole("combobox", {
-      name: "Group aggregation",
+      name: "Amount aggregation",
     });
-    fireEvent.mouseDown(aggregation);
-    fireEvent.click(screen.getByRole("option", { name: "Sum" }));
-
     expect(aggregation).toHaveTextContent("Sum");
+    fireEvent.mouseDown(aggregation);
+    fireEvent.click(screen.getByRole("option", { name: "Average" }));
+
+    expect(aggregation).toHaveTextContent("Average");
+    expect(
+      screen.getByRole("button", { name: "Remove Amount aggregation" })
+    ).toBeInTheDocument();
   });
 
   it("wraps controls and omits drag insertion targets on mobile", () => {

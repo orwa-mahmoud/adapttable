@@ -1,16 +1,28 @@
 /** The interactive row-grouping panel, in Radix Themes. */
 import {
   GripIcon,
+  type GroupingPanelAggregationItemProps,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
   GroupingPanelChrome,
   type GroupingPanelChromeProps,
   type GroupingPanelDropZoneProps,
   type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
 } from "@adapttable/react/adapter";
-import { Box, Card, Flex, IconButton, Text } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Card,
+  Checkbox,
+  Flex,
+  IconButton,
+  Text,
+} from "@radix-ui/themes";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import { NativeSelect } from "./primitives";
@@ -243,6 +255,99 @@ const slots: GroupingPanelSlots = {
         {label}
       </Text>
     </Box>
+  ),
+  AggregationItem: ({
+    label,
+    readOnly,
+    readOnlyLabel,
+    children,
+    ...rest
+  }: GroupingPanelAggregationItemProps) => (
+    <Card size="1" data-read-only={readOnly || undefined} {...rest}>
+      <Flex gap="1" align="center">
+        <Text size="2" weight="medium">
+          {label}
+        </Text>
+        {readOnly ? (
+          <Text size="1" color="gray">
+            {readOnlyLabel}
+          </Text>
+        ) : (
+          children
+        )}
+      </Flex>
+    </Card>
+  ),
+  AggregationRemove: ({
+    label,
+    onRemove,
+    ...rest
+  }: GroupingPanelAggregationRemoveProps) => (
+    <IconButton
+      variant="ghost"
+      size="1"
+      aria-label={label}
+      onClick={onRemove}
+      style={{ minWidth: TOUCH_TARGET, minHeight: TOUCH_TARGET }}
+      {...rest}
+    >
+      {"\u00d7"}
+    </IconButton>
+  ),
+  AggregationPicker: ({
+    label,
+    options,
+    onToggle,
+    disabled,
+    ...rest
+  }: GroupingPanelChecklistProps) => (
+    <Flex
+      asChild
+      wrap="wrap"
+      align="center"
+      gap="2"
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      {...rest}
+    >
+      <fieldset aria-label={label}>
+        <Text size="1" color="gray">
+          {label}
+        </Text>
+        {options.map((option) => (
+          <Text as="label" size="2" key={option.value}>
+            <Flex gap="1" align="center">
+              <Checkbox
+                size="1"
+                checked={option.checked}
+                disabled={disabled}
+                onCheckedChange={(next) =>
+                  onToggle(option.value, next === true)
+                }
+                aria-label={option.label}
+                data-adapttable-part="grouping-aggregation-option"
+              />
+              {option.label}
+            </Flex>
+          </Text>
+        ))}
+      </fieldset>
+    </Flex>
+  ),
+  AggregationRestore: ({
+    label,
+    disabled,
+    onRestore,
+    ...rest
+  }: GroupingPanelRestoreProps) => (
+    <Button
+      variant="ghost"
+      size="1"
+      disabled={disabled}
+      onClick={onRestore}
+      {...rest}
+    >
+      {label}
+    </Button>
   ),
 };
 

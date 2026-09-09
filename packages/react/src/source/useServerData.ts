@@ -1,5 +1,6 @@
 import {
   applyQuerySupport,
+  type ColumnMetadata,
   devWarn,
   type FacetMap,
   type PaginationMode,
@@ -85,6 +86,12 @@ export interface UseServerDataOptions<TRow> extends Pick<
   /** Aggregate requests to send when the endpoint supports them. */
   aggregates?: readonly QueryAggregate[];
   /**
+   * Columns used to refuse a stale or disallowed aggregate request before
+   * it is sent. The same `aggregatable` rules the panel and column menu
+   * resolve; omit them and only the backend's listed operations are gated.
+   */
+  columns?: readonly ColumnMetadata<TRow>[];
+  /**
    * The `key` from the `onQueryChange` call these `rows` answer.
    *
    * A controlled tier cannot see which request a response belongs to: the
@@ -160,6 +167,7 @@ export function useServerData<TRow>(
     forceMobile,
     supports,
     aggregates,
+    columns,
     responseKey,
     expandedIds,
     facetKeys,
@@ -184,9 +192,25 @@ export function useServerData<TRow>(
     sortLevels,
     extra,
   } = state;
+  const queryAggregationSource = useMemo(
+    () =>
+      supports?.aggregates || supports?.aggregateOperations
+        ? {
+            grouping: "server" as const,
+            aggregateOperations: supports.aggregateOperations,
+          }
+        : undefined,
+    [supports]
+  );
   const effectiveAggregates = useMemo(
-    () => withQueryAggregateOverrides(aggregates, groupAggregateOverrides),
-    [aggregates, groupAggregateOverrides]
+    () =>
+      withQueryAggregateOverrides(
+        aggregates,
+        groupAggregateOverrides,
+        columns,
+        queryAggregationSource
+      ),
+    [aggregates, columns, groupAggregateOverrides, queryAggregationSource]
   );
   const effectiveGroupBy = useMemo(() => {
     const keys = parseGroupBy(groupBy);
@@ -412,6 +436,8 @@ export function useServerData<TRow>(
     groupBy,
     groupAggregateOverrides,
     groupAggregations,
+    queryAggregates: aggregates,
+    aggregateOperations: supports?.aggregateOperations,
     extra,
     facets,
     filterTree: state.filterTree,

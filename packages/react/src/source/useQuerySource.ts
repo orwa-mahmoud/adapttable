@@ -1,5 +1,6 @@
 import {
   applyQuerySupport,
+  type ColumnMetadata,
   type FacetMap,
   type PaginatedResponse,
   type PaginationMode,
@@ -140,6 +141,12 @@ export interface UseQuerySourceOptions<
    */
   aggregates?: readonly QueryAggregate[];
   /**
+   * Columns used to refuse a stale or disallowed aggregate request before
+   * it is sent. The same `aggregatable` rules the panel and column menu
+   * resolve; omit them and only the backend's listed operations are gated.
+   */
+  columns?: readonly ColumnMetadata<TRow>[];
+  /**
    * The tree nodes the reader has open, when the hierarchy lives on the server.
    * Sent as `expandedIds` only if the source declares
    * `supports: { tree: true }`, so the response can carry the children of every
@@ -193,6 +200,7 @@ export function useQuerySource<
     forceMobile,
     supports,
     aggregates,
+    columns,
     expandedIds,
     nextCursor,
     facetKeys,
@@ -215,9 +223,25 @@ export function useQuerySource<
     groupAggregateOverrides,
     extra,
   } = state;
+  const queryAggregationSource = useMemo(
+    () =>
+      supports?.aggregates || supports?.aggregateOperations
+        ? {
+            grouping: "server" as const,
+            aggregateOperations: supports.aggregateOperations,
+          }
+        : undefined,
+    [supports]
+  );
   const effectiveAggregates = useMemo(
-    () => withQueryAggregateOverrides(aggregates, groupAggregateOverrides),
-    [aggregates, groupAggregateOverrides]
+    () =>
+      withQueryAggregateOverrides(
+        aggregates,
+        groupAggregateOverrides,
+        columns,
+        queryAggregationSource
+      ),
+    [aggregates, columns, groupAggregateOverrides, queryAggregationSource]
   );
   const effectiveGroupBy = useMemo(() => {
     const keys = parseGroupBy(groupBy);
@@ -442,6 +466,8 @@ export function useQuerySource<
       groupBy,
       groupAggregateOverrides,
       groupAggregations,
+      queryAggregates: aggregates,
+      aggregateOperations: supports?.aggregateOperations,
       extra,
       facets,
       filterTree: state.filterTree,
@@ -481,6 +507,8 @@ export function useQuerySource<
       groupBy,
       groupAggregateOverrides,
       groupAggregations,
+      aggregates,
+      supports,
       extra,
       facets,
       state.filterTree,

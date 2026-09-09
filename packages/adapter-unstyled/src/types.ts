@@ -428,12 +428,18 @@ export interface DataTableClassNames {
   groupingChipRemove?: string;
   /** The select that adds another grouping column. */
   groupingAdd?: string;
-  /** The wrapper around the aggregate column and function selects. */
-  groupingAggregateControls?: string;
-  /** The aggregate target-column select. */
-  groupingAggregateColumn?: string;
-  /** The aggregate function select. */
-  groupingAggregate?: string;
+  /** The row listing every active aggregation. */
+  groupingAggregations?: string;
+  /** One active aggregation: its column, operation and remove control. */
+  groupingAggregationItem?: string;
+  /** The operation select of one active aggregation. */
+  groupingAggregationOperation?: string;
+  /** The control that removes one aggregation. */
+  groupingAggregationRemove?: string;
+  /** The checklist that adds and removes aggregated columns. */
+  groupingAggregationAdd?: string;
+  /** The button that restores the app's declared aggregations. */
+  groupingAggregationsRestore?: string;
   /** The drop target that removes a dragged grouping chip. */
   groupingRemoveZone?: string;
   /* ── Cell editing ────────────────────────────────────────────────── */

@@ -317,9 +317,12 @@ export const shadcnClassNames: {
     groupingChipHandle: string;
     groupingChipRemove: string;
     groupingAdd: string;
-    groupingAggregateControls: string;
-    groupingAggregateColumn: string;
-    groupingAggregate: string;
+    groupingAggregations: string;
+    groupingAggregationItem: string;
+    groupingAggregationOperation: string;
+    groupingAggregationRemove: string;
+    groupingAggregationAdd: string;
+    groupingAggregationsRestore: string;
     groupingRemoveZone: string;
     editCellError: string;
     editCellSaveError: string;

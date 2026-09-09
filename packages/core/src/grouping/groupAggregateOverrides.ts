@@ -1,7 +1,14 @@
 import {
+  type AggregationSourceSupport,
+  allowsReaderOperation,
+  resolveAggregatable,
+} from "../aggregate/aggregatable";
+import {
   aggregate,
   AGGREGATE_NAMES,
   type AggregateName,
+  type AggregateOperationId,
+  type AggregateSpec,
 } from "../aggregate/aggregate";
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
@@ -9,8 +16,17 @@ import type { QueryAggregate } from "../source/queryContract";
 import type { GroupAggregateOps } from "./groupRowLayout";
 import type { GroupAggregatesFn } from "./groupRows";
 
-/** A session-level aggregation choice for one grouped-table column. @public */
-export type GroupAggregateOverride = AggregateName | "none";
+/**
+ * A session-level aggregation choice for one grouped-table column.
+ *
+ * A built-in name, a host operation's own id, or `"none"` — the reader having
+ * taken the column's aggregate away. Built-ins still autocomplete; the open
+ * half is what lets a column's own `{ id, label, calculate }` operation
+ * survive a URL and a saved view.
+ *
+ * @public
+ */
+export type GroupAggregateOverride = AggregateOperationId | "none";
 
 /**
  * Session-level aggregation choices keyed by column.
@@ -24,10 +40,16 @@ export type GroupAggregateOverrides = Readonly<
   Partial<Record<string, GroupAggregateOverride>>
 >;
 
-const OVERRIDE_NAMES = new Set<string>([...AGGREGATE_NAMES, "none"]);
-
+/**
+ * Whether a serialized value can be an operation id at all.
+ *
+ * Syntax only. Which ids a column actually allows is a question about that
+ * column, answered by `reconcileAggregations` once the columns are known —
+ * a parser that rejected everything it did not recognize would drop every
+ * host-defined operation on the way back from a URL.
+ */
 function isOverride(value: string): value is GroupAggregateOverride {
-  return OVERRIDE_NAMES.has(value);
+  return value !== "" && !value.includes(",");
 }
 
 /**
@@ -92,16 +114,36 @@ export function parseGroupAggregateOverrides(
 export function withGroupAggregateOverrides<TRow>(
   base: GroupAggregatesFn<TRow> | undefined,
   overrides: GroupAggregateOverrides,
-  columns: readonly ColumnMetadata<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[],
+  source?: AggregationSourceSupport
 ): GroupAggregatesFn<TRow> | undefined {
   const entries = Object.entries(overrides).filter(
     (entry): entry is [string, GroupAggregateOverride] => entry[1] !== undefined
   );
   if (entries.length === 0) return base;
 
-  const spec: Partial<Record<string, AggregateName>> = {};
+  const byKey = new Map(columns.map((column) => [column.key, column]));
+  const spec: AggregateSpec = {};
+  const applied = new Set<string>();
   for (const [key, fn] of entries) {
-    if (fn !== "none") spec[key] = fn;
+    if (fn === "none") continue;
+    const column = byKey.get(key);
+    const resolved = resolveAggregatable(column ?? { key });
+    // A stale URL or a programmatic write must not calculate something the
+    // column never offered. Leave the host's own cell alone.
+    if (!allowsReaderOperation(resolved, fn, source)) continue;
+    const operation = resolved?.operations.find(
+      (candidate) => candidate.id === fn
+    );
+    if (!operation) continue;
+    if (!operation.builtIn) {
+      if (!operation.calculate) continue;
+      spec[key] = operation.calculate;
+      applied.add(key);
+      continue;
+    }
+    spec[key] = fn as AggregateName;
+    applied.add(key);
   }
   const calculate = aggregate<TRow>(spec, { columns });
   return (rows) => {
@@ -109,7 +151,7 @@ export function withGroupAggregateOverrides<TRow>(
     const calculated = calculate(rows);
     for (const [key, fn] of entries) {
       if (fn === "none") delete result[key];
-      else result[key] = calculated[key];
+      else if (applied.has(key)) result[key] = calculated[key];
     }
     return result;
   };
@@ -120,9 +162,9 @@ export function withGroupAggregateOverrides<TRow>(
  *
  * The request already says it — `{ key: "budget", fn: "avg" }` — so a column
  * formatting a server's answer is told the same thing it would be told about
- * one computed in the browser. A name the built-ins do not cover is a custom
- * aggregator the server understands and the table does not: it is left out
- * rather than guessed at, and the column is told nothing.
+ * one computed in the browser. A name the built-ins do not cover is a host
+ * operation's own id, and it travels unchanged: the column declared it, so
+ * `formatAggregate` is told exactly what the server was asked for.
  *
  * @param aggregates - The aggregates the request carried, if any.
  * @returns The operations by column key.
@@ -133,11 +175,9 @@ export function queryAggregateOps(
   aggregates: readonly QueryAggregate[] | undefined
 ): GroupAggregateOps | undefined {
   if (!aggregates || aggregates.length === 0) return undefined;
-  const ops: Record<string, AggregateName> = {};
+  const ops: Record<string, string> = {};
   for (const entry of aggregates) {
-    if (AGGREGATE_NAMES.includes(entry.fn as AggregateName)) {
-      ops[entry.key] = entry.fn as AggregateName;
-    }
+    if (entry.fn !== "") ops[entry.key] = entry.fn;
   }
   return Object.keys(ops).length > 0 ? ops : undefined;
 }
@@ -147,14 +187,42 @@ export function queryAggregateOps(
  *
  * @public
  */
-export function withQueryAggregateOverrides(
+export function withQueryAggregateOverrides<TRow = unknown>(
   base: readonly QueryAggregate[] | undefined,
-  overrides: GroupAggregateOverrides
+  overrides: GroupAggregateOverrides,
+  columns?: readonly ColumnMetadata<TRow>[],
+  source?: AggregationSourceSupport
 ): readonly QueryAggregate[] | undefined {
   const byKey = new Map(base?.map((aggregate) => [aggregate.key, aggregate]));
+  const byColumn = new Map(columns?.map((column) => [column.key, column]));
   for (const [key, fn] of Object.entries(overrides)) {
-    if (fn === undefined || fn === "none") byKey.delete(key);
-    else byKey.set(key, { key, fn });
+    if (fn === undefined || fn === "none") {
+      byKey.delete(key);
+      continue;
+    }
+    if (columns) {
+      const resolved = resolveAggregatable(byColumn.get(key) ?? { key });
+      if (!allowsReaderOperation(resolved, fn, source)) continue;
+    } else if (!querySourceAllows(fn, source)) {
+      continue;
+    }
+    byKey.set(key, { key, fn });
   }
   return byKey.size > 0 ? [...byKey.values()] : undefined;
+}
+
+/**
+ * Whether a request may carry this id when the columns are not known yet.
+ *
+ * A listed backend is the allowlist. Without a list, only the five standard
+ * names travel — a local `calculate` is not proof the server knows the id.
+ */
+function querySourceAllows(
+  operationId: string,
+  source: AggregationSourceSupport | undefined
+): boolean {
+  if (source?.grouping !== "server") return true;
+  const listed = source.aggregateOperations;
+  if (listed) return listed.includes(operationId);
+  return (AGGREGATE_NAMES as readonly string[]).includes(operationId);
 }

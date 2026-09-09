@@ -62,6 +62,11 @@ export interface TableSourceCapabilities {
   readonly exportScope: ExportScopeCapability;
   /** Whether the row count is the dataset's or only what has arrived. */
   readonly totalCount: TotalCountCapability;
+  /**
+   * Operation ids a server can compute. Absent unless the source named them.
+   * A local `calculate` never appears here.
+   */
+  readonly aggregateOperations?: readonly string[];
 }
 
 /** What a source that answers nothing beyond one page can do. */
@@ -127,6 +132,9 @@ export function sourceCapabilities(
     selectAcrossPages: fullDataset || counted,
     exportScope: fullDataset ? "all" : "page",
     totalCount: fullDataset || counted ? "exact" : "loaded",
+    ...(support?.aggregateOperations
+      ? { aggregateOperations: support.aggregateOperations }
+      : {}),
   };
 }
 
@@ -154,5 +162,7 @@ export function capabilityReason(
       return "Export all is off — this source provides one page at a time.";
     case "totalCount":
       return "The row count is what has loaded, not the whole set.";
+    case "aggregateOperations":
+      return "This source did not name the aggregate operations it can compute.";
   }
 }

@@ -3125,6 +3125,38 @@ export interface GroupingExtras<TRow> extends StaticGroupingExtras {
 }
 
 // @public
+export interface GroupingPanelAggregationItemProps {
+    "data-adapttable-part": "grouping-aggregation-item";
+    children: ReactNode;
+    label: string;
+    readOnly: boolean;
+    readOnlyLabel: string;
+}
+
+// @public
+export interface GroupingPanelAggregationRemoveProps {
+    "data-adapttable-part": "grouping-aggregation-remove";
+    label: string;
+    onRemove: () => void;
+}
+
+// @public
+export interface GroupingPanelChecklistOption {
+    checked: boolean;
+    label: string;
+    value: string;
+}
+
+// @public
+export interface GroupingPanelChecklistProps {
+    "data-adapttable-part": "grouping-aggregation-add";
+    disabled?: boolean;
+    label: string;
+    onToggle: (value: string, checked: boolean) => void;
+    options: readonly GroupingPanelChecklistOption[];
+}
+
+// @public
 export interface GroupingPanelChipProps {
     "data-adapttable-part": "grouping-chip";
     dragProps: GroupingDragProps;
@@ -3170,8 +3202,16 @@ export interface GroupingPanelRemoveZoneProps {
 }
 
 // @public
+export interface GroupingPanelRestoreProps {
+    "data-adapttable-part": "grouping-aggregations-restore";
+    disabled: boolean;
+    label: string;
+    onRestore: () => void;
+}
+
+// @public
 export interface GroupingPanelSelectProps {
-    "data-adapttable-part": "grouping-add" | "grouping-aggregate-column" | "grouping-aggregate";
+    "data-adapttable-part": "grouping-add" | "grouping-aggregation-operation";
     disabled?: boolean;
     label: string;
     onChange: (value: string) => void;
@@ -3190,6 +3230,10 @@ export interface GroupingPanelSlotProps<TRow = unknown> {
 
 // @public
 export interface GroupingPanelSlots {
+    AggregationItem: (props: GroupingPanelAggregationItemProps) => ReactNode;
+    AggregationPicker: (props: GroupingPanelChecklistProps) => ReactNode;
+    AggregationRemove: (props: GroupingPanelAggregationRemoveProps) => ReactNode;
+    AggregationRestore: (props: GroupingPanelRestoreProps) => ReactNode;
     Chip: (props: GroupingPanelChipProps) => ReactNode;
     DropZone: (props: GroupingPanelDropZoneProps) => ReactNode;
     RemoveZone: (props: GroupingPanelRemoveZoneProps) => ReactNode;
@@ -5032,6 +5076,10 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly groupBy: string | undefined;
         readonly aggregateOverrides: GroupAggregateOverrides;
         readonly columnLabel: (key: string) => string;
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+        readonly computedAggregateKeys?: readonly string[];
+        readonly queryAggregates?: readonly QueryAggregate[];
+        readonly aggregateOperations?: readonly string[];
         readonly setGroupBy: (key: string | undefined) => void;
         readonly initializeGroupBy?: (key: string) => void;
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
@@ -5462,6 +5510,7 @@ export interface UseSavedViewsOptions {
 // @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
     aggregates?: readonly QueryAggregate[];
+    columns?: readonly ColumnMetadata<TRow>[];
     error?: Error | null;
     expandedIds?: readonly string[];
     facetKeys?: readonly string[];

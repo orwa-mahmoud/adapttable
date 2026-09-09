@@ -78,14 +78,50 @@ export type {
   ContextMenuTarget,
 } from "./actions/contextMenuModel";
 export {
+  type Aggregatable,
+  type AggregatableConfig,
+  type AggregateOperation,
+  type AggregationSourceSupport,
+  allowsOperation,
+  allowsReaderOperation,
+  type CustomAggregateOperation,
+  impliedOperations,
+  offerableOperations,
+  resolveAggregatable,
+  resolveAggregatableColumns,
+  type ResolvedAggregatable,
+  type ResolvedAggregateOperation,
+} from "./aggregate/aggregatable";
+export {
   aggregate,
   AGGREGATE_NAMES,
   type AggregateFormatContext,
   type AggregateName,
+  type AggregateOperationId,
   type AggregateOptions,
   type AggregateSpec,
   type Aggregator,
+  CUSTOM_AGGREGATE,
+  type DeclaredAggregates,
+  declaredAggregates,
+  type GroupAggregatesMapper,
 } from "./aggregate/aggregate";
+export {
+  addAggregation,
+  AGGREGATE_SUPPRESSED,
+  type AggregationCandidate,
+  type AggregationItem,
+  type AggregationModel,
+  aggregationModel,
+  type AggregationModelInput,
+  type AggregationOrigin,
+  computedAggregateKeys,
+  declaredByDeveloper,
+  initialOperation,
+  reconcileAggregations,
+  removeAggregation,
+  restoreAggregationDefaults,
+} from "./aggregate/aggregationModel";
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
 export { localizedColumnPath } from "./columns/resolveColumns";

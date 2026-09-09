@@ -104,8 +104,16 @@ export type { FilterOption } from "./filters/filterDefs";
  * returns them.
  */
 export type {
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+} from "./aggregate/aggregatable";
+export type {
   AggregateFormatContext,
   AggregateName,
+  AggregateOperationId,
+  Aggregator,
 } from "./aggregate/aggregate";
 export type {
   ColumnMetadata,

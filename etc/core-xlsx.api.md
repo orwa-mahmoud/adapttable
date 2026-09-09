@@ -5,13 +5,31 @@
 ```ts
 
 // @public
+export type Aggregatable<TValue = SortableValue> = boolean | AggregatableConfig<TValue>;
+
+// @public
+export interface AggregatableConfig<TValue = SortableValue> {
+    readonly default?: string;
+    readonly operations: readonly AggregateOperation<TValue>[];
+}
+
+// @public
 export interface AggregateFormatContext {
-    readonly aggregation?: AggregateName | "none";
+    readonly aggregation?: AggregateOperationId;
     readonly columnKey: string;
 }
 
 // @public
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type AggregateOperation<TValue = SortableValue> = AggregateName | CustomAggregateOperation<TValue>;
+
+// @public
+export type AggregateOperationId = AggregateName | (string & Record<never, never>);
+
+// @public
+export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function buildTableXlsx<TRow>(options: {
@@ -93,6 +111,7 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 // @public
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
+    aggregatable?: Aggregatable<SortableValue>;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
@@ -136,6 +155,13 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 
 // @public
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
+
+// @public
+export interface CustomAggregateOperation<TValue = SortableValue> {
+    readonly calculate?: Aggregator<TValue>;
+    readonly id: string;
+    readonly label: string;
+}
 
 // @public
 export interface CustomCellEditorConflict {

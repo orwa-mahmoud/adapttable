@@ -1,15 +1,19 @@
 /** The interactive grouping strip, drawn with Ant Design controls. */
 import {
+  type GroupingPanelAggregationItemProps,
+  type GroupingPanelAggregationRemoveProps,
+  type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
   GroupingPanelChrome,
   type GroupingPanelChromeProps,
   type GroupingPanelDropZoneProps,
   type GroupingPanelRemoveZoneProps,
+  type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
 } from "@adapttable/react/adapter";
-import { Button, Card, Flex, Select, Tag, Typography } from "antd";
+import { Button, Card, Checkbox, Flex, Select, Tag, Typography } from "antd";
 
 const TOUCH_TARGET = 40;
 
@@ -186,6 +190,91 @@ const slots: GroupingPanelSlots = {
         {label}
       </Typography.Text>
     </Card>
+  ),
+  AggregationItem: ({
+    label,
+    readOnly,
+    readOnlyLabel,
+    children,
+    ...rest
+  }: GroupingPanelAggregationItemProps) => (
+    <Card
+      size="small"
+      data-read-only={readOnly || undefined}
+      styles={{ body: { padding: "4px 8px" } }}
+      {...rest}
+    >
+      <Flex gap={4} align="center">
+        <Typography.Text strong>{label}</Typography.Text>
+        {readOnly ? (
+          <Typography.Text type="secondary">{readOnlyLabel}</Typography.Text>
+        ) : (
+          children
+        )}
+      </Flex>
+    </Card>
+  ),
+  AggregationRemove: ({
+    label,
+    onRemove,
+    ...rest
+  }: GroupingPanelAggregationRemoveProps) => (
+    <Button
+      type="text"
+      size="small"
+      aria-label={label}
+      onClick={onRemove}
+      {...rest}
+    >
+      {"\u00d7"}
+    </Button>
+  ),
+  AggregationPicker: ({
+    label,
+    options,
+    onToggle,
+    disabled,
+    ...rest
+  }: GroupingPanelChecklistProps) => (
+    <Flex
+      component="fieldset"
+      wrap="wrap"
+      align="center"
+      gap={8}
+      aria-label={label}
+      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      {...rest}
+    >
+      <Typography.Text type="secondary">{label}</Typography.Text>
+      {options.map((option) => (
+        <Checkbox
+          key={option.value}
+          aria-label={option.label}
+          checked={option.checked}
+          disabled={disabled}
+          onChange={(event) => onToggle(option.value, event.target.checked)}
+          data-adapttable-part="grouping-aggregation-option"
+        >
+          {option.label}
+        </Checkbox>
+      ))}
+    </Flex>
+  ),
+  AggregationRestore: ({
+    label,
+    disabled,
+    onRestore,
+    ...rest
+  }: GroupingPanelRestoreProps) => (
+    <Button
+      type="link"
+      size="small"
+      disabled={disabled}
+      onClick={onRestore}
+      {...rest}
+    >
+      {label}
+    </Button>
   ),
 };
 

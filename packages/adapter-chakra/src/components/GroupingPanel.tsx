@@ -5,9 +5,17 @@ import {
   type GroupingPanelChromeProps,
   type GroupingPanelSlots,
 } from "@adapttable/react/adapter";
-import { Box, Field, Flex, HStack, IconButton, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Field,
+  Flex,
+  HStack,
+  IconButton,
+  Text,
+} from "@chakra-ui/react";
 
-import { NativeSelect } from "./primitives";
+import { Checkbox, NativeSelect } from "./primitives";
 
 const TOUCH_SIZE = "44px";
 /** A caret between chips, grown into something aimable mid-drag. */
@@ -168,6 +176,85 @@ const slots: GroupingPanelSlots = {
         {label}
       </Text>
     </Box>
+  ),
+  AggregationItem: ({ label, readOnly, readOnlyLabel, children, ...rest }) => (
+    <HStack
+      gap={1}
+      px={2}
+      py={1}
+      borderWidth="1px"
+      borderRadius="md"
+      data-read-only={readOnly || undefined}
+      {...rest}
+    >
+      <Text fontSize="sm" fontWeight="medium">
+        {label}
+      </Text>
+      {readOnly ? (
+        <Text fontSize="xs" color="fg.muted">
+          {readOnlyLabel}
+        </Text>
+      ) : (
+        children
+      )}
+    </HStack>
+  ),
+  AggregationRemove: ({ label, onRemove, ...rest }) => (
+    <IconButton
+      variant="ghost"
+      size="xs"
+      minW={TOUCH_SIZE}
+      minH={TOUCH_SIZE}
+      aria-label={label}
+      onClick={onRemove}
+      {...rest}
+    >
+      {"\u00d7"}
+    </IconButton>
+  ),
+  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => (
+    <Flex
+      as="fieldset"
+      wrap="wrap"
+      align="center"
+      gap={2}
+      aria-label={label}
+      {...rest}
+    >
+      <Text fontSize="xs" color="fg.muted">
+        {label}
+      </Text>
+      {options.map((option) => (
+        <Text as="label" key={option.value} fontSize="sm">
+          <HStack gap={1}>
+            <Checkbox
+              size="sm"
+              aria-label={option.label}
+              checked={option.checked}
+              onToggle={
+                disabled
+                  ? undefined
+                  : () => onToggle(option.value, !option.checked)
+              }
+              data-adapttable-part="grouping-aggregation-option"
+            />
+            {option.label}
+          </HStack>
+        </Text>
+      ))}
+    </Flex>
+  ),
+  AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
+    <Button
+      variant="ghost"
+      size="xs"
+      minH={TOUCH_SIZE}
+      disabled={disabled}
+      onClick={onRestore}
+      {...rest}
+    >
+      {label}
+    </Button>
   ),
 };
 

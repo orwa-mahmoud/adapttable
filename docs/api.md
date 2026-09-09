@@ -1135,34 +1135,43 @@ turns any of its forms (`GroupByInput`) into the key list and `formatGroupBy`
 back into the single comma-separated value state is stored as.
 `groupingPanel(groupBy?, extras?)` from each kit's `/grouping-panel` subpath
 adds the interactive strip and still accepts every `GroupingExtras` option.
-It publishes `GroupingPanelState`: ordered `groupBy`, drag/drop and keyboard
-bindings, `add` / `remove` / `moveBy`, and `setAggregate`.
-`GroupAggregateOverride` is `"sum" | "avg" | "min" | "max" | "count" |
-"none"`; `GroupAggregateOverrides` maps those session choices by column.
-`serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` encode the
-`groupAgg` parameter. `withGroupAggregateOverrides` layers them over a
-developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
-the same for server `query.aggregates`, and `queryAggregateOps` reads those
-requested functions back as the operations a column is told about —
-`TableSource.groupAggregations`, which `useQuerySource` and `useServerData`
-publish as of the response being drawn — `useQuerySource` from the query's
-`dataUpdatedAt` read against its request, `useServerData` from the
-`responseKey` a host echoes back, without which a request it cannot place is
-reported as unknown; an absent key preserves the developer choice and
-`"none"` removes it. A column's `formatAggregate` says how the
-result reads, taking the value and an `AggregateFormatContext` — the column
-key, and the operation where the table knows it. It is applied where the cell
-is drawn: `groupRowLayout` and `groupAggregateEntries` take the group's
-`GroupAggregateOps` and hand each cell through it, and `groupAggregateNode`
-does one cell for a kit that lays out its own group rows.
+It publishes `GroupingPanelState`: ordered `groupBy`, the `aggregations`
+model every surface reads, drag/drop and keyboard bindings, `add` / `remove`
+/ `moveBy`, and `setAggregateOperation` / `addAggregate` / `removeAggregate`
+/ `restoreAggregateDefaults`. A column's `aggregatable` (`false` / `true` /
+`{ default?, operations }`) is the one offer the panel, the column menu, a
+URL and a request all resolve. `GroupAggregateOverride` is a built-in name, a
+host operation id, or `"none"`; `GroupAggregateOverrides` maps those session
+choices by column. `serializeGroupAggregateOverrides` /
+`parseGroupAggregateOverrides` encode the `groupAgg` parameter, including
+custom ids. `withGroupAggregateOverrides` layers them over a developer
+`groupAggregates` mapper and refuses a disallowed id at execution, while
+`withQueryAggregateOverrides` does the same for server `query.aggregates`.
+`queryAggregateOps` reads those requested functions back as the operations a
+column is told about — `TableSource.groupAggregations`, which
+`useQuerySource` and `useServerData` publish as of the response being drawn —
+`useQuerySource` from the query's `dataUpdatedAt` read against its request,
+`useServerData` from the `responseKey` a host echoes back, without which a
+request it cannot place is reported as unknown. The developer's original
+`aggregates` option is published separately as `queryAggregates`, so Restore
+defaults never treats the current response as the initial query. An absent
+key preserves the developer choice and `"none"` removes it. A column's
+`formatAggregate` says how the result reads, taking the value and an
+`AggregateFormatContext` — the column key, and the operation where the table
+knows it. It is applied where the cell is drawn: `groupRowLayout` and
+`groupAggregateEntries` take the group's `GroupAggregateOps` and hand each
+cell through it, and `groupAggregateNode` does one cell for a kit that lays
+out its own group rows.
 
 Adapter authors bind the `GROUPING_PANEL` slot with
 `createAdapterGroupingPanelFeature(AdapterGroupingPanelComponents)`.
 `GroupingPanelChrome` takes `GroupingPanelChromeProps` /
 `GroupingPanelSlotProps` and a `GroupingPanelSlots` object whose required
 pieces receive `GroupingPanelSurfaceProps`, `GroupingPanelDropZoneProps`,
-`GroupingPanelChipProps`, `GroupingPanelSelectProps`, and
-`GroupingPanelRemoveZoneProps`; select entries are `GroupingPanelOption`s and
+`GroupingPanelChipProps`, `GroupingPanelSelectProps`,
+`GroupingPanelRemoveZoneProps`, `GroupingPanelAggregationItemProps`,
+`GroupingPanelAggregationRemoveProps`, `GroupingPanelChecklistProps`, and
+`GroupingPanelRestoreProps`; select entries are `GroupingPanelOption`s and
 native event wiring uses `GroupingDragProps` / `GroupingDropProps`.
 `GroupingPanelInteractions` carries those callbacks,
 `GroupingChipKeyboardProps` defines the equal keyboard path, and

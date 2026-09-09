@@ -2188,6 +2188,7 @@ export function useQuerySource<TRow, TParams extends TableQueryParams = TableQue
 export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams, TPage> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
     aggregates?: readonly QueryAggregate[];
     baseParams?: Partial<TParams>;
+    columns?: readonly ColumnMetadata<TRow>[];
     expandedIds?: readonly string[];
     facetKeys?: readonly string[];
     forceMobile?: boolean;
@@ -2330,6 +2331,7 @@ export function useServerData<TRow>(options: UseServerDataOptions<TRow>): TableS
 // @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
     aggregates?: readonly QueryAggregate[];
+    columns?: readonly ColumnMetadata<TRow>[];
     error?: Error | null;
     expandedIds?: readonly string[];
     facetKeys?: readonly string[];

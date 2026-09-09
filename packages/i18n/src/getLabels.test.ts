@@ -297,6 +297,18 @@ const INTERPOLATION_CASES: Record<
       ),
     expects: ["COLUMN_X", "AGGREGATION_X"],
   },
+  groupingRemoveAggregation: {
+    call: (fn) => (fn as (column: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  groupingAggregationFor: {
+    call: (fn) => (fn as (column: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
+  groupingAggregateRemoved: {
+    call: (fn) => (fn as (column: string) => string)("COLUMN_X"),
+    expects: ["COLUMN_X"],
+  },
   proposalChange: {
     call: (fn) =>
       (

@@ -43,6 +43,35 @@ function panelState(
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
+    aggregations: {
+      items: [
+        {
+          columnKey: "budget",
+          operationId: "sum",
+          editable: true,
+          origin: "declared",
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+      ],
+      candidates: [
+        {
+          columnKey: "budget",
+          active: true,
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+      ],
+      atDefaults: true,
+    },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
     ...overrides,
   };
 }
@@ -92,11 +121,15 @@ describe("GroupingPanel (radix)", () => {
     expect(keyboard).toHaveBeenCalled();
 
     const aggregate = screen.getByRole("combobox", {
-      name: "Group aggregation",
+      name: "Budget aggregation",
     });
     fireEvent.click(aggregate);
-    fireEvent.click(screen.getByRole("option", { name: "None" }));
-    expect(state.setAggregate).toHaveBeenCalledWith("budget", "none");
+    fireEvent.click(screen.getByRole("option", { name: "Average" }));
+    expect(state.setAggregateOperation).toHaveBeenCalledWith("budget", "avg");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Budget aggregation" })
+    );
+    expect(state.removeAggregate).toHaveBeenCalledWith("budget");
 
     fireEvent.click(
       screen.getByRole("button", { name: "Remove Team from grouping" })

@@ -1,3 +1,5 @@
+import type { DeclaredAggregates } from "../aggregate/aggregate";
+import type { AggregationModel } from "../aggregate/aggregationModel";
 import type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
@@ -82,15 +84,43 @@ export interface GroupingPanelInteractions {
   remove: (key: string) => void;
   /** Move a grouping field by one logical position. */
   moveBy: (key: string, delta: -1 | 1) => void;
-  /** Set or clear one session aggregate override. */
+  /** Set or clear one session aggregate override, without validation. */
   setAggregate: (
     key: string,
     value: GroupAggregateOverride | undefined
   ) => void;
+  /**
+   * What the developer's own `groupAggregates` mapper declares, when the
+   * table built it with `aggregate()`. Published by the panel feature, which
+   * is the only part that was handed the mapper.
+   */
+  declaredAggregates?: DeclaredAggregates;
+  /**
+   * Change one active aggregation's operation. An operation the column does
+   * not offer is refused rather than calculated.
+   */
+  setAggregateOperation: (key: string, operationId: string) => void;
+  /** Turn a column's aggregation on with its opening operation. */
+  addAggregate: (key: string) => void;
+  /**
+   * Take one aggregation away. Removing something the developer declared
+   * records the removal, so the default does not come straight back.
+   */
+  removeAggregate: (key: string) => void;
+  /** Restore the developer's whole initial setup, removals included. */
+  restoreAggregateDefaults: () => void;
 }
 
 /** Live panel state adapters and the column menu consume. @public */
 export interface GroupingPanelState extends GroupingPanelInteractions {
+  /**
+   * Every active aggregation and every column still on offer.
+   *
+   * The one list the panel and the column menu both read, so a column offers
+   * the same operations wherever a reader meets it. Built by the chrome from
+   * the choices the current render carries.
+   */
+  aggregations: AggregationModel;
   /** Ordered grouping fields, outermost first. */
   groupBy: readonly string[];
   /** Session aggregate choices keyed by column. */
