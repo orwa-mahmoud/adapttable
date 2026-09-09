@@ -215,6 +215,26 @@ describe("GroupingPanelChrome", () => {
     ).toBeInTheDocument();
   });
 
+  it("opens the drag-to-ungroup line below the chips, never above them", () => {
+    // The target appears the instant a chip leaves the strip. On a line above
+    // the chips it moves the one under the pointer, and a drag whose source is
+    // pulled away as it starts never begins — so the line that opens has to be
+    // one no chip sits below.
+    mount(
+      panelState({
+        groupBy: ["team", "budget", "person"],
+        drag: { key: "team", source: "chip" },
+      })
+    );
+    const zone = screen.getByLabelText("Drop here to remove grouping");
+    for (const name of ["Move Team", "Move Budget", "Move Person"]) {
+      const chip = screen.getByRole("button", { name });
+      expect(
+        chip.compareDocumentPosition(zone) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    }
+  });
+
   it("leaves a column the host closed to grouping out of the panel", () => {
     const closed = [
       { key: "team", header: "Team" },

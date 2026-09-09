@@ -353,19 +353,6 @@ export function GroupingPanelChrome<TRow>({
       {...(mobile ? {} : reactGroupingDropProps(ontoPanel()))}
       data-adapttable-part="grouping-panel"
     >
-      {/* The way out of a grouping, on a line of its own above the chips: a
-          target squeezed in beside them is one a reader never finds, and it
-          only exists while a chip is in the air. */}
-      {state.drag?.source === "chip" ? (
-        <span style={{ display: "flex", flex: "1 0 100%", width: "100%" }}>
-          <RemoveZone
-            label={labels.groupingDropToRemove}
-            active={state.drag.overRemove === true}
-            dropProps={reactGroupingDropProps(state.removeDropProps())}
-            data-adapttable-part="grouping-remove-zone"
-          />
-        </span>
-      ) : null}
       {state.groupBy.map((key, index) => {
         const label = byKey.has(key) ? columnName(byKey.get(key)!) : key;
         return (
@@ -463,6 +450,21 @@ export function GroupingPanelChrome<TRow>({
       <LiveRegion part="grouping-announcer" statusRole={false}>
         {state.announcement}
       </LiveRegion>
+      {/* The way out of a grouping, on a line of its own: a target squeezed in
+          beside the chips is one a reader never finds. It exists only while a
+          chip is in the air, so it takes the line BELOW them — a line that
+          appears above the chips moves the one under the pointer, and a drag
+          whose source is pulled away the instant it starts never begins. */}
+      {state.drag?.source === "chip" ? (
+        <span style={{ display: "flex", flex: "1 0 100%", width: "100%" }}>
+          <RemoveZone
+            label={labels.groupingDropToRemove}
+            active={state.drag.overRemove === true}
+            dropProps={reactGroupingDropProps(state.removeDropProps())}
+            data-adapttable-part="grouping-remove-zone"
+          />
+        </span>
+      ) : null}
     </Surface>
   );
 }
