@@ -117,7 +117,6 @@ export function EditableDataCell<TRow>(props: {
   readonly row: TRow;
   readonly column: ColumnDef<TRow>;
   readonly rowId: string;
-  readonly rowIndex: number;
   readonly rows: readonly TRow[];
   readonly columns: readonly ColumnDef<TRow>[];
   readonly rowKey: (row: TRow) => string;
